@@ -27,6 +27,7 @@
  * .09  02/03/04   rls  Eliminate erroneous "Motor motion timeout ERROR".
  * .10  04/20/04   mlr  Convert from MPF to ASYN
  * .11  07/16/04   rls  removed unused <driver>Setup() argument.
+ * .12  09/20/04   rls  support for 32axes/controller.
  */
 
 
@@ -85,7 +86,7 @@ int PM304_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int card, char *buff, int len);
-STATIC RTN_STATUS send_mess(int card, const char *com, char c);
+STATIC RTN_STATUS send_mess(int, const char *, char *);
 STATIC int send_recv_mess(int card, const char *out, char *in);
 STATIC void start_status(int card);
 STATIC int set_status(int card, int signal);
@@ -116,7 +117,8 @@ struct driver_table PM304_access =
     set_status,
     query_done,
     start_status,
-    &initialized
+    &initialized,
+    NULL
 };
 
 struct
@@ -340,7 +342,7 @@ STATIC int set_status(int card, int signal)
 /* ring buffer                                       */
 /* send_mess()                                       */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, const char *com, char c)
+STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
     char *p, *tok_save;
     char buff[BUFF_SIZE];

@@ -12,6 +12,7 @@
  * .02  02-12-2004   rls  Copied from drvMicos.c. Upgraded from R3.14.x
  * .03  02-17-2004   rls  Removed Debug calls to tickGet().
  * .04  07-12-2004   rls  Converted from MPF to asyn.
+ * .05  09-20-2004   rls  support for 32axes/controller.
  */
 
 
@@ -64,10 +65,10 @@ volatile int Micos_num_axis = 0;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int card, const char *com, char c);
-static void start_status(int card);
-static int set_status(int card, int signal);
-static long report(int level);
+static RTN_STATUS send_mess(int, const char *, char *);
+static void start_status(int);
+static int set_status(int, int);
+static long report(int);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
@@ -94,7 +95,8 @@ struct driver_table Micos_access =
     set_status,
     query_done,
     start_status,
-    &initialized
+    &initialized,
+    NULL
 };
 
 struct
@@ -290,7 +292,7 @@ static int set_status(int card, int signal)
 /* send a message to the Micos board                 */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, const char *com, char c)
+static RTN_STATUS send_mess(int card, const char *com, char *name)
 {
     char buff[BUFF_SIZE];
     struct MicosController *cntrl;

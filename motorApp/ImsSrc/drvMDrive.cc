@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:	$Revision: 1.12 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:28:30 $
+Version:	$Revision: 1.13 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-20 21:10:34 $
 */
 
 /*
@@ -41,6 +41,8 @@ Last Modified:	$Date: 2004-08-17 21:28:30 $
  *                  Kevin Peterson's eat_garbage() function.  Added support
  *                  for encoder detection via "ident".
  * .04 07/01/04 rls Converted from MPF to asyn.
+ * .05 09/20/04 rls - support for 32axes/controller.
+ *                  - remove '?' command string padding.
  */
 
 /*
@@ -79,7 +81,7 @@ DESIGN LIMITATIONS...
 
 /* --- Local data. --- */
 int MDrive_num_cards = 0;
-static char MDrive_axis[8] = {'1', '2', '3', '4', '5', '6', '7', '8'};
+static char *MDrive_axis[] = {"1", "2", "3", "4", "5", "6", "7", "8"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -87,9 +89,9 @@ static char MDrive_axis[8] = {'1', '2', '3', '4', '5', '6', '7', '8'};
 /*----------------functions-----------------*/
 static int eat_garbage(int, char *, int);
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int card, char const *com, char c);
-static int set_status(int card, int signal);
-static long report(int level);
+static RTN_STATUS send_mess(int, char const *, char *);
+static int set_status(int, int);
+static long report(int);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
@@ -265,7 +267,7 @@ static int set_status(int card, int signal)
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
 
-    send_mess(card, "?PR MV", MDrive_axis[signal]);
+    send_mess(card, "PR MV", MDrive_axis[signal]);
     eat_garbage(card, buff, 1);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
@@ -301,7 +303,7 @@ static int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, "?PR P", MDrive_axis[signal]);
+    send_mess(card, "PR P", MDrive_axis[signal]);
     eat_garbage(card, buff, 1);
     recv_mess(card, buff, 1);
 
@@ -324,7 +326,7 @@ static int set_status(int card, int signal)
 
     plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
-    send_mess(card, "?PR IN", MDrive_axis[signal]);
+    send_mess(card, "PR IN", MDrive_axis[signal]);
     eat_garbage(card, buff, 1);
     recv_mess(card, buff, 1);
     inputs.All = atoi(buff);
@@ -362,7 +364,7 @@ static int set_status(int card, int signal)
 	motor_info->encoder_position = 0;
     else
     {
-	send_mess(card, "?PR C2", MDrive_axis[signal]);
+	send_mess(card, "PR C2", MDrive_axis[signal]);
 	eat_garbage(card, buff, 1);
 	recv_mess(card, buff, 1);
 	motorData = atof(buff);
@@ -401,7 +403,7 @@ exit:
 /* send a message to the MDrive board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
@@ -424,11 +426,15 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     }
 
     /* Make a local copy of the string and add the command line terminator. */
-    strcpy(local_buff, com);
-    strcat(local_buff, "\n");
+    if (name != NULL)
+    {
+	strcpy(local_buff, name);	    /* put in axis */
+	strcat(local_buff, com);
+    }
+    else
+	strcpy(local_buff, com);
 
-    if (inchar != (char) NULL)
-	local_buff[0] = inchar;	    /* put in axis */
+    strcat(local_buff, "\n");
 
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
@@ -625,7 +631,7 @@ static int motor_init()
 		/* Try 3 times to connect to controller. */
 		do
 		{
-		    send_mess(card_index, "?PR VR", MDrive_axis[total_axis]);
+		    send_mess(card_index, "PR VR", MDrive_axis[total_axis]);
                     eat_garbage(card_index, buff, 1);
 		    status = recv_mess(card_index, buff, 1);
 		    retry++;

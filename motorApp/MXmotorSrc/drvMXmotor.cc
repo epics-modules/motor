@@ -2,9 +2,9 @@
 FILENAME...	drvMXmotor.cc
 USAGE...	Motor record driver level support for MX device driver.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-10-28 16:32:11 $
+Last Modified:	$Date: 2004-09-20 21:10:56 $
 */
 
 /*
@@ -60,7 +60,7 @@ static long report(int level);
 static long init();
 static void query_done(int, int, struct mess_node *);
 static int set_status(int card, int signal);
-static RTN_STATUS send_mess(int card, char const *com, char c);
+static RTN_STATUS send_mess(int, char const *, char *);
 static int recv_mess(int, char *, int);
 static int motor_init();
 
@@ -310,7 +310,7 @@ static int set_status(int card, int signal)
     return(rtn_state);
 }
 
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct controller *brdptr;
     struct MXcontroller *cntrl;

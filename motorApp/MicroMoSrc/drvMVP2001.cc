@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.cc
 USAGE...	Motor record driver level support for MicroMo
 		MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:29:31 $
+Version:	$Revision: 1.5 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-20 21:14:14 $
 */
 
 /*
@@ -145,9 +145,9 @@ int MVP2001_num_cards = 0;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int card, char const *com, char c);
-static int set_status(int card, int signal);
-static long report(int level);
+static RTN_STATUS send_mess(int, char const *, char *);
+static int set_status(int, int);
+static long report(int);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
@@ -439,7 +439,7 @@ exit:
 /* send a message to the MVP2001 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct MVPcontroller *cntrl;
@@ -464,9 +464,6 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     /* Make a local copy of the string and add the command line terminator. */
     strcpy(local_buff, com);
     strcat(local_buff, "\r");
-
-    if (inchar != (char) NULL)
-	local_buff[0] = inchar;	    /* put in axis */
 
     Debug(2, "send_mess(): message = %s\n", local_buff);
 

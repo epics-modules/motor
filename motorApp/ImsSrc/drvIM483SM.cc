@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:28:30 $
+Version:	$Revision: 1.12 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-20 21:05:39 $
 */
  
 /*****************************************************************
@@ -34,6 +34,7 @@ of this distribution.
  * .04 03/07/03 rls R3.14 conversion.
  * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .06 07/01/04 rls Converted from MPF to asyn.
+ * .07 09/20/04 rls support for 32axes/controller.
  */
 
 /*
@@ -88,9 +89,9 @@ int IM483SM_num_cards = 0;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int card, char const *com, char c);
-static int set_status(int card, int signal);
-static long report(int level);
+static RTN_STATUS send_mess(int, char const *, char *);
+static int set_status(int, int);
+static long report(int);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
@@ -373,7 +374,7 @@ exit:
 /* send a message to the IM483SM board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
@@ -395,18 +396,15 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 	return(ERROR);
     }
 
-    if (inchar != (char) NULL)
+    if (name != NULL)
     {
-	errlogPrintf("drvIM483SM.c:send_mess() - invalid argument = %c\n", inchar);
+	errlogPrintf("drvIM483SM.c:send_mess() - invalid argument = %s\n", name);
 	return(ERROR);
     }
 
     /* Make a local copy of the string and add the command line terminator. */
     strcpy(local_buff, com);
     strcat(local_buff, "\r");
-
-    if (inchar != (char) NULL)
-	local_buff[0] = inchar;	    /* put in axis */
 
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
