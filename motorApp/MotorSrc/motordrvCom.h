@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-10-02 22:52:27 $
+Last Modified:	$Date: 2001-12-14 20:48:00 $
 */
 
 /*
@@ -149,7 +149,7 @@ struct irqdatastr	/* Used only for VME44. */
 {
     /* Interrupt Handling control elements */
     int irqErrno;	/* Error indicator from isr */
-    uint8_t irqEnable;
+    epicsUInt8 irqEnable;
     RING_ID recv_rng;	/* message receiving control */
     SEM_ID recv_sem;
     RING_ID send_rng;	/* message transmitting control */
@@ -160,9 +160,9 @@ struct mess_info
 {
     struct mess_node *motor_motion;	/* in motion, NULL/node */
     int encoder_present;		/* one YES/NO for each axis */
-    int32_t position;		/* one pos for each axis */
-    int32_t encoder_position;	/* one pos for each axis */
-    int32_t velocity;		/* Raw velocity readback(not implemented) */
+    epicsInt32 position;		/* one pos for each axis */
+    epicsInt32 encoder_position;	/* one pos for each axis */
+    epicsInt32 velocity;		/* Raw velocity readback(not implemented) */
     int no_motion_count;
     ULONG status_delay;		/* Insure 10ms delay between motion/velocity
 				 * commands and status query. */

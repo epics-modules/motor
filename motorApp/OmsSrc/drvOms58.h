@@ -3,9 +3,9 @@ FILENAME...	drvOms58.h
 USAGE...	OMS driver level "include" information that is specific to OMS
 		model VME58.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-08-22 18:46:12 $
+Last Modified:	$Date: 2001-12-14 20:53:00 $
 */
 
 /*
@@ -87,7 +87,7 @@ typedef struct
 /* Control Register - Offset = 0x0FE1 */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	unsigned int intReqEna	:1;	/* Master interrupt request enable */
@@ -104,7 +104,7 @@ typedef union
 /* Status Register - Offset = 0x0FE3 */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	unsigned int interrupt	:1;	/* Interrupt dectect */
@@ -121,7 +121,7 @@ typedef union
 /* I/O Register(0-7) -  Offset = 0x0FE5 */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	unsigned int io_7	:1;	/* Bit 7 */
@@ -138,7 +138,7 @@ typedef union
 /* Slip Flag Register - Offset = 0x0FE7 */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	unsigned int slip_s	:1;	/* status of S axis */
@@ -155,7 +155,7 @@ typedef union
 /* Done Flag Register - Offset = 0x0FE9 */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	unsigned int done_s	:1;	/* status of S axis */
@@ -172,7 +172,7 @@ typedef union
 /* I/O High Register(8-13) - Offset = 0x0FEB */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	unsigned int		:1;	/* Unused */
@@ -190,7 +190,7 @@ typedef union
 /* Limit Switch Status Register - Offset = 0x0FED */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	unsigned int limit_s	:1;	/* status of S axis */
@@ -207,7 +207,7 @@ typedef union
 /* Home Switch Status Register - Offset = 0x0FEF */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	unsigned int home_s	:1;	/* status of S axis */
@@ -223,39 +223,39 @@ typedef union
 
 typedef struct
 {
-    uint8_t unused00;
-    uint8_t cntrlReg;		/* Control Register - Read/Write */
-    uint8_t unused02;
-    uint8_t statusReg;		/* Status Register  - Read */
-    uint8_t unused04;
-    uint8_t ioLowReg;		/* IO bits 0-7 status register   - Read */
-    uint8_t unused06;
-    uint8_t slipReg;		/* Encoder slip status register - Read */
-    uint8_t unused08;
-    uint8_t doneReg;		/* Axis done status register - Read */
-    uint8_t unused0A;
-    uint8_t ioHighReg;		/* IO bits 8-13 status register - Read */
-    uint8_t unused0C;
-    uint8_t limitReg;		/* Limit switch  status register - Read */
-    uint8_t unused0E;
-    uint8_t homeReg;		/* Home switch  status register - Read */
-    uint8_t unusedF0;
-    uint8_t intVector;		/* Interrupt vector */
+    epicsUInt8 unused00;
+    epicsUInt8 cntrlReg;	/* Control Register - Read/Write */
+    epicsUInt8 unused02;
+    epicsUInt8 statusReg;	/* Status Register  - Read */
+    epicsUInt8 unused04;
+    epicsUInt8 ioLowReg;	/* IO bits 0-7 status register   - Read */
+    epicsUInt8 unused06;
+    epicsUInt8 slipReg;		/* Encoder slip status register - Read */
+    epicsUInt8 unused08;
+    epicsUInt8 doneReg;		/* Axis done status register - Read */
+    epicsUInt8 unused0A;
+    epicsUInt8 ioHighReg;	/* IO bits 8-13 status register - Read */
+    epicsUInt8 unused0C;
+    epicsUInt8 limitReg;	/* Limit switch  status register - Read */
+    epicsUInt8 unused0E;
+    epicsUInt8 homeReg;		/* Home switch  status register - Read */
+    epicsUInt8 unusedF0;
+    epicsUInt8 intVector;	/* Interrupt vector */
 } MOTOR_CNTRL_REGS;
 
 
 /* OMS VME dual port memory map */
 struct vmex_motor
 {
-    int16_t inPutIndex;
-    int16_t outGetIndex;
-    int16_t inBuffer[BUFFER_SIZE];
-    int16_t reserved0[254];
+    epicsInt16 inPutIndex;
+    epicsInt16 outGetIndex;
+    epicsInt16 inBuffer[BUFFER_SIZE];
+    epicsInt16 reserved0[254];
     MOTOR_DATA_REGS data[OMS_NUM_CHANNELS];
-    int16_t outPutIndex;
-    int16_t inGetIndex;
-    int16_t outBuffer[BUFFER_SIZE];
-    int16_t reserved1[750];
+    epicsInt16 outPutIndex;
+    epicsInt16 inGetIndex;
+    epicsInt16 outBuffer[BUFFER_SIZE];
+    epicsInt16 reserved1[750];
     MOTOR_CNTRL_REGS control;
 };
 

@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-06-19 18:25:10 $
+Last Modified:	$Date: 2001-12-14 20:52:59 $
 */
 
 /*
@@ -138,7 +138,7 @@ volatile int drvOms58debug = 0;
 /* --- Local data common to all OMS drivers. --- */
 STATIC char *oms_addrs = 0x0;
 STATIC volatile unsigned omsInterruptVector = 0;
-STATIC volatile uint8_t omsInterruptLevel = OMS_INT_LEVEL;
+STATIC volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 STATIC volatile int max_io_tries = MAX_COUNT;
 STATIC volatile int motionTO = 10;
 STATIC char oms58_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
@@ -311,7 +311,7 @@ STATIC int set_status(int card, int signal)
     volatile struct vmex_motor *pmotor;
     CNTRL_REG cntrlReg;
     volatile MOTOR_DATA_REGS *pmotorData;
-    int32_t motorData;
+    epicsInt32 motorData;
     /* Message parsing variables */
     char *p, *tok_save;
     struct axis_status *ax_stat;
@@ -487,8 +487,8 @@ STATIC int set_status(int card, int signal)
 STATIC int send_mess(int card, char const *com, char inchar)
 {
     volatile struct vmex_motor *pmotor;
-    int16_t putIndex;
-    int16_t deltaIndex;
+    epicsInt16 putIndex;
+    epicsInt16 deltaIndex;
     char outbuf[MAX_MSG_SIZE], *p;
     int return_code;
 
@@ -594,7 +594,7 @@ STATIC int send_mess(int card, char const *com, char inchar)
 STATIC int recv_mess(int card, char *com, int amount)
 {
     volatile struct vmex_motor *pmotor;
-    int16_t getIndex;
+    epicsInt16 getIndex;
     int i, trys;
     char junk;
     unsigned char inchar;
@@ -771,7 +771,7 @@ STATIC void motorIsr(int card)
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
     STATUS_REG statusBuf;
-    uint8_t doneFlags, userIO, slipFlags, limitFlags, cntrlReg;
+    epicsUInt8 doneFlags, userIO, slipFlags, limitFlags, cntrlReg;
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
@@ -804,7 +804,7 @@ STATIC void motorIsr(int card)
     /* Assure proper control register settings  */
     cntrlReg = pmotor->control.cntrlReg;
     if ((cntrlReg & 0x01) == 0)
-	pmotor->control.cntrlReg = (uint8_t) 0x90;
+	pmotor->control.cntrlReg = (epicsUInt8) 0x90;
 /* Questioniable Fix for undefined problem Ends Here. */
 
     if (drvOms58debug >= 10)

@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-10-02 22:19:30 $
+Last Modified:	$Date: 2001-12-14 20:50:34 $
 */
 
 /*
@@ -88,7 +88,7 @@ struct MMcontroller
 /* Motor status response for MM[3000/4000/4005]. */
 typedef union
 {
-    uint8_t All;
+    epicsUInt8 All;
     struct
     {
 	BOOLEAN bit7		:1;	/* Bit #7 N/A. */

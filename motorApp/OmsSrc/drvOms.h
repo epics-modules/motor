@@ -3,9 +3,9 @@ FILENAME...	drvOms.h
 USAGE... This file contains OMS driver "include" information that is
 		specific to OMS models VME8 and VME44.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:02 $
+Last Modified:	$Date: 2001-12-14 20:52:57 $
 */
 
 /*
@@ -79,17 +79,17 @@ Last Modified:	$Date: 2000-02-08 22:19:02 $
 
 struct vmex_motor
 {
-    uint8_t unused0;
-    uint8_t data;
-    uint8_t unused1;
-    uint8_t done;
-    uint8_t unused2;
-    uint8_t control;
-    uint8_t unused3;
-    uint8_t status;
-    uint8_t unused4;
-    uint8_t vector;
-    uint8_t unused5[6];
+    epicsUInt8 unused0;
+    epicsUInt8 data;
+    epicsUInt8 unused1;
+    epicsUInt8 done;
+    epicsUInt8 unused2;
+    epicsUInt8 control;
+    epicsUInt8 unused3;
+    epicsUInt8 status;
+    epicsUInt8 unused4;
+    epicsUInt8 vector;
+    epicsUInt8 unused5[6];
 };
 
 #endif	/* INCdrvOmsh */

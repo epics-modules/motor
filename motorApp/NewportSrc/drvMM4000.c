@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.c
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-10-02 22:17:59 $
+Last Modified:	$Date: 2001-12-14 20:50:33 $
 */
 
 /*
@@ -403,7 +403,7 @@ STATIC int set_status(int card, int signal)
     {
 	motor_info->position = NINT(motorData);
 	if (motor_state[card]->motor_info[signal].encoder_present == YES)
-	    motor_info->encoder_position = (int32_t) motorData;
+	    motor_info->encoder_position = (epicsInt32) motorData;
 	else
 	    motor_info->encoder_position = 0;
 

@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-07-24 18:23:50 $
+Last Modified:	$Date: 2001-12-14 20:52:56 $
 */
 
 /*
@@ -125,7 +125,7 @@ extern long locationProbe(epicsAddressType, char *);
 /* --- Local data common to all OMS drivers. --- */
 STATIC char *oms_addrs = 0x0;
 STATIC volatile unsigned omsInterruptVector = 0;
-STATIC volatile uint8_t omsInterruptLevel = OMS_INT_LEVEL;
+STATIC volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 STATIC volatile int max_io_tries = MAX_COUNT;
 STATIC volatile int motionTO = 10;
 STATIC char oms_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
@@ -305,7 +305,7 @@ STATIC int set_status(int card, int signal)
 		int temp;
 
 		sscanf(p, "%i", &temp);
-		motor_info->encoder_position = (int32_t) temp;
+		motor_info->encoder_position = (epicsInt32) temp;
 	    }
 	    break;
 	case 3:		/* encoder status */
@@ -721,9 +721,9 @@ STATIC void motorIsr(int card)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
-    uint8_t control;
-    uint8_t status;
-    uint8_t doneFlags;
+    epicsUInt8 control;
+    epicsUInt8 status;
+    epicsUInt8 doneFlags;
     char dataChar;
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
@@ -757,7 +757,7 @@ STATIC void motorIsr(int card)
     /* If command error is present - clear it */
     if (status & STAT_ERROR)
     {
-	pmotor->data = (uint8_t) CMD_CLEAR;
+	pmotor->data = (epicsUInt8) CMD_CLEAR;
 
 	/* Send null character to indicate error */
 	if (drvOMSdebug >= 1)
@@ -803,7 +803,7 @@ STATIC int motorIsrEnable(int card)
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
     long status;
-    uint8_t cardStatus;
+    epicsUInt8 cardStatus;
 
     Debug(5, "motorIsrEnable: Entry card#%d\n", card);
 

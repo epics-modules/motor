@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.c
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-10-02 22:42:36 $
+Last Modified:	$Date: 2001-12-14 20:49:11 $
 */
 
 /*
@@ -336,7 +336,7 @@ STATIC int set_status(int card, int signal)
     {
 	motor_info->position = NINT(motorData);
 	if (motor_state[card]->motor_info[signal].encoder_present == YES)
-	    motor_info->encoder_position = (int32_t) motorData;
+	    motor_info->encoder_position = (epicsInt32) motorData;
 	else
 	    motor_info->encoder_position = 0;
 

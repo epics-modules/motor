@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.c
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-10-02 22:39:11 $
+Last Modified:	$Date: 2001-12-14 20:50:31 $
 */
 
 /*
@@ -380,9 +380,9 @@ STATIC int set_status(int card, int signal)
 	motor_info->no_motion_count++;
     else
     {
-	motor_info->position = (int32_t) motorData;
+	motor_info->position = (epicsInt32) motorData;
 	if (motor_state[card]->motor_info[signal].encoder_present == YES)
-	    motor_info->encoder_position = (int32_t) motorData;
+	    motor_info->encoder_position = (epicsInt32) motorData;
 	else
 	    motor_info->encoder_position = 0;
 
