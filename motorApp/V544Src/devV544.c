@@ -129,7 +129,6 @@ static struct v544_motor_table v544_table[] = {
     {IMMEDIATE, -1, 1},		/* SET_VELO */
     {IMMEDIATE, -1, 1},		/* SET_ACCEL */
     {IMMEDIATE, CS_GO, 0},	/* GO */
-    {IMMEDIATE, -1, 2},		/* SET_ENC_RATIO - Not supported */
     {INFO, -1, 0},		/* GET_INFO */
     {MOVE_TERM, CS_IDLE, 0},	/* STOP_AXIS */
     {VELOCITY, -1, 1},		/* JOG */
@@ -229,11 +228,10 @@ STATIC long v544_init(int after)
 STATIC long v544_init_record(struct motorRecord * mr)
 {
     int card, signal;
-    int initEncoder, initPos;
+    int initPos;
     struct v544_trans *ptrans;
     MOTOR_AXIS_QUERY axis_query;
     MOTOR_CALL *motor_call;
-    double ep_mp[2];		/* encoder pulses, motor pulses */
     int rtnStat;
 
     Debug(1, "v544_init_record: entry...\n", 0);
@@ -308,41 +306,10 @@ STATIC long v544_init_record(struct motorRecord * mr)
     v544_cards[card].v544_axis[signal].in_use = YES;
 
 
-/*jps: setting the encoder ratio was moved from init_record() remove  callbacks during iocInit */
-    /*
-     * Set the encoder ratio.  Note this is blatantly device dependent.
-     * Determine the number of encoder pulses and the number of motor pulses
-     * per engineering unit (EGU).  Send an array containing this information
-     * to device support.
-     */
-    if ((initEncoder = (mr->msta & EA_PRESENT)) && mr->ueip)
-    {
-	if (fabs(mr->mres) < 1.e-9)
-	    mr->mres = 1.;
-	if (fabs(mr->eres) < 1.e-9)
-	    mr->eres = mr->mres;
-	{
-	    int m;
-	    for (m=10000000; (m > 1) &&
-		(fabs(m/mr->eres) > 1.e6 || fabs(m/mr->mres) > 1.e6);
-		m /= 10)
-		;
-	    Debug(5, "oms58_init_record: ER mult = %d\n", m);
-	    ep_mp[0] = m / mr->eres;	/* encoder pulses per ...*/
-	    ep_mp[1] = m / mr->mres;	/*    motor pulses */
-	}
-    }
-    else
-    {
-	ep_mp[0] = 1.;
-	ep_mp[1] = 1.;
-    }
-
-
     /* Program the device if an initial position is programmed or 
      * an encoder is present. */
 
-    if ((initPos = (mr->dval && mr->mres)) || initEncoder)
+    if (initPos = (mr->dval && mr->mres))
     {
 
 	/*
@@ -357,17 +324,6 @@ STATIC long v544_init_record(struct motorRecord * mr)
 	 */
 	callbackSetCallback((void (*)(struct callbackPvt *)) v544_init_callback,
 			    &(motor_call->callback));
-
-	if (initEncoder)
-	{
-	    Debug(7, "v544_init_record: encoder pulses per EGU = %f\n", ep_mp[0]);
-	    Debug(7, "v544_init_record: motor pulses per EGU = %f\n", ep_mp[1]);
-
-	
-	    v544_start_trans(mr);
-	    v544_build_trans(SET_ENC_RATIO, ep_mp, mr);
-	    v544_end_trans(mr);
-	}
 
 	if (initPos)
         {
@@ -565,7 +521,6 @@ STATIC long v544_build_trans(motor_cmnd command, double *parms, struct motorReco
 	    motor_call->cmndList[motor_call->cmndCnt].cmnd |= v544_table[command].command;
 	    motor_call->cmndCnt++;
 	    break;
-	case SET_ENC_RATIO:
 	case GET_INFO:
 	    motor_call->cmndCnt++;
 	    break;
