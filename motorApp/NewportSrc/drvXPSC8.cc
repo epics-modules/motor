@@ -11,6 +11,7 @@
  */
 
 #include        <string.h>
+#include        <stdio.h>
 #include        <epicsThread.h>
 #include        <epicsMutex.h>
 #include        <epicsExport.h>
