@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 16:01:53 $
+Last Modified:	$Date: 2003-05-23 18:45:43 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -652,7 +652,7 @@ STATIC int motor_init()
 	    brdptr->motor_in_motion = 0;
 	    send_mess(card_index, GET_IDENT, (char) NULL);	/* Read controller ID string */
 	    recv_mess(card_index, buff, 1);
-	    strcpy(brdptr->ident, &buff[2]);  /* Skip "XD" */
+	    strncpy(brdptr->ident, &buff[2], 50);  /* Skip "XD" */
 
             /* Figure out how many axes this controller has.
              * Do this by querying status of each axis in order */
