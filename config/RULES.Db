@@ -1,4 +1,4 @@
-# $Id: RULES.Db,v 1.1 2000-02-08 22:17:43 sluiter Exp $
+# RULES.Db,v 1.9.6.4 2001/08/20 16:36:50 jba Exp
 #
 #	Rules for making things related to databases
 #
@@ -46,6 +46,8 @@ rebuild:: clean install
 install:: inc buildInstall 
 
 buildInstall:: build $(INSTALL_DATA)
+
+depends::
 
 clean::
 	@echo "Cleaning"
