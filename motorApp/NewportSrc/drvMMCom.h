@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-04-18 21:01:59 $
+Last Modified:	$Date: 2001-10-02 22:19:30 $
 */
 
 /*
@@ -62,7 +62,6 @@ typedef enum MM_model MM_model;
 typedef enum MM_motor_type MM_motor_type;
 #endif
 
-
 /* Motion Master specific data is stored in this structure. */
 struct MMcontroller
 {
@@ -85,6 +84,24 @@ struct MMcontroller
     double home_preset[MAX_AXIS]; /* Controller's home preset position (XF command). */
     CommStatus status;		/* Controller communication status. */
 };
+
+/* Motor status response for MM[3000/4000/4005]. */
+typedef union
+{
+    uint8_t All;
+    struct
+    {
+	BOOLEAN bit7		:1;	/* Bit #7 N/A. */
+	BOOLEAN bit6		:1;	/* Bit #6 N/A. */
+	BOOLEAN homels		:1;	/* Home LS. */
+	BOOLEAN minusTL		:1;	/* Minus Travel Limit. */
+	BOOLEAN plustTL		:1;	/* Plus Travel Limit. */
+	BOOLEAN direction	:1;	/* Motor direction: 0 - minus; 1 - plus. */
+	BOOLEAN NOT_power	:1;	/* Motor power 0 - ON; 1 - OFF. */
+	BOOLEAN inmotion	:1;	/* In-motion indicator. */
+    } Bits;
+} MOTOR_STATUS;
+
 
 #endif	/* INCdrvMMComh */
 
