@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:38:43 $
+Last Modified:	$Date: 2003-12-23 16:14:27 $
 */
 
 /*
@@ -39,6 +39,8 @@ Last Modified:	$Date: 2003-12-12 21:38:43 $
  * .01 06/13/03 rls Ported to R3.14.
  * .02 11/06/03 rls Bug fixes for inoperable polling rate and INFO command type
  *			delay.
+ * .03 12/22/03 rls Limit valid "delay" in process_messages() to;
+ *			0 < delay <= (quantum * 2).
  */
 
 
@@ -253,7 +255,7 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 	    char axis_name;
 
 	    if (tabptr->axis_names == NULL)
-		axis_name = NULL;
+		axis_name = (char) NULL;
 	    else
 		axis_name = tabptr->axis_names[axis];
 
@@ -309,9 +311,11 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 		break;
 
 	    case INFO:
-		if (tick >= motor_info->status_delay)
-		    delay = tick - motor_info->status_delay;
-		if (delay < quantum_x_2) /* Status update delay - needed for OMS. */
+		/* Status update delay - needed for OMS. */
+		delay = tick - motor_info->status_delay;
+
+		/* Limit delay to; 0 < delay <= (quantum * 2). */
+		if (delay > 0.0 && delay < quantum_x_2)
 		    epicsThreadSleep(quantum_x_2 - delay);
 
 		if (tabptr->strtstat != NULL)
