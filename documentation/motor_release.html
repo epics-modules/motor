@@ -2,10 +2,27 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; U; SunOS 5.6 sun4u) [Netscape]">
+   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
 </head>
 <body>
 
+<center>
+<h1>
+<b><u>Motor Record Version 4.3 Release Notice</u></b></h1></center>
+This release of the motor record is strictly a bug fix release; no new
+features have been added.
+<p><b><u>STOP field hangs record</u></b><b><u></u></b>
+<p>An error was introduced into the motor record with the release of V4.2
+(see README file item #14 under V4.2 ).&nbsp; This error occurred if the
+STOP field was activated when the motor was not moving (i.e., MIP = 0).&nbsp;
+The motor record would become "stuck", and not respond to a move request
+(due to the internal state machine associated with IP being set to the
+"stop" state), until the condition was cleared by either a SPMG-stop or
+some other user action that forced the MIP field to zero.
+<p><b><u>HIDEOS support removed</u></b><b><u></u></b>
+<p>HIDEOS is no longer supported.&nbsp; MPF is the only supported alternative
+to HIDEOS.
+<br><b><u></u></b>&nbsp;
 <center>
 <h1>
 <b><u>Motor Record Version 4.2 Release Notice</u></b></h1></center>
