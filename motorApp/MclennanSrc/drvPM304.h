@@ -20,7 +20,7 @@
 #define	INCdrvPM304h 1
 
 #include "motordrvCom.h"
-#include "serialIO.h"
+#include "asynSyncIO.h"
 
 /* PM304 default profile. */
 
@@ -35,12 +35,14 @@
 
 struct PM304controller
 {
-    serialIO *serialInfo;   /* For RS-232 */
-    int serial_card;        /* Card on which Hideos/MPF is running */
-    char serial_task[20];   /* Hideos/MPF task/server name for serial port */
+    asynUser *pasynUser;    /* asyn */
     int n_axes;             /* Number of axes on this controller */
     int model;              /* Model = MODEL_PM304 or MODEL_PM600 */
     int use_encoder[PM304_MAX_CHANNELS];  /* Does axis have an encoder? */
+    char port[80];          /* asyn port name */
 };
+
+RTN_STATUS PM304Setup(int, int, int);
+RTN_STATUS PM304Config(int, const char *, int);
 
 #endif	/* INCdrvPM304h */

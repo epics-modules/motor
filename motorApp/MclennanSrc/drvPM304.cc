@@ -33,12 +33,12 @@
 #include 	<drvSup.h>
 #include        "motor.h"
 #include        "drvPM304.h"
-#include        "serialIO.h"
+#include        "asynSyncIO.h"
 #include 	"epicsExport.h"
 
 #define STATIC static
 
-#define SERIAL_TIMEOUT 2000 /* Command timeout in msec */
+#define TIMEOUT 2.0 /* Command timeout in sec */
 
 #define BUFF_SIZE 200       /* Maximum length of string to/from PM304 */
 
@@ -363,8 +363,8 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
         strcpy(buff, p);
         strcat(buff, OUTPUT_TERMINATOR);
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
-	cntrl->serialInfo->serialIOSendRecv(buff, strlen(buff), response,
-			    BUFF_SIZE, INPUT_TERMINATOR, SERIAL_TIMEOUT);
+	pasynSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), response,
+			    BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT);
         Debug(2, "send_mess: card %d, response=%s\n", card, response);
     }
 
@@ -383,10 +383,11 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
 /*****************************************************/
 STATIC int recv_mess(int card, char *com, int flag)
 {
-    int timeout;
+    double timeout;
     int len=0;
     char *pos;
     char temp[BUFF_SIZE];
+    int flush;
     struct PM304controller *cntrl;
 
     com[0] = '\0';
@@ -399,11 +400,15 @@ STATIC int recv_mess(int card, char *com, int flag)
 
     cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
 
-    if (flag == FLUSH)
+    if (flag == FLUSH) {
+        flush = 1;
         timeout = 0;
-    else
-        timeout = SERIAL_TIMEOUT;
-    len = cntrl->serialInfo->serialIORecv(com, BUFF_SIZE, INPUT_TERMINATOR, timeout);
+    } else {
+        flush = 0;
+        timeout = TIMEOUT;
+    }
+    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
+                            INPUT_TERMINATOR, 1, flush, timeout);
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
     if (len < 2) com[0] = '\0'; else com[len-2] = '\0';
@@ -471,8 +476,8 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
         strcpy(buff, p);
         strcat(buff, OUTPUT_TERMINATOR);
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, buff);
-	len = cntrl->serialInfo->serialIOSendRecv(buff, strlen(buff), 
-                         response, BUFF_SIZE, INPUT_TERMINATOR, SERIAL_TIMEOUT);
+	len = pasynSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), 
+                         response, BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT);
     }
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
@@ -541,9 +546,8 @@ PM304Setup(int num_cards,   	/* maximum number of controllers in system */
 /* PM304Config()                                    */
 /*****************************************************/
 RTN_STATUS
-PM304Config(int card,       	/* card being configured */
-            int location,	/* card for RS-232 */
-            const char *name,	/* server_task for RS-232 */
+PM304Config(int card,           /* card being configured */
+            const char *port,	/* asyn port name */
             int n_axes)         /* Number of axes */
 {
     struct PM304controller *cntrl;
@@ -555,10 +559,9 @@ PM304Config(int card,       	/* card being configured */
     motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
     motor_state[card]->DevicePrivate = malloc(sizeof(struct PM304controller));
     cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
-    cntrl->serial_card = location;
     cntrl->n_axes = n_axes;
     cntrl->model = MODEL_PM304;  /* Assume PM304 initially */
-    strcpy(cntrl->serial_task, name);
+    strcpy(cntrl->port, port);
     return(OK);
 }
 
@@ -602,8 +605,9 @@ STATIC int motor_init()
         /* Initialize communications channel */
         success_rtn = false;
 
-	cntrl->serialInfo = new serialIO(cntrl->serial_card,
-				     cntrl->serial_task, &success_rtn);
+        success_rtn = pasynSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
+        Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n",
+              cntrl->port, success_rtn, cntrl->pasynUser);
 
         if (success_rtn == true)
         {

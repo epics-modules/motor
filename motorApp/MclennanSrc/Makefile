@@ -13,7 +13,8 @@ LIBRARY_IOC = Mclennan
 SRCS += MclennanRegister.cc
 SRCS += devPM304.cc drvPM304.cc
 
-Mclennan_LIBS += motor motorCOM_mpf
+Mclennan_LIBS += motor
+Mclennan_LIBS += asyn
 Mclennan_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
