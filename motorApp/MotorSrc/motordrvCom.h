@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 18:34:02 $
+Last Modified:	$Date: 2000-09-05 22:07:59 $
 */
 
 /*
@@ -52,10 +52,11 @@ enum PortType
     RS232_PORT		/* = 1 */
 };
 
+/* Controller communication status. */
 enum CommStatus
 {
     NORMAL,
-    COMM_ERR
+    COMM_ERR		/* Communication timeout error. */
 };
 
 #ifndef __cplusplus
@@ -132,16 +133,6 @@ struct axis_status
     char done;
     char overtravel;
     char home;
-};
-
-struct encoder_status
-{
-    char slip_enable;
-    char pos_enable;
-    char slip_detect;
-    char pos_dead;
-    char axis_home;
-    char unused;
 };
 
 struct circ_queue	/* Circular queue structure. */
