@@ -2,11 +2,6 @@
 # IMS483 controller.  The examples must be configured by including or omitting
 # comment characters (i.e., #'s) from this file.
 
-# The Newport example can be configured for either serial or GPIB communication
-# by omitting/including comments (i.e., remove "# !SERIAL! #" or "# !GPIB!   #"
-# for serial or GPIB communication, respectively.  The IMS example is serial
-# communication only, in "single mode".
-
 # The MPF option is either single or double CPU board configuration and is
 # selected by deleting either the "# !MPF-1-CPU! #" for the "# !MPF-2-CPU! #"
 # comments.
@@ -15,23 +10,21 @@
 # The following must be added for many board support packages
 #cd "... IOC st.cmd complete directory path ... "
 
-#< ../nfsCommands
 < cdCommands 
-< ../MPFconfig.cmd
+#< ../nfsCommands.rls
 
-cd appbin
+cd topbin
 
 # If the VxWorks kernel was built using the project facility, the following must
 # be added before any C++ code is loaded (see SPR #28980).
 sysCplusEnable=1
 
-ld < WithMPFLib
-
-# !GPIB!   ## !MPF-1-CPU! #ld < GpibHideosLocal.o
-# !GPIB!   ## !MPF-2-CPU! #ld < GpibHideosRemote.o
+ld < WithMPFVx.munch
 
 cd startup
-dbLoadDatabase("../../dbd/WithMPFApp.dbd")
+dbLoadDatabase("../../dbd/WithMPFVx.dbd")
+registerRecordDeviceDriver(pdbbase)
+
 dbLoadRecords("../../db/WithMPF.db")
 
 routerInit
@@ -40,7 +33,7 @@ MPF_Server_Location = 0
 # !MPF-2-CPU! #tcpMessageRouterClientStart(MPF_Server_Location,9900,"164.54.53.78",1500,40)
 
 # Configure the MPF server code. This MUST be configured too!
-# !MPF-1-CPU! #< st_mpfserver.cmd
+# !MPF-1-CPU! #< st_mpfserver.cmd.Vx
 
 # Newport MM4000 driver setup parameters: 
 #     (1) maximum number of controllers in system
@@ -53,10 +46,7 @@ MM4000Setup(1, 0, 10)
 #     (2) port type: 0-GPIB_PORT or 1-RS232_PORT,
 #     (3) GPIB link or MPF server location
 #     (4) GPIB address or MPF serial server name
-# !SERIAL! #MM4000Config(0, 1, MPF_Server_Location, "a-Serial[0]")
-# !GPIB!   #GPIB_Link = 10
-# !GPIB!   #GPIB_Addr = 1
-# !GPIB!   #MM4000Config(0, 0, GPIB_Link, GPIB_Addr)
+MM4000Config(0, 1, MPF_Server_Location, "a-Serial[0]")
 
 # Newport PM500 driver setup parameters:
 #     (1) maximum number of controllers in system
@@ -102,8 +92,18 @@ MM4000Setup(1, 0, 10)
 #   MCB4BConfig(0, 1, "a-Serial[0]")  MPF card 1, port 0 on IP slot A.
 #MCB4BConfig(0, MPF_Server_Location, "a-Serial[3]")
 
-# !GPIB!   ## !MPF-1-CPU! #Server_Mod_Name = GPIB_Module_Name
-# !GPIB!   ## !MPF-2-CPU! #Server_Mod_Name = "GPIB0"
-# !GPIB!   #HiDEOSGpibLinkConfig(GPIB_Link, GPIB_Addr, Server_Mod_Name)
+# Newport ESP300 driver setup parameters: 
+#     (1) maximum number of controllers in system
+#     (2) N/A
+#     (3) motor task polling rate (min=1Hz,max=60Hz)
+#ESP300Setup(1, 0, 10)
+
+# Newport ESP300 driver configuration parameters: 
+#     (1) controller# being configured,
+#     (2) port type: 0-GPIB_PORT or 1-RS232_PORT,
+#     (3) MPF server location
+#     (4) GPIB address or MPF serial server name
+#ESP300Config(0, 1, MPF_Server_Location, "a-Serial[0]")
+#drvESP300debug = 4
 
 iocInit

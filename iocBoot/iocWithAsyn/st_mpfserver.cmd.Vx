@@ -1,0 +1,19 @@
+# This configures the MPF server stuff.
+###############################################################################
+# Initialize IP carrier
+# ipacAddCarrier(ipac_carrier_t *pcarrier, char *cardParams)
+#   pcarrier   - pointer to carrier driver structure
+#   cardParams - carrier-specific init parameters
+
+carrier = "ipac"
+ipacAddCarrier(&ipmv162, "A:l=3,3 m=0xe0000000,64")
+
+tyGSOctalDrv(1)
+taskDelay(10)
+octalUart0 = tyGSOctalModuleInit("GSIP_OCTAL232", 0x80, 0, 0)
+taskDelay(3)
+port0 = tyGSOctalDevCreate("/tyGS/0/0",octalUart0,0,1000,1000)
+tyGSOctalConfig(port0,9600,'N',1,8,'N')
+initTtyPort("tyGS00","/tyGS/0/0",9600,1000)
+initSerialServer("serial0","tyGS00",100,2,"")
+
