@@ -22,10 +22,10 @@ sysCplusEnable=1
 ld < WithMPFVx.munch
 
 cd startup
-dbLoadDatabase("../../dbd/WithMPFVx.dbd")
+dbLoadDatabase("$(TOP)/dbd/WithMPFVx.dbd")
 WithMPFVx_registerRecordDeviceDriver(pdbbase)
 
-dbLoadRecords("../../db/WithMPF.db")
+dbLoadRecords("$(TOP)/db/WithMPF.db")
 
 routerInit
 MPF_Server_Location = 0
