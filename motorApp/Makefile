@@ -29,6 +29,7 @@ DIRS += NewportSrc
 DIRS += ImsSrc
 DIRS += AcsSrc
 DIRS += MclennanSrc
+DIRS += PiSrc
 endif
 
 DIRS += Db
