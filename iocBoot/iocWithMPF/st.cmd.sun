@@ -12,7 +12,7 @@ localMessageRouterStart(1)
 # Configure the MPF server code. This MUST be configured too!
 < st_mpfserver.cmd.sun
 
-IM483PLSetup(1, 0, 5)
-IM483PLConfig(0, 1, 1, "serial0")
+MM4000Setup(1, 0, 60)
+MM4000Config(0, 1, 1, "serial0")
 
 iocInit
