@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-13 21:54:00 $
+Last Modified:	$Date: 2003-05-12 19:07:03 $
 */
 
 /*
@@ -40,6 +40,9 @@ Last Modified:	$Date: 2003-02-13 21:54:00 $
  * .03 10-29-02 rls - NTM field added for Soft Channel device.
  *		    - Update "last" target position in do_work() when stop
  *			command is sent.
+ * .04 03-21-03 rls - Elminate three redundant DMOV monitor postings.
+ *		    - Consolidate do_work() backlash correction logic.
+ * .05 04-16-03 rls - Home velocity field (HVEL) added.
  */
 
 #define VERSION 5.1
@@ -64,9 +67,8 @@ Last Modified:	$Date: 2003-02-13 21:54:00 $
 #include	"motor.h"
 
 
-#define STATIC static
-
 /*----------------debugging-----------------*/
+
 #ifdef __GNUG__
     #ifdef	DEBUG
 	volatile int motorRecordDebug = 0;
@@ -81,28 +83,28 @@ Last Modified:	$Date: 2003-02-13 21:54:00 $
 
 /*** Forward references ***/
 
-STATIC RTN_STATUS do_work(motorRecord *);
-STATIC void alarm_sub(motorRecord *);
-STATIC void monitor(motorRecord *);
-STATIC void post_MARKed_fields(motorRecord *, unsigned short);
-STATIC void process_motor_info(motorRecord *, bool);
-STATIC void load_pos(motorRecord *);
-STATIC void check_speed_and_resolution(motorRecord *);
-STATIC void set_dial_highlimit(motorRecord *, struct motor_dset *);
-STATIC void set_dial_lowlimit(motorRecord *, struct motor_dset *);
-STATIC void set_userlimits(motorRecord *);
-STATIC void range_check(motorRecord *, float *, double, double);
+static RTN_STATUS do_work(motorRecord *);
+static void alarm_sub(motorRecord *);
+static void monitor(motorRecord *);
+static void post_MARKed_fields(motorRecord *, unsigned short);
+static void process_motor_info(motorRecord *, bool);
+static void load_pos(motorRecord *);
+static void check_speed_and_resolution(motorRecord *);
+static void set_dial_highlimit(motorRecord *, struct motor_dset *);
+static void set_dial_lowlimit(motorRecord *, struct motor_dset *);
+static void set_userlimits(motorRecord *);
+static void range_check(motorRecord *, float *, double, double);
 
 /*** Record Support Entry Table (RSET) functions. ***/
 
-STATIC long init_record(dbCommon *, int);
-STATIC long process(dbCommon *);
-STATIC long special(DBADDR *, int);
-STATIC long get_units(const DBADDR *, char *);
-STATIC long get_precision(const DBADDR *, long *);
-STATIC long get_graphic_double(const DBADDR *, struct dbr_grDouble *);
-STATIC long get_control_double(const DBADDR *, struct dbr_ctrlDouble *);
-STATIC long get_alarm_double(const DBADDR  *, struct dbr_alDouble *);
+static long init_record(dbCommon *, int);
+static long process(dbCommon *);
+static long special(DBADDR *, int);
+static long get_units(const DBADDR *, char *);
+static long get_precision(const DBADDR *, long *);
+static long get_graphic_double(const DBADDR *, struct dbr_grDouble *);
+static long get_control_double(const DBADDR *, struct dbr_ctrlDouble *);
+static long get_alarm_double(const DBADDR  *, struct dbr_alDouble *);
 
 
 struct rset motorRSET =
@@ -303,7 +305,7 @@ struct callback		/* DLY feature callback structure. */
     struct motorRecord *precord;
 };
 
-STATIC void callbackFunc(struct callback * pcb)
+static void callbackFunc(struct callback * pcb)
 {
     motorRecord *pmr = pcb->precord;
 
@@ -328,7 +330,7 @@ Calculate minumum retry deadband (.rdbd) achievable under current
 circumstances, and enforce this minimum value.
 Make RDBD >= MRES.
 ******************************************************************************/
-STATIC void enforceMinRetryDeadband(motorRecord * pmr)
+static void enforceMinRetryDeadband(motorRecord * pmr)
 {
     float min_rdbd;
 
@@ -368,7 +370,7 @@ LOGIC:
 
 *******************************************************************************/
 
-STATIC long init_record(dbCommon* arg, int pass)
+static long init_record(dbCommon* arg, int pass)
 {
     motorRecord *pmr = (motorRecord *) arg;
     struct motor_dset *pdset;
@@ -567,7 +569,7 @@ LOGIC:
     
     
 ******************************************************************************/
-STATIC long postProcess(motorRecord * pmr)
+static long postProcess(motorRecord * pmr)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
     const unsigned short monitor_mask = DBE_VALUE;
@@ -612,11 +614,9 @@ STATIC long postProcess(motorRecord * pmr)
 	{
 	    /* Stopped and Hom* button still down.  Now do Hom*. */
 	    double vbase = pmr->vbas / fabs(pmr->mres);
-	    double hvel = 1000 * fabs(pmr->mres / pmr->eres);
 	    double hpos = 0;
+	    double hvel =  pmr->hvel / fabs(pmr->mres);
 
-	    if (hvel <= vbase)
-		hvel = vbase + 1;
 	    pmr->mip &= ~MIP_STOP;
 	    pmr->dmov = FALSE;
 	    MARK(M_DMOV);
@@ -666,8 +666,9 @@ STATIC long postProcess(motorRecord * pmr)
 	    double relpos = pmr->diff / pmr->mres;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
+	    /* Restore DMOV to false and UNMARK it so it is not posted. */
 	    pmr->dmov = FALSE;
-	    MARK(M_DMOV);
+	    UNMARK(M_DMOV);
 
 	    INIT_MSG();
 
@@ -741,7 +742,7 @@ STATIC long postProcess(motorRecord * pmr)
 Compare target with actual position.  If retry is indicated, set variables so
 that it will happen when we return.
 ******************************************************************************/
-STATIC void maybeRetry(motorRecord * pmr)
+static void maybeRetry(motorRecord * pmr)
 {
     if ((fabs(pmr->diff) > pmr->rdbd) && !pmr->hls && !pmr->lls)
     {
@@ -947,7 +948,7 @@ Exit:
     Exit.
 
 *******************************************************************************/
-STATIC long process(dbCommon *arg)
+static long process(dbCommon *arg)
 {
     motorRecord *pmr = (motorRecord *) arg;
     long status = OK, process_reason;
@@ -1023,8 +1024,11 @@ STATIC long process(dbCommon *arg)
 
 	    /* Motor has stopped. */
 	    /* Assume we're done moving until we find out otherwise. */
-	    pmr->dmov = TRUE;
-	    MARK(M_DMOV);
+	    if (pmr->dmov != TRUE)
+	    {
+		pmr->dmov = TRUE;
+		MARK(M_DMOV);
+	    }
 
 	    /* Do another update after LS error. */
 	    if (pmr->mip != MIP_DONE && (pmr->rhls || pmr->rlls))
@@ -1338,7 +1342,7 @@ LOGIC:
     
     
 *******************************************************************************/
-STATIC RTN_STATUS do_work(motorRecord * pmr)
+static RTN_STATUS do_work(motorRecord * pmr)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
     int dir_positive = (pmr->dir == motorDIR_Pos);
@@ -1592,13 +1596,11 @@ STATIC RTN_STATUS do_work(motorRecord * pmr)
 		}
 
 		vbase = pmr->vbas / fabs(pmr->mres);
-		hvel = 1000 * fabs(pmr->mres / pmr->eres);
+		hvel  = pmr->hvel / fabs(pmr->mres);
 		hpos = 0;
 
 		INIT_MSG();
 		WRITE_MSG(SET_VEL_BASE, &vbase);
-		if (hvel <= vbase)
-		    hvel = vbase + 1;
 		WRITE_MSG(SET_VELOCITY, &hvel);
 		WRITE_MSG((pmr->mip & MIP_HOMF) ? HOME_FOR : HOME_REV, &hpos);
 		/*
@@ -1814,7 +1816,7 @@ STATIC RTN_STATUS do_work(motorRecord * pmr)
 	    double bvel = pmr->bvel / fabs(pmr->mres);	/* backlash speed  */
 	    double bacc = bvel / pmr->bacc;	/* backlash accel. */
 	    double slop = 0.95 * pmr->rdbd;
-	    bool use_rel;
+	    bool use_rel, preferred_dir;
 	    double dMdR = pmr->mres / pmr->mres;
 	    double relpos = pmr->diff / pmr->mres;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
@@ -1869,13 +1871,18 @@ STATIC RTN_STATUS do_work(motorRecord * pmr)
 		MARK(M_RCNT);
 	    }
 
+	    if (((use_rel == false) && ((newpos > currpos) != (pmr->bdst > 0))) ||
+		((use_rel == true)  && ((mRelPos > 0)      != (pmr->bdst > 0))))
+		preferred_dir = false;
+	    else
+		preferred_dir = true;
+
 	    /*
 	     * If we're within retry deadband, move only in preferred dir.
 	     */
 	    if (fabs(pmr->diff) < slop)
 	    {
-		if (((use_rel == false) && ((newpos > currpos) != (pmr->bdst > 0))) ||
-		    ((use_rel == true)  && ((mRelPos > 0)      != (pmr->bdst > 0))))
+		if (preferred_dir == false)
 		{
 		    if (pmr->mip == MIP_DONE)
 		    {
@@ -1892,6 +1899,8 @@ STATIC RTN_STATUS do_work(motorRecord * pmr)
 
 	    if (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY)
 	    {
+		double velocity, position, accel;
+
 		pmr->mip = MIP_MOVE;
 		MARK(M_MIP);
 		/* v1.96 Don't post dmov if special already did. */
@@ -1905,81 +1914,65 @@ STATIC RTN_STATUS do_work(motorRecord * pmr)
 		pmr->lrvl = pmr->rval;
     
 		INIT_MSG();
-    
-		/* Is backlash correction disabled? */
-		if (fabs(pmr->bdst) <  fabs(pmr->mres))
+
+		/* Backlash disabled, OR, no need for seperate backlash move
+		 * since move is in preferred direction (preferred_dir==ON),
+		 * AND, backlash acceleration and velocity are the same as slew values
+		 * (BVEL == VELO, AND, BACC == ACCL). */
+		if ((fabs(pmr->bdst) <  fabs(pmr->mres)) ||
+		    (preferred_dir == true && pmr->bvel == pmr->velo &&
+		     pmr->bacc == pmr->accl))
 		{
-		    /* Yes, just move to newpos at (vel,acc) */
-		    WRITE_MSG(SET_VEL_BASE, &vbase);
-		    WRITE_MSG(SET_VELOCITY, &vel);
-		    WRITE_MSG(SET_ACCEL, &acc);
-		    if (use_rel)
-		    {
-			mRelPos *= pmr->frac;
-			WRITE_MSG(MOVE_REL, &relpos);
-		    }
+		    velocity = vel;
+		    accel = acc;
+		    if (use_rel == true)
+			position = mRelPos * pmr->frac;
 		    else
-		    {
-			newpos = currpos + pmr->frac * (newpos - currpos);
-			WRITE_MSG(MOVE_ABS, &newpos);
-		    }
-		    WRITE_MSG(GO, NULL);
+			position = currpos + pmr->frac * (newpos - currpos);
 		}
-		/*
-		 * If current position is already within backlash range, or if
-		 * we already within retry deadband of desired position, then
-		 * we don't have to take out backlash.
-		 */
+		/* Is current position within backlash or retry range? */
 		else if ((fabs(pmr->diff) < slop) ||
-			 (use_rel && ((relbpos < 0) == (relpos > 0))) ||
-			 (!use_rel && (((currpos + slop) > bpos) == (newpos > currpos))))
+			 (use_rel == true  && ((relbpos < 0) == (relpos > 0))) ||
+			 (use_rel == false && (((currpos + slop) > bpos) == (newpos > currpos))))
 		{
-		    /**
-		     * Yes, assume backlash has already been taken out.
-		     * Move to newpos at (bvel, bacc).
-		     */
-		    WRITE_MSG(SET_VEL_BASE, &vbase);
-		    WRITE_MSG(SET_VELOCITY, &bvel);
-		    WRITE_MSG(SET_ACCEL, &bacc);
-		    /********************************************************
-		     * Backlash correction imposes a much larger penalty on
-		     * overshoot than on undershoot. Here, we allow user to
-		     * specify (by .frac) the fraction of the backlash distance
-		     * to move as a first approximation. When the motor stops
-		     * and we're not yet at 'newpos', the callback will give
-		     * us another chance, and we'll go .frac of the remaining
-		     * distance, and so on. This algorithm is essential when
-		     * the drive creeps after a move (e.g., piezo inchworm),
-		     * and helpful when the readback device has a latency
-		     * problem (e.g., interpolated encoder), or is a little
-		     * nonlinear. (Blatantly nonlinear readback is not handled
-		     * by the motor record.)
-		     */
-		    if (use_rel)
-		    {
-			mRelPos *= pmr->frac;
-			WRITE_MSG(MOVE_REL, &relpos);
-		    }
+/******************************************************************************
+ * Backlash correction imposes a much larger penalty on overshoot than on
+ * undershoot. Here, we allow user to specify (by .frac) the fraction of the
+ * backlash distance to move as a first approximation. When the motor stops and
+ * we're not yet at 'newpos', the callback will give us another chance, and
+ * we'll go .frac of the remaining distance, and so on. This algorithm is
+ * essential when the drive creeps after a move (e.g., piezo inchworm), and
+ * helpful when the readback device has a latency problem (e.g., interpolated
+ * encoder), or is a little nonlinear. (Blatantly nonlinear readback is not
+ * handled by the motor record.)
+ *****************************************************************************/
+		    velocity = bvel;
+		    accel = bacc;
+		    if (use_rel == true)
+			position = mRelPos * pmr->frac;
 		    else
-		    {
-			newpos = currpos + pmr->frac * (newpos - currpos);
-			WRITE_MSG(MOVE_ABS, &newpos);
-		    }
-		    WRITE_MSG(GO, NULL);
+			position = currpos + pmr->frac * (newpos - currpos);
 		}
 		else
 		{
-		    /* We need to take out backlash.  Go to bpos at (vel,acc). */
-		    WRITE_MSG(SET_VEL_BASE, &vbase);
-		    WRITE_MSG(SET_VELOCITY, &vel);
-		    WRITE_MSG(SET_ACCEL, &acc);
-		    if (use_rel)
-			WRITE_MSG(MOVE_REL, &mRelBPos);
+		    velocity = vel;
+		    accel = acc;
+		    if (use_rel == true)
+			position = mRelBPos;
 		    else
-			WRITE_MSG(MOVE_ABS, &bpos);
-		    WRITE_MSG(GO, NULL);
+			position = bpos;
 		    pmr->pp = TRUE;	/* Do backlash from posprocess(). */
 		}
+
+		WRITE_MSG(SET_VEL_BASE, &vbase);
+		WRITE_MSG(SET_VELOCITY, &velocity);
+		WRITE_MSG(SET_ACCEL, &accel);
+		if (use_rel == true)
+		    WRITE_MSG(MOVE_REL, &position);
+		else
+		    WRITE_MSG(MOVE_ABS, &position);
+		WRITE_MSG(GO, NULL);
+
 		pmr->cdir = (pmr->rdif < 0.0) ? 0 : 1;
 		SEND_MSG();
 	    }
@@ -1992,7 +1985,7 @@ STATIC RTN_STATUS do_work(motorRecord * pmr)
 /******************************************************************************
 	special()
 *******************************************************************************/
-STATIC long special(DBADDR *paddr, int after)
+static long special(DBADDR *paddr, int after)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
@@ -2496,6 +2489,10 @@ pidcof:
 	}
 	break;
 
+    case motorRecordHVEL:
+	range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
+	break;
+
     default:
 	break;
     }
@@ -2540,6 +2537,7 @@ velcheckA:
 	    }
 
 	    range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+	    range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
     }
     /* Do not process (i.e., clear) marked fields here.  PP fields (e.g., MRES) must remain marked. */
     return(OK);
@@ -2549,7 +2547,7 @@ velcheckA:
 /******************************************************************************
 	get_units()
 *******************************************************************************/
-STATIC long get_units(const DBADDR *paddr, char *units)
+static long get_units(const DBADDR *paddr, char *units)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int siz = dbr_units_size - 1;	/* "dbr_units_size" from dbAccess.h */
@@ -2598,7 +2596,7 @@ STATIC long get_units(const DBADDR *paddr, char *units)
 /******************************************************************************
 	get_graphic_double()
 *******************************************************************************/
-STATIC long get_graphic_double(const DBADDR *paddr, struct dbr_grDouble * pgd)
+static long get_graphic_double(const DBADDR *paddr, struct dbr_grDouble * pgd)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int fieldIndex = dbGetFieldIndex(paddr);
@@ -2643,7 +2641,7 @@ STATIC long get_graphic_double(const DBADDR *paddr, struct dbr_grDouble * pgd)
 /******************************************************************************
 	get_control_double()
 *******************************************************************************/
-STATIC long
+static long
  get_control_double(const DBADDR *paddr, struct dbr_ctrlDouble * pcd)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
@@ -2688,7 +2686,7 @@ STATIC long
 /******************************************************************************
 	get_precision()
 *******************************************************************************/
-STATIC long get_precision(const DBADDR *paddr, long *precision)
+static long get_precision(const DBADDR *paddr, long *precision)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int fieldIndex = dbGetFieldIndex(paddr);
@@ -2719,7 +2717,7 @@ STATIC long get_precision(const DBADDR *paddr, long *precision)
 /******************************************************************************
 	get_alarm_double()
 *******************************************************************************/
-STATIC long get_alarm_double(const DBADDR  *paddr, struct dbr_alDouble * pad)
+static long get_alarm_double(const DBADDR  *paddr, struct dbr_alDouble * pad)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int fieldIndex = dbGetFieldIndex(paddr);
@@ -2742,7 +2740,7 @@ STATIC long get_alarm_double(const DBADDR  *paddr, struct dbr_alDouble * pad)
 /******************************************************************************
 	alarm_sub()
 *******************************************************************************/
-STATIC void alarm_sub(motorRecord * pmr)
+static void alarm_sub(motorRecord * pmr)
 {
     if (pmr->udf == TRUE)
     {
@@ -2773,7 +2771,7 @@ STATIC void alarm_sub(motorRecord * pmr)
 /******************************************************************************
 	monitor()
 *******************************************************************************/
-STATIC void monitor(motorRecord * pmr)
+static void monitor(motorRecord * pmr)
 {
     unsigned short monitor_mask;
 
@@ -2788,7 +2786,7 @@ STATIC void monitor(motorRecord * pmr)
 /******************************************************************************
 	post_MARKed_fields()
 *******************************************************************************/
-STATIC void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
+static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 {
     unsigned short local_mask;
     mmap_field mmap_bits;
@@ -2952,7 +2950,7 @@ STATIC void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 /******************************************************************************
 	process_motor_info()
 *******************************************************************************/
-STATIC void
+static void
  process_motor_info(motorRecord * pmr, bool initcall)
 {
     unsigned long status = pmr->msta;
@@ -3062,7 +3060,7 @@ STATIC void
 }
 
 /* Calc and load new raw position into motor w/out moving it. */
-STATIC void load_pos(motorRecord * pmr)
+static void load_pos(motorRecord * pmr)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
     double newpos = pmr->dval / pmr->mres;
@@ -3093,8 +3091,11 @@ STATIC void load_pos(motorRecord * pmr)
     pmr->mip = MIP_LOAD_P;
     MARK(M_MIP);
     pmr->pp = TRUE;
-    pmr->dmov = FALSE;
-    MARK(M_DMOV);
+    if (pmr->dmov == TRUE)
+    {
+	pmr->dmov = FALSE;
+	MARK(M_DMOV);
+    }
 
     /* Load pos. into motor controller.  Get new readback vals. */
     INIT_MSG();
@@ -3167,7 +3168,7 @@ STATIC void load_pos(motorRecord * pmr)
  *  NORMAL RETURN.
  */
 
-STATIC void check_speed_and_resolution(motorRecord * pmr)
+static void check_speed_and_resolution(motorRecord * pmr)
 {
     const unsigned short monitor_mask = DBE_VALUE;
     double fabs_urev = fabs(pmr->urev);
@@ -3274,6 +3275,12 @@ STATIC void check_speed_and_resolution(motorRecord * pmr)
 
     if (pmr->jar == 0.0)
 	pmr->jar = pmr->velo / pmr->accl;
+
+    /* Sanity check on home velocity. */
+    if (pmr->hvel == 0.0)
+	pmr->hvel = pmr->vbas;
+    else
+	range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
 }
 
 /*
@@ -3284,7 +3291,7 @@ limit.  This is done so that a device level function may do an error check on
 the validity of the limit.  This is to support those devices (e.g., MM4000)
 that have their own, read-only, travel limits.
 */
-STATIC void set_dial_highlimit(motorRecord *pmr, struct motor_dset *pdset)
+static void set_dial_highlimit(motorRecord *pmr, struct motor_dset *pdset)
 {
     int dir_positive = (pmr->dir == motorDIR_Pos);
     double offset, tmp_raw;
@@ -3318,7 +3325,7 @@ limit.  This is done so that a device level function may do an error check on
 the validity of the limit.  This is to support those devices (e.g., MM4000)
 that have their own, read-only, travel limits.
 */
-STATIC void set_dial_lowlimit(motorRecord *pmr, struct motor_dset *pdset)
+static void set_dial_lowlimit(motorRecord *pmr, struct motor_dset *pdset)
 {
     int dir_positive = (pmr->dir == motorDIR_Pos);
     double offset, tmp_raw;
@@ -3349,7 +3356,7 @@ STATIC void set_dial_lowlimit(motorRecord *pmr, struct motor_dset *pdset)
 FUNCTION... void set_userlimits(motorRecord *)
 USAGE... Translate dial-coordinate limits to user-coordinate limits.
 */
-STATIC void set_userlimits(motorRecord *pmr)
+static void set_userlimits(motorRecord *pmr)
 {
     if (pmr->dir == motorDIR_Pos)
     {
@@ -3373,7 +3380,7 @@ INPUT...	parm - pointer to parameter to be range check.
 		min  - minimum value.
 		max  - 0 = max. range check disabled; !0 = maximum value.
 */
-STATIC void range_check(motorRecord *pmr, float *parm_ptr, double min, double max)
+static void range_check(motorRecord *pmr, float *parm_ptr, double min, double max)
 {
     const unsigned short monitor_mask = DBE_VALUE;
     bool changed = false;
