@@ -1,4 +1,4 @@
-Motor Record V4.3 Release Notice
+Motor Record V4.4 Release Notice
 ================================
 
 Although the motor record software in this release is compatible with EPICS
@@ -74,6 +74,46 @@ Known Problems
 	nonzero.  This bug existed as far back as V3.3 of the motor record.
 
 
+
+Modification Log from V4.3 to V4.4
+==================================
+
+1) config/RELEASE: - Changed comments to indicate that MPF_SERIAL must be
+		     defined if either serial or GPIB communication is
+		     required.
+		   - Updated support modules to latest releases;
+		     mpfSerial R1-2, MPF R1-6, EPICS base R3-13-4.
+
+2) Examples: - iocBoot/iocNoMPF/st.cmd; added GDCT compatible Soft Channel
+	       device driver example.
+	     - iocBoot/iocWithMPF/[st.cmd and st_mpfserver.cmd]; for 1 CPU
+	       configuration, both initGpibGsTi9914() and
+	       HiDEOSGpibLinkConfig() must have the same GPIB server name.
+	     - motorExApp/Db/[SoftMotorEx.db andSoftMotorEx] ; added a GDCT
+	       compatible Soft channel device driver database example.
+
+3) Jog Velocity and Acceleration.  Two new fields (JVEL and JAR) were added to
+	support jog velocity and acceleration parameters.
+	Files modified: motorRecord.dbd - Added jog specific fields (JVEL and
+									JAR).
+			motorRecord.c - 
+			devIM483[PL/SM].c, devMM[3/4]000.c,
+			devPM500.c, -  Added Jog Velocity motor command.
+			devOmsCom.c - 
+
+4) Travel limits can be disabled by setting dial high and low limits equal;
+	i.e., DHLM = DLLM.
+	File modified: motorRecord.c
+
+5) A problem was discovered with entering target positions through RVAL.  If
+	the difference between the current and the next target position (i.e.,
+	RDIF, DIFF) was less than the retry deadband (RDBD), and the next
+	target position was in the "preferred direction", then the new RVAL
+	was ignored.
+	File modified: motorRecord.c - Root cause in do_work() was that under
+			the above conditions, LVAL was not updated.
+
+					
 Modification Log from V4.2 to V4.3
 ==================================
 
