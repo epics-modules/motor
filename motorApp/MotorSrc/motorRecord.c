@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.18 $
+Version:	$Revision: 1.19 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-01 22:47:03 $
+Last Modified:	$Date: 2002-04-19 16:24:10 $
 */
 
 /*
@@ -137,9 +137,10 @@ Last Modified:	$Date: 2002-04-01 22:47:03 $
  *		      so that init_record() can call process_motor_info()
  *		      without reading the external readback device (RDBL).
  *		      init_record() was causing LINK alarms.
- * .41 03-25-02 rls - Eliminated RES.
+ * .41 03-25-02 rls - RES=MRES.  RES preserved for backward compatibility only.
  *		    - Eliminated "Set Encoder Ratio" motor command.
  *		    - Range check JVEL when VMAX or VBAS change.
+ *		    - Do backlash in a separate command; after move completed .
  */
 
 #define VERSION 4.5
@@ -291,6 +292,7 @@ fields.  ('pmr' is a pointer to motorRecord.)
 #define MIP_MOVE	0x0020	/* A move not resulting from Jog* or Hom*. */
 #define MIP_RETRY	0x0040	/* A retry is in progress. */
 #define MIP_LOAD_P	0x0080	/* A load-position command is in progress. */
+#define MIP_MOVE_BL	0x0100	/* Done moving; now take out backlash. */
 #define MIP_STOP	0x0200	/* We're trying to stop.  When combined with */
 /*                                 MIP_JOG* or MIP_HOM*, the jog or home     */
 /*                                 command is performed after motor stops    */
@@ -612,6 +614,7 @@ STATIC long init_record(motorRecord * pmr, int pass)
      */
     (*pdset->update_values) (pmr);
 
+    pmr->res = pmr->mres;	/* After R4.5, RES is always = MRES. */
     if (pmr->eres == 0.0)
     {
 	pmr->eres = pmr->mres;
@@ -633,7 +636,7 @@ STATIC long init_record(motorRecord * pmr, int pass)
 	MARK(M_VAL);
 	pmr->dval = pmr->drbv;
 	MARK(M_DVAL);
-	pmr->rval = pmr->rrbv;
+	pmr->rval = NINT(pmr->dval / pmr->mres);
 	MARK(M_RVAL);
     }
 
@@ -691,11 +694,12 @@ any of several reasons:
 	7) We hit a limit switch.
 LOGIC:
     Clear post process command field; PP.
-    IF Output Mode Select field set to CLOSED_LOOP.
+    IF Output Mode Select field set to CLOSED_LOOP, AND,
+       NOT a "move", AND, NOT a "backlash move".
 	Make drive values agree with readback value;
 	    VAL  <- RBV
 	    DVAL <- DRBV
-	    RVAL <- RRBV
+	    RVAL <- DVAL converted to motor steps.
 	    DIFF <- RDIF <- 0
     ENDIF
     IF done with either load-position or load-encoder-ratio commands.
@@ -730,7 +734,8 @@ STATIC long postProcess(motorRecord * pmr)
 
     pmr->pp = FALSE;
 
-    if (pmr->omsl != CLOSED_LOOP)
+    if (pmr->omsl != CLOSED_LOOP && !(pmr->mip & MIP_MOVE) &&
+	!(pmr->mip & MIP_MOVE_BL))
     {
 	/* Make drive values agree with readback value. */
 #ifdef DMR_SOFTMOTOR_MODS
@@ -744,7 +749,7 @@ STATIC long postProcess(motorRecord * pmr)
 #endif
 	MARK(M_VAL);
 	MARK(M_DVAL);
-	pmr->rval = pmr->rrbv;
+	pmr->rval = NINT(pmr->dval / pmr->mres);
 	MARK(M_RVAL);
 	pmr->diff = 0.;
 	MARK(M_DIFF);
@@ -753,12 +758,7 @@ STATIC long postProcess(motorRecord * pmr)
     }
 
     if (pmr->mip & MIP_LOAD_P)
-    {
-	/* We sent LOAD_POS, followed by GET_INFO. */
-	pmr->mip = MIP_DONE;
-	MARK(M_MIP);
-
-    }
+	pmr->mip = MIP_DONE;	/* We sent LOAD_POS, followed by GET_INFO. */
     else if (pmr->mip & MIP_HOME)
     {
 	/* Home command */
@@ -772,7 +772,6 @@ STATIC long postProcess(motorRecord * pmr)
 	    if (hvel <= vbase)
 		hvel = vbase + 1;
 	    pmr->mip &= ~MIP_STOP;
-	    MARK(M_MIP);
 	    pmr->dmov = FALSE;
 	    MARK(M_DMOV);
 	    pmr->rcnt = 0;
@@ -790,7 +789,6 @@ STATIC long postProcess(motorRecord * pmr)
 	    if (pmr->mip & MIP_HOMF)
 	    {
 		pmr->mip &= ~MIP_HOMF;
-		MARK(M_MIP);
 		pmr->homf = 0;
 		db_post_events(pmr, &pmr->homf, monitor_mask);
 	    }
@@ -798,15 +796,13 @@ STATIC long postProcess(motorRecord * pmr)
 	    {
     
 		pmr->mip &= ~MIP_HOMR;
-		MARK(M_MIP);
 		pmr->homr = 0;
 		db_post_events(pmr, &pmr->homr, monitor_mask);
 	    }
 	}
     }
-    else if (pmr->mip & MIP_JOG_STOP)
+    else if (pmr->mip & MIP_JOG_STOP || pmr->mip & MIP_MOVE)
     {
-	pmr->mip &= ~MIP_JOG_STOP;
 	if (fabs(pmr->bdst) >  fabs(pmr->mres))
 	{
 	    /* First part of jog done. Do backlash correction. */
@@ -826,22 +822,22 @@ STATIC long postProcess(motorRecord * pmr)
 
 	    pmr->dmov = FALSE;
 	    MARK(M_DMOV);
-	    pmr->mip = MIP_JOG_BL;
-	    MARK(M_MIP);
-	    pmr->pp = TRUE;
 
 	    INIT_MSG();
 
-	    WRITE_MSG(SET_VEL_BASE, &vbase);
-	    if (vel <= vbase)
-		vel = vbase + 1;
-	    WRITE_MSG(SET_VELOCITY, &vel);
-	    WRITE_MSG(SET_ACCEL, &acc);
-	    if (use_rel)
-		WRITE_MSG(MOVE_REL, &relbpos);
-	    else
-		WRITE_MSG(MOVE_ABS, &bpos);
-	    WRITE_MSG(GO, NULL);
+	    if (pmr->mip & MIP_JOG_STOP)
+	    {
+		WRITE_MSG(SET_VEL_BASE, &vbase);
+		if (vel <= vbase)
+		    vel = vbase + 1;
+		WRITE_MSG(SET_VELOCITY, &vel);
+		WRITE_MSG(SET_ACCEL, &acc);
+		if (use_rel)
+		    WRITE_MSG(MOVE_REL, &relbpos);
+		else
+		    WRITE_MSG(MOVE_ABS, &bpos);
+		WRITE_MSG(GO, NULL);
+	    }
 
 	    if (bvel <= vbase)
 		bvel = vbase + 1;
@@ -860,20 +856,26 @@ STATIC long postProcess(motorRecord * pmr)
 	    }
 	    WRITE_MSG(GO, NULL);
 	    SEND_MSG();
+
+	    if (pmr->mip & MIP_JOG_STOP)
+		pmr->mip = MIP_JOG_BL;
+	    else
+		pmr->mip = MIP_MOVE_BL;
+	    pmr->pp = TRUE;
 	}
 	else
 	{
 	    pmr->mip = MIP_DONE;	/* Backup distance = 0; skip backlash. */
-	    MARK(M_MIP);
 	    if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
 		pmr->mip |= MIP_JOG_REQ;
 	}
+	pmr->mip &= ~MIP_JOG_STOP;
+	pmr->mip &= ~MIP_MOVE;
     }
-    else if (pmr->mip & MIP_JOG_BL)
+    else if (pmr->mip & MIP_JOG_BL || pmr->mip & MIP_MOVE_BL)
     {
 	/* Completed backlash part of jog command. */
 	pmr->mip = MIP_DONE;
-	MARK(M_MIP);
 	if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
 	    pmr->mip |= MIP_JOG_REQ;
     }
@@ -1562,7 +1564,7 @@ STATIC long do_work(motorRecord * pmr)
 		    MARK(M_VAL);
 		    pmr->dval = pmr->drbv;
 		    MARK(M_DVAL);
-		    pmr->rval = pmr->rrbv;
+		    pmr->rval = NINT(pmr->dval / pmr->mres);
 		    MARK(M_RVAL);
 		}
 	    }
@@ -1611,6 +1613,8 @@ STATIC long do_work(motorRecord * pmr)
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     if (MARKED(M_MRES) || MARKED(M_ERES) || MARKED(M_UEIP))
     {
+	if (MARKED(M_MRES))
+	    pmr->res = pmr->mres;	/* After R4.5, RES is always = MRES. */
 
 	/* Make sure retry deadband is achievable */
 	enforceMinRetryDeadband(pmr);
@@ -2064,22 +2068,7 @@ STATIC long do_work(motorRecord * pmr)
 		    else
 			WRITE_MSG(MOVE_ABS, &bpos);
 		    WRITE_MSG(GO, NULL);
-    
-		    /* Move to newpos at (bvel, bacc). */
-		    WRITE_MSG(SET_VELOCITY, &bvel);
-		    WRITE_MSG(SET_ACCEL, &bacc);
-		    /* See note regarding backlash and overshoot above. */
-		    if (use_rel)
-		    {
-			mRelPos = (mRelPos - mRelBPos) * pmr->frac;
-			WRITE_MSG(MOVE_REL, &mRelPos);
-		    }
-		    else
-		    {
-			newpos = bpos + pmr->frac * (newpos - bpos);
-			WRITE_MSG(MOVE_ABS, &newpos);
-		    }
-		    WRITE_MSG(GO, NULL);
+		    pmr->pp = TRUE;	/* Do backlash from posprocess(). */
 		}
 		pmr->cdir = (pmr->rdif >= 0.0) ? 0 : 1;
 		SEND_MSG();
