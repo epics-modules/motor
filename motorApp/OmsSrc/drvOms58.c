@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:52:59 $
+Last Modified:	$Date: 2002-02-22 22:08:01 $
 */
 
 /*
@@ -39,27 +39,33 @@ Last Modified:	$Date: 2001-12-14 20:52:59 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93	jbk     initialized
- * .02  11-14-94	jps     copy drvOms.c and modify to point to vme58 driver
+ * .01  01-18-93 jbk     initialized
+ * .02  11-14-94 jps     copy drvOms.c and modify to point to vme58 driver
  *      ...
- * .14  02-10-95	jps	first released version w/interrupt supprt
- * .15  02-16-95	jps	add better simulation mode support
- * .16  03-10-95	jps	limit switch handling improvements
- * .17  04-11-95	jps  	misc. fixes
- * .18  09-27-95	jps	fix GET_INFO latency bug, add axis argument to
- *				set_status() create add debug verbosity of 3
- * .19  05-03-96	jps     convert 32bit card accesses to 16bit - vme58PCB
- *				version D does not support 32bit accesses.
- * .20  06-20-96	jps     add more security to message parameters (card #)
- * .20a 02-19-97	tmm	fixed for EPICS 3.13
- * V4.1 01-20-00	rls	Update bit collision check and wait.  Problem
- *				with old position data returned after Done
- *				detected when moving multiple axes on same
- *				controller board.  Fix: Update shared memory
- *				data after Done detected via ASCII controller
- *				commands.  To avoid collisions, skip writing to
- *				control reg. from motorIsr() if update bit is
- *				ON.
+ * .14  02-10-95 jps	first released version w/interrupt supprt
+ * .15  02-16-95 jps	add better simulation mode support
+ * .16  03-10-95 jps	limit switch handling improvements
+ * .17  04-11-95 jps  	misc. fixes
+ * .18  09-27-95 jps	fix GET_INFO latency bug, add axis argument to
+ *			set_status() create add debug verbosity of 3
+ * .19  05-03-96 jps     convert 32bit card accesses to 16bit - vme58PCB
+ *			version D does not support 32bit accesses.
+ * .20  06-20-96 jps     add more security to message parameters (card #)
+ * .20a 02-19-97 tmm	fixed for EPICS 3.13
+ * .21  01-20-00 rls	Update bit collision check and wait.  Problem
+ *			with old position data returned after Done
+ *			detected when moving multiple axes on same
+ *			controller board.  Fix: Update shared memory
+ *			data after Done detected via ASCII controller
+ *			commands.  To avoid collisions, skip writing to
+ *			control reg. from motorIsr() if update bit is
+ *			ON.
+ * .22  02-22-02 rls	- start_status() was not checking for a valid
+ *			motor_state[card] pointer. This causes a bus error if
+ *			the controller array has holes in it.
+ *			- "total_cards" changed from total detected to total
+ *			cards that "memory is allocated for".  This allows
+ *			boards after the "hole" to work.
  */
 
 
@@ -262,7 +268,8 @@ STATIC void start_status(int card)
 
     if (card >= 0)
     {
-	if ((pmotor = (struct vmex_motor *) motor_state[card]->localaddr) != 0)
+	if (motor_state[card] != NULL &&
+	    (pmotor = (struct vmex_motor *) motor_state[card]->localaddr) != NULL)
 	{
 	    /* Wait Forever for controller to update. */
 	    cntrlReg.All = pmotor->control.cntrlReg;
@@ -281,7 +288,8 @@ STATIC void start_status(int card)
     {
 	for (index = 0; index < total_cards; index++)
 	{
-	    if ((pmotor = (struct vmex_motor *) motor_state[index]->localaddr) != 0)
+	    if (motor_state[index] != NULL &&
+		(pmotor = (struct vmex_motor *) motor_state[index]->localaddr) != NULL)
 	    {
 		/* Wait Forever for controller to update. */
 		cntrlReg.All = pmotor->control.cntrlReg;
@@ -898,7 +906,7 @@ STATIC int motor_init()
 
     /* allocate structure space for each motor present */
 
-    total_cards = 0;
+    total_cards = oms58_num_cards;
 
     if (rebootHookAdd((FUNCPTR) oms_reset) == ERROR)
 	Debug(1, "vme58 motor_init: oms_reset disabled\n");
@@ -936,8 +944,6 @@ STATIC int motor_init()
 
 	    Debug(9, "motor_init: localaddr = %x\n", (uint_t) localaddr);
 	    pmotor = (struct vmex_motor *) localaddr;
-
-	    total_cards++;
 
 	    Debug(9, "motor_init: malloc'ing motor_state\n");
 	    motor_state[card_index] = (struct controller *) malloc(sizeof(struct controller));
@@ -1099,12 +1105,15 @@ STATIC void oms_reset()
 
     for (card = 0; card < total_cards; card++)
     {
-	pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
-	if (vxMemProbe((char *) pmotor, READ, sizeof(short), (char *) &status) == OK)
+	if (motor_state[card] != NULL)
 	{
-	    cntrlBuf.All = pmotor->control.cntrlReg;
-	    cntrlBuf.Bits.intReqEna = 0;
-	    pmotor->control.cntrlReg = cntrlBuf.All;
+	    pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
+	    if (vxMemProbe((char *) pmotor, READ, sizeof(short), (char *) &status) == OK)
+	    {
+		cntrlBuf.All = pmotor->control.cntrlReg;
+		cntrlBuf.Bits.intReqEna = 0;
+		pmotor->control.cntrlReg = cntrlBuf.All;
+	    }
 	}
     }
 }
