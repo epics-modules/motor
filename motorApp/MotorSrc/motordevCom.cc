@@ -1,11 +1,11 @@
 /*
-FILENAME: motordevCom.c
+FILENAME: motordevCom.cc
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:38:42 $
+Last Modified:	$Date: 2004-02-03 19:42:47 $
 */
 
 /*
@@ -42,6 +42,7 @@ Last Modified:	$Date: 2003-12-12 21:38:42 $
  * .04  11-26-96 jps allow for bumpless-reboot on position
  * .04a 02-19-97 tmm fixed for EPICS 3.13
  * .05  06/13/03 rls Ported to R3.14.
+ * .06  02/03/04 rls Initialize PID parameters from motor_init_record_com().
  */
 
 
@@ -175,7 +176,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     struct motor_dset *pdset = (struct motor_dset *) (mr->dset);
     struct board_stat *brdptr;
     int card, signal;
-    bool initEncoder, initPos, initString;
+    bool initEncoder, initPos, initString, initPID;
     struct motor_trans *ptrans;
     MOTOR_AXIS_QUERY axis_query;
     struct mess_node *motor_call;
@@ -281,9 +282,11 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     initPos = (mr->dval != 0 && mr->mres != 0 && axis_query.position == 0) ? true : false;
     /* Test for command primitive initialization string. */
     initString = (mr->init != NULL && strlen(mr->init)) ? true : false;
-    
+    /* Test for PID support. */
+    initPID = (msta.Bits.GAIN_SUPPORT) ? true : false;
+
     /* Program the device if an encoder is present */
-    if (initPos == true || initEncoder == true || initString == true)
+    if (initPos == true || initEncoder == true || initString == true || initPID)
     {
 	/* Semaphore used to hold initialization until device is programmed - cleared by callback. */
 	ptrans->initSem = new epicsEvent(epicsEventEmpty);
@@ -312,6 +315,32 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 	    (*pdset->start_trans)(mr);
 	    (*pdset->build_trans)(PRIMITIVE, NULL, mr);
 	    (*pdset->end_trans)(mr);
+	}
+
+	if (initPID == true)
+	{
+	    double pidcoef;
+
+	    if ((pidcoef = mr->pcof) > 0.0)
+	    {
+		(*pdset->start_trans)(mr);
+		(*pdset->build_trans)(SET_PGAIN, &pidcoef, mr);
+		(*pdset->end_trans)(mr);
+	    }
+
+	    if ((pidcoef = mr->icof) > 0.0)
+	    {
+		(*pdset->start_trans)(mr);
+		(*pdset->build_trans)(SET_IGAIN, &pidcoef, mr);
+		(*pdset->end_trans)(mr);
+	    }
+
+	    if ((pidcoef = mr->dcof) > 0.0)
+	    {
+		(*pdset->start_trans)(mr);
+		(*pdset->build_trans)(SET_DGAIN, &pidcoef, mr);
+		(*pdset->end_trans)(mr);
+	    }
 	}
 
 	/* Changing encoder ratio may have changed the readback value. */
