@@ -63,7 +63,8 @@ MM4000Setup(1, 0, 10)
 #     (4) GPIB address or hideos_task
 #IM483SMConfig(0, 1, 0, "a-Serial[0]")
 
-# !MPF-2-CPU! #GPIB_ServerName = "GPIB0"
-# !GPIB!   #HiDEOSGpibLinkConfig(GPIB_Link, GPIB_Addr, GPIB_ServerName)
+# !MPF-1-CPU! #Server_Mod_Name = GPIB_Module_Name
+# !MPF-2-CPU! #Server_Mod_Name = "GPIB0"
+# !GPIB!   #HiDEOSGpibLinkConfig(GPIB_Link, GPIB_Addr, Server_Mod_Name)
 
 iocInit

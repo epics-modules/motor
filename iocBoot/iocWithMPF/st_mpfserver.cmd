@@ -14,7 +14,8 @@ initIpacCarrier(carrier, 0)
 ###############################################################################
 # Initialize GPIB module
 
-# !GPIB! #initGpibGsTi9914("GS-IP488-0",carrier,"IP_d",104)
+# !GPIB! #GPIB_Module_Name = "GS-IP488-0"
+# !GPIB! #initGpibGsTi9914(GPIB_Module_Name,carrier,"IP_d",104)
 # !GPIB! #GPIB_ServerName = "GPIB0"
 # !GPIB! #initGpibServer(GPIB_ServerName,"GS-IP488-0",1024,1000)
 
