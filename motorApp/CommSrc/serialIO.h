@@ -2,9 +2,9 @@
 FILENAME...	serialIO.h
 USAGE...	.
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-27 21:48:45 $
+Version:	$Revision: 1.5 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2003-09-17 16:43:05 $
 */
  
 /*****************************************************************
@@ -41,7 +41,7 @@ public:
     static void serialIOCallback(Message *, void *);
 private:
     MessageClient* pMessageClient;
-    epicsRingPointer<void *> *msgQId;
+    epicsMessageQueue *msgQId;
 };
 #else  /* For C just define serialInfo as a dummy structure since it can't
           understand the include files which define what it really is */
