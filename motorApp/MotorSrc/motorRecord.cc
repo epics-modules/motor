@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-24 18:03:32 $
+Last Modified:	$Date: 2002-10-31 20:38:45 $
 */
 
 /*
@@ -34,118 +34,12 @@ Last Modified:	$Date: 2002-10-24 18:03:32 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93 jbk  initial development
- * .02  01-25-93 tmm  initial development continued
- * .03  09-13-93 tmm  disabled HOPR & LOPR with #define USE_HOPR_LOPR 0
- * .04  08-01-94 tmm  move to 3.11.6 (tsLocalTime -> recGblGetTimeStamp)
- * .05  09-07-94 tmm  make .diff zero when we set drive fields to readback
- *                    fields
- * .06  09-07-94 tmm  test for stop and spmg every time record processes
- * .07  11-15-94 jps  create .rvel to indicate motor actually moving
- * .08  06-12-95 tmm  added VERSION and .vers field, fixed stuck .dmov flag
- * .09  06-14-95 tmm  propagate dial-value calibration to user value;
- *                    fix precision and units assoc. with .vers field
- * .10  07-20-95 tmm  added record name to debug output
- * .11  07-20-95 tmm  check that we've actually moved before worrying whether
- *                    we're going in the wrong direction
- * .12  08-23-95 tmm  version 1.5  removed HOPR/LOPR code, added dial dir
- *                    (sign of .mres).  Fixed coding error in jog*.  No
- *                    longer propagate dial-value calib. to user value
- * .13  08-25-95 tmm  version 1.51  limit switches now reported w.r.t user
- *                    coordinates.  Added raw limit switches .rhls, .rlls.
- * .14  08-28-95 tmm  version 1.6  Added .card field, so users can know which
- *                    card in crate is associated with this motor.
- * .15  08-30-95 tmm  version 1.7  Added .nmap field to supplement .mmap, and
- *                    rewrote MARK() macros.  
- * .16  08-31-95 tmm  version 1.8  Freeze-offset switch (.foff) replaces earlier
- *                    "propagate dial-value calibration to user value"
- * .17  09-01-95 tmm  limit-violation changes.
- * .18  09-07-95 tmm  version 1.9  Added .fof / .vof fields to put .foff (freeze
- *                    offset) into frozen / variable mode.
- *                    Added .urev, .srev, .s, .sbas, .sbak fields to meet user
- *                    demands for more intuitive setting of speeds and
- *                    resolution.
- *                    Modified offset handling.  Changing .off should never
- *                    cause the motor to move.
- * .19  09-08-95 tmm  version 1.91  Work around 8-character limit in handling
- *                    by dbGet() of the string returned by get_units().
- * .20  09-13-95 tmm  version 1.92  Allow .rdbl (readback inlink) and .rlnk
- *                    (readout outlink) to be channel-access links.
- * .21  09-26-95 tmm  version 1.93  Post process (as if STOP had been hit)
- *                    when a limit switch is hit.  When post process sets,
- *                    e.g., VAL=RBV, then also set LVAL=RBV.
- * .22  11-21-95 tmm  Version 1.94  Fix post_MARKed_fields.  Fix pmr->pp bug
- *                    that caused post processing every time.
- * .23  12-27-95 tmm  Version 1.95  Implemented MISS field.  More sanity checks
- *                    on resolution, speed, and acceleration.
- * .24  02-09-96 tmm  Version 1.96  Don't db_post dmov==0 if special() already
- *                    posted it.
- * .25  03-19-96 tmm  v1.97  Much more precise encoder-ratio calculation.
- *                    Made actual home speed independent of UEIP flag.
- *                    (Thanks to Vicky Austin, Royal Greenwich Observatory.)
- * .26  06-07-96 tmm  v1.98 Added more debugging output.
- * .27  06-10-96 tmm  v2.00 Fixed the way changes to resolutions and speeds are
- *                    handled in init_record() and in special().  Now, when
- *                    motor resolution is changed, speeds in revs/sec are held
- *                    constant, which requires speeds in EGUs/sec to change.
- * .28  08-02-96 tmm  v2.1 Changing mres or eres while in SET mode no longer
- *                    changes the raw motor position, but instead changes user
- *                    and dial positions to agree with the old raw position.
- * .29  08-09-96 tmm  v2.2 Changed the order in which PV's are posted.  DMOV is
- *                    last; frequently changed PV's are first.
- * .30  08-14-96 tmm  v2.3 Fixed long-standing bug in special handling of DVAL,
- *                    RVAL, RLV.
- * .31  08-14-96 tmm  v3.0 Conversion to EPICS 3.13.0
- * .32  12-16-96 tmm  v3.1 Fixed moving-in-right-dir check, and jog, when using
- *                    relative moves.  Fixed JOG limits.
- * .33  05-29-97 tmm  v3.2 Watchdog callback for encoder-settling time delay.
- *                    Added DLY field to implement delay.
- *                    Split postProcess() and maybeRetry() out of process().
- *                    Fix problem of first call to process() looking like a
- *                    device-support callback (first move command fails).
- *                    Don't do mid-course checks if using encoder or readback
- *                    device.  (We don't know how badly they might behave while
- *                    the motor's moving.)  Set .res field in init_record().
- *                    Set retry deadband according to .mres, .eres, and .bdst.
- * .34  05-30-97 tmm  v3.3 Relative moves know about motor granularity.
- * .35 10-11-99 rls v4.0 Enforce finite state machine on jog request, jogging,
- *			stopping a jog and backlash after jogging.  These
- *			modifications fix the "runaway jog" problem discovered
- *			with the MM4000 device support using serial communication
- *			when the user "hammers" on the jog request.
- * .36 02-14-01 rls - Changed logic in do_work() so that the stop command is
- *		      always sent to the controller when the STOP field is
- *		      activated; but, the MIP field in only set to the "stop"
- *		      state if the current state is not STOP or DONE.
- *		    - Eliminated unused MIP_LOAD_ER.
- *		    - Added Mark Rivers Soft Channel changes as a
- *			conditionial option; DMR_SOFTMOTOR_MODS.
- * .37 06-05-01 rls Bug fix for MIP left in MOVE state if valid target
- *		      position is followed by a target position that violates
- *		      the travel limit, while 1st move is in progress.
- *		      Modified do_work() to set DMOV true only if MIP is DONE.
- * .38 06-08-01 rls Bug fix for MIP left in STOP state if STOP set TRUE or
- *		      SPMG set to STOP in between MIP set to RETRY in
- *		      maybeRetry() and MIP set to MOVE in do_work().  Modified
- *		      do_work() STOP and SPMG processing to set MIP <- DONE and
- *		      DMOV <- TRUE when MIP == RETRY.
- * .39 10-02-01 rls - V4.5
- *		    - Removed erroneous setting of PP <- TRUE in init_record().
- *		    - Replaced PDIF with CDIR field (see README V4.5 item #2).
- *		    - Simplified "tdir" logic in process().
- * .40 02-06-02 rls - Added "initcall" function argument to process_motor_info()
- *		      so that init_record() can call process_motor_info()
- *		      without reading the external readback device (RDBL).
- *		      init_record() was causing LINK alarms.
- * .41 03-25-02 rls - RES=MRES.  RES preserved for backward compatibility only.
- *		    - Range check JVEL when VMAX or VBAS change.
- *		    - Do backlash in a separate command; after move completed.
- * .42 07-05-02 rls - Force RDBD >= MRES.
- *                  - Do another update after Done due to LS error.
- *                  - Seperate +/- limit switch status bits.
- *		    - CDIR matches TDIR and RA_DIRECTION.
- * .43 07-11-02 rls Post all fields when recGblResetAlarms() returns an alarm.
- * .44 09-17-02 rls Joe Sullivan's port to R3.14.x and OSI.
+ * .01 09-17-02 rls Joe Sullivan's port to R3.14.x and OSI.
+ * .02 09-30-02 rls Bug fix for another "invalid state" scenario (i.e., new
+ *			target position while MIP != DONE, see README).
+ * .03 10-29-02 rls - NTM field added for Soft Channel device.
+ *		    - Update "last" target position in do_work() when stop
+ *			command is sent.
  */
 
 #define VERSION 5.1
@@ -174,13 +68,12 @@ Last Modified:	$Date: 2002-10-24 18:03:32 $
 
 /*----------------debugging-----------------*/
 #ifdef	DEBUG
+    volatile int motorRecordDebug = 0;
     #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
 #else
     #define Debug(l, f, args...)
 #endif
 
-volatile int motorRecordDebug = 0;
-/*----------------debugging-----------------*/
 
 /*** Forward references ***/
 
@@ -1102,7 +995,8 @@ STATIC long process(dbCommon *arg)
 	    /* Test for new target position in opposite direction of current
 	       motion.
 	     */	    
-	    if ((sign_rdif != pmr->cdir) &&
+	    if (pmr->ntm == menuYesNoYES &&
+		(sign_rdif != pmr->cdir) &&
 		(fabs(pmr->diff) > 2 * (fabs(pmr->bdst) + pmr->rdbd)) &&
 		(pmr->mip == MIP_RETRY || pmr->mip == MIP_MOVE))
 	    {
@@ -1119,7 +1013,7 @@ STATIC long process(dbCommon *arg)
 	}
 	else
 	{
-            mmap_field mmap_bits;
+	    mmap_field mmap_bits;
 
 	    mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
 
@@ -1262,7 +1156,7 @@ LOGIC:
         Update Last Stop/Pause/Move/Go field.
 	IF SPMG field set to STOP, OR, PAUSE.
 	    IF SPMG field set to STOP.
-		IF MIP state is DONE or STOP.
+		IF MIP state is DONE, STOP or RETRY.
 		    Shouldn't be moving, but send a STOP command without
 			changing to the STOP state.
 		    NORMAL RETURN.
@@ -1514,11 +1408,11 @@ STATIC RTN_STATUS do_work(motorRecord * pmr)
 		}
 		else
 		{
-		    pmr->val = pmr->rbv;
+		    pmr->val  = pmr->lval = pmr->rbv;
 		    MARK(M_VAL);
-		    pmr->dval = pmr->drbv;
+		    pmr->dval = pmr->ldvl = pmr->drbv;
 		    MARK(M_DVAL);
-		    pmr->rval = NINT(pmr->dval / pmr->mres);
+		    pmr->rval = pmr->lrvl = NINT(pmr->dval / pmr->mres);
 		    MARK(M_RVAL);
 		}
 	    }
