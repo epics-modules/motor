@@ -2,9 +2,9 @@
 FILENAME...	MXRegister.cc
 USAGE...	Register MX motor device driver shell commands.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-14 15:15:26 $
+Last Modified:	$Date: 2003-05-19 17:35:17 $
 */
 
 /*****************************************************************
@@ -22,10 +22,9 @@ of this distribution.
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-
 #include <iocsh.h>
-
 #include "MXmotor.h"
+#include "epicsExport.h"
 
 extern "C"
 {
@@ -47,12 +46,6 @@ static void mxmotorRegister(void)
     iocshRegister(&setupFuncDef, setupCallFunc);
 }
 
-class MXmotorRegister
-{
-public:
-    MXmotorRegister() {mxmotorRegister();}
-};
-
-static MXmotorRegister MXmotorRegisterObj;
+epicsExportRegistrar(mxmotorRegister);
 
 } // extern "C"

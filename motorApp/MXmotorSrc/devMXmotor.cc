@@ -2,9 +2,9 @@
 FILENAME...	devMXmotor.cc
 USAGE...	Motor record device level support for MX device driver.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-03-12 21:07:46 $
+Last Modified:	$Date: 2003-05-19 17:35:18 $
 */
 
 /*
@@ -32,8 +32,8 @@ Last Modified:	$Date: 2003-03-12 21:07:46 $
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
-
 #include "MXmotor.h"
+#include "epicsExport.h"
 
 extern int MXmotor_num_cards;
 extern struct driver_table MXmotor_access;
@@ -47,12 +47,14 @@ static RTN_STATUS MXmotor_end_trans(struct motorRecord *);
 
 struct motor_dset devMXmotor =
 {
-    {8, NULL, MXmotor_init, MXmotor_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) MXmotor_init, (DEVSUPFUN) MXmotor_init_record, NULL},
     motor_update_values,
     MXmotor_start_trans,
     MXmotor_build,
     MXmotor_end_trans
 };
+
+epicsExportAddress(dset,devMXmotor);
 
 
 /* This table is used to define the command types */

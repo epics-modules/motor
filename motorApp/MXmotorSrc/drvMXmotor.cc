@@ -2,9 +2,9 @@
 FILENAME...	drvMXmotor.cc
 USAGE...	Motor record driver level support for MX device driver.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-03-06 18:54:56 $
+Last Modified:	$Date: 2003-05-19 17:35:18 $
 */
 
 /*
@@ -28,10 +28,12 @@ Last Modified:	$Date: 2003-03-06 18:54:56 $
  */
 
 #include <epicsThread.h>
+#include <drvSup.h>
 
 #include "motor.h"
 #include "motordrvCom.h"
 #include "MXmotor.h"
+#include "epicsExport.h"
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
@@ -92,6 +94,8 @@ struct
     long (*report) (int);
     long (*init) (void);
 } drvMXmotor = {2, report, init};
+
+epicsExportAddress(drvet,drvMXmotor);
 
 static struct thread_args targs = {SCAN_RATE, &MXmotor_access};
 
