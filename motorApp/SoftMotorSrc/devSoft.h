@@ -4,9 +4,9 @@ FILENAME..	devSoft.h
 USAGE... 	This file contains information that is common to
 		all Soft channel device support modules.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:09:31 $
+Last Modified:	$Date: 2002-10-31 20:47:55 $
 */
 
 /*
@@ -41,7 +41,7 @@ typedef enum DONE_STATES {SOFTMOVE = 0, HARDMOVE = 1, DONE = 2} DONE_STATES;
 struct soft_private
 {
     CALLBACK callback;
-    long callback_flag;
+    CALLBACK_VALUE callback_flag;
     DONE_STATES dinp_value;		/* Value from DINP link. */
     bool default_done_behavior;		/* If the DINP is not programmed, exhibit
 					 * "immediate done" default behavior. */
