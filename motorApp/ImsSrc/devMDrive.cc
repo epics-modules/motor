@@ -3,9 +3,9 @@ FILENAME...	devMDrive.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MDrive series of controllers.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-15 20:10:25 $
+Last Modified:	$Date: 2004-03-16 15:13:32 $
 */
 
 /*
@@ -38,6 +38,8 @@ Last Modified:	$Date: 2004-03-15 20:10:25 $
  * .01	03/21/03 rls copied from devIM483PL.c
  * .02  05/15/03 rls R3.14 compatible.
  * .03  03/15/04 rls bug fix for LOAD_POS command with encoder.
+ * .04  03/16/04 rls Protect against NULL "parms" argument in
+ *                   MDrive_build_trans().
  */
 
 #include <string.h>
@@ -163,7 +165,10 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
     send = true;		/* Default to send motor command. */
     rtnval = OK;
     buff[0] = '\0';
-    intval = NINT(parms[0]);
+
+    /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
+    intval = (parms == NULL) ? 0 : NINT(parms[0]);
+
     msta.All = mr->msta;
 
     motor_start_trans_com(mr, MDrive_cards);
