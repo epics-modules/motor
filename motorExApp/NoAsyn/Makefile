@@ -19,6 +19,10 @@ NoMPF_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 NoMPFVx_SRCS += NoMPFVx_registerRecordDeviceDriver.cpp
 NoMPFVx_LIBS += oms softMotor motor
+
+# Support from IPAC R2.6 and above.
+NoMPFVx_LIBS += Ipac TyGSOctal
+
 NoMPFVx_OBJS += $(EPICS_BASE_BIN)/vxComLibrary
 NoMPFVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 
