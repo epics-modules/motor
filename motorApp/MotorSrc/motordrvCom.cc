@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-23 16:14:27 $
+Last Modified:	$Date: 2004-02-11 22:24:15 $
 */
 
 /*
@@ -41,6 +41,8 @@ Last Modified:	$Date: 2003-12-23 16:14:27 $
  *			delay.
  * .03 12/22/03 rls Limit valid "delay" in process_messages() to;
  *			0 < delay <= (quantum * 2).
+ * .03 02/11/04 rls Limit valid "delay" in process_messages() to;
+ *			0 <= delay <= (quantum * 2).
  */
 
 
@@ -51,6 +53,20 @@ Last Modified:	$Date: 2003-12-23 16:14:27 $
 
 #include	"motor.h"
 #include	"motordrvCom.h"
+
+/*----------------debugging-----------------*/
+
+#ifdef __GNUG__
+    #ifdef	DEBUG
+	volatile int motordrvComdebug = 0;
+	#define Debug(l, f, args...) {if (l <= motordrvComdebug) printf(f, ## args);}
+    #else
+	#define Debug(l, f, args...)
+    #endif
+#else
+    #define Debug()
+#endif
+
 
 /* Function declarations. */
 static int query_axis(int card, struct driver_table *tabptr, epicsTime tick);
@@ -313,9 +329,10 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 	    case INFO:
 		/* Status update delay - needed for OMS. */
 		delay = tick - motor_info->status_delay;
-
+		if (delay < 0.0)	/* Protect against negative delay. */
+		    delay = 0.0;
 		/* Limit delay to; 0 < delay <= (quantum * 2). */
-		if (delay > 0.0 && delay < quantum_x_2)
+		if (delay >= 0.0 && delay < quantum_x_2)
 		    epicsThreadSleep(quantum_x_2 - delay);
 
 		if (tabptr->strtstat != NULL)
