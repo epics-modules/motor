@@ -37,8 +37,8 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version 5.1 of the EPICS motor 
-record, and related EPICS software required to build and use it.&nbsp; Version 
+<h2>Overview</h2> This documentation describes version 5.1 of the EPICS motor
+record, and related EPICS software required to build and use it.&nbsp; Version
 5.1 of the motor record is compatible with EPICS base R3.14.2 and above.
 <p>
 The motor record is intended to support motors of all kinds, but currently 
@@ -120,7 +120,7 @@ motor has stopped and no motion requests are pending.&nbsp;<a name="Fields"></a>
 
 <h2>Field Descriptions</h2> In addition to fields common to all record types (see 
 the <a href="http://www.atdiv.lanl.gov/aot8/epics/dbase/recref/rcrf-1.html">EPICS 
-Record Reference Manual</a> for these) the motor record has the fields described 
+Record Reference Manual</a> for these) the motor record has the fields described
 below.
 <ul>
   <li>
@@ -167,14 +167,12 @@ below.
 <hr>
 <table border="1" nosave="">
   <caption>
-    <a name="Fields_alphabetical"></a>
-
-    <h2>Alphabetical list of record-specific fields</h2> NOTE: Hot links in this 
-    table take you only to the <i>section</i> in which the linked item is described 
-    in detail. You'll probably have to scroll down to find the actual item.
+    <a name="Fields_alphabetical"></a> <h2>Alphabetical list of record-specific 
+    fields</h2> NOTE: Hot links in this table take you only to the <i>section</i> in 
+    which the linked item is described in detail. You'll probably have to scroll 
+    down to find the actual item.
   </caption>
   <tbody>
-
   <tr>
     <th>Name</th>
     <th>Access</th>
@@ -182,7 +180,6 @@ below.
     <th>Data type</th>
     <th>Comment</th>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">ACCL</a></td>
     <td>R/W</td>
@@ -190,7 +187,6 @@ below.
     <td>FLOAT</td>
     <td>acceleration time</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">ATHM</a></td>
     <td>R</td>
@@ -198,7 +194,6 @@ below.
     <td>SHORT</td>
     <td>uses the HOME switch</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">BACC</a></td>
     <td>R/W</td>
@@ -206,7 +201,6 @@ below.
     <td>FLOAT</td>
     <td>backlash acceleration time</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">BDST</a></td>
     <td>R/W</td>
@@ -214,7 +208,6 @@ below.
     <td>FLOAT</td>
     <td>backlash distance</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">BVEL</a></td>
     <td>R/W</td>
@@ -222,7 +215,6 @@ below.
     <td>FLOAT</td>
     <td>backlash speed</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">CARD</a></td>
     <td>R</td>
@@ -230,7 +222,6 @@ below.
     <td>SHORT</td>
     <td>EPICS card #</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">CBAK</a></td>
     <td>None</td>
@@ -239,7 +230,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">CDIR</a></td>
     <td>R</td>
@@ -248,7 +238,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Servo_fields">CNEN</a></td>
     <td>R/W</td>
@@ -256,7 +245,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"Disable", 1:"Enable")</td>
   </tr>
-
   <tr>
     <td><a href="#Servo_fields">DCOF</a></td>
     <td>R/W</td>
@@ -265,7 +253,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">DHLM</a></td>
     <td>R/W*</td>
@@ -274,7 +261,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">DIFF</a></td>
     <td>R</td>
@@ -283,7 +269,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_link">DINP</a></td>
     <td>R/W</td>
@@ -292,7 +277,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_calib">DIR</a></td>
     <td>R/W*</td>
@@ -300,7 +284,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"Pos", 1:"Neg")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">DLLM</a></td>
     <td>R/W*</td>
@@ -309,7 +292,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">DLY</a></td>
     <td>R/W</td>
@@ -318,7 +300,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">DMOV</a></td>
     <td>R</td>
@@ -326,7 +307,6 @@ below.
     <td>SHORT</td>
     <td>The "done" flag</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_link">DOL</a></td>
     <td>R</td>
@@ -334,7 +314,6 @@ below.
     <td>INLINK</td>
     <td>only for closed-loop mode</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">DRBV</a></td>
     <td>R</td>
@@ -343,7 +322,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_drive">DVAL</a></td>
     <td>R/W*</td>
@@ -352,7 +330,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">EGU</a></td>
     <td>R/W</td>
@@ -361,7 +338,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_res">ERES</a></td>
     <td>R/W*</td>
@@ -370,7 +346,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_calib">FOF</a></td>
     <td>R/W</td>
@@ -379,7 +354,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_calib">FOFF</a></td>
     <td>R/W</td>
@@ -387,7 +361,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"Variable", 1:"Frozen")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">FRAC</a></td>
     <td>R/W</td>
@@ -396,7 +369,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">HHSV</a></td>
     <td>R/W*</td>
@@ -405,7 +377,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">HIGH</a></td>
     <td>R/W*</td>
@@ -414,7 +385,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">HIHI</a></td>
     <td>R/W*</td>
@@ -423,7 +393,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">HLM</a></td>
     <td>R/W*</td>
@@ -432,7 +401,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">HLS</a></td>
     <td>R</td>
@@ -441,7 +409,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">HLSV</a></td>
     <td>R/W*</td>
@@ -450,7 +417,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">HOMF</a></td>
     <td>R/W*</td>
@@ -459,7 +425,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">HOMR</a></td>
     <td>R/W*</td>
@@ -468,7 +433,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">HOPR</a></td>
     <td>R/W</td>
@@ -477,7 +441,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">HSV</a></td>
     <td>R/W*</td>
@@ -486,7 +449,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">HVEL</a></td>
     <td>R/W*</td>
@@ -495,7 +457,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Servo_fields">ICOF</a></td>
     <td>R/W</td>
@@ -504,7 +465,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">INIT</a></td>
     <td>R/W</td>
@@ -513,7 +473,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">JAR</a></td>
     <td>R/W</td>
@@ -522,7 +481,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">JOGF</a></td>
     <td>R/W*</td>
@@ -530,7 +488,6 @@ below.
     <td>SHORT</td>
     <td>careful!</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">JOGR</a></td>
     <td>R/W*</td>
@@ -538,7 +495,6 @@ below.
     <td>SHORT</td>
     <td>careful!</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">JVEL</a></td>
     <td>R/W</td>
@@ -547,7 +503,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">LDVL</a></td>
     <td>R</td>
@@ -556,7 +511,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">LLM</a></td>
     <td>R/W*</td>
@@ -565,7 +519,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">LLS</a></td>
     <td>R</td>
@@ -574,7 +527,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">LLSV</a></td>
     <td>R/W*</td>
@@ -583,7 +535,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">LOCK</a></td>
     <td>R/W*</td>
@@ -591,7 +542,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"No", 1:"Yes")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">LOLO</a></td>
     <td>R/W*</td>
@@ -600,7 +550,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">LOPR</a></td>
     <td>R/W</td>
@@ -609,7 +558,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">LOW</a></td>
     <td>R/W*</td>
@@ -618,7 +566,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">LRLV</a></td>
     <td>R</td>
@@ -627,7 +574,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">LRVL</a></td>
     <td>R</td>
@@ -636,7 +582,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">LSPG</a></td>
     <td>R</td>
@@ -644,7 +589,6 @@ below.
     <td>RECCHOICE</td>
     <td>(See SPMG)</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_alarm">LSV</a></td>
     <td>R/W*</td>
@@ -653,7 +597,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">LVAL</a></td>
     <td>R</td>
@@ -662,7 +605,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">LVIO</a></td>
     <td>R</td>
@@ -671,7 +613,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">MIP</a></td>
     <td>R</td>
@@ -680,7 +621,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">MISS</a></td>
     <td>R</td>
@@ -689,7 +629,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">MMAP</a></td>
     <td>R</td>
@@ -698,7 +637,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">MOVN</a></td>
     <td>R</td>
@@ -706,7 +644,6 @@ below.
     <td>SHORT</td>
     <td>Don't confuse with DMOV</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_res">MRES</a></td>
     <td>R/W*</td>
@@ -715,7 +652,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">MSTA</a></td>
     <td>R</td>
@@ -724,7 +660,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">NMAP</a></td>
     <td>R</td>
@@ -733,7 +668,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">NTM</a></td>
     <td>R/W*</td>
@@ -741,7 +675,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"No", 1:"Yes")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_calib">OFF</a></td>
     <td>R/W</td>
@@ -750,7 +683,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_link">OMSL</a></td>
     <td>R/W</td>
@@ -759,7 +691,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_link">OUT</a></td>
     <td>R/W</td>
@@ -768,7 +699,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Servo_fields">PCOF</a></td>
     <td>R/W</td>
@@ -777,7 +707,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">PERL</a></td>
     <td>R/W</td>
@@ -785,7 +714,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"No", 1:"Yes")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">POST</a></td>
     <td>R/W</td>
@@ -794,7 +722,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_private">PP</a></td>
     <td>R</td>
@@ -803,7 +730,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">PREC</a></td>
     <td>R/W</td>
@@ -812,7 +738,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">PREM</a></td>
     <td>R/W</td>
@@ -821,7 +746,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">RBV</a></td>
     <td>R</td>
@@ -830,7 +754,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">RCNT</a></td>
     <td>R</td>
@@ -839,7 +762,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">RDBD</a></td>
     <td>R/W</td>
@@ -848,7 +770,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_link">RDBL</a></td>
     <td>R</td>
@@ -857,7 +778,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">RDIF</a></td>
     <td>R</td>
@@ -866,7 +786,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">REP</a></td>
     <td>R</td>
@@ -875,7 +794,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">RHLS</a></td>
     <td>R</td>
@@ -884,7 +802,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_link">RINP</a></td>
     <td>R/W</td>
@@ -893,7 +810,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_limit">RLLS</a></td>
     <td>R</td>
@@ -902,7 +818,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_link">RLNK</a></td>
     <td>R</td>
@@ -911,7 +826,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_drive">RLV</a></td>
     <td>R/W*</td>
@@ -920,7 +834,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">RMP</a></td>
     <td>R</td>
@@ -929,7 +842,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">RRBV</a></td>
     <td>R</td>
@@ -938,7 +850,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_res">RRES</a></td>
     <td>R/W</td>
@@ -947,7 +858,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">RTRY</a></td>
     <td>R/W</td>
@@ -956,7 +866,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_drive">RVAL</a></td>
     <td>R/W*</td>
@@ -965,7 +874,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">RVEL</a></td>
     <td>R</td>
@@ -974,7 +882,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">S</a></td>
     <td>R/W</td>
@@ -983,7 +890,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">SBAK</a></td>
     <td>R/W</td>
@@ -992,7 +898,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">SBAS</a></td>
     <td>R/W</td>
@@ -1001,7 +906,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_calib">SET</a></td>
     <td>R/W</td>
@@ -1009,7 +913,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"Use", 1:"Set")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">SMAX</a></td>
     <td>R/W</td>
@@ -1018,7 +921,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">SPMG</a></td>
     <td>R/W*</td>
@@ -1026,7 +928,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"Stop", 1:"Pause", 2:"Move", 3:"Go")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_res">SREV</a></td>
     <td>R/W*</td>
@@ -1035,7 +936,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_calib">SSET</a></td>
     <td>R/W</td>
@@ -1044,7 +944,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_link">STOO</a></td>
     <td>R/W</td>
@@ -1053,7 +952,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">STOP</a></td>
     <td>R/W*</td>
@@ -1062,7 +960,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_calib">SUSE</a></td>
     <td>R/W</td>
@@ -1071,7 +968,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_status">TDIR</a></td>
     <td>R</td>
@@ -1080,7 +976,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">TWF</a></td>
     <td>R/W*</td>
@@ -1089,7 +984,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">TWR</a></td>
     <td>R/W*</td>
@@ -1098,7 +992,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_command">TWV</a></td>
     <td>R/W*</td>
@@ -1107,7 +1000,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_res">UEIP</a></td>
     <td>R/W*</td>
@@ -1115,7 +1007,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"No", 1:"Yes")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_res">UREV</a></td>
     <td>R/W*</td>
@@ -1124,7 +1015,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_res">URIP</a></td>
     <td>R/W*</td>
@@ -1132,7 +1022,6 @@ below.
     <td>RECCHOICE</td>
     <td>(0:"No", 1:"Yes")</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_drive">VAL</a></td>
     <td>R/W*</td>
@@ -1141,7 +1030,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">VBAS</a></td>
     <td>R/W</td>
@@ -1150,7 +1038,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">VELO</a></td>
     <td>R/W</td>
@@ -1159,7 +1046,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_misc">VERS</a></td>
     <td>R</td>
@@ -1167,7 +1053,6 @@ below.
     <td>FLOAT</td>
     <td>e.g., "1.95"</td>
   </tr>
-
   <tr>
     <td><a href="#Fields_motion">VMAX</a></td>
     <td>R/W</td>
@@ -1176,7 +1061,6 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr>
     <td><a href="#Fields_calib">VOF</a></td>
     <td>R/W</td>
@@ -1185,13 +1069,12 @@ below.
     <td><br>
     </td>
   </tr>
-
   <tr valign="top">
     <td align="left" colspan="5">
       <table>
 	<tbody>
 	<tr>
-	  <td colspan="3">Note: In the <b>Access</b> column above:&nbsp;</td>
+	  <td colspan="3">Note: In the <b>Access</b> column above:</td>
 	</tr>
 	<tr valign="top">
 	  <td>R</td>
@@ -1225,7 +1108,6 @@ below.
 	</tr>
   </tbody>
       </table>
-
     </td>
   </tr>
 
@@ -1235,9 +1117,7 @@ below.
 <hr>
 <table border="1" cellpadding="0">
   <caption>
-    <a name="Fields_calib"></a>
-
-    <h2>Calibration-related fields</h2>
+    <a name="Fields_calib"></a> <h2>Calibration-related fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -1384,9 +1264,7 @@ below.
 <hr>
 <table border="1" cellpadding="5">
   <caption>
-    <a name="Fields_res"></a>
-
-    <h2>Motor-resolution fields</h2>
+    <a name="Fields_res"></a> <h2>Motor-resolution fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -1485,7 +1363,7 @@ below.
     <td>R/W</td>
     <td>Readback Step Size (EGU)</td>
     <td>FLOAT</td>
-    <td>Readback-device resolution: the distance or angle, in engineering units, 
+    <td>Readback-device resolution: the distance or angle, in engineering units,
     associated with a unit change of the number retrieved via the readback- location 
     input link (RDBL). RRES may be either positive or negative.&nbsp;</td>
   </tr>
@@ -1546,9 +1424,7 @@ below.
 <hr>
 <table border="1" cellpadding="5" nosave="">
   <caption>
-    <a name="Fields_motion"></a>
-
-    <h2>Motion-related fields</h2>
+    <a name="Fields_motion"></a> <h2>Motion-related fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -1563,7 +1439,7 @@ below.
     <td>R/W</td>
     <td>Max Velocity (EGU/s)</td>
     <td>FLOAT</td>
-    <td>Valid range; 0 &lt;= VMAX.&nbsp; VMAX=0 disables maximum velocity range 
+    <td>Valid range; 0 &lt;= VMAX.&nbsp; VMAX=0 disables maximum velocity range
     checking.</td>
   </tr>
   <tr>
@@ -1638,7 +1514,6 @@ below.
     same speed expressed in revolutions per second. The record makes sure that VELO 
     and S are consistent, using the equation S = VELO/UREV.</td>
   </tr>
-
   <tr>
     <td>HVEL</td>
     <td>R/W</td>
@@ -1646,7 +1521,6 @@ below.
     <td>FLOAT</td>
     <td>Homing velocity; valid range; VBAS &lt;= HVEL &lt;= VMAX</td>
   </tr>
-
   <tr valign="top">
     <td>ACCL</td>
     <td>R/W</td>
@@ -1806,11 +1680,11 @@ below.
     <td>R/W</td>
     <td>Retry Deadband (EGU)</td>
     <td>FLOAT</td>
-    <td>When the motor has finished a complete motion, possibly including backlash 
-    takeout, the motor record will compare its current position with the desired 
-    position. If the magnitude of the difference is greater than RDBD, the motor 
-    will try again, as if the user had requested a move from the now current 
-    position to the desired position. Only a limited number of retries will be 
+    <td>When the motor has finished a complete motion, possibly including backlash
+    takeout, the motor record will compare its current position with the desired
+    position. If the magnitude of the difference is greater than RDBD, the motor
+    will try again, as if the user had requested a move from the now current
+    position to the desired position. Only a limited number of retries will be
     performed (see RTRY).&nbsp;</td>
   </tr>
   <tr valign="top">
@@ -1830,9 +1704,7 @@ below.
 <hr>
 <table border="1" cellpadding="5" nosave="">
   <caption>
-    <a name="Fields_link"></a>
-
-    <h2>Link-related fields</h2>
+    <a name="Fields_link"></a> <h2>Link-related fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -1935,9 +1807,7 @@ below.
 <hr>
 <table border="1" cellpadding="5">
   <caption>
-    <a name="Fields_limit"></a>
-
-    <h2>Limit-related fields</h2>
+    <a name="Fields_limit"></a> <h2>Limit-related fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -2004,7 +1874,7 @@ below.
     <td>R/W</td>
     <td>Periodic Limits</td>
     <td>RECCHOICE</td>
-    <td>(0:"No", 1:"Yes")&nbsp; <br>
+    <td>(0:"No", 1:"Yes") <br>
       Not implemented. Originally intended to support periodic "limits" on the VAL 
       field (such as those associated with a rotation stage--e.g., [0...360] or [-180...180]) 
       independently of the actual soft limits HLM and LLM.&nbsp;</td>
@@ -2112,9 +1982,7 @@ below.
 <hr>
 <table border="1" cellpadding="5">
   <caption>
-    <a name="Fields_command"></a>
-
-    <h2>Command-button fields</h2>
+    <a name="Fields_command"></a> <h2>Command-button fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -2202,7 +2070,7 @@ below.
   <tr>
     <td colspan="5">When one of these fields is set to 1, the motor will decelerate 
     to a stop if already moving, move in the indicated direction (in <i>dial</i> 
-    coordinates) at the acceleration specified by ACCL and a speed spedified by HVEL, 
+    coordinates) at the acceleration specified by ACCL and a speed specified by HVEL, 
     until the hardware detects the "home" switch has become active. Then the 
     hardware will do something hardware dependent in response to its "home" command, 
     if any. (The OMS hardware causes the motor to decelerate to a stop.) When the 
@@ -2295,9 +2163,7 @@ below.
 <hr>
 <table border="1" cellpadding="5">
   <caption>
-    <a name="Fields_drive"></a>
-
-    <h2>Drive fields</h2>
+    <a name="Fields_drive"></a> <h2>Drive fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -2312,8 +2178,8 @@ below.
     <td>R/W*</td>
     <td>User Desired Value</td>
     <td>DOUBLE</td>
-    <td>This is the desired position in user coordinates. When this field is written 
-    to, DVAL and RVAL will be changed correspondingly, and the motor will move (with 
+    <td>This is the desired position in user coordinates. When this field is written
+    to, DVAL and RVAL will be changed correspondingly, and the motor will move (with
     backlash takeout if BDST is nonzero) to the newly written position.&nbsp;</td>
   </tr>
   <tr valign="top">
@@ -2321,8 +2187,8 @@ below.
     <td>R/W*</td>
     <td>Dial Desired Value</td>
     <td>DOUBLE</td>
-    <td>This is the desired position in dial coordinates. When this field is written 
-    to, VAL and RVAL will be changed correspondingly, and the motor will move (with 
+    <td>This is the desired position in dial coordinates. When this field is written
+    to, VAL and RVAL will be changed correspondingly, and the motor will move (with
     backlash takeout if BDST is nonzero) to the newly written position.&nbsp;</td>
   </tr>
   <tr valign="top">
@@ -2336,7 +2202,7 @@ below.
   </tr>
   <tr valign="top">
     <td>RLV</td>
-    <td>R/W*&nbsp;</td>
+    <td>R/W*</td>
     <td>Relative Value</td>
     <td>DOUBLE</td>
     <td>When this field is changed, its value will be added to VAL, the field itself 
@@ -2350,9 +2216,7 @@ below.
 <hr>
 <table border="1" cellpadding="5">
   <caption>
-    <a name="Fields_status"></a>
-
-    <h2>Status/readback fields</h2>
+    <a name="Fields_status"></a> <h2>Status/readback fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -2416,14 +2280,14 @@ below.
     <td>R</td>
     <td>Difference dval-drbv</td>
     <td>DOUBLE</td>
-    <td rowspan="2">DIFF is the difference, in engineering units, between the 
+    <td rowspan="2">DIFF is the difference, in engineering units, between the
     desired motor position, and the readback device's report of the current position. 
     RDIF is the same difference in "raw" units (normally, steps).&nbsp;</td>
   </tr>
   <tr valign="top">
     <td>RDIF</td>
     <td>R</td>
-    <td>Difference rval-rrbv&nbsp;</td>
+    <td>Difference rval-rrbv</td>
     <td>LONG</td>
   </tr>
   <tr valign="top">
@@ -2438,7 +2302,7 @@ below.
   <tr valign="top">
     <td>RMP</td>
     <td>R</td>
-    <td>Raw Motor Position&nbsp;</td>
+    <td>Raw Motor Position</td>
     <td>DOUBLE</td>
     <td>The contents of the hardware's step-count register. This field contains the 
     same information as the dial value, but in steps, rather than in engineering 
@@ -2524,7 +2388,7 @@ below.
     <td>At HOME</td>
     <td>SHORT</td>
     <td>The state of the hardware's "home" switch. If 1, the motor has hit the 
-    switch.&nbsp;</td>
+    switch.</td>
   </tr>
   <tr valign="top">
     <td>RCNT</td>
@@ -2548,7 +2412,7 @@ below.
     <td>R</td>
     <td>Raw Velocity</td>
     <td>LONG</td>
-    <td>Speed in steps per second that the motor actually is moving.&nbsp;</td>
+    <td>Speed in steps per second that the motor actually is moving.</td>
   </tr>
 
   </tbody>
@@ -2747,9 +2611,7 @@ below.
 <hr>
 <table border="1" cellpadding="5" nosave="">
   <caption>
-    <a name="Fields_misc"></a>
-
-    <h2>Miscellaneous fields</h2>
+    <a name="Fields_misc"></a> <h2>Miscellaneous fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -2846,11 +2708,6 @@ below.
 	  settle time field</i> (DLY) should be used to create a time delay after the PV 
 	  specified in the POST field is written.
 	</blockquote>
-	<blockquote>
-	  <li>
-	    A valid device directive; currently, only "DPM_ON".
-	  </li>
-	</blockquote>
 	<li>
 	  Device directive strings are stripped of valid device directives (including @'s) 
 	  and tested for nonzero length before being sent to the controller.&nbsp; For 
@@ -2858,7 +2715,6 @@ below.
 	  stripped out before HE is sent to the controller.
 	</li>
       </ul>
-
       <b>Driver Power Monitoring</b>
       <ul>
 	<li>
@@ -2922,7 +2778,6 @@ below.
     <td>Sent after a complete motion is finished or when an overtravel limit switch 
     is detected.</td>
   </tr>
-
   <tr>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2930,7 +2785,6 @@ below.
     <td>&nbsp;</td>
     <td>&nbsp;</td>
   </tr>
-
   <tr>
     <td>LOCK</td>
     <td>R/W</td>
@@ -2944,7 +2798,6 @@ below.
     multi-axis application. Hence, setting the LOCK field to "Yes" disables this 
     automatic synchronization.</td>
   </tr>
-
   <tr>
     <td>NTM</td>
     <td>R/W</td>
@@ -2972,16 +2825,13 @@ below.
       motors should be configured with NTM set to "No" to prevent Case #1 above from 
       interfering with "hard" motors using backlash correction.  </td>
   </tr>
-
   </tbody>
 </table>
 
 <hr>
 <table border="1" cellpadding="5">
   <caption>
-    <a name="Fields_private"></a>
-
-    <h2>Private fields</h2>
+    <a name="Fields_private"></a> <h2>Private fields</h2>
   </caption>
   <tbody>
   <tr valign="top">
@@ -3076,9 +2926,9 @@ below.
 files required to implement and use the motor record. The reader is assumed to 
 be familiar with the <a href="http://www.aps.anl.gov/asd/controls/epics/EpicsDocumentation/WWWPages/EpicsDocs/AppDevManuals/AppSrcRelControl/AppSRControl.html">EPICS 
 Application Source/Release Control document</a> which describes how to build an 
-EPICS application tree into which these files are to be placed, and how to run "makesdr 
-" and "gnumake" to build the record support. These files can all be obtained 
-from the <a href="http://www.aps.anl.gov/xfd/WWW/xfd/SoftDist/Welcome.html">EPICS 
+EPICS application tree into which these files are to be placed, and how to run
+"makesdr" and "gnumake" to build the record support. These files can all be
+obtained from the <a href="http://www.aps.anl.gov/xfd/WWW/xfd/SoftDist/Welcome.html">EPICS 
 Software Distribution</a> (in the <a href="http://www.aps.anl.gov/xfd/WWW/xfd/SoftDist/Welcome.html#Custom_EPICS">custom-software 
 section</a> ).
 <table border="1" cellpadding="5">
@@ -3222,7 +3072,7 @@ section</a> ).
   <tr>
     <td><br>
     </td>
-    <td>NOTE: The above files are required for any and all Newport Motion Master 
+    <td>NOTE: The above files are required for any and all Newport Motion Master
     device drivers.</td>
   </tr>
   <tr>
@@ -3235,11 +3085,11 @@ section</a> ).
   </tr>
   <tr>
     <td>devMM4000.c</td>
-    <td>Device support for Newport MM4000.</td>
+    <td>Device support for Newport MM4000/40005.</td>
   </tr>
   <tr>
     <td>drvMM4000.c</td>
-    <td>Driver for Newport MM4000.</td>
+    <td>Driver for Newport MM4000/40005.</td>
   </tr>
   <tr>
     <td>devPM500.c</td>
@@ -3248,6 +3098,16 @@ section</a> ).
   <tr>
     <td>drvPM500.c</td>
     <td>Driver for Newport PM500.</td>
+  </tr>
+  <tr>
+    <td>devESP300.c<br>
+    </td>
+    <td>Device support for Newport ESP300.</td>
+  </tr>
+  <tr>
+    <td valign="top">drvESP300.c<br>
+    </td>
+    <td>Driver for Newport ESP300.</td>
   </tr>
   <tr>
     <td><br>
@@ -3324,75 +3184,6 @@ section</a> ).
     <td><br>
     </td>
   </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td>Makefile.Vx</td>
-    <td>This file is not included in the distribution. However, the user must edit 
-    this file and add lines similar to the following:
-      <pre>MOTOR_OBJS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = motorRecord.o devOms.o
-      drvOms.o devOms58.o drvOms58.o<br>LIBNAME = mylib.o<br>LIBOBJS = $(MOTOR_OBJS) $
-      (other objects here)<br><br></pre>
-    </td>
-  </tr>
-
-  </tbody>
-</table>
-
-<table border="1" cellpadding="5">
-  <tbody>
-  <tr>
-    <th colspan="2">ASCII FILES <br>
-      files to be placed in <tt>&amp;lttop&gt;/cat_ascii/</tt></th>
-  </tr>
-  <tr valign="top">
-    <td>motorRecord.ascii</td>
-    <td>This file defines all of the fields for the motor record.</td>
-  </tr>
-  <tr valign="top">
-    <td>choiceRecMotor.ascii</td>
-    <td>This file defines all of the choice values for the motor record.</td>
-  </tr>
-  <tr valign="top">
-    <td>choiceMotor.h</td>
-    <td>This file is included by choiceRecMotor.ascii and by recMotor.c.</td>
-  </tr>
-  <tr valign="top">
-    <td>choiceRec.ascii</td>
-    <td>This file is not included in the distribution. However, the user must edit 
-    this file and add the line:
-      <pre>#include &amp;ltchoiceRecMotor.ascii&gt;</pre>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td>dbRecType.ascii</td>
-    <td>This file is not included in the distribution. However, the user must edit 
-    this file and add the line:
-      <pre>"motor"</pre>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td>devSup.ascii</td>
-    <td>This file is not included in the distribution. However, the user must edit 
-    this file and add the following lines:
-      <pre>! Device Support for motor record<br>"motor"&nbsp;&nbsp;&nbsp; VME_IO&nbsp;&nbsp;&nbsp; 
-      "devOMS"&nbsp;&nbsp;&nbsp;&nbsp; "OMS VME8, VME44"&nbsp;<br>"motor"&nbsp;&nbsp;&nbsp; 
-      VME_IO&nbsp;&nbsp;&nbsp; "devOms58"&nbsp;&nbsp; "OMS VME58"&nbsp;<br>"motor"&nbsp;&nbsp;&nbsp; 
-      VME_IO&nbsp;&nbsp;&nbsp; "devV544"&nbsp;&nbsp;&nbsp; "Highland V544"&nbsp;</pre>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td>drvSup.ascii</td>
-    <td>This file is not included in the distribution. However, the user must edit 
-    or create this file and add the following lines:
-      <pre>! Driver support for the OME VME58 motor controller<br>"drvOms58"<br><br><br><br></pre>
-    </td>
-  </tr>
-
   </tbody>
 </table>
 
@@ -3489,36 +3280,44 @@ section</a> ).
 	    <p>
 	    <tt>MM3000Setup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 	    pollRate)</tt> <br>
-	    <tt>MM3000Config(card#, portType, GPIB link or hideos_card#, GPIB address or 
-	    hideos_task name)</tt>
+	    <tt>MM3000Config(card#, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;portType, &nbsp;link, 
+	    port)</tt> 
 	    </p>
 
 	    <p>
 	    <tt>MM4000Setup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 	    pollRate)</tt> <br>
-	    <tt>MM4000Config(card#, portType, GPIB link or hideos_card#, GPIB address or 
-	    hideos_task name)</tt>
+	    <tt>MM4000Config(card#, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;portType, &nbsp;link, 
+	    port)</tt> 
 	    </p>
 
 	    <p>
 	    <tt>IM483SMSetup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 	    pollRate)&nbsp;</tt> <br>
-	    <tt>IM483SMConfig(card#, portType, GPIB link or hideos_card#, GPIB address or 
-	    hideos_task name)&nbsp;</tt>
+	    <tt>IM483SMConfig(card#, &nbsp; &nbsp; &nbsp; &nbsp; portType, &nbsp;link, port)&nbsp;</tt> 
+	    
 	    </p>
 
 	    <p>
 	    <tt>IM483[PL/SM]Setup(nCommNet, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 	    pollRate)&nbsp;</tt> <br>
-	    <tt>IM483[PL/sm]Config(CommNet#, portType, GPIB link or hideos_card#,  GPIB 
-	    address or hideos_task name)&nbsp;</tt> <br>
-	    &nbsp;
+	    <tt>IM483[PL/sm]Config(CommNet#, portType, &nbsp;link, port)&nbsp;</tt> <br>
+	    </p>
+
+	    <p>
+	    ESP300Setup(<tt>nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+	    &nbsp; &nbsp;pollRate</tt>)<br>
+	    ESP300Config(<tt>card#, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; portType, &nbsp;link, 
+	    port</tt>)<br>
+	    <br>
+	    <br>
 	    </p>
 	  </td>
 	</tr>
 	<tr valign="top">
 	  <td>nCards</td>
-	  <td>the actual number of cards may be less, but not greater than this</td>
+	  <td>the number of cards or controllers; may be less, but not greater than this 
+	  value.</td>
 	</tr>
 	<tr>
 	  <td>nCommNet</td>
@@ -3533,34 +3332,35 @@ section</a> ).
 	  <td>baseAddress</td>
 	  <td>the base address of the first card of a series. This must agree with address 
 	  jumpers on the actual card(s).
+
 	    <p>
-	    OMS VME8, VME44, and VMEX cards are all of one series, with a base address in 
+	    OMS VME8, VME44, and VMEX cards are all of one series,  with a base address in 
 	    the short address space, on a 16-byte (0x10) boundary. (I.e., these cards 
 	    require 16 bytes each, and must all be addressed contiguously as, e.g., 0xFC00, 
-	    0xFC10).
+	    0xFC10). 
 	    </p>
 
 	    <p>
-	    OMS VME58-x cards are in their own series, also in the short address space, on a 
-	    4k-byte (0x1000) boundary.
+	    OMS VME58-x cards are in their own series, also in the  short address space, on 
+	    a 4k-byte (0x1000) boundary. 
 	    </p>
 
 	    <p>
-	    Highland Technology V544 cards are in their own series, in the short address 
+	    Highland Technology V544 cards are in their own series,  in the short address 
 	    space, on a 128-byte (0x80) boundary.
 	    </p>
 	  </td>
 	</tr>
 	<tr valign="top">
 	  <td>intVectBase</td>
-	  <td>the interrupt vector that will be loaded into the first card of a series. 
+	  <td>the interrupt vector that will be loaded into the first card of a series.  
 	  Succeeding cards will be loaded with intVectBase+1, intVectBase+2, etc. Set to "0 
-	   " to disable interrupt generation; otherwise, stay in the range [64..255].</td>
+	  " to disable interrupt generation; otherwise, stay in the range [64..255].</td>
 	</tr>
 	<tr valign="top">
 	  <td>intLevel</td>
-	  <td>the VME-interrupt level (in [1..6]) the cards will use. This must agree with 
-	  jumper settings on the cards.</td>
+	  <td>the VME-interrupt level (in [1..6]) the cards will use. This must agree  
+	  with jumper settings on the cards.</td>
 	</tr>
 	<tr valign="top">
 	  <td>pollRate</td>
@@ -3573,15 +3373,28 @@ section</a> ).
 	  <td>portType</td>
 	  <td>0 - GPIB_PORT or 1 - RS232_PORT</td>
 	</tr>
+	<tr>
+	  <td valign="top">link<br>
+	  </td>
+	  <td valign="top">GPIB link or MPF server CPU location<br>
+	  </td>
+	</tr>
+	<tr>
+	  <td valign="top">port<br>
+	  </td>
+	  <td valign="top">GPIB address or MPF serial server task name<br>
+	  </td>
+	</tr>
 
   </tbody>
       </table>
 
-      <pre># OMS VME8, VME44, VMEX driver setup parameters:<br>omsSetup(5, 8, 0xFC00,
-      180, 5, 10)<br><br># OMS VME58 driver setup parameters:<br>oms58Setup(5, 8,
-      0x2000, 190, 5, 10)<br><br># Highland Technology V544 driver setup parameters:<br>
+      <pre># OMS VME8, VME44, VMEX driver setup parameters:<br>omsSetup(5, 8, 0xFC00, 
+      180, 5, 10)<br><br># OMS VME58 driver setup parameters:<br>oms58Setup(5, 8, 
+      0x2000, 190, 5, 10)<br><br># Highland Technology V544 driver setup parameters:<br> 
       v544Setup(5, 4, 0xDD00, 200, 5, 10)</pre>
       <b><font color="#ffffff">Start EPICS</font></b>
+
       <pre>iocInit</pre>
     </td>
   </tr>
@@ -3632,19 +3445,18 @@ section</a> ).
 </table>
 
 <hr>
-<a name="Restrictions"></a>
-
-<h2>Restrictions</h2> You <i>must</i> not change the motor resolution while the 
-motor is moving, but the record currently does not defend itself against this.
+<a name="Restrictions"></a> <h2>Restrictions</h2> You <i>must</i> not change the 
+motor resolution while the motor is moving, but the record currently does not 
+defend itself against this.
 <p>
 There is no way to ask for a reading of the motor's position register, encoder, 
 or limit switches. These are read only while the motor is moving.
 </p>
 
 <p>
-Because of the way limit-switch information is conveyed by the OMS hardware, the 
-motor record cannot know the states of both limit switches at the same time. It 
-only knows the state of the switch toward which the motor is moving. 
+Because of the way limit-switch information is conveyed by the OMS hardware, the
+motor record cannot know the states of both limit switches at the same time. It
+only knows the state of the switch toward which the motor is moving.
 </p>
 
 <p>
@@ -3662,9 +3474,7 @@ with SBAK and SBAS. <br>
 
 <hr width="100%">
 <br>
-<a name="Examples"></a>
-
-<h2>Examples</h2>
+<a name="Examples"></a> <h2>Examples</h2>
 
 <h4>Command Primitives</h4> This example assumes the controller is an MM4000 and 
 that only one motor in the controller is moved at a time (MM4000 power on/off 
@@ -3704,7 +3514,7 @@ linear position along an axis that is one meter perpendicular to the center of
 rotation.
 
 <p>
-The following database implements the system described above.&nbsp; The database 
+The following database implements the system described above.&nbsp; The database
 consist of four records: 
 </p>
 
@@ -3804,28 +3614,26 @@ support:
   </tbody>
 </table>
 
-<hr width="100%">
-<br>
+<hr width="100%" size="2">
 <a name="Design_Decisions"></a>
 
-<h2>Design Decisions</h2>
-
-This section of the document is an attempt to record the reasoning behind recent 
-motor record design decisions. <h4>Motor Controller Travel Limits</h4> For those 
-motor controllers that provide their own internal software travel limits (e.g., 
-MM4000), the motor record will only allow the user to set dial travel limits (i.e., 
-D[H/L]LM) that are within the controller's travel limit range, inclusively.&nbsp; 
-In making this design decision it was assumed that an <i>expert</i> user would 
-enter the controller travel limits (possibly, through a front panel user 
-interface) that would protect other users from reaching the hard travel limits.&nbsp; 
-Controllers with their own travel limits that are commanded to move outside 
-their valid range respond with an error.&nbsp; Hence, there is no utility in 
-allowing the dial travel limits outside the controller's range. <h4>Separate EGU's 
-and MRES's between Controller and Motor Record</h4> Device driver support for 
-controllers that have characteristics different from the OMS controllers, such 
-as the Newport MM4000, has raised new issues.&nbsp; One of these issues is 
-whether or not the motor record should set it's EGU and MRES fields from the 
-controller's values.&nbsp; We think it should not.
+<h2>Design Decisions</h2> This section of the document is an attempt to record 
+the reasoning behind recent motor record design decisions. <h4>Motor Controller 
+Travel Limits</h4> For those motor controllers that provide their own internal 
+software travel limits (e.g., MM4000), the motor record will only allow the user 
+to set dial travel limits (i.e., D[H/L]LM) that are within the controller's 
+travel limit range, inclusively.&nbsp; In making this design decision it was 
+assumed that an <i>expert</i> user would enter the controller travel limits (possibly, 
+through a front panel user interface) that would protect other users from 
+reaching the hard travel limits.&nbsp; Controllers with their own travel limits 
+that are commanded to move outside their valid range respond with an error.&nbsp; 
+Hence, there is no utility in allowing the dial travel limits outside the 
+controller's range. <h4>Separate EGU's and MRES's between Controller and Motor 
+Record</h4> Device driver support for controllers that have characteristics 
+different from the OMS controllers, such as the Newport MM4000, has raised new 
+issues.&nbsp; One of these issues is whether or not the motor record should set 
+it's EGU and MRES fields from the controller's values.&nbsp; We think it should 
+not.
 
 <p>
 Background: The MM4000 is a stand-alone controller with it's own front panel, 
@@ -3856,6 +3664,6 @@ specific value (e.g., kV) that is not supported by the motor controller. <br>
 <a href="mailto:sluiter@aps.anl.gov">Ron Sluiter</a> : (sluiter@aps.anl.gov) <br>
 <a href="mailto:mooney@aps.anl.gov">Tim Mooney</a> : (mooney@aps.anl.gov) <br>
 <a href="mailto:sullivan@aps.anl.gov">Joe Sullivan</a> : (sullivan@aps.anl.gov) <br>
-Last modified: June 9, 2003
+Last modified: June 25, 2003
 </body>
 </html>
