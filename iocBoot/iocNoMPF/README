@@ -1,0 +1,7 @@
+To start the ioc from this directory, execute the following command.
+This command assumes that your EPICS_HOST_ARCH environment variable
+is set correctly.
+
+../../bin/${EPICS_HOST_ARCH}/NoMPF st.cmd.unix
+
+../../bin/${EPICS_HOST_ARCH}/NoMPF st.cmd.mx
