@@ -13,7 +13,7 @@ LIBRARY_IOC = PI
 SRCS += PiRegister.cc
 SRCS += devPIC844.cc drvPIC844.cc
 
-PI_LIBS += motor motorCOM_mpf
+PI_LIBS += motor asyn
 PI_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
