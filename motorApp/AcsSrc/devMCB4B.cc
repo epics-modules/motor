@@ -9,6 +9,7 @@
  * -----------------
  * .00  02-24-2002      mlr     initialized from devPM304.c
  * .01  05-23-2003      rls     Converted to R3.14.x.
+ * .02  02-19-2004      mlr     Bug fix when not sending anything
  */
 
 
@@ -92,7 +93,8 @@ static msg_types MCB4B_table[] = {
     IMMEDIATE,  /* DISABL_TORQUE */
     IMMEDIATE,  /* PRIMITIVE */
     IMMEDIATE,  /* SET_HIGH_LIMIT */
-    IMMEDIATE   /* SET_LOW_LIMIT */
+    IMMEDIATE,  /* SET_LOW_LIMIT */
+    VELOCITY    /* JOB_VELOCITY */
 };
 
 
@@ -159,14 +161,16 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
     RTN_STATUS rtnval;
     double dval;
     long ival;
+    bool send;
 
+    send = true;
     rtnval = OK;
     buff[0] = '\0';
     dval = parms[0];
     ival = NINT(parms[0]);
 
     rtnval = (RTN_STATUS) motor_start_trans_com(mr, MCB4B_cards);
-    Debug(5, "MCB4B_build_trans: entry, motor_start_trans_com=%ld\n", rtnval);
+    Debug(5, "MCB4B_build_trans: entry, motor_start_trans_com=%d\n", rtnval);
 
     motor_call = &(trans->motor_call);
     motor_call->type = MCB4B_table[command];
@@ -201,6 +205,7 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
             if (strlen(mr->prem) != 0)
             {
                 strcpy(motor_call->message, mr->prem);
+                rtnval = motor_end_trans_com(mr, drvtabptr);
                 rtnval = (RTN_STATUS) motor_start_trans_com(mr, MCB4B_cards);
                 motor_call->type = MCB4B_table[command];
             }
@@ -230,6 +235,7 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
         sprintf(motor_call->message, "#%02dP=%+ld", axis, ival);
         break;
     case SET_VEL_BASE:
+        send=false;
         trans->state = IDLE_STATE;
         break;          /* MCB4B does not use base velocity */
     case SET_VELOCITY:
@@ -253,6 +259,7 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
          * The MCB4B starts moving immediately on move commands, GO command
          * does nothing
          */
+        send=false;
         trans->state = IDLE_STATE;
         break;
     case SET_ENC_RATIO:
@@ -260,6 +267,7 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
          * The MCB4B does not have the concept of encoder ratio, ignore this
          * command
          */
+        send=false;
         trans->state = IDLE_STATE;
         break;
     case GET_INFO:
@@ -288,14 +296,9 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
         }
         break;
     case SET_PGAIN:
-        trans->state = IDLE_STATE;
-        break;
-
     case SET_IGAIN:
-        trans->state = IDLE_STATE;
-        break;
-
     case SET_DGAIN:
+        send=false;
         trans->state = IDLE_STATE;
         break;
 
@@ -309,6 +312,7 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
 
     case SET_HIGH_LIMIT:
     case SET_LOW_LIMIT:
+        send=false;
         trans->state = IDLE_STATE;
         break;
 
@@ -316,7 +320,11 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
         rtnval = ERROR;
     }
 
-    rtnval = motor_end_trans_com(mr, drvtabptr);
-    Debug(5, "MCB4B_send_msg: motor_end_trans_com status=%ld, exit\n", rtnval); 
-    return (rtnval);
+    if(send == false)
+       return(rtnval);
+    else { 
+        rtnval = motor_end_trans_com(mr, drvtabptr);
+        Debug(5, "MCB4B_send_msg: motor_end_trans_com status=%d, exit\n", rtnval); 
+        return (rtnval);
+    }
 }
