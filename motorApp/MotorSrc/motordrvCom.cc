@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-06 15:56:10 $
+Last Modified:	$Date: 2003-11-06 21:21:57 $
 */
 
 /*
@@ -69,11 +69,11 @@ static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent
  *		return from semaphore pend.
  *	    IF elapsed time (time_lapse) < user delay (scan_sec).
  *		Set "wait_time" to (user delay - elapsed time).
- *		IF "wait_time" < 10 msec.
- *		    Set "wait_time" to 10 msec..
+ *		IF "wait_time" < 1 quantum time unit.
+ *		    Set "wait_time" to 1 quantum time unit.
  *		ENDIF
  *	    ELSE
- *		Set "wait_time" to 10 msec..
+ *		Set "wait_time" to 1 quantum time unit.
  *	    ENDIF
  *	ENDIF
  *	Pend on semaphore with "wait_time" timeout argument.
@@ -103,6 +103,7 @@ int motor_task(struct thread_args *args)
     bool sem_ret;
     epicsTime previous_time, current_time;
     double scan_sec, wait_time, time_lapse;
+    const double quantum = epicsThreadSleepQuantum();
     int itera;
 
     tabptr = args->table;    
@@ -120,11 +121,11 @@ int motor_task(struct thread_args *args)
 	    if (time_lapse < scan_sec)
 	    {
 		wait_time = scan_sec - time_lapse;
-		if (wait_time < 0.010)		
-		    wait_time = 0.010;
+		if (wait_time < quantum)		
+		    wait_time = quantum;
 	    }
 	    else
-		wait_time = 0.010;
+		wait_time = quantum;
 	}
 
 	sem_ret = tabptr->semptr->wait(wait_time);
@@ -153,6 +154,8 @@ static int query_axis(int card, struct driver_table *tabptr, epicsTime tick)
 {
     struct controller *brdptr;
     int index;
+    /* quantum_x_2 to insure at least one quantum delay. */
+    const double quantum_x_2 = epicsThreadSleepQuantum() * 2.0;
 
     brdptr = (*tabptr->card_array)[card];
 
@@ -169,7 +172,7 @@ static int query_axis(int card, struct driver_table *tabptr, epicsTime tick)
 		delay = tick - motor_info->status_delay;
 	}
 
-	if (motor_motion && (delay >= 0.01) && (*tabptr->setstat) (card, index))
+	if (motor_motion && (delay >= quantum_x_2) && (*tabptr->setstat) (card, index))
 	{
 	    struct mess_node *mess_ret;
 	    bool ls_active;
@@ -230,6 +233,8 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 {
     struct mess_node *node, *motor_motion;
     double delay;
+    /* quantum_x_2 to insure at least one quantum delay. */
+    const double quantum_x_2 = epicsThreadSleepQuantum() * 2.0;
 
     while ((node = get_head_node(tabptr)))
     {
@@ -306,8 +311,8 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 	    case INFO:
 		if (tick >= motor_info->status_delay)
 		    delay = tick - motor_info->status_delay;
-		if (delay < 0.01)	/* Status update delay - needed for OMS. */
-		    epicsThreadSleep(0.01);	/* 10 ms. delay. */
+		if (delay < quantum_x_2) /* Status update delay - needed for OMS. */
+		    epicsThreadSleep(quantum_x_2 - delay);
 
 		if (tabptr->strtstat != NULL)
 		    (*tabptr->strtstat) (card);
