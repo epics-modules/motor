@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 16:41:02 $
+Last Modified:	$Date: 2003-05-19 17:10:49 $
 */
 
 /*
@@ -474,7 +474,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 	timeout	= SERIAL_TIMEOUT;
 
     /* Get the response. */      
-    len = serialIORecv(cntrl->serialInfo, localbuf, BUFF_SIZE, "?", timeout);
+    len = serialIORecv(cntrl->serialInfo, localbuf, BUFF_SIZE, (char *) "?", timeout);
 
     if (len == 0)
 	com[0] = '\0';
@@ -581,7 +581,7 @@ STATIC int motor_init()
 	    continue;
 	
 	brdptr = motor_state[card_index];
-	brdptr->ident[0] = NULL;	/* No controller identification message. */
+	brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
 	brdptr->cmnd_response = true;
 	total_cards = card_index + 1;
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
@@ -640,7 +640,7 @@ STATIC int motor_init()
 		motor_info->encoder_present = NO;
 
                 /* Determine if encoder present based on open/closed loop mode. */
-		loop_state = NULL;
+		loop_state = 0;
 		if (loop_state != 0)
 		{
 		    motor_info->pid_present = YES;
