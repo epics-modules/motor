@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-25 16:48:13 $
+Last Modified:	$Date: 2002-07-05 19:39:28 $
 */
 
 /*
@@ -235,8 +235,9 @@ STATIC int set_status(int card, int signal)
     struct axis_status *ax_stat;
     struct encoder_status *en_stat;
     char q_buf[50];
-    int i, pos;
+    int index, pos;
     int rtn_state;
+    BOOLEAN ls_active;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
 
@@ -254,10 +255,10 @@ STATIC int set_status(int card, int signal)
 
     Debug(5, "info = (%s)\n", q_buf);
 
-    for (i = 0, p = strtok_r(q_buf, ",", &tok_save); p;
-	 p = strtok_r(NULL, ",", &tok_save), i++)
+    for (index = 0, p = strtok_r(q_buf, ",", &tok_save); p;
+	 p = strtok_r(NULL, ",", &tok_save), index++)
     {
-	switch (i)
+	switch (index)
 	{
 	case 0:		/* axis status */
 	    ax_stat = (struct axis_status *) p;
@@ -273,9 +274,18 @@ STATIC int set_status(int card, int signal)
 		motor_info->status &= ~RA_DONE;
 
 	    if (ax_stat->overtravel == 'L')
-		motor_info->status |= RA_OVERTRAVEL;
+	    {
+		ls_active = ON;
+		if (motor_info->status & RA_DIRECTION)
+		    motor_info->status |= RA_PLUS_LS;
+		else
+		    motor_info->status |= RA_MINUS_LS;
+	    }
 	    else
-		motor_info->status &= ~RA_OVERTRAVEL;
+	    {
+		ls_active = OFF;
+		motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
+	    }
 
 	    if (ax_stat->home == 'H')
 		motor_info->status |= RA_HOME;
@@ -284,7 +294,7 @@ STATIC int set_status(int card, int signal)
 
 	    break;
 	case 1:		/* motor pulse count (position) */
-	    sscanf(p, "%i", &pos);
+	    sscanf(p, "%index", &pos);
 
 	    if (pos == motor_info->position)
 		motor_info->no_motion_count++;
@@ -308,7 +318,7 @@ STATIC int set_status(int card, int signal)
 	    {
 		int temp;
 
-		sscanf(p, "%i", &temp);
+		sscanf(p, "%index", &temp);
 		motor_info->encoder_position = (epicsInt32) temp;
 	    }
 	    break;
@@ -355,12 +365,12 @@ STATIC int set_status(int card, int signal)
     if (!(motor_info->status & RA_DIRECTION))
 	motor_info->velocity *= -1;
 
-    rtn_state = (!motor_info->no_motion_count ||
-     (motor_info->status & (RA_OVERTRAVEL | RA_DONE | RA_PROBLEM))) ? 1 : 0;
+    rtn_state = (!motor_info->no_motion_count || ls_active == ON ||
+     (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || motor_info->status & RA_OVERTRAVEL) &&
-        (motor_info->motor_motion != 0) &&
+    if ((motor_info->status & RA_DONE || ls_active == ON) &&
+	(motor_info->motor_motion != 0) &&
 	(motor_info->motor_motion->postmsgptr != 0))
     {
 	send_mess(card, motor_info->motor_motion->postmsgptr, oms_axis[signal]);

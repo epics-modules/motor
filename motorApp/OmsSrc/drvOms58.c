@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-22 22:08:01 $
+Last Modified:	$Date: 2002-07-05 19:40:07 $
 */
 
 /*
@@ -307,10 +307,46 @@ STATIC void start_status(int card)
     }
 }
 
-/**************************************************************
- * Read motor status from card
- * set_status()
- ************************************************************/
+/******************************************************************************
+* FUNCTION NAME: set_status
+*
+* ARGUMETS     Type      I/O     Description
+* --------     ----      ---     -----------
+*
+* card         int        I      Controller card index #.
+* signal       int        I      Motor index.
+*
+* LOGIC
+*   Initialize.
+*   IF encoder present.
+*	Get axis and encoder information.
+*   ELSE
+*       Get axis information.
+*   ENDIF
+*
+*   Process controller response strings.
+*
+*   ...
+*   ...
+*   IF "motor-in-motion" (i.e., nodeptr != 0), AND, no limit switch error.
+*	IF drive power monitoring enabled.
+*	    ...
+*	ENDIF
+*   ENDIF
+*
+*   IF no motion, OR, status indicates limit switch error, OR, motor done, OR,
+*		controller problem.
+*	Set return state to "callback record".
+*   ELSE
+*	Set return state to skip "record callback".
+*   ENDIF
+*   IF status indicates DONE/LIMIT, AND, "motor-in-motion" (nodeptr != 0), AND,
+*		post-move message is not null.
+*	Send post-move message to controller.
+*	Clear post-move message pointer.
+*   ENDIF
+*   EXIT with return state indicator.
+******************************************************************************/
 
 STATIC int set_status(int card, int signal)
 {
@@ -326,6 +362,7 @@ STATIC int set_status(int card, int signal)
     struct encoder_status *en_stat;
     char q_buf[50], outbuf[50];
     int index;
+    BOOLEAN ls_active;
 
     int rtn_state;
 
@@ -370,9 +407,18 @@ STATIC int set_status(int card, int signal)
 		motor_info->status &= ~RA_DONE;
 
 	    if (ax_stat->overtravel == 'L')
-		motor_info->status |= RA_OVERTRAVEL;
+	    {
+		ls_active = ON;
+		if (motor_info->status & RA_DIRECTION)
+		    motor_info->status |= RA_PLUS_LS;
+		else
+		    motor_info->status |= RA_MINUS_LS;
+	    }
 	    else
-		motor_info->status &= ~RA_OVERTRAVEL;
+	    {
+		ls_active = OFF;
+		motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
+	    }
 
 	    if (ax_stat->home == 'H')
 		motor_info->status |= RA_HOME;
@@ -454,7 +500,7 @@ STATIC int set_status(int card, int signal)
 
     motor_info->encoder_position = motorData;
 
-    if ((nodeptr != NULL) && ((motor_info->status & RA_OVERTRAVEL) == 0))
+    if (nodeptr != NULL && ls_active == OFF)
     {
 	struct motor_trans *trans = (struct motor_trans *) nodeptr->mrecord->dpvt;
 	if (trans->dpm == ON)
@@ -464,20 +510,19 @@ STATIC int set_status(int card, int signal)
 	    bitselect = (1 << signal);
 	    if ((inputs & bitselect) == 0)
 	    {
-                motor_info->status |= RA_OVERTRAVEL;
+                motor_info->status |= (RA_PLUS_LS | RA_MINUS_LS);
 		logMsg((char *) "Drive power failure at VME58 card#%d motor#%d\n",
 		       card, signal, 0, 0, 0, 0);
 	    }
 	}
     }
 
-    rtn_state = (!motor_info->no_motion_count ||
-     (motor_info->status & (RA_OVERTRAVEL | RA_DONE | RA_PROBLEM))) ? 1 : 0;
-    
+    rtn_state = (!motor_info->no_motion_count || ls_active == ON ||
+     (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
+
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || motor_info->status & RA_OVERTRAVEL) &&
-	(nodeptr != 0) &&
-	(nodeptr->postmsgptr != 0))
+    if ((motor_info->status & RA_DONE || ls_active == ON) && nodeptr != 0 &&
+	nodeptr->postmsgptr != 0)
     {
 	strcpy(outbuf, nodeptr->postmsgptr);
 	send_mess(card, outbuf, oms58_axis[signal]);
