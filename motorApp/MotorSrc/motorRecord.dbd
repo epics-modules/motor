@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.9 $
+# Version:		$Revision: 1.10 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2002-10-31 20:37:26 $
+# Last Modified:	$Date: 2003-06-05 15:54:08 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -713,5 +713,11 @@ recordtype(motor) {
 		interest(1)
 		menu(menuYesNo)
 		initial("YES")
+	}
+	field(HVEL,DBF_FLOAT) {
+		prompt("Home Velocity (EGU/s)")
+		promptgroup(GUI_COMMON)
+		special(SPC_MOD)
+		interest(1)
 	}
 }
