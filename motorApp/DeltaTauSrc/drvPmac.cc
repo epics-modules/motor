@@ -2,9 +2,9 @@
 FILENAME...	drvPmac.cc
 USAGE...	Driver level support for Delta Tau PMAC model.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-10-07 15:26:40 $
+Last Modified:	$Date: 2004-12-21 17:17:13 $
 */
 
 /*
@@ -40,6 +40,10 @@ Last Modified:	$Date: 2004-10-07 15:26:40 $
  * .01 09/21/04 rls - support for 32axes/controller.
  * .02 09/27/04 rls - convert "Mbox_addrs" from logical to physical address.
  * .03 10/07/04 rls - mask off high order bits when setting DPRAM address lines.
+ * .04 12/21/04 rls - MS Visual C compiler support.
+ *                  - eliminate calls to devConnectInterrupt() due to C++
+ *		      problems with devLib.h; i.e. "sorry, not implemented:
+ *		      `tree_list' not supported..." compiler error message.
  */
 
 #include	<vxLib.h>
@@ -49,13 +53,7 @@ Last Modified:	$Date: 2004-10-07 15:26:40 $
 #include	<logLib.h>
 #include	<drvSup.h>
 #include	<epicsVersion.h>
-#if EPICS_MODIFICATION <= 4
-extern "C" {
 #include	<devLib.h>
-}
-#else
-#include	<devLib.h>
-#endif
 #include	<dbAccess.h>
 #include	<epicsThread.h>
 #include	<epicsInterrupt.h>
@@ -152,7 +150,7 @@ struct
     long (*init) (void);
 } drvPmac = {2, report, init};
 
-epicsExportAddress(drvet, drvPmac);
+extern "C" {epicsExportAddress(drvet, drvPmac);}
 
 static struct thread_args targs = {SCAN_RATE, &Pmac_access};
 
@@ -579,10 +577,8 @@ static int motorIsrEnable(int card)
 {
     long status;
     
-    status = devConnectInterrupt(intVME, PmacInterruptVector + card,
-		    (void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
-// Tornado 2.2	    (devLibVOIDFUNCPTR) motorIsr, (void *) card);
-    
+    status = pdevLibVirtualOS->pDevConnectInterruptVME(
+	PmacInterruptVector + card, (void (*)()) motorIsr, (void *) card);
 
     status = devEnableInterruptLevel(Pmac_INTERRUPT_TYPE,
 				     PmacInterruptLevel);
@@ -594,9 +590,9 @@ static void motorIsrDisable(int card)
 {
     long status;
 
-    status = devDisconnectInterrupt(intVME, PmacInterruptVector + card,
-		    (void (*)()) motorIsr);// Tornado 2.0.2
-// Tornado 2.2	    (devLibVOIDFUNCPTR) motorIsr);
+    status = pdevLibVirtualOS->pDevDisconnectInterruptVME(
+	PmacInterruptVector + card, (void (*)(void *)) motorIsr);
+
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",
 		  PmacInterruptVector + card);
