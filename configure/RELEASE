@@ -7,18 +7,9 @@
 #
 # Add your declarations here
 
-#SUPPORT=
-
-# If the EPICS GPIB Module from Benjamin Franksen is used, then remove the '#'
-# from the following and modify the motorApp/CommSrc/Makefile.Vx file per
-# instructions found there.  If GPIB driver support is from EPICS base, then
-# leave this line commented out.
-#GPIB=$(SUPPORT)/gpib
-
 # If any motor controller communication mechanism besides the VME backplane is
-# required, then MPF must be defined.
-# Recommended MPF release: R2.4.2
-#MPF=$(SUPPORT)/mpfosiR2-4-2
+# required, then ASYN must be defined.
+ASYN=$(SUPPORT)/asyn/2-2beta
 
 # Recommended EPICS release: R3.14.5
 EPICS_BASE=$(SUPPORT)/../base-3.14.5
@@ -31,9 +22,6 @@ EPICS_BASE=$(SUPPORT)/../base-3.14.5
 # be built.
 # Recommended IPAC release: R2.7a
 #IPAC=$(SUPPORT)/ipac2-7a
-
-#GPIB is not yet supported!
-#MPF_GPIB=$(SUPPORT)/mpfGpib/mpfGpib1-4
 
 # The following must be defined for the MXmotor device driver.
 #MX=$(SUPPORT)/mx/mx
