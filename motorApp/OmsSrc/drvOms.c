@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8 and VME44.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:33:58 $
+Last Modified:	$Date: 2000-06-14 16:16:13 $
 */
 
 /*
@@ -51,7 +51,7 @@ Last Modified:	$Date: 2000-03-03 22:33:58 $
 ========================stepper motor driver ========================*/
 
 #include	<vxWorks.h>
-#include	<stdioLib.h>
+#include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
 #include	<taskLib.h>
@@ -975,8 +975,8 @@ STATIC int motor_init()
 	if (PROBE_SUCCESS(status))
 	{
 	    status = devRegisterAddress(__FILE__, OMS_ADDRS_TYPE,
-					(size_t) probeAddr, OMS_BRD_SIZE,
-					(volatile void **) &localaddr);
+					(void *) probeAddr, OMS_BRD_SIZE,
+					(void **) &localaddr);
 	    Debug(9, "motor_init: devRegisterAddress() status = %d\n",
 		  (int) status);
 	    if (!RTN_SUCCESS(status))
@@ -996,6 +996,7 @@ STATIC int motor_init()
 	    pmotorState = motor_state[card_index];
 	    pmotorState->localaddr = (char *) localaddr;
 	    pmotorState->motor_in_motion = 0;
+	    pmotorState->cmnd_response = OFF;
 
 	    /* Disable Interrupts */
 	    pmotorState->irqdata = (struct irqdatastr *) malloc(sizeof(struct irqdatastr));
@@ -1069,7 +1070,7 @@ STATIC int motor_init()
 	else
 	{
 	    Debug(3, "motor_init: Card NOT found!\n");
-	    pmotorState = (struct controller *) NULL;
+	    motor_state[card_index] = (struct controller *) NULL;
 	}
     }
 
