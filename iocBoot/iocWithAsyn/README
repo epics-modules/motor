@@ -1,22 +1,22 @@
-To run this Newport MM4000/5, "asyn" example on a Unix OS;
+To build this Newport MM4000/5, "asyn" example on a Unix OS;
 
-in <motor>/Makefile: the following two lines must be uncommented;
+- in <motor>/Makefile: the following two lines must be uncommented;
 	#DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
 	#DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
 
-in <motor>/configure/RELEASE: ASYN= must be defined.
+- in <motor>/configure/RELEASE: EPICS_BASE, TEMPLATE_TOP, MSI and ASYN must
+	all be defined.
 
-in <motor>/motorApp/Makefile: #DIRS += NewportSrc must be uncommented.
+- in <motor>/motorApp/Makefile: #DIRS += NewportSrc must be uncommented.
 
-in <motor>/motorExApp/Makefile: #DIRS += WithMPF must be uncommented.
+- in <motor>/motorExApp/Makefile: #DIRS += WithMPF must be uncommented.
 
 Finally, cd <motor>; gnumake clean uninstall; gnumake
 
-Assuming the EPICS_HOST_ARCH environment variable is set correctly,
-start the ioc from this directory by executing the following command.
+To run this Newport MM4000/5, "asyn" example on a Unix OS;
+- Set the EPICS_HOST_ARCH environment variable correctly.
+- Edit the st.cmd.unix file for either sun or linux.
+- Start the ioc from this directory by executing the following command.
 
-../../bin/${EPICS_HOST_ARCH}/WithMPF st.cmd.sun
-OR,
-../../bin/${EPICS_HOST_ARCH}/WithMPF st.cmd.linux
-
+../../bin/${EPICS_HOST_ARCH}/WithMPF st.cmd.unix
 

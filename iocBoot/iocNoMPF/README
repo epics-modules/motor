@@ -1,4 +1,21 @@
-To run this MX example, uncomment the following;
+To run any examples in this directory;
+
+- in <motor>/Makefile: the following two lines must be uncommented;
+	#DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
+	#DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
+
+- in <motor>/configure/RELEASE: EPICS_BASE, TEMPLATE_TOP and MSI must
+	be defined.
+
+To run the OMS example,
+- in <motor>/motorApp/Makefile: #DIRS += OmsSrc must be uncommented.
+
+- in <motor>/motorExApp/Makefile: #DIRS += NoMPF must be uncommented.
+
+Finally, cd <motor>; gnumake clean uninstall; gnumake
+
+
+To run the MX example, uncomment the following;
 in <motor>/motorExApp/NoMPF/Makefile: #NoMPF_LIBS += MXmotor
 in <motor>/motorExApp/NoMPF/NoMPFInclude.dbd: #include "devMXmotor.dbd" 
 and rebuild.
