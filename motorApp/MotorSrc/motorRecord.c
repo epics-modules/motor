@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Record Support Routines for the Motor record.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-08-16 19:04:39 $
+Last Modified:	$Date: 2000-08-18 19:44:37 $
 */
 
 /*
@@ -1868,7 +1868,7 @@ stop_all:   /* Cancel any operations. */
 		}
 	    }
 
-	    if (pmr->mip == 0)
+	    if (pmr->mip == 0 || pmr->mip == MIP_RETRY)
 	    {
 		pmr->mip = MIP_MOVE;
 		MARK(M_MIP);
