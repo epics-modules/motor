@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.13 $
+Version:	$Revision: 1.14 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:52:55 $
+Last Modified:	$Date: 2004-01-22 22:18:49 $
 */
 
 /*
@@ -232,7 +232,7 @@ static int set_status(int card, int signal)
     char q_buf[50], outbuf[50];
     int index, pos;
     int rtn_state;
-    bool ls_active;
+    bool ls_active = false;
     msta_field status;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
