@@ -2,9 +2,9 @@
 FILENAME...	devMM3000.c
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:51 $
+Last Modified:	$Date: 2000-06-14 14:57:34 $
 */
 
 /*
@@ -41,7 +41,7 @@ Last Modified:	$Date: 2000-02-08 22:18:51 $
  */
 
 #include	<vxWorks.h>
-#include	<stdioLib.h>
+#include	<stdio.h>
 #include	<string.h>
 #include        <semLib.h>	/* jps: include for init_record wait */
 
