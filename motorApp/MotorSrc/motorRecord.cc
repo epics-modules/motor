@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.16 $
+Version:	$Revision: 1.17 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-02-12 19:39:29 $
+Last Modified:	$Date: 2004-07-16 19:27:08 $
 */
 
 /*
@@ -63,10 +63,11 @@ Last Modified:	$Date: 2004-02-12 19:39:29 $
  * .13 12-23-03 rls - Prevent STUP from activating DLY or setting DMOV true.
  * .14 02-10-03 rls - Update lval in load_pos() if FOFF is set to FROZEN.
  * .15 02-12-03 rls - Allow sign(MRES) != sign(ERES).
+ * .16 06-16-04 rls - JAR validity check.
  *
  */
 
-#define VERSION 5.3
+#define VERSION 5.4
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -2614,6 +2615,12 @@ pidcof:
 	    WRITE_MSG(JOG_VELOCITY, &jogv);
 	    SEND_MSG();
 	}
+	break;
+
+    case motorRecordJAR:
+	// Valid JAR; 0 < JAR < JVEL [egu / sec] / 0.1 [sec]
+	if (pmr->jar <= 0.0)
+	    pmr->jar = pmr->jvel / 0.1;
 	break;
 
     case motorRecordHVEL:
