@@ -28,7 +28,7 @@ include $(TOP)/../config/MPFSERIAL_RELEASE
 include $(TOP)/../config/MPF_RELEASE
 
 #EPICS_BASE=$(SUPPORT)/base/3-13-4
-include $(TOP)/../config/EPICS_BASE_RELEASE
+include $(TOP)/../config/RELEASE
 
 # The following must be defined if motorExApp is to be built.
 #TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
