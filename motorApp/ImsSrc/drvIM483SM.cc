@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-02-03 19:51:50 $
+Last Modified:	$Date: 2004-03-15 20:40:20 $
 */
  
 /*****************************************************************
@@ -72,6 +72,7 @@ DESIGN LIMITATIONS...
     #ifdef	DEBUG
 	volatile int drvIM483SMdebug = 0;
 	#define Debug(l, f, args...) {if (l <= drvIM483SMdebug) printf(f, ## args);}
+	epicsExportAddress(int, drvIM483SMdebug);
     #else
 	#define Debug(l, f, args...)
     #endif
