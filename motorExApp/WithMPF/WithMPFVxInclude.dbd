@@ -4,4 +4,8 @@ include "mpfSerialVx.dbd"
 include "devAcsMotor.dbd"
 include "devImsMotor.dbd"
 include "devNewport.dbd"
+include "devPIMotor.dbd"
+# Only for IPAC R2.6 and above.
+include "tyGSOctal.dbd"
+
 
