@@ -15,7 +15,7 @@ SRCS += devIM483SM.cc drvIM483SM.cc
 SRCS += devIM483PL.cc drvIM483PL.cc
 SRCS += devMDrive.cc  drvMDrive.cc
 
-Ims_LIBS += motor motorCOM_mpf
+Ims_LIBS += motor asyn
 Ims_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
