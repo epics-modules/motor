@@ -3,9 +3,9 @@ FILENAME...	drvOmsCom.h
 USAGE... 	This file contains OMS driver "include" information
 		that is common to all OMS models.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:03 $
+Last Modified:	$Date: 2000-07-14 20:30:12 $
 */
 
 /*
@@ -50,13 +50,10 @@ Last Modified:	$Date: 2000-02-08 22:19:03 $
 #define OMS_INT_LEVEL           5	/* default interrupt level (1-6) */
 
 /* OMS Command strings. */
-#define AXIS_STOP       "A? ST\n"
-#define GET_IDENT       "WY\n"
-#define ERROR_CLEAR     "IC\n"
-#define STOP_ALL        "AA SA\n"
-#define ALL_POS         "AA RP\n"
-
-/* Global data. */
-extern char oms_trans_axis[];
+#define AXIS_STOP       "ST"
+#define GET_IDENT       "WY"
+#define ERROR_CLEAR     "IC"
+#define STOP_ALL        "AA SA"
+#define ALL_POS         "AA RP"
 
 #endif	/* INCdrvOmsComh */
