@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Record Support Routines for the Motor record.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-08-18 19:44:37 $
+Last Modified:	$Date: 2000-09-05 22:06:50 $
 */
 
 /*
@@ -1169,7 +1169,8 @@ STATIC long process(motorRecord * pmr)
 	if (pmr->lvio && !pmr->set)
 	{
 	    pmr->stop = 1;
-	    pmr->jogf = pmr->jogr = 0;
+	    /* Clear all the buttons that cause motion. */
+	    pmr->jogf = pmr->jogr = pmr->homf = pmr->homr = 0;
 	}
     }
     /* Do we need to examine the record to figure out what work to perform? */
