@@ -291,7 +291,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
     Debug(2, "%.2f : send_mess: sending message to card %d, message=%s\n",
                     tickGet()/60., card, buff);
 */
-    serialIOSend(cntrl->serialInfo, buff, strlen(buff), SERIAL_TIMEOUT);
+    cntrl->serialInfo->serialIOSend(buff, strlen(buff), SERIAL_TIMEOUT);
 
     return (OK);
 }
@@ -324,8 +324,7 @@ STATIC int recv_mess(int card, char *com, int flag)
         timeout = 0;
     else
         timeout = SERIAL_TIMEOUT;
-    len = serialIORecv(cntrl->serialInfo, com, MAX_MSG_SIZE,
-                       (char *) "\r", timeout);
+    len = cntrl->serialInfo->serialIORecv(com, MAX_MSG_SIZE, (char *) "\r", timeout);
 
     /* The response from the MCB4B is terminated with CR.  Remove */
     if (len < 1) com[0] = '\0'; 
@@ -428,7 +427,7 @@ STATIC int motor_init()
     char buff[BUFF_SIZE];
     int total_axis = 0;
     int status = 0;
-    bool errind;
+    bool success_rtn;
 
     initialized = true;   /* Indicate that driver is initialized. */
 
@@ -450,14 +449,12 @@ STATIC int motor_init()
         cntrl = (struct MCB4Bcontroller *) brdptr->DevicePrivate;
 
         /* Initialize communications channel */
-        errind = false;
+        success_rtn = false;
 
-        cntrl->serialInfo = serialIOInit(cntrl->serial_card,
-                                         cntrl->serial_task);
-        if (cntrl->serialInfo == NULL) 
-            errind = true;
+	cntrl->serialInfo = new serialIO(cntrl->serial_card,
+				     cntrl->serial_task, &success_rtn);
 
-        if (errind == false)
+        if (success_rtn == true)
         {
             int retry = 0;
 
@@ -476,7 +473,7 @@ STATIC int motor_init()
         }
 
 
-        if (errind == false && status > 0)
+        if (success_rtn == true && status > 0)
         {
             brdptr->localaddr = (char *) NULL;
             brdptr->motor_in_motion = 0;

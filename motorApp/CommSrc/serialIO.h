@@ -2,9 +2,9 @@
 FILENAME...	serialIO.h
 USAGE...	.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-07 13:42:47 $
+Last Modified:	$Date: 2003-05-27 21:48:45 $
 */
  
 /*****************************************************************
@@ -25,16 +25,30 @@ of this distribution.
  * -----------------
  */
 
+#ifndef	INCserialIOh
+#define	INCserialIOh 1
+
+#include "Message.h"
 
 #ifdef __cplusplus
-extern "C"
+class serialIO
 {
+public:
+    serialIO(int, char *, bool *);
+    int serialIOSend(char const *, int, int);
+    int serialIORecv(char *, int, char *, int);
+    int serialIOSendRecv(char const *, int, char *, int, char *, int);
+    static void serialIOCallback(Message *, void *);
+private:
+    MessageClient* pMessageClient;
+    epicsRingPointer<void *> *msgQId;
+};
+#else  /* For C just define serialInfo as a dummy structure since it can't
+          understand the include files which define what it really is */
+void *serialIOInit(int, char *);
+int serialIOSend(void *, char const *, int, int);
+int serialIORecv(void *, char *, int, char *, int);
+int serialIOSendRecv(void *, const char *, int, char *, int, char *, int);
 #endif
-struct serialInfo *serialIOInit(int card, char *task);
-int serialIOSend(struct serialInfo *serialInfo, char const *buffer,
-		 int buffer_len, int timeout);
-int serialIORecv(struct serialInfo *serialInfo, char *buffer, int buffer_len,
-                    char *terminator, int timeout);
-#ifdef __cplusplus
-}
+
 #endif
