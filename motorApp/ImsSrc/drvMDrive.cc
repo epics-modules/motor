@@ -1,11 +1,11 @@
 /*
 FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
-		Systems, Inc. IM483(I/IE).
+		Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-02-03 19:51:50 $
+Last Modified:	$Date: 2004-03-15 21:01:44 $
 */
 
 /*
@@ -37,6 +37,9 @@ Last Modified:	$Date: 2004-02-03 19:51:50 $
  * -----------------
  * .01 03/21/03 rls copied from drvIM483PL.c
  * .02 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
+ * .03 03/15/04 rls Previous driver releases not working.  Fixed by adding
+ *                  Kevin Peterson's eat_garbage() function.  Added support
+ *                  for encoder detection via "ident".
  */
 
 /*
@@ -65,8 +68,9 @@ DESIGN LIMITATIONS...
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int MDrive_num_cards = 0;
+	volatile int drvMDrivedebug = 0;
 	#define Debug(l, f, args...) {if (l <= drvMDrivedebug) printf(f, ## args);}
+	epicsExportAddress(int, drvMDrivedebug);
     #else
 	#define Debug(l, f, args...)
     #endif
@@ -82,6 +86,7 @@ STATIC char MDrive_axis[8] = {'1', '2', '3', '4', '5', '6', '7', '8'};
 #include	"motordrvComCode.h"
 
 /*----------------functions-----------------*/
+static int eat_garbage(int, char *, int);
 STATIC int recv_mess(int, char *, int);
 STATIC RTN_STATUS send_mess(int card, char const *com, char c);
 STATIC int set_status(int card, int signal);
@@ -108,7 +113,7 @@ struct driver_table MDrive_access =
     &total_cards,
     &any_motor_in_motion,
     send_mess,
-    recv_mess,
+    eat_garbage,
     set_status,
     query_done,
     NULL,
@@ -272,7 +277,8 @@ STATIC int set_status(int card, int signal)
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
 
-    send_mess(card, "? PR MV", MDrive_axis[signal]);
+    send_mess(card, "?PR MV", MDrive_axis[signal]);
+    eat_garbage(card, buff, 1);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
@@ -307,7 +313,8 @@ STATIC int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, "? PR P", MDrive_axis[signal]);
+    send_mess(card, "?PR P", MDrive_axis[signal]);
+    eat_garbage(card, buff, 1);
     recv_mess(card, buff, 1);
 
     motorData = atof(buff);
@@ -329,7 +336,8 @@ STATIC int set_status(int card, int signal)
 
     plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
-    send_mess(card, "? PR IN", MDrive_axis[signal]);
+    send_mess(card, "?PR IN", MDrive_axis[signal]);
+    eat_garbage(card, buff, 1);
     recv_mess(card, buff, 1);
     inputs.All = atoi(buff);
 
@@ -366,9 +374,10 @@ STATIC int set_status(int card, int signal)
 	motor_info->encoder_position = 0;
     else
     {
-	send_mess(card, "? z 0", MDrive_axis[signal]);
+	send_mess(card, "?PR C2", MDrive_axis[signal]);
+	eat_garbage(card, buff, 1);
 	recv_mess(card, buff, 1);
-	motorData = atof(&buff[5]);
+	motorData = atof(buff);
 	motor_info->encoder_position = (int32_t) motorData;
     }
 
@@ -443,6 +452,42 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 
 
 /*****************************************************/
+/* eat garbage characters from the MDrive board      */
+/* eat_garbage()			             */
+/*****************************************************/
+static int eat_garbage(int card, char *com, int flag)
+{
+    struct IM483controller *cntrl;
+    char localbuf[BUFF_SIZE];
+    int timeout;
+    int len=0;
+
+    /* Check that card exists */
+    if (!motor_state[card])
+	return (-1);
+
+    cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
+
+    if (flag == FLUSH)
+	timeout = 0;
+    else
+	timeout	= SERIAL_TIMEOUT;
+
+    /* Get the response. */      
+    len = cntrl->serialInfo->serialIORecv(localbuf, BUFF_SIZE, (char *) "\r\n", timeout);
+
+    Debug(2, "eat_garbage(): len = %i\n", len);
+    if (len != 2)
+        Debug(2, "eat_garbage(): localbuf = \"%s\"\n", localbuf);
+
+    com[0] = '\0';
+
+    /*Debug(2, "eat_garbage(): message = \"%s\"\n", com);*/
+    return (len);
+}
+
+
+/*****************************************************/
 /* receive a message from the MDrive board           */
 /* recv_mess()			                     */
 /*****************************************************/
@@ -465,14 +510,14 @@ STATIC int recv_mess(int card, char *com, int flag)
 	timeout	= SERIAL_TIMEOUT;
 
     /* Get the response. */      
-    len = cntrl->serialInfo->serialIORecv(localbuf, BUFF_SIZE, (char *) "?", timeout);
-
+    len = cntrl->serialInfo->serialIORecv(localbuf, BUFF_SIZE, (char *) "\r\n", timeout);
+    
     if (len == 0)
 	com[0] = '\0';
     else
     {
-	localbuf[len - 3] = '\0'; /* Strip off trailing "<CR><LF>?". */
-	strcpy(com, &localbuf[2]); /* Strip off leading <CR LF>. */
+	localbuf[len - 2] = '\0'; /* Strip off trailing <CR LF>. */
+	strcpy(com, localbuf);
     }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
@@ -598,6 +643,7 @@ STATIC int motor_init()
 		do
 		{
 		    send_mess(card_index, "?PR VR", MDrive_axis[total_axis]);
+                    eat_garbage(card_index, buff, 1);
 		    status = recv_mess(card_index, buff, 1);
 		    retry++;
 		} while (status == 0 && retry < 3);
@@ -618,22 +664,22 @@ STATIC int motor_init()
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
 		struct mess_info *motor_info = &brdptr->motor_info[motor_index];
-		int loop_state;
 
 		motor_info->status.All = 0;
 		motor_info->no_motion_count = 0;
 		motor_info->encoder_position = 0;
 		motor_info->position = 0;
 		brdptr->motor_info[motor_index].motor_motion = NULL;
-		/* Assume encoder support, i.e., IM483IE. */
+		/* Assume no encoder support. */
 		motor_info->encoder_present = NO;
 
-                /* Determine if encoder present based on open/closed loop mode. */
-		loop_state = 0;
-		if (loop_state != 0)
+                /* Determine if encoder present based last character of "ident". */
+		if (brdptr->ident[strlen(brdptr->ident) - 1] == 'E')
 		{
 		    motor_info->pid_present = YES;
 		    motor_info->status.Bits.GAIN_SUPPORT = 1;
+		    motor_info->encoder_present = YES;
+		    motor_info->status.Bits.EA_PRESENT = 1;
 		}
 
 		set_status(card_index, motor_index);  /* Read status of each motor */
