@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.18 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-07-28 18:16:06 $
+Version:	$Revision: 1.19 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-20 20:37:28 $
 */
 
 /*
@@ -64,6 +64,7 @@ Last Modified:	$Date: 2004-07-28 18:16:06 $
  * .14 02-10-03 rls - Update lval in load_pos() if FOFF is set to FROZEN.
  * .15 02-12-03 rls - Allow sign(MRES) != sign(ERES).
  * .16 06-16-04 rls - JAR validity check.
+ * .17 09-20-04 rls - Do status update if nothing else to do.
  *
  */
 
@@ -91,10 +92,15 @@ Last Modified:	$Date: 2004-07-28 18:16:06 $
 
 
 /*----------------debugging-----------------*/
-volatile int motorRecordDebug = 0;
-epicsExportAddress(int, motorRecordDebug);
+
 #ifdef __GNUG__
-    #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
+    #ifdef	DEBUG
+	volatile int motorRecordDebug = 0;
+	#define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
+	epicsExportAddress(int, motorRecordDebug);
+    #else
+	#define Debug(l, f, args...)
+    #endif
 #else
     #define Debug()
 #endif
@@ -102,7 +108,7 @@ epicsExportAddress(int, motorRecordDebug);
 
 /*** Forward references ***/
 
-static RTN_STATUS do_work(motorRecord *);
+static RTN_STATUS do_work(motorRecord *, CALLBACK_VALUE);
 static void alarm_sub(motorRecord *);
 static void monitor(motorRecord *);
 static void post_MARKed_fields(motorRecord *, unsigned short);
@@ -1020,7 +1026,8 @@ Exit:
 static long process(dbCommon *arg)
 {
     motorRecord *pmr = (motorRecord *) arg;
-    long status = OK, process_reason;
+    long status = OK;
+    CALLBACK_VALUE process_reason;
     int old_lvio = pmr->lvio;
     unsigned int old_msta = pmr->msta;
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
@@ -1193,7 +1200,7 @@ enter_do_work:
 	(pmr->spmg == motorSPMG_Pause) ||
 	(process_reason != CALLBACK_DATA) || pmr->dmov || pmr->mip & MIP_RETRY)
     {
-	status = do_work(pmr);
+	status = do_work(pmr, process_reason);
     }
 
     /* Fire off readback link */
@@ -1455,7 +1462,7 @@ LOGIC:
     
     
 *******************************************************************************/
-static RTN_STATUS do_work(motorRecord * pmr)
+static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
     int dir_positive = (pmr->dir == motorDIR_Pos);
@@ -2097,6 +2104,14 @@ static RTN_STATUS do_work(motorRecord * pmr)
 		SEND_MSG();
 	    }
 	}
+    }
+    else if (proc_ind == NOTHING_DONE && pmr->stup == motorSTUP_OFF)
+    {
+	pmr->stup = motorSTUP_BUSY;
+	MARK_AUX(M_STUP);
+	INIT_MSG();
+	WRITE_MSG(GET_INFO, NULL);
+	SEND_MSG();
     }
     return(OK);
 }
