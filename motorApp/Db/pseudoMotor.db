@@ -1,0 +1,86 @@
+grecord(bo,"$(P)$(M)_able")
+{
+	field(DESC,"motor enable")
+	field(PINI,"YES")
+	field(OUT,"$(P)$(M)_ableput.A PP MS")
+	field(ZNAM,"Enable")
+	field(ONAM,"Disable")
+}
+grecord(motor,"$(P)$(M)")
+{
+	field(DESC,"$(DESC)")
+	field(DTYP,"Soft Channel")
+	field(DINP,"$(DINP)")
+	field(DIR,"$(DIR)")
+	field(VELO,"$(VELO)")
+	field(VMAX,"$(VELO)")
+	field(S,"0")
+	field(VBAS,"$(VBAS)")
+	field(SBAS,"0")
+	field(ACCL,"$(ACCL)")
+	field(BDST,"$(BDST)")
+	field(BVEL,"$(BVEL)")
+	field(BACC,"$(BACC)")
+	field(OUT,"$(OUT)")
+	field(RDBL,"$(RDBL)")
+        field(URIP,"Yes")
+        field(STOO,"$(STOO)")
+	field(MRES,"$(MRES)")
+	field(RRES,"$(RRES)")
+	field(PREC,"$(PREC)")
+	field(EGU,"$(EGU)")
+	field(DHLM,"$(DHLM)")
+	field(DLLM,"$(DLLM)")
+	field(TWV,"1")
+        field(RTRY,"0")
+        field(OFF,"0.")
+        field(FOFF,"Frozen")
+	field(NTM,"NO")
+}
+grecord(transform,"$(P)$(M)_ableput")
+{
+	field(CLCB,"a")
+	field(CLCC,"a")
+	field(OUTA,"$(P)$(M).DISA NPP NMS")
+	field(OUTB,"$(P)$(M).DISP NPP NMS")
+	field(OUTC,"$(P)$(M).DISA NPP NMS")
+}
+
+# Note: the C1-C5 records have PINI=1 so that they process once.
+# If they don't then they have STAT=UDF and SEVR=Invalid, and records
+# like the transform record will report bad input links.
+grecord(ao,"$(P)$(M)C1") {
+	field(DESC, "User-defined geom. const. 1")
+        field(VAL,"1")
+        field(PINI,"1")
+	field(PREC, "$(PREC)")
+	field(EGU, "$(EGU)")
+}
+grecord(ao,"$(P)$(M)C2") {
+	field(DESC, "User-defined geom. const. 2")
+        field(VAL,"1")
+        field(PINI,"1")
+	field(PREC, "$(PREC)")
+	field(EGU, "$(EGU)")
+}
+grecord(ao,"$(P)$(M)C3") {
+	field(DESC, "User-defined geom. const. 3")
+        field(VAL,"1")
+        field(PINI,"1")
+	field(PREC, "$(PREC)")
+	field(EGU, "$(EGU)")
+}
+grecord(ao,"$(P)$(M)C4") {
+	field(DESC, "User-defined geom. const. 4")
+        field(VAL,"1")
+        field(PINI,"1")
+	field(PREC, "$(PREC)")
+	field(EGU, "$(EGU)")
+}
+grecord(ao,"$(P)$(M)C5") {
+	field(DESC, "User-defined geom. const. 5")
+        field(VAL,"1")
+        field(PINI,"1")
+	field(PREC, "$(PREC)")
+	field(EGU, "$(EGU)")
+}

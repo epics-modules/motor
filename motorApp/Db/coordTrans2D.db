@@ -1,0 +1,82 @@
+# This database implements a generic 2-D coordinate transformation.  Given two
+# real motors (P)(MX) and (P)(MY), which move in the X,Y coordinate system,
+# it will move two soft motors (P)(MXP) and (P)(MYP) in the X',Y'
+# coordinate system.  The offset between the two coordinate systems is
+# X0 = (P)(MXP)C1 and Y0 = (P)(MYP)C1, and the coordinate systems are 
+# rotated by angle theta = (P)(MYP)C2.
+
+# These two records are where the soft motors write their output.
+# They are needed because writing to a transform record field does not
+# cause the record to process?
+# We use forward links to the transform record (rather than making the INPA and
+# INPB fields of the transform record CP) so that the scan record waits 
+# for the motors to move.
+grecord(ao,"$(P)$(MXP)DVAL") {
+	field(FLNK, "$(P)$(T)Drive")
+}
+grecord(ao,"$(P)$(MYP)DVAL") {
+	field(FLNK, "$(P)$(T)Drive")
+}
+
+# This record is processed whenever the soft motor records XP or YP write
+# new values to the DVAL records above.
+# Note: the INPA and INPB fields get their values directly from the .DVAL
+# fields of the soft motor records, rather than from the DVAL record above.
+# This is because the .DVAL fields are always correct, while the DVAL records
+# do not get updated when the soft motor .DVAL fields are modified in SET mode.
+grecord(transform,"$(P)$(T)Drive") {
+	field(INPA,"$(P)$(MXP).DVAL NPP NMS")
+	field(INPB,"$(P)$(MYP).DVAL NPP NMS")
+	field(INPC,"$(P)$(MXP)C1.VAL NPP NMS")
+	field(INPD,"$(P)$(MYP)C1.VAL NPP NMS")
+	field(INPE,"$(P)$(MYP)C2.VAL NPP NMS")
+        field(CLCF,"0.0174533 * E")
+	field(CLCG,"C+A*COS(F)-B*SIN(F)")
+        field(OUTG,"$(P)$(XDRV) PP MS")
+	field(CLCH,"D+A*SIN(F)+B*COS(F)")
+        field(OUTH,"$(P)$(YDRV) PP MS")
+	field(PREC,"$(PREC)")
+}
+
+# This record is processed to set the origin of the XP, YP coordinate system
+# to be the current position of the motors.
+grecord(transform,"$(P)$(T)synch") {
+	field(INPA,"$(P)$(XDRV) NPP NMS")
+	field(INPB,"$(P)$(YDRV) NPP NMS")
+	field(CLCC,"A")
+	field(OUTC,"$(P)$(MXP)C1.VAL PP MS")
+	field(CLCD,"B")
+	field(OUTD,"$(P)$(MYP)C1.VAL PP MS")
+	field(PREC,"$(PREC)")
+}
+
+# This record calculates the readback positions of the soft motors.  It 
+# processes whenever the readbacks of the real motors change, or whenever
+# one of the the geometry constants changes.
+grecord(transform,"$(P)$(T)Readback") {
+	field(INPA,"$(P)$(XRBV) CP MS")
+	field(INPB,"$(P)$(YRBV) CP MS")
+	field(INPC,"$(P)$(MXP)C1.VAL CP MS")
+	field(INPD,"$(P)$(MYP)C1.VAL CP MS")
+	field(INPE,"$(P)$(MYP)C2.VAL CP MS")
+        field(CLCF,"0.0174533 * E")
+	field(CLCG,"(B-D)*SIN(F)+(A-C)*COS(F)")
+	field(CLCH,"(B-D)*COS(F)-(A-C)*SIN(F)")
+	field(PREC,"$(PREC)")
+}
+
+# This record processes if either of the sof motor STOP fields is set.
+grecord(dfanout,"$(P)$(T)Stop") {
+        field(VAL,"1")
+        field(OUTA,"$(P)$(XSTOP) PP MS")
+        field(OUTB,"$(P)$(YSTOP) PP MS")
+}
+
+# This record computes whether the compound motor is done moving.  
+# It goes to 1 when both real motors are done moving.
+# positions of the real motors.
+grecord(calcout,"$(P)$(T)Done") {
+        field(INPA,"$(P)$(XDONE) CP MS")
+        field(INPB,"$(P)$(YDONE) CP MS")
+        field(CALC,"A & B")
+}

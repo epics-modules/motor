@@ -1,0 +1,75 @@
+# This database implements a generic 2-D coordinate transformation.  Given two
+# real motors $(P)$(M1DRV) and $(P)$(M1DRV), which move parallel to each other,
+# it will move two soft motors $(P)$(SUM) and $(P)$(DIFF) as the weighted 
+# average and difference of the two real motors.  The weighting factors are 
+# as follows:
+# SUM = (( $(P)$(M1DRV) * $(P)$(SUM)C1 ) + ( $(P)$(M2DRV) * $(P)$(SUM)C2 )) /
+#       ( $(P)$(SUM)C1) + $(P)$(SUM)C2 )
+# DIFF = (( $(P)$(M1DRV) - $(P)$(M2DRV) ) * ( $(P)$(DIFF)C1 )
+# Thus the SUM C1 and C2 terms are the "distances" from the center and the 
+# DIFF C1 term is a units conversion, e.g. to degrees for a rotation system.
+
+# These two records are where the soft motors write their output.
+# They are needed because writing to a transform record field does not
+# cause the record to process?
+# We use forward links to the transform record (rather than making the INPA and
+# INPB fields of the transform record CP) so that the scan record waits 
+# for the motors to move.
+grecord(ao,"$(P)$(SUM)DVAL") {
+	field(FLNK, "$(P)$(T)Drive")
+}
+grecord(ao,"$(P)$(DIFF)DVAL") {
+	field(FLNK, "$(P)$(T)Drive")
+}
+
+# This record is processed whenever the soft motor records SUM or DIFF write
+# new values to the DVAL records above.
+# Note: the INPA and INPB fields get their values directly from the .DVAL
+# fields of the soft motor records, rather than from the DVAL record above.
+# This is because the .DVAL fields are always correct, while the DVAL records
+# do not get updated when the soft motor .DVAL fields are modified in SET mode.
+grecord(transform,"$(P)$(T)Drive") {
+	field(INPA,"$(P)$(SUM).DVAL NPP NMS")
+	field(INPB,"$(P)$(DIFF).DVAL NPP NMS")
+	field(INPC,"$(P)$(SUM)C1.VAL NPP NMS")
+	field(INPD,"$(P)$(SUM)C2.VAL NPP NMS")
+	field(INPE,"$(P)$(DIFF)C1.VAL NPP NMS")
+        field(CLCF,"C+D")
+	field(CLCG,"A+(B*D)/(E*F)")
+        field(OUTG,"$(P)$(M1DRV) PP MS")
+	field(CLCH,"A-(B*C)/(E*F)")
+        field(OUTH,"$(P)$(M2DRV) PP MS")
+	field(PREC,"$(PREC)")
+}
+
+# This record calculates the readback positions of the soft motors.  It 
+# processes whenever the readbacks of the real motors change, or whenever
+# one of the the geometry constants changes.
+grecord(transform,"$(P)$(T)Readback") {
+	field(INPA,"$(P)$(M1RBV) CP MS")
+	field(INPB,"$(P)$(M2RBV) CP MS")
+	field(INPC,"$(P)$(SUM)C1.VAL CP MS")
+	field(INPD,"$(P)$(SUM)C2.VAL CP MS")
+	field(INPE,"$(P)$(DIFF)C1.VAL CP MS")
+        field(CLCF,"C+D")
+	field(CLCG,"((A*C) + (B*D))/F")
+	field(CLCH,"(A-B)*E")
+	field(IVLA,"Do Nothing")
+	field(PREC,"$(PREC)")
+}
+
+# This record processes if either of the soft motor STOP fields is set.
+grecord(dfanout,"$(P)$(T)Stop") {
+        field(VAL,"1")
+        field(OUTA,"$(P)$(M1STOP) PP MS")
+        field(OUTB,"$(P)$(M2STOP) PP MS")
+}
+
+# This record computes whether the compound motor is done moving.  
+# It goes to 1 when both real motors are done moving.
+# positions of the real motors.
+grecord(calcout,"$(P)$(T)Done") {
+        field(INPA,"$(P)$(M1DONE) CP MS")
+        field(INPB,"$(P)$(M2DONE) CP MS")
+        field(CALC,"A & B")
+}
