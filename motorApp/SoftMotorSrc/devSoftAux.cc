@@ -2,9 +2,9 @@
 FILENAME...	devSoftAux.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.5 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:03:12 $
+Version:	$Revision: 1.6 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2003-06-30 04:57:09 $
 */
 
 /*
@@ -105,7 +105,7 @@ long soft_init(void *after)
 	soft_motor_priority = epicsThreadGetPriority(dbCaTask_tid);
 	soft_motor_priority -= 1;
 
-	soft_motor_id = epicsThreadCreate((char *) "soft_motor", soft_motor_priority, 6000,
+	soft_motor_id = epicsThreadCreate((char *) "soft_motor", soft_motor_priority, 10000,
 					  (EPICSTHREADFUNC) soft_motor_task, NULL);
     }
     else
