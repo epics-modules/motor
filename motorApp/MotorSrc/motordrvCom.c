@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:44 $
+Last Modified:	$Date: 2000-03-03 22:18:30 $
 */
 
 /*
@@ -222,7 +222,7 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
 		motor_info->motor_motion = (struct mess_node *) NULL;
 	    }
 
-	    callbackRequest((CALLBACK *) mess_ret);
+	    callbackRequest(&mess_ret->callback);
 
 	    if (brdptr->motor_in_motion == 0)
 	    {
