@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.cc
 USAGE...	Register Newport motor device driver shell commands.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:28:01 $
+Last Modified:	$Date: 2004-07-28 20:02:16 $
 */
 
 /*****************************************************************
@@ -38,7 +38,7 @@ static const iocshArg * const NewportSetupArgs[2] = {&setupArg0, &setupArg1};
 static const iocshArg * const NewportConfigArgs[3] = {&configArg0, &configArg1,
     &configArg2};
 
-static const iocshFuncDef setupMM3000 = {"MM300Setup", 2, NewportSetupArgs};
+static const iocshFuncDef setupMM3000 = {"MM3000Setup", 2, NewportSetupArgs};
 static const iocshFuncDef setupMM4000 = {"MM4000Setup",2, NewportSetupArgs};
 static const iocshFuncDef setupPM500  = {"PM500Setup", 2, NewportSetupArgs};
 static const iocshFuncDef setupESP300 = {"ESP300Setup",2, NewportSetupArgs};
