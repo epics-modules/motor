@@ -3,9 +3,9 @@ FILENAME...	devIM483SM.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-05-16 16:22:16 $
+Last Modified:	$Date: 2002-03-01 17:45:09 $
 */
 
 /*
@@ -37,6 +37,7 @@ Last Modified:	$Date: 2001-05-16 16:22:16 $
  * -----------------
  * .01	02/10/00  rls	copied from devMM4000.c
  * .02  05/16/01  rls	Added support for changing jog velocity while jogging.
+ * .03  03/01/02  rls   eliminated "ASCII record separator (IS2) = /x1E".
  */
 
 
@@ -162,14 +163,14 @@ STATIC long IM483SM_init_record(struct motorRecord *mr)
 /* start building a transaction */
 STATIC long IM483SM_start_trans(struct motorRecord *mr)
 {
-    return(motor_start_trans_com(mr, IM483SM_cards));
+    return(OK);
 }
 
 
 /* end building a transaction */
 STATIC long IM483SM_end_trans(struct motorRecord *mr)
 {
-    return(motor_end_trans_com(mr, drvtabptr));
+    return(OK);
 }
 
 
@@ -189,12 +190,17 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
     buff[0] = '\0';
     dval = *parms;
 
+    motor_start_trans_com(mr, IM483SM_cards);
+
     motor_call = &(trans->motor_call);
     card = motor_call->card;
     axis = motor_call->signal + 1;
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
-	return(rtnval = ERROR);
+    {
+	rtnval = ERROR;
+	goto exit;
+    }
 
     cntrl = (struct IM483controller *) brdptr->DevicePrivate;
     cntrl_units = dval;
@@ -204,7 +210,10 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
 	motor_call->type = IM483SM_table[command];
 
     if (trans->state != BUILD_STATE)
-	return(rtnval = ERROR);
+    {
+	rtnval = ERROR;
+	goto exit;
+    }
 
     if (command == PRIMITIVE && mr->init != NULL && strlen(mr->init) != 0)
 	strcat(motor_call->message, mr->init);
@@ -233,13 +242,11 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
     switch (command)
     {
 	case MOVE_ABS:
-	    /* Using ":" to separate target from backlash move command. */
-	    sprintf(buff, "R%.*f\x1E", maxdigits, cntrl_units);
+	    sprintf(buff, "R%.*f", maxdigits, cntrl_units);
 	    break;
 	
 	case MOVE_REL:
-	    /* Using ":" to separate target from backlash move command. */
-	    sprintf(buff, "%.*f\x1E", maxdigits, cntrl_units);
+	    sprintf(buff, "%.*f", maxdigits, cntrl_units);
 	    break;
 	
 	case HOME_FOR:
@@ -324,6 +331,7 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
 	   0, 0, 0, 0, 0, 0);
     else
 	strcat(motor_call->message, buff);
-
+exit:
+    motor_end_trans_com(mr, drvtabptr);
     return(rtnval);
 }
