@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.7 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-04-20 20:51:57 $
+Version:	$Revision: 1.8 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-07-16 19:33:21 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -40,6 +40,7 @@ Last Modified:	$Date: 2004-04-20 20:51:57 $
  * .03 10/02/01 rls allow one retry after a communication error.
  * .04 05-23-03	rls Converted to R3.14.x.
  * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
+ * .06 07/09/04 rls removed unused <driver>Setup() argument.
  */
 
 
@@ -52,8 +53,6 @@ Last Modified:	$Date: 2004-04-20 20:51:57 $
 #include "drvMMCom.h"
 #include "asynSyncIO.h"
 #include "epicsExport.h"
-
-#define STATIC static
 
 #define READ_RESOLUTION ""
 #define READ_STATUS     ""
@@ -98,13 +97,13 @@ static char PM500_axis_names[PM500_NUM_CHANNELS] = {'X', 'Y', 'Z', 'A', 'B',
 #include	"motordrvComCode.h"
 
 /*----------------functions-----------------*/
-STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int card, char const *com, char c);
-STATIC int set_status(int card, int signal);
+static int recv_mess(int, char *, int);
+static RTN_STATUS send_mess(int card, char const *com, char c);
+static int set_status(int card, int signal);
 static long report(int level);
 static long init();
-STATIC int motor_init();
-STATIC void query_done(int, int, struct mess_node *);
+static int motor_init();
+static void query_done(int, int, struct mess_node *);
 
 /*----------------functions-----------------*/
 
@@ -146,7 +145,7 @@ struct
 
 epicsExportAddress(drvet, drvPM500);
 
-STATIC struct thread_args targs = {SCAN_RATE, &PM500_access};
+static struct thread_args targs = {SCAN_RATE, &PM500_access};
 
 /*********************************************************
  * Print out driver status report
@@ -197,7 +196,7 @@ static long init()
 }
 
 
-STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
+static void query_done(int card, int axis, struct mess_node *nodeptr)
 {
 }
 
@@ -207,7 +206,7 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
  * set_status()
  ************************************************************/
 
-STATIC int set_status(int card, int signal)
+static int set_status(int card, int signal)
 {
     struct MMcontroller *cntrl;
     struct mess_node *nodeptr;
@@ -339,7 +338,7 @@ exit:
 /* send a message to the PM500 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
@@ -392,7 +391,7 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
  *  NORMAL RETURN.
  */
 
-STATIC int recv_mess(int card, char *com, int flag)
+static int recv_mess(int card, char *com, int flag)
 {
     struct MMcontroller *cntrl;
     double timeout = 0.;
@@ -436,7 +435,6 @@ STATIC int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 RTN_STATUS
 PM500Setup(int num_cards,	/* maximum number of controllers in system.  */
-	   int num_channels,	/* NOT Used. */
 	   int scan_rate)	/* polling rate - 1/60 sec units.  */
 {
     int itera;
@@ -499,7 +497,7 @@ PM500Config(int card,	/* card being configured */
 /* device support.                                   */
 /* motor_init()			                     */
 /*****************************************************/
-STATIC int motor_init()
+static int motor_init()
 {
     struct controller *brdptr;
     struct MMcontroller *cntrl;

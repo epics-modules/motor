@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.9 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-04-20 20:56:53 $
+Version:	$Revision: 1.10 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-07-16 19:33:20 $
 */
 
 /*
@@ -39,6 +39,7 @@ Last Modified:	$Date: 2004-04-20 20:56:53 $
  * .02 05-23-03	rls Converted to R3.14.x.
  * .03 10-28-03 rls initialize "drive_resolution".
  * .04 02-03-04 rls Eliminate erroneous "Motor motion timeout ERROR".
+ * .05 07/09/04 rls removed unused <driver>Setup() argument.
  */
 
 
@@ -480,7 +481,6 @@ static int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 RTN_STATUS
 ESP300Setup(int num_cards,	/* maximum number of controllers in system.  */
-	    int num_channels,	/* NOT Used. */
 	    int scan_rate)	/* polling rate - 1/60 sec units.  */
 {
     int itera;

@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.h
 USAGE... This file contains function prototypes for Newport IOC shell commands.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-04-20 20:57:23 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-07-16 19:33:20 $
 */
 
 /*
@@ -40,10 +40,10 @@ Last Modified:	$Date: 2004-04-20 20:57:23 $
 #include "motordrvCom.h"
 
 /* Function prototypes. */
-extern RTN_STATUS MM3000Setup(int, int, int);
-extern RTN_STATUS MM4000Setup(int, int, int);
-extern RTN_STATUS  PM500Setup(int, int, int);
-extern RTN_STATUS ESP300Setup(int, int, int);
+extern RTN_STATUS MM3000Setup(int, int);
+extern RTN_STATUS MM4000Setup(int, int);
+extern RTN_STATUS  PM500Setup(int, int);
+extern RTN_STATUS ESP300Setup(int, int);
 extern RTN_STATUS MM3000Config(int, const char *, int);
 extern RTN_STATUS MM4000Config(int, const char *, int);
 extern RTN_STATUS  PM500Config(int, const char *, int);

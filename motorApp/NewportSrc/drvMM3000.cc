@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.8 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-04-20 20:56:04 $
+Version:	$Revision: 1.9 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-07-16 19:33:20 $
 */
 
 /*
@@ -53,6 +53,7 @@ Last Modified:	$Date: 2004-04-20 20:56:04 $
  * .08 10/23/03 rls - recv_mess() eats the controller error response, outputs
  *			an error message and retries.
  * .09 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
+ * .10 07/09/04 rls - removed unused <driver>Setup() argument.
  *
  */
 
@@ -524,7 +525,6 @@ STATIC int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 RTN_STATUS
 MM3000Setup(int num_cards,	/* maximum number of controllers in system.  */
-	    int num_channels,	/* NOT Used. */
 	    int scan_rate)	/* polling rate - 1/60 sec units.  */
 {
     int itera;
