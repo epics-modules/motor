@@ -30,17 +30,19 @@ extern struct driver_table XPSC8_access;
 
 #define MOVING 1
 
-
-#ifdef NODEBUG
-#define Debug(L,FMT,V) ;
+/*----------------debugging-----------------*/
+#ifdef __GNUG__
+    #ifdef	DEBUG
+	volatile int devXPSC8Debug = 0;
+	#define Debug(L, FMT, V...) { if(L <= devXPSC8Debug) \
+			{ printf("%s(%d):",__FILE__,__LINE__); \
+			  printf(FMT,##V); } }
+	epicsExportAddress(int, devXPSC8Debug);
+    #else
+	#define Debug(L, FMT, V...)
+    #endif
 #else
-volatile int devXPSC8Debug = 0;
-epicsExportAddress(int, devXPSC8Debug); 
-/* To make the var available to the shell */
-
-#define Debug(L,FMT,V...) {  if(L <= devXPSC8Debug) \
-                        { printf("%s(%d):",__FILE__,__LINE__); \
-                          printf(FMT,##V); } }
+    #define Debug()
 #endif
 
 /* Debugging levels:
@@ -150,8 +152,8 @@ STATIC long XPSC8_init_record(struct motorRecord *mr)
     cntrl = (struct XPSC8axis *)&control->axis[signal];
     cntrl->resolution = mr->mres;    /* Set the motor resolution */
     mr->rmp = NINT(cntrl->currentposition[1] / cntrl->resolution);
-    Debug(1, "XPSC8_init_record: card=%d, signal=%d, currentposition[1]=%f"
-          " resolution=%f, mr->rmp=%d\n", 
+    Debug(1, "XPSC8_init_record: card=%d, signal=%d, currentposition[1]=%f"\
+          " resolution=%f, mr->rmp=%d\n",\
           card, signal, cntrl->currentposition[1], cntrl->resolution, mr->rmp);
     return(rtnval);
 }
@@ -220,8 +222,8 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command, double *parms, struct mo
 /*    mr->dllm = cntrl->minlimit;*/        /* set the epics limits to the XPS limits */
 /*    mr->dhlm = cntrl->maxlimit; */   
     
-    Debug(1, "XPSC8_build_trans: card=%d, signal=%d, command=%d, ival=%d"
-          " dval=%f, steps=%f\n", 
+    Debug(1, "XPSC8_build_trans: card=%d, signal=%d, command=%d, ival=%d"\
+          " dval=%f, steps=%f\n",\
           card, signal, command, ival, dval, steps);    
     
     Debug(1, "XPSC8_build_trans: resolution=%f\n",resolution);
@@ -238,13 +240,13 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command, double *parms, struct mo
     /* No need to deal with initialization, premove or postmove strings, 
        XPSC8 does not support */
 
-    Debug(1, "build_trans: Top Of Switch command=%d, cntrl->moving=%d"
+    Debug(1, "build_trans: Top Of Switch command=%d, cntrl->moving=%d"\
           " GStat=%d-\n", command,cntrl->moving,cntrl->groupstatus);       
 
     switch (command) {
     case MOVE_ABS:/* command 0*/
   
-        Debug(1, "XPSC8_build_trans: command=%d, Move_ABS moving=%d steps=%f\n", 
+        Debug(1, "XPSC8_build_trans: command=%d, Move_ABS moving=%d steps=%f\n",\
               command,cntrl->moving, steps);    
 
         if ((cntrl->moving) == MOVING) {
@@ -252,7 +254,7 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command, double *parms, struct mo
             goto done;
         } /* This is set in drvXPSC8.cc*/
 
-        Debug(11, "Move_ABS socket=%d posiname=%s posit=%d dval=%f\n",
+        Debug(11, "Move_ABS socket=%d posiname=%s posit=%d dval=%f\n",\
               cntrl->socket, cntrl->positionername, positioner, dval);
         epicsThreadSleep(0.1);
             
@@ -262,7 +264,7 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command, double *parms, struct mo
             printf(" Error performing GroupMoveAbsolute\n");
         }
 
-        Debug(1, "--After GroupMoveAbsolute command=%d,Move_ABS moving=%d \n", 
+        Debug(1, "--After GroupMoveAbsolute command=%d,Move_ABS moving=%d \n",\
               command,cntrl->moving);  
     
         break;
@@ -404,8 +406,8 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command, double *parms, struct mo
         break;
 
     case SET_HIGH_LIMIT:
-        Debug(1, "XPSC8_build_trans highlimit: socket=%d, posname=%s, "
-              "minlim=%f, steps=%f\n", 
+        Debug(1, "XPSC8_build_trans highlimit: socket=%d, posname=%s, "\
+              "minlim=%f, steps=%f\n",\
               cntrl->socket, cntrl->positionername, cntrl->minlimit, steps);    
 
         status = PositionerUserTravelLimitsSet(cntrl->pollsocket,
