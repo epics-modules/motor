@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-05 18:56:02 $
+Last Modified:	$Date: 2003-05-16 20:43:35 $
 */
  
 /*****************************************************************
@@ -62,8 +62,9 @@ DESIGN LIMITATIONS...
 #include	"drvIM483.h"
 #include        "serialIO.h"
 
+#include	"epicsExport.h"
+
 #define STATIC static
-#define INPUT_TERMINATOR  '\n'
 
 /* Read Limit Status response values. */
 #define L_ALIMIT	1
@@ -72,7 +73,7 @@ DESIGN LIMITATIONS...
 
 
 #define IM483SM_NUM_CARDS	8
-#define BUFF_SIZE 13		/* Maximum length of string to/from IM483 */
+#define BUFF_SIZE 13  /* Maximum length of string to/from IM483 */
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
@@ -146,6 +147,8 @@ struct
 #endif
 } drvIM483SM = {2, report, init};
 
+epicsExportAddress(drvet, drvIM483SM);
+
 STATIC struct thread_args targs = {SCAN_RATE, &IM483SM_access};
 
 
@@ -187,7 +190,7 @@ static long report(int level)
 	    }
 	}
     }
-    return (0);
+    return(OK);
 }
 
 
@@ -204,7 +207,7 @@ static long init()
     {
 	Debug(1, "init(): IM483SM driver disabled. IM483SMSetup() missing from startup script.\n");
     }
-    return ((long) 0);
+    return((long) 0);
 }
 
 
@@ -420,21 +423,21 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
     if (size > MAX_MSG_SIZE)
     {
 	errlogMessage("drvIM483SM.c:send_mess(); message size violation.\n");
-	return (ERROR);
+	return(ERROR);
     }
     else if (size == 0)	/* Normal exit on empty input message. */
-	return (OK);
-    
+	return(OK);
+
     if (!motor_state[card])
     {
 	errlogPrintf("drvIM483SM.c:send_mess() - invalid card #%d\n", card);
-	return (ERROR);
+	return(ERROR);
     }
 
     if (inchar != (char) NULL)
     {
 	errlogPrintf("drvIM483SM.c:send_mess() - invalid argument = %c\n", inchar);
-	return (ERROR);
+	return(ERROR);
     }
 
     /* Make a local copy of the string and add the command line terminator. */
@@ -449,7 +452,7 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
     serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
 
-    return (OK);
+    return(OK);
 }
 
 
@@ -465,7 +468,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 
     /* Check that card exists */
     if (!motor_state[card])
-	return (-1);
+	return(ERROR);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
 
@@ -474,15 +477,15 @@ STATIC int recv_mess(int card, char *com, int flag)
     else
 	timeout	= SERIAL_TIMEOUT;
 
-    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, INPUT_TERMINATOR, timeout);
+    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, "\r\n", timeout);
 
-    if (len == 0)
+    if (len < 2)
 	com[0] = '\0';
     else
 	com[len - 2] = '\0';
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return (len);
+    return(len);
 }
 
 
@@ -520,7 +523,7 @@ IM483SMSetup(int num_cards,	/* maximum number of controllers in system.  */
     for (itera = 0; itera < IM483SM_num_cards; itera++)
 	motor_state[itera] = (struct controller *) NULL;
 
-    return (OK);
+    return(OK);
 }
 
 
@@ -537,7 +540,7 @@ IM483SMConfig(int card,	          /* card being configured */
     struct IM483controller *cntrl;
 
     if (card < 0 || card >= IM483SM_num_cards)
-        return (ERROR);
+        return(ERROR);
 
     motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
     motor_state[card]->DevicePrivate = malloc(sizeof(struct IM483controller));
@@ -546,7 +549,7 @@ IM483SMConfig(int card,	          /* card being configured */
     cntrl->port_type = RS232_PORT;
     cntrl->serial_card = location;
     strcpy(cntrl->serial_task, name);
-    return (OK);
+    return(OK);
 }
 
 
@@ -570,7 +573,7 @@ STATIC int motor_init()
 
     /* Check for setup */
     if (IM483SM_num_cards <= 0)
-	return (ERROR);
+	return(ERROR);
 
     for (card_index = 0; card_index < IM483SM_num_cards; card_index++)
     {
@@ -693,6 +696,6 @@ STATIC int motor_init()
 
     epicsThreadCreate((char *) "IM483SM_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
-    return (0);
+    return(OK);
 }
 
