@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-22 19:25:26 $
+Last Modified:	$Date: 2003-05-23 18:44:33 $
 */
 
 /*
@@ -456,12 +456,17 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
+    int size;
 
-    if (strlen(com) > MAX_MSG_SIZE)
+    size = strlen(com);
+
+    if (size > MAX_MSG_SIZE)
     {
 	errlogMessage("drvMM4000.c:send_mess(); message size violation.\n");
 	return(ERROR);
     }
+    else if (size == 0)	/* Normal exit on empty input message. */
+	return(OK);
     
     if (!motor_state[card])
     {
@@ -482,15 +487,12 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
-    switch (cntrl->port_type)
-    {
-	case GPIB_PORT:
-//	    gpibIOSend(cntrl->gpibInfo, local_buff, strlen(local_buff), GPIB_TIMEOUT);
-	    break;
-	case RS232_PORT:
-	    serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
-	    break;
-    }
+    if (cntrl->port_type == GPIB_PORT)
+	;
+//	gpibIOSend(cntrl->gpibInfo, local_buff, strlen(local_buff), GPIB_TIMEOUT);
+    else
+	serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
+
     return(OK);
 }
 
@@ -546,7 +548,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 	com[len-1] = '\0';
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return (len);
+    return(len);
 }
 
 
@@ -601,7 +603,7 @@ MM4000Config(int card,		/* card being configured */
     struct MMcontroller *cntrl;
 
     if (card < 0 || card >= MM4000_num_cards)
-        return (ERROR);
+        return(ERROR);
 
     motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
     motor_state[card]->DevicePrivate = malloc(sizeof(struct MMcontroller));
@@ -713,6 +715,12 @@ STATIC int motor_init()
 
 	    /* Set Motion Master model indicator. */
 	    pos_ptr = strstr(brdptr->ident, "MM");
+	    if (pos_ptr == NULL)
+	    {
+		errlogPrintf("drvMM4000.c:motor_init() - invalid model = %s\n", brdptr->ident);
+		motor_state[card_index] = (struct controller *) NULL;
+		continue;
+	    }
 	    model_num = atoi(pos_ptr + 2);
 	    if (model_num == 4000)
 		cntrl->model = MM4000;
@@ -721,7 +729,8 @@ STATIC int motor_init()
 	    else
 	    {
 		errlogPrintf("drvMM4000.c:motor_init() - invalid model = %s\n", brdptr->ident);
-		return (ERROR);
+		motor_state[card_index] = (struct controller *) NULL;
+		continue;
 	    }
 
 	    send_mess(card_index, READ_POSITION, (char) NULL);
