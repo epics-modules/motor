@@ -46,9 +46,7 @@ MM4000Setup(1, 0, 10)
 # Newport MM4000 driver configuration parameters: 
 #     (1)controller# being configured,
 #     (2)port type: 0-GPIB_PORT or 1-RS232_PORT,
-#     (3)GPIB link, hideos_card# or MPF server location# (specified by either
-#        localMessageRouterStart(location) or
-#        tcpMessageRouterClientStart(location,port,"address",bufSize,queueSize)
+#     (3)GPIB link or MPF server location
 #     (4)GPIB address or hideos_task name
 # !SERIAL! #MM4000Config(0, 1, MPF_Server_Location, "a-Serial[0]")
 # !GPIB!   #GPIB_Link = 10
@@ -64,9 +62,9 @@ MM4000Setup(1, 0, 10)
 # IMS IM483 configuration parameters:
 #     (1) card being configured
 #     (2) port type (1-RS232_PORT)
-#     (3) link for GPIB or hideos_card for RS-232
+#     (3) MPF server location
 #     (4) GPIB address or hideos_task
-#IM483SMConfig(0, 1, 0, "a-Serial[0]")
+#IM483SMConfig(0, 1, MPF_Server_Location, "a-Serial[0]")
 
 # !MPF-1-CPU! #Server_Mod_Name = GPIB_Module_Name
 # !MPF-2-CPU! #Server_Mod_Name = "GPIB0"
