@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2003-09-17 16:43:59 $
+Version:	$Revision: 1.12 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2003-10-28 16:31:29 $
 */
 
 /*
@@ -37,6 +37,7 @@ Last Modified:	$Date: 2003-09-17 16:43:59 $
  * Modification Log:
  * -----------------
  * .01 10-02-01 rls added RETRY to CommStatus enumeration.
+ * .02 10-24-03 rls moved irqdatastr to OmsSrc.
  */
 
 
@@ -144,15 +145,6 @@ struct circ_queue	/* Circular queue structure. */
 
 /*----------------motor state info-----------------*/
 
-struct irqdatastr	/* Used only for VME44. */
-{
-    /* Interrupt Handling control elements */
-    int irqErrno;	/* Error indicator from isr */
-    epicsUInt8 irqEnable;
-    epicsRingPointerId recv_rng;	/* message receiving control */
-    epicsEvent *recv_sem;
-};
-
 struct mess_info
 {
     struct mess_node *motor_motion;	/* in motion, NULL/node */
@@ -177,9 +169,7 @@ struct controller	/* Controller board information. */
     char *localaddr;	/* address of this card */
     bool cmnd_response; /* Indicates controller communication response
 	    * to VELOCITY, MOTION and MOVE_TERM type commands. */
-    struct irqdatastr *irqdata;	/* VME44 only; IRQ data. */
-    void *DevicePrivate; /* Pointer to device specific structure.  For
-		MM3000/4000 = (struct MMcontroller *); otherwise Null. */
+    void *DevicePrivate; /* Pointer to device specific structure. */
     struct mess_info motor_info[MAX_AXIS];
 };
 

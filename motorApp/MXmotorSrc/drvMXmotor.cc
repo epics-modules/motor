@@ -2,9 +2,9 @@
 FILENAME...	drvMXmotor.cc
 USAGE...	Motor record driver level support for MX device driver.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:35:18 $
+Last Modified:	$Date: 2003-10-28 16:32:11 $
 */
 
 /*
@@ -199,8 +199,6 @@ static int motor_init()
 	pmotorState->localaddr = (char *) 0;
 	pmotorState->motor_in_motion = 0;
 	pmotorState->cmnd_response = false;
-
-	pmotorState->irqdata = (struct irqdatastr *) NULL;
 
 	Debug(3, "Total axis = %d\n", total_axis);
 	pmotorState->total_axis = total_axis = 1;
