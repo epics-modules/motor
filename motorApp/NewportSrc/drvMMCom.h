@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:53 $
+Last Modified:	$Date: 2000-03-03 22:28:21 $
 */
 
 /*
@@ -44,10 +44,6 @@ Last Modified:	$Date: 2000-02-08 22:18:53 $
 
 #include "motordrvCom.h"
 
-#define MAX_UNIT_LENGTH 5	/* Maximum length of controller position units string. */
-
-#define GPIB_PORT  0
-#define RS232_PORT 1
 #define GPIB_TIMEOUT	2000 /* Command timeout in msec */
 #define SERIAL_TIMEOUT	2000 /* Command timeout in msec */
 
@@ -64,23 +60,16 @@ enum MM_motor_type
     DC
 };
 
-enum MM_comm_status
-{
-    NORMAL,
-    COMM_ERR
-};
-
 #ifndef __cplusplus
 typedef enum MM_model MM_model;
 typedef enum MM_motor_type MM_motor_type;
-typedef enum MM_comm_status MM_comm_status;
 #endif
 
 
 /* Motion Master specific data is stored in this structure. */
 struct MMcontroller
 {
-    int port_type;		/* GPIB_PORT or RS232_PORT */
+    PortType port_type;		/* GPIB_PORT or RS232_PORT */
     struct serialInfo *serialInfo;  /* For RS-232 */
     int gpib_link;
     int gpib_address;
@@ -97,7 +86,7 @@ struct MMcontroller
     double drive_resolution[MAX_AXIS];
     int res_decpts[MAX_AXIS];	/* Drive resolution significant dec. pts. */
     double home_preset[MAX_AXIS]; /* Controller's home preset position (XF command). */
-    MM_comm_status status;	/* Controller communication status. */
+    CommStatus status;		/* Controller communication status. */
 };
 
 #endif	/* INCdrvMMComh */
