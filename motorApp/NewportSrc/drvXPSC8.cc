@@ -24,18 +24,20 @@
 #define STATIC static
 
 /*----------------debugging-----------------*/
-#ifdef NODEBUG
-#define Debug(l, f, args...);
-#else
-/*#define Debug(L,FMT,V...) {  if(L <= drvXPSC8Debug) \
+#ifdef __GNUG__
+    #ifdef	DEBUG
+	volatile int drvXPSC8Debug = 0;
+	#define Debug(L, FMT, V...) { if(L <= drvXPSC8Debug) \
                         { printf("%s(%d):",__FILE__,__LINE__); \
-                          printf(FMT,##V); } }*/
-  
-int drvXPSC8Debug = 0;
-epicsExportAddress(int, drvXPSC8Debug);
-/* To make the var available to the shell */
-#define Debug(l, f, args...) { if(l<=drvXPSC8Debug) printf(f,## args); }
+                          printf(FMT,##V); } }
+	epicsExportAddress(int, drvXPSC8Debug);
+    #else
+	#define Debug(l, f, args...)
+    #endif
+#else
+    #define Debug()
 #endif
+
 
 /* --- Local data. --- */
 int XPSC8_num_cards = 0;
@@ -47,7 +49,7 @@ int XPSC8_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int card, const char  *com, char c);
+STATIC RTN_STATUS send_mess(int, const char *, char *);
 STATIC void start_status(int card);
 /*STATIC void XPSC8Status(int card);*/
 STATIC int set_status(int card, int signal);
@@ -79,7 +81,8 @@ struct driver_table XPSC8_access =
     set_status,
     query_done,
     start_status,
-    &initialized
+    &initialized,
+    NULL
 };
 
 
@@ -194,15 +197,15 @@ STATIC void readXPSC8Status(int card)
         nodeptr = motor_info->motor_motion;
         statusflags.All = motor_info->status.All;
 
-        Debug(9, "XPSC8:readXPSC8Status RA_DONE=%d, RA_MOVING=%d, "
-                 "RA_PROBLEM=%d\n",
-              statusflags.Bits.RA_DONE, statusflags.Bits.RA_MOVING,
+        Debug(9, "XPSC8:readXPSC8Status RA_DONE=%d, RA_MOVING=%d, "\
+                 "RA_PROBLEM=%d\n",\
+              statusflags.Bits.RA_DONE, statusflags.Bits.RA_MOVING,\
               statusflags.Bits.RA_PROBLEM);
 
         control = (struct XPSC8controller *) motor_state[card]->DevicePrivate;
         cntrl = (struct XPSC8axis *)&control->axis[i];
 
-        Debug(2, "XPSC8:readXPSC8Status card=%d axis=%d sock=%d gp=%s\n",card,i,
+        Debug(2, "XPSC8:readXPSC8Status card=%d axis=%d sock=%d gp=%s\n",card,i,\
               cntrl->socket,cntrl->groupname);
     
         /* Where I have used "&" the func requires an pointer */
@@ -287,7 +290,7 @@ STATIC void readXPSC8Status(int card)
             statuserror =1;
         }
 
-        Debug(11, "readXPSC8Status, socket=%d, groupname=%s, minlim=%f\n", 
+        Debug(11, "readXPSC8Status, socket=%d, groupname=%s, minlim=%f\n",\
                     cntrl->socket,cntrl->groupname,cntrl->minlimit);    
 
         if (status == 1)
@@ -336,10 +339,10 @@ STATIC int set_status(int card, int signal)
     positionererror = cntrl->positionererror;
     pos = cntrl->currentposition[1];
     groupstatus = cntrl->groupstatus;
-    Debug(2, "XPSC8:set_status entry: positionererror=%d, pos=%f,"
-          " resolution=%f\n", 
+    Debug(2, "XPSC8:set_status entry: positionererror=%d, pos=%f,"\
+          " resolution=%f\n",\
           positionererror, pos, resolution);
-    Debug(11, "XPSC8:set_status entry: pos0=%f, pos1=%f\n",
+    Debug(11, "XPSC8:set_status entry: pos0=%f, pos1=%f\n",\
           cntrl->currentposition[0], cntrl->currentposition[1]);
 
     if (cntrl->velocity >= 0)
@@ -446,7 +449,7 @@ STATIC int set_status(int card, int signal)
 /* send a message to the XPS board                  */
 /* send_mess()                                       */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
+STATIC RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     /* This is a no-op for the XPS, but must be present */
     return (OK);
@@ -523,7 +526,7 @@ RTN_STATUS XPSC8Config(int card,   /* Controller number */
     pollsocket = 0;
     
     
-    Debug(1, "XPSC8Config: IP=%s, Port=%d, Card=%d, totalaxes=%d\n",
+    Debug(1, "XPSC8Config: IP=%s, Port=%d, Card=%d, totalaxes=%d\n",\
           ipchar, port, card, totalaxes);
     
     if (totalaxes < 0 || totalaxes > XPSC8_NUM_CHANNELS) {return (ERROR);}
@@ -561,8 +564,8 @@ RTN_STATUS XPSC8Config(int card,   /* Controller number */
         cntrl->ip = epicsStrDup(ip);
 
     
-        Debug(1, "XPSC8Config: Socket=%d, PollSock=%d, ip=%s, port=%d,"
-              " axis=%d controller=%d\n",
+        Debug(1, "XPSC8Config: Socket=%d, PollSock=%d, ip=%s, port=%d,"\
+              " axis=%d controller=%d\n",\
               cntrl->socket,cntrl->pollsocket,ip,port,axis,card);        
     }
     Debug(11, "XPSC8Config: Above OjectsListGet\n");        
@@ -590,7 +593,7 @@ RTN_STATUS XPSC8NameConfig(int card,      /*specify which controller 0-up*/
     struct XPSC8controller *control;
     struct XPSC8axis         *cntrl;
 
-    Debug(1, "XPSC8NameConfig: card=%d axis=%d, group=%s, positioner=%s\n",
+    Debug(1, "XPSC8NameConfig: card=%d axis=%d, group=%s, positioner=%s\n",\
           card, axis, gpname, posname);
  
     control = (struct XPSC8controller *) motor_state[card]->DevicePrivate;
@@ -632,7 +635,7 @@ STATIC int motor_init()
         Debug(5, "XPSC8:motor_init: Card init loop card_index=%d\n",card_index);
         brdptr = motor_state[card_index];
         total_cards = card_index + 1;
-        Debug(5, "XPSC8:motor_init: Above control def card_index=%d\n",
+        Debug(5, "XPSC8:motor_init: Above control def card_index=%d\n",\
               card_index);
         control = (struct XPSC8controller *) brdptr->DevicePrivate;
 
@@ -646,7 +649,7 @@ STATIC int motor_init()
         status = GroupStatusGet(cntrl->socket,cntrl->groupname,
                                 &cntrl->groupstatus); 
         if (status !=0) errind = true;
-        Debug(5, "XPSC8:motor_init: card_index=%d, errind=%d\n",
+        Debug(5, "XPSC8:motor_init: card_index=%d, errind=%d\n",\
               card_index, errind);
 
         if (errind == false) {
@@ -673,7 +676,7 @@ STATIC int motor_init()
                 motor_info->encoder_position = 0;
                 motor_info->position = 0;
                 /* Read status of each motor */
-                Debug(5, " XPSC8:motor_init: calling set_status for motor %d\n",
+                Debug(5, " XPSC8:motor_init: calling set_status for motor %d\n",\
                       motor_index);
                 set_status(card_index, motor_index);
             }
