@@ -2,9 +2,9 @@
 FILENAME...	drvPmac.h
 USAGE... This file contains Delta Tau PMAC driver "include" information.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-06-07 19:27:05 $
+Last Modified:	$Date: 2004-09-15 18:48:35 $
 */
 
 /*
@@ -58,10 +58,11 @@ Last Modified:	$Date: 2004-06-07 19:27:05 $
 
 #define AXIS_STOP "\\"
 
-/* !!!!! DELETE THIS !!!PMAC specific data is stored in this structure. */
 struct PMACcontroller
 {
-    int status;
+    int	status;
+    bool irqEnable;
+    double pos_scaleFac[Pmac_MAX_AXES];	/* Position scale factor (Ixx08 * 32). */
 };
 
 typedef struct
