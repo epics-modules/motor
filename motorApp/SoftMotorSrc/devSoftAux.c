@@ -2,9 +2,9 @@
 FILENAME...	devSoftAux.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-06-25 20:05:26 $
+Last Modified:	$Date: 2002-07-05 19:42:20 $
 */
 
 /*
@@ -40,6 +40,7 @@ in the same file; each defines (redefines) the DBR's.
 #include	<taskLib.h>
 #include	<msgQLib.h>
 #include	<cadef.h>
+#include	<logLib.h>
 
 #include	"motorRecord.h"
 
@@ -75,10 +76,23 @@ long soft_init(int after)
 {
     if (after == 0)
     {
+	int dbCaTask_tid, soft_motor_priority;
+	/* 
+	 * Fix for DMOV processing before the last DRBV update; i.e., lower
+	 * the priority of the "soft_motor" task below the priority of the
+	 * "dbCaLink" task.
+	 */
+	dbCaTask_tid = taskNameToId("dbCaLink");
+	if (dbCaTask_tid == ERROR)
+	    logMsg((char *) "soft_init(): dbCaLink not found.\n", 0, 0, 0, 0, 0, 0);
+	taskPriorityGet(dbCaTask_tid, &soft_motor_priority);
+	soft_motor_priority += 1;
+
 	soft_motor_sem = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
 	soft_motor_msgQ = msgQCreate(MAXMSGS, 4, MSG_Q_FIFO);
-	taskSpawn((char *) "soft_motor", 64, VX_FP_TASK | VX_STDIO, 5000,
-		  soft_motor_task, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	taskSpawn((char *) "soft_motor", soft_motor_priority,
+		  VX_FP_TASK | VX_STDIO, 5000, soft_motor_task, 0, 0, 0, 0, 0,
+		  0, 0, 0, 0, 0);
     }
     else
 	semGive(soft_motor_sem);	/* Start soft_motor_task(). */
