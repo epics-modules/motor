@@ -3,9 +3,9 @@ FILENAME...	devIM483SM.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-05 18:56:41 $
+Last Modified:	$Date: 2003-05-16 19:20:14 $
 */
 
 /*
@@ -61,6 +61,8 @@ Last Modified:	$Date: 2003-05-05 18:56:41 $
 #include	"motordevCom.h"
 #include	"drvIM483.h"
 
+#include	"epicsExport.h"
+
 #define STATIC static
 
 extern struct driver_table IM483SM_access;
@@ -75,13 +77,14 @@ STATIC RTN_STATUS IM483SM_end_trans(struct motorRecord *);
 
 struct motor_dset devIM483SM =
 {
-    {8, NULL, IM483SM_init, IM483SM_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) IM483SM_init, (DEVSUPFUN) IM483SM_init_record, NULL},
     motor_update_values,
     IM483SM_start_trans,
     IM483SM_build_trans,
     IM483SM_end_trans
 };
 
+epicsExportAddress(dset,devIM483SM);
 
 /* --------------------------- program data --------------------- */
 
@@ -128,20 +131,6 @@ STATIC long IM483SM_init(void *arg)
     if (after == 0)
     {
 	drvtabptr = &IM483SM_access;
-/*
-	char iocshID[] = "iocsh";
-        struct iocshCommand *found;
-
-	found = (iocshCommand *)registryFind (iocshID, "_IM483SM_access");
-	if (found == NULL)
-	    return(rtnval);
-*/
-    /*
-	IF before DB initialization.
-	    Initialize IM483SM driver (i.e., call init()). See comment in
-		drvIM483SM.c init().
-	ENDIF
-    */
 	(drvtabptr->init)();
     }
 
@@ -180,7 +169,8 @@ STATIC RTN_STATUS IM483SM_build_trans(motor_cmnd command, double *parms, struct 
     struct controller *brdptr;
     struct IM483controller *cntrl;
     char buff[110];
-    int axis, card, maxdigits, size;
+    int axis, card, maxdigits;
+    unsigned int size;
     double dval, cntrl_units;
     RTN_STATUS rtnval;
     bool send;
@@ -188,7 +178,9 @@ STATIC RTN_STATUS IM483SM_build_trans(motor_cmnd command, double *parms, struct 
     send = true;	/* Default to send motor command. */
     rtnval = OK;
     buff[0] = '\0';
-    dval = *parms;
+
+    /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
+    dval = (parms == NULL) ? 0.0 : *parms;
 
     motor_start_trans_com(mr, IM483SM_cards);
 
