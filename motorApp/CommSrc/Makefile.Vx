@@ -12,24 +12,16 @@ include $(TOP)/config/CONFIG_APP
 
 SRCS.c += ../gpibIO.c
 
-# Uncomment the following for device drivers that need serial
-# or GPIB communication support via HIDEOS.  In addition, the
-# HIDEOS directory must be defined in the config/RELEASE file.
-#USR_CXXFLAGS += -DOS_EQ_VXWORKS
-#SRCS.cc += ../serialIO.cc
-#HIDEOSLIBOBJS = gpibIO.o serialIO.o
-#motorCOM_hideos: $(HIDEOSLIBOBJS)
-#	$(LINK.c) $@ $(HIDEOSLIBOBJS)
-#INSTALLS += motorCOM_hideos
-
-# Uncomment the following for device drivers that need serial
-# or GPIB communication support via MPF.  In addition, the
-# MPF directory must be defined in the config/RELEASE file.
-#SRCS.cc += ../serialIOMPF.cc
-#MPFLIBOBJS = $(SRCS.cc:../%.cc=%.o) $(SRCS.c:../%.c=%.o)
-#motorCOM_mpf: $(MPFLIBOBJS)
-#	$(LINK.c) $@ $(MPFLIBOBJS)
-#INSTALLS += motorCOM_mpf
+# The following is for device drivers that need serial
+# or GPIB communication support via MPF.  Define
+# MPF_SERIAL in <ioctop>/config/RELEASE.
+ifdef MPF_SERIAL
+SRCS.cc += ../serialIOMPF.cc
+MPFLIBOBJS = $(SRCS.cc:../%.cc=%.o) $(SRCS.c:../%.c=%.o)
+motorCOM_mpf: $(MPFLIBOBJS)
+	$(LINK.c) $@ $(MPFLIBOBJS)
+INSTALLS += motorCOM_mpf
+endif
 
 #Note that the command line that builds the
 #library $(LIBNAME) may be HUGE (>3kB)
