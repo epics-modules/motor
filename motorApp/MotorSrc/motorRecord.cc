@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.20 $
+Version:	$Revision: 1.21 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-10-08 17:54:47 $
+Last Modified:	$Date: 2004-12-21 17:37:07 $
 */
 
 /*
@@ -66,7 +66,9 @@ Last Modified:	$Date: 2004-10-08 17:54:47 $
  * .16 06-16-04 rls - JAR validity check.
  * .17 09-20-04 rls - Do status update if nothing else to do.
  * .18 10-08-04 rls - Bug fix for backlashing into limit switch; update CDIR.
- *
+ * .19 12-01-04 rls - make epicsExportAddress extern "C" linkage for Windows
+ *			compatibility.
+ * .20 12-02-04 rls - fixed incorrect slew acceleration calculation.
  */
 
 #define VERSION 5.5
@@ -96,15 +98,15 @@ Last Modified:	$Date: 2004-10-08 17:54:47 $
 
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int motorRecordDebug = 0;
 	#define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
-	epicsExportAddress(int, motorRecordDebug);
     #else
 	#define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
+volatile int motorRecordDebug = 0;
+extern "C" {epicsExportAddress(int, motorRecordDebug);}
 
 
 /*** Forward references ***/
@@ -154,7 +156,7 @@ rset motorRSET =
     (RECSUPFUN) get_control_double,
     (RECSUPFUN) get_alarm_double
 };
-epicsExportAddress(rset, motorRSET);
+extern "C" {epicsExportAddress(rset, motorRSET);}
 
 
 /*******************************************************************************
@@ -702,7 +704,7 @@ static long postProcess(motorRecord * pmr)
 
 	    if (pmr->mip & MIP_JOG_STOP)
 	    {
-		double acc = vel / pmr->accl;
+		double acc = (vel - vbase) / pmr->accl;
 
 		WRITE_MSG(SET_VEL_BASE, &vbase);
 		if (vel <= vbase)
@@ -718,7 +720,7 @@ static long postProcess(motorRecord * pmr)
 	    else
 	    {
 		double bvel = pmr->bvel / fabs(pmr->mres);
-		double bacc = bvel / pmr->bacc;
+		double bacc = (bvel - vbase) / pmr->bacc;
 
 		if (bvel <= vbase)
 		    bvel = vbase + 1;
@@ -758,8 +760,8 @@ static long postProcess(motorRecord * pmr)
 	
 	/* First part of jog done. Do backlash correction. */
 	double bvel = pmr->bvel / fabs(pmr->mres);
-	double bacc = bvel / pmr->bacc;
 	double vbase = pmr->vbas / fabs(pmr->mres);
+	double bacc = (bvel - vbase) / pmr->bacc;
 	double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
 
 	/* Use if encoder or ReadbackLink is in use. */
@@ -1931,13 +1933,13 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    double newpos = pmr->dval / pmr->mres;	/* where to go     */
 	    double vbase = pmr->vbas / fabs(pmr->mres);	/* base speed      */
 	    double vel = pmr->velo / fabs(pmr->mres);	/* normal speed    */
-	    double acc = vel / pmr->accl;	/* normal accel.   */
+	    double acc = (vel - vbase) / pmr->accl;	/* normal accel.   */
 	    /*
 	     * 'bpos' is one backlash distance away from 'newpos'.
 	     */
 	    double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
 	    double bvel = pmr->bvel / fabs(pmr->mres);	/* backlash speed  */
-	    double bacc = bvel / pmr->bacc;	/* backlash accel. */
+	    double bacc = (bvel - vbase) / pmr->bacc;	/* backlash accel. */
 	    double slop = 0.95 * pmr->rdbd;
 	    bool use_rel, preferred_dir;
 	    double relpos = pmr->diff / pmr->mres;
