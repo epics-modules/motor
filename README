@@ -1,4 +1,4 @@
-Motor Record V4.2 Release Notice
+Motor Record V4.3 Release Notice
 ================================
 
 Although the motor record software in this release is compatible with EPICS
@@ -7,8 +7,6 @@ configuration files are intended for the "unbundled" architecture of EPICS
 R3.13.2 and above.  See motor_release.html for a description of features and
 bug fixes.
 
-!WARNING! motorRecord.dbd has been modified.  This requires you to 'rebuild'
-any and all user trees (i.e., <ioctop>) that load the motor record.
 
 Contents
 ========
@@ -54,12 +52,10 @@ needs.  See individual files for instructions.
                         - MPF_SERIAL V1.1 or above
 			- either MPF_GPIB V1.3 or GPIB V0.1 or above.
 		
-		If any, example applications (motorExApp) are to be built, then
+		If any example applications (motorExApp) are to be built, then
 			TEMPLATE_TOP and MSITOP must be defined.
 
 	- ./motorApp/Makefile: Define which device/driver modules to build.
-	- ./motorApp/CommSrc/Makefile.Vx: Define communication support via
-		Hideos and/or MPF.
 	- ./motorExApp/Makefile: Define which, if any, example applications are
 		to be built.
 
@@ -76,6 +72,31 @@ Known Problems
 
 2) The PAUSE function of the SPMG field only works if the RTRY field is
 	nonzero.  This bug existed as far back as V3.3 of the motor record.
+
+
+Modification Log from V4.2 to V4.3
+==================================
+
+1) An error was introduced into the motor record when item #14 under V4.2 was
+implemented.  This error occurred if the STOP field was activated when the
+motor was not moving (i.e., MIP = 0).  The motor record would become "stuck",
+and not respond to a move request (due to the internal state machine associated
+with MIP being set to the "stop" state), until the condition was cleared by
+either a SPMG-stop or some other user action that forced the MIP field to zero.
+	File modified: motorRecord.c - Changed logic in do_work() so that the
+		stop command is always sent to the controller when the STOP
+		field is activated; but, the MIP field in only set to the
+		"stop" state if the current state is not STOP or DONE.
+
+2) Due to ambiguous and conflicting Newport PM500 documentation, the velocity
+and acceleration values for the PM500 controller were off by a factor of 1,000.
+	File modified: devPM500.c - Scaled velocity, acceleration and jogging
+		command parameters by 1,000.
+
+3) HIDEOS is no longer supported.
+	Files modified: config/RELEASE - Removed HIDEOS path.
+			motorApp/CommSrc/Makefile.Vx - Removed HIDEOS.
+			
 
 
 Modification Log from V4.1 to V4.2
