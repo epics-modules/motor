@@ -1,0 +1,526 @@
+%I Unidraw 1.2 
+%I 2036 1213832 0 10
+
+%I 2020 1231000 0 $(user):rotary 0 
+%I 2028 1235216 0 1 
+%I 2027 1235344 0 
+%I 2028 1235216 0 
+%I 4"node"$(user):rotary VAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):rotary VAL l 2 nodecomp 
+%I t 1 0 0 1 872.5 1633.5 2 2 0 
+%I 2028 1237504 0 0 
+%I 2027 1235600 0 
+%I 2028 1237504 0 
+%I 4"node"$(user):convertReadbackValue VAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 1169.67 970.704 $(user):rotary RDBL l 2 nodecomp 
+%I 2028 1239760 0 0 
+%I 2027 1235792 0 
+%I 2028 1239760 0 
+%I 4"node"$(user):linear DMOV nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 1169.67 970.704 $(user):rotary DINP l 2 nodecomp 
+%I 2028 1240472 0 0 
+%I 2027 1235984 0 
+%I 2028 1240472 0 
+%I 4"node"$(user):convertDriverValue A nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 1246.67 970.704 $(user):rotary OUT r 2 nodecomp 
+%I 2028 1242216 0 0 
+%I 2027 1236176 0 
+%I 2028 1242216 0 
+%I 4"node"$(user):linear STOP nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 1246.67 970.704 $(user):rotary STOO r 2 nodecomp 
+
+%I 2020 1244808 0 $(user):linear 0 
+%I 2028 1553648 0 1 
+%I 2027 1236432 0 
+%I 2028 1553648 0 
+%I 4"node"$(user):linear VAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):linear VAL l 2 nodecomp 
+%I t 1 0 0 1 1391.5 1602.5 0 0 8 
+%I 2028 1553880 0 1 
+%I 2027 1236656 0 
+%I 2028 1553880 0 
+%I 4"node"$(user):linear DRBV nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 -142 0 $(user):linear DRBV l 2 nodecomp 
+%I 2028 1554160 0 1 
+%I 2027 1236848 0 
+%I 2028 1554160 0 
+%I 4"node"$(user):linear DRBV nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):linear DRBV r 2 nodecomp 
+%I 2028 1556416 0 1 
+%I 2027 1237040 0 
+%I 2028 1556416 0 
+%I 4"node"$(user):linear DMOV nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 -142 0 $(user):linear DMOV l 2 nodecomp 
+%I 2028 1556600 0 1 
+%I 2027 1237232 0 
+%I 2028 1556600 0 
+%I 4"node"$(user):linear DMOV nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):linear DMOV r 2 nodecomp 
+%I 2028 1557312 0 1 
+%I 2027 1557472 0 
+%I 2028 1557312 0 
+%I 4"node"$(user):linear DVAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 -142 0 $(user):linear DVAL l 2 nodecomp 
+%I 2028 1559552 0 1 
+%I 2027 1557664 0 
+%I 2028 1559552 0 
+%I 4"node"$(user):linear DVAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):linear DVAL r 2 nodecomp 
+%I 2028 1561808 0 1 
+%I 2027 1557856 0 
+%I 2028 1561808 0 
+%I 4"node"$(user):linear STOP nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 -142 0 $(user):linear STOP l 2 nodecomp 
+%I 2028 1561992 0 1 
+%I 2027 1558048 0 
+%I 2028 1561992 0 
+%I 4"node"$(user):linear STOP nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):linear STOP r 2 nodecomp 
+
+%I 2020 1564072 0 $(user):convertReadbackValue 0 
+%I 2028 1568376 0 1 
+%I 2027 1558208 0 
+%I 2028 1568376 0 
+%I 4"node"$(user):convertReadbackValue VAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):convertReadbackValue VAL l 2 nodecomp 
+%I t 1 0 0 1 1141.5 1551.5 1 0 2 
+%I 2028 1568608 0 0 
+%I 2027 1558528 0 
+%I 2028 1568608 0 
+%I 4"node"$(user):linear DRBV nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 1169.67 970.704 $(user):convertReadbackValue INPA l 2 nodecomp 
+%I 2028 1571056 0 1 
+%I 2027 1558720 0 
+%I 2028 1571056 0 
+%I 4"node"$(user):convertReadbackValue VAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 -142 0 $(user):convertReadbackValue VAL l 2 nodecomp 
+%I 2028 1571192 0 1 
+%I 2027 1558912 0 
+%I 2028 1571192 0 
+%I 4"node"$(user):convertReadbackValue VAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):convertReadbackValue VAL r 2 nodecomp 
+
+%I 2029 1549680 0 4
+%I 385 335 
+%I 385 283 
+%I 681 283 
+%I 681 379 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 0.846284 0 0 1.52273 743.681 1034.39 
+%I 2028 1573872 0 1 
+%I 2027 1559040 0 
+%I 2028 1573872 0 
+%I 4"node"$(user):linear DRBV nodevar 385 335 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 684.5 1209.5 0 0 l 0 nodecomp 
+%I 2028 1574056 0 0 
+%I 2027 1559296 0 
+%I 2028 1574056 0 
+%I 4"node"$(user):linear DRBV nodevar 681 379 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 639 1232.5 0 0 l 0 nodecomp 
+%I 9077 1573000 0 
+%I 2027 1559296 0 
+%I 2027 1559040 0 0 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b ~ 
+%I t ~ 
+%I 2030 1574296 0 
+%I 0 0 0 
+%I 6"pvlink"INPA $(user):convertReadbackValue CP MS CP/MS pvlinkvar 
+
+%I 2029 1549720 0 3
+%I 116 417 
+%I 116 352 
+%I 385 352 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1.12454 0 0 1.24615 637.054 1121.85 
+%I 2028 1577440 0 1 
+%I 2027 1574608 0 
+%I 2028 1577440 0 
+%I 4"node"$(user):convertReadbackValue VAL nodevar 116 417 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 651.5 1224.5 0 0 l 0 nodecomp 
+%I 2028 1580200 0 0 
+%I 2027 1574800 0 
+%I 2028 1580200 0 
+%I 4"node"$(user):convertReadbackValue VAL nodevar 385 352 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 685 1208.5 0 0 l 0 nodecomp 
+%I 9077 1578064 0 
+%I 2027 1574800 0 
+%I 2027 1574608 0 0 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b ~ 
+%I t ~ 
+%I 2030 1580440 0 
+%I 0 0 0 
+%I 6"pvlink"RDBL $(user):rotary NPP MS NPP/MS pvlinkvar 
+
+%I 2020 1581344 0 $(user):convertDriverValue 0 
+%I 2028 1585616 0 1 
+%I 2027 1575216 0 
+%I 2028 1585616 0 
+%I 4"node"$(user):convertDriverValue VAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):convertDriverValue VAL l 2 nodecomp 
+%I t 1 0 0 1 1052.5 1333.5 0 1 2 
+%I 2028 1585848 0 0 
+%I 2027 1575472 0 
+%I 2028 1585848 0 
+%I 4"node"$(user):linear DVAL nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 1246.67 970.704 $(user):convertDriverValue OUT r 2 nodecomp 
+%I 2028 1586560 0 1 
+%I 2027 1575664 0 
+%I 2028 1586560 0 
+%I 4"node"$(user):convertDriverValue A nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1 0 0 1 -142 0 $(user):convertDriverValue A l 2 nodecomp 
+%I 2028 1588288 0 1 
+%I 2027 1575856 0 
+%I 2028 1588288 0 
+%I 4"node"$(user):convertDriverValue A nodevar 0 0 0 
+%I 1 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t ~ $(user):convertDriverValue A r 2 nodecomp 
+
+%I 2029 1550000 0 4
+%I 406 132 
+%I 881 132 
+%I 881 432 
+%I 822 432 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 0.893029 0 0 1 727.931 1209.5 
+%I 2028 1589424 0 1 
+%I 2027 1575984 0 
+%I 2028 1589424 0 
+%I 4"node"$(user):linear DVAL nodevar 406 132 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 684.5 1209.5 0 0 r 0 nodecomp 
+%I 2028 1589608 0 0 
+%I 2027 1576240 0 
+%I 2028 1589608 0 
+%I 4"node"$(user):linear DVAL nodevar 822 432 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 640 1209.5 0 0 r 0 nodecomp 
+%I 9077 1589800 0 
+%I 2027 1576240 0 
+%I 2027 1575984 0 0 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b ~ 
+%I t ~ 
+%I 2030 1591392 0 
+%I 0 0 0 
+%I 6"pvlink"OUT $(user):convertDriverValue PP MS PP/MS pvlinkvar 
+
+%I 2029 1550040 0 2
+%I 226 447 
+%I 680 448 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 0.901982 0 0 0 706.652 1656.5 
+%I 2028 1568800 0 1 
+%I 2027 1591672 0 
+%I 2028 1568800 0 
+%I 4"node"$(user):linear STOP nodevar 226 447 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 684.5 1209.5 0 0 r 0 nodecomp 
+%I 2028 1596040 0 0 
+%I 2027 1591864 0 
+%I 2028 1596040 0 
+%I 4"node"$(user):linear STOP nodevar 680 448 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 640 1208.5 0 0 l 0 nodecomp 
+%I 9077 1591048 0 
+%I 2027 1591864 0 
+%I 2027 1591672 0 0 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b ~ 
+%I t ~ 
+%I 2030 1597824 0 
+%I 0 0 0 
+%I 6"pvlink"STOO $(user):rotary PP MS PP/MS pvlinkvar 
+
+%I 2029 1550080 0 6
+%I 77 607 
+%I 30 607 
+%I 30 684 
+%I 532 684 
+%I 532 577 
+%I 629 577 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1.00091 0 0 1 690.43 1049.5 
+%I 2028 1598912 0 1 
+%I 2027 1592312 0 
+%I 2028 1598912 0 
+%I 4"node"$(user):linear DMOV nodevar 77 607 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 690.5 1049.5 0 0 l 0 nodecomp 
+%I 2028 1599096 0 0 
+%I 2027 1592504 0 
+%I 2028 1599096 0 
+%I 4"node"$(user):linear DMOV nodevar 629 577 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 691 1049.5 0 0 l 0 nodecomp 
+%I 9077 1597320 0 
+%I 2027 1592504 0 
+%I 2027 1592312 0 0 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b ~ 
+%I t ~ 
+%I 2030 1599336 0 
+%I 0 0 0 
+%I 6"pvlink"DINP $(user):rotary NPP MS NPP/MS pvlinkvar 
+
+%I 2029 1550120 0 3
+%I 212 525 
+%I 212 241 
+%I 249 241 
+%I c #000000000000 0 0 0 
+%I c #AEAEB2B2C3C3 0.682353 0.698039 0.764706 
+%I b 65535 0 
+%I t 1.01352 0 0 1 695.634 1116.5 
+%I 2028 1601968 0 1 
+%I 2027 1592888 0 
+%I 2028 1601968 0 
+%I 4"node"$(user):convertDriverValue A nodevar 212 525 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 698.5 1116.5 0 0 r 0 nodecomp 
+%I 2028 1602152 0 0 
+%I 2027 1593080 0 
+%I 2028 1602152 0 
+%I 4"node"$(user):convertDriverValue A nodevar 249 241 1 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b n 
+%I t 1 0 0 1 699 1116.5 0 0 l 0 nodecomp 
+%I 9077 1601040 0 
+%I 2027 1593080 0 
+%I 2027 1592888 0 0 
+%I 4294967295 
+%I c ~ 
+%I c ~ 
+%I b ~ 
+%I t ~ 
+%I 2030 1602392 0 
+%I 0 0 0 
+%I 6"pvlink"OUT $(user):rotary PP MS PP/MS pvlinkvar 
+
+%I 4294967295 
+%I b ~ 
+%I c ~ 
+%I c ~ 
+%I f ~ 
+%I p ~ 
+%I t ~ ---no-prefix--- 
+%I 12 
+%I 767.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1577440 0 
+%I 2028 1237504 0 
+%I 767.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1598912 0 
+%I 2028 1239760 0 
+%I 910.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1601968 0 
+%I 2028 1240472 0 
+%I 910.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1568800 0 
+%I 2028 1242216 0 
+%I 1320 0 0 0 0 1e+06 1e+06 
+%I 2028 1574056 0 
+%I 2028 1553880 0 
+%I 1320 0 0 0 0 1e+06 1e+06 
+%I 2028 1599096 0 
+%I 2028 1556416 0 
+%I 1462 0 0 0 0 1e+06 1e+06 
+%I 2028 1589608 0 
+%I 2028 1559552 0 
+%I 1320 0 0 0 0 1e+06 1e+06 
+%I 2028 1596040 0 
+%I 2028 1561808 0 
+%I 1069.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1573872 0 
+%I 2028 1568608 0 
+%I 1070 0 0 0 0 1e+06 1e+06 
+%I 2028 1580200 0 
+%I 2028 1571056 0 
+%I 1090.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1589424 0 
+%I 2028 1585848 0 
+%I 948 0 0 0 0 1e+06 1e+06 
+%I 2028 1602152 0 
+%I 2028 1586560 0 
+%I 12 
+%I 1641.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1577440 0 
+%I 2028 1237504 0 
+%I 1656.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1598912 0 
+%I 2028 1239760 0 
+%I 1641.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1601968 0 
+%I 2028 1240472 0 
+%I 1656.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1568800 0 
+%I 2028 1242216 0 
+%I 1611.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1574056 0 
+%I 2028 1553880 0 
+%I 1626.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1599096 0 
+%I 2028 1556416 0 
+%I 1641.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1589608 0 
+%I 2028 1559552 0 
+%I 1656.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1596040 0 
+%I 2028 1561808 0 
+%I 1544.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1573872 0 
+%I 2028 1568608 0 
+%I 1560.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1580200 0 
+%I 2028 1571056 0 
+%I 1341.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1589424 0 
+%I 2028 1585848 0 
+%I 1357.5 0 0 0 0 1e+06 1e+06 
+%I 2028 1602152 0 
+%I 2028 1586560 0 
