@@ -2,9 +2,9 @@
 FILENAME...	serialIOMPF.cc
 USAGE...	Interface between MPF and motor record device drivers.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-04-29 14:28:24 $
+Last Modified:	$Date: 2003-05-07 13:41:50 $
 */
 
 /*
@@ -50,7 +50,7 @@ class serialIO
 public:
         serialIO(int card, char *serverName, int *createdOK);
         int serialIOSend(char const *buffer, int buffer_len, int timeout);
-        int serialIORecv(char *buffer, int buffer_len, int terminator, 
+        int serialIORecv(char *buffer, int buffer_len, char *terminator, 
                                 int timeout);
         static void serialIOCallback(Message *message, void *pointer);
 private:
@@ -167,7 +167,7 @@ finish:
 }
 
 
-int serialIO::serialIORecv(char *buffer, int buffer_len, int terminator, 
+int serialIO::serialIORecv(char *buffer, int buffer_len, char *terminator, 
                            int timeout)
 {
     int status, nrec = 0;
@@ -180,13 +180,13 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, int terminator,
     // MPF uses seconds, not milliseconds for timeout.  If the desired timeout
     // is non-zero then use a minimum 1 second timeout
     if ((timeout > 0) && (psm->timeout < 1)) psm->timeout = 1;
-    psm->cmd = cmdRead|cmdSetEom;
-    psm->eomString[0] = terminator;
-    if (terminator == -1)
-        psm->eomLen = 0;
-    else {
-        psm->eomLen = 1;
-        psm->eomString[0] = terminator;
+    psm->cmd = cmdRead | cmdSetEom;
+    if (terminator == NULL)
+	psm->eomLen = 0;
+    else
+    {
+	psm->eomLen = strlen(terminator);
+	strcpy(&psm->eomString[0], terminator);
     }
 
     
@@ -238,7 +238,7 @@ done:
 void serialIO::serialIOCallback(Message *message, void *pointer)
 {
     serialIO *psi = (serialIO *)pointer;
-    bool error;
+    bool rtnval;
 
     // If this is a Connect message or a Char8ArrayMessage then send it to
     // the message queue.
@@ -257,8 +257,8 @@ void serialIO::serialIOCallback(Message *message, void *pointer)
         return;
     }
 
-    error = psi->msgQId->push((void **) message);
-    if (error == true)
+    rtnval = psi->msgQId->push((void **) message);
+    if (rtnval == false)
         epicsPrintf("serialIOCallback: error from msgQId->push\n");
 }
 
@@ -283,7 +283,7 @@ int serialIOSend(serialIO *psi, char const *buffer,
 }
 
 int serialIORecv(serialIO *psi, char *buffer, int buffer_len,
-                    int terminator, int timeout)
+                    char *terminator, int timeout)
 {
     return (psi->serialIORecv(buffer, buffer_len, terminator, timeout));
 }
