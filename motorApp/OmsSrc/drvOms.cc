@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.11 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-10-28 16:57:01 $
+Last Modified:	$Date: 2003-11-07 22:28:38 $
 */
 
 /*
@@ -111,7 +111,6 @@ extern "C" {
 
 /* Global data. */
 int oms44_num_cards = 0;
-volatile int omsSpyClkRate = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
