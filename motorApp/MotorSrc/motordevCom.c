@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-25 16:57:15 $
+Last Modified:	$Date: 2002-03-27 21:24:31 $
 */
 
 /*
@@ -129,7 +129,6 @@ LOGIC...
     Error check "card" index, "signal" index and motor "in_use" indicator.
     IF error detected.
 	Set the MSTA PROBLEM bit ON.
-	Set RES <- MRES.
 	Set RMP <- REP <- 0.
 	ERROR RETURN.
     ENDIF
@@ -146,10 +145,9 @@ LOGIC...
 	...
     ELSE
 	Set local encoder ratio to unity.
-	Set RES <- MRES.
     ENDIF
 
-    Set Initialize position indicator based on (DVEL != 0, AND, RES != 0,
+    Set Initialize position indicator based on (DVEL != 0, AND, MRES != 0,
 	AND, the above "get_axis_info()" position == 0) [NOTE: non-zero controller
 	position takes precedence over autorestore position].
     Set Command Primitive Initialization string indicator based on (non-NULL "init"
@@ -245,7 +243,6 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     {
 	/* Initialize readback fields for simulation */
 	mr->msta = RA_PROBLEM;
-	mr->res = mr->mres;
 	mr->rmp = 0;		/* raw motor pulse count */
 	mr->rep = 0;		/* raw encoder pulse count */
 	return(rtnStat);
@@ -277,16 +274,14 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 	    ep_mp[0] = m / mr->eres;	/* encoder pulses per ... */
 	    ep_mp[1] = m / mr->mres;	/* motor pulses */
 	}
-	mr->res = mr->eres;
     }
     else
     {
 	ep_mp[0] = 1.;
 	ep_mp[1] = 1.;
-	mr->res = mr->mres;
     }
 
-    initPos = (mr->dval != 0 && mr->res != 0 && axis_query.position == 0) ? ON : OFF;
+    initPos = (mr->dval != 0 && mr->mres != 0 && axis_query.position == 0) ? ON : OFF;
     /* Test for command primitive initialization string. */
     initString = (mr->init != NULL && strlen(mr->init)) ? ON : OFF;
     
@@ -308,7 +303,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 
 	if (initPos == ON)
 	{
-	    double setPos = mr->dval / mr->res;
+	    double setPos = mr->dval / mr->mres;
 
 	    (*pdset->start_trans)(mr);
 	    (*pdset->build_trans)(LOAD_POS, &setPos, mr);

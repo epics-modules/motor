@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.5 $
+# Version:		$Revision: 1.6 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2001-10-02 23:12:16 $
+# Last Modified:	$Date: 2002-03-27 21:24:29 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -27,6 +27,7 @@
 
 #Modification Log:
 #-----------------
+# 00 03-25-02 rls - Eliminated RES.
 
 
 menu(motorDIR) {
@@ -263,11 +264,6 @@ recordtype(motor) {
 	field(RRES,DBF_FLOAT) {
 		prompt("Readback Step Size (EGU")
 		promptgroup(GUI_COMMON)
-		interest(1)
-	}
-	field(RES,DBF_DOUBLE) {
-		prompt("Step Size (EGU)")
-		special(SPC_NOMOD)
 		interest(1)
 	}
 	field(UEIP,DBF_MENU) {
