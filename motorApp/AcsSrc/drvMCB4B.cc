@@ -31,25 +31,17 @@
 #define BUFF_SIZE 100       /* Maximum length of string to/from MCB4B */
 
 #ifdef __GNUG__
-    #ifdef	DEBUG
+    #ifdef DEBUG
 	volatile int drvMCB4BDebug = 0;
-	#define Debug(l, f, args...) { if(l<=drvMCB4BDebug) printf(f,## args); }
+	#define Debug(L, FMT, V...) { if(L <= drvMCB4BDebug) \
+                        { errlogPrintf("%s(%d):",__FILE__,__LINE__); \
+                          errlogPrintf(FMT,##V); } }
     #else
-	#define Debug(l, f, args...)
+	#define Debug(L, FMT, V...)
     #endif
 #else
     #define Debug()
 #endif
-
-/*
-#ifdef NODEBUG
-#define Debug(L,FMT,V) ;
-#else
-#define Debug(L,FMT,V...) {  if(L <= drvMCB4BDebug) \
-                        { errlogPrintf("%s(%d):",__FILE__,__LINE__); \
-                          errlogPrintf(FMT,##V); } }
-#endif
-*/
 
 /* Debugging notes:
  *   drvMCB4BDebug == 0  No debugging information is printed
@@ -60,7 +52,6 @@
  */    
 
 int MCB4B_num_cards = 0;
-volatile int drvMCB4BDebug = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include        "motordrvComCode.h"
@@ -264,7 +255,7 @@ STATIC int set_status(int card, int signal)
     {
         strcpy(buff, nodeptr->postmsgptr);
         strcat(buff, "\r");
-        send_mess(card, buff, NULL);
+        send_mess(card, buff, (char) NULL);
         /* The MCB4B always sends back a response, read it and discard */
         recv_mess(card, buff, WAIT);
         nodeptr->postmsgptr = NULL;
