@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Record Support Routines for the Motor record.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-09-05 22:06:50 $
+Last Modified:	$Date: 2000-11-08 20:26:53 $
 */
 
 /*
@@ -115,7 +115,7 @@ Last Modified:	$Date: 2000-09-05 22:06:50 $
  *			when the user "hammers" on the jog request.
  */
 
-#define VERSION 4.2
+#define VERSION 4.3
 
 #include	<vxWorks.h>
 #include	<stdlib.h>
@@ -1382,13 +1382,23 @@ STATIC long do_work(motorRecord * pmr)
     mmap_field mmap_bits;
 
     /*** Process Stop button. ***/
-    if (pmr->stop && (pmr->mip != MIP_STOP))
+    if (pmr->stop != 0)
     {
-	/* Stop motor. */
-	pmr->pp = TRUE;
-	pmr->jogf = pmr->jogr = 0;
 	pmr->stop = 0;
-	goto stop_all;
+	if (pmr->mip == MIP_DONE || pmr->mip == MIP_STOP)
+	{
+	    /* Send message (just in case), but don't put MIP in STOP state. */
+	    INIT_MSG();
+	    WRITE_MSG(STOP_AXIS, NULL);
+	    SEND_MSG();
+	}
+	else
+	{
+	    /* Stop motor. */
+	    pmr->pp = TRUE;
+	    pmr->jogf = pmr->jogr = 0;
+	    goto stop_all;
+	}
     }
 
     /*** Process Stop/Pause/Go_Pause/Go switch. ***
