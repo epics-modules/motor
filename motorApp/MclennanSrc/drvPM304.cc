@@ -654,7 +654,7 @@ STATIC int motor_init()
             /* send_mess(i, "1RSES;", buff); */
             send_mess(card_index, "1ST;", 0);     /* Stop motor */
             send_recv_mess(card_index, "1ID;", buff);    /* Read controller ID string */
-            strcpy(brdptr->ident, buff);
+            strncpy(brdptr->ident, buff, MAX_IDENT_LEN);
             /* Parse the response to figure out what model this is */
             if (strstr(brdptr->ident, "PM304") != NULL) {
                 cntrl->model = MODEL_PM304;
