@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; U; SunOS 5.6 sun4u) [Netscape]">
+   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
    <title>Motor Record and related software</title>
 </head>
 <body>
@@ -40,15 +40,15 @@ Contents</h2>
 <a NAME="Overview"></a>
 <h2>
 Overview</h2>
-This documentation describes version 4.2 of the EPICS motor record, and
-related EPICS software required to build and use it.&nbsp; Version 4.2
+This documentation describes version 4.4 of the EPICS motor record, and
+related EPICS software required to build and use it.&nbsp; Version 4.4
 of the motor record is compatible with EPICS baseR3.13.2 and above.
 <p>The motor record is intended to support motors of all kinds, but currently
 supports only the following variety of motor controllers (in addition to
 Soft Channel support):
 <ul>
 <li>
-Oregon Micro Systems, Inc. models; VME8, VME44 and VME58.</li>
+Oregon Micro Systems, Inc. (OMS) models; VME8, VME44 and VME58.</li>
 
 <li>
 Highland Technologies model V540.</li>
@@ -57,7 +57,7 @@ Highland Technologies model V540.</li>
 Newport models MM3000, MM4000, MM4005 and PM500.</li>
 
 <li>
-Intelligent Motion Systems, Inc. model IM483.</li>
+Intelligent Motion Systems, Inc. (IMS) model IM483.</li>
 </ul>
 The record maintains two coordinate systems for motor position ("user"
 and "dial" coordinates); displays drive and readback values; enforces limits
@@ -597,6 +597,18 @@ down to find the actual item.</caption>
 </tr>
 
 <tr>
+<td><a href="#Fields_motion">JAR</a></td>
+
+<td>R/W</td>
+
+<td>Jog Acceleration (EGU/s^2)</td>
+
+<td>FLOAT</td>
+
+<td></td>
+</tr>
+
+<tr>
 <td><a href="#Fields_command">JOGF</a></td>
 
 <td>R/W*&nbsp;</td>
@@ -618,6 +630,18 @@ down to find the actual item.</caption>
 <td>SHORT&nbsp;</td>
 
 <td>careful!</td>
+</tr>
+
+<tr>
+<td><a href="#Fields_motion">JVEL</a></td>
+
+<td>R/W</td>
+
+<td>Jog Velocity</td>
+
+<td>FLOAT</td>
+
+<td></td>
 </tr>
 
 <tr>
@@ -1664,7 +1688,7 @@ FOFF field to "Variable" (VOF) or "Frozen" (FOF).&nbsp;</td>
 
 <td>Set/Use Switch&nbsp;</td>
 
-<td>RECCHOICE&nbsp;</td>
+<td>RECCHOICE</td>
 
 <td>(0:"Use", 1:"Set")</td>
 </tr>
@@ -2072,16 +2096,34 @@ At the end of a motion, the speed is expected to decrease similarly to
 VBAS.&nbsp;</td>
 </tr>
 
-<tr VALIGN=TOP>
-<td></td>
+<tr>
+<td>JVEL</td>
 
-<td></td>
+<td>R/W</td>
 
-<td></td>
+<td>Jog Velocity (EGU/s)</td>
 
-<td></td>
+<td>FLOAT</td>
 
-<td></td>
+<td>Valid range; VBAS &lt;= VELO &lt;= VMAX</td>
+</tr>
+
+<tr>
+<td>JAR</td>
+
+<td>R/W</td>
+
+<td>Jog&nbsp; Acceleraton (EGU/s^2)</td>
+
+<td>FLOAT</td>
+
+<td>Default value: VELO / ACCL</td>
+</tr>
+
+<tr NOSAVE>
+<td COLSPAN="5" NOSAVE>With the OMS and IMS device drivers, jog velocity
+can be changed on-the-fly.&nbsp; The velocity will accelerate to the new
+velocity based on the JAR field.</td>
 </tr>
 
 <tr VALIGN=TOP>
@@ -4070,12 +4112,6 @@ they are record oriented (devSoft.c) or CA oriented (devSoftAux.c).</td>
 </tr>
 
 <tr>
-<td>serialIO.cc</td>
-
-<td>Serial communication interface via Hideos.</td>
-</tr>
-
-<tr>
 <td>serialIOMPF.cc</td>
 
 <td>Serial communication interface via MPF.</td>
@@ -4324,16 +4360,16 @@ or hideos_task name)</tt>
 <p><tt>MM4000Setup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 pollRate)</tt>
 <br><tt>MM4000Config(card#, portType, GPIB link or hideos_card#, GPIB address
-or hideos_task name)</tt><tt></tt>
+or hideos_task name)</tt>
 <p><tt>IM483SMSetup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 pollRate)&nbsp;</tt>
 <br><tt>IM483SMConfig(card#, portType, GPIB link or hideos_card#, GPIB
-address or hideos_task name)&nbsp;</tt><tt></tt>
+address or hideos_task name)&nbsp;</tt>
 <p><tt>IM483[PL/SM]Setup(nCommNet, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 pollRate)&nbsp;</tt>
 <br><tt>IM483[PL/sm]Config(CommNet#, portType, GPIB link or hideos_card#,
 GPIB address or hideos_task name)&nbsp;</tt>
-<br><tt></tt>&nbsp;</td>
+<br>&nbsp;</td>
 </tr>
 
 <tr VALIGN=TOP>
