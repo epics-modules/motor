@@ -18,7 +18,7 @@ ld < NoMPFVx.munch
 
 cd startup
 dbLoadDatabase("../../dbd/NoMPFVx.dbd")
-registerRecordDeviceDriver(pdbbase)
+NoMPFVx_registerRecordDeviceDriver(pdbbase)
 
 dbLoadRecords("../../db/NoMPF.db")
 #dbLoadRecords("../../motorExApp/Db/SoftMotorEx.db","user=rls,motor=m1", startup)
