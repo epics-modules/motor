@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.20 $
+Version:	$Revision: 1.21 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-21 15:18:48 $
+Last Modified:	$Date: 2005-03-23 22:16:12 $
 */
 
 /*
@@ -67,6 +67,7 @@ Last Modified:	$Date: 2004-12-21 15:18:48 $
  *                   - eliminate calls to devConnectInterrupt() due to C++
  *		       problems with devLib.h; i.e. "sorry, not implemented:
  *		       `tree_list' not supported..." compiler error message.
+ * .11  03-23-05 rls - Make OSI.
  */
 
 /*========================stepper motor driver ========================
@@ -86,17 +87,15 @@ Last Modified:	$Date: 2004-12-21 15:18:48 $
 
 ========================stepper motor driver ========================*/
 
-#include	<vxLib.h>
-#include	<sysLib.h>
 #include	<string.h>
-#include	<rebootLib.h>
-#include	<logLib.h>
 #include	<drvSup.h>
 #include	<epicsVersion.h>
 #include	<devLib.h>
 #include	<dbAccess.h>
 #include	<epicsThread.h>
 #include	<epicsInterrupt.h>
+#include	<epicsExit.h>
+#include	<epicsEvent.h>
 
 #include	"motor.h"
 #include	"drvOms.h"
@@ -115,12 +114,17 @@ Last Modified:	$Date: 2004-12-21 15:18:48 $
 #define	DONE_QUERY	"RA"
 
 /*----------------debugging-----------------*/
-#ifdef	DEBUG
-    volatile int drvOMSdebug = 0;
-    #define Debug(l, f, args...) { if(l<=drvOMSdebug) printf(f,## args); }
+#ifdef __GNUG__
+    #ifdef	DEBUG
+	#define Debug(l, f, args...) {if (l <= drvOMSdebug) printf(f, ## args);}
+    #else
+	#define Debug(l, f, args...)
+    #endif
 #else
-    #define Debug(l, f, args...)
+    #define Debug
 #endif
+volatile int drvOMSdebug = 0;
+extern "C" {epicsExportAddress(int, drvOMSdebug);}
 
 /* Global data. */
 int oms44_num_cards = 0;
@@ -146,7 +150,7 @@ static RTN_STATUS send_mess(int, char const *, char *);
 static int recv_mess(int, char *, int);
 static void motorIsr(int);
 static int motor_init();
-static void oms_reset();
+static void oms_reset(void *);
 
 static int omsGet(int card, char *pcom, bool timeout);
 static RTN_STATUS omsPut(int card, char *pcom);
@@ -202,7 +206,7 @@ static long report(int level)
 	for (card = 0; card < oms44_num_cards; card++)
 	    if (motor_state[card])
 		printf("    Oms VME8/44 motor card %d @ 0x%X, id: %s \n", card,
-		       (uint_t) motor_state[card]->localaddr,
+		       (epicsUInt32) motor_state[card]->localaddr,
 		       motor_state[card]->ident);
     }
     return (0);
@@ -371,7 +375,7 @@ static int set_status(int card, int signal)
 
 		/* Copy device directive to buffer. */
 		strncpy(buffer, nodeptr->postmsgptr, size);
-		buffer[size] = NULL;
+		buffer[size] = (char) NULL;
 
 		if (strncmp(buffer, "@PUT(", 5) != 0)
 		    goto errorexit;
@@ -426,16 +430,14 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 
     if (strlen(com) > MAX_MSG_SIZE)
     {
-	logMsg((char *) "drvOms.cc:send_mess(); message size violation.\n",
-	       0, 0, 0, 0, 0, 0);
+	errlogPrintf("drvOms.cc:send_mess(); message size violation.\n");
 	return (ERROR);
     }
 
     /* Check that card exists */
     if (!motor_state[card])
     {
-	logMsg((char *) "drvOms.cc:send_mess() - invalid card #%d\n", card,
-	       0, 0, 0, 0, 0);
+	errlogPrintf("drvOms.cc:send_mess() - invalid card #%d\n", card);
 	return (ERROR);
     }
 
@@ -636,7 +638,7 @@ static int omsGet(int card, char *pchar, bool timeout)
 	}
 	if (!irqdata->recv_rng->isEmpty())
 	{
-	    *pchar = (char) irqdata->recv_rng->pop();
+	    *pchar = (char) ((epicsUInt32) irqdata->recv_rng->pop() & 0xFF);
 	    getCnt = 1;
 	}
     }
@@ -679,13 +681,13 @@ static RTN_STATUS omsPut(int card, char *pmess)
     {
 	putptr = pmess;
 	/* Put string into isr transmitt buffer */
-	while (*putptr != NULL)
+	while (*putptr != (char) NULL)
 	{
 	    char outchar = *putptr;
 	    if (!irqdata->send_rng->push((char *) outchar))
 	    {
-		logMsg((char *) "omsPut: card %d send ring full, lost '%c'\n", card,
-		       *putptr, 0, 0, 0, 0);
+		errlogPrintf("omsPut: card %d send ring full, lost '%c'\n",
+			     card, *putptr);
 		return(ERROR);
 	    }
 	    putptr++;
@@ -786,7 +788,7 @@ static void motorIsr(int card)
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
-	logMsg((char *) "Invalid entry-card #%d\n", card, 0, 0, 0, 0, 0);
+	errlogPrintf("Invalid entry-card #%d\n", card);
 	return;
     }
 
@@ -806,8 +808,7 @@ static void motorIsr(int card)
 
 #ifdef	DEBUG
     if (drvOMSdebug >= 10)
-	logMsg((char *) "entry card #%d,status=0x%X,done=0x%X\n", card,
-	       status, doneFlags, 0, 0, 0);
+	errlogPrintf("entry card #%d,status=0x%X,done=0x%X\n", card, status, doneFlags);
 #endif
 
     /* Motion done handling */
@@ -823,8 +824,7 @@ static void motorIsr(int card)
 	/* Send null character to indicate error */
 #ifdef	DEBUG
 	if (drvOMSdebug >= 1)
-	    logMsg((char *) "command error detected on card %d\n", card, 0, 0,
-		    0, 0, 0);
+	    errlogPrintf("command error detected on card %d\n", card);
 #endif
 	irqdata->irqErrno |= STAT_ERROR;
     }
@@ -835,7 +835,7 @@ static void motorIsr(int card)
 	if (irqdata->send_rng->isEmpty())
 	    control &= ~IRQ_TRANS_BUF;	/* Transmit done - disable irq */
 	else
-	    pmotor->data = (char) irqdata->send_rng->pop();
+	    pmotor->data = (char) ((epicsUInt32) irqdata->send_rng->pop() & 0xFF);
     }
 
     /* Read Response */
@@ -845,8 +845,8 @@ static void motorIsr(int card)
 
 	if (!irqdata->recv_rng->push((char *) dataChar))
 	{
-	    logMsg((char *) "card %d recv ring full, lost '%c'\n", card,
-		   dataChar, 0, 0, 0, 0);
+	    errlogPrintf("card %d recv ring full, lost '%c'\n", card,
+			 dataChar);
 	    irqdata->irqErrno |= STAT_INPUT_BUF_FULL;
 	}
 	irqdata->recv_sem->signal();
@@ -869,7 +869,7 @@ static int motorIsrEnable(int card)
     irqdata = (struct irqdatastr *) pmotorState->DevicePrivate;
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
 
-
+#ifdef vxWorks
     status = pdevLibVirtualOS->pDevConnectInterruptVME(
 	omsInterruptVector + card, (void (*)()) motorIsr, (void *) card);
 
@@ -894,6 +894,8 @@ static int motorIsrEnable(int card)
 	return (ERROR);
     }
 
+#endif
+    
     /* Setup card for interrupt-on-done */
     pmotor->vector = omsInterruptVector + card;
 
@@ -910,7 +912,6 @@ static int motorIsrEnable(int card)
 
     /* enable interrupt-when-done and input-buffer-full interrupts */
     pmotor->control = IRQ_ENABLE_ALL;
-
     return (OK);
 }
 
@@ -930,8 +931,10 @@ static void motorIsrDisable(int card)
     /* Disable interrupts */
     pmotor->control = 0;
 
+#ifdef vxWorks
     status = pdevLibVirtualOS->pDevDisconnectInterruptVME(
 	omsInterruptVector + card, (void (*)(void *)) motorIsr);
+#endif
 
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",
@@ -963,9 +966,9 @@ int omsSetup(int num_cards,	/* maximum number of cards in rack */
 	oms44_num_cards = num_cards;
 
     /* Check boundary(16byte) on base address */
-    if ((uint32_t) addrs & 0xF)
+    if ((epicsUInt32) addrs & 0xF)
     {
-	Debug(1, "omsSetup: invalid base address 0x%X\n", (uint_t) addrs);
+	Debug(1, "omsSetup: invalid base address 0x%X\n", (epicsUInt32) addrs);
 	oms_addrs = (char *) OMS_NUM_ADDRS;
     }
     else
@@ -1033,10 +1036,10 @@ static int motor_init()
     /* allocate structure space for each motor present */
 
     total_cards = oms44_num_cards;
-
-    if (rebootHookAdd((FUNCPTR) oms_reset) == ERROR)
+    
+    if (epicsAtExit(oms_reset, NULL) == ERROR)
 	Debug(1, "vme8/44 motor_init: oms_reset disabled\n");
-
+    
     for (card_index = 0; card_index < oms44_num_cards; card_index++)
     {
 	int8_t *startAddr;
@@ -1048,18 +1051,21 @@ static int motor_init()
 	startAddr = (int8_t *) probeAddr + 1;
 	endAddr = startAddr + OMS_BRD_SIZE;
 
-	Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n", (uint_t) probeAddr);
+	Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n",
+	      (epicsUInt32) probeAddr);
 	/* Scan memory space to assure card id */
+#ifdef vxWorks
 	do
 	{
 	    status = devNoResponseProbe(OMS_ADDRS_TYPE, (unsigned int) startAddr, 1);
 	    startAddr += 0x2;
 	} while (PROBE_SUCCESS(status) && startAddr < endAddr);
-
+#endif
 	if (PROBE_SUCCESS(status))
 	{
 	    struct irqdatastr *irqdata;
 
+#ifdef vxWorks
 	    status = devRegisterAddress(__FILE__, OMS_ADDRS_TYPE,
 					(size_t) probeAddr, OMS_BRD_SIZE,
 					(volatile void **) &localaddr);
@@ -1071,8 +1077,8 @@ static int motor_init()
 			  "Can't register address 0x%x\n", (unsigned) probeAddr);
 		return (ERROR);
 	    }
-
-	    Debug(9, "motor_init: localaddr = %x\n", (int) localaddr);
+#endif
+	    Debug(9, "motor_init: localaddr = %x\n", (epicsUInt32) localaddr);
 	    pmotor = (struct vmex_motor *) localaddr;
 
 	    Debug(9, "motor_init: malloc'ing motor_state\n");
@@ -1149,8 +1155,8 @@ static int motor_init()
 		set_status(card_index, motor_index);
 	    }
 
-	    Debug(2, "Init Address=0x%08.8x\n", (uint_t) localaddr);
-	    Debug(3, "Total encoders = %d\n\n", (int) total_encoders);
+	    Debug(2, "Init Address=0x%8.8x\n", (epicsUInt32) localaddr);
+	    Debug(3, "Total encoders = %d\n\n", total_encoders);
 	}
 	else
 	{
@@ -1177,23 +1183,17 @@ static int motor_init()
 
 /* Disables interrupts. Called on CTL X reboot. */
 
-static void oms_reset()
+static void oms_reset(void *arg)
 {
     short card;
     struct vmex_motor *pmotor;
-    short status;
 
     for (card = 0; card < total_cards; card++)
     {
 	if (motor_state[card] != NULL)
 	{
-	    char *memptr, byteread;
-
 	    pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
-	    memptr = (char *) &pmotor->data;
-	    status = vxMemProbe(memptr, READ, sizeof(char), (char *) &byteread);
-	    if (status == OK)
-		pmotor->control = 0;	/* Disable all interrupts. */
+	    pmotor->control = 0;	/* Disable all interrupts. */
 	}
     }
 }
