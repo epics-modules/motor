@@ -18,6 +18,10 @@ endif
 #DIRS += SoftMotorSrc
 #DIRS += V544Src
 
+ifdef MX
+DIRS += MXmotorSrc
+endif
+
 # The following modules require MPF_SERIAL.
 # Select individual device/driver support modules by removing the comment.
 ifdef MPF_SERIAL
