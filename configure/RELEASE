@@ -19,10 +19,6 @@
 # Recommended EPICS release: R3.14.6
 EPICS_BASE=$(SUPPORT)/../base-3.14.6
 
-# The following must be defined if motorExApp is to be built.
-#!TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
-#!MSI=
-
 # The following must be defined if the "WithMPF" example in motorExApp is to
 # be built.
 # Recommended IPAC release: R2.7a
