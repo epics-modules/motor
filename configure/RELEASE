@@ -21,7 +21,7 @@
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then MPF must be defined.
-#MPF=$(SUPPORT)/mpf/mpf1-8
+#MPF=$(SUPPORT)/mpf2-1
 
 #EPICS_BASE=$(SUPPORT)/../base
 
@@ -31,3 +31,7 @@ TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 # The following must be defined if the "WithMPF" example in motorExApp is to
 # be built.
 #MPF_GPIB=$(SUPPORT)/mpfGpib/mpfGpib1-4
+
+# The following must be defined for the MXmotor device driver.
+#MX=$(SUPPORT)/mx/mx
+
