@@ -305,7 +305,7 @@ STATIC int set_status(int card, int signal)
     /* Parse motor velocity? */
     /* NEEDS WORK */
 
-    motor_info->velocity = 0.;
+    motor_info->velocity = 0;
 
     if (!(motor_info->status & RA_DIRECTION))
         motor_info->velocity *= -1;
@@ -319,7 +319,7 @@ STATIC int set_status(int card, int signal)
     {
         strcpy(buff, nodeptr->postmsgptr);
         strcat(buff, "\r");
-        send_mess(card, buff, NULL);
+        send_mess(card, buff, (char) NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -593,7 +593,7 @@ STATIC int motor_init()
 {
     struct controller *brdptr;
     struct PM304controller *cntrl;
-    int card_index, motor_index, arg3, arg4;
+    int card_index, motor_index;
     char buff[BUFF_SIZE];
     char command[20];
     int total_axis = 0;
