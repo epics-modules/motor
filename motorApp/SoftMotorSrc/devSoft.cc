@@ -2,9 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:08:59 $
+Last Modified:	$Date: 2002-10-31 21:07:25 $
 */
 
 /*
@@ -35,6 +35,8 @@ Last Modified:	$Date: 2002-10-21 21:08:59 $
  *		    - In soft_rdbl_func(), reset motor record's target to actual
  *		      position after last readback if motion was not initiated
  *		      by this record.
+ * .01 10-29-02 rls - LOCK field added to prevent synchronization due to
+ *		      changing readback.
  */
 
 
@@ -57,10 +59,10 @@ NOTES...
 
 #define	STATIC	static
 
-STATIC long update(struct motorRecord *);
+STATIC CALLBACK_VALUE update(struct motorRecord *);
 STATIC long start(struct motorRecord *);
 STATIC RTN_STATUS build(motor_cmnd, double *, struct motorRecord *);
-STATIC long end(struct motorRecord *);
+STATIC RTN_STATUS end(struct motorRecord *);
 STATIC void soft_process(struct motorRecord *);
 
 
@@ -74,7 +76,7 @@ struct motor_dset devMotorSoft =
 };
 
 
-STATIC long update(struct motorRecord *mr)
+STATIC CALLBACK_VALUE update(struct motorRecord *mr)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 
@@ -96,17 +98,17 @@ STATIC long update(struct motorRecord *mr)
 
 STATIC long start(struct motorRecord *mr)
 {
-    return((long) 0);
+    return((long) OK);
 }
 
 
-STATIC long end(struct motorRecord *mr)
+STATIC RTN_STATUS end(struct motorRecord *mr)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 
     if (ptr->default_done_behavior == YES)
 	mr->msta = RA_DONE;
-    return((long) 0);
+    return(OK);
 }
 
 

@@ -2,9 +2,9 @@
 FILENAME...	devSoftAux.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:09:00 $
+Last Modified:	$Date: 2002-10-31 21:06:24 $
 */
 
 /*
@@ -44,6 +44,7 @@ in the same file; each defines (redefines) the DBR's.
 #include	<epicsThread.h>
 
 #include	"motorRecord.h"
+#include	"motor.h"
 #include	"devSoft.h"
 
 #define	STATIC	static
@@ -98,7 +99,7 @@ long soft_init(void *after)
 	if (dbCaTask_tid == 0)
 	{
 	    errMessage(0, "cannot find dbCaLink task.");
-	    return(-1);
+	    return(ERROR);
 	}
 	soft_motor_priority = epicsThreadGetPriority(dbCaTask_tid);
 	soft_motor_priority -= 1;
@@ -108,7 +109,7 @@ long soft_init(void *after)
     }
     else
 	epicsEventSignal(soft_motor_sem);	/* Start soft_motor_task(). */
-    return((long) 0);
+    return(OK);
 }
 
 
@@ -121,10 +122,10 @@ long soft_init_record(void *arg)
     static int count = 0;
 
     if (++count > MAXMSGS)
-	return(-1);
+	return(ERROR);
 
     if (!epicsRingPointerPush(soft_motor_msgQ, (void *) mr))
-        status = -1;
+        status = ERROR;
 
     /* Allocate space for private field. */
     mr->dpvt = (struct soft_private *) malloc(sizeof(struct soft_private));
