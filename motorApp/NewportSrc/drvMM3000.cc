@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:33:20 $
+Last Modified:	$Date: 2004-07-28 20:05:42 $
 */
 
 /*
@@ -54,6 +54,7 @@ Last Modified:	$Date: 2004-07-16 19:33:20 $
  *			an error message and retries.
  * .09 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
  * .10 07/09/04 rls - removed unused <driver>Setup() argument.
+ * .11 07/28/04 rls - "epicsExport" debug variable.
  *
  */
 
@@ -95,6 +96,7 @@ Last Modified:	$Date: 2004-07-16 19:33:20 $
     #ifdef	DEBUG
 	volatile int drvMM3000debug = 0;
 	#define Debug(l, f, args...) { if(l<=drvMM3000debug) printf(f,## args); }
+	epicsExportAddress(int, drvMM3000debug);
     #else
 	#define Debug(l, f, args...)
     #endif
@@ -597,7 +599,7 @@ STATIC int motor_init()
     char *tok_save, *bufptr;
     int total_axis = 0;
     int status;
-    bool success_rtn;
+    asynStatus success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
     
@@ -620,7 +622,7 @@ STATIC int motor_init()
 	/* Initialize communications channel */
 	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 
                           cntrl->asyn_address, &cntrl->pasynUser);
-	if (success_rtn == true)
+	if (success_rtn == asynSuccess)
 	{
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
@@ -631,14 +633,14 @@ STATIC int motor_init()
 	    /* Return value is length of response string */
 	}
 
-	if (success_rtn == true && status > 0)
+	if (success_rtn == asynSuccess && status > 0)
 	{
 	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;
 	    send_mess(card_index, STOP_ALL, (char) NULL);	/* Stop all motors */
 	    send_mess(card_index, GET_IDENT, (char) NULL);	/* Read controller ID string */
 	    recv_mess(card_index, buff, 1);
-	    strncpy(brdptr->ident, &buff[0], 50);  /* Skip "VE" */
+	    strncpy(brdptr->ident, &buff[0], MAX_IDENT_LEN);  /* Skip "VE" */
 
 	    send_mess(card_index, "RC", (char) NULL);
 	    recv_mess(card_index, buff, 1);

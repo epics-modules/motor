@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:33:21 $
+Last Modified:	$Date: 2004-07-28 20:05:42 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -41,6 +41,7 @@ Last Modified:	$Date: 2004-07-16 19:33:21 $
  * .04 05-23-03	rls Converted to R3.14.x.
  * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .06 07/09/04 rls removed unused <driver>Setup() argument.
+ * .07 07/28/04 rls "epicsExport" debug variable.
  */
 
 
@@ -81,6 +82,7 @@ Last Modified:	$Date: 2004-07-16 19:33:21 $
     #ifdef	DEBUG
 	volatile int drvPM500debug = 0;
 	#define Debug(l, f, args...) { if(l<=drvPM500debug) printf(f,## args); }
+	epicsExportAddress(int, drvPM500debug);
     #else
 	#define Debug(l, f, args...)
     #endif
@@ -505,7 +507,7 @@ static int motor_init()
     char buff[BUFF_SIZE];
     int total_axis = 0;
     int status, digits;
-    bool success_rtn;
+    asynStatus success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
 
@@ -527,7 +529,7 @@ static int motor_init()
 	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 
                           cntrl->asyn_address, &cntrl->pasynUser);
 
-	if (success_rtn == true)
+	if (success_rtn == asynSuccess)
 	{
 	    /* flush any junk at input port - should not be any data available */
             pasynSyncIO->flush(cntrl->pasynUser);
@@ -564,7 +566,7 @@ static int motor_init()
 	    /* Return value is length of response string */
 	}
 
-	if (success_rtn == true && status > 0)
+	if (success_rtn == asynSuccess && status > 0)
 	{
 	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;

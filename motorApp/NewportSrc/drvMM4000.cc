@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:33:21 $
+Last Modified:	$Date: 2004-07-28 20:05:42 $
 */
 
 /*
@@ -53,6 +53,7 @@ Last Modified:	$Date: 2004-07-16 19:33:21 $
  *                  on the first poll after a move is begun with the motor power off.
  * .09 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .10 07/09/04 rls removed unused <driver>Setup() argument.
+ * .11 07/28/04 rls "epicsExport" debug variable.
  */
 
 
@@ -91,6 +92,7 @@ Last Modified:	$Date: 2004-07-16 19:33:21 $
     #ifdef	DEBUG
 	volatile int drvMM4000debug = 0;
 	#define Debug(l, f, args...) { if(l<=drvMM4000debug) printf(f,## args); }
+	epicsExportAddress(int, drvMM4000debug);
     #else
 	#define Debug(l, f, args...)
     #endif
@@ -620,7 +622,7 @@ static int motor_init()
     char *tok_save, *pos_ptr;
     int total_axis = 0;
     int status, model_num, digits;
-    int success_rtn;
+    asynStatus success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
 
