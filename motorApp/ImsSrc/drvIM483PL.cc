@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-15 20:39:56 $
+Last Modified:	$Date: 2004-07-16 19:13:22 $
 */
 
 /*****************************************************************
@@ -19,7 +19,6 @@ described on the COPYRIGHT_UniversityOfChicago file included as part
 of this distribution.
 **********************************************************************/
 
-
 /*
  *      Original Author: Ron Sluiter
  *      Date: 07/10/2000
@@ -32,8 +31,9 @@ of this distribution.
  *		    set_status() based on (new - old) commanded position.
  *		    Removed support for "ASCII record separator (IS2) = /x1E"
  *		    from send_mess().
- * .04  03/07/03 rls R3.14 conversion.
- * .05  02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
+ * .04 03/07/03 rls R3.14 conversion.
+ * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
+ * .06 07/01/04 rls Converted from MPF to asyn.
  */
 
 /*
@@ -53,10 +53,8 @@ DESIGN LIMITATIONS...
 #include <drvSup.h>
 #include "motor.h"
 #include "drvIM483.h"
-#include "serialIO.h"
+#include "asynSyncIO.h"
 #include "epicsExport.h"
-
-#define STATIC static
 
 /* Read Limit Status response values. */
 #define L_ALIMIT	1
@@ -84,19 +82,19 @@ DESIGN LIMITATIONS...
 
 /* --- Local data. --- */
 int IM483PL_num_cards = 0;
-STATIC char IM483PL_axis[8] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+static char IM483PL_axis[8] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
 
 /*----------------functions-----------------*/
-STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int card, char const *com, char c);
-STATIC int set_status(int card, int signal);
+int recv_mess(int, char *, int);
+RTN_STATUS send_mess(int card, char const *com, char c);
+static int set_status(int card, int signal);
 static long report(int level);
 static long init();
-STATIC int motor_init();
-STATIC void query_done(int, int, struct mess_node *);
+static int motor_init();
+static void query_done(int, int, struct mess_node *);
 
 /*----------------functions-----------------*/
 
@@ -138,7 +136,7 @@ struct
 
 epicsExportAddress(drvet, drvIM483PL);
 
-STATIC struct thread_args targs = {SCAN_RATE, &IM483PL_access};
+static struct thread_args targs = {SCAN_RATE, &IM483PL_access};
 
 /*********************************************************
  * Print out driver status report
@@ -162,19 +160,8 @@ static long report(int level)
 		struct IM483controller *cntrl;
 
 		cntrl = (struct IM483controller *) brdptr->DevicePrivate;
-		switch (cntrl->port_type)
-		{
-		case RS232_PORT: 
-		    printf("    IM483PL controller %d port type = RS-232, id: %s \n", 
-			   card, 
-			   brdptr->ident);
-		    break;
-		default:
-		    printf("    IM483PL controller %d port type = Unknown, id: %s \n", 
-			   card, 
-			   brdptr->ident);
-		    break;
-		}
+	    	printf("    IM483PL controller #%d, port=%s, id: %s \n", card,
+		       cntrl->asyn_port, brdptr->ident);
 	    }
 	}
     }
@@ -199,7 +186,7 @@ static long init()
 }
 
 
-STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
+static void query_done(int card, int axis, struct mess_node *nodeptr)
 {
 }
 
@@ -233,7 +220,7 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 *   										*
 ********************************************************************************/
 
-STATIC int set_status(int card, int signal)
+static int set_status(int card, int signal)
 {
     struct IM483controller *cntrl;
     struct mess_node *nodeptr;
@@ -386,7 +373,7 @@ exit:
 /* send a message to the IM483PL board		     */
 /* send_mess()			                     */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
+RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
@@ -418,7 +405,8 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
-    cntrl->serialInfo->serialIOSend(local_buff, strlen(local_buff), SERIAL_TIMEOUT);
+    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
+		       COMM_TIMEOUT);
 
     return(OK);
 }
@@ -428,11 +416,12 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 /* receive a message from the IM483 board           */
 /* recv_mess()			                     */
 /*****************************************************/
-STATIC int recv_mess(int card, char *com, int flag)
+int recv_mess(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
     int timeout;
-    int len=0;
+    int flush = 0;
+    int len = 0;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -443,9 +432,10 @@ STATIC int recv_mess(int card, char *com, int flag)
     if (flag == FLUSH)
 	timeout = 0;
     else
-	timeout	= SERIAL_TIMEOUT;
+	timeout	= COMM_TIMEOUT;
 
-    len = cntrl->serialInfo->serialIORecv(com, BUFF_SIZE, (char *) "\n", timeout);
+    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n",
+                            1, flush, timeout);
 
     if (len == 0)
 	com[0] = '\0';
@@ -463,8 +453,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 RTN_STATUS
 IM483PLSetup(int num_cards,	/* maximum number of controllers in system.  */
-	    int num_channels,	/* NOT Used. */
-	    int scan_rate)	/* polling rate - 1/60 sec units.  */
+	     int scan_rate)	/* polling rate - 1/60 sec units.  */
 {
     int itera;
 
@@ -500,10 +489,8 @@ IM483PLSetup(int num_cards,	/* maximum number of controllers in system.  */
 /* IM483PLConfig()                                    */
 /*****************************************************/
 RTN_STATUS
-IM483PLConfig(int card,	/* card being configured */
-              int port_type,      /* N/A - always RS232_PORT */
-	      int location,       /* MPF server location */
-              const char *name)   /* MPF server task name */
+IM483PLConfig(int card,		/* card being configured */
+              const char *name)	/* asyn server task name */
 {
     struct IM483controller *cntrl;
 
@@ -514,9 +501,7 @@ IM483PLConfig(int card,	/* card being configured */
     motor_state[card]->DevicePrivate = malloc(sizeof(struct IM483controller));
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
 
-    cntrl->port_type = RS232_PORT;
-    cntrl->serial_card = location;
-    strcpy(cntrl->serial_task, name);
+    strcpy(cntrl->asyn_port, name);
     return(OK);
 }
 
@@ -527,7 +512,7 @@ IM483PLConfig(int card,	/* card being configured */
 /* device support.                                   */
 /* motor_init()			                     */
 /*****************************************************/
-STATIC int motor_init()
+static int motor_init()
 {
     struct controller *brdptr;
     struct IM483controller *cntrl;
@@ -535,7 +520,7 @@ STATIC int motor_init()
     char buff[BUFF_SIZE];
     int total_axis = 0;
     int status;
-    bool success_rtn;
+    asynStatus success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
 
@@ -555,17 +540,13 @@ STATIC int motor_init()
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = false;
-	cntrl->serialInfo = new serialIO(cntrl->serial_card,
-				     cntrl->serial_task, &success_rtn);
+	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
 
-	if (success_rtn == true)
+	if (success_rtn == asynSuccess)
 	{
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
-	    do
-		recv_mess(card_index, buff, FLUSH);
-	    while (strlen(buff) != 0);
+            pasynSyncIO->flush(cntrl->pasynUser);
     
 	    for (total_axis = 0; total_axis < MAX_AXES; total_axis++)
 	    {
@@ -577,7 +558,7 @@ STATIC int motor_init()
 	    brdptr->total_axis = total_axis;
 	}
 
-	if (success_rtn == true && total_axis > 0)
+	if (success_rtn == asynSuccess && total_axis > 0)
 	{
 	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;

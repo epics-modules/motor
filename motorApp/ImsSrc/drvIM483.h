@@ -3,9 +3,9 @@ FILENAME...	drvIM483.h
 USAGE... This file contains driver "include" information that is specific to
 	Intelligent Motion Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-27 21:57:54 $
+Last Modified:	$Date: 2004-07-16 19:12:08 $
 */
 
 /*
@@ -37,39 +37,35 @@ Last Modified:	$Date: 2003-05-27 21:57:54 $
  *
  * Modification Log:
  * -----------------
- * .01	02/10/2000	rls     copied from drvMM4000.h
+ * .01	02/10/2000 rls copied from drvMM4000.h
+ * .02  07/01/2004 rls Converted from MPF to asyn.
  */
 
 #ifndef	INCdrvIM483h
 #define	INCdrvIM483h 1
 
 #include "motordrvCom.h"
-#include "serialIO.h"
+#include "asynDriver.h"
+#include "asynSyncIO.h"
 
-#define GPIB_TIMEOUT	2000 /* Command timeout in msec */
-#define SERIAL_TIMEOUT	2000 /* Command timeout in msec */
+#define COMM_TIMEOUT 2 /* Timeout in seconds */
 
 
 /* IM483 specific data is stored in this structure. */
 struct IM483controller
 {
-    int port_type;		/* GPIB_PORT or RS232_PORT */
-    serialIO *serialInfo;  	/* For RS-232 */
-    int gpib_link;
-    int gpib_address;
-    struct gpibInfo *gpibInfo;  /* For GPIB */
-    int serial_card;            /* Card on which Hideos is running */
-    char serial_task[20];       /* Hideos task name for serial port */
+    asynUser *pasynUser;  	/* For RS-232 */
+    char asyn_port[80];     	/* asyn port name */
     CommStatus status;		/* Controller communication status. */
 };
 
 /* Function prototypes. */
-extern RTN_STATUS IM483SMSetup(int, int, int);
-extern RTN_STATUS IM483PLSetup(int, int, int);
-extern RTN_STATUS  MDriveSetup(int, int, int);
-extern RTN_STATUS IM483SMConfig(int, int, int, const char *);
-extern RTN_STATUS IM483PLConfig(int, int, int, const char *);
-extern RTN_STATUS  MDriveConfig(int, int, int, const char *);
+extern RTN_STATUS IM483SMSetup(int, int);
+extern RTN_STATUS IM483PLSetup(int, int);
+extern RTN_STATUS  MDriveSetup(int, int);
+extern RTN_STATUS IM483SMConfig(int, const char *);
+extern RTN_STATUS IM483PLConfig(int, const char *);
+extern RTN_STATUS  MDriveConfig(int, const char *);
 
 #endif	/* INCdrvIM483h */
 

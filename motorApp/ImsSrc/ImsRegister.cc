@@ -2,9 +2,9 @@
 FILENAME...	ImsRegister.cc
 USAGE...	Register IMS motor device driver shell commands.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 19:34:13 $
+Last Modified:	$Date: 2004-07-16 19:10:15 $
 */
 
 /*****************************************************************
@@ -32,53 +32,48 @@ extern "C"
 
 // Ims Setup arguments
 static const iocshArg setupArg0 = {"Max. controller count", iocshArgInt};
-static const iocshArg setupArg1 = {"N/A", iocshArgInt};
-static const iocshArg setupArg2 = {"Polling rate", iocshArgInt};
+static const iocshArg setupArg1 = {"Polling rate", iocshArgInt};
 // Ims Config arguments
 static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
-static const iocshArg configArg1 = {"N/A - always RS232_PORT", iocshArgInt};
-static const iocshArg configArg2 = {"MPF server location", iocshArgInt};
-static const iocshArg configArg3 = {"MPF server task name", iocshArgString};
+static const iocshArg configArg1 = {"asyn port name", iocshArgString};
 
 
-static const iocshArg * const IM483SetupArgs[3] = {&setupArg0, &setupArg1,
-    &setupArg2};
-static const iocshArg * const IM483ConfigArgs[4] = {&configArg0, &configArg1,
-    &configArg2, &configArg3};
+static const iocshArg * const IM483SetupArgs[2]  = {&setupArg0,  &setupArg1};
+static const iocshArg * const IM483ConfigArgs[2] = {&configArg0, &configArg1};
 
-static const iocshFuncDef setupIM483SM = {"IM483SMSetup", 3, IM483SetupArgs};
-static const iocshFuncDef setupIM483PL = {"IM483PLSetup", 3, IM483SetupArgs};
-static const iocshFuncDef setupMDrive  = {"MDriveSetup",  3, IM483SetupArgs};
+static const iocshFuncDef setupIM483SM = {"IM483SMSetup", 2, IM483SetupArgs};
+static const iocshFuncDef setupIM483PL = {"IM483PLSetup", 2, IM483SetupArgs};
+static const iocshFuncDef setupMDrive  = {"MDriveSetup",  2, IM483SetupArgs};
 
-static const iocshFuncDef configIM483SM = {"IM483SMConfig", 4, IM483ConfigArgs};
-static const iocshFuncDef configIM483PL = {"IM483PLConfig", 4, IM483ConfigArgs};
-static const iocshFuncDef configMDrive  = {"MDriveConfig",  4, IM483ConfigArgs};
+static const iocshFuncDef configIM483SM = {"IM483SMConfig", 2, IM483ConfigArgs};
+static const iocshFuncDef configIM483PL = {"IM483PLConfig", 2, IM483ConfigArgs};
+static const iocshFuncDef configMDrive  = {"MDriveConfig",  2, IM483ConfigArgs};
 
 static void setupSMCallFunc(const iocshArgBuf *args)
 {
-    IM483SMSetup(args[0].ival, args[1].ival, args[2].ival);
+    IM483SMSetup(args[0].ival, args[1].ival);
 }
 static void setupPLCallFunc(const iocshArgBuf *args)
 {
-    IM483PLSetup(args[0].ival, args[1].ival, args[2].ival);
+    IM483PLSetup(args[0].ival, args[1].ival);
 }
 static void setupMDriveCallFunc(const iocshArgBuf *args)
 {
-    MDriveSetup(args[0].ival, args[1].ival, args[2].ival);
+    MDriveSetup(args[0].ival, args[1].ival);
 }
 
 
 static void configSMCallFunc(const iocshArgBuf *args)
 {
-    IM483SMConfig(args[0].ival, args[1].ival, args[2].ival, args[3].sval);
+    IM483SMConfig(args[0].ival, args[1].sval);
 }
 static void configPLCallFunc(const iocshArgBuf *args)
 {
-    IM483PLConfig(args[0].ival, args[1].ival, args[2].ival, args[3].sval);
+    IM483PLConfig(args[0].ival, args[1].sval);
 }
 static void configMDriveCallFunc(const iocshArgBuf *args)
 {
-    MDriveConfig(args[0].ival, args[1].ival, args[2].ival, args[3].sval);
+    MDriveConfig(args[0].ival, args[1].sval);
 }
 
 
