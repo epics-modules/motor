@@ -27,6 +27,9 @@ sysCplusEnable=1
 
 ld < WithMPFLib
 
+# !MPF-1-CPU! #ld < GpibHideosLocal.o
+# !MPF-2-CPU! #ld < GpibHideosRemote.o
+
 cd startup
 dbLoadDatabase("../../dbd/WithMPFApp.dbd")
 dbLoadRecords("../../db/WithMPF.db")
