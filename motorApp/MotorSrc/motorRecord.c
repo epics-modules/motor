@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.13 $
+Version:	$Revision: 1.14 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-08-22 18:37:27 $
+Last Modified:	$Date: 2001-10-02 23:16:52 $
 */
 
 /*
@@ -108,30 +108,34 @@ Last Modified:	$Date: 2001-08-22 18:37:27 $
  *                    the motor's moving.)  Set .res field in init_record().
  *                    Set retry deadband according to .mres, .eres, and .bdst.
  * .34  05-30-97 tmm  v3.3 Relative moves know about motor granularity.
- * .35  10-11-99 rls  v4.0 Enforce finite state machine on jog request, jogging,
+ * .35 10-11-99 rls v4.0 Enforce finite state machine on jog request, jogging,
  *			stopping a jog and backlash after jogging.  These
  *			modifications fix the "runaway jog" problem discovered
  *			with the MM4000 device support using serial communication
  *			when the user "hammers" on the jog request.
- * .36  02-14-01 rls  - Changed logic in do_work() so that the stop command is
+ * .36 02-14-01 rls - Changed logic in do_work() so that the stop command is
  *		      always sent to the controller when the STOP field is
  *		      activated; but, the MIP field in only set to the "stop"
  *		      state if the current state is not STOP or DONE.
- *		      - Eliminated unused MIP_LOAD_ER.
- *		      - Added Mark Rivers Soft Channel changes as a
+ *		    - Eliminated unused MIP_LOAD_ER.
+ *		    - Added Mark Rivers Soft Channel changes as a
  *			conditionial option; DMR_SOFTMOTOR_MODS.
- * .37  06-05-01 rls  Bug fix for MIP left in MOVE state if valid target
+ * .37 06-05-01 rls Bug fix for MIP left in MOVE state if valid target
  *		      position is followed by a target position that violates
  *		      the travel limit, while 1st move is in progress.
  *		      Modified do_work() to set DMOV true only if MIP is DONE.
- * .38  06-08-01 rls  Bug fix for MIP left in STOP state if STOP set TRUE or
+ * .38 06-08-01 rls Bug fix for MIP left in STOP state if STOP set TRUE or
  *		      SPMG set to STOP in between MIP set to RETRY in
  *		      maybeRetry() and MIP set to MOVE in do_work().  Modified
  *		      do_work() STOP and SPMG processing to set MIP <- DONE and
  *		      DMOV <- TRUE when MIP == RETRY.
+ * .39 10-02-01 rls - V4.5
+ *		    - Removed erroneous setting of PP <- TRUE in init_record().
+ *		    - Replaced PDIF with CDIR field (see README V4.5 item #2).
+ *		    - Simplified "tdir" logic in process().
  */
 
-#define VERSION 4.4
+#define VERSION 4.5
 
 #include	<vxWorks.h>
 #include	<stdlib.h>
@@ -640,7 +644,6 @@ STATIC long init_record(motorRecord * pmr, int pass)
     MARK(M_MOVN);
     pmr->lspg = pmr->spmg = motorSPMG_Go;
     MARK(M_SPMG);
-    pmr->pp = TRUE;
     pmr->diff = pmr->dval - pmr->drbv;
     MARK(M_DIFF);
     pmr->rdif = NINT(pmr->diff / pmr->mres);
@@ -719,7 +722,7 @@ STATIC long postProcess(motorRecord * pmr)
     int dir = dir_positive ? 1 : -1;
 #endif
 
-    Debug(3, "postProcess: entry\n", 0);
+    Debug(3, "postProcess: entry\n");
 
     pmr->pp = FALSE;
 
@@ -1145,6 +1148,7 @@ STATIC long process(motorRecord * pmr)
 
 	if (pmr->movn)
 	{
+	    int sign_rdif = (pmr->rdif >= 0) ? 0 : 1;
             mmap_field mmap_bits;
 
 	    mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
@@ -1156,16 +1160,10 @@ STATIC long process(motorRecord * pmr)
 	     * don't get midcourse corrections since we don't know their
 	     * destinations.) v3.2: Don't do this check with an encoder or
 	     * readback device.
-	     */
-
-	    if (!pmr->ueip &&
-		!pmr->urip &&
+	     */	    
+	    if ((sign_rdif != pmr->cdir) &&
 		(fabs(pmr->diff) > 2 * (fabs(pmr->bdst) + pmr->rdbd)) &&
-		(pmr->pdif != 0) &&
-		((pmr->rdif & 0x80000000) != (pmr->pdif & 0x80000000)) &&
-		(pmr->rvel != 0) &&
-		(MARKED(M_RRBV)) &&
-		((pmr->mip == MIP_RETRY) || (pmr->mip == MIP_MOVE)))
+		(pmr->mip == MIP_RETRY || pmr->mip == MIP_MOVE))
 	    {
 
 		/* We're going in the wrong direction. Readback problem? */
@@ -1216,8 +1214,7 @@ STATIC long process(motorRecord * pmr)
 		}
 	    }
 	}
-	pmr->pdif = pmr->rdif;
-    }				/* if (process_reason == CALLBACK_DATA) */
+    }	/* END of (process_reason == CALLBACK_DATA). */
 
     /* check for soft-limit violation */
     if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
@@ -1498,7 +1495,7 @@ STATIC long do_work(motorRecord * pmr)
     const unsigned short monitor_mask = DBE_VALUE;
     mmap_field mmap_bits;
 
-    Debug(3, "do_work: begin\n", 0);
+    Debug(3, "do_work: begin\n");
     
     /*** Process Stop/Pause/Go_Pause/Go switch. ***
     *
@@ -2131,6 +2128,7 @@ STATIC long do_work(motorRecord * pmr)
 		    }
 		    WRITE_MSG(GO, NULL);
 		}
+		pmr->cdir = (pmr->diff >= 0.0) ? 0 : 1;
 		SEND_MSG();
 	    }
 	}
