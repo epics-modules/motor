@@ -2,15 +2,15 @@
 FILENAME...	motorRecord.c
 USAGE...	Record Support Routines for the Motor record.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:43 $
+Last Modified:	$Date: 2000-06-14 15:07:47 $
 */
 
 /*
  *		Original Author: Jim Kowalkowski
- *		Current Author:	Tim Mooney
- *		Date: 06/14/95
+ *		Previous Author: Tim Mooney
+ *		Current Author: Ron Sluiter
  *
  *	Experimental Physics and Industrial Control System (EPICS)
  *
@@ -115,7 +115,7 @@ Last Modified:	$Date: 2000-02-08 22:18:43 $
  *			when the user "hammers" on the jog request.
  */
 
-#define VERSION 4.1
+#define VERSION 4.2
 
 #include	<vxWorks.h>
 #include	<stdlib.h>
@@ -3054,10 +3054,72 @@ STATIC void load_pos(motorRecord * pmr)
     SEND_MSG();
 }
 
+/*
+ * FUNCTION... static void check_speed_and_resolution(motorRecord *)
+ *
+ * INPUT ARGUMENTS...
+ *	1 - motor record pointer
+ *
+ * RETRUN ARGUMENTS... None.
+ *
+ * LOGIC...
+ *
+ *  IF SREV negative.
+ *	Set SREV <- 200.
+ *  ENDIF
+ *  IF UREV nonzero.
+ *	Set MRES < - |UREV| / SREV.
+ *  ENDIF
+ *  IF MRES zero.
+ *	Set MRES <- 1.0
+ *  ENDIF
+ *  IF UREV does not match MRES.
+ *	Set UREV <- MRES * SREV.
+ *  ENDIF
+ *
+ *  IF SMAX > 0.
+ *	Set VMAX <- SMAX * |UREV|.
+ *  ELSE IF VMAX > 0.
+ *	Set SMAX <- VMAX / |UREV|.
+ *  ELSE
+ *	Set both SMAX and VMAX to zero.
+ *  ENDIF
+ *
+ *  IF SBAS is nonzero.
+ *	Range check; 0 < SBAS < SMAX.
+ *	Set VBAS <- SBAS * |UREV|.
+ *  ELSE
+ *	Range check; 0 < VBAS < VMAX.
+ *	Set SBAS <- VBAS / |UREV|.
+ *  ENDIF
+ *
+ *  IF S is nonzero.
+ *	Range check; SBAS < S < SMAX.
+ *	VELO <- S * |UREV|.
+ *  ELSE
+ *	Range check; VBAS < VELO < VMAX.
+ *	S < - VELO / |UREV|.
+ *  ENDIF
+ *
+ *  IF SBAK is nonzero.
+ *	Range check; SBAS < SBAK < SMAX.
+ *	BVEL <- SBAK * |UREV|.
+ *  ELSE
+ *	Range check; VBAS < BVEL < VMAX.
+ *	SBAK <- BVEL / |UREV|.
+ *  ENDIF
+ *
+ *  IF ACCL or BACC is zero.
+ *	Set ACCL/BACC to 0.1
+ *  ENDIF
+ *
+ *  NORMAL RETURN.
+ */
+
 STATIC void check_speed_and_resolution(motorRecord * pmr)
 {
     const unsigned short monitor_mask = DBE_VALUE;
-    double temp_dbl, fabs_urev = fabs(pmr->urev);
+    double fabs_urev = fabs(pmr->urev);
 
     /*
      * Reconcile two different ways of specifying speed, resolution, and make
@@ -3089,45 +3151,58 @@ STATIC void check_speed_and_resolution(motorRecord * pmr)
 	MARK_AUX(M_UREV);
     }
 
-    /* SBAS (revolutions/sec) <--> VBAS (EGU/sec) */
-    range_check(pmr, &pmr->vbas, 0.0, pmr->vmax);
-
-    if ((pmr->urev != 0.0) && (pmr->sbas != (temp_dbl = pmr->vbas / fabs_urev)))
-    {
-	pmr->sbas = temp_dbl;
-	db_post_events(pmr, &pmr->sbas, monitor_mask);
-    }
-
     /* SMAX (revolutions/sec) <--> VMAX (EGU/sec) */
-    if (pmr->vmax < 0.0)
-    {
-	pmr->vmax = 0.0;
-	db_post_events(pmr, &pmr->vmax, monitor_mask);
-    }
+    if (pmr->smax > 0.0)
+	pmr->vmax = pmr->smax * fabs_urev;
+    else if (pmr->vmax > 0.0)
+	pmr->smax = pmr->vmax / fabs_urev;
+    else
+	pmr->smax = pmr->vmax = 0.0;
+    db_post_events(pmr, &pmr->vmax, monitor_mask);
+    db_post_events(pmr, &pmr->smax, monitor_mask);
 
-    if ((pmr->urev != 0.0) && (pmr->smax != (temp_dbl = pmr->vmax / fabs_urev)))
+    /* SBAS (revolutions/sec) <--> VBAS (EGU/sec) */
+    if (pmr->sbas != 0.0)
     {
-	pmr->smax = temp_dbl;
-	db_post_events(pmr, &pmr->smax, monitor_mask);
+	range_check(pmr, &pmr->sbas, 0.0, pmr->smax);
+	pmr->vbas = pmr->sbas * fabs_urev;
     }
+    else
+    {
+	range_check(pmr, &pmr->vbas, 0.0, pmr->vmax);
+	pmr->sbas = pmr->vbas / fabs_urev;
+    }
+    db_post_events(pmr, &pmr->vbas, monitor_mask);
+    db_post_events(pmr, &pmr->sbas, monitor_mask);
+
     
     /* S (revolutions/sec) <--> VELO (EGU/sec) */
-    range_check(pmr, &pmr->velo, pmr->vbas, pmr->vmax);
-
-    if ((pmr->urev != 0.0) && (pmr->s != (temp_dbl = pmr->velo / fabs_urev)))
+    if (pmr->s != 0.0)
     {
-	pmr->s = temp_dbl;
-	db_post_events(pmr, &pmr->s, monitor_mask);
+	range_check(pmr, &pmr->s, pmr->sbas, pmr->smax);
+	pmr->velo = pmr->s * fabs_urev;
     }
+    else
+    {
+	range_check(pmr, &pmr->velo, pmr->vbas, pmr->vmax);
+	pmr->s = pmr->velo / fabs_urev;
+    }
+    db_post_events(pmr, &pmr->velo, monitor_mask);
+    db_post_events(pmr, &pmr->s, monitor_mask);
 
     /* SBAK (revolutions/sec) <--> BVEL (EGU/sec) */
-    range_check(pmr, &pmr->bvel, pmr->vbas, pmr->vmax);
-
-    if ((pmr->urev != 0.0) && (pmr->sbak != (temp_dbl = pmr->bvel / fabs_urev)))
+    if (pmr->sbak != 0.0)
     {
-	pmr->sbak = temp_dbl;
-	db_post_events(pmr, &pmr->sbak, monitor_mask);
+	range_check(pmr, &pmr->sbak, pmr->sbas, pmr->smax);
+	pmr->bvel = pmr->sbak * fabs_urev;
     }
+    else
+    {
+	range_check(pmr, &pmr->bvel, pmr->vbas, pmr->vmax);
+	pmr->sbak = pmr->bvel / fabs_urev;
+    }
+    db_post_events(pmr, &pmr->sbak, monitor_mask);
+    db_post_events(pmr, &pmr->bvel, monitor_mask);
 
     /* Sanity check on acceleration time. */
     if (pmr->accl == 0.0)
