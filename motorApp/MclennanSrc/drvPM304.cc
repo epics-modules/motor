@@ -35,7 +35,7 @@
 #include 	<drvSup.h>
 #include        "motor.h"
 #include        "drvPM304.h"
-#include        "asynSyncIO.h"
+#include        "asynOctetSyncIO.h"
 #include 	"epicsExport.h"
 
 #define STATIC static
@@ -366,7 +366,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
         strcpy(buff, p);
         strcat(buff, OUTPUT_TERMINATOR);
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
-	pasynSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), response,
+	pasynOctetSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), response,
 			    BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT, &eomReason);
         Debug(2, "send_mess: card %d, response=%s\n", card, response);
     }
@@ -411,7 +411,7 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
                             INPUT_TERMINATOR, 1, flush, timeout, &eomReason);
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
@@ -481,7 +481,7 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
         strcpy(buff, p);
         strcat(buff, OUTPUT_TERMINATOR);
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, buff);
-	len = pasynSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), 
+	len = pasynOctetSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), 
                          response, BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT,
                          &eomReason);
     }
@@ -611,9 +611,9 @@ STATIC int motor_init()
         /* Initialize communications channel */
         success_rtn = false;
 
-        status = pasynSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
+        status = pasynOctetSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
         success_rtn = (status == asynSuccess);
-        Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n", cntrl->port, success_rtn, cntrl->pasynUser);
+        Debug(1, "motor_init, return from pasynOctetSyncIO->connect for port %s = %d, pasynUser=%p\n", cntrl->port, success_rtn, cntrl->pasynUser);
 
         if (success_rtn == true)
         {

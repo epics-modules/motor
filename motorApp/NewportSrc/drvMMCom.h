@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-04-20 20:52:12 $
+Last Modified:	$Date: 2004-08-17 21:28:22 $
 */
 
 /*
@@ -46,7 +46,7 @@ Last Modified:	$Date: 2004-04-20 20:52:12 $
 #include "motor.h"
 #include "motordrvCom.h"
 #include "asynDriver.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 
 enum MM_model
 {

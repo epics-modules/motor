@@ -20,7 +20,7 @@
 #define	INCdrvPM304h 1
 
 #include "motordrvCom.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 
 /* PM304 default profile. */
 

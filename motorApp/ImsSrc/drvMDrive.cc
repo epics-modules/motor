@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-07-30 04:17:25 $
+Last Modified:	$Date: 2004-08-17 21:28:30 $
 */
 
 /*
@@ -57,7 +57,7 @@ DESIGN LIMITATIONS...
 #include <drvSup.h>
 #include "motor.h"
 #include "drvIM483.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 #include "epicsExport.h"
 
 #define MDrive_NUM_CARDS	8
@@ -433,7 +433,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
-    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
+    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
 		       COMM_TIMEOUT);
 
     return(OK);
@@ -464,7 +464,7 @@ static int eat_garbage(int card, char *com, int flag)
 	timeout	= COMM_TIMEOUT;
 
     /* Get the response. */      
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
                             2, flush, timeout, &eomReason);
 
     Debug(2, "eat_garbage(): len = %i\n", len);
@@ -502,7 +502,7 @@ static int recv_mess(int card, char *com, int flag)
 	timeout	= COMM_TIMEOUT;
 
     /* Get the response. */      
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
                             1, flush, timeout, &eomReason);
     
     if (len == 0)
@@ -610,13 +610,13 @@ static int motor_init()
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
 
 	if (success_rtn == asynSuccess)
 	{
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
-            pasynSyncIO->flush(cntrl->pasynUser);
+            pasynOctetSyncIO->flush(cntrl->pasynUser);
     
 	    for (total_axis = 0; total_axis < MAX_AXES; total_axis++)
 	    {

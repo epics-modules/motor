@@ -3,9 +3,9 @@ FILENAME...	drvIM483.h
 USAGE... This file contains driver "include" information that is specific to
 	Intelligent Motion Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.5 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:12:08 $
+Version:	$Revision: 1.6 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-08-17 21:28:30 $
 */
 
 /*
@@ -46,7 +46,7 @@ Last Modified:	$Date: 2004-07-16 19:12:08 $
 
 #include "motordrvCom.h"
 #include "asynDriver.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 
 #define COMM_TIMEOUT 2 /* Timeout in seconds */
 

@@ -22,7 +22,7 @@
 #include "motor.h"
 #include "AcsRegister.h"
 #include "drvMCB4B.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 #include "epicsExport.h"
 
 #define STATIC static
@@ -302,7 +302,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
     Debug(2, "send_mess: sending message to card %d, message=%s\n",\
                      card, buff);
 
-    pasynSyncIO->write(cntrl->pasynUser, buff, strlen(buff), TIMEOUT);
+    pasynOctetSyncIO->write(cntrl->pasynUser, buff, strlen(buff), TIMEOUT);
 
     return (OK);
 }
@@ -338,7 +338,7 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
-    len = pasynSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE, 
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE, 
                             "\r", 1, flush, timeout, &eomReason);
 
     /* The response from the MCB4B is terminated with CR.  Remove */
@@ -460,8 +460,8 @@ STATIC int motor_init()
 
         /* Initialize communications channel */
 
-	success_rtn = pasynSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
-        Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n",\
+	success_rtn = pasynOctetSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
+        Debug(1, "motor_init, return from pasynOctetSyncIO->connect for port %s = %d, pasynUser=%p\n",\
               cntrl->port, success_rtn, cntrl->pasynUser);
 
         if (success_rtn == 0)
@@ -470,7 +470,7 @@ STATIC int motor_init()
 
             /* Send a message to the board, see if it exists */
             /* flush any junk at input port - should not be any data available */
-            pasynSyncIO->flush(cntrl->pasynUser);
+            pasynOctetSyncIO->flush(cntrl->pasynUser);
             do
             {
                 send_mess(card_index, "#00X", 0);

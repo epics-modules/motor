@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-07-30 04:05:06 $
+Last Modified:	$Date: 2004-08-17 21:28:21 $
 */
 
 /*
@@ -50,7 +50,7 @@ Last Modified:	$Date: 2004-07-30 04:05:06 $
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 #include "epicsExport.h"
 
 #define READ_POSITION   "%.2dTP"
@@ -381,7 +381,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 	
-    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), 
+    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), 
                        SERIAL_TIMEOUT);
     
     return(OK);
@@ -413,7 +413,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
  *	    IF input "flag" indicates NOT flushing the input buffer.
  *		Set receive timeout nonzero.
  *	    ENDIF
- *	    Call pasynSyncIO->read().
+ *	    Call pasynOctetSyncIO->read().
  *
  *	    NOTE: The ESP300 sometimes responds to an MS command with an error
  *		message (see ESP300 User's Manual Appendix A).  This is an
@@ -423,7 +423,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
  *	    IF input "com" buffer length is > 3 characters, AND, the 1st
  *			character is an "E" (Maybe this an unsolicited error
  *			message response?).
- *	    	Call pasynSyncIO->read().
+ *	    	Call pasynOctetSyncIO->read().
  *	    ENDIF
  *	    BREAK
  *    ENDSWITCH
@@ -449,7 +449,7 @@ static int recv_mess(int card, char *com, int flag)
         flush = 0;
 	timeout	= SERIAL_TIMEOUT;
     }
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
                             "\n", 1, flush, timeout, &eomReason);
     if (len > 3 && com[0] == 'E')
     {
@@ -457,7 +457,7 @@ static int recv_mess(int card, char *com, int flag)
 
 	error = strtol(&com[1], NULL, 0);
 	if (error >= 35 && error <= 42)
-	    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
+	    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
                                     "\n", 1, flush, timeout, &eomReason);
     }
 
@@ -573,14 +573,14 @@ static int motor_init()
 	cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
                           cntrl->asyn_address, &cntrl->pasynUser);
 
 	if (success_rtn == asynSuccess)
 	{
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
-            pasynSyncIO->flush(cntrl->pasynUser);
+            pasynOctetSyncIO->flush(cntrl->pasynUser);
     
 	    send_mess(card_index, GET_IDENT, (char) NULL);
 	    status = recv_mess(card_index, buff, 1);  

@@ -3,9 +3,9 @@ FILENAME...	drvPI.h
 USAGE... This file contains driver "include" information that is specific to
 Physik Instrumente (PI) GmbH & Co. motor controller driver support.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:38:52 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-08-17 21:29:52 $
 */
 
 /*
@@ -47,7 +47,7 @@ Last Modified:	$Date: 2004-07-16 19:38:52 $
 #include "motor.h"
 #include "motordrvCom.h"
 #include "asynDriver.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 
 #define COMM_TIMEOUT	2 /* Timeout in seconds. */
 

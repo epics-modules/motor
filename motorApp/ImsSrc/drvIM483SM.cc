@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.11 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-07-30 04:17:07 $
+Last Modified:	$Date: 2004-08-17 21:28:30 $
 */
  
 /*****************************************************************
@@ -54,7 +54,7 @@ DESIGN LIMITATIONS...
 #include <drvSup.h>
 #include "motor.h"
 #include "drvIM483.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 #include "epicsExport.h"
 
 /* Read Limit Status response values. */
@@ -411,7 +411,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
-    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
+    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
 		       COMM_TIMEOUT);
 
     return(OK);
@@ -441,7 +441,7 @@ static int recv_mess(int card, char *com, int flag)
     else
 	timeout	= COMM_TIMEOUT;
 
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
                             2, flush, timeout, &eomReason);
 
     if (len < 2)
@@ -546,7 +546,7 @@ static int motor_init()
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
 
 	if (success_rtn == asynSuccess)
 	{
@@ -555,7 +555,7 @@ static int motor_init()
 
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
-            pasynSyncIO->flush(cntrl->pasynUser);
+            pasynOctetSyncIO->flush(cntrl->pasynUser);
     
 	    send_mess(card_index, "\003", (char) NULL);	/* Reset device. */
 	    epicsThreadSleep(1.0);

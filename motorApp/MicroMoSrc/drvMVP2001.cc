@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.cc
 USAGE...	Motor record driver level support for MicroMo
 		MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-07-30 04:22:14 $
+Last Modified:	$Date: 2004-08-17 21:29:31 $
 */
 
 /*
@@ -471,7 +471,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct MVPcontroller *) motor_state[card]->DevicePrivate;
-    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
+    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
 		       COMM_TIMEOUT);
     return(OK);
 }
@@ -501,9 +501,9 @@ static int recv_mess(int card, char *com, int flag)
     else
 	timeout	= COMM_TIMEOUT;
 
-    len = pasynSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE, (char *) "\n",
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE, (char *) "\n",
                             1, flush, timeout, &eomReason);
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n",
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n",
                             1, flush, timeout, &eomReason);
 
     Debug(5, "bytes: 1st call: %d\t2nd call: %d\n", lenTemp, len);
@@ -610,7 +610,7 @@ static int motor_init()
 	cntrl = (struct MVPcontroller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
 
 	if (success_rtn == asynSuccess)
 	{

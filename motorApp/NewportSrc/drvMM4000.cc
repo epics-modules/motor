@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-07-30 04:05:06 $
+Last Modified:	$Date: 2004-08-17 21:28:21 $
 */
 
 /*
@@ -64,7 +64,7 @@ Last Modified:	$Date: 2004-07-30 04:05:06 $
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 #include "epicsExport.h"
 
 #define READ_RESOLUTION "TU;"
@@ -491,7 +491,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
-    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), 
+    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), 
                        TIMEOUT);
 
     return(OK);
@@ -529,7 +529,7 @@ static int recv_mess(int card, char *com, int flag)
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
     timeout	= TIMEOUT;
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r", 
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r", 
                             1, flush, timeout, &eomReason);
 
     if (len <= 0)
@@ -642,7 +642,7 @@ static int motor_init()
 	cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
                                       cntrl->asyn_address, &cntrl->pasynUser);
 
 	if (success_rtn == asynSuccess)
@@ -651,7 +651,7 @@ static int motor_init()
 
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
-            pasynSyncIO->flush(cntrl->pasynUser);
+            pasynOctetSyncIO->flush(cntrl->pasynUser);
 
 	    do
 	    {

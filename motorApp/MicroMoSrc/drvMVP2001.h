@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.h
 USAGE... This file contains driver "include" information that is specific to
 	 the MicroMo MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:25:33 $
+Version:	$Revision: 1.5 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-08-17 21:29:32 $
 */
 
 /*
@@ -77,7 +77,7 @@ Last Modified:	$Date: 2004-07-16 19:25:33 $
 #include "motor.h"
 #include "motordrvCom.h"
 #include "asynDriver.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 
 #define COMM_TIMEOUT 2			/* Command timeout in seconds. */
 

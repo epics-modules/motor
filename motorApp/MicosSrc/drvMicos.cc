@@ -310,7 +310,7 @@ static RTN_STATUS send_mess(int card, const char *com, char c)
     strcat(buff, OUTPUT_TERMINATOR);
     Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
-    pasynSyncIO->write(cntrl->pasynUser, buff, strlen(buff), COMM_TIMEOUT);
+    pasynOctetSyncIO->write(cntrl->pasynUser, buff, strlen(buff), COMM_TIMEOUT);
 
     return (OK);
 }
@@ -343,7 +343,7 @@ static int recv_mess(int card, char *com, int flag)
     else
         timeout = COMM_TIMEOUT;
     
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\3",
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\3",
                             1, flush, timeout, &eomReason);
 
     /* The response from the Micos is terminated with <CR><LF><ETX>.  Remove */
@@ -468,7 +468,7 @@ static int motor_init()
 
         /* Initialize communications channel */
         errind = false;
-	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
         
 	if (success_rtn == asynSuccess)
         {

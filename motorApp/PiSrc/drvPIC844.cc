@@ -3,9 +3,9 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-07-30 04:20:56 $
+Last Modified:	$Date: 2004-08-17 21:29:52 $
 */
 
 /*
@@ -428,7 +428,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct PIC844controller *) motor_state[card]->DevicePrivate;
-    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
+    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
 		       COMM_TIMEOUT);
 
     return(OK);
@@ -458,7 +458,7 @@ static int recv_mess(int card, char *com, int flag)
     else
 	timeout	= COMM_TIMEOUT;
 
-    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n", 
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n", 
                             1, flush, timeout, &eomReason);
 
     if (len == 0)
@@ -569,7 +569,7 @@ static int motor_init()
 	cntrl = (struct PIC844controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
                                       cntrl->asyn_address, &cntrl->pasynUser);
 
 	if (success_rtn == asynSuccess)

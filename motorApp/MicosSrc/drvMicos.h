@@ -19,7 +19,7 @@
 #include "motor.h"
 #include "motordrvCom.h"
 #include "asynDriver.h"
-#include "asynSyncIO.h"
+#include "asynOctetSyncIO.h"
 
 /* Micos default profile. */
 
