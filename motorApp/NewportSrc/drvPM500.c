@@ -31,8 +31,9 @@
  *
  * Modification Log:
  * -----------------
- * .01  11-19-98        mlr     Initial development, based on drvMM4000.c
- * .02  06-02-00	rls	integrated into standard motor record
+ * .01 11-19-98 mlr Initial development, based on drvMM4000.c
+ * .02 06-02-00	rls integrated into standard motor record
+ * .03 10/02/01 rls allow one retry after a communication error.
  */
 
 
@@ -248,13 +249,24 @@ STATIC int set_status(int card, int signal)
     send_mess(card, buff, NULL);
     status = recv_mess(card, response, 1);
     if (status > 0)
+    {
 	cntrl->status = NORMAL;
+	motor_info->status &= ~CNTRL_COMM_ERR;
+    }
     else
     {
-	cntrl->status = COMM_ERR;
-	motor_info->status |= RA_PROBLEM;	/* This terminates the transaction. */
-	rtn_state = 1;
-	goto exit;
+	if (cntrl->status == NORMAL)
+	{
+	    cntrl->status = RETRY;
+	    return(0);
+	}
+	else
+	{
+	    cntrl->status = COMM_ERR;
+	    motor_info->status |= CNTRL_COMM_ERR;
+	    motor_info->status |= RA_PROBLEM;
+	    return(1);
+	}
     }
 
     status_char = response[1];
@@ -345,12 +357,6 @@ STATIC int set_status(int card, int signal)
 	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
-
-exit:
-    if (cntrl->status == COMM_ERR)
-	motor_info->status |= CNTRL_COMM_ERR;
-    else
-	motor_info->status &= ~CNTRL_COMM_ERR;
 
     return(rtn_state);
 }
