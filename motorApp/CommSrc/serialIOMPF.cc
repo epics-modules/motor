@@ -2,9 +2,9 @@
 FILENAME...	serialIOMPF.cc
 USAGE...	Interface between MPF and motor record device drivers.
 
-Version:	$Revision: 1.9 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:06:24 $
+Version:	$Revision: 1.10 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2003-09-02 05:10:01 $
 */
 
 /*
@@ -258,7 +258,7 @@ int serialIO::serialIOSendRecv(char const *outbuff, int outbuff_len,
         goto done;
     }
     
-//    Debug(2, "serialIOSendRecv: %.2f sent: %s\n", (double)tickGet()/CLOCKS_PER_SEC, outbuff);
+    Debug(2, "serialIOSendRecv: sent: %s\n", outbuff);
 
 
     /* Wait for 2x the timeout or MIN_MSGQ_WAIT; which ever is greater. */
@@ -276,6 +276,8 @@ int serialIO::serialIOSendRecv(char const *outbuff, int outbuff_len,
 	epicsThreadSleep(0.1);
     }   
     
+    pmess = (Message *) msgQId->pop();
+    
     if (pmess->getType() != messageTypeChar8Array) {
         epicsPrintf("serialIOSendRecv: incorrect message type received = %d\n",
                                 pmess->getType());
@@ -292,7 +294,7 @@ int serialIO::serialIOSendRecv(char const *outbuff, int outbuff_len,
     // Append a NULL byte to the response if there is room
     if (nrec < inbuff_len) inbuff[nrec] = '\0';
 
-//    Debug(2,"serialIOSendRecv: %.2f received %d bytes: \n%s\n", (double)tickGet()/CLOCKS_PER_SEC, nrec, inbuff);
+    Debug(2,"serialIOSendRecv: received %d bytes: \n%s\n", nrec, inbuff);
 cleanup:
     delete prm;
 
