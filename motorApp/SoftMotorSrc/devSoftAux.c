@@ -2,9 +2,9 @@
 FILENAME...	devSoftAux.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-11 17:34:35 $
+Last Modified:	$Date: 2002-06-25 20:05:26 $
 */
 
 /*
@@ -101,7 +101,7 @@ long soft_init_record(struct motorRecord *mr)
     /* Allocate space for private field. */
     mr->dpvt = (struct soft_private *) malloc(sizeof(struct soft_private));
     ptr = (struct soft_private *) mr->dpvt;
-    ptr->dinp_value = (mr->dmov == 0) ? MOVING : DONE; /* Must match after initialzation. */
+    ptr->dinp_value = (mr->dmov == 0) ? SOFTMOVE : DONE; /* Must match after initialzation. */
     ptr->initialized = OFF;
 
     cbptr = &ptr->callback;
@@ -124,13 +124,14 @@ STATIC int soft_motor_task(int a1, int a2, int a3, int a4, int a5, int a6,
 
     while (msgQReceive(soft_motor_msgQ, (char *) &mr, 4, NO_WAIT) != ERROR)
     {
+	struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 	if (mr->dinp.value.constantStr == NULL)
 	{
-	    struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 	    ptr->default_done_behavior = ON;
 	}
 	else
 	{
+	    ptr->default_done_behavior = OFF;
 	    SEVCHK(ca_search(mr->dinp.value.pv_link.pvname, &dinp),
 		   "ca_search() failure");
 	    SEVCHK(ca_add_event(DBR_SHORT, dinp, soft_dinp, mr, NULL),"ca_add_event() failure");
