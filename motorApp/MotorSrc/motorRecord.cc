@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-06 21:09:09 $
+Last Modified:	$Date: 2003-06-16 15:32:43 $
 */
 
 /*
@@ -3379,7 +3379,6 @@ INPUT...	parm - pointer to parameter to be range check.
 */
 static void range_check(motorRecord *pmr, float *parm_ptr, double min, double max)
 {
-    const unsigned short monitor_mask = DBE_VAL_LOG;
     bool changed = false;
     double parm_val = *parm_ptr;
 
