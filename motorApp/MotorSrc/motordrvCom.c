@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:18:30 $
+Last Modified:	$Date: 2000-06-14 15:11:37 $
 */
 
 /*
@@ -246,20 +246,18 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 	    (node->signal >= 0 && node->signal < (*tabptr->card_array)[node->card]->total_axis))
 	{
 	    struct mess_info *motor_info;
+	    struct controller *brdptr;
 
 	    motor_info = &((*tabptr->card_array)[node->card]->motor_info[node->signal]);
 	    motor_motion = motor_info->motor_motion;
+	    brdptr = (*tabptr->card_array)[node->card];
 
 	    switch (node->type)
 	    {
-	    case QUERY:
-		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
-		(*tabptr->getmsg) (node->card, node->message, 1);
-		callbackRequest((CALLBACK *) node);
-		break;
-
 	    case VELOCITY:
 		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
+		if (brdptr->cmnd_response == ON)
+		    (*tabptr->getmsg) (node->card, node->message, 1);
 
 		/*
 		 * this is tricky - another motion is here there is a very
@@ -286,6 +284,8 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 
 	    case MOTION:
 		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
+		if (brdptr->cmnd_response == ON)
+		    (*tabptr->getmsg) (node->card, node->message, 1);
 
 		/* this is tricky - see velocity comment */
 		if (!motor_motion)	/* if NULL */
@@ -332,11 +332,15 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 
 	    case MOVE_TERM:
 		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
+		if (brdptr->cmnd_response == ON)
+		    (*tabptr->getmsg) (node->card, node->message, 1);
 		motor_free(node, tabptr);	/* free message buffer */
 		break;
 
 	    default:
 		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
+		if (brdptr->cmnd_response == ON)
+		    (*tabptr->getmsg) (node->card, node->message, 1);
 		motor_free(node, tabptr);	/* free message buffer */
 		motor_info->status_delay = tick;
 		break;
@@ -418,7 +422,6 @@ int motor_send(struct mess_node *u_msg, struct driver_table *tabptr, char *cmnd_
 	    break;
 	case VELOCITY:
 	case IMMEDIATE:
-	case QUERY:
 	case INFO:
 	    break;
 	default:
