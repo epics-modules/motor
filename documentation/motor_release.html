@@ -16,13 +16,24 @@ EPICS R3.13.2 and above.
 <center>
 <h3>
 <u>Modifications to Existing Features</u></h3></center>
-Three errors in the OMS VME58 driver were found.&nbsp; All the errors caused
-the same problem.&nbsp; Namely, erroneous retries occurred intermittently
+
+<h4>
+<b><u>OMS VME58 retry problem</u></b></h4>
+Several errors in the OMS VME58 driver were found.&nbsp; All the errors
+caused the same problem.&nbsp; Namely, erroneous retries occurred intermittently
 when multiple axes were commanded to move on the same controller.&nbsp;
 This error occurred because old position data was being passed back from
 the driver after Done was detected.&nbsp; The erroneous intermittent retries
 occurred more often when the Oms setup parameters called for a high frequency
-(e.g., 60 Hz) "polling" rate and Oms interrupts were enabled.
+(e.g., 60 Hz) "polling" rate and OMS board interrupts were enabled.
+<h4>
+<b><u>OMS Stop problem</u></b></h4>
+A problem with issuing a stop command (via either the STOP&nbsp;or SPMG
+field) was found with <b>all</b> OMS boards and <b>all </b>versions of
+the OMS device drivers.&nbsp; The root cause of this problem is a statment
+in the OMS manual <i>that is not entirely correct</i>; the AC and VL commands
+are not completely queued.
+<br>&nbsp;
 <br>&nbsp;
 <center>
 <h1>
@@ -422,7 +433,8 @@ or through the individual PID gain parameter fields (i.e., PCOF, ICOF,
 DCOF).&nbsp; Let the motor controller PID parameters be represented by
 CKP, CKI and CKD; then the relationship between these two methods is as
 follows:
-<blockquote><u>For the MM4000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<blockquote><u>For the MM4000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 <u>For all OMS controllers</u></blockquote>
 
 <ul>
