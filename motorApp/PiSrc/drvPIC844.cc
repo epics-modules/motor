@@ -3,9 +3,9 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-16 15:18:27 $
+Last Modified:	$Date: 2004-07-16 19:40:25 $
 */
 
 /*
@@ -37,6 +37,7 @@ Last Modified:	$Date: 2004-03-16 15:18:27 $
  * -----------------
  * .01 12/17/03 rls - copied from drvIM483PL.cc
  * .02 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
+ * .03 07/12/04 rls - Converted from MPF to asyn.
  */
 
 /*
@@ -53,7 +54,6 @@ DESIGN LIMITATIONS...
 #include <drvSup.h>
 #include "motor.h"
 #include "drvPI.h"
-#include "serialIO.h"
 #include "epicsExport.h"
 
 #define GET_IDENT "*IDN?"
@@ -149,19 +149,8 @@ static long report(int level)
 		struct PIC844controller *cntrl;
 
 		cntrl = (struct PIC844controller *) brdptr->DevicePrivate;
-		switch (cntrl->port_type)
-		{
-		case RS232_PORT: 
-		    printf("    PIC844 controller %d port type = RS-232, id: %s \n", 
-			   card, 
-			   brdptr->ident);
-		    break;
-		default:
-		    printf("    PIC844 controller %d port type = Unknown, id: %s \n", 
-			   card, 
-			   brdptr->ident);
-		    break;
-		}
+	    	printf("    PIC844 controller #%d, port=%s, id: %s \n", card,
+		       cntrl->asyn_port, brdptr->ident);
 	    }
 	}
     }
@@ -439,11 +428,8 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct PIC844controller *) motor_state[card]->DevicePrivate;
-    if (cntrl->port_type == GPIB_PORT)
-	;
-//	gpibIOSend(cntrl->gpibInfo, local_buff, strlen(local_buff), GPIB_TIMEOUT);
-    else
-	cntrl->serialInfo->serialIOSend(local_buff, strlen(local_buff), SERIAL_TIMEOUT);
+    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
+		       COMM_TIMEOUT);
 
     return(OK);
 }
@@ -456,6 +442,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 static int recv_mess(int card, char *com, int flag)
 {
     struct PIC844controller *cntrl;
+    int flush = 0;
     int timeout;
     int len=0;
 
@@ -468,21 +455,10 @@ static int recv_mess(int card, char *com, int flag)
     if (flag == FLUSH)
 	timeout = 0;
     else
-	timeout	= SERIAL_TIMEOUT;
+	timeout	= COMM_TIMEOUT;
 
-    switch (cntrl->port_type)
-    {
-	case GPIB_PORT:
-	    if (flag != FLUSH)
-		timeout	= GPIB_TIMEOUT;
-//	    len = gpibIORecv(cntrl->gpibInfo, com, BUFF_SIZE, (char *) "\n", timeout);
-	    break;
-	case RS232_PORT:
-	    if (flag != FLUSH)
-		timeout	= SERIAL_TIMEOUT;
-	    len = cntrl->serialInfo->serialIORecv(com, BUFF_SIZE, (char *) "\n", timeout);
-	    break;
-    }
+    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n", 
+                            1, flush, timeout);
 
     if (len == 0)
 	com[0] = '\0';
@@ -503,7 +479,6 @@ static int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 RTN_STATUS
 PIC844Setup(int num_cards,	/* maximum number of controllers in system.  */
-	    int num_channels,	/* NOT Used. */
 	    int scan_rate)	/* polling rate - 1/60 sec units.  */
 {
     int itera;
@@ -540,10 +515,9 @@ PIC844Setup(int num_cards,	/* maximum number of controllers in system.  */
 /* PIC844Config()                                    */
 /*****************************************************/
 RTN_STATUS
-PIC844Config(int card,		/* card being configured */
-	     int port_type,     /* GPIB_PORT or RS232_PORT */
-	     int location,      /* MPF server location */
-	     const char *name)  /* MPF server task name */
+PIC844Config(int card,		 /* card being configured */
+             const char *name,   /* asyn port name */
+             int addr)           /* asyn address (GPIB) */
 {
     struct PIC844controller *cntrl;
 
@@ -554,23 +528,8 @@ PIC844Config(int card,		/* card being configured */
     motor_state[card]->DevicePrivate = malloc(sizeof(struct PIC844controller));
     cntrl = (struct PIC844controller *) motor_state[card]->DevicePrivate;
 
-    switch (port_type)
-    {
-/*
-    case GPIB_PORT:
-        cntrl->port_type = port_type;
-        cntrl->gpib_link = location;
-        cntrl->gpib_address = addr2;
-        break;
-*/
-    case RS232_PORT:
-	cntrl->port_type = port_type;
-	cntrl->serial_card = location;
-	strcpy(cntrl->serial_task, name);
-	break;
-    default:
-        return (ERROR);
-    }
+    strcpy(cntrl->asyn_port, name);
+    cntrl->asyn_address = addr;
     return(OK);
 }
 
@@ -589,7 +548,7 @@ static int motor_init()
     char buff[BUFF_SIZE];
     int total_axis;
     int status;
-    bool success_rtn;
+    asynStatus success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
 
@@ -609,24 +568,10 @@ static int motor_init()
 	cntrl = (struct PIC844controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = false;
-	switch (cntrl->port_type)
-	{
-/*
-	    case GPIB_PORT:
-		cntrl->gpibInfo = gpibIOInit(cntrl->gpib_link,
-					     cntrl->gpib_address);
-		if (cntrl->gpibInfo == NULL)
-		    success_rtn = true;
-		break;
-*/
-	    case RS232_PORT:
-		cntrl->serialInfo = new serialIO(cntrl->serial_card,
-					     cntrl->serial_task, &success_rtn);
-		break;
-	}
+	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 
+                                      cntrl->asyn_address, &cntrl->pasynUser);
 
-	if (success_rtn == true)
+	if (success_rtn == asynSuccess)
 	{
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
@@ -638,7 +583,7 @@ static int motor_init()
 	    status = recv_mess(card_index, buff, 1);
 	}
 
-	if (success_rtn == true && status > 0)
+	if (success_rtn == asynSuccess && status > 0)
 	{
 	    strcpy(brdptr->ident, &buff[0]);
 	    brdptr->localaddr = (char *) NULL;
