@@ -3,7 +3,7 @@ TOP = ../..
 include $(TOP)/configure/CONFIG
 
 # The following are used for debugging messages.
-USR_CXXFLAGS += -DDEBUG
+#USR_CXXFLAGS += -DDEBUG
 
 INC += gpibIO.h serialIO.h
 
