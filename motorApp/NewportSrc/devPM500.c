@@ -3,9 +3,9 @@ FILENAME...	devPM500.c
 USAGE...	Motor record device level support for the Newport PM500 motor
 		controller.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-01 22:44:18 $
+Last Modified:	$Date: 2002-07-05 19:25:38 $
 */
 
 /*
@@ -108,6 +108,7 @@ static int PM500_table[] = {
     IMMEDIATE,	/* SET_VELOCITY */
     IMMEDIATE,	/* SET_ACCEL */
     IMMEDIATE,	/* GO */
+    IMMEDIATE,	/* SET_ENC_RATIO */
     INFO,	/* GET_INFO */
     MOVE_TERM,	/* STOP_AXIS */
     VELOCITY,	/* JOG */
@@ -279,6 +280,13 @@ STATIC long PM500_build_trans(motor_cmnd command, double *parms, struct motorRec
 	    /* 
 	     * The PM500 starts moving immediately on move commands, GO command
 	     * does nothing
+	     */
+	    break;
+	
+	case SET_ENC_RATIO:
+	    /*
+	     * The PM500 does not have the concept of encoder ratio, ignore this
+	     * command
 	     */
 	    break;
 	
