@@ -24,6 +24,7 @@ ifdef MPF_SERIAL
 DIRS += NewportSrc
 DIRS += ImsSrc
 DIRS += AcsSrc
+DIRS += MclennanSrc
 endif
 
 DIRS += Db
