@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.c
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-01 22:37:19 $
+Last Modified:	$Date: 2002-07-05 19:37:50 $
 */
 
 /*
@@ -43,10 +43,12 @@ Last Modified:	$Date: 2002-04-01 22:37:19 $
  * .04a 02-19-97  tmm	fixed for EPICS 3.13
  * .05  05-14-01  rls	Support for jog velocity and acceleration commands.
  *			Added "CA" to home and jog commands so JVEL does not
- *			see done flag from previous operation.
- * .06 03-27-02   rls - Eliminated RES. All input positions, velocities and
- *			accelerations are in motor steps.
- *		      - Eliminated SET_ENC_RATIO.
+ *			  see done flag from previous operation.
+ * .06  03-27-02  rls   Eliminated RES. All input positions, velocities and
+ *			  accelerations are in motor steps.
+ * .07  07-05-02  rls   Work around for OMS bug that ignores MR+/-1.
+ *                      Use OMS UU command to support reference is always in
+ *			  motor steps.
  */
 
 #include	<vxWorks.h>
@@ -81,6 +83,7 @@ struct motor_table const oms_table[] =
     {IMMEDIATE, " VL", 1},	/* SET_VELO */
     {IMMEDIATE, " AC", 1},	/* SET_ACCEL */
     {IMMEDIATE, " GD", 0},	/* jps: from GO to GD */
+    {IMMEDIATE, " ER", 2},	/* SET_ENC_RATIO */
     {INFO,      " ",   0},	/* GET_INFO */
     {MOVE_TERM, " ST", 0},	/* STOP_AXIS */
     {VELOCITY, " CA JG", 1},	/* JOG */
@@ -266,13 +269,15 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    }
 	    
 	    /* Code to hide Oms58 moving off limit switch problem. */
-	    if (((mr->msta & RA_OVERTRAVEL) != 0) && (command == MOVE_ABS || command == MOVE_REL))
+	    if (((mr->msta & RA_PLUS_LS) || (mr->msta & RA_MINUS_LS)) &&
+		(command == MOVE_ABS || command == MOVE_REL))
 	    {
 		if (mr->rdif >= 0)
 		    strcat(motor_call->message, " MP");
 		else
 		    strcat(motor_call->message, " MM");
 	    }
+
 	    /* put in command */
 	    strcat(motor_call->message, oms_table[command].command);
    
@@ -306,12 +311,32 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 			    sprintf(buffer, "%ld", vel);
 			}
 			break;
+			
+		    case MOVE_REL:
+			{
+			    /* Code around OMS bug that ignores MR+/-1. */
+			    long relmove;
+
+			    relmove = NINT(parms[itera]);
+			    if (relmove == 1 || relmove == -1)
+				sprintf(buffer, "%ld.5", relmove);
+			    else
+				sprintf(buffer, "%ld", relmove);
+			}
+			break;
 
 		    default:
 			sprintf(buffer, "%ld", NINT(parms[itera]));
 		}
 		strcat(motor_call->message, buffer);
 	    }
+
+	    if (command == SET_ENC_RATIO)
+	    {
+		sprintf(buffer, " UU%f", parms[0]/parms[1]);
+		strcat(motor_call->message, buffer);
+	    }
+
 	}
     }
     return(rtnind);
