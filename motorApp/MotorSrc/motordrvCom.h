@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:19:55 $
+Last Modified:	$Date: 2000-06-14 15:09:40 $
 */
 
 /*
@@ -75,7 +75,6 @@ use as the driver transaction type.
 #define MOTION    (unsigned char)3	/* 'm' will produce motion updates */
 #define VELOCITY  (unsigned char)4	/* 'v' make motion updates till MOVE_TERM */
 #define INFO      (unsigned char)5	/* 'f' get curr motor/encoder pos and stat */
-#define QUERY     (unsigned char)6	/* 'q' specialty type, not needed */
 
 /* Macros used to set/clear bits in any_motor_in_motion variable. */
 #define SET_MM_ON(v,a)  v|=(1<<a)
@@ -181,6 +180,8 @@ struct controller	/* Controller board information. */
     char ident[50];	/* identification string for this card */
     int total_axis;	/* total axis on this card */
     char *localaddr;	/* address of this card */
+    BOOLEAN cmnd_response; /* Indicates controller communication response
+	    * to VELOCITY, MOTION and MOVE_TERM type commands. */
     struct irqdatastr *irqdata;	/* VME44 only; IRQ data. */
     void *DevicePrivate; /* Pointer to device specific structure.  For
 		MM3000/4000 = (struct MMcontroller *); otherwise Null. */
