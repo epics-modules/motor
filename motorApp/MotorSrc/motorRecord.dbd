@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.4 $
+# Version:		$Revision: 1.5 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2001-06-05 15:43:52 $
+# Last Modified:	$Date: 2001-10-02 23:12:16 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -539,8 +539,8 @@ recordtype(motor) {
 		prompt("Difference rval-rrbv")
 		special(SPC_NOMOD)
 	}
-	field(PDIF,DBF_LONG) {
-		prompt("Previous RDIF")
+	field(CDIR,DBF_SHORT) {
+		prompt("Command direction")
 		special(SPC_NOMOD)
 	}
 	field(RRBV,DBF_LONG) {
@@ -592,7 +592,7 @@ recordtype(motor) {
 		prompt("Post process command")
 		special(SPC_NOMOD)
 		interest(2)
-		initial("1")
+		initial("0")
 	}
 	field(MIP,DBF_USHORT) {
 		prompt("Motion In Progress")
