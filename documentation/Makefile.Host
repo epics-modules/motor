@@ -1,0 +1,6 @@
+TOP = ../..
+include $(TOP)/config/CONFIG_APP
+
+HTMLS += motorRecord.html
+
+include $(TOP)/config/RULES.Host

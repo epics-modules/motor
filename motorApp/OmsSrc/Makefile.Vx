@@ -1,0 +1,30 @@
+# Makefile.Vx
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+# The following are used for debugging messages.
+#USR_CFLAGS += -DDEBUG
+#USR_CXXFLAGS += -DDEBUG
+
+# The following is required for all OMS device drivers.
+SRCS.c += ../devOmsCom.c
+LIBOBJS += devOmsCom.o
+	
+# The following is required for the OMS VME8/44 (i.e., devOMS) device driver.
+SRCS.c += ../devOms.c ../drvOms.c
+LIBOBJS += devOms.o drvOms.o
+
+# The following is required for the OMS VME58 (i.e., devOms58) device driver.
+SRCS.c += ../devOms58.c ../drvOms58.c
+LIBOBJS += devOms58.o drvOms58.o
+
+LIBNAME = OmsLib
+
+#Note that the command line that builds the
+#library $(LIBNAME) may be HUGE (>3kB)
+#
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE

@@ -1,0 +1,14 @@
+# RELEASE - Location of external products
+#
+# (Architecture dependent declarations should go into RELEASE.<arch>)
+#
+# Note: This file will be scanned to automatically generate
+#       include path definitions etc.
+#       The order of the following declarations will be retained
+#       within those definitions.
+#
+# Add your declarations here
+
+SUPPORT=/usr/local/iocapps/R3.13.2/support
+EPICS_BASE=$(SUPPORT)/base/3-13-2
+HIDEOS=/usr/local/hideos/v3.1/install

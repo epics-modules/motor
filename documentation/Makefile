@@ -1,0 +1,3 @@
+TOP=..
+include $(TOP)/config/CONFIG_APP
+include $(EPICS_BASE)/config/RULES_ARCHS

@@ -1,0 +1,6 @@
+# Newport MM3000 and MM4000/5 Driver support.
+device(motor,VME_IO,devMM3000,"MM3000")
+device(motor,VME_IO,devMM4000,"MM4000")
+driver(drvMM3000)
+driver(drvMM4000)
+

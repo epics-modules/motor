@@ -1,0 +1,30 @@
+# Makefile.Host
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+#----------------------------------------------------
+#  Optimization of DB files using dbst (default: NO)
+#DB_OPT = YES
+
+#----------------------------------------------------
+#  Optimization needs the name of the appropriate
+#  dbd file (compare with ../src/Makefile.Vx)
+#DBDNAME = motor.dbd
+
+#----------------------------------------------------
+# Add databases, templates, substitutions like this
+#DB += motor.db
+
+#----------------------------------------------------
+# Declare template files which do not show up in DB
+#USES_TEMPLATE += motor.template
+
+#----------------------------------------------------
+# The following lines are for local dbd expansion
+#DBDEXPAND = motorInclude.dbd
+
+include $(TOP)/config/RULES.Db
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE

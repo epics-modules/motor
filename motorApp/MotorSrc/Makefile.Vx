@@ -1,0 +1,18 @@
+# Makefile.Vx
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+# The following is required for all motor record configurations.
+SRCS.c += ../motorRecord.c ../motordevCom.c ../motordrvCom.c
+LIBOBJS = motorRecord.o motordevCom.o motordrvCom.o
+
+LIBNAME = MotorLib
+
+#Note that the command line that builds the
+#library $(LIBNAME) may be HUGE (>3kB)
+#
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE

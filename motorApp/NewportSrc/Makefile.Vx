@@ -1,0 +1,36 @@
+# Makefile.Vx
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+# The following is required for  Hideos.
+USR_INCLUDES += -I$(HIDEOS)/include
+USR_CXXFLAGS += -DOS_EQ_VXWORKS
+
+# The following are used for debugging messages.
+#USR_CFLAGS += -DDEBUG
+#USR_CXXFLAGS += -DDEBUG
+
+# The following is required for all Newport Motion Master device drivers.
+# NOTE: GPIB and/or serial communication require Hideos support.
+SRCS.c += ../gpibIO.c
+SRCS.cc += ../serialIO.cc
+LIBOBJS += gpibIO.o serialIO.o
+
+# The following is required for the Newport MM3000 (i.e., MM3000) device driver.
+SRCS.c += ../devMM3000.c ../drvMM3000.c
+LIBOBJS += devMM3000.o drvMM3000.o
+
+# The following is required for the Newport MM4000/5 (i.e., MM4000) device driver.
+SRCS.c += ../devMM4000.c ../drvMM4000.c
+LIBOBJS += devMM4000.o drvMM4000.o
+
+LIBNAME = NewportLib
+
+#Note that the command line that builds the
+#library $(LIBNAME) may be HUGE (>3kB)
+#
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
