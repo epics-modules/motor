@@ -11,6 +11,7 @@
  * .01  02-06-2004   rls  Eliminate erroneous "Motor motion timeout ERROR".
  * .02  02-12-2004   rls  Copied from drvMicos.c. Upgraded from R3.14.x
  * .03  02-17-2004   rls  Removed Debug calls to tickGet().
+ * .04  07-12-2004   rls  Converted from MPF to asyn.
  */
 
 
@@ -19,12 +20,11 @@
 #include <drvSup.h>
 #include "motor.h"
 #include "drvMicos.h"
-#include "serialIO.h"
 #include "epicsExport.h"
 
 #define WAIT 1
 
-#define SERIAL_TIMEOUT 2000 /* Command timeout in msec */
+#define COMM_TIMEOUT 2	/* Command timeout in seconds. */
 
 #define BUFF_SIZE 100       /* Maximum length of string to/from Micos */
 
@@ -308,10 +308,9 @@ static RTN_STATUS send_mess(int card, const char *com, char c)
 
     strcpy(buff, com);
     strcat(buff, OUTPUT_TERMINATOR);
-    Debug(2, "send_mess: sending message to card %d, message=%s\n",
-		    card, buff);
+    Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
-    cntrl->serialInfo->serialIOSend(buff, strlen(buff), SERIAL_TIMEOUT);
+    pasynSyncIO->write(cntrl->pasynUser, buff, strlen(buff), COMM_TIMEOUT);
 
     return (OK);
 }
@@ -324,6 +323,7 @@ static RTN_STATUS send_mess(int card, const char *com, char c)
 static int recv_mess(int card, char *com, int flag)
 {
     int timeout;
+    int flush = 0;
     int len=0;
     struct MicosController *cntrl;
 
@@ -340,8 +340,10 @@ static int recv_mess(int card, char *com, int flag)
     if (flag == FLUSH)
         timeout = 0;
     else
-        timeout = SERIAL_TIMEOUT;
-    len = cntrl->serialInfo->serialIORecv(com, BUFF_SIZE, (char *) "\3", timeout);
+        timeout = COMM_TIMEOUT;
+    
+    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\3",
+                            1, flush, timeout);
 
     /* The response from the Micos is terminated with <CR><LF><ETX>.  Remove */
     if (len < 3) com[0] = '\0'; 
@@ -409,9 +411,8 @@ MicosSetup(int num_cards,   /* maximum number of "controllers" in system */
 /* MicosConfig()                                    */
 /*****************************************************/
 RTN_STATUS
-MicosConfig(int card,	       /* "controller" being configured */
-	    int location,      /* MPF server location */
-	    const char *name)  /* MPF server task name */
+MicosConfig(int card,		/* "controller" being configured */
+	    const char *name)	/* asyn server task name */
 {
     struct MicosController *cntrl;
 
@@ -420,9 +421,9 @@ MicosConfig(int card,	       /* "controller" being configured */
 
     motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
     motor_state[card]->DevicePrivate = malloc(sizeof(struct MicosController));
+    
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
-    cntrl->serial_card = location;
-    strcpy(cntrl->serial_task, name);
+    strcpy(cntrl->asyn_port, name);
     return(OK);
 }
 
@@ -442,7 +443,8 @@ static int motor_init()
     char buff[BUFF_SIZE];
     int total_axis = 0;
     int status = 0;
-    bool errind, success_rtn;
+    bool errind;
+    asynStatus success_rtn;
 
     initialized = true;   /* Indicate that driver is initialized. */
 
@@ -465,12 +467,9 @@ static int motor_init()
 
         /* Initialize communications channel */
         errind = false;
-
-	success_rtn = false;
-	cntrl->serialInfo = new serialIO(cntrl->serial_card,
-				     cntrl->serial_task, &success_rtn);
+	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
         
-	if (success_rtn == true)
+	if (success_rtn == asynSuccess)
         {
             int retry = 0;
 
@@ -499,7 +498,7 @@ static int motor_init()
         }
 
 
-        if (success_rtn == true && status > 0)
+        if (success_rtn == asynSuccess && status > 0)
         {
             brdptr->localaddr = (char *) NULL;
             brdptr->motor_in_motion = 0;

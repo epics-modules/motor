@@ -13,7 +13,7 @@ LIBRARY_IOC = MicroMo
 SRCS += MicroMoRegister.cc
 SRCS += devMVP2001.cc drvMVP2001.cc
 
-MicroMo_LIBS += motor motorCOM_mpf
+MicroMo_LIBS += motor asyn
 MicroMo_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES

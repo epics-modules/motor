@@ -2,9 +2,9 @@
 FILENAME... MicosRegister.cc
 USAGE...    Register Micos MoCo dc motor controller device driver shell commands.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-02-13 18:21:19 $
+Last Modified:	$Date: 2004-07-16 19:22:58 $
 */
 
 /*****************************************************************
@@ -36,17 +36,14 @@ static const iocshArg setupArg1 = {"Max. motor count", iocshArgInt};
 static const iocshArg setupArg2 = {"Polling rate", iocshArgInt};
 // Micos Config arguments
 static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
-static const iocshArg configArg1 = {"MPF server location", iocshArgInt};
-static const iocshArg configArg2 = {"MPF server task name", iocshArgString};
-
+static const iocshArg configArg1 = {"asyn port name", iocshArgString};
 
 static const iocshArg * const MicosSetupArgs[3]  = {&setupArg0, &setupArg1,
 						     &setupArg2};
-static const iocshArg * const MicosConfigArgs[3] = {&configArg0, &configArg1,
-						     &configArg2};
+static const iocshArg * const MicosConfigArgs[2] = {&configArg0, &configArg1};
 
 static const iocshFuncDef  setupMicos = {"MicosSetup",  3, MicosSetupArgs};
-static const iocshFuncDef configMicos = {"MicosConfig", 3, MicosConfigArgs};
+static const iocshFuncDef configMicos = {"MicosConfig", 2, MicosConfigArgs};
 
 static void setupMicosCallFunc(const iocshArgBuf *args)
 {
@@ -56,7 +53,7 @@ static void setupMicosCallFunc(const iocshArgBuf *args)
 
 static void configMicosCallFunc(const iocshArgBuf *args)
 {
-    MicosConfig(args[0].ival, args[1].ival, args[2].sval);
+    MicosConfig(args[0].ival, args[1].sval);
 }
 
 

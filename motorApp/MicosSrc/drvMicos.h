@@ -10,6 +10,7 @@
  * Modification Log:
  * -----------------
  * .00  11/24/2003  kag  initialized from drvMCB4B.h
+ * .01  07/12/2004  rls  Converted from MPF to asyn.
  */
 
 #ifndef	INCdrvMicosh
@@ -17,7 +18,8 @@
 
 #include "motor.h"
 #include "motordrvCom.h"
-#include "serialIO.h"
+#include "asynDriver.h"
+#include "asynSyncIO.h"
 
 /* Micos default profile. */
 
@@ -28,13 +30,12 @@
 
 struct MicosController
 {
-    serialIO *serialInfo;       /* For RS-232 */
-    int serial_card;        /* Card on which Hideos/MPF is running */
-    char serial_task[20];   /* Hideos/MPF task/server name for serial port */
+    asynUser *pasynUser;  	/* For RS-232 */
+    char asyn_port[80];     	/* asyn port name */
 };
 
 /* Function prototypes. */
 extern RTN_STATUS MicosSetup(int, int, int);
-extern RTN_STATUS MicosConfig(int, int, const char *);
+extern RTN_STATUS MicosConfig(int, const char *);
 
 #endif	/* INCdrvMicosh */

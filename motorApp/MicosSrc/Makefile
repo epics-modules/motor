@@ -13,7 +13,7 @@ LIBRARY_IOC = Micos
 SRCS += MicosRegister.cc
 SRCS += devMicos.cc drvMicos.cc
 
-Micos_LIBS += motor motorCOM_mpf
+Micos_LIBS += motor asyn
 Micos_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
