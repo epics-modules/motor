@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:06:04 $
+Last Modified:	$Date: 2002-10-31 20:44:26 $
 */
 
 /*
@@ -333,7 +333,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     mr->rmp = axis_query.position;	/* raw motor pulse count */
     mr->rep = axis_query.encoder_position;	/* raw encoder pulse count */
     mr->msta = axis_query.status;	/* status info */
-    return(0);
+    return(OK);
 }
 
 /*
@@ -346,10 +346,10 @@ USAGE... Update the following motor record fields with the latest driver data:
 NOTES... This function MUST BE reentrant.
 */
 
-long motor_update_values(struct motorRecord * mr)
+CALLBACK_VALUE motor_update_values(struct motorRecord * mr)
 {
     struct motor_trans *ptrans;
-    long rc;
+    CALLBACK_VALUE rc;
 
     rc = NOTHING_DONE;
     ptrans = (struct motor_trans *) mr->dpvt;
@@ -414,13 +414,13 @@ USAGE... Finish building a transaction.
 NOTES... This function MUST BE reentrant.
 */
 
-long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
+RTN_STATUS motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
-    long rc;
+    RTN_STATUS rc;
 
-    rc = 0;
+    rc = OK;
     motor_call = &(trans->motor_call);
     if ((*trans->tabptr->card_array)[motor_call->card] == NULL)
     {
@@ -430,7 +430,7 @@ long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
 	mr->dmov = TRUE;
 	db_post_events(mr, &mr->dmov, DBE_VALUE);
 	mr->msta |= CNTRL_COMM_ERR;
-	return(rc = -1);
+	return(rc = ERROR);
     }
 
     switch (trans->state)
@@ -443,7 +443,7 @@ long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
 
 	case IDLE_STATE:
 	default:
-	    rc = -1;
+	    rc = ERROR;
     }
     return (rc);
 }
