@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:06:04 $
+Last Modified:	$Date: 2002-10-31 20:45:17 $
 */
 
 /*
@@ -420,7 +420,7 @@ static struct mess_node *get_head_node(struct driver_table *tabptr)
  *  Insert new node at tail of queue.
  */
 
-int motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
+RTN_STATUS motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
 {
     struct mess_node *new_message;
     struct circ_queue *qptr;
@@ -449,7 +449,7 @@ int motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
 	case INFO:
 	    break;
 	default:
-	    return (-1);
+	    return (ERROR);
     }
 
     /* Lock queue */
@@ -472,7 +472,7 @@ int motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
     tabptr->quelockptr->signal();
 
     tabptr->semptr->signal();
-    return (0);
+    return (OK);
 }
 
 static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent *lockptr)
