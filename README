@@ -325,14 +325,4 @@ Modification Log from V3.5 to V4.0
 	1,000 to 5,000 bytes.
 	Files modified: devSoftAux.c
 
-32) Three errors in the OMS VME58 driver were found.  All the errors caused
-	the same problem.  Namely, erroneous retries occurred intermittently
-	when multiple axes were commanded to move on the same controller.
-	This error occurred because old position data was being passed back
-	from the driver after Done was detected.  The erroneous intermittent
-	retries occurred more often when the Oms setup parameters called for a
-	high frequency (e.g., 60 Hz) "polling" rate and Oms interrupts were
-	enabled.
-
-	File modified: drvOms58.c
 
