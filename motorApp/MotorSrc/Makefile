@@ -4,10 +4,8 @@ include $(TOP)/configure/CONFIG
 #----------------------------------------
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 
-# The following are used for debugging messages.
-#USR_CXXFLAGS += -DDEBUG
-
 DBDINC += motorRecord.h
+DBD += motorSupport.dbd
 
 INC += motor.h motordevCom.h motordrvCom.h
 INC += motordrvComCode.h
