@@ -1,0 +1,22 @@
+# Makefile.Vx
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+# The following are used for debugging messages.
+#USR_CFLAGS += -DDEBUG
+#USR_CXXFLAGS += -DDEBUG
+
+# Advanced Control Systems driver support.
+SRCS.c += ../devPM304.c ../drvPM304.c
+
+LIBOBJS = $(SRCS.c:../%.c=%.o)
+LIBNAME = AcsLib
+
+#Note that the command line that builds the
+#library $(LIBNAME) may be HUGE (>3kB)
+#
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE

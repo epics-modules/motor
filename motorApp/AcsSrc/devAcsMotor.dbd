@@ -1,0 +1,5 @@
+# Advanced Control Systems driver support.
+device(motor,VME_IO,devMCB4B,"ACS MCB-4B")
+driver(drvMCB4B)
+
+
