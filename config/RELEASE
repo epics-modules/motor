@@ -9,6 +9,16 @@
 #
 # Add your declarations here
 
-SUPPORT=/usr/local/iocapps/R3.13.2/support
+SUPPORT=/local/epics/3.13.2/support
 EPICS_BASE=$(SUPPORT)/base/3-13-2
-HIDEOS=/usr/local/hideos/v3.1/install
+
+# If any motor controller communication mechanism besides the
+# VME backplane is required, then either MPF or HIDEOS must
+# be defined.
+#MPF=$(SUPPORT)/mpf/mpf1-5
+#HIDEOS=$(SUPPORT)/hideos/install
+
+# Define the following if MPF is defined and serial motor controller
+# support is required.
+#MPF_SERIAL=$(SUPPORT)/mpfSerial/mpfSerial1-1
+
