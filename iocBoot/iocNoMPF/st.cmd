@@ -15,10 +15,12 @@ cd appbin
 # be added before any C++ code is loaded (see SPR #28980).
 sysCplusEnable=1
 
-ld < NoMPFLib
+ld < NoMPF.munch
 
 cd startup
-dbLoadDatabase("../../dbd/NoMPFApp.dbd")
+dbLoadDatabase("../../dbd/NoMPF.dbd")
+registerRecordDeviceDriver(pdbbase)
+
 dbLoadRecords("../../db/NoMPF.db")
 #dbLoadRecords("../../motorExApp/Db/SoftMotorEx.db","user=rls,motor=m1", startup)
 
