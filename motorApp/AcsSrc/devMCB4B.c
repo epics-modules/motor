@@ -93,7 +93,6 @@ static int MCB4B_table[] = {
     IMMEDIATE,  /* SET_VELOCITY */
     IMMEDIATE,  /* SET_ACCEL */
     IMMEDIATE,  /* GO */
-    IMMEDIATE,  /* SET_ENC_RATIO */
     INFO,       /* GET_INFO */
     MOVE_TERM,  /* STOP_AXIS */
     VELOCITY,   /* JOG */
@@ -275,13 +274,6 @@ STATIC long MCB4B_build_trans(motor_cmnd command, double *parms, struct motorRec
         /*
          * The MCB4B starts moving immediately on move commands, GO command
          * does nothing
-         */
-        trans->state = IDLE_STATE;
-        break;
-    case SET_ENC_RATIO:
-        /*
-         * The MCB4B does not have the concept of encoder ratio, ignore this
-         * command
          */
         trans->state = IDLE_STATE;
         break;

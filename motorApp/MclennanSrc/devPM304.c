@@ -99,7 +99,6 @@ static int PM304_table[] = {
     IMMEDIATE,  /* SET_VELOCITY */
     IMMEDIATE,  /* SET_ACCEL */
     IMMEDIATE,  /* GO */
-    IMMEDIATE,  /* SET_ENC_RATIO */
     INFO,       /* GET_INFO */
     MOVE_TERM,  /* STOP_AXIS */
     VELOCITY,   /* JOG */
@@ -265,12 +264,6 @@ STATIC long PM304_build_trans(motor_cmnd command, double *parms, struct motorRec
         /*
          * The PM304 starts moving immediately on move commands, GO command
          * does nothing
-         */
-        break;
-    case SET_ENC_RATIO:
-        /*
-         * The PM304 does not have the concept of encoder ratio, ignore this
-         * command
          */
         break;
     case GET_INFO:
