@@ -1,0 +1,38 @@
+MDrive 17,23,34
+===============
+
+Configuring MDrive for party mode.
+----------------------------------
+
+The following is a modified version of the procedure defined in Section 2.1,
+"Interfacing RS-485 Communications", page #25, of the "MDrive Motion Control"
+manual; Revision 02.05.2004.
+
+1. Connect the first MDrive Motion Control to the Host PC configured for Single
+        Mode Operation.
+	
+2. Establish communications.
+	If you can see the sign-on message "Copyright 2001-2003 by Intelligent
+	Motion Systems, Inc.", then you are up and running.  If the sign-on
+	message does not appear, try using a software reset.  Hold down the
+	"Ctrl" key and press "C" (^C). If the sign-on message still does not
+	appear then there may be a problem with either the connections,
+	hardware or software configuration of the MDrive Motion Control or
+	Host.
+
+3. Using the command DN, name the MDrive Motion Control. This must be a number
+        1-9. (DN="1"{enter}). Label the motor with the device name.
+
+4. Set Echo Mode EM=1{enter}.
+
+5. Set the party flag PY=1{enter}.
+
+6. Type CTRL+J to activate the Party Mode.
+
+7. Type {DN}S CTRL+J where {DN} is the device name given in step #3 (Save
+        device name, Echo and Party Mode).
+
+8. Remove power.
+
+9. Repeat steps 1 through 8 for each additional MDrive in the system using
+        successive device names "1" through "9".
