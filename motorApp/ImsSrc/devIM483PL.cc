@@ -3,9 +3,9 @@ FILENAME...	devIM483PL.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:08:02 $
+Last Modified:	$Date: 2004-09-20 20:54:43 $
 */
 
 /*
@@ -218,24 +218,24 @@ STATIC RTN_STATUS IM483PL_build_trans(motor_cmnd command, double *parms, struct 
     switch (command)
     {
 	case MOVE_ABS:
-	    sprintf(buff, "? R%.*f", maxdigits, cntrl_units);
+	    sprintf(buff, " R%.*f", maxdigits, cntrl_units);
 	    break;
 	
 	case MOVE_REL:
-	    sprintf(buff, "? %+.*f", maxdigits, cntrl_units);
+	    sprintf(buff, " %+.*f", maxdigits, cntrl_units);
 	    break;
 	
 	case HOME_FOR:
-	    sprintf(buff, "? F1000 0");
+	    sprintf(buff, " F1000 0");
 	    break;
 
 	case HOME_REV:
-	    sprintf(buff, "? F1000 1");
+	    sprintf(buff, " F1000 1");
 	    break;
 	
 	case LOAD_POS:
 	    if (cntrl_units == 0.0)
-		sprintf(buff, "? O");
+		sprintf(buff, " O");
 	    else
 	    {
 		send = false;
@@ -244,11 +244,11 @@ STATIC RTN_STATUS IM483PL_build_trans(motor_cmnd command, double *parms, struct 
 	    break;
 	
 	case SET_VEL_BASE:
-	    sprintf(buff, "? I%.*f;", maxdigits, cntrl_units);
+	    sprintf(buff, " I%.*f;", maxdigits, cntrl_units);
 	    break;
 	
 	case SET_VELOCITY:
-	    sprintf(buff, "? V%.*f;", maxdigits, cntrl_units);
+	    sprintf(buff, " V%.*f;", maxdigits, cntrl_units);
 	    break;
 	
 	case SET_ACCEL:
@@ -270,12 +270,12 @@ STATIC RTN_STATUS IM483PL_build_trans(motor_cmnd command, double *parms, struct 
 	    break;
 	
 	case STOP_AXIS:
-	    sprintf(buff, "? @ 0");
+	    sprintf(buff, " @ 0");
 	    break;
 	
 	case JOG_VELOCITY:
 	case JOG:
-	    sprintf(buff, "? M%.*f;", maxdigits, cntrl_units);
+	    sprintf(buff, " M%.*f;", maxdigits, cntrl_units);
 	    break;
 	
 	case SET_PGAIN:
@@ -285,11 +285,11 @@ STATIC RTN_STATUS IM483PL_build_trans(motor_cmnd command, double *parms, struct 
 	    break;
 	
 	case ENABLE_TORQUE:
-	    sprintf(buff, "? MO;");
+	    sprintf(buff, " MO;");
 	    break;
 	
 	case DISABL_TORQUE:
-	    sprintf(buff, "? MF;");
+	    sprintf(buff, " MF;");
 	    break;
 	
 	case SET_HIGH_LIMIT:

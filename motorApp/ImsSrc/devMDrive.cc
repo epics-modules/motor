@@ -3,9 +3,9 @@ FILENAME...	devMDrive.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MDrive series of controllers.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-16 15:13:32 $
+Last Modified:	$Date: 2004-09-20 20:57:05 $
 */
 
 /*
@@ -40,6 +40,7 @@ Last Modified:	$Date: 2004-03-16 15:13:32 $
  * .03  03/15/04 rls bug fix for LOAD_POS command with encoder.
  * .04  03/16/04 rls Protect against NULL "parms" argument in
  *                   MDrive_build_trans().
+ * .05  09/20/04 rls remove '?' command string padding.
  */
 
 #include <string.h>
@@ -190,7 +191,7 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
 
     if (command == PRIMITIVE && mr->init != NULL && strlen(mr->init) != 0)
     {
-	strcat(motor_call->message, "? ");
+	strcat(motor_call->message, " ");
 	strcat(motor_call->message, mr->init);
     }
 
@@ -218,23 +219,23 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
     switch (command)
     {
 	case MOVE_ABS:
-	    sprintf(buff, "?MA %d", intval);
+	    sprintf(buff, "MA %d", intval);
 	    break;
 	
 	case MOVE_REL:
-	    sprintf(buff, "?MR %d", intval);
+	    sprintf(buff, "MR %d", intval);
 	    break;
 	
 	case HOME_FOR:
-	    sprintf(buff, "? F1000 0");
+	    sprintf(buff, " F1000 0");
 	    break;
 
 	case HOME_REV:
-	    sprintf(buff, "? F1000 1");
+	    sprintf(buff, " F1000 1");
 	    break;
 	
 	case LOAD_POS:
-	    sprintf(buff, "?P=%d", intval);
+	    sprintf(buff, "P=%d", intval);
 	    if (msta.Bits.EA_PRESENT == 1)
 	    {
 		/* Finish 1st message; MDrive can only handle one msg. */
@@ -243,27 +244,27 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
 		rtnval = (RTN_STATUS) motor_start_trans_com(mr, MDrive_cards);
 
 		intval = NINT(mr->dval / mr->eres);
-		sprintf(buff, "?C2=%d", intval);
+		sprintf(buff, "C2=%d", intval);
 		motor_call->type = MDrive_table[command];
 	    }
 	    break;
 	
 	case SET_VEL_BASE:
-	    sprintf(buff, "?VI %d", intval);
+	    sprintf(buff, "VI %d", intval);
 	    break;
 	
 	case SET_VELOCITY:
-	    sprintf(buff, "?VM %d", intval);
+	    sprintf(buff, "VM %d", intval);
 	    break;
 	
 	case SET_ACCEL:
-	    sprintf(buff, "?A=%d", intval);
+	    sprintf(buff, "A=%d", intval);
 	    break;
 	
 	case GO:
 	    /* The MDrive starts moving immediately on move commands, GO command
 	     * does nothing. Use it to set ACCL = DECL. */
-	    sprintf(buff, "?A=D");
+	    sprintf(buff, "A=D");
 	    break;
 	
 	case PRIMITIVE:
@@ -274,12 +275,12 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
 	    break;
 	
 	case STOP_AXIS:
-	    sprintf(buff, "?SL 0");
+	    sprintf(buff, "SL 0");
 	    break;
 	
 	case JOG_VELOCITY:
 	case JOG:
-	    sprintf(buff, "?SL=%d", intval);
+	    sprintf(buff, "SL=%d", intval);
 	    break;
 	
 	case SET_PGAIN:
@@ -289,11 +290,11 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
 	    break;
 	
 	case ENABLE_TORQUE:
-	    sprintf(buff, "?DE=1");
+	    sprintf(buff, "DE=1");
 	    break;
 	
 	case DISABL_TORQUE:
-	    sprintf(buff, "?DE=0");
+	    sprintf(buff, "DE=0");
 	    break;
 	
 	case SET_HIGH_LIMIT:
