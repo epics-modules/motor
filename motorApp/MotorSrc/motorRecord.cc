@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.21 $
+Version:	$Revision: 1.22 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-21 17:37:07 $
+Last Modified:	$Date: 2005-03-18 22:36:36 $
 */
 
 /*
@@ -69,9 +69,10 @@ Last Modified:	$Date: 2004-12-21 17:37:07 $
  * .19 12-01-04 rls - make epicsExportAddress extern "C" linkage for Windows
  *			compatibility.
  * .20 12-02-04 rls - fixed incorrect slew acceleration calculation.
+ * .21 03-13-05 rls - Removed record level round-up position code in do_work().
  */
 
-#define VERSION 5.5
+#define VERSION 5.6
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -1945,14 +1946,6 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    double relpos = pmr->diff / pmr->mres;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 	    long rpos, npos;
-	    /*
-	     * Relative-move target positions with motor-resolution
-	     * granularity. The hardware is going to convert encoder steps to
-	     * motor steps by truncating any fractional part, instead of
-	     * converting to nearest integer, so we prepare for that.
-	     */
-	    double mRelPos = NINT(relpos) + ((relpos > 0) ? .5 : -.5);
-	    double mRelBPos = NINT(relbpos) + ((relbpos > 0) ? .5 : -.5);
 
 	    msta_field msta;
 	    msta.All = pmr->msta;
@@ -2059,7 +2052,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		    velocity = vel;
 		    accel = acc;
 		    if (use_rel == true)
-			position = mRelPos * pmr->frac;
+			position = relpos * pmr->frac;
 		    else
 			position = currpos + pmr->frac * (newpos - currpos);
 		}
@@ -2082,7 +2075,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		    velocity = bvel;
 		    accel = bacc;
 		    if (use_rel == true)
-			position = mRelPos * pmr->frac;
+			position = relpos * pmr->frac;
 		    else
 			position = currpos + pmr->frac * (newpos - currpos);
 		}
@@ -2091,7 +2084,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		    velocity = vel;
 		    accel = acc;
 		    if (use_rel == true)
-			position = mRelBPos;
+			position = relbpos;
 		    else
 			position = bpos;
 		    pmr->pp = TRUE;	/* Do backlash from posprocess(). */
