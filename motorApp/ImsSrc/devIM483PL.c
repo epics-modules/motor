@@ -3,9 +3,9 @@ FILENAME...	devIM483PL.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-15 20:07:22 $
+Last Modified:	$Date: 2002-07-05 19:14:31 $
 */
 
 /*
@@ -108,6 +108,7 @@ static int IM483PL_table[] = {
     IMMEDIATE,	/* SET_VELOCITY */
     IMMEDIATE,	/* SET_ACCEL */
     IMMEDIATE,	/* GO */
+    IMMEDIATE,	/* SET_ENC_RATIO */
     INFO,	/* GET_INFO */
     MOVE_TERM,	/* STOP_AXIS */
     VELOCITY,	/* JOG */
@@ -318,6 +319,7 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
 	
 	case SET_HIGH_LIMIT:
 	case SET_LOW_LIMIT:
+	case SET_ENC_RATIO:
 	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
 	    send = OFF;
 	    break;
