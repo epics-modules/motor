@@ -627,7 +627,6 @@ STATIC int motor_init()
     /* Check for setup */
     Debug(1, "XPSC8:motor_init: num_cards=%d\n", XPSC8_num_cards);
     if (XPSC8_num_cards <= 0){
-        printf("Error num_cards <=0");
         return (ERROR);
     }
 
