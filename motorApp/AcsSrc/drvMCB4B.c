@@ -1,25 +1,13 @@
-/* File: drvPM304.c                     */
-/* Version: 2.01                        */
-/* Date Last Modified: 10/26/99         */
-
+/* File: drvMCB4B.c                     */
 
 /* Device Driver Support routines for motor */
 /*
  *      Original Author: Mark Rivers
- *      Date: 11/20/98
+ *      Date: 2/24/2002
  *
  * Modification Log:
  * -----------------
- * .01  11-20-98   mlr  initialized from drvMM4000
- * .02  09-29-99   mlr  Converted to motor record V4.04
- * .03  10-26-99   mlr  Minor fixes for motor record V4.0
- * .04  08-16-00   mlr  Fixed serious problem with limits - they were not
- *                      correct, bring extract from wrong character in response
- *                      Minor fixes to avoid compiler warnings
- * .05  11-27-01   mlr  Added global variable drvPM304ReadbackDelay.  This is a
- *                      double time in seconds to wait after the PM304 says the move
- *                      is complete before reading the encoder position the final
- *                      time.
+ * .01  02-24-2002   mlr  initialized from drvPM304.c
  */
 
 
@@ -41,22 +29,16 @@
 #include        <logLib.h>
 
 #include        "motor.h"
-#include        "drvPM304.h"
-#include        "gpibIO.h"
+#include        "drvMCB4B.h"
 #include        "serialIO.h"
 
 #define STATIC static
 
-#define WAIT 0
+#define WAIT 1
 
 #define SERIAL_TIMEOUT 2000 /* Command timeout in msec */
 
-#define BUFF_SIZE 100       /* Maximum length of string to/from PM304 */
-
-/* This is a temporary fix to introduce a delayed reading of the motor
- * position after a move completes
- */
-volatile double drvPM304ReadbackDelay = 0.;
+#define BUFF_SIZE 100       /* Maximum length of string to/from MCB4B */
 
 struct mess_queue
 {
@@ -68,21 +50,21 @@ struct mess_queue
 #ifdef NODEBUG
 #define Debug(L,FMT,V) ;
 #else
-#define Debug(L,FMT,V...) {  if(L <= drvPM304Debug) \
-                        { printf("%s(%d):",__FILE__,__LINE__); \
-                          printf(FMT,##V); } }
+#define Debug(L,FMT,V...) {  if(L <= drvMCB4BDebug) \
+                        { errlogPrintf("%s(%d):",__FILE__,__LINE__); \
+                          errlogPrintf(FMT,##V); } }
 #endif
 
 /* Debugging notes:
- *   drvPM304Debug == 0  No debugging information is printed
- *   drvPM304Debug >= 1  Warning information is printed
- *   drvPM304Debug >= 2  Time-stamped messages are printed for each string 
+ *   drvMCB4BDebug == 0  No debugging information is printed
+ *   drvMCB4BDebug >= 1  Warning information is printed
+ *   drvMCB4BDebug >= 2  Time-stamped messages are printed for each string 
  *                       sent to and received from the controller
- *   drvPM304Debug >= 3  Additional debugging messages
+ *   drvMCB4BDebug >= 3  Additional debugging messages
  */    
 
-int PM304_num_cards = 0;
-volatile int drvPM304Debug = 0;
+int MCB4B_num_cards = 0;
+volatile int drvMCB4BDebug = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include        "motordrvComCode.h"
@@ -100,7 +82,7 @@ STATIC void query_done(int, int, struct mess_node *);
 
 /*----------------functions-----------------*/
 
-struct driver_table PM304_access =
+struct driver_table MCB4B_access =
 {
     motor_init,
     motor_send,
@@ -133,7 +115,7 @@ struct
     DRVSUPFUN report;
     DRVSUPFUN init;
 #endif
-} drvPM304 = {2, report, init};
+} drvMCB4B = {2, report, init};
 
 
 
@@ -145,13 +127,13 @@ static long report(int level)
 {
   int card;
 
-  if (PM304_num_cards <=0)
-    printf("    NO PM304 controllers found\n");
+  if (MCB4B_num_cards <=0)
+    printf("    NO MCB4B controllers found\n");
   else
     {
-      for (card = 0; card < PM304_num_cards; card++)
+      for (card = 0; card < MCB4B_num_cards; card++)
           if (motor_state[card])
-             printf("    PM304 controller %d, id: %s \n",
+             printf("    MCB4B controller %d, id: %s \n",
                    card,
                    motor_state[card]->ident);
     }
@@ -168,10 +150,10 @@ static long init()
     * support
     */
     /* Check for setup */
-    if (PM304_num_cards <= 0)
+    if (MCB4B_num_cards <= 0)
     {
-        Debug(1, "init: *PM304 driver disabled*\n");
-        Debug(1, "PM304Setup() is missing from startup script.\n");
+        Debug(1, "init: *MCB4B driver disabled*\n");
+        Debug(1, "MCB4BSetup() is missing from startup script.\n");
         return (ERROR);
     }
 
@@ -190,7 +172,7 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
  *********************************************************/
 STATIC void start_status(int card)
 {
-    /* The PM304 cannot query status or positions of all axes with a
+    /* The MCB4B cannot query status or positions of all axes with a
      * single command.  This needs to be done on an axis-by-axis basis,
      * so this function does nothing
      */
@@ -215,31 +197,29 @@ STATIC int set_status(int card, int signal)
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
 
-    /* Request the status of this motor */
-    sprintf(command, "%dOS;", signal+1);
+    /* Request the moving status of this motor */
+    sprintf(command, "#%02dX", signal);
     send_mess(card, command, 0);
     recv_mess(card, response, WAIT);
-    /* The response string is an eight character string of ones an zeroes */
+    /* The response string is of the form "#01X=1" */
 
-    if (strcmp(response, "00000000") == 0)
+    if (response[5] == '1')
         motor_info->status &= ~RA_DONE;
     else {
         motor_info->status |= RA_DONE;
-        if (drvPM304ReadbackDelay != 0.)
-            taskDelay((int)(drvPM304ReadbackDelay * sysClkRateGet()));
     }
 
-    if (response[2] == '1')
-        motor_info->status |= RA_PROBLEM;
-    else
-        motor_info->status &= ~RA_PROBLEM;
-
+    /* Request the limit status of this motor */
+    sprintf(command, "#%02dE", signal);
+    send_mess(card, command, 0);
+    recv_mess(card, response, WAIT);
+    /* The response string is of the form "#01E=1" */
     motor_info->status &= ~RA_OVERTRAVEL;
-    if (response[1] == '1') {
+    if (response[5] == '1') {
         motor_info->status |= RA_OVERTRAVEL;
         motor_info->status |= RA_DIRECTION;
     }
-    if (response[0] == '1') {
+    if (response[6] == '1') {
         motor_info->status |= RA_OVERTRAVEL;
         motor_info->status &= ~RA_DIRECTION;
     }
@@ -251,11 +231,11 @@ STATIC int set_status(int card, int signal)
     motor_info->status &= ~EA_HOME;
 
     /* Request the position of this motor */
-    sprintf(command, "%dOA;", signal+1);
+    sprintf(command, "#%02dP", signal);
     send_mess(card, command, 0);
     recv_mess(card, response, WAIT);
-    /* Parse the response string which is of the form "AP=10234" */
-    motorData = atoi(&response[3]);
+    /* The response string is of the form "#01P=+1000" */
+    motorData = atoi(&response[5]);
 
     if (motorData == motor_info->position)
         motor_info->no_motion_count++;
@@ -284,7 +264,7 @@ STATIC int set_status(int card, int signal)
         strcpy(buff, nodeptr->postmsgptr);
         strcat(buff, "\r");
         send_mess(card, buff, NULL);
-        /* The PM304 always sends back a response, read it and discard */
+        /* The MCB4B always sends back a response, read it and discard */
         recv_mess(card, buff, WAIT);
         nodeptr->postmsgptr = NULL;
     }
@@ -294,81 +274,72 @@ STATIC int set_status(int card, int signal)
 
 
 /*****************************************************/
-/* send a message to the PM304 board                 */
+/* send a message to the MCB4B board                 */
 /* send_mess()                                       */
 /*****************************************************/
 STATIC int send_mess(int card, const char *com, char c)
 {
-    char *p, *tok_save;
     char buff[BUFF_SIZE];
-    char response[BUFF_SIZE];
-    int len=0;
-    struct PM304controller *cntrl;
+    struct MCB4Bcontroller *cntrl;
 
     /* Check that card exists */
     if (!motor_state[card])
     {
-        epicsPrintf("send_mess - invalid card #%d\n", card);
+        errlogPrintf("send_mess - invalid card #%d\n", card);
         return (-1);
     }
 
-    cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
+    /* If the string is NULL just return */
+    if (strlen(com) == 0) return(OK);
+    cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
 
-    /* Device support can send us multiple commands separated with ';'
-     * characters.  The PM304 cannot handle more than 1 command on a line
-     * so send them separately */
-    for (p = strtok_r(com, ";", &tok_save);
-                ((p != NULL) && (strlen(p) != 0));
-                p = strtok_r(NULL, ";", &tok_save)) {
-        strcpy(buff, p);
-        strcat(buff, OUTPUT_TERMINATOR);
-        Debug(2, "%.2f : send_mess: sending message to card %d, message=%s\n",
+    strcpy(buff, com);
+    strcat(buff, OUTPUT_TERMINATOR);
+    Debug(2, "%.2f : send_mess: sending message to card %d, message=%s\n",
                     tickGet()/60., card, buff);
-        /* The PM304 always sends a response string to every command. There
-           could be some stale characters in the input buffer - flush them. */
-        do recv_mess(card, response, FLUSH); while (strlen(response) != 0);
-	serialIOSend(cntrl->serialInfo, buff, strlen(buff), SERIAL_TIMEOUT);
-    }
+    serialIOSend(cntrl->serialInfo, buff, strlen(buff), SERIAL_TIMEOUT);
 
-    return (len);
+    return (OK);
 }
-
 
 
 /*****************************************************/
-/* receive a message from the PM304 board           */
+/* Read a response string from the MCB4B board */
 /* recv_mess()                                       */
 /*****************************************************/
 STATIC int recv_mess(int card, char *com, int flag)
 {
     int timeout;
     int len=0;
-    struct PM304controller *cntrl;
+    struct MCB4Bcontroller *cntrl;
 
     /* Check that card exists */
     if (!motor_state[card])
     {
-        epicsPrintf("resv_mess - invalid card #%d\n", card);
+        errlogPrintf("recv_mess - invalid card #%d\n", card);
         return (-1);
     }
 
-    cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
+    cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
 
+    Debug(3, "%.2f : recv_mess entry: card %d, flag=%d\n", 
+            tickGet()/60., card, flag);
     if (flag == FLUSH)
         timeout = 0;
     else
         timeout = SERIAL_TIMEOUT;
-    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE,
+    len = serialIORecv(cntrl->serialInfo, com, MAX_MSG_SIZE,
                        INPUT_TERMINATOR, timeout);
 
-    /* The response from the PM304 is terminated with CR/LF.  Remove these */
-    if (len < 2) com[0] = '\0'; else com[len-2] = '\0';
+    /* The response from the MCB4B is terminated with CR.  Remove */
+    if (len < 1) com[0] = '\0'; 
+    else com[len-1] = '\0';
     if (len > 0) {
         Debug(2, "%.2f : recv_mess: card %d, message = \"%s\"\n", 
             tickGet()/60., card, com);
     }
     if (len == 0) {
-        if (flag == WAIT)  {
+        if (flag != FLUSH)  {
             Debug(1, "%.2f: recv_mess: card %d ERROR: no response\n", 
                 tickGet()/60., card);
         } else {
@@ -383,18 +354,18 @@ STATIC int recv_mess(int card, char *com, int flag)
 
 /*****************************************************/
 /* Setup system configuration                        */
-/* PM304Setup()                                     */
+/* MCB4BSetup()                                     */
 /*****************************************************/
-int PM304Setup(int num_cards,   /* maximum number of controllers in system */
+int MCB4BSetup(int num_cards,   /* maximum number of controllers in system */
             int num_channels,   /* NOT USED            */
            int scan_rate)       /* polling rate - 1/60 sec units */
 {
     int itera;
 
-    if (num_cards < 1 || num_cards > PM304_NUM_CARDS)
-        PM304_num_cards = PM304_NUM_CARDS;
+    if (num_cards < 1 || num_cards > MCB4B_NUM_CARDS)
+        MCB4B_num_cards = MCB4B_NUM_CARDS;
     else
-        PM304_num_cards = num_cards;
+        MCB4B_num_cards = num_cards;
 
     /* Set motor polling task rate */
     if (scan_rate >= 1 && scan_rate <= sysClkRateGet())
@@ -404,15 +375,15 @@ int PM304Setup(int num_cards,   /* maximum number of controllers in system */
 
    /*
     * Allocate space for motor_state structure pointers.  Note this must be done
-    * before PM304Config is called, so it cannot be done in motor_init()
+    * before MCB4BConfig is called, so it cannot be done in motor_init()
     * This means that we must allocate space for a card without knowing
     * if it really exists, which is not a serious problem since this is just
     * an array of pointers.
     */
-    motor_state = (struct controller **) malloc(PM304_num_cards *
+    motor_state = (struct controller **) malloc(MCB4B_num_cards *
                                                 sizeof(struct controller *));
 
-    for (itera = 0; itera < PM304_num_cards; itera++)
+    for (itera = 0; itera < MCB4B_num_cards; itera++)
         motor_state[itera] = (struct controller *) NULL;
     return (0);
 }
@@ -420,20 +391,20 @@ int PM304Setup(int num_cards,   /* maximum number of controllers in system */
 
 /*****************************************************/
 /* Configure a controller                            */
-/* PM304Config()                                    */
+/* MCB4BConfig()                                    */
 /*****************************************************/
-int PM304Config(int card,       /* card being configured */
-            int addr1,          /* hideos_card for RS-232 */
-            int addr2)          /* hideos_task for RS-232 */
+int MCB4BConfig(int card,       /* card being configured */
+            int addr1,          /* card for RS-232 */
+            int addr2)          /* server_task for RS-232 */
 {
-    struct PM304controller *cntrl;
+    struct MCB4Bcontroller *cntrl;
 
-    if (card < 0 || card >= PM304_num_cards)
+    if (card < 0 || card >= MCB4B_num_cards)
         return (ERROR);
 
     motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
-    motor_state[card]->DevicePrivate = malloc(sizeof(struct PM304controller));
-    cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
+    motor_state[card]->DevicePrivate = malloc(sizeof(struct MCB4Bcontroller));
+    cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
     cntrl->serial_card = addr1;
     strcpy(cntrl->serial_task, (char *) addr2);
     return (0);
@@ -450,7 +421,7 @@ int PM304Config(int card,       /* card being configured */
 STATIC int motor_init()
 {
     struct controller *brdptr;
-    struct PM304controller *cntrl;
+    struct MCB4Bcontroller *cntrl;
     int card_index, motor_index, arg3, arg4;
     char buff[BUFF_SIZE];
     int total_axis = 0;
@@ -460,21 +431,21 @@ STATIC int motor_init()
     initialized = ON;   /* Indicate that driver is initialized. */
 
     /* Check for setup */
-    if (PM304_num_cards <= 0)
+    if (MCB4B_num_cards <= 0)
     {
-        Debug(1, "motor_init: *PM304 driver disabled*\n");
-        Debug(1, "PM304Setup() is missing from startup script.\n");
+        Debug(1, "motor_init: *MCB4B driver disabled*\n");
+        Debug(1, "MCB4BSetup() is missing from startup script.\n");
         return (ERROR);
     }
 
-    for (card_index = 0; card_index < PM304_num_cards; card_index++)
+    for (card_index = 0; card_index < MCB4B_num_cards; card_index++)
     {
         if (!motor_state[card_index])
             continue;
 
         brdptr = motor_state[card_index];
         total_cards = card_index + 1;
-        cntrl = (struct PM304controller *) brdptr->DevicePrivate;
+        cntrl = (struct MCB4Bcontroller *) brdptr->DevicePrivate;
 
         /* Initialize communications channel */
         errind = OFF;
@@ -493,43 +464,42 @@ STATIC int motor_init()
             do {
                 recv_mess(card_index, buff, FLUSH);
             } while (strlen(buff) != 0);
-
             do
             {
-                send_mess(card_index, "1OA;", 0);
+                send_mess(card_index, "#00X", 0);
                 status = recv_mess(card_index, buff, WAIT);
                 retry++;
                 /* Return value is length of response string */
             } while(status == 0 && retry < 3);
         }
 
+
         if (errind == OFF && status > 0)
         {
             brdptr->localaddr = (char *) NULL;
             brdptr->motor_in_motion = 0;
+            brdptr->cmnd_response = ON;
 
-            /* Don't turn on motor power, too dangerous */
-            /* send_mess(i, "1RSES;", buff); */
-            send_mess(card_index, "1ST;", 0);     /* Stop motor */
-            recv_mess(card_index, buff, WAIT);    /* Throw away response */
-            send_mess(card_index, "1ID;", 0);    /* Read controller ID string */
-            recv_mess(card_index, buff, WAIT);
-            strcpy(brdptr->ident, buff);
-
-            /* For now we assume that this controller has only 1 axis. */
-            total_axis = 1;
+            /* Assume that this controller has 4 axes. */
+            total_axis = 4;
             brdptr->total_axis = total_axis;
-            brdptr->motor_info[total_axis-1].motor_motion = NULL;
             start_status(card_index);
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 struct mess_info *motor_info = &brdptr->motor_info[motor_index];
-
+                brdptr->motor_info[motor_index].motor_motion = NULL;
+                /* Don't turn on motor power, too dangerous */
+                sprintf(buff,"#%02dW=1", motor_index);
+                /* send_mess(card_index, buff, 0); */
+                /* Stop motor */
+                sprintf(buff,"#%02dQ", motor_index);
+                send_mess(card_index, buff, 0);     
+                recv_mess(card_index, buff, WAIT);    /* Throw away response */
+                strcpy(brdptr->ident, "MCB-4B");
                 motor_info->status = 0;
                 motor_info->no_motion_count = 0;
                 motor_info->encoder_position = 0;
                 motor_info->position = 0;
-
                 set_status(card_index, motor_index);  /* Read status of each motor */
             }
 
@@ -555,16 +525,16 @@ STATIC int motor_init()
 
     if (sizeof(int) >= sizeof(char *))
     {
-        arg3 = (int) (&PM304_access);
+        arg3 = (int) (&MCB4B_access);
         arg4 = 0;
     }
     else
     {
-        arg3 = (int) ((long) &PM304_access >> 16);
-        arg4 = (int) ((long) &PM304_access & 0xFFFF);
+        arg3 = (int) ((long) &MCB4B_access >> 16);
+        arg4 = (int) ((long) &MCB4B_access & 0xFFFF);
     }
     Debug(3, "motor_init: spawning motor task\n");
-    taskSpawn((char *) "tPM304", 64, VX_FP_TASK | VX_STDIO, 5000, motor_task,
+    taskSpawn((char *) "tMCB4B", 64, VX_FP_TASK | VX_STDIO, 5000, motor_task,
               motor_scan_rate, arg3, arg4, 0, 0, 0, 0, 0, 0, 0);
     return (0);
 }

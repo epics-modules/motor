@@ -9,7 +9,7 @@ include $(TOP)/config/CONFIG_APP
 #USR_CXXFLAGS += -DDEBUG
 
 # Advanced Control Systems driver support.
-SRCS.c += ../devPM304.c ../drvPM304.c
+SRCS.c += ../devMCB4B.c ../drvMCB4B.c
 
 LIBOBJS = $(SRCS.c:../%.c=%.o)
 LIBNAME = AcsLib
