@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.cc
 USAGE...	Motor record driver level support for MicroMo
 		MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 21:14:14 $
+Last Modified:	$Date: 2004-12-21 17:08:50 $
 */
 
 /*
@@ -77,6 +77,11 @@ Last Modified:	$Date: 2004-09-20 21:14:14 $
  * .04 02/06/04  rls    Eliminate erroneous "Motor motion timeout ERROR".
  * .05 02/13/04  rls	port to R3.14.x
  * .06 07/12/04  rls	Converted from MPF to asyn.
+ * .07 12/16/04  rls    - asyn R4.0 support.
+ *		    	- make debug variables always available.
+ *		    	- MS Visual C compatibility; make all epicsExportAddress
+ *		 	  extern "C" linkage.
+ *			- retry on initial communication.
  *
  */
 
@@ -128,7 +133,6 @@ MORE DESIGN LIMITATIONS
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvMVP2001debug = 0;
 	#define Debug(l, f, args...) { if(l<=drvMVP2001debug) printf(f,## args); }
     #else
 	#define Debug(l, f, args...)
@@ -136,6 +140,8 @@ MORE DESIGN LIMITATIONS
 #else
     #define Debug()
 #endif
+volatile int drvMVP2001debug = 0;
+extern "C" {epicsExportAddress(int, drvMVP2001debug);}
 
 /* --- Local data. --- */
 int MVP2001_num_cards = 0;
@@ -185,7 +191,7 @@ struct
     long (*init) (void);
 } drvMVP2001 = {2, report, init};
 
-epicsExportAddress(drvet, drvMVP2001);
+extern "C" {epicsExportAddress(drvet, drvMVP2001);}
 
 static struct thread_args targs = {SCAN_RATE, &MVP2001_access};
 
@@ -441,9 +447,9 @@ exit:
 /*****************************************************/
 static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
-    char local_buff[MAX_MSG_SIZE];
     struct MVPcontroller *cntrl;
     int size;
+    int nwrite;
 
     size = strlen(com);
 
@@ -461,15 +467,12 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    /* Make a local copy of the string and add the command line terminator. */
-    strcpy(local_buff, com);
-    strcat(local_buff, "\r");
-
-    Debug(2, "send_mess(): message = %s\n", local_buff);
+    Debug(2, "send_mess(): message = %s\n", com);
 
     cntrl = (struct MVPcontroller *) motor_state[card]->DevicePrivate;
-    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
-		       COMM_TIMEOUT);
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, size, COMM_TIMEOUT,
+			    &nwrite);
+
     return(OK);
 }
 
@@ -482,6 +485,8 @@ static int recv_mess(int card, char *com, int flag)
 {
     struct MVPcontroller *cntrl;
     char temp[BUFF_SIZE];
+    int nread = 0;
+    asynStatus status = asynError;
     int timeout;
     int flush = 0;
     int len=0, lenTemp=0;
@@ -498,20 +503,21 @@ static int recv_mess(int card, char *com, int flag)
     else
 	timeout	= COMM_TIMEOUT;
 
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE, (char *) "\n",
-                            1, flush, timeout, &eomReason);
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n",
-                            1, flush, timeout, &eomReason);
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE,
+				 COMM_TIMEOUT, &lenTemp, &eomReason);
+    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+				 COMM_TIMEOUT, &nread, &eomReason);
 
-    Debug(5, "bytes: 1st call: %d\t2nd call: %d\n", lenTemp, len);
+    Debug(5, "bytes: 1st call: %d\t2nd call: %d\n", lenTemp, nread);
     
-    if (len == 0)
+    if ((status != asynSuccess) || (nread <= 0))
+    {
 	com[0] = '\0';
-    else
-	com[len - 1] = '\0';
+	nread = 0;
+    }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return (len);
+    return(nread);
 }
 
 
@@ -586,6 +592,8 @@ static int motor_init()
     int total_axis = 0;
     int status;
     asynStatus success_rtn;
+    static const char output_terminator[] = "\r";
+    static const char input_terminator[]  = "\n";
 
     buff[0] = limitStr[0] = '\0';
 
@@ -607,21 +615,33 @@ static int motor_init()
 	cntrl = (struct MVPcontroller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, 
+						&cntrl->pasynUser, NULL);
 
 	if (success_rtn == asynSuccess)
 	{
+	    pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
+					   strlen(output_terminator));
+	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
+					  strlen(input_terminator));
+	    
 	    /* Send a message to the board, see if it exists */    
 	    for (total_axis = 0; total_axis < MAX_AXIS; total_axis++)
 	    {
-	    	/* flush any junk at input port - should not be any data available */
-	    	do
+		int retry = 0;
+
+		/* flush any junk at input port - should not be any data available */
+		do
 		    recv_mess(card_index, buff, FLUSH);
-	    	while (strlen(buff) != 0);	
-	    
-		sprintf(buff, "%d ST", (total_axis + 1));
-		send_mess(card_index, buff, (char) NULL);
-		status = recv_mess(card_index, buff, 1);
+		while (strlen(buff) != 0);  
+
+		do
+		{
+		    sprintf(buff, "%d ST", (total_axis + 1));
+		    send_mess(card_index, buff, (char) NULL);
+		    status = recv_mess(card_index, buff, 1);
+		    retry++;
+		} while (status <= 0 && retry < 3);
 		if (status <= 0)
 		    break;
 	    }
