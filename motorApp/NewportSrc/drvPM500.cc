@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.13 $
+Version:	$Revision: 1.14 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-09-28 23:52:59 $
+Last Modified:	$Date: 2004-11-10 05:27:30 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -61,8 +61,6 @@ Last Modified:	$Date: 2004-09-28 23:52:59 $
 #define READ_POSITION   ""
 #define MOTOR_ON        ""
 #define GET_IDENT       "SVN?"
-
-#define OUTPUT_TERMINATOR	"\r"
 
 /* Status byte bits */
 #define M_AXIS_MOVING     0x01
@@ -344,7 +342,6 @@ exit:
 static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
-    char local_buff[BUFF_SIZE];
     int size;
     int nwrite;
 
@@ -364,16 +361,12 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    /* Make a local copy of the string and add the command line terminator. */
-    strcpy(local_buff, com);
-    strcat(local_buff, OUTPUT_TERMINATOR);
-
-    Debug(2, "send_mess(): message = %s\n", local_buff);
+    Debug(2, "send_mess(): message = %s\n", com);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
-    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), 
-                       SERIAL_TIMEOUT, &nwrite);
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, strlen(com), 
+                            SERIAL_TIMEOUT, &nwrite);
 
     return(OK);
 }
@@ -414,8 +407,9 @@ static int recv_mess(int card, char *com, int flag)
         flush=0;
 	timeout	= SERIAL_TIMEOUT;
     }
-    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, "\r", 
-                            1, flush, timeout, &nread, &eomReason);
+    if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
+    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+                                    timeout, &nread, &eomReason);
 
     if ((status != asynSuccess) || (nread <= 0))
     {
@@ -424,7 +418,6 @@ static int recv_mess(int card, char *com, int flag)
     }
     else
     {
-	com[nread-1] = '\0';
 	/* Test for "system error" response. */
 	if (strncmp(com, "SE", 2) == 0)
 	    errlogMessage("recv_mess(): PM500 system error.\n");
@@ -531,7 +524,7 @@ static int motor_init()
 
 	/* Initialize communications channel */
 	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
-                          cntrl->asyn_address, &cntrl->pasynUser);
+                          cntrl->asyn_address, &cntrl->pasynUser, NULL);
 
 	if (success_rtn == asynSuccess)
 	{

@@ -266,9 +266,7 @@ STATIC int set_status(int card, int signal)
     if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
 	nodeptr->postmsgptr != 0)
     {
-        strcpy(buff, nodeptr->postmsgptr);
-        strcat(buff, "\r");
-        send_mess(card, buff, (char) NULL);
+        send_mess(card, nodeptr->postmsgptr, (char) NULL);
         /* The MCB4B always sends back a response, read it and discard */
         recv_mess(card, buff, WAIT);
         nodeptr->postmsgptr = NULL;
@@ -285,7 +283,6 @@ STATIC int set_status(int card, int signal)
 /*****************************************************/
 STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
-    char buff[BUFF_SIZE];
     struct MCB4Bcontroller *cntrl;
     int nwrite;
 
@@ -300,13 +297,10 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
     if (strlen(com) == 0) return(OK);
     cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
 
-    strcpy(buff, com);
-    strcat(buff, OUTPUT_TERMINATOR);
-
     Debug(2, "send_mess: sending message to card %d, message=%s\n",\
-                     card, buff);
+                     card, com);
 
-    pasynOctetSyncIO->write(cntrl->pasynUser, buff, strlen(buff), TIMEOUT, &nwrite);
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, strlen(com), TIMEOUT, &nwrite);
 
     return (OK);
 }
@@ -343,12 +337,11 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
+    if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
     status = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE, 
-                            "\r", 1, flush, timeout, &nread, &eomReason);
+                                    timeout, &nread, &eomReason);
 
-    /* The response from the MCB4B is terminated with CR.  Remove */
     if (nread < 1) com[0] = '\0'; 
-    else com[nread-1] = '\0';
     
     if (nread > 0) {
         Debug(2, "recv_mess: card %d, message = \"%s\"\n",\
@@ -465,7 +458,7 @@ STATIC int motor_init()
 
         /* Initialize communications channel */
 
-	success_rtn = pasynOctetSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser, NULL);
         Debug(1, "motor_init, return from pasynOctetSyncIO->connect for port %s = %d, pasynUser=%p\n",\
               cntrl->port, success_rtn, cntrl->pasynUser);
 

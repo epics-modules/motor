@@ -345,7 +345,6 @@ STATIC int set_status(int card, int signal)
 STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
     char *p, *tok_save;
-    char buff[BUFF_SIZE];
     char response[BUFF_SIZE];
     struct PM304controller *cntrl;
     int nwrite, nread, eomReason;
@@ -365,11 +364,9 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
     for (p = strtok_r((char *) com, ";", &tok_save);
                 ((p != NULL) && (strlen(p) != 0));
                 p = strtok_r(NULL, ";", &tok_save)) {
-        strcpy(buff, p);
-        strcat(buff, OUTPUT_TERMINATOR);
-        Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
-	pasynOctetSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), response,
-			    BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT, &nwrite, &nread, &eomReason);
+        Debug(2, "send_mess: sending message to card %d, message=%s\n", card, p);
+	pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
+			    BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
         Debug(2, "send_mess: card %d, response=%s\n", card, response);
     }
 
@@ -413,11 +410,12 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
+    if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
     status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
-                            INPUT_TERMINATOR, 1, flush, timeout, &nread, &eomReason);
+                                    timeout, &nread, &eomReason);
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
-    if (nread < 2) com[0] = '\0'; else com[nread-2] = '\0';
+    if (nread == 0) com[0] = '\0';
     if (nread > 0) {
         Debug(2, "recv_mess: card %d, flag=%d, message = \"%s\"\n", card, flag, com);
     }
@@ -456,7 +454,6 @@ STATIC int recv_mess(int card, char *com, int flag)
 STATIC int send_recv_mess(int card, const char *out, char *response)
 {
     char *p, *tok_save;
-    char buff[BUFF_SIZE];
     struct PM304controller *cntrl;
     char *pos;
     asynStatus status;
@@ -480,16 +477,14 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     for (p = strtok_r((char *) out, ";", &tok_save);
                 ((p != NULL) && (strlen(p) != 0));
                 p = strtok_r(NULL, ";", &tok_save)) {
-        strcpy(buff, p);
-        strcat(buff, OUTPUT_TERMINATOR);
-        Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, buff);
-	status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), 
-                         response, BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT,
+        Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, p);
+	status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), 
+                         response, BUFF_SIZE, TIMEOUT,
                          &nwrite, &nread, &eomReason);
     }
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
-    if (nread < 2) response[0] = '\0'; else response[nread-2] = '\0';
+    if (nread == 0) response[0] = '\0';;
     if (nread > 0) {
         Debug(2, "send_recv_mess: card %d, response = \"%s\"\n", card, response);
     }
@@ -613,7 +608,7 @@ STATIC int motor_init()
         /* Initialize communications channel */
         success_rtn = false;
 
-        status = pasynOctetSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
+        status = pasynOctetSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser, NULL);
         success_rtn = (status == asynSuccess);
         Debug(1, "motor_init, return from pasynOctetSyncIO->connect for port %s = %d, pasynUser=%p\n", cntrl->port, success_rtn, cntrl->pasynUser);
 

@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-09-28 23:52:58 $
+Last Modified:	$Date: 2004-11-10 05:27:28 $
 */
 
 /*
@@ -350,7 +350,6 @@ exit:
 static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
-    char local_buff[BUFF_SIZE];
     int size;
     int nwrite;
 
@@ -376,14 +375,11 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    /* Make a local copy of the string and add the command line terminator. */
-    strcpy(local_buff, com);
-    strcat(local_buff, "\r");
-    Debug(2, "send_mess(): message = %s\n", local_buff);
+    Debug(2, "send_mess(): message = %s\n", com);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 	
-    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), 
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, strlen(com), 
                        SERIAL_TIMEOUT, &nwrite);
     
     return(OK);
@@ -452,16 +448,19 @@ static int recv_mess(int card, char *com, int flag)
         flush = 0;
 	timeout	= SERIAL_TIMEOUT;
     }
+    if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
     status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
-                            "\n", 1, flush, timeout, &nread, &eomReason);
+                                    timeout, &nread, &eomReason);
     if (nread > 3 && com[0] == 'E')
     {
 	long error;
 
 	error = strtol(&com[1], NULL, 0);
-	if (error >= 35 && error <= 42)
+	if (error >= 35 && error <= 42) {
+            if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
 	    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
-                                    "\n", 1, flush, timeout, &nread, &eomReason);
+                                            timeout, &nread, &eomReason);
+        }
     }
 
     if ((status != asynSuccess) || (nread <= 0))
@@ -469,12 +468,6 @@ static int recv_mess(int card, char *com, int flag)
 	com[0] = '\0';
 	nread = 0;
     }
-    else
-	/* ESP300 responses are always terminated with CR/LF combination (see
-	 * ESP300 User' Manual Sec. 3.4 NOTE). Strip both CR&LF from buffer
-	 * before returning to caller.
-	 */
-	com[nread-2] = '\0';
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
     return(nread);
@@ -577,7 +570,7 @@ static int motor_init()
 
 	/* Initialize communications channel */
 	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
-                          cntrl->asyn_address, &cntrl->pasynUser);
+                          cntrl->asyn_address, &cntrl->pasynUser, NULL);
 
 	if (success_rtn == asynSuccess)
 	{

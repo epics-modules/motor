@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.14 $
+Version:	$Revision: 1.15 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-09-28 23:52:59 $
+Last Modified:	$Date: 2004-11-10 05:27:29 $
 */
 
 /*
@@ -460,7 +460,6 @@ exit:
 static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
-    char local_buff[BUFF_SIZE];
     int size;
     int nwrite;
 
@@ -486,15 +485,12 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    /* Make a local copy of the string and add the command line terminator. */
-    strcpy(local_buff, com);
-    strcat(local_buff, "\r");
-    Debug(2, "send_mess(): message = %s\n", local_buff);
+    Debug(2, "send_mess(): message = %s\n", com);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
-    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), 
-                       TIMEOUT, &nwrite);
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, strlen(com), 
+                            TIMEOUT, &nwrite);
 
     return(OK);
 }
@@ -520,7 +516,6 @@ static int recv_mess(int card, char *com, int flag)
 {
     struct MMcontroller *cntrl;
     double timeout = 0.;
-    int flush = 0;
     int nread = 0;
     asynStatus status;
     int eomReason;
@@ -532,16 +527,14 @@ static int recv_mess(int card, char *com, int flag)
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
     timeout	= TIMEOUT;
-    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r", 
-                            1, flush, timeout, &nread, &eomReason);
+    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+                                    timeout, &nread, &eomReason);
 
     if ((status != asynSuccess) || (nread <= 0))
     {
 	com[0] = '\0';
 	nread = 0;
     }
-    else
-	com[nread-1] = '\0';
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
     return(nread);
@@ -646,7 +639,7 @@ static int motor_init()
 
 	/* Initialize communications channel */
 	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
-                                      cntrl->asyn_address, &cntrl->pasynUser);
+                                            cntrl->asyn_address, &cntrl->pasynUser, NULL);
 
 	if (success_rtn == asynSuccess)
 	{
