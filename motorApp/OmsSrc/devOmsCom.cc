@@ -1,10 +1,10 @@
 /*
-FILENAME...	devOmsCom.c
+FILENAME...	devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:10:19 $
+Last Modified:	$Date: 2003-06-05 16:38:27 $
 */
 
 /*
@@ -49,15 +49,19 @@ Last Modified:	$Date: 2002-10-21 21:10:19 $
  * .07  07-05-02  rls   Work around for OMS bug that ignores MR+/-1.
  *                      Use OMS UU command to support reference is always in
  *			  motor steps.
+ * .08  06-04-03  rls   Convert to R3.14.x.
+ * .09  06-04-03  rls   extended device directive support PREM and POST.
  */
 
-#include	<string.h>
-#include	<errlog.h>
-#include	<math.h>
+#include <string.h>
+#include <errlog.h>
+#include <math.h>
+#include <epicsThread.h>
+#include <dbAccess.h>
 
-#include	"motorRecord.h"
-#include	"motor.h"
-#include	"motordevCom.h"
+#include "motorRecord.h"
+#include "motor.h"
+#include "motordevCom.h"
 
 /*
 Command set used by record support.  WARNING! this must match "motor_cmnd" in
@@ -259,8 +263,83 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    {
 		if (strlen(mr->prem) != 0)
 		{
+		    char buffer[40];
+
+		    /* Test for a "device directive" in the PREM string. */
+		    if (mr->prem[0] == '@')
+		    {
+			bool errind = false;
+			char *end = strchr(&mr->prem[1], '@');
+			if (end == NULL)
+			    errind = true;
+			else
+			{
+			    DBADDR addr;
+			    double delay;
+			    char *start, *tail;
+			    int size = (end - &mr->prem[0]) + 1;
+
+			    /* Copy device directive to buffer. */
+			    strncpy(buffer, mr->prem, size);
+			    buffer[size] = NULL;
+
+			    if (strncmp(buffer, "@PUT(", 5) != 0)
+				goto errorexit;
+
+			    /* Point "start" to PV name argument. */
+			    tail = NULL;
+			    start = strtok_r(&buffer[5], ",", &tail);
+			    if (tail == NULL)
+				goto errorexit;
+
+			    if (dbNameToAddr(start, &addr))	/* Get address of PV. */
+			    {
+				errPrintf(-1, __FILE__, __LINE__, "Invalid PV name: %s", start);
+				goto errorexit;
+			    }
+
+			    /* Point "start" to PV value argument. */
+			    start = strtok_r(NULL, ",", &tail);
+			    if (tail == NULL)
+			    {
+				delay = 0.0;
+				tail = start;
+				start = strtok_r(NULL, ")", &tail);
+				if (tail == NULL)
+				    goto errorexit;
+			    }
+			    else
+			    {
+				char *last;
+
+				last = strtok_r(NULL, ")", &tail);
+				if (last == NULL)
+				    goto errorexit;
+				delay = atof(last);
+			    }
+			    if (dbPutField(&addr, DBR_STRING, start, 1L))
+			    {
+				errPrintf(-1, __FILE__, __LINE__, "invalid value: %s", start);
+				goto errorexit;
+			    }
+			    if (delay != 0.0)
+			    {
+				if (delay > 10.0)
+				    delay = 10.0;
+				epicsThreadSleep(delay);
+			    }
+			}
+
+			if (errind == true)
+errorexit:		    errMessage(-1, "Invalid device directive");
+			end++;
+			strcpy(buffer, end);
+		    }
+		    else
+			strcpy(buffer, mr->prem);
+
 		    strcat(motor_call->message, " ");
-		    strcat(motor_call->message, mr->prem);
+		    strcat(motor_call->message, buffer);
 		    strcat(motor_call->message, " ");
 		}
 		if (strlen(mr->post) != 0)

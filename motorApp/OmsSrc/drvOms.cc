@@ -1,10 +1,10 @@
 /*
-FILENAME...	drvOms.c
+FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-04 18:36:17 $
+Last Modified:	$Date: 2003-06-05 16:39:25 $
 */
 
 /*
@@ -44,6 +44,8 @@ Last Modified:	$Date: 2003-06-04 18:36:17 $
  * .00  02-22-02 rls	- "total_cards" changed from total detected to total
  *			cards that "memory is allocated for".  This allows
  *			boards after the "hole" to work.
+ * .01  06-05-03  rls   Convert to R3.14.x.
+ * .02  06-05-03  rls   extended device directive support to PREM and POST.
  */
 
 /*========================stepper motor driver ========================
@@ -67,11 +69,12 @@ Last Modified:	$Date: 2003-06-04 18:36:17 $
 #include	<sysLib.h>
 #include	<string.h>
 #include	<rebootLib.h>
-extern "C" {
 #include	<logLib.h>
 #include	<drvSup.h>
+extern "C" {
 #include	<devLib.h>
 }
+#include	<dbAccess.h>
 #include	<epicsThread.h>
 
 #include	"motor.h"
@@ -93,6 +96,7 @@ extern "C" {
 
 /*----------------debugging-----------------*/
 #ifdef	DEBUG
+    volatile int drvOMSdebug = 0;
     #define Debug(l, f, args...) { if(l<=drvOMSdebug) printf(f,## args); }
 #else
     #define Debug(l, f, args...)
@@ -100,7 +104,6 @@ extern "C" {
 
 /* Global data. */
 int oms44_num_cards = 0;
-volatile int drvOMSdebug = 0;
 volatile int omsSpyClkRate = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
@@ -210,15 +213,17 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 STATIC int set_status(int card, int signal)
 {
     struct mess_info *motor_info;
+    struct mess_node *nodeptr;
     char *p, *tok_save;
     struct axis_status *ax_stat;
     struct encoder_status *en_stat;
-    char q_buf[50];
+    char q_buf[50], outbuf[50];
     int index, pos;
     int rtn_state;
     bool ls_active;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
+    nodeptr = motor_info->motor_motion;
 
     if (motor_state[card]->motor_info[signal].encoder_present == YES)
     {
@@ -348,14 +353,64 @@ STATIC int set_status(int card, int signal)
      (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == true) &&
-	(motor_info->motor_motion != 0) &&
-	(motor_info->motor_motion->postmsgptr != 0))
+    if ((motor_info->status & RA_DONE || ls_active == true) && (nodeptr != 0) &&
+	(nodeptr->postmsgptr != 0))
     {
-	send_mess(card, motor_info->motor_motion->postmsgptr, oms_axis[signal]);
-	motor_info->motor_motion->postmsgptr = NULL;
-    }
+	char buffer[40];
 
+	/* Test for a "device directive" in the POST string. */
+	if (nodeptr->postmsgptr[0] == '@')
+	{
+	    bool errind = false;
+	    char *end = strchr(&nodeptr->postmsgptr[1], '@');
+	    if (end == NULL)
+		errind = true;
+	    else
+	    {
+		DBADDR addr;
+		char *start, *tail;
+		int size = (end - &nodeptr->postmsgptr[0]) + 1;
+
+		/* Copy device directive to buffer. */
+		strncpy(buffer, nodeptr->postmsgptr, size);
+		buffer[size] = NULL;
+
+		if (strncmp(buffer, "@PUT(", 5) != 0)
+		    goto errorexit;
+		
+		/* Point "start" to PV name argument. */
+		tail = NULL;
+		start = strtok_r(&buffer[5], ",", &tail);
+		if (tail == NULL)
+		    goto errorexit;
+
+		if (dbNameToAddr(start, &addr))	/* Get address of PV. */
+		{
+		    errPrintf(-1, __FILE__, __LINE__, "Invalid PV name: %s", start);
+		    goto errorexit;
+		}
+
+		/* Point "start" to PV value argument. */
+		start = strtok_r(NULL, ")", &tail);
+		if (dbPutField(&addr, DBR_STRING, start, 1L))
+		{
+		    errPrintf(-1, __FILE__, __LINE__, "invalid value: %s", start);
+		    goto errorexit;
+		}
+	    }
+
+	    if (errind == true)
+errorexit:	errMessage(-1, "Invalid device directive");
+	    end++;
+	    strcpy(buffer, end);
+	}
+	else
+	    strcpy(buffer, nodeptr->postmsgptr);
+
+	strcpy(outbuf, buffer);
+	send_mess(card, outbuf, oms_axis[signal]);
+	nodeptr->postmsgptr = NULL;
+    }
     return (rtn_state);
 }
 
@@ -717,9 +772,11 @@ STATIC void motorIsr(int card)
 
     /* Determine cause of entry */
 
+#ifdef	DEBUG
     if (drvOMSdebug >= 10)
 	logMsg((char *) "entry card #%d,status=0x%X,done=0x%X\n", card,
 	       status, doneFlags, 0, 0, 0);
+#endif
 
     /* Motion done handling */
     if (status & STAT_DONE)
@@ -732,10 +789,11 @@ STATIC void motorIsr(int card)
 	pmotor->data = (epicsUInt8) CMD_CLEAR;
 
 	/* Send null character to indicate error */
+#ifdef	DEBUG
 	if (drvOMSdebug >= 1)
 	    logMsg((char *) "command error detected on card %d\n", card, 0, 0,
 		    0, 0, 0);
-
+#endif
 	pmotorState->irqdata->irqErrno |= STAT_ERROR;
     }
 
