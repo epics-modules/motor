@@ -11,4 +11,4 @@ setenv MEDM_HELP medm_help.sh
 setenv MEDM_HELP_URL "http://www.aps.anl.gov/xfd/WWW/xfd/bcda/medm_help"
 
 cd $MOTOR/motorApp/op/adl
-medm -x -macro "P=rls:,M1=m1,M2=m2,M3=m3,M4=m4,M5=m5,M6=m6,M7=m7,M8=m8" topMotors8.adl &
+medm -attach -x -macro "P=rls:,M1=m1,M2=m2,M3=m3,M4=m4,M5=m5,M6=m6,M7=m7,M8=m8" topMotors8.adl &
