@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.15 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-11-10 05:27:29 $
+Version:	$Revision: 1.16 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-12-21 15:35:00 $
 */
 
 /*
@@ -55,6 +55,10 @@ Last Modified:	$Date: 2004-11-10 05:27:29 $
  * .10 07/09/04 rls removed unused <driver>Setup() argument.
  * .11 07/28/04 rls "epicsExport" debug variable.
  * .12 09/21/04 rls support for 32axes/controller.
+ * .13 12/21/04 rls - support for MM4006.
+ *		    - MS Visual C compatibility; make all epicsExportAddress
+ *		      extern "C" linkage.
+ *		    - make debug variables always available.
  */
 
 
@@ -91,15 +95,15 @@ Last Modified:	$Date: 2004-11-10 05:27:29 $
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvMM4000debug = 0;
 	#define Debug(l, f, args...) { if(l<=drvMM4000debug) printf(f,## args); }
-	epicsExportAddress(int, drvMM4000debug);
     #else
 	#define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
+volatile int drvMM4000debug = 0;
+extern "C" {epicsExportAddress(int, drvMM4000debug);}
 
 /* --- Local data. --- */
 int MM4000_num_cards = 0;
@@ -161,7 +165,7 @@ struct
 #endif
 } drvMM4000 = {2, report, init};
 
-epicsExportAddress(drvet, drvMM4000);
+extern "C" {epicsExportAddress(drvet, drvMM4000);}
 
 static struct thread_args targs = {SCAN_RATE, &MM4000_access};
 
@@ -678,7 +682,7 @@ static int motor_init()
 	    model_num = atoi(pos_ptr + 2);
 	    if (model_num == 4000)
 		cntrl->model = MM4000;
-	    else if (model_num == 4005)
+	    else if (model_num == 4005 || model_num == 4006)
 		cntrl->model = MM4005;
 	    else
 	    {
