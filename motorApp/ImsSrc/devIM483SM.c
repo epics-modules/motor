@@ -3,9 +3,9 @@ FILENAME...	devIM483SM.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-25 13:36:35 $
+Last Modified:	$Date: 2001-04-21 18:15:43 $
 */
 
 /*
@@ -92,6 +92,7 @@ struct motor_dset devIM483SM =
 /* --------------------------- program data --------------------- */
 
 /* This table is used to define the command types */
+/* WARNING! this must match "motor_cmnd" in motor.h */
 
 static int IM483SM_table[] = {
     MOTION, 	/* MOVE_ABS */
@@ -114,7 +115,8 @@ static int IM483SM_table[] = {
     IMMEDIATE,	/* DISABL_TORQUE */
     IMMEDIATE,	/* PRIMITIVE */
     IMMEDIATE,	/* SET_HIGH_LIMIT */
-    IMMEDIATE	/* SET_LOW_LIMIT */
+    IMMEDIATE,	/* SET_LOW_LIMIT */
+    VELOCITY	/* JOG_VELOCITY */
 };
 
 
