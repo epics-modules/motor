@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-03 18:43:15 $
+Last Modified:	$Date: 2003-11-07 21:23:22 $
 */
 
 /*
@@ -53,6 +53,8 @@ Last Modified:	$Date: 2003-11-03 18:43:15 $
  *			BDST != 0, DLY != 0 and new target position before
  *			backlash correction move.
  *		    - Update readback after DLY timeout.
+ * .09 11-06-03 rls - Fix backlash after jog; added more state nodes to MIP so
+ *			that commands can be broken up.
  *
  */
 
@@ -151,8 +153,8 @@ fields.  ('pmr' is a pointer to motorRecord.)
 #define MIP_DONE	0x0000	/* No motion is in progress. */
 #define MIP_JOGF	0x0001	/* A jog-forward command is in progress. */
 #define MIP_JOGR	0x0002	/* A jog-reverse command is in progress. */
-#define MIP_JOG_BL	0x0004	/* Done jogging; now take out backlash. */
-#define MIP_JOG		(MIP_JOGF | MIP_JOGR | MIP_JOG_BL)
+#define MIP_JOG_BL1	0x0004	/* Done jogging; 1st phase take out backlash. */
+#define MIP_JOG		(MIP_JOGF | MIP_JOGR | MIP_JOG_BL1 | MIP_JOG_BL2)
 #define MIP_HOMF	0x0008	/* A home-forward command is in progress. */
 #define MIP_HOMR	0x0010	/* A home-reverse command is in progress. */
 #define MIP_HOME	(MIP_HOMF | MIP_HOMR)
@@ -169,6 +171,7 @@ fields.  ('pmr' is a pointer to motorRecord.)
 							 * to settle */
 #define MIP_JOG_REQ	0x1000	/* Jog Request. */
 #define MIP_JOG_STOP	0x2000	/* Stop jogging. */
+#define MIP_JOG_BL2	0x4000	/* 2nd phase take out backlash. */
 
 /*******************************************************************************
 Support for keeping track of which record fields have been changed, so we can
@@ -596,7 +599,8 @@ static long postProcess(motorRecord * pmr)
     pmr->pp = FALSE;
 
     if (pmr->omsl != menuOmslclosed_loop && !(pmr->mip & MIP_MOVE) &&
-	!(pmr->mip & MIP_MOVE_BL))
+	!(pmr->mip & MIP_MOVE_BL) && !(pmr->mip & MIP_JOG_BL1) &&
+	!(pmr->mip & MIP_JOG_BL2))
     {
 	/* Make drive values agree with readback value. */
 #ifdef DMR_SOFTMOTOR_MODS
@@ -665,14 +669,9 @@ static long postProcess(motorRecord * pmr)
 	if (fabs(pmr->bdst) >  fabs(pmr->mres))
 	{
 	    /* First part of jog done. Do backlash correction. */
-	    double bvel = pmr->bvel / fabs(pmr->mres);
-	    double bacc = bvel / pmr->bacc;
 	    double vbase = pmr->vbas / fabs(pmr->mres);
 	    double vel = pmr->velo / fabs(pmr->mres);
-	    double acc = vel / pmr->accl;
 	    double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
-	    double currpos = pmr->dval / pmr->mres;
-	    double newpos;
 
 	    /* Use if encoder or ReadbackLink is in use. */
 	    int use_rel = ((pmr->msta & EA_PRESENT) && pmr->ueip) || pmr->urip;
@@ -687,6 +686,8 @@ static long postProcess(motorRecord * pmr)
 
 	    if (pmr->mip & MIP_JOG_STOP)
 	    {
+		double acc = vel / pmr->accl;
+
 		WRITE_MSG(SET_VEL_BASE, &vbase);
 		if (vel <= vbase)
 		    vel = vbase + 1;
@@ -696,31 +697,33 @@ static long postProcess(motorRecord * pmr)
 		    WRITE_MSG(MOVE_REL, &relbpos);
 		else
 		    WRITE_MSG(MOVE_ABS, &bpos);
-		WRITE_MSG(GO, NULL);
-	    }
-
-	    if (bvel <= vbase)
-		bvel = vbase + 1;
-	    WRITE_MSG(SET_VELOCITY, &bvel);
-	    WRITE_MSG(SET_ACCEL, &bacc);
-	    if (use_rel)
-	    {
-		relpos = (relpos - relbpos) * pmr->frac;
-		WRITE_MSG(MOVE_REL, &relpos);
+		pmr->mip = MIP_JOG_BL1;
 	    }
 	    else
 	    {
-		newpos = bpos + pmr->frac * (currpos - bpos);
-		pmr->rval = NINT(newpos);
-		WRITE_MSG(MOVE_ABS, &newpos);
+		double bvel = pmr->bvel / fabs(pmr->mres);
+		double bacc = bvel / pmr->bacc;
+
+		if (bvel <= vbase)
+		    bvel = vbase + 1;
+		WRITE_MSG(SET_VELOCITY, &bvel);
+		WRITE_MSG(SET_ACCEL, &bacc);
+		if (use_rel)
+		{
+		    relpos = (relpos - relbpos) * pmr->frac;
+		    WRITE_MSG(MOVE_REL, &relpos);
+		}
+		else
+		{
+		    double currpos = pmr->dval / pmr->mres;
+		    double newpos = bpos + pmr->frac * (currpos - bpos);
+		    pmr->rval = NINT(newpos);
+		    WRITE_MSG(MOVE_ABS, &newpos);
+		}
+		pmr->mip = MIP_MOVE_BL;
 	    }
 	    WRITE_MSG(GO, NULL);
 	    SEND_MSG();
-
-	    if (pmr->mip & MIP_JOG_STOP)
-		pmr->mip = MIP_JOG_BL;
-	    else
-		pmr->mip = MIP_MOVE_BL;
 	    pmr->pp = TRUE;
 	}
 	else
@@ -732,7 +735,48 @@ static long postProcess(motorRecord * pmr)
 	pmr->mip &= ~MIP_JOG_STOP;
 	pmr->mip &= ~MIP_MOVE;
     }
-    else if (pmr->mip & MIP_JOG_BL || pmr->mip & MIP_MOVE_BL)
+    else if (pmr->mip & MIP_JOG_BL1)
+    {
+	/* First part of jog done. Do backlash correction. */
+	double bvel = pmr->bvel / fabs(pmr->mres);
+	double bacc = bvel / pmr->bacc;
+	double vbase = pmr->vbas / fabs(pmr->mres);
+	double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
+
+	/* Use if encoder or ReadbackLink is in use. */
+	int use_rel = ((pmr->msta & EA_PRESENT) && pmr->ueip) || pmr->urip;
+	double relpos = pmr->diff / pmr->mres;
+	double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
+
+	/* Restore DMOV to false and UNMARK it so it is not posted. */
+	pmr->dmov = FALSE;
+	UNMARK(M_DMOV);
+
+	INIT_MSG();
+
+	if (bvel <= vbase)
+	    bvel = vbase + 1;
+	WRITE_MSG(SET_VELOCITY, &bvel);
+	WRITE_MSG(SET_ACCEL, &bacc);
+	if (use_rel)
+	{
+	    relpos = (relpos - relbpos) * pmr->frac;
+	    WRITE_MSG(MOVE_REL, &relpos);
+	}
+	else
+	{
+	    double currpos = pmr->dval / pmr->mres;
+	    double newpos = bpos + pmr->frac * (currpos - bpos);
+	    pmr->rval = NINT(newpos);
+	    WRITE_MSG(MOVE_ABS, &newpos);
+	}
+	WRITE_MSG(GO, NULL);
+	SEND_MSG();
+
+	pmr->mip = MIP_JOG_BL2;
+	pmr->pp = TRUE;
+    }
+    else if (pmr->mip & MIP_JOG_BL2 || pmr->mip & MIP_MOVE_BL)
     {
 	/* Completed backlash part of jog command. */
 	pmr->mip = MIP_DONE;
@@ -1725,7 +1769,7 @@ static RTN_STATUS do_work(motorRecord * pmr)
 	    SEND_MSG();
 	    return(OK);
 	}
-	else if (pmr->mip & (MIP_JOG_STOP | MIP_JOG_BL))
+	else if (pmr->mip & (MIP_JOG_STOP | MIP_JOG_BL1 | MIP_JOG_BL2))
 	    return(OK);	/* Normal return if process jog stop or backlash. */
 
 	/*
