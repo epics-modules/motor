@@ -2,9 +2,9 @@
 FILENAME...	drvMAXv.cc
 USAGE...	Motor record driver level support for OMS model MAXv.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-08-30 17:12:48 $
+Last Modified:	$Date: 2004-09-20 21:30:34 $
 */
 
 /*
@@ -41,6 +41,9 @@ Last Modified:	$Date: 2004-08-30 17:12:48 $
  * Modification Log:
  * -----------------
  * 01  04-05-04 rls Copied from drvOms58.cc
+ * 02  09-20-04 rls - support for 32axes/controller.
+ *                  - added MAXvConfig() with initilization string.  Axis type
+ *                    MUST be set before iocInit is called.
  *
  */
 
@@ -79,7 +82,7 @@ extern "C" {
 #define	ENCODER_QUERY	"EA ID"
 #define	AXIS_CLEAR	"CA"		/* Clear done of addressed axis */
 #define	DONE_QUERY	"RA"		/* ?? Is this needed?? */
-#define	PID_QUERY	"KK2 ID"
+#define	PID_QUERY	"?KA ID"
 
 
 /*----------------debugging-----------------*/
@@ -91,6 +94,7 @@ extern "C" {
 #endif
 
 #define pack2x16(p)      ((uint32_t)(((p[0])<<16)|(p[1])))
+#define INITSTR_SIZE	150	/* 150 byte intialization string. */
 
 /* Global data. */
 int MAXv_num_cards = 0;
@@ -104,19 +108,20 @@ static epicsAddressType MAXv_ADDRS_TYPE;
 static volatile unsigned MAXvInterruptVector = 0;
 static volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 static volatile int motionTO = 10;
-static char MAXv_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
+static char *MAXv_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 static double quantum;
+static char *initstring[MAXv_NUM_CARDS];
 
 /*----------------functions-----------------*/
 
 /* Common local function declarations. */
-static long report(int level);
+static long report(int);
 static long init();
 static void query_done(int, int, struct mess_node *);
-static int set_status(int card, int signal);
-static RTN_STATUS send_mess(int card, char const *com, char c);
-static int recv_mess(int, char *, int);
-static void motorIsr(int card);
+static int set_status(int, int);
+RTN_STATUS send_mess(int, char const *, char *);
+int recv_mess(int, char *, int);
+static void motorIsr(int);
 static int motor_init();
 static void MAXv_reset();
 static char *readbuf(volatile struct MAXv_motor *, char *);
@@ -469,7 +474,7 @@ errorexit:	errMessage(-1, "Invalid device directive");
 /* send a message to the OMS board		     */
 /* send_mess()			     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     volatile struct MAXv_motor *pmotor;
     epicsInt16 putIndex;
@@ -506,12 +511,13 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     }
 
 
-    if (inchar == NULL)
+    if (name == NULL)
 	strcpy(outbuf, com);
     else
     {
-	strcpy(outbuf, "A? ");
-	outbuf[1] = inchar;
+	strcpy(outbuf, "A");
+	strcat(outbuf, name);
+	strcat(outbuf, " ");
 	strcat(outbuf, com);
     }
 
@@ -572,7 +578,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
  *  ENDFOR
  *  
  */
-static int recv_mess(int card, char *com, int amount)
+int recv_mess(int card, char *com, int amount)
 {
     volatile struct MAXv_motor *pmotor;
     int itera;
@@ -695,6 +701,8 @@ RTN_VALUES MAXvSetup(int num_cards,	/* maximum number of cards in rack */
 	      int int_level,	/* interrupt level (1-6) */
 	      int scan_rate)	/* polling rate - 1/60 sec units */
 {
+    int itera;
+    char **strptr;
     RTN_VALUES rtnind = OK;
 
     if (num_cards < 1 || num_cards > MAXv_NUM_CARDS)
@@ -765,7 +773,31 @@ RTN_VALUES MAXvSetup(int num_cards,	/* maximum number of cards in rack */
 	targs.motor_scan_rate = scan_rate;
     else
 	targs.motor_scan_rate = SCAN_RATE;
+
+    /* Allocate memory for initialization strings. */
+    for (itera = 0, strptr = &initstring[0]; itera < MAXv_num_cards; itera++, strptr++)
+    {
+	*strptr = (char *) malloc(INITSTR_SIZE);
+	**strptr = NULL;
+    }
+
     return(rtnind);
+}
+
+RTN_VALUES MAXvConfig(int card,			/* number of card being configured */
+		      const char *initstr)	/* initialization string */
+{
+    if (card < 0 || card >= MAXv_num_cards)
+        return(ERROR);
+
+    if (strlen(initstr) > INITSTR_SIZE)
+    {
+	errlogPrintf("MAXvConfig: initialization string > %d bytes.\n", INITSTR_SIZE);
+	return(ERROR);
+    }
+
+    strcpy(initstring[card], initstr);
+    return(OK);
 }
 
 
@@ -777,6 +809,7 @@ static void motorIsr(int card)
 {
     volatile struct controller *pmotorState;
     volatile struct MAXv_motor *pmotor;
+    STATUS1 status1_flag;
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
@@ -785,22 +818,29 @@ static void motorIsr(int card)
     }
 
     pmotor = (struct MAXv_motor *) (pmotorState->localaddr);
+    status1_flag.All = pmotor->status1_flag.All;
 
     /* Motion done handling */
-    if (pmotor->status1_flag.Bits.done != 0)
+    if (status1_flag.Bits.done != 0)
     {
 	/* Wake up polling task 'motor_task()' to issue callbacks */
 	motor_sem.signal();
 
     }
-    if (pmotor->status1_flag.Bits.cmndError)
+    if (status1_flag.Bits.cmndError)
 	logMsg((char *) "command error detected by motorISR() on card %d\n",
 	       card, 0, 0, 0, 0, 0);
+
+    if (status1_flag.Bits.text_response != 0)	/* Don't clear this. */
+	status1_flag.Bits.text_response = 0;
+
+    pmotor->status1_flag.All = status1_flag.All; /* Release IRQ's. */
 }
 
 static int motorIsrSetup(int card)
 {
     volatile struct MAXv_motor *pmotor;
+    STATUS1 status1_irq;
     long status;
 
     Debug(5, "motorIsrSetup: Entry card#%d\n", card);
@@ -808,8 +848,8 @@ static int motorIsrSetup(int card)
     pmotor = (struct MAXv_motor *) (motor_state[card]->localaddr);
 
     status = devConnectInterrupt(intVME, MAXvInterruptVector + card,
-// Tornado 2.0.2	(void (*)()) motorIsr, (void *) card);
-			(devLibVOIDFUNCPTR) motorIsr, (void *) card);// Tornado 2.2
+			(void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
+// Tornado 2.2		(devLibVOIDFUNCPTR) motorIsr, (void *) card);
 
     if (!RTN_SUCCESS(status))
     {
@@ -826,10 +866,11 @@ static int motorIsrSetup(int card)
     }
 
     /* Setup card for interrupt-on-done */
+    status1_irq.All = 0;
+    status1_irq.Bits.done = 0xFF;
+    status1_irq.Bits.cmndError = 1;
 
-    /* enable interrupt-when-done irq */
-
-    pmotor->status1_irq_enable = 0x1;	/* Enable ALL interrupts. */
+    pmotor->status1_irq_enable.All = status1_irq.All;	/* Enable interrupts. */
     pmotor->status2_irq_enable = 0x0;
     return (OK);
 }
@@ -844,8 +885,8 @@ static int motor_init()
     volatile struct controller *pmotorState;
     volatile struct MAXv_motor *pmotor;
     long status;
-    int card_index, motor_index;
-    char axis_pos[50], encoder_pos[50];
+    int card_index, motor_index, itera;
+    char axis_pos[50], encoder_pos[50], **strptr;
     char *tok_save, *pos_ptr;
     int total_encoders = 0, total_axis = 0, total_pidcnt = 0;
     volatile void *localaddr;
@@ -925,7 +966,7 @@ static int motor_init()
 	    pmotor->status1_flag.All = 0xFFFFFFFF;
 	    pmotor->status2_flag = 0xFFFFFFFF;
 	    /* Disable all interrupts */
-	    pmotor->status1_irq_enable = 0;
+	    pmotor->status1_irq_enable.All = 0;
 	    pmotor->status2_irq_enable = 0;
 
 	    send_mess(card_index, ERROR_CLEAR, (char) NULL);
@@ -934,6 +975,8 @@ static int motor_init()
 	    send_mess(card_index, GET_IDENT, (char) NULL);
 	    recv_mess(card_index, (char *) pmotorState->ident, 1);
 	    Debug(3, "Identification = %s\n", pmotorState->ident);
+
+	    send_mess(card_index, initstring[card_index], (char) NULL);
 
 	    send_mess(card_index, ALL_POS, (char) NULL);
 	    recv_mess(card_index, axis_pos, 1);
@@ -973,6 +1016,8 @@ static int motor_init()
 		
 		/* Test if motor has PID parameters. */
 		send_mess(card_index, PID_QUERY, MAXv_axis[motor_index]);
+		while (!pmotor->status1_flag.Bits.done)	/* Wait for command to complete. */
+		    epicsThreadSleep(quantum);
 		if (pmotor->status1_flag.Bits.cmndError)
 		{
 		    Debug(2, "motor_init: No PID parameters on axis %d\n", motor_index);
@@ -984,6 +1029,7 @@ static int motor_init()
 		{
 		    total_pidcnt++;
 		    pmotorState->motor_info[motor_index].pid_present = YES;
+		    recv_mess(card_index, encoder_pos, FLUSH);	/* Flush response. */
 		}
 	    }
 
@@ -1039,6 +1085,11 @@ static int motor_init()
     epicsThreadCreate((char *) "MAXv_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     Debug(3, "Started motor_task\n");
+
+    /* Deallocate memory for initialization strings. */
+    for (itera = 0, strptr = &initstring[0]; itera < MAXv_num_cards; itera++, strptr++)
+	cfree(*strptr);
+
     return (0);
 }
 
@@ -1058,7 +1109,7 @@ static void MAXv_reset()
 	    pmotor = (struct MAXv_motor *) motor_state[card]->localaddr;
 	    if (vxMemProbe((char *) pmotor, READ, sizeof(short), (char *) &status) == OK)
 	    {
-		pmotor->status1_irq_enable = 0;
+		pmotor->status1_irq_enable.All = 0;
 	    }
 	}
     }
