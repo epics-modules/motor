@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.c
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-04-18 20:55:03 $
+Last Modified:	$Date: 2000-06-14 15:21:35 $
 */
 
 /*
@@ -52,7 +52,7 @@ Last Modified:	$Date: 2000-04-18 20:55:03 $
 
 
 #include	<vxWorks.h>
-#include	<stdioLib.h>
+#include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
 #include	<taskLib.h>
@@ -250,6 +250,7 @@ STATIC int set_status(int card, int signal)
     double motorData;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
+    motor_info = &(motor_state[card]->motor_info[signal]);
 
     sprintf(outbuff, "%dMS\r", signal + 1);
     send_mess(card, outbuff, NULL);
@@ -269,7 +270,6 @@ STATIC int set_status(int card, int signal)
     status = inbuff[0];
     Debug(5, "set_status(): status byte = %x\n", status);
 
-    motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
 
     if (status & M_MOTOR_DIRECTION)
@@ -446,9 +446,36 @@ STATIC int send_mess(int card, char const *com, char inchar)
  *		| !FLUSH = retrieve response into caller's buffer; set timeout.
  *
  * LOGIC...
+ *  Initialize:
+ *	- receive timeout to zero
+ *	- received string length to zero.
+ *
  *  IF controller card does not exist.
  *	ERROR RETURN.
  *  ENDIF
+ *
+ *  SWITCH on port type.
+ *	CASE port type is GPIB.
+ *	    BREAK.
+ *	CASE port type is RS232.
+ *	    IF input "flag" indicates NOT flushing the input buffer.
+ *		Set receive timeout nonzero.
+ *	    ENDIF
+ *	    Call serialIORecv().
+ *
+ *	    NOTE: The MM3000 sometimes responds to an MS command with an error
+ *		message (see MM3000 User's Manual Appendix A).  This is an
+ *		unconfirmed MM3000 bug.  Retry read if this is a Hard Travel
+ *		limit switch error. This effectively flushes the error message.
+ *
+ *	    IF input "com" buffer length is > 3 characters, AND, the 1st
+ *			character is an "E" (Maybe this an unsolicited error
+ *			message response?).
+ *	    	Call serialIORecv().
+ *	    ENDIF
+ *	    BREAK
+ *    ENDSWITCH
+ *		
  *  NORMAL RETURN.
  */
 
@@ -477,11 +504,23 @@ STATIC int recv_mess(int card, char *com, int flag)
 		timeout	= SERIAL_TIMEOUT;
 	    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE,
 			       INPUT_TERMINATOR, timeout);
+	    if (len > 3 && com[0] == 'E')
+	    {
+		long error;
+
+		error = strtol(&com[1], NULL, NULL);
+		if (error >= 35 && error <= 42)
+		    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE,
+				       INPUT_TERMINATOR, timeout);
+	    }
 	    break;
     }
 
     if (len <= 0)
+    {
 	com[0] = '\0';
+	len = 0;
+    }
     else
 	/* MM3000 responses are always terminated with CR/LF combination (see
 	 * MM3000 User' Manual Sec. 3.4 NOTE). Strip both CR&LF from buffer
@@ -601,6 +640,7 @@ STATIC int motor_init()
 	    continue;
 
 	brdptr = motor_state[card_index];
+	brdptr->cmnd_response = OFF;
 	total_cards = card_index + 1;
 	cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
 
