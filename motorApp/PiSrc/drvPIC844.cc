@@ -3,9 +3,9 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-01-07 15:00:07 $
+Last Modified:	$Date: 2004-01-13 21:01:38 $
 */
 
 /*
@@ -227,7 +227,7 @@ static int set_status(int card, int signal)
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     C844_Cond_Reg mstat;
-    int rtn_state, charcnt;
+    int rtn_state;
     double motorData;
     bool plusdir, ls_active = false, inmotion, plusLS, minusLS;
     msta_field status;
@@ -237,27 +237,19 @@ static int set_status(int card, int signal)
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
 
-    /* With out this delay, the following transaction results in a timeout,
-     * followed by communication out of synch.  This could be due to jumpering
-     * out RS-232 hardware handshaking.
-     */
+    send_mess(card, "AXIS:STAT?", PIC844_axis[signal]);
+    recv_mess(card, buff, 1);
 
-    epicsThreadSleep(epicsThreadSleepQuantum() * 2.0);
-    
-    send_mess(card, "MOT:COND?", (char) NULL);
-    charcnt = recv_mess(card, buff, 1);
-    if (charcnt == 1)
-    {
-	cntrl->status = NORMAL;
-	status.Bits.CNTRL_COMM_ERR = 0;
-    }
+    if (strcmp(buff, "ON") == 0)
+	status.Bits.EA_POSITION = 1;
+    else if (strcmp(buff, "OFF") == 0)
+	status.Bits.EA_POSITION = 0;
     else
     {
 	if (cntrl->status == NORMAL)
 	{
 	    cntrl->status = RETRY;
 	    rtn_state = 0;
-	    goto exit;
 	}
 	else
 	{
@@ -265,9 +257,15 @@ static int set_status(int card, int signal)
 	    status.Bits.CNTRL_COMM_ERR = 1;
 	    status.Bits.RA_PROBLEM     = 1;
 	    rtn_state = 1;
-	    goto exit;
 	}
+	goto exit;
     }
+    
+    cntrl->status = NORMAL;
+    status.Bits.CNTRL_COMM_ERR = 0;
+
+    send_mess(card, "MOT:COND?", (char) NULL);
+    recv_mess(card, buff, 1);
 
     mstat.All = atoi(&buff[0]);
     switch(signal)
@@ -293,7 +291,7 @@ static int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, "CURR:TPOS?", PIC844_axis[signal]);
+    send_mess(card, "CURR:TPOS?", (char) NULL);
     recv_mess(card, buff, 1);
 
     motorData = atof(buff);
@@ -349,14 +347,6 @@ static int set_status(int card, int signal)
     }
     else
 	status.Bits.RA_MINUS_LS = 0;
-
-    send_mess(card, "AXIS:STAT?", (char) NULL);
-    recv_mess(card, buff, 1);
-
-    if (strcmp(buff, "ON") == 0)
-	status.Bits.EA_POSITION = 1;
-    else
-	status.Bits.EA_POSITION = 0;
 
     /* encoder status */
     status.Bits.EA_SLIP	      = 0;
