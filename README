@@ -1,7 +1,7 @@
 Motor Record R5-1 Release Notice
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base R3.14.1.
+The motor record software in this release is compatible with EPICS base R3.14.2.
 
 
 Contents
@@ -21,13 +21,12 @@ As distributed, this support directory only builds the following:
 
 Optionally, any of the following device/driver libraries can be built by
 uncommenting the appropriate line in ./motorApp/Makefile.
-	ImsLib - Intelligent Motion Systems (IMS) controllers; ImsSrc
-		 directory.
-	newportLib - Newport controllers; NewportSrc directory.
-	omsLib - Oregon Micro System (OMS) controllers; OmsSrc directory.
-	AcsLib - Advanced Control Systems controllers; AcsSrc directory.
-	MclennanLib - Mclennan controllers; MclennanSrc directory.
-	softMotorLib - Soft Channel device support; SoftMotorSrc directory.
+	Ims - Intelligent Motion Systems (IMS) controllers; ImsSrc directory.
+	Newport - Newport controllers; NewportSrc directory.
+	oms - Oregon Micro System (OMS) controllers; OmsSrc directory.
+	Acs - Advanced Control Systems controllers; AcsSrc directory.
+	Mclennan - Mclennan controllers; MclennanSrc directory.
+	softMotor - Soft Channel device support; SoftMotorSrc directory.
 	motorCOM_mpf - Communication interface between motor device/drivers and
 		MPF; CommSrc directory.
 
@@ -44,10 +43,9 @@ needs.  See individual files for instructions.
 
 		For serial and/or GPIB motor controller communication, ALL of
 		the following support modules are required;
-			- EPICS_BASE R3.13.2 or above.
-			- MPF V1.5 or above.
-                        - MPF_SERIAL V1.1 or above
-			- either MPF_GPIB V1.3 or GPIB V0.1 or above.
+			- EPICS base R3.14.2 or above.
+			- mpf R2-2 or above.
+			- GPIB is not supported yet.
 		
 		If any example applications (motorExApp) are to be built, then
 			TEMPLATE_TOP and MSITOP must be defined.
@@ -56,7 +54,6 @@ needs.  See individual files for instructions.
 	- ./motorExApp/Makefile: Define which, if any, example applications are
 		to be built.
 		
-Newport - Newport device drivers require both MPF_SERIAL and MPF_GPIB support.
 
 
 Known Problems
@@ -108,7 +105,7 @@ Modification Log from R4-5 to R5-1
 	direction in which the motor moves during the backlash-takeout part of
 	a motor move).
 
-	File modified: do_work() in motorRecord.c.  Update last target
+	File modified: do_work() in motorRecord.cc.  Update last target
 			positions and set DMOV TRUE, only if the motion in
 			progress indicator (MIP) is DONE.
 
@@ -118,7 +115,7 @@ Modification Log from R4-5 to R5-1
 	position at the backlash velocity rather than the slew velocity.
 	This bug was discovered by Kevin M. Peterson.
 	
-	File modified: process() in motorRecord.c.  Before calling
+	File modified: process() in motorRecord.cc.  Before calling
 			postProcess() check if the target position has changed.
 
 3) A conflict between the requirements specified in item #2 below and the goal
@@ -160,7 +157,7 @@ Modification Log from R4-5 to R5-1
 	of NTM.
 
 	Files modified: - NTM field added to motorRecord.dbd
-			- process() in motorRecord.c checks NTM field before
+			- process() in motorRecord.cc checks NTM field before
 				sending stop motor command.
 
 4) A Soft Channel device support design limitation was discovered by Tim
@@ -178,8 +175,63 @@ Modification Log from R4-5 to R5-1
 	synchronization due to the readback changing.
 	
 	Files modified: - LOCK field added to motorRecord.dbd
-			- soft_dinp_func() in devSoft.c checks LOCK field
+			- soft_dinp_func() in devSoft.cc checks LOCK field
 				before putting dinp_value into HARDMOVE state.
+
+
+5) Device driver support added for the Newport ESP300 motor controller.
+	Files added: - NewportSrc/devESP300.cc
+		     - NewportSrc/drvESP300.cc
+
+6) An uninitialized pointer error check was omitted from a Newport ESP300
+	device function.  This resulted in a bus error at boot-up if the IOC
+	failed to connect to the ESP300 controller.
+	
+	File modified: ESP300_init_record() in the devESP300.cc
+
+7) "device directive" support has been extended to the PREM and POST fields for
+	OMS devices only.  The new device directive supports changing the value
+	of a database variable.  The syntax is as follows:
+
+	PREM - @PUT(<pvname>, <pv-value>, <delay in seconds>)@
+	POST - @PUT(<pvname>, <pv-value>)@
+
+	Note that the PREM supports a delay argument, but that POST does not.
+	The "Readback settle time" field (DLY) should be used to create a time
+	delay after the PV specified in the POST field is written.  See the
+	"Miscellaneous fields" in motorRecord.html for further information on
+	the INIT, PREM and POST fields.
+
+	Files modified: devOmsCom.cc, drvOms58.cc and drvOms.cc
+
+8) Device driver support added for the Intelligent Motion Systems (IMS)
+	MDrive17 model motor controller.
+	
+	Files modified: - [dev/drv]MDrive.cd added to ImsSrc/Makefile.Vx
+			- "MDrive" device and driver added to devImsMotor.dbd
+	Files added:	- [dev/drv]MDrive.cd added to ImsSrc directory.
+
+9) Eliminated redundant DMOV monitor posting's.  For example, with previous
+	releases the motor record would post DMOV=0 twice if backlash
+	correction was enabled and the user jogged the motor.
+	
+	Files modified: modified postProcess(), process() and load_pos()
+			in motorRecord.cc.
+
+10) A Home Velocity field (HVEL) was added.
+	Files modified: - HVEL added to motorRecord.dbd
+			- motorRecord.cc
+			- op/adl/motorx_setup.adl
+
+11) There is a problem with OMS VME58 ver 2.35-8 firmware when used with
+	MVME2700 CPU boards.  The problem is that the controller board
+	intermittently, reports that there is no limit switch error when there
+	is an error.  This error can occur if the user repeatedly, tries to
+	move in the direction of the limit switch when the limit error
+	condition exits.  A delay has been added to work around the problem.
+
+	File modified: - drvOms58.c; conditional delay added to query_done().
+
 
 Modification Log from R4-4 to R4-5
 ==================================
