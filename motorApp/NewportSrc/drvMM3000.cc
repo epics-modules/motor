@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-28 14:56:45 $
+Last Modified:	$Date: 2003-10-23 19:57:28 $
 */
 
 /*
@@ -50,6 +50,8 @@ Last Modified:	$Date: 2003-05-28 14:56:45 $
  * .06 10/02/01 rls - allow one retry after a communication error.
  *		    - use motor status response bit-field.
  * .07 05-22-03	rls - Converted to R3.14.2.
+ * .08 10/23/03 rls - recv_mess() eats the controller error response, outputs
+ *			an error message and retries.
  */
 
 #include <string.h>
@@ -538,11 +540,19 @@ STATIC int recv_mess(int card, char *com, int flag)
 	len = 0;
     }
     else
+    {
 	/* MM3000 responses are always terminated with CR/LF combination (see
 	 * MM3000 User' Manual Sec. 3.4 NOTE). Strip both CR&LF from buffer
 	 * before returning to caller.
 	 */
 	com[len-2] = '\0';
+	/* Test for "system error" response. */
+	if (com[0] == 'E')
+	{
+	    errPrintf( -1, __FILE__, __LINE__, "%s\n", com);
+	    return(recv_mess(card, com, flag));
+	}
+    }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
     return (len);
