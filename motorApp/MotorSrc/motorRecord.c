@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Record Support Routines for the Motor record.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-25 20:34:50 $
+Last Modified:	$Date: 2000-08-16 19:04:39 $
 */
 
 /*
@@ -1343,8 +1343,15 @@ LOGIC:
 	    NORMAL RETURN.
 	ELSE
 	    Calculate....
-	    IF last dial commanded position = current dial feedback position.
-		NORMAL RETURN.		
+	    
+	    IF new raw commanded position = current raw feedback position.
+		IF not done moving, AND, [either no motion-in-progress, OR,
+					    retry-in-progress].
+		    Set done moving TRUE.
+		    NORMAL RETURN.
+		    NOTE: maybeRetry() can send control here even though the
+			move is to the same raw position.
+		ENDIF
 	    ENDIF
 	    ....
 	    ....
@@ -1806,10 +1813,15 @@ stop_all:   /* Cancel any operations. */
 	    npos = NINT(newpos);
 	    if (npos == rpos)
 	    {
-		if (pmr->dmov == FALSE && pmr->mip == 0)
+		if (pmr->dmov == FALSE && (pmr->mip == 0 || pmr->mip == MIP_RETRY))
 		{
 		    pmr->dmov = TRUE;
 		    MARK(M_DMOV);
+		    if (pmr->mip != 0)
+		    {
+			pmr->mip = 0;
+			MARK(M_MIP);
+		    }
 		}
 		return(OK);
 	    }
