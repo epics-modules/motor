@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:48:45 $
+Last Modified:	$Date: 2004-06-21 21:43:36 $
 */
 
 /*
@@ -52,6 +52,7 @@ Last Modified:	$Date: 2003-12-12 21:48:45 $
  * .08  06-04-03 rls Convert to R3.14.x.
  * .09  06-04-03 rls extended device directive support PREM and POST.
  * .10  06-16-03 rls Converted to R3.14.x.
+ * .11  06-16-04 rls Terminate "LP" command with ";" to prevent MAXv stale data.
  */
 
 #include <string.h>
@@ -418,7 +419,8 @@ errorexit:		    errMessage(-1, "Invalid device directive");
 		sprintf(buffer, " UU%f", parms[0]/parms[1]);
 		strcat(motor_call->message, buffer);
 	    }
-
+	    if (command == LOAD_POS)
+		strcat(motor_call->message, ";");
 	}
     }
     return(rtnind);
