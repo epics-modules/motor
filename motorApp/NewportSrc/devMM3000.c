@@ -2,9 +2,9 @@
 FILENAME...	devMM3000.c
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-04-21 18:27:38 $
+Last Modified:	$Date: 2002-03-27 21:43:15 $
 */
 
 /*
@@ -328,9 +328,9 @@ STATIC long MM3000_build_trans(motor_cmnd command, double *parms, struct motorRe
 	    sprintf(buff, "%dVA%d;", axis, abs(intval));
 	    strcat(motor_call->message, buff);
 	    if (intval > 0)
-		sprintf(buff, "%dPA%d;", axis, (int) (mr->dhlm / mr->res));
+		sprintf(buff, "%dPA%d;", axis, (int) (mr->dhlm / mr->mres));
 	    else
-		sprintf(buff, "%dPA%d;", axis, (int) (mr->dllm / mr->res));
+		sprintf(buff, "%dPA%d;", axis, (int) (mr->dllm / mr->mres));
 	    break;
 	case SET_PGAIN:
 	    sprintf(buff, "%dKP%d;%dUF;", axis, intval, axis);
