@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 20:40:53 $
+Last Modified:	$Date: 2003-05-23 19:44:05 $
 */
 
 /*
@@ -142,6 +142,14 @@ struct motor_dset
     RTN_STATUS (*build_trans) (motor_cmnd, double *, struct motorRecord *);
     RTN_STATUS (*end_trans) (struct motorRecord *);
 };
+
+// Define, from top to bottom, how bit fields are packed.
+// This works for SunPro, 
+#if #cpu(i386) && !#cpu(sparc)
+    #define LSB_First (TRUE)  // LSB is packed first.
+#else
+    #define MSB_First (TRUE)  // MSB is packed first.
+#endif
 
 #endif	/* INCmotorh */
 
