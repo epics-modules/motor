@@ -4,9 +4,9 @@ FILENAME..	devSoft.h
 USAGE... 	This file contains information that is common to
 		all Soft channel device support modules.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-11 17:34:33 $
+Last Modified:	$Date: 2002-06-25 20:01:28 $
 */
 
 /*
@@ -32,7 +32,7 @@ Last Modified:	$Date: 2002-02-11 17:34:33 $
 #ifndef	INCdevSofth
 #define	INCdevSofth 1
 
-typedef enum DONE_STATES {MOVING = 0, DONE = 1, WAIT = 2} DONE_STATES;
+typedef enum DONE_STATES {SOFTMOVE = 0, HARDMOVE = 1, DONE = 2, WAIT = 3} DONE_STATES;
 
 #define MAXMSGS 20
 
