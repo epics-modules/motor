@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:28:22 $
+Version:	$Revision: 1.12 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-21 14:57:12 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -42,6 +42,7 @@ Last Modified:	$Date: 2004-08-17 21:28:22 $
  * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .06 07/09/04 rls removed unused <driver>Setup() argument.
  * .07 07/28/04 rls "epicsExport" debug variable.
+ * .08 09/21/04 rls support for 32axes/controller.
  */
 
 
@@ -92,17 +93,17 @@ Last Modified:	$Date: 2004-08-17 21:28:22 $
 
 /* --- Local data. --- */
 int PM500_num_cards = 0;
-static char PM500_axis_names[PM500_NUM_CHANNELS] = {'X', 'Y', 'Z', 'A', 'B',
-    'C', 'D', 'E', 'F', 'G', 'H', 'I'};
+static char *PM500_axis_names[] = {"X", "Y", "Z", "A", "B", "C", "D", "E", "F",
+				   "G", "H", "I"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int card, char const *com, char c);
-static int set_status(int card, int signal);
-static long report(int level);
+static RTN_STATUS send_mess(int, char const *, char *);
+static int set_status(int, int);
+static long report(int);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
@@ -214,7 +215,7 @@ static int set_status(int card, int signal)
     struct mess_node *nodeptr;
     register struct mess_info *motor_info;
     /* Message parsing variables */
-    char axis_name, status_char, dir_char, buff[BUFF_SIZE],
+    char *axis_name, status_char, dir_char, buff[BUFF_SIZE],
 	response[BUFF_SIZE];
     int rtnval, rtn_state = 0;
     double motorData;
@@ -228,7 +229,7 @@ static int set_status(int card, int signal)
     status.All = motor_info->status.All;
 
     /* Request the status and position of this motor */
-    sprintf(buff, "%cR", axis_name);
+    sprintf(buff, "%sR", axis_name);
     send_mess(card, buff, (char) NULL);
     rtnval = recv_mess(card, response, 1);
     if (rtnval > 0)
@@ -340,7 +341,7 @@ exit:
 /* send a message to the PM500 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
@@ -602,10 +603,10 @@ static int motor_init()
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
 		struct mess_info *motor_info = &brdptr->motor_info[motor_index];
-  		char *firmware, axis_name = PM500_axis_names[motor_index];
+  		char *firmware, *axis_name = PM500_axis_names[motor_index];
 		double res = 0.0;
 
-                sprintf(buff, "%cCONFIG?", axis_name);
+                sprintf(buff, "%sCONFIG?", axis_name);
 	        send_mess(card_index, buff, (char) NULL);
 	        recv_mess(card_index, buff, 1);
                 firmware = &buff[8];
