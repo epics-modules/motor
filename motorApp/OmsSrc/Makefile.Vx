@@ -10,19 +10,17 @@ include $(TOP)/config/CONFIG_APP
 
 # The following is required for all OMS device drivers.
 SRCS.c += ../devOmsCom.c
-LIBOBJS += devOmsCom.o
 INSTALLS += devOmsCom.o
 	
 # The following is required for the OMS VME8/44 (i.e., devOMS) device driver.
 SRCS.c += ../devOms.c ../drvOms.c
-LIBOBJS += devOms.o drvOms.o
 INSTALLS += devOms.o drvOms.o
 
 # The following is required for the OMS VME58 (i.e., devOms58) device driver.
 SRCS.c += ../devOms58.c ../drvOms58.c
-LIBOBJS += devOms58.o drvOms58.o
 INSTALLS += devOms58.o drvOms58.o
 
+LIBOBJS = $(SRCS.c:../%.c=%.o)
 LIBNAME = omsLib
 
 #Note that the command line that builds the

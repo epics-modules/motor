@@ -6,8 +6,8 @@ include $(TOP)/config/CONFIG_APP
 
 # The following is required for the Soft Channel (i.e., MotorSoft) device driver.
 SRCS.c += ../devSoft.c ../devSoftAux.c
-LIBOBJS += devSoft.o devSoftAux.o
 
+LIBOBJS = $(SRCS.c:../%.c=%.o)
 LIBNAME = softMotorLib
 
 #Note that the command line that builds the
