@@ -1,0 +1,5 @@
+# Micos MoCo dc series support.
+device(motor,VME_IO,devMicos,"Micos MoCo")
+driver(drvMicos)
+
+
