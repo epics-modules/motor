@@ -1,4 +1,4 @@
-file basic_motor.db
+file "$(MOTOR)/db/basic_motor.db"
 {
 pattern
 {P,     N,  M,      DTYP,      C,  S,  DESC,          EGU,      DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC,  DHLM,  DLLM,  INIT}
