@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:	$Revision: 1.14 $
+Version:	$Revision: 1.15 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-21 17:19:34 $
+Last Modified:	$Date: 2005-03-18 22:32:59 $
 */
 
 /*
@@ -47,6 +47,8 @@ Last Modified:	$Date: 2004-12-21 17:19:34 $
  *		    - make debug variables always available.
  *		    - MS Visual C compatibility; make all epicsExportAddress
  *		      extern "C" linkage.
+ * .07 03/18/05 rls - Flexible MDrive I/O configuration.
+ *		    - Change Echo mode to 2; eliminate eat_garbage().
  */
 
 /*
@@ -91,7 +93,6 @@ static char *MDrive_axis[] = {"1", "2", "3", "4", "5", "6", "7", "8"};
 #include	"motordrvComCode.h"
 
 /*----------------functions-----------------*/
-static int eat_garbage(int, char *, int);
 static int recv_mess(int, char *, int);
 static RTN_STATUS send_mess(int, char const *, char *);
 static int set_status(int, int);
@@ -118,7 +119,7 @@ struct driver_table MDrive_access =
     &total_cards,
     &any_motor_in_motion,
     send_mess,
-    eat_garbage,
+    recv_mess,
     set_status,
     query_done,
     NULL,
@@ -137,34 +138,6 @@ extern "C" {epicsExportAddress(drvet, drvMDrive);}
 
 static struct thread_args targs = {SCAN_RATE, &MDrive_access};
 
-
-/* Single Inputs - response from PR IN command */
-typedef union
-{
-    epicsUInt8 All;
-    struct
-    {
-#ifdef MSB_First
-	unsigned int na7:1;
-	unsigned int na6:1;
-	unsigned int na5:1;
-	unsigned int na4:1;
-	unsigned int na3:1;
-	unsigned int homels:1;		/* Home limit switch.  */
-	unsigned int ls_plus:1;		/* Plus limit switch.  */
-	unsigned int ls_minus:1;	/* Minus limit switch. */
-#else
-	unsigned int ls_minus:1;	/* Minus limit switch. */
-	unsigned int ls_plus:1;		/* Plus limit switch.  */
-	unsigned int homels:1;		/* Home limit switch.  */
-	unsigned int na3:1;
-	unsigned int na4:1;
-	unsigned int na5:1;
-	unsigned int na6:1;
-	unsigned int na7:1;
-#endif
-    } Bits;
-} SINPUTS;
 
 /*********************************************************
  * Print out driver status report
@@ -257,17 +230,17 @@ static int set_status(int card, int signal)
     char buff[BUFF_SIZE];
     int rtnval, rtn_state;
     double motorData;
-    SINPUTS inputs;
+    epicsUInt8 Lswitch;
     bool plusdir, ls_active = false;
     msta_field status;
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
+    input_config *confptr = cntrl->inconfig;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
 
     send_mess(card, "PR MV", MDrive_axis[signal]);
-    eat_garbage(card, buff, 1);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
@@ -303,7 +276,6 @@ static int set_status(int card, int signal)
      */
 
     send_mess(card, "PR P", MDrive_axis[signal]);
-    eat_garbage(card, buff, 1);
     recv_mess(card, buff, 1);
 
     motorData = atof(buff);
@@ -325,31 +297,53 @@ static int set_status(int card, int signal)
 
     plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
-    send_mess(card, "PR IN", MDrive_axis[signal]);
-    eat_garbage(card, buff, 1);
-    recv_mess(card, buff, 1);
-    inputs.All = atoi(buff);
-
-    /* Set limit switch error indicators. */
-    if (inputs.Bits.ls_plus == 0)
+    if (confptr->plusLS == 0 || confptr->minusLS == 0)
     {
-	status.Bits.RA_PLUS_LS = 1;
-	if (plusdir == true)
-	    ls_active = true;
-    }
-    else
-	status.Bits.RA_PLUS_LS = 0;
-
-    if (inputs.Bits.ls_minus == 0)
-    {
-	status.Bits.RA_MINUS_LS = 1;
-	if (plusdir == false)
-	    ls_active = true;
-    }
-    else
+	status.Bits.RA_PLUS_LS  = 0;
 	status.Bits.RA_MINUS_LS = 0;
+    }
+    else
+    {
+        sprintf(buff, "PR I%d", confptr->plusLS);
+        send_mess(card, buff, MDrive_axis[signal]);
+        recv_mess(card, buff, 1);
+        Lswitch = atoi(buff);
 
-    status.Bits.RA_HOME = (inputs.Bits.homels) ? 1 : 0;
+        /* Set limit Lswitch error indicators. */
+	if (Lswitch != 0)
+	{
+	    status.Bits.RA_PLUS_LS = 1;
+	    if (plusdir == true)
+		ls_active = true;
+	}
+	else
+	    status.Bits.RA_PLUS_LS = 0;
+
+        sprintf(buff, "PR I%d", confptr->minusLS);
+        send_mess(card, buff, MDrive_axis[signal]);
+        recv_mess(card, buff, 1);
+        Lswitch = atoi(buff);
+	
+	if (Lswitch != 0)
+	{
+	    status.Bits.RA_MINUS_LS = 1;
+	    if (plusdir == false)
+		ls_active = true;
+	}
+	else
+	    status.Bits.RA_MINUS_LS = 0;
+    }
+
+    if (confptr->homeLS == 0)
+	status.Bits.RA_HOME = 0;
+    else
+    {
+        sprintf(buff, "PR I%d", confptr->homeLS);
+        send_mess(card, buff, MDrive_axis[signal]);
+        recv_mess(card, buff, 1);
+        Lswitch = atoi(buff);
+	status.Bits.RA_HOME = (Lswitch) ? 1 : 0;
+    }
 
     /* !!! Assume no closed-looped control!!!*/
     status.Bits.EA_POSITION = 0;
@@ -364,7 +358,6 @@ static int set_status(int card, int signal)
     else
     {
 	send_mess(card, "PR C2", MDrive_axis[signal]);
-	eat_garbage(card, buff, 1);
 	recv_mess(card, buff, 1);
 	motorData = atof(buff);
 	motor_info->encoder_position = (int32_t) motorData;
@@ -446,51 +439,13 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 
 
 /*****************************************************/
-/* eat garbage characters from the MDrive board      */
-/* eat_garbage()			             */
-/*****************************************************/
-static int eat_garbage(int card, char *com, int flag)
-{
-    struct IM483controller *cntrl;
-    int timeout = 0;
-    int nread = 0;
-    asynStatus status = asynError;
-    int eomReason;
-
-    /* Check that card exists */
-    if (!motor_state[card])
-	return(ERROR);
-
-    cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
-
-    if (flag == FLUSH)
-	pasynOctetSyncIO->flush(cntrl->pasynUser);
-    else
-	status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
-					timeout, &nread, &eomReason);
-
-    Debug(2, "eat_garbage(): nread = %i\n", nread);
-    
-    if ((status != asynSuccess) || (nread <= 0))
-    {
-        Debug(2, "eat_garbage(): com = \"%s\"\n", com);
-	com[0] = '\0';
-	nread = 0;
-    }
-
-    /*Debug(2, "eat_garbage(): message = \"%s\"\n", com);*/
-    return (nread);
-}
-
-
-/*****************************************************/
 /* receive a message from the MDrive board           */
 /* recv_mess()			                     */
 /*****************************************************/
 static int recv_mess(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    int timeout = 0;
+    const double timeout = 1.0;
     int nread = 0;
     asynStatus status = asynError;
     int eomReason;
@@ -523,7 +478,7 @@ static int recv_mess(int card, char *com, int flag)
 /* MDriveSetup()                                     */
 /*****************************************************/
 RTN_STATUS
-MDriveSetup(int num_cards,	/* maximum number of controllers in system.  */
+MDriveSetup(int num_cards,	/* maximum number of chains in system.  */
 	    int scan_rate)	/* polling rate - 1/60 sec units.  */
 {
     int itera;
@@ -560,8 +515,8 @@ MDriveSetup(int num_cards,	/* maximum number of controllers in system.  */
 /* MDriveConfig()                                    */
 /*****************************************************/
 RTN_STATUS
-MDriveConfig(int card,		/* card being configured */
-             const char *name)	/* MPF server task name */
+MDriveConfig(int card,		/* chain being configured */
+             const char *name)	/* ASYN port name */
 {
     struct IM483controller *cntrl;
 
@@ -608,7 +563,7 @@ static int motor_init()
 	
 	brdptr = motor_state[card_index];
 	brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
-	brdptr->cmnd_response = true;
+	brdptr->cmnd_response = false;
 	total_cards = card_index + 1;
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
@@ -634,7 +589,6 @@ static int motor_init()
 		do
 		{
 		    send_mess(card_index, "PR VR", MDrive_axis[total_axis]);
-                    eat_garbage(card_index, buff, 1);
 		    status = recv_mess(card_index, buff, 1);
 		    retry++;
 		} while (status == 0 && retry < 3);
@@ -645,15 +599,20 @@ static int motor_init()
 		    strcpy(brdptr->ident, buff);
 	    }
 	    brdptr->total_axis = total_axis;
+	    cntrl->inconfig = (input_config *) malloc(
+		    sizeof(struct IM483controller) * total_axis);
 	}
 
 	if (success_rtn == asynSuccess && total_axis > 0)
 	{
+	    input_config *confptr = cntrl->inconfig;
+
 	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;
 
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
+		int itera;
 		struct mess_info *motor_info = &brdptr->motor_info[motor_index];
 
 		motor_info->status.All = 0;
@@ -673,6 +632,50 @@ static int motor_init()
 		    motor_info->status.Bits.EA_PRESENT = 1;
 		}
 
+                /* Determine input configuration. */
+		confptr->homeLS = confptr->minusLS = confptr->plusLS = 0;
+
+		for (itera = 1; itera <= 4; itera++)
+		{
+		    int type, active;
+
+		    sprintf(buff, "PR S%d", itera);
+		    send_mess(card_index, buff, MDrive_axis[motor_index]);
+		    status = recv_mess(card_index, buff, 1);
+		    if (status == 0)
+		    {
+			errlogPrintf("Error reading I/O configuration.\n");
+			break;
+		    }
+		    
+		    status = sscanf(buff, "%d,%d", &type, &active);
+		    switch (type)
+		    {
+		    case 0:
+			break;
+		    case 1: // Home switch.
+			confptr->homeLS = itera;
+			break;
+		    case 2: // Plus limit switch.
+			confptr->plusLS = itera;
+			break;
+		    case 3: // Minus limit switch.
+			confptr->minusLS = itera;
+			break;
+		    default:
+			errlogPrintf("Invalid I/O type: %d.\n", type);
+
+		    }
+		}
+		// Test for missing configuration.
+		if (confptr->minusLS == 0 || confptr->plusLS == 0)
+		{
+		    const char p_label[6] = "Plus", m_label[6] = "Minus";
+		    errlogPrintf("MDrive chain #%d, motor #%d %s LS not configured.\n",
+				 card_index, motor_index,
+				 (confptr->minusLS == 0) ? m_label : p_label);
+		}
+
 		set_status(card_index, motor_index);  /* Read status of each motor */
 	    }
 	}
@@ -688,7 +691,9 @@ static int motor_init()
     free_list.head = (struct mess_node *) NULL;
     free_list.tail = (struct mess_node *) NULL;
 
-    epicsThreadCreate((char *) "MDrive_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
+    epicsThreadCreate((char *) "MDrive_motor", 64,
+	epicsThreadGetStackSize(epicsThreadStackMedium),
+	(EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     return(OK);
 }
