@@ -15,9 +15,9 @@
 # The following must be added for many board support packages
 #cd "... IOC st.cmd complete directory path ... "
 
-< cdCommands
- 
 #< ../nfsCommands
+< cdCommands 
+< ../MPFconfig.cmd
 
 cd appbin
 
@@ -27,15 +27,15 @@ sysCplusEnable=1
 
 ld < WithMPFLib
 
-# !MPF-1-CPU! #ld < GpibHideosLocal.o
-# !MPF-2-CPU! #ld < GpibHideosRemote.o
+# !GPIB!   ## !MPF-1-CPU! #ld < GpibHideosLocal.o
+# !GPIB!   ## !MPF-2-CPU! #ld < GpibHideosRemote.o
 
 cd startup
 dbLoadDatabase("../../dbd/WithMPFApp.dbd")
 dbLoadRecords("../../db/WithMPF.db")
 
 routerInit
-MPF_Server_Location = 1
+MPF_Server_Location = 0
 # !MPF-1-CPU! #localMessageRouterStart(MPF_Server_Location)
 # !MPF-2-CPU! #tcpMessageRouterClientStart(MPF_Server_Location,9900,"164.54.53.78",1500,40)
 
@@ -43,31 +43,64 @@ MPF_Server_Location = 1
 # !MPF-1-CPU! #< st_mpfserver.cmd
 
 # Newport MM4000 driver setup parameters: 
-#     (1) max. controllers, (2)Unused, (3)polling rate (min=1Hz,max=60Hz) 
+#     (1) maximum number of controllers in system
+#     (2) N/A
+#     (3) motor task polling rate (min=1Hz,max=60Hz)
 MM4000Setup(1, 0, 10)
 
 # Newport MM4000 driver configuration parameters: 
-#     (1)controller# being configured,
-#     (2)port type: 0-GPIB_PORT or 1-RS232_PORT,
-#     (3)GPIB link or MPF server location
-#     (4)GPIB address or hideos_task name
+#     (1) controller# being configured,
+#     (2) port type: 0-GPIB_PORT or 1-RS232_PORT,
+#     (3) GPIB link or MPF server location
+#     (4) GPIB address or MPF serial server name
 # !SERIAL! #MM4000Config(0, 1, MPF_Server_Location, "a-Serial[0]")
 # !GPIB!   #GPIB_Link = 10
 # !GPIB!   #GPIB_Addr = 1
 # !GPIB!   #MM4000Config(0, 0, GPIB_Link, GPIB_Addr)
 
+# Newport PM500 driver setup parameters:
+#     (1) maximum number of controllers in system
+#     (2) N/A
+#     (3) motor task polling rate (min=1Hz,max=60Hz)
+#PM500Setup(1, 0, 10)
+
+# Newport PM500 configuration parameters:
+#     (1) controller# being configured,
+#     (2) port type (0-GPIB_PORT, 1-RS232_PORT)
+#     (3) GPIB link or MPF server location
+#     (4) GPIB address or MPF serial server name
+#PM500Config(0, 1, MPF_Server_Location, "a-Serial[0]")
+
 # IMS IM483 driver setup parameters:
 #     (1) maximum number of controllers in system
 #     (2) N/A
 #     (3) motor task polling rate (min=1Hz,max=60Hz)
+#  SM - single mode     PL - party mode
 #IM483SMSetup(1, 0, 1)
+#IM483PLSetup(1, 0, 5)
 
 # IMS IM483 configuration parameters:
-#     (1) card being configured
+#     (1) controller# being configured,
 #     (2) port type (1-RS232_PORT)
 #     (3) MPF server location
-#     (4) GPIB address or hideos_task
+#     (4) GPIB address or serial server task name
+#  SM - single mode     PL - party mode
 #IM483SMConfig(0, 1, MPF_Server_Location, "a-Serial[0]")
+#IM483PLConfig(0, 1, MPF_Server_Location, "a-Serial[0]")
+
+# MCB-4B driver setup parameters:
+#     (1) maximum # of controllers,
+#     (2) maximum # axis per controller
+#     (3) motor task polling rate (min=1Hz, max=60Hz)
+#MCB4BSetup(1, 1, 10)
+
+# MCB-4B driver configuration parameters:
+#     (1) controller
+#     (2) MPF card
+#     (3) MPF server
+# Example:
+#   MCB4BConfig(0, 1, "a-Serial[0]")  MPF card 1, port 0 on IP slot A.
+#MCB4BConfig(0, MPF_Server_Location, "a-Serial[3]")
 
 # !GPIB!   ## !MPF-1-CPU! #Server_Mod_Name = GPIB_Module_Name
 # !GPIB!   ## !MPF-2-CPU! #Server_Mod_Name = "GPIB0"

@@ -12,14 +12,6 @@ ipacAddCarrier(&ipmv162, "A:l=3,3 m=0xe0000000,64;B:l=3,3 m=0xe0010000,64;C:l=3,
 initIpacCarrier(carrier, 0)
 
 ###############################################################################
-# Initialize GPIB module
-
-# !GPIB! #GPIB_Module_Name = "GS-IP488-0"
-# !GPIB! #initGpibGsTi9914(GPIB_Module_Name,carrier,"IP_d",104)
-# !GPIB! #GPIB_ServerName = "GPIB0"
-# !GPIB! #initGpibServer(GPIB_ServerName,"GS-IP488-0",1024,1000)
-
-###############################################################################
 # Initialize Octal UART module
 #initOctalUART("moduleName","carrierName","carrierSite",nports,intVec)
 initOctalUART("octalUart0",carrier,"IP_a",8,100)
@@ -34,20 +26,5 @@ initOctalUART("octalUart0",carrier,"IP_a",8,100)
 # Port 0 is Generic Serial Record
 
 initOctalUARTPort("UART[0]","octalUart0",0, 9600,"N",1,8,"N")
-initOctalUARTPort("UART[1]","octalUart0",1, 9600,"N",1,8,"N")
-initOctalUARTPort("UART[2]","octalUart0",2, 9600,"N",1,8,"N")
-initOctalUARTPort("UART[3]","octalUart0",3, 9600,"N",1,8,"N")
-initOctalUARTPort("UART[4]","octalUart0",4, 9600,"N",1,8,"N")
-initOctalUARTPort("UART[5]","octalUart0",5, 9600,"N",1,8,"N")
-initOctalUARTPort("UART[6]","octalUart0",6, 9600,"N",1,8,"N")
-initOctalUARTPort("UART[7]","octalUart0",7, 9600,"N",1,8,"N")
-
 initSerialServer("a-Serial[0]","UART[0]",1000,20,"\r",1)
-initSerialServer("a-Serial[1]","UART[1]",1000,20,"\r",1)
-initSerialServer("a-Serial[2]","UART[2]",1000,20,"\r",1)
-initSerialServer("a-Serial[3]","UART[3]",1000,20,"\r",1)
-initSerialServer("a-Serial[4]","UART[4]",1000,20,"\r",1)
-initSerialServer("a-Serial[5]","UART[5]",1000,20,"\r",1)
-initSerialServer("a-Serial[6]","UART[6]",1000,20,"\r",1)
-initSerialServer("a-Serial[7]","UART[7]",1000,20,"\r",1)
 
