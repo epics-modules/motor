@@ -2,9 +2,9 @@
 FILENAME...	MXRegister.cc
 USAGE...	Register MX motor device driver shell commands.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:35:17 $
+Last Modified:	$Date: 2003-05-28 14:33:57 $
 */
 
 /*****************************************************************
@@ -41,11 +41,11 @@ static void setupCallFunc(const iocshArgBuf *args)
 }
 
 
-static void mxmotorRegister(void)
+static void MXmotorRegister(void)
 {
     iocshRegister(&setupFuncDef, setupCallFunc);
 }
 
-epicsExportRegistrar(mxmotorRegister);
+epicsExportRegistrar(MXmotorRegister);
 
 } // extern "C"
