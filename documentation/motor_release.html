@@ -5,11 +5,45 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R5.3 Notice</title>
+  <title>EPICS Motor Record Release R5.5 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+
+<CENTER>
+  <h1><b><u>Motor Record Version 5.5 Release Notice</u></b></h1>
+</CENTER>
+
+<BR>
+<b><U>Requirements</u></B><BR>
+<BR>
+EPICS base R3.14.7 or greater.&nbsp; See the "Required Modules" section of the 
+Motor Record web page for details.<br>
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+
+<div align="left">
+  <U><B>Conversion to ASYN</B></U>
+  <P>
+  The motor record distribution has been converted from MPF to ASYN R4.1. All 
+  support for MPF has been removed.
+  </P>
+</div>
+
+<div align="left">
+  <U><B>Acceleration Correction</B></U>
+  <P>
+  Slew acceleration calculations were incorrect.  Instead of the correct 
+  calculation; A = (Vf - Vo) / t, the record was using A = Vf / t, which is 
+  correct only if Vo (VBAS) is zero.  Thanks to Harvey Rarback for pointing out 
+  this long standing error.
+  </P>
+</div>
 
 
 <CENTER>
@@ -54,9 +88,6 @@ Motor Record web page for details.<br>
   Device support for Delta Tau's PMAC2-VME controller was added.
   </P>
 </div>
-
-
-
 
 
 <CENTER>

@@ -1,7 +1,7 @@
-Motor Record R5-4 Release Notice
+Motor Record R5-5 Release Notice
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base R3.14.6.
+The motor record software in this release is compatible with EPICS base R3.14.7.
 
 
 Contents
@@ -23,17 +23,16 @@ As distributed, this support directory only builds the following:
 Optionally, any of the following device/driver libraries can be built by
 uncommenting the appropriate line in ./motorApp/Makefile.
 	Acs - Advanced Control Systems controllers; AcsSrc directory.
+	DeltaTau - Delta Tau controllers; DeltaTauSrc directory.
 	Ims - Intelligent Motion Systems (IMS) controllers; ImsSrc directory.
-	Newport - Newport controllers; NewportSrc directory.
 	Mclennan - Mclennan controllers; MclennanSrc directory.
 	MicosLib - Micos controller; MicosSrc directory.
 	MicroMoLib - MicroMo controllers; MicroMoSrc directory.
+	Newport - Newport controllers; NewportSrc directory.
 	oms - Oregon Micro System (OMS) controllers; OmsSrc directory.
-	PILib - Physik Instrumente (PI) GmbH & Co. controllers; PiSrc
+	PI - Physik Instrumente (PI) GmbH & Co. controllers; PiSrc
 		directory.
 	softMotor - Soft Channel device support; SoftMotorSrc directory.
-	motorCOM_mpf - Communication interface between motor device/drivers and
-		MPF; CommSrc directory.
 
 
 Configuration
@@ -74,7 +73,7 @@ Known Problems
 	the motor moves to where it was commanded.  However, the motor record's
 	positions (both target and readback) do not reflect the move.  This
 	is because of the following sequence of events:
-	
+
 	- a limit (i.e., laser light beam) violation occurs.  The Newport
 	controller turns motor power off.
 	- the axis stops at position X.
@@ -93,6 +92,63 @@ Known Problems
 3) The OMS VME58 servo motor controller board (i.e., model -8S) is unable to
 	move off an activated limit switch.  Users are advised to avoid this
 	situation.  This problem is fixed with the MAXv model.
+
+
+Modification Log from R5-4 to R5-5
+==================================
+
+
+1) Removed the <motor>/motorExApp/Db directory.  R3.13.x  versions of the motor
+	distribution needed some way to convert *.substitutions files into *.db
+	files, because it could not rely on the synApps version of
+	dbLoadTemplates().  This is not required with R3.14.x since "motor" is
+	able to use the EPICS base version of dbLoadTemplates().  This, in
+	turn, means that all the *.substitutions have been moved to their
+	respective iocBoot directories and loaded directly by
+	dbLoadTemplates().
+
+2) The motor record would get into an invalid state when it attempted to
+	perform a backlash correction move in the direction of an activated
+	limit switch.
+
+	File modified: - update CDIR in postProcess() in motorRecord.cc
+
+3) Ported all affected device drivers to R4-1 of asyn.
+
+	Files modified - all serial and/or GPIB based drivers.
+
+4) Slew acceleration calculations were incorrect.  Instead of the correct
+	calculation; A = (Vf - Vo) / t, the record was using A = Vf / t,
+	which is correct only if Vo (VBAS) is zero.  Thanks to Harvey Rarback
+	for pointing out this long standing error.
+
+	File modified - motorRecord.cc
+
+5) Modifications for EPICS R3.14.7 compatibility.
+
+	Files modified - devSoftAux.cc; changes to epicsThread.h required
+			 adding an explicit "#include <stdlib.h>".
+
+6) Modifications for MicroSoft Visual C compiler compatibility.  Changed all
+	occurrences of epicsExportAddress(); to extern "C"
+	{epicsExportAddress();}.
+
+	Files modified - most all.
+
+7) Eliminated calls to devConnectInterrupt() due to C++ problems with devLib.h;
+	i.e. "sorry, not implemented: `tree_list' not supported..." compiler
+	error message.
+
+	Files modified - drvOms.cc, drvOms58.cc and drvMAXv.cc
+
+8) Omitted iocshRegister() call to resister PIC844Config().
+
+	Files modified - PiRegister.cc
+
+9) Added MM4006 to the list of controllers supported by the Newport MM4000
+	device driver.
+
+	Files modified - drvMM4000.cc
 
 
 Modification Log from R5-3 to R5-4
