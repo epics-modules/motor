@@ -2,9 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-27 21:43:45 $
+Last Modified:	$Date: 2002-06-25 20:12:24 $
 */
 
 /*
@@ -93,7 +93,7 @@ STATIC long update(struct motorRecord *mr)
 	ptr->load_position = FALSE;
     }
 #endif
-    if (ptr->dinp_value == MOVING)
+    if (ptr->dinp_value == SOFTMOVE || ptr->dinp_value == HARDMOVE)
 	mr->msta &= ~RA_DONE;
     else
 	mr->msta |= RA_DONE;
@@ -181,11 +181,13 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
     /* Test for hard motor started moving or initialization. */
     if (newdinp == 0)
     {
-	ptr->dinp_value = MOVING;
-	if (mr->dmov == TRUE)	/* Hard motor is moving independent of soft motor. */
+	if (mr->dmov == FALSE)
+	    ptr->dinp_value = SOFTMOVE;
+	else	/* Hard motor is moving independent of soft motor. */
 	{
 	    unsigned short mask = (DBE_VALUE | DBE_LOG);
 
+	    ptr->dinp_value = HARDMOVE;
 	    mr->dmov = FALSE;
 	    db_post_events(mr, &mr->dmov, mask);
 	    mr->pp = TRUE;
@@ -194,8 +196,11 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
     }
     else		/* Hard motor is done moving. */
     {
-	ptr->dinp_value = WAIT;	/* Wait for last update to set soft motor Done. */
-	soft_process(mr);	/* Process in case there is no readback callback. */
+	if (ptr->dinp_value == HARDMOVE)
+	    ptr->dinp_value = WAIT;	/* Reset Target to Actual position. */
+	else
+	    ptr->dinp_value = DONE;
+	soft_process(mr);		/* Process in case there is no readback callback. */
     }
 }
 
@@ -222,13 +227,14 @@ void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
 
     if (ptr->dinp_value == WAIT || ptr->initialized == OFF)
     {
-	/* Reset Target to Actual positions. */
+	/* Reset Target to Actual position. */
 	unsigned short mask = (DBE_VALUE | DBE_LOG);
 
 	mr->dmov = FALSE;
 	db_post_events(mr, &mr->dmov, mask);
 	mr->pp = TRUE;
 	db_post_events(mr, &mr->pp, mask);
+
 	ptr->dinp_value = DONE;
 	ptr->initialized = ON;
     }    
