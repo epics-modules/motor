@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:10:20 $
+Last Modified:	$Date: 2003-02-03 17:18:44 $
 */
 
 /*
@@ -83,17 +83,9 @@ Last Modified:	$Date: 2002-10-21 21:10:20 $
 #include	<dbCommon.h>
 #include	<devSup.h>
 #include	<drvSup.h>
-#ifdef __cplusplus
-extern "C" {
-#include	<recSup.h>
-#include	<devLib.h>
-#include	<errlog.h>
-}
-#else
 #include	<recSup.h>
 #include        <devLib.h>
 #include	<errlog.h>
-#endif
 #include	<errMdef.h>
 #include	<epicsThread.h>
 
@@ -127,12 +119,6 @@ extern "C" {
 
 #define pack2x16(p)      ((uint32_t)(((p[0])<<16)|(p[1])))
 
-#ifdef __cplusplus
-extern "C" long locationProbe(epicsAddressType, char *);
-#else
-extern long locationProbe(epicsAddressType, char *);
-#endif
-
 /* Global data. */
 int oms58_num_cards = 0;
 volatile int drvOms58debug = 0;
@@ -161,7 +147,7 @@ static long report(int level);
 static long init();
 static void query_done(int, int, struct mess_node *);
 static int set_status(int card, int signal);
-static int send_mess(int card, char const *com, char c);
+static RTN_STATUS send_mess(int card, char const *com, char c);
 static int recv_mess(int, char *, int);
 static void motorIsr(int card);
 static int motor_init();
@@ -199,13 +185,8 @@ struct driver_table oms58_access =
 struct
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvOms58 = {2, report, init};
 
 STATIC struct thread_args targs = {SCAN_RATE, &oms58_access};
@@ -538,18 +519,18 @@ STATIC int set_status(int card, int signal)
 /* send a message to the OMS board		     */
 /* send_mess()			     */
 /*****************************************************/
-STATIC int send_mess(int card, char const *com, char inchar)
+STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     volatile struct vmex_motor *pmotor;
     epicsInt16 putIndex;
     char outbuf[MAX_MSG_SIZE], *p;
-    int return_code;
+    RTN_STATUS return_code;
 
     if (strlen(com) > MAX_MSG_SIZE)
     {
 	logMsg((char *) "drvOms58.cc:send_mess(); message size violation.\n",
 	       0, 0, 0, 0, 0, 0);
-	return (-1);
+	return (ERROR);
     }
 
     /* Check that card exists */
@@ -557,13 +538,13 @@ STATIC int send_mess(int card, char const *com, char inchar)
     {
 	logMsg((char *) "drvOms58.cc:send_mess() - invalid card #%d\n", card,
 	       0, 0, 0, 0, 0);
-	return (-1);
+	return (ERROR);
     }
 
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
     Debug(9, "send_mess: pmotor = %x\n", (uint_t) pmotor);
 
-    return_code = 0;
+    return_code = OK;
 
     Debug(9, "send_mess: checking card %d status\n", card);
 
