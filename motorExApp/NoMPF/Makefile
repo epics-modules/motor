@@ -6,22 +6,20 @@ include $(TOP)/configure/CONFIG
 #=============================
 
 DBD += NoMPF.dbd
+DBD += NoMPFVx.dbd
 
-PROD_IOC_vxWorks = NoMPF
+PROD_IOC_DEFAULT = NoMPF
+PROD_IOC_vxWorks = NoMPFVx
 
 NoMPF_SRCS += NoMPF_registerRecordDeviceDriver.cpp
 NoMPF_SRCS_DEFAULT += NoMPFMain.cpp
-NoMPF_SRCS_vxWorks += -nil-
-
-#The following adds support from base/src/vxWorks
-NoMPF_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
-
-NoMPF_LIBS         += motor
-NoMPF_LIBS_vxWorks += oms
-NoMPF_LIBS         += softMotor
-NoMPF_LIBS         += MXmotor
-
+NoMPF_LIBS += MXmotor softMotor motor
 NoMPF_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+NoMPFVx_SRCS += NoMPFVx_registerRecordDeviceDriver.cpp
+NoMPFVx_LIBS += oms softMotor motor
+NoMPFVx_OBJS += $(EPICS_BASE_BIN)/vxComLibrary
+NoMPFVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
 
