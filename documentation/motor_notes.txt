@@ -1,0 +1,201 @@
+NOTES on Motor Record fields
+============================
+
+
+Field	Function
+-----	--------
+
+REP	Raw Encoder Position.  Feedback position read from motor controller.
+
+	If the "Encoder Present" status bit is ON in the MSTA, REP is the raw
+	encoder value read from the controller; if the status bit is OFF, REP
+	is always zero.
+
+	motor_update_values(motordevCom.c): mr->rep = ptrans->encoder_pos
+	motor_callback(motordevCom.c):
+		ptrans->encoder_pos = motor_return->encoder_position
+	set_status(drv[device].c): motor_info->encoder_position = motorData
+	
+
+RMP	Raw Motor Position.  Commanded position read from motor controller.
+	
+	motor_update_values(motordevCom.c): mr->rmp = ptrans->motor_pos
+	motor_callback(motordevCom.c):
+		ptrans->motor_pos = motor_return->position
+        set_status(drv[device].c): motor_info->position = pos
+
+
+RRBV    Raw Readback Value.
+
+	process_motor_info(motorRecord.c):
+		IF UEIP set to YES, AND, MSTA indicates an encoder is present.
+		    pmr->rrbv = pmr->rep
+		ELSE
+		    pmr->rrbv = pmr->rmp.
+		ENDIF
+
+
+DRBV    Dial Readback Value.
+
+	process_motor_info(motorRecord.c):
+		IF URIP set to YES.
+		    pmr->drbv *= pmr->rres;	/* Set DRBV from RDBL link. */
+		ELSE
+		    IF UEIP set to YES, AND, MSTA indicates an encoder is present.
+			pmr->drbv = pmr->rrbv * pmr->eres
+		    ELSE
+			pmr->drbv = pmr->rrbv * pmr->mres		    
+		ENDIF
+
+RBV     User Readback Value.  Actual (i.e, feedback) motor position.
+
+        process_motor_info(motorRecord.c):
+		pmr->rbv = dir * pmr->drbv + pmr->off
+
+==============================================================================
+------------------------------------------------------------------------------
+
+DIR	User Direction.	Used to convert between dial and user coordinates.
+		Valid values are defined by menu(motorDIR);
+			0 = "motorDIR_Pos"; user has same sign as dial.
+			1 = "motorDIR_Neg"; user has opposite sign of dial.
+
+
+OFF	User Offset (EGU).  User and dial coordinates can differ by a sign
+	(the DIR field) and an offset (OFF), according to the following
+	equations:
+			IF DIR == motorDIR_Pos
+			    HLM = DHLM + OFF
+			    LLM = DLLM + OFF
+			ELSE
+			    HLM = -DLLM + OFF
+			    LLM = -DHLM + OFF
+			ENDIF
+
+			RBV = (DRBV * DIR) + OFF
+			DVAL = (VAL - OFF) / DIR
+			VAL = (DVAL * DIR) + OFF
+			userVAL = (DialVAL * DIR) + OFFset
+
+	OFF is set by the motor record under the following conditions.
+	
+	do_work():	IF new DVAL, AND, the SET position field is ON, AND,
+				the FOFF field is "Variable".
+			    OFF = VAL - (DVAL * DIR)
+			ENDIF
+	special():	IF new DIR
+			    OFF = VAL - (DVAL * DIR)
+			ENDIF
+	load_pos():	IF FOFF field is "Variable".
+			    IF DIR == motorDIR_Pos
+				OFF = VAL - DVAL
+			    ELSE
+				OFF = VAL + DVAL
+			    ENDIF
+			ENDIF
+
+SET     Set/Use Switch. Used to calibrate the motor's user and dial positions.
+
+------------------------------------------------------------------------------
+RVAL	Raw Desired Value.  Target position.
+
+	do_work():	IF new DVAL,
+			    pmr->rval = NINT(pmr->dval / pmr->res)
+	postProcess():	IF OMSL is OFF (i.e., "supervisory")
+			    pmr->rval = pmr->rrbv ???Reset Target to Actual???
+
+	
+DVAL	Dial Desired Value.  Target position.
+
+	do_work():	IF new RVAL,
+			    pmr->dval = pmr->rval * pmr->res
+	postProcess():	IF OMSL is OFF (i.e., "supervisory")????
+			    pmr->dval = pmr->drbv
+
+
+VAL	User Desired Value.  Target position.
+
+	do_work():	IF (new DVAL, OR, DMOV is FALSE), AND, SET is FALSE.
+			    pmr->val = pmr->dval * dir + pmr->off
+	postProcess():	IF OMSL is OFF (i.e., "supervisory")?????
+			    pmr->val = pmr->rbv
+
+------------------------------------------------------------------------------
+
+ERES	Encoder Step Size (EGU)
+	    do_work():	IF MRES, OR, ERES, OR, UEIP are marked as changed.
+			    IF MSTA indicates an encoder is present, AND, UEIP
+								set to YES.
+				if (fabs(pmr->eres) < 1.e-9)
+				    pmr->eres = pmr->mres;
+			    ENDIF
+			ENDIF
+
+RRES	Readback Step Size (EGU)
+
+RES	Step Size (EGU). With R4.5, RES <=> MRES.
+
+MRES	Motor Step Size (EGU).  Motor resolution in EGU/step.  MRES=UREV/SREV
+
+	special(motorRecord.c): pmr->mres = pmr->urev / pmr->srev;
+
+UREV	EGU's per Revolution.
+		
+SREV	Steps per Revolution.  The record never sets this field.
+
+------------------------------------------------------------------------------
+
+VBAS	Minimum Velocity (EGU/s)
+SBAS	Minimum Speed (revolutions/sec)
+
+	special(motorRecord.c): pmr->sbas = pmr->vbas / fabs(pmr->urev);
+				pmr->vbas = fabs(pmr->urev) * pmr->sbas;
+
+VMAX	Maximum Velocity (EGU/s)
+SMAX	Maximum Speed (revolutions/sec)
+
+VELO	Slew Velocity (EGU/s)
+S	Speed (revolutions/sec)
+
+BVEL	Backlash Velocity (EGU/s)
+SBAK	Backlash Speed (revolutions/sec)
+
+
+UEIP effects
+------------
+
+The state of the UEIP, together with the MSTA encoder indicator, determine;
+
+1) if the RRBV is set to either the feedback (REP) or the command (RMP)
+position.
+2) if the RES is set to either the feedback (ERES) or the command (MRES)
+resolution.
+3) whether absolute or relative position commands are used.
+
+
+The algorithm used in moves to a (dial-coordinate) position called "TARGET"
+follows:
+
+1) If the motor is to move a distance greater than the magnitude of BDST, or
+if the motor is to move in a direction opposite to the sign of BDST, then the
+motor will move first to position (TARGET-BDST), at an acceleration specified
+by ACCL and speed VELO, and then to position TARGET, at an acceleration
+specified by BACC and speed BVEL.  
+
+2) If the motor is to move a distance smaller than the magnitude of BDST, and
+if the motor is to move in the same direction as the sign of BDST, then
+backlash is assumed already to have been taken out, and the motor will move to
+position TARGET at an acceleration specified by BACC and speed BVEL. 
+
+
+#1)
+IF |DIFF| > |BDST|, OR, sign(DIFF) != sign(BDST)
+    Move to position (TARGET - BDST) using ACCL and VELO.
+    Move to position TARGET using BACC and BVEL.
+ELSE IF |DIFF| <= |BDST|, AND, sign(DIFF) == sign(BDST).
+    Move to position TARGET using BACC and BVEL.
+ENDIF
+
+
+#3) Backlash correction is disabled if and only if |BDST| < |RES|.
+

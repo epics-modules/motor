@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+    
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    
+  <meta name="Author" content="sluiter">
+    
+  <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; U; SunOS 5.6 sun4u) [Netscape]">
+  <title>Procedure for new motor record device drivers</title>
+  <meta name="author" content="Ron Sluiter">
+</head>
+  <body>
+  
+<center> 
+<h1> Procedures for adding&nbsp; new motor controller support to motor record</h1>
+</center>
+  
+<ol>
+ <li> Select a supported controller that most closely matches the characteristics 
+of the new controller.&nbsp; If the new controller is simply a different model
+of a supported controller family (e.g. Oregon Micro Systems or Newport's Motion
+Master), then, of course, chose a model from the controller family that most
+closely matches the characteristics of the new controller.&nbsp; Otherwise,
+select a supported controller based on other characteristics, such as; communication
+interface (i.e., VME, RS232, GPIB), controller features (e.g., encoder support,
+DC servo support, etc.), etc.&nbsp; In what follows this will be called the
+    <i>source</i> controller or <i>source</i> device driver.</li>
+  
+  <ul>
+ <li> When I added MM3000 device support I selected the MM4000 because it
+is simply a different Newport model.</li>
+  <li> When I added IM483 device support I selected the MM4000 because it
+has a serial communication option.</li>
+ 
+  </ul>
+  <li> Chose an appropriate device name for the new controller.&nbsp; Copy
+the <i>relevant </i>files from the selected source controller, to the new,
+    <i>destination,</i> controller, giving the new files appropriate names
+using the new device name.&nbsp; (See motor_files.html for a list of all
+motor record source code files.)</li>
+  
+  <ul>
+ <li> When I added MM3000 device support I copied the following files:</li>
+  
+    <ul>
+ <li> devMM4000.c -&gt; devMM3000.c</li>
+  <li> drvMM4000.h -&gt; drvMMCom.h</li>
+  <li> drvMM4000.c -&gt; drvMM3000.c</li>
+ 
+    </ul>
+  <li> When I added IM483 device support I copied the following files:</li>
+  
+    <ul>
+ <li> devMM4000.c -&gt; devIM483.c</li>
+  <li> drvMMCom.h -&gt; drvIM483.h</li>
+  <li> drvMM4000.c -&gt; drvIM483.c</li>
+ 
+    </ul>
+ 
+  </ul>
+  <li> Modify all the new files by cleaning up the obvious header information 
+(e.g. filename, usage, etc.).&nbsp; Delete the old <i>Modification Log </i>
+entries and add a single new entry that notes which source file you copied
+to start this file.</li>
+  <li> Modify the new driver include file (e.g., drvOms.h, drvMMCom.h, drvIM483.h, 
+etc.) first.</li>
+  
+  <ul>
+ <li> Fix the multiple inclusion protection; i.e.,</li>
+  
+    <ul>
+ <li> #ifndef INC<i>filename</i>h</li>
+  <li> #define INC<i>filename</i>h 1</li>
+  <li> #endif /* INC<i>filename</i>h */</li>
+ 
+    </ul>
+  <li> Delete everything in the driver include file that is specific to the
+old controller.&nbsp; If a device specific data area is needed for this controller, 
+then that structure definition should appear in this file (see the MMcontroller 
+structure in drvMMCom.h or IM483controller structure in drvIM483.h).</li>
+ 
+  </ul>
+  <li> Modify the device source code file (e.g., devOms.c, devMM4000.c, devIM483.c, 
+etc.) next.</li>
+  
+  <ul>
+ <li> Do a global <i>find and replace</i> on the file; replacing the source
+root name with the destination root name; e.g., MM4000 to IM483.</li>
+  <li> Find the &lt;device&gt;_build_trans() function.&nbsp; Unless the source
+controller you chose was from the same family of controllers, the command
+primitives for the new controller will not match those of the source controller.&nbsp;
+Hence, each of the <i>switch case </i>statements in &lt;device&gt;_build_trans()&nbsp;
+will have to be;</li>
+  
+    <ol>
+ <li> Evaluated, as to be whether or not the new controller can support the
+associated motor command.</li>
+  <li> If the new controller supports the motor command, find the command
+primitive for the motor command and modify the <i>switch case </i>code to
+output the correct command primitive.</li>
+  
+    </ol>
+    <li> Check that the command line terminator function argument located
+in the &lt;device&gt;_end_trans() function is correct.</li>
+    <li>Determine whether or not the destination motor controller supports
+multiple commands on the same command line. &nbsp;For example, the Oregon
+Micro Systems (OMS) motor controllers allow the velocity base, slew velocity,
+acceleration and target position all on the same command line &nbsp;(e.g.,
+AX VB200 VL4000 AC4444 MA-38866  GD ID). &nbsp;The Newport Motion Master
+(i.e, MM3000, MM4000, MM4005) and PM500 controllers also support multiple
+commands. &nbsp;On the other hand, multiple commands are not supported by
+the Intelligent Motion Systems (IMS) IM483 motor controller.</li>
+    <ol>
+      <ul>
+        <li>If multiple commands on the same command line <b>is</b> supported,
+then the functions &lt;device&gt;_start_trans(), &lt;device&gt;_end_trans()
+and &lt;device&gt;_build_trans() in the destination device code should look
+like those found in any of the Newport device files; i.e., devPM500.c, devMM4000.c
+or devMM3000.c. &nbsp;In addition, determine the command seperation ASCII
+character for the destination motor controller and append this ASCII character
+to the end of each&nbsp;command primitive.</li>
+        <li>If multiple commands on the same command line <b>is</b> <b>not
+          </b>supported, then the functions &lt;device&gt;_start_trans(),
+&lt;device&gt;_end_trans() and &lt;device&gt;_build_trans() in the should
+look like those found in any of the IMS device files; i.e., devIM483SM.c
+or devIM483PL.c.</li>
+      </ul>
+ 
+    </ol>
+ 
+  </ul>
+  <li> Modify the driver source code file (e.g., drvOms.c, drvMM4000.c, drvIM483.c, 
+etc.) next.</li>
+  
+  <ul>
+ <li> Do a global <i>find and replace</i> on the file; replacing the source
+root name with the destination root name; e.g., MM4000 to IM483.</li>
+  <li> Locate each call to send_mess() that passes a string constant argument, 
+either explicitly or through a preprocessor macro name.&nbsp; Modify either 
+the string constant or the macro definition for the new controller.</li>
+  <li>Determine whether or not the destination motor controller echos commands
+and whether or not this feature can be disabled. &nbsp;If echoing cannot
+be disabled, then set the brdptr-&gt;cmnd_response = ON in motor_init().<br>
+ </li>
+ 
+  </ul>
+ 
+</ol>
+  
+</body>
+</html>
