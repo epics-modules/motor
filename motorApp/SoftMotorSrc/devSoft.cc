@@ -2,9 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 21:07:25 $
+Last Modified:	$Date: 2003-02-14 15:00:21 $
 */
 
 /*
@@ -275,9 +275,17 @@ LOGIC...
 
 void soft_motor_callback(CALLBACK *cbptr)
 {
+#ifdef __GNUG__
     struct motorRecord *mr;
 
     callbackGetUser((void *) mr, cbptr);
     soft_process(mr);
+
+#else
+    void *mr;
+
+    callbackGetUser(mr, cbptr);
+    soft_process((motorRecord *) mr);
+#endif
 }
 
