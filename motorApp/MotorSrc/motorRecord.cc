@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.17 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:27:08 $
+Version:	$Revision: 1.18 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-28 18:16:06 $
 */
 
 /*
@@ -91,14 +91,10 @@ Last Modified:	$Date: 2004-07-16 19:27:08 $
 
 
 /*----------------debugging-----------------*/
-
+volatile int motorRecordDebug = 0;
+epicsExportAddress(int, motorRecordDebug);
 #ifdef __GNUG__
-    #ifdef	DEBUG
-	volatile int motorRecordDebug = 0;
-	#define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
-    #else
-	#define Debug(l, f, args...)
-    #endif
+    #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
 #else
     #define Debug()
 #endif
