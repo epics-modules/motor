@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.19 $
+Version:	$Revision: 1.20 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-21 14:00:35 $
+Last Modified:	$Date: 2004-12-21 15:18:48 $
 */
 
 /*
@@ -63,6 +63,10 @@ Last Modified:	$Date: 2004-09-21 14:00:35 $
  * .07  02-03-04 rls - Eliminate erroneous "Motor motion timeout ERROR".
  * .08  03-02-04 rls - Reduce omsGet() timeout from 1sec. to 250msec.
  * .09  09-20-04 rls - support for 32axes/controller.
+ * .10  12-06-04 rls - Windows compiler support.
+ *                   - eliminate calls to devConnectInterrupt() due to C++
+ *		       problems with devLib.h; i.e. "sorry, not implemented:
+ *		       `tree_list' not supported..." compiler error message.
  */
 
 /*========================stepper motor driver ========================
@@ -89,13 +93,7 @@ Last Modified:	$Date: 2004-09-21 14:00:35 $
 #include	<logLib.h>
 #include	<drvSup.h>
 #include	<epicsVersion.h>
-#if EPICS_MODIFICATION <= 4
-extern "C" {
 #include	<devLib.h>
-}
-#else
-#include	<devLib.h>
-#endif
 #include	<dbAccess.h>
 #include	<epicsThread.h>
 #include	<epicsInterrupt.h>
@@ -187,7 +185,7 @@ struct
     long (*init) (void);
 } drvOms = {2, report, init};
 
-epicsExportAddress(drvet, drvOms);
+extern "C" {epicsExportAddress(drvet, drvOms);}
 
 static struct thread_args targs = {SCAN_RATE, &oms_access};
 
@@ -871,10 +869,10 @@ static int motorIsrEnable(int card)
     irqdata = (struct irqdatastr *) pmotorState->DevicePrivate;
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
 
-    status = devConnectInterrupt(intVME, omsInterruptVector + card,
-			(void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
-// Tornado 2.2		(devLibVOIDFUNCPTR) motorIsr, (void *) card);
-    
+
+    status = pdevLibVirtualOS->pDevConnectInterruptVME(
+	omsInterruptVector + card, (void (*)()) motorIsr, (void *) card);
+
     if (!RTN_SUCCESS(status))
     {
 	errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n",
@@ -932,9 +930,9 @@ static void motorIsrDisable(int card)
     /* Disable interrupts */
     pmotor->control = 0;
 
-    status = devDisconnectInterrupt(intVME, omsInterruptVector + card,
-			(void (*)()) motorIsr);// Tornado 2.0.2
-// Tornado 2.2		(devLibVOIDFUNCPTR) motorIsr);
+    status = pdevLibVirtualOS->pDevDisconnectInterruptVME(
+	omsInterruptVector + card, (void (*)(void *)) motorIsr);
+
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",
 		  omsInterruptVector + card);

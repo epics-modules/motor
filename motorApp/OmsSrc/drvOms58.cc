@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-21 14:04:57 $
+Last Modified:	$Date: 2004-12-21 15:19:34 $
 */
 
 /*
@@ -78,10 +78,14 @@ Last Modified:	$Date: 2004-09-21 14:04:57 $
  *			Tornado 2.0.2 (default) or Tornado 2.2.  If Tornado
  *			2.2 is selected, EPICS base patches must be applied as
  *			described in;
- *		http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
+ *     http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
  * .26  02-03-04  rls - Eliminate erroneous "Motor motion timeout ERROR".
  * .27  07-16-04  rls - removed unused <driver>Setup() argument.
  * .28  09-20-04  rls - support for 32axes/controller.
+ * .29  12-06-04  rls - Windows compiler support.
+ *                    - eliminate calls to devConnectInterrupt() due to C++
+ *			problems with devLib.h; i.e. "sorry, not implemented:
+ *			`tree_list' not supported..." compiler error message.
  */
 
 #include	<vxLib.h>
@@ -93,13 +97,7 @@ Last Modified:	$Date: 2004-09-21 14:04:57 $
 #include	<dbCommon.h>
 #include	<drvSup.h>
 #include	<epicsVersion.h>
-#if EPICS_MODIFICATION <= 4
-extern "C" {
 #include	<devLib.h>
-}
-#else
-#include	<devLib.h>
-#endif
 #include	<dbAccess.h>
 #include	<epicsThread.h>
 
@@ -195,7 +193,7 @@ struct
     long (*init) (void);
 } drvOms58 = {2, report, init};
 
-epicsExportAddress(drvet, drvOms58);
+extern "C" {epicsExportAddress(drvet, drvOms58);}
 
 static struct thread_args targs = {SCAN_RATE, &oms58_access};
 
@@ -933,9 +931,9 @@ static int motorIsrSetup(int card)
 
     pmotor = (struct vmex_motor *) (motor_state[card]->localaddr);
 
-    status = devConnectInterrupt(intVME, omsInterruptVector + card,
-			(void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
-// Tornado 2.2		(devLibVOIDFUNCPTR) motorIsr, (void *) card);
+    status = pdevLibVirtualOS->pDevConnectInterruptVME(
+	omsInterruptVector + card, (void (*)()) motorIsr, (void *) card);
+
     if (!RTN_SUCCESS(status))
     {
 	errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n", omsInterruptVector + card);
