@@ -1,8 +1,8 @@
 Motor Record V4.4 Release Notice
 ================================
 
-The motor record software in this release is compatible with EPICS baseR3.13.2
-to baseR3.13.4.
+The motor record software in this release is compatible with EPICS base
+R3.13.2, R3.13.3 and R3.13.4.
 
 
 Contents
@@ -131,6 +131,15 @@ Modification Log from V4.3 to V4.4
 	leaves the record's MIP in the STOP state and DMOV false.
 	File modified: motorRecord.c - Modified do_work() STOP and SPMG
 	     processing to set MIP <- DONE and DMOV <- TRUE when MIP == RETRY.
+
+9) As suggested by Brian McAllister, type specifications for all bit-fields
+	found within unions have been changed to "int".  This modification
+	elminates the ANSI warning messages and has no effect on the machine
+	code generated.
+	Files modified: motorRecord.c	- mmap_field and nmap_field unions.
+			drvOms58.h	- all control/status registers.
+	
+
 					
 Modification Log from V4.2 to V4.3
 ==================================
