@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-02-03 19:59:22 $
+Last Modified:	$Date: 2004-03-16 15:17:18 $
 */
 
 /*
@@ -671,7 +671,7 @@ static int motor_init()
 
 		/* Set axis resolution. */
 		sprintf(buff, "%.2dSU?", motor_index + 1);
-		send_mess(card_index, buff, NULL);
+		send_mess(card_index, buff, (char) NULL);
 		recv_mess(card_index, buff, 1);
 		cntrl->drive_resolution[motor_index] = atof(&buff[0]);
 		

@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-02-03 19:59:21 $
+Last Modified:	$Date: 2004-03-16 15:17:39 $
 */
 
 /*
@@ -375,7 +375,7 @@ STATIC int set_status(int card, int signal)
 	    mstat.All = cntrl->status_string[pos];
 	    if (mstat.Bits.inmotion == true)
 		status.Bits.RA_DONE = 0;
-	    send_mess(card, READ_POSITION, NULL);
+	    send_mess(card, READ_POSITION, (char) NULL);
 	    recv_mess(card, cntrl->position_string, 1);
 	}
     }
