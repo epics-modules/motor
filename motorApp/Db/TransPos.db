@@ -1,0 +1,36 @@
+# MACROS
+# ------
+#$(P)		- Record name prefix; e.g., P=1bmb:trans1:
+#$(SOFT) 	- Name of motor record with Soft Channel device support.
+#$(HARD) 	- Name of an existing hard motor record.
+#$(FCALC)	- Forward transformation calculation (from soft to hard motor).
+#$(RCALC)	- Reverse transformation calculation (from hard to soft motor).
+
+grecord(motor,"$(P)$(SOFT)")
+{
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(P)frwdcalc.A  PP MS")
+	field(RDBL,"$(P)revscalc.VAL  NPP MS")
+	field(URIP,"Yes")
+	field(RRES,"1.0")
+	field(RTRY,"0")
+	field(MRES,"0.001")
+	field(PREC,"3")
+	field(STOO,"$(P)$(HARD).STOP  PP MS")
+	field(DINP,"$(P)$(HARD).DMOV  NPP MS")
+}
+
+grecord(calcout,"$(P)frwdcalc")
+{
+	field(DESC,"Forward calc")
+	field(CALC,"$(FCALC)")
+	field(OUT,"$(P)$(HARD).DVAL  PP MS")
+}
+
+grecord(calcout,"$(P)revscalc")
+{
+	field(DESC,"Reverse calc")
+	field(CALC,"$(RCALC)")
+	field(INPA,"$(P)$(HARD).DRBV  CP MS")
+}
+
