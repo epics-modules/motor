@@ -50,3 +50,28 @@ the above for all the MAXv controllers and corresponding records.  Boot the
 IOC.  The limit switch sense and motor type are now stored in the MAXv's flash
 memory.  REMOVE the "APP" commands from ALL the MAXv motor record INIT fields.
 Reboot the IOC. The motor record should now have the correct configuration.
+
+VMEbus addressing
+-----------------
+
+MAXv array base address - defined the by 3rd argument to the MAXvSetup() call.
+MAXv incremental address - increment each additional MAXv's VMEbus address by
+				0x1000 from the array base address.
+
+
+VME8, VME44, VS4, VX2
+==============================================================================
+
+OMS array base address - defined the by 3rd argument to the omsSetup() call.
+                       - the VMEbus address of the 1st board in the array of
+		         OMS boards.
+OMS incremental address - increment each additional board's VMEbus address by
+				0x10 from the array base address.
+
+IMPORTANT NOTES
+---------------
+
+1. The EPICS motor record does NOT support the encoder mode.  The encoder mode
+	is enabled with the ER#,# and results in all distance, velocity and
+	acceleration parameters being input in encoder counts.
+
