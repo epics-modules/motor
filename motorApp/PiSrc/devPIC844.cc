@@ -3,9 +3,9 @@ FILENAME...	devPIC844.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-01-07 15:00:06 $
+Last Modified:	$Date: 2004-01-13 20:59:36 $
 */
 
 /*
@@ -131,6 +131,7 @@ static long PIC844_init_record(void *arg)
 /* start building a transaction */
 static long PIC844_start_trans(struct motorRecord *mr)
 {
+    motor_start_trans_com(mr, PIC844_cards);
     return(OK);
 }
 
@@ -138,6 +139,7 @@ static long PIC844_start_trans(struct motorRecord *mr)
 /* end building a transaction */
 static RTN_STATUS PIC844_end_trans(struct motorRecord *mr)
 {
+    motor_end_trans_com(mr, drvtabptr);
     return(OK);
 }
 
@@ -162,8 +164,6 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     dval = (parms == NULL) ? 0.0 : *parms;
 
-    motor_start_trans_com(mr, PIC844_cards);
-    
     motor_call = &(trans->motor_call);
     card = motor_call->card;
     axis = motor_call->signal + 1;
@@ -258,7 +258,7 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
 	
 	case JOG_VELOCITY:
 	case JOG:
-	    send = false;		/* No Jog. */
+	    sprintf(buff, "TARG:VEL %.*f", maxdigits, cntrl_units);
 	    break;
 	
 	case SET_PGAIN:
@@ -293,9 +293,6 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
     else if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
 	errlogMessage("PIC844_build_trans(): buffer overflow.\n");
     else
-    {
 	strcat(motor_call->message, buff);
-	motor_end_trans_com(mr, drvtabptr);
-    }
     return(rtnval);
 }
