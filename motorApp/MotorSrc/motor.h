@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:04:30 $
+Last Modified:	$Date: 2002-10-31 20:40:53 $
 */
 
 /*
@@ -60,6 +60,8 @@ message size for each device. */
 
 typedef enum RTN_VALUES {OK = 0, ERROR = 1} RTN_STATUS;
 
+typedef enum CALLBACK_VALUES {NOTHING_DONE = 0, CALLBACK_DATA = 1} CALLBACK_VALUE;
+
 #define NINT(f)	(long)((f)>0 ? (f)+0.5 : (f)-0.5)	/* Nearest integer. */
 
 /* Motor Record Command Set. !WARNING! this enumeration must match ALL of the
@@ -101,9 +103,6 @@ enum motor_cmnd {
 #define MAX_COUNT	50000 /*19000*/	/* timeout value */
 #define MAX_AXIS	10	/* max number of axis per board */
 
-#define NOTHING_DONE	0
-#define CALLBACK_DATA 	1
-
 #define NO		0
 #define YES		1
 
@@ -138,10 +137,10 @@ enum motor_cmnd {
 struct motor_dset
 {
     struct dset base;
-    long (*update_values) (struct motorRecord *);
+    CALLBACK_VALUE (*update_values) (struct motorRecord *);
     long (*start_trans) (struct motorRecord *);
     RTN_STATUS (*build_trans) (motor_cmnd, double *, struct motorRecord *);
-    long (*end_trans) (struct motorRecord *);
+    RTN_STATUS (*end_trans) (struct motorRecord *);
 };
 
 #endif	/* INCmotorh */
