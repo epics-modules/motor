@@ -31,7 +31,7 @@
 #define MODEL_PM600 1
 
 #define OUTPUT_TERMINATOR "\r"
-#define INPUT_TERMINATOR  (char *) "\n"
+#define INPUT_TERMINATOR  "\n"
 
 struct PM304controller
 {
