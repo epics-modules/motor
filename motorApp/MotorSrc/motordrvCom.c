@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-01 20:38:43 $
+Last Modified:	$Date: 2002-03-04 15:24:03 $
 */
 
 /*
@@ -211,27 +211,7 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
 	    mess_ret->status = motor_motion->status;
 	    mess_ret->type = motor_motion->type;
 
-	    if (motor_motion->status & RA_DONE && motor_motion->type == MOTION &&
-		(strlen(motor_motion->message) != NULL))
-	    {
-		char axis_name;
-
-		if (tabptr->axis_names == NULL)
-		    axis_name = NULL;
-		else
-		    axis_name = tabptr->axis_names[index];
-
-		mess_ret->status &= ~RA_DONE;	/* Hide DONE from record. */
-		/* Send backlash command to controller. */
-		(*tabptr->sendmsg) (card, motor_motion->message, axis_name);
-		if (brdptr->cmnd_response == ON)
-		{
-		    char inbuf[MAX_MSG_SIZE];
-		    (*tabptr->getmsg) (card, inbuf, 1);
-		}
-		motor_motion->message[0] = NULL;
-	    }
-	    else if (motor_motion->status & RA_OVERTRAVEL ||
+	    if (motor_motion->status & RA_OVERTRAVEL ||
 		motor_motion->status & RA_DONE ||
 		motor_motion->status & RA_PROBLEM)
 	    {
