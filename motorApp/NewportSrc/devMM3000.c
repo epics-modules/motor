@@ -2,9 +2,9 @@
 FILENAME...	devMM3000.c
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 14:57:34 $
+Last Modified:	$Date: 2000-07-17 17:11:36 $
 */
 
 /*
@@ -43,6 +43,7 @@ Last Modified:	$Date: 2000-06-14 14:57:34 $
 #include	<vxWorks.h>
 #include	<stdio.h>
 #include	<string.h>
+#include	<stdlib.h>
 #include        <semLib.h>	/* jps: include for init_record wait */
 
 #ifdef __cplusplus
@@ -70,11 +71,6 @@ extern "C" {
 #include	"drvMMCom.h"
 
 #define STATIC static
-
-#define ABS(f) ((f)>0 ? (f) : -(f))
-#define SIGN(f) (long)((f)>0 ? 1 : -1)
-#define MAX(a,b) ((a)>(b) ? (a) : (b))
-#define MIN(a,b) ((a)<(b) ? (a) : (b))
 
 /* ----------------Create the dsets for devMM3000----------------- */
 /* static long report(); */
@@ -165,7 +161,7 @@ STATIC long MM3000_init_record(struct motorRecord *mr)
 /* start building a transaction */
 STATIC long MM3000_start_trans(struct motorRecord *mr)
 {
-    return(motor_start_trans_com(mr, MM3000_cards, NULL));
+    return(motor_start_trans_com(mr, MM3000_cards));
 }
 
 
@@ -184,7 +180,7 @@ STATIC long MM3000_end_trans(struct motorRecord *mr)
     if (msgptr[last] == ';')
 	msgptr[last] = NULL;
 
-    return(motor_end_trans_com(mr, drvtabptr, "\r"));
+    return(motor_end_trans_com(mr, drvtabptr));
 }
 
 
@@ -327,7 +323,7 @@ STATIC long MM3000_build_trans(motor_cmnd command, double *parms, struct motorRe
 	    * If the record soft limits are set tighter than the MM3000 limits
 	    * the record will prevent JOG motion beyond its soft limits 
 	    */
-	    sprintf(buff, "%dVA%d;", axis, ABS(intval));
+	    sprintf(buff, "%dVA%d;", axis, abs(intval));
 	    strcat(motor_call->message, buff);
 	    if (intval > 0)
 		sprintf(buff, "%dPA%d;", axis, (int) (mr->dhlm / mr->res));
