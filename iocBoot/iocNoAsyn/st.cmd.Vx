@@ -39,4 +39,28 @@ dbLoadRecords("$(TOP)/db/NoMPF.db")
 #!oms58Setup(1, 0x1000, 190, 5, 10)
 #!drvOms58debug = 4
 
+# OMS MAXv driver setup parameters: 
+#     (1)number of cards in array.
+#     (2)VME Address Type (16,24,32).
+#     (3)Base Address on 4K (0x1000) boundary.
+#     (4)interrupt vector (0=disable or  64 - 255).
+#     (5)interrupt level (1 - 6).
+#     (6)motor task polling rate (min=1Hz,max=60Hz).
+#!MAXvSetup(1, 16, 0xF000,     190, 5, 10)
+#!MAXvSetup(1, 24, 0xF00000,   190, 5, 10)
+#!MAXvSetup(1, 32, 0xB0000000, 190, 5, 10)
+#!drvMAXvdebug=4
+
+# OMS MAXv configuration string:
+#     (1) number of card being configured (0-14).
+#     (2) configuration string; axis type (PSO/PSE/PSM) MUST be set here.
+#         For example, set which TTL signal level defines
+#         an active limit switch.  Set X,Y,Z,T to active low and set U,V,R,S
+#         to active high.  Set all axes to open-loop stepper (PSO). See MAXv
+#         User's Manual for LL/LH and PSO/PSE/PSM commands.
+#config0="AX LL PSO; AY LL PSO; AZ LL PSO; AT LL PSO; AU LH PSO; AV LH PSO; AR LH PSO; AS LH PSO;"
+
+#!config0="AX LH PSM; AY LL PSO; AZ LL PSO; AT LL PSO; AU LH PSO; AV LH PSO; AR LH PSO; AS LH PSO;"
+#!MAXvConfig(0, config0)
+
 iocInit
