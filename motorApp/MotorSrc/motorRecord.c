@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Record Support Routines for the Motor record.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 18:56:06 $
+Last Modified:	$Date: 2000-07-25 20:34:50 $
 */
 
 /*
@@ -1348,7 +1348,7 @@ LOGIC:
 	    ENDIF
 	    ....
 	    ....
-	    IF motor moving indicator is OFF.
+	    IF motion in progress indicator is OFF.
 		Set MIP MOVE indicator ON.
 		.....
 		.....
@@ -1856,7 +1856,7 @@ stop_all:   /* Cancel any operations. */
 		}
 	    }
 
-	    if (pmr->movn == 0)
+	    if (pmr->mip == 0)
 	    {
 		pmr->mip = MIP_MOVE;
 		MARK(M_MIP);
