@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:28:21 $
+Last Modified:	$Date: 2000-04-18 21:01:59 $
 */
 
 /*
@@ -43,9 +43,6 @@ Last Modified:	$Date: 2000-03-03 22:28:21 $
 #define	INCdrvMMComh 1
 
 #include "motordrvCom.h"
-
-#define GPIB_TIMEOUT	2000 /* Command timeout in msec */
-#define SERIAL_TIMEOUT	2000 /* Command timeout in msec */
 
 enum MM_model
 {
