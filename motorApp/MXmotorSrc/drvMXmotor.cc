@@ -2,9 +2,9 @@
 FILENAME...	drvMXmotor.cc
 USAGE...	Motor record driver level support for MX device driver.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-03-04 15:27:29 $
+Last Modified:	$Date: 2003-03-06 18:54:56 $
 */
 
 /*
@@ -251,7 +251,8 @@ static int set_status(int card, int signal)
     motor_info = &(brdptr->motor_info[signal]);
     cntrl = (struct MXcontroller *) brdptr->DevicePrivate;
 
-    mx_status = mx_motor_get_status(cntrl->MXmotor_record, &status);
+    mx_status = mx_motor_get_extended_status(cntrl->MXmotor_record, &motorData,
+					     &status);
     if (mx_status.code != MXE_SUCCESS)
 	return(rtn_state = ERROR);
 
@@ -259,10 +260,6 @@ static int set_status(int card, int signal)
 	motor_info->status &= ~RA_DONE;
     else
 	motor_info->status |= RA_DONE;
-
-    mx_status = mx_motor_get_position(cntrl->MXmotor_record, &motorData);
-    if (mx_status.code != MXE_SUCCESS)
-	return(rtn_state = ERROR);
 
     if (motorData == motor_info->position)
 	motor_info->no_motion_count++;
@@ -280,6 +277,30 @@ static int set_status(int card, int signal)
     }
 
     plusdir = (motor_info->status & RA_DIRECTION) ? true : false;
+
+    /* Set limit switch error indicators. */
+    if (status & MXSF_MTR_POSITIVE_LIMIT_HIT)
+    {
+	motor_info->status |= RA_PLUS_LS;
+	if (plusdir == true)
+	    ls_active = true;
+    }
+    else
+	motor_info->status &= ~RA_PLUS_LS;
+
+    if (status & MXSF_MTR_NEGATIVE_LIMIT_HIT)
+    {
+	motor_info->status |= RA_MINUS_LS;
+	if (plusdir == false)
+	    ls_active = true;
+    }
+    else
+	motor_info->status &= ~RA_MINUS_LS;
+
+    if (status & MXSF_MTR_ERROR)
+	motor_info->status |= RA_PROBLEM;
+    else
+	motor_info->status &= ~RA_PROBLEM;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
      (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
