@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:	$Revision: 1.10 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:16:06 $
+Version:	$Revision: 1.11 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-30 04:17:25 $
 */
 
 /*
@@ -447,10 +447,10 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 static int eat_garbage(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    char localbuf[BUFF_SIZE];
     int timeout;
     int flush = 0;
     int len = 0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -465,11 +465,11 @@ static int eat_garbage(int card, char *com, int flag)
 
     /* Get the response. */      
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
-                            2, flush, timeout);
+                            2, flush, timeout, &eomReason);
 
     Debug(2, "eat_garbage(): len = %i\n", len);
     if (len != 2)
-        Debug(2, "eat_garbage(): localbuf = \"%s\"\n", localbuf);
+        Debug(2, "eat_garbage(): com = \"%s\"\n", com);
 
     com[0] = '\0';
 
@@ -485,10 +485,10 @@ static int eat_garbage(int card, char *com, int flag)
 static int recv_mess(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    char localbuf[BUFF_SIZE];
     int timeout;
     int flush = 0;
     int len = 0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -503,14 +503,13 @@ static int recv_mess(int card, char *com, int flag)
 
     /* Get the response. */      
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
-                            1, flush, timeout);
+                            1, flush, timeout, &eomReason);
     
     if (len == 0)
 	com[0] = '\0';
     else
     {
-	localbuf[len - 2] = '\0'; /* Strip off trailing <CR LF>. */
-	strcpy(com, localbuf);
+	com[len - 2] = '\0'; /* Strip off trailing <CR LF>. */
     }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
