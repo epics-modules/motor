@@ -1,7 +1,7 @@
-Motor Record R5-5 Release Notice
+Motor Record R5-6 Release Notice
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base R3.14.7.
+The motor record software in this release is compatible with EPICS base R3-14-7.
 
 
 Contents
@@ -18,7 +18,7 @@ This <supporttop> contains the following motor record related items:
 		under <motor>/iocBoot/* for configuration instructions.
 
 As distributed, this support directory only builds the following:
-	- motorLib; Record support and common code for all device/drivers.
+	- motor; Record support and common code for all device/drivers.
 
 Optionally, any of the following device/driver libraries can be built by
 uncommenting the appropriate line in ./motorApp/Makefile.
@@ -26,8 +26,8 @@ uncommenting the appropriate line in ./motorApp/Makefile.
 	DeltaTau - Delta Tau controllers; DeltaTauSrc directory.
 	Ims - Intelligent Motion Systems (IMS) controllers; ImsSrc directory.
 	Mclennan - Mclennan controllers; MclennanSrc directory.
-	MicosLib - Micos controller; MicosSrc directory.
-	MicroMoLib - MicroMo controllers; MicroMoSrc directory.
+	Micos - Micos controller; MicosSrc directory.
+	MicroMo - MicroMo controllers; MicroMoSrc directory.
 	Newport - Newport controllers; NewportSrc directory.
 	oms - Oregon Micro System (OMS) controllers; OmsSrc directory.
 	PI - Physik Instrumente (PI) GmbH & Co. controllers; PiSrc
@@ -39,7 +39,7 @@ Configuration
 =============
 The following files can be edited to tailor this distribution to site specific
 needs.  See individual files for instructions.
-	- ./config/RELEASE: Define location of external products.
+	- <motor>/configure/RELEASE: Define location of external products.
 	
 		If only VMEbus based motor controllers (e.g., OMS, Highland
 		V544) and/or Soft Channel device support is used, then only
@@ -47,14 +47,13 @@ needs.  See individual files for instructions.
 
 		For serial and/or GPIB motor controller communication, ALL of
 		the following support modules are required;
-			- EPICS base R3.14.6
-			- ASYN R3.3
-			- IPAC R2.7a
+			- EPICS base R3-14-7
+			- ASYN R4-2
 		
 		If any example applications (motorExApp) are to be built, then
 			TEMPLATE_TOP and MSITOP must be defined.
 
-	- ./motorApp/Makefile: Define which device/driver modules to build.
+	- <motor>/motorApp/Makefile: Define which device/driver modules to build.
 	- ./Makefile: uncomment the following to build example applications.
 		#DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
 		#DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
@@ -93,6 +92,40 @@ Known Problems
 	move off an activated limit switch.  Users are advised to avoid this
 	situation.  This problem is fixed with the MAXv model.
 
+
+Modification Log from R5-5 to R5-6
+==================================
+
+1) IMS MDrive modifications;
+	1) Support flexible configuration of limit switches (see
+		<motor>/motorApp/ImsSrc/README file).
+	2) User must configure MDrives' Echo Mode Flag to two (EM=2).
+
+	Files modified: drvIM483.h and drvMDrive.cc
+
+2) Removed code from record level code that rounded-up absolute and relative
+	positions before passing them on the device level code.  Any rounding
+	required for controllers that communicate in integer values (motor
+	steps) must be done at the device level.
+	
+	File modified: do_work() in motorRecord.cc
+
+3) Modifications made to OMS device drivers that allow omsLib to be built, but
+	not ran, for solaris and linux targets.
+
+	Files modified: in motorApp/OmsSrc; Makefile, devOmsCom.cc, drvMAXv.cc,
+			drvOms.cc and drvOms58.cc
+
+4) Override invalid acceleration rates and output an error message for OMS
+	devices only.
+
+	File modified: devOmsCom.cc
+
+5) Replaced hardcoded task/thread stack size and priority values with generic
+	OSI values in all epicsThreadCreate() calls.
+
+	Files modified: All drivers.
+	
 
 Modification Log from R5-4 to R5-5
 ==================================
