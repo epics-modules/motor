@@ -1,5 +1,5 @@
 TOP = ..
-include $(TOP)/config/CONFIG_APP
+include $(TOP)/configure/CONFIG
 
 # MotorSrc is required for all motor record configurations.  It MUST appear
 # 1st in this list of directories.
@@ -28,4 +28,4 @@ ifdef MPF_SERIAL
 endif
 
 DIRS += Db
-include $(TOP)/config/RULES_DIRS
+include $(TOP)/configure/RULES_DIRS
