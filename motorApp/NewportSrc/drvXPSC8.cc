@@ -388,6 +388,7 @@ STATIC int set_status(int card, int signal)
     status.Bits.EA_HOME=0;
 
     /* Motor position */
+    if (resolution == 0.) resolution = 1.;
     motorData = pos / resolution;
 
     if (motorData == motor_info->position)
