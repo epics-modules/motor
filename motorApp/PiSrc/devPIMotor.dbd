@@ -1,0 +1,5 @@
+# Intelligent Motion Systems driver support.
+device(motor,VME_IO,devPIC844,"PIC844")
+driver(drvPIC844)
+
+
