@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-01-22 21:57:51 $
+Last Modified:	$Date: 2004-02-12 19:39:29 $
 */
 
 /*
@@ -61,6 +61,8 @@ Last Modified:	$Date: 2004-01-22 21:57:51 $
  * .11 12-12-03 rls - Changed MSTA access to bit field.
  * .12 12-12-03 rls - Added status update field (STUP).
  * .13 12-23-03 rls - Prevent STUP from activating DLY or setting DMOV true.
+ * .14 02-10-03 rls - Update lval in load_pos() if FOFF is set to FROZEN.
+ * .15 02-12-03 rls - Allow sign(MRES) != sign(ERES).
  *
  */
 
@@ -1603,16 +1605,6 @@ static RTN_STATUS do_work(motorRecord * pmr)
 	    if (pmr->eres == 0.0)
 	    {
 		pmr->eres = pmr->mres;
-		MARK(M_ERES);
-	    }
-	    /*
-	     * OMS hardware can't handle negative motor or encoder resolution
-	     * in the SET_ENCODER_RATIO command. For now, we simply don't allow
-	     * motor and encoder resolutions to differ in sign.
-	     */
-	    if ((pmr->mres < 0.) != (pmr->eres < 0.))
-	    {
-		pmr->eres *= -1.;
 		MARK(M_ERES);
 	    }
 	    /* Calculate encoder ratio. */
@@ -3233,6 +3225,7 @@ static void load_pos(motorRecord * pmr)
 	else
 	    pmr->val = pmr->off - pmr->dval;
 	MARK(M_VAL);
+	pmr->lval = pmr->val;
     }
     else
     {
