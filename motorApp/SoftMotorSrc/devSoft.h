@@ -4,9 +4,9 @@ FILENAME..	devSoft.h
 USAGE... 	This file contains information that is common to
 		all Soft channel device support modules.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 20:47:55 $
+Last Modified:	$Date: 2003-06-16 15:03:12 $
 */
 
 /*
@@ -27,6 +27,7 @@ Last Modified:	$Date: 2002-10-31 20:47:55 $
  *
  * Modification Log:
  * -----------------
+ * .01 06-16-03 rls Converted to R3.14.x.
  */
 
 #ifndef	INCdevSofth

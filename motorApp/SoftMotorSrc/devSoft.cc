@@ -2,9 +2,9 @@
 FILENAME...	devSoft.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-06 21:09:24 $
+Last Modified:	$Date: 2003-06-16 15:03:12 $
 */
 
 /*
@@ -37,6 +37,7 @@ Last Modified:	$Date: 2003-06-06 21:09:24 $
  *		      by this record.
  * .01 10-29-02 rls - LOCK field added to prevent synchronization due to
  *		      changing readback.
+ * .02 06-16-03 rls   Convert to R3.14.x.
  */
 
 
