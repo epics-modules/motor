@@ -13,8 +13,8 @@
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
-# Recommended ASYN release: R3-2
-#!ASYN=$(SUPPORT)/asyn3-2
+# Recommended ASYN release: R3-3
+#!ASYN=$(SUPPORT)/asynR3-3
 
 # Recommended EPICS release: R3.14.6
 EPICS_BASE=$(SUPPORT)/../base-3.14.6
