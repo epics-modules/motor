@@ -1,4 +1,4 @@
-# This configures the MPF server stuff.
+# This configures the ASYN server stuff.
 # "#!" marks lines that can be uncommented.
 
 ### START of IPAC R2.5 and below ##############################################
@@ -60,7 +60,7 @@
 #!initOctalUARTPort("UART1[1]","octalUart1",1, 9600,"N",1,8,"N")
 #!initOctalUARTPort("UART1[2]","octalUart1",2, 9600,"N",1,8,"N")
 #!initOctalUARTPort("UART1[3]","octalUart1",3, 9600,"N",1,8,"N")
-### END of IPAC R2.5 and below ##############################################
+### END of IPAC R2.5 and below ################################################
 
 ### IPAC R2.6 and above #######################################################
 # IPAC R2.6 and above
@@ -77,14 +77,22 @@
 #!port0 = tyGSOctalDevCreate("/tyGS/0/0",octalUart0,0,1000,1000)
 #!port1 = tyGSOctalDevCreate("/tyGS/0/1",octalUart0,1,1000,1000)
 
-#!tyGSOctalConfig(port0,9600,'N',1,8,'N')
-#!tyGSOctalConfig(port1,9600,'N',1,8,'N')
+#!drvAsynSerialPortConfigure("L0","/tyGS/0/0",0,0,0)
+#!drvAsynSerialPortConfigure("L1","/tyGS/0/1",0,0,0)
 
-#!initTtyVxPort("UART0[0]","/tyGS/0/0",9600,1000)
-#!initTtyVxPort("UART0[1]","/tyGS/0/1",9600,1000)
-###############################################################################
+#!asynSetOption("L0", 0, "baud", "9600")
+#!asynSetOption("L0", 0, "bits", "8")
+#!asynSetOption("L0", 0, "parity", "none")
+#!asynSetOption("L0", 0, "stop", "1")
+#!asynSetOption("L0", 0, "clocal", "Y")
+#!asynSetOption("L0", 0, "crtscts", "N")
 
+#!asynSetOption("L1", 0, "baud", "9600")
+#!asynSetOption("L1", 0, "bits", "8")
+#!asynSetOption("L1", 0, "parity", "none")
+#!asynSetOption("L1", 0, "stop", "1")
+#!asynSetOption("L1", 0, "clocal", "Y")
+#!asynSetOption("L1", 0, "crtscts", "N")
 
-#!initSerialServer("a-Serial[0]","UART0[0]",100,2,"")
-#!initSerialServer("a-Serial[1]","UART0[1]",100,2,"")
+### END of IPAC R2.6 and above#################################################
 
