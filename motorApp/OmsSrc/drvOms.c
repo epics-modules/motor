@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8 and VME44.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-14 21:46:43 $
+Last Modified:	$Date: 2001-06-19 18:31:24 $
 */
 
 /*
@@ -28,6 +28,11 @@ Last Modified:	$Date: 2000-07-14 21:46:43 $
  *	      Accelerator Systems Division
  *	      Advanced Photon Source
  *	      Argonne National Laboratory
+ *
+ *
+ * NOTES
+ * -----
+ * Verified with firmware: VME44 ver 1.97-4E.
  *
  * Modification Log:
  * -----------------
