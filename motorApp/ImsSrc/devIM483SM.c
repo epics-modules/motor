@@ -3,9 +3,9 @@ FILENAME...	devIM483SM.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-01 17:45:09 $
+Last Modified:	$Date: 2002-03-29 21:08:53 $
 */
 
 /*
@@ -197,10 +197,7 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
     axis = motor_call->signal + 1;
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
-    {
-	rtnval = ERROR;
-	goto exit;
-    }
+	return(rtnval = ERROR);
 
     cntrl = (struct IM483controller *) brdptr->DevicePrivate;
     cntrl_units = dval;
@@ -210,10 +207,7 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
 	motor_call->type = IM483SM_table[command];
 
     if (trans->state != BUILD_STATE)
-    {
-	rtnval = ERROR;
-	goto exit;
-    }
+	return(rtnval = ERROR);
 
     if (command == PRIMITIVE && mr->init != NULL && strlen(mr->init) != 0)
 	strcat(motor_call->message, mr->init);
@@ -246,7 +240,7 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
 	    break;
 	
 	case MOVE_REL:
-	    sprintf(buff, "%.*f", maxdigits, cntrl_units);
+	    sprintf(buff, "%+.*f", maxdigits, cntrl_units);
 	    break;
 	
 	case HOME_FOR:
@@ -326,12 +320,14 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
     }
 
     size = strlen(buff);
-    if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
-	logMsg((char *) "devIM483SM.c:IM483SM_build_trans(): buffer overflow.\n",
-	   0, 0, 0, 0, 0, 0);
+    if (size == 0)
+	return(rtnval);
+    else if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
+	logMsg((char *) "IM483SM_build_trans(): buffer overflow.\n", 0, 0, 0, 0, 0, 0);
     else
+    {
 	strcat(motor_call->message, buff);
-exit:
-    motor_end_trans_com(mr, drvtabptr);
+	motor_end_trans_com(mr, drvtabptr);
+    }
     return(rtnval);
 }
