@@ -1,7 +1,7 @@
-Motor Record R5-3 Release Notice
+Motor Record R5-4 Release Notice
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base R3.14.5.
+The motor record software in this release is compatible with EPICS base R3.14.6.
 
 
 Contents
@@ -13,8 +13,9 @@ This <supporttop> contains the following motor record related items:
 	- device/driver libraries for various controllers.
 	- motor record/device/driver level documentation.
 	- motor record release documentation.
-	- two example applications; one without MPF (i.e. motorExApp/NoMPF) and
-		one with MPF (i.e., motorExApp/WithMPF).
+	- two example applications; one without ASYN (i.e. motorExApp/NoMPF) and
+		one with ASYN (i.e., motorExApp/WithMPF). See the README files
+		under <motor>/iocBoot/* for configuration instructions.
 
 As distributed, this support directory only builds the following:
 	- motorLib; Record support and common code for all device/drivers.
@@ -47,10 +48,9 @@ needs.  See individual files for instructions.
 
 		For serial and/or GPIB motor controller communication, ALL of
 		the following support modules are required;
-			- EPICS base R3.14.5.
-			- mpfosi R2.4.2.
+			- EPICS base R3.14.6
+			- ASYN R3.3
 			- IPAC R2.7a
-			- GPIB is not supported yet.
 		
 		If any example applications (motorExApp) are to be built, then
 			TEMPLATE_TOP and MSITOP must be defined.
@@ -92,8 +92,56 @@ Known Problems
 
 3) The OMS VME58 servo motor controller board (i.e., model -8S) is unable to
 	move off an activated limit switch.  Users are advised to avoid this
-	situation.
+	situation.  This problem is fixed with the MAXv model.
 
+
+Modification Log from R5-3 to R5-4
+==================================
+
+1) Mark Rivers and I converted the motor record device drivers from MPF to
+	ASYN.
+
+	Files modified: too numerous to list.
+
+2) OMS MAXv device support was added.
+
+	Files added: to the motorApp/OmsSrc directory; drvMAXv.h, devMAXv.cc
+                     and drvMAXv.cc.
+
+3) In order to support the maximum number of motors per board for the Delta Tau
+	PMAC motor controller (32), several changes have been made to all
+	driver level code.
+
+	- The "maximum number of axis per board" definition in motor.h
+	(MAX_AXIS) was increased from 10 to 32.
+
+	- The "driver_table" structure in motordrvCom.h was modified by
+	changing the "axis_names" member from a "char *" to a "char **".  The
+	third argument of the sendmsg() declaration was changed from a "char"
+	to a "char *".
+
+	- The "axis name" argument of sendmsg() was changed from a "char" to a
+	"char *" in all drivers.  Those drivers that used the axis name
+	argument of send_mess() were modified accordingly.
+
+	- Those device drivers that defined an array of axis names in the
+	driver (e.g., MAXv, PIC844) where redefined from an array of char's to
+	an array of strings.
+	
+	Files modified: too numerous to list.
+
+4) If the motor record is processed and there are no functions to perform
+	(i.e., no current or outstanding move request) then the motor record
+	will perform a status update using the STUP field.
+
+	File modified: do_work() in motorRecord.cc determines that the record
+			is not being processed as a result of a call back and
+			that there is nothing to do.
+
+5) Delta Tau PMAC device support was added.
+
+	Files added: added the motorApp/DeltaTauSrc directory.
+	
 
 Modification Log from R5-2 to R5-3
 ==================================
