@@ -20,6 +20,7 @@
 #include <tickLib.h>
 #include <taskLib.h>
 #include <time.h>
+#include <sysLib.h>
 
 #include "epicsPrint.h"
 
