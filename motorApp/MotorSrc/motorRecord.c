@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.20 $
+Version:	$Revision: 1.21 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 19:13:24 $
+Last Modified:	$Date: 2002-07-11 20:36:07 $
 */
 
 /*
@@ -144,6 +144,7 @@ Last Modified:	$Date: 2002-07-05 19:13:24 $
  *                  - Do another update after Done due to LS error.
  *                  - Seperate +/- limit switch status bits.
  *		    - CDIR matches TDIR and RA_DIRECTION.
+ * .43 07-11-02 rls Post all fields when recGblResetAlarms() returns an alarm.
  */
 
 #define VERSION 4.5
@@ -2931,7 +2932,6 @@ STATIC void monitor(motorRecord * pmr)
     unsigned short monitor_mask;
 
     monitor_mask = recGblResetAlarms(pmr);
-    monitor_mask |= (DBE_VALUE | DBE_LOG);
 
     /*
      * Mark .val, .dval changes, and save old values for backlash correction.
@@ -2954,50 +2954,58 @@ STATIC void monitor(motorRecord * pmr)
 *******************************************************************************/
 STATIC void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 {
+    unsigned short local_mask;
     mmap_field mmap_bits;
     nmap_field nmap_bits;
     
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     nmap_bits.All = pmr->nmap; /* Initialize for MARKED_AUX. */
     
-    if (MARKED(M_RBV))
+    if ((local_mask = mask | (MARKED(M_RBV) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->rbv, mask);
+	db_post_events(pmr, &pmr->rbv, local_mask);
 	UNMARK(M_RBV);
     }
-    if (MARKED(M_RRBV))
+    
+    if ((local_mask = mask | (MARKED(M_RRBV) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->rrbv, mask);
+	db_post_events(pmr, &pmr->rrbv, local_mask);
 	UNMARK(M_RRBV);
     }
-    if (MARKED(M_DRBV))
+    
+    if ((local_mask = mask | (MARKED(M_DRBV) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->drbv, mask);
+	db_post_events(pmr, &pmr->drbv, local_mask);
 	UNMARK(M_DRBV);
     }
-    if (MARKED(M_RMP))
+    
+    if ((local_mask = mask | (MARKED(M_RMP) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->rmp, mask);
+	db_post_events(pmr, &pmr->rmp, local_mask);
 	UNMARK(M_RMP);
     }
-    if (MARKED(M_REP))
+    
+    if ((local_mask = mask | (MARKED(M_REP) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->rep, mask);
+	db_post_events(pmr, &pmr->rep, local_mask);
 	UNMARK(M_REP);
     }
-    if (MARKED(M_DIFF))
+    
+    if ((local_mask = mask | (MARKED(M_DIFF) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->diff, mask);
+	db_post_events(pmr, &pmr->diff, local_mask);
 	UNMARK(M_DIFF);
     }
-    if (MARKED(M_RDIF))
+    
+    if ((local_mask = mask | (MARKED(M_RDIF) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->rdif, mask);
+	db_post_events(pmr, &pmr->rdif, local_mask);
 	UNMARK(M_RDIF);
     }
-    if (MARKED(M_MSTA))
+    
+    if ((local_mask = mask | (MARKED(M_MSTA) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->msta, mask);
+	db_post_events(pmr, &pmr->msta, local_mask);
 	UNMARK(M_MSTA);
 	if (pmr->msta & GAIN_SUPPORT)
 	{
@@ -3005,7 +3013,7 @@ STATIC void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 	    if (pos_maint != pmr->cnen)
 	    {
 		pmr->cnen = pos_maint;
-		db_post_events(pmr, &pmr->cnen, mask);
+		db_post_events(pmr, &pmr->cnen, local_mask);
 	    }
 	}
     }
@@ -3017,89 +3025,89 @@ STATIC void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     nmap_bits.All = pmr->nmap; /* Initialize for MARKED_AUX. */
 
-    if (MARKED(M_VAL))
-	db_post_events(pmr, &pmr->val, mask);
-    if (MARKED(M_DVAL))
-	db_post_events(pmr, &pmr->dval, mask);
-    if (MARKED(M_RVAL))
-	db_post_events(pmr, &pmr->rval, mask);
-    if (MARKED(M_TDIR))
-	db_post_events(pmr, &pmr->tdir, mask);
-    if (MARKED(M_MIP))
-	db_post_events(pmr, &pmr->mip, mask);
-    if (MARKED(M_HLM))
-	db_post_events(pmr, &pmr->hlm, mask);
-    if (MARKED(M_LLM))
-	db_post_events(pmr, &pmr->llm, mask);
-    if (MARKED(M_SPMG))
-	db_post_events(pmr, &pmr->spmg, mask);
-    if (MARKED(M_RCNT))
-	db_post_events(pmr, &pmr->rcnt, mask);
-    if (MARKED(M_RLV))
-	db_post_events(pmr, &pmr->rlv, mask);
-    if (MARKED(M_OFF))
-	db_post_events(pmr, &pmr->off, mask);
-    if (MARKED(M_DHLM))
-	db_post_events(pmr, &pmr->dhlm, mask);
-    if (MARKED(M_DLLM))
-	db_post_events(pmr, &pmr->dllm, mask);
-    if (MARKED(M_HLS))
+    if ((local_mask = mask | (MARKED(M_VAL) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->val, local_mask);
+    if ((local_mask = mask | (MARKED(M_DVAL) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->dval, local_mask);
+    if ((local_mask = mask | (MARKED(M_RVAL) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->rval, local_mask);
+    if ((local_mask = mask | (MARKED(M_TDIR) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->tdir, local_mask);
+    if ((local_mask = mask | (MARKED(M_MIP) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->mip, local_mask);
+    if ((local_mask = mask | (MARKED(M_HLM) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->hlm, local_mask);
+    if ((local_mask = mask | (MARKED(M_LLM) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->llm, local_mask);
+    if ((local_mask = mask | (MARKED(M_SPMG) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->spmg, local_mask);
+    if ((local_mask = mask | (MARKED(M_RCNT) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->rcnt, local_mask);
+    if ((local_mask = mask | (MARKED(M_RLV) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->rlv, local_mask);
+    if ((local_mask = mask | (MARKED(M_OFF) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->off, local_mask);
+    if ((local_mask = mask | (MARKED(M_DHLM) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->dhlm, local_mask);
+    if ((local_mask = mask | (MARKED(M_DLLM) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->dllm, local_mask);
+    if ((local_mask = mask | (MARKED(M_HLS) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->hls, mask);
+	db_post_events(pmr, &pmr->hls, local_mask);
 	if ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0))
-	    db_post_events(pmr, &pmr->rhls, mask);
+	    db_post_events(pmr, &pmr->rhls, local_mask);
 	else
-	    db_post_events(pmr, &pmr->rlls, mask);
+	    db_post_events(pmr, &pmr->rlls, local_mask);
     }
-    if (MARKED(M_LLS))
+    if ((local_mask = mask | (MARKED(M_LLS) ? DBE_VALUE : 0)))
     {
-	db_post_events(pmr, &pmr->lls, mask);
+	db_post_events(pmr, &pmr->lls, local_mask);
 	if ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0))
-	    db_post_events(pmr, &pmr->rlls, mask);
+	    db_post_events(pmr, &pmr->rlls, local_mask);
 	else
-	    db_post_events(pmr, &pmr->rhls, mask);
+	    db_post_events(pmr, &pmr->rhls, local_mask);
     }
-    if (MARKED(M_ATHM))
-	db_post_events(pmr, &pmr->athm, mask);
-    if (MARKED(M_MRES))
-	db_post_events(pmr, &pmr->mres, mask);
-    if (MARKED(M_ERES))
-	db_post_events(pmr, &pmr->eres, mask);
-    if (MARKED(M_UEIP))
-	db_post_events(pmr, &pmr->ueip, mask);
-    if (MARKED(M_URIP))
-	db_post_events(pmr, &pmr->urip, mask);
-    if (MARKED(M_LVIO))
-	db_post_events(pmr, &pmr->lvio, mask);
-    if (MARKED(M_RDBD))
-	db_post_events(pmr, &pmr->rdbd, mask);
+    if ((local_mask = mask | (MARKED(M_ATHM) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->athm, local_mask);
+    if ((local_mask = mask | (MARKED(M_MRES) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->mres, local_mask);
+    if ((local_mask = mask | (MARKED(M_ERES) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->eres, local_mask);
+    if ((local_mask = mask | (MARKED(M_UEIP) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->ueip, local_mask);
+    if ((local_mask = mask | (MARKED(M_URIP) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->urip, local_mask);
+    if ((local_mask = mask | (MARKED(M_LVIO) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->lvio, local_mask);
+    if ((local_mask = mask | (MARKED(M_RDBD) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->rdbd, local_mask);
 
-    if (MARKED_AUX(M_S))
-	db_post_events(pmr, &pmr->s, mask);
-    if (MARKED_AUX(M_SBAS))
-	db_post_events(pmr, &pmr->sbas, mask);
-    if (MARKED_AUX(M_SBAK))
-	db_post_events(pmr, &pmr->sbak, mask);
-    if (MARKED_AUX(M_SREV))
-	db_post_events(pmr, &pmr->srev, mask);
-    if (MARKED_AUX(M_UREV))
-	db_post_events(pmr, &pmr->urev, mask);
-    if (MARKED_AUX(M_VELO))
-	db_post_events(pmr, &pmr->velo, mask);
-    if (MARKED_AUX(M_VBAS))
-	db_post_events(pmr, &pmr->vbas, mask);
-    if (MARKED_AUX(M_BVEL))
-	db_post_events(pmr, &pmr->bvel, mask);
-    if (MARKED_AUX(M_MISS))
-	db_post_events(pmr, &pmr->miss, mask);
-    if (MARKED_AUX(M_ACCL))
-	db_post_events(pmr, &pmr->accl, mask);
-    if (MARKED_AUX(M_BACC))
-	db_post_events(pmr, &pmr->bacc, mask);
-    if (MARKED(M_MOVN))
-	db_post_events(pmr, &pmr->movn, mask);
-    if (MARKED(M_DMOV))
-	db_post_events(pmr, &pmr->dmov, mask);
+    if ((local_mask = mask | (MARKED_AUX(M_S) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->s, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_SBAS) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->sbas, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_SBAK) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->sbak, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_SREV) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->srev, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_UREV) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->urev, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_VELO) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->velo, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_VBAS) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->vbas, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_BVEL) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->bvel, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_MISS) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->miss, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_ACCL) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->accl, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_BACC) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->bacc, local_mask);
+    if ((local_mask = mask | (MARKED(M_MOVN) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->movn, local_mask);
+    if ((local_mask = mask | (MARKED(M_DMOV) ? DBE_VALUE : 0)))
+	db_post_events(pmr, &pmr->dmov, local_mask);
 
     UNMARK_ALL;
 }
