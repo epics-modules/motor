@@ -27,6 +27,7 @@ As distributed, this support directory only builds the following:
 
 Optionally, any of the following device/driver libraries can be built by
 uncommenting the appropriate line in ./motorApp/Makefile.
+	ImsLib - Intelligent Motion Systems controllers; ImsSrc directory.
 	newportLib - Newport controllers; NewportSrc directory.
 	omsLib - Oregon Micro System controllers; OmsSrc directory.
 	softMotorLib - Soft Channel device support; SoftMotorSrc directory.
@@ -48,7 +49,7 @@ needs.  See individual files for instructions.
 
 		For serial and/or GPIB motor controller communication, ALL of
 		the following support modules are required;
-			- EPICS_BASE V3.13.2 or above.
+			- EPICS_BASE R3.13.2 or above.
 			- MPF V1.5 or above.
                         - MPF_SERIAL V1.1 or above
 			- either MPF_GPIB V1.3 or GPIB V0.1 or above.
@@ -241,6 +242,9 @@ under these circumstances with DMOV set FALSE and RCNT set to one.
 				because of item #13.  Fixed, by testing for
 				MIP_RETRY, and clearing MIP.
 
+21) Moved device specific structure "encoder_status" from motordrvCom.h to
+drvOmsCom.h.
+	Files modified: motordrvCom.h and drvOmsCom.h
 
 
 Modification Log from V4.0 to V4.1
