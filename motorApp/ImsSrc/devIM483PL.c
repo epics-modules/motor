@@ -3,9 +3,9 @@ FILENAME...	devIM483PL.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 19:14:31 $
+Last Modified:	$Date: 2002-07-11 20:38:10 $
 */
 
 /*
@@ -325,6 +325,7 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
 	    break;
 	
 	default:
+	    send = OFF;
 	    rtnval = ERROR;
     }
 
