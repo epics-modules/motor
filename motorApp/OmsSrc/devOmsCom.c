@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.c
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 16:23:49 $
+Last Modified:	$Date: 2001-05-14 20:50:54 $
 */
 
 /*
@@ -36,11 +36,14 @@ Last Modified:	$Date: 2000-06-14 16:23:49 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93	jbk     initialized
- * .02  11-14-94	jps     copy devOMS.c and modify to point to vme58 driver
- * .03  03-19-96	tmm     v1.10: modified encoder-ratio calculation
- * .04  06-20-96	jps     allow for bumpless-reboot on position
- * .04a 02-19-97	tmm     fixed for EPICS 3.13
+ * .01  01-18-93  jbk	initialized
+ * .02  11-14-94  jps	copy devOMS.c and modify to point to vme58 driver
+ * .03  03-19-96  tmm	v1.10: modified encoder-ratio calculation
+ * .04  06-20-96  jps	allow for bumpless-reboot on position
+ * .04a 02-19-97  tmm	fixed for EPICS 3.13
+ * .05  05-14-01  rls	Support for jog velocity and acceleration commands.
+ *			Added "CA" to home and jog commands so JVEL does not
+ *			see done flag from previous operation.
  */
 
 #include	<vxWorks.h>
@@ -52,10 +55,10 @@ Last Modified:	$Date: 2000-06-14 16:23:49 $
 #include	"motor.h"
 #include	"motordevCom.h"
 
-/* Command set used by record support.  WARNING! this must match
-   "motor_cmnds" in motor.h .
+/*
+Command set used by record support.  WARNING! this must match "motor_cmnd" in
+motor.h
 */
-
 
 struct motor_table
 {
@@ -68,8 +71,8 @@ struct motor_table const oms_table[] =
 {
     {MOTION, " MA", 1},		/* MOVE_ABS */
     {MOTION, " MR", 1},		/* MOVE_REL */
-    {MOTION, " HM", 1},		/* HOME_FOR */
-    {MOTION, " HR", 1},		/* HOME_REV */
+    {MOTION, " CA HM", 1},	/* HOME_FOR */
+    {MOTION, " CA HR", 1},		/* HOME_REV */
     {IMMEDIATE, " LP", 1},	/* LOAD_POS */
     {IMMEDIATE, " VB", 1},	/* SET_VELO_BASE */
     {IMMEDIATE, " VL", 1},	/* SET_VELO */
@@ -78,7 +81,7 @@ struct motor_table const oms_table[] =
     {IMMEDIATE, " ER", 2},	/* SET_ENC_RATIO */
     {INFO, " ", 0},		/* GET_INFO */
     {MOVE_TERM, " ST", 0},	/* STOP_AXIS */
-    {VELOCITY, " JG", 1},	/* JOG */
+    {VELOCITY, " CA JG", 1},	/* JOG */
     {IMMEDIATE," KP", 1},	/* SET_PGAIN */
     {IMMEDIATE," KI", 1},	/* SET_IGAIN */
     {IMMEDIATE," KD", 1},	/* SET_DGAIN */
@@ -87,6 +90,7 @@ struct motor_table const oms_table[] =
     {IMMEDIATE,   "", 0},	/* PRIMITIVE */
     {IMMEDIATE,   "", 0},	/* SET_HIGH_LIMIT */
     {IMMEDIATE,   "", 0},	/* SET_LOW_LIMIT */
+    {VELOCITY, " JG", 1},	/* JOG_VELOCITY */
 };
 
 
