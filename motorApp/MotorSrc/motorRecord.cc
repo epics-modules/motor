@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:06:03 $
+Last Modified:	$Date: 2002-10-24 18:03:32 $
 */
 
 /*
@@ -649,11 +649,18 @@ LOGIC:
     ELSE IF done homing.
 	...
 	...
-    ELSE IF done stopping after jog.
-	Clear DMOV and JOG_STOP state in MIP.
+    ELSE IF done stopping after jog, OR, done with move.
+	IF |backlash distance| > |motor resolution|.
+	    Do backlasth correction.
+	ELSE
+	    Set MIP to DONE.
+	    IF there is a jog request and the corresponding LS is off.
+		Set jog requesst on in MIP.
+	    ENDIF
+	ENDIF
 	...
 	...
-    ELSE IF done with backlash after jog.
+    ELSE IF done with jog or move backlash.
 	Clear MIP.
 	IF (JOGF field true, AND, Hard High limit false), OR,
 		(JOGR field true, AND, Hard Low  limit false)
@@ -966,10 +973,9 @@ LOGIC:
     IF function was invoked by a callback, OR, process delay acknowledged is true?
 	Set process reason indicator to CALLBACK_DATA.
 	Call process_motor_info().
-	IF DMOV is TRUE.
-	    GOTO Exit.
 	IF motor-in-motion indicator (MOVN) is true.
-	    IF [Sign of RDIF is NOT the same as sign of CDIR], AND,
+	    IF new target position in opposite direction of current motion.
+	       [Sign of RDIF is NOT the same as sign of CDIR], AND,
 	       [Dist. to target {DIFF} > 2 x (|Backlash Dist.| + Retry Deadband)], AND,
 	       [MIP indicates this move is either (a result of a retry),OR,
 	    		(not from a Jog* or Hom*)]
@@ -983,7 +989,11 @@ LOGIC:
 		Set the Post Process field to TRUE.
 	    ENDIF
 	    IF the Post Process field is TRUE.
-		Call postProcess().
+		IF target position has changed (VAL != LVAL).
+		    Set MIP to DONE.
+		ELSE
+		    Call postProcess().
+		ENDIF
 	    ENDIF
 	    IF the Done Moving field (DMOV) is TRUE.
 		Initialize delay ticks.
@@ -1089,13 +1099,8 @@ STATIC long process(dbCommon *arg)
 	{
 	    int sign_rdif = (pmr->rdif < 0) ? 0 : 1;
 
-	    /* This is a motor-in-motion update from device support. */
-	    /*
-	     * Are we going in the wrong direction?  (Don't be fooled by a
-	     * backlash correction into saying "yes". 'Jog*' and 'Hom*' motions
-	     * don't get midcourse corrections since we don't know their
-	     * destinations.) v3.2: Don't do this check with an encoder or
-	     * readback device.
+	    /* Test for new target position in opposite direction of current
+	       motion.
 	     */	    
 	    if ((sign_rdif != pmr->cdir) &&
 		(fabs(pmr->diff) > 2 * (fabs(pmr->bdst) + pmr->rdbd)) &&
@@ -1136,7 +1141,12 @@ STATIC long process(dbCommon *arg)
 	    }
 	    
 	    if (pmr->pp)
-		status = postProcess(pmr);
+	    {
+		if (pmr->val != pmr->lval)
+		    pmr->mip = MIP_DONE;
+		else
+		    status = postProcess(pmr);
+	    }
 
 	    /* Are we "close enough" to desired position? */
 	    if (pmr->dmov && !(pmr->rhls || pmr->rlls))
