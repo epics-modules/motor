@@ -3,9 +3,9 @@ FILENAME...	devPIC844.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-01-13 20:59:36 $
+Last Modified:	$Date: 2004-01-22 22:09:56 $
 */
 
 /*
@@ -36,7 +36,8 @@ Last Modified:	$Date: 2004-01-13 20:59:36 $
  * Modification Log:
  * -----------------
  * .01 12/17/03 rls - copied from devIM483PL.cc
- */
+ * .02 01/22/03 rls - fix INIT field processing; support HOME and PID commands.
+ */							      
 
 
 #include <string.h>
@@ -152,7 +153,8 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
     struct controller *brdptr;
     struct PIC844controller *cntrl;
     char buff[110];
-    int axis, card, maxdigits, size;
+    int axis, card, maxdigits;
+    unsigned int size;
     double dval, cntrl_units;
     RTN_STATUS rtnval;
     bool send;
@@ -182,10 +184,7 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
 	return(rtnval = ERROR);
 
     if (command == PRIMITIVE && mr->init != NULL && strlen(mr->init) != 0)
-    {
-	strcat(motor_call->message, "? ");
 	strcat(motor_call->message, mr->init);
-    }
 
     switch (command)
     {
@@ -219,8 +218,10 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
 	    break;
 	
 	case HOME_FOR:
+	    sprintf(buff, "TARG:FIND POS");
+	    break;
 	case HOME_REV:
-	    send = false;	/* ?? Don't know ?? */
+	    sprintf(buff, "TARG:FIND NEG");
 	    break;
 	
 	case LOAD_POS:
@@ -262,9 +263,16 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
 	    break;
 	
 	case SET_PGAIN:
+	    cntrl_units *= 32767;
+	    sprintf(buff, "PID %.*f,,", maxdigits, cntrl_units);
+	    break;
 	case SET_IGAIN:
+	    cntrl_units *= 32767;
+	    sprintf(buff, "PID ,%.*f,", maxdigits, cntrl_units);
+	    break;
 	case SET_DGAIN:
-	    send = false;
+	    cntrl_units *= 32767;
+	    sprintf(buff, "PID ,,%.*f", maxdigits, cntrl_units);
 	    break;
 	
 	case ENABLE_TORQUE:
