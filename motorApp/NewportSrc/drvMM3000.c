@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.c
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 17:20:28 $
+Last Modified:	$Date: 2001-10-02 22:39:11 $
 */
 
 /*
@@ -35,19 +35,20 @@ Last Modified:	$Date: 2000-07-17 17:20:28 $
  *
  * Modification Log:
  * -----------------
- * .01  10-20-97	mlr     initialized from drvOms58
- * .02  10-30-97	mlr     Replaced driver calls with gpipIO functions
- * .03  10-30-98	mlr     Minor code cleanup, improved formatting
- * .04  02-01-99	mlr     Added temporary fix to delay reading motor
- *                      	positions at the end of a move.
- * .05  04-18-00	rls	MM3000 takes 2 to 5 seconds to respond to
- *				queries after hitting a hard travel limit.
- *				Adjusted GPIB and SERIAL timeouts accordingly.
- *				Deleted communication retries.  Reworked travel
- *				limit processing so that direction status bit
- *				matches limit switch.  Copied recv_mess() logic
- *				from drvMM4000.c.  Use TPE command to determine
- *				if motor has an encoder.
+ * .01 10-20-97 mlr initialized from drvOms58
+ * .02 10-30-97 mlr Replaced driver calls with gpipIO functions
+ * .03 10-30-98 mlr Minor code cleanup, improved formatting
+ * .04 02-01-99 mlr Added temporary fix to delay reading motor positions at
+ *			the end of a move.
+ * .05 04-18-00 rls MM3000 takes 2 to 5 seconds to respond to queries after
+ *			hitting a hard travel limit.  Adjusted GPIB and SERIAL
+ *			timeouts accordingly.  Deleted communication retries.
+ *			Reworked travel limit processing so that direction
+ *			status bit matches limit switch.  Copied recv_mess()
+ *			logic from drvMM4000.c.  Use TPE command to determine
+ *			if motor has an encoder.
+ * .06 10/02/01 rls - allow one retry after a communication error.
+ *		    - use motor status response bit-field.
  */
 
 
@@ -247,7 +248,8 @@ STATIC int set_status(int card, int signal)
     /* Message parsing variables */
     char *cptr, *tok_save;
     char inbuff[BUFF_SIZE], outbuff[BUFF_SIZE];
-    int status, rtn_state;
+    MOTOR_STATUS mstat;
+    int rtn_state, charcnt;
     double motorData;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
@@ -255,32 +257,39 @@ STATIC int set_status(int card, int signal)
 
     sprintf(outbuff, "%dMS", signal + 1);
     send_mess(card, outbuff, NULL);
-    status = recv_mess(card, inbuff, 1);
-    if (status <= 0)
-    {
-	cntrl->status = COMM_ERR;
-	motor_info->status |= CNTRL_COMM_ERR;
-	return (rtn_state = 1);
-    }
-    else
+    charcnt = recv_mess(card, inbuff, 1);
+    if (charcnt > 0)
     {
 	cntrl->status = NORMAL;
 	motor_info->status &= ~CNTRL_COMM_ERR;
     }
+    else
+    {
+	if (cntrl->status == NORMAL)
+	{
+	    cntrl->status = RETRY;
+	    return(0);
+	}
+	else
+	{
+	    cntrl->status = COMM_ERR;
+	    motor_info->status |= CNTRL_COMM_ERR;
+	    motor_info->status |= RA_PROBLEM;
+	    return(1);
+	}
+    }
 
-    status = inbuff[0];
-    Debug(5, "set_status(): status byte = %x\n", status);
+    mstat.All = inbuff[0];
+    Debug(5, "set_status(): status byte = %x\n", mstat.All);
 
     nodeptr = motor_info->motor_motion;
 
-    if (status & M_MOTOR_DIRECTION)
-	motor_info->status |= RA_DIRECTION;
-    else
+    if (mstat.Bits.direction == OFF)
 	motor_info->status &= ~RA_DIRECTION;
-
-    if (status & M_AXIS_MOVING)
-	motor_info->status &= ~RA_DONE;
     else
+	motor_info->status |= RA_DIRECTION;
+
+    if (mstat.Bits.inmotion == OFF)
     {
 	motor_info->status |= RA_DONE;
 /* TEMPORARY FIX, Mark Rivers, 2/1/99. The MM3000 has reported that the
@@ -295,41 +304,44 @@ STATIC int set_status(int card, int signal)
 	    recv_mess(card, cntrl->position_string, 1);
 	}
     }
+    else
+	motor_info->status &= ~RA_DONE;
 
     /* Set Travel limit status bit. */
-    if (status & M_AXIS_MOVING)
+    if (mstat.Bits.inmotion == OFF)
     {
-	if (((status & M_PLUS_LIMIT)  &&  (status & M_MOTOR_DIRECTION)) ||
-	    ((status & M_MINUS_LIMIT) && !(status & M_MOTOR_DIRECTION)))
-	    motor_info->status |= RA_OVERTRAVEL;
-	else
+	if (mstat.Bits.plustTL == OFF && mstat.Bits.minusTL == OFF)
 	    motor_info->status &= ~RA_OVERTRAVEL;
-    }
-    else
-    {
-	if ((status & M_PLUS_LIMIT) || (status & M_MINUS_LIMIT))
+	else
 	{
 	    motor_info->status |= RA_OVERTRAVEL;
 	    /* Until status is modified to distinguish +/- limits;
 	     * Set RA_DIRECTION to match travel limit switch. */
-	    if (status & M_PLUS_LIMIT)
+	    if (mstat.Bits.plustTL != OFF)
 		motor_info->status |= RA_DIRECTION;
 	    else
 		motor_info->status &= ~RA_DIRECTION;
 	}
+    }
+    else
+    {
+	if ((mstat.Bits.plustTL != OFF && mstat.Bits.direction != OFF) ||
+	    (mstat.Bits.minusTL != OFF && mstat.Bits.direction == OFF))
+	    motor_info->status |= RA_OVERTRAVEL;
 	else
 	    motor_info->status &= ~RA_OVERTRAVEL;
     }
 
-    if (status & M_HOME_SIGNAL)
-	motor_info->status |= RA_HOME;
-    else
+    if (mstat.Bits.homels == OFF)
 	motor_info->status &= ~RA_HOME;
-
-    if (status & M_MOTOR_POWER)
-	motor_info->status &= ~EA_POSITION;
     else
+	motor_info->status |= RA_HOME;
+
+
+    if (mstat.Bits.NOT_power == OFF)
 	motor_info->status |= EA_POSITION;
+    else
+	motor_info->status &= ~EA_POSITION;
 
     /* encoder status */
     motor_info->status &= ~EA_SLIP;
@@ -338,17 +350,26 @@ STATIC int set_status(int card, int signal)
 
     sprintf(outbuff, "%dTP", signal + 1);
     send_mess(card, outbuff, NULL);
-    status = recv_mess(card, inbuff, 1);
-    if (status <= 0)
-    {
-	cntrl->status = COMM_ERR;
-	motor_info->status |= CNTRL_COMM_ERR;
-	return (rtn_state = 1);
-    }
-    else
+    charcnt = recv_mess(card, inbuff, 1);
+    if (charcnt > 0)
     {
 	cntrl->status = NORMAL;
 	motor_info->status &= ~CNTRL_COMM_ERR;
+    }
+    else
+    {
+	if (cntrl->status == NORMAL)
+	{
+	    cntrl->status = RETRY;
+	    return(0);
+	}
+	else
+	{
+	    cntrl->status = COMM_ERR;
+	    motor_info->status |= CNTRL_COMM_ERR;
+	    motor_info->status |= RA_PROBLEM;
+	    return(1);
+	}
     }
 
     tok_save = NULL;
