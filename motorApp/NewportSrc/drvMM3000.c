@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.c
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 15:21:35 $
+Last Modified:	$Date: 2000-07-17 17:20:28 $
 */
 
 /*
@@ -73,13 +73,13 @@ Last Modified:	$Date: 2000-06-14 15:21:35 $
 
 #define STATIC static
 
-#define READ_RESOLUTION "TU;\r"
-#define READ_STATUS     "MS;\r"
-#define READ_POSITION   "TP;\r"
-#define STOP_ALL        "ST\r"
-#define MOTOR_ON        "MO;\r"
-#define REMOTE_MODE     "MR;\r"
-#define GET_IDENT       "VE\r"
+#define READ_RESOLUTION "TU;"
+#define READ_STATUS     "MS;"
+#define READ_POSITION   "TP;"
+#define STOP_ALL        "ST"
+#define MOTOR_ON        "MO;"
+#define REMOTE_MODE     "MR;"
+#define GET_IDENT       "VE"
 
 #define INPUT_TERMINATOR  '\n'
 
@@ -148,7 +148,8 @@ struct driver_table MM3000_access =
     set_status,
     query_done,
     NULL,
-    &initialized
+    &initialized,
+    NULL
 };
 
 struct
@@ -252,7 +253,7 @@ STATIC int set_status(int card, int signal)
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
 
-    sprintf(outbuff, "%dMS\r", signal + 1);
+    sprintf(outbuff, "%dMS", signal + 1);
     send_mess(card, outbuff, NULL);
     status = recv_mess(card, inbuff, 1);
     if (status <= 0)
@@ -335,7 +336,7 @@ STATIC int set_status(int card, int signal)
     motor_info->status &= ~EA_SLIP_STALL;
     motor_info->status &= ~EA_HOME;
 
-    sprintf(outbuff, "%dTP\r", signal + 1);
+    sprintf(outbuff, "%dTP", signal + 1);
     send_mess(card, outbuff, NULL);
     status = recv_mess(card, inbuff, 1);
     if (status <= 0)
@@ -385,7 +386,6 @@ STATIC int set_status(int card, int signal)
 	 nodeptr != 0 && nodeptr->postmsgptr != 0)
     {
 	strcpy(outbuff, nodeptr->postmsgptr);
-	strcat(outbuff, "\r");
 	send_mess(card, outbuff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
@@ -401,6 +401,7 @@ STATIC int set_status(int card, int signal)
 STATIC int send_mess(int card, char const *com, char inchar)
 {
     struct MMcontroller *cntrl;
+    char local_buff[BUFF_SIZE];
 
     if (strlen(com) > MAX_MSG_SIZE)
     {
@@ -423,14 +424,17 @@ STATIC int send_mess(int card, char const *com, char inchar)
 	return (-1);
     }
 
-    Debug(2, "send_mess(): message = %s\n", com);
+    /* Make a local copy of the string and add the command line terminator. */
+    strcpy(local_buff, com);
+    strcat(local_buff, "\r");
+    Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
     if (cntrl->port_type == GPIB_PORT)
-	gpibIOSend(cntrl->gpibInfo, com, strlen(com), GPIB_TIMEOUT);
+	gpibIOSend(cntrl->gpibInfo, local_buff, strlen(local_buff), GPIB_TIMEOUT);
     else        
-	serialIOSend(cntrl->serialInfo, com, strlen(com), SERIAL_TIMEOUT);
+	serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
     
     return (0);
 }
@@ -684,7 +688,7 @@ STATIC int motor_init()
 	    recv_mess(card_index, buff, 1);
 	    strcpy(brdptr->ident, &buff[0]);  /* Skip "VE" */
 
-	    send_mess(card_index, "RC\r", NULL);
+	    send_mess(card_index, "RC", NULL);
 	    recv_mess(card_index, buff, 1);
 	    bufptr = strtok_r(buff, "=", &tok_save);
 	    bufptr = strtok_r(NULL, " ", &tok_save);
@@ -730,7 +734,7 @@ STATIC int motor_init()
 		    motor_info->encoder_present = YES;
 		else
 		{
-		    sprintf(buff, "%dTPE\r", motor_index + 1);
+		    sprintf(buff, "%dTPE", motor_index + 1);
 		    send_mess(card_index, buff, NULL);
 		    recv_mess(card_index, buff, 1);
 

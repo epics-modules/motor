@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.c
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 16:10:05 $
+Last Modified:	$Date: 2000-07-17 17:19:28 $
 */
 
 /*
@@ -67,12 +67,12 @@ Last Modified:	$Date: 2000-06-14 16:10:05 $
 
 #define STATIC static
 
-#define READ_RESOLUTION "TU;\r"
-#define READ_STATUS     "MS;\r"
-#define READ_POSITION   "TP;\r"
-#define STOP_ALL        "ST;\r"
-#define MOTOR_ON        "MO;\r"
-#define GET_IDENT       "VE;\r"
+#define READ_RESOLUTION "TU;"
+#define READ_STATUS     "MS;"
+#define READ_POSITION   "TP;"
+#define STOP_ALL        "ST;"
+#define MOTOR_ON        "MO;"
+#define GET_IDENT       "VE;"
 
 #define INPUT_TERMINATOR	'\r'
 
@@ -142,7 +142,8 @@ struct driver_table MM4000_access =
     set_status,
     query_done,
     start_status,
-    &initialized
+    &initialized,
+    NULL
 };
 
 struct
@@ -396,7 +397,6 @@ STATIC int set_status(int card, int signal)
 	 nodeptr != 0 && nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	strcat(buff, "\r");
 	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
@@ -417,6 +417,7 @@ STATIC int set_status(int card, int signal)
 STATIC int send_mess(int card, char const *com, char inchar)
 {
     struct MMcontroller *cntrl;
+    char local_buff[BUFF_SIZE];
 
     if (strlen(com) > MAX_MSG_SIZE)
     {
@@ -439,17 +440,20 @@ STATIC int send_mess(int card, char const *com, char inchar)
 	return (-1);
     }
 
-    Debug(2, "send_mess(): message = %s\n", com);
+    /* Make a local copy of the string and add the command line terminator. */
+    strcpy(local_buff, com);
+    strcat(local_buff, "\r");
+    Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
     switch (cntrl->port_type)
     {
 	case GPIB_PORT:
-	    gpibIOSend(cntrl->gpibInfo, com, strlen(com), GPIB_TIMEOUT);
+	    gpibIOSend(cntrl->gpibInfo, local_buff, strlen(local_buff), GPIB_TIMEOUT);
 	    break;
 	case RS232_PORT:
-	    serialIOSend(cntrl->serialInfo, com, strlen(com), SERIAL_TIMEOUT);
+	    serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
 	    break;
     }
     return (0);
@@ -704,7 +708,7 @@ STATIC int motor_init()
 		motor_info->position = 0;
 
                 /* Determine if encoder present based on open/closed loop mode. */
-		sprintf(buff, "%dTC\r", motor_index + 1);
+		sprintf(buff, "%dTC", motor_index + 1);
 	        send_mess(card_index, buff, NULL);
 	        recv_mess(card_index, buff, 1);
 		loop_state = atoi(&buff[3]);	/* Skip first 3 characters */
@@ -717,7 +721,7 @@ STATIC int motor_init()
 		}
 
                 /* Determine drive resolution. */
-                sprintf(buff, "%dTU\r", motor_index + 1);
+                sprintf(buff, "%dTU", motor_index + 1);
 	        send_mess(card_index, buff, NULL);
 	        recv_mess(card_index, buff, 1);
 		cntrl->drive_resolution[motor_index] = atof(&buff[3]);
@@ -728,19 +732,19 @@ STATIC int motor_init()
 		cntrl->res_decpts[motor_index] = digits;              
 
 		/* Save home preset position. */
-                sprintf(buff, "%dXH\r", motor_index + 1);
+                sprintf(buff, "%dXH", motor_index + 1);
 	        send_mess(card_index, buff, NULL);
 	        recv_mess(card_index, buff, 1);
 		cntrl->home_preset[motor_index] = atof(&buff[3]);
 
                 /* Determine low limit */
-                sprintf(buff, "%dTL\r", motor_index + 1);
+                sprintf(buff, "%dTL", motor_index + 1);
 	        send_mess(card_index, buff, NULL);
 	        recv_mess(card_index, buff, 1);
                 motor_info->low_limit = atof(&buff[3]);
 
                 /* Determine high limit */
-                sprintf(buff, "%dTR\r", motor_index + 1);
+                sprintf(buff, "%dTR", motor_index + 1);
 	        send_mess(card_index, buff, NULL);
 	        recv_mess(card_index, buff, 1);
                 motor_info->high_limit = atof(&buff[3]);
