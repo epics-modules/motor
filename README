@@ -99,7 +99,7 @@ Modification Log from R5-1 to R5-2
 	an error message response, print the error message and then,
 	recursively, call itself.  This restored communication transmit/receive
 	synchronization.
-	File modified: - recv_mess() in drvMM3000.c
+	File modified: - recv_mess() in drvMM3000.cc
 
 2) Spurious interrupts were occurring with OMS VX2-006 ver 1.04 controller
 	boards.  For the sake of throughput, the OMS VME8/44 device driver
@@ -134,6 +134,67 @@ Modification Log from R5-1 to R5-2
 	Files modified: - OmsSrc/drvOms.h; enable TBE_E interrupt.
 			- OmsSrc/drvOms.cc; support TBE_E interrupt.
 			- MotorSrc/motordrvCom.h
+
+3) With release R4-7, there was a slight (undocumented) modification made to
+	the way that backlash correction functioned. If a move is in the
+	preferred direction and the backlash speed and acceleration are the
+	same as the slew speed and acceleration, then the backlash move is
+	skipped and the motor moves directly to the target position.
+	
+	Unfortunately, there was a bug in the logic that appeared only when MRES
+	< 0.  When MRES < 0, and the backlash speed and acceleration were the
+	same as the slew speed and acceleration, the motor record did the
+	opposite of the requirements; i.e., it did backlash correction when the
+	move was in the preferred direction and did not do backlash correction
+	when the move was not in the preferred direction.
+
+	File modified: - do_work() in motorRecord.cc
+
+4) The Newport ESP300 would randomly crash at boot-up because an internal
+	parameter ("drive_resolution") was not always, under all
+	configurations, initialized.  With this release, the "drive_resolution"
+	is set based on the response to the ESP300 "SU?" command.  In addition,
+	the user is required to set MRES to the resolution of the controller as
+	explained in the new document <motor>/motorApp/NewportSrc/README.
+	
+	Files modified: - NewportSrc/devESP300.c
+			- NewportSrc/drvESP300.c
+	File added:     - NewportSrc/README (notes on serial communication and
+				ESP300 configuration).
+
+5) There were two timing related bugs with the previous release (R5.1).  First,
+	the update rate was not working properly.  The end result was that the
+	motor task was polling controllers as fast as possible.  Second, there
+	was an error in the motor_task function process_messages() that
+	enforces a time delay between UNDEFINED or IMMEDIATE type commands
+	(e.g., LOAD_POS, SET_ENC_RATIO, etc.) and an INFO type command.  One
+	result of this error was that on OMS VME58 controllers an INFO update
+	after a LOAD_POS command would, intermittently, yield the previous
+	position.
+
+	File modified: motor_task() and process_messages() in motordrvCom.cc
+
+6) Backlash correction after jogging was not working for controllers that do
+	not support multiple position commands on the same command line (e.g.,
+	Newport ESP300).  This has been corrected with this release with one
+	caveat; in contrast to the feature described in item#3 above, backlash
+	correction is always done after jogging, regardless of the jog
+	acceleration and speed parameters.
+
+	File modified: Added extra jog backlash states to postProcess() in
+			motorRecord.cc
+
+7) Although there is no explicit statement in the motor record documentation,
+	most user's would expect the "Readback settle time" field (DLY) to
+	update the readback after the delay timeout.  It did not do this.
+	With this release, the readback is updated one time after the timeout.
+
+	Since a functioning DLY field performs the same function as the
+	drv<driver>ReadbackDelay variables, with the added advantage that the
+	delay can be motor specific, the drv<driver>ReadbackDelay variables
+	have been deleted (except for the MM4000).
+	
+	File modified: - callbackFunc() and process() in motorRecord.cc
 
 
 Modification Log from R4-5 to R5-1

@@ -1,920 +1,1304 @@
-<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en"><html><head>
-    
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
-    
   <meta name="Author" content="Ronald L. Sluiter">
-    
-  <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release."><title>EPICS Motor Record Release Notice</title></head>
-
+  <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
+  <title>EPICS Motor Record Release R5.2 Notice</title>
+  <meta name="author" content="Ronald L. Sluiter">
+  <meta name="description" content="Notification of bug fixes, functional changes and new features.">
+</head>
 <body>
-  
-<center> 
-<center> 
-<h1> <b><u>Motor Record Version 5.1 Release Notice</u></b></h1>
-</center>
 
-<div style="text-align: left;"><b>!WARNING!</b><br>
+<CENTER>
+  <h1><b><u>Motor Record Version 5.2 Release Notice</u></b></h1>
+</CENTER>
+
+<BR><b><U>Requirements</u></B><BR><BR>
+EPICS base R3.14.4 or greater.&nbsp; See the "Required Modules" section of 
+the Motor Record web page for details.<br>
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+<div align="left">
+  <P>
+  <U><B>Newport MM3000 Communication</B></U>
+  </P>
+  <P>
+  Communication with the Newport MM3000 motor controller was getting out of 
+  synchronization whenever the MM3000 responded with an error message. This 
+  problem was resolved by having recv_mess() in drvMM3000.c detect an error 
+  message response, print the error message and then, recursively, call itself. 
+  This restored communication transmit/receive synchronization.
+  </P>
+
+  <P>
+  <U><B>OMS VX2-006 Spurious Interrupts</B></U>
+  </P>
+  <P>
+  Spurious interrupts were occurring with OMS VX2-006 ver 1.04 controller boards. 
+  For the sake of throughput, the OMS VME8/44 device driver enables the done (DON_E) 
+  and input buffer full (IBF_E) interrupts, but disables the transmit buffer empty 
+  (TBE_E).
+  </P>
+  <P>
+  The OMS boards are RORA VME type interrupters.  The "release" register is the 
+  status register.  It contains information on the status of the transmit/receive 
+  buffer interrupts and the done interrupt.  Since the device driver was not using 
+  the transmit buffer empty interrupt, it was polling the status register when 
+  sending a command to the controller. With the VX2, if the IRQ became active 
+  during a status register read cycle, the IRQ was negated at the end of the cycle 
+  and the CPU board generated a spurious interrupt.
+  </P>
+  <P>
+  The VME8/44 models somehow prevented the spurious interrupts from occurring by
+  latching the IRQ, if and when, the IRQ became active during a status register
+  read.
+  </P>
+  <P>
+  This problem has been fixed by using all of the OMS board interrupts (i.e., 
+  enable transmit buffer empty).  The OMS VME8/44/VX2/VS4 design is limited with 
+  regard to interrupts by an all or none choice.
+  </P>
+
+  <P>
+  <U><B>Backlash Correction Bug Fix</B></U>
+  </P>
+  <P>
+  With release R4-7, there was a slight (undocumented) modification made to the 
+  way that backlash correction functioned. If a move is in the preferred direction 
+  and the backlash speed and acceleration are the same as the slew speed and 
+  acceleration, then the backlash move is skipped and the motor moves directly to 
+  the target position.
+  </P>
+  <P>
+  Unfortunately, there was a bug in the logic that appeared only when MRES< 0. 
+  When MRES < 0, and the backlash speed and acceleration were the same as the slew 
+  speed and acceleration, the motor record did the opposite of the requirements; i.e., 
+  it did backlash correction when the move was in the preferred direction and did 
+  not do backlash correction when the move was not in the preferred direction.
+  </P>
+
+  <P>
+  <U><B>Newport ESP300 Device Driver Crash</B></U>
+  </P>
+  <P>
+  The Newport ESP300 would randomly crash at boot-up because an internal parameter 
+  ("drive_resolution") was not always, under all configurations, initialized. With 
+  this release, the "drive_resolution" is set based on the response to the ESP300 
+  "SU?" command.
+  </P>
+  <P>
+  In addition, the user is required to set MRES to the resolution of the 
+  controller as explained in the distribution document <I>motor</I>/motorApp/NewportSrc/README.
+  </P>
+
+  <P>
+  <U><B>Update Rate Bug Fix</B></U>
+  </P>
+  <P>
+  There were two timing related bugs with the previous release (R5.1).  First, the 
+  update rate was not working properly.  The end result was that the motor task 
+  was polling controllers as fast as possible.  Second, there was an error in the 
+  motor_task function process_messages() that enforces a time delay between 
+  UNDEFINED or IMMEDIATE type commands (e.g., LOAD_POS, SET_ENC_RATIO, etc.) and 
+  an INFO type command.  One result of this error was that on OMS VME58 
+  controllersan INFO update after a LOAD_POS command would, intermittently, yield 
+  the previous position.
+  </P>
+
+  <P>
+  <U><B>Backlash Correction after Jogging Bug Fix</B></U>
+  </P>
+  <P>
+  Backlash correction after jogging was not working for controllers that do not 
+  support multiple position commands on the same command line (e.g., Newport 
+  ESP300).  This has been corrected with this release with one caveat; in contrast 
+  to the feature described in <I>Backlash Correction Bug Fix</I> above, backlash 
+  correction is always done after jogging, regardless of the jog acceleration and 
+  speed parameters
+  </P>
+
+  <P>
+  <U><B>DLY field</B></U>
+  </P>
+  <P>
+  Although there is no explicit statement in the motor record documentation, most 
+  user's would expect the "Readback settle time" field (DLY) to update the 
+  readback after the delay timeout.  It did not do this. With this release, the 
+  readback is updated one time after the timeout.
+  </P>
+  <P>
+  Since a functioning DLY field performs the same function as the drv<driver>ReadbackDelay 
+  variables, with the added advantage that the delay can be motor specific, the 
+  drv<driver>ReadbackDelay variables have been deleted (except for the MM4000).
+  </P>
+
 </div>
-<div style="text-align: left;">This release of the motor record
-contains major modifications.&nbsp; It has not, yet, undergone rigorous
-testing.&nbsp; I highly recommend that user's test this release in a
-safe, non-critical environment before committing themselves to using it
-with their critical applications.<br>
-<br>
-This is the first R3.14 compatible release of the motor record.&nbsp;
-All of the device drivers, with the exception of OMS, are operating
-system independent (OSI).&nbsp; Thanks to Joe Sullivan for his work
-with the initial port to R3.14.<br>
-<h4><span style="text-decoration: underline;">Requirements</span><br>
-</h4>
-EPICS base R3.14.2 or greater.&nbsp; See the "Required Modules" section of the Motor Record web page for details.<br>
-<br>
-<div style="text-align: center;"><b><u>New Features</u></b><br>
-<div style="text-align: left;"><span style="text-decoration: underline;"><span style="font-weight: bold;">MX Device Driver<br>
-<br>
-<span style="text-decoration: underline;"><span style="font-weight: bold;"></span></span></span></span>This
-release includes a device driver for MX.&nbsp; The MX device driver
-gives EPICS user's access to motor controllers that are not currently
-supported by the motor record.&nbsp; An MX example is included with the
-motor distribution.  This device driver requires MX release 0.62.0 or greater.<br>
-<br>
-<span style="font-weight: bold; text-decoration: underline;">Mclennan PM600<br>
-<br>
-</span>Mark Rivers added support for the Mclennan PM600 controller.<br>
-<h1 style="text-align: center;"> <b><u>Motor Record Version 4.7 Release Notice</u></b></h1>
 
+</div>
+
+
+
+<CENTER>
+  <h1><b><u>Motor Record Version 5.1 Release Notice</u></b></h1>
+</CENTER>
 
 <b>!WARNING!</b><br>
 
+<div style="text-align: left;">
+  This release of the motor record contains major modifications.&nbsp; It has not, 
+  yet, undergone rigorous testing.&nbsp; I highly recommend that user's test this 
+  release in a safe, non-critical environment before committing themselves to 
+  using it with their critical applications.<br>
+  <br>
+  This is the first R3.14 compatible release of the motor record.&nbsp; All of the 
+  device drivers, with the exception of OMS, are operating system independent (OSI).&nbsp; 
+  Thanks to Joe Sullivan for his work with the initial port to R3.14.<br>
+</div>
 
-motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and
-all user trees (i.e., &lt;ioctop&gt;) that load the motor record (see  README
-items #3 and #4 for details).     
-<h4> </h4>
+<BR><b><U>Requirements</u></B><BR><BR>
+EPICS base R3.14.2 or greater.&nbsp; See the "Required Modules" section of 
+the Motor Record web page for details.<br>
 
+<center>
+  <h4><u>New Features</u></h4>
+</CENTER>
 
- 
-<h4 style="text-align: center;"> <u>Modifications to Existing Features</u></h4>
-
-<div align="left"><u><b>Redundant DMOV Monitor Postings</b></u><br>
-<br>
-Eliminated redundant DMOV monitor postings.&nbsp; Under certain conditions
-the motor record would post the state of the DMOV field twice. &nbsp;For
-example, with previous releases the motor record would post DMOV=0 twice
-if backlash correction was enabled and the user jogged the motor.<br>
-<br>
-<u><b>OMS VME58 Intermittent Limit Switch Status Error<br>
-<br>
-</b></u>There is a problem with OMS VME58 ver 2.35-8 firmware when used with
-MVME2700 CPU boards.&nbsp; The problem is that the controller board intermittently,
-reports that there is no limit switch error when there is an error.&nbsp;
-This error can occur if the user repeatedly, tries to move in the direction
-of the limit switch when the limit error condition exits.&nbsp; A delay has
-been added to work around the problem.<br>
-
-<center>        
-<p><b><u>New Features</u></b></p>
 <div align="left">
+  <U><B>MX Device Driver</B></U><br><br>
+    This release includes a device driver for MX.&nbsp; The MX device driver gives 
+    EPICS user's access to motor controllers that are not currently supported by the 
+    motor record.&nbsp; An MX example is included with the motor distribution.  This 
+    device driver requires MX release 0.62.0 or greater.<br>
+    <br>
+  <U><B>Mclennan PM600</B></U><br><br>
+    Mark Rivers added support for the Mclennan PM600 controller.<br>
+</div>
+
+
+<CENTER>
+  </h1> <h1><b><u>Motor Record Version 4.7 Release Notice</u></b></h1>
+</CENTER>
+
+<b>!WARNING!</b><br>
+
+motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and all 
+user trees (i.e., &lt;ioctop&gt;) that load the motor record (see  README items 
+#3 and #4 for details). <h4></h4>
+
+<CENTER>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+<div align="left">
+  <u><b>Redundant DMOV Monitor Postings</b></u><br>
+  <br>
+  Eliminated redundant DMOV monitor postings.&nbsp; Under certain conditions the 
+  motor record would post the state of the DMOV field twice. &nbsp;For example, 
+  with previous releases the motor record would post DMOV=0 twice if backlash 
+  correction was enabled and the user jogged the motor.<br>
+  <br>
+  <u><b>OMS VME58 Intermittent Limit Switch Status Error<br>
+  <br>
+  </b></u>There is a problem with OMS VME58 ver 2.35-8 firmware when used with 
+  MVME2700 CPU boards.&nbsp; The problem is that the controller board 
+  intermittently, reports that there is no limit switch error when there is an 
+  error.&nbsp; This error can occur if the user repeatedly, tries to move in the 
+  direction of the limit switch when the limit error condition exits.&nbsp; A 
+  delay has been added to work around the problem.<br>
+
+  <center>
+    <p>
+    <b><u>New Features</u></b>
+    </p>
+    <div align="left">
       <u><b>Motor Synchronized DB Puts</b></u><br>
-<br>
-<i>device directive </i>support has been extended to the PREM and POST fields
-for OMS devices only.&nbsp; The new device directive supports changing the
-value of a database variable.&nbsp; The syntax is as follows:<br>
-<blockquote>PREM - @PUT(<i>pvname</i>, <i>pv-value</i>, <i>delay in seconds</i>)@<br>
-</blockquote>
-<blockquote>POST &nbsp;- @PUT(<i>pvname</i>, <i>pv-value</i>)@<br>
-</blockquote>
-Note that the PREM supports a delay argument, but that POST does not. &nbsp;The <i>Readback settle time field</i> (DLY) should be used to create a time delay after the PV specified in the POST field is written.&nbsp; See the <i>Miscellaneous fields</i> section of motorRecord.html for further information on the INIT, PREM and POST fields.<br>
-<br>
-<u><b>IMS MDrive17 device support</b></u>
+      <br>
+      <i>device directive </i>support has been extended to the PREM and POST fields 
+      for OMS devices only.&nbsp; The new device directive supports changing the value 
+      of a database variable.&nbsp; The syntax is as follows:<br>
+      <blockquote>
+	PREM - @PUT(<i>pvname</i>, <i>pv-value</i>, <i>delay in seconds</i>)@<br>
+      </blockquote>
+      <blockquote>
+	POST &nbsp;- @PUT(<i>pvname</i>, <i>pv-value</i>)@<br>
+      </blockquote>
+      Note that the PREM supports a delay argument, but that POST does not. &nbsp;The <i>Readback 
+      settle time field</i> (DLY) should be used to create a time delay after the PV 
+      specified in the POST field is written.&nbsp; See the <i>Miscellaneous fields</i> 
+      section of motorRecord.html for further information on the INIT, PREM and POST 
+      fields.<br>
+      <br>
+      <u><b>IMS MDrive17 device support</b></u>
+    </div>
+  </center>
+  <br>
+  Device driver support for the Intelligent Motion Systems (IMS) MDrive17 model 
+  motor controller is available with this release.<br>
+  <u><b><br>
+  Home Velocity<br>
+  </b></u><br>
+  A home velocity field (HVEL) was added with this release. &nbsp;Like all speed 
+  related fields, the HVEL is limited by the maximum (VMAX) and base (VBAS) 
+  velocity fields.<u><b></b></u> &nbsp;In addition, if HVEL is not initialized by 
+  the user, the motor record sets HVEL to VBAS.<br>
+
 </div>
+
+<CENTER>
+  <h1><b><u>Motor Record Version 4.6 Release Notice</u></b></h1>
 </center>
-<br>
-Device driver support for the Intelligent Motion Systems (IMS) MDrive17 model motor controller is available with this release.<br>
-<u><b><br>
-Home Velocity<br>
-</b></u><br>
-A home velocity field (HVEL) was added with this release. &nbsp;Like all
-speed related fields, the HVEL is limited by the maximum (VMAX) and base
-(VBAS) velocity fields. &nbsp;In addition, if HVEL is not initialized by the user, the motor record sets HVEL to VBAS.<br>
-
-</div>
-
-<h1 style="text-align: center;"><b><u>Motor Record Version 4.6 Release Notice</u></b></h1>
-
 
 <b>!WARNING!</b><br>
-
-motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and
-all user trees (i.e., &lt;ioctop&gt;) that load the motor record (see  README
-items #3 and #4 for details).     
-<h4> </h4>
-
-<center> 
-<h4> <u>Modifications to Existing Features</u></h4>
-<div align="left"><b><u>Soft Channel Device Support<br>
-<br>
-</u></b></div>
-<div align="left">A conflict between the requirements specified under <i>Requirements
-Clarification </i>below and the goal of having the same record level functionality
-for all device drivers, including Soft Channel device support, was found by
-Tim Graber.<br>
-</div>
-<div align="left"><br>
-</div>
-<div align="left">A problem occurred with, for example, the SoftMotorEx.db
-that is distributed with the motor record, when backlash was enabled in the
-<i>hard motor</i>(a motor configured <u>without</u> Soft Channel device support).&nbsp;
-The result was that the <i>soft motor</i> (a motor configured <u>with</u>
-Soft Channel device support) would interpret the hard motor's backlash correction
-as the motor going in the wrong direction, and stop the "hard" motor from
-completing the backlash correction.<br>
-</div>
-<div align="left"><br>
-</div>
-<div align="left">With this release, the requirements on how the motor record
-processes a new target position while the motor is in motion have been modified
-based on a new field; New Target Monitor (NTM).<br>
+motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and all 
+user trees (i.e., &lt;ioctop&gt;) that load the motor record (see  README items 
+#3 and #4 for details). <h4></h4>
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</center>
+<div align="left">
+  <b><u>Soft Channel Device Support<br>
+  <br>
+  </u></b>
 </div>
 <div align="left">
-<blockquote>Case #1: The motor record is given a new position, which is in
-the opposite direction from the current motor motion. &nbsp;If NTM is <u>yes,</u>
-the motor is immediately stopped and given a motion command to the new position.
-&nbsp;If NTM is <u>no</u>, the motor completes the previous move before it
-is given a motion command to the new position.<br>
-</blockquote>
+  A conflict between the requirements specified under <i>Requirements 
+  Clarification </i>below and the goal of having the same record level 
+  functionality for all device drivers, including Soft Channel device support, was 
+  found by Tim Graber.<br>
 </div>
 <div align="left">
-<blockquote>Case #2: The motor record is given a new position, which is in
-the same direction as the current motor motion, but the new position is closer
-to the motor's current position than the original target position. &nbsp;If
-NTM is <u>yes</u>, the motor is stopped after it has gone past the new position;
-then a command is given to return to the new position. &nbsp;If NTM is <u>no</u>,
-the motor completes the previous move before it is given a motion command
-to the new position.<br>
-</blockquote>
+  <br>
 </div>
 <div align="left">
-<blockquote>Case #3: The motor record is given a new position, which is in
-the same direction as the current motor motion, but the new position is further
-from the motor's current position than the original position. &nbsp;After
-the motor reaches the original target position and stops, a command is given
-to the new target position.&nbsp; This case is <u>independent</u> of NTM.<br>
-</blockquote>
+  A problem occurred with, for example, the SoftMotorEx.db that is distributed 
+  with the motor record, when backlash was enabled in the <i>hard motor</i>(a 
+  motor configured <u>without</u> Soft Channel device support).&nbsp; The result 
+  was that the <i>soft motor</i> (a motor configured <u>with</u> Soft Channel 
+  device support) would interpret the hard motor's backlash correction as the 
+  motor going in the wrong direction, and stop the "hard" motor from completing 
+  the backlash correction.<br>
 </div>
-<div align="left"><br>
+<div align="left">
+  <br>
 </div>
-<div align="left">A Soft Channel device support design limitation was discovered
-by Tim Mooney.&nbsp; The problem is a result of the modifications made with
-R4-5 below, where the soft motor synchronizes it's target position (i.e.,
-VAL/DVAL/RVAL) with it's readback position (RBV/DRBV/RRBV). &nbsp;Given an
-application where there are two or more soft motors driving the system (e.g.,
-slit), when one soft motor is moved, the other soft motor <i>sees</i> it's
-readback changing and synchronizes it's target position with it's readback
-position at the end of the move, thereby losing it's target position.<br>
+<div align="left">
+  With this release, the requirements on how the motor record processes a new 
+  target position while the motor is in motion have been modified based on a new 
+  field; New Target Monitor (NTM).<br>
+</div>
+<div align="left">
+  <blockquote>
+    Case #1: The motor record is given a new position, which is in the opposite 
+    direction from the current motor motion. &nbsp;If NTM is <u>yes,</u> the motor 
+    is immediately stopped and given a motion command to the new position. &nbsp;If 
+    NTM is <u>no</u>, the motor completes the previous move before it is given a 
+    motion command to the new position.<br>
+  </blockquote>
+</div>
+<div align="left">
+  <blockquote>
+    Case #2: The motor record is given a new position, which is in the same 
+    direction as the current motor motion, but the new position is closer to the 
+    motor's current position than the original target position. &nbsp;If NTM is <u>yes</u>, 
+    the motor is stopped after it has gone past the new position; then a command is 
+    given to return to the new position. &nbsp;If NTM is <u>no</u>, the motor 
+    completes the previous move before it is given a motion command to the new 
+    position.<br>
+  </blockquote>
+</div>
+<div align="left">
+  <blockquote>
+    Case #3: The motor record is given a new position, which is in the same 
+    direction as the current motor motion, but the new position is further from the 
+    motor's current position than the original position. &nbsp;After the motor 
+    reaches the original target position and stops, a command is given to the new 
+    target position.&nbsp; This case is <u>independent</u> of NTM.<br>
+  </blockquote>
+</div>
+<div align="left">
+  <br>
+</div>
+<div align="left">
+  A Soft Channel device support design limitation was discovered by Tim Mooney.&nbsp; 
+  The problem is a result of the modifications made with R4-5 below, where the 
+  soft motor synchronizes it's target position (i.e., VAL/DVAL/RVAL) with it's 
+  readback position (RBV/DRBV/RRBV). &nbsp;Given an application where there are 
+  two or more soft motors driving the system (e.g., slit), when one soft motor is 
+  moved, the other soft motor <i>sees</i> it's readback changing and synchronizes 
+  it's target position with it's readback position at the end of the move, thereby 
+  losing it's target position.<br>
 </div>
 &nbsp;&nbsp;&nbsp; <br>
-<div align="left">With this release, the LOCK field has been added to allow
-the user to enable/disable synchronization due to the readback changing.</div>
-</center>
-
 <div align="left">
-<h4><u>Backlash Correction Bug Fixes</u></h4>
-The following scenario would put the motor record into an invalid state. &nbsp;A
-new target position (i.e., VAL/DVAL/RVAL) is written to the motor record
-under the following conditions;<br>
-<ol><li>motion is in progress (i.e., DMOV is false).</li><li>the new target position is different from the actual position by less
-than the retry deadband (|DIFF| &lt; RDBD).</li><li>backlash correction is enabled (i.e., BDST is non-zero) and the new
-move is <b>not</b> in the "preferred direction" (preferred direction is the
-direction in which the motor moves during the backlash-takeout part of a motor
-move).</li></ol>
-A bug was introduced in R4.5 when backlash correction was changed.&nbsp; The
-error occurred when a new target position was issued while the motor was
-moving.&nbsp; The motor would move to the new target position at the backlash
-velocity rather than the slew velocity.<br>
-<br>
-Thanks to Kevin M. Peterson, James B. Stevens and John Maclean for their help
-in finding and fixing these bugs.
-<br>
-<center>        
-<p><b><u>New Features</u></b></p>
-      </center>
-<h4><u>Newport ESP300 device support</u></h4>
-Device support for the Newport ESP300 motor controller is available with
-this release.<br>
-<h1> </h1>
+  With this release, the LOCK field has been added to allow the user to enable/disable 
+  synchronization due to the readback changing.
+</div>
+</center>
+<div align="left">
+  <h4><u>Backlash Correction Bug Fixes</u></h4> The following scenario would put 
+  the motor record into an invalid state. &nbsp;A new target position (i.e., VAL/DVAL/RVAL) 
+  is written to the motor record under the following conditions;<br>
+  <ol>
+    <li>
+      motion is in progress (i.e., DMOV is false).
+    </li>
+    <li>
+      the new target position is different from the actual position by less than the 
+      retry deadband (|DIFF| &lt; RDBD).
+    </li>
+    <li>
+      backlash correction is enabled (i.e., BDST is non-zero) and the new move is <b>not</b> 
+      in the "preferred direction" (preferred direction is the direction in which the 
+      motor moves during the backlash-takeout part of a motor move).
+    </li>
+  </ol>
+  A bug was introduced in R4.5 when backlash correction was changed.&nbsp; The 
+  error occurred when a new target position was issued while the motor was moving.&nbsp; 
+  The motor would move to the new target position at the backlash velocity rather 
+  than the slew velocity.<br>
+  <br>
+  Thanks to Kevin M. Peterson, James B. Stevens and John Maclean for their help in 
+  finding and fixing these bugs. <br>
+  <center>
+    <p>
+    <b><u>New Features</u></b>
+    </p>
+  </center>
+  <h4><u>Newport ESP300 device support</u></h4> Device support for the Newport 
+  ESP300 motor controller is available with this release.<br>
+  <h1></h1>
 </div>
 
-
-<h1> </h1>
-
-<span style="text-decoration: underline;"><span style="font-weight: bold;"></span></span></div>
-</div>
-</div>
-<h1> </h1>
-<h1><b><u>Motor Record Version 4.5 Release Notice</u></b></h1>
-
+<CENTER>
+  <h1><b><u>Motor Record Version 4.5 Release Notice</u></b></h1>
 </center>
 <b>!WARNING!</b><br>
-motorRecord.dbd has been modified.&nbsp; This requires you to 'rebuild' any
-and all user trees (i.e., &lt;ioctop&gt;) that load the motor record (see 
-README item #2 for details).   
-<center> 
-<h4> <u>Modifications to Existing Features</u></h4>
+motorRecord.dbd has been modified.&nbsp; This requires you to 'rebuild' any and 
+all user trees (i.e., &lt;ioctop&gt;) that load the motor record (see README 
+item #2 for details).
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
 </center>
- <b><u>Communication Retries</u></b> 
-<p>Once a communication error is detected, one retry is attempted (Further 
-retries are made, if the position RETRY field is non-zero).&nbsp; If the retry
-fails, then a communication error is reported.&nbsp; No further attempt is
-made to communicate with the controller until subsequent user input (e.g.,
-a new target position is entered).&nbsp; This change affects all device drivers
-using GPIB or RS232 serial communication mechanisms (i.e., non-VME Bus boards). 
+<b><u>Communication Retries</u></b>
+<p>
+Once a communication error is detected, one retry is attempted (Further retries 
+are made, if the position RETRY field is non-zero).&nbsp; If the retry fails, 
+then a communication error is reported.&nbsp; No further attempt is made to 
+communicate with the controller until subsequent user input (e.g., a new target 
+position is entered).&nbsp; This change affects all device drivers using GPIB or 
+RS232 serial communication mechanisms (i.e., non-VME Bus boards).
 </p>
-<h4> </h4>
-<h4>
-</h4><h4><u>Requirements Clarification</u></h4>
+<h4></h4> <h4></h4> <h4><u>Requirements Clarification</u></h4> The requirements 
+on how the motor record processes a new target position while the motor is in 
+motion have never been specified.&nbsp; The requirements are as follows:<br>
+<blockquote>
+  Case #1: &nbsp;The motor record is given a new position, which is in the 
+  opposite direction from the current motor motion.&nbsp; The motor is immediately 
+  stopped and given a motion command to the new position.
+</blockquote>
 
-The requirements on how the motor record processes a new target position
-while the motor is in motion have never been specified.&nbsp; The requirements
-are as follows:<br>
-<blockquote>Case #1: &nbsp;The motor record is given a new position, which
-is in the opposite direction from the current motor motion.&nbsp; The motor
-is immediately stopped and given a motion command to the new position.</blockquote>
-  <blockquote>Case #2: &nbsp;The motor record is given a new position, which
-is in the same direction as the current motor motion, but the new position
-is closer to the motor's current position than the original target position.&nbsp;
-The motor is stopped after it has gone past the new position; then a command
-is given to return to the new position.<br>
-    <br>
-Case #3: &nbsp;The motor record is given a new position, which is in the
-same direction as the current motor motion, but the new position is further
-from the motor's current position than the original position. &nbsp;After
-the motor reaches the original target position and stops, a command is given
-to the new target position (Previous motor record versions ignored the new
-target position.)</blockquote>
-    <h4><u>Bug Fix for Driver Power Monitoring error</u></h4>
- The <i>Driver Power Monitoring</i> feature (available only with OMS VME58 
-controllers) was erroneously and randomly being enabled.&nbsp; This resulted 
-in the error message <i>Drive power failure at VME58 card# motor# </i>appearing 
-at the VxWorks console. 
-    <p><b><u>Soft Channel device support modifications</u></b> </p>
-    <ul>
- <li> Prevent record processing before "interruptAccept" is true.&nbsp; This 
-helps prevent alarms.</li>
-  <li> If the readback is changing, but motion was not initiated by this
-record, then reset the motor record's target to actual position (i.e., VAL/DVAL/RVAL 
-= RBV/DRBV/RRBV) after the move.</li>
-      <li>Lowered the priority of the "soft_motor task below the "dbCaLink"
-task.&nbsp; This fixes the "DMOV processing before the last DRBV update"
-problem.<br>
-      </li>
- 
-    </ul>
- <b><u>Bug Fix for Array Holes in VMEbus based controllers</u></b> 
-    <p>For VMEbus based motor controllers only (i.e., OMS), a <i>hole</i>
- in an array of VME based motor controller boards caused the system to crash 
-with a memory <i>access error</i> on the address of the missing controller.&nbsp; 
-For example, if oms58Setup(3, 8, 0x4000, 190, 5, 10) was issued without a
-board at 0xFFFF5000, a bus error would occur if the user attempted to move
-a motor on the missing board.</p>
-    <p>This release allows <i>holes </i>in an array of VMEbus based motor
-controllers. </p>
-    <p><b><u>RES Field</u></b> </p>
-    <p>With previous releases of the motor record, the RES field was set
-to either ERES or MRES, based on whether or not the following statement was 
-true; MSTA indicates an encoder is present, AND, UEIP is set to YES.&nbsp; 
-This state (i.e., MSTA indicates an encoder is present, AND, UEIP is set to
-YES) resulted in the record converting all position and velocity related values
-from EGU's to raw encoder counts before sending them to the motor controller.&nbsp;
-This is the manner in which the OMS controllers work (see OMS User's Manual,
-ER# command).</p>
-    <p>With this release, all raw positions, velocity and acceleration are
-in terms of motor steps. &nbsp;The RES field is preserved for backward compatibility
- only. &nbsp;With this release, the RES field is always equal to MRES. <br>
-    </p>
-    <h4><u>Backlash Correction</u></h4>
-Previous motor record releases put both the "slew" and backlash correction
-moves on the same motor controller command line.&nbsp; Some controllers (i.e.,
-OMS) handled this correctly by processing the slew move followed by the backlash
-correction move.&nbsp; Other controllers (i.e, Newport) did not handle this
-correctly and processed the commands immediately, resulting in the controller
-moving to the target position without backlash correction, but at the backlash
-correction velocity.<br>
-    <br>
-With this release, backlash correction commands are not issued to the controller
-until after the slew move is completed.<br>
-    <h4><u>Separa</u><b>te +/- Limit Switch status bits</b></h4>
-The MSTA field has been modified by providing separate +/- limit switch status
-bits. &nbsp;The MSTA bits  are defined as follows:        
-    <blockquote>
-      <ol>
-        <li> DIRECTION: (0:Negative, 1:Positive)</li>
-        <li> DONE: motion is complete.</li>
-        <li>PLUS_LS: plus limit switch has been hit.</li>
-        <li> HOMELS: state of the home limit switch.</li>
-        <li> Unused</li>
-        <li> POSITION: closed-loop position control is enabled.</li>
-        <li> Unused</li>
-        <li> HOME: if at home position.</li>
-        <li> PRESENT: encoder is present.</li>
-        <li> PROBLEM: driver stopped polling.</li>
-        <li> MOVING: non-zero velocity present.</li>
-        <li> GAIN_SUPPORT: motor supports closed-loop position control.</li>
-        <li>COMM_ERR: Controller communication error.</li>
-        <li>MINUS_LS: minus limit switch has been hit.<br>
-        </li>
-      </ol>
-      </blockquote>
-      <br>
-      <center> 
-      <p><b><u>New Features</u></b></p>
-      </center>
-  
-      <p><b><u>Advanced Control Systems and Mclennan device driver support</u></b>
- </p>
-      <p>Mark Rivers has added device driver support for the following motor 
-controllers: </p>
-      <ul>
- <li> Advanced Control Systems, Corp. model MCB-4B</li>
-  <li> Mclennan model PM304</li>
- 
-      </ul>
-  
-      <center> 
-      <h1> <b><u>Motor Record Version 4.4 Release Notice</u></b></h1>
-      </center>
-  
-      <center> 
-      <h4> <u>Modifications to Existing Features</u></h4>
-      </center>
- <b><u>Disable Travel Limits</u></b> 
-      <p>The travel limits can be disabled by setting both dial high and
-low limits equal to zero; i.e., DHLM = DLLM = 0. </p>
-      <p><b><u>RVAL ignored error</u></b> </p>
-      <p>A problem was discovered with entering target positions through
-RVAL.&nbsp; If the difference between the current and the next target position
-(i.e., RDIF, DIFF) was less than the retry deadband (RDBD), and the next
-target position was in the "preferred direction", then the new RVAL was ignored.&nbsp; 
-This error occured on releases as far back as V3.4. </p>
-      <center><b><u>New Features</u></b></center>
- <b><u>Jog velocity and acceleration parameters</u></b> 
-      <p>Two new fields (JVEL and JAR) were added to&nbsp; support jog velocity 
-and acceleration parameters.&nbsp; These fields are only supported with Oregon
-Micro Systems, Inc device driver support.&nbsp; The JVEL field allows the
-user to change the jog velocity of the motor on-the-fly. </p>
-      <center> 
-      <h1> <b><u>Motor Record Version 4.3 Release Notice</u></b></h1>
-      </center>
- This release of the motor record is strictly a bug fix release; no new features
-have been added. 
-      <p><b><u>STOP field hangs record</u></b> </p>
-      <p>An error was introduced into the motor record with the release of
-V4.2 (see README file item #14 under V4.2 ).&nbsp; This error occurred if
-the STOP field was activated when the motor was not moving (i.e., MIP = 0).&nbsp; 
-The motor record would become "stuck", and not respond to a move request (due
-to the internal state machine associated with IP being set to the "stop"
-state), until the condition was cleared by either a SPMG-stop or some other
-user action that forced the MIP field to zero. </p>
-      <p><b><u>HIDEOS support removed</u></b> </p>
-      <p>HIDEOS is no longer supported.&nbsp; MPF is the only supported alternative 
-to HIDEOS. <br>
-&nbsp; </p>
-      <center> 
-      <h1> <b><u>Motor Record Version 4.2 Release Notice</u></b></h1>
-      </center>
- This release of the motor record is compatible with EPICS R3.13.2 and above. 
-      <p><b>!WARNING!</b> <br>
-motorRecord.dbd has been modified.&nbsp; This requires you to 'rebuild' any
-and all user trees (i.e., &lt;ioctop&gt;) that load the motor record (see 
-README item #20 for details). <br>
-&nbsp; <br>
-&nbsp; </p>
-      <center> 
-      <h4> <u>Modifications to Existing Features</u></h4>
-      </center>
- <b><u>Precedence between field pairs</u></b> 
-      <p>At boot-up, if one field of a field pair (i.e., VMAX/SMAX, VBAS/SBAS, 
-VELO/S, BVEL/SBAK) is zero and the other field is nonzero, the nonzero field
-takes precedence.&nbsp; If both fields of a given field pair are nonzero,
-the RPS member of the field pair (i.e., SMAX, SBAS, S, SBAK) takes precedence.&nbsp;
-This requirement was lost with the release of V4.0. </p>
-      <p><b><u>Moving Off a Limit Switch with a Oms58 device</u></b> </p>
-      <p>An error occurs with the OMS VME58 when the user runs the motor
-into a limit switch and then attempts to move away from the limit switch.&nbsp; 
-If either an absolute or incremental move is utilized to move away from the
-limit switch, the OMS VME58 ignores the 1st move attempt.&nbsp; Subsequent 
-moves work.&nbsp; In addition, the user can jog off a limit switch.&nbsp; 
-This error was hidden in most applications if RTRY was nonzero. </p>
-      <p><b><u>Separate motion commands for target and backlash moves</u></b>
- </p>
-      <p>The record level support assumed that the motor controller would
-accept two motion commands on the same command line.&nbsp; This occurs when
-backlash compensation is enabled.&nbsp; Since the IM483[PL/SM] controller
-does not have this capability, support for a command line "record separator"
-character was added.&nbsp; The record separator is defined as an ASCII (IS2)
-character = /x1E.&nbsp; Currently, only one record separator is allowed in
-a command line. </p>
-      <p><b><u>Errors introduced in V4.0</u></b> </p>
-      <p>Unfortunately, several errors were introduced into the motor record 
-with V4.0.&nbsp; The following have been fixed: </p>
-      <ul>
- <li> If the "ncards" argument of the omsSetup() function in st.cmd file
-was not accurate (i.e., did not match the actual number of OMS VME8/44 boards 
-in the VME crate); the "dbior" command could result in erroneous information 
-or a bus error.</li>
-  <li> Jog request would not work after the state of the UEIP field was changd.</li>
-  <li> Backlash correction was not occurring after a JOG.</li>
-  <li> The motor record would 'hang' in the moving state on the rare occasion 
-when a target position (i.e., VAL or DVAL) fell almost exactly half way between
-two integer RVAL values, and the retry feature was enabled (i.e., RTRY is
-nonzero)</li>
- 
-      </ul>
-  
-      <center> 
-      <h4> <b><u>New Features</u></b></h4>
-      </center>
- <b><u>Newport PM500 device support</u></b> 
-      <p>Device driver support for the Newport PM500 is available for this
-release of the motor record.&nbsp; This device/driver is based on Mark River's 
-PM500 V2.0 release. </p>
-      <p><b><u>Intelligent Motion Systems, Inc. IM483 device support</u></b>
- </p>
-      <p>Device driver support for Intelligent Motion Systems (IMS) IM483[I/IE] 
-is available with this release.&nbsp; Two different device/drivers are available
-for the same motor&nbsp; controller.&nbsp; The two device/drivers, IM483PL
-and IM483SM, correspond to the two available IM483 communication modes, <i>
-party line </i>and <i>single mode</i>, respectively (see the IMS Software
-Reference Manual for details). <br>
-&nbsp; </p>
-      <center> 
-      <h1> <u>Motor Record Version 4.1 Release Notice</u></h1>
-      </center>
- Although the motor record software in this release is compatible with EPICS 
-baseR3.13.1.1 and above, the directory structure, the "make" files and the
-configuration files are intended for the "unbundled" architecture of EPICS
-R3.13.2 and above. 
-      <center> 
-      <h4> <u>Modifications to Existing Features</u></h4>
-      </center>
-  
-      <h4> <b><u>OMS VME58 retry problem</u></b></h4>
- Several errors in the OMS VME58 driver were found.&nbsp; All the errors caused
-the same problem.&nbsp; Namely, erroneous retries occurred intermittently 
-when multiple axes were commanded to move on the same controller.&nbsp; This
-error occurred because old position data was being passed back from the driver
-after Done was detected.&nbsp; The erroneous intermittent retries occurred
-more often when the Oms setup parameters called for a high frequency (e.g.,
-60 Hz) "polling" rate and OMS board interrupts were enabled. 
-      <h4> <b><u>OMS Stop problem</u></b></h4>
- A problem with issuing a stop command (via either the STOP or SPMG field) 
-was found with <b>all</b> OMS boards and <b>all </b>versions of the OMS device
-drivers.&nbsp; The root cause of this problem is a statement in the OMS manual
-      <i>that is not entirely correct</i>; the AC and VL commands are not
-completely queued. <br>
-&nbsp; <br>
-&nbsp; 
-      <center> 
-      <h1> <u>Motor Record Version 4.0 Release Notice</u></h1>
-      </center>
- Release 4.0 of the motor record is <u>only</u> compatible with EPICS baseR3.13.1.1 
-and above.&nbsp; This document describes changes made to the motor record 
-and its' associated device driver support between versions 3.5 and 4.0. 
-      <center> 
-      <h4> <u>Modifications to Existing Features</u></h4>
-      </center>
-  
-      <h4> <b><u>GAIN Field Removed</u></b></h4>
- Since the GAIN field is redundant (i.e., PID parameters can be set individually) 
-it has been removed. <br>
-&nbsp; 
-      <h4> <b><u>HOM[F/R] Bug Fix</u></b></h4>
- Previous releases of the motor record had a potential problem associated 
-with the homing function.&nbsp; The motorx_all.adl V1.9 MEDM display sets 
-the HOM[F/R] fields on and off, corresponding to the user pressing and releasing
-the respective home button.&nbsp; Depending on the <i>pollRate</i> defined
-in the st.cmd <i>Setup</i> command and the speed at which the user toggled
-the HOM[F/R] buttons; the record level software would turn off the DMOV field
-when the HOM[F/R] button was turned off and a motor status update had not
-yet been received.&nbsp; As a result, when the motor completed it's homing
-function the command positions (i.e., VAL, DVAL, RVAL) were not updated. 
-      <p>All previous motor record releases contained the DMOV problem; the
-commanded position update problem was limited to the previous release (V3.5).&nbsp; 
-With this release, a dbPutField to either HOMF or HOMR is valid on a FALSE 
-to TRUE transition (i.e., 0 to 1), but a TRUE to FALSE transition (i.e., 1
-to 0) will result in an error.&nbsp;&nbsp; <i>motorx_all.adl_V2.2</i> (which
-is included with this distribution) sets the HOM[F/R] fields on when the
-user presses the homing button, but is does <b>not</b> set it off when the
-button is released.&nbsp; The motor record clears the HOM[F/R] field when
-the homing operation is done (i.e., completed or terminated). <br>
-&nbsp; </p>
-      <h4> <u>Initial Position</u></h4>
- If both the auto restore and controller target position values are non-zero 
-at boot-up, then DVAL will be initialized from the controller's value.&nbsp; 
-In other words, the controller's target position takes precedence over the
-autorestore value when both systems have non-zero DVAL values.&nbsp; As before,
-it is assumed that a zero target position from autorestore or the controller
-at boot-up are default values, and hence, they are ignored in favor of a
-non-zero value. 
-      <p>Previous releases of the motor record allowed the auto restore to
-take precedence over the controller when initializing the target position
-(i.e., DVAL). <br>
-&nbsp; </p>
-      <h4> <u>Access Security Level</u></h4>
- In order to support the new VMAX/SMAX fields, the Access Security Level for
-the following fields have been changed from one to zero: 
-      <blockquote> 
-        <ul>
- <li> MRES</li>
-  <li> UREV</li>
-  <li> VBAS</li>
-  <li> SBAS</li>
- 
-        </ul>
- </blockquote>
-  
-        <h4> <u>MM4000/5 Device Driver</u></h4>
- Although the previous motor record release (V3.5) had device driver support 
-for the MM4000, it is <b>not</b> recommended for use with either the MM4000 
-or the MM4005 controllers.&nbsp; The following changes were made to the previous
-release to create, what is now, the MM4000/5 device driver support: 
-        <ol>
- <li> The MM4000 device driver software supports both the MM4000 and MM4005
-controllers.&nbsp; Driver level software detects and saves which controller
-it is communicating with at boot-up.&nbsp; Currently, there are two functional
-differences&nbsp; between the two models.</li>
-  
-          <ol>
- <li> The MM4005's position cannot be set by a host.&nbsp; This mean that,
-for the MM4005 only, setting the motor record RVAL or DVAL fields has no
-effect.</li>
-  <li> Since the MM4005's position cannot be set by EPICS, the initial position 
-of its' motors (see <i>Initial Position </i>above) will always be initialized 
-from the controller's value.</li>
- 
-          </ol>
-  <li> The MM4005 supports up to eight axes.&nbsp; User access to the controller's 
-front panel is required to scroll the front panel display through all eight 
-axes.&nbsp; Since <i>remote mode</i> locks out the user from using the controller's
-front panel, the motor record no longer puts the MM4000/5 in <i>remote mode</i>
-.&nbsp; EPICS is unable to communicate with the MM4000/5 controller if it
-is in <i>local</i> <i>mode</i> and the front panel is not at the top menu.&nbsp;&nbsp;
-A <i>Controller communication error</i> bit was allocated in the MSTA field
-to help aid user's in diagnosing a controller communication error.&nbsp;
-Currently, only the MM4000/5 device driver sets this error indicator.&nbsp;
-When the communication error bit is set True in the MSTA, the motor record
-SEVR field is set to INVALID_ALARM and the STAT field is set to COMM_ALARM.&nbsp;
-User's who want their MM4000/5 in remote mode at boot-up can add the remote
-mode command ("MR") to&nbsp; their INIT field.</li>
- 
-        </ol>
-  
-        <h4> <u>Bug Fix for OMS VME58 running on PowerPC</u></h4>
- Through an odd set of circumstances the Oms58 driver was not performing status
-updates on PowerPC (PPC) platforms.&nbsp; All users of the OMS VME58 controller
-on a PPC platform must upgrade to Motor Record version 4.0 for full functionality. 
-        <center> 
-        <h4> <u>New Features</u></h4>
-        </center>
- <b><u>Newport MM3000 Device Support</u></b> 
-        <p>Device driver support for the MM3000 exist for this release of
-the motor record.&nbsp; Note the following differences between the MM4000
-and MM3000 device drivers: </p>
-        <ul>
- <li> The MM3000 does not support a generic <i>Load Position </i>commands.&nbsp; 
-In other words, the user can only define the current controller position as
-being the zero position.&nbsp; This limitation is reflected in the motor record
-device support.&nbsp; When the SET field is true, the only valid entry to
-either the DVAL or RVAL fields is zero.</li>
-  <li> The only position units the MM3000 will communicate with the host
-in, are either encoder ticks or stepper motor steps.</li>
- 
-        </ul>
-  
-        <h4> <u>Uninitialized Oms/Oms58 Driver Error Check</u></h4>
- With previous release, if the Oms or Oms58 driver was some how omitted from
-the database, a "... card does not exist" error message would result.&nbsp; 
-With this release, an explicit error check and corresponding error message 
-(i.e., "Oms[58] driver uninitialized.") is issued at record initialization 
-if a required driver is not initialized. (Because of the particulars of MM[3000/4000]
-initialization, this is not an issue with Newport controllers.) 
-        <h4> <u>Maximum Velocity Fields (VMAX/SMAX)</u></h4>
- Maximum velocity fields have been added; VMAX in EGU/s units and SMAX in 
-RPS units. 
-        <p>In order to support BURT, range checking is done in such a way
-that any minimum (i.e., VBAS/SBAS) or maximum (i.e., VMAX/SMAX) value entered 
-is valid.&nbsp; For example, if the minimum is entered and it exceeds the 
-maximum, then the maximum is set to the new minimum value.&nbsp; Slew (VELO/S) 
-and backup velocity (BVEL/SBAK) fields are forced by the motor record to be
-within the range set by VMAX/SMAX and VBAS/SBAS, inclusively.&nbsp; For example,
-if VELO is entered and it is less than the minimum, then VELO is set to VBAS. 
-        </p>
-        <p>To facilitate software upgrades, a zero VMAX disables maximum
-velocity error checking.&nbsp; Those who use both BURT and VMAX (i.e., nonzero
-VMAX) should insure that VMAX and VBAS are placed before VELO and BVEL in
-their BURT <i>request files.&nbsp; </i>VMAX/SMAX have Access Security Level
-zero. </p>
-        <p><i>motorx_setup_1.7.adl</i> (which is included with this distribution) 
-includes support for the maximum velocity fields. <br>
-&nbsp; </p>
-        <center> 
-        <h1> <u>Motor Record Version 3.5 Release Notice</u></h1>
-        </center>
- Release 3.5 of the motor record is only compatible with EPICS baseR3.13.1.1 
-and above.&nbsp; This document describes changes made to the motor record 
-and its' associated device driver support between versions 3.4 and 3.5.&nbsp; 
-Those changes are as follows: 
-        <center> 
-        <h4> <u>Modifications to Existing Features</u></h4>
-        </center>
-  
-        <h4> <u>Command Primitives</u></h4>
- <b>This feature is available only with OMS VME8/44/58 or Newport MM4000 device
-support (i.e., devOms, devOms58, devMM4000)</b>. Three motor record fields
-are available to the user to send ASCII command primitives to the servo control
-board at fixed, predefined, times.&nbsp; Each of the following fields is
-defined as a character string: 
-        <blockquote>&nbsp; 1. INIT - Sent at record initialization. <br>
-&nbsp; 2. PREM - Sent before every command string that causes motion. <br>
-&nbsp; 3. POST - Sent after a complete motion is finished <b>or when an overtravel
-limit switch is detected</b>.</blockquote>
- No error checking is done by the motor record or the device driver to insure 
-that the command strings are valid.&nbsp; Command primitives that result in
-a response from the motion control board are valid, but the response is not
-processed. 
-          <h4> <u>Servo related Fields</u></h4>
-  
-          <ul>
- <li> The GAIN field "prompt" has been changed from "Response Gain" to "Combined 
-Gain".&nbsp; In addition, valid values for the GAIN field have been changed 
-to [0.0, for MM4000 - 0.00005, for OMS] &lt;= GAIN &lt;= 1.&nbsp; For more 
-on PID, see "PID Gain Parameters" below.</li>
-  <li> The <i>status enable </i>field (i.e., STEN) has been eliminated; the
-              <i>control enable </i>field (i.e., CNEN) is used to both control
-the torque enable and show its' status.</li>
- 
-          </ul>
-  
-          <h4> <u>Unused Fields Removed</u></h4>
- The following unused motor record fields were deleted: MODE, TRAK, MDEL, 
-ADEL, CVEL, POSM, ALST, MLST <br>
-&nbsp; <br>
-&nbsp; 
-          <center> 
-          <h4> <u>New Features</u></h4>
-          </center>
-  
-          <h4> <u>Device Directives</u></h4>
- Device directive definition and processing: 
-          <ul>
- <li> Valid only in the INIT field.</li>
-  <li> Must be identified by the following;</li>
-  
-            <blockquote> <li> First character of INIT string must be a '@'.</li>
-  <li> One or more characters followed by a terminating '@'; i.e., device
-directives must have nonzero length.</li>
-  <li> A valid device directive; currently, only "DPM_ON".</li>
- </blockquote>
-  <li> INIT strings are stripped of valid device directives (including @'s)
-and tested for nonzero length before being sent to the controller.&nbsp;
-For example, given the INIT string, "@DPM_ON@HE", the device directive @DPM_ON@ 
-is stripped out before HE is sent to the controller.</li>
- 
-            </ul>
-  
-            <h4> <u>Driver Power Monitoring</u></h4>
-  
-            <ul>
- <li> This feature is only available with the OMS VME58 device support.</li>
-  <li> The 8 User I/O signals are assigned to the 8 possible VME58 axes as
-follows:</li>
- 
-            </ul>
-  
-            <ul>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-User I/O #0 &lt;&gt; X axis <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " 1 &lt;&gt; Y&nbsp; " <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-..................... <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " 7 &lt;&gt; S&nbsp; " <li> Drive-power
-monitoring defaults to disabled at boot-up.&nbsp; Request enabling drive-power
-monitoring by entering the device directive "@DPM_ON@" command into the motor
-record initialization field (i.e., INIT).&nbsp; The INIT field is processed
-at record initialization (i.e., bootup), hence if there are no errors, drive-power
-monitoring will be enabled after the next bootup.</li>
-  <li> Whenever a request is made to enable drive-power status monitoring,
-an error check is made (using the VME58 "RB" command) to verify that the
-User I/O has been configured as an input.&nbsp; The following message will
-appear in the error log if a configuration error is detected; "Invalid VME58
-configuration; RB = 0x####", where "####" is the VME58's response to the
-RB command.</li>
-  <li> When drive-power status monitoring is enabled and a power failure
-is detected, the device driver will respond by activating the the RA_OVERTRAVEL
-bit in the MSTA.&nbsp; This results in either HLS or LLS being activated
-depending on the DIR field. In addition, the following message will appear
-in the error log; "Drive power failure at VME58 card#?? motor#??".</li>
- 
-            </ul>
-  
-            <h4> <u>Soft Channel Device Support</u></h4>
- The immediate goals for soft channel motor record device support were twofold.&nbsp; 
-First, to solve the problem of nonlinear position conversion in the data base,
-rather than in the record.&nbsp; Second, to provide a more flexible motor
-record interface for Table Records and SPEC. 
-            <p>New fields have been added to the motor record to support
-the Soft Channel device driver.&nbsp;&nbsp; The new fields are all database
-links associated with existing motor record fields.&nbsp; The new links and
-their associated fields are listed in the table below: <br>
-&nbsp; <br>
-&nbsp; </p>
-            <center>
-            <table border="1" nosave="">
- <tbody>
-                <tr align="center" nosave="">
- <td nosave=""><u>Link</u></td>
-  <td><u>Link Type</u></td>
-  <td>&nbsp;<u>Associated Field</u></td>
- </tr>
-  <tr>
- <td>OUT*</td>
-  <td>DBOUTPUT</td>
-  <td> 
-                  <center>DVAL</center>
- </td>
- </tr>
-  <tr align="center" nosave="">
- <td nosave="">STOO</td>
-  <td>DBOUTPUT</td>
-  <td align="center" nosave="">STOP</td>
- </tr>
-  <tr align="center" nosave="">
- <td nosave="">DINP</td>
-  <td>DBINPUT</td>
-  <td>DMOV</td>
- </tr>
-  <tr>
- <td>RDBL*</td>
-  <td>DBINPUT</td>
-  <td> 
-                  <center>DRBV</center>
- </td>
- </tr>
-  <tr>
- <td>RINP</td>
-  <td>DBINPUT</td>
-  <td> 
-                  <center>RMP</center>
- </td>
- </tr>
- 
-              </tbody>
-            </table>
-            </center>
-  
-            <center> 
-            <p>* - Not a new field, but a new function provided only by soft
-channel device support.</p>
-            </center>
-  
-            <p>The Soft Channel database links are only processed when the
-Soft Channel device driver is selected.&nbsp; These links are ignored when
-using any other Motor Record device driver.&nbsp; At this time, the above
-links are <b>not</b> dynamically retargetable. </p>
-            <p>The OUT, DINP and RDBL are monitored for value changes via
-a CA event task.&nbsp; Users must choose either a dial input link (RDBL)
-or a raw input link (RINP), but not both. <br>
-&nbsp; <br>
-&nbsp; </p>
-            <h4> <u>Newport MM4000 Device Support</u></h4>
- This is <a href="http://cars1.uchicago.edu/software/dev_mm4000.html">Mark 
-Rivers MM4000</a>
- device support ported to the latest motor record release.&nbsp; The following
-are the functional differences between Mark's version 1.01 and <br>
-this release: 
-            <blockquote> 
-              <ol>
- <li> When either user or dial travel limit values are entered, a validity
-check is made using the travel limit values from the MM4000 control.&nbsp;
-User and dial travel limit values are valid if they are within the travel
-limits set on the front panel of the MM4000 controller.&nbsp; Attempting
-to enter a travel limit outside the MM4000 controller's range results in
-the travel limit being reset to the MM4000's value.</li>
-  <li> Servo support has been extended to the MM4000 controller.</li>
- 
-              </ol>
- </blockquote>
-  
-              <h4> <u>PID Gain Parameters</u></h4>
- With this release there are two ways to set the motor controllers' PID parameters;
-either through the <i>Combined Gain </i>field (i.e., GAIN) or through the
-individual PID gain parameter fields (i.e., PCOF, ICOF, DCOF).&nbsp; Let
-the motor controller PID parameters be represented by CKP, CKI and CKD; then
-the relationship between these two methods is as follows: 
-              <blockquote><u>For the MM4000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <u>For all OMS controllers</u></blockquote>
-  
-                <ul>
- <li>
-CKP&nbsp; =
-GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-CKP =&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1999.9 * GAIN</li>
+<blockquote>
+  Case #2: &nbsp;The motor record is given a new position, which is in the same 
+  direction as the current motor motion, but the new position is closer to the 
+  motor's current position than the original target position.&nbsp; The motor is 
+  stopped after it has gone past the new position; then a command is given to 
+  return to the new position.<br>
+  <br>
+  Case #3: &nbsp;The motor record is given a new position, which is in the same 
+  direction as the current motor motion, but the new position is further from the 
+  motor's current position than the original position. &nbsp;After the motor 
+  reaches the original target position and stops, a command is given to the new 
+  target position (Previous motor record versions ignored the new target position.)
+</blockquote>
+
+<h4><u>Bug Fix for Driver Power Monitoring error</u></h4> The <i>Driver Power 
+Monitoring</i> feature (available only with OMS VME58 controllers) was 
+erroneously and randomly being enabled.&nbsp; This resulted in the error message <i>Drive 
+power failure at VME58 card# motor# </i>appearing at the VxWorks console.
+<p>
+<b><u>Soft Channel device support modifications</u></b>
+</p>
+
+<ul>
   <li>
-CKI&nbsp;&nbsp; = 2 *
-GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-CKI =&nbsp; 2 * 1999.9 * GAIN</li>
-  <li> CKD = 3 *
-GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-CKD = 3 * 1999.9 * GAIN</li>
- 
-                </ul>
- Note that setting any of the individual PID record fields is <b>not</b> reflected
-in the value of the GAIN field. 
-                <h4> <u>Highland V544 Device Support</u></h4>
- Device support for the Highland V544 is available with this release.&nbsp; 
-This version (i.e., version 1.3) is functionally the same as the earlier release
-(i.e., version 1.2).&nbsp; No new features have been added. <br>
-&nbsp; 
-                <center> 
-                <h1> <u>Motor Record Version 3.4 Release Notice</u></h1>
-                </center>
- This document describes changes made to the motor record and its' associated 
-device driver support between versions 3.3 and 3.4.&nbsp; Those changes are
-as follows: 
-                <h3> <u><font size="+0">Device driver design error fix</font></u></h3>
- A design error was discovered in the OMS device drivers (drvOms and drvOms58).&nbsp; 
-The EPICS device driver support task (i.e., tmotor) would query the OMS motion
+    Prevent record processing before "interruptAccept" is true.&nbsp; This helps 
+    prevent alarms.
+  </li>
+  <li>
+    If the readback is changing, but motion was not initiated by this record, then 
+    reset the motor record's target to actual position (i.e., VAL/DVAL/RVAL = RBV/DRBV/RRBV) 
+    after the move.
+  </li>
+  <li>
+    Lowered the priority of the "soft_motor task below the "dbCaLink"task.&nbsp; 
+    This fixes the "DMOV processing before the last DRBV update" problem.<br>
+  </li>
+
+</ul>
+<b><u>Bug Fix for Array Holes in VMEbus based controllers</u></b>
+<p>
+For VMEbus based motor controllers only (i.e., OMS), a <i>hole</i> in an array 
+of VME based motor controller boards caused the system to crash with a memory <i>access 
+error</i> on the address of the missing controller.&nbsp; For example, if 
+oms58Setup(3, 8, 0x4000, 190, 5, 10) was issued without a board at 0xFFFF5000, a 
+bus error would occur if the user attempted to move a motor on the missing board.
+</p>
+
+<p>
+This release allows <i>holes </i>in an array of VMEbus based motor controllers.
+</p>
+
+<p>
+<b><u>RES Field</u></b>
+</p>
+
+<p>
+With previous releases of the motor record, the RES field was set to either ERES 
+or MRES, based on whether or not the following statement was  true; MSTA 
+indicates an encoder is present, AND, UEIP is set to YES.&nbsp;  This state (i.e., 
+MSTA indicates an encoder is present, AND, UEIP is set to YES) resulted in the 
+record converting all position and velocity related values from EGU's to raw 
+encoder counts before sending them to the motor controller.&nbsp; This is the 
+manner in which the OMS controllers work (see OMS User's Manual, ER# command).
+</p>
+
+<p>
+With this release, all raw positions, velocity and acceleration are in terms of 
+motor steps. &nbsp;The RES field is preserved for backward compatibility only. &nbsp;With 
+this release, the RES field is always equal to MRES. <br>
+</p>
+
+<h4><u>Backlash Correction</u></h4> Previous motor record releases put both the 
+"slew" and backlash correction moves on the same motor controller command line.&nbsp; 
+Some controllers (i.e., OMS) handled this correctly by processing the slew move 
+followed by the backlash correction move.&nbsp; Other controllers (i.e, Newport) 
+did not handle this correctly and processed the commands immediately, resulting 
+in the controller moving to the target position without backlash correction, but 
+at the backlash correction velocity.<br>
+<br>
+With this release, backlash correction commands are not issued to the controller 
+until after the slew move is completed.<br>
+
+<h4><u>Separa</u><b>te +/- Limit Switch status bits</b></h4> The MSTA field has 
+been modified by providing separate +/- limit switch status bits. &nbsp;The MSTA 
+bits  are defined as follows:
+<blockquote>
+  <ol>
+    <li>
+      DIRECTION: (0:Negative, 1:Positive)
+    </li>
+    <li>
+      DONE: motion is complete.
+    </li>
+    <li>
+      PLUS_LS: plus limit switch has been hit.
+    </li>
+    <li>
+      HOMELS: state of the home limit switch.
+    </li>
+    <li>
+      Unused
+    </li>
+    <li>
+      POSITION: closed-loop position control is enabled.
+    </li>
+    <li>
+      Unused
+    </li>
+    <li>
+      HOME: if at home position.
+    </li>
+    <li>
+      PRESENT: encoder is present.
+    </li>
+    <li>
+      PROBLEM: driver stopped polling.
+    </li>
+    <li>
+      MOVING: non-zero velocity present.
+    </li>
+    <li>
+      GAIN_SUPPORT: motor supports closed-loop position control.
+    </li>
+    <li>
+      COMM_ERR: Controller communication error.
+    </li>
+    <li>
+      MINUS_LS: minus limit switch has been hit.<br>
+    </li>
+
+  </ol>
+</blockquote>
+<br>
+
+<center>
+  <p>
+  <b><u>New Features</u></b>
+  </p>
+</center>
+
+<p>
+<b><u>Advanced Control Systems and Mclennan device driver support</u></b>
+</p>
+
+<p>
+Mark Rivers has added device driver support for the following motor  controllers:
+</p>
+
+<ul>
+  <li>
+    Advanced Control Systems, Corp. model MCB-4B
+  </li>
+  <li>
+    Mclennan model PM304
+  </li>
+
+</ul>
+
+<center>
+  <h1><b><u>Motor Record Version 4.4 Release Notice</u></b></h1>
+</center>
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</center>
+<b><u>Disable Travel Limits</u></b>
+<p>
+The travel limits can be disabled by setting both dial high and low limits equal 
+to zero; i.e., DHLM = DLLM = 0.
+</p>
+
+<p>
+<b><u>RVAL ignored error</u></b>
+</p>
+
+<p>
+A problem was discovered with entering target positions through RVAL.&nbsp; If 
+the difference between the current and the next target position (i.e., RDIF, 
+DIFF) was less than the retry deadband (RDBD), and the next target position was 
+in the "preferred direction", then the new RVAL was ignored.&nbsp; This error 
+occured on releases as far back as V3.4.
+</p>
+
+<center>
+  <b><u>New Features</u></b>
+</center>
+<b><u>Jog velocity and acceleration parameters</u></b>
+<p>
+Two new fields (JVEL and JAR) were added to&nbsp; support jog velocity and 
+acceleration parameters.&nbsp; These fields are only supported with Oregon Micro 
+Systems, Inc device driver support.&nbsp; The JVEL field allows the user to 
+change the jog velocity of the motor on-the-fly.
+</p>
+
+<center>
+  <h1><b><u>Motor Record Version 4.3 Release Notice</u></b></h1>
+</center>
+This release of the motor record is strictly a bug fix release; no new features 
+have been added.
+<p>
+<b><u>STOP field hangs record</u></b>
+</p>
+
+<p>
+An error was introduced into the motor record with the release of V4.2 (see 
+README file item #14 under V4.2 ).&nbsp; This error occurred if the STOP field 
+was activated when the motor was not moving (i.e., MIP = 0).&nbsp; The motor 
+record would become "stuck", and not respond to a move request (due to the 
+internal state machine associated with IP being set to the "stop" state), until 
+the condition was cleared by either a SPMG-stop or some other user action that 
+forced the MIP field to zero.
+</p>
+
+<p>
+<b><u>HIDEOS support removed</u></b>
+</p>
+
+<p>
+HIDEOS is no longer supported.&nbsp; MPF is the only supported alternative to 
+HIDEOS. <br>
+&nbsp;
+</p>
+
+<center>
+  <h1><b><u>Motor Record Version 4.2 Release Notice</u></b></h1>
+</center>
+This release of the motor record is compatible with EPICS R3.13.2 and above.
+
+<p>
+<b>!WARNING!</b> <br>
+motorRecord.dbd has been modified.&nbsp; This requires you to 'rebuild' any and 
+all user trees (i.e., &lt;ioctop&gt;) that load the motor record (see README 
+item #20 for details). <br>
+&nbsp; <br>
+&nbsp;
+</p>
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</center>
+<b><u>Precedence between field pairs</u></b>
+<p>
+At boot-up, if one field of a field pair (i.e., VMAX/SMAX, VBAS/SBAS, VELO/S, 
+BVEL/SBAK) is zero and the other field is nonzero, the nonzero field takes 
+precedence.&nbsp; If both fields of a given field pair are nonzero, the RPS 
+member of the field pair (i.e., SMAX, SBAS, S, SBAK) takes precedence.&nbsp; 
+This requirement was lost with the release of V4.0.
+</p>
+
+<p>
+<b><u>Moving Off a Limit Switch with a Oms58 device</u></b>
+</p>
+
+<p>
+An error occurs with the OMS VME58 when the user runs the motor into a limit 
+switch and then attempts to move away from the limit switch.&nbsp; If either an 
+absolute or incremental move is utilized to move away from the limit switch, the 
+OMS VME58 ignores the 1st move attempt.&nbsp; Subsequent moves work.&nbsp; In 
+addition, the user can jog off a limit switch.&nbsp; This error was hidden in 
+most applications if RTRY was nonzero.
+</p>
+
+<p>
+<b><u>Separate motion commands for target and backlash moves</u></b>
+</p>
+
+<p>
+The record level support assumed that the motor controller would accept two 
+motion commands on the same command line.&nbsp; This occurs when backlash 
+compensation is enabled.&nbsp; Since the IM483[PL/SM] controller does not have 
+this capability, support for a command line "record separator" character was 
+added.&nbsp; The record separator is defined as an ASCII (IS2) character = /x1E.&nbsp; 
+Currently, only one record separator is allowed in a command line.
+</p>
+
+<p>
+<b><u>Errors introduced in V4.0</u></b>
+</p>
+
+<p>
+Unfortunately, several errors were introduced into the motor record  with V4.0.&nbsp; 
+The following have been fixed:
+</p>
+
+<ul>
+  <li>
+    If the "ncards" argument of the omsSetup() function in st.cmd file was not 
+    accurate (i.e., did not match the actual number of OMS VME8/44 boards in the VME 
+    crate); the "dbior" command could result in erroneous information or a bus error.
+  </li>
+  <li>
+    Jog request would not work after the state of the UEIP field was changd.
+  </li>
+  <li>
+    Backlash correction was not occurring after a JOG.
+  </li>
+  <li>
+    The motor record would 'hang' in the moving state on the rare occasion when a 
+    target position (i.e., VAL or DVAL) fell almost exactly half way between two 
+    integer RVAL values, and the retry feature was enabled (i.e., RTRY is nonzero)
+  </li>
+
+</ul>
+
+<center>
+  <h4><b><u>New Features</u></b></h4>
+</center>
+<b><u>Newport PM500 device support</u></b>
+<p>
+Device driver support for the Newport PM500 is available for this release of the 
+motor record.&nbsp; This device/driver is based on Mark River's  PM500 V2.0 
+release.
+</p>
+
+<p>
+<b><u>Intelligent Motion Systems, Inc. IM483 device support</u></b>
+</p>
+
+<p>
+Device driver support for Intelligent Motion Systems (IMS) IM483[I/IE] is 
+available with this release.&nbsp; Two different device/drivers are available 
+for the same motor&nbsp; controller.&nbsp; The two device/drivers, IM483PL and 
+IM483SM, correspond to the two available IM483 communication modes, <i>party 
+line </i>and <i>single mode</i>, respectively (see the IMS Software Reference 
+Manual for details). <br>
+&nbsp;
+</p>
+
+<center>
+  <h1><u>Motor Record Version 4.1 Release Notice</u></h1>
+</center>
+Although the motor record software in this release is compatible with EPICS 
+baseR3.13.1.1 and above, the directory structure, the "make" files and the 
+configuration files are intended for the "unbundled" architecture of EPICS R3.13.2 
+and above.
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</center>
+
+<h4><b><u>OMS VME58 retry problem</u></b></h4> Several errors in the OMS VME58 
+driver were found.&nbsp; All the errors caused the same problem.&nbsp; Namely, 
+erroneous retries occurred intermittently when multiple axes were commanded to 
+move on the same controller.&nbsp; This error occurred because old position data 
+was being passed back from the driver after Done was detected.&nbsp; The 
+erroneous intermittent retries occurred more often when the Oms setup parameters 
+called for a high frequency (e.g., 60 Hz) "polling" rate and OMS board 
+interrupts were enabled. <h4><b><u>OMS Stop problem</u></b></h4> A problem with 
+issuing a stop command (via either the STOP or SPMG field) was found with <b>all</b> 
+OMS boards and <b>all </b>versions of the OMS device drivers.&nbsp; The root 
+cause of this problem is a statement in the OMS manual <i>that is not entirely 
+correct</i>; the AC and VL commands are not completely queued. <br>
+&nbsp; <br>
+&nbsp;
+<center>
+  <h1><u>Motor Record Version 4.0 Release Notice</u></h1>
+</center>
+Release 4.0 of the motor record is <u>only</u> compatible with EPICS baseR3.13.1.1 
+and above.&nbsp; This document describes changes made to the motor record and 
+its' associated device driver support between versions 3.5 and 4.0.
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</center>
+
+<h4><b><u>GAIN Field Removed</u></b></h4> Since the GAIN field is redundant (i.e., 
+PID parameters can be set individually) it has been removed. <br>
+&nbsp; <h4><b><u>HOM[F/R] Bug Fix</u></b></h4> Previous releases of the motor 
+record had a potential problem associated with the homing function.&nbsp; The 
+motorx_all.adl V1.9 MEDM display sets the HOM[F/R] fields on and off, 
+corresponding to the user pressing and releasing the respective home button.&nbsp; 
+Depending on the <i>pollRate</i> defined in the st.cmd <i>Setup</i> command and 
+the speed at which the user toggled the HOM[F/R] buttons; the record level 
+software would turn off the DMOV field when the HOM[F/R] button was turned off 
+and a motor status update had not yet been received.&nbsp; As a result, when the 
+motor completed it's homing function the command positions (i.e., VAL, DVAL, 
+RVAL) were not updated.
+
+<p>
+All previous motor record releases contained the DMOV problem; the commanded 
+position update problem was limited to the previous release (V3.5).&nbsp; With 
+this release, a dbPutField to either HOMF or HOMR is valid on a FALSE to TRUE 
+transition (i.e., 0 to 1), but a TRUE to FALSE transition (i.e., 1 to 0) will 
+result in an error.&nbsp;&nbsp; <i>motorx_all.adl_V2.2</i> (which is included 
+with this distribution) sets the HOM[F/R] fields on when the user presses the 
+homing button, but is does <b>not</b> set it off when the button is released.&nbsp; 
+The motor record clears the HOM[F/R] field when the homing operation is done (i.e., 
+completed or terminated). <br>
+&nbsp;
+</p>
+
+<h4><u>Initial Position</u></h4> If both the auto restore and controller target 
+position values are non-zero at boot-up, then DVAL will be initialized from the 
+controller's value.&nbsp; In other words, the controller's target position takes 
+precedence over the autorestore value when both systems have non-zero DVAL 
+values.&nbsp; As before, it is assumed that a zero target position from 
+autorestore or the controller at boot-up are default values, and hence, they are 
+ignored in favor of a non-zero value.
+<p>
+Previous releases of the motor record allowed the auto restore to take 
+precedence over the controller when initializing the target position (i.e., DVAL).
+<br>
+&nbsp;
+</p>
+
+<h4><u>Access Security Level</u></h4> In order to support the new VMAX/SMAX 
+fields, the Access Security Level for the following fields have been changed 
+from one to zero:
+<blockquote>
+  <ul>
+    <li>
+      MRES
+    </li>
+    <li>
+      UREV
+    </li>
+    <li>
+      VBAS
+    </li>
+    <li>
+      SBAS
+    </li>
+
+  </ul>
+</blockquote>
+
+<h4><u>MM4000/5 Device Driver</u></h4> Although the previous motor record 
+release (V3.5) had device driver support for the MM4000, it is <b>not</b> 
+recommended for use with either the MM4000 or the MM4005 controllers.&nbsp; The 
+following changes were made to the previous release to create, what is now, the 
+MM4000/5 device driver support:
+
+<ol>
+  <li>
+    The MM4000 device driver software supports both the MM4000 and MM4005 
+    controllers.&nbsp; Driver level software detects and saves which controller it 
+    is communicating with at boot-up.&nbsp; Currently, there are two functional 
+    differences&nbsp; between the two models.
+  </li>
+
+  <ol>
+    <li>
+      The MM4005's position cannot be set by a host.&nbsp; This mean that, for the 
+      MM4005 only, setting the motor record RVAL or DVAL fields has no effect.
+    </li>
+    <li>
+      Since the MM4005's position cannot be set by EPICS, the initial position of its' 
+      motors (see <i>Initial Position </i>above) will always be initialized from the 
+      controller's value.
+    </li>
+
+  </ol>
+  <li>
+    The MM4005 supports up to eight axes.&nbsp; User access to the controller's 
+    front panel is required to scroll the front panel display through all eight axes.&nbsp; 
+    Since <i>remote mode</i> locks out the user from using the controller's front 
+    panel, the motor record no longer puts the MM4000/5 in <i>remote mode</i> .&nbsp; 
+    EPICS is unable to communicate with the MM4000/5 controller if it is in <i>local</i>
+    <i>mode</i> and the front panel is not at the top menu.&nbsp;&nbsp; A <i>Controller 
+    communication error</i> bit was allocated in the MSTA field to help aid user's 
+    in diagnosing a controller communication error.&nbsp; Currently, only the MM4000/5 
+    device driver sets this error indicator.&nbsp; When the communication error bit 
+    is set True in the MSTA, the motor record SEVR field is set to INVALID_ALARM and 
+    the STAT field is set to COMM_ALARM.&nbsp; User's who want their MM4000/5 in 
+    remote mode at boot-up can add the remote mode command ("MR") to&nbsp; their 
+    INIT field.
+  </li>
+
+</ol>
+
+<h4><u>Bug Fix for OMS VME58 running on PowerPC</u></h4> Through an odd set of 
+circumstances the Oms58 driver was not performing status updates on PowerPC (PPC) 
+platforms.&nbsp; All users of the OMS VME58 controller on a PPC platform must 
+upgrade to Motor Record version 4.0 for full functionality.
+<center>
+  <h4><u>New Features</u></h4>
+</center>
+<b><u>Newport MM3000 Device Support</u></b>
+<p>
+Device driver support for the MM3000 exist for this release of the motor record.&nbsp; 
+Note the following differences between the MM4000 and MM3000 device drivers:
+</p>
+
+<ul>
+  <li>
+    The MM3000 does not support a generic <i>Load Position </i>commands.&nbsp; In 
+    other words, the user can only define the current controller position as being 
+    the zero position.&nbsp; This limitation is reflected in the motor record device 
+    support.&nbsp; When the SET field is true, the only valid entry to either the 
+    DVAL or RVAL fields is zero.
+  </li>
+  <li>
+    The only position units the MM3000 will communicate with the host in, are either 
+    encoder ticks or stepper motor steps.
+  </li>
+
+</ul>
+
+<h4><u>Uninitialized Oms/Oms58 Driver Error Check</u></h4> With previous release, 
+if the Oms or Oms58 driver was some how omitted from the database, a "... card 
+does not exist" error message would result.&nbsp; With this release, an explicit 
+error check and corresponding error message (i.e., "Oms[58] driver uninitialized. 
+") is issued at record initialization if a required driver is not initialized. (Because 
+of the particulars of MM[3000/4000] initialization, this is not an issue with 
+Newport controllers.) <h4><u>Maximum Velocity Fields (VMAX/SMAX)</u></h4> 
+Maximum velocity fields have been added; VMAX in EGU/s units and SMAX in RPS 
+units.
+<p>
+In order to support BURT, range checking is done in such a way that any minimum 
+(i.e., VBAS/SBAS) or maximum (i.e., VMAX/SMAX) value entered  is valid.&nbsp; 
+For example, if the minimum is entered and it exceeds the  maximum, then the 
+maximum is set to the new minimum value.&nbsp; Slew (VELO/S)  and backup 
+velocity (BVEL/SBAK) fields are forced by the motor record to be within the 
+range set by VMAX/SMAX and VBAS/SBAS, inclusively.&nbsp; For example, if VELO is 
+entered and it is less than the minimum, then VELO is set to VBAS.
+</p>
+
+<p>
+To facilitate software upgrades, a zero VMAX disables maximum velocity error 
+checking.&nbsp; Those who use both BURT and VMAX (i.e., nonzero VMAX) should 
+insure that VMAX and VBAS are placed before VELO and BVEL in their BURT <i>request 
+files.&nbsp; </i>VMAX/SMAX have Access Security Level zero.
+</p>
+
+<p>
+<i>motorx_setup_1.7.adl</i> (which is included with this distribution) includes 
+support for the maximum velocity fields. <br>
+&nbsp;
+</p>
+
+<center>
+  <h1><u>Motor Record Version 3.5 Release Notice</u></h1>
+</center>
+Release 3.5 of the motor record is only compatible with EPICS baseR3.13.1.1 and 
+above.&nbsp; This document describes changes made to the motor record and its' 
+associated device driver support between versions 3.4 and 3.5.&nbsp; Those 
+changes are as follows:
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</center>
+
+<h4><u>Command Primitives</u></h4> <b>This feature is available only with OMS 
+VME8/44/58 or Newport MM4000 device support (i.e., devOms, devOms58, devMM4000)</b>. 
+Three motor record fields are available to the user to send ASCII command 
+primitives to the servo control board at fixed, predefined, times.&nbsp; Each of 
+the following fields is defined as a character string:
+<blockquote>
+  &nbsp; 1. INIT - Sent at record initialization. <br>
+  &nbsp; 2. PREM - Sent before every command string that causes motion. <br>
+  &nbsp; 3. POST - Sent after a complete motion is finished <b>or when an 
+  overtravel limit switch is detected</b>.
+</blockquote>
+No error checking is done by the motor record or the device driver to insure 
+that the command strings are valid.&nbsp; Command primitives that result in a 
+response from the motion control board are valid, but the response is not 
+processed. <h4><u>Servo related Fields</u></h4>
+
+<ul>
+  <li>
+    The GAIN field "prompt" has been changed from "Response Gain" to "Combined Gain".&nbsp; 
+    In addition, valid values for the GAIN field have been changed to [0.0, for 
+    MM4000 - 0.00005, for OMS] &lt;= GAIN &lt;= 1.&nbsp; For more on PID, see "PID 
+    Gain Parameters" below.
+  </li>
+  <li>
+    The <i>status enable </i>field (i.e., STEN) has been eliminated; the <i>control 
+    enable </i>field (i.e., CNEN) is used to both control the torque enable and show 
+    its' status.
+  </li>
+
+</ul>
+
+<h4><u>Unused Fields Removed</u></h4> The following unused motor record fields 
+were deleted: MODE, TRAK, MDEL, ADEL, CVEL, POSM, ALST, MLST <br>
+&nbsp; <br>
+&nbsp;
+<center>
+  <h4><u>New Features</u></h4>
+</center>
+
+<h4><u>Device Directives</u></h4> Device directive definition and processing:
+<ul>
+  <li>
+    Valid only in the INIT field.
+  </li>
+  <li>
+    Must be identified by the following;
+  </li>
+
+  <blockquote>
+    <li>
+      First character of INIT string must be a '@'.
+    </li>
+    <li>
+      One or more characters followed by a terminating '@'; i.e., device directives 
+      must have nonzero length.
+    </li>
+    <li>
+      A valid device directive; currently, only "DPM_ON".
+    </li>
+  </blockquote>
+  <li>
+    INIT strings are stripped of valid device directives (including @'s) and tested 
+    for nonzero length before being sent to the controller.&nbsp; For example, given 
+    the INIT string, "@DPM_ON@HE", the device directive @DPM_ON@ is stripped out 
+    before HE is sent to the controller.
+  </li>
+
+</ul>
+
+<h4><u>Driver Power Monitoring</u></h4>
+
+<ul>
+  <li>
+    This feature is only available with the OMS VME58 device support.
+  </li>
+  <li>
+    The 8 User I/O signals are assigned to the 8 possible VME58 axes as follows:
+  </li>
+
+</ul>
+
+<ul>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  User I/O #0 &lt;&gt; X axis <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " 1 &lt;&gt; Y&nbsp; " <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  ..................... <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " 7 &lt;&gt; S&nbsp; "
+  <li>
+    Drive-power monitoring defaults to disabled at boot-up.&nbsp; Request enabling 
+    drive-power monitoring by entering the device directive "@DPM_ON@" command into 
+    the motor record initialization field (i.e., INIT).&nbsp; The INIT field is 
+    processed at record initialization (i.e., bootup), hence if there are no errors, 
+    drive-power monitoring will be enabled after the next bootup.
+  </li>
+  <li>
+    Whenever a request is made to enable drive-power status monitoring, an error 
+    check is made (using the VME58 "RB" command) to verify that the User I/O has 
+    been configured as an input.&nbsp; The following message will appear in the 
+    error log if a configuration error is detected; "Invalid VME58 configuration; RB 
+    = 0x####", where "####" is the VME58's response to the RB command.
+  </li>
+  <li>
+    When drive-power status monitoring is enabled and a power failure is detected, 
+    the device driver will respond by activating the the RA_OVERTRAVEL bit in the 
+    MSTA.&nbsp; This results in either HLS or LLS being activated depending on the 
+    DIR field. In addition, the following message will appear in the error log; "Drive 
+    power failure at VME58 card#?? motor#??".
+  </li>
+
+</ul>
+
+<h4><u>Soft Channel Device Support</u></h4> The immediate goals for soft channel 
+motor record device support were twofold.&nbsp; First, to solve the problem of 
+nonlinear position conversion in the data base, rather than in the record.&nbsp; 
+Second, to provide a more flexible motor record interface for Table Records and 
+SPEC.
+<p>
+New fields have been added to the motor record to support the Soft Channel 
+device driver.&nbsp;&nbsp; The new fields are all database links associated with 
+existing motor record fields.&nbsp; The new links and their associated fields 
+are listed in the table below: <br>
+&nbsp; <br>
+&nbsp;
+</p>
+
+<center>
+  <table border="1" nosave="">
+    <tbody>
+    <tr align="center" nosave="">
+      <td nosave=""><u>Link</u></td>
+      <td><u>Link Type</u></td>
+      <td>&nbsp;<u>Associated Field</u></td>
+    </tr>
+    <tr>
+      <td>OUT*</td>
+      <td>DBOUTPUT</td>
+      <td>
+	<center>
+	  DVAL
+	</center>
+      </td>
+    </tr>
+    <tr align="center" nosave="">
+      <td nosave="">STOO</td>
+      <td>DBOUTPUT</td>
+      <td align="center" nosave="">STOP</td>
+    </tr>
+    <tr align="center" nosave="">
+      <td nosave="">DINP</td>
+      <td>DBINPUT</td>
+      <td>DMOV</td>
+    </tr>
+    <tr>
+      <td>RDBL*</td>
+      <td>DBINPUT</td>
+      <td>
+	<center>
+	  DRBV
+	</center>
+      </td>
+    </tr>
+    <tr>
+      <td>RINP</td>
+      <td>DBINPUT</td>
+      <td>
+	<center>
+	  RMP
+	</center>
+      </td>
+    </tr>
+
+    </tbody>
+  </table>
+</center>
+
+<center>
+  <p>
+  * - Not a new field, but a new function provided only by soft channel device 
+  support.
+  </p>
+</center>
+
+<p>
+The Soft Channel database links are only processed when the Soft Channel device 
+driver is selected.&nbsp; These links are ignored when using any other Motor 
+Record device driver.&nbsp; At this time, the above links are <b>not</b> 
+dynamically retargetable.
+</p>
+
+<p>
+The OUT, DINP and RDBL are monitored for value changes via a CA event task.&nbsp; 
+Users must choose either a dial input link (RDBL) or a raw input link (RINP), 
+but not both. <br>
+&nbsp; <br>
+&nbsp;
+</p>
+
+<h4><u>Newport MM4000 Device Support</u></h4> This is <a href="http://cars1.uchicago.edu/software/dev_mm4000.html">Mark 
+Rivers MM4000</a> device support ported to the latest motor record release.&nbsp; 
+The following are the functional differences between Mark's version 1.01 and<br>
+this release:
+<blockquote>
+  <ol>
+    <li>
+      When either user or dial travel limit values are entered, a validity check is 
+      made using the travel limit values from the MM4000 control.&nbsp; User and dial 
+      travel limit values are valid if they are within the travel limits set on the 
+      front panel of the MM4000 controller.&nbsp; Attempting to enter a travel limit 
+      outside the MM4000 controller's range results in the travel limit being reset to 
+      the MM4000's value.
+    </li>
+    <li>
+      Servo support has been extended to the MM4000 controller.
+    </li>
+
+  </ol>
+</blockquote>
+
+<h4><u>PID Gain Parameters</u></h4> With this release there are two ways to set 
+the motor controllers' PID parameters; either through the <i>Combined Gain </i>field 
+(i.e., GAIN) or through the individual PID gain parameter fields (i.e., PCOF, 
+ICOF, DCOF).&nbsp; Let the motor controller PID parameters be represented by CKP, 
+CKI and CKD; then the relationship between these two methods is as follows:
+<blockquote>
+  <u>For the MM4000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <u>For all OMS 
+  controllers</u>
+</blockquote>
+
+<ul>
+  <li>
+    CKP&nbsp; = GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    CKP =&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1999.9 * GAIN
+  </li>
+  <li>
+    CKI&nbsp;&nbsp; = 2 * GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    CKI =&nbsp; 2 * 1999.9 * GAIN
+  </li>
+  <li>
+    CKD = 3 * GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    CKD = 3 * 1999.9 * GAIN
+  </li>
+
+</ul>
+Note that setting any of the individual PID record fields is <b>not</b>reflected 
+in the value of the GAIN field. <h4><u>Highland V544 Device Support</u></h4> 
+Device support for the Highland V544 is available with this release.&nbsp; This 
+version (i.e., version 1.3) is functionally the same as the earlier release (i.e., 
+version 1.2).&nbsp; No new features have been added. <br>
+&nbsp;
+<center>
+  <h1><u>Motor Record Version 3.4 Release Notice</u></h1>
+</center>
+This document describes changes made to the motor record and its' associated 
+device driver support between versions 3.3 and 3.4.&nbsp; Those changes are as 
+follows: <h3><u><font size="+0">Device driver design error fix</font></u></h3> A 
+design error was discovered in the OMS device drivers (drvOms and drvOms58).&nbsp; 
+The EPICS device driver support task (i.e., tmotor) would query the OMS motion 
 controller for status information immediately after a motion command.&nbsp; 
 Since the state of the controller board was in the midst of changing, this 
 sometimes resulted in inconsistent or conflicting status information being 
-returned to the motor record.&nbsp; This problem was remedied by enforcing 
-a minimum time delay (16.67 ms) between a motion command and a status query. 
-                <p>It is difficult to enumerate the symptoms associated with
-this problem.&nbsp; Sometimes they exhibited themselves intermittently, other
-times bad data stayed in the record.&nbsp;&nbsp; Several symptoms are as
-follows: </p>
-                <blockquote> 
-                  <ul>
- <li> Erroneous motor stops being issued by the device support when changing 
-motor direction.</li>
-  <li> Backlash occurring when the motor is moving in the same direction
-as the sign of BDST.</li>
-  <li> DVAL and RBV becoming out-of-synch.&nbsp; RBV would always be an old
-value from the previous move.</li>
- 
-                  </ul>
- </blockquote>
-  
-                  <h3> <u><font size="+0">PID Parameter Support for VME58</font></u></h3>
- The motor record classifies a motor as a servo if it has two features; an
-adjustable closed loop position response gain and the ability to enable/disable 
-closed loop position control (i.e., motor torque).&nbsp; A motor lacking either
-of the above two features is classified as a stepper and is supported by
-the standard motor record features.&nbsp; The following three motor record
-fields support servo motors: 
-                  <p>&nbsp; 1. GAIN - Closed loop position response gain
-of the motor. <br>
+returned to the motor record.&nbsp; This problem was remedied by enforcing a 
+minimum time delay (16.67 ms) between a motion command and a status query.
+
+<p>
+It is difficult to enumerate the symptoms associated with this problem.&nbsp; 
+Sometimes they exhibited themselves intermittently, other times bad data stayed 
+in the record.&nbsp;&nbsp; Several symptoms are as follows:
+</p>
+
+<blockquote>
+  <ul>
+    <li>
+      Erroneous motor stops being issued by the device support when changing motor 
+      direction.
+    </li>
+    <li>
+      Backlash occurring when the motor is moving in the same direction as the sign of 
+      BDST.
+    </li>
+    <li>
+      DVAL and RBV becoming out-of-synch.&nbsp; RBV would always be an old value from 
+      the previous move.
+    </li>
+
+  </ul>
+</blockquote>
+
+<h3><u><font size="+0">PID Parameter Support for VME58</font></u></h3> The motor 
+record classifies a motor as a servo if it has two features; an adjustable 
+closed loop position response gain and the ability to enable/disable closed loop 
+position control (i.e., motor torque).&nbsp; A motor lacking either of the above 
+two features is classified as a stepper and is supported by the standard motor 
+record features.&nbsp; The following three motor record fields support servo 
+motors:
+<p>
+&nbsp; 1. GAIN - Closed loop position response gain of the motor. <br>
 &nbsp; 2. CNEN - Enable/disable closed loop position control request. <br>
 &nbsp; 3. STEN - Closed loop position control status (i.e., <br>
-&nbsp;&nbsp;&nbsp;&nbsp; enabled/disabled). </p>
-                  <p>Currently, servo support is only available with OMS's
-VME58 device support (i.e., VME58-[4S/8S/2S2/2S6/4S4/6S2] model boards).&nbsp;
-At driver initialization, the driver automatically detects whether or not
-the underlying device supports the use of the GAIN field and thereby classifies
-the motor as a stepper or a servo.&nbsp;&nbsp; Bit#11 of the MSTA field is
-set on/off based on the results of this test.&nbsp; If the device supports
-the GAIN field, then bit#11 of the MSTA is set on and all of the above servo
-fields are enabled.&nbsp;&nbsp; Otherwise, they are disabled and bit#11 of
-the MSTA is set off.&nbsp; When the servo fields are disabled, they can still
-be read or written to without an error response. </p>
-                  <p>The VME58 device support allows the closed loop position
-gain of the motor to be set directly through the GAIN field.&nbsp; For the
-VME58, setting the GAIN field value results in the Combined Coefficient command
-(i.e., KK#) being executed with the GAIN field value as the argument to the
-command.&nbsp; This command, in turn, sets the PID loop parameter values
-(with the OMS VME58, gain changes do not take effect until the command velocity
-is zero). </p>
-                  <p>The user can request that the closed loop position control
-be enabled or disabled by setting the CNEN field nonzero or zero, respectively. 
-                  <br>
-Likewise, the user can monitor the state of closed loop position control (i.e.,
-enabled/disabled) by reading the STEN field.&nbsp; See the OMS "VME58 Family
-User's Manual" for further details. </p>
-                  <h3> <u><font size="+0">Command primitives feature</font></u></h3>
- Three motor record fields are available to the user that can be used to send
-ASCII command primitives to the servo control board at fixed, predefined, 
-times.&nbsp; Each field is defined as a character string. 
-                  <p>&nbsp; 1. INIT - Sent at record initialization. <br>
+&nbsp;&nbsp;&nbsp;&nbsp; enabled/disabled).
+</p>
+
+<p>
+Currently, servo support is only available with OMS's VME58 device support (i.e., 
+VME58-[4S/8S/2S2/2S6/4S4/6S2] model boards).&nbsp; At driver initialization, the 
+driver automatically detects whether or not the underlying device supports the 
+use of the GAIN field and thereby classifies the motor as a stepper or a servo.&nbsp;&nbsp; 
+Bit#11 of the MSTA field is set on/off based on the results of this test.&nbsp; 
+If the device supports the GAIN field, then bit#11 of the MSTA is set on and all 
+of the above servo fields are enabled.&nbsp;&nbsp; Otherwise, they are disabled 
+and bit#11 of the MSTA is set off.&nbsp; When the servo fields are disabled, 
+they can still be read or written to without an error response.
+</p>
+
+<p>
+The VME58 device support allows the closed loop position gain of the motor to be 
+set directly through the GAIN field.&nbsp; For the VME58, setting the GAIN field 
+value results in the Combined Coefficient command (i.e., KK#) being executed 
+with the GAIN field value as the argument to the command.&nbsp; This command, in 
+turn, sets the PID loop parameter values (with the OMS VME58, gain changes do 
+not take effect until the command velocity is zero).
+</p>
+
+<p>
+The user can request that the closed loop position control be enabled or 
+disabled by setting the CNEN field nonzero or zero, respectively. <br>
+Likewise, the user can monitor the state of closed loop position control (i.e., 
+enabled/disabled) by reading the STEN field.&nbsp; See the OMS "VME58 Family 
+User's Manual" for further details.
+</p>
+
+<h3><u><font size="+0">Command primitives feature</font></u></h3> Three motor 
+record fields are available to the user that can be used to send ASCII command 
+primitives to the servo control board at fixed, predefined, times.&nbsp; Each 
+field is defined as a character string.
+
+<p>
+&nbsp; 1. INIT - Sent at record initialization. <br>
 &nbsp; 2. PREM - Sent before every command string that causes motion. <br>
-&nbsp; 3. POST - Sent after a complete motion is finished. </p>
-                  <p>No error checking is done by the motor record or the
-device driver to insure that the command strings are valid.&nbsp; Command
-primitives that result in a response from the motion control board are valid,
-but the response is not processed. <br>
+&nbsp; 3. POST - Sent after a complete motion is finished.
+</p>
+
+<p>
+No error checking is done by the motor record or the device driver to insure 
+that the command strings are valid.&nbsp; Command primitives that result in a 
+response from the motion control board are valid, but the response is not 
+processed. <br>
 &nbsp; <br>
-&nbsp; </p>
-                  </body></html>
+&nbsp;
+</p>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>
