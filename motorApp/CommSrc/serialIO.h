@@ -1,41 +1,30 @@
-#ifdef __cplusplus
+/*
+FILENAME...	serialIO.h
+USAGE...	.
 
-#include "vxWorks.h"
-#include "vme.h"
-#include "iv.h"
-#include "stdio.h"
-#include "string.h"
-#include "cacheLib.h"
-#include "taskLib.h"
+Version:	$Revision: 1.2 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2003-04-29 14:30:12 $
+*/
+ 
+/*****************************************************************
+                          COPYRIGHT NOTIFICATION
+*****************************************************************
 
-#include "gen/all_msg_ids.h"
-#include "msg/serial_config_msg.h"
-#include "msg/string_msg.h"
-#include "hideos/globals.h"
-#include "hideos/resources.h"
-#include "hideos/msgpool.h"
-#include "hideos/registry.h"
-#include "hideos/drvBp.h"
+(C)  COPYRIGHT 1993 UNIVERSITY OF CHICAGO
 
+This software was developed under a United States Government license
+described on the COPYRIGHT_UniversityOfChicago file included as part
+of this distribution.
+**********************************************************************/
 
-struct serialInfo
-{
-    BPD *bpd;
-    TD  td;
-};
+/*
+ *      Original Author: Mark Rivers
+ *
+ * Modification Log:
+ * -----------------
+ */
 
-/* Function prototypes */
-struct serialInfo *cc_serialIOInit(int card, char *task);
-int cc_serialIOSend(struct serialInfo *serialInfo, char const *buffer,
-                    int buffer_len, int timeout);
-
-#else  /* For C just define serialInfo as a dummy structure since it can't
-          understand the include files which define what it really is */
-struct serialInfo
-{
-    int dummy;
-};
-#endif
 
 #ifdef __cplusplus
 extern "C"

@@ -2,9 +2,9 @@
 FILENAME...	serialIOMPF.cc
 USAGE...	Interface between MPF and motor record device drivers.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-01-24 19:22:44 $
+Last Modified:	$Date: 2003-04-29 14:28:24 $
 */
 
 /*
@@ -25,17 +25,15 @@ Last Modified:	$Date: 2002-01-24 19:22:44 $
  *
  */
 
-#include <vxWorks.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
 
-#include <msgQLib.h>
-#include <tickLib.h>
-#include <taskLib.h>
+#include <epicsThread.h>
+#include <epicsRingPointer.h>
+
 #include <time.h>
-#include <sysLib.h>
 
 #include "epicsPrint.h"
 
@@ -57,26 +55,30 @@ public:
         static void serialIOCallback(Message *message, void *pointer);
 private:
         MessageClient* pMessageClient;
-        MSG_Q_ID msgQId;
+        epicsRingPointer<void *> *msgQId;
 };
 
-#ifdef	DEBUG
-    #define Debug(l, f, args...) {if (l <= serialIODebug) printf(f, ## args);}
-#else
-    #define Debug(l, f, args...)
-#endif
 
-volatile int serialIODebug = 0;
+#ifdef __GNUG__
+    #ifdef	DEBUG
+	volatile int serialIODebug = 0;
+	#define Debug(l, f, args...) {if (l <= serialIODebug) printf(f, ## args);}
+    #else
+	#define Debug(l, f, args...)
+    #endif
+#else
+    #define Debug()
+#endif
 
 
 serialIO::serialIO(int card, char *serverName, int *createdOK)
 {
-    int status;
+    int status, itera;
     Message *pmess;
 
     *createdOK = 1;
     // Create a message queue for the callback
-    msgQId = msgQCreate(4, sizeof(Message *), MSG_Q_FIFO);
+    msgQId = new epicsRingPointer<void *>(4);
     Debug(5, "serialIOInit: message queue created, ID=%p\n", msgQId);
     pMessageClient = new MessageClient(serialIOCallback,(void *)this);
     Debug(5, "serialIOInit: message client created=%p\n", pMessageClient);
@@ -87,16 +89,24 @@ serialIO::serialIO(int card, char *serverName, int *createdOK)
     }
     else
         Debug(1, "serialIOInit: Bound to MPF server %s\n", serverName);
+    
     // Wait for connect message to be received, 2 second timeout
-    status = msgQReceive(msgQId, (char *) &pmess, sizeof(pmess), 10 * CLOCKS_PER_SEC);
-    if (status == ERROR) {
-        epicsPrintf("serialIO: error calling msgQReceive, status = %d\n",
-                                status);
-        *createdOK = 0;
+    for (itera = 0; msgQId->isEmpty() == true; itera++)
+    {
+	epicsThreadSleep(0.1);
+	if (itera >= 20)
+	{
+	    epicsPrintf("serialIO: error calling msgQReceive, status = %d\n", status);
+	    *createdOK = 0;
+	    return;
+	}
     }
-    if (pmess->getType() != messageTypeConnect) {
-        epicsPrintf("serialIO: incorrect message type received = %d\n",
-                                pmess->getType());
+
+    pmess = (Message *) msgQId->pop();
+
+    if (pmess->getType() != messageTypeConnect)
+    {
+        epicsPrintf("serialIO: incorrect message type received = %d\n", pmess->getType());
         *createdOK = 0;
     }
 }
@@ -107,7 +117,7 @@ int serialIO::serialIOSend(char const *buffer, int buffer_len, int timeout)
     Char8ArrayMessage *psm = new Char8ArrayMessage;
     Char8ArrayMessage *prm = NULL;
     Message *pmess;
-    int wait;
+    int itera;
 
     psm->allocValue(buffer_len);
     psm->setSize(buffer_len);
@@ -115,30 +125,39 @@ int serialIO::serialIOSend(char const *buffer, int buffer_len, int timeout)
     psm->cmd = cmdWrite;
     psm->timeout = timeout/1000;
     status = pMessageClient->send(psm);
-    if (status) {
+    if (status)
+    {
         Debug(1, "serialIOSend: error sending message %s\n", buffer);
         goto finish;
     }
     Debug(2, "serialIOSend: sent message %s\n", buffer);
 
     // Wait for response back from server
-    wait = 2*timeout/1000*CLOCKS_PER_SEC;
-    if (wait < MIN_MSGQ_WAIT) wait = MIN_MSGQ_WAIT;
-    status = msgQReceive(msgQId, (char *)&pmess, sizeof(pmess), wait);
-    if (status == ERROR) {
-        epicsPrintf("serialIOSend: error calling msgQReceive=%d\n", status);
-        goto finish;
+    for (itera = 0; msgQId->isEmpty() == true; itera++)
+    {
+	if (itera >= 20)
+	{
+	    epicsPrintf("serialIOSend: error calling msgQReceive=%d\n", status);
+	    goto finish;
+	}
+	epicsThreadSleep(0.1);
     }
+
+
+    pmess = (Message *) msgQId->pop();
     Debug(5, "serialIOSend:  got message, pmess=%p\n", pmess);
-    if (pmess->getType() == messageTypeChar8Array) {
-        prm = (Char8ArrayMessage *)pmess;
-        status = prm->status;
-        if (status) Debug(1, "serialIOSend: error receiving message, status=%d\n", 
-                                                status);
-        Debug(4, "serialIOSend: received message, status=%d\n", status);
-    } else {
-        epicsPrintf("serialIOInit: incorrect message type received = %d\n",
-                                pmess->getType());
+    if (pmess->getType() == messageTypeChar8Array)
+    {
+	prm = (Char8ArrayMessage *)pmess;
+	status = prm->status;
+	if (status)
+	    Debug(1, "serialIOSend: error receiving message, status=%d\n", status);
+	Debug(4, "serialIOSend: received message, status=%d\n", status);
+    }
+    else
+    {
+	epicsPrintf("serialIOInit: incorrect message type received = %d\n",
+		    pmess->getType());
     }
 
     delete prm;
@@ -155,7 +174,7 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, int terminator,
     Char8ArrayMessage *psm = new Char8ArrayMessage;
     Char8ArrayMessage *prm = NULL;
     Message *pmess;
-    int wait;
+    int itera;
 
     psm->timeout = timeout/1000;
     // MPF uses seconds, not milliseconds for timeout.  If the desired timeout
@@ -177,17 +196,20 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, int terminator,
                         status);
         goto done;
     }
-    Debug(2, "serialIORecv: sent message status = %d, timeout=%d\n", 
-                                             status, timeout);
-    wait = 2*timeout/1000*CLOCKS_PER_SEC;
-    if (wait < MIN_MSGQ_WAIT) wait = MIN_MSGQ_WAIT;
-    status = msgQReceive(msgQId, (char *)&pmess, sizeof(pmess), wait);
-    if (status == ERROR) {
-        epicsPrintf("serialIORecv: error calling msgQReceive, status = %d\n",
-                                status);
-        goto done;
+    Debug(2, "serialIORecv: sent message status = %d, timeout=%d\n", status, timeout);
+
+    for (itera = 0; msgQId->isEmpty() == true; itera++)
+    {
+	if (itera >= 20)
+	{
+	    epicsPrintf("serialIORecv: error calling msgQReceive, status = %d\n", status);
+	    goto done;
+	}
+	epicsThreadSleep(0.1);
     }
 
+    pmess = (Message *) msgQId->pop();
+    
     if (pmess->getType() != messageTypeChar8Array) {
         epicsPrintf("serialIOInit: incorrect message type received = %d\n",
                                 pmess->getType());
@@ -216,16 +238,15 @@ done:
 void serialIO::serialIOCallback(Message *message, void *pointer)
 {
     serialIO *psi = (serialIO *)pointer;
-    int status;
+    bool error;
 
     // If this is a Connect message or a Char8ArrayMessage then send it to
     // the message queue.
-    Debug(5, "serialIOCallback: message type=%d\n", message->getType());
+
     if(message->getType()==messageTypeConnect) {
         ConnectMessage *pcm = (ConnectMessage *)message;
         if (pcm->status != connectYes) {
-            Debug(1, "serialIOCallback: disconnect message?, status=%d\n", 
-                                                pcm->status);
+            Debug(1, "serialIOCallback: disconnect message?, status=%d\n", pcm->status);
             delete message;
             return;
         }
@@ -235,12 +256,10 @@ void serialIO::serialIOCallback(Message *message, void *pointer)
         delete message;
         return;
     }
-    status = msgQSend(psi->msgQId, (char *)&message, sizeof(message), 
-                                       NO_WAIT, MSG_PRI_NORMAL);
-    if (status == ERROR) {
-        epicsPrintf("serialIOCallback: error from msgQSend, status = %d\n",
-                                                    status);
-    }
+
+    error = psi->msgQId->push((void **) message);
+    if (error == true)
+        epicsPrintf("serialIOCallback: error from msgQId->push\n");
 }
 
 extern "C"
