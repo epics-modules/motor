@@ -2,14 +2,14 @@
 FILENAME...	devESP300.cc
 USAGE...	Motor record device level support for Newport ESP300.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 16:01:51 $
+Last Modified:	$Date: 2003-11-04 15:49:01 $
 */
 
 /*
- *      Original Author: Mark Rivers
- *      Date: 10/16/97
+ *      Original Author: Ron Sluiter
+ *      Date: 02/19/03
  *	Current Author: Ron Sluiter
  *
  *      Experimental Physics and Industrial Control System (EPICS)
@@ -35,10 +35,8 @@ Last Modified:	$Date: 2003-05-23 16:01:51 $
  *
  * Modification Log:
  * -----------------
- * .00  10-16-97 mlr initialized from devOms58
- * .01  07-19-99 rls initialized from drvMM4000
- * .02  04-21-01 rls Added jog velocity motor command.
- * .03  05-23-03 rls Converted to R3.14.x.
+ * .01  05-23-03 rls Converted to R3.14.x.
+ * .02  10-28-03 rls User must set MRES to drive resolution.
  */
 
 #include <string.h>
@@ -49,18 +47,16 @@ Last Modified:	$Date: 2003-05-23 16:01:51 $
 #include "drvMMCom.h"
 #include "epicsExport.h"
 
-#define STATIC static
-
 extern struct driver_table ESP300_access;
 
 /* ----------------Create the dsets for devESP300----------------- */
 /* static long report(); */
-STATIC struct driver_table *drvtabptr;
-STATIC long ESP300_init(void *);
-STATIC long ESP300_init_record(void *);
-STATIC long ESP300_start_trans(struct motorRecord *);
-STATIC RTN_STATUS ESP300_build_trans(motor_cmnd, double *, struct motorRecord *);
-STATIC RTN_STATUS ESP300_end_trans(struct motorRecord *);
+static struct driver_table *drvtabptr;
+static long ESP300_init(void *);
+static long ESP300_init_record(void *);
+static long ESP300_start_trans(struct motorRecord *);
+static RTN_STATUS ESP300_build_trans(motor_cmnd, double *, struct motorRecord *);
+static RTN_STATUS ESP300_end_trans(struct motorRecord *);
 
 struct motor_dset devESP300 =
 {
@@ -110,7 +106,7 @@ static struct board_stat **ESP300_cards;
 
 
 /* initialize device support for ESP300 stepper motor */
-STATIC long ESP300_init(void *arg)
+static long ESP300_init(void *arg)
 {
     long rtnval;
     int after = (int) arg;
@@ -127,39 +123,26 @@ STATIC long ESP300_init(void *arg)
 
 
 /* initialize a record instance */
-STATIC long ESP300_init_record(void *arg)
+static long ESP300_init_record(void *arg)
 {
     struct motorRecord *mr = (struct motorRecord *) arg;
     long rtnval;
 
     rtnval = motor_init_record_com(mr, *drvtabptr->cardcnt_ptr, drvtabptr, ESP300_cards);
     
-    /* Initialize "drive_resolution" to mres. */
-    {
-	int card = mr->out.value.vmeio.card;
-	int axis = mr->out.value.vmeio.signal;
-	struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
-	struct controller *brdptr = (*trans->tabptr->card_array)[card];
-	if (brdptr != NULL)
-	{
-	    struct MMcontroller *cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
-	    cntrl->drive_resolution[axis] = mr->mres;
-	}
-    }
-
     return(rtnval);
 }
 
 
 /* start building a transaction */
-STATIC long ESP300_start_trans(struct motorRecord *mr)
+static long ESP300_start_trans(struct motorRecord *mr)
 {
     return(motor_start_trans_com(mr, ESP300_cards));
 }
 
 
 /* end building a transaction */
-STATIC RTN_STATUS ESP300_end_trans(struct motorRecord *mr)
+static RTN_STATUS ESP300_end_trans(struct motorRecord *mr)
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
@@ -178,7 +161,7 @@ STATIC RTN_STATUS ESP300_end_trans(struct motorRecord *mr)
 
 
 /* add a part to the transaction */
-STATIC RTN_STATUS ESP300_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
+static RTN_STATUS ESP300_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
@@ -268,9 +251,6 @@ STATIC RTN_STATUS ESP300_build_trans(motor_cmnd command, double *parms, struct m
 	     */
 	    break;
 	case SET_ENC_RATIO:
-	    /* MRES and drive_resolution must be equal. */
-	    cntrl->drive_resolution[axis - 1] = mr->mres;
-	    break;
 	case GET_INFO:
 	    /* These commands are not actually done by sending a message, but
 	       rather they will indirectly cause the driver to read the status
