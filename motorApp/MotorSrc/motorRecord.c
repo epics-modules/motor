@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.17 $
+Version:	$Revision: 1.18 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-27 21:24:26 $
+Last Modified:	$Date: 2002-04-01 22:47:03 $
 */
 
 /*
@@ -138,6 +138,8 @@ Last Modified:	$Date: 2002-03-27 21:24:26 $
  *		      without reading the external readback device (RDBL).
  *		      init_record() was causing LINK alarms.
  * .41 03-25-02 rls - Eliminated RES.
+ *		    - Eliminated "Set Encoder Ratio" motor command.
+ *		    - Range check JVEL when VMAX or VBAS change.
  */
 
 #define VERSION 4.5
@@ -1609,55 +1611,10 @@ STATIC long do_work(motorRecord * pmr)
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     if (MARKED(M_MRES) || MARKED(M_ERES) || MARKED(M_UEIP))
     {
-	/* encoder pulses, motor pulses */
-	double ep_mp[2];
-	long m;
-
-	/* Set the encoder ratio.  Note this is blatantly device dependent. */
-	if ((pmr->msta & EA_PRESENT) && pmr->ueip)
-	{
-	    /* defend against divide by zero */
-	    if (fabs(pmr->mres) < 1.e-9)
-	    {
-		pmr->mres = 1.;
-		MARK(M_MRES);
-	    }
-	    if (pmr->eres == 0.0)
-	    {
-		pmr->eres = pmr->mres;
-		MARK(M_ERES);
-	    }
-	    /*
-	     * OMS hardware can't handle negative motor or encoder resolution
-	     * in the SET_ENCODER_RATIO command. For now, we simply don't allow
-	     * motor and encoder resolutions to differ in sign.
-	     */
-	    if ((pmr->mres < 0.) != (pmr->eres < 0.))
-	    {
-		pmr->eres *= -1.;
-		MARK(M_ERES);
-	    }
-	    /* Calculate encoder ratio. */
-	    for (m = 10000000; (m > 1) &&
-		 (fabs(m / pmr->eres) > 1.e6 || fabs(m / pmr->mres) > 1.e6); m /= 10);
-	    ep_mp[0] = fabs(m / pmr->eres);
-	    ep_mp[1] = fabs(m / pmr->mres);
-	}
-	else
-	{
-	    ep_mp[0] = 1.;
-	    ep_mp[1] = 1.;
-	}
 
 	/* Make sure retry deadband is achievable */
 	enforceMinRetryDeadband(pmr);
 
-	if (pmr->msta & EA_PRESENT)
-	{
-	    INIT_MSG();
-	    WRITE_MSG(SET_ENC_RATIO, ep_mp);
-	    SEND_MSG();
-	}
 	if (pmr->set)
 	{
 	    pmr->pp = TRUE;
@@ -2691,6 +2648,8 @@ velcheckA:
 		pmr->sbak = temp_dbl;
 		db_post_events(pmr, &pmr->sbak, monitor_mask);
 	    }
+
+	    range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
     }
     /* Do not process (i.e., clear) marked fields here.  PP fields (e.g., MRES) must remain marked. */
     return(OK);
