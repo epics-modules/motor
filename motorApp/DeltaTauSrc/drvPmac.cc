@@ -2,9 +2,9 @@
 FILENAME...	drvPmac.cc
 USAGE...	Driver level support for Delta Tau PMAC model.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-15 18:47:31 $
+Last Modified:	$Date: 2004-09-21 15:24:37 $
 */
 
 /*
@@ -37,6 +37,7 @@ Last Modified:	$Date: 2004-09-15 18:47:31 $
  * Modification Log:
  * -----------------
  * .00 04/17/04 rls - Copied from drvOms.cc
+ * .01 09/21/04 rls - support for 32axes/controller.
  */
 
 #include	<vxLib.h>
@@ -94,25 +95,30 @@ static char *Mbox_addrs = 0x0;	/* Base address of Mailbox. */
 static epicsAddressType Pmac_ADDRS_TYPE;
 static volatile unsigned PmacInterruptVector = 0;
 static volatile epicsUInt8 PmacInterruptLevel = Pmac_INT_LEVEL;
-static char Pmac_axis[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+static char *Pmac_axis[] =
+    {"1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9", "10",
+    "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+    "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
+    "31", "32"};
+
 static double quantum;
 
 /*----------------functions-----------------*/
 
 /* Common local function declarations. */
-static long report(int level);
+static long report(int);
 static long init();
 static void query_done(int, int, struct mess_node *);
-static int set_status(int card, int signal);
-RTN_STATUS send_mess(int card, char const *com, char c);
-int recv_mess(int, char *, int);
-static void motorIsr(int card);
+static int set_status(int, int);
+static RTN_STATUS send_mess(int, char const *, char *);
+static int recv_mess(int, char *, int);
+static void motorIsr(int);
 static int motor_init();
 static void Pmac_reset();
 
-static RTN_STATUS PmacPut(int card, char *pcom);
-static int motorIsrEnable(int card);
-static void motorIsrDisable(int card);
+static RTN_STATUS PmacPut(int, char *);
+static int motorIsrEnable(int);
+static void motorIsrDisable(int);
 
 struct driver_table Pmac_access =
 {
@@ -294,7 +300,7 @@ static int set_status(int card, int signal)
 /* send a message to the Pmac board		     */
 /*		send_mess()			     */
 /*****************************************************/
-RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char outbuf[MAX_MSG_SIZE];
     RTN_STATUS return_code;
@@ -317,12 +323,12 @@ RTN_STATUS send_mess(int card, char const *com, char inchar)
     /* Flush receive buffer */
     recv_mess(card, (char *) NULL, -1);
 
-    if (inchar == NULL)
+    if (name == NULL)
 	strcpy(outbuf, com);
     else
     {
-	strcpy(outbuf, "#?");
-	outbuf[1] = inchar;
+	strcpy(outbuf, "#");
+	strcat(outbuf, name);
 	strcat(outbuf, com);
     }
 
@@ -389,7 +395,7 @@ RTN_STATUS send_mess(int card, char const *com, char inchar)
  *  NORMAL RETURN.
  */
 
-int recv_mess(int card, char *com, int amount)
+static int recv_mess(int card, char *com, int amount)
 {
     volatile struct controller *pmotorState;
     volatile struct pmac_dpram *pmotor;
@@ -695,7 +701,7 @@ static int motor_init()
     struct PMACcontroller *cntrl;
     long status;
     int card_index, motor_index;
-    char axis_pos[50], encoder_pos[50];
+    char axis_pos[50];
     char *tok_save;
     int total_encoders = 0, total_axis = 0;
     volatile void *localaddr;
