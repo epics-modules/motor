@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.9 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-02-11 22:24:15 $
+Version:	$Revision: 1.10 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-28 18:10:47 $
 */
 
 /*
@@ -50,19 +50,17 @@ Last Modified:	$Date: 2004-02-11 22:24:15 $
 #include	<string.h>
 #include	<callback.h>
 #include 	<epicsThread.h>
+#include        <epicsExport.h>
 
 #include	"motor.h"
 #include	"motordrvCom.h"
 
 /*----------------debugging-----------------*/
 
+volatile int motordrvComdebug = 0;
+epicsExportAddress(int, motordrvComdebug);
 #ifdef __GNUG__
-    #ifdef	DEBUG
-	volatile int motordrvComdebug = 0;
-	#define Debug(l, f, args...) {if (l <= motordrvComdebug) printf(f, ## args);}
-    #else
-	#define Debug(l, f, args...)
-    #endif
+    #define Debug(l, f, args...) {if (l <= motordrvComdebug) printf(f, ## args);}
 #else
     #define Debug()
 #endif
