@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 16:09:38 $
+Last Modified:	$Date: 2001-06-19 18:25:10 $
 */
 
 /*
@@ -32,6 +32,10 @@ Last Modified:	$Date: 2000-07-17 16:09:38 $
  *	      Accelerator Systems Division
  *	      Advanced Photon Source
  *	      Argonne National Laboratory
+ *
+ * NOTES
+ * -----
+ * Verified with firmware: VME58 ver 2.24-8 and 2.24-8S.
  *
  * Modification Log:
  * -----------------
