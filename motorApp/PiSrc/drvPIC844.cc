@@ -3,9 +3,9 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.7 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:29:52 $
+Version:	$Revision: 1.8 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-21 14:41:41 $
 */
 
 /*
@@ -38,6 +38,9 @@ Last Modified:	$Date: 2004-08-17 21:29:52 $
  * .01 12/17/03 rls - copied from drvIM483PL.cc
  * .02 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
  * .03 07/12/04 rls - Converted from MPF to asyn.
+ * .04 09/09/04 rls - Retry on initial comm. (PIC844 comm. locks up when IOC
+ *                    is power cycled).
+ * .05 09/21/04 rls - support for 32axes/controller.
  */
 
 /*
@@ -76,16 +79,16 @@ DESIGN LIMITATIONS...
 
 /* --- Local data. --- */
 int PIC844_num_cards = 0;
-static char PIC844_axis[4] = {'1', '2', '3', '4'};
+static char *PIC844_axis[4] = {"1", "2", "3", "4"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int card, char const *com, char c);
-static int set_status(int card, int signal);
-static long report(int level);
+static RTN_STATUS send_mess(int, char const *, char *);
+static int set_status(int, int);
+static long report(int);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
@@ -389,7 +392,7 @@ exit:
 /* send a message to the PIC844 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct PIC844controller *cntrl;
@@ -413,11 +416,10 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 
     local_buff[0] = (char) NULL;	/* Terminate local buffer. */
 
-    if (inchar != (char) NULL)
+    if (name != NULL)
     {
 	strcpy(local_buff, "AXIS ");
-	local_buff[5] = inchar;		/* put in axis. */
-	local_buff[6] = (char) NULL;
+	strcat(local_buff, name);	/* put in axis. */
 	strcat(local_buff, ";");	/* put in comman seperator. */
     }
 
@@ -574,14 +576,20 @@ static int motor_init()
 
 	if (success_rtn == asynSuccess)
 	{
+	    int retry = 0;
+
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
 	    do
 		recv_mess(card_index, buff, FLUSH);
 	    while (strlen(buff) != 0);
-    
-	    send_mess(card_index, GET_IDENT, (char) NULL);
-	    status = recv_mess(card_index, buff, 1);
+
+	    do
+	    {
+		send_mess(card_index, GET_IDENT, (char) NULL);
+		status = recv_mess(card_index, buff, 1);
+                retry++;
+	    } while (status == 0 && retry < 3);
 	}
 
 	if (success_rtn == asynSuccess && status > 0)
