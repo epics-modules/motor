@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.21 $
+Version:	$Revision: 1.22 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-23 22:16:12 $
+Last Modified:	$Date: 2005-03-30 19:12:09 $
 */
 
 /*
@@ -1175,7 +1175,9 @@ static int motor_init()
 
     Debug(3, "Motors initialized\n");
 
-    epicsThreadCreate((const char *) "Oms_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
+    epicsThreadCreate((const char *) "Oms_motor", epicsThreadPriorityMedium,
+		      epicsThreadGetStackSize(epicsThreadStackMedium),
+		      (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     Debug(3, "Started motor_task\n");
     return (0);

@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-21 15:38:50 $
+Last Modified:	$Date: 2005-03-30 19:10:48 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -672,7 +672,9 @@ static int motor_init()
     free_list.head = (struct mess_node *) NULL;
     free_list.tail = (struct mess_node *) NULL;
 
-    epicsThreadCreate((char *) "PM500_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
+    epicsThreadCreate((char *) "PM500_motor", epicsThreadPriorityMedium,
+		     epicsThreadGetStackSize(epicsThreadStackMedium),
+		     (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     return(OK);
 }

@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-18 22:32:59 $
+Last Modified:	$Date: 2005-03-30 19:01:26 $
 */
 
 /*
@@ -691,7 +691,7 @@ static int motor_init()
     free_list.head = (struct mess_node *) NULL;
     free_list.tail = (struct mess_node *) NULL;
 
-    epicsThreadCreate((char *) "MDrive_motor", 64,
+    epicsThreadCreate((char *) "MDrive_motor", epicsThreadPriorityMedium,
 	epicsThreadGetStackSize(epicsThreadStackMedium),
 	(EPICSTHREADFUNC) motor_task, (void *) &targs);
 

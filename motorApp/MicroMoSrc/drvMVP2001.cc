@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.cc
 USAGE...	Motor record driver level support for MicroMo
 		MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-21 17:08:50 $
+Last Modified:	$Date: 2005-03-30 19:07:09 $
 */
 
 /*
@@ -725,7 +725,9 @@ static int motor_init()
     free_list.head = (struct mess_node *) NULL;
     free_list.tail = (struct mess_node *) NULL;
 
-    epicsThreadCreate((char *) "MVP2001_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
+    epicsThreadCreate((char *) "MVP2001_motor", epicsThreadPriorityMedium,
+		      epicsThreadGetStackSize(epicsThreadStackMedium),
+		      (EPICSTHREADFUNC) motor_task, (void *) &targs);
     
     return(0);
 }

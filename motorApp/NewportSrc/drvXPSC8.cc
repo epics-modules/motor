@@ -696,7 +696,8 @@ STATIC int motor_init()
 
     Debug(5, "XPSC8:motor_init: spawning XPSC8_motor task\n");
     
-    epicsThreadCreate((char *) "XPSC8_motor", 64, 5000, 
+    epicsThreadCreate((char *) "XPSC8_motor", epicsThreadPriorityMedium,
+		      epicsThreadGetStackSize(epicsThreadStackMedium), 
                       (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     return (OK);

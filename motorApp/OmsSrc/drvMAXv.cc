@@ -2,9 +2,9 @@
 FILENAME...	drvMAXv.cc
 USAGE...	Motor record driver level support for OMS model MAXv.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-23 22:16:11 $
+Last Modified:	$Date: 2005-03-30 19:12:09 $
 */
 
 /*
@@ -1092,7 +1092,9 @@ static int motor_init()
 
     Debug(3, "Motors initialized\n");
 
-    epicsThreadCreate((char *) "MAXv_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
+    epicsThreadCreate((char *) "MAXv_motor", epicsThreadPriorityMedium,
+		      epicsThreadGetStackSize(epicsThreadStackMedium),
+		      (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     Debug(3, "Started motor_task\n");
 
