@@ -2,9 +2,9 @@
 FILENAME...	drvPmac.cc
 USAGE...	Driver level support for Delta Tau PMAC model.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-06-07 19:27:05 $
+Last Modified:	$Date: 2004-09-15 18:47:31 $
 */
 
 /*
@@ -94,7 +94,7 @@ static char *Mbox_addrs = 0x0;	/* Base address of Mailbox. */
 static epicsAddressType Pmac_ADDRS_TYPE;
 static volatile unsigned PmacInterruptVector = 0;
 static volatile epicsUInt8 PmacInterruptLevel = Pmac_INT_LEVEL;
-static char Pmac_axis[] = {'1', '2', '3', '4', '5', '6', '7', '8'};
+static char Pmac_axis[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
 static double quantum;
 
 /*----------------functions-----------------*/
@@ -178,18 +178,12 @@ static long init()
 
 static void query_done(int card, int axis, struct mess_node *nodeptr)
 {
-    char buffer[40];
-
-    send_mess(card, DONE_QUERY, Pmac_axis[axis]);
-    recv_mess(card, buffer, 1);
-
-    if (nodeptr->status.Bits.RA_PROBLEM)
-	send_mess(card, AXIS_STOP, Pmac_axis[axis]);
 }
 
 
 static int set_status(int card, int signal)
 {
+    struct PMACcontroller *cntrl;
     struct mess_node *nodeptr;
     MOTOR_STATUS motorstat;
     struct mess_info *motor_info;
@@ -200,6 +194,7 @@ static int set_status(int card, int signal)
     bool plusdir, ls_active = false, plusLS, minusLS;
     msta_field status;
 
+    cntrl = (struct PMACcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
@@ -209,20 +204,15 @@ static int set_status(int card, int signal)
     rtn_state = sscanf(buff, "%4hx%4hx%4hx", &motorstat.word1.All, &motorstat.word2.All,
 		       &motorstat.word3.All);
 
-    status.Bits.RA_DONE = (motorstat.word3.Bits.in_position == YES) ? 0 : 1;
+    status.Bits.RA_DONE     = (motorstat.word3.Bits.in_position == YES) ? 1 : 0;
     status.Bits.EA_POSITION = (motorstat.word1.Bits.amp_enabled == YES) ? 1 : 0;
 
-    /* 
-     * Parse motor position
-     * Position string format: 1TP5.012,2TP1.123,3TP-100.567,...
-     * Skip to substring for this motor, convert to double
-     */
-
-    sprintf(outbuf, "M%.2d61", (signal + 1));
+    sprintf(outbuf, "M%.2d61", (signal + 1));	// Get Commanded Position.
     send_mess(card, outbuf, (char) NULL);
     recv_mess(card, buff, 1);
 
     motorData = atof(buff);
+    motorData /= 32.0; /* Shift out fractionial data. */
 
     if (motorData == motor_info->position)
     {
@@ -267,10 +257,10 @@ static int set_status(int card, int signal)
     status.Bits.EA_SLIP_STALL = 0;
     status.Bits.EA_HOME	      = 0;
 
-    send_mess(card, "P", (char) NULL);
+    sprintf(outbuf, "M%.2d62", (signal + 1));
+    send_mess(card, outbuf, (char) NULL);	// Get Actual Position.
     recv_mess(card, buff, 1);
     motorData = atof(buff);
-    motorData *= 32.0;	/* "P" command units are in 1/32 of a count. */
     motor_info->encoder_position = (int32_t) motorData;
 
     status.Bits.RA_PROBLEM	= 0;
@@ -610,9 +600,9 @@ static void motorIsrDisable(int card)
 /* areas. PmacSetup()                                */
 /*****************************************************/
 int PmacSetup(int num_cards,	/* maximum number of cards in rack */
+	     int addrs_type,	/* VME address type; 24 - A24 or 32 - A32. */
 	     void *mbox,	/* Mailbox base address. */
 	     void *addrs,	/* DPRAM Base Address */
-	     int addrs_type,	/* VME address type; 24 - A24 or 32 - A32. */
 	     unsigned vector,	/* noninterrupting(0), valid vectors(64-255) */
 	     int int_level,	/* interrupt level (1-6) */
 	     int scan_rate)	/* polling rate - in HZ */
@@ -630,7 +620,7 @@ int PmacSetup(int num_cards,	/* maximum number of cards in rack */
 	case 24:
 	    Pmac_ADDRS_TYPE = atVMEA24;
 
-	    if ((uint32_t) mbox & 0xF)
+	    if ((uint32_t) mbox & 0xF0000000)
 		erraddr = mbox;
 	    else if ((uint32_t) addrs & 0xF)
 		erraddr = addrs;
@@ -647,18 +637,20 @@ int PmacSetup(int num_cards,	/* maximum number of cards in rack */
 	    break;
     }
 
-    status = devNoResponseProbe(Pmac_ADDRS_TYPE, (unsigned int) mbox, 1);
+    // Test MailBox address
+    Mbox_addrs = (char *) mbox;
+    status = devNoResponseProbe(Pmac_ADDRS_TYPE, (unsigned int) (Mbox_addrs + 0x121), 1);
 
-    if (status == 0)
+    if (PROBE_SUCCESS(status))
     {
 	Pmac_addrs = (char *) addrs;
-	Mbox_addrs = (char *) mbox;
 	*(Mbox_addrs + 0x121) = (char) ((unsigned long) Pmac_addrs >> 14); /* Select VME A19-A14 for DPRAM. */
     }
     else
     {
 	errlogPrintf("%s(%d): Mailbox bus error - 0x%X\n", __FILE__, __LINE__,
-		     (unsigned int) mbox);
+		     (unsigned int) (Mbox_addrs + 0x121));
+	Mbox_addrs = (char *) NULL;
 	Pmac_num_cards = 0;
     }
 
@@ -700,6 +692,7 @@ static int motor_init()
 {
     volatile struct controller *pmotorState;
     volatile struct pmac_dpram *pmotor;
+    struct PMACcontroller *cntrl;
     long status;
     int card_index, motor_index;
     char axis_pos[50], encoder_pos[50];
@@ -774,6 +767,10 @@ static int motor_init()
 	    pmotorState->motor_in_motion = 0;
 	    pmotorState->cmnd_response = false;
 
+	    cntrl = (struct PMACcontroller *) malloc(sizeof(struct PMACcontroller));
+	    pmotorState->DevicePrivate = cntrl;
+	    cntrl->irqEnable = FALSE;
+
 	    /* Initialize DPRAM communication. */
 	    pmotor = (struct pmac_dpram *) pmotorState->localaddr;
 	    pmotor->out_cntrl_wd = 0;	/* Clear "Data ready from host" bit indicator. */
@@ -804,6 +801,19 @@ static int motor_init()
 		{
 		    pmotorState->motor_info[total_axis].motor_motion = NULL;
 		    pmotorState->motor_info[total_axis].status.All = 0;
+
+		    // Set Ixx20=1 and Ixx21=0; control acceleration via Ixx19.
+		    sprintf(outbuf, "I%.2d20=1", (total_axis + 1));
+		    send_mess(card_index, outbuf, (char) NULL);
+		    sprintf(outbuf, "I%.2d21=0", (total_axis + 1));
+		    send_mess(card_index, outbuf, (char) NULL);
+
+/* ????? Read and save Position Scale Factor. ??????
+		    sprintf(outbuf, "I%.2d08", (total_axis + 1));
+		    send_mess(card_index, outbuf, (char) NULL);
+		    recv_mess(card_index, axis_pos, 1);
+		    cntrl->pos_scaleFac[total_axis] = atof(axis_pos) * 32.0;
+*/
 		}
 		else
 		{
