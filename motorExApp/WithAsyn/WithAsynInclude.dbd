@@ -1,6 +1,6 @@
 include "base.dbd"
-include "motorRecord.dbd"
-include "drvAsynSerialPort.dbd"
+include "motorSupport.dbd"
+include "asyn.dbd"
 #include "devAcsMotor.dbd"
 #include "devImsMotor.dbd"
 #include "devMclennanMotor.dbd"
