@@ -11,6 +11,8 @@
  * .02  07-03-2002   rls  replaced RA_OVERTRAVEL with RA_PLUS_LS and RA_MINUS_LS
  * .03  05-23-2003   rls  Converted to R3.14.x.
  * .04  02-03-2004   rls  Eliminate erroneous "Motor motion timeout ERROR".
+ * .05  07-09-2004   rls  - removed unused <driver>Setup() argument.
+ *                        - added "\" at end of long Debug stmt's for SunPro.
  */
 
 
@@ -297,7 +299,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
     strcpy(buff, com);
     strcat(buff, OUTPUT_TERMINATOR);
 
-    Debug(2, "send_mess: sending message to card %d, message=%s\n",
+    Debug(2, "send_mess: sending message to card %d, message=%s\n",\
                      card, buff);
 
     pasynSyncIO->write(cntrl->pasynUser, buff, strlen(buff), TIMEOUT);
@@ -326,7 +328,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 
     cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
 
-    Debug(3, "recv_mess entry: card %d, flag=%d\n", 
+    Debug(3, "recv_mess entry: card %d, flag=%d\n",\
             card, flag);
     if (flag == FLUSH) {
         flush = 1;
@@ -343,15 +345,15 @@ STATIC int recv_mess(int card, char *com, int flag)
     else com[len-1] = '\0';
     
     if (len > 0) {
-        Debug(2, "recv_mess: card %d, message = \"%s\"\n", 
+        Debug(2, "recv_mess: card %d, message = \"%s\"\n",\
                    card, com);
     }
     if (len == 0) {
         if (flag != FLUSH)  {
-            Debug(1, "recv_mess: card %d ERROR: no response\n", 
+            Debug(1, "recv_mess: card %d ERROR: no response\n",\
                   card);
         } else {
-            Debug(3, "recv_mess: card %d flush returned no characters\n", 
+            Debug(3, "recv_mess: card %d flush returned no characters\n",\
                   card);
         }
     }
@@ -367,7 +369,6 @@ STATIC int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 RTN_STATUS
 MCB4BSetup(int num_cards,   	/* maximum number of controllers in system */
-           int num_channels,	/* NOT USED            */
            int scan_rate)       /* polling rate - 1/60 sec units */
 {
     int itera;
@@ -459,7 +460,7 @@ STATIC int motor_init()
         /* Initialize communications channel */
 
 	success_rtn = pasynSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
-        Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n", 
+        Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n",\
               cntrl->port, success_rtn, cntrl->pasynUser);
 
         if (success_rtn == 0)
