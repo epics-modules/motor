@@ -1,5 +1,6 @@
 # Advanced Control Systems driver support.
 device(motor,VME_IO,devPM304,"Mclennan PM304")
 driver(drvPM304)
+registrar(MclennanRegister)
 
 
