@@ -10,6 +10,11 @@
 #< ../nfsCommands
 
 cd appbin
+
+# If the VxWorks kernel was built using the project facility, the following must
+# be added before any C++ code is loaded (see SPR #28980).
+sysCplusEnable=1
+
 ld < NoMPFLib
 
 cd startup
