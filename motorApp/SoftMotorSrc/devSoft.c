@@ -2,9 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-11 17:34:31 $
+Last Modified:	$Date: 2002-03-27 21:43:45 $
 */
 
 /*
@@ -217,7 +217,7 @@ void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
     if (interruptAccept != TRUE)
 	return;
 
-    newrdbl = newrdbl / mr->res;
+    newrdbl = newrdbl / mr->mres;
     mr->rmp = NINT(newrdbl);
 
     if (ptr->dinp_value == WAIT || ptr->initialized == OFF)
