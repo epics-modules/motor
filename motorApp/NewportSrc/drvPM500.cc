@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.14 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-11-10 05:27:30 $
+Version:	$Revision: 1.15 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-12-21 15:38:50 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -43,6 +43,9 @@ Last Modified:	$Date: 2004-11-10 05:27:30 $
  * .06 07/09/04 rls removed unused <driver>Setup() argument.
  * .07 07/28/04 rls "epicsExport" debug variable.
  * .08 09/21/04 rls support for 32axes/controller.
+ * .09 12/21/04 rls - MS Visual C compatibility; make all epicsExportAddress
+ *		      extern "C" linkage.
+ *		    - make debug variables always available.
  */
 
 
@@ -79,15 +82,15 @@ Last Modified:	$Date: 2004-11-10 05:27:30 $
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvPM500debug = 0;
 	#define Debug(l, f, args...) { if(l<=drvPM500debug) printf(f,## args); }
-	epicsExportAddress(int, drvPM500debug);
     #else
 	#define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
+volatile int drvPM500debug = 0;
+extern "C" {epicsExportAddress(int, drvPM500debug);}
 
 /* --- Local data. --- */
 int PM500_num_cards = 0;
@@ -144,7 +147,7 @@ struct
 #endif
 } drvPM500 = {2, report, init};
 
-epicsExportAddress(drvet, drvPM500);
+extern "C" {epicsExportAddress(drvet, drvPM500);}
 
 static struct thread_args targs = {SCAN_RATE, &PM500_access};
 

@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.15 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-11-10 05:27:29 $
+Version:	$Revision: 1.16 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-12-21 15:42:15 $
 */
 
 /*
@@ -56,6 +56,9 @@ Last Modified:	$Date: 2004-11-10 05:27:29 $
  * .10 07/09/04 rls - removed unused <driver>Setup() argument.
  * .11 07/28/04 rls - "epicsExport" debug variable.
  * .12 09/21/04 rls - support for 32axes/controller.
+ * .13 12/21/04 rls - MS Visual C compatibility; make all epicsExportAddress
+ *		      extern "C" linkage.
+ *		    - make debug variables always available.
  *
  */
 
@@ -95,15 +98,15 @@ Last Modified:	$Date: 2004-11-10 05:27:29 $
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvMM3000debug = 0;
 	#define Debug(l, f, args...) { if(l<=drvMM3000debug) printf(f,## args); }
-	epicsExportAddress(int, drvMM3000debug);
     #else
 	#define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
+volatile int drvMM3000debug = 0;
+extern "C" {epicsExportAddress(int, drvMM3000debug);}
 
 /* --- Local data. --- */
 int MM3000_num_cards = 0;
@@ -149,16 +152,11 @@ struct driver_table MM3000_access =
 struct
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvMM3000 = {2, report, init};
 
-epicsExportAddress(drvet, drvMM3000);
+extern "C" {epicsExportAddress(drvet, drvMM3000);}
 
 STATIC struct thread_args targs = {SCAN_RATE, &MM3000_access};
 
