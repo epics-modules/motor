@@ -1,13 +1,11 @@
 include "base.dbd"
 include "motorRecord.dbd"
-include "mpfSerialVx.dbd"
+include "asyn.dbd"
 include "devAcsMotor.dbd"
-include "devImsMotor.dbd"
+#include "devImsMotor.dbd"
 include "devNewport.dbd"
-include "devPIMotor.dbd"
+#include "devPIMotor.dbd"
 # Only for IPAC R2.7 and above.
 driver(drvIpac)
 registrar(vipc616Registrar)
 registrar(tyGSOctalRegistrar)
-
-

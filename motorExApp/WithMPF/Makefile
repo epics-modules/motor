@@ -23,26 +23,24 @@ WithMPF_OBJS_vxWorks	+= $(EPICS_BASE_BIN)/vxComLibrary
 #!WithMPFVx_LDOBJS_vxWorks += $(IPAC_BIN)/ipacLib
 #!WithMPFVx_OBJS_vxWorks   += $(IPAC_BIN)/tyGSOctal
 
-WithMPF_LIBS		+= PI
+#WithMPF_LIBS		+= PI
 WithMPF_LIBS		+= Acs
-WithMPF_LIBS		+= Ims
+#WithMPF_LIBS		+= Ims
 WithMPF_LIBS		+= Newport
-WithMPF_LIBS		+= motorCOM_mpf
 WithMPF_LIBS		+= motor
-WithMPF_LIBS		+= mpfSerial mpfEpics mpf
+WithMPFVx_LIBS		+= asyn
 WithMPF_LIBS 		+= $(EPICS_BASE_IOC_LIBS)
 
-WithMPFVx_LIBS		+= PI
+#WithMPFVx_LIBS		+= PI
 WithMPFVx_LIBS		+= Acs
-WithMPFVx_LIBS		+= Ims
+#WithMPFVx_LIBS		+= Ims
 WithMPFVx_LIBS		+= Newport
-WithMPFVx_LIBS		+= motorCOM_mpf
 WithMPFVx_LIBS		+= motor
 
 # Support from IPAC R2.6 and above.
 WithMPFVx_LIBS 		+= Ipac TyGSOctal
 
-WithMPFVx_LIBS		+= mpfSerial mpfEpics mpf
+WithMPFVx_LIBS		+= asyn
 WithMPFVx_LIBS 		+= $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES

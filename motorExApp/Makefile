@@ -1,10 +1,10 @@
 TOP = ..
 include $(TOP)/configure/CONFIG
 
-#DIRS += Db
-#DIRS += NoMPF
-ifdef MPF
-#DIRS += WithMPF
+DIRS += Db
+DIRS += NoMPF
+ifdef ASYN
+DIRS += WithMPF
 #DIRS += ipServerApp
 endif
 
