@@ -2,9 +2,9 @@
 FILENAME...	serialIOMPF.cc
 USAGE...	Interface between MPF and motor record device drivers.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:27:19 $
+Last Modified:	$Date: 2003-05-27 21:56:44 $
 */
 
 /*
@@ -25,38 +25,16 @@ Last Modified:	$Date: 2003-05-19 17:27:19 $
  *
  */
 
-#include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
-#include <stdio.h>
-
 #include <epicsThread.h>
 #include <epicsRingPointer.h>
-
-#include <time.h>
-
-#include "epicsPrint.h"
-
-#include "Message.h"
+#include "serialIO.h"
 #include "ConnectMessage.h"
 #include "Char8ArrayMessage.h"
 #include "serialServer.h"
 
 // Minimum wait for server reply; in 0.1 second increments.
-#define MIN_MSGQ_WAIT (1/0.1)
-
-class serialIO
-{
-public:
-        serialIO(int card, char *serverName, int *createdOK);
-        int serialIOSend(char const *buffer, int buffer_len, int timeout);
-        int serialIORecv(char *buffer, int buffer_len, char *terminator, 
-                                int timeout);
-        static void serialIOCallback(Message *message, void *pointer);
-private:
-        MessageClient* pMessageClient;
-        epicsRingPointer<void *> *msgQId;
-};
+#define MIN_MSGQ_WAIT (int) (1/0.1)
 
 
 #ifdef __GNUG__
@@ -71,7 +49,7 @@ private:
 #endif
 
 
-serialIO::serialIO(int card, char *serverName, int *createdOK)
+serialIO::serialIO(int card, char *serverName, bool *createdOK)
 {
     int status, itera;
     Message *pmess;
@@ -171,8 +149,8 @@ finish:
 }
 
 
-int serialIO::serialIORecv(char *buffer, int buffer_len, char *terminator, 
-                           int timeout)
+int serialIO::serialIORecv(char *buffer, int buffer_len, char *terminator,
+			   int timeout)
 {
     int status, nrec = 0;
     Char8ArrayMessage *psm = new Char8ArrayMessage;
@@ -192,7 +170,6 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, char *terminator,
 	psm->eomLen = strlen(terminator);
 	strcpy(&psm->eomString[0], terminator);
     }
-
     
     status = pMessageClient->send(psm);
     if (status != 0) {
@@ -244,6 +221,82 @@ done:
     return (nrec);
 }
 
+int serialIO::serialIOSendRecv(char const *outbuff, int outbuff_len, 
+                                char *inbuff, int inbuff_len, char *terminator,
+                                int timeout)
+{
+    int status, nrec = 0;
+    Char8ArrayMessage *psm = new Char8ArrayMessage;
+    Char8ArrayMessage *prm = NULL;
+    Message *pmess;
+    int itera, timeout_itera;
+
+    psm->allocValue(outbuff_len);
+    psm->setSize(outbuff_len);
+    memcpy(psm->value, outbuff, outbuff_len);
+    psm->cmd = cmdWriteRead | cmdFlush | cmdSetEom;
+    psm->timeout = timeout/1000;
+    // MPF uses seconds, not milliseconds for timeout.  If the desired timeout
+    // is non-zero then use a minimum 1 second timeout
+    if ((timeout > 0) && (psm->timeout < 1)) psm->timeout = 1;
+    if (terminator == NULL)
+	psm->eomLen = 0;
+    else
+    {
+	psm->eomLen = strlen(terminator);
+	strcpy(&psm->eomString[0], terminator);
+    }
+
+    status = pMessageClient->send(psm);
+
+    if (status != 0) {
+        epicsPrintf("serialIOSendRecv: error sending message, status = %d\n", 
+                        status);
+        goto done;
+    }
+    
+//    Debug(2, "serialIOSendRecv: %.2f sent: %s\n", (double)tickGet()/CLOCKS_PER_SEC, outbuff);
+
+
+    /* Wait for 2x the timeout or MIN_MSGQ_WAIT; which ever is greater. */
+    timeout_itera = psm->timeout * 20;
+    if (timeout_itera < MIN_MSGQ_WAIT)
+	timeout_itera = MIN_MSGQ_WAIT;
+       
+    for (itera = 0; msgQId->isEmpty() == true; itera++)
+    {
+	if (itera > timeout_itera)
+	{
+	    epicsPrintf("serialIOSendRecv: error calling msgQReceive, status = %d\n", status);
+	    goto done;
+	}
+	epicsThreadSleep(0.1);
+    }   
+    
+    if (pmess->getType() != messageTypeChar8Array) {
+        epicsPrintf("serialIOSendRecv: incorrect message type received = %d\n",
+                                pmess->getType());
+        goto cleanup;
+    }
+    prm = (Char8ArrayMessage *)pmess;
+    if (prm->status != 0) {
+        Debug(1,"serialIOSendRecv: error, return status = %d\n", prm->status);
+        goto cleanup;
+    }
+    nrec = prm->getSize();
+    if (nrec > inbuff_len) nrec=inbuff_len;
+    memcpy(inbuff, prm->value, nrec);
+    // Append a NULL byte to the response if there is room
+    if (nrec < inbuff_len) inbuff[nrec] = '\0';
+
+//    Debug(2,"serialIOSendRecv: %.2f received %d bytes: \n%s\n", (double)tickGet()/CLOCKS_PER_SEC, nrec, inbuff);
+cleanup:
+    delete prm;
+
+done:
+    return (nrec);
+}
+
 void serialIO::serialIOCallback(Message *message, void *pointer)
 {
     serialIO *psi = (serialIO *)pointer;
@@ -275,7 +328,7 @@ extern "C"
 {
 void* serialIOInit(int card, char *serverName)
 {
-    int createdOK=0;
+    bool createdOK;
     serialIO *psi = new serialIO(card, serverName, &createdOK);
     if (createdOK) {
         return( (void *)(psi) );
@@ -295,6 +348,13 @@ int serialIORecv(serialIO *psi, char *buffer, int buffer_len,
                     char *terminator, int timeout)
 {
     return (psi->serialIORecv(buffer, buffer_len, terminator, timeout));
+}
+
+int serialIOSendRecv(serialIO *psi, char const *outbuff, int outbuff_len, 
+                    char *inbuff, int inbuff_len,
+                    char *terminator, int timeout)
+{
+    return (psi->serialIOSendRecv(outbuff, outbuff_len, inbuff, inbuff_len, terminator, timeout));
 }
 
 }
