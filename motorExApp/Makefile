@@ -1,7 +1,6 @@
 TOP = ..
 include $(TOP)/configure/CONFIG
 
-DIRS += Db
 DIRS += NoMPF
 ifdef ASYN
 DIRS += WithMPF
