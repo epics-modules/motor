@@ -8,6 +8,7 @@
  * Modification Log:
  * -----------------
  * .01  02-24-2002   mlr  initialized from drvPM304.c
+ * .02  07-03-2002   rls  replaced RA_OVERTRAVEL with RA_PLUS_LS and RA_MINUS_LS
  */
 
 
@@ -193,6 +194,7 @@ STATIC int set_status(int card, int signal)
     int rtn_state;
     long motorData;
     char buff[BUFF_SIZE];
+    BOOLEAN ls_active = OFF;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
@@ -214,14 +216,16 @@ STATIC int set_status(int card, int signal)
     send_mess(card, command, 0);
     recv_mess(card, response, WAIT);
     /* The response string is of the form "#01E=1" */
-    motor_info->status &= ~RA_OVERTRAVEL;
+    motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
     if (response[5] == '1') {
-        motor_info->status |= RA_OVERTRAVEL;
+        motor_info->status |= RA_PLUS_LS;
         motor_info->status |= RA_DIRECTION;
+	ls_active = ON;
     }
     if (response[6] == '1') {
-        motor_info->status |= RA_OVERTRAVEL;
+        motor_info->status |= RA_MINUS_LS;
         motor_info->status &= ~RA_DIRECTION;
+	ls_active = ON;
     }
 
     /* encoder status */
@@ -254,12 +258,12 @@ STATIC int set_status(int card, int signal)
     if (!(motor_info->status & RA_DIRECTION))
         motor_info->velocity *= -1;
 
-    rtn_state = (!motor_info->no_motion_count ||
-     (motor_info->status & (RA_OVERTRAVEL | RA_DONE | RA_PROBLEM))) ? 1 : 0;
+    rtn_state = (!motor_info->no_motion_count || ls_active == ON ||
+		 (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || motor_info->status & RA_OVERTRAVEL) &&
-         nodeptr != 0 && nodeptr->postmsgptr != 0)
+    if ((motor_info->status & RA_DONE || ls_active == ON) && nodeptr != 0 &&
+	nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
         strcat(buff, "\r");
