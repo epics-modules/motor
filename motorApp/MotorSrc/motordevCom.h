@@ -3,9 +3,9 @@ FILENAME...	motordevCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record device support modules.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:44 $
+Last Modified:	$Date: 2000-07-17 17:48:55 $
 */
 
 /*
@@ -45,7 +45,6 @@ Last Modified:	$Date: 2000-02-08 22:18:44 $
 /* Axis status. */
 struct axis_stat
 {
-    char name;
     BOOLEAN in_use;	/* Indicates axis assigned to a motor record. */
 };
 
@@ -79,8 +78,7 @@ extern long motor_init_com(int, int, struct driver_table *,
 			   struct board_stat ***);
 extern long motor_init_record_com(struct motorRecord *, int,
 			    struct driver_table *, struct board_stat *[]);
-extern long motor_start_trans_com(struct motorRecord *, struct board_stat *[],
-				const char *);
-extern long motor_end_trans_com(struct motorRecord *, struct driver_table *, char *);
+extern long motor_start_trans_com(struct motorRecord *, struct board_stat *[]);
+extern long motor_end_trans_com(struct motorRecord *, struct driver_table *);
 
 #endif	/* INCmotordevComh */
