@@ -17,6 +17,10 @@
 #include <stdio.h>
 #include <vxWorks.h>
 #include <gpibIO.h>
+#ifdef	GPIB
+#include <semLib.h>
+#include <drvGpibInterface.h>
+#endif
 
 #define GPIB_SEND 0
 #define GPIB_RECEIVE 1
@@ -29,7 +33,11 @@
 
 volatile int gpibIODebug = 0;
 
-extern struct drvGpibSet drvGpib;       /* entry points to driver functions */
+#ifdef	GPIB
+extern struct drvGpibEt drvGpib;	/* entry points to driver functions */
+#else
+extern struct drvGpibSet drvGpib;	/* entry points to driver functions */
+#endif
 
 struct gpibMessage {
     struct dpvtGpibHead head;
@@ -54,9 +62,12 @@ struct gpibInfo *gpibIOInit(int link, int address)
     gpibInfo->head.device = address;
     gpibInfo->address = address;
     gpibInfo->semID = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
-
+#ifdef	GPIB
+    gpibInfo->head.pibLink = (*(drvGpib.getLink))(link, address);
+#else
     (*(drvGpib.ioctl))(GPIB_IO, link, NULL, IBGENLINK, 0, NULL);
     (*(drvGpib.ioctl))(GPIB_IO, link, NULL, IBGETLINK, 0, &gpibInfo->head.pibLink);
+#endif
     Debug(1, "gpibIOInit, address = %d\n", address);
     return(gpibInfo);
 }
