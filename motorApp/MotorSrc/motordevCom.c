@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:44 $
+Last Modified:	$Date: 2000-07-17 18:13:45 $
 */
 
 /*
@@ -54,10 +54,12 @@ Last Modified:	$Date: 2000-02-08 22:18:44 $
 extern "C" {
 #include	<dbAccess.h>
 #include	<recSup.h>
+#include	<dbEvent.h>
 }
 #else
 #include	<dbAccess.h>
 #include	<recSup.h>
+#include	<dbEvent.h>
 #endif
 #include	<devSup.h>
 
@@ -102,10 +104,7 @@ long motor_init_com(int after, int brdcnt, struct driver_table *tabptr,
 				 card_query.total_axis * sizeof(struct axis_stat));
     
 		for (motor = 0; motor < card_query.total_axis; motor++)
-		{
 		   brdptr->axis_stat[motor].in_use = OFF;
-		   brdptr->axis_stat[motor].name = card_query.axis_names[motor];
-		}
 	    }
 	}
     }
@@ -231,13 +230,13 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     else if (signal < 0 || signal >= brdptr->total_axis)
     {
 	recGblRecordError(S_db_badField, (void *) mr,
-	    (char *) "devOMS (init_record_com) signal does not exist!");
+	    (char *) "motor_init_record_com(): signal does not exist!");
 	rtnStat = S_db_badField;
     }
     else if (brdptr->axis_stat[signal].in_use == YES)
     {
 	recGblRecordError(S_db_badField, (void *) mr,
-	    (char *) "devOmsCom (init_record_com) motor already in use!");
+	    (char *) "motor_init_record_com(): motor already in use!");
 	rtnStat = S_db_badField;
     }
 
@@ -384,15 +383,13 @@ long motor_update_values(struct motorRecord * mr)
 
 
 /*
-FUNCTION... long motor_start_trans_com(struct motorRecord *, struct board_stat **, const char *)
+FUNCTION... long motor_start_trans_com(struct motorRecord *, struct board_stat **)
 USAGE... Start building a transaction.
 NOTES... This function MUST BE reentrant.
 */
 
-long motor_start_trans_com(struct motorRecord *mr, struct board_stat **sptr,
-			 const char *init_str)
+long motor_start_trans_com(struct motorRecord *mr, struct board_stat **sptr)
 {
-    struct board_stat *brdptr;
     int card = mr->out.value.vmeio.card;
     int axis = mr->out.value.vmeio.signal;
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
@@ -414,29 +411,18 @@ long motor_start_trans_com(struct motorRecord *mr, struct board_stat **sptr,
     motor_call->message[0] = (char) NULL;
     motor_call->postmsgptr = (char) NULL;
     motor_call->termstring = (char) NULL;
-
-    if (init_str != NULL)
-	strcat(motor_call->message, init_str);
-
-    /* Check for card/signal before building command - allow callback to
-     * continue if no card/signal for simulation mode. */
-    brdptr = sptr[card];
-    if (brdptr->exists == YES && axis < brdptr->total_axis)
-	motor_call->message[1] = brdptr->axis_stat[axis].name;
-    else
-	motor_call->message[1] = '*';
+    
     return (0);
 }
 
 
 /*
-FUNCTION... long motor_end_trans_com(struct motorRecord *, struct driver_table *, char *)
+FUNCTION... long motor_end_trans_com(struct motorRecord *, struct driver_table *)
 USAGE... Finish building a transaction.
 NOTES... This function MUST BE reentrant.
 */
 
-long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr,
-			 char *cmnd_line_terminator)
+long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
@@ -445,14 +431,22 @@ long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr,
     rc = OK;
     motor_call = &(trans->motor_call);
     if ((*trans->tabptr->card_array)[motor_call->card] == NULL)
+    {
+	/* If the controller does not exits, then set "done moving"
+	 * and communication error TRUE.
+	 */
+	mr->dmov = TRUE;
+	db_post_events(mr, &mr->dmov, DBE_VALUE);
+	mr->msta |= CNTRL_COMM_ERR;
 	return(rc = ERROR);
+    }
 
     switch (trans->state)
     {
 	case BUILD_STATE:
 	    /* shut off command build in process thing */
 	    trans->state = IDLE_STATE;
-	    rc = (*tabptr->send) (motor_call, tabptr, cmnd_line_terminator);
+	    rc = (*tabptr->send) (motor_call, tabptr);
 	    break;
 
 	case IDLE_STATE:
