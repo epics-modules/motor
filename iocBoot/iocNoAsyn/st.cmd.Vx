@@ -22,8 +22,8 @@ cd startup
 dbLoadDatabase("$(TOP)/dbd/NoMPFVx.dbd")
 NoMPFVx_registerRecordDeviceDriver(pdbbase)
 
-dbLoadRecords("$(TOP)/db/NoMPF.db")
-#!dbLoadRecords("$(TOP)/motorExApp/Db/SoftMotorEx.db","user=rls,motor=m1", startup)
+dbLoadTemplate("motor.substitutions")
+#!dbLoadRecords("$(TOP)/motorApp/Db/SoftMotorEx.db","user=rls,motor=m1", startup)
 
 # OMS VME driver setup parameters: 
 #     (1)cards, (2)base address(short, 16-byte boundary), 
@@ -62,5 +62,16 @@ dbLoadRecords("$(TOP)/db/NoMPF.db")
 
 #!config0="AX LH PSM; AY LL PSO; AZ LL PSO; AT LL PSO; AU LH PSO; AV LH PSO; AR LH PSO; AS LH PSO;"
 #!MAXvConfig(0, config0)
+
+
+# PMAC VME driver setup parameters: 
+#     (1)cards, (2) VME Address Type (24,32)
+#     (3)Mailbox base address, (4)DPRAM base address, 
+#     (5)interrupt vector (0=disable or  64 - 255),
+#     (6)interrupt level (1 - 6),
+#     (7)motor task polling rate (min=1Hz,max=60Hz)
+#!PmacSetup(1, 32, 0xB07FA000, 0xB0700000, 0, 5, 2)
+#!PmacSetup(1, 24, 0x7FA000, 0x700000, 0, 5, 2)
+#!drvPmacdebug = 4
 
 iocInit
