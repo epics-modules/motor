@@ -1,0 +1,17 @@
+d_spacing variable inline double "" "" 1  1  3.13555
+Io        device scaler soft_scaler "" "" 0 0 0 timer1 energy 101 ./i0.dat 0
+It        device scaler soft_scaler "" "" 0 0 0 timer1 energy 101 ./it.dat 0
+#rls:m2    device motor soft_motor "" "" 250000 0 -20000000 20000000 0 -1 -1 5e-05 0 deg 10000 0 2000
+energy    device motor energy_motor "" "" 0 0 0 1e+08 0 -1 -1 1 0 eV rls:m1 d_spacing 0.017453
+timer1    device timer soft_timer "" ""
+#
+#  Newport test records
+#
+newport_rs232 interface rs232 tty "" "" 9600 8 N 1 N 0x0d 0x0d /dev/ttyb
+newport       interface generic mm4000 "" "" newport_rs232
+rls:m1        device motor mm4000_motor "" "" 0 0 -1.0e38 1.0e38 0 -1 -1 1 0 deg newport 1
+#
+#  IMS test records
+#
+#ims_rs232     interface rs232 tty "" "" 9600 8 N 1 N 0x0d0a 0x0d0a /dev/ttyS0
+#rls:m3        device motor panther_hi "" "" 0 0 -10000000 10000000 0 -1 -1 1 0 steps ims_rs232 0 18340 2001 5 5 8 F 1 6 50 -1
