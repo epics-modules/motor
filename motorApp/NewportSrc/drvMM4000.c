@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.c
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:53 $
+Last Modified:	$Date: 2000-03-03 22:27:22 $
 */
 
 /*
@@ -541,7 +541,7 @@ int MM4000Setup(int num_cards,	/* maximum number of controllers in system.  */
 /* MM4000Config()                                    */
 /*****************************************************/
 int MM4000Config(int card,	/* card being configured */
-            int port_type,      /* GPIB_PORT or RS232_PORT */
+            PortType port_type,	/* GPIB_PORT or RS232_PORT */
 	    int addr1,          /* = link for GPIB or hideos_card for RS-232 */
             int addr2)          /* GPIB address or hideos_task */
 {
