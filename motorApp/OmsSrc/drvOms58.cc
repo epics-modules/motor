@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-12 18:18:48 $
+Last Modified:	$Date: 2003-05-22 17:24:25 $
 */
 
 /*
@@ -95,6 +95,8 @@ extern "C" {
 #include	"motor.h"
 #include	"motordevCom.h"
 #include	"drvOms58.h"
+
+#include	"epicsExport.h"
 
 #define PRIVATE_FUNCTIONS 1	/* normal:1, debug:0 */
 
@@ -190,6 +192,8 @@ struct
     long (*report) (int);
     long (*init) (void);
 } drvOms58 = {2, report, init};
+
+epicsExportAddress(drvet, drvOms58);
 
 STATIC struct thread_args targs = {SCAN_RATE, &oms58_access};
 

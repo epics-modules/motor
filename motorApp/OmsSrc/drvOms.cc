@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-14 14:55:14 $
+Last Modified:	$Date: 2003-05-22 17:24:08 $
 */
 
 /*
@@ -88,6 +88,8 @@ extern "C" {
 
 #include	"motor.h"
 #include	"drvOms.h"
+
+#include	"epicsExport.h"
 
 #define PRIVATE_FUNCTIONS 1	/* normal:1, debug:0 */
 #define STATIC static
@@ -174,6 +176,8 @@ struct
     long (*report) (int);
     long (*init) (void);
 } drvOms = {2, report, init};
+
+epicsExportAddress(drvet, drvOms);
 
 STATIC struct thread_args targs = {SCAN_RATE, &oms_access};
 

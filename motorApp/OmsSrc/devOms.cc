@@ -2,9 +2,9 @@
 FILENAME...	devOms.c
 USAGE... Device level support for OMS VME8 and VME44 models.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-03 17:13:30 $
+Last Modified:	$Date: 2003-05-22 17:23:22 $
 */
 
 /*
@@ -58,6 +58,8 @@ Last Modified:	$Date: 2003-02-03 17:13:30 $
 #include	"drvOms.h"
 #include	"devOmsCom.h"
 
+#include	"epicsExport.h"
+
 #define STATIC static
 
 extern int oms44_num_cards;
@@ -77,6 +79,8 @@ struct motor_dset devOMS =
     oms_build_trans,
     oms_end_trans
 };
+
+epicsExportAddress(dset,devOMS);
 
 STATIC struct board_stat **oms_cards;
 STATIC const char errmsg[] = {"\n\n!!!ERROR!!! - Oms driver uninitialized.\n"};

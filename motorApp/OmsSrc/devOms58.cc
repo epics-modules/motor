@@ -2,9 +2,9 @@
 FILENAME...	devOms58.c
 USAGE...	Motor record device level support for OMS VME58.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-03 17:13:59 $
+Last Modified:	$Date: 2003-05-22 17:23:47 $
 */
 
 /*
@@ -59,6 +59,8 @@ Last Modified:	$Date: 2003-02-03 17:13:59 $
 #include	"drvOms58.h"
 #include	"devOmsCom.h"
 
+#include	"epicsExport.h"
+
 #define STATIC static
 
 extern int oms58_num_cards;
@@ -79,6 +81,7 @@ struct motor_dset devOms58 =
     oms_end_trans
 };
 
+epicsExportAddress(dset,devOms58);
 
 STATIC struct board_stat **oms_cards;
 STATIC const char errmsg[] = {"\n\n!!!ERROR!!! - Oms58 driver uninitialized.\n"};
