@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:45 $
+Last Modified:	$Date: 2000-03-03 22:19:55 $
 */
 
 /*
@@ -44,6 +44,25 @@ Last Modified:	$Date: 2000-02-08 22:18:45 $
 
 #include <rngLib.h>
 
+
+/* Controller communication port type, followed by status. */
+enum PortType
+{
+    GPIB_PORT = 0,
+    RS232_PORT		/* = 1 */
+};
+
+enum CommStatus
+{
+    NORMAL,
+    COMM_ERR
+};
+
+#ifndef __cplusplus
+typedef enum PortType PortType;
+typedef enum CommStatus CommStatus;
+#endif
+
 /*
 Valid command types for the driver. The order is of importance; 0 is
 lowest importance.  Device support will choose the greatest one to
@@ -71,7 +90,8 @@ use as the driver transaction type.
 /* message queue management - device and driver support only */
 struct mess_node
 {
-    CALLBACK callback;
+    CALLBACK callback;	/* !!WARNING!! - MUST be 1st structure member. Calls to
+		    callbackRequest(CALLBACK *) use pointer to mess_node. */
     int signal;
     int card;
     unsigned char type;
