@@ -8,6 +8,7 @@ DIRS += MotorSrc
 
 # Select individual device/driver modules by removing the "#!" comment.
 
+#!DIRS += DeltaTauSrc
 #!DIRS += OmsSrc
 #!DIRS += SoftMotorSrc
 #!DIRS += V544Src
