@@ -2,9 +2,9 @@
 FILENAME...	serialIOMPF.cc
 USAGE...	Interface between MPF and motor record device drivers.
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2003-09-17 16:43:05 $
+Version:	$Revision: 1.12 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2003-10-23 19:13:50 $
 */
 
 /*
@@ -119,8 +119,8 @@ int serialIO::serialIOSend(char const *buffer, int buffer_len, int timeout)
     if (pmess->getType() == messageTypeChar8Array) {
         prm = (Char8ArrayMessage *)pmess;
         status = prm->status;
-        if (status) Debug(1, "serialIOSend: error receiving message, status=%d\n",
-                                                status);
+        if (status)
+	    Debug(1, "serialIOSend: error receiving message, status=%d\n", status);
         Debug(4, "serialIOSend: received message, status=%d\n", status);
     } else {
         epicsPrintf("serialIOInit: incorrect message type received = %d\n",
