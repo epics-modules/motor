@@ -9,10 +9,6 @@
 
 #SUPPORT=
 
-# Define the following if MPF is defined (i.e., if either serial
-# or GPIB motor controller support is required).
-#MPF_SERIAL=$(SUPPORT)/mpfSerial/mpfSerial1-3
-
 # If the EPICS GPIB Module from Benjamin Franksen is used, then remove the '#'
 # from the following and modify the motorApp/CommSrc/Makefile.Vx file per
 # instructions found there.  If GPIB driver support is from EPICS base, then
@@ -21,15 +17,19 @@
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then MPF must be defined.
-#MPF=$(SUPPORT)/mpf2-1
+#MPF=$(SUPPORT)/mpf2-2
 
 #EPICS_BASE=$(SUPPORT)/../base
 
 # The following must be defined if motorExApp is to be built.
-TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
+#TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
+#MSI=
 
 # The following must be defined if the "WithMPF" example in motorExApp is to
 # be built.
+#IPAC=$(SUPPORT)/ipac
+
+#GPIB is not yet supported!
 #MPF_GPIB=$(SUPPORT)/mpfGpib/mpfGpib1-4
 
 # The following must be defined for the MXmotor device driver.
