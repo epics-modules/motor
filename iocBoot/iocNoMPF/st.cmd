@@ -26,12 +26,12 @@ dbLoadRecords("../../db/NoMPF.db")
 #     (1)cards, (2)axes per card, (3)base address(short, 16-byte boundary), 
 #     (4)interrupt vector (0=disable or  64 - 255), (5)interrupt level (1 - 6),
 #     (6)motor task polling rate (min=1Hz,max=60Hz)
-#omsSetup(1, 8, 0xFC00, 180, 5, 60)
+#omsSetup(1, 8, 0xFC00, 180, 5, 10)
 
 # OMS VME58 driver setup parameters: 
 #     (1)cards, (2)axes per card, (3)base address(short, 4k boundary), 
 #     (4)interrupt vector (0=disable or  64 - 255), (5)interrupt level (1 - 6),
 #     (6)motor task polling rate (min=1Hz,max=60Hz)
-oms58Setup(6, 8, 0x1000, 190, 4, 10)
+oms58Setup(1, 8, 0x1000, 190, 5, 10)
 
 iocInit
