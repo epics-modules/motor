@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.19 $
+Version:	$Revision: 1.20 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-19 16:24:10 $
+Last Modified:	$Date: 2002-07-05 19:13:24 $
 */
 
 /*
@@ -138,9 +138,12 @@ Last Modified:	$Date: 2002-04-19 16:24:10 $
  *		      without reading the external readback device (RDBL).
  *		      init_record() was causing LINK alarms.
  * .41 03-25-02 rls - RES=MRES.  RES preserved for backward compatibility only.
- *		    - Eliminated "Set Encoder Ratio" motor command.
  *		    - Range check JVEL when VMAX or VBAS change.
- *		    - Do backlash in a separate command; after move completed .
+ *		    - Do backlash in a separate command; after move completed.
+ * .42 07-05-02 rls - Force RDBD >= MRES.
+ *                  - Do another update after Done due to LS error.
+ *                  - Seperate +/- limit switch status bits.
+ *		    - CDIR matches TDIR and RA_DIRECTION.
  */
 
 #define VERSION 4.5
@@ -475,19 +478,13 @@ STATIC void callbackFunc(struct callback * pcb)
 
 Calculate minumum retry deadband (.rdbd) achievable under current
 circumstances, and enforce this minimum value.
+Make RDBD >= MRES.
 ******************************************************************************/
 STATIC void enforceMinRetryDeadband(motorRecord * pmr)
 {
     float min_rdbd;
-    int encoder = (pmr->msta & EA_PRESENT) && pmr->ueip;
-    int backlash = pmr->bdst > 0.;
 
-    if (backlash && encoder)
-	min_rdbd = 0.51 * (fabs(pmr->eres) + fabs(pmr->mres));
-    else if (encoder)
-	min_rdbd = 0.51 * MAX(fabs(pmr->eres), fabs(pmr->mres));
-    else
-	min_rdbd = 0.51 * fabs(pmr->mres);
+    min_rdbd = fabs(pmr->mres);
 
     if (pmr->rdbd < min_rdbd)
     {
@@ -1142,18 +1139,9 @@ STATIC long process(motorRecord * pmr)
 	 */
 	process_motor_info(pmr, OFF);
 
-	/* For Soft Channel device support; skip most record processing if
-	 * called due to readback updates.
-	 */
-	if (pmr->dmov)
-	    goto process_exit;
-
 	if (pmr->movn)
 	{
-	    int sign_rdif = (pmr->rdif >= 0) ? 0 : 1;
-            mmap_field mmap_bits;
-
-	    mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
+	    int sign_rdif = (pmr->rdif < 0) ? 0 : 1;
 
 	    /* This is a motor-in-motion update from device support. */
 	    /*
@@ -1180,21 +1168,32 @@ STATIC long process(motorRecord * pmr)
 	}
 	else
 	{
+            mmap_field mmap_bits;
+
+	    mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
+
 	    /* Motor has stopped. */
 	    /* Assume we're done moving until we find out otherwise. */
 	    pmr->dmov = TRUE;
 	    MARK(M_DMOV);
 
-	    if (pmr->hls || pmr->lls)
-		pmr->pp = TRUE;
-
-	    if (pmr->pp)
+	    /* Do another update after LS error. */
+	    if (pmr->mip != MIP_DONE && (pmr->rhls || pmr->rlls))
 	    {
+		INIT_MSG();
+		WRITE_MSG(GET_INFO, NULL);
+		SEND_MSG();
+		pmr->pp = TRUE;
+		pmr->mip = MIP_DONE;
+		MARK(M_MIP);
+		goto process_exit;
+	    }
+	    
+	    if (pmr->pp)
 		status = postProcess(pmr);
-	    }			/* if (pmr->pp) */
 
 	    /* Are we "close enough" to desired position? */
-	    if (pmr->dmov)
+	    if (pmr->dmov && !(pmr->rhls || pmr->rlls))
 	    {
 		int ticks = (int) NINT(vxTicksPerSecond * pmr->dly);
 
@@ -1613,12 +1612,58 @@ STATIC long do_work(motorRecord * pmr)
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     if (MARKED(M_MRES) || MARKED(M_ERES) || MARKED(M_UEIP))
     {
+	/* encoder pulses, motor pulses */
+	double ep_mp[2];
+	long m;
+
 	if (MARKED(M_MRES))
 	    pmr->res = pmr->mres;	/* After R4.5, RES is always = MRES. */
+
+	/* Set the encoder ratio.  Note this is blatantly device dependent. */
+	if ((pmr->msta & EA_PRESENT) && pmr->ueip)
+	{
+	    /* defend against divide by zero */
+	    if (fabs(pmr->mres) < 1.e-9)
+	    {
+		pmr->mres = 1.;
+		MARK(M_MRES);
+	    }
+	    if (pmr->eres == 0.0)
+	    {
+		pmr->eres = pmr->mres;
+		MARK(M_ERES);
+	    }
+	    /*
+	     * OMS hardware can't handle negative motor or encoder resolution
+	     * in the SET_ENCODER_RATIO command. For now, we simply don't allow
+	     * motor and encoder resolutions to differ in sign.
+	     */
+	    if ((pmr->mres < 0.) != (pmr->eres < 0.))
+	    {
+		pmr->eres *= -1.;
+		MARK(M_ERES);
+	    }
+	    /* Calculate encoder ratio. */
+	    for (m = 10000000; (m > 1) &&
+		 (fabs(m / pmr->eres) > 1.e6 || fabs(m / pmr->mres) > 1.e6); m /= 10);
+	    ep_mp[0] = fabs(m / pmr->eres);
+	    ep_mp[1] = fabs(m / pmr->mres);
+	}
+	else
+	{
+	    ep_mp[0] = 1.;
+	    ep_mp[1] = 1.;
+	}
 
 	/* Make sure retry deadband is achievable */
 	enforceMinRetryDeadband(pmr);
 
+	if (pmr->msta & EA_PRESENT)
+	{
+	    INIT_MSG();
+	    WRITE_MSG(SET_ENC_RATIO, ep_mp);
+	    SEND_MSG();
+	}
 	if (pmr->set)
 	{
 	    pmr->pp = TRUE;
@@ -1751,8 +1796,17 @@ STATIC long do_work(motorRecord * pmr)
 		pmr->dmov = FALSE;
 		MARK(M_DMOV);
 		pmr->pp = TRUE;
-		if (pmr->jogr)
+		if (pmr->jogf)
+		    pmr->cdir = 1;
+		else
+		{
+		    pmr->cdir = 0;
 		    jogv = -jogv;
+		}
+
+		if (pmr->mres < 0.0)
+		    pmr->cdir = !pmr->cdir;
+
 		INIT_MSG();
 		WRITE_MSG(SET_ACCEL, &jacc);
 		WRITE_MSG(JOG, &jogv);
@@ -2070,7 +2124,7 @@ STATIC long do_work(motorRecord * pmr)
 		    WRITE_MSG(GO, NULL);
 		    pmr->pp = TRUE;	/* Do backlash from posprocess(). */
 		}
-		pmr->cdir = (pmr->rdif >= 0.0) ? 0 : 1;
+		pmr->cdir = (pmr->rdif < 0.0) ? 0 : 1;
 		SEND_MSG();
 	    }
 	}
@@ -3067,6 +3121,7 @@ STATIC void
     short old_lls = pmr->lls;
     short old_athm = pmr->athm;
     int dir = (pmr->dir == motorDIR_Pos) ? 1 : -1;
+    BOOLEAN ls_active;
 
     /*** Process record fields. ***/
 
@@ -3100,14 +3155,12 @@ STATIC void
     if (pmr->tdir != old_tdir)
 	MARK(M_TDIR);
 
-    /* Get motor-now-moving indicator. */
-    pmr->movn = (status & (RA_DONE | RA_PROBLEM | RA_OVERTRAVEL)) ? 0 : 1;
-    if (pmr->movn != old_movn)
-	MARK(M_MOVN);
-
     /* Get states of high, low limit switches. */
-    pmr->rhls = (status & RA_OVERTRAVEL) && pmr->tdir;
-    pmr->rlls = (status & RA_OVERTRAVEL) && !pmr->tdir;
+    pmr->rhls = (status & RA_PLUS_LS)  &&  pmr->cdir;
+    pmr->rlls = (status & RA_MINUS_LS) && !pmr->cdir;
+
+    ls_active = (pmr->rhls || pmr->rlls) ? ON : OFF;
+    
     pmr->hls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rhls : pmr->rlls;
     pmr->lls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rlls : pmr->rhls;
     if (pmr->hls != old_hls)
@@ -3115,6 +3168,14 @@ STATIC void
     if (pmr->lls != old_lls)
 	MARK(M_LLS);
 
+    /* Get motor-now-moving indicator. */
+    if (ls_active == ON || (status & (RA_DONE | RA_PROBLEM)))
+	pmr->movn = 0;
+    else
+	pmr->movn = 1;
+    if (pmr->movn != old_movn)
+	MARK(M_MOVN);
+    
     /* Get state of motor's or encoder's home switch. */
     if ((status & EA_PRESENT) && pmr->ueip)
 	pmr->athm = (status & EA_HOME) ? 1 : 0;
