@@ -110,6 +110,15 @@ Modification Log from V4.3 to V4.4
 	File modified: motorRecord.c - Root cause in do_work() was that under
 			the above conditions, LVAL was not updated.
 
+6) The following scenario would put the motor record into an invalid state.
+	First, start the motor moving by giving it a new target position.
+	Next, while the motor is still moving, enter a new target position that
+	is beyond the software travel limit (HLM/LLM) .  The invalid target
+	position is rejected (as it should be), but when the first target
+	position is reached the MIP field is left in the MOVE state, rather
+	than the DONE state.
+	File modified: motorRecord.c - Modified do_work() LVIO logic to set
+				       DMOV true only if MIP is DONE.
 					
 Modification Log from V4.2 to V4.3
 ==================================
