@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.10 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:28:30 $
+Version:	$Revision: 1.11 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-20 21:04:06 $
 */
 
 /*****************************************************************
@@ -34,6 +34,9 @@ of this distribution.
  * .04 03/07/03 rls R3.14 conversion.
  * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .06 07/01/04 rls Converted from MPF to asyn.
+ * .07 09/20/04 rls - increase BUFF_SIZE; response was exceeding 13 characters.
+ *                  - support for 32axes/controller.
+ *                  - remove '?' command line padding.
  */
 
 /*
@@ -64,7 +67,7 @@ DESIGN LIMITATIONS...
 
 #define IM483PL_NUM_CARDS	8
 #define MAX_AXES		8
-#define BUFF_SIZE 13		/* Maximum length of string to/from IM483PL */
+#define BUFF_SIZE 50		/* Maximum length of string to/from IM483PL */
 
 
 /*----------------debugging-----------------*/
@@ -82,16 +85,16 @@ DESIGN LIMITATIONS...
 
 /* --- Local data. --- */
 int IM483PL_num_cards = 0;
-static char IM483PL_axis[8] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+static char *IM483PL_axis[] = {"A", "B", "C", "D", "E", "F", "G", "H"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
 
 /*----------------functions-----------------*/
 int recv_mess(int, char *, int);
-RTN_STATUS send_mess(int card, char const *com, char c);
-static int set_status(int card, int signal);
-static long report(int level);
+RTN_STATUS send_mess(int, char const *, char *);
+static int set_status(int, int);
+static long report(int);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
@@ -237,7 +240,7 @@ static int set_status(int card, int signal)
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
 
-    send_mess(card, "? ^", IM483PL_axis[signal]);
+    send_mess(card, " ^", IM483PL_axis[signal]);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
@@ -272,7 +275,7 @@ static int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, "? Z 0", IM483PL_axis[signal]);
+    send_mess(card, " Z 0", IM483PL_axis[signal]);
     recv_mess(card, buff, 1);
 
     motorData = atof(&buff[5]);
@@ -294,7 +297,7 @@ static int set_status(int card, int signal)
 
     plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
-    send_mess(card, "? ] 0", IM483PL_axis[signal]);
+    send_mess(card, " ] 0", IM483PL_axis[signal]);
     recv_mess(card, buff, 1);
     rtnval = atoi(&buff[5]);
 
@@ -317,7 +320,7 @@ static int set_status(int card, int signal)
     else
 	status.Bits.RA_MINUS_LS = 0;
 
-    send_mess(card, "? ] 1", IM483PL_axis[signal]);
+    send_mess(card, " ] 1", IM483PL_axis[signal]);
     recv_mess(card, buff, 1);
     rtnval = buff[5];
 
@@ -335,7 +338,7 @@ static int set_status(int card, int signal)
 	motor_info->encoder_position = 0;
     else
     {
-	send_mess(card, "? z 0", IM483PL_axis[signal]);
+	send_mess(card, " z 0", IM483PL_axis[signal]);
 	recv_mess(card, buff, 1);
 	motorData = atof(&buff[5]);
 	motor_info->encoder_position = (int32_t) motorData;
@@ -373,7 +376,7 @@ exit:
 /* send a message to the IM483PL board		     */
 /* send_mess()			                     */
 /*****************************************************/
-RTN_STATUS send_mess(int card, char const *com, char inchar)
+RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
@@ -396,11 +399,16 @@ RTN_STATUS send_mess(int card, char const *com, char inchar)
     }
 
     /* Make a local copy of the string and add the command line terminator. */
-    strcpy(local_buff, com);
+    if (name != NULL)
+    {
+	strcpy(local_buff, name);	    /* put in axis */
+	strcat(local_buff, com);
+    }
+    else
+	strcpy(local_buff, com);
+
     strcat(local_buff, "\n");
 
-    if (inchar != (char) NULL)
-	local_buff[0] = inchar;	    /* put in axis */
 
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
@@ -551,7 +559,7 @@ static int motor_init()
     
 	    for (total_axis = 0; total_axis < MAX_AXES; total_axis++)
 	    {
-		send_mess(card_index, "? Z 0", IM483PL_axis[total_axis]);
+		send_mess(card_index, " Z 0", IM483PL_axis[total_axis]);
 		status = recv_mess(card_index, buff, 1);
 		if (status <= 0)
 		    break;
