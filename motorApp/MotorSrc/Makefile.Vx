@@ -4,6 +4,12 @@ include $(TOP)/config/CONFIG_APP
 #----------------------------------------
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 
+# The following are used for debugging messages.
+#USR_CFLAGS += -DDEBUG
+#USR_CXXFLAGS += -DDEBUG
+
+#USR_CFLAGS += -DDMR_SOFTMOTOR_MODS
+
 # The following are required for all motor record configurations.
 SRCS.c += ../motorRecord.c ../motordevCom.c ../motordrvCom.c
 
