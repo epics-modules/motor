@@ -3,7 +3,6 @@ TOP = ../..
 include $(TOP)/configure/CONFIG
 
 # The following are used for debugging messages.
-#USR_CFLAGS += -DDEBUG
 #USR_CXXFLAGS += -DDEBUG
 
 INC += gpibIO.h serialIO.h
@@ -27,6 +26,9 @@ endif
 ifdef MPF
 SRCS += serialIOMPF.cc
 endif
+
+motorCOM_mpf_LIBS += mpf mpfEpics mpfSerial
+motorCOM_mpf_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
 
