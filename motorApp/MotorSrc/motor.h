@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:18:42 $
+Last Modified:	$Date: 2001-05-14 19:46:46 $
 */
 
 /*
@@ -78,7 +78,8 @@ enum motor_cmnd {
 	DISABL_TORQUE,	/* Disable Servo Closed-Loop Control. */
 	PRIMITIVE,	/* Primitive Controller command. */
 	SET_HIGH_LIMIT,	/* Set High Travel Limit. */
-	SET_LOW_LIMIT	/* Set Low Travel Limit. */
+	SET_LOW_LIMIT,	/* Set Low Travel Limit. */
+	JOG_VELOCITY	/* Change Jog velocity. */
 };
 
 #ifndef __cplusplus
