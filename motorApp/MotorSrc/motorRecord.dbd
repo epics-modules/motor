@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.10 $
+# Version:		$Revision: 1.11 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2003-06-05 15:54:08 $
+# Last Modified:	$Date: 2003-12-12 21:38:17 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -719,5 +719,11 @@ recordtype(motor) {
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
+	}
+	field(STUP,DBF_MENU) {
+		prompt("Status Update")
+		menu(menuYesNo)
+		pp(TRUE)
+		interest(3)
 	}
 }
