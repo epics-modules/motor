@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:	$Revision: 1.13 $
+Version:	$Revision: 1.14 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 21:10:34 $
+Last Modified:	$Date: 2004-12-21 17:19:34 $
 */
 
 /*
@@ -43,6 +43,10 @@ Last Modified:	$Date: 2004-09-20 21:10:34 $
  * .04 07/01/04 rls Converted from MPF to asyn.
  * .05 09/20/04 rls - support for 32axes/controller.
  *                  - remove '?' command string padding.
+ * .06 12/16/04 rls - asyn R4.0 support.
+ *		    - make debug variables always available.
+ *		    - MS Visual C compatibility; make all epicsExportAddress
+ *		      extern "C" linkage.
  */
 
 /*
@@ -69,15 +73,15 @@ DESIGN LIMITATIONS...
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvMDrivedebug = 0;
 	#define Debug(l, f, args...) {if (l <= drvMDrivedebug) printf(f, ## args);}
-	epicsExportAddress(int, drvMDrivedebug);
     #else
 	#define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
+volatile int drvMDrivedebug = 0;
+extern "C" {epicsExportAddress(int, drvMDrivedebug);}
 
 /* --- Local data. --- */
 int MDrive_num_cards = 0;
@@ -125,16 +129,11 @@ struct driver_table MDrive_access =
 struct
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvMDrive = {2, report, init};
 
-epicsExportAddress(drvet, drvMDrive);
+extern "C" {epicsExportAddress(drvet, drvMDrive);}
 
 static struct thread_args targs = {SCAN_RATE, &MDrive_access};
 
@@ -407,16 +406,18 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
-    int size;
+    int comsize, namesize;
+    int nwrite;
 
-    size = strlen(com);
+    comsize = (com == NULL) ? 0 : strlen(com);
+    namesize = (name == NULL) ? 0 : strlen(name);
 
-    if (size > MAX_MSG_SIZE)
+    if ((comsize + namesize) > MAX_MSG_SIZE)
     {
 	errlogMessage("drvMDrive.c:send_mess(); message size violation.\n");
 	return(ERROR);
     }
-    else if (size == 0)	/* Normal exit on empty input message. */
+    else if (comsize == 0)	/* Normal exit on empty input message. */
 	return(OK);
 
     if (!motor_state[card])
@@ -426,7 +427,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     }
 
     /* Make a local copy of the string and add the command line terminator. */
-    if (name != NULL)
+    if (namesize != 0)
     {
 	strcpy(local_buff, name);	    /* put in axis */
 	strcat(local_buff, com);
@@ -434,13 +435,11 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     else
 	strcpy(local_buff, com);
 
-    strcat(local_buff, "\n");
-
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
     pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
-		       COMM_TIMEOUT);
+		       COMM_TIMEOUT, &nwrite);
 
     return(OK);
 }
@@ -453,34 +452,34 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 static int eat_garbage(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    int timeout;
-    int flush = 0;
-    int len = 0;
+    int timeout = 0;
+    int nread = 0;
+    asynStatus status = asynError;
     int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
-	return (-1);
+	return(ERROR);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
 
     if (flag == FLUSH)
-	timeout = 0;
+	pasynOctetSyncIO->flush(cntrl->pasynUser);
     else
-	timeout	= COMM_TIMEOUT;
+	status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+					timeout, &nread, &eomReason);
 
-    /* Get the response. */      
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
-                            2, flush, timeout, &eomReason);
-
-    Debug(2, "eat_garbage(): len = %i\n", len);
-    if (len != 2)
+    Debug(2, "eat_garbage(): nread = %i\n", nread);
+    
+    if ((status != asynSuccess) || (nread <= 0))
+    {
         Debug(2, "eat_garbage(): com = \"%s\"\n", com);
-
-    com[0] = '\0';
+	com[0] = '\0';
+	nread = 0;
+    }
 
     /*Debug(2, "eat_garbage(): message = \"%s\"\n", com);*/
-    return (len);
+    return (nread);
 }
 
 
@@ -491,9 +490,9 @@ static int eat_garbage(int card, char *com, int flag)
 static int recv_mess(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    int timeout;
-    int flush = 0;
-    int len = 0;
+    int timeout = 0;
+    int nread = 0;
+    asynStatus status = asynError;
     int eomReason;
 
     /* Check that card exists */
@@ -503,23 +502,19 @@ static int recv_mess(int card, char *com, int flag)
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
 
     if (flag == FLUSH)
-	timeout = 0;
+	pasynOctetSyncIO->flush(cntrl->pasynUser);
     else
-	timeout	= COMM_TIMEOUT;
-
-    /* Get the response. */      
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
-                            1, flush, timeout, &eomReason);
+	status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+					timeout, &nread, &eomReason);
     
-    if (len == 0)
-	com[0] = '\0';
-    else
+    if ((status != asynSuccess) || (nread <= 0))
     {
-	com[len - 2] = '\0'; /* Strip off trailing <CR LF>. */
+	com[0] = '\0';
+	nread = 0;
     }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return(len);
+    return(nread);
 }
 
 
@@ -597,6 +592,8 @@ static int motor_init()
     int total_axis = 0;
     int status;
     asynStatus success_rtn;
+    static const char output_terminator[] = "\n";
+    static const char input_terminator[]  = "\r\n";
 
     initialized = true;	/* Indicate that driver is initialized. */
 
@@ -616,10 +613,15 @@ static int motor_init()
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
+				&cntrl->pasynUser, NULL);
 
 	if (success_rtn == asynSuccess)
 	{
+	    pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
+					   strlen(output_terminator));
+	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
+					  strlen(input_terminator));
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
             pasynOctetSyncIO->flush(cntrl->pasynUser);
