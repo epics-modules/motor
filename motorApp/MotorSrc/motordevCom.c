@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 18:13:45 $
+Last Modified:	$Date: 2001-11-12 21:46:34 $
 */
 
 /*
@@ -200,6 +200,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     ptrans->state = IDLE_STATE;
     ptrans->callback_changed = NO;
     ptrans->tabptr = tabptr;
+    ptrans->dpm = OFF;
 
     FASTLOCKINIT(&ptrans->lock);
     motor_call = &(ptrans->motor_call);
