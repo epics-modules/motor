@@ -1,12 +1,17 @@
+grecord(calc,"$(user):height") {
+	field(CALC,"1000")
+}
 grecord(calcout,"$(user):convertDriverValue") {
 	field(DESC,"Convert rotary to linear")
-	field(CALC,"TAN(A / 57.296) * 1000")
+	field(CALC,"TAN(A / 57.296) * B")
+	field(INPB,"$(user):height.VAL  PP MS")
 	field(OUT,"$(user):linear.DVAL  PP MS")
 }
 grecord(calcout,"$(user):convertReadbackValue") {
 	field(DESC,"Convert linear to rotary")
-	field(CALC,"ATAN(A / 1000) * 57.296")
+	field(CALC,"ATAN(A / B) * 57.296")
 	field(INPA,"$(user):linear.DRBV  CP MS")
+	field(INPB,"$(user):height.VAL  PP MS")
 }
 grecord(motor,"$(user):linear") {
 	field(DTYP,"OMS VME58")
