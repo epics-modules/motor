@@ -1,10 +1,10 @@
 /*
 FILENAME...	drvMAXv.cc
-USAGE...	Motor record driver level support for OMS model VME58.
+USAGE...	Motor record driver level support for OMS model MAXv.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-06-21 21:42:30 $
+Last Modified:	$Date: 2004-08-30 17:12:48 $
 */
 
 /*
@@ -74,8 +74,8 @@ extern "C" {
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
 
 /* jps: INFO messages - add RV and move QA to top */
-#define	ALL_INFO	"QA RP RE EA"	/* jps: add RV */
-#define	AXIS_INFO	"QA RP"		/* jps: add RV */
+#define	ALL_INFO	"QA EA"
+#define	AXIS_INFO	"QA"
 #define	ENCODER_QUERY	"EA ID"
 #define	AXIS_CLEAR	"CA"		/* Clear done of addressed axis */
 #define	DONE_QUERY	"RA"		/* ?? Is this needed?? */
@@ -114,8 +114,8 @@ static long report(int level);
 static long init();
 static void query_done(int, int, struct mess_node *);
 static int set_status(int card, int signal);
-RTN_STATUS send_mess(int card, char const *com, char c);
-int recv_mess(int, char *, int);
+static RTN_STATUS send_mess(int card, char const *com, char c);
+static int recv_mess(int, char *, int);
 static void motorIsr(int card);
 static int motor_init();
 static void MAXv_reset();
@@ -198,11 +198,6 @@ static void query_done(int card, int axis, struct mess_node *nodeptr)
 
     send_mess(card, DONE_QUERY, MAXv_axis[axis]);
     recv_mess(card, buffer, 1);
-
-#if (CPU == PPC604 || CPU == PPC603)    
-    if (strcmp(motor_state[card]->ident, "VME58 ver 2.35-8") == 0)
-	taskDelay(1);	/* Work around for intermittent wrong LS status. */
-#endif
 
     if (nodeptr->status.Bits.RA_PROBLEM)
 	send_mess(card, AXIS_STOP, MAXv_axis[axis]);
@@ -287,14 +282,14 @@ static int set_status(int card, int signal)
     {
 	/* get 4 peices of info from axis */
 	send_mess(card, ALL_INFO, MAXv_axis[signal]);
-	recv_mess(card, q_buf, 4);
+	recv_mess(card, q_buf, 2);
 	got_encoder = true;
     }
     else
     {
 	/* get 2 peices of info from axis */
 	send_mess(card, AXIS_INFO, MAXv_axis[signal]);
-	recv_mess(card, q_buf, 2);
+	recv_mess(card, q_buf, 1);
 	got_encoder = false;
     }
 
@@ -335,33 +330,7 @@ static int set_status(int card, int signal)
 	    }
 	    break;
 
-	case 1:		/* motor pulse count (position) */
-	    sscanf(p, "%index", &motorData);
-
-	    if (motorData == motor_info->position)
-	    {
-		if (nodeptr != 0)	/* Increment counter only if motor is moving. */
-		    motor_info->no_motion_count++;
-	    }
-	    else
-	    {
-		motor_info->no_motion_count = 0;
-		motor_info->position = motorData;
-	    }
-
-	    if (motor_info->no_motion_count > motionTO)
-	    {
-		status.Bits.RA_PROBLEM = 1;
-		send_mess(card, AXIS_STOP, MAXv_axis[signal]);
-		motor_info->no_motion_count = 0;
-		errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
-		    card, signal);
-	    }
-	    else
-		status.Bits.RA_PROBLEM = 0;
-	    break;
-
-	case 2:		/* encoder status */
+	case 1:		/* encoder status */
 	    en_stat = (struct encoder_status *) p;
 
 	    status.Bits.EA_SLIP       = (en_stat->slip_enable == 'E') ? 1 : 0;
@@ -375,6 +344,31 @@ static int set_status(int card, int signal)
 	}
     }
 
+    /* motor pulse count (position) */
+    motorData = pmotor->cmndPos[signal];
+
+    if (motorData == motor_info->position)
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
+    else
+    {
+	motor_info->no_motion_count = 0;
+	motor_info->position = motorData;
+    }
+
+    if (motor_info->no_motion_count > motionTO)
+    {
+	status.Bits.RA_PROBLEM = 1;
+	send_mess(card, AXIS_STOP, MAXv_axis[signal]);
+	motor_info->no_motion_count = 0;
+	errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
+	    card, signal);
+    }
+    else
+	status.Bits.RA_PROBLEM = 0;
+    
     /* Get encoder position */
     motorData = pmotor->encPos[signal];
 
@@ -385,7 +379,7 @@ static int set_status(int card, int signal)
 	struct motor_trans *trans = (struct motor_trans *) nodeptr->mrecord->dpvt;
 	if (trans->dpm == true)
 	{
-	    logMsg((char *) "Drive power failure at VME58 card#%d motor#%d\n",
+	    logMsg((char *) "Drive power failure at MAXv card#%d motor#%d\n",
 		       card, signal, 0, 0, 0, 0);
 	}
     }
@@ -475,7 +469,7 @@ errorexit:	errMessage(-1, "Invalid device directive");
 /* send a message to the OMS board		     */
 /* send_mess()			     */
 /*****************************************************/
-RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     volatile struct MAXv_motor *pmotor;
     epicsInt16 putIndex;
@@ -578,7 +572,7 @@ RTN_STATUS send_mess(int card, char const *com, char inchar)
  *  ENDFOR
  *  
  */
-int recv_mess(int card, char *com, int amount)
+static int recv_mess(int card, char *com, int amount)
 {
     volatile struct MAXv_motor *pmotor;
     int itera;
@@ -835,7 +829,8 @@ static int motorIsrSetup(int card)
 
     /* enable interrupt-when-done irq */
 
-    pmotor->status1_irq_enable = 0;	/* ???????????? */
+    pmotor->status1_irq_enable = 0x1;	/* Enable ALL interrupts. */
+    pmotor->status2_irq_enable = 0x0;
     return (OK);
 }
 
@@ -862,7 +857,7 @@ static int motor_init()
     /* Check for setup */
     if (MAXv_num_cards <= 0)
     {
-	Debug(1, "motor_init: *OMS58 driver disabled* \n MAXvSetup() is missing from startup script.\n");
+	Debug(1, "motor_init: MAXv driver disabled\nMAXvSetup() is missing from startup script.\n");
 	return (ERROR);
     }
 
@@ -875,7 +870,7 @@ static int motor_init()
     total_cards = MAXv_num_cards;
 
     if (rebootHookAdd((FUNCPTR) MAXv_reset) == ERROR)
-	Debug(1, "vme58 motor_init: MAXv_reset disabled\n");
+	Debug(1, "MAXv motor_init: MAXv_reset disabled\n");
 
     for (card_index = 0; card_index < MAXv_num_cards; card_index++)
     {
@@ -922,7 +917,11 @@ static int motor_init()
 	    pmotorState->motor_in_motion = 0;
 	    pmotorState->cmnd_response = false;
 
-	    pmotor->IACK_vector = MAXvInterruptVector + card_index;
+	    if (MAXvInterruptVector == 0)
+		pmotor->IACK_vector = 0;
+	    else
+		pmotor->IACK_vector = MAXvInterruptVector + card_index;
+
 	    pmotor->status1_flag.All = 0xFFFFFFFF;
 	    pmotor->status2_flag = 0xFFFFFFFF;
 	    /* Disable all interrupts */
