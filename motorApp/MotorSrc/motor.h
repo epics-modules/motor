@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-01 22:47:25 $
+Last Modified:	$Date: 2002-07-05 17:10:31 $
 */
 
 /*
@@ -68,6 +68,7 @@ enum motor_cmnd {
 	SET_VELOCITY,	/* Set Jog and Trajectory Velocity. */
 	SET_ACCEL,	/* Set Acceleration. */
 	GO,		/* Start previously programmed move. */
+	SET_ENC_RATIO,	/* Set Encoder Ratio. */
 	GET_INFO,	/* Update Motor Status. */
 	STOP_AXIS,	/* Stop Axis Motion. */
 	JOG,		/* Momentary Jog. */
@@ -103,7 +104,7 @@ typedef enum motor_cmnd motor_cmnd;
 /* axis and encoder status for return to requester */
 #define RA_DIRECTION		0x01	/* (last) 0=Negative, 1=Positive */
 #define RA_DONE			0x02	/* a motion is complete */
-#define RA_OVERTRAVEL		0x04	/* a limit switch has been hit */
+#define RA_PLUS_LS		0x04	/* plus limit switch has been hit */
 #define RA_HOME			0x08	/* The home signal is on */
 #define EA_SLIP			0x10	/* encoder slip enabled */
 #define EA_POSITION		0x20	/* position maintenence enabled */
@@ -115,6 +116,7 @@ typedef enum motor_cmnd motor_cmnd;
 #define GAIN_SUPPORT		0x800	/* Motor supports closed-loop position
 					    control. */
 #define CNTRL_COMM_ERR		0x1000	/* Controller communication error. */
+#define RA_MINUS_LS		0x2000	/* minus limit switch has been hit */
 
 /*
    The RA_PROBLEM status bit indicates that the driver has stopped the polling
