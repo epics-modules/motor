@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.c
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 17:19:28 $
+Last Modified:	$Date: 2001-10-02 21:33:56 $
 */
 
 /*
@@ -35,12 +35,17 @@ Last Modified:	$Date: 2000-07-17 17:19:28 $
  *
  * Modification Log:
  * -----------------
- * .01  10-20-97	mlr     initialized from drvOms58
- * .02  10-30-97        mlr     Replaced driver calls with gpipIO functions
- * .03  10-30-98        mlr     Minor code cleanup, improved formatting
- * .04  02-01-99        mlr     Added temporary fix to delay reading motor
- *                              positions at the end of a move.
- * .05  10-13-99	rls	modified for standardized motor record.
+ * .01 10-20-97 mlr initialized from drvOms58
+ * .02 10-30-97 mlr Replaced driver calls with gpipIO functions
+ * .03 10-30-98 mlr Minor code cleanup, improved formatting
+ * .04 02-01-99 mlr Added temporary fix to delay reading motor positions at
+ *			the end of a move.
+ * .05 10-13-99 rls modified for standardized motor record.
+ * .06 09-17-01 rls
+ *	- created a bit-field for motor status response.
+ *	- start_status() allows one retry after a communication error.
+ *	- set_status() sets RA_PROBLEM along with CNTRL_COMM_ERR to terminate
+ *		node.
  */
 
 
@@ -159,6 +164,24 @@ struct
 } drvMM4000 = {2, report, init};
 
 
+/* Motor status. */
+typedef union
+{
+    uint8_t All;
+    struct
+    {
+	BOOLEAN bit7		:1;	/* Bit #7 N/A. */
+	BOOLEAN bit6		:1;	/* Bit #6 N/A. */
+	BOOLEAN homels		:1;	/* Home LS. */
+	BOOLEAN minusTL		:1;	/* Minus Travel Limit. */
+	BOOLEAN plustTL		:1;	/* Plus Travel Limit. */
+	BOOLEAN direction	:1;	/* Motor direction: 0 - minus; 1 - plus. */
+	BOOLEAN NOT_power	:1;	/* Motor power 0 - ON; 1 - OFF. */
+	BOOLEAN inmotion	:1;	/* In-motion indicator. */
+    } Bits;
+} MOTOR_STATUS;
+
+
 /*********************************************************
  * Print out driver status report
  *********************************************************/
@@ -243,13 +266,18 @@ STATIC void start_status(int card)
 	cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 	send_mess(card, READ_STATUS, NULL);
 	status = recv_mess(card, cntrl->status_string, 1);
-	if (status <= 0)
-	    cntrl->status = COMM_ERR;
-	else
+	if (status > 0)
 	{
 	    cntrl->status = NORMAL;
 	    send_mess(card, READ_POSITION, NULL);
 	    recv_mess(card, cntrl->position_string, 1);
+	}
+	else
+	{
+	    if (cntrl->status == NORMAL)
+		cntrl->status = RETRY;
+	    else
+		cntrl->status = COMM_ERR;
 	}
     }
     else
@@ -264,10 +292,15 @@ STATIC void start_status(int card)
 	{
 	    cntrl = (struct MMcontroller *) motor_state[itera]->DevicePrivate;
 	    status = recv_mess(itera, cntrl->status_string, 1);
-	    if (status <= 0)
-		cntrl->status = COMM_ERR;
-	    else
+	    if (status > 0)
 		cntrl->status = NORMAL;
+	    else
+	    {
+		if (cntrl->status == NORMAL)
+		    cntrl->status = RETRY;
+		else
+		    cntrl->status = COMM_ERR;
+	    }
 	}
 	for (itera = 0; (itera < total_cards) && motor_state[itera]; itera++)
 	    send_mess(itera, READ_POSITION, NULL);
@@ -293,12 +326,27 @@ STATIC int set_status(int card, int signal)
     /* Message parsing variables */
     char *p, *tok_save;
     char buff[BUFF_SIZE];
-    int i, pos, status;
+    int itera, pos;
+    MOTOR_STATUS mstat;
     int rtn_state;
     double motorData;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
+    if (cntrl->status != NORMAL)
+    {
+	if (cntrl->status == COMM_ERR)
+	{
+	    motor_info->status |= CNTRL_COMM_ERR;
+	    motor_info->status |= RA_PROBLEM;
+	    return(1);
+	}
+	else
+	    return(0);
+    }
+    else
+	motor_info->status &= ~CNTRL_COMM_ERR;
+    
     nodeptr = motor_info->motor_motion;
 
     /* 
@@ -307,17 +355,15 @@ STATIC int set_status(int card, int signal)
      * bytes for the motors
      */
     pos = signal*5 + 3;	 /* Offset in status string */
-    status = cntrl->status_string[pos];
-    Debug(5, "set_status(): status byte = %x\n", status);
+    mstat.All = cntrl->status_string[pos];
+    Debug(5, "set_status(): status byte = %x\n", mstat.All);
 
-    if (status & M_MOTOR_DIRECTION)
-	motor_info->status |= RA_DIRECTION;
-    else
+    if (mstat.Bits.direction == OFF)
 	motor_info->status &= ~RA_DIRECTION;
-
-    if (status & M_AXIS_MOVING)
-	motor_info->status &= ~RA_DONE;
     else
+	motor_info->status |= RA_DIRECTION;
+
+    if (mstat.Bits.inmotion == OFF)
     {
 	motor_info->status |= RA_DONE;
 /* TEMPORARY FIX, Mark Rivers, 2/1/99. The MM4000 has reported that the
@@ -332,21 +378,23 @@ STATIC int set_status(int card, int signal)
 	    recv_mess(card, cntrl->position_string, 1);
 	}
     }
-
-    if ((status & M_PLUS_LIMIT) || (status & M_MINUS_LIMIT))
-	motor_info->status |= RA_OVERTRAVEL;
     else
+	motor_info->status &= ~RA_DONE;
+
+    if (mstat.Bits.plustTL == OFF && mstat.Bits.minusTL == OFF)
 	motor_info->status &= ~RA_OVERTRAVEL;
-
-    if (status & M_HOME_SIGNAL)
-	motor_info->status |= RA_HOME;
     else
+	motor_info->status |= RA_OVERTRAVEL;
+
+    if (mstat.Bits.homels == OFF)
 	motor_info->status &= ~RA_HOME;
-
-    if (status & M_MOTOR_POWER)
-	motor_info->status &= ~EA_POSITION;
     else
+	motor_info->status |= RA_HOME;
+
+    if (mstat.Bits.NOT_power == OFF)
 	motor_info->status |= EA_POSITION;
+    else
+	motor_info->status &= ~EA_POSITION;
 
     /* encoder status */
     motor_info->status &= ~EA_SLIP;
@@ -362,7 +410,8 @@ STATIC int set_status(int card, int signal)
     strcpy(buff, cntrl->position_string);
     tok_save = NULL;
     p = strtok_r(buff, ",", &tok_save);
-    for (i=0; i<signal; i++) p = strtok_r(NULL, ",", &tok_save);
+    for (itera = 0; itera < signal; itera++)
+	p = strtok_r(NULL, ",", &tok_save);
     Debug(6, "set_status(): position substring = %s\n", p);
     motorData = atof(p+3) / cntrl->drive_resolution[signal];
 
@@ -400,11 +449,6 @@ STATIC int set_status(int card, int signal)
 	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
-
-    if (cntrl->status == COMM_ERR)
-	motor_info->status |= CNTRL_COMM_ERR;
-    else
-	motor_info->status &= ~CNTRL_COMM_ERR;
 
     return(rtn_state);
 }
