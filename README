@@ -1,11 +1,8 @@
 Motor Record V4.4 Release Notice
 ================================
 
-Although the motor record software in this release is compatible with EPICS
-baseR3.13.1.1 and above, the directory structure, the "make" files and the
-configuration files are intended for the "unbundled" architecture of EPICS
-R3.13.2 and above.  See motor_release.html for a description of features and
-bug fixes.
+The motor record software in this release is compatible with EPICS baseR3.13.2
+to baseR3.13.4.
 
 
 Contents
@@ -29,8 +26,6 @@ uncommenting the appropriate line in ./motorApp/Makefile.
 	newportLib - Newport controllers; NewportSrc directory.
 	omsLib - Oregon Micro System controllers; OmsSrc directory.
 	softMotorLib - Soft Channel device support; SoftMotorSrc directory.
-	motorCOM_hideos - Communication interface between motor device/drivers
-		and Hideos; CommSrc directory.
 	motorCOM_mpf - Communication interface between motor device/drivers and
 		MPF; CommSrc directory.
 
@@ -94,15 +89,17 @@ Modification Log from V4.3 to V4.4
 
 3) Jog Velocity and Acceleration.  Two new fields (JVEL and JAR) were added to
 	support jog velocity and acceleration parameters.
-	Files modified: motorRecord.dbd - Added jog specific fields (JVEL and
-									JAR).
-			motorRecord.c - 
+	Files modified: motorRecord.dbd - Jog specific fields (JVEL and JAR).
+			motorRecord.c - Process JVEL in special().
 			devIM483[PL/SM].c, devMM[3/4]000.c,
-			devPM500.c, -  Added Jog Velocity motor command.
-			devOmsCom.c - 
+			devPM500.c, - Added Jog Velocity motor command.
+			devOmsCom.c - Added clear axis done flag command (CA)
+					to home and jog commands.  This is
+					needed so that JVEL does not see
+					done from previous command.
 
-4) Travel limits can be disabled by setting dial high and low limits equal;
-	i.e., DHLM = DLLM.
+4) Travel limits can be disabled by setting both the dial high and low limits
+	equal to zero; i.e., DHLM = DLLM = 0.
 	File modified: motorRecord.c
 
 5) A problem was discovered with entering target positions through RVAL.  If
@@ -136,6 +133,18 @@ and acceleration values for the PM500 controller were off by a factor of 1,000.
 3) HIDEOS is no longer supported.
 	Files modified: config/RELEASE - Removed HIDEOS path.
 			motorApp/CommSrc/Makefile.Vx - Removed HIDEOS.
+
+4) Added Mark Rivers soft channel modifications as a conditional compilation
+option (i.e., DMR_SOFTMOTOR_MODS).
+	Files modified: motorApp/MotorSrc/Makefile.Vx
+			motorApp/MotorSrc/motorRecord.c
+			motorApp/SoftMotorSrc/Makefile.Vx
+			motorApp/SoftMotorSrc/devSoft.h
+			motorApp/SoftMotorSrc/devSoft.c
+
+5) The Soft Channel device driver example, softex.db, was removed from
+motorExApp/Db and replaced with a GDCT compatible copy, SoftMotorEx.db.  The
+corresponding GDCT data file is SoftMotorEx.
 			
 
 
