@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.h
 USAGE... This file contains driver "include" information that is specific to
 	 the MicroMo MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-16 15:14:55 $
+Last Modified:	$Date: 2004-07-16 19:25:33 $
 */
 
 /*
@@ -67,6 +67,7 @@ Last Modified:	$Date: 2004-03-16 15:14:55 $
  * -----------------
  * .01	08/27/2002  kmp  copied from drvIM483.h (rev 1.1, mod .01) and
  *			 customized for the MVP2001.
+ * .02  07/12/2004  rls  Converted from MPF to asyn.
  *
  */
 
@@ -75,20 +76,19 @@ Last Modified:	$Date: 2004-03-16 15:14:55 $
 
 #include "motor.h"
 #include "motordrvCom.h"
-#include "serialIO.h"
+#include "asynDriver.h"
+#include "asynSyncIO.h"
 
-#define SERIAL_TIMEOUT	2000 /* Command timeout in msec */
+#define COMM_TIMEOUT 2			/* Command timeout in seconds. */
 
 
 /* MVP2001 (chain) specific data is stored in this structure. */
 struct MVPcontroller
 {
-    int port_type;			/* GPIB_PORT or RS232_PORT 		*/
-    serialIO *serialInfo;  		/* For RS-232 				*/
-    int serial_card;            	/* Card on which Hideos is running 	*/
-    char serial_task[20];		/* Hideos task name for serial port 	*/
-    int maxCurrent[MAX_AXIS];	   	/* Maximum current (in mA) 		*/
-    int encoderCpr[MAX_AXIS];	   	/* Encoder counts per revolution 	*/
+    asynUser *pasynUser;		/* For RS-232				*/
+    char asyn_port[80];			/* asyn port name			*/
+    int maxCurrent[MAX_AXIS];		/* Maximum current (in mA) 		*/
+    int encoderCpr[MAX_AXIS];		/* Encoder counts per revolution 	*/
     CommStatus status;			/* Controller communication status. 	*/
 };
 
@@ -118,8 +118,8 @@ typedef union
 } MOTOR_STATUS;
 
 /* Function prototypes. */
-extern RTN_STATUS MVP2001Setup(int, int, int);
-extern RTN_STATUS MVP2001Config(int, int, int, const char *);
+extern RTN_STATUS MVP2001Setup(int, int);
+extern RTN_STATUS MVP2001Config(int, const char *);
 
 #endif	/* INCdrvMVP2001h */
 

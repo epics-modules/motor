@@ -3,9 +3,9 @@ FILENAME... MicroMoRegister.cc
 USAGE...    Register MicroMo MVP 2001 B02 motor controller device driver shell
 	    commands.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-16 15:15:37 $
+Last Modified:	$Date: 2004-07-16 19:25:09 $
 */
 
 /*****************************************************************
@@ -33,32 +33,27 @@ extern "C"
 
 // MicroMo Setup arguments
 static const iocshArg setupArg0 = {"Max. controller count", iocshArgInt};
-static const iocshArg setupArg1 = {"Max. motor count", iocshArgInt};
-static const iocshArg setupArg2 = {"Polling rate", iocshArgInt};
+static const iocshArg setupArg1 = {"Polling rate", iocshArgInt};
 // MicroMo Config arguments
 static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
-static const iocshArg configArg1 = {"PortType: 0 = GPIB, 1 = RS232", iocshArgInt};
-static const iocshArg configArg2 = {"MPF server location", iocshArgInt};
-static const iocshArg configArg3 = {"MPF server task name", iocshArgString};
+static const iocshArg configArg1 = {"asyn port name", iocshArgString};
 
 
-static const iocshArg * const MicroMoSetupArgs[3]  = {&setupArg0, &setupArg1,
-						     &setupArg2};
-static const iocshArg * const MicroMoConfigArgs[4] = {&configArg0, &configArg1,
-						     &configArg2, &configArg3};
+static const iocshArg * const MicroMoSetupArgs[2]  = {&setupArg0, &setupArg1};
+static const iocshArg * const MicroMoConfigArgs[3] = {&configArg0, &configArg1};
 
-static const iocshFuncDef  setupMicroMo = {"MicroMoSetup",  3, MicroMoSetupArgs};
-static const iocshFuncDef configMicroMo = {"MicroMoConfig", 4, MicroMoConfigArgs};
+static const iocshFuncDef  setupMicroMo = {"MicroMoSetup",  2, MicroMoSetupArgs};
+static const iocshFuncDef configMicroMo = {"MicroMoConfig", 2, MicroMoConfigArgs};
 
 static void setupMicroMoCallFunc(const iocshArgBuf *args)
 {
-    MVP2001Setup(args[0].ival, args[1].ival, args[2].ival);
+    MVP2001Setup(args[0].ival, args[1].ival);
 }
 
 
 static void configMicroMoCallFunc(const iocshArgBuf *args)
 {
-    MVP2001Config(args[0].ival, args[1].ival, args[2].ival, args[3].sval);
+    MVP2001Config(args[0].ival, args[1].sval);
 }
 
 

@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.cc
 USAGE...	Motor record driver level support for MicroMo
 		MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-03 20:02:57 $
+Last Modified:	$Date: 2004-07-16 19:26:11 $
 */
 
 /*
@@ -76,6 +76,7 @@ Last Modified:	$Date: 2004-03-03 20:02:57 $
  *			if the controller was power-cycled.
  * .04 02/06/04  rls    Eliminate erroneous "Motor motion timeout ERROR".
  * .05 02/13/04  rls	port to R3.14.x
+ * .06 07/12/04  rls	Converted from MPF to asyn.
  *
  */
 
@@ -119,7 +120,6 @@ MORE DESIGN LIMITATIONS
 #include <drvSup.h>
 #include "motor.h"
 #include "drvMVP2001.h"
-#include "serialIO.h"
 #include "epicsExport.h"
 
 #define MVP2001_NUM_CARDS	8
@@ -205,24 +205,13 @@ static long report(int level)
 	    struct controller *brdptr = motor_state[card];
 
 	    if (brdptr == NULL)
-		printf("    MVP2001 controller chain %d connection failed.\n", card);
+		printf("    MVP2001 controller chain #%d connection failed.\n", card);
 	    else
 	    {
 		struct MVPcontroller *cntrl;
 		cntrl = (struct MVPcontroller *) brdptr->DevicePrivate;
-		switch (cntrl->port_type)
-		{
-		    case RS232_PORT:							  
-		    	printf("    MVP2001 controller chain %d port type = RS-232, id: %s \n", 
-		    	       card,							  
-		    	       brdptr->ident);  					  
-		    	break;  							  
-		    default:								  
-		    	printf("    MVP2001 controller chain %d port type = Unknown, id: %s \n",
-		    	       card,							  
-		    	       brdptr->ident);  					  
-		    	break;  							  
-		}
+	    	printf("    MVP2001 controller chain #%d, port=%s, id: %s \n", card,
+		       cntrl->asyn_port, brdptr->ident);
 	    }
 	}
     }
@@ -482,8 +471,8 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct MVPcontroller *) motor_state[card]->DevicePrivate;
-    cntrl->serialInfo->serialIOSend(local_buff, strlen(local_buff), SERIAL_TIMEOUT);
-
+    pasynSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
+		       COMM_TIMEOUT);
     return(OK);
 }
 
@@ -497,6 +486,7 @@ static int recv_mess(int card, char *com, int flag)
     struct MVPcontroller *cntrl;
     char temp[BUFF_SIZE];
     int timeout;
+    int flush = 0;
     int len=0, lenTemp=0;
 
     /* Check that card exists */
@@ -508,10 +498,12 @@ static int recv_mess(int card, char *com, int flag)
     if (flag == FLUSH)
 	timeout = 0;
     else
-	timeout	= SERIAL_TIMEOUT;
+	timeout	= COMM_TIMEOUT;
 
-    lenTemp = cntrl->serialInfo->serialIORecv(temp, BUFF_SIZE, (char *) "\n", timeout);
-    len = cntrl->serialInfo->serialIORecv(com, BUFF_SIZE, (char *) "\n", timeout);
+    len = pasynSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE, (char *) "\n",
+                            1, flush, timeout);
+    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n",
+                            1, flush, timeout);
 
     Debug(5, "bytes: 1st call: %d\t2nd call: %d\n", lenTemp, len);
     
@@ -531,7 +523,6 @@ static int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 RTN_STATUS
 MVP2001Setup(int num_cards,	/* number of CHAINS of controllers 	*/
-	     int num_channels,	/* NOT Used. 				*/
 	     int scan_rate)	/* polling rate  (Min=1Hz, max=60Hz) 	*/
 {
     if (num_cards < 1 || num_cards > MVP2001_NUM_CARDS)
@@ -567,10 +558,8 @@ MVP2001Setup(int num_cards,	/* number of CHAINS of controllers 	*/
 *  MVP2001Config()				       *
 ********************************************************/
 RTN_STATUS
-MVP2001Config(int card,	/* CHAIN being configured 		*/
-              int port_type,      /* 1:RS232_PORT 			*/
-	      int location,       /* MPF server location */
-              const char *name)   /* MPF server task name */
+MVP2001Config(int card,		/* CHAIN being configured 		*/
+              const char *name)	/* asyn server task name */
 {
     struct MVPcontroller *cntrl;
 
@@ -581,20 +570,7 @@ MVP2001Config(int card,	/* CHAIN being configured 		*/
     motor_state[card]->DevicePrivate = calloc(1, sizeof(struct MVPcontroller));
     cntrl = (struct MVPcontroller *) motor_state[card]->DevicePrivate;
 
-    switch (port_type)
-    {
-    case GPIB_PORT:
-	/* GPIB not possible with MVP2001 */
-        break;
-    case RS232_PORT:
-        cntrl->port_type = port_type;
-        cntrl->serial_card = location;
-        strcpy(cntrl->serial_task, name);
-        break;
-    /* DeviceNet not yet implemented */
-    default:
-        return (ERROR);
-    }
+    strcpy(cntrl->asyn_port, name);
     return(OK);
 }
 
@@ -611,7 +587,7 @@ static int motor_init()
     char buff[BUFF_SIZE], limitStr[BUFF_SIZE];
     int total_axis = 0;
     int status;
-    bool success_rtn;
+    asynStatus success_rtn;
 
     buff[0] = limitStr[0] = '\0';
 
@@ -633,11 +609,9 @@ static int motor_init()
 	cntrl = (struct MVPcontroller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = false;
-	cntrl->serialInfo = new serialIO(cntrl->serial_card,
-					 cntrl->serial_task, &success_rtn);
+	success_rtn = pasynSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
 
-	if (success_rtn == false)
+	if (success_rtn == asynSuccess)
 	{
 	    /* Send a message to the board, see if it exists */    
 	    for (total_axis = 0; total_axis < MAX_AXIS; total_axis++)
@@ -654,11 +628,10 @@ static int motor_init()
 		    break;
 	    }
 	    brdptr->total_axis = total_axis;
-	    Debug(5, "brdptr->total_axis (number of controllers on chain %d) = %d\n", 
-	    		card_index, brdptr->total_axis);
+	    Debug(5, "brdptr->total_axis (number of controllers on chain %d) = %d\n", card_index, brdptr->total_axis);
 	}
 
-	if (success_rtn == false && total_axis > 0)
+	if (success_rtn == asynSuccess && total_axis > 0)
 	{
 	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;
