@@ -2,9 +2,9 @@
 FILENAME...	devMM3000.c
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-27 21:43:15 $
+Last Modified:	$Date: 2002-04-01 22:44:14 $
 */
 
 /*
@@ -106,7 +106,6 @@ static int MM3000_table[] = {
     IMMEDIATE,	/* SET_VELOCITY */
     IMMEDIATE,	/* SET_ACCEL */
     IMMEDIATE,	/* GO */
-    IMMEDIATE,	/* SET_ENC_RATIO */
     INFO,	/* GET_INFO */
     MOVE_TERM,	/* STOP_AXIS */
     VELOCITY,	/* JOG */
@@ -299,16 +298,6 @@ STATIC long MM3000_build_trans(motor_cmnd command, double *parms, struct motorRe
 	     * The MM3000 starts moving immediately on move commands, GO command
 	     * does nothing
 	     */
-	    break;
-	case SET_ENC_RATIO:
-	    /* MM3000 valid encoder ratio values < 10,000. */
-	    while (parms[0] > 10000.0 || parms[1] > 10000.0)
-	    {
-		parms[0] /= 10;
-		parms[1] /= 10;
-	    }
-	    if (cntrl->type[axis - 1] == STEPPER)
-		sprintf(buff, "%dER%d:%d", axis, (int) parms[0], (int) parms[1]);
 	    break;
 	case GET_INFO:
 	    /* These commands are not actually done by sending a message, but

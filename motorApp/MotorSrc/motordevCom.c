@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-27 21:24:31 $
+Last Modified:	$Date: 2002-04-01 22:45:33 $
 */
 
 /*
@@ -36,11 +36,12 @@ Last Modified:	$Date: 2002-03-27 21:24:31 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93	jbk     initialized
+ * .01  01-18-93 jbk initialized
  *      ...
- * .03  03-19-96	tmm     v1.10: modified encoder-ratio calculation
- * .04  11-26-96	jps     allow for bumpless-reboot on position
- * .04a 02-19-97    tmm     fixed for EPICS 3.13
+ * .03  03-19-96 tmm v1.10: modified encoder-ratio calculation
+ * .04  11-26-96 jps allow for bumpless-reboot on position
+ * .04a 02-19-97 tmm fixed for EPICS 3.13
+ * .05  04-01-02 rls Eliminated SET_ENC_RATIO.
  */
 
 
@@ -137,29 +138,16 @@ LOGIC...
     Update MSTA.
     Set axis assigned to a motor record indicator ON.
 
-    Set Initialize encoder indicator based on (MSTA indicates an encoder is
-	present, AND, UEIP set to YES).
-
-    IF Initialize encoder indicator is ON.
-	...
-	...
-    ELSE
-	Set local encoder ratio to unity.
-    ENDIF
-
     Set Initialize position indicator based on (DVEL != 0, AND, MRES != 0,
 	AND, the above "get_axis_info()" position == 0) [NOTE: non-zero controller
 	position takes precedence over autorestore position].
     Set Command Primitive Initialization string indicator based on (non-NULL "init"
 	pointer, AND, non-zero string length.
 
-    IF (Initialize position, OR, encoder, OR, string indicators are ON)
+    IF (Initialize position, OR, string indicators are ON)
 	Create initialization semaphore.
 	...
 	...
-	IF Initialize encoder indicator is ON.
-	    Send Set Encoder Ratio command to controller.
-	ENDIF
 	IF Initialize position indicator is ON.
 	    Send Load Position command to controller.
 	ENDIF
@@ -183,11 +171,10 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     struct motor_dset *pdset = (struct motor_dset *) (mr->dset);
     struct board_stat *brdptr;
     int card, signal;
-    BOOLEAN initEncoder, initPos, initString;
+    BOOLEAN initPos, initString;
     struct motor_trans *ptrans;
     MOTOR_AXIS_QUERY axis_query;
     struct mess_node *motor_call;
-    double ep_mp[2];		/* encoder pulses, motor pulses */
     int rtnStat;
 
     /* allocate space for private field - an motor_trans structure */
@@ -253,40 +240,12 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     mr->msta = axis_query.status;	/* status info */
     brdptr->axis_stat[signal].in_use = ON;
 
-/*jps: setting the encoder ratio was moved from init_record() remove  callbacks during iocInit */
-    /*
-     * Set the encoder ratio.  Note this is blatantly device dependent.
-     * Determine the number of encoder pulses and the number of motor pulses
-     * per engineering unit (EGU).  Send an array containing this information
-     * to device support.
-     */
-    initEncoder = ((mr->msta & EA_PRESENT) && mr->ueip) ? ON : OFF;
-    if (initEncoder == ON)
-    {
-	if (fabs(mr->mres) < 1.e-9)
-	    mr->mres = 1.;
-	if (fabs(mr->eres) < 1.e-9)
-	    mr->eres = mr->mres;
-	{
-	    int m;
-	    for (m = 10000000; (m > 1) && (fabs(m / mr->eres) > 1.e6 ||
-			fabs(m / mr->mres) > 1.e6); m /= 10);
-	    ep_mp[0] = m / mr->eres;	/* encoder pulses per ... */
-	    ep_mp[1] = m / mr->mres;	/* motor pulses */
-	}
-    }
-    else
-    {
-	ep_mp[0] = 1.;
-	ep_mp[1] = 1.;
-    }
-
     initPos = (mr->dval != 0 && mr->mres != 0 && axis_query.position == 0) ? ON : OFF;
     /* Test for command primitive initialization string. */
     initString = (mr->init != NULL && strlen(mr->init)) ? ON : OFF;
     
     /* Program the device if an encoder is present */
-    if (initPos == ON || initEncoder == ON || initString == ON)
+    if (initPos == ON || initString == ON)
     {
 	/* Semaphore used to hold initialization until device is programmed - cleared by callback. */
 	ptrans->initSem = semBCreate(SEM_Q_FIFO, SEM_EMPTY);
@@ -294,13 +253,6 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 	/* Switch to special init callback so that record will not be processed during iocInit. */
 	callbackSetCallback((void (*)(struct callbackPvt *)) motor_init_callback,
 			    &(motor_call->callback));
-	if (initEncoder == ON)
-	{
-	    (*pdset->start_trans)(mr);
-	    (*pdset->build_trans)(SET_ENC_RATIO, ep_mp, mr);
-	    (*pdset->end_trans)(mr);
-	}
-
 	if (initPos == ON)
 	{
 	    double setPos = mr->dval / mr->mres;

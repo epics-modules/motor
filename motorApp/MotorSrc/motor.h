@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:45:23 $
+Last Modified:	$Date: 2002-04-01 22:47:25 $
 */
 
 /*
@@ -68,7 +68,6 @@ enum motor_cmnd {
 	SET_VELOCITY,	/* Set Jog and Trajectory Velocity. */
 	SET_ACCEL,	/* Set Acceleration. */
 	GO,		/* Start previously programmed move. */
-	SET_ENC_RATIO,	/* Set Encoder Ratio. */
 	GET_INFO,	/* Update Motor Status. */
 	STOP_AXIS,	/* Stop Axis Motion. */
 	JOG,		/* Momentary Jog. */
