@@ -1,0 +1,338 @@
+Motor Record V4.1 Release Notice
+================================
+
+Although the motor record software in this release is compatible with EPICS
+baseR3.13.1.1 and above, the directory structure, the "make" files and the
+configuration files are intended for the "unbundled" architecture of EPICS
+R3.13.2 and above.  See motor_release.html for a description of features and
+bug fixes.
+
+
+Contents
+========
+
+This <supporttop> contains the following motor record related items:
+	- motor record and device driver database definitions.
+	- the record level support library.
+	- device/driver libraries for various controllers.
+	- motor record/device/driver level documentation.
+	- motor record release documentation.
+
+
+Site Specific Motor Record Configuration Options
+================================================
+
+Motor controller device/driver support that is either unwanted or unused
+throughout a specific site can be eliminated by commenting out the associated
+"DIRS +=" line in the <top>/motorApp/Makefile.
+
+
+Known Problems
+==============
+
+1) With the exception of jogging, motor record controlled backlash correction
+	does not work with the Newport MM4000.  Since the MM4000 controller
+	has its' own backlash compensation feature, there are no plans to fix
+	this in future releases.  Users of the MM4000 who need backlash
+	compensation should set the motor record's backlash distance to zero
+	and program the MM4000 controller's backlash compensation parameters.
+
+
+Modification Log from V4.0 to V4.1
+==================================
+
+1) Three errors in the OMS VME58 driver were found.  All the errors caused the
+same problem.  Namely, erroneous retries occurred intermittently when multiple
+axes were commanded to move on the same controller.  This error occurred
+because old position data was being passed back from the driver after Done
+was detected.  The erroneous intermittent retries occurred more often when the
+Oms setup parameters called for a high frequency (e.g., 60 Hz) "polling" rate
+and Oms interrupts were enabled.
+	File modified: drvOms58.c
+
+
+Modification Log from V3.5 to V4.0
+==================================
+
+1) EPICS base 3.13.1 compatibility.
+	- Changed dev{Connect/Disconnect}Interrupt() to
+		  dev{Connect/Disconnect}InterruptVME()
+	Files modified: drvOms.c, drvOms58.c
+
+2) Newport MM3000 Device Support.
+	- Renamed drvMM400.h -> drvMMCom.h
+	- Added device and driver support in source code files "devMM3000.c"
+		and "drvMM3000.c".
+	- Modified MM3000_build_trans() in "devMM3000.c" and
+		motor_end_trans_com() in "motordevCom.c" to prevent motor
+		commands from being sent if card does not exists.  Bus error
+		occurred with MM3000 device/driver when card did not exists
+		and motion was commanded from medm display.
+
+3) Eliminated the GAIN field and the associated SET_CGAIN command;
+	Files modified: motorRecord.dbd, motor.h, devMM3000.c, devMM4000.c,
+	devOmsCom.c, and motorRecord.c
+
+4) Previous releases of the motor record had a potential problem associated
+	with the homing function.  The motorx_all.adl MEDM display set the
+	HOM[F/R] fields on and off.  Depending on the pollRate defined in the
+	st.cmd Setup command and the speed at which the user toggled the
+	HOM[F/R] buttons; the record level software would turn off the DMOV
+	field when the HOM[F/R] button was turned off and a motor status update
+	had not yet been received.  As a result, when the motor completed it's
+	homing function the command positions (i.e., VAL, DVAL, RVAL) were not
+	updated.
+
+	All previous motor record releases contained the DMOV problem; the
+	commanded position update problem was limited to the previous release
+	(V3.5).  With this release, a dbPutField to either HOMF or HOMR is
+	valid on a FALSE to TRUE transition (i.e., 0 to 1), but a TRUE to FALSE
+	transition (i.e., 1 to 0) will result in an error.
+
+	- Modified motorRecord.dbd; added HOM[F/R] "special" processing.
+	- Modified motorRecord.c; since OPI can't reset HOM[F/R], postProcess()
+		does it; return error from special() if OPI tries to write to
+		HOM[F/R] when MIP indicates homing active.
+
+5) Previous releases of the motor record allowed the auto restore to take
+	precedence over the controller when initializing the target position
+	(i.e., DVAL).  With this release, if both the auto restore and
+	controller target position values are non-zero at boot-up, then DVAL
+	will be initialized from the controller's value.  In other words, the
+	controller's target position takes precedence.
+
+	- Modified motor_init_record_com() in motordevCom.c so that a "Load
+		Pos" command is issued only if the position from the
+		controller is zero.
+		
+6) Consolidated common driver local variables in the motordrvComCode.h file.
+	- Created motordrvComCode.h
+	- Moved common local variables from drvOms.c, drvOms58.c, drvMM3000.c,
+		drvMM4000.c
+
+7) Uninitialized Oms/Oms58 Driver Error Check. With previous release, if the
+	Oms or Oms58 driver was some how omitted from the database, a "... card
+	does not exist" error message would result.  With this release, an
+	explicit error check and corresponding error message (i.e., "Oms[58]
+	driver uninitialized.") results at record initialization if a required
+	driver is not initialized. (Because of the particulars of MM[3000/4000]
+	initialization, this is not an issue with Newport controllers.)
+
+	- Added pointer to initialized indicator to driver table structure in
+		motordrvCom.h
+	- Added error checks in oms_init() and oms_end_trans() in both devOms.c
+		and devOms58.c
+	- For drvOms.c, drvOms58.c, drvMM3000.c and drvMM4000.c
+		- initialized pointer to local initialized indicator in driver
+			table.
+		- set initialized indicator ON in init().
+		
+8) Both the MM3000 and MM4000 device driver support could generate a bus error
+	under the following conditions:
+	1) The user selected GPIB communication mode.
+	2) At boot-up, the driver could not communicate with the device,
+		resulting in a "... card does not exist!" error.
+	3) Motor motion is commanded.
+
+	- Modified MM3000_build_trans() and MM4000_build_trans() in devMM3000.c
+		and devMM4000.c, respectively, to test for NULL board pointer.
+		
+
+9) Eliminated MM3000 and MM4000 device driver "internal" offset.
+	- Removed "offset" from MM3000_build_trans() and MM4000_build_trans()
+		in devMM3000.c and devMM4000.c, respectively.
+	- Read controller's home preset position at boot-up; save and restore
+		save home preset position when "setting" DVAL or RVAL.
+
+10) For MM4000/40005 only, the controller's position resolution (TU controller
+	command) is read and saved so that the device driver can convert
+	between motor record "raw" positions and controller egu's.
+
+11) Modified report() in drvMM4000.c by adding message; "MM4000 controller #
+	connection failed."
+
+12) For the MM3000 when the GPIB communication interface is selected; sometimes
+	the MM3000 returns a NULL communication response.  Hence, set_status()
+	in drvMM3000.c was modified to detect a NULL response and resend the
+	status query.
+
+13) A jog request occurring during a jog induced backlash correction would,
+	intermittently, cause the MM4000 to go into an uncontrolled jog; i.e.,
+	the user would set JOG[F/R] false, but the jogging would not stop.
+	This occurred because the sequence of events were as follows:
+		<- mip = 0
+	JOGF=1 ->
+		<- mip = 1; Jog command
+	JOGF=0 ->
+		<- Stop command
+		<- Done
+		<- mip = 4; backlash command
+	JOGF=1 ->
+		<- Done
+		<- mip = 1; Jog command
+		<- mip = 4; backlash command
+	JOGF=0 ->
+
+	In the above event sequence, since mip=4 when JOGF is set to zero, no
+	stop command is sent.  The MM4000 only accepts one motion command at
+	a time.  Therefore, the last backlash command is ignored in the above
+	event sequence.  The end result is an uncontrolled jog operation.
+	
+	Modifications were made to motorRecord.c to fix this; in general, a
+	finite state machine was strictly enforced on jog request, jogging,
+	stopping a jog and the backlash after jogging.  Jog processing is
+	isolated from the JOG[F/R] fields.  Specifically,
+	
+	- Added two new state indicators to MIP; MIP_JOG_REQ and MIP_JOG_STOP.
+		The jog states now consist of the following; Start (mip=0),
+		Request, Jogging, Stopping and Backlash.
+	- In postProcess();
+		- replaced (MIP_JOGF | MIP_JOGR) with (MIP_JOG_STOP)
+		when testing for done stopping after jogging.
+		- replaced (pmr->jogf || pmr->jogr) with MIP_JOG_REQ
+		when testing for done stopping after jog.
+		- "Queued" jog request (stop and jog buttons both on)
+		processing has been moved from postProcess() to do_work().
+		- Skip backlash operation if backlash distance is zero.
+	- In maybeRetry();
+		- Clear MIP if Max retry count (RTRY) set to zero.
+		- When clearing MIP, don't clear MIP_JOG_REQ.
+	- In do_work();
+		- Detect and process "Queued" jog request.
+		- Use MIP state indicators rather than JOG[F/R] fields to
+		process jog function.
+		- Don't want "DVAL has changed..." logic to get processed when
+		doing jog stop or backlash.  Detect and do Normal Return.
+	- In special(); Set MIP_JOG_REQ on only if MIP=0 and the corresponding
+		hardware limit switch is not active.
+
+14) Eliminated device dependent code from process_messages() in motordrvCom.c;
+	specifically, removed concatenating a carriage return to end of
+	controller message.  The new method is to pass a pointer to the
+	command line terminator string in function arguments; beginning with
+	<device>_end_trans(), through motor_end_trans_com() in motordevCom.c,
+	to the "send()" function specified in the driver table.
+	Files modified: motordevCom.h, motordrvCom.h, devMM3000.c, devMM4000.c,
+	devOms.c, devOms58.c
+
+15) In motordrvCom.h, changed "controller" structure member "MMptr" to
+	"DevicePrivate".
+	Files modified: devMM3000.c, devMM4000.c
+
+16) All files were modified as follows:
+	- standard headers were added.
+	- original headers and modification history's were restored.
+	- all instances of #include <motorRecord.h> have been changed to
+	#include "motorRecord.h".  As Mark Rivers explained, 'Include files
+	which are in <> are not included in dependencies by GCC.  Thus, if
+	motorRecord.dbd is changed, devMM4000.c will not be recompiled unless
+	the <> are changed to "".'
+
+17) The task name associated with each device driver has been given a unique
+	name; i.e. "<device>_motor".  Previously, all the motor tasks were
+	given the same task name, "tmotor".  This prevents using some of the
+	Tornado tools (Browser, CrossWind, etc.).
+	Files modified: drvMM3000.c, drvMM4000.c, drvOms.c, drvOms58.c
+
+18) Removed my_strtok() from  and replace with VxWorks library function
+	strtok_r().
+	Files modified: drvMM3000.c, drvMM4000.c, drvOms.c, drvOms58.c
+
+19) Added record report function for Oms driver.  File modified: drvOms.c
+
+20) Added maximum allowable velocity fields; VMAX and SMAX.
+	- VMAX/SMAX added to motorRecord.dbd with Access Security Limit = 0.
+	- changed the Access Security Level for MRES, UREV, VBAS and SBAS from
+	one to zero.
+	- see motorRecord.html for valid velocity range limits.
+	- optimized calls to fabs(pmr->urev).
+	- added range_check() for validity checking bounded fields.
+	- In order to support backup and restore functions, the range checking
+	is done in such a way that the last minimum (i.e., VBAS/SBAS) or
+	maximum (i.e., VMAX/SMAX) value entered is always valid.  For example,
+	if the minimum is entered and it exceeds the maximum, then the maximum
+	is set to the new minimum value.
+	
+	Files modified: motorRecord.dbd, motorRecord.c
+
+21) With MM4000 device support, a tweak request (TWF/TWR) occurring during the
+	processing of a previous tweak request, would intermittently leave the
+	MIP field in a nonzero state (i.e., mip = 0x20).  A nonzero MIP field
+	prevents processing a jog request.
+	
+	File modified: motorRecord.c
+	Removed code that set DMOV TRUE.  See do_work() under the following
+	logic;
+	    IF DVAL field has changed
+		IF the SET position field is OFF
+		    IF last dial commanded position = current dial feedback position.
+
+22) An infinite home velocity was being issued if the MSTA "encoder present"
+	bit was on, ERES=0 and UEIP=NO.
+
+	File modified: init_record() in motorRecord.c;
+		if ERES = 0, set ERES <- MRES.
+
+23) Setting MRES negative could invalidated comparisons between BDST and RES.
+	File modified: motorRecord.c
+		- in postProcess(), (pmr->bdst != 0.0) to (|BDST| < |RES|).
+		- in do_work(), (|BDST| < RES) to (|BDST| < |RES|).
+
+24) Moved OMS device specific code that enforced VELO > VBAS from do_work() in
+	motorRecord.c to oms_build_trans() in devOmsCom.c
+
+25) No longer put MM4000 in "remote mode".  User can do this by putting "MR;"
+	in the INIT field.  File modified: drvMM4000.c
+
+26) MM4000_build_trans() in devMM4000.c was overflowing its character buffer
+	(i.e., buff) when processing a LOAD_POS command.  Increased buffer
+	size to controller maximum (110) and added buffer overflow detection
+	for both the local buffer and the "mess_node" message buffer.
+
+27) Added model detection to MM4000/5 device driver.  The long term plan
+	is to have the same source code support both MM4000 and MM4005
+	controllers and use the "model" indicator to tailor the device
+	driver support to either controller at run time.  With this release
+	the "model" variable is used to ignore (i.e. NO-OP) the LOAD_POS motor
+	command for the MM4005.  This is an interim solution until Newport
+	releases controller firmware that explicitly supports a LOAD_POS
+	command.
+	Files modified: drvMMCom.h, drvMM4000.c and devMM4000.c
+
+28) When a MM4000's motor resolution is small, the MM4000 communicates the
+	motor's resolution in scientific notation.  The MM4000 driver was not
+	processing the number of significant decimal points correctly when the
+	controller used scientific notation for the motor resolution.
+	Files modified: motor_init() in drvMM400.c
+	
+29) Through an odd set of circumstances the Oms58 driver was not performing
+	status updates on PowerPC (PPC) platforms.  All users of the OMS VME58
+	controller on a PPC platform must upgrade to Motor Record version 4.0
+	for full functionality.
+	Files modified: start_status() in drvOms58.c
+        for (index = 0; index < total_cards; index++)
+        {
+            if ((pmotor = (struct vmex_motor *) motor_state[card]->localaddr) != 0)
+                                                             ^
+                                                       wrong | index
+
+30) A "Controller communication error" bit was allocated in the MSTA field.
+	Currently, only the MM4000/5 device driver sets this error indicator.
+	Files modified: motor.h, drvMMCom.h, motorRecord.c, drvMM4000.c
+
+31) The "soft_motor" task (i.e., Soft channel device driver support task) was
+	nearly running out of stack space.  Increased stack allocation from
+	1,000 to 5,000 bytes.
+	Files modified: devSoftAux.c
+
+32) Three errors in the OMS VME58 driver were found.  All the errors caused
+	the same problem.  Namely, erroneous retries occurred intermittently
+	when multiple axes were commanded to move on the same controller.
+	This error occurred because old position data was being passed back
+	from the driver after Done was detected.  The erroneous intermittent
+	retries occurred more often when the Oms setup parameters called for a
+	high frequency (e.g., 60 Hz) "polling" rate and Oms interrupts were
+	enabled.
+
+	File modified: drvOms58.c
+
