@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.16 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-11-10 05:27:28 $
+Version:	$Revision: 1.17 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-12-21 16:51:17 $
 */
 
 /*
@@ -42,6 +42,11 @@ Last Modified:	$Date: 2004-11-10 05:27:28 $
  * .05 07/09/04 rls removed unused <driver>Setup() argument.
  * .06 07/28/04 rls "epicsExport" debug variable.
  * .07 09/21/04 rls support for 32axes/controller.
+ * .08 12/21/04 rls - retry on initial communication.
+ *                  - using asyn's set[Out/In]putEos().
+ *		    - make debug variables always available.
+ *		    - MS Visual C compatibility; make all epicsExportAddress
+ *		      extern "C" linkage.
  */
 
 
@@ -67,15 +72,15 @@ Last Modified:	$Date: 2004-11-10 05:27:28 $
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvESP300debug = 0;
 	#define Debug(l, f, args...) { if(l<=drvESP300debug) printf(f,## args); }
-	epicsExportAddress(int, drvESP300debug);
     #else
 	#define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
+volatile int drvESP300debug = 0;
+extern "C" {epicsExportAddress(int, drvESP300debug);}
 
 int ESP300_num_cards = 0;
 
@@ -129,7 +134,7 @@ struct
 #endif
 } drvESP300 = {2, report, init};
 
-epicsExportAddress(drvet, drvESP300);
+extern "C" {epicsExportAddress(drvet, drvESP300);}
 
 static struct thread_args targs = {SCAN_RATE, &ESP300_access};
 
@@ -203,7 +208,7 @@ static int set_status(int card, int signal)
     int rtn_state, charcnt;
     long mstatus;
     double motorData;
-    bool power, done, plusdir, ls_active = false;
+    bool power, plusdir, ls_active = false;
     msta_field status;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
@@ -214,7 +219,8 @@ static int set_status(int card, int signal)
     sprintf(outbuff, "%.2dMD", signal + 1);
     send_mess(card, outbuff, (char) NULL);
     charcnt = recv_mess(card, inbuff, 1);
-    if (charcnt == 3)
+
+    if (charcnt == 1 && (inbuff[0] == '0' || inbuff[0] == '1'))
     {
 	cntrl->status = NORMAL;
 	status.Bits.CNTRL_COMM_ERR = 0;
@@ -237,8 +243,7 @@ static int set_status(int card, int signal)
 	}
     }
     
-    done = atoi(inbuff) ? true : false;
-    status.Bits.RA_DONE = (done == true) ? 1 : 0;
+    status.Bits.RA_DONE = (inbuff[0] == '1') ? 1 : 0;
 
     /* Get motor position. */
     sprintf(outbuff, READ_POSITION, signal + 1);
@@ -551,6 +556,8 @@ static int motor_init()
     int total_axis = 0;
     int status;
     asynStatus success_rtn;
+    static const char output_terminator[] = "\r";
+    static const char input_terminator[] = "\r\n";
 
     initialized = true;	/* Indicate that driver is initialized. */
     
@@ -569,18 +576,28 @@ static int motor_init()
 	cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
-                          cntrl->asyn_address, &cntrl->pasynUser, NULL);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port,
+				cntrl->asyn_address, &cntrl->pasynUser, NULL);
+	pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
+				       strlen(output_terminator));
+	pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
+				      strlen(input_terminator));
 
 	if (success_rtn == asynSuccess)
 	{
+	    int retry = 0;
+	    
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
             pasynOctetSyncIO->flush(cntrl->pasynUser);
     
-	    send_mess(card_index, GET_IDENT, (char) NULL);
-	    status = recv_mess(card_index, buff, 1);  
-	    /* Return value is length of response string */
+	    do
+	    {
+		send_mess(card_index, GET_IDENT, (char) NULL);
+		status = recv_mess(card_index, buff, 1);  
+		retry++;
+		/* Return value is length of response string */
+	    } while (status == 0 && retry < 3);
 	}
 
 	if (success_rtn == asynSuccess && status > 0)
