@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-04 15:24:03 $
+Last Modified:	$Date: 2002-07-05 18:48:44 $
 */
 
 /*
@@ -36,21 +36,22 @@ Last Modified:	$Date: 2002-03-04 15:24:03 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93	jbk     initialized
- * .02  11-14-94	jps     copy drvOms.c and modify to point to vme58 driver
+ * .01  01-18-93  jbk   initialized
+ * .02  11-14-94  jps   copy drvOms.c and modify to point to vme58 driver
  *      ...
- * .14  02-10-95	jps	first released version w/interrupt supprt
- * .15  02-16-95	jps	add better simulation mode support
- * .16  03-10-95	jps	limit switch handling improvements
- * .17  04-11-95	jps  	misc. fixes
- * .18  09-27-95	jps	fix GET_INFO latency bug, add axis argument to
- *				set_status() create add debug verbosity of 3
- * .19  05-03-96	jps     convert 32bit card accesses to 16bit - vme58PCB
- *				version D does not support 32bit accesses.
- * .20  06-20-96	jps     add more security to message parameters (card #)
- * .20a 02-19-97    	tmm     fixed for EPICS 3.13
- * .21  03-01-02	rls	Eliminated support for the "ASCII record
- *				separator (IS2) = /x1E".
+ * .14  02-10-95  jps	first released version w/interrupt supprt
+ * .15  02-16-95  jps	add better simulation mode support
+ * .16  03-10-95  jps	limit switch handling improvements
+ * .17  04-11-95  jps  	misc. fixes
+ * .18  09-27-95  jps	fix GET_INFO latency bug, add axis argument to
+ *		  	  set_status() create add debug verbosity of 3
+ * .19  05-03-96  jps   convert 32bit card accesses to 16bit - vme58PCB
+ *		  	  version D does not support 32bit accesses.
+ * .20  06-20-96  jps   add more security to message parameters (card #)
+ * .20a 02-19-97  tmm   fixed for EPICS 3.13
+ * .21  03-01-02  rls	Eliminated support for the "ASCII record separator
+ *                        (IS2) = /x1E".
+ * .22  07-05-02  rls   Seperate +/- limit switch status bits.
  */
 
 
@@ -196,6 +197,7 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
 	if (motor_motion && (delay >= 2) && (*tabptr->setstat) (card, index))
 	{
 	    struct mess_node *mess_ret;
+	    BOOLEAN ls_active;
 
 	    motor_motion->position = motor_info->position;
 	    motor_motion->encoder_position = motor_info->encoder_position;
@@ -211,7 +213,22 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
 	    mess_ret->status = motor_motion->status;
 	    mess_ret->type = motor_motion->type;
 
-	    if (motor_motion->status & RA_OVERTRAVEL ||
+	    if (motor_motion->status & RA_DIRECTION)
+	    {
+		if (motor_motion->status & RA_PLUS_LS)
+		    ls_active = ON;
+		else
+		    ls_active = OFF;
+	    }
+	    else
+	    {
+		if (motor_motion->status & RA_MINUS_LS)
+		    ls_active = ON;
+		else
+		    ls_active = OFF;
+	    }
+	    
+	    if (ls_active == ON ||
 		motor_motion->status & RA_DONE ||
 		motor_motion->status & RA_PROBLEM)
 	    {
