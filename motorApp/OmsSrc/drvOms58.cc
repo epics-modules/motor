@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:52:53 $
+Last Modified:	$Date: 2003-12-19 18:36:11 $
 */
 
 /*
@@ -924,8 +924,8 @@ STATIC int motorIsrSetup(int card)
     pmotor = (struct vmex_motor *) (motor_state[card]->localaddr);
 
     status = devConnectInterrupt(intVME, omsInterruptVector + card,
-// Tornado 2.0.2    (void (*)()) motorIsr, (void *) card);
-		    (devLibVOIDFUNCPTR) motorIsr, (void *) card);// Tornado 2.2
+			    (void (*)()) motorIsr, (void *) card); // Tornado 2.0.2
+// Tornado 2.2		    (devLibVOIDFUNCPTR) motorIsr, (void *) card);
     if (!RTN_SUCCESS(status))
     {
 	errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n", omsInterruptVector + card);
