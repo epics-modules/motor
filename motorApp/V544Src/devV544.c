@@ -295,7 +295,6 @@ STATIC long v544_init_record(struct motorRecord * mr)
     {
 	/* Initialize readback fields for simulation */
 	mr->msta = RA_PROBLEM;
-	mr->res = mr->mres;
 	mr->rmp = 0;		/* raw motor pulse count */
 	mr->rep = 0;		/* raw encoder pulse count */
 	return (rtnStat);
@@ -332,20 +331,18 @@ STATIC long v544_init_record(struct motorRecord * mr)
 	    ep_mp[0] = m / mr->eres;	/* encoder pulses per ...*/
 	    ep_mp[1] = m / mr->mres;	/*    motor pulses */
 	}
-	mr->res = mr->eres;
     }
     else
     {
 	ep_mp[0] = 1.;
 	ep_mp[1] = 1.;
-	mr->res = mr->mres;
     }
 
 
     /* Program the device if an initial position is programmed or 
      * an encoder is present. */
 
-    if ((initPos = (mr->dval && mr->res)) || initEncoder)
+    if ((initPos = (mr->dval && mr->mres)) || initEncoder)
     {
 
 	/*
@@ -374,7 +371,7 @@ STATIC long v544_init_record(struct motorRecord * mr)
 
 	if (initPos)
         {
-	    double setPos = mr->dval / mr->res;
+	    double setPos = mr->dval / mr->mres;
 
 	    Debug(7, "v544_init_record: initial raw position = %f\n", setPos);
 	
