@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-03 19:12:35 $
+Last Modified:	$Date: 2003-12-12 21:52:55 $
 */
 
 /*
@@ -54,7 +54,12 @@ Last Modified:	$Date: 2003-12-03 19:12:35 $
  *		     - changed omsGet() timeout argument to type bool.
  *		     - changed recv_rng and send_rng from C to C++ interface.
  * .05  12-03-03 rls - update rate bug fix.
- *
+ * .06  12-12-03 rls - Converted MSTA #define's to bit field.
+ *		     - Two lines of code must be selected based on either
+ *			Tornado 2.0.2 (default) or Tornado 2.2.  If Tornado
+ *			2.2 is selected, EPICS base patches must be applied as
+ *			described in;
+ *		http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
  */
 
 /*========================stepper motor driver ========================
@@ -212,7 +217,7 @@ static void query_done(int card, int axis, struct mess_node *nodeptr)
     send_mess(card, DONE_QUERY, oms_axis[axis]);
     recv_mess(card, buffer, 1);
 
-    if (nodeptr->status & RA_PROBLEM)
+    if (nodeptr->status.Bits.RA_PROBLEM)
 	send_mess(card, AXIS_STOP, oms_axis[axis]);
 }
 
@@ -228,9 +233,11 @@ static int set_status(int card, int signal)
     int index, pos;
     int rtn_state;
     bool ls_active;
+    msta_field status;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
+    status.All = motor_info->status.All;
 
     if (motor_state[card]->motor_info[signal].encoder_present == YES)
     {
@@ -254,34 +261,24 @@ static int set_status(int card, int signal)
 	case 0:		/* axis status */
 	    ax_stat = (struct axis_status *) p;
 
-	    if (ax_stat->direction == 'P')
-		motor_info->status |= RA_DIRECTION;
-	    else
-		motor_info->status &= ~RA_DIRECTION;
-
-	    if (ax_stat->done == 'D')
-		motor_info->status |= RA_DONE;
-	    else
-		motor_info->status &= ~RA_DONE;
+	    status.Bits.RA_DIRECTION = (ax_stat->direction == 'P') ? 1 : 0;
+	    status.Bits.RA_DONE =      (ax_stat->done == 'D')      ? 1 : 0;
+	    status.Bits.RA_HOME =      (ax_stat->home == 'H')      ? 1 : 0;
 
 	    if (ax_stat->overtravel == 'L')
 	    {
 		ls_active = true;
-		if (motor_info->status & RA_DIRECTION)
-		    motor_info->status |= RA_PLUS_LS;
+		if (status.Bits.RA_DIRECTION)
+		    status.Bits.RA_PLUS_LS = 1;
 		else
-		    motor_info->status |= RA_MINUS_LS;
+		    status.Bits.RA_MINUS_LS = 1;
 	    }
 	    else
 	    {
 		ls_active = false;
-		motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
+		status.Bits.RA_PLUS_LS  = 0;
+		status.Bits.RA_MINUS_LS = 0;
 	    }
-
-	    if (ax_stat->home == 'H')
-		motor_info->status |= RA_HOME;
-	    else
-		motor_info->status &= ~RA_HOME;
 
 	    break;
 	case 1:		/* motor pulse count (position) */
@@ -294,14 +291,14 @@ static int set_status(int card, int signal)
 
 	    if (motor_info->no_motion_count > motionTO)
 	    {
-		motor_info->status |= RA_PROBLEM;
+		status.Bits.RA_PROBLEM = 1;
 		send_mess(card, AXIS_STOP, oms_axis[signal]);
 		motor_info->no_motion_count = 0;
 		errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
 		    card, signal);
 	    }
 	    else
-		motor_info->status &= ~RA_PROBLEM;
+		status.Bits.RA_PROBLEM = 0;
 
 	    motor_info->position = pos;
 	    break;
@@ -315,27 +312,10 @@ static int set_status(int card, int signal)
 	    break;
 	case 3:		/* encoder status */
 	    en_stat = (struct encoder_status *) p;
-
-	    if (en_stat->slip_enable == 'E')
-		motor_info->status |= EA_SLIP;
-	    else
-		motor_info->status &= ~EA_SLIP;
-
-	    if (en_stat->pos_enable == 'E')
-		motor_info->status |= EA_POSITION;
-	    else
-		motor_info->status &= ~EA_POSITION;
-
-	    if (en_stat->slip_detect == 'S')
-		motor_info->status |= EA_SLIP_STALL;
-	    else
-		motor_info->status &= ~EA_SLIP_STALL;
-
-	    if (en_stat->axis_home == 'H')
-		motor_info->status |= EA_HOME;
-	    else
-		motor_info->status &= ~EA_HOME;
-
+	    status.Bits.EA_SLIP       = (en_stat->slip_enable == 'E') ? 1 : 0;
+	    status.Bits.EA_POSITION   = (en_stat->pos_enable  == 'E') ? 1 : 0;
+	    status.Bits.EA_SLIP_STALL = (en_stat->slip_detect == 'S') ? 1 : 0;
+	    status.Bits.EA_HOME       = (en_stat->axis_home   == 'H') ? 1 : 0;
 	    break;
 	default:
 	    break;
@@ -348,19 +328,19 @@ static int set_status(int card, int signal)
      * time to request additional information so the velocity is set to
      * indicate moving or not-moving.
      */
-    if (motor_info->status & RA_DONE)
+    if (status.Bits.RA_DONE)
 	motor_info->velocity = 0;
     else
 	motor_info->velocity = 1;
 
-    if (!(motor_info->status & RA_DIRECTION))
+    if (!(status.Bits.RA_DIRECTION))
 	motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-     (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
+     status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == true) && (nodeptr != 0) &&
+    if ((status.Bits.RA_DONE || ls_active == true) && (nodeptr != 0) &&
 	(nodeptr->postmsgptr != 0))
     {
 	char buffer[40];
@@ -418,6 +398,8 @@ errorexit:	errMessage(-1, "Invalid device directive");
 	send_mess(card, outbuf, oms_axis[signal]);
 	nodeptr->postmsgptr = NULL;
     }
+
+    motor_info->status.All = status.All;	/* Update status from local copy. */
     return (rtn_state);
 }
 
@@ -876,7 +858,8 @@ static int motorIsrEnable(int card)
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
 
     status = devConnectInterrupt(intVME, omsInterruptVector + card,
-		    (void (*)()) motorIsr, (void *) card);
+		    (void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
+// Tornado 2.2	    (devLibVOIDFUNCPTR) motorIsr, (void *) card);
     
     if (!RTN_SUCCESS(status))
     {
@@ -936,7 +919,8 @@ static void motorIsrDisable(int card)
     pmotor->control = 0;
 
     status = devDisconnectInterrupt(intVME, omsInterruptVector + card,
-				    (void (*)()) motorIsr);
+				    (void (*)()) motorIsr);// Tornado 2.0.2
+// Tornado 2.2			    (devLibVOIDFUNCPTR) motorIsr);
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",
 		  omsInterruptVector + card);
@@ -1110,7 +1094,7 @@ static int motor_init()
 		 pos_ptr = strtok_r(NULL, ",", &tok_save), total_axis++)
 	    {
 		pmotorState->motor_info[total_axis].motor_motion = NULL;
-		pmotorState->motor_info[total_axis].status = 0;
+		pmotorState->motor_info[total_axis].status.All = 0;
 	    }
 
 	    Debug(3, "Total axis = %d\n", total_axis);
@@ -1144,13 +1128,13 @@ static int motor_init()
 
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
-		pmotorState->motor_info[motor_index].status = 0;
+		pmotorState->motor_info[motor_index].status.All = 0;
 		pmotorState->motor_info[motor_index].no_motion_count = 0;
 		pmotorState->motor_info[motor_index].encoder_position = 0;
 		pmotorState->motor_info[motor_index].position = 0;
 
 		if (pmotorState->motor_info[motor_index].encoder_present == YES)
-		    pmotorState->motor_info[motor_index].status |= EA_PRESENT;
+		    pmotorState->motor_info[motor_index].status.Bits.EA_PRESENT = 1;
 		set_status(card_index, motor_index);
 	    }
 

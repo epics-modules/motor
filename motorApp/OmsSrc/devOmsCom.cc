@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:04:11 $
+Last Modified:	$Date: 2003-12-12 21:48:45 $
 */
 
 /*
@@ -243,6 +243,8 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
 	else
 	{
+	    msta_field msta;
+	    
 	    /* Silently enforce minimum range on KP command. */
 	    if (command == SET_PGAIN && *parms < 0.00005)
 	    {
@@ -348,7 +350,8 @@ errorexit:		    errMessage(-1, "Invalid device directive");
 	    }
 	    
 	    /* Code to hide Oms58 moving off limit switch problem. */
-	    if (((mr->msta & RA_PLUS_LS) || (mr->msta & RA_MINUS_LS)) &&
+	    msta.All = mr->msta;
+	    if ((msta.Bits.RA_PLUS_LS || msta.Bits.RA_MINUS_LS) &&
 		(command == MOVE_ABS || command == MOVE_REL))
 	    {
 		if (mr->rdif >= 0)

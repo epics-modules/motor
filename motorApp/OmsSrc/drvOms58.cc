@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-10-28 16:41:14 $
+Last Modified:	$Date: 2003-12-12 21:52:53 $
 */
 
 /*
@@ -73,6 +73,12 @@ Last Modified:	$Date: 2003-10-28 16:41:14 $
  *			boards after the "hole" to work.
  * .23  06-04-03  rls   Convert to R3.14.x.
  * .24  06-04-03  rls   extended device directive support to PREM and POST.
+ * .25  12-12-03  rls - Converted MSTA #define's to bit field.
+ *		      - One line of code must be selected based on either
+ *			Tornado 2.0.2 (default) or Tornado 2.2.  If Tornado
+ *			2.2 is selected, EPICS base patches must be applied as
+ *			described in;
+ *		http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
  */
 
 #include	<vxLib.h>
@@ -232,7 +238,7 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 	taskDelay(1);	/* Work around for intermittent wrong LS status. */
 #endif
 
-    if (nodeptr->status & RA_PROBLEM)
+    if (nodeptr->status.Bits.RA_PROBLEM)
 	send_mess(card, AXIS_STOP, oms58_axis[axis]);
 }
 
@@ -345,25 +351,30 @@ STATIC int set_status(int card, int signal)
     struct encoder_status *en_stat;
     char q_buf[50], outbuf[50];
     int index;
-    bool ls_active;
+    bool ls_active = false;
+    bool got_encoder;
+    msta_field status;
 
     int rtn_state;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
+    status.All = motor_info->status.All;
 
     if (motor_state[card]->motor_info[signal].encoder_present == YES)
     {
 	/* get 4 peices of info from axis */
 	send_mess(card, ALL_INFO, oms58_axis[signal]);
 	recv_mess(card, q_buf, 2);
+	got_encoder = true;
     }
     else
     {
 	/* get 2 peices of info from axis */
 	send_mess(card, AXIS_INFO, oms58_axis[signal]);
 	recv_mess(card, q_buf, 1);
+	got_encoder = false;
     }
 
     for (index = 0, p = strtok_r(q_buf, ",", &tok_save); p;
@@ -374,63 +385,41 @@ STATIC int set_status(int card, int signal)
 	case 0:		/* axis status */
 	    ax_stat = (struct axis_status *) p;
 
-	    if (ax_stat->direction == 'P')
-		motor_info->status |= RA_DIRECTION;
-	    else
-		motor_info->status &= ~RA_DIRECTION;
+	    status.Bits.RA_DIRECTION = (ax_stat->direction == 'P') ? 1 : 0;
+	    status.Bits.RA_HOME =      (ax_stat->home == 'H')      ? 1 : 0;
 
 	    if (ax_stat->done == 'D')
 	    {
 		/* Request Data Area Update after DONE detected so that both
 		 * ASCII command data and shared memory data match. */
 		start_status(card);
-		motor_info->status |= RA_DONE;
+		status.Bits.RA_DONE = 1;
 	    }
 	    else
-		motor_info->status &= ~RA_DONE;
+		status.Bits.RA_DONE = 0;
 
 	    if (ax_stat->overtravel == 'L')
 	    {
 		ls_active = true;
-		if (motor_info->status & RA_DIRECTION)
-		    motor_info->status |= RA_PLUS_LS;
+		if (status.Bits.RA_DIRECTION)
+		    status.Bits.RA_PLUS_LS = 1;
 		else
-		    motor_info->status |= RA_MINUS_LS;
+		    status.Bits.RA_MINUS_LS = 1;
 	    }
 	    else
 	    {
 		ls_active = false;
-		motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
+		status.Bits.RA_PLUS_LS  = 0;
+		status.Bits.RA_MINUS_LS = 0;
 	    }
-
-	    if (ax_stat->home == 'H')
-		motor_info->status |= RA_HOME;
-	    else
-		motor_info->status &= ~RA_HOME;
-
 	    break;
 	case 1:		/* encoder status */
 	    en_stat = (struct encoder_status *) p;
 
-	    if (en_stat->slip_enable == 'E')
-		motor_info->status |= EA_SLIP;
-	    else
-		motor_info->status &= ~EA_SLIP;
-
-	    if (en_stat->pos_enable == 'E')
-		motor_info->status |= EA_POSITION;
-	    else
-		motor_info->status &= ~EA_POSITION;
-
-	    if (en_stat->slip_detect == 'S')
-		motor_info->status |= EA_SLIP_STALL;
-	    else
-		motor_info->status &= ~EA_SLIP_STALL;
-
-	    if (en_stat->axis_home == 'H')
-		motor_info->status |= EA_HOME;
-	    else
-		motor_info->status &= ~EA_HOME;
+	    status.Bits.EA_SLIP       = (en_stat->slip_enable == 'E') ? 1 : 0;
+	    status.Bits.EA_POSITION   = (en_stat->pos_enable  == 'E') ? 1 : 0;
+	    status.Bits.EA_SLIP_STALL = (en_stat->slip_detect == 'S') ? 1 : 0;
+	    status.Bits.EA_HOME       = (en_stat->axis_home   == 'H') ? 1 : 0;
 	    break;
 	default:
 	    break;
@@ -461,21 +450,21 @@ STATIC int set_status(int card, int signal)
 
     if (motor_info->no_motion_count > motionTO)
     {
-	motor_info->status |= RA_PROBLEM;
+	status.Bits.RA_PROBLEM = 1;
 	send_mess(card, AXIS_STOP, oms58_axis[signal]);
 	motor_info->no_motion_count = 0;
 	errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
 	    card, signal);
     }
     else
-	motor_info->status &= ~RA_PROBLEM;
+	status.Bits.RA_PROBLEM = 0;
 
     /* get command velocity - word access only */
     motorData = pack2x16(pmotorData->cmndVel);
 
     motor_info->velocity = motorData;
 
-    if (!(motor_info->status & RA_DIRECTION))
+    if (!(status.Bits.RA_DIRECTION))
 	motor_info->velocity *= -1;
 
     /* Get encoder position */
@@ -493,7 +482,8 @@ STATIC int set_status(int card, int signal)
 	    bitselect = (1 << signal);
 	    if ((inputs & bitselect) == 0)
 	    {
-                motor_info->status |= (RA_PLUS_LS | RA_MINUS_LS);
+		status.Bits.RA_PLUS_LS  = 1;	/* Turn on both limit switches. */
+		status.Bits.RA_MINUS_LS = 1;
 		logMsg((char *) "Drive power failure at VME58 card#%d motor#%d\n",
 		       card, signal, 0, 0, 0, 0);
 	    }
@@ -501,10 +491,10 @@ STATIC int set_status(int card, int signal)
     }
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-     (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
+		status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == true) && nodeptr != 0 &&
+    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
 	nodeptr->postmsgptr != 0)
     {
 	char buffer[40];
@@ -563,6 +553,19 @@ errorexit:	errMessage(-1, "Invalid device directive");
 	nodeptr->postmsgptr = NULL;
     }
 
+    /* Bug fix for DC servo moving away from limit switch, but move is not far enough to
+     * get off limit switch; resulting in limit error.  Fix is to force CDIR to match
+     * MSTA.RA_DIRECTION.
+     */
+    if (ls_active == true && status.Bits.GAIN_SUPPORT && status.Bits.EA_POSITION == 0)
+    {
+	struct motorRecord *mr = (struct motorRecord *) nodeptr->mrecord;
+
+	if (mr->cdir != (short) status.Bits.RA_DIRECTION)
+	    mr->cdir = status.Bits.RA_DIRECTION;
+    }
+
+    motor_info->status.All = status.All;	/* Update status from local copy. */
     return (rtn_state);
 }
 
@@ -921,7 +924,8 @@ STATIC int motorIsrSetup(int card)
     pmotor = (struct vmex_motor *) (motor_state[card]->localaddr);
 
     status = devConnectInterrupt(intVME, omsInterruptVector + card,
-		    (void (*)()) motorIsr, (void *) card);
+// Tornado 2.0.2    (void (*)()) motorIsr, (void *) card);
+		    (devLibVOIDFUNCPTR) motorIsr, (void *) card);// Tornado 2.2
     if (!RTN_SUCCESS(status))
     {
 	errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n", omsInterruptVector + card);
@@ -1019,7 +1023,8 @@ STATIC int motor_init()
 	    Debug(9, "motor_init: devRegisterAddress() status = %d\n", (int) status);
 	    if (!RTN_SUCCESS(status))
 	    {
-		errPrintf(status, __FILE__, __LINE__, "Can't register address 0x%x\n", probeAddr);
+		errPrintf(status, __FILE__, __LINE__, "Can't register address 0x%x\n",
+			  (unsigned int) probeAddr);
 		return (ERROR);
 	    }
 
@@ -1051,7 +1056,7 @@ STATIC int motor_init()
 		 pos_ptr; pos_ptr = strtok_r(NULL, ",", &tok_save), total_axis++)
 	    {
 		pmotorState->motor_info[total_axis].motor_motion = NULL;
-		pmotorState->motor_info[total_axis].status = 0;
+		pmotorState->motor_info[total_axis].status.All = 0;
 	    }
 
 	    Debug(3, "motor_init: Total axis = %d\n", total_axis);
@@ -1112,15 +1117,15 @@ STATIC int motor_init()
 	    start_status(card_index);
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
-		pmotorState->motor_info[motor_index].status = 0;
+		pmotorState->motor_info[motor_index].status.All = 0;
 		pmotorState->motor_info[motor_index].no_motion_count = 0;
 		pmotorState->motor_info[motor_index].encoder_position = 0;
 		pmotorState->motor_info[motor_index].position = 0;
 
 		if (pmotorState->motor_info[motor_index].encoder_present == YES)
-		    pmotorState->motor_info[motor_index].status |= EA_PRESENT;
+		    pmotorState->motor_info[motor_index].status.Bits.EA_PRESENT = 1;
 		if (pmotorState->motor_info[motor_index].pid_present == YES)
-		    pmotorState->motor_info[motor_index].status |= GAIN_SUPPORT;
+		    pmotorState->motor_info[motor_index].status.Bits.GAIN_SUPPORT = 1;
 
 		set_status(card_index, motor_index);
 

@@ -2,9 +2,9 @@
 FILENAME...	devSoft.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:03:12 $
+Last Modified:	$Date: 2003-12-12 21:53:10 $
 */
 
 /*
@@ -83,6 +83,7 @@ epicsExportAddress(dset,devMotorSoft);
 STATIC CALLBACK_VALUE update(struct motorRecord *mr)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
+    msta_field status;
 
 #ifdef DMR_SOFTMOTOR_MODS
     if (ptr->load_position)
@@ -92,10 +93,14 @@ STATIC CALLBACK_VALUE update(struct motorRecord *mr)
 	ptr->load_position = FALSE;
     }
 #endif
+
+    status.All = mr->msta;
+
     if (ptr->dinp_value == SOFTMOVE || ptr->dinp_value == HARDMOVE)
-	mr->msta &= ~RA_DONE;
+	status.Bits.RA_DONE = 0;
     else
-	mr->msta |= RA_DONE;
+	status.Bits.RA_DONE = 1;
+    mr->msta = status.All;
     return(ptr->callback_flag);
 }
 
@@ -111,7 +116,13 @@ STATIC RTN_STATUS end(struct motorRecord *mr)
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 
     if (ptr->default_done_behavior == YES)
-	mr->msta = RA_DONE;
+    {
+	msta_field status;
+
+	status.All = 0;
+	status.Bits.RA_DONE = 1;
+	mr->msta = status.All;
+    }
     return(OK);
 }
 
@@ -140,12 +151,15 @@ STATIC RTN_STATUS build(motor_cmnd command, double *parms, struct motorRecord *m
 	case LOAD_POS:
 	    {
 		struct soft_private *ptr = (struct soft_private *) mr->dpvt;
+		msta_field msta;
     
 #ifdef DMR_SOFTMOTOR_MODS
 		ptr->load_position = TRUE;
 		ptr->new_position = *parms;
 #endif
-		mr->msta = RA_DONE;
+		msta.All = 0;
+		msta.Bits.RA_DONE = 1;
+		mr->msta = msta.All;
 		callbackRequest(&ptr->callback);
 	    }
 	    break;
