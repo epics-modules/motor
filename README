@@ -88,7 +88,8 @@ Modification Log from V4.3 to V4.4
 	       compatible Soft channel device driver database example.
 
 3) Jog Velocity and Acceleration.  Two new fields (JVEL and JAR) were added to
-	support jog velocity and acceleration parameters.
+	support jog velocity and acceleration parameters.  Only the OMS and IMS
+	device drivers support changing the Jog Velocity while jogging.
 	Files modified: motorRecord.dbd - Jog specific fields (JVEL and JAR).
 			motorRecord.c - Process JVEL in special().
 			devIM483[PL/SM].c, devMM[3/4]000.c,
@@ -119,6 +120,8 @@ Modification Log from V4.3 to V4.4
 	than the DONE state.
 	File modified: motorRecord.c - Modified do_work() LVIO logic to set
 				       DMOV true only if MIP is DONE.
+
+7) Removed Hideos file motorApp/CommSrc/serialIO.cc from distribution.
 					
 Modification Log from V4.2 to V4.3
 ==================================
