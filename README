@@ -90,6 +90,52 @@ Known Problems
 	ERROR" message will appear.
 
 
+Modification Log from R5-1 to R5-2
+==================================
+
+1) Communication with the Newport MM3000 motor controller was getting out of
+	synchronization whenever the MM3000 responded with an error message.
+	This problem was resolved by having recv_mess() in drvMM3000.c detect
+	an error message response, print the error message and then,
+	recursively, call itself.  This restored communication transmit/receive
+	synchronization.
+	File modified: - recv_mess() in drvMM3000.c
+
+2) Spurious interrupts were occurring with OMS VX2-006 ver 1.04 controller
+	boards.  For the sake of throughput, the OMS VME8/44 device driver
+	enables the done (DON_E) and input buffer full (IBF_E) interrupts, but
+	disables the transmit buffer empty (TBE_E).
+
+	The OMS boards are RORA VME type interrupters.  The "release" register
+	is the status register.  It contains information on the status of the
+	transmit/receive buffer interrupts and the done interrupt.  Since the
+	device driver was not using the transmit buffer empty interrupt, it was
+	polling the status register when sending a command to the controller.
+	With the VX2, if the IRQ became active during a status register read
+	cycle, the IRQ was negated at the end of the cycle and the CPU board
+	generated a spurious interrupt.
+	
+	The VME8/44 models somehow prevented the spurious interrupts from
+	occurring by latching the IRQ, if and when, the IRQ became active
+	during a status register read.
+	
+	This problem has been fixed by using all of the OMS board interrupts
+	(i.e., enable transmit buffer empty).  The OMS VME8/44/VX2/VS4 design
+	is limited with regard to interrupts by an all or none choice.
+
+	In addition, the following modifications were made to the OMS8/44
+	device driver;
+	- Moved the OMS specific data structure "irqdatastr" from motordrvCom.h
+	to drvOms.h.
+	- Changed recv_rng and send_rng in irqdatastr from C to C++ interface.
+	- Added epicsThreadSleep() calls to omsGet() and omsPut() in drvOms.cc
+	during delays.
+	
+	Files modified: - OmsSrc/drvOms.h; enable TBE_E interrupt.
+			- OmsSrc/drvOms.cc; support TBE_E interrupt.
+			- MotorSrc/motordrvCom.h
+
+
 Modification Log from R4-5 to R5-1
 ==================================
 
