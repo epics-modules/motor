@@ -37,9 +37,9 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version 5.5 of the EPICS motor
+<h2>Overview</h2> This documentation describes version 5.6 of the EPICS motor
 record, and related EPICS software required to build and use it.&nbsp; Version
-5.5 of the motor record is compatible with EPICS base R3.14.7 and above.
+5.6 of the motor record is compatible with EPICS base R3.14.7 and above.
 <p>
 The motor record is intended to support motors of all kinds, but currently 
 supports only the following variety of motor controllers (in addition to Soft 
@@ -48,13 +48,13 @@ Channel support):
 
 <ul>
   <li>
-    Oregon Micro Systems, Inc. (OMS) models; VME8, VME44, VME58, VS4 and MAXv.
+    Oregon Micro Systems, Inc. (OMS) models; VME8, VME44, VME58, VS4, VX2 and MAXv.
   </li>
   <li>
     Highland Technologies model V540.
   </li>
   <li>
-    Newport models MM3000, MM4000, MM4005, MM4006, PM500 and ESP300.
+    Newport models MM3000, MM4000, MM4005, MM4006, PM500, ESP300 and XPSC8.
   </li>
   <li>
     Intelligent Motion Systems, Inc. (IMS) models IM483 and MDrive.
@@ -1810,17 +1810,25 @@ below.
     <td>If Soft Channel device support is specified, a one is written to the&nbsp; 
     specified link each time the STOP_AXIS motor command is issued.</td>
   </tr>
-  <tr nosave="">
-    <td colspan="5" nosave=""><h4>Soft Channel Device Driver</h4> The Soft Channel 
-    database links (i.e., DINP, RINP and STOO) are only processed when the Soft 
-    Channel device driver is selected.&nbsp; These links are ignored when using any 
-    other Motor Record device driver. <br>
+  <TR nosave="">
+    <TD colspan="5" nosave=""><H4>Soft Channel Device Driver</H4>
+      The Soft Channel database links (i.e., DINP, RINP and STOO) are only processed 
+      when the Soft Channel device driver is selected.&nbsp; These links are ignored 
+      when using any other Motor Record device driver. <BR>
+      <BR>
       The input links (i.e., DINP, RDBL and RINP) are monitored for value changes by a 
       CA event task.&nbsp; Users must choose either a dial input link (RDBL) or a raw 
-      input link (RINP), but not both. At this time, the above links are <b>not</b> 
-      dynamically retargetable.&nbsp; <br>
-      Note that JOG[F/R] does not work with the Soft Channel device driver.</td>
-  </tr>
+      input link (RINP), but not both. At this time, the above links are <B>not</B> 
+      dynamically retargetable.&nbsp; <BR>
+      <BR>
+      Note that Soft Channel device support resets the target position (VAL/DVAL/RVAL) 
+      to the actual position (RBV/DRBV/RRBV) the first time, and only the first time, 
+      that the PV pointed to by RDBL is posted. Hence, Soft Channel device support 
+      requires that the RDBL PV have a valid value the first time it is posted.&nbsp; <BR>
+      <BR>
+      Note that JOG[F/R] does not work with the Soft Channel device driver.
+    </TD>
+  </TR>
 
   </tbody>
 </table>
