@@ -3,9 +3,9 @@ FILENAME...	drvOms58.h
 USAGE...	OMS driver level "include" information that is specific to OMS
 		model VME58.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:03 $
+Last Modified:	$Date: 2001-08-22 18:46:12 $
 */
 
 /*
@@ -44,6 +44,7 @@ Last Modified:	$Date: 2000-02-08 22:19:03 $
  * .08  05-03-96	jps     convert 32bit card accesses to 16bit - vme58PCB
  *				version D does not support 32bit accesses.
  * .09  05-09-97	jps     increase maximum card count to 15
+ * .10  08-22-01	rls     "int" type specifications for all bit-fields.
  *  
  */
 
@@ -89,14 +90,14 @@ typedef union
     uint8_t All;
     struct
     {
-	uint8_t intReqEna:1;	/* Master interrupt request enable */
-	uint8_t ioIntEna:1;	/* I/O bits 0 and 1 interrupt enable */
-	uint8_t directInEna:1;	/* Interrupt request to the VME58 ? */
-	uint8_t doneIntEna:1;	/* Done detect interrupt enable */
-	uint8_t otIntEna:1;	/* Overtravel detect interrupt enable */
-	uint8_t slipIntEna:1;	/* Encoder slip detect interrupt enable */
-	uint8_t:1;		/* Unused  */
-	uint8_t update:1;	/* Data area update request */
+	unsigned int intReqEna	:1;	/* Master interrupt request enable */
+	unsigned int ioIntEna	:1;	/* I/O bits 0 and 1 interrupt enable */
+	unsigned int directInEna:1;	/* Interrupt request to the VME58 ? */
+	unsigned int doneIntEna	:1;	/* Done detect interrupt enable */
+	unsigned int otIntEna	:1;	/* Overtravel detect interrupt enable */
+	unsigned int slipIntEna	:1;	/* Encoder slip detect interrupt enable */
+	unsigned int		:1;	/* Unused  */
+	unsigned int update	:1;	/* Data area update request */
     } Bits;
 } CNTRL_REG;
 
@@ -106,14 +107,14 @@ typedef union
     uint8_t All;
     struct
     {
-	uint8_t interrupt:1;	/* Interrupt dectect */
-	uint8_t directIn:1;	/* Direct input interrupt detect */
-	uint8_t directOut:1;	/* Direct ouput interrupt detect */
-	uint8_t done:1;		/* Motion done detect */
-	uint8_t overtravel:1;	/* Overtravel detect */
-	uint8_t encoderSlip:1;	/* Encoder slip detect */
-	uint8_t cardOK:1;	/* Powerup initilization complete */
-	uint8_t cmndError:1;	/* Command error dectect */
+	unsigned int interrupt	:1;	/* Interrupt dectect */
+	unsigned int directIn	:1;	/* Direct input interrupt detect */
+	unsigned int directOut	:1;	/* Direct ouput interrupt detect */
+	unsigned int done	:1;	/* Motion done detect */
+	unsigned int overtravel	:1;	/* Overtravel detect */
+	unsigned int encoderSlip:1;	/* Encoder slip detect */
+	unsigned int cardOK	:1;	/* Powerup initilization complete */
+	unsigned int cmndError	:1;	/* Command error dectect */
     } Bits;
 } STATUS_REG;
 
@@ -123,14 +124,14 @@ typedef union
     uint8_t All;
     struct
     {
-	uint8_t io_7:1;		/* Bit 7 */
-	uint8_t io_6:1;		/* Bit 6 */
-	uint8_t io_5:1;		/* Bit 5 */
-	uint8_t io_4:1;		/* Bit 4 */
-	uint8_t io_3:1;		/* Bit 3 */
-	uint8_t io_2:1;		/* Bit 2 */
-	uint8_t io_1:1;		/* Bit 1 */
-	uint8_t io_0:1;		/* Bit 0 */
+	unsigned int io_7	:1;	/* Bit 7 */
+	unsigned int io_6	:1;	/* Bit 6 */
+	unsigned int io_5	:1;	/* Bit 5 */
+	unsigned int io_4	:1;	/* Bit 4 */
+	unsigned int io_3	:1;	/* Bit 3 */
+	unsigned int io_2	:1;	/* Bit 2 */
+	unsigned int io_1	:1;	/* Bit 1 */
+	unsigned int io_0	:1;	/* Bit 0 */
     } Bits;
 } IO_LOW_REG;
 
@@ -140,14 +141,14 @@ typedef union
     uint8_t All;
     struct
     {
-	uint8_t slip_s:1;	/* status of S axis */
-	uint8_t slip_r:1;	/* status of R axis */
-	uint8_t slip_v:1;	/* status of V axis */
-	uint8_t slip_u:1;	/* status of U axis */
-	uint8_t slip_t:1;	/* status of T axis */
-	uint8_t slip_z:1;	/* status of Z axis */
-	uint8_t slip_y:1;	/* status of Y axis */
-	uint8_t slip_x:1;	/* status of X axis */
+	unsigned int slip_s	:1;	/* status of S axis */
+	unsigned int slip_r	:1;	/* status of R axis */
+	unsigned int slip_v	:1;	/* status of V axis */
+	unsigned int slip_u	:1;	/* status of U axis */
+	unsigned int slip_t	:1;	/* status of T axis */
+	unsigned int slip_z	:1;	/* status of Z axis */
+	unsigned int slip_y	:1;	/* status of Y axis */
+	unsigned int slip_x	:1;	/* status of X axis */
     } Bits;
 } SLIP_REG;
 
@@ -157,14 +158,14 @@ typedef union
     uint8_t All;
     struct
     {
-	uint8_t done_s:1;	/* status of S axis */
-	uint8_t done_r:1;	/* status of R axis */
-	uint8_t done_v:1;	/* status of V axis */
-	uint8_t done_u:1;	/* status of U axis */
-	uint8_t done_t:1;	/* status of T axis */
-	uint8_t done_z:1;	/* status of Z axis */
-	uint8_t done_y:1;	/* status of Y axis */
-	uint8_t done_x:1;	/* status of X axis */
+	unsigned int done_s	:1;	/* status of S axis */
+	unsigned int done_r	:1;	/* status of R axis */
+	unsigned int done_v	:1;	/* status of V axis */
+	unsigned int done_u	:1;	/* status of U axis */
+	unsigned int done_t	:1;	/* status of T axis */
+	unsigned int done_z	:1;	/* status of Z axis */
+	unsigned int done_y	:1;	/* status of Y axis */
+	unsigned int done_x	:1;	/* status of X axis */
     } Bits;
 } DONE_REG;
 
@@ -174,14 +175,14 @@ typedef union
     uint8_t All;
     struct
     {
-	uint8_t:1;		/* Unused */
-	uint8_t:1;		/* Unused */
-	uint8_t io_13:1;	/* Bit 13 */
-	uint8_t io_12:1;	/* Bit 12 */
-	uint8_t io_11:1;	/* Bit 11 */
-	uint8_t io_10:1;	/* Bit 10 */
-	uint8_t io_9:1;		/* Bit 9  */
-	uint8_t io_8:1;		/* Bit 8  */
+	unsigned int		:1;	/* Unused */
+	unsigned int		:1;	/* Unused */
+	unsigned int io_13	:1;	/* Bit 13 */
+	unsigned int io_12	:1;	/* Bit 12 */
+	unsigned int io_11	:1;	/* Bit 11 */
+	unsigned int io_10	:1;	/* Bit 10 */
+	unsigned int io_9	:1;	/* Bit 9  */
+	unsigned int io_8	:1;	/* Bit 8  */
     } Bits;
 } IO_HIGH_REG;
 
@@ -192,14 +193,14 @@ typedef union
     uint8_t All;
     struct
     {
-	uint8_t limit_s:1;	/* status of S axis */
-	uint8_t limit_r:1;	/* status of R axis */
-	uint8_t limit_v:1;	/* status of V axis */
-	uint8_t limit_u:1;	/* status of U axis */
-	uint8_t limit_t:1;	/* status of T axis */
-	uint8_t limit_z:1;	/* status of Z axis */
-	uint8_t limit_y:1;	/* status of Y axis */
-	uint8_t limit_x:1;	/* status of X axis */
+	unsigned int limit_s	:1;	/* status of S axis */
+	unsigned int limit_r	:1;	/* status of R axis */
+	unsigned int limit_v	:1;	/* status of V axis */
+	unsigned int limit_u	:1;	/* status of U axis */
+	unsigned int limit_t	:1;	/* status of T axis */
+	unsigned int limit_z	:1;	/* status of Z axis */
+	unsigned int limit_y	:1;	/* status of Y axis */
+	unsigned int limit_x	:1;	/* status of X axis */
     } Bits;
 } LIMIT_REG;
 
@@ -209,14 +210,14 @@ typedef union
     uint8_t All;
     struct
     {
-	uint8_t home_s:1;	/* status of S axis */
-	uint8_t home_r:1;	/* status of R axis */
-	uint8_t home_v:1;	/* status of V axis */
-	uint8_t home_u:1;	/* status of U axis */
-	uint8_t home_t:1;	/* status of T axis */
-	uint8_t home_z:1;	/* status of Z axis */
-	uint8_t home_y:1;	/* status of Y axis */
-	uint8_t home_x:1;	/* status of X axis */
+	unsigned int home_s	:1;	/* status of S axis */
+	unsigned int home_r	:1;	/* status of R axis */
+	unsigned int home_v	:1;	/* status of V axis */
+	unsigned int home_u	:1;	/* status of U axis */
+	unsigned int home_t	:1;	/* status of T axis */
+	unsigned int home_z	:1;	/* status of Z axis */
+	unsigned int home_y	:1;	/* status of Y axis */
+	unsigned int home_x	:1;	/* status of X axis */
     } Bits;
 } HOME_REG;
 
