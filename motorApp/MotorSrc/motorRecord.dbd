@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.7 $
+# Version:		$Revision: 1.8 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2002-04-19 14:59:22 $
+# Last Modified:	$Date: 2002-10-21 21:06:32 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -28,6 +28,7 @@
 #Modification Log:
 #-----------------
 
+include "menuYesNo.dbd"
 
 menu(motorDIR) {
 	choice(motorDIR_Pos,"Pos")
@@ -59,6 +60,9 @@ menu(motorTORQ) {
 	choice(motorTORQ_Disable,"Disable")
 	choice(motorTORQ_Enable,"Enable")
 }
+
+include "menuOmsl.dbd"
+
 recordtype(motor) {
 	include "dbCommon.dbd" 
 	field(VERS,DBF_FLOAT) {
@@ -612,7 +616,6 @@ recordtype(motor) {
 	field(DLY,DBF_FLOAT) {
 		prompt("Readback settle time (s)")
 		promptgroup(GUI_COMMON)
-		special(SPC_MOD)
 		interest(1)
 	}
 	field(CBAK,DBF_NOACCESS) {
@@ -696,5 +699,11 @@ recordtype(motor) {
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
+	}
+	field(LOCK,DBF_MENU) {
+		prompt("Soft Channel Position Lock")
+		promptgroup(GUI_COMMON)
+		interest(1)
+		menu(menuYesNo)
 	}
 }
