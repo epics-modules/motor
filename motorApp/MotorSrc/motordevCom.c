@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-11-12 21:46:34 $
+Last Modified:	$Date: 2002-02-25 16:57:15 $
 */
 
 /*
@@ -91,7 +91,7 @@ long motor_init_com(int after, int brdcnt, struct driver_table *tabptr,
 	{
 	    struct board_stat *brdptr;
 
-	    brdptr = (*sptr)[card] = (struct board_stat *) malloc(brdcnt * sizeof(struct board_stat));
+	    brdptr = (*sptr)[card] = (struct board_stat *) malloc(sizeof(struct board_stat));
 	    (tabptr->get_card_info) (card, &card_query, tabptr);
 	    if (card_query.total_axis == 0)
 		brdptr->exists = NO;
