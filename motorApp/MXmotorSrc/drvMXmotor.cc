@@ -2,9 +2,9 @@
 FILENAME...	drvMXmotor.cc
 USAGE...	Motor record driver level support for MX device driver.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-14 15:15:29 $
+Last Modified:	$Date: 2003-03-04 15:27:29 $
 */
 
 /*
@@ -166,9 +166,7 @@ RTN_STATUS MXmotorSetup(int max_motors,		/* Maximum number of motors. */
 static int motor_init()
 {
     struct controller *pmotorState;
-    long status;
     int card_index, motor_index;
-    char axis_pos[50], encoder_pos[50];
     int total_encoders = 0, total_axis = 0;
 
     /* Check for setup */
@@ -295,22 +293,72 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     struct MXcontroller *cntrl;
     motor_cmnd command;
     mx_status_type mx_status;
-    char *cmndptr, *posptr;
-    float position;
+    char *cmndptr, *argptr;
+    double darg;
+    int iarg, flags = MXF_MTR_IGNORE_BACKLASH;
 
     brdptr = motor_state[card];
     cntrl = (struct MXcontroller *) brdptr->DevicePrivate;
     
-    posptr = NULL;
-    cmndptr = strtok_r((char *) com, " ", &posptr);
+    argptr = NULL;
+    cmndptr = strtok_r((char *) com, " ", &argptr);
+    if (cmndptr == NULL)
+	return(OK);
     command = (motor_cmnd) atoi(cmndptr);
-    position = atof(posptr);
 
     switch (command)
     {
 	case MOVE_ABS:
-	    mx_status = mx_motor_raw_move_absolute(cntrl->MXmotor_record, position);
+	case MOVE_REL:
+	case LOAD_POS:
+	case SET_VEL_BASE:
+	case SET_VELOCITY:
+	    darg = atof(argptr);
+	    break;
+
+	case HOME_FOR:
+	case HOME_REV:
+	    iarg = atoi(argptr);
+	    break;
+ 
+	default:
+	    break;
+    }
+
+
+    switch (command)
+    {
+	case MOVE_ABS:
+	    mx_status = mx_motor_move_absolute(cntrl->MXmotor_record, darg, flags);
     	    break;
+	
+	case MOVE_REL:
+	    mx_status = mx_motor_move_relative(cntrl->MXmotor_record, darg, flags);
+	    break;
+
+	case HOME_FOR:
+	case HOME_REV:
+	    mx_status = mx_motor_find_home_position(cntrl->MXmotor_record, iarg);
+	    break;
+
+	case SET_VEL_BASE:
+	    mx_status = mx_motor_set_base_speed(cntrl->MXmotor_record, darg);
+	    break;
+
+	case SET_VELOCITY:
+	    mx_status = mx_motor_set_speed(cntrl->MXmotor_record, darg);
+	    break;
+
+	case SET_ACCEL:
+	    break;
+
+	case LOAD_POS:
+	    mx_status = mx_motor_set_position(cntrl->MXmotor_record, darg);
+	    break;
+
+	case STOP_AXIS:
+	    mx_status = mx_motor_soft_abort(cntrl->MXmotor_record);
+	    break;
 	
 	default:
 	    break;

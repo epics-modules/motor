@@ -2,9 +2,9 @@
 FILENAME...	devMXmotor.cc
 USAGE...	Motor record device level support for MX device driver.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-14 15:15:28 $
+Last Modified:	$Date: 2003-03-04 15:26:47 $
 */
 
 /*
@@ -90,7 +90,6 @@ static const char errmsg[] = {"\n\n!!!ERROR!!! - MX driver uninitialized.\n"};
 static long MXmotor_init(void *after)
 {
     int before_after = (int) after;
-    long rtnval = 0;
 
     if (*(MXmotor_access.init_indicator) == NO)
     {
@@ -143,15 +142,13 @@ static RTN_STATUS MXmotor_build(motor_cmnd command, double *parms, struct motorR
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
-    int size;
+    unsigned int size;
     char buff[110];
     RTN_STATUS rtnval = OK;
     bool send = true;	/* Default to send motor command. */
     
     struct controller *brdptr;
     struct MXcontroller *cntrl;
-    float fparm;
-    mx_status_type mx_status;
 
     brdptr = (*trans->tabptr->card_array)[mr->card];
     if (brdptr == NULL)
@@ -171,12 +168,42 @@ static RTN_STATUS MXmotor_build(motor_cmnd command, double *parms, struct motorR
     {	
 	case MOVE_ABS:
 	    sprintf(buff, "%d %f", command, *parms);
-	    fparm = *parms;
-	    mx_status = mx_motor_raw_move_absolute(cntrl->MXmotor_record, fparm);
 	    break;
 	
 	case MOVE_REL:
 	    sprintf(buff, "%d %f", command, *parms);
+	    break;
+	
+	case HOME_FOR:
+	    sprintf(buff, "%d %d", command, 1);
+	    break;
+	
+	case HOME_REV:
+	    sprintf(buff, "%d %d", command, -1);
+	    break;
+
+	case LOAD_POS:
+	    sprintf(buff, "%d %f", command, *parms);
+	    break;
+
+	case SET_VEL_BASE:
+	case SET_VELOCITY:
+	case SET_ACCEL:
+	    sprintf(buff, "%d %f", command, *parms);
+	    break;
+		
+	case GO:
+	    send = false;
+	    break;
+
+	case GET_INFO:
+	    /* This command is not actually done by sending a message, but
+	       rather they will indirectly cause the driver to read the status
+	       of all motors */
+	    break;
+
+	case STOP_AXIS:
+	    sprintf(buff, "%d", command);
 	    break;
 	
 	default:
