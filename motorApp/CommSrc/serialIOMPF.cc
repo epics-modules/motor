@@ -2,9 +2,9 @@
 FILENAME...	serialIOMPF.cc
 USAGE...	Interface between MPF and motor record device drivers.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-07 13:41:50 $
+Last Modified:	$Date: 2003-05-19 17:27:19 $
 */
 
 /*
@@ -42,8 +42,8 @@ Last Modified:	$Date: 2003-05-07 13:41:50 $
 #include "Char8ArrayMessage.h"
 #include "serialServer.h"
 
-// Minimum number of ticks to wait for server reply
-#define MIN_MSGQ_WAIT (1 * CLOCKS_PER_SEC)
+// Minimum wait for server reply; in 0.1 second increments.
+#define MIN_MSGQ_WAIT (1/0.1)
 
 class serialIO
 {
@@ -94,7 +94,7 @@ serialIO::serialIO(int card, char *serverName, int *createdOK)
     for (itera = 0; msgQId->isEmpty() == true; itera++)
     {
 	epicsThreadSleep(0.1);
-	if (itera >= 20)
+	if (itera >= MIN_MSGQ_WAIT)
 	{
 	    epicsPrintf("serialIO: error calling msgQReceive, status = %d\n", status);
 	    *createdOK = 0;
@@ -117,7 +117,7 @@ int serialIO::serialIOSend(char const *buffer, int buffer_len, int timeout)
     Char8ArrayMessage *psm = new Char8ArrayMessage;
     Char8ArrayMessage *prm = NULL;
     Message *pmess;
-    int itera;
+    int itera, timeout_itera;
 
     psm->allocValue(buffer_len);
     psm->setSize(buffer_len);
@@ -132,17 +132,21 @@ int serialIO::serialIOSend(char const *buffer, int buffer_len, int timeout)
     }
     Debug(2, "serialIOSend: sent message %s\n", buffer);
 
+    /* Wait for 2x the timeout or MIN_MSGQ_WAIT; which ever is greater. */
+    timeout_itera = psm->timeout * 20;
+    if (timeout_itera < MIN_MSGQ_WAIT)
+	timeout_itera = MIN_MSGQ_WAIT;
+       
     // Wait for response back from server
     for (itera = 0; msgQId->isEmpty() == true; itera++)
     {
-	if (itera >= 20)
+	if (itera > timeout_itera)
 	{
 	    epicsPrintf("serialIOSend: error calling msgQReceive=%d\n", status);
 	    goto finish;
 	}
 	epicsThreadSleep(0.1);
     }
-
 
     pmess = (Message *) msgQId->pop();
     Debug(5, "serialIOSend:  got message, pmess=%p\n", pmess);
@@ -174,7 +178,7 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, char *terminator,
     Char8ArrayMessage *psm = new Char8ArrayMessage;
     Char8ArrayMessage *prm = NULL;
     Message *pmess;
-    int itera;
+    int itera, timeout_itera;
 
     psm->timeout = timeout/1000;
     // MPF uses seconds, not milliseconds for timeout.  If the desired timeout
@@ -198,9 +202,14 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, char *terminator,
     }
     Debug(2, "serialIORecv: sent message status = %d, timeout=%d\n", status, timeout);
 
+    /* Wait for 2x the timeout or MIN_MSGQ_WAIT; which ever is greater. */
+    timeout_itera = psm->timeout * 20;
+    if (timeout_itera < MIN_MSGQ_WAIT)
+	timeout_itera = MIN_MSGQ_WAIT;
+       
     for (itera = 0; msgQId->isEmpty() == true; itera++)
     {
-	if (itera >= 20)
+	if (itera > timeout_itera)
 	{
 	    epicsPrintf("serialIORecv: error calling msgQReceive, status = %d\n", status);
 	    goto done;
