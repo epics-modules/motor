@@ -48,17 +48,12 @@ record(motor,"$(user):rotary") {
   field(RTRY,"0")
   field(TWV,"5")
   field(STOO,"$(user):linear.STOP  PP MS")
-  field(DINP,"$(user):motorDone")
-}
-
-record(ao,"$(user):motorDone") {
-  field(DOL,"$(user):linear.DMOV CP MS")
-  field(OMSL,"closed_loop")
+  field(DINP,"$(user):linear.DMOV")
 }
 
 #! Further lines contain layout data used by VisualDCT
 
-#! Group("$(user)",720,1680,0,"")
+#! Group("$(user)",1120,1860,0,"")
 #! Record("$(user):height",420,180,0,0,"$(user):height")
 #! Field("$(user):height.VAL",0,1,"$(user):height.VAL")
 #! Record("$(user):convertDriverValue",740,180,0,0,"$(user):convertDriverValue")
@@ -74,10 +69,10 @@ record(ao,"$(user):motorDone") {
 #! Link("$(user):convertReadbackValue.INPB","$(user):height.VAL")
 #! Field("$(user):convertReadbackValue.VAL",0,0,"$(user):convertReadbackValue.VAL")
 #! Record("$(user):linear",1040,320,0,0,"$(user):linear")
-#! Field("$(user):linear.DMOV",0,0,"$(user):linear.DMOV")
 #! Field("$(user):linear.DRBV",0,0,"$(user):linear.DRBV")
 #! Field("$(user):linear.STOP",0,0,"$(user):linear.STOP")
 #! Field("$(user):linear.DVAL",0,0,"$(user):linear.DVAL")
+#! Field("$(user):linear.DMOV",0,0,"$(user):linear.DMOV")
 #! Record("$(user):rotary",420,320,0,0,"$(user):rotary")
 #! Field("$(user):rotary.OUT",0,1,"$(user):rotary.OUT")
 #! Link("$(user):rotary.OUT","$(user):convertDriverValue.A")
@@ -86,8 +81,4 @@ record(ao,"$(user):motorDone") {
 #! Field("$(user):rotary.STOO",0,1,"$(user):rotary.STOO")
 #! Link("$(user):rotary.STOO","$(user):linear.STOP")
 #! Field("$(user):rotary.DINP",0,1,"$(user):rotary.DINP")
-#! Link("$(user):rotary.DINP","$(user):motorDone.VAL")
-#! Record("$(user):motorDone",720,460,0,1,"$(user):motorDone")
-#! Field("$(user):motorDone.DOL",0,1,"$(user):motorDone.DOL")
-#! Link("$(user):motorDone.DOL","$(user):linear.DMOV")
-#! Field("$(user):motorDone.VAL",0,0,"$(user):motorDone.VAL")
+#! Link("$(user):rotary.DINP","$(user):linear.DMOV")
