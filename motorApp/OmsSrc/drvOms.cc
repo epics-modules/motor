@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-22 17:24:08 $
+Last Modified:	$Date: 2003-06-04 18:36:17 $
 */
 
 /*
@@ -64,31 +64,18 @@ Last Modified:	$Date: 2003-05-22 17:24:08 $
 ========================stepper motor driver ========================*/
 
 #include	<vxLib.h>
-#include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
-#include	<taskLib.h>
 #include	<rebootLib.h>
-#include	<logLib.h>
-
-#include	<alarm.h>
-#include	<dbDefs.h>
-#include	<dbAccess.h>
-#include	<dbCommon.h>
-#include	<devSup.h>
-#include	<drvSup.h>
 extern "C" {
-#include	<recSup.h>
+#include	<logLib.h>
+#include	<drvSup.h>
 #include	<devLib.h>
-#include	<errlog.h>
 }
-#include	<errMdef.h>
-#include	<intLib.h>
 #include	<epicsThread.h>
 
 #include	"motor.h"
 #include	"drvOms.h"
-
 #include	"epicsExport.h"
 
 #define PRIVATE_FUNCTIONS 1	/* normal:1, debug:0 */

@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-22 17:24:25 $
+Last Modified:	$Date: 2003-06-04 18:36:59 $
 */
 
 /*
@@ -69,26 +69,16 @@ Last Modified:	$Date: 2003-05-22 17:24:25 $
  */
 
 #include	<vxLib.h>
-#include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
-#include	<taskLib.h>
-#include        <rngLib.h>
 #include	<rebootLib.h>
 #include	<logLib.h>
-
-#include	<alarm.h>
-#include	<dbDefs.h>
-#include	<dbAccess.h>
+#include	<taskLib.h>
 #include	<dbCommon.h>
-#include	<devSup.h>
 #include	<drvSup.h>
 extern "C" {
-#include	<recSup.h>
 #include	<devLib.h>
-#include	<errlog.h>
 }
-#include	<errMdef.h>
 #include	<epicsThread.h>
 
 #include	"motorRecord.h"	/* For Driver Power Monitor feature only. */
