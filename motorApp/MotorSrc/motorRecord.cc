@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.19 $
+Version:	$Revision: 1.20 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 20:37:28 $
+Last Modified:	$Date: 2004-10-08 17:54:47 $
 */
 
 /*
@@ -65,10 +65,11 @@ Last Modified:	$Date: 2004-09-20 20:37:28 $
  * .15 02-12-03 rls - Allow sign(MRES) != sign(ERES).
  * .16 06-16-04 rls - JAR validity check.
  * .17 09-20-04 rls - Do status update if nothing else to do.
+ * .18 10-08-04 rls - Bug fix for backlashing into limit switch; update CDIR.
  *
  */
 
-#define VERSION 5.4
+#define VERSION 5.5
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -738,6 +739,7 @@ static long postProcess(motorRecord * pmr)
 		pmr->mip = MIP_MOVE_BL;
 	    }
 	    WRITE_MSG(GO, NULL);
+	    pmr->cdir = (relpos < 0.0) ? 0 : 1;
 	    SEND_MSG();
 	    pmr->pp = TRUE;
 	}
@@ -789,6 +791,7 @@ static long postProcess(motorRecord * pmr)
 	    WRITE_MSG(MOVE_ABS, &newpos);
 	}
 	WRITE_MSG(GO, NULL);
+	pmr->cdir = (relpos < 0.0) ? 0 : 1;
 	SEND_MSG();
 
 	pmr->mip = MIP_JOG_BL2;
