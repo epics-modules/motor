@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-21 15:46:02 $
+Last Modified:	$Date: 2002-02-25 16:48:13 $
 */
 
 /*
@@ -40,6 +40,9 @@ Last Modified:	$Date: 2002-02-21 15:46:02 $
  *
  * Modification Log:
  * -----------------
+ * .00  02-22-02 rls	- "total_cards" changed from total detected to total
+ *			cards that "memory is allocated for".  This allows
+ *			boards after the "hole" to work.
  */
 
 /*========================stepper motor driver ========================
@@ -970,7 +973,7 @@ STATIC int motor_init()
 
     /* allocate structure space for each motor present */
 
-    total_cards = 0;
+    total_cards = oms44_num_cards;
 
     if (rebootHookAdd((FUNCPTR) oms_reset) == ERROR)
 	Debug(1, "vme8/44 motor_init: oms_reset disabled\n");
@@ -1000,8 +1003,6 @@ STATIC int motor_init()
 
 	    Debug(9, "motor_init: localaddr = %x\n", (int) localaddr);
 	    pmotor = (struct vmex_motor *) localaddr;
-
-	    total_cards++;
 
 	    Debug(9, "motor_init: malloc'ing motor_state\n");
 	    motor_state[card_index] = (struct controller *) malloc(sizeof(struct controller));
@@ -1130,9 +1131,12 @@ STATIC void oms_reset()
 
     for (card = 0; card < total_cards; card++)
     {
-	pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
-	if (vxMemProbe((char *) pmotor, READ, sizeof(short), (char *) &status) == OK)
-	    pmotor->control &= 0x5f;
+	if (motor_state[card] != NULL)
+	{
+	    pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
+	    if (vxMemProbe((char *) pmotor, READ, sizeof(short), (char *) &status) == OK)
+		pmotor->control &= 0x5f;
+	}
     }
 }
 
