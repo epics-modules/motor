@@ -116,6 +116,8 @@ struct v544_motor_table
     int num_parms;
 };
 
+/* WARNING! this must match "motor_cmnd" in motor.h */
+
 static struct v544_motor_table v544_table[] = {
 /*	  type      cmd  num_parms */
     {MOTION, CS_MOVE_ABS, 1},	/* MOVE_ABS */
@@ -138,7 +140,8 @@ static struct v544_motor_table v544_table[] = {
     {UNDEFINED, 0, 0},		/* DISABL_TORQUE */
     {UNDEFINED, 0, 0},		/* PRIMITIVE */
     {UNDEFINED, 0, 0},		/* SET_HIGH_LIMIT */
-    {UNDEFINED, 0, 0}		/* SET_LOW_LIMIT */
+    {UNDEFINED, 0, 0},		/* SET_LOW_LIMIT */
+    {VELOCITY,	0, 0}		/* JOG_VELOCITY */
 };
 
 /* status of an axis of a board, one present for each axis of each board*/
