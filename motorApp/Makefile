@@ -17,6 +17,7 @@ DIRS += MotorSrc
 #DIRS += OmsSrc
 #DIRS += SoftMotorSrc
 #DIRS += V544Src
+#DIRS += ImsSrc
 
 DIRS += Db
 include $(TOP)/config/RULES_DIRS
