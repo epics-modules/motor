@@ -42,7 +42,7 @@ struct PM304controller
     char port[80];          /* asyn port name */
 };
 
-RTN_STATUS PM304Setup(int, int, int);
+RTN_STATUS PM304Setup(int, int);
 RTN_STATUS PM304Config(int, const char *, int);
 
 #endif	/* INCdrvPM304h */

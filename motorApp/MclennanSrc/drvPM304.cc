@@ -26,6 +26,7 @@
  * .08  03/27/03   rls  R3.14 conversion.
  * .09  02/03/04   rls  Eliminate erroneous "Motor motion timeout ERROR".
  * .10  04/20/04   mlr  Convert from MPF to ASYN
+ * .11  07/16/04   rls  removed unused <driver>Setup() argument.
  */
 
 
@@ -510,7 +511,6 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
 /*****************************************************/
 RTN_STATUS
 PM304Setup(int num_cards,   	/* maximum number of controllers in system */
-           int num_channels,	/* NOT USED            */
            int scan_rate)       /* polling rate - 1/60 sec units */
 {
     int itera;
@@ -609,8 +609,7 @@ STATIC int motor_init()
 
         status = pasynSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
         success_rtn = (status == asynSuccess);
-        Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n",
-              cntrl->port, success_rtn, cntrl->pasynUser);
+        Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n", cntrl->port, success_rtn, cntrl->pasynUser);
 
         if (success_rtn == true)
         {

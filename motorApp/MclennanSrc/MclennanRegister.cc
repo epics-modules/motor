@@ -2,9 +2,9 @@
 FILENAME...	MclennanRegister.cc
 USAGE...	Register Mclennan motor device driver shell commands.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-04-20 22:46:07 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-07-16 19:17:22 $
 */
 
 /*****************************************************************
@@ -27,25 +27,23 @@ extern "C"
 
 // PM304Setup arguments
 static const iocshArg setupArg0 = {"Max. controller count", iocshArgInt};
-static const iocshArg setupArg1 = {"N/A", iocshArgInt};
-static const iocshArg setupArg2 = {"Polling rate", iocshArgInt};
+static const iocshArg setupArg1 = {"Polling rate", iocshArgInt};
 
 // PM304Config arguments
 static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
 static const iocshArg configArg1 = {"asyn port name", iocshArgString};
 static const iocshArg configArg2 = {"Number of axes", iocshArgInt};
 
-static const iocshArg * const PM304SetupArgs[3]  = {&setupArg0, &setupArg1,
-    &setupArg2};
+static const iocshArg * const PM304SetupArgs[2]  = {&setupArg0, &setupArg1};
 static const iocshArg * const PM304ConfigArgs[3] = {&configArg0, &configArg1,
     &configArg2};
 
-static const iocshFuncDef setupPM304  = {"PM304Setup",  3, PM304SetupArgs};
+static const iocshFuncDef setupPM304  = {"PM304Setup",  2, PM304SetupArgs};
 static const iocshFuncDef configPM304 = {"PM304Config", 3, PM304ConfigArgs};
 
 static void setupPM304CallFunc(const iocshArgBuf *args)
 {
-    PM304Setup(args[0].ival, args[1].ival, args[2].ival);
+    PM304Setup(args[0].ival, args[1].ival);
 }
 static void configPM304CallFunc(const iocshArgBuf *args)
 {
