@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Record Support Routines for the Motor record.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 15:07:47 $
+Last Modified:	$Date: 2000-07-17 18:56:06 $
 */
 
 /*
@@ -556,6 +556,12 @@ STATIC long init_record(motorRecord * pmr, int pass)
      */
     (*pdset->update_values) (pmr);
 
+    if (pmr->eres == 0.0)
+    {
+	pmr->eres = pmr->mres;
+	MARK(M_ERES);
+    }
+
     /* v3.2 Set .res according to whether an encoder is in use. */
     pmr->res = ((pmr->msta & EA_PRESENT) && pmr->ueip) ? pmr->eres : pmr->mres;
 
@@ -603,11 +609,6 @@ STATIC long init_record(motorRecord * pmr, int pass)
     {
 	pmr->lvio = 1;
 	MARK(M_LVIO);
-    }
-    if (fabs(pmr->eres) < 1.e-9)
-    {
-	pmr->eres = pmr->mres;
-	MARK(M_ERES);
     }
 
     /* Make sure readback-delay field accurately conveys the time delay we */
@@ -739,7 +740,7 @@ STATIC long postProcess(motorRecord * pmr)
     else if (pmr->mip & MIP_JOG_STOP)
     {
 	pmr->mip &= ~MIP_JOG_STOP;
-	if (fabs(pmr->bdst) <  fabs(pmr->res))
+	if (fabs(pmr->bdst) >  fabs(pmr->res))
 	{
 	    /* First part of jog done. Do backlash correction. */
 	    double bvel = pmr->bvel / fabs(pmr->res);
@@ -1474,7 +1475,7 @@ stop_all:   /* Cancel any operations. */
 		pmr->mres = 1.;
 		MARK(M_MRES);
 	    }
-	    if (fabs(pmr->eres) < 1.e-9)
+	    if (pmr->eres == 0.0)
 	    {
 		pmr->eres = pmr->mres;
 		MARK(M_ERES);
@@ -1576,9 +1577,18 @@ stop_all:   /* Cancel any operations. */
 	    }
 	    else
 	    {
-		double vbase = pmr->vbas / fabs(pmr->res);
-		double hvel = 1000 * fabs(pmr->mres / pmr->eres);
-		double hpos = 0;
+		double vbase, hvel, hpos;
+
+		/* defend against divide by zero */
+		if (pmr->eres == 0.0)
+		{
+		    pmr->eres = pmr->mres;
+		    MARK(M_ERES);
+		}
+
+		vbase = pmr->vbas / fabs(pmr->res);
+		hvel = 1000 * fabs(pmr->mres / pmr->eres);
+		hpos = 0;
 
 		INIT_MSG();
 		WRITE_MSG(SET_VEL_BASE, &vbase);
@@ -2333,14 +2343,14 @@ velcheckB:
 
 	/* new eres (encoder resolution) */
     case motorRecordERES:
-	MARK(M_ERES);		/* MARK it so we'll remember to tell device
-				 * support */
+	if (pmr->eres == 0.0)	/* Don't allow ERES = 0. */
+    	    pmr->eres = pmr->mres;
+	MARK(M_ERES);
 	break;
 
 	/* new ueip flag */
     case motorRecordUEIP:
-	MARK(M_UEIP);		/* MARK it so we'll remember to tell device
-				 * support */
+	MARK(M_UEIP);
 	/* Ideally, we should be recalculating speeds, but at the moment */
 	/* we don't know whether hardware even has an encoder. */
 	break;
@@ -3044,6 +3054,8 @@ STATIC void load_pos(motorRecord * pmr)
     pmr->mip = MIP_LOAD_P;
     MARK(M_MIP);
     pmr->pp = TRUE;
+    pmr->dmov = FALSE;
+    MARK(M_DMOV);
 
     /* Load pos. into motor controller.  Get new readback vals. */
     INIT_MSG();
