@@ -1,8 +1,16 @@
-To run this Newport MM4000/5, MPF example on a Unix OS;
-in <motor>/configure/RELEASE: MPF= must be defined.
+To run this Newport MM4000/5, "asyn" example on a Unix OS;
+
+in <motor>/Makefile: the following two lines must be uncommented;
+	#DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
+	#DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
+
+in <motor>/configure/RELEASE: ASYN= must be defined.
+
 in <motor>/motorApp/Makefile: #DIRS += NewportSrc must be uncommented.
+
 in <motor>/motorExApp/Makefile: #DIRS += WithMPF must be uncommented.
-and rebuild.
+
+Finally, cd <motor>; gnumake clean uninstall; gnumake
 
 Assuming the EPICS_HOST_ARCH environment variable is set correctly,
 start the ioc from this directory by executing the following command.
