@@ -2,9 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-06-25 20:12:24 $
+Last Modified:	$Date: 2002-07-05 19:43:17 $
 */
 
 /*
@@ -163,9 +163,17 @@ FUNCTION... void soft_dinp_func(struct motorRecord *, short)
 USAGE... Update soft channel device input links and
     process soft channel motor record when done moving.
 LOGIC...
-    IF FALSE to TRUE transition.
-	Set WAIT for last readback indicator.
-    
+    IF TRUE to FALSE transition.
+	IF this soft motor's DMOV is FALSE.
+	    This is a soft motor initiated move.
+	    Set SOFTMOVE indicator.
+	ELSE
+	    This is NOT a soft motor initiated move.
+	    Set HARDMOVE indicator.
+	    Set soft motor's DMOV FALSE.
+	    Set PP TRUE.
+	ENDIF
+    ENDIF    
     Get DINP_VALUE via DINP link.
     IF Get() succeeds and DINP_VALUE is true
         Process soft channel record
@@ -197,9 +205,8 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
     else		/* Hard motor is done moving. */
     {
 	if (ptr->dinp_value == HARDMOVE)
-	    ptr->dinp_value = WAIT;	/* Reset Target to Actual position. */
-	else
-	    ptr->dinp_value = DONE;
+	    mr->pp = TRUE;
+	ptr->dinp_value = DONE;
 	soft_process(mr);		/* Process in case there is no readback callback. */
     }
 }
@@ -225,7 +232,7 @@ void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
     newrdbl = newrdbl / mr->mres;
     mr->rmp = NINT(newrdbl);
 
-    if (ptr->dinp_value == WAIT || ptr->initialized == OFF)
+    if (ptr->initialized == OFF)
     {
 	/* Reset Target to Actual position. */
 	unsigned short mask = (DBE_VALUE | DBE_LOG);
