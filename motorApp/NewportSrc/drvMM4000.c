@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.c
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:27:22 $
+Last Modified:	$Date: 2000-04-18 21:01:05 $
 */
 
 /*
@@ -74,7 +74,7 @@ Last Modified:	$Date: 2000-03-03 22:27:22 $
 #define MOTOR_ON        "MO;\r"
 #define GET_IDENT       "VE;\r"
 
-#define INPUT_TERMINATOR  '\r'
+#define INPUT_TERMINATOR	'\r'
 
 /* Status byte bits */
 #define M_AXIS_MOVING     0x01
@@ -86,6 +86,9 @@ Last Modified:	$Date: 2000-03-03 22:27:22 $
 
 #define MM4000_NUM_CARDS	4
 #define BUFF_SIZE 100       /* Maximum length of string to/from MM4000 */
+
+#define GPIB_TIMEOUT	2000	/* Command timeout in msec. */
+#define SERIAL_TIMEOUT	2000	/* Command timeout in msec. */
 
 /*----------------debugging-----------------*/
 #ifdef	DEBUG
@@ -453,15 +456,27 @@ STATIC int send_mess(int card, char const *com, char inchar)
 }
 
 
-/*****************************************************/
-/* receive a message from the MM4000 board           */
-/* recv_mess()			                     */
-/*****************************************************/
+/*
+ * FUNCTION... recv_mess(int card, char *com, int flag)
+ *
+ * INPUT ARGUMENTS...
+ *	card - controller card # (0,1,...).
+ *	*com - caller's response buffer.
+ *	flag	| FLUSH  = flush controller's output buffer; set timeout = 0.
+ *		| !FLUSH = retrieve response into caller's buffer; set timeout.
+ *
+ * LOGIC...
+ *  IF controller card does not exist.
+ *	ERROR RETURN.
+ *  ENDIF
+ *  NORMAL RETURN.
+ */
+
 STATIC int recv_mess(int card, char *com, int flag)
 {
     struct MMcontroller *cntrl;
-    int timeout;
-    int len=0;
+    int timeout = 0;
+    int len = 0;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -472,25 +487,24 @@ STATIC int recv_mess(int card, char *com, int flag)
     switch (cntrl->port_type)
     {
 	case GPIB_PORT:
-	    if (flag == FLUSH)
-		timeout = 0;
-	    else
+	    if (flag != FLUSH)
 		timeout	= GPIB_TIMEOUT;
 	    len = gpibIORecv(cntrl->gpibInfo, com, BUFF_SIZE, INPUT_TERMINATOR,
 			     timeout);
 	    break;
 	case RS232_PORT:
-	    if (flag == FLUSH)
-		timeout = 0;
-	    else
+	    if (flag != FLUSH)
 		timeout	= SERIAL_TIMEOUT;
 	    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE,
 			       INPUT_TERMINATOR, timeout);
 	    break;
     }
 
-    if (len == 0)
+    if (len <= 0)
+    {
 	com[0] = '\0';
+	len = 0;
+    }
     else
 	com[len-1] = '\0';
 
@@ -634,7 +648,7 @@ STATIC int motor_init()
 	    do
 		recv_mess(card_index, buff, FLUSH);
 	    while (strlen(buff) != 0);
-    
+
 	    do
 	    {
 		send_mess(card_index, READ_POSITION, NULL);
