@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.2 $
+# Version:		$Revision: 1.3 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2000-08-16 19:09:06 $
+# Last Modified:	$Date: 2001-05-14 19:48:43 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -684,5 +684,18 @@ recordtype(motor) {
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
+	}
+	field(JVEL,DBF_FLOAT) {
+		prompt("Jog Velocity (EGU/s)")
+		promptgroup(GUI_COMMON)
+		special(SPC_MOD)
+		interest(1)
+	}
+	field(JAR,DBF_FLOAT) {
+		prompt("Jog Accel. (EGU/s^2)")
+		promptgroup(GUI_COMMON)
+		special(SPC_MOD)
+		interest(1)
+		initial("10.0")
 	}
 }
