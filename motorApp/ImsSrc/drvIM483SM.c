@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.c
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:49:11 $
+Last Modified:	$Date: 2002-03-29 21:13:24 $
 */
 
 /*
@@ -378,13 +378,18 @@ STATIC int send_mess(int card, char const *com, char inchar)
     char *head, *end, local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
     BOOLEAN lastcmnd = OFF;
+    int size;
 
-    if (strlen(com) > MAX_MSG_SIZE)
+    size = strlen(com);
+
+    if (size > MAX_MSG_SIZE)
     {
 	logMsg((char *) "drvIM483SM.c:send_mess(); message size violation.\n",
 	       0, 0, 0, 0, 0, 0);
 	return (-1);
     }
+    else if (size == 0)	/* Normal exit on empty input message. */
+	return (0);
     
     if (!motor_state[card])
     {
@@ -401,7 +406,7 @@ STATIC int send_mess(int card, char const *com, char inchar)
     }
 
     head = (char *) com;
-    end = head + strlen(com);
+    end = head + size;
 
     while (lastcmnd == OFF)
     {
