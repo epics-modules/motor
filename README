@@ -232,6 +232,21 @@ Modification Log from R4-5 to R5-1
 
 	File modified: - drvOms58.c; conditional delay added to query_done().
 
+12) With release R4-5, DBE_LOG was omitted from the event select mask of all
+	db_post_events() calls.  This prevented archival clients from being
+	notified of process variable changes.  With this release, DBE_LOG is
+	on for all calls to db_post_events()
+	
+	Files modified: - motorRecord.cc, motordevCom.cc and devSoft.cc
+
+13) Mark Rivers added support for the Mclennan PM600 controller.
+
+	Files modified: - MclennanSrc/devPM304.cc
+			- MclennanSrc/drvPM304.cc
+			- MclennanSrc/drvPM304.h
+
+14) MX device driver support added.  MXmotorSrc directory added.
+
 
 Modification Log from R4-4 to R4-5
 ==================================
