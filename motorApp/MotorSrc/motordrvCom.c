@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 18:43:40 $
+Last Modified:	$Date: 2002-03-01 20:38:43 $
 */
 
 /*
@@ -49,6 +49,8 @@ Last Modified:	$Date: 2000-07-17 18:43:40 $
  *				version D does not support 32bit accesses.
  * .20  06-20-96	jps     add more security to message parameters (card #)
  * .20a 02-19-97    	tmm     fixed for EPICS 3.13
+ * .21  03-01-02	rls	Eliminated support for the "ASCII record
+ *				separator (IS2) = /x1E".
  */
 
 
@@ -270,7 +272,7 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 	{
 	    struct mess_info *motor_info;
 	    struct controller *brdptr;
-	    char *head, *tail, inbuf[MAX_MSG_SIZE], outbuf[MAX_MSG_SIZE];
+	    char inbuf[MAX_MSG_SIZE];
 	    char axis_name;
 
 	    if (tabptr->axis_names == NULL)
@@ -313,26 +315,7 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 		break;
 
 	    case MOTION:
-		head = node->message;
-		/* Search for ASCII record separator (IS2) = /x1E. */
-		tail = strchr(head, '\x1E');
-		if (tail == NULL)
-		{
-		    strcpy(outbuf, head);
-		    /* Empty "message" signals query_axis() there are no more messages. */
-		    *head = NULL;
-		}
-		else
-		{
-		    int size = tail - head;	/* Copy 1st command to local buffer. */
-		    strncpy(outbuf, head, size);
-		    outbuf[size] = NULL;
-
-		    strcpy(head, ++tail);	/* Move 2nd command to front of message buffer. */
-		    if ((tail = strchr(head, '\x1E')) != NULL)
-			*tail = NULL;		/* Remove record separator from buffer. */
-		}
-		(*tabptr->sendmsg) (card, outbuf, axis_name);
+		(*tabptr->sendmsg) (card, node->message, axis_name);
 		if (brdptr->cmnd_response == ON)
 		    (*tabptr->getmsg) (card, inbuf, 1);
 
