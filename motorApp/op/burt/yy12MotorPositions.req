@@ -1,0 +1,37 @@
+% save positions for motors 1-12
+
+#define MOTOR_REC m1
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m2
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m3
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m4
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m5
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m6
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m7
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m8
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m9
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m10
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m11
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m12
+#include "yyMotorPositions.req"

@@ -1,0 +1,9 @@
+%
+%  This request file the absolute position fields of a motor
+%  record named PREFIX:MOTOR_REC. This must be defined and then
+%  this file "#include(d)
+%
+PREFIX:MOTOR_REC.SSET
+PREFIX:MOTOR_REC.DVAL
+PREFIX:MOTOR_REC.OFF
+PREFIX:MOTOR_REC.SUSE

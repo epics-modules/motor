@@ -1,0 +1,133 @@
+% save positions for motors 1-44
+
+#define MOTOR_REC m1
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m2
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m3
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m4
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m5
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m6
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m7
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m8
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m9
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m10
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m11
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m12
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m13
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m14
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m15
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m16
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m17
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m18
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m19
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m20
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m21
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m22
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m23
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m24
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m25
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m26
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m27
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m28
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m29
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m30
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m31
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m32
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m33
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m34
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m35
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m36
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m37
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m38
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m39
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m40
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m41
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m42
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m43
+#include "yyMotorPositions.req"
+
+#define MOTOR_REC m44
+#include "yyMotorPositions.req"

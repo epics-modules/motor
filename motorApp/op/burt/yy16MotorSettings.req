@@ -1,0 +1,65 @@
+% save settings for motors 1-16
+
+#define MOTOR_REC m1
+#include "yyMotorSettings.req"
+PREFIX:m1_able.VAL
+
+#define MOTOR_REC m2
+#include "yyMotorSettings.req"
+PREFIX:m2_able.VAL
+
+#define MOTOR_REC m3
+#include "yyMotorSettings.req"
+PREFIX:m3_able.VAL
+
+#define MOTOR_REC m4
+#include "yyMotorSettings.req"
+PREFIX:m4_able.VAL
+
+#define MOTOR_REC m5
+#include "yyMotorSettings.req"
+PREFIX:m5_able.VAL
+
+#define MOTOR_REC m6
+#include "yyMotorSettings.req"
+PREFIX:m6_able.VAL
+
+#define MOTOR_REC m7
+#include "yyMotorSettings.req"
+PREFIX:m7_able.VAL
+
+#define MOTOR_REC m8
+#include "yyMotorSettings.req"
+PREFIX:m8_able.VAL
+
+#define MOTOR_REC m9
+#include "yyMotorSettings.req"
+PREFIX:m9_able.VAL
+
+#define MOTOR_REC m10
+#include "yyMotorSettings.req"
+PREFIX:m10_able.VAL
+
+#define MOTOR_REC m11
+#include "yyMotorSettings.req"
+PREFIX:m11_able.VAL
+
+#define MOTOR_REC m12
+#include "yyMotorSettings.req"
+PREFIX:m12_able.VAL
+
+#define MOTOR_REC m13
+#include "yyMotorSettings.req"
+PREFIX:m13_able.VAL
+
+#define MOTOR_REC m14
+#include "yyMotorSettings.req"
+PREFIX:m14_able.VAL
+
+#define MOTOR_REC m15
+#include "yyMotorSettings.req"
+PREFIX:m15_able.VAL
+
+#define MOTOR_REC m16
+#include "yyMotorSettings.req"
+PREFIX:m16_able.VAL

@@ -1,0 +1,17 @@
+% save settings for motors 1-4
+
+#define MOTOR_REC m1
+#include "yyMotorSettings.req"
+PREFIX:m1_able.VAL
+
+#define MOTOR_REC m2
+#include "yyMotorSettings.req"
+PREFIX:m2_able.VAL
+
+#define MOTOR_REC m3
+#include "yyMotorSettings.req"
+PREFIX:m3_able.VAL
+
+#define MOTOR_REC m4
+#include "yyMotorSettings.req"
+PREFIX:m4_able.VAL
