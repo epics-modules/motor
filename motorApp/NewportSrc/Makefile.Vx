@@ -13,10 +13,12 @@ include $(TOP)/config/CONFIG_APP
 # The following is required for the Newport MM3000 (i.e., MM3000) device driver.
 SRCS.c += ../devMM3000.c ../drvMM3000.c
 LIBOBJS += devMM3000.o drvMM3000.o
+INSTALLS += devMM3000.o drvMM3000.o
 
 # The following is required for the Newport MM4000/5 (i.e., MM4000) device driver.
 SRCS.c += ../devMM4000.c ../drvMM4000.c
 LIBOBJS += devMM4000.o drvMM4000.o
+INSTALLS += devMM4000.o drvMM4000.o
 
 LIBNAME = newportLib
 
