@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:10:19 $
+Last Modified:	$Date: 2003-02-03 17:17:26 $
 */
 
 /*
@@ -75,17 +75,9 @@ Last Modified:	$Date: 2002-10-21 21:10:19 $
 #include	<dbCommon.h>
 #include	<devSup.h>
 #include	<drvSup.h>
-#ifdef __cplusplus
-extern "C" {
-#include	<recSup.h>
-#include	<devLib.h>
-#include	<errlog.h>
-}
-#else
 #include	<recSup.h>
 #include        <devLib.h>
 #include	<errlog.h>
-#endif
 #include	<errMdef.h>
 #include	<intLib.h>
 #include	<epicsThread.h>
@@ -117,11 +109,6 @@ extern "C" {
 int oms44_num_cards = 0;
 volatile int drvOMSdebug = 0;
 volatile int omsSpyClkRate = 0;
-#ifdef __cplusplus
-extern "C" long locationProbe(epicsAddressType, char *);
-#else
-extern long locationProbe(epicsAddressType, char *);
-#endif
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -141,14 +128,14 @@ static long report(int level);
 static long init();
 static void query_done(int, int, struct mess_node *);
 static int set_status(int card, int signal);
-static int send_mess(int card, char const *com, char c);
+static RTN_STATUS send_mess(int card, char const *com, char c);
 static int recv_mess(int, char *, int);
 static void motorIsr(int card);
 static int motor_init();
 static void oms_reset();
 
 STATIC int omsGet(int card, char *pcom, int timeout);
-STATIC int omsPut(int card, char *pcom);
+STATIC RTN_STATUS omsPut(int card, char *pcom);
 STATIC int omsError(int card);
 STATIC int motorIsrEnable(int card);
 STATIC void motorIsrDisable(int card);
@@ -180,13 +167,8 @@ struct driver_table oms_access =
 struct
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvOms = {2, report, init};
 
 STATIC struct thread_args targs = {SCAN_RATE, &oms_access};
@@ -387,16 +369,16 @@ STATIC int set_status(int card, int signal)
 /* send a message to the OMS board		     */
 /*		send_mess()			     */
 /*****************************************************/
-STATIC int send_mess(int card, char const *com, char inchar)
+STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     char outbuf[MAX_MSG_SIZE];
-    int return_code;
+    RTN_STATUS return_code;
 
     if (strlen(com) > MAX_MSG_SIZE)
     {
 	logMsg((char *) "drvOms.cc:send_mess(); message size violation.\n",
 	       0, 0, 0, 0, 0, 0);
-	return (-1);
+	return (ERROR);
     }
 
     /* Check that card exists */
@@ -404,7 +386,7 @@ STATIC int send_mess(int card, char const *com, char inchar)
     {
 	logMsg((char *) "drvOms.cc:send_mess() - invalid card #%d\n", card,
 	       0, 0, 0, 0, 0);
-	return (-1);
+	return (ERROR);
     }
 
     /* Check/Clear command errors */
@@ -632,7 +614,7 @@ STATIC int omsGet(int card, char *pchar, int timeout)
 /* Send Message to OMS                               */
 /*		omsPut()			     */
 /*****************************************************/
-STATIC int omsPut(int card, char *pmess)
+STATIC RTN_STATUS omsPut(int card, char *pmess)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
