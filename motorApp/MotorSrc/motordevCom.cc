@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:08:24 $
+Last Modified:	$Date: 2003-12-12 21:38:42 $
 */
 
 /*
@@ -181,6 +181,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     struct mess_node *motor_call;
     double ep_mp[2];		/* encoder pulses, motor pulses */
     int rtnStat;
+    msta_field msta;
 
     /* allocate space for private field - an motor_trans structure */
     mr->dpvt = (struct motor_trans *) malloc(sizeof(struct motor_trans));
@@ -236,7 +237,9 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     if (rtnStat)
     {
 	/* Initialize readback fields for simulation */
-	mr->msta = RA_PROBLEM;
+	msta.All = 0;
+	msta.Bits.RA_PROBLEM = 1;
+	mr->msta = msta.All;
 	mr->rmp = 0;		/* raw motor pulse count */
 	mr->rep = 0;		/* raw encoder pulse count */
 	return(rtnStat);
@@ -244,7 +247,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 	
     /* query motor for all info to fill into record */
     (tabptr->get_axis_info) (card, signal, &axis_query, tabptr);
-    mr->msta = axis_query.status;	/* status info */
+    msta.All = mr->msta = axis_query.status.All;	/* status info */
     brdptr->axis_stat[signal].in_use = true;
 
 /*jps: setting the encoder ratio was moved from init_record() remove  callbacks during iocInit */
@@ -254,7 +257,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
      * per engineering unit (EGU).  Send an array containing this information
      * to device support.
      */
-    initEncoder = ((mr->msta & EA_PRESENT) && mr->ueip) ? true : false;
+    initEncoder = (msta.Bits.EA_PRESENT && mr->ueip) ? true : false;
     if (initEncoder == true)
     {
 	if (fabs(mr->mres) < 1.e-9)
@@ -333,7 +336,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 
     mr->rmp = axis_query.position;	/* raw motor pulse count */
     mr->rep = axis_query.encoder_position;	/* raw encoder pulse count */
-    mr->msta = axis_query.status;	/* status info */
+    mr->msta = axis_query.status.All;	/* status info */
     return(OK);
 }
 
@@ -363,7 +366,7 @@ CALLBACK_VALUE motor_update_values(struct motorRecord * mr)
 	mr->rmp = ptrans->motor_pos;
 	mr->rep = ptrans->encoder_pos;
 	mr->rvel = ptrans->vel;
-	mr->msta = ptrans->status;
+	mr->msta = ptrans->status.All;
 	ptrans->callback_changed = NO;
 	rc = CALLBACK_DATA;
     }
@@ -425,12 +428,16 @@ RTN_STATUS motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabp
     motor_call = &(trans->motor_call);
     if ((*trans->tabptr->card_array)[motor_call->card] == NULL)
     {
+	msta_field msta;
+
 	/* If the controller does not exits, then set "done moving"
 	 * and communication error TRUE.
 	 */
 	mr->dmov = TRUE;
 	db_post_events(mr, &mr->dmov, DBE_VAL_LOG);
-	mr->msta |= CNTRL_COMM_ERR;
+	msta.All = mr->msta;
+	msta.Bits.CNTRL_COMM_ERR = 1;
+	mr->msta = msta.All;
 	return(rc = ERROR);
     }
 

@@ -183,9 +183,11 @@ STATIC int set_status(int card, int signal)
     long motorData;
     char buff[BUFF_SIZE];
     bool ls_active = false;
+    msta_field status;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
+    status.All = motor_info->status.All;
 
     /* Request the moving status of this motor */
     sprintf(command, "#%02dX", signal);
@@ -193,34 +195,31 @@ STATIC int set_status(int card, int signal)
     recv_mess(card, response, WAIT);
     /* The response string is of the form "#01X=1" */
 
-    if (response[5] == '1')
-        motor_info->status &= ~RA_DONE;
-    else {
-        motor_info->status |= RA_DONE;
-    }
+    status.Bits.RA_DONE = (response[5] == '1') ? 0 : 1;
 
     /* Request the limit status of this motor */
     sprintf(command, "#%02dE", signal);
     send_mess(card, command, 0);
     recv_mess(card, response, WAIT);
     /* The response string is of the form "#01E=1" */
-    motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
+    status.Bits.RA_PLUS_LS = 0;
+    status.Bits.RA_MINUS_LS = 0;
     if (response[5] == '1') {
-        motor_info->status |= RA_PLUS_LS;
-        motor_info->status |= RA_DIRECTION;
+	status.Bits.RA_PLUS_LS = 1;
+	status.Bits.RA_DIRECTION = 1;
 	ls_active = true;
     }
     if (response[6] == '1') {
-        motor_info->status |= RA_MINUS_LS;
-        motor_info->status &= ~RA_DIRECTION;
+	status.Bits.RA_MINUS_LS = 1;
+	status.Bits.RA_DIRECTION = 0;
 	ls_active = true;
     }
 
     /* encoder status */
-    motor_info->status &= ~EA_SLIP;
-    motor_info->status &= ~EA_POSITION;
-    motor_info->status &= ~EA_SLIP_STALL;
-    motor_info->status &= ~EA_HOME;
+    status.Bits.EA_SLIP	      = 0;
+    status.Bits.EA_POSITION   = 0;
+    status.Bits.EA_SLIP_STALL = 0;
+    status.Bits.EA_HOME	      = 0;
 
     /* Request the position of this motor */
     sprintf(command, "#%02dP", signal);
@@ -233,10 +232,7 @@ STATIC int set_status(int card, int signal)
         motor_info->no_motion_count++;
     else
     {
-        if (motorData >= motor_info->position)
-            motor_info->status |= RA_DIRECTION;
-        else
-            motor_info->status &= ~RA_DIRECTION;
+	status.Bits.RA_DIRECTION = (motorData >= motor_info->position) ? 1 : 0;
         motor_info->position = motorData;
         motor_info->encoder_position = motorData;
         motor_info->no_motion_count = 0;
@@ -247,14 +243,14 @@ STATIC int set_status(int card, int signal)
 
     motor_info->velocity = 0;
 
-    if (!(motor_info->status & RA_DIRECTION))
+    if (!status.Bits.RA_DIRECTION)
         motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		 (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
+		status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == true) && nodeptr != 0 &&
+    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
 	nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
@@ -265,6 +261,7 @@ STATIC int set_status(int card, int signal)
         nodeptr->postmsgptr = NULL;
     }
 
+    motor_info->status.All = status.All;
     return (rtn_state);
 }
 
@@ -499,7 +496,7 @@ STATIC int motor_init()
                 send_mess(card_index, buff, 0);     
                 recv_mess(card_index, buff, WAIT);    /* Throw away response */
                 strcpy(brdptr->ident, "MCB-4B");
-                motor_info->status = 0;
+                motor_info->status.All = 0;
                 motor_info->no_motion_count = 0;
                 motor_info->encoder_position = 0;
                 motor_info->position = 0;

@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-07 22:26:59 $
+Last Modified:	$Date: 2003-12-12 21:39:28 $
 */
 
 /*****************************************************************
@@ -238,44 +238,44 @@ STATIC int set_status(int card, int signal)
     register struct mess_info *motor_info;
     /* Message parsing variables */
     char buff[BUFF_SIZE];
-    int status;
-    int rtn_state;
+    int rtnval, rtn_state;
     double motorData;
     bool plusdir, ls_active = false;
+    msta_field status;
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
+    status.All = motor_info->status.All;
 
     send_mess(card, "? ^", IM483PL_axis[signal]);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
 	cntrl->status = NORMAL;
-	motor_info->status &= ~CNTRL_COMM_ERR;
+	status.Bits.CNTRL_COMM_ERR = 0;
     }
     else
     {
 	if (cntrl->status == NORMAL)
 	{
 	    cntrl->status = RETRY;
-	    return(0);
+	    rtn_state = 0;
+	    goto exit;
 	}
 	else
 	{
 	    cntrl->status = COMM_ERR;
-	    motor_info->status |= CNTRL_COMM_ERR;
-	    motor_info->status |= RA_PROBLEM;
-	    return(1);
+	    status.Bits.CNTRL_COMM_ERR = 1;
+	    status.Bits.RA_PROBLEM     = 1;
+	    rtn_state = 1;
+	    goto exit;
 	}
     }
 
-    status = atoi(&buff[4]);
+    rtnval = atoi(&buff[4]);
 
-    if (status != 0)
-	motor_info->status &= ~RA_DONE;
-    else
-	motor_info->status |= RA_DONE;
+    status.Bits.RA_DONE = (rtnval != 0) ? 0 : 1;
 
     /* 
      * Parse motor position
@@ -295,55 +295,49 @@ STATIC int set_status(int card, int signal)
 	epicsInt32 newposition;
 
 	newposition = NINT(motorData);
-	if (newposition >= motor_info->position)
-	    motor_info->status |= RA_DIRECTION;
-	else
-	    motor_info->status &= ~RA_DIRECTION;
+	status.Bits.RA_DIRECTION = (newposition >= motor_info->position) ? 1 : 0;
 	motor_info->position = newposition;
 	motor_info->no_motion_count = 0;
     }
 
-    plusdir = (motor_info->status & RA_DIRECTION) ? true : false;
+    plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
     send_mess(card, "? ] 0", IM483PL_axis[signal]);
     recv_mess(card, buff, 1);
-    status = atoi(&buff[5]);
+    rtnval = atoi(&buff[5]);
 
     /* Set limit switch error indicators. */
-    if (status & 1)
+    if (rtnval & 1)
     {
-	motor_info->status |= RA_PLUS_LS;
+	status.Bits.RA_PLUS_LS = 1;
 	if (plusdir == true)
 	    ls_active = true;
     }
     else
-	motor_info->status &= ~RA_PLUS_LS;
+	status.Bits.RA_PLUS_LS = 0;
 
-    if (status & 2)
+    if (rtnval & 2)
     {
-	motor_info->status |= RA_MINUS_LS;
+	status.Bits.RA_MINUS_LS = 1;
 	if (plusdir == false)
 	    ls_active = true;
     }
     else
-	motor_info->status &= ~RA_MINUS_LS;
+	status.Bits.RA_MINUS_LS = 0;
 
     send_mess(card, "? ] 1", IM483PL_axis[signal]);
     recv_mess(card, buff, 1);
-    status = buff[5];
+    rtnval = buff[5];
 
-    if (status & 0x01)
-	motor_info->status |= RA_HOME;
-    else
-	motor_info->status &= ~RA_HOME;
+    status.Bits.RA_HOME = (rtnval & 0x01) ? 1 : 0;
 
     /* !!! Assume no closed-looped control!!!*/
-    motor_info->status &= ~EA_POSITION;
+    status.Bits.EA_POSITION = 0;
 
     /* encoder status */
-    motor_info->status &= ~EA_SLIP;
-    motor_info->status &= ~EA_SLIP_STALL;
-    motor_info->status &= ~EA_HOME;
+    status.Bits.EA_SLIP	      = 0;
+    status.Bits.EA_SLIP_STALL = 0;
+    status.Bits.EA_HOME	      = 0;
 
     if (motor_state[card]->motor_info[signal].encoder_present == NO)
 	motor_info->encoder_position = 0;
@@ -355,21 +349,21 @@ STATIC int set_status(int card, int signal)
 	motor_info->encoder_position = (int32_t) motorData;
     }
 
-    motor_info->status &= ~RA_PROBLEM;
+    status.Bits.RA_PROBLEM	= 0;
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
 
     motor_info->velocity = 0;
 
-    if (!(motor_info->status & RA_DIRECTION))
+    if (!status.Bits.RA_DIRECTION)
 	motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-     (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
+		status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == true) && nodeptr != 0 &&
+    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
@@ -377,6 +371,8 @@ STATIC int set_status(int card, int signal)
 	nodeptr->postmsgptr = NULL;
     }
 
+exit:
+    motor_info->status.All = status.All;
     return(rtn_state);
 }
 
@@ -586,21 +582,21 @@ STATIC int motor_init()
 		struct mess_info *motor_info = &brdptr->motor_info[motor_index];
 		int loop_state;
 
-		motor_info->status = 0;
+		motor_info->status.All = 0;
 		motor_info->no_motion_count = 0;
 		motor_info->encoder_position = 0;
 		motor_info->position = 0;
 		brdptr->motor_info[motor_index].motor_motion = NULL;
 		/* Assume encoder support, i.e., IM483IE. */
 		motor_info->encoder_present = YES;
-		motor_info->status |= EA_PRESENT;
+		motor_info->status.Bits.EA_PRESENT = 1;
 
                 /* Determine if encoder present based on open/closed loop mode. */
 		loop_state = 0;
 		if (loop_state != 0)
 		{
 		    motor_info->pid_present = YES;
-		    motor_info->status |= GAIN_SUPPORT;
+		    motor_info->status.Bits.GAIN_SUPPORT = 1;
 		}
 
 		set_status(card_index, motor_index);  /* Read status of each motor */

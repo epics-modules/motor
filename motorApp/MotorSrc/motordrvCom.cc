@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-06 21:21:57 $
+Last Modified:	$Date: 2003-12-12 21:38:43 $
 */
 
 /*
@@ -191,24 +191,24 @@ static int query_axis(int card, struct driver_table *tabptr, epicsTime tick)
 	    mess_ret->status = motor_motion->status;
 	    mess_ret->type = motor_motion->type;
 
-	    if (motor_motion->status & RA_DIRECTION)
+	    if (motor_motion->status.Bits.RA_DIRECTION)
 	    {
-		if (motor_motion->status & RA_PLUS_LS)
+		if (motor_motion->status.Bits.RA_PLUS_LS)
 		    ls_active = true;
 		else
 		    ls_active = false;
 	    }
 	    else
 	    {
-		if (motor_motion->status & RA_MINUS_LS)
+		if (motor_motion->status.Bits.RA_MINUS_LS)
 		    ls_active = true;
 		else
 		    ls_active = false;
 	    }
 	    
 	    if (ls_active == true ||
-		motor_motion->status & RA_DONE ||
-		motor_motion->status & RA_PROBLEM)
+		motor_motion->status.Bits.RA_DONE ||
+		motor_motion->status.Bits.RA_PROBLEM)
 	    {
 		(*tabptr->query_done) (card, index, motor_motion);
 		brdptr->motor_in_motion--;
@@ -330,9 +330,9 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 * and this we can tell by looking for a struct motor_motion.
 ==============================================================================*/
 		if (motor_motion)
-		    node->status &= ~RA_DONE;
+		    node->status.Bits.RA_DONE = 0;
 		else
-		    node->status |= RA_DONE;
+		    node->status.Bits.RA_DONE = 1;
 
 		callbackRequest((CALLBACK *) node);
 		break;
@@ -360,7 +360,8 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 	    node->position = 0;
 	    node->encoder_position = 0;
 	    node->velocity = 0;
-	    node->status = RA_PROBLEM;
+	    node->status.All = 0;
+	    node->status.Bits.RA_PROBLEM = 1;
 	    callbackRequest((CALLBACK *) node);
 	}
     }
@@ -419,7 +420,7 @@ RTN_STATUS motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
     new_message->signal = u_msg->signal;
     new_message->card = u_msg->card;
     new_message->mrecord = u_msg->mrecord;
-    new_message->status = 0;
+    new_message->status.All = 0;
     strcpy(new_message->message, u_msg->message);
     new_message->postmsgptr = u_msg->postmsgptr;
     new_message->termstring = u_msg->termstring;
@@ -556,7 +557,8 @@ int motor_axis_info(int card, int signal, MOTOR_AXIS_QUERY * aq, struct driver_t
     else
     {
 	aq->position = aq->encoder_position = 0;
-	aq->status = RA_PROBLEM;
+	aq->status.All = 0;
+	aq->status.Bits.RA_PROBLEM = 1;
     }
 
     return (0);

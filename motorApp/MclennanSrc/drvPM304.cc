@@ -208,75 +208,72 @@ STATIC int set_status(int card, int signal)
     char buff[BUFF_SIZE];
     bool ls_active = false;
     struct PM304controller *cntrl;
+    msta_field status;
 
     cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
+    status.All = motor_info->status.All;
 
     /* Request the status of this motor */
     sprintf(command, "%dOS;", signal+1);
     send_recv_mess(card, command, response);
     Debug(2, "set_status, status query, card %d, response=%s\n", card, response);
 
+    status.Bits.RA_PLUS_LS = 0;
+    status.Bits.RA_MINUS_LS = 0;
+    
     if (cntrl->model == MODEL_PM304) {
         /* The response string is an eight character string of ones and zeroes */
 
         if (strcmp(response, "00000000") == 0)
-            motor_info->status &= ~RA_DONE;
+            status.Bits.RA_DONE = 0;
         else {
-            motor_info->status |= RA_DONE;
+            status.Bits.RA_DONE = 1;
             if (drvPM304ReadbackDelay != 0.)
                 epicsThreadSleep(drvPM304ReadbackDelay);
         }
 
-        if (response[2] == '1')
-            motor_info->status |= RA_PROBLEM;
-        else
-            motor_info->status &= ~RA_PROBLEM;
+	status.Bits.RA_PROBLEM = (response[2] == '1') ? 1 : 0;
 
-        motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
         if (response[1] == '1') {
-            motor_info->status |= RA_PLUS_LS;
-            motor_info->status |= RA_DIRECTION;
-	      ls_active = true;
+	    status.Bits.RA_PLUS_LS = 1;
+	    status.Bits.RA_DIRECTION = 1;
+	    ls_active = true;
         }
         if (response[0] == '1') {
-            motor_info->status |= RA_MINUS_LS;
-            motor_info->status &= ~RA_DIRECTION;
-	      ls_active = true;
+	    status.Bits.RA_MINUS_LS = 1;
+	    status.Bits.RA_DIRECTION = 0;
+	    ls_active = true;
         }
     } else {
         /* The response string is 01: followed by an eight character string of ones and zeroes */
         strcpy(response, &response[3]);
         if (response[0] == '0')
-            motor_info->status &= ~RA_DONE;
+            status.Bits.RA_DONE = 0;
         else {
-            motor_info->status |= RA_DONE;
+            status.Bits.RA_DONE = 1;
             if (drvPM304ReadbackDelay != 0.)
                 epicsThreadSleep(drvPM304ReadbackDelay);
         }
 
-        if (response[1] == '1')
-            motor_info->status |= RA_PROBLEM;
-        else
-            motor_info->status &= ~RA_PROBLEM;
+	status.Bits.RA_PROBLEM = (response[1] == '1') ? 1 : 0;
 
-        motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
         if (response[2] == '1') {
-            motor_info->status |= RA_PLUS_LS;
+	    status.Bits.RA_PLUS_LS = 1;
         }
         if (response[3] == '1') {
-            motor_info->status |= RA_MINUS_LS;
+	    status.Bits.RA_MINUS_LS = 1;
         }
     }
 
 
     /* encoder status */
-    motor_info->status &= ~EA_SLIP;
-    motor_info->status &= ~EA_POSITION;
-    motor_info->status &= ~EA_SLIP_STALL;
-    motor_info->status &= ~EA_HOME;
+    status.Bits.EA_SLIP	      = 0;
+    status.Bits.EA_POSITION   = 0;
+    status.Bits.EA_SLIP_STALL = 0;
+    status.Bits.EA_HOME	      = 0;
 
     /* Request the position of this motor */
     if (cntrl->use_encoder[signal]) {
@@ -293,10 +290,7 @@ STATIC int set_status(int card, int signal)
         motor_info->no_motion_count++;
     else
     {
-        if (motorData >= motor_info->position)
-            motor_info->status |= RA_DIRECTION;
-        else
-            motor_info->status &= ~RA_DIRECTION;
+	status.Bits.RA_DIRECTION = (motorData >= motor_info->position) ? 1 : 0;
         motor_info->position = motorData;
         motor_info->encoder_position = motorData;
         motor_info->no_motion_count = 0;
@@ -307,14 +301,14 @@ STATIC int set_status(int card, int signal)
 
     motor_info->velocity = 0;
 
-    if (!(motor_info->status & RA_DIRECTION))
+    if (!status.Bits.RA_DIRECTION)
         motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		 (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
+		status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == true) && nodeptr != 0 &&
+    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
 	nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
@@ -323,6 +317,7 @@ STATIC int set_status(int card, int signal)
         nodeptr->postmsgptr = NULL;
     }
 
+    motor_info->status.All = status.All;
     Debug(2, "set_status, return value=%d\n", rtn_state);
     return (rtn_state);
 }
@@ -652,7 +647,7 @@ STATIC int motor_init()
                 struct mess_info *motor_info = &brdptr->motor_info[motor_index];
 
                 motor_info->motor_motion = NULL;
-                motor_info->status = 0;
+                motor_info->status.All = 0;
                 motor_info->no_motion_count = 0;
                 motor_info->encoder_position = 0;
                 motor_info->position = 0;

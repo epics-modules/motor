@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-06 21:09:09 $
+Last Modified:	$Date: 2003-12-12 21:36:37 $
 */
 
 /*
@@ -36,7 +36,9 @@ Last Modified:	$Date: 2003-06-06 21:09:09 $
  * Modification Log:
  * -----------------
  *
- * .01  10-21-02 rls  Convert to R3.14.x and C++.
+ * .01 10-21-02 rls - Convert to R3.14.x and C++.
+ * .02 12-12-03 rls - Added MAX_SCAN_RATE.
+ *		    - Converted MSTA #define's to bit field.
  */
 
 #ifndef	INCmotorh
@@ -99,30 +101,65 @@ enum motor_cmnd {
 /* -------------------------------------------------- */
 
 /* driver and device support parameters */
-#define SCAN_RATE	6	/* 60=once a second */
-#define MAX_COUNT	50000 /*19000*/	/* timeout value */
+#define MAX_SCAN_RATE	60	/* Maximum polling rate in HZ. */
+#define SCAN_RATE	6	/* Default polling rate in HZ. */
+#define MAX_COUNT	50000	/*19000*/	/* timeout value */
 #define MAX_AXIS	10	/* max number of axis per board */
 
 #define NO		0
 #define YES		1
 
+// Define, from top to bottom, how bit fields are packed.
+// This works for SunPro, 
+#if #cpu(i386) && !#cpu(sparc)
+    #define LSB_First (TRUE)  // LSB is packed first.
+#else
+    #define MSB_First (TRUE)  // MSB is packed first.
+#endif
+
 /* -------------------------------------------------- */
 /* axis and encoder status for return to requester */
-#define RA_DIRECTION		0x01	/* (last) 0=Negative, 1=Positive */
-#define RA_DONE			0x02	/* a motion is complete */
-#define RA_PLUS_LS		0x04	/* plus limit switch has been hit */
-#define RA_HOME			0x08	/* The home signal is on */
-#define EA_SLIP			0x10	/* encoder slip enabled */
-#define EA_POSITION		0x20	/* position maintenence enabled */
-#define EA_SLIP_STALL		0x40	/* slip/stall detected */
-#define EA_HOME			0x80	/* encoder home signal on */
-#define EA_PRESENT		0x100	/* encoder is present */
-#define RA_PROBLEM		0x200	/* driver stopped polling */
-#define RA_MOVING		0x400	/* non-zero velocity present */
-#define GAIN_SUPPORT		0x800	/* Motor supports closed-loop position
-					    control. */
-#define CNTRL_COMM_ERR		0x1000	/* Controller communication error. */
-#define RA_MINUS_LS		0x2000	/* minus limit switch has been hit */
+
+typedef union
+{
+    unsigned long All;
+    struct
+    {
+#ifdef MSB_First
+	unsigned int na		    :18;/* N/A bits  */
+	unsigned int RA_MINUS_LS    :1;	/* minus limit switch has been hit */
+	unsigned int CNTRL_COMM_ERR :1;	/* Controller communication error. */
+	unsigned int GAIN_SUPPORT   :1;	/* Motor supports closed-loop position control. */
+	unsigned int RA_MOVING      :1;	/* non-zero velocity present */
+	unsigned int RA_PROBLEM     :1; /* driver stopped polling */
+	unsigned int EA_PRESENT     :1; /* encoder is present */
+	unsigned int EA_HOME        :1; /* encoder home signal on */
+	unsigned int EA_SLIP_STALL  :1; /* slip/stall detected */
+	unsigned int EA_POSITION    :1; /* position maintenence enabled */
+	unsigned int EA_SLIP        :1; /* encoder slip enabled */
+	unsigned int RA_HOME        :1; /* The home signal is on */
+	unsigned int RA_PLUS_LS     :1; /* plus limit switch has been hit */
+	unsigned int RA_DONE        :1;	/* a motion is complete */
+	unsigned int RA_DIRECTION   :1;	/* (last) 0=Negative, 1=Positive */
+#else
+	unsigned int RA_DIRECTION   :1;	/* (last) 0=Negative, 1=Positive */
+	unsigned int RA_DONE        :1;	/* a motion is complete */
+	unsigned int RA_PLUS_LS     :1; /* plus limit switch has been hit */
+	unsigned int RA_HOME        :1; /* The home signal is on */
+	unsigned int EA_SLIP        :1; /* encoder slip enabled */
+	unsigned int EA_POSITION    :1; /* position maintenence enabled */
+	unsigned int EA_SLIP_STALL  :1; /* slip/stall detected */
+	unsigned int EA_HOME        :1; /* encoder home signal on */
+	unsigned int EA_PRESENT     :1; /* encoder is present */
+	unsigned int RA_PROBLEM     :1; /* driver stopped polling */
+	unsigned int RA_MOVING      :1;	/* non-zero velocity present */
+	unsigned int GAIN_SUPPORT   :1;	/* Motor supports closed-loop position control. */
+	unsigned int CNTRL_COMM_ERR :1;	/* Controller communication error. */
+	unsigned int RA_MINUS_LS    :1;	/* minus limit switch has been hit */
+	unsigned int na		    :18;/* N/A bits  */
+#endif
+    } Bits;                                
+} msta_field;
 
 /*
    The RA_PROBLEM status bit indicates that the driver has stopped the polling
@@ -143,13 +180,6 @@ struct motor_dset
     RTN_STATUS (*end_trans) (struct motorRecord *);
 };
 
-// Define, from top to bottom, how bit fields are packed.
-// This works for SunPro, 
-#if #cpu(i386) && !#cpu(sparc)
-    #define LSB_First (TRUE)  // LSB is packed first.
-#else
-    #define MSB_First (TRUE)  // MSB is packed first.
-#endif
 
 /* All db_post_events() calls set both VALUE and LOG bits. */
 #define DBE_VAL_LOG (unsigned int) (DBE_VALUE | DBE_LOG)

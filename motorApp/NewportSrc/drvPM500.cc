@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-07 22:20:55 $
+Last Modified:	$Date: 2003-12-12 21:40:27 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -230,37 +230,41 @@ STATIC int set_status(int card, int signal)
     /* Message parsing variables */
     char axis_name, status_char, dir_char, buff[BUFF_SIZE],
 	response[BUFF_SIZE];
-    int status, rtn_state = 0;
+    int rtnval, rtn_state = 0;
     double motorData;
     bool ls_active;
+    msta_field status;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
     axis_name = PM500_axis_names[signal];
+    status.All = motor_info->status.All;
 
     /* Request the status and position of this motor */
     sprintf(buff, "%cR", axis_name);
     send_mess(card, buff, (char) NULL);
-    status = recv_mess(card, response, 1);
-    if (status > 0)
+    rtnval = recv_mess(card, response, 1);
+    if (rtnval > 0)
     {
 	cntrl->status = NORMAL;
-	motor_info->status &= ~CNTRL_COMM_ERR;
+	status.Bits.CNTRL_COMM_ERR = 0;
     }
     else
     {
 	if (cntrl->status == NORMAL)
 	{
 	    cntrl->status = RETRY;
-	    return(0);
+	    rtn_state = 0;
+	    goto exit;
 	}
 	else
 	{
 	    cntrl->status = COMM_ERR;
-	    motor_info->status |= CNTRL_COMM_ERR;
-	    motor_info->status |= RA_PROBLEM;
-	    return(1);
+	    status.Bits.CNTRL_COMM_ERR = 1;
+	    status.Bits.RA_PROBLEM     = 1;
+	    rtn_state = 1;
+	    goto exit;
 	}
     }
 
@@ -268,50 +272,38 @@ STATIC int set_status(int card, int signal)
     dir_char = response[2];
     motorData = atof(&response[2]) / cntrl->drive_resolution[signal];
 
-    if (status_char == 'B')
-	motor_info->status &= ~RA_DONE;
-    else
-	motor_info->status |= RA_DONE;
-
-    if (status_char == 'E') 
-        motor_info->status |= RA_PROBLEM;
-    else
-        motor_info->status &= ~RA_PROBLEM;
-
-    if (dir_char == '+')
-	motor_info->status |= RA_DIRECTION;
-    else
-	motor_info->status &= ~RA_DIRECTION;
+    status.Bits.RA_DONE	     = (status_char == 'B') ? 0 : 1;
+    status.Bits.RA_PROBLEM   = (status_char == 'E') ? 1 : 0;
+    status.Bits.RA_DIRECTION = (dir_char == '+')    ? 1 : 0;
     
     if (status_char == 'L')
     {
 	ls_active = true;
 	if (dir_char == '+')
-	    motor_info->status |= RA_PLUS_LS;
+	    status.Bits.RA_PLUS_LS = 1;
 	else
-	    motor_info->status |= RA_MINUS_LS;
+	    status.Bits.RA_MINUS_LS = 1;
     }
     else
     {
 	ls_active = false;
-	motor_info->status &= ~RA_PLUS_LS;
-	motor_info->status &= ~RA_MINUS_LS;
+	status.Bits.RA_PLUS_LS = 0;
+	status.Bits.RA_MINUS_LS = 0;
     }
 
-    motor_info->status &= ~RA_HOME;
+    status.Bits.RA_HOME = 0;
 
     /* encoder status */
-    motor_info->status &= ~EA_POSITION;
-    motor_info->status &= ~EA_SLIP;
-    motor_info->status &= ~EA_SLIP_STALL;
-    motor_info->status &= ~EA_HOME;
+    status.Bits.EA_POSITION	= 0;
+    status.Bits.EA_SLIP		= 0;
+    status.Bits.EA_SLIP_STALL	= 0;
+    status.Bits.EA_HOME		= 0;
 
     /* 
      * Parse motor position
      * Position string format: 1TP5.012,2TP1.123,3TP-100.567,...
      * Skip to substring for this motor, convert to double
      */
-
 
     if (motorData == motor_info->position)
 	motor_info->no_motion_count++;
@@ -326,21 +318,21 @@ STATIC int set_status(int card, int signal)
 	motor_info->no_motion_count = 0;
     }
 
-    motor_info->status &= ~RA_PROBLEM;
+    status.Bits.RA_PROBLEM = 0;
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
 
     motor_info->velocity = 0;
 
-    if (!(motor_info->status & RA_DIRECTION))
+    if (!status.Bits.RA_DIRECTION)
 	motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		 (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
+		 status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == true) && nodeptr != 0 &&
+    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
@@ -349,6 +341,8 @@ STATIC int set_status(int card, int signal)
 	nodeptr->postmsgptr = NULL;
     }
 
+exit:
+    motor_info->status.All = status.All;
     return(rtn_state);
 }
 
@@ -702,11 +696,11 @@ STATIC int motor_init()
 
 		/* PM500 only supports DC motors. */
 		motor_info->encoder_present = YES;
-		motor_info->status |= EA_PRESENT;
+		motor_info->status.Bits.EA_PRESENT = 1;
 		motor_info->pid_present = YES;
-		motor_info->status |= GAIN_SUPPORT;
+		motor_info->status.Bits.GAIN_SUPPORT = 1;
 
-		motor_info->status = 0;
+		motor_info->status.All = 0;
 		motor_info->no_motion_count = 0;
 		motor_info->encoder_position = 0;
 		motor_info->position = 0;

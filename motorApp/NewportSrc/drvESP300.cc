@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-07 22:21:50 $
+Last Modified:	$Date: 2003-12-12 21:40:23 $
 */
 
 /*
@@ -215,10 +215,12 @@ static int set_status(int card, int signal)
     long mstatus;
     double motorData;
     bool power, done, plusdir, ls_active = false;
+    msta_field status;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
+    status.All = motor_info->status.All;
 
     sprintf(outbuff, "%.2dMD", signal + 1);
     send_mess(card, outbuff, (char) NULL);
@@ -226,29 +228,28 @@ static int set_status(int card, int signal)
     if (charcnt == 3)
     {
 	cntrl->status = NORMAL;
-	motor_info->status &= ~CNTRL_COMM_ERR;
+	status.Bits.CNTRL_COMM_ERR = 0;
     }
     else
     {
 	if (cntrl->status == NORMAL)
 	{
 	    cntrl->status = RETRY;
-	    return(0);
+	    rtn_state = 0;
+	    goto exit;
 	}
 	else
 	{
 	    cntrl->status = COMM_ERR;
-	    motor_info->status |= CNTRL_COMM_ERR;
-	    motor_info->status |= RA_PROBLEM;
-	    return(1);
+	    status.Bits.CNTRL_COMM_ERR = 1;
+	    status.Bits.RA_PROBLEM     = 1;
+	    rtn_state = 1;
+	    goto exit;
 	}
     }
     
     done = atoi(inbuff) ? true : false;
-    if (done == true)
-	motor_info->status |= RA_DONE;
-    else
-	motor_info->status &= ~RA_DONE;
+    status.Bits.RA_DONE = (done == true) ? 1 : 0;
 
     /* Get motor position. */
     sprintf(outbuff, READ_POSITION, signal + 1);
@@ -264,16 +265,12 @@ static int set_status(int card, int signal)
 	epicsInt32 newposition;
 
 	newposition = NINT(motorData);
-	if (newposition >= motor_info->position)
-	    motor_info->status |= RA_DIRECTION;
-	else
-	    motor_info->status &= ~RA_DIRECTION;
+	status.Bits.RA_DIRECTION = (newposition >= motor_info->position) ? 1 : 0;
 	motor_info->position = newposition;
 	motor_info->no_motion_count = 0;
     }
 
-    plusdir = (motor_info->status & RA_DIRECTION) ? true : false;
-
+    plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
     /* Get travel limit switch status. */
     sprintf(outbuff, "%.2dPH", signal + 1);
@@ -283,25 +280,26 @@ static int set_status(int card, int signal)
     if (cptr == NULL)
     {
 	Debug(2, "set_status(): PH error = %s\n", inbuff);
-	return(1);
+	rtn_state = 1;
+	goto exit;
     }
     mstatus = strtol(inbuff, &cptr, 16);
 
     /* Set Travel limit switch status bits. */
     if (((mstatus >> signal) & 0x01) == false)
-	motor_info->status &= ~RA_PLUS_LS;
+	status.Bits.RA_PLUS_LS = 0;
     else
     {
-	motor_info->status |= RA_PLUS_LS;
+	status.Bits.RA_PLUS_LS = 1;
 	if (plusdir == true)
 	    ls_active = true;
     }
 
     if (((mstatus >> (signal + 8)) & 0x01) == false)
-	motor_info->status &= ~RA_MINUS_LS;
+	status.Bits.RA_MINUS_LS = 0;
     else
     {
-	motor_info->status |= RA_MINUS_LS;
+	status.Bits.RA_MINUS_LS = 1;
 	if (plusdir == false)
 	    ls_active = true;
     }
@@ -311,10 +309,7 @@ static int set_status(int card, int signal)
     tok_save = strchr(inbuff, 'H');
     mstatus = strtol(cptr, &tok_save, 16);
 
-    if (((mstatus >> signal) & 0x01) == false)
-	motor_info->status &= ~RA_HOME;
-    else
-	motor_info->status |= RA_HOME;
+    status.Bits.RA_HOME = ((mstatus >> signal) & 0x01) ? 1 : 0;
 
     /* Get motor power on/off status. */
     sprintf(outbuff, "%.2dMO?", signal + 1);
@@ -322,30 +317,27 @@ static int set_status(int card, int signal)
     charcnt = recv_mess(card, inbuff, 1);
     power = atoi(inbuff) ? true : false;
 
-    if (power == true)
-	motor_info->status |= EA_POSITION;
-    else
-	motor_info->status &= ~EA_POSITION;
+    status.Bits.EA_POSITION = (power == true) ? 1 : 0;
 
     /* encoder status */
-    motor_info->status &= ~EA_SLIP;
-    motor_info->status &= ~EA_SLIP_STALL;
-    motor_info->status &= ~EA_HOME;
-    motor_info->status &= ~RA_PROBLEM;
+    status.Bits.EA_SLIP		= 0;
+    status.Bits.EA_SLIP_STALL	= 0;
+    status.Bits.EA_HOME		= 0;
+    status.Bits.RA_PROBLEM	= 0;
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
 
     motor_info->velocity = 0;
 
-    if (!(motor_info->status & RA_DIRECTION))
+    if (!status.Bits.RA_DIRECTION)
 	motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		 (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
+		 status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == true) && nodeptr != 0 &&
+    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(outbuff, nodeptr->postmsgptr);
@@ -353,6 +345,8 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr = NULL;
     }
 
+exit:
+    motor_info->status.All = status.All;
     return (rtn_state);
 }
 
@@ -677,7 +671,7 @@ static int motor_init()
 		recv_mess(card_index, buff, 1);
 		cntrl->drive_resolution[motor_index] = atof(&buff[0]);
 		
-		motor_info->status = 0;
+		motor_info->status.All = 0;
 		motor_info->no_motion_count = 0;
 		motor_info->encoder_position = 0;
 		motor_info->position = 0;
@@ -685,9 +679,9 @@ static int motor_init()
                 
 		if (motor_info->encoder_present == YES)
 		{
-		    motor_info->status |= EA_PRESENT;
+		    motor_info->status.Bits.EA_PRESENT = 1;
 		    motor_info->pid_present = YES;
-		    motor_info->status |= GAIN_SUPPORT;
+		    motor_info->status.Bits.GAIN_SUPPORT = 1;
 		}
 
 		set_status(card_index, motor_index);  /* Read status of each motor */

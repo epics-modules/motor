@@ -3,9 +3,9 @@ FILENAME...	motordevCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record device support modules.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 20:41:29 $
+Last Modified:	$Date: 2003-12-12 21:36:38 $
 */
 
 /*
@@ -26,6 +26,7 @@ Last Modified:	$Date: 2002-10-31 20:41:29 $
  *
  * Modification Log:
  * -----------------
+ * .01 12-12-03 rls - Converted MSTA #define's to bit field.
  */
 
 
@@ -64,7 +65,7 @@ struct motor_trans
     int motor_pos;
     int encoder_pos;
     int vel;
-    unsigned long status;
+    msta_field status;
     epicsEvent *initSem;
     struct driver_table *tabptr;
     bool dpm;		/* For OMS VME58 only, drive power monitoring. */

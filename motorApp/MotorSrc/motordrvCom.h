@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-10-28 16:31:29 $
+Last Modified:	$Date: 2003-12-12 21:36:40 $
 */
 
 /*
@@ -38,6 +38,7 @@ Last Modified:	$Date: 2003-10-28 16:31:29 $
  * -----------------
  * .01 10-02-01 rls added RETRY to CommStatus enumeration.
  * .02 10-24-03 rls moved irqdatastr to OmsSrc.
+ * .03 12-12-03 rls Converted MSTA #define's to bit field.
  */
 
 
@@ -50,6 +51,8 @@ Last Modified:	$Date: 2003-10-28 16:31:29 $
 #include <epicsTime.h>
 #include <epicsRingPointer.h>
 #include <epicsMessageQueue.h>
+
+#include "motor.h"
 
 #define MAX_IDENT_LEN 100
 
@@ -107,7 +110,7 @@ struct mess_node
     long position;
     long encoder_position;
     long velocity;
-    unsigned long status;
+    msta_field status;
     struct dbCommon *mrecord;	/* "Hidden" pointer to motor record. */
     struct mess_node *next;
     char *postmsgptr;
@@ -126,7 +129,7 @@ typedef struct mess_axis_query
 {
     long position;
     long encoder_position;
-    unsigned long status;
+    msta_field status;
 } MOTOR_AXIS_QUERY;
 
 struct axis_status
@@ -155,7 +158,7 @@ struct mess_info
     int no_motion_count;
     epicsTime status_delay;     /* Insure 10ms delay between motion/velocity
 				 * commands and status query. */
-    unsigned long status;	/* one pos for each axis */
+    msta_field status;		/* one pos for each axis */
     int pid_present;		/* PID control indicator for VME58 (YES/NO). */
     double high_limit;		/* MM4000 only; Controller's high travel limit. */
     double low_limit;		/* MM4000 only; Controller's low travel limit. */
@@ -204,7 +207,7 @@ struct driver_table
 
 struct thread_args
 {
-    int motor_scan_rate;
+    int motor_scan_rate;	/* Poll rate in HZ. */
     struct driver_table *table;
 };
 
