@@ -1,4 +1,6 @@
 include "base.dbd"
 include "motorRecord.dbd"
-include "devNewport.dbd"
+include "mpfSerial.dbd"
+include "devAcsMotor.dbd"
 include "devImsMotor.dbd"
+include "devNewport.dbd"
