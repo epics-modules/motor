@@ -6,6 +6,7 @@ include $(TOP)/configure/CONFIG
 #=============================
 
 DB += NoMPF.db
+DB += NoMPF_MX.db
 DB += WithMPF.db
 
 #===========================
