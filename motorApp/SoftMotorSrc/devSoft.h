@@ -4,9 +4,9 @@ FILENAME..	devSoft.h
 USAGE... 	This file contains information that is common to
 		all Soft channel device support modules.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:03:12 $
+Last Modified:	$Date: 2004-09-23 16:18:12 $
 */
 
 /*
@@ -28,6 +28,8 @@ Last Modified:	$Date: 2003-06-16 15:03:12 $
  * Modification Log:
  * -----------------
  * .01 06-16-03 rls Converted to R3.14.x.
+ * .02 09-23-04 rls Increase the maximum number of Soft Channel motor records
+ *                  from 20 to 50.
  */
 
 #ifndef	INCdevSofth
@@ -37,7 +39,7 @@ Last Modified:	$Date: 2003-06-16 15:03:12 $
 
 typedef enum DONE_STATES {SOFTMOVE = 0, HARDMOVE = 1, DONE = 2} DONE_STATES;
 
-#define MAXMSGS 20
+#define MAXMSGS 50
 
 struct soft_private
 {
