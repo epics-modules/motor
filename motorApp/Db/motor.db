@@ -1,0 +1,36 @@
+grecord(bo,"$(P)$(M)_able")
+{
+	field(DESC,"motor enable")
+	field(PINI,"YES")
+	field(OUT,"$(P)$(M)_ableput.A PP MS")
+	field(ZNAM,"Enable")
+	field(ONAM,"Disable")
+}
+grecord(motor,"$(P)$(M)")
+{
+	field(DESC,"$(DESC)")
+	field(DTYP,"$(DTYP)")
+	field(DIR,"$(DIR)")
+	field(VELO,"$(VELO)")
+	field(VBAS,"$(VBAS)")
+	field(ACCL,"$(ACCL)")
+	field(BDST,"$(BDST)")
+	field(BVEL,"$(BVEL)")
+	field(BACC,"$(BACC)")
+	field(OUT,"#C$(C) S$(S) @")
+	field(MRES,"$(MRES)")
+	field(PREC,"$(PREC)")
+	field(EGU,"$(EGU)")
+	field(DHLM,"$(DHLM)")
+	field(DLLM,"$(DLLM)")
+	field(INIT,"$(INIT)")
+	field(TWV,"1")
+}
+grecord(transform,"$(P)$(M)_ableput")
+{
+	field(CLCB,"a")
+	field(CLCC,"a")
+	field(OUTA,"$(P)$(M).DISA NPP NMS")
+	field(OUTB,"$(P)$(M).DISP NPP NMS")
+	field(OUTC,"$(P)$(M).DISA NPP NMS")
+}
