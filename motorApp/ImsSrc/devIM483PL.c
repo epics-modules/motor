@@ -3,9 +3,9 @@ FILENAME...	devIM483PL.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-29 21:08:52 $
+Last Modified:	$Date: 2002-04-01 22:33:45 $
 */
 
 /*
@@ -106,7 +106,6 @@ static int IM483PL_table[] = {
     IMMEDIATE,	/* SET_VELOCITY */
     IMMEDIATE,	/* SET_ACCEL */
     IMMEDIATE,	/* GO */
-    IMMEDIATE,	/* SET_ENC_RATIO */
     INFO,	/* GET_INFO */
     MOVE_TERM,	/* STOP_AXIS */
     VELOCITY,	/* JOG */
@@ -185,7 +184,9 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
     int axis, card, maxdigits, size;
     double dval, cntrl_units;
     long rtnval;
+    BOOLEAN send;
 
+    send = ON;		/* Default to send motor command. */
     rtnval = OK;
     buff[0] = '\0';
     dval = *parms;
@@ -255,7 +256,10 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
 	    if (cntrl_units == 0.0)
 		sprintf(buff, "? O");
 	    else
+	    {
+		send = OFF;
 		rtnval = ERROR;
+	    }
 	    break;
 	
 	case SET_VEL_BASE:
@@ -268,18 +272,13 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
 	
 	case SET_ACCEL:
 	    /* ????? MAKE SENSE OF ACCELERATION PARAMETER ??????*/
+	    send = OFF;
 	    break;
 	
 	case GO:
 	    /* The IM483PL starts moving immediately on move commands, GO command
 	     * does nothing. */
-	    break;
-	
-	case SET_ENC_RATIO:
-	    /*
-	     * The IM483PL does not have the concept of encoder ratio, ignore this
-	     * command
-	     */
+	    send = OFF;
 	    break;
 	
 	case GET_INFO:
@@ -300,6 +299,7 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
 	case SET_PGAIN:
 	case SET_IGAIN:
 	case SET_DGAIN:
+	    send = OFF;
 	    break;
 	
 	case ENABLE_TORQUE:
@@ -313,6 +313,7 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
 	case SET_HIGH_LIMIT:
 	case SET_LOW_LIMIT:
 	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
+	    send = OFF;
 	    break;
 	
 	default:
@@ -320,7 +321,7 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
     }
 
     size = strlen(buff);
-    if (size == 0)
+    if (send == OFF)
 	return(rtnval);
     else if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
 	logMsg((char *) "IM483PL_build_trans(): buffer overflow.\n", 0, 0, 0, 0, 0, 0);
