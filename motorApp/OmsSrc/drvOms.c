@@ -1,10 +1,10 @@
 /*
 FILENAME...	drvOms.c
-USAGE...	Driver level support for OMS models VME8 and VME44.
+USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-06-19 18:31:24 $
+Last Modified:	$Date: 2001-07-24 18:23:50 $
 */
 
 /*
@@ -32,7 +32,10 @@ Last Modified:	$Date: 2001-06-19 18:31:24 $
  *
  * NOTES
  * -----
- * Verified with firmware: VME44 ver 1.97-4E.
+ * Verified with firmware:
+ *	- VME44    ver 1.97-4E
+ *	- VME8     ver 1.97-8
+ *	- VS4-040  ver 1.04
  *
  * Modification Log:
  * -----------------
