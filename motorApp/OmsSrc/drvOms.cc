@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.14 $
+Version:	$Revision: 1.15 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-01-22 22:18:49 $
+Last Modified:	$Date: 2004-02-03 20:09:00 $
 */
 
 /*
@@ -60,6 +60,7 @@ Last Modified:	$Date: 2004-01-22 22:18:49 $
  *			2.2 is selected, EPICS base patches must be applied as
  *			described in;
  *		http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
+ * .07  02-03-04 rls - Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 /*========================stepper motor driver ========================
@@ -85,9 +86,14 @@ Last Modified:	$Date: 2004-01-22 22:18:49 $
 #include	<rebootLib.h>
 #include	<logLib.h>
 #include	<drvSup.h>
+#include	<epicsVersion.h>
+#if EPICS_MODIFICATION <= 4
 extern "C" {
 #include	<devLib.h>
 }
+#else
+#include	<devLib.h>
+#endif
 #include	<dbAccess.h>
 #include	<epicsThread.h>
 #include	<epicsInterrupt.h>
@@ -230,7 +236,7 @@ static int set_status(int card, int signal)
     struct axis_status *ax_stat;
     struct encoder_status *en_stat;
     char q_buf[50], outbuf[50];
-    int index, pos;
+    int index, motorData;
     int rtn_state;
     bool ls_active = false;
     msta_field status;
@@ -282,12 +288,18 @@ static int set_status(int card, int signal)
 
 	    break;
 	case 1:		/* motor pulse count (position) */
-	    sscanf(p, "%index", &pos);
+	    sscanf(p, "%index", &motorData);
 
-	    if (pos == motor_info->position)
-		motor_info->no_motion_count++;
+	    if (motorData == motor_info->position)
+	    {
+		if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+		    motor_info->no_motion_count++;
+	    }
 	    else
+	    {
 		motor_info->no_motion_count = 0;
+		motor_info->position = motorData;
+	    }
 
 	    if (motor_info->no_motion_count > motionTO)
 	    {
@@ -300,7 +312,6 @@ static int set_status(int card, int signal)
 	    else
 		status.Bits.RA_PROBLEM = 0;
 
-	    motor_info->position = pos;
 	    break;
 	case 2:		/* encoder pulse count (position) */
 	    {
@@ -858,8 +869,8 @@ static int motorIsrEnable(int card)
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
 
     status = devConnectInterrupt(intVME, omsInterruptVector + card,
-		    (void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
-// Tornado 2.2	    (devLibVOIDFUNCPTR) motorIsr, (void *) card);
+			(void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
+// Tornado 2.2		(devLibVOIDFUNCPTR) motorIsr, (void *) card);
     
     if (!RTN_SUCCESS(status))
     {
@@ -919,8 +930,8 @@ static void motorIsrDisable(int card)
     pmotor->control = 0;
 
     status = devDisconnectInterrupt(intVME, omsInterruptVector + card,
-				    (void (*)()) motorIsr);// Tornado 2.0.2
-// Tornado 2.2			    (devLibVOIDFUNCPTR) motorIsr);
+			(void (*)()) motorIsr);// Tornado 2.0.2
+// Tornado 2.2		(devLibVOIDFUNCPTR) motorIsr);
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",
 		  omsInterruptVector + card);

@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-19 18:36:11 $
+Last Modified:	$Date: 2004-02-03 20:09:00 $
 */
 
 /*
@@ -79,6 +79,7 @@ Last Modified:	$Date: 2003-12-19 18:36:11 $
  *			2.2 is selected, EPICS base patches must be applied as
  *			described in;
  *		http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
+ * .26  02-03-04  rls - Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 #include	<vxLib.h>
@@ -89,9 +90,14 @@ Last Modified:	$Date: 2003-12-19 18:36:11 $
 #include	<taskLib.h>
 #include	<dbCommon.h>
 #include	<drvSup.h>
+#include	<epicsVersion.h>
+#if EPICS_MODIFICATION <= 4
 extern "C" {
 #include	<devLib.h>
 }
+#else
+#include	<devLib.h>
+#endif
 #include	<dbAccess.h>
 #include	<epicsThread.h>
 
@@ -441,7 +447,10 @@ STATIC int set_status(int card, int signal)
     motorData = pack2x16(pmotorData->cmndPos);
 
     if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	motor_info->position = motorData;
@@ -557,7 +566,8 @@ errorexit:	errMessage(-1, "Invalid device directive");
      * get off limit switch; resulting in limit error.  Fix is to force CDIR to match
      * MSTA.RA_DIRECTION.
      */
-    if (ls_active == true && status.Bits.GAIN_SUPPORT && status.Bits.EA_POSITION == 0)
+    if (ls_active == true && status.Bits.GAIN_SUPPORT &&
+	status.Bits.EA_POSITION == 0 && nodeptr != 0)
     {
 	struct motorRecord *mr = (struct motorRecord *) nodeptr->mrecord;
 
@@ -924,8 +934,8 @@ STATIC int motorIsrSetup(int card)
     pmotor = (struct vmex_motor *) (motor_state[card]->localaddr);
 
     status = devConnectInterrupt(intVME, omsInterruptVector + card,
-			    (void (*)()) motorIsr, (void *) card); // Tornado 2.0.2
-// Tornado 2.2		    (devLibVOIDFUNCPTR) motorIsr, (void *) card);
+			(void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
+// Tornado 2.2		(devLibVOIDFUNCPTR) motorIsr, (void *) card);
     if (!RTN_SUCCESS(status))
     {
 	errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n", omsInterruptVector + card);
