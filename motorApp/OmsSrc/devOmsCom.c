@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.c
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-25 17:49:05 $
+Last Modified:	$Date: 2002-03-27 21:33:09 $
 */
 
 /*
@@ -44,6 +44,8 @@ Last Modified:	$Date: 2002-02-25 17:49:05 $
  * .05  05-14-01  rls	Support for jog velocity and acceleration commands.
  *			Added "CA" to home and jog commands so JVEL does not
  *			see done flag from previous operation.
+ * .06 03-27-02   rls - Eliminated RES. All input positions, velocities and
+ *			accelerations are in motor steps.
  */
 
 #include	<vxWorks.h>
@@ -72,9 +74,9 @@ struct motor_table const oms_table[] =
     {MOTION, " MA", 1},		/* MOVE_ABS */
     {MOTION, " MR", 1},		/* MOVE_REL */
     {MOTION, " CA HM", 1},	/* HOME_FOR */
-    {MOTION, " CA HR", 1},		/* HOME_REV */
+    {MOTION, " CA HR", 1},	/* HOME_REV */
     {IMMEDIATE, " LP", 1},	/* LOAD_POS */
-    {IMMEDIATE, " VB", 1},	/* SET_VELO_BASE */
+    {IMMEDIATE, " VB", 1},	/* SET_VEL_BASE */
     {IMMEDIATE, " VL", 1},	/* SET_VELO */
     {IMMEDIATE, " AC", 1},	/* SET_ACCEL */
     {IMMEDIATE, " GD", 0},	/* jps: from GO to GD */
@@ -170,9 +172,17 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
     char buffer[40];
     unsigned char cmnd_type;
     long rtnind;
+    double absres, steptoencoder;
 
     rtnind = OK;
     motor_call = &trans->motor_call;
+
+    if ((mr->msta & EA_PRESENT) && mr->ueip == YES)
+	absres = mr->eres;
+    else
+	absres = mr->mres;
+    absres = fabs(absres);
+    steptoencoder = fabs(mr->mres) / absres; /* This is equal to either 1.0 or MRES/ERES. */
 
     cmnd_type = oms_table[command].type;
     if (cmnd_type > motor_call->type)
@@ -243,7 +253,9 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    }
 	    else if (command == STOP_AXIS)
 	    {
-		double  acc = (mr->velo / fabs(mr->res)) / mr->accl;
+		double acc;
+
+		acc = mr->velo / absres / mr->accl;
 	    
 		/* Put in acceleration. */
 		strcat(motor_call->message, oms_table[SET_ACCEL].command);
@@ -282,24 +294,40 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 		    first_one = NO;
 		else
 		    strcat(motor_call->message, ",");
-    
-		if (command == SET_PGAIN || command == SET_IGAIN ||
-		    command == SET_DGAIN)
-		{
-		    *parms *= 1999.9;
-		    sprintf(buffer, "%.1f", parms[itera]);
-		}
-		else if (command == SET_VELOCITY)	/* OMS errors if VB = VL. */
-		{
-		    long vbase = NINT(mr->vbas / fabs(mr->res));
-		    long vel = NINT(parms[itera]);
 
-		    if (vel <= vbase)
-			vel = vbase + 1;
-		    sprintf(buffer, "%ld", vel);
+		switch (command)
+		{
+		    case SET_PGAIN:
+		    case SET_IGAIN:
+		    case SET_DGAIN:
+			*parms *= 1999.9;
+			sprintf(buffer, "%.1f", parms[itera]);
+			break;
+
+		    case SET_VELOCITY:	/* OMS errors if VB = VL. */
+			{
+			    long vbase, vel;
+
+			    vbase = NINT(mr->vbas / absres);
+			    vel = NINT(parms[itera] * steptoencoder);
+
+			    if (vel <= vbase)
+				vel = vbase + 1;
+			    sprintf(buffer, "%ld", vel);
+			}
+			break;
+
+		    case MOVE_ABS:
+		    case MOVE_REL:
+		    case SET_VEL_BASE:
+		    case SET_ACCEL:
+		    case JOG:
+			sprintf(buffer, "%ld", NINT(parms[itera] * steptoencoder));
+			break;
+
+		    default:
+			sprintf(buffer, "%ld", NINT(parms[itera]));
 		}
-		else
-		    sprintf(buffer, "%ld", NINT(parms[itera]));
 		strcat(motor_call->message, buffer);
 	    }
 	}
