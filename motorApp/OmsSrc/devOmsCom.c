@@ -2,15 +2,16 @@
 FILENAME...	devOmsCom.c
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-04-19 15:29:43 $
+Last Modified:	$Date: 2000-06-14 16:23:49 $
 */
 
 /*
  *      Original Author: Jim Kowalkowski
- *      Current Author: Joe Sullivan
+ *      Previous Author: Joe Sullivan
  *      Date: 11/14/94
+ *	Current  Author: Ron Sluiter
  *
  *      Experimental Physics and Industrial Control System (EPICS)
  *
@@ -89,7 +90,75 @@ struct motor_table const oms_table[] =
 };
 
 
-/* add a part to the transaction */
+/*
+FUNCTION... long oms_build_trans(motor_cmnd, double *, struct motorRecord *)
+USAGE... Add a part to the transaction.
+
+INPUT...	command - index into oms_table[].
+		*parms  - one or more input parameters; determined by
+			    "num_parms" in oms_table.
+		*mr	- motor record pointer.
+LOGIC...
+    Initialize pointers; return value to OK.
+    Set highest command type priority.
+    IF transaction is NOT initialized (i.e., state != BUILD_STATE)
+	ERROR RETURN.
+    ENDIF
+    
+    IF input command is a PRIMITIVE command, AND, the INIT field is not empty.
+	IF input command is a "device directive".
+	    Find terminating '@'.
+	    IF valid "device directive" (i.e, directive bracketed by '@'s).
+		IF "Driver Power Monitoring ON" directive.
+		    Flush response buffer.
+		    Read motor controller's GPIO configuration.
+		    IF bit corresponding to current axis is configured as an
+			    output bit.
+			Set "Driver Power Monitoring" indicator ON.
+		    ELSE
+			Output ERROR message.
+		    ENDIF
+		ENDIF
+		Strip device directive and copy rest of INIT field to local buffer.
+	    ELSE
+		Copy INIT field to local buffer.
+	    ENDIF
+	ELSE
+	    Copy INIT field to local buffer.
+	ENDIF
+    ELSE
+	IF input command is set HIGH or LOW travel limit.
+	    Null command. Set transaction state to IDLE.
+	ELSE
+	    IF input command is Proportional Gain, AND, gain < valid minimum.
+		Set the gain and the PCOF field to the minimum.
+		Set return indicator to ERROR.
+	    ELSE IF input command is STOP_AXIS.
+		NOTE: This logic is here as a workaround for an OMS firmware
+		error.  When a STOP command was issued during the target move,
+		the backlash acceleration would go into effect.
+		
+		Prefix command with ACCL field acceleration.
+	    ENDIF
+	    IF command type is MOTION or VELOCITY.
+		Process PREM and POST fields.
+	    ENDIF
+	    IF Overtravel status indicator ON, AND, input command is a MOVE.
+		NOTE: This logic is here as a workaround for the "Moving off a
+		limit switch" OMS firmware error.
+
+		IF incremental distance to target position is positive.
+		    Set OMS controller "direction logic" positive.
+		ELSE
+		    Set OMS controller "direction logic" negative.
+		ENDIF
+	    ENDIF
+	    Copy input command into output message.
+	    Copy input command parameters into output message.
+	ENDIF
+    ENDIF    
+*/
+
 long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
@@ -106,123 +175,130 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 	motor_call->type = cmnd_type;
     
     /* concatenate onto the dpvt message field */
-    if (trans->state == BUILD_STATE) 
-    {
-	if ((command == PRIMITIVE) && (mr->init != NULL) &&
-	    (strlen(mr->init) != 0))
-	{
-	    extern struct driver_table oms58_access;
-	    /* Test for a "device directive" in the Initialization string. */
-	    if ((mr->init[0] == '@') && (trans->tabptr == &oms58_access))
-	    {
-		char *end = strrchr(&mr->init[1], '@');
-		if (end != NULL)
-		{
-                    struct driver_table *tabptr = trans->tabptr;
-		    int size = (end - &mr->init[0]) + 1;
-		    strncpy(buffer, mr->init, size);
-		    buffer[size] = NULL;
-		    if (strcmp(buffer, "@DPM_ON@") == 0)
-		    {
-			int response, bitselect;
-			char respbuf[10];
+    if (trans->state != BUILD_STATE)
+	return(rtnind = ERROR);
 
-			(*tabptr->getmsg)(motor_call->card, respbuf, -1);
-			(*tabptr->sendmsg)(motor_call->card, "RB\r",
-					   (char) NULL);
-			(*tabptr->getmsg)(motor_call->card, respbuf, 1);
-			if (sscanf(respbuf, "%x", &response) == 0)
-			    response = 0;	/* Force an error. */
-			bitselect = (1 << motor_call->signal);
-			if ((response & bitselect) == 0)
-			    trans->dpm = ON;
-			else
-			    logMsg((char *) "Invalid VME58 configuration; RB = 0x%x\n",
-				   response, 0, 0, 0, 0 ,0);
-		    }
-		    end++;
-		    strcpy(buffer, end);
+    if ((command == PRIMITIVE) && (mr->init != NULL) &&
+	(strlen(mr->init) != 0))
+    {
+	extern struct driver_table oms58_access;
+	/* Test for a "device directive" in the Initialization string. */
+	if ((mr->init[0] == '@') && (trans->tabptr == &oms58_access))
+	{
+	    char *end = strrchr(&mr->init[1], '@');
+	    if (end != NULL)
+	    {
+		struct driver_table *tabptr = trans->tabptr;
+		int size = (end - &mr->init[0]) + 1;
+		strncpy(buffer, mr->init, size);
+		buffer[size] = NULL;
+		if (strcmp(buffer, "@DPM_ON@") == 0)
+		{
+		    int response, bitselect;
+		    char respbuf[10];
+
+		    (*tabptr->getmsg)(motor_call->card, respbuf, -1);
+		    (*tabptr->sendmsg)(motor_call->card, "RB\r",
+				       (char) NULL);
+		    (*tabptr->getmsg)(motor_call->card, respbuf, 1);
+		    if (sscanf(respbuf, "%x", &response) == 0)
+			response = 0;	/* Force an error. */
+		    bitselect = (1 << motor_call->signal);
+		    if ((response & bitselect) == 0)
+			trans->dpm = ON;
+		    else
+			logMsg((char *) "Invalid VME58 configuration; RB = 0x%x\n",
+			       response, 0, 0, 0, 0 ,0);
 		}
-		else
-		    strcpy(buffer, mr->init);
+		end++;
+		strcpy(buffer, end);
 	    }
 	    else
 		strcpy(buffer, mr->init);
-
-	    strcat(motor_call->message, " ");
-	    strcat(motor_call->message, buffer);
 	}
 	else
+	    strcpy(buffer, mr->init);
+
+	strcat(motor_call->message, " ");
+	strcat(motor_call->message, buffer);
+    }
+    else
+    {
+	int first_one, itera;
+
+	if (command == SET_HIGH_LIMIT || command == SET_LOW_LIMIT)
+	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
+	else
 	{
-	    int first_one, itera;
-
-	    if (command == SET_HIGH_LIMIT || command == SET_LOW_LIMIT)
-                trans->state = IDLE_STATE;	/* No command sent to the controller. */
-	    else
+	    /* Silently enforce minimum range on KP command. */
+	    if (command == SET_PGAIN && *parms < 0.00005)
 	    {
-		/* Silently enforce minimum range on KP command. */
-		if (command == SET_PGAIN && *parms < 0.00005)
-		{
-		    *parms = 0.00005;
-		    mr->pcof = 0.00005;
-		    rtnind = ERROR;
-		}
-		else if (command == STOP_AXIS)
-		{
-		    double  acc = (mr->velo / fabs(mr->res)) / mr->accl;
-		
-		    /* Put in acceleration. */
-		    strcat(motor_call->message, oms_table[SET_ACCEL].command);
-		    sprintf(buffer, "%ld", NINT(acc));
-		    strcat(motor_call->message, buffer);
-		}
-    
-		if (cmnd_type == MOTION || cmnd_type == VELOCITY)
-		{
-		    if (strlen(mr->prem) != 0)
-		    {
-			strcat(motor_call->message, mr->prem);
-			strcat(motor_call->message, " ");
-		    }
-		    if (strlen(mr->post) != 0)
-			motor_call->postmsgptr = (char *) &mr->post;
-		}
-		/* put in command */
-		strcat(motor_call->message, oms_table[command].command);
-       
-		/* put in parameters */
-		for (first_one = YES, itera = 0; itera < oms_table[command].num_parms;
-		     itera++)
-		{
-		    if (first_one == YES)
-			first_one = NO;
-		    else
-			strcat(motor_call->message, ",");
-	
-		    if (command == SET_PGAIN || command == SET_IGAIN ||
-			command == SET_DGAIN)
-		    {
-			*parms *= 1999.9;
-			sprintf(buffer, "%.1f", parms[itera]);
-		    }
-		    else if (command == SET_VELOCITY)	/* OMS errors if VB = VL. */
-		    {
-			long vbase = NINT(mr->vbas / fabs(mr->res));
-			long vel = NINT(parms[itera]);
+		*parms = 0.00005;
+		mr->pcof = 0.00005;
+		rtnind = ERROR;
+	    }
+	    else if (command == STOP_AXIS)
+	    {
+		double  acc = (mr->velo / fabs(mr->res)) / mr->accl;
+	    
+		/* Put in acceleration. */
+		strcat(motor_call->message, oms_table[SET_ACCEL].command);
+		sprintf(buffer, "%ld", NINT(acc));
+		strcat(motor_call->message, buffer);
+	    }
 
-			if (vel <= vbase)
-			    vel = vbase + 1;
-			sprintf(buffer, "%ld", vel);
-		    }
-		    else
-			sprintf(buffer, "%ld", NINT(parms[itera]));
-		    strcat(motor_call->message, buffer);
+	    if (cmnd_type == MOTION || cmnd_type == VELOCITY)
+	    {
+		if (strlen(mr->prem) != 0)
+		{
+		    strcat(motor_call->message, mr->prem);
+		    strcat(motor_call->message, " ");
 		}
+		if (strlen(mr->post) != 0)
+		    motor_call->postmsgptr = (char *) &mr->post;
+	    }
+	    
+	    /* Code to hide Oms58 moving off limit switch problem. */
+	    if (((mr->msta & RA_OVERTRAVEL) != 0) && (command == MOVE_ABS || command == MOVE_REL))
+	    {
+		if (mr->rdif >= 0)
+		    strcat(motor_call->message, " MP");
+		else
+		    strcat(motor_call->message, " MM");
+	    }
+	    /* put in command */
+	    strcat(motor_call->message, oms_table[command].command);
+   
+	    /* put in parameters */
+	    for (first_one = YES, itera = 0; itera < oms_table[command].num_parms;
+		 itera++)
+	    {
+		if (first_one == YES)
+		    first_one = NO;
+		else
+		    strcat(motor_call->message, ",");
+    
+		if (command == SET_PGAIN || command == SET_IGAIN ||
+		    command == SET_DGAIN)
+		{
+		    *parms *= 1999.9;
+		    sprintf(buffer, "%.1f", parms[itera]);
+		}
+		else if (command == SET_VELOCITY)	/* OMS errors if VB = VL. */
+		{
+		    long vbase = NINT(mr->vbas / fabs(mr->res));
+		    long vel = NINT(parms[itera]);
+
+		    if (vel <= vbase)
+			vel = vbase + 1;
+		    sprintf(buffer, "%ld", vel);
+		}
+		else
+		    sprintf(buffer, "%ld", NINT(parms[itera]));
+		strcat(motor_call->message, buffer);
 	    }
 	}
     }
-    else
-	rtnind = ERROR;
     return(rtnind);
 }
 
