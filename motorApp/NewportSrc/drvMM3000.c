@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.c
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:27:04 $
+Last Modified:	$Date: 2000-04-18 20:55:03 $
 */
 
 /*
@@ -36,10 +36,18 @@ Last Modified:	$Date: 2000-03-03 22:27:04 $
  * Modification Log:
  * -----------------
  * .01  10-20-97	mlr     initialized from drvOms58
- * .02  10-30-97        mlr     Replaced driver calls with gpipIO functions
- * .03  10-30-98        mlr     Minor code cleanup, improved formatting
- * .04  02-01-99        mlr     Added temporary fix to delay reading motor
- *                              positions at the end of a move.
+ * .02  10-30-97	mlr     Replaced driver calls with gpipIO functions
+ * .03  10-30-98	mlr     Minor code cleanup, improved formatting
+ * .04  02-01-99	mlr     Added temporary fix to delay reading motor
+ *                      	positions at the end of a move.
+ * .05  04-18-00	rls	MM3000 takes 2 to 5 seconds to respond to
+ *				queries after hitting a hard travel limit.
+ *				Adjusted GPIB and SERIAL timeouts accordingly.
+ *				Deleted communication retries.  Reworked travel
+ *				limit processing so that direction status bit
+ *				matches limit switch.  Copied recv_mess() logic
+ *				from drvMM4000.c.  Use TPE command to determine
+ *				if motor has an encoder.
  */
 
 
@@ -85,6 +93,10 @@ Last Modified:	$Date: 2000-03-03 22:27:04 $
 
 #define MM3000_NUM_CARDS	4
 #define BUFF_SIZE 100       /* Maximum length of string to/from MM3000 */
+
+/* The MM3000 does not respond for 2 to 5 seconds after hitting a travel limit. */
+#define GPIB_TIMEOUT	5000	/* Command timeout in msec. */
+#define SERIAL_TIMEOUT	5000	/* Command timeout in msec. */
 
 /*----------------debugging-----------------*/
 #ifdef	DEBUG
@@ -234,34 +246,29 @@ STATIC int set_status(int card, int signal)
     /* Message parsing variables */
     char *cptr, *tok_save;
     char inbuff[BUFF_SIZE], outbuff[BUFF_SIZE];
-    int itera, status, rtn_state;
+    int status, rtn_state;
     double motorData;
 
-    recv_mess(card, inbuff, FLUSH);
+    cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
+
     sprintf(outbuff, "%dMS\r", signal + 1);
     send_mess(card, outbuff, NULL);
-
-    itera = 0;
-    do
+    status = recv_mess(card, inbuff, 1);
+    if (status <= 0)
     {
-	recv_mess(card, inbuff, 1);
-	itera++;
-	if (itera < 10 && strlen(inbuff) == 0)
-	{
-	    Debug(2, "set_status(): empty MS response message.\n");
-	    send_mess(card, outbuff, NULL);
-	}
-    } while((strlen(inbuff) != 1) && itera < 10);
-
-    if (itera == 10)
-    {
-	Debug(4, "set_status(): MS response error.\n");
-	return(0);
+	cntrl->status = COMM_ERR;
+	motor_info->status |= CNTRL_COMM_ERR;
+	return (rtn_state = 1);
     }
+    else
+    {
+	cntrl->status = NORMAL;
+	motor_info->status &= ~CNTRL_COMM_ERR;
+    }
+
     status = inbuff[0];
     Debug(5, "set_status(): status byte = %x\n", status);
 
-    cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
 
@@ -288,10 +295,30 @@ STATIC int set_status(int card, int signal)
 	}
     }
 
-    if ((status & M_PLUS_LIMIT) || (status & M_MINUS_LIMIT))
-	motor_info->status |= RA_OVERTRAVEL;
+    /* Set Travel limit status bit. */
+    if (status & M_AXIS_MOVING)
+    {
+	if (((status & M_PLUS_LIMIT)  &&  (status & M_MOTOR_DIRECTION)) ||
+	    ((status & M_MINUS_LIMIT) && !(status & M_MOTOR_DIRECTION)))
+	    motor_info->status |= RA_OVERTRAVEL;
+	else
+	    motor_info->status &= ~RA_OVERTRAVEL;
+    }
     else
-	motor_info->status &= ~RA_OVERTRAVEL;
+    {
+	if ((status & M_PLUS_LIMIT) || (status & M_MINUS_LIMIT))
+	{
+	    motor_info->status |= RA_OVERTRAVEL;
+	    /* Until status is modified to distinguish +/- limits;
+	     * Set RA_DIRECTION to match travel limit switch. */
+	    if (status & M_PLUS_LIMIT)
+		motor_info->status |= RA_DIRECTION;
+	    else
+		motor_info->status &= ~RA_DIRECTION;
+	}
+	else
+	    motor_info->status &= ~RA_OVERTRAVEL;
+    }
 
     if (status & M_HOME_SIGNAL)
 	motor_info->status |= RA_HOME;
@@ -310,7 +337,18 @@ STATIC int set_status(int card, int signal)
 
     sprintf(outbuff, "%dTP\r", signal + 1);
     send_mess(card, outbuff, NULL);
-    recv_mess(card, inbuff, 1);
+    status = recv_mess(card, inbuff, 1);
+    if (status <= 0)
+    {
+	cntrl->status = COMM_ERR;
+	motor_info->status |= CNTRL_COMM_ERR;
+	return (rtn_state = 1);
+    }
+    else
+    {
+	cntrl->status = NORMAL;
+	motor_info->status &= ~CNTRL_COMM_ERR;
+    }
 
     tok_save = NULL;
     cptr = strtok_r(inbuff, " ", &tok_save);
@@ -399,83 +437,57 @@ STATIC int send_mess(int card, char const *com, char inchar)
 
 
 /*
- * FUNCTION... recv_mess(int card, char *com, int amount)
+ * FUNCTION... recv_mess(int card, char *com, int flag)
  *
  * INPUT ARGUMENTS...
  *	card - controller card # (0,1,...).
  *	*com - caller's response buffer.
- *	amount	| -1 = flush controller's output buffer.
- *		| >= 1 = the # of command responses to retrieve into caller's
- *				response buffer.
+ *	flag	| FLUSH  = flush controller's output buffer; set timeout = 0.
+ *		| !FLUSH = retrieve response into caller's buffer; set timeout.
  *
  * LOGIC...
  *  IF controller card does not exist.
  *	ERROR RETURN.
  *  ENDIF
- *  IF "amount" indicates buffer flush.
- *	WHILE characters left in input buffer.
- *	    Call omsGet().
- *	ENDWHILE
- *  ENDIF
- *
- *  FOR each message requested (i.e. "amount").
- *	Initialize head and tail pointers.
- *	Initialize retry counter and state indicator.
- *	WHILE retry count not exhausted, AND, state indicator is NOT at END.
- *	    IF characters left in controller's input buffer.
- *		Process input character.
- *	    ELSE IF command error occured - call omsError().
- *		ERROR RETURN.
- *	    ENDIF
- *	ENDWHILE
- *	IF retry count exhausted.
- *	    Terminate receive buffer.
- *	    ERROR RETURN.
- *	ENDIF
- *	Terminate command response.
- *  ENDFOR
- *
- *  IF commands processed.
- *	Terminate response buffer.
- *  ELSE
- *	Clear response buffer.
- *  ENDIF
  *  NORMAL RETURN.
  */
 
-STATIC int recv_mess(int card, char *com, int amount)
+STATIC int recv_mess(int card, char *com, int flag)
 {
     struct MMcontroller *cntrl;
-    int len=0;
+    int timeout = 0;
+    int len = 0;
 
     /* Check that card exists */
     if (!motor_state[card])
 	return (-1);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
-    if (amount == -1)
+
+    switch (cntrl->port_type)
     {
-	do
-	{
-	    if (cntrl->port_type == GPIB_PORT)
-		len = gpibIORecv(cntrl->gpibInfo, com, BUFF_SIZE, INPUT_TERMINATOR, NULL);
-	    else
-		len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, INPUT_TERMINATOR, NULL);
-	    Debug(2, "recv_mess(): flushed message = \"%s\"\n", com);
-	} while(len != 0);
-    }
-    else
-    {
-	if (cntrl->port_type == GPIB_PORT)
-	    len = gpibIORecv(cntrl->gpibInfo, com, BUFF_SIZE, INPUT_TERMINATOR, GPIB_TIMEOUT);
-	else
-	    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, INPUT_TERMINATOR, SERIAL_TIMEOUT);
+	case GPIB_PORT:
+	    if (flag != FLUSH)
+		timeout	= GPIB_TIMEOUT;
+	    len = gpibIORecv(cntrl->gpibInfo, com, BUFF_SIZE, INPUT_TERMINATOR,
+			     timeout);
+	    break;
+	case RS232_PORT:
+	    if (flag != FLUSH)
+		timeout	= SERIAL_TIMEOUT;
+	    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE,
+			       INPUT_TERMINATOR, timeout);
+	    break;
     }
 
-    if (len == 0)
+    if (len <= 0)
 	com[0] = '\0';
     else
-	com[len-2] = '\0';	/* Terminate at carriage return. */
+	/* MM3000 responses are always terminated with CR/LF combination (see
+	 * MM3000 User' Manual Sec. 3.4 NOTE). Strip both CR&LF from buffer
+	 * before returning to caller.
+	 */
+	com[len-2] = '\0';
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
     return (len);
@@ -653,7 +665,7 @@ STATIC int motor_init()
 			cntrl->type[total_axis] = DC;
 		    else
 			logMsg((char *) "drvMM3000:motor_init() - invalid RC response = %s\n",
-			       bufptr, 0, 0, 0, 0, 0);
+			       (int) bufptr, 0, 0, 0, 0, 0);
 
 		    bufptr = strtok_r(NULL, "=", &tok_save);
 		    bufptr = strtok_r(NULL, " ", &tok_save);
@@ -678,35 +690,11 @@ STATIC int motor_init()
 		    motor_info->encoder_present = YES;
 		else
 		{
-		    double pre_position, mod_position;
-		    int fm_value;
-
-		    sprintf(buff, "%dFM?\r", motor_index + 1);
+		    sprintf(buff, "%dTPE\r", motor_index + 1);
 		    send_mess(card_index, buff, NULL);
 		    recv_mess(card_index, buff, 1);
-		    fm_value = atoi(&buff[3]);
 
-		    sprintf(buff, "%dTP\r", motor_index + 1);
-		    send_mess(card_index, buff, NULL);
-		    recv_mess(card_index, buff, 1);
-		    pre_position = atof(&buff[3]);
-
-		    fm_value = (fm_value == 0) ? 1 : 0;
-		    
-		    sprintf(buff, "%dFM%d\r", motor_index + 1, fm_value);
-		    send_mess(card_index, buff, NULL);
-		    
-		    sprintf(buff, "%dTP\r", motor_index + 1);
-		    send_mess(card_index, buff, NULL);		    
-		    recv_mess(card_index, buff, 1);
-		    mod_position = atof(&buff[3]);
-
-		    fm_value = (fm_value == 0) ? 1 : 0;
-		    
-		    sprintf(buff, "%dFM%d\r", motor_index + 1, fm_value);
-		    send_mess(card_index, buff, NULL);
-
-		    if (pre_position == mod_position)
+		    if (strcmp(buff, "E01") == 0)
 			motor_info->encoder_present = NO;
 		    else
 			motor_info->encoder_present = YES;
