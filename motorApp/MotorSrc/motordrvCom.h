@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 20:43:05 $
+Last Modified:	$Date: 2003-06-25 16:46:23 $
 */
 
 /*
@@ -49,6 +49,7 @@ Last Modified:	$Date: 2002-10-31 20:43:05 $
 #include <epicsTime.h>
 #include <epicsRingPointer.h>
 
+#define MAX_IDENT_LEN 100
 
 /* Controller communication port type, followed by status. */
 enum PortType
@@ -170,7 +171,7 @@ struct mess_info
 struct controller	/* Controller board information. */
 {
     int motor_in_motion;/* count of motors in motion */
-    char ident[50];	/* identification string for this card */
+    char ident[MAX_IDENT_LEN];	/* identification string for this card */
     int total_axis;	/* total axis on this card */
     char *localaddr;	/* address of this card */
     bool cmnd_response; /* Indicates controller communication response
