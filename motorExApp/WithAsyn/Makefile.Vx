@@ -35,8 +35,6 @@ LIBOBJS += $(MPF_SERIAL_BIN)/serialServer.o
 LIBOBJS += $(MPF_GPIB_BIN)/GpibGsTi9914.o
 LIBOBJS += $(MPF_GPIB_BIN)/Gpib.o
 LIBOBJS += $(MPF_GPIB_BIN)/gpibServer.o
-# !MPF-1-CPU! #LIBOBJS += $(MPF_GPIB_BIN)/GpibHideosLocal.o
-# !MPF-2-CPU! #LIBOBJS += $(MPF_GPIB_BIN)/GpibHideosRemote.o
 
 # The motor communication library (i.e. motorCOM_mpf)
 # requires both serial and GPIB support. Some motion
@@ -51,6 +49,12 @@ LIBOBJS += $(EPICS_BASE_BIN)/drvGpib.o
 LIBOBJS += $(EPICS_BASE_BIN)/drvBitBus.o
 
 LIBNAME = WithMPFLib
+
+# Both "Local" and "Remote" versions of GpibHideos are
+# copied to the bin directory.  Which one is loaded is
+# specified in the st.cmd file.
+BIN_INSTALLS  = $(MPF_GPIB_BIN)/GpibHideosLocal.o
+BIN_INSTALLS += $(MPF_GPIB_BIN)/GpibHideosRemote.o
 
 #Note that the command line that builds the
 #library $(LIBNAME) may be HUGE (>3kB)
