@@ -62,23 +62,81 @@
 #!initOctalUARTPort("UART1[3]","octalUart1",3, 9600,"N",1,8,"N")
 ### END of IPAC R2.5 and below ################################################
 
-### IPAC R2.6 and above #######################################################
-# IPAC R2.6 and above
-# Initialize IP carrier
+### IPAC R2.8 #################################################################
+# Initialize the drvIpac carriers.
+# -------------------------------
+# ipacAdd{CarrierType}(char *cardParams)
+#   CarrierType - VIPC310, VIPC610, VIPC610_01, VIPC616, VIPC616_01,
+#                 MVME162, or ATC40.
+#   cardParams  - carrier-specific init parameters.
 # ipacAddVIPC616_01(const char *cardParams);
 # ipacAddMVME162(const char *cardParams)
+
 #!ipacAddVIPC616_01("6000,A0000000")
 #!ipacAddMVME162("A:l=3,3 m=0xA0000000,64")
 
+# Allocate the number of tyGSOctal modules to support.
+# ----------------------------------------------------
+
 #!tyGSOctalDrv(1)
 
-#!octalUart0 = tyGSOctalModuleInit("GSIP_OCTAL232", 0x80, 0, 0)
+# Initialize IP Octal modules.
+# ----------------------------
+# tyGSOctalModuleInit(char *moduleID, char *ModuleType, int irq_num,
+#                     char *carrier#, int slot#)
+#   moduleID   - assign the IP module a name for future reference. 
+#   ModuleType - "232", "422", or "485".
+#   irq_num    - interrupt request number.
+#   carrier#   - carrier# assigned from the ipacAddCarrierType() call.
+#   slot#      - slot number on carrier; slot[A,B,C,D] -> slot#[0,1,2,3].
 
-#!port0 = tyGSOctalDevCreate("/tyGS/0/0",octalUart0,0,1000,1000)
-#!port1 = tyGSOctalDevCreate("/tyGS/0/1",octalUart0,1,1000,1000)
+#!tyGSOctalModuleInit "Mod0", "232", 0x80, 0, 0
 
-#!drvAsynSerialPortConfigure("L0","/tyGS/0/0",0,0,0)
-#!drvAsynSerialPortConfigure("L1","/tyGS/0/1",0,0,0)
+# Create tty devices.
+# ------------------
+# tyGSOctalDevCreate(char *portname, int moduleID, int port#, int rdBufSize,
+#                    int wrtBufSize)
+#   portname   - assign the port a name for future reference.
+#   moduleID   - moduleID from the tyGSOctalModuleInit() call.
+#   port#      - port number for this module [0-7].
+#   rdBufSize  - read buffer size, in bytes.
+#   wrtBufSize - write buffer size, in bytes.
+
+# Create two tty ports on Mod0 with portname based on the convention;
+# "/tyGScarrier#/moduleID/port#".
+
+#!tyGSOctalDevCreate    "/tyGS0/Mod0/0",  "Mod0", 0, 512, 512
+#!tyGSOctalDevCreate    "/tyGS0/Mod0/1",  "Mod0", 1, 512, 512
+
+# Create all uninitialized tty devices.
+# ------------------------------------
+# tyGSOctalDevCreateAll(char *base, char *moduleID, int rdBufSize,
+#			int wrtBufSize)
+#   base	- base name for these devices.
+#   moduleID	- module identifier from the call to tyGSOctalModuleInit().
+#   rdBufSize 	- read buffer size, in bytes.
+#   wrtBufSize	- write buffer size, in bytes.
+
+# Initialze all the remaining uninitialized Mod0 ports; i.e., /tyGS0/0/[2-7].
+#!tyGSOctalDevCreateAll "/tyGS0/Mod0/", "Mod0", 512, 512
+
+# Configurd asyn serial port.
+# ---------------------------
+# drvAsynSerialPortConfigure("portName","ttyName",priority,noAutoConnect,
+#	noProcessEosIn)
+#
+#   portName 	- The portName that is registered with asynGpib.
+#   ttyName 	- The name of the local serial port (e.g. "/dev/ttyS0").
+#   priority 	- Priority at which the asyn I/O thread will run. If this is
+#		  zero or missing,then epicsThreadPriorityMedium is used.
+#   noAutoConnect - Zero or missing indicates that portThread should
+#		  automatically connect. Non-zero if explicit connect command
+#		  must be issued.
+#   noProcessEos - If 0 then asynInterposeEosConfig is called specifying both
+#		  processEosIn and processEosOut.
+
+#!drvAsynSerialPortConfigure("L0","/tyGS0/Mod0/0",0,0,0)
+#!drvAsynSerialPortConfigure("L1","/tyGS0/Mod0/1",0,0,0)
 
 #!asynSetOption("L0", 0, "baud", "9600")
 #!asynSetOption("L0", 0, "bits", "8")
@@ -94,5 +152,5 @@
 #!asynSetOption("L1", 0, "clocal", "Y")
 #!asynSetOption("L1", 0, "crtscts", "N")
 
-### END of IPAC R2.6 and above#################################################
+### END of IPAC R2.8 ##########################################################
 
