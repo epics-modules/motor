@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:09:07 $
+Last Modified:	$Date: 2003-05-27 21:58:23 $
 */
 
 /*****************************************************************
@@ -436,7 +436,7 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
-    serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
+    cntrl->serialInfo->serialIOSend(local_buff, strlen(local_buff), SERIAL_TIMEOUT);
 
     return(OK);
 }
@@ -463,7 +463,7 @@ STATIC int recv_mess(int card, char *com, int flag)
     else
 	timeout	= SERIAL_TIMEOUT;
 
-    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, (char *) "\n", timeout);
+    len = cntrl->serialInfo->serialIORecv(com, BUFF_SIZE, (char *) "\n", timeout);
 
     if (len == 0)
 	com[0] = '\0';
@@ -553,7 +553,7 @@ STATIC int motor_init()
     char buff[BUFF_SIZE];
     int total_axis = 0;
     int status;
-    bool errind;
+    bool success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
 
@@ -573,13 +573,11 @@ STATIC int motor_init()
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	errind = false;
-	cntrl->serialInfo = serialIOInit(cntrl->serial_card,
-					 cntrl->serial_task);
-	if (cntrl->serialInfo == NULL)
-	    errind = true;
+	success_rtn = false;
+	cntrl->serialInfo = new serialIO(cntrl->serial_card,
+				     cntrl->serial_task, &success_rtn);
 
-	if (errind == false)
+	if (success_rtn == true)
 	{
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
@@ -597,7 +595,7 @@ STATIC int motor_init()
 	    brdptr->total_axis = total_axis;
 	}
 
-	if (errind == false && total_axis > 0)
+	if (success_rtn == true && total_axis > 0)
 	{
 	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;

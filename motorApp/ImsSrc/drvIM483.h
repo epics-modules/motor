@@ -3,9 +3,9 @@ FILENAME...	drvIM483.h
 USAGE... This file contains driver "include" information that is specific to
 	Intelligent Motion Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 19:31:43 $
+Last Modified:	$Date: 2003-05-27 21:57:54 $
 */
 
 /*
@@ -44,6 +44,7 @@ Last Modified:	$Date: 2003-05-23 19:31:43 $
 #define	INCdrvIM483h 1
 
 #include "motordrvCom.h"
+#include "serialIO.h"
 
 #define GPIB_TIMEOUT	2000 /* Command timeout in msec */
 #define SERIAL_TIMEOUT	2000 /* Command timeout in msec */
@@ -53,7 +54,7 @@ Last Modified:	$Date: 2003-05-23 19:31:43 $
 struct IM483controller
 {
     int port_type;		/* GPIB_PORT or RS232_PORT */
-    struct serialInfo *serialInfo;  /* For RS-232 */
+    serialIO *serialInfo;  	/* For RS-232 */
     int gpib_link;
     int gpib_address;
     struct gpibInfo *gpibInfo;  /* For GPIB */
