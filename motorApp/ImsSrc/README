@@ -6,10 +6,10 @@ Configuring MDrive for party mode.
 ----------------------------------
 
 The following is a modified version of the procedure defined in Section 2.1,
-"Interfacing RS-485 Communications", page #25, of the "MDrive Motion Control"
-manual; Revision 02.05.2004.
+"Multiple MDrive Motion Control System (Party Mode)", page #27, of the
+"MDrive Motion Control" manual; Revision 01.24.2005.
 
-1. Configure the first MDrive Motion Control to the Host PC configured for Single
+1. Connect the first MDrive Motion Control to the Host PC configured for Single
         Mode Operation.
 	
 2. Establish communications.
@@ -24,20 +24,37 @@ manual; Revision 02.05.2004.
 3. Using the command DN, name the MDrive Motion Control. This must be a number
         1-9. (DN="1"{enter}). Label the motor with the device name.
 
-4. Set Echo Mode EM=1{enter}.
+4. Set Echo Mode EM=2{enter}.
 
-5. Set the party flag PY=1{enter}.
+5. Define the plus, minus and home limit switches, if available, using the
+	S<1-4> command.
 
-6. Type CTRL+J to activate the Party Mode.
+6. Set the party flag PY=1{enter}.
 
-7. Type {DN}S CTRL+J where {DN} is the device name given in step #3 (Save
-        device name, Echo and Party Mode).
+7. Type CTRL+J to activate the Party Mode.
 
-8. Remove power.
+8. Type {DN}S CTRL+J where {DN} is the device name given in step #3 (Save
+        device name, Echo mode, I/O Setup and Party Mode).
 
-9. Repeat steps 1 through 8 for each additional MDrive in the system using
+9. Remove power.
+
+10. Repeat steps 1 through 8 for each additional MDrive in the system using
         successive device names "1" through "9".
 	
+
+IMPORTANT NOTES
+---------------
+
+1. The EPICS motor record does NOT support the optional encoder mode.  The
+	Encoder Enable Flag (EE) must be 0.
+
+
+MDrive Facts
+------------
+
+* Step resolution    -  200 steps / 1 motor revolution.
+* Encoder resolution - 2048 ticks / 1 motor revolution.
+
 
                              IM483
 ==============================================================================
