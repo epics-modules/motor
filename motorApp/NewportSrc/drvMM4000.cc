@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-28 14:57:08 $
+Last Modified:	$Date: 2003-11-07 22:24:21 $
 */
 
 /*
@@ -47,6 +47,10 @@ Last Modified:	$Date: 2003-05-28 14:57:08 $
  *	- set_status() sets RA_PROBLEM along with CNTRL_COMM_ERR to terminate
  *		node.
  * .07 05-19-03	rls Converted to R3.14.x.
+ * .08 11-04-03 mlr Added a final poll of motor status if drvMM4000ReadbackDelay is
+ *                  non-zero.  This is required to work around a bug in the firmware
+ *                  (versions 2.40 and 2.44) that the motor is reported as done moving
+ *                  on the first poll after a move is begun with the motor power off.
  */
 
 
@@ -350,11 +354,23 @@ STATIC int set_status(int card, int signal)
  * motor is done moving, which means that the "jerk time" is done.  However,
  * the axis can still be settling.  For now we put in a delay and poll the
  * motor position again. This is not a good long-term solution.
+ *
+ * Another TEMPORARY FIX, Mark Rivers, 4/13/03.  The MM4000 has reported that
+ * the motor is done moving.  However, if the motor power was off, and the firmware
+ * version is 2.43 or 2.44 then the controller "lies" and says the motor is done
+ * on the first poll, when it is really moving.  We work around this by reading
+ * the status again after the delay, in case it is really still moving. 
  */
 	if (motor_info->pid_present == YES && drvMM4000ReadbackDelay != 0.)
 	{
 	    epicsThreadSleep(drvMM4000ReadbackDelay);
 	    send_mess(card, READ_POSITION, (char) NULL);
+	    recv_mess(card, cntrl->position_string, 1);
+	    pos = signal*5 + 3;	 /* Offset in status string */
+	    mstat.All = cntrl->status_string[pos];
+	    if (mstat.Bits.inmotion == true)
+		motor_info->status &= ~RA_DONE;
+	    send_mess(card, READ_POSITION, NULL);
 	    recv_mess(card, cntrl->position_string, 1);
 	}
     }
