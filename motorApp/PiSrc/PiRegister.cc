@@ -2,9 +2,9 @@
 FILENAME...	PiRegister.cc
 USAGE...	Register IMS motor device driver shell commands.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:38:22 $
+Last Modified:	$Date: 2004-12-20 21:30:38 $
 */
 
 /*****************************************************************
@@ -59,7 +59,8 @@ static void configPIC844CallFunc(const iocshArgBuf *args)
 
 static void PImotorRegister(void)
 {
-    iocshRegister(&setupPIC844, setupPIC844CallFunc);
+    iocshRegister(&setupPIC844,  setupPIC844CallFunc);
+    iocshRegister(&configPIC844, configPIC844CallFunc);
 }
 
 epicsExportRegistrar(PImotorRegister);
