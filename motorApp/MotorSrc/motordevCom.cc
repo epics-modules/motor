@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-06 21:09:10 $
+Last Modified:	$Date: 2003-06-16 15:08:24 $
 */
 
 /*
@@ -41,6 +41,7 @@ Last Modified:	$Date: 2003-06-06 21:09:10 $
  * .03  03-19-96 tmm v1.10: modified encoder-ratio calculation
  * .04  11-26-96 jps allow for bumpless-reboot on position
  * .04a 02-19-97 tmm fixed for EPICS 3.13
+ * .05  06/13/03 rls Ported to R3.14.
  */
 
 

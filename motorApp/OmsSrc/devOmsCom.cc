@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-05 16:38:27 $
+Last Modified:	$Date: 2003-06-16 15:04:11 $
 */
 
 /*
@@ -36,21 +36,22 @@ Last Modified:	$Date: 2003-06-05 16:38:27 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93  jbk	initialized
- * .02  11-14-94  jps	copy devOMS.c and modify to point to vme58 driver
- * .03  03-19-96  tmm	v1.10: modified encoder-ratio calculation
- * .04  06-20-96  jps	allow for bumpless-reboot on position
- * .04a 02-19-97  tmm	fixed for EPICS 3.13
- * .05  05-14-01  rls	Support for jog velocity and acceleration commands.
- *			Added "CA" to home and jog commands so JVEL does not
- *			  see done flag from previous operation.
- * .06  03-27-02  rls   Eliminated RES. All input positions, velocities and
- *			  accelerations are in motor steps.
- * .07  07-05-02  rls   Work around for OMS bug that ignores MR+/-1.
- *                      Use OMS UU command to support reference is always in
- *			  motor steps.
- * .08  06-04-03  rls   Convert to R3.14.x.
- * .09  06-04-03  rls   extended device directive support PREM and POST.
+ * .01  01-18-93 jbk initialized
+ * .02  11-14-94 jps copy devOMS.c and modify to point to vme58 driver
+ * .03  03-19-96 tmm v1.10: modified encoder-ratio calculation
+ * .04  06-20-96 jps allow for bumpless-reboot on position
+ * .04a 02-19-97 tmm fixed for EPICS 3.13
+ * .05  05-14-01 rls Support for jog velocity and acceleration commands.
+ *		     Added "CA" to home and jog commands so JVEL does not
+ *		     see done flag from previous operation.
+ * .06  03-27-02 rls Eliminated RES. All input positions, velocities and
+ *		     accelerations are in motor steps.
+ * .07  07-05-02 rls Work around for OMS bug that ignores MR+/-1.
+ *                   Use OMS UU command to support reference is always in
+ *		     motor steps.
+ * .08  06-04-03 rls Convert to R3.14.x.
+ * .09  06-04-03 rls extended device directive support PREM and POST.
+ * .10  06-16-03 rls Converted to R3.14.x.
  */
 
 #include <string.h>

@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 19:48:44 $
+Last Modified:	$Date: 2003-06-16 15:08:23 $
 */
 
 /*
@@ -52,6 +52,7 @@ Last Modified:	$Date: 2003-05-23 19:48:44 $
  * .21  03-01-02  rls	Eliminated support for the "ASCII record separator
  *                        (IS2) = /x1E".
  * .22  07-05-02  rls   Seperate +/- limit switch status bits.
+ * .23  06/13/03  rls	Ported to R3.14.
  */
 
 

@@ -2,9 +2,9 @@
 FILENAME...	serialIOMPF.cc
 USAGE...	Interface between MPF and motor record device drivers.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-27 21:56:44 $
+Last Modified:	$Date: 2003-06-16 15:06:24 $
 */
 
 /*
@@ -22,6 +22,9 @@ Last Modified:	$Date: 2003-05-27 21:56:44 $
  *		     - Increased timeout from 2 to 10 seconds in call to
  *			msgQReceive() from serialIO().  This prevents timeouts
  *			if a satellite CPU board is slow to boot.
+ * .02 02-13-03 MLR  - Added serialIOSendRecv for atomic send/receive functions
+ * .02 04-14-03 MLR  - Modified debugging, added timestamps to debug statements.
+ * .03 06-11-03 RLS  - Converted to R3.14.x.
  *
  */
 
@@ -177,7 +180,7 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, char *terminator,
                         status);
         goto done;
     }
-    Debug(2, "serialIORecv: sent message status = %d, timeout=%d\n", status, timeout);
+    Debug(5, "serialIORecv: sent message status = %d, timeout=%d\n", status, timeout);
 
     /* Wait for 2x the timeout or MIN_MSGQ_WAIT; which ever is greater. */
     timeout_itera = psm->timeout * 20;

@@ -2,9 +2,9 @@
 FILENAME...	devOms58.c
 USAGE...	Motor record device level support for OMS VME58.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-22 17:23:47 $
+Last Modified:	$Date: 2003-06-16 15:04:11 $
 */
 
 /*
@@ -35,12 +35,12 @@ Last Modified:	$Date: 2003-05-22 17:23:47 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93	jbk     initialized
- * .02  11-14-94	jps     copy devOMS.c and modify to point to vme58 driver
- * .03  03-19-96	tmm     v1.10: modified encoder-ratio calculation
- * .04  06-20-96	jps     allow for bumpless-reboot on position
- * .04a 02-19-97    	tmm     fixed for EPICS 3.13
- *      ...
+ * .01  01-18-93 jbk initialized
+ * .02  11-14-94 jps copy devOMS.c and modify to point to vme58 driver
+ * .03  03-19-96 tmm v1.10: modified encoder-ratio calculation
+ * .04  06-20-96 jps allow for bumpless-reboot on position
+ * .04a 02-19-97 tmm fixed for EPICS 3.13
+ * .05  06-16-03 rls Converted to R3.14.x.
  */
 
 

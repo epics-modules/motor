@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-28 14:58:16 $
+Last Modified:	$Date: 2003-06-16 15:04:45 $
 */
 
 /*
@@ -36,7 +36,8 @@ Last Modified:	$Date: 2003-05-28 14:58:16 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93	mlr     initialized from drvOms58
+ * .01  01-18-93 mlr initialized from drvOms58
+ * .02  06-16-03 rls Converted to R3.14.x.
  */
 
 #ifndef	INCdrvMMComh
