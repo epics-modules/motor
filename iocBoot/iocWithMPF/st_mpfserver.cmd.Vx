@@ -14,6 +14,6 @@ octalUart0 = tyGSOctalModuleInit("GSIP_OCTAL232", 0x80, 0, 0)
 taskDelay(3)
 port0 = tyGSOctalDevCreate("/tyGS/0/0",octalUart0,0,1000,1000)
 tyGSOctalConfig(port0,9600,'N',1,8,'N')
-initTtyPort("tyGS00","/tyGS/0/0",9600,1000)
+initTtyVxPort("tyGS00","/tyGS/0/0",9600,1000)
 initSerialServer("a-Serial[0]","tyGS00",100,2,"")
 
