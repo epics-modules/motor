@@ -13,6 +13,8 @@
  * .04  02-03-2004   rls  Eliminate erroneous "Motor motion timeout ERROR".
  * .05  07-09-2004   rls  - removed unused <driver>Setup() argument.
  *                        - added "\" at end of long Debug stmt's for SunPro.
+ * .06  09-20-2004   rls  send_mess() argument changed to char * for
+ *                        32axis/controller support.
  */
 
 
@@ -62,7 +64,7 @@ int MCB4B_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int card, const char *com, char c);
+STATIC RTN_STATUS send_mess(int, const char *, char *);
 STATIC void start_status(int card);
 STATIC int set_status(int card, int signal);
 static long report(int level);
@@ -92,7 +94,8 @@ struct driver_table MCB4B_access =
     set_status,
     query_done,
     start_status,
-    &initialized
+    &initialized,
+    NULL
 };
 
 struct
@@ -280,7 +283,7 @@ STATIC int set_status(int card, int signal)
 /* send a message to the MCB4B board                 */
 /* send_mess()                                       */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, const char *com, char c)
+STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
     char buff[BUFF_SIZE];
     struct MCB4Bcontroller *cntrl;
