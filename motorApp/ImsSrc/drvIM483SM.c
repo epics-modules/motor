@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.c
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-19 18:14:28 $
+Last Modified:	$Date: 2002-07-05 19:22:35 $
 */
 
 /*
@@ -261,7 +261,7 @@ STATIC int set_status(int card, int signal)
     int status;
     int rtn_state;
     double motorData;
-    BOOLEAN plusdir;
+    BOOLEAN plusdir, ls_active = OFF;
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
@@ -342,10 +342,24 @@ STATIC int set_status(int card, int signal)
     recv_mess(card, buff, 1);
     status = atoi(&buff[5]);
 
-    if ((plusdir == ON && (status & 1)) || (plusdir == OFF && (status & 2)))
-	motor_info->status |= RA_OVERTRAVEL;
+    /* Set limit switch error indicators. */
+    if (status & 1)
+    {
+	motor_info->status |= RA_PLUS_LS;
+	if (plusdir == ON)
+	    ls_active = ON;
+    }
     else
-	motor_info->status &= ~RA_OVERTRAVEL;
+	motor_info->status &= ~RA_PLUS_LS;
+
+    if (status & 2)
+    {
+	motor_info->status |= RA_MINUS_LS;
+	if (plusdir == OFF)
+	    ls_active = ON;
+    }
+    else
+	motor_info->status &= ~RA_MINUS_LS;
 
     send_mess(card, "] 1", NULL);
     recv_mess(card, buff, 1);
@@ -384,12 +398,12 @@ STATIC int set_status(int card, int signal)
     if (!(motor_info->status & RA_DIRECTION))
 	motor_info->velocity *= -1;
 
-    rtn_state = (!motor_info->no_motion_count ||
-		 (motor_info->status & (RA_OVERTRAVEL | RA_DONE | RA_PROBLEM))) ? 1 : 0;
+    rtn_state = (!motor_info->no_motion_count || ls_active == ON ||
+     (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || motor_info->status & RA_OVERTRAVEL) &&
-	 nodeptr != 0 && nodeptr->postmsgptr != 0)
+    if ((motor_info->status & RA_DONE || ls_active == ON) && nodeptr != 0 &&
+	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
 	send_mess(card, buff, NULL);

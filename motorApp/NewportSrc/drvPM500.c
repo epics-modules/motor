@@ -238,6 +238,7 @@ STATIC int set_status(int card, int signal)
 	response[BUFF_SIZE];
     int status, rtn_state = 0;
     double motorData;
+    BOOLEAN ls_active;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
@@ -296,16 +297,25 @@ STATIC int set_status(int card, int signal)
     else
         motor_info->status &= ~RA_PROBLEM;
 
-    motor_info->status &= ~RA_OVERTRAVEL;
-    motor_info->status |= RA_DIRECTION;
+    if (dir_char == '+')
+	motor_info->status |= RA_DIRECTION;
+    else
+	motor_info->status &= ~RA_DIRECTION;
+    
     if (status_char == 'L')
     {
-	motor_info->status |= RA_OVERTRAVEL;
+	ls_active = ON;
 	if (dir_char == '+')
-	    motor_info->status |= RA_DIRECTION;
+	    motor_info->status |= RA_PLUS_LS;
 	else
-	    motor_info->status &= ~RA_DIRECTION;
-    }    
+	    motor_info->status |= RA_MINUS_LS;
+    }
+    else
+    {
+	ls_active = OFF;
+	motor_info->status &= ~RA_PLUS_LS;
+	motor_info->status &= ~RA_MINUS_LS;
+    }
 
     motor_info->status &= ~RA_HOME;
 
@@ -345,12 +355,12 @@ STATIC int set_status(int card, int signal)
     if (!(motor_info->status & RA_DIRECTION))
 	motor_info->velocity *= -1;
 
-    rtn_state = (!motor_info->no_motion_count ||
-		 (motor_info->status & (RA_OVERTRAVEL | RA_DONE | RA_PROBLEM))) ? 1 : 0;
+    rtn_state = (!motor_info->no_motion_count || ls_active == ON ||
+		 (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || motor_info->status & RA_OVERTRAVEL) &&
-	 nodeptr != 0 && nodeptr->postmsgptr != 0)
+    if ((motor_info->status & RA_DONE || ls_active == ON) && nodeptr != 0 &&
+	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
 	strcat(buff, "\r");

@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.c
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:50:31 $
+Last Modified:	$Date: 2002-07-05 19:27:22 $
 */
 
 /*
@@ -251,6 +251,7 @@ STATIC int set_status(int card, int signal)
     MOTOR_STATUS mstat;
     int rtn_state, charcnt;
     double motorData;
+    BOOLEAN plusdir, ls_active = OFF;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
@@ -289,6 +290,8 @@ STATIC int set_status(int card, int signal)
     else
 	motor_info->status |= RA_DIRECTION;
 
+    plusdir = (motor_info->status & RA_DIRECTION) ? ON : OFF;
+
     if (mstat.Bits.inmotion == OFF)
     {
 	motor_info->status |= RA_DONE;
@@ -307,30 +310,25 @@ STATIC int set_status(int card, int signal)
     else
 	motor_info->status &= ~RA_DONE;
 
-    /* Set Travel limit status bit. */
-    if (mstat.Bits.inmotion == OFF)
-    {
-	if (mstat.Bits.plustTL == OFF && mstat.Bits.minusTL == OFF)
-	    motor_info->status &= ~RA_OVERTRAVEL;
-	else
-	{
-	    motor_info->status |= RA_OVERTRAVEL;
-	    /* Until status is modified to distinguish +/- limits;
-	     * Set RA_DIRECTION to match travel limit switch. */
-	    if (mstat.Bits.plustTL != OFF)
-		motor_info->status |= RA_DIRECTION;
-	    else
-		motor_info->status &= ~RA_DIRECTION;
-	}
-    }
+    /* Set Travel limit switch status bits. */
+    if (mstat.Bits.plustTL == OFF)
+	motor_info->status &= ~RA_PLUS_LS;
     else
     {
-	if ((mstat.Bits.plustTL != OFF && mstat.Bits.direction != OFF) ||
-	    (mstat.Bits.minusTL != OFF && mstat.Bits.direction == OFF))
-	    motor_info->status |= RA_OVERTRAVEL;
-	else
-	    motor_info->status &= ~RA_OVERTRAVEL;
+	motor_info->status |= RA_PLUS_LS;
+	if (plusdir == ON)
+	    ls_active = ON;
     }
+
+    if (mstat.Bits.minusTL == OFF)
+	motor_info->status &= ~RA_MINUS_LS;
+    else
+    {
+	motor_info->status |= RA_MINUS_LS;
+	if (plusdir == OFF)
+	    ls_active = ON;
+    }
+
 
     if (mstat.Bits.homels == OFF)
 	motor_info->status &= ~RA_HOME;
@@ -399,12 +397,12 @@ STATIC int set_status(int card, int signal)
     if (!(motor_info->status & RA_DIRECTION))
 	motor_info->velocity *= -1;
 
-    rtn_state = (!motor_info->no_motion_count ||
-		 (motor_info->status & (RA_OVERTRAVEL | RA_DONE | RA_PROBLEM))) ? 1 : 0;
+    rtn_state = (!motor_info->no_motion_count || ls_active == ON ||
+		 (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || motor_info->status & RA_OVERTRAVEL) &&
-	 nodeptr != 0 && nodeptr->postmsgptr != 0)
+    if ((motor_info->status & RA_DONE || ls_active == ON) && nodeptr != 0 &&
+	nodeptr->postmsgptr != 0)
     {
 	strcpy(outbuff, nodeptr->postmsgptr);
 	send_mess(card, outbuff, NULL);
