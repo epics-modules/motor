@@ -2,9 +2,9 @@
 FILENAME...	devSoft.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:53:10 $
+Last Modified:	$Date: 2004-01-22 22:22:04 $
 */
 
 /*
@@ -130,7 +130,7 @@ STATIC RTN_STATUS end(struct motorRecord *mr)
 STATIC RTN_STATUS build(motor_cmnd command, double *parms, struct motorRecord *mr)
 {
     const short int stop = 1;
-    long int status;
+    long int status = 0;
 
     switch (command)
     {
