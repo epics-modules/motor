@@ -1,11 +1,11 @@
 /*
 FILENAME...	drvIM483.h
 USAGE... This file contains driver "include" information that is specific to
-	Intelligent Motion Systems, Inc. IM483(I/IE).
+	Intelligent Motion Systems, Inc. IM483(I/IE) and MDrive controllers.
 
-Version:	$Revision: 1.6 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:28:30 $
+Version:	$Revision: 1.7 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2005-03-18 22:26:33 $
 */
 
 /*
@@ -39,6 +39,7 @@ Last Modified:	$Date: 2004-08-17 21:28:30 $
  * -----------------
  * .01	02/10/2000 rls copied from drvMM4000.h
  * .02  07/01/2004 rls Converted from MPF to asyn.
+ * .03  03/18/2005 rls Added MDrive input configuration structure.
  */
 
 #ifndef	INCdrvIM483h
@@ -50,13 +51,22 @@ Last Modified:	$Date: 2004-08-17 21:28:30 $
 
 #define COMM_TIMEOUT 2 /* Timeout in seconds */
 
+/* MDrive input configuration - 0 indicates unassigned. */
+typedef struct inputc
+{
+    epicsUInt8 plusLS;	/* Input # of + limit switch. */
+    epicsUInt8 minusLS;	/* Input # of - limit switch. */
+    epicsUInt8 homeLS;	/* Input # of home switch. */
+} input_config;
 
-/* IM483 specific data is stored in this structure. */
+
+/* IMS specific data is stored in this structure. */
 struct IM483controller
 {
     asynUser *pasynUser;  	/* For RS-232 */
     char asyn_port[80];     	/* asyn port name */
     CommStatus status;		/* Controller communication status. */
+    input_config *inconfig; 	/* Discrete input configuration - MDrive only. */
 };
 
 /* Function prototypes. */
