@@ -2,9 +2,9 @@
 FILENAME...	devOms.c
 USAGE... Device level support for OMS VME8 and VME44 models.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:00 $
+Last Modified:	$Date: 2000-07-14 20:19:08 $
 */
 
 /*
@@ -112,7 +112,7 @@ STATIC long oms_start_trans(struct motorRecord *mr)
     struct motor_trans *trans;
     long rtnval;
 
-    rtnval = motor_start_trans_com(mr, oms_cards, ADDRESS);
+    rtnval = motor_start_trans_com(mr, oms_cards);
     /* Initialize a STOP_AXIS command termination string pointer. */
     trans = (struct motor_trans *) mr->dpvt;
     trans->motor_call.termstring = " ID";
@@ -127,6 +127,6 @@ STATIC long oms_end_trans(struct motorRecord *mr)
 	return(ERROR);
     }
     else
-	return(motor_end_trans_com(mr, &oms_access, "\r"));
+	return(motor_end_trans_com(mr, &oms_access));
 }
 
