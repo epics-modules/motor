@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.12 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:28:21 $
+Version:	$Revision: 1.13 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-21 14:48:33 $
 */
 
 /*
@@ -54,6 +54,7 @@ Last Modified:	$Date: 2004-08-17 21:28:21 $
  * .09 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .10 07/09/04 rls removed unused <driver>Setup() argument.
  * .11 07/28/04 rls "epicsExport" debug variable.
+ * .12 09/21/04 rls support for 32axes/controller.
  */
 
 
@@ -114,7 +115,7 @@ volatile double drvMM4000ReadbackDelay = 0.;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int card, char const *com, char c);
+static RTN_STATUS send_mess(int, char const *, char *name);
 static void start_status(int card);
 static int set_status(int card, int signal);
 static long report(int level);
@@ -456,7 +457,7 @@ exit:
 /* send a message to the MM4000 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
@@ -478,9 +479,9 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 	return(ERROR);
     }
 
-    if (inchar != (char) NULL)
+    if (name != NULL)
     {
-	errlogPrintf("drvMM4000.c:send_mess() - invalid argument = %c\n", inchar);
+	errlogPrintf("drvMM4000.c:send_mess() - invalid argument = %s\n", name);
 	return(ERROR);
     }
 

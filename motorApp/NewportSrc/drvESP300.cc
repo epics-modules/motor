@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.13 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:28:21 $
+Version:	$Revision: 1.14 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-21 14:47:01 $
 */
 
 /*
@@ -41,6 +41,7 @@ Last Modified:	$Date: 2004-08-17 21:28:21 $
  * .04 02-03-04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .05 07/09/04 rls removed unused <driver>Setup() argument.
  * .06 07/28/04 rls "epicsExport" debug variable.
+ * .07 09/21/04 rls support for 32axes/controller.
  */
 
 
@@ -83,9 +84,9 @@ int ESP300_num_cards = 0;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int card, char const *com, char c);
-static int set_status(int card, int signal);
-static long report(int level);
+static RTN_STATUS send_mess(int, char const *, char *);
+static int set_status(int, int);
+static long report(int);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
@@ -346,7 +347,7 @@ exit:
 /* send a message to the ESP300 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
@@ -368,9 +369,9 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 	return(ERROR);
     }
 
-    if (inchar != (char) NULL)
+    if (name != NULL)
     {
-	errlogPrintf("drvESP300:send_mess() - invalid argument = %c\n", inchar);
+	errlogPrintf("drvESP300:send_mess() - invalid argument = %s\n", name);
 	return(ERROR);
     }
 

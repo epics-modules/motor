@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.12 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:28:21 $
+Version:	$Revision: 1.13 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-09-21 14:45:38 $
 */
 
 /*
@@ -55,6 +55,7 @@ Last Modified:	$Date: 2004-08-17 21:28:21 $
  * .09 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
  * .10 07/09/04 rls - removed unused <driver>Setup() argument.
  * .11 07/28/04 rls - "epicsExport" debug variable.
+ * .12 09/21/04 rls - support for 32axes/controller.
  *
  */
 
@@ -112,9 +113,9 @@ int MM3000_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int card, char const *com, char c);
-STATIC int set_status(int card, int signal);
-static long report(int level);
+STATIC RTN_STATUS send_mess(int, char const *, char *);
+STATIC int set_status(int, int);
+static long report(int);
 static long init();
 STATIC int motor_init();
 STATIC void query_done(int, int, struct mess_node *);
@@ -382,7 +383,7 @@ exit:
 /* send a message to the MM3000 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
+STATIC RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
@@ -404,9 +405,9 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 	return(ERROR);
     }
 
-    if (inchar != (char) NULL)
+    if (name != NULL)
     {
-	errlogPrintf("drvMM3000:send_mess() - invalid argument = %c\n", inchar);
+	errlogPrintf("drvMM3000:send_mess() - invalid argument = %s\n", name);
 	return(ERROR);
     }
 
