@@ -1,7 +1,7 @@
 Motor Record R5-3 Release Notice
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base R3.14.4.
+The motor record software in this release is compatible with EPICS base R3.14.5.
 
 
 Contents
@@ -21,11 +21,15 @@ As distributed, this support directory only builds the following:
 
 Optionally, any of the following device/driver libraries can be built by
 uncommenting the appropriate line in ./motorApp/Makefile.
+	Acs - Advanced Control Systems controllers; AcsSrc directory.
 	Ims - Intelligent Motion Systems (IMS) controllers; ImsSrc directory.
 	Newport - Newport controllers; NewportSrc directory.
-	oms - Oregon Micro System (OMS) controllers; OmsSrc directory.
-	Acs - Advanced Control Systems controllers; AcsSrc directory.
 	Mclennan - Mclennan controllers; MclennanSrc directory.
+	MicosLib - Micos controller; MicosSrc directory.
+	MicroMoLib - MicroMo controllers; MicroMoSrc directory.
+	oms - Oregon Micro System (OMS) controllers; OmsSrc directory.
+	PILib - Physik Instrumente (PI) GmbH & Co. controllers; PiSrc
+		directory.
 	softMotor - Soft Channel device support; SoftMotorSrc directory.
 	motorCOM_mpf - Communication interface between motor device/drivers and
 		MPF; CommSrc directory.
@@ -43,14 +47,18 @@ needs.  See individual files for instructions.
 
 		For serial and/or GPIB motor controller communication, ALL of
 		the following support modules are required;
-			- EPICS base R3.14.2 or above.
-			- mpf R2-2 or above.
+			- EPICS base R3.14.5.
+			- mpfosi R2.4.2.
+			- IPAC R2.7a
 			- GPIB is not supported yet.
 		
 		If any example applications (motorExApp) are to be built, then
 			TEMPLATE_TOP and MSITOP must be defined.
 
 	- ./motorApp/Makefile: Define which device/driver modules to build.
+	- ./Makefile: uncomment the following to build example applications.
+		#DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
+		#DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
 	- ./motorExApp/Makefile: Define which, if any, example applications are
 		to be built.
 		
@@ -82,14 +90,7 @@ Known Problems
 	- the controller turns motor power on and the axis moves to the
 	requested position.
 
-3) Under certain circumstances the error message "Motor motion timeout ERROR"
-	can appear erroneously.  This occurs if the user repeats 10 consecutive
-	commands that include a controller update command (i.e., INFO) without
-	any intervening motor moves.  For example, if the UEIP field is
-	toggled between "Yes" and "No" 10 times, the "Motor motion timeout
-	ERROR" message will appear.
-
-4) The OMS VME58 servo motor controller board (i.e., model -8S) is unable to
+3) The OMS VME58 servo motor controller board (i.e., model -8S) is unable to
 	move off an activated limit switch.  Users are advised to avoid this
 	situation.
 
@@ -114,11 +115,99 @@ Modification Log from R5-2 to R5-3
 
 3) The motor record would lock-up when a user tried to move off an activated
 	limit switch with the OMS VME58 servo motor controller board (i.e.,
-	model -8S).  See above "Known Problems" item #4.
+	model -8S).  See above "Known Problems" item #3.
 
 	File modified: - set_status() in drvOms58.cc; had to force CDIR to
 			match the limit switch polarity for record level code
 			to see the limit switch error condition.
+			
+4) Added the STUP field (Status Update) to the motor record that allows
+	continuous status updates.  The STUP field functions as follows;
+
+	- the valid values for STUP are OFF(0), ON(1) and BUSY(2).
+
+	- a Channel Access (CA) client writes ON(1) to the STUP field which
+	causes the motor record to set STUP to BUSY(2) and request a single
+	controller status update.  After the status is updated the record sets
+	STUP to OFF(0).
+
+	- CA client are restricted to writing ON(1) to STUP only when STUP is
+	OFF(0).
+
+	- it is the responsibility of the user to restrict the frequency (and
+	thus the incurred overhead) at which the CA client writes ON(1) to
+	STUP.
+
+	With the STUP field it is possible to have another EPICS record whose
+	SCAN field (e.g.,  Calcout record) is set to periodically scan.  This
+	record could periodically write ON(1) to the motor record's STUP
+	field.  This would result in continuous, periodic status updates.
+	Under certain circumstances, item #2 under "Known Problems" will occur
+	with the use of STUP.  This will be fixed in a later release.
+
+	Files modified: - MotorSrc/motorRecord.dbd
+			- MotorSrc/motorRecord.cc
+
+5) Eliminated the erroneous "Motor motion timeout ERROR" that would occur if
+	the user repeats 10 consecutive commands that include a controller
+	update command (i.e., INFO) without any intervening motor moves.
+	Modified all drivers to suspend incrementing the "no_motion_count" when
+	the motor is not moving.
+
+	Files modified: - set_status() in all drivers.
+
+6) PID parameters (i.e., PCOF, ICOF and DCOF fields) were not initialized at
+	boot-up.  With this release, if the GAIN_SUPPORT bit in the MSTA is
+	true, each nonzero, PID parameter will be initialized.  For backwards
+	compatibility, zero valued PID parameters will not be initialized.
+
+	File modified:    motor_init_record_com() in motordevCom.cc
+
+7) A bug was introduced when item #2, under R5.1 was fixed. This error
+	occurred when the SET/USE field was in the SET mode and the FOFF field
+	was in the FROZEN mode.  Under these conditions, if the user entered
+	a new RVAL, the record ignored every other new RVAL; with every other
+	new DVAL that the user entered, RVAL was not updated.  VAL always
+	worked.
+
+	File modified:	- load_pos() in motorRecord.c modified so that LVAL
+				is updated when FOFF is in the FROZEN mode.
+
+8) Item#5 under R5-2 was not fixed.  There was still a problem in the logic
+	that enforced a time delay between UNDEFINED or IMMEDIATE type commands.
+	On OMS VME58 controllers an INFO update after a LOAD_POS command would,
+	intermittently, yield the previous position.
+
+	File modified: process_messages() in motordrvCom.cc modified so that a
+			valid "delay" in process_messages() is limited to,
+			0 <= delay <= (quantum * 2).
+
+9) Previous releases of the motor record forced the sign of ERES to match the
+	sign of MRES.  With this release, ERES and MRES may have different
+	signs.  This allows the user to change the sign of ERES rather than
+	reverse encoder wires when the motor and encoder direction are
+	reversed.  Warning! This does not work with controllers that are doing
+	closed-loop control; e.g., DC motors.  Reference (D/A) and feedback
+	(encoder) signals must have the same polarity for DC motors or the
+	motor will literally run away.
+
+	File modified: do_work() in motorRecord.cc
+
+10) Previous releases of the IMS MDrive device driver did not work.  Thanks to
+	Kevin M. Peterson (UNI-CAT) for identifying and fixing the errors in
+	previous releases.  A README file has been added to the ImsSrc
+	directory that documents how the MDrive must be initialized before
+	using it with this device driver.
+
+	Files modified: - Added README file.
+			- drvMDrive.cc; incorporated Kevin's modifications.
+			- devMDrive.cc; Added encoder support.
+
+11) The following three device drivers have been ported from the R3.13.x
+	compatible version of the motor record:
+        - the Physik Instrumente (PI) GmbH & Co. C-844 motor controller.
+	- Kevin Peterson's support for the MicroMo MVP 2001 B02 controller.
+	- Kurt Goetze's support for the Micos MoCo dc controller.
 
 
 Modification Log from R5-1 to R5-2

@@ -37,9 +37,9 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version 5.2 of the EPICS motor
+<h2>Overview</h2> This documentation describes version 5.3 of the EPICS motor
 record, and related EPICS software required to build and use it.&nbsp; Version
-5.2 of the motor record is compatible with EPICS base R3.14.4 and above.
+5.3 of the motor record is compatible with EPICS base R3.14.4 and above.
 <p>
 The motor record is intended to support motors of all kinds, but currently 
 supports only the following variety of motor controllers (in addition to Soft 
@@ -57,13 +57,22 @@ Channel support):
     Newport models MM3000, MM4000, MM4005, PM500 and ESP300.
   </li>
   <li>
-    Intelligent Motion Systems, Inc. (IMS) model IM483.
+    Intelligent Motion Systems, Inc. (IMS) models IM483 and MDrive.
   </li>
   <li>
     Advanced Control Systems, Corp. model MCB-4B.
   </li>
   <li>
-    Mclennan model PM304 and PM600.<br>
+    Mclennan models PM304 and PM600.
+  </li>
+  <li>
+    Physik Instrumente (PI) GmbH & Co. model C-844.
+  </li>
+  <li>
+    MicroMo model MVP 2001 B02.
+  </li>
+  <li>
+    Micos model MoCo dc controller.
   </li>
 </ul>
 The record maintains two coordinate systems for motor position ("user" and "dial 
@@ -1353,10 +1362,11 @@ below.
     <td>R/W*</td>
     <td>Encoder Step Size (EGU)</td>
     <td>FLOAT</td>
-    <td>Encoder resolution: the distance or angle, in engineering units, associated 
-    with a single encoder step. ERES may be positive or negative; it must have the 
-    same sign as MRES; and it must be nonzero.&nbsp; If the user sets ERES to zero, 
-    the record will overwrite it with MRES.&nbsp;</td>
+    <TD>
+      Encoder resolution: the distance or angle, in engineering units, associated 
+      with a single encoder step. ERES may be positive or negative. If the user sets 
+      ERES to zero, the record will overwrite it with MRES.
+    </TD>
   </tr>
   <tr valign="top">
     <td>RRES</td>
@@ -2413,6 +2423,38 @@ below.
     <td>Raw Velocity</td>
     <td>LONG</td>
     <td>Speed in steps per second that the motor actually is moving.</td>
+  </tr>
+  <tr valign="top">
+    <td>STUP</td>
+    <td>R/W</td>
+    <td>Status Update</td>
+    <td>RECCHOICE</td>
+    <td>
+      The STUP field functions as follows;
+      <ul>
+	<LI>
+	  Valid values for STUP are OFF(0), ON(1) and BUSY(2).
+	</LI>
+	<LI>
+	  A Channel Access (CA) client writes ON(1) to the STUP field which causes the 
+	  motor record to set STUP to BUSY(2) and request a single controller status 
+	  update.  After the status is updated the record sets STUP to OFF(0).
+	</LI>
+	<LI>
+	  CA clients are restricted to writing ON(1) to STUP only when STUP is OFF(0).
+	</LI>
+    
+	<LI>
+	  It is the responsibility of the user to restrict the frequency (and thus the 
+	  incurred overhead) at which the CA client writes ON(1) to STUP.
+	</LI>
+      </UL>
+      <P>
+      With the STUP field it is possible to have another EPICS record periodically 
+      write ON(1) to the motor record's STUP field.  This would result in continuous, 
+      periodic status updates.
+      </P>
+    </td>
   </tr>
 
   </tbody>
