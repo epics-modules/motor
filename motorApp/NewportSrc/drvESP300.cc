@@ -2,14 +2,14 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-28 14:56:11 $
+Last Modified:	$Date: 2003-11-04 15:50:57 $
 */
 
 /*
- *      Original Author: Mark Rivers
- *      Date: 10/20/97
+ *      Original Author: Ron Sluiter
+ *      Date: 02/19/03
  *	Current Author: Ron Sluiter
  *
  *      Experimental Physics and Industrial Control System (EPICS)
@@ -35,8 +35,9 @@ Last Modified:	$Date: 2003-05-28 14:56:11 $
  *
  * Modification Log:
  * -----------------
- * .01 19-02-03 rls copied from drvMM3000
+ * .01 02-19-03 rls copied from drvMM3000
  * .02 05-23-03	rls Converted to R3.14.x.
+ * .03 10-28-03 initialize "drive_resolution".
  */
 
 
@@ -48,8 +49,6 @@ Last Modified:	$Date: 2003-05-28 14:56:11 $
 #include "drvMMCom.h"
 #include "serialIO.h"
 #include "epicsExport.h"
-
-#define STATIC static
 
 #define READ_POSITION   "%.2dTP"
 #define STOP_AXIS	"%.2dST"
@@ -86,13 +85,13 @@ volatile double drvESP300ReadbackDelay = 0.;
 
 
 /*----------------functions-----------------*/
-STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int card, char const *com, char c);
-STATIC int set_status(int card, int signal);
+static int recv_mess(int, char *, int);
+static RTN_STATUS send_mess(int card, char const *com, char c);
+static int set_status(int card, int signal);
 static long report(int level);
 static long init();
-STATIC int motor_init();
-STATIC void query_done(int, int, struct mess_node *);
+static int motor_init();
+static void query_done(int, int, struct mess_node *);
 
 /*----------------functions-----------------*/
 
@@ -134,7 +133,7 @@ struct
 
 epicsExportAddress(drvet, drvESP300);
 
-STATIC struct thread_args targs = {SCAN_RATE, &ESP300_access};
+static struct thread_args targs = {SCAN_RATE, &ESP300_access};
 
 /*********************************************************
  * Print out driver status report
@@ -200,7 +199,7 @@ static long init()
 }
 
 
-STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
+static void query_done(int card, int axis, struct mess_node *nodeptr)
 {
 }
 
@@ -210,7 +209,7 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
  * set_status()
  ************************************************************/
 
-STATIC int set_status(int card, int signal)
+static int set_status(int card, int signal)
 {
     struct MMcontroller *cntrl;
     struct mess_node *nodeptr;
@@ -253,20 +252,7 @@ STATIC int set_status(int card, int signal)
     
     done = atoi(inbuff) ? true : false;
     if (done == true)
-    {
 	motor_info->status |= RA_DONE;
-/* TEMPORARY FIX, Mark Rivers, 2/1/99. The ESP300 has reported that the
- * motor is done moving, which means that the "jerk time" is done.  However,
- * the axis can still be settling.  For now we put in a delay and poll the
- * motor position again. This is not a good long-term solution.
- */
-	if (motor_info->pid_present == YES && drvESP300ReadbackDelay != 0.)
-	{
-	    epicsThreadSleep(drvESP300ReadbackDelay);
-	    send_mess(card, READ_POSITION, (char) NULL);
-	    recv_mess(card, cntrl->position_string, 1);
-	}
-    }
     else
 	motor_info->status &= ~RA_DONE;
 
@@ -381,7 +367,7 @@ STATIC int set_status(int card, int signal)
 /* send a message to the ESP300 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
@@ -469,7 +455,7 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
  *  NORMAL RETURN.
  */
 
-STATIC int recv_mess(int card, char *com, int flag)
+static int recv_mess(int card, char *com, int flag)
 {
     struct MMcontroller *cntrl;
     int timeout = 0;
@@ -605,7 +591,7 @@ ESP300Config(int card,	/* card being configured */
 /* device support.                                   */
 /* motor_init()			                     */
 /*****************************************************/
-STATIC int motor_init()
+static int motor_init()
 {
     struct controller *brdptr;
     struct MMcontroller *cntrl;
@@ -677,7 +663,6 @@ STATIC int motor_init()
 		total_axis = 4;
 	    }
 
-	    /* The return string will tell us how many axes this controller has */
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
 		sprintf(buff, STOP_AXIS, motor_index + 1);	/* Stop motor */
@@ -692,6 +677,12 @@ STATIC int motor_init()
 	    {
 		struct mess_info *motor_info = &brdptr->motor_info[motor_index];
 
+		/* Set axis resolution. */
+		sprintf(buff, "%.2dSU?", motor_index + 1);
+		send_mess(card_index, buff, NULL);
+		recv_mess(card_index, buff, 1);
+		cntrl->drive_resolution[motor_index] = atof(&buff[0]);
+		
 		motor_info->status = 0;
 		motor_info->no_motion_count = 0;
 		motor_info->encoder_position = 0;
