@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 16:13:56 $
+Last Modified:	$Date: 2000-07-17 16:09:38 $
 */
 
 /*
@@ -101,12 +101,12 @@ extern "C" {
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
 
 /* jps: INFO messages - add RV and move QA to top */
-#define ALL_INFO        "A? QA EA\n"	/* jps: add RV */
-#define AXIS_INFO       "A? QA\n"	/* jps: add RV */
-#define ENCODER_QUERY   "A? EA ID\n"
-#define AXIS_CLEAR      "A? CA\n"	/* Clear done of addressed axis */
-#define DONE_QUERY      "A? RA\n"	/* ?? Is this needed?? */
-#define PID_QUERY	"A? KK2 ID\n"
+#define	ALL_INFO	"QA EA"	/* jps: add RV */
+#define	AXIS_INFO	"QA"		/* jps: add RV */
+#define	ENCODER_QUERY	"EA ID"
+#define	AXIS_CLEAR	"CA"		/* Clear done of addressed axis */
+#define	DONE_QUERY	"RA"		/* ?? Is this needed?? */
+#define	PID_QUERY	"KK2 ID"
 
 
 /*----------------debugging-----------------*/
@@ -137,6 +137,7 @@ STATIC volatile unsigned omsInterruptVector = 0;
 STATIC volatile uint8_t omsInterruptLevel = OMS_INT_LEVEL;
 STATIC volatile int max_io_tries = MAX_COUNT;
 STATIC volatile int motionTO = 10;
+STATIC char oms58_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
 
 /* --- Local data specific to the Oms58 driver. --- */
 STATIC volatile int cmndBuffReadyWait = 4;
@@ -184,7 +185,8 @@ struct driver_table oms58_access =
     set_status,
     query_done,
     start_status,
-    &initialized
+    &initialized,
+    oms58_axis
 };
 
 struct
@@ -234,11 +236,11 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 {
     char buffer[40];
 
-    send_mess(card, DONE_QUERY, oms_trans_axis[axis]);
+    send_mess(card, DONE_QUERY, oms58_axis[axis]);
     recv_mess(card, buffer, 1);
 
     if (nodeptr->status & RA_PROBLEM)
-	send_mess(card, AXIS_STOP, oms_trans_axis[axis]);
+	send_mess(card, AXIS_STOP, oms58_axis[axis]);
 }
 
 
@@ -322,13 +324,13 @@ STATIC int set_status(int card, int signal)
     if (motor_state[card]->motor_info[signal].encoder_present == YES)
     {
 	/* get 4 peices of info from axis */
-	send_mess(card, ALL_INFO, oms_trans_axis[signal]);
+	send_mess(card, ALL_INFO, oms58_axis[signal]);
 	recv_mess(card, q_buf, 2);
     }
     else
     {
 	/* get 2 peices of info from axis */
-	send_mess(card, AXIS_INFO, oms_trans_axis[signal]);
+	send_mess(card, AXIS_INFO, oms58_axis[signal]);
 	recv_mess(card, q_buf, 1);
     }
 
@@ -419,7 +421,7 @@ STATIC int set_status(int card, int signal)
     if (motor_info->no_motion_count > motionTO)
     {
 	motor_info->status |= RA_PROBLEM;
-	send_mess(card, AXIS_STOP, oms_trans_axis[signal]);
+	send_mess(card, AXIS_STOP, oms58_axis[signal]);
 	motor_info->no_motion_count = 0;
 	errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
 	    card, signal);
@@ -465,10 +467,8 @@ STATIC int set_status(int card, int signal)
 	(nodeptr != 0) &&
 	(nodeptr->postmsgptr != 0))
     {
-	strcpy(outbuf, "A? ");
-	strcat(outbuf, nodeptr->postmsgptr);
-	strcat(outbuf, "\n");
-	send_mess(card, outbuf, oms_trans_axis[signal]);
+	strcpy(outbuf, nodeptr->postmsgptr);
+	send_mess(card, outbuf, oms58_axis[signal]);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -520,9 +520,16 @@ STATIC int send_mess(int card, char const *com, char inchar)
 	recv_mess(card, NULL, -1);
     }
 
-    strcpy(outbuf, com);
-    if (inchar != (char) NULL)
-	outbuf[1] = inchar;		/* put in axis */
+
+    if (inchar == NULL)
+	strcpy(outbuf, com);
+    else
+    {
+	strcpy(outbuf, "A? ");
+	outbuf[1] = inchar;
+	strcat(outbuf, com);
+    }
+    strcat(outbuf, "\n");		/* Add the command line terminator. */
 
     Debug(9, "send_mess: ready to send message.\n");
     putIndex = pmotor->outPutIndex;
@@ -939,7 +946,7 @@ STATIC int motor_init()
 	    /* Disable all interrupts */
 	    pmotor->control.cntrlReg = 0;
 
-	    send_mess(card_index, "EF\n", (char) NULL);
+	    send_mess(card_index, "EF", (char) NULL);
 	    send_mess(card_index, ERROR_CLEAR, (char) NULL);
 	    send_mess(card_index, STOP_ALL, (char) NULL);
 
@@ -966,7 +973,7 @@ STATIC int motor_init()
 	    for (total_encoders = total_pidcnt = 0, motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
 	    	/* Test if motor has an encoder. */
-		send_mess(card_index, ENCODER_QUERY, oms_trans_axis[motor_index]);
+		send_mess(card_index, ENCODER_QUERY, oms58_axis[motor_index]);
 		while (!pmotor->control.doneReg)	/* Wait for command to complete. */
 		    oms_nanoSleep(1);
 
@@ -985,7 +992,7 @@ STATIC int motor_init()
 		}
 		
 		/* Test if motor has PID parameters. */
-		send_mess(card_index, PID_QUERY, oms_trans_axis[motor_index]);
+		send_mess(card_index, PID_QUERY, oms58_axis[motor_index]);
 		do	/* Wait for command to complete. */
 		{
 		    taskDelay(1);
@@ -1027,7 +1034,7 @@ STATIC int motor_init()
 
 		set_status(card_index, motor_index);
 
-		send_mess(card_index, DONE_QUERY, oms_trans_axis[motor_index]); /* Is this needed??? */
+		send_mess(card_index, DONE_QUERY, oms58_axis[motor_index]); /* Is this needed??? */
 		recv_mess(card_index, axis_pos, 1);
 	    }
 
