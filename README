@@ -18,13 +18,28 @@ This <supporttop> contains the following motor record related items:
 	- motor record/device/driver level documentation.
 	- motor record release documentation.
 
+As distributed, this support directory only builds the following:
+	- motorLib; Record support and common code for all device/drivers.
 
-Site Specific Motor Record Configuration Options
-================================================
+Optionially, any of the following device/driver libraries can be built by
+uncommenting the appropiate line in ./motorApp/Makefile.
+	newportLib - Newport controllers; NewportSrc directory.
+	omsLib - Oregon Micro System controllers; OmsSrc directory.
+	softMotorLib - Soft Channel device support; SoftMotorSrc directory.
+	motorCOM_hideos - Communication interface between motor device/drivers
+		and Hideos; CommSrc directory.
+	motorCOM_mpf - Communication interface between motor device/drivers and
+		MPF; CommSrc directory.
 
-Motor controller device/driver support that is either unwanted or unused
-throughout a specific site can be eliminated by commenting out the associated
-"DIRS +=" line in the <top>/motorApp/Makefile.
+
+Configuration
+=============
+The following files can be edited to tailor this distribution to site specific
+needs.  See individual files for instructions.
+	- ./config/RELEASE: Define location of external products.
+	- ./motorApp/Makefile: Define which device/driver modules to build.
+	- ./motorApp/CommSrc/Makefile.Vx: Define communication support via
+		Hideos and/or MPF.
 
 
 Known Problems
