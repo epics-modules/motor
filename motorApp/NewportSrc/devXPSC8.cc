@@ -213,6 +213,7 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command, double *parms, struct mo
     control = (struct XPSC8controller *) brdptr->DevicePrivate;
     cntrl = (struct XPSC8axis *)&control->axis[signal];
 
+    cntrl->resolution = mr->mres;    /* Read in the motor resolution */
     resolution = cntrl->resolution;
     steps = resolution * dval;
     
