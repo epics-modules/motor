@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-09-05 22:07:59 $
+Last Modified:	$Date: 2001-10-02 22:52:27 $
 */
 
 /*
@@ -36,6 +36,7 @@ Last Modified:	$Date: 2000-09-05 22:07:59 $
  *
  * Modification Log:
  * -----------------
+ * .01 10-02-01 rls added RETRY to CommStatus enumeration.
  */
 
 
@@ -56,6 +57,7 @@ enum PortType
 enum CommStatus
 {
     NORMAL,
+    RETRY,		/* Communication retry. */
     COMM_ERR		/* Communication timeout error. */
 };
 
