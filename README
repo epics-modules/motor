@@ -1,8 +1,7 @@
-Motor Record R4-5 Release Notice
+Motor Record R5-1 Release Notice
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base
-R3.13.3, R3.13.4 and R3.13.5.
+The motor record software in this release is compatible with EPICS base R3.14.1.
 
 
 Contents
@@ -93,6 +92,94 @@ Known Problems
 	toggled between "Yes" and "No" 10 times, the "Motor motion timeout
 	ERROR" message will appear.
 
+
+Modification Log from R4-5 to R5-1
+==================================
+
+1) The following scenario would put the motor record into an invalid state.
+	A new target position (i.e., VAL/DVAL/RVAL) is written to the motor
+	record under the following conditions,
+
+	- motion is in progress (i.e., DMOV is false).
+	- the new target position is different from the actual position by less
+	than the retry deadband (|DIFF| < RDBD).
+	- backlash correction is enabled (i.e., BDST is non-zero) and the new
+	move is NOT in the "preferred direction" (preferred direction is the
+	direction in which the motor moves during the backlash-takeout part of
+	a motor move).
+
+	File modified: do_work() in motorRecord.c.  Update last target
+			positions and set DMOV TRUE, only if the motion in
+			progress indicator (MIP) is DONE.
+
+2) A bug was introduced in R4-5 when backlash correction was changed per item
+	#11 below.  The error occurred when a new target position was issued
+	while the motor was moving.  The motor would move to the new target
+	position at the backlash velocity rather than the slew velocity.
+	This bug was discovered by Kevin M. Peterson.
+	
+	File modified: process() in motorRecord.c.  Before calling
+			postProcess() check if the target position has changed.
+
+3) A conflict between the requirements specified in item #2 below and the goal
+	of having the same record level functionality for all device drivers,
+	including Soft Channel device support, was found by Tim Graber.
+
+	A problem occurred with, for example, the SoftMotorEx.db that is
+	distributed with the motor record, when backlash was enabled in the
+	"hard" motor.  The result was that the "soft" motor would interpret
+	the "hard" motor's backlash correction as the motor going in the wrong
+	direction, and stop the "hard" motor from completing the backlash
+	correction.
+
+	With this release, the requirements on how the motor record processes a
+	new target position while the motor is in motion have been modified
+	based on a new field; New Target Monitor (NTM).
+
+	Case #1: The motor record is given a new position, which is in the
+	opposite direction from the current motor motion.
+	If NTM is YES, the motor is immediately stopped and given a motion
+	command to the new position.
+	If NTM is NO, the motor completes the previous move before it is given
+	a motion command to the new position.
+	
+	Case #2: The motor record is given a new position, which is in the
+	same direction as the current motor motion, but the new position is
+	closer to the motor's current position than the original target
+	position.
+	If NTM is YES, the motor is stopped after it has gone past the new
+	position; then a command is given to return to the new position.
+	If NTM is NO, the motor completes the previous move before it is given
+	a motion command to the new position.
+
+	Case #3: The motor record is given a new position, which is in the
+	same direction as the current motor motion, but the new position is
+	further from the motor's current position than the original position.
+	After the motor reaches the original target position and stops, a
+	command is given to the new target position.  This case is independent
+	of NTM.
+
+	Files modified: - NTM field added to motorRecord.dbd
+			- process() in motorRecord.c checks NTM field before
+				sending stop motor command.
+
+4) A Soft Channel device support design limitation was discovered by Tim
+	Mooney.  The problem is a result of the modifications made with R4-5,
+	item #5 below, where the "soft" motor synchronizes it's target position
+	(i.e., VAL/DVAL/RVAL) with it's readback/raw position (RBV/DRBV/RRBV).
+	
+	Given an application where there are two or more "soft" motors driving
+	the system (e.g., slit), when one soft motor is moved, the other soft
+	motor "sees" it's readback changing and synchronizes it's target position
+	with it's readback position at the end of the move, thereby losing it's
+	target position.
+	
+	With this release, the LOCK field has been added to prevent
+	synchronization due to the readback changing.
+	
+	Files modified: - LOCK field added to motorRecord.dbd
+			- soft_dinp_func() in devSoft.c checks LOCK field
+				before putting dinp_value into HARDMOVE state.
 
 Modification Log from R4-4 to R4-5
 ==================================
