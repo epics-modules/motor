@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:40:27 $
+Last Modified:	$Date: 2004-02-03 19:59:21 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -39,6 +39,7 @@ Last Modified:	$Date: 2003-12-12 21:40:27 $
  * .02 06-02-00	rls integrated into standard motor record
  * .03 10/02/01 rls allow one retry after a communication error.
  * .04 05-23-03	rls Converted to R3.14.x.
+ * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 
@@ -306,7 +307,10 @@ STATIC int set_status(int card, int signal)
      */
 
     if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	motor_info->position = NINT(motorData);

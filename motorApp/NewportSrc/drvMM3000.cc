@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:40:24 $
+Last Modified:	$Date: 2004-02-03 19:59:21 $
 */
 
 /*
@@ -52,6 +52,8 @@ Last Modified:	$Date: 2003-12-12 21:40:24 $
  * .07 05-22-03	rls - Converted to R3.14.2.
  * .08 10/23/03 rls - recv_mess() eats the controller error response, outputs
  *			an error message and retries.
+ * .09 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
+ *
  */
 
 #include <string.h>
@@ -345,7 +347,10 @@ STATIC int set_status(int card, int signal)
     motorData = atof(cptr);
 
     if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	motor_info->position = (epicsInt32) motorData;

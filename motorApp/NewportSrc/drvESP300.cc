@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:40:23 $
+Last Modified:	$Date: 2004-02-03 19:59:22 $
 */
 
 /*
@@ -37,7 +37,8 @@ Last Modified:	$Date: 2003-12-12 21:40:23 $
  * -----------------
  * .01 02-19-03 rls copied from drvMM3000
  * .02 05-23-03	rls Converted to R3.14.x.
- * .03 10-28-03 initialize "drive_resolution".
+ * .03 10-28-03 rls initialize "drive_resolution".
+ * .04 02-03-04 rls Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 
@@ -259,7 +260,10 @@ static int set_status(int card, int signal)
     motorData = atof(inbuff) / cntrl->drive_resolution[signal];
 
     if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	epicsInt32 newposition;

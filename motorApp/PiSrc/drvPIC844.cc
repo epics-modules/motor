@@ -3,9 +3,9 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-01-13 21:01:38 $
+Last Modified:	$Date: 2004-02-03 20:00:00 $
 */
 
 /*
@@ -36,6 +36,7 @@ Last Modified:	$Date: 2004-01-13 21:01:38 $
  * Modification Log:
  * -----------------
  * .01 12/17/03 rls - copied from drvIM483PL.cc
+ * .02 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 /*
@@ -297,7 +298,10 @@ static int set_status(int card, int signal)
     motorData = atof(buff);
 
     if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	epicsInt32 newposition;

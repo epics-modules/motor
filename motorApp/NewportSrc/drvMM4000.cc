@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:40:26 $
+Last Modified:	$Date: 2004-02-03 19:59:21 $
 */
 
 /*
@@ -51,6 +51,7 @@ Last Modified:	$Date: 2003-12-12 21:40:26 $
  *                  non-zero.  This is required to work around a bug in the firmware
  *                  (versions 2.40 and 2.44) that the motor is reported as done moving
  *                  on the first poll after a move is begun with the motor power off.
+ * .09 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 
@@ -423,7 +424,10 @@ STATIC int set_status(int card, int signal)
     motorData = atof(p+3) / cntrl->drive_resolution[signal];
 
     if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	motor_info->position = NINT(motorData);
