@@ -1,0 +1,18 @@
+PI C-844
+========
+
+Serial communication using the GreensSpring XM Octal I/O.
+---------------------------------------------------------
+
+The GreensSpring XM Octal I/O has a 16 pin jumper block for each serial port.
+Assume (the manual does not define this) that the jumper pins are numbered
+from, top to bottom, and from left to right; i.e.,
+    1  2  3  4
+    5  6  7  8
+    9 10 11 12
+   13 14 15 16
+   
+Then the "Default jumbering ..." depicted in Fig. 2 of the GreensSpring XM
+Octal I/O manual is jumpered as follows; 1-5, 2-6, 9-13, 10-14.
+
+The correct jumpering for the C-844 is; 1-2, 5-6, 13-16.
