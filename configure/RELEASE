@@ -27,3 +27,6 @@ EPICS_BASE=$(SUPPORT)/../base-3.14.6
 # The following must be defined for the MXmotor device driver.
 #!MX=$(SUPPORT)/mx/mx
 
+# The following is needed for the various *.substitutions files in iocBoot.
+MOTOR=$(TOP)
+
