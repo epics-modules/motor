@@ -1,10 +1,14 @@
 include "base.dbd"
 include "motorRecord.dbd"
-include "asyn.dbd"
-include "devAcsMotor.dbd"
+include "drvAsynSerialPort.dbd"
+#include "devAcsMotor.dbd"
 #include "devImsMotor.dbd"
+#include "devMclennanMotor.dbd"
+#include "devMicos.dbd"
+#include "devMicroMo.dbd"
 include "devNewport.dbd"
 #include "devPIMotor.dbd"
+#include "devSoftMotor.dbd"
 # Only for IPAC R2.7 and above.
 driver(drvIpac)
 registrar(vipc616Registrar)
