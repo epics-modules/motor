@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 18:44:33 $
+Last Modified:	$Date: 2003-05-28 14:57:08 $
 */
 
 /*
@@ -491,7 +491,7 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 	;
 //	gpibIOSend(cntrl->gpibInfo, local_buff, strlen(local_buff), GPIB_TIMEOUT);
     else
-	serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
+	cntrl->serialInfo->serialIOSend(local_buff, strlen(local_buff), SERIAL_TIMEOUT);
 
     return(OK);
 }
@@ -535,7 +535,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 	case RS232_PORT:
 	    if (flag != FLUSH)
 		timeout	= SERIAL_TIMEOUT;
-	    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, (char *) "\r", timeout);
+	    len = cntrl->serialInfo->serialIORecv(com, BUFF_SIZE, (char *) "\r", timeout);
 	    break;
     }
 
@@ -647,7 +647,7 @@ STATIC int motor_init()
     char *tok_save, *pos_ptr;
     int total_axis = 0;
     int status, model_num, digits;
-    bool errind;
+    bool success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
 
@@ -666,7 +666,7 @@ STATIC int motor_init()
 	cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	errind = false;
+	success_rtn = false;
 	switch (cntrl->port_type)
 	{
 /*
@@ -674,18 +674,16 @@ STATIC int motor_init()
 		cntrl->gpibInfo = gpibIOInit(cntrl->gpib_link,
 					     cntrl->gpib_address);
 		if (cntrl->gpibInfo == NULL)
-		    errind = true;
+		    success_rtn = true;
 		break;
 */
 	    case RS232_PORT:
-		cntrl->serialInfo = serialIOInit(cntrl->serial_card,
-						 cntrl->serial_task);
-		if (cntrl->serialInfo == NULL)
-		    errind = true;
+		cntrl->serialInfo = new serialIO(cntrl->serial_card,
+					     cntrl->serial_task, &success_rtn);
 		break;
 	}
 
-	if (errind == false)
+	if (success_rtn == true)
 	{
 	    int retry = 0;
 
@@ -704,7 +702,7 @@ STATIC int motor_init()
 	    } while(status == 0 && retry < 3);
 	}
 
-	if (errind == false && status > 0)
+	if (success_rtn == true && status > 0)
 	{
 	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;
