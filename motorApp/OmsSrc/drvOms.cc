@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.17 $
+Version:	$Revision: 1.18 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-02 19:20:23 $
+Last Modified:	$Date: 2004-07-16 19:42:37 $
 */
 
 /*
@@ -37,7 +37,7 @@ Last Modified:	$Date: 2004-03-02 19:20:23 $
  *	- VME8     ver 1.97-8
  *		   ver 2.16-8
  *	- VS4-040  ver 1.04
- *	- VX2-006  ver 1.04
+ *	- VX2-006  ver 1.05 (1.04 has control register initialization problem)
  *
  * Modification Log:
  * -----------------
@@ -951,7 +951,6 @@ static void motorIsrDisable(int card)
 /* areas. omsSetup()                                */
 /*****************************************************/
 int omsSetup(int num_cards,	/* maximum number of cards in rack */
-	     int num_channels,	/* Not used - Channels per card (4 or 8) */
 	     void *addrs,	/* Base Address(0x0-0xb000 on 4K boundary) */
 	     unsigned vector,	/* noninterrupting(0), valid vectors(64-255) */
 	     int int_level,	/* interrupt level (1-6) */
