@@ -3,9 +3,9 @@ FILENAME...	drvIM483.h
 USAGE... This file contains driver "include" information that is specific to
 	Intelligent Motion Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-16 19:22:11 $
+Last Modified:	$Date: 2003-05-23 19:31:43 $
 */
 
 /*
@@ -65,8 +65,10 @@ struct IM483controller
 /* Function prototypes. */
 extern RTN_STATUS IM483SMSetup(int, int, int);
 extern RTN_STATUS IM483PLSetup(int, int, int);
+extern RTN_STATUS  MDriveSetup(int, int, int);
 extern RTN_STATUS IM483SMConfig(int, int, int, const char *);
 extern RTN_STATUS IM483PLConfig(int, int, int, const char *);
+extern RTN_STATUS  MDriveConfig(int, int, int, const char *);
 
 #endif	/* INCdrvIM483h */
 

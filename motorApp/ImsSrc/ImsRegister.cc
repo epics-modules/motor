@@ -2,9 +2,9 @@
 FILENAME...	ImsRegister.cc
 USAGE...	Register IMS motor device driver shell commands.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 16:39:58 $
+Last Modified:	$Date: 2003-05-23 19:34:13 $
 */
 
 /*****************************************************************
@@ -62,6 +62,10 @@ static void setupPLCallFunc(const iocshArgBuf *args)
 {
     IM483PLSetup(args[0].ival, args[1].ival, args[2].ival);
 }
+static void setupMDriveCallFunc(const iocshArgBuf *args)
+{
+    MDriveSetup(args[0].ival, args[1].ival, args[2].ival);
+}
 
 
 static void configSMCallFunc(const iocshArgBuf *args)
@@ -72,17 +76,21 @@ static void configPLCallFunc(const iocshArgBuf *args)
 {
     IM483PLConfig(args[0].ival, args[1].ival, args[2].ival, args[3].sval);
 }
+static void configMDriveCallFunc(const iocshArgBuf *args)
+{
+    MDriveConfig(args[0].ival, args[1].ival, args[2].ival, args[3].sval);
+}
 
 
 static void IMSmotorRegister(void)
 {
     iocshRegister(&setupIM483SM, setupSMCallFunc);
     iocshRegister(&setupIM483PL, setupPLCallFunc);
-    iocshRegister(&setupMDrive,  setupPLCallFunc);
+    iocshRegister(&setupMDrive,  setupMDriveCallFunc);
 
     iocshRegister(&configIM483SM, configSMCallFunc);
     iocshRegister(&configIM483PL, configPLCallFunc);
-    iocshRegister(&configMDrive,  configPLCallFunc);
+    iocshRegister(&configMDrive,  configMDriveCallFunc);
 }
 
 epicsExportRegistrar(IMSmotorRegister);
