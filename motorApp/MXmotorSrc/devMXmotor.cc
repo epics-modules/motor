@@ -2,9 +2,9 @@
 FILENAME...	devMXmotor.cc
 USAGE...	Motor record device level support for MX device driver.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-03-04 15:26:47 $
+Last Modified:	$Date: 2003-03-12 21:07:46 $
 */
 
 /*
@@ -121,7 +121,7 @@ static long MXmotor_init_record(void *arg)
     rtnval = motor_init_record_com(mr, MXmotor_num_cards, &MXmotor_access, MXmotor_cards);
     
     trans = (struct motor_trans *) mr->dpvt;
-    brdptr = (*trans->tabptr->card_array)[mr->card];
+    brdptr = (*trans->tabptr->card_array)[mr->out.value.vmeio.card];
     if (brdptr == NULL)
 	return(rtnval = ERROR);
     cntrl = (struct MXcontroller *) brdptr->DevicePrivate;
