@@ -4,11 +4,31 @@ include $(TOP)/config/CONFIG_APP
 #----------------------------------------
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 
+# The following is required for device drivers that require serial
+# or GPIB communication support via HIDEOS.  In addition, the
+# HIDEOS directory must be defined in the config/RELEASE file.
+USR_CXXFLAGS += -DOS_EQ_VXWORKS
+SRCS.c += ../gpibIO.c
+SRCS.cc += ../serialIO.cc
+HIDEOSLIBOBJS = gpibIO.o serialIO.o
+
+# The following is required for device drivers that require serial
+# or GPIB communication support via MPF.  In addition, the
+# MPF directory must be defined in the config/RELEASE file.
+MPFLIBOBJS = serialIOMPF.o
+SRCS.cc += ../serialIOMPF.cc
+
 # The following is required for all motor record configurations.
 SRCS.c += ../motorRecord.c ../motordevCom.c ../motordrvCom.c
-LIBOBJS = motorRecord.o motordevCom.o motordrvCom.o
+MOTORLIBOBJS = motorRecord.o motordevCom.o motordrvCom.o
 
-LIBNAME = MotorLib
+motorLib_hideos: $(MOTORLIBOBJS) $(HIDEOSLIBOBJS)
+	$(LINK.c) $@ $(MOTORLIBOBJS) $(HIDEOSLIBOBJS)
+
+motorLib_mpf: $(MOTORLIBOBJS) $(MPFLIBOBJS)
+	$(LINK.c) $@ $(MOTORLIBOBJS) $(MPFLIBOBJS)
+
+INSTALLS += motorLib_hideos motorLib_mpf
 
 #Note that the command line that builds the
 #library $(LIBNAME) may be HUGE (>3kB)
