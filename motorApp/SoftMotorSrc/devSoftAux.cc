@@ -2,9 +2,9 @@
 FILENAME...	devSoftAux.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.6 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2003-06-30 04:57:09 $
+Version:	$Revision: 1.7 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2004-12-20 21:26:52 $
 */
 
 /*
@@ -26,6 +26,8 @@ Last Modified:	$Date: 2003-06-30 04:57:09 $
  * Modification Log:
  * -----------------
  * .01 06-16-03 rls Convert to R3.14.x.
+ * .02 12-14-04 rls With EPICS R3.14.7 changes to epicsThread.h, need explicit
+ *		    #include <stdlib.h>
  */
 
 
@@ -36,17 +38,17 @@ primary devSoft.c file because CA and record access code cannot both reside
 in the same file; each defines (redefines) the DBR's.
 */
 
+#include <stdlib.h>
+#include <cadef.h>
+#include <errlog.h>
+#include <epicsEvent.h>
+#include <epicsRingPointer.h>
+#include <callback.h>
+#include <epicsThread.h>
 
-#include	<cadef.h>
-#include	<errlog.h>
-#include        <epicsEvent.h>
-#include        <epicsRingPointer.h>
-#include        <callback.h>
-#include	<epicsThread.h>
-
-#include	"motorRecord.h"
-#include	"motor.h"
-#include	"devSoft.h"
+#include "motorRecord.h"
+#include "motor.h"
+#include "devSoft.h"
 
 #define	STATIC	static
 
