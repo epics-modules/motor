@@ -1,16 +1,19 @@
-To run any examples in this directory;
-
-- in <motor>/Makefile: the following two lines must be uncommented;
-	#DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
-	#DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
+To build any examples;
 
 - in <motor>/configure/RELEASE: EPICS_BASE, TEMPLATE_TOP and MSI must
 	be defined.
 
-To run the OMS example,
-- in <motor>/motorApp/Makefile: #DIRS += OmsSrc must be uncommented.
+- in <motor>/Makefile: the following two lines must be uncommented;
+	#!DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
+	#!DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
 
-- in <motor>/motorExApp/Makefile: #DIRS += NoMPF must be uncommented.
+To build the OMS example in this directory;
+- in <motor>/motorApp/Makefile: #!DIRS += OmsSrc must be uncommented.
+
+- in <motor>/motorExApp/Makefile: #!DIRS += NoMPF must be uncommented.
+
+- in <motor>/motorExApp/NoMPF/Makefile: #!NoMPFVx_LIBS += oms must be
+	uncommented.
 
 Finally, cd <motor>; gnumake clean uninstall; gnumake
 
