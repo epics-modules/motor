@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.11 $
+# Version:		$Revision: 1.12 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2003-12-12 21:38:17 $
+# Last Modified:	$Date: 2003-12-17 16:20:10 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -567,6 +567,7 @@ recordtype(motor) {
 	}
 	field(DMOV,DBF_SHORT) {
 		prompt("Done moving to value")
+		promptgroup(GUI_COMMON)
 		special(SPC_NOMOD)
 		initial("1")
 	}
@@ -616,6 +617,7 @@ recordtype(motor) {
 	field(DLY,DBF_FLOAT) {
 		prompt("Readback settle time (s)")
 		promptgroup(GUI_COMMON)
+		special(SPC_MOD)
 		interest(1)
 	}
 	field(CBAK,DBF_NOACCESS) {
