@@ -8,7 +8,6 @@ RECTYPES += motorRecord.h
 
 INC += motor.h motordevCom.h motordrvCom.h
 INC += motordrvComCode.h
-INC += gpibIO.h serialIO.h
 
 include $(TOP)/config/RULES.Host
 #----------------------------------------
