@@ -1,11 +1,11 @@
 /*
-FILENAME...	motordrvCom.c
+FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:08:23 $
+Last Modified:	$Date: 2003-11-06 15:56:10 $
 */
 
 /*
@@ -36,23 +36,9 @@ Last Modified:	$Date: 2003-06-16 15:08:23 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93  jbk   initialized
- * .02  11-14-94  jps   copy drvOms.c and modify to point to vme58 driver
- *      ...
- * .14  02-10-95  jps	first released version w/interrupt supprt
- * .15  02-16-95  jps	add better simulation mode support
- * .16  03-10-95  jps	limit switch handling improvements
- * .17  04-11-95  jps  	misc. fixes
- * .18  09-27-95  jps	fix GET_INFO latency bug, add axis argument to
- *		  	  set_status() create add debug verbosity of 3
- * .19  05-03-96  jps   convert 32bit card accesses to 16bit - vme58PCB
- *		  	  version D does not support 32bit accesses.
- * .20  06-20-96  jps   add more security to message parameters (card #)
- * .20a 02-19-97  tmm   fixed for EPICS 3.13
- * .21  03-01-02  rls	Eliminated support for the "ASCII record separator
- *                        (IS2) = /x1E".
- * .22  07-05-02  rls   Seperate +/- limit switch status bits.
- * .23  06/13/03  rls	Ported to R3.14.
+ * .01 06/13/03 rls Ported to R3.14.
+ * .02 11/06/03 rls Bug fixes for inoperable polling rate and INFO command type
+ *			delay.
  */
 
 
@@ -78,19 +64,20 @@ static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent
  *	IF no motors in motion for this board type.
  *	    Set "wait_time" to WAIT_FOREVER.
  *	ELSE
- *	    Set "tick_curr" to time elapsed since last timeout return from semaphore pend.
- *	    Limit "wait_time" to between 2 and "motor_scan_rate" RTOS ticks.
- *	    IF elapsed time (i.e., "tick_curr") < user delay.
+ *	    Update current_time.
+ *	    Set "time_lapse" to time elapsed (in seconds) since last timeout
+ *		return from semaphore pend.
+ *	    IF elapsed time (time_lapse) < user delay (scan_sec).
  *		Set "wait_time" to (user delay - elapsed time).
- *		IF "wait_time" < 2 OS tick.
- *		    Set "wait_time" to 2 OS tick.
+ *		IF "wait_time" < 10 msec.
+ *		    Set "wait_time" to 10 msec..
  *		ENDIF
  *	    ELSE
- *		Set "wait_time" to to 2 OS tick.
+ *		Set "wait_time" to 10 msec..
  *	    ENDIF
  *	ENDIF
- *	Pend on semaphore with "wait_time" timeout argument - call semTake().
- *	Update elapsed time.
+ *	Pend on semaphore with "wait_time" timeout argument.
+ *	Update "previous_time".
  *	IF the "any_motor_in_motion" indicator is true.
  *	    IF VME58 instance of this task.
  *		Start data area update on all cards - Call start_status().
@@ -114,19 +101,13 @@ int motor_task(struct thread_args *args)
 {
     struct driver_table *tabptr;
     bool sem_ret;
-    epicsTimeStamp scan_timestamp;
-    epicsTime scan_time, previous_time, current_time;
+    epicsTime previous_time, current_time;
     double scan_sec, wait_time, time_lapse;
     int itera;
 
-    tabptr = args->table;
-    
+    tabptr = args->table;    
     previous_time = epicsTime::getCurrent();
-
     scan_sec = 1 / (double) args->motor_scan_rate;	/* Convert HZ to seconds. */
-    scan_timestamp.secPastEpoch = 0;
-    scan_timestamp.nsec = (epicsUInt32) (scan_sec * 10E9); /* Convert sec. to nanoseconds. */
-    scan_time = scan_timestamp;
 
     for(;;)
     {
@@ -138,7 +119,7 @@ int motor_task(struct thread_args *args)
 	    time_lapse = current_time - previous_time;
 	    if (time_lapse < scan_sec)
 	    {
-		wait_time = scan_time - current_time;
+		wait_time = scan_sec - time_lapse;
 		if (wait_time < 0.010)		
 		    wait_time = 0.010;
 	    }
@@ -179,7 +160,7 @@ static int query_axis(int card, struct driver_table *tabptr, epicsTime tick)
     {
 	register struct mess_info *motor_info;
 	register struct mess_node *motor_motion;
-	double delay;
+	double delay = 0.0;
 
 	motor_info = &(brdptr->motor_info[index]);
 	if ((motor_motion = motor_info->motor_motion) != 0)
@@ -326,7 +307,7 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 		if (tick >= motor_info->status_delay)
 		    delay = tick - motor_info->status_delay;
 		if (delay < 0.01)	/* Status update delay - needed for OMS. */
-		    epicsThreadSleep(delay);	/* 2 RTOS tick delay. */
+		    epicsThreadSleep(0.01);	/* 10 ms. delay. */
 
 		if (tabptr->strtstat != NULL)
 		    (*tabptr->strtstat) (card);
