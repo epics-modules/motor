@@ -2,9 +2,9 @@
 FILENAME...	devMM4000.cc
 USAGE...	Motor record device level support for Newport MM4000.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-22 19:25:27 $
+Last Modified:	$Date: 2003-05-23 16:06:25 $
 */
 
 /*
@@ -337,7 +337,7 @@ STATIC RTN_STATUS MM4000_build_trans(motor_cmnd command, double *parms, struct m
 
     size = strlen(buff);
     if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
-	errlogMessage("devMM4000.c:MM4000_build_trans(): buffer overflow.\n");
+	errlogMessage("MM4000_build_trans(): buffer overflow.\n");
     else
 	strcat(motor_call->message, buff);
 
