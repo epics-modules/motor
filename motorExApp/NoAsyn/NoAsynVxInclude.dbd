@@ -1,4 +1,5 @@
 include "base.dbd"
 include "motorRecord.dbd"
 #!include "devOms.dbd"
+#!include "devDeltaTau.dbd"
 #!include "devSoftMotor.dbd"
