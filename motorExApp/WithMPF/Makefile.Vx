@@ -37,7 +37,6 @@ LIBOBJS += $(MPF_GPIB_BIN)/Gpib.o
 LIBOBJS += $(MPF_GPIB_BIN)/gpibServer.o
 # !MPF-1-CPU! #LIBOBJS += $(MPF_GPIB_BIN)/GpibHideosLocal.o
 # !MPF-2-CPU! #LIBOBJS += $(MPF_GPIB_BIN)/GpibHideosRemote.o
-LIBOBJS += $(MPF_GPIB_BIN)/GpibHideosRemote.o
 
 # The motor communication library (i.e. motorCOM_mpf)
 # requires both serial and GPIB support. Some motion
