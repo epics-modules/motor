@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8 and VME44.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:01 $
+Last Modified:	$Date: 2000-03-03 22:33:58 $
 */
 
 /*
@@ -799,7 +799,7 @@ STATIC int motorIsrEnable(int card)
     pmotorState = motor_state[card];
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
 
-    status = devConnectInterruptVME(omsInterruptVector + card,
+    status = devConnectInterrupt(intVME, omsInterruptVector + card,
 		    (void (*)(void *)) motorIsr, (void *) card);
     
     if (!RTN_SUCCESS(status))
@@ -859,7 +859,7 @@ STATIC void motorIsrDisable(int card)
     /* Disable interrupts */
     pmotor->control = 0;
 
-    status = devDisconnectInterruptVME(omsInterruptVector + card,
+    status = devDisconnectInterrupt(intVME, omsInterruptVector + card,
 				    (void (*)(void *)) motorIsr);
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",

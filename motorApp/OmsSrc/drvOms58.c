@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:02 $
+Last Modified:	$Date: 2000-03-03 22:34:24 $
 */
 
 /*
@@ -814,7 +814,7 @@ STATIC int motorIsrSetup(int card)
 
     pmotor = (struct vmex_motor *) (motor_state[card]->localaddr);
 
-    status = devConnectInterruptVME(omsInterruptVector + card,
+    status = devConnectInterrupt(intVME, omsInterruptVector + card,
 		    (void (*)(void *)) motorIsr, (void *) card);
     if (!RTN_SUCCESS(status))
     {
