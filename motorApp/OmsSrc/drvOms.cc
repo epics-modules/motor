@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-05 16:39:25 $
+Last Modified:	$Date: 2003-10-24 14:40:12 $
 */
 
 /*
@@ -46,6 +46,8 @@ Last Modified:	$Date: 2003-06-05 16:39:25 $
  *			boards after the "hole" to work.
  * .01  06-05-03  rls   Convert to R3.14.x.
  * .02  06-05-03  rls   extended device directive support to PREM and POST.
+ * .03  10-23-03  rls - VX2 spurious interrupt fix; support transmit buffer
+ *			empty interrupt in omsPut() and motorIsr().
  */
 
 /*========================stepper motor driver ========================
@@ -76,13 +78,13 @@ extern "C" {
 }
 #include	<dbAccess.h>
 #include	<epicsThread.h>
+#include	<epicsInterrupt.h>
 
 #include	"motor.h"
 #include	"drvOms.h"
 #include	"epicsExport.h"
 
 #define PRIVATE_FUNCTIONS 1	/* normal:1, debug:0 */
-#define STATIC static
 
 /* Define for return test on devNoResponseProbe() */
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
@@ -110,12 +112,12 @@ volatile int omsSpyClkRate = 0;
 #include	"motordrvComCode.h"
 
 /* --- Local data common to all OMS drivers. --- */
-STATIC char *oms_addrs = 0x0;
-STATIC volatile unsigned omsInterruptVector = 0;
-STATIC volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
-STATIC volatile int max_io_tries = MAX_COUNT;
-STATIC volatile int motionTO = 10;
-STATIC char oms_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
+static char *oms_addrs = 0x0;
+static volatile unsigned omsInterruptVector = 0;
+static volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
+static volatile int max_io_tries = MAX_COUNT;
+static volatile int motionTO = 10;
+static char oms_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
 
 /*----------------functions-----------------*/
 
@@ -130,11 +132,11 @@ static void motorIsr(int card);
 static int motor_init();
 static void oms_reset();
 
-STATIC int omsGet(int card, char *pcom, int timeout);
-STATIC RTN_STATUS omsPut(int card, char *pcom);
-STATIC int omsError(int card);
-STATIC int motorIsrEnable(int card);
-STATIC void motorIsrDisable(int card);
+static int omsGet(int card, char *pcom, int timeout);
+static RTN_STATUS omsPut(int card, char *pcom);
+static int omsError(int card);
+static int motorIsrEnable(int card);
+static void motorIsrDisable(int card);
 
 struct driver_table oms_access =
 {
@@ -169,7 +171,7 @@ struct
 
 epicsExportAddress(drvet, drvOms);
 
-STATIC struct thread_args targs = {SCAN_RATE, &oms_access};
+static struct thread_args targs = {SCAN_RATE, &oms_access};
 
 /*----------------functions-----------------*/
 
@@ -198,7 +200,7 @@ static long init()
 }
 
 
-STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
+static void query_done(int card, int axis, struct mess_node *nodeptr)
 {
     char buffer[40];
 
@@ -210,7 +212,7 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 }
 
 
-STATIC int set_status(int card, int signal)
+static int set_status(int card, int signal)
 {
     struct mess_info *motor_info;
     struct mess_node *nodeptr;
@@ -419,7 +421,7 @@ errorexit:	errMessage(-1, "Invalid device directive");
 /* send a message to the OMS board		     */
 /*		send_mess()			     */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     char outbuf[MAX_MSG_SIZE];
     RTN_STATUS return_code;
@@ -516,7 +518,7 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
  *  NORMAL RETURN.
  */
 
-STATIC int recv_mess(int card, char *com, int amount)
+static int recv_mess(int card, char *com, int amount)
 {
     int i, trys;
     char junk;
@@ -615,7 +617,7 @@ STATIC int recv_mess(int card, char *com, int amount)
 /* Get next character from OMS input buffer          */
 /*		omsGet()			     */
 /*****************************************************/
-STATIC int omsGet(int card, char *pchar, int timeout)
+static int omsGet(int card, char *pchar, int timeout)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
@@ -634,10 +636,10 @@ STATIC int omsGet(int card, char *pchar, int timeout)
 	}
 	if (!epicsRingPointerIsEmpty(pmotorState->irqdata->recv_rng))
 	{
-	    void *rtnptr;
+	    void *rngptr;
 
-	    rtnptr = epicsRingPointerPop(pmotorState->irqdata->recv_rng);
-	    *pchar = (char) rtnptr;
+	    rngptr = epicsRingPointerPop(pmotorState->irqdata->recv_rng);
+	    *pchar = (char) rngptr;
 	    getCnt = 1;
 	}
     }
@@ -662,34 +664,58 @@ STATIC int omsGet(int card, char *pchar, int timeout)
 /* Send Message to OMS                               */
 /*		omsPut()			     */
 /*****************************************************/
-STATIC RTN_STATUS omsPut(int card, char *pmess)
+static RTN_STATUS omsPut(int card, char *pmess)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
+    int key;
     char *putptr;
     int trys;
 
     pmotorState = motor_state[card];
     pmotor = (struct vmex_motor *) pmotorState->localaddr;
 
-    /* Send next message */
-    for (putptr = pmess; *putptr != '\0'; putptr++)
+    if (pmotorState->irqdata->irqEnable)
     {
-	trys = 0;
-	while (!(pmotor->status & STAT_TRANS_BUF_EMPTY))
+	putptr = pmess;
+	/* Put string into isr transmitt buffer */
+	while (*putptr != NULL)
 	{
-	    if (trys > max_io_tries)
+	    if (!epicsRingPointerPush(pmotorState->irqdata->send_rng, (void *) *putptr))
 	    {
-		Debug(1, "omsPut: Time_out occurred in send\n");
-		return (ERROR);
+		logMsg((char *) "omsPut: card %d send ring full, lost '%c'\n", card,
+		       *putptr, 0, 0, 0, 0);
+		return(ERROR);
 	    }
-	    if (pmotor->status & STAT_ERROR)
-	    {
-		Debug(1, "omsPut: error occurred in send\n");
-	    }
-	    trys++;
+	    putptr++;
 	}
-	pmotor->data = *putptr;
+
+	/* Turn-on transmit buffer interrupt */
+	key = epicsInterruptLock();
+	pmotor->control |= IRQ_TRANS_BUF;
+	epicsInterruptUnlock(key);
+    }
+    else
+    {
+	/* Send next message */
+	for (putptr = pmess; *putptr != '\0'; putptr++)
+	{
+	    trys = 0;
+	    while (!(pmotor->status & STAT_TRANS_BUF_EMPTY))
+	    {
+		if (trys > max_io_tries)
+		{
+		    Debug(1, "omsPut: Time_out occurred in send\n");
+		    return(ERROR);
+		}
+		if (pmotor->status & STAT_ERROR)
+		{
+		    Debug(1, "omsPut: error occurred in send\n");
+		}
+		trys++;
+	    }
+	    pmotor->data = *putptr;
+	}
     }
     return (OK);
 }
@@ -699,7 +725,7 @@ STATIC RTN_STATUS omsPut(int card, char *pmess)
 /* Clear OMS errors                                  */
 /*		omsClearErrors()	             */
 /*****************************************************/
-STATIC int omsError(int card)
+static int omsError(int card)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
@@ -744,7 +770,7 @@ STATIC int omsError(int card)
 /* Interrupt service routine.                        */
 /* motorIsr()		                     */
 /*****************************************************/
-STATIC void motorIsr(int card)
+static void motorIsr(int card)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
@@ -797,6 +823,20 @@ STATIC void motorIsr(int card)
 	pmotorState->irqdata->irqErrno |= STAT_ERROR;
     }
 
+    /* Send message */
+    if (status & STAT_TRANS_BUF_EMPTY)
+    {
+	if (epicsRingPointerIsEmpty(pmotorState->irqdata->send_rng))
+	    control &= ~IRQ_TRANS_BUF;	/* Transmit done - disable irq */
+	else
+	{
+	    void *rngptr;
+
+	    rngptr = epicsRingPointerPop(pmotorState->irqdata->send_rng);
+	    pmotor->data = (char) rngptr;
+	}
+    }
+
     /* Read Response */
     if (status & STAT_INPUT_BUF_FULL)
     {
@@ -814,7 +854,7 @@ STATIC void motorIsr(int card)
     pmotor->control = control;
 }
 
-STATIC int motorIsrEnable(int card)
+static int motorIsrEnable(int card)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
@@ -857,6 +897,8 @@ STATIC int motorIsrEnable(int card)
     pmotorState->irqdata->recv_rng = epicsRingPointerCreate(OMS_RESP_Q_SZ);
     pmotorState->irqdata->recv_sem = new epicsEvent(epicsEventEmpty);
 
+    pmotorState->irqdata->send_rng = epicsRingPointerCreate(MAX_MSG_SIZE * 2);
+
     pmotorState->irqdata->irqEnable = TRUE;
     pmotorState->irqdata->irqErrno = 0;
 
@@ -869,7 +911,7 @@ STATIC int motorIsrEnable(int card)
     return (OK);
 }
 
-STATIC void motorIsrDisable(int card)
+static void motorIsrDisable(int card)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
@@ -893,6 +935,7 @@ STATIC void motorIsrDisable(int card)
     pmotorState->irqdata->irqEnable = FALSE;
     pmotorState->irqdata->irqErrno = 0;
     epicsRingPointerDelete(pmotorState->irqdata->recv_rng);
+    epicsRingPointerDelete(pmotorState->irqdata->send_rng);
 
     delete pmotorState->irqdata->recv_sem;
 }
@@ -954,7 +997,7 @@ int omsSetup(int num_cards,	/* maximum number of cards in rack */
 /* initialize all software and hardware		     */
 /*		motor_init()			     */
 /*****************************************************/
-STATIC int motor_init()
+static int motor_init()
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
@@ -1123,7 +1166,7 @@ STATIC int motor_init()
 
 /* Disables interrupts. Called on CTL X reboot. */
 
-STATIC void oms_reset()
+static void oms_reset()
 {
     short card;
     struct vmex_motor *pmotor;
