@@ -23,27 +23,27 @@ WithMPF_OBJS_vxWorks	+= $(EPICS_BASE_BIN)/vxComLibrary
 #!WithMPFVx_LDOBJS_vxWorks += $(IPAC_BIN)/ipacLib
 #!WithMPFVx_OBJS_vxWorks   += $(IPAC_BIN)/tyGSOctal
 
-WithMPF_LIBS		+= Mclennan
-WithMPF_LIBS		+= Micos
-WithMPF_LIBS		+= MicroMo
-WithMPF_LIBS		+= PI
-WithMPF_LIBS		+= Acs
-WithMPF_LIBS		+= Ims
-WithMPF_LIBS		+= Newport
-WithMPF_LIBS		+= softMotor
-WithMPF_LIBS		+= motor
-WithMPF_LIBS		+= asyn
-WithMPF_LIBS 		+= $(EPICS_BASE_IOC_LIBS)
+#!WithMPF_LIBS   += Mclennan
+#!WithMPF_LIBS   += Micos
+#!WithMPF_LIBS   += MicroMo
+#!WithMPF_LIBS   += PI
+#!WithMPF_LIBS   += Acs
+#!WithMPF_LIBS   += Ims
+#!WithMPF_LIBS   += Newport
+#!WithMPF_LIBS   += softMotor
+WithMPF_LIBS     += motor
+WithMPF_LIBS     += asyn
+WithMPF_LIBS     += $(EPICS_BASE_IOC_LIBS)
 
-WithMPFVx_LIBS		+= Mclennan
-WithMPFVx_LIBS		+= Micos
-WithMPFVx_LIBS		+= MicroMo
-WithMPFVx_LIBS		+= PI
-WithMPFVx_LIBS		+= Acs
-WithMPFVx_LIBS		+= Ims
-WithMPFVx_LIBS		+= Newport
-WithMPFVx_LIBS		+= softMotor
-WithMPFVx_LIBS		+= motor
+#!WithMPFVx_LIBS += Mclennan
+#!WithMPFVx_LIBS += Micos
+#!WithMPFVx_LIBS += MicroMo
+#!WithMPFVx_LIBS += PI
+#!WithMPFVx_LIBS += Acs
+#!WithMPFVx_LIBS += Ims
+#!WithMPFVx_LIBS += Newport
+#!WithMPFVx_LIBS += softMotor
+WithMPFVx_LIBS   += motor
 
 # Support from IPAC R2.6 and above.
 WithMPFVx_LIBS 		+= Ipac TyGSOctal

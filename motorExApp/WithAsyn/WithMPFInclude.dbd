@@ -6,7 +6,7 @@ include "drvAsynSerialPort.dbd"
 #include "devMclennanMotor.dbd"
 #include "devMicos.dbd"
 #include "devMicroMo.dbd"
-include "devNewport.dbd"
+#include "devNewport.dbd"
 #include "devPIMotor.dbd"
 #include "devSoftMotor.dbd"
 
