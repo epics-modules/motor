@@ -235,7 +235,7 @@ STATIC int set_status(int card, int signal)
     /* Message parsing variables */
     char axis_name, status_char, dir_char, buff[BUFF_SIZE],
 	response[BUFF_SIZE];
-    int rtn_state;
+    int status, rtn_state = 0;
     double motorData;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
@@ -246,7 +246,16 @@ STATIC int set_status(int card, int signal)
     /* Request the status and position of this motor */
     sprintf(buff, "%cR", axis_name);
     send_mess(card, buff, NULL);
-    recv_mess(card, response, 1);
+    status = recv_mess(card, response, 1);
+    if (status > 0)
+	cntrl->status = NORMAL;
+    else
+    {
+	cntrl->status = COMM_ERR;
+	motor_info->status |= RA_PROBLEM;	/* This terminates the transaction. */
+	rtn_state = 1;
+	goto exit;
+    }
 
     status_char = response[1];
     dir_char = response[2];
@@ -337,6 +346,7 @@ STATIC int set_status(int card, int signal)
 	nodeptr->postmsgptr = NULL;
     }
 
+exit:
     if (cntrl->status == COMM_ERR)
 	motor_info->status |= CNTRL_COMM_ERR;
     else
@@ -440,7 +450,13 @@ STATIC int recv_mess(int card, char *com, int flag)
 	len = 0;
     }
     else
+    {
 	com[len-1] = '\0';
+	/* Test for "system error" response. */
+	if (strncmp(com, "SE", 2) == 0)
+	    logMsg((char *) "recv_mess(): PM500 system error.\n",
+		   0, 0, 0, 0, 0, 0);
+    }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
     return (len);
