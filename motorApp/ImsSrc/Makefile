@@ -10,8 +10,9 @@ DBD += devImsMotor.dbd
 LIBRARY_IOC = Ims
 
 # Intelligent Motion Systems driver support.
-SRCS += devIM483SM.c drvIM483SM.c
-SRCS += devIM483PL.c drvIM483PL.c
+SRCS += devIM483SM.cc drvIM483SM.cc
+SRCS += devIM483PL.cc drvIM483PL.cc
+SRCS += devMDrive.cc  drvMDrive.cc
 
 OBJS_DEFAULT += ImsRegister
 OBJS_vxWorks += -nil-
