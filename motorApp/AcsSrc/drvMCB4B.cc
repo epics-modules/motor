@@ -232,11 +232,15 @@ STATIC int set_status(int card, int signal)
     if (motorData == motor_info->position)
         motor_info->no_motion_count++;
     else
-        {
-            motor_info->position = motorData;
-            motor_info->encoder_position = motorData;
-            motor_info->no_motion_count = 0;
-        }
+    {
+        if (motorData >= motor_info->position)
+            motor_info->status |= RA_DIRECTION;
+        else
+            motor_info->status &= ~RA_DIRECTION;
+        motor_info->position = motorData;
+        motor_info->encoder_position = motorData;
+        motor_info->no_motion_count = 0;
+    }
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
