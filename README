@@ -1,4 +1,4 @@
-Motor Record V4.1 Release Notice
+Motor Record V4.2 Release Notice
 ================================
 
 Although the motor record software in this release is compatible with EPICS
@@ -7,6 +7,8 @@ configuration files are intended for the "unbundled" architecture of EPICS
 R3.13.2 and above.  See motor_release.html for a description of features and
 bug fixes.
 
+!WARNING! motorRecord.dbd has been modified.  This requires you to 'rebuild'
+any and all user trees (i.e., <ioctop>) that load the motor record.
 
 Contents
 ========
@@ -17,12 +19,14 @@ This <supporttop> contains the following motor record related items:
 	- device/driver libraries for various controllers.
 	- motor record/device/driver level documentation.
 	- motor record release documentation.
+	- two example applications; one without MPF (i.e. motorExApp/NoMPF) and
+		one with MPF (i.e., motorExApp/WithMPF).
 
 As distributed, this support directory only builds the following:
 	- motorLib; Record support and common code for all device/drivers.
 
-Optionially, any of the following device/driver libraries can be built by
-uncommenting the appropiate line in ./motorApp/Makefile.
+Optionally, any of the following device/driver libraries can be built by
+uncommenting the appropriate line in ./motorApp/Makefile.
 	newportLib - Newport controllers; NewportSrc directory.
 	omsLib - Oregon Micro System controllers; OmsSrc directory.
 	softMotorLib - Soft Channel device support; SoftMotorSrc directory.
@@ -37,9 +41,26 @@ Configuration
 The following files can be edited to tailor this distribution to site specific
 needs.  See individual files for instructions.
 	- ./config/RELEASE: Define location of external products.
+	
+		If only VMEbus based motor controllers (e.g., OMS, Highland
+		V544) and/or Soft Channel device support is used, then only
+		EPICS_BASE is required.
+
+		For serial and/or GPIB motor controller communication, ALL of
+		the following support modules are required;
+			- EPICS_BASE V3.13.2 or above.
+			- MPF V1.5 or above.
+                        - MPF_SERIAL V1.1 or above
+			- either MPF_GPIB V1.3 or GPIB V0.1 or above.
+		
+		If any, example applications (motorExApp) are to be built, then
+			TEMPLATE_TOP and MSITOP must be defined.
+
 	- ./motorApp/Makefile: Define which device/driver modules to build.
 	- ./motorApp/CommSrc/Makefile.Vx: Define communication support via
 		Hideos and/or MPF.
+	- ./motorExApp/Makefile: Define which, if any, example applications are
+		to be built.
 
 
 Known Problems
@@ -51,6 +72,175 @@ Known Problems
 	this in future releases.  Users of the MM4000 who need backlash
 	compensation should set the motor record's backlash distance to zero
 	and program the MM4000 controller's backlash compensation parameters.
+
+2) The PAUSE function of the SPMG field only works if the RTRY field is
+	nonzero.  This bug existed as far back as V3.3 of the motor record.
+
+
+Modification Log from V4.1 to V4.2
+==================================
+
+1) The following requirement was lost with release V4.0.  At boot-up, if one
+field of a field pair (i.e., VMAX/SMAX, VBAS/SBAS, VELO/S, BVEL/SBAK) is zero
+and the other field is nonzero, the nonzero field takes precedence.  If both
+fields of a given field pair are nonzero, the RPS member of the field pair
+(i.e., SMAX, SBAS, S, SBAK) takes precedence.
+	File modified: motorRecord.c - Changed logic in
+			check_speed_and_resolution().
+
+2) An error was introduced into the Oms device support with V4.0.  The 1st
+argument of the omsSetup(nCards, ...) function in the st.cmd file is for the
+maximum number of VME8 and/or VME44 cards to be supported in a specific IOC
+crate.  If the "nCards" argument was set to anything other than the actual
+number of cards in the IOC crate, the "dbior" function would result in
+erroneous information or a bus error.
+	File modified: drvOms.c - Restored statement in motor_init() that sets
+			motor_state[] to NULL when card not found.
+
+3) An error occurs with the OMS VME58 when the user runs the motor into a
+limit switch and then attempts to move away from the limit switch.  If either
+an absolute or incremental move is utilized to move away from the limit switch,
+the OMS VME58 ignores the 1st move attempt.  Subsequent moves work.  In
+addition, the user can jog off a limit switch.  This error was hidden in most
+applications if RTRY was nonzero.
+	File modified: devOmsCom.c - Changed logic in oms_build_trans() to
+			prefix MP or MM command to any move when overtravel
+			status indicator is ON.
+
+4) Added support for EPICS GPIB Module Version 0-0 from Benjamin Franksen.
+Warning! Neither GPIB 0-0 are my usage of it has been throughly tested yet.
+	Files modified: config/RELEASE - Configuration instructions added.
+			CommSrc/Makefile.Vx - Conditional compilation label.
+			CommSrc/gpibIO.c - Conditional compilation for
+						unbundled GPIB module.
+
+5) All motorApp/*/Makefile.Vx files were modified to take advantage of the
+macro found in Benjamin Franksen's makefiles; i.e.,
+LIBOBJS = $(SRCS.c:../%.c=%.o)
+
+6) Replaced all occurrences of "include <stdioLib.h>" with "include <stdio.h>.
+Wind River has labeled stdioLib.h as "obsolete vxWorks 5.0 header file".
+	Files modified: drvOms.c, drvOms58.c, devMM3000.c, devMM4000.c,
+			drvMM3000.c, drvMM4000.c
+
+7) Added support for the Newport PM500 motion controller.  This device/driver
+is based on Mark River's PM500 V2.0 release. 
+	Files added: devPM500.c and drvPM500.c
+
+8) Removed QUERY from the list of valid "command types".  It was unused.
+Enumerated message types.
+	File modified: motordrvCom.h and motordrvCom.c
+
+9) Some motor controllers (e.g., PM500) unconditionally respond when motor
+commands are sent.  Although these communication responses are not needed
+(they are in fact a nuisance), they must be received so that later communication
+transactions are kept in synchronization.  To this end, a flag was added to the
+"controller" structure to indicate where or not the associated motor controller
+responds to all commands.
+	Files modified: motordrvCom.h - Added "cmnd_response" member to
+					"controller".
+			motordrvCom.c - Get controller response if
+					"cmnd_response" is set ON.
+	drvMM3000.c, drvMM400.c, drvOms.c drvOms58.c - Initialize "cmnd_response".
+
+10) Modifications were made to the following files to adopt Mark River's
+method of command line termination; i.e., the send_mess() function appends
+the command line termination character to the string.
+	Files modified:
+		motordrvCom.h
+		motordrvCom.c	- Removed command line terminator argument from
+				  motor_send() and driver_table member, send().
+		motordevCom.h	- Function declaration changes.
+		motordevCom.c	- Removed command line terminator argument from
+				  motor_end_trans_com().
+
+11) Added support for the Intelligent Motion Systems, Inc. IM483 controller.
+Two device/driver versions are available; IM483PL for "party line" and IM483SM
+for "single" communication mode.  See the IMS "Software Reference manual
+Revision 051794 for detail.
+	Directory added:	motorApp/ImsSrc
+	Files added:	    	drvIM483.h, devImsMotor.dbd
+				devIM483SM.c, drvIM483SM.c
+				devIM483PL.c, drvIM483PL.c
+	Files modified:		motorApp/Makefile - Added ImsSrc directory.
+
+12) The record level support assumed that the motor controller would accept
+two motion commands on the same command line.  This occurs when backlash
+compensation is enabled.  Since the IM483[PL/SM] does not have this capability,
+support for a command line "record separator" character was added.  The record
+separator is defined as an ASCII (IS2) character = /x1E.  Currently, only one
+record separator is allowed in a command line.
+	Files modified:
+		motordrvCom.c - process_messages() searches for a record
+				separator.  If found, it splits the message,
+				outputs the 1st part and stores the 2nd part
+				back into the front of the message buffer.
+			      - query_axis() detects 2nd part of messages,
+				outputs it and clears the message buffer.
+				
+13) For those controllers whose command lines require an alphabetic character
+for the axis name identifier (e.g. OMS, Oms58, IMS483PL), support has been
+added for driver specific axis names.  An axis name array pointer was added to
+the driver_table structure.
+	Files modified:
+		motordrvCom.h - Moved mess_card_query member axis_names to
+				driver_table.
+		motordrvCom.c - The global oms_trans_axis[] was removed.
+		motordevCom.h - Removed axis "name" member from axis_stat.
+		motordevCom.c - Removed initial string function argument from
+				motor_start_trans_com().
+		All drv{driver}.c files were modified to add an axis name
+				array point to their driver_table; (NULL for
+				device/drivers that do not use axis names;
+				e.g., MM3000, MM4000/5).					
+
+14) An error was introduced in V4.0 which prevented the record from processing
+a jog request if the UEIP field was changed.  Issuing a STOP or SPMG/STOP,
+cleared the error.
+	Files modified: motorRecord.c - Activate DMOV when loading a position
+					(i.e., load_pos() called).
+
+15) Removed unused C macros from driver level files.
+	Files modified:	- devMM3000.c, 
+
+16) Records were stuck with DMOV = 0 if the user requested a move and there
+was no underlying controller.  No error message, besides the "card does not
+exist" message at boot-up, would appear.  With this release, the COMM_ALARM is
+set and DMOV is reset if the controller does not exist.
+	File modified: - motor_end_trans_com() in motordevCom.c
+
+17) An error was introduced in V4.0 which prevented backlash correction from
+occurring after a JOG.
+	Files modified: postProcess() in motorRecord.c
+
+18) Divide-by-zero errors were occurring in do_work() of motorRecord.c.
+	File modified: Added various error checks in motorRecord.c against
+		ERES becoming zero
+			
+19) Two motion commands were being sent by do_work() if the record was
+processed twice before a callback was processed.  This could occur under
+various scenarios
+	- banging on the tweak button with a low frequency update rate.
+	- the motor record was (accidentally) processed from a periodic scan
+		with a higher frequency than the update rate.
+	File modified: In motorRecord.c, do_work(), changed the "motor moving"
+			test from the "movn" to the "mip" field.
+
+20) An error was introduced into the motor record with V4.0.  This error
+occurred on the rare occasion when a target position (i.e., VAL or DVAL)
+fell almost exactly half way between two integer RVAL values, and the retry
+feature was enabled (i.e., RTRY is nonzero).  The motor record would 'hang'
+under these circumstances with DMOV set FALSE and RCNT set to one.
+	Files modified: motorRecord.dbd - erroneous retries were a result of
+				round-off error.  Changed RES from a 'float'
+				to a 'double'.
+			motorRecord.c - Prior to V4.0, do_work() handled
+				retry request to the same position by setting
+				DMOV true and exiting (see code;
+				(npos == rpos)).  Broke this logic in V4.0
+				because of item #13.  Fixed, by testing for
+				MIP_RETRY, and clearing MIP.
+
 
 
 Modification Log from V4.0 to V4.1
