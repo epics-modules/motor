@@ -25,6 +25,7 @@
  *                      simplifies and cleans up.
  * .08  03/27/03   rls  R3.14 conversion.
  * .09  02/03/04   rls  Eliminate erroneous "Motor motion timeout ERROR".
+ * .10  04/20/04   mlr  Convert from MPF to ASYN
  */
 
 
@@ -581,6 +582,7 @@ STATIC int motor_init()
     char buff[BUFF_SIZE];
     char command[20];
     int total_axis = 0;
+    int status;
     bool success_rtn;
 
     initialized = true;   /* Indicate that driver is initialized. */
@@ -605,7 +607,8 @@ STATIC int motor_init()
         /* Initialize communications channel */
         success_rtn = false;
 
-        success_rtn = pasynSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
+        status = pasynSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
+        success_rtn = (status == asynSuccess);
         Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n",
               cntrl->port, success_rtn, cntrl->pasynUser);
 
