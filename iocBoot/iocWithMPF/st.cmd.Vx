@@ -27,15 +27,18 @@ dbLoadRecords("$(TOP)/db/WithMPF.db")
 # Configure the ASYN server code. This MUST be configured too!
 < st_asynserver.cmd.Vx
 
-# Newport MM4000 driver setup parameters: 
+# Newport MM3000 and MM4000/5/6 driver setup parameters: 
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz,max=60Hz)
+#!MM3000Setup(1, 10)
 #!MM4000Setup(1, 10)
 
-# Newport MM4000 driver configuration parameters: 
+# Newport MM3000 and MM4000/5/6 driver configuration parameters: 
 #     (1) controller# being configured
 #     (2) ASYN port name
 #     (3) address (GPIB only)
+#!MM3000Config(0, "a-Serial[0]")
+#!drvMM3000debug=4
 #!MM4000Config(0, "a-Serial[0]")
 #!drvMM4000debug=4
 
