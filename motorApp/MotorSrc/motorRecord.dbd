@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.8 $
+# Version:		$Revision: 1.9 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2002-10-21 21:06:32 $
+# Last Modified:	$Date: 2002-10-31 20:37:26 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -705,5 +705,13 @@ recordtype(motor) {
 		promptgroup(GUI_COMMON)
 		interest(1)
 		menu(menuYesNo)
+		initial("NO")
+	}
+	field(NTM,DBF_MENU) {
+		prompt("New Target Monitor")
+		promptgroup(GUI_COMMON)
+		interest(1)
+		menu(menuYesNo)
+		initial("YES")
 	}
 }
