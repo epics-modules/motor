@@ -1,10 +1,10 @@
 /*
-FILENAME...	drvOms58.c
+FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-04 18:36:59 $
+Last Modified:	$Date: 2003-06-05 16:41:44 $
 */
 
 /*
@@ -35,7 +35,12 @@ Last Modified:	$Date: 2003-06-04 18:36:59 $
  *
  * NOTES
  * -----
- * Verified with firmware: VME58 ver 2.24-8 and 2.24-8S.
+ * Verified with firmware:
+ *	- VME58 ver 2.16-8
+ *	- VME58 ver 2.24-8
+ *	- VME58 ver 2.24-8S
+ *	- VME58 ver 2.24-4E
+ *	- VME58 ver 2.35-8
  *
  * Modification Log:
  * -----------------
@@ -66,6 +71,8 @@ Last Modified:	$Date: 2003-06-04 18:36:59 $
  *			- "total_cards" changed from total detected to total
  *			cards that "memory is allocated for".  This allows
  *			boards after the "hole" to work.
+ * .23  06-04-03  rls   Convert to R3.14.x.
+ * .24  06-04-03  rls   extended device directive support to PREM and POST.
  */
 
 #include	<vxLib.h>
@@ -79,11 +86,12 @@ Last Modified:	$Date: 2003-06-04 18:36:59 $
 extern "C" {
 #include	<devLib.h>
 }
+#include	<dbAccess.h>
 #include	<epicsThread.h>
 
 #include	"motorRecord.h"	/* For Driver Power Monitor feature only. */
 #include	"motor.h"
-#include	"motordevCom.h"
+#include	"motordevCom.h"	/* For Driver Power Monitor feature only. */
 #include	"drvOms58.h"
 
 #include	"epicsExport.h"
@@ -106,6 +114,7 @@ extern "C" {
 
 /*----------------debugging-----------------*/
 #ifdef	DEBUG
+    volatile int drvOms58debug = 0;
     #define Debug(l, f, args...) { if(l<=drvOms58debug) printf(f,## args); }
 #else
     #define Debug(l, f, args...)
@@ -115,7 +124,6 @@ extern "C" {
 
 /* Global data. */
 int oms58_num_cards = 0;
-volatile int drvOms58debug = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -127,12 +135,6 @@ STATIC volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 STATIC volatile int max_io_tries = MAX_COUNT;
 STATIC volatile int motionTO = 10;
 STATIC char oms58_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
-
-/* --- Local data specific to the Oms58 driver. --- */
-STATIC volatile int cmndBuffReadyWait = 4;
-STATIC volatile int dataReadyWait = 1;
-STATIC volatile int omsNanoRate = 2000;	/* Aux clock rate for nanosleep */
-
 
 /*----------------functions-----------------*/
 
@@ -149,8 +151,6 @@ static void oms_reset();
 
 STATIC void start_status(int card);
 STATIC int motorIsrSetup(int card);
-STATIC void oms_nanoSleep(int time);
-STATIC int oms_nanoWakup(int val);
 
 struct driver_table oms58_access =
 {
@@ -226,6 +226,11 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 
     send_mess(card, DONE_QUERY, oms58_axis[axis]);
     recv_mess(card, buffer, 1);
+
+#if (CPU == PPC604 || CPU == PPC603)    
+    if (strcmp(motor_state[card]->ident, "VME58 ver 2.35-8") == 0)
+	taskDelay(1);	/* Work around for intermittent wrong LS status. */
+#endif
 
     if (nodeptr->status & RA_PROBLEM)
 	send_mess(card, AXIS_STOP, oms58_axis[axis]);
@@ -439,7 +444,7 @@ STATIC int set_status(int card, int signal)
 
     /* Wait for data area update to complete on card */
     while (cntrlReg.All & pmotor->control.cntrlReg)
-	oms_nanoSleep(dataReadyWait);
+	taskDelay(0);
 
     pmotorData = &pmotor->data[signal];
 
@@ -502,7 +507,58 @@ STATIC int set_status(int card, int signal)
     if ((motor_info->status & RA_DONE || ls_active == true) && nodeptr != 0 &&
 	nodeptr->postmsgptr != 0)
     {
-	strcpy(outbuf, nodeptr->postmsgptr);
+	char buffer[40];
+
+	/* Test for a "device directive" in the POST string. */
+	if (nodeptr->postmsgptr[0] == '@')
+	{
+	    bool errind = false;
+	    char *end = strchr(&nodeptr->postmsgptr[1], '@');
+	    if (end == NULL)
+		errind = true;
+	    else
+	    {
+		DBADDR addr;
+		char *start, *tail;
+		int size = (end - &nodeptr->postmsgptr[0]) + 1;
+
+		/* Copy device directive to buffer. */
+		strncpy(buffer, nodeptr->postmsgptr, size);
+		buffer[size] = NULL;
+
+		if (strncmp(buffer, "@PUT(", 5) != 0)
+		    goto errorexit;
+		
+		/* Point "start" to PV name argument. */
+		tail = NULL;
+		start = strtok_r(&buffer[5], ",", &tail);
+		if (tail == NULL)
+		    goto errorexit;
+
+		if (dbNameToAddr(start, &addr))	/* Get address of PV. */
+		{
+		    errPrintf(-1, __FILE__, __LINE__, "Invalid PV name: %s", start);
+		    goto errorexit;
+		}
+
+		/* Point "start" to PV value argument. */
+		start = strtok_r(NULL, ")", &tail);
+		if (dbPutField(&addr, DBR_STRING, start, 1L))
+		{
+		    errPrintf(-1, __FILE__, __LINE__, "invalid value: %s", start);
+		    goto errorexit;
+		}
+	    }
+
+	    if (errind == true)
+errorexit:	errMessage(-1, "Invalid device directive");
+	    end++;
+	    strcpy(buffer, end);
+	}
+	else
+	    strcpy(buffer, nodeptr->postmsgptr);
+
+	strcpy(outbuf, buffer);
 	send_mess(card, outbuf, oms58_axis[signal]);
 	nodeptr->postmsgptr = NULL;
     }
@@ -586,8 +642,7 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 	Debug(5, "send_mess: Waiting for ack: index delta=%d\n",
 	   (((deltaIndex = pmotor->outPutIndex - pmotor->outGetIndex) < 0) ?
 	    BUFFER_SIZE + deltaIndex : deltaIndex));
-	/* after position command - latency = 4ms */
-	oms_nanoSleep(cmndBuffReadyWait);
+	taskDelay(0);
     };
 
     return (return_code);
@@ -839,9 +894,11 @@ STATIC void motorIsr(int card)
 	pmotor->control.cntrlReg = (epicsUInt8) 0x90;
 /* Questioniable Fix for undefined problem Ends Here. */
 
+#ifdef	DEBUG
     if (drvOms58debug >= 10)
 	logMsg((char *) "entry card #%d,status=0x%X,done=0x%X\n", card,
 	       statusBuf.All, doneFlags, 0, 0, 0);
+#endif
 
     /* Motion done handling */
     if (statusBuf.Bits.done)
@@ -1009,7 +1066,7 @@ STATIC int motor_init()
 	    	/* Test if motor has an encoder. */
 		send_mess(card_index, ENCODER_QUERY, oms58_axis[motor_index]);
 		while (!pmotor->control.doneReg)	/* Wait for command to complete. */
-		    oms_nanoSleep(1);
+		    taskDelay(1);
 
 		statusReg.All = pmotor->control.statusReg;
 
@@ -1122,36 +1179,6 @@ STATIC void oms_reset()
 	    }
 	}
     }
-}
-
-STATIC SEM_ID nanoSem;
-STATIC int nanoTime;
-
-/* Sleep for about 1ms - MVME167 vxWorks dependant */
-STATIC void oms_nanoSleep(int time)
-{
-    if (FALSE)
-/*     if (time > 0)  */
-    {
-	nanoSem = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
-	nanoTime = time;
-
-	sysAuxClkDisable();
-	sysAuxClkRateSet(omsNanoRate);	/* tick = 1ms */
-//	sysAuxClkConnect(&oms_nanoWakup, 0);
-	sysAuxClkEnable();
-
-	semTake(nanoSem, 1);	/* Maximum sleep time = 1 system clock tick */
-	sysAuxClkDisable();
-	semDelete(nanoSem);
-    }
-}
-
-STATIC int oms_nanoWakup(int val)
-{
-    if (--nanoTime <= 0)
-	semGive(nanoSem);
-    return(0);
 }
 
 
