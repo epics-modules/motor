@@ -125,7 +125,12 @@ Modification Log from R5-5 to R5-6
 	OSI values in all epicsThreadCreate() calls.
 
 	Files modified: All drivers.
-	
+
+6) Removed the MPF based directory <motor>/motorExApp/ipServerApp from the
+	distribution.
+
+	Files modified: Removed ipServerApp from <motor>/motorExApp/Makefile
+
 
 Modification Log from R5-4 to R5-5
 ==================================
