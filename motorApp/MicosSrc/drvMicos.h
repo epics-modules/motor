@@ -26,7 +26,6 @@
 #define MICOS_NUM_CARDS   16
 #define MICOS_NUM_AXIS    16
 #define CTLA               1
-#define OUTPUT_TERMINATOR "\r"
 
 struct MicosController
 {
