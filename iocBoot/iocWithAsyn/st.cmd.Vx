@@ -106,4 +106,18 @@ MM4000Config(0, 1, MPF_Server_Location, "a-Serial[0]")
 #ESP300Config(0, 1, MPF_Server_Location, "a-Serial[0]")
 #drvESP300debug = 4
 
+# PI C-844 driver setup parameters: 
+#     (1) maximum number of controllers in system
+#     (2) N/A
+#     (3) motor task polling rate (min=1Hz,max=60Hz)
+PIC844Setup(1, 0, 2)
+
+# PI C-844 driver configuration parameters: 
+#     (1) controller# being configured,
+#     (2) port type: 0-GPIB_PORT or 1-RS232_PORT,
+#     (3) GPIB link or MPF server location
+#     (4) GPIB address or MPF serial server name
+PIC844Config(0, 1, MPF_Server_Location, "a-Serial[0]")
+#drvPIC844debug = 4
+
 iocInit
