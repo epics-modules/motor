@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:08:10 $
+Last Modified:	$Date: 2002-10-31 20:43:05 $
 */
 
 /*
@@ -65,10 +65,6 @@ enum CommStatus
     COMM_ERR		/* Communication timeout error. */
 };
 
-#ifndef __cplusplus
-typedef enum PortType PortType;
-typedef enum CommStatus CommStatus;
-#endif
 
 /*
 Valid message types for the driver. The order is of importance; 0 is
@@ -85,9 +81,6 @@ enum msg_types {
     INFO		/* get curr motor/encoder pos and stat */
 };
 
-#ifndef __cplusplus
-typedef enum msg_types msg_types;
-#endif
 
 /* Macros used to set/clear bits in any_motor_in_motion variable. */
 #define SET_MM_ON(v,a)  v|=(1<<a)
@@ -195,7 +188,7 @@ struct controller	/* Controller board information. */
 struct driver_table
 {
     int (*init) (void);
-    int (*send) (struct mess_node *, struct driver_table *);
+    RTN_STATUS (*send) (struct mess_node *, struct driver_table *);
     int (*free) (struct mess_node *, struct driver_table *);
     int (*get_card_info) (int, MOTOR_CARD_QUERY *, struct driver_table *);
     int (*get_axis_info) (int, int, MOTOR_AXIS_QUERY *, struct driver_table *);
@@ -207,7 +200,7 @@ struct driver_table
     struct controller ***card_array;
     int *cardcnt_ptr;
     int *any_inmotion_ptr;
-    int (*sendmsg) (int, char const *, char);
+    RTN_STATUS (*sendmsg) (int, char const *, char);
     int (*getmsg) (int, char *, int);
     int (*setstat) (int, int);
     void (*query_done) (int, int, struct mess_node *);
@@ -226,7 +219,7 @@ struct thread_args
 
 /* Function prototypes. */
 
-extern int motor_send(struct mess_node *, struct driver_table *);
+extern RTN_STATUS motor_send(struct mess_node *, struct driver_table *);
 extern int motor_free(struct mess_node *, struct driver_table *);
 extern int motor_card_info(int, MOTOR_CARD_QUERY *, struct driver_table *);
 extern int motor_axis_info(int, int, MOTOR_AXIS_QUERY *, struct driver_table *);
