@@ -18,10 +18,10 @@ SRCS += devMM3000.cc drvMM3000.cc
 SRCS += devMM4000.cc drvMM4000.cc
 
 # PM500 device driver.
-#!SRCS += devPM500.cc  drvPM500.cc
+SRCS += devPM500.cc  drvPM500.cc
 
 # ESP300 device driver.
-#!SRCS += devESP300.cc drvESP300.cc
+SRCS += devESP300.cc drvESP300.cc
 
 Newport_LIBS += motor motorCOM_mpf
 Newport_LIBS += $(EPICS_BASE_IOC_LIBS)

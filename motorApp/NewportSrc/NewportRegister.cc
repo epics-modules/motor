@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.cc
 USAGE...	Register Newport motor device driver shell commands.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-22 19:56:13 $
+Last Modified:	$Date: 2003-05-23 16:01:10 $
 */
 
 /*****************************************************************
@@ -61,7 +61,6 @@ static void setupMM4000CallFunc(const iocshArgBuf *args)
     MM4000Setup(args[0].ival, args[1].ival, args[2].ival);
 }
 
-/*
 static void setupPM500CallFunc(const iocshArgBuf *args)
 {
     PM500Setup(args[0].ival, args[1].ival, args[2].ival);
@@ -70,40 +69,35 @@ static void setupESP300CallFunc(const iocshArgBuf *args)
 {
     ESP300Setup(args[0].ival, args[1].ival, args[2].ival);
 }
-*/
 
 static void configMM3000CallFunc(const iocshArgBuf *args)
 {
     MM3000Config(args[0].ival, (PortType) args[1].ival, args[2].ival, args[3].sval);
 }
-
 static void configMM4000CallFunc(const iocshArgBuf *args)
 {
     MM4000Config(args[0].ival, (PortType) args[1].ival, args[2].ival, args[3].sval);
 }
-
-/*
 static void configPM500CallFunc(const iocshArgBuf *args)
 {
-    PM500Config(args[0].ival, (PortType) args[1].ival, args[2].ival, args[3].sval);
+    PM500Config(args[0].ival,  (PortType) args[1].ival, args[2].ival, args[3].sval);
 }
 static void configESP300CallFunc(const iocshArgBuf *args)
 {
     ESP300Config(args[0].ival, (PortType) args[1].ival, args[2].ival, args[3].sval);
 }
-*/
 
 static void NewportRegister(void)
 {
     iocshRegister(&setupMM3000, setupMM3000CallFunc);
     iocshRegister(&setupMM4000, setupMM4000CallFunc);
-//    iocshRegister(&setupPM500,  setupPM500CallFunc);
-//    iocshRegister(&setupESP300, setupESP300CallFunc);
+    iocshRegister(&setupPM500,  setupPM500CallFunc);
+    iocshRegister(&setupESP300, setupESP300CallFunc);
 
     iocshRegister(&configMM3000, configMM3000CallFunc);
     iocshRegister(&configMM4000, configMM4000CallFunc);
-//    iocshRegister(&configPM500,  configPM500CallFunc);
-//    iocshRegister(&configESP300, configESP300CallFunc);
+    iocshRegister(&configPM500,  configPM500CallFunc);
+    iocshRegister(&configESP300, configESP300CallFunc);
 }
 
 epicsExportRegistrar(NewportRegister);
