@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.11 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:32:43 $
+Last Modified:	$Date: 2003-10-23 19:52:16 $
 */
 
 /*
@@ -45,7 +45,7 @@ Last Modified:	$Date: 2003-06-16 15:32:43 $
  * .05 04-16-03 rls - Home velocity field (HVEL) added.
  */
 
-#define VERSION 5.1
+#define VERSION 5.2
 
 #include	<stdlib.h>
 #include	<string.h>
