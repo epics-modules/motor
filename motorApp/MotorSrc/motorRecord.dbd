@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.12 $
+# Version:		$Revision: 1.13 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2003-12-17 16:20:10 $
+# Last Modified:	$Date: 2004-01-22 21:19:03 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -59,6 +59,11 @@ menu(motorFOFF) {
 menu(motorTORQ) {
 	choice(motorTORQ_Disable,"Disable")
 	choice(motorTORQ_Enable,"Enable")
+}
+menu(motorSTUP) {
+	choice(motorSTUP_OFF, "OFF")
+	choice(motorSTUP_ON,  "ON")
+	choice(motorSTUP_BUSY,"BUSY")
 }
 
 include "menuOmsl.dbd"
@@ -724,8 +729,11 @@ recordtype(motor) {
 	}
 	field(STUP,DBF_MENU) {
 		prompt("Status Update")
-		menu(menuYesNo)
+		promptgroup(GUI_COMMON)
+		menu(motorSTUP)
 		pp(TRUE)
+		special(SPC_MOD)
 		interest(3)
+		initial("OFF")
 	}
 }
