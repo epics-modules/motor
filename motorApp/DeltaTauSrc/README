@@ -1,0 +1,38 @@
+Delta Tau PMAC
+==============
+
+Notation: "$" denotes hexadecimal number.
+
+Configuring PMAC
+----------------
+
+- Set the "VMEbus Address Modifier" (I90):
+	- $39 for A24 addressing (default).
+	- $9 for A32 addressing.
+- Enable both "supervisory" and "non-privileged" VMEbus data access by setting
+	the "VMEbus Address Modifier Don't Care Bits" (I91) to $4 (default).
+- For A32 addressing only, set the "VME Base Address Bits A31-A24" (I92) to the
+	most significant hex nibble; e.g. for $A123 0000 set I92 to $A1.  The
+	default value ($FF) is N/A.
+- Leave the "VME Mailbox Address Bits A23-A16" (I93) at the default value
+	($7F) so it does not conflict with the DPRAM.
+- Leave the "VME Mailbox Address Bits A15-A08" (I94) at the default value
+	($A0) so it does not conflict with the DPRAM.
+- Set 
+
+
+- Set the "VME DPRAM Base Address Bits A23-A20" (I97); for example,
+	- for A32 addressing, at base address $A123 0000 set I97 to $23.
+	- for A24 addressing, at base address $00D0 0000 set I97 to $D0.
+	The default value is $0.
+
+- Set the "VME DPRAM Enable" (I98) to $E0 to enable DPRAM access; the default
+	value is $60.
+- Set the "VME Address Width Control" (I99) to:
+	- $90 for A24 addressing.
+	- $80 for A32 addressing.
+	The default value is $30.
+
+
+- Enable DPRAM ASCII communication; set I58 to 1.
+
