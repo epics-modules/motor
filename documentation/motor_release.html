@@ -1,6 +1,4 @@
-<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
-<html>
-<head>
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en"><html><head>
     
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
     
@@ -8,13 +6,216 @@
     
   <meta name="Author" content="Ronald L. Sluiter">
     
-  <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release Notice</title>
-</head>
-  <body>
+  <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release."><title>EPICS Motor Record Release Notice</title></head>
+
+<body>
   
 <center> 
-<h1> <b><u>Motor Record Version 4.5 Release Notice</u></b></h1>
+<center> 
+<h1> <b><u>Motor Record Version 5.1 Release Notice</u></b></h1>
+</center>
+
+<div style="text-align: left;"><b>!WARNING!</b><br>
+</div>
+<div style="text-align: left;">This release of the motor record
+contains major modifications.&nbsp; It has not, yet, undergone rigorous
+testing.&nbsp; I highly recommend that user's test this release in a
+safe, non-critical environment before committing themselves to using it
+with their critical applications.<br>
+<br>
+This is the first R3.14 compatible release of the motor record.&nbsp;
+All of the device drivers, with the exception of OMS, are operating
+system independent (OSI).&nbsp; Thanks to Joe Sullivan for his work
+with the initial port to R3.14.<br>
+<h4><span style="text-decoration: underline;">Requirements</span><br>
+</h4>
+EPICS base R3.14.2 or greater.&nbsp; See the "Required Modules" section of the Motor Record web page for details.<br>
+<br>
+<div style="text-align: center;"><b><u>New Features</u></b><br>
+<div style="text-align: left;"><span style="text-decoration: underline;"><span style="font-weight: bold;">MX Device Driver<br>
+<br>
+<span style="text-decoration: underline;"><span style="font-weight: bold;"></span></span></span></span>This
+release includes a device driver for MX.&nbsp; The MX device driver
+gives EPICS user's access to motor controllers that are not currently
+supported by the motor record.&nbsp; An MX example is included with the
+motor distribution.  This device driver requires MX release 0.62.0 or greater.<br>
+<br>
+<span style="font-weight: bold; text-decoration: underline;">Mclennan PM600<br>
+<br>
+</span>Mark Rivers added support for the Mclennan PM600 controller.<br>
+<h1 style="text-align: center;"> <b><u>Motor Record Version 4.7 Release Notice</u></b></h1>
+
+
+<b>!WARNING!</b><br>
+
+
+motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and
+all user trees (i.e., &lt;ioctop&gt;) that load the motor record (see  README
+items #3 and #4 for details).     
+<h4> </h4>
+
+
+ 
+<h4 style="text-align: center;"> <u>Modifications to Existing Features</u></h4>
+
+<div align="left"><u><b>Redundant DMOV Monitor Postings</b></u><br>
+<br>
+Eliminated redundant DMOV monitor postings.&nbsp; Under certain conditions
+the motor record would post the state of the DMOV field twice. &nbsp;For
+example, with previous releases the motor record would post DMOV=0 twice
+if backlash correction was enabled and the user jogged the motor.<br>
+<br>
+<u><b>OMS VME58 Intermittent Limit Switch Status Error<br>
+<br>
+</b></u>There is a problem with OMS VME58 ver 2.35-8 firmware when used with
+MVME2700 CPU boards.&nbsp; The problem is that the controller board intermittently,
+reports that there is no limit switch error when there is an error.&nbsp;
+This error can occur if the user repeatedly, tries to move in the direction
+of the limit switch when the limit error condition exits.&nbsp; A delay has
+been added to work around the problem.<br>
+
+<center>        
+<p><b><u>New Features</u></b></p>
+<div align="left">
+      <u><b>Motor Synchronized DB Puts</b></u><br>
+<br>
+<i>device directive </i>support has been extended to the PREM and POST fields
+for OMS devices only.&nbsp; The new device directive supports changing the
+value of a database variable.&nbsp; The syntax is as follows:<br>
+<blockquote>PREM - @PUT(<i>pvname</i>, <i>pv-value</i>, <i>delay in seconds</i>)@<br>
+</blockquote>
+<blockquote>POST &nbsp;- @PUT(<i>pvname</i>, <i>pv-value</i>)@<br>
+</blockquote>
+Note that the PREM supports a delay argument, but that POST does not. &nbsp;The <i>Readback settle time field</i> (DLY) should be used to create a time delay after the PV specified in the POST field is written.&nbsp; See the <i>Miscellaneous fields</i> section of motorRecord.html for further information on the INIT, PREM and POST fields.<br>
+<br>
+<u><b>IMS MDrive17 device support</b></u>
+</div>
+</center>
+<br>
+Device driver support for the Intelligent Motion Systems (IMS) MDrive17 model motor controller is available with this release.<br>
+<u><b><br>
+Home Velocity<br>
+</b></u><br>
+A home velocity field (HVEL) was added with this release. &nbsp;Like all
+speed related fields, the HVEL is limited by the maximum (VMAX) and base
+(VBAS) velocity fields. &nbsp;In addition, if HVEL is not initialized by the user, the motor record sets HVEL to VBAS.<br>
+
+</div>
+
+<h1 style="text-align: center;"><b><u>Motor Record Version 4.6 Release Notice</u></b></h1>
+
+
+<b>!WARNING!</b><br>
+
+motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and
+all user trees (i.e., &lt;ioctop&gt;) that load the motor record (see  README
+items #3 and #4 for details).     
+<h4> </h4>
+
+<center> 
+<h4> <u>Modifications to Existing Features</u></h4>
+<div align="left"><b><u>Soft Channel Device Support<br>
+<br>
+</u></b></div>
+<div align="left">A conflict between the requirements specified under <i>Requirements
+Clarification </i>below and the goal of having the same record level functionality
+for all device drivers, including Soft Channel device support, was found by
+Tim Graber.<br>
+</div>
+<div align="left"><br>
+</div>
+<div align="left">A problem occurred with, for example, the SoftMotorEx.db
+that is distributed with the motor record, when backlash was enabled in the
+<i>hard motor</i>(a motor configured <u>without</u> Soft Channel device support).&nbsp;
+The result was that the <i>soft motor</i> (a motor configured <u>with</u>
+Soft Channel device support) would interpret the hard motor's backlash correction
+as the motor going in the wrong direction, and stop the "hard" motor from
+completing the backlash correction.<br>
+</div>
+<div align="left"><br>
+</div>
+<div align="left">With this release, the requirements on how the motor record
+processes a new target position while the motor is in motion have been modified
+based on a new field; New Target Monitor (NTM).<br>
+</div>
+<div align="left">
+<blockquote>Case #1: The motor record is given a new position, which is in
+the opposite direction from the current motor motion. &nbsp;If NTM is <u>yes,</u>
+the motor is immediately stopped and given a motion command to the new position.
+&nbsp;If NTM is <u>no</u>, the motor completes the previous move before it
+is given a motion command to the new position.<br>
+</blockquote>
+</div>
+<div align="left">
+<blockquote>Case #2: The motor record is given a new position, which is in
+the same direction as the current motor motion, but the new position is closer
+to the motor's current position than the original target position. &nbsp;If
+NTM is <u>yes</u>, the motor is stopped after it has gone past the new position;
+then a command is given to return to the new position. &nbsp;If NTM is <u>no</u>,
+the motor completes the previous move before it is given a motion command
+to the new position.<br>
+</blockquote>
+</div>
+<div align="left">
+<blockquote>Case #3: The motor record is given a new position, which is in
+the same direction as the current motor motion, but the new position is further
+from the motor's current position than the original position. &nbsp;After
+the motor reaches the original target position and stops, a command is given
+to the new target position.&nbsp; This case is <u>independent</u> of NTM.<br>
+</blockquote>
+</div>
+<div align="left"><br>
+</div>
+<div align="left">A Soft Channel device support design limitation was discovered
+by Tim Mooney.&nbsp; The problem is a result of the modifications made with
+R4-5 below, where the soft motor synchronizes it's target position (i.e.,
+VAL/DVAL/RVAL) with it's readback position (RBV/DRBV/RRBV). &nbsp;Given an
+application where there are two or more soft motors driving the system (e.g.,
+slit), when one soft motor is moved, the other soft motor <i>sees</i> it's
+readback changing and synchronizes it's target position with it's readback
+position at the end of the move, thereby losing it's target position.<br>
+</div>
+&nbsp;&nbsp;&nbsp; <br>
+<div align="left">With this release, the LOCK field has been added to allow
+the user to enable/disable synchronization due to the readback changing.</div>
+</center>
+
+<div align="left">
+<h4><u>Backlash Correction Bug Fixes</u></h4>
+The following scenario would put the motor record into an invalid state. &nbsp;A
+new target position (i.e., VAL/DVAL/RVAL) is written to the motor record
+under the following conditions;<br>
+<ol><li>motion is in progress (i.e., DMOV is false).</li><li>the new target position is different from the actual position by less
+than the retry deadband (|DIFF| &lt; RDBD).</li><li>backlash correction is enabled (i.e., BDST is non-zero) and the new
+move is <b>not</b> in the "preferred direction" (preferred direction is the
+direction in which the motor moves during the backlash-takeout part of a motor
+move).</li></ol>
+A bug was introduced in R4.5 when backlash correction was changed.&nbsp; The
+error occurred when a new target position was issued while the motor was
+moving.&nbsp; The motor would move to the new target position at the backlash
+velocity rather than the slew velocity.<br>
+<br>
+Thanks to Kevin M. Peterson, James B. Stevens and John Maclean for their help
+in finding and fixing these bugs.
+<br>
+<center>        
+<p><b><u>New Features</u></b></p>
+      </center>
+<h4><u>Newport ESP300 device support</u></h4>
+Device support for the Newport ESP300 motor controller is available with
+this release.<br>
+<h1> </h1>
+</div>
+
+
+<h1> </h1>
+
+<span style="text-decoration: underline;"><span style="font-weight: bold;"></span></span></div>
+</div>
+</div>
+<h1> </h1>
+<h1><b><u>Motor Record Version 4.5 Release Notice</u></b></h1>
+
 </center>
 <b>!WARNING!</b><br>
 motorRecord.dbd has been modified.&nbsp; This requires you to 'rebuild' any
@@ -33,8 +234,8 @@ using GPIB or RS232 serial communication mechanisms (i.e., non-VME Bus boards).
 </p>
 <h4> </h4>
 <h4>
-<h4><u>Requirements Clarification</u></h4>
-</h4>
+</h4><h4><u>Requirements Clarification</u></h4>
+
 The requirements on how the motor record processes a new target position
 while the motor is in motion have never been specified.&nbsp; The requirements
 are as follows:<br>
@@ -618,11 +819,16 @@ the relationship between these two methods is as follows:
                 <u>For all OMS controllers</u></blockquote>
   
                 <ul>
- <li> CKP&nbsp; = GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ <li>
+CKP&nbsp; =
+GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CKP =&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1999.9 * GAIN</li>
-  <li> CKI&nbsp;&nbsp; = 2 * GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  <li>
+CKI&nbsp;&nbsp; = 2 *
+GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CKI =&nbsp; 2 * 1999.9 * GAIN</li>
-  <li> CKD = 3 * GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  <li> CKD = 3 *
+GAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CKD = 3 * 1999.9 * GAIN</li>
  
                 </ul>
@@ -711,5 +917,4 @@ primitives that result in a response from the motion control board are valid,
 but the response is not processed. <br>
 &nbsp; <br>
 &nbsp; </p>
-                  </body>
-                  </html>
+                  </body></html>
