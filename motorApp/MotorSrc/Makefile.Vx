@@ -6,8 +6,8 @@ include $(TOP)/config/CONFIG_APP
 
 # The following are required for all motor record configurations.
 SRCS.c += ../motorRecord.c ../motordevCom.c ../motordrvCom.c
-LIBOBJS = motorRecord.o motordevCom.o motordrvCom.o
 
+LIBOBJS = $(SRCS.c:../%.c=%.o)
 LIBNAME = motorLib
 
 #Note that the command line that builds the
