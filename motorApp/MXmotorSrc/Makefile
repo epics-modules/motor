@@ -18,7 +18,7 @@ SRCS_DEFAULT += MXRegister.cc
 # The following is required for the Soft Channel (i.e., MotorSoft) device driver.
 SRCS_DEFAULT += devMXmotor.cc drvMXmotor.cc
 
-MXmotor_LIBS += motor motorCOM_mpf Mx
+MXmotor_LIBS += motor Mx
 MXmotor_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
