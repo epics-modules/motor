@@ -13,6 +13,10 @@
  * .03  02-17-2004   rls  Removed Debug calls to tickGet().
  * .04  07-12-2004   rls  Converted from MPF to asyn.
  * .05  09-20-2004   rls  support for 32axes/controller.
+ * .08  12-16-2004   rls  - asyn R4.0 support.
+ *		    	  - make debug variables always available.
+ *		          - MS Visual C compatibility; make all epicsExportAddress
+ *				extern "C" linkage.
  */
 
 
@@ -39,7 +43,6 @@ struct mess_queue
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvMicosDebug = 0;
 	#define Debug(l, f, args...) {if (l <= drvMicosDebug) printf(f, ## args);}
     #else
 	#define Debug(l, f, args...)
@@ -47,6 +50,8 @@ struct mess_queue
 #else
     #define Debug()
 #endif
+volatile int drvMicosDebug = 0;
+extern "C" {epicsExportAddress(int, drvMicosDebug);}
 
 /* Debugging notes:
  *   drvMicosDebug == 0  No debugging information is printed
@@ -106,7 +111,7 @@ struct
     long (*init) (void);
 } drvMicos = {2, report, init};
 
-epicsExportAddress(drvet, drvMicos);
+extern "C" {epicsExportAddress(drvet, drvMicos);}
 
 static struct thread_args targs = {SCAN_RATE, &Micos_access};
 
@@ -294,8 +299,11 @@ static int set_status(int card, int signal)
 /*****************************************************/
 static RTN_STATUS send_mess(int card, const char *com, char *name)
 {
-    char buff[BUFF_SIZE];
     struct MicosController *cntrl;
+    int size;
+    int nwrite;
+
+    size = strlen(com);
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -305,14 +313,13 @@ static RTN_STATUS send_mess(int card, const char *com, char *name)
     }
 
     /* If the string is NULL just return */
-    if (strlen(com) == 0) return(OK);
+    if (size == 0) return(OK);
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
 
-    strcpy(buff, com);
-    strcat(buff, OUTPUT_TERMINATOR);
     Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
-    pasynOctetSyncIO->write(cntrl->pasynUser, buff, strlen(buff), COMM_TIMEOUT);
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, size, COMM_TIMEOUT,
+			    &nwrite);
 
     return (OK);
 }
@@ -324,11 +331,10 @@ static RTN_STATUS send_mess(int card, const char *com, char *name)
 /*****************************************************/
 static int recv_mess(int card, char *com, int flag)
 {
-    int timeout;
-    int flush = 0;
-    int len=0;
-    int eomReason;
     struct MicosController *cntrl;
+    int nread = 0;
+    asynStatus status = asynError;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -341,27 +347,25 @@ static int recv_mess(int card, char *com, int flag)
 
     Debug(3, "recv_mess entry: card %d, flag=%d\n", card, flag);
     if (flag == FLUSH)
-        timeout = 0;
+	pasynOctetSyncIO->flush(cntrl->pasynUser);
     else
-        timeout = COMM_TIMEOUT;
+	status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+				    COMM_TIMEOUT, &nread, &eomReason);
     
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\3",
-                            1, flush, timeout, &eomReason);
-
-    /* The response from the Micos is terminated with <CR><LF><ETX>.  Remove */
-    if (len < 3) com[0] = '\0'; 
-    else com[len-3] = '\0';
-    if (len > 0) {
-        Debug(2, "recv_mess: card %d, message = \"%s\"\n", card, com);
+    if ((status != asynSuccess) || (nread <= 0))
+    {
+	com[0] = '\0';
+	nread = 0;
+	if (flag != FLUSH)
+	{
+	    Debug(1, "recv_mess: card %d ERROR: no response\n", card);
+	}
     }
-    if (len == 0) {
-        if (flag != FLUSH)  {
-            Debug(1, "recv_mess: card %d ERROR: no response\n", card);
-        } else {
-            Debug(3, "recv_mess: card %d flush returned no characters\n", card);
-        }
+    else
+    {
+	Debug(2, "recv_mess: card %d, message = \"%s\"\n", card, com);
     }
-    return (len);
+    return (nread);
 }
 
 
@@ -448,6 +452,9 @@ static int motor_init()
     int status = 0;
     bool errind;
     asynStatus success_rtn;
+    static const char output_terminator[] = "\r";
+    /* The response from the Micos is terminated with <CR><LF><ETX>. */
+    static const char input_terminator[]  = "\r\n\3";
 
     initialized = true;   /* Indicate that driver is initialized. */
 
@@ -470,11 +477,17 @@ static int motor_init()
 
         /* Initialize communications channel */
         errind = false;
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
+						&cntrl->pasynUser, NULL);
         
 	if (success_rtn == asynSuccess)
         {
             int retry = 0;
+
+	    pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
+					   strlen(output_terminator));
+	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
+					  strlen(input_terminator));
 
             /* Each "controller" can have max 16 axes. */
             total_axis = Micos_num_axis;
