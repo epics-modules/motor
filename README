@@ -1,8 +1,8 @@
-Motor Record V4.4 Release Notice
-================================
+Motor Record R4-5 Release Notice
+===============================================================================
 
 The motor record software in this release is compatible with EPICS base
-R3.13.2, R3.13.3 and R3.13.4.
+R3.13.3, R3.13.4 and R3.13.5.
 
 
 Contents
@@ -22,9 +22,12 @@ As distributed, this support directory only builds the following:
 
 Optionally, any of the following device/driver libraries can be built by
 uncommenting the appropriate line in ./motorApp/Makefile.
-	ImsLib - Intelligent Motion Systems controllers; ImsSrc directory.
+	ImsLib - Intelligent Motion Systems (IMS) controllers; ImsSrc
+		 directory.
 	newportLib - Newport controllers; NewportSrc directory.
-	omsLib - Oregon Micro System controllers; OmsSrc directory.
+	omsLib - Oregon Micro System (OMS) controllers; OmsSrc directory.
+	AcsLib - Advanced Control Systems controllers; AcsSrc directory.
+	MclennanLib - Mclennan controllers; MclennanSrc directory.
 	softMotorLib - Soft Channel device support; SoftMotorSrc directory.
 	motorCOM_mpf - Communication interface between motor device/drivers and
 		MPF; CommSrc directory.
@@ -53,24 +56,234 @@ needs.  See individual files for instructions.
 	- ./motorApp/Makefile: Define which device/driver modules to build.
 	- ./motorExApp/Makefile: Define which, if any, example applications are
 		to be built.
+		
+Newport - Newport device drivers require both MPF_SERIAL and MPF_GPIB support.
 
 
 Known Problems
 ==============
 
-1) With the exception of jogging, motor record controlled backlash correction
-	does not work with the Newport MM4000.  Since the MM4000 controller
-	has its' own backlash compensation feature, there are no plans to fix
-	this in future releases.  Users of the MM4000 who need backlash
-	compensation should set the motor record's backlash distance to zero
-	and program the MM4000 controller's backlash compensation parameters.
-
-2) The PAUSE function of the SPMG field only works if the RTRY field is
+1) The PAUSE function of the SPMG field only works if the RTRY field is
 	nonzero.  This bug existed as far back as V3.3 of the motor record.
 
+2) MM4005 only.  On the first attempt to move off an activated limit switch,
+	the motor moves to where it was commanded.  However, the motor record's
+	positions (both target and readback) do not reflect the move.  This
+	is because of the following sequence of events:
+	
+	- a limit (i.e., laser light beam) violation occurs.  The Newport
+	controller turns motor power off.
+	- the axis stops at position X.
+	- a move command is issued in the opposite direction.
+	- after a delay of between 16.67 ms and 33.33 ms, a motor status
+	(i.e., MS) query is issued to the MM4005.
+	- the motor status response indicates the axis is NOT in motion
+	and motor power is OFF (the motor record interprets this as "Done
+	Moving" true).
+	- a "read actual positions" command is issued.
+	- the actual position response indicates the axis is still at
+	position X.
+	- the controller turns motor power on and the axis moves to the
+	requested position.
+
+3) Under certain circumstances the error message "Motor motion timeout ERROR"
+	can appear erroneously.  This occurs if the user repeats 10 consecutive
+	commands that include a controller update command (i.e., INFO) without
+	any intervening motor moves.  For example, if the UEIP field is
+	toggled between "Yes" and "No" 10 times, the "Motor motion timeout
+	ERROR" message will appear.
 
 
-Modification Log from V4.3 to V4.4
+Modification Log from R4-4 to R4-5
+==================================
+
+1) The GPIB and RS232 serial communication error detection and reporting
+	mechanism was unreliable.  In addition, once a communication error was
+	detected, the motor task did endless periodic communication retries.
+	With this release, once a communication error is detected, one retry
+	is attempted (Further retries are made, if the position RETRY field is
+	non-zero).  If the retry fails, then a communication error is
+	reported.  No further attempt is made to communicate with the
+	controller until subsequent user input (e.g., a new target position is
+	entered).  This change affects all device drivers using GPIB or RS232
+	serial communication mechanisms (i.e., non-VME Bus boards).
+	
+	Files modified: motordrvCom.h - added RETRY to CommStatus enumeration.
+	drvMM4000.c, drvMM3000.c, drvPM500.c, drvIM483PL.c, drvIM483SM.c
+	- start_status() allows one retry after a communication error.
+	- set_status() sets RA_PROBLEM along with CNTRL_COMM_ERR to terminate
+		node.
+
+2) The requirements on how the motor record processes a new target position
+	while the motor is in motion have never been specified.  The
+	requirements are as follows:
+
+	Case #1: The motor record is given a new position, which is in the
+	opposite direction from the current motor motion.  The motor is
+	immediately stopped and given a motion command to the new position.
+	
+	Case #2: The motor record is given a new position, which is in the
+	same direction as the current motor motion, but the new position is
+	closer to the motor's current position than the original target
+	position.  The motor is stopped after it has gone past the new
+	position; then a command is given to return to the new position.
+
+	Case #3: The motor record is given a new position, which is in the
+	same direction as the current motor motion, but the new position is
+	further from the motor's current position than the original position.
+	After the motor reaches the original target position and stops, a
+	command is given to the new target position.  (Previous motor record
+	versions ignored the new target position.)
+	
+	File modified: * process() in motorRecord.c
+		       * motorRecord.dbd - the PP field is initially zero.
+					 - replaced PDIF with CDIR field.
+
+3) For two CPU board configurations only (i.e., EPICS and IP satellite boards),
+	erroneous timeouts occurred if the EPICS board booted much faster than
+	the satellite board.
+	
+	File modified: CommSrc/serialIOMPF.cc; increased timeout from 2 to 10
+			seconds in call to msgQReceive() from serialIO().
+
+4) The "Driver Power Monitoring" feature (available only with OMS VME58
+	controllers) was erroneously and randomly being enabled.  This
+	occurred because the internal state indicator (dpm) was never
+	initialized to OFF at boot-up.
+	
+	File modified: motor_init_record_com() in motordevCom.c.  Explicitly
+			initialize "dpm" to OFF.
+
+5) The Soft Channel device support modifications:
+	- Prevent record processing before "interruptAccept" is true.  This
+	helps prevent alarms.
+	- If the readback is changing, but motion was not initiated by this
+	record, then reset the motor record's target to actual position (i.e.,
+	VAL/DVAL/RVAL = RBV/DRBV/RRBV) after the move.  As always, the Soft
+	Channel motor record's DMOV field is guaranteed to execute and post a
+	1/0/1 pulse, but MOVN remains zero throughout a move that was not
+	initiated by the Soft Channel record.
+	- Lowered the priority of the "soft_motor task below the "dbCaLink"
+	task.  This fixes the "DMOV processing before the last DRBV update"
+	problem.
+	 
+	Files modified: - devSoft.h, devSoft.c, devAuxSoft.c
+
+6) For VMEbus based motor controllers only (i.e., OMS), a "hole" in an array
+	of VME based motor controller boards caused the system to crash with
+	a memory "access error" on the address of the missing controller.
+	For example, if oms58Setup(3, 8, 0x4000, 190, 5, 10) was issued without
+	a board at 0xFFFF5000, a bus error would occur if the user attempted
+	to move a motor on the missing board.
+
+	Files modified: drvOms58.c - start_status() was not checking for valid
+					motor_state[card] pointer.
+			drvOms.c,drvOms58.c - "total_cards" changed from total
+				detected to total cards that "memory is
+				allocated for".  This allows boards after the
+				"hole" to work.
+
+7) For OMS motor controllers only, if the PREM field was set without a leading
+	space character (e.g., "BH8") this resulted in an invalid OMS command
+	(e.g., "AX VB10 VL1000 AC5000BH1 MA200 GD ID").
+
+	File modified: devOmsCom.c - A space character was prefixed to the
+					PREM field in oms_build_trans().
+
+8) Eliminated support for the "ASCII record separator (IS2) = /x1E".
+
+	Files modified:
+		- MotorSrc/motordrvCom.c: Removed support for splitting and
+		shuffling concatenated command messages in query_axis().
+                - ImsSrc/devIM483[SM/PL].c: Moved the calls to
+		motor_[start/end]_trans_com() into IM483[SM/PL]_build_trans().
+		Don't call motor_end_trans_com() if motor command is a NOOP. 
+
+9) With previous releases of the motor record, the RES field was set to either
+	ERES or MRES, based on whether or not the following statement was true;
+	MSTA indicates an encoder is present, AND, UEIP is set to YES.  This
+	state (i.e., MSTA indicates an encoder is present, AND, UEIP is set to
+	YES) resulted in the record converting all position and velocity
+	related values from EGU's to raw encoder counts before sending them to
+	the motor controller.  This is the manner in which the OMS controllers
+	work (see OMS User's Manual, ER# command).
+	With this release, all raw positions, velocity and acceleration are
+	in terms of motor steps.
+	- RES always equal to MRES.  RES preserved for backward compatibility
+		only.  All instances of RES have been replaced with MRES.
+	
+	Files modified: - MotorSrc/motor.h
+			- MotorSrc/motorRecord.c
+			- MotorSrc/motordevCom.c
+			- OmsSrc/devOmsCom.c
+			- NewportSrc/devMM3000.c
+			- NewportSrc/devMM4000.c
+			- NewportSrc/devPM500.c
+			- ImsSrc/devIM483PL.c
+			- ImsSrc/devIM483SM.c
+			- V544Src/devV544.c
+
+10) Jog velocity was not checked for validity when VMAX or VBAS was changed.
+	Files modified: MotorSrc/motorRecord.c, added JVEL error check in
+			special().
+
+11) Previous motor record releases put both the "slew" and backlash correction
+	moves on the same motor controller command line.  Some controllers
+	(i.e., OMS) handled this correctly by processing the slew move followed
+	by the backlash correction move.  Other controllers (i.e, Newport) did
+	not handle this correctly and processed the commands immediately,
+	resulting in the controller moving to the target position without
+	backlash correction, but at the backlash correction velocity.
+
+	With this release, backlash correction commands are not issued to the
+	controller until after the slew move is completed.
+	
+	File modified:	MotorSrc/motorRecord.c
+		- Moved the backlash commands from do_work() to postProcess().
+		- Added a MIP_MOVE_BL state indicator.
+		- Eliminated redundant MARK(M_MIP)'s.
+		- Combined MIP_MOVE with MIP_JOG_STOP logic in postProcess().
+
+12) Mark Rivers has added device driver support for the following motor
+	controllers:
+
+		- Advanced Control Systems, Corp. model MCB-4B.
+		- Mclennan model PM304.
+
+13) motor_callback() in motordevCom.c calls dbProcess(), rather than calling
+	motor record process() directly.  This supports standard database
+	processing functions like TPRO and breakpoints.
+
+14) Update <motor>/config files to synApps R4.4 and epics base 3.13.5:
+
+	Files modified:
+		RULES.Db - added "depends::"
+		makeConfigAppInclude.pl - updated to synApps R4.4 version.
+		makeIocCdCommands.pl    - updated to synApps R4.4 version
+
+15) Some databases where converted to VDCT; i.e., motor.db, SoftMotorEx.db.
+
+16) Added separate +/- limit switch status bits in the MSTA field.  There are
+	two types of motor controllers.  The first type provides a limit switch
+	error and a direction indicator, the second type provides the state of
+	both limit switches, but no direction indicator.  In the first case,
+	the device driver knows that an error has occurred, that motion has
+	stopped,  and that based on the direction indicator, which limit switch
+	was activated.  In the second case the device driver must determine,
+	based on the limit switch states and an internally generated direction
+	indicator, whether or not a limit switch error has occurred.  The OMS
+	controllers are an example of the first type of controller and the
+	IM483 is an example of the second type of controller.
+
+	Files modified:  - MotorSrc/motor.h
+			 - MotorSrc/motorRecord.c
+			 - MotorSrc/motordrvCom.c
+			 - All drivers; i.e., */drv*.c
+		
+17) Post all fields when recGblResetAlarms() returns an alarm.
+
+
+Modification Log from R4-3 to R4-4
 ==================================
 
 1) config/RELEASE: - Changed comments to indicate that MPF_SERIAL must be
@@ -141,10 +354,10 @@ Modification Log from V4.3 to V4.4
 	
 
 					
-Modification Log from V4.2 to V4.3
+Modification Log from R4-2 to R4-3
 ==================================
 
-1) An error was introduced into the motor record when item #14 under V4.2 was
+1) An error was introduced into the motor record when item #14 under R4-2 was
 implemented.  This error occurred if the STOP field was activated when the
 motor was not moving (i.e., MIP = 0).  The motor record would become "stuck",
 and not respond to a move request (due to the internal state machine associated
@@ -178,7 +391,7 @@ corresponding GDCT data file is SoftMotorEx.
 			
 
 
-Modification Log from V4.1 to V4.2
+Modification Log from R4-1 to R4-2
 ==================================
 
 1) The following requirement was lost with release V4.0.  At boot-up, if one
@@ -279,6 +492,7 @@ record separator is allowed in a command line.
 			      - query_axis() detects 2nd part of messages,
 				outputs it and clears the message buffer.
 				
+				
 13) For those controllers whose command lines require an alphabetic character
 for the axis name identifier (e.g. OMS, Oms58, IMS483PL), support has been
 added for driver specific axis names.  An axis name array pointer was added to
@@ -347,7 +561,7 @@ drvOmsCom.h.
 	Files modified: motordrvCom.h and drvOmsCom.h
 
 
-Modification Log from V4.0 to V4.1
+Modification Log from R4-0 to R4-1
 ==================================
 
 1) Three errors in the OMS VME58 driver were found.  All the errors caused the
@@ -397,7 +611,7 @@ target acceleration rate (ACCL) with the STOP command.
 	File modified: devOmsCom.c
 
 
-Modification Log from V3.5 to V4.0
+Modification Log from V3-5 to R4-0
 ==================================
 
 1) EPICS base 3.13.1 compatibility.
@@ -611,7 +825,8 @@ Modification Log from V3.5 to V4.0
 	logic;
 	    IF DVAL field has changed
 		IF the SET position field is OFF
-		    IF last dial commanded position = current dial feedback position.
+		    IF last dial commanded position = current dial feedback
+								position.
 
 22) An infinite home velocity was being issued if the MSTA "encoder present"
 	bit was on, ERES=0 and UEIP=NO.
@@ -658,7 +873,7 @@ Modification Log from V3.5 to V4.0
 	Files modified: start_status() in drvOms58.c
         for (index = 0; index < total_cards; index++)
         {
-            if ((pmotor = (struct vmex_motor *) motor_state[card]->localaddr) != 0)
+            if((pmotor=(struct vmex_motor *) motor_state[card]->localaddr)!=0)
                                                              ^
                                                        wrong | index
 
