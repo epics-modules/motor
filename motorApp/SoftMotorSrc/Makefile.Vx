@@ -8,7 +8,7 @@ include $(TOP)/config/CONFIG_APP
 SRCS.c += ../devSoft.c ../devSoftAux.c
 LIBOBJS += devSoft.o devSoftAux.o
 
-LIBNAME = SoftMotorLib
+LIBNAME = softMotorLib
 
 #Note that the command line that builds the
 #library $(LIBNAME) may be HUGE (>3kB)
