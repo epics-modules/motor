@@ -3,9 +3,9 @@ FILENAME...	devPM500.c
 USAGE...	Motor record device level support for the Newport PM500 motor
 		controller.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 17:21:02 $
+Last Modified:	$Date: 2000-11-08 20:41:33 $
 */
 
 /*
@@ -260,14 +260,18 @@ STATIC long PM500_build_trans(motor_cmnd command, double *parms, struct motorRec
 	    break;	    /* PM500 does not use base velocity */
 	
 	case SET_VELOCITY:
+	    /* PM500 uses mm/sec and karc-sec/sec for velocity, but microns and
+	     * arc-sec for position.  Divide by 1000 here.
+	     */
+	    cntrl_units /= 1000.0;
 	    sprintf(buff, "%cV%.*f;", axis_name, maxdigits, cntrl_units);
 	    break;
 	
 	case SET_ACCEL:
-	    /* 
-	     * The value passed is in steps/sec/sec.  
-	     * Convert to user units/sec/sec
+	    /* PM500 uses mm/sec^2 and karc-sec/sec^2 for acceleration, but
+	     * microns and arc-sec for position.  Divide by 1000 here.
 	     */
+	    cntrl_units /= 1000.0;
 	    sprintf(buff, "%cACCEL%.*f;", axis_name, maxdigits, cntrl_units);
 	    break;
 	
@@ -294,11 +298,10 @@ STATIC long PM500_build_trans(motor_cmnd command, double *parms, struct motorRec
 	    break;
 	
 	case JOG:
-	    /* Note: PM 500 uses mm/sec/sec and karc-sec/sec/sec for
-	     * velocity and acceleration, but microns and arc-sec for position
-	     * Divide 1000 here.
+	    /* PM500 uses mm/sec and karc-sec/sec for velocity, but microns and
+	     * arc-sec for position.  Divide by 1000 here.
 	     */
-	    cntrl_units /= 1000.;
+	    cntrl_units /= 1000.0;
 	    sprintf(buff, "%cS%f;", axis_name, cntrl_units);
            break;
 	
