@@ -3,7 +3,7 @@
 errlogInit(0)
 
 dbLoadDatabase("../../dbd/WithMPF.dbd")
-registerRecordDeviceDriver(pdbbase)
+WithMPFVx_registerRecordDeviceDriver(pdbbase)
 dbLoadRecords("../../db/WithMPF.db")
 
 routerInit
