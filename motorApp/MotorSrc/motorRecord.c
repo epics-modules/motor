@@ -1,16 +1,16 @@
 /*
 FILENAME...	motorRecord.c
-USAGE...	Record Support Routines for the Motor record.
+USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-11-08 20:26:53 $
+Last Modified:	$Date: 2001-05-11 21:24:21 $
 */
 
 /*
- *		Original Author: Jim Kowalkowski
- *		Previous Author: Tim Mooney
- *		Current Author: Ron Sluiter
+ *	Original Author: Jim Kowalkowski
+ *	Previous Author: Tim Mooney
+ *	Current Author: Ron Sluiter
  *
  *	Experimental Physics and Industrial Control System (EPICS)
  *
@@ -113,9 +113,16 @@ Last Modified:	$Date: 2000-11-08 20:26:53 $
  *			modifications fix the "runaway jog" problem discovered
  *			with the MM4000 device support using serial communication
  *			when the user "hammers" on the jog request.
+ * .36  02-14-01 rls  - Changed logic in do_work() so that the stop command is
+ *		      always sent to the controller when the STOP field is
+ *		      activated; but, the MIP field in only set to the "stop"
+ *		      state if the current state is not STOP or DONE.
+ *		      - Eliminated unused MIP_LOAD_ER.
+ *		      - Added Mark Rivers Soft Channel changes as a
+ *			conditionial option; DMR_SOFTMOTOR_MODS.
  */
 
-#define VERSION 4.3
+#define VERSION 4.4
 
 #include	<vxWorks.h>
 #include	<stdlib.h>
@@ -160,6 +167,16 @@ extern "C" {
 
 #define STATIC static
 #define MAX(a,b) ((a)>(b)?(a):(b))	/* nearest integer */
+
+/*----------------debugging-----------------*/
+
+#ifdef	DEBUG
+    #define Debug(l, f, args...) { if(l<=motorRecordDebug) printf(f,## args); }
+#else
+    #define Debug(l, f, args...)
+#endif
+
+volatile int motorRecordDebug = 0;
 
 /*** Forward references ***/
 
@@ -254,7 +271,6 @@ fields.  ('pmr' is a pointer to motorRecord.)
 #define MIP_MOVE	0x0020	/* A move not resulting from Jog* or Hom*.   */
 #define MIP_RETRY	0x0040	/* A retry is in progress.                   */
 #define MIP_LOAD_P	0x0080	/* A load-position command is in progress.   */
-#define MIP_LOAD_ER	0x0100	/* A load-encoder-ratio command in progress. */
 #define MIP_STOP	0x0200	/* We're trying to stop.  When combined with */
 /*                                 MIP_JOG* or MIP_HOM*, the jog or home     */
 /*                                 command is performed after motor stops    */
@@ -464,7 +480,27 @@ STATIC void enforceMinRetryDeadband(motorRecord * pmr)
 
 Called twice after an EPICS database has been loaded, and then never called
 again.
+
+LOGIC:
+    IF first call (pass == 0).
+	Initialize VERS field to Motor Record version number.
+	NORMAL RETURN.
+    ENDIF
+    ...
+    ...
+    ...
+    Initialize Limit violation field OFF.
+    IF (Software Travel limits are NOT disabled), AND,
+	    (Dial readback violates dial high limit), OR,
+	    (Dial readback violates dial low limit)
+	Set Limit violation field ON.
+    ENDIF
+    ...
+    Call monitor().
+    NORMAL RETURN.
+
 *******************************************************************************/
+
 STATIC long init_record(motorRecord * pmr, int pass)
 {
     struct motor_dset *pdset;
@@ -604,8 +640,10 @@ STATIC long init_record(motorRecord * pmr, int pass)
     pmr->ldvl = pmr->dval;
     pmr->lrvl = pmr->rval;
     pmr->lvio = 0;		/* init limit-violation field */
-    if ((pmr->drbv > pmr->dhlm + pmr->res) ||
-	(pmr->drbv < pmr->dllm - pmr->res))
+
+    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+	;
+    else if ((pmr->drbv > pmr->dhlm + pmr->res) || (pmr->drbv < pmr->dllm - pmr->res))
     {
 	pmr->lvio = 1;
 	MARK(M_LVIO);
@@ -667,15 +705,28 @@ STATIC long postProcess(motorRecord * pmr)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
     const unsigned short monitor_mask = DBE_VALUE;
+#ifdef DMR_SOFTMOTOR_MODS
+    int dir_positive = (pmr->dir == motorDIR_Pos);
+    int dir = dir_positive ? 1 : -1;
+#endif
 
-    pmr->pp = 0;
+    Debug(3, "postProcess: entry\n", 0);
+
+    pmr->pp = FALSE;
 
     if (pmr->omsl != CLOSED_LOOP)
     {
 	/* Make drive values agree with readback value. */
+#ifdef DMR_SOFTMOTOR_MODS
+    	/* Mark Rivers - make val and dval agree with rrbv, rather than rbv or
+    	   drbv */
+	pmr->val = (pmr->rrbv * pmr->res) * dir + pmr->off;
+	pmr->dval = pmr->rrbv * pmr->res;
+#else
 	pmr->val = pmr->rbv;
-	MARK(M_VAL);
 	pmr->dval = pmr->drbv;
+#endif
+	MARK(M_VAL);
 	MARK(M_DVAL);
 	pmr->rval = pmr->rrbv;
 	MARK(M_RVAL);
@@ -685,10 +736,10 @@ STATIC long postProcess(motorRecord * pmr)
 	MARK(M_RDIF);
     }
 
-    if (pmr->mip & (MIP_LOAD_P | MIP_LOAD_ER))
+    if (pmr->mip & MIP_LOAD_P)
     {
-	/* We sent LOAD_POS or SET_ENC_RATIO, followed by GET_INFO. */
-	pmr->mip = 0;
+	/* We sent LOAD_POS, followed by GET_INFO. */
+	pmr->mip = MIP_DONE;
 	MARK(M_MIP);
 
     }
@@ -796,7 +847,7 @@ STATIC long postProcess(motorRecord * pmr)
 	}
 	else
 	{
-	    pmr->mip = 0;	/* Backup distance = 0; skip backlash. */
+	    pmr->mip = MIP_DONE;	/* Backup distance = 0; skip backlash. */
 	    MARK(M_MIP);
 	    if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
 		pmr->mip |= MIP_JOG_REQ;
@@ -805,7 +856,7 @@ STATIC long postProcess(motorRecord * pmr)
     else if (pmr->mip & MIP_JOG_BL)
     {
 	/* Completed backlash part of jog command. */
-	pmr->mip = 0;
+	pmr->mip = MIP_DONE;
 	MARK(M_MIP);
 	if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
 	    pmr->mip |= MIP_JOG_REQ;
@@ -831,6 +882,7 @@ STATIC void maybeRetry(motorRecord * pmr)
     if ((fabs(pmr->diff) > pmr->rdbd) && !pmr->hls && !pmr->lls)
     {
 	/* No, we're not close enough.  Try again. */
+	Debug(1, "maybeRetry: not close enough; diff = %f\n", pmr->diff);
 	/* If max retry count is zero, retry is disabled */
 	if (pmr->rtry == 0)
 	{
@@ -844,7 +896,7 @@ STATIC void maybeRetry(motorRecord * pmr)
 	    {
 		/* Too many retries. */
 		/* pmr->spmg = motorSPMG_Pause; MARK(M_SPMG); */
-		pmr->mip = 0;
+		pmr->mip = MIP_DONE;
 		MARK(M_MIP);
 		pmr->lval = pmr->val;
 		pmr->ldvl = pmr->dval;
@@ -867,6 +919,7 @@ STATIC void maybeRetry(motorRecord * pmr)
     else
     {
 	/* Yes, we're close enough to the desired value. */
+	Debug(1, "maybeRetry: close enough; diff = %f\n", pmr->diff);
 	pmr->mip &= MIP_JOG_REQ;/* Clear everything, except jog request; for
 				    jog reactivation in postProcess(). */
 	MARK(M_MIP);
@@ -994,12 +1047,16 @@ LOGIC:
 	Save previous RDIF (pre_rdif) for target direction reversal detection in
 		above Stop logic.
     ENDIF
-    IF Jog indicator is ON in MIP field.
-	Update Limit violation (LVIO) based on Jog direction (JOGF/JOGR) and VELO.
-    ELSE IF Homing indicator is ON in MIP field.
-	Update Limit violation (LVIO) based on Home direction (HOMF/HOMR) and VELO.
+    IF Software travel limits are disabled.
+	Clear Limit violation field.
     ELSE
-	Update Limit violation (LVIO).
+	IF Jog indicator is ON in MIP field.
+	    Update Limit violation (LVIO) based on Jog direction (JOGF/JOGR) and VELO.
+	ELSE IF Homing indicator is ON in MIP field.
+	    Update Limit violation (LVIO) based on Home direction (HOMF/HOMR) and VELO.
+	ELSE
+	    Update Limit violation (LVIO).
+	ENDIF
     ENDIF
     IF Limit violation (LVIO) has changed.
 	Mark LVIO as changed.
@@ -1038,6 +1095,7 @@ STATIC long process(motorRecord * pmr)
     if (pmr->pact)
 	return(OK);
 
+    Debug(4, "process:---------------------- begin; motor \"%s\"\n", pmr->name);
     pmr->pact = 1;
 
     /*** Who called us? ***/
@@ -1153,15 +1211,20 @@ STATIC long process(motorRecord * pmr)
     }				/* if (process_reason == CALLBACK_DATA) */
 
     /* check for soft-limit violation */
-    if (pmr->mip & MIP_JOG)
-	pmr->lvio = (pmr->jogf && (pmr->drbv > pmr->dhlm - pmr->velo)) ||
-	    (pmr->jogr && (pmr->drbv < pmr->dllm + pmr->velo));
-    else if (pmr->mip & MIP_HOME)
-	pmr->lvio = (pmr->homf && (pmr->drbv > pmr->dhlm - pmr->velo)) ||
-	    (pmr->homr && (pmr->drbv < pmr->dllm + pmr->velo));
+    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+	pmr->lvio = OFF;
     else
-	pmr->lvio = (pmr->drbv > pmr->dhlm + fabs(pmr->res)) ||
-	    (pmr->drbv < pmr->dllm - fabs(pmr->res));
+    {
+	if (pmr->mip & MIP_JOG)
+	    pmr->lvio = (pmr->jogf && (pmr->drbv > pmr->dhlm - pmr->velo)) ||
+			(pmr->jogr && (pmr->drbv < pmr->dllm + pmr->velo));
+	else if(pmr->mip & MIP_HOME)
+	    pmr->lvio = (pmr->homf && (pmr->drbv > pmr->dhlm - pmr->velo)) ||
+			(pmr->homr && (pmr->drbv < pmr->dllm + pmr->velo));
+	else
+	    pmr->lvio = (pmr->drbv > pmr->dhlm + fabs(pmr->res)) ||
+			(pmr->drbv < pmr->dllm - fabs(pmr->res));
+    }
 
     if (pmr->lvio != old_lvio)
     {
@@ -1232,11 +1295,12 @@ LOGIC:
     IF Stop/Pause/Move/Go field has changed.
         Update Last Stop/Pause/Move/Go field.
 	IF SPMG field set to STOP, OR, PAUSE.
-	    Set MIP field to indicate processing a STOP request.
-	    Mark MIP field changed.
-	    Send STOP_AXIS message to controller.
 	    IF SPMG field set to STOP.
-		IF Motor is moving (MOVN).
+		IF MIP state is DONE or STOP.
+		    Shouldn't be moving, but send a STOP command without
+			changing to the STOP state.
+		    NORMAL RETURN.
+		ELSE IF Motor is moving (MOVN).
 		    Set Post process command TRUE.
 		ELSE
 		    Set VAL <- RBV and mark as changed.
@@ -1244,7 +1308,17 @@ LOGIC:
 		    Set RVAL <- RRBV and mark as changed.
 		ENDIF
 	    ENDIF
+	    Clear any possible Home request.
+	    Set MIP field to indicate processing a STOP request.
+	    Mark MIP field changed.
+	    Send STOP_AXIS message to controller.
 	    NORMAL RETURN.
+	ELSE IF SPMG field set to GO.
+	    IF either JOG request is true, AND, the corresponding limit is off.		
+		Set MIP to JOG request (i.e., queue jog request).
+	    ELSE IF MIP state is STOP.
+		Set MIP to DONE.
+	    ENDIF
 	ELSE
 	    Clear MIP and RCNT. Mark both as changed.
 	ENDIF
@@ -1288,6 +1362,12 @@ LOGIC:
 	    IF (STOPPED, OR, PAUSED)
 		Set DMOV FALSE (Home command will be processed from
 		    postProcess() when SPMG is set to GO).
+	    ENDIF
+	    IF (Software Travel limits are NOT disabled), AND,
+		(Home Forward, AND, (DVAL > DHLM - VELO)), OR,
+		(Home Reverse, AND, (DVAL < DLLM + VELO)))
+		Set Limit violation field ON.
+		NORMAL RETURN.
 	    ENDIF
 	    ...
 	    ...
@@ -1381,6 +1461,8 @@ STATIC long do_work(motorRecord * pmr)
     const unsigned short monitor_mask = DBE_VALUE;
     mmap_field mmap_bits;
 
+    Debug(3, "do_work: begin\n", 0);
+    
     /*** Process Stop button. ***/
     if (pmr->stop != 0)
     {
@@ -1391,6 +1473,7 @@ STATIC long do_work(motorRecord * pmr)
 	    INIT_MSG();
 	    WRITE_MSG(STOP_AXIS, NULL);
 	    SEND_MSG();
+	    return(OK);
 	}
 	else
 	{
@@ -1434,7 +1517,15 @@ STATIC long do_work(motorRecord * pmr)
 	     */
 	    if (pmr->spmg == motorSPMG_Stop)
 	    {
-		if (pmr->movn)
+		if (pmr->mip == MIP_DONE || pmr->mip == MIP_STOP)
+		{
+		    /* Send message (just in case), but don't put MIP in STOP state. */
+		    INIT_MSG();
+		    WRITE_MSG(STOP_AXIS, NULL);
+		    SEND_MSG();
+		    return(OK);
+		}
+		else if (pmr->movn)
 		    pmr->pp = TRUE;	/* Do when motor stops. */
 		else
 		{
@@ -1464,12 +1555,23 @@ stop_all:   /* Cancel any operations. */
 	    SEND_MSG();
 	    return(OK);
 	}
-	/* Test for "queued" jog request. */
-	else if (pmr->spmg == motorSPMG_Go && ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls)))
-	    pmr->mip = MIP_JOG_REQ;
+	else if (pmr->spmg == motorSPMG_Go)
+	{
+	    /* Test for "queued" jog request. */
+	    if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
+	    {
+		pmr->mip = MIP_JOG_REQ;
+		MARK(M_MIP);
+	    }
+	    else if (pmr->mip == MIP_STOP)
+	    {
+		pmr->mip = MIP_DONE;
+		MARK(M_MIP);
+	    }
+	}
 	else
 	{
-	    pmr->mip = 0;
+	    pmr->mip = MIP_DONE;
 	    MARK(M_MIP);
 	    pmr->rcnt = 0;
 	    MARK(M_RCNT);
@@ -1575,8 +1677,10 @@ stop_all:   /* Cancel any operations. */
     		return(OK);
 	    }
 	    /* check for limit violation */
-	    if ((pmr->homf && (pmr->dval > pmr->dhlm - pmr->velo)) ||
-		(pmr->homr && (pmr->dval < pmr->dllm + pmr->velo)))
+	    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+		;
+	    else if ((pmr->homf && (pmr->dval > pmr->dhlm - pmr->velo)) ||
+		     (pmr->homr && (pmr->dval < pmr->dllm + pmr->velo)))
 	    {
 		pmr->lvio = 1;
 		MARK(M_LVIO);
@@ -1633,8 +1737,10 @@ stop_all:   /* Cancel any operations. */
 	if (!(pmr->mip & MIP_JOG) && !stopped && !pmr->lvio && (pmr->mip & MIP_JOG_REQ))
 	{
 	    /* check for limit violation */
-	    if ((pmr->jogf && (pmr->dval > pmr->dhlm - pmr->velo)) ||
-		(pmr->jogr && (pmr->dval < pmr->dllm + pmr->velo)))
+	    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+		;
+	    else if ((pmr->jogf && (pmr->dval > pmr->dhlm - pmr->velo)) ||
+		     (pmr->jogr && (pmr->dval < pmr->dllm + pmr->velo)))
 	    {
 		pmr->lvio = 1;
 		MARK(M_LVIO);
@@ -1653,8 +1759,8 @@ stop_all:   /* Cancel any operations. */
 	    }
 	    else
 	    {
-		double jogv = (pmr->velo * dir) / pmr->res;
-		double jacc = fabs(jogv) / pmr->accl;
+		double jogv = (pmr->jvel * dir) / pmr->res;
+		double jacc = pmr->jar / fabs(pmr->res);
 
 		pmr->dmov = FALSE;
 		MARK(M_DMOV);
@@ -1738,7 +1844,7 @@ stop_all:   /* Cancel any operations. */
 	    set_userlimits(pmr);	/* Translate dial limits to user limits. */
 
 	    pmr->lval = pmr->val;
-	    pmr->mip = 0;
+	    pmr->mip = MIP_DONE;
 	    MARK(M_MIP);
 	    pmr->dmov = TRUE;
 	    MARK(M_DMOV);
@@ -1751,9 +1857,16 @@ stop_all:   /* Cancel any operations. */
 	     */
 	    pmr->dval = (pmr->val - pmr->off) / dir;	/* Later we'll act on this. */	    
     }
+
     /* Record limit violation */
-    pmr->lvio = (pmr->dval > pmr->dhlm) || (pmr->dval > pmr->dhlm + pmr->bdst)
-	|| (pmr->dval < pmr->dllm) || (pmr->dval < pmr->dllm + pmr->bdst);
+    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+	pmr->lvio = OFF;
+    else
+	pmr->lvio = (pmr->dval > pmr->dhlm) ||
+		    (pmr->dval > pmr->dhlm + pmr->bdst) ||
+		    (pmr->dval < pmr->dllm) ||
+		    (pmr->dval < pmr->dllm + pmr->bdst);
+
     if (pmr->lvio != old_lvio)
 	MARK(M_LVIO);
     if (pmr->lvio)
@@ -1830,7 +1943,7 @@ stop_all:   /* Cancel any operations. */
 		    MARK(M_DMOV);
 		    if (pmr->mip != 0)
 		    {
-			pmr->mip = 0;
+			pmr->mip = MIP_DONE;
 			MARK(M_MIP);
 		    }
 		}
@@ -2010,6 +2123,7 @@ STATIC long special(struct dbAddr * paddr, int after)
     double temp_dbl;
     float *temp_flt;
 
+    Debug(3, "special: after = %d\n", after);
 
     /*
      * Someone wrote to drive field.  Blink .dmov unless record is disabled.
@@ -2464,7 +2578,6 @@ pidcof:
 	if ((pmr->msta & GAIN_SUPPORT) != 0)
 	{
 	    double tempdbl;
-	    struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
 
 	    INIT_MSG();
 	    tempdbl = pmr->cnen;
@@ -2487,6 +2600,25 @@ pidcof:
 	    pmr->mip &= ~MIP_JOG_REQ;
 	else if (pmr->mip == 0 && !pmr->lls)
 	    pmr->mip |= MIP_JOG_REQ;
+	break;
+
+    case motorRecordJVEL:
+	range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+
+	if ((pmr->mip & MIP_JOGF) || (pmr->mip & MIP_JOGR))
+	{
+	    int dir = (pmr->dir == motorDIR_Pos) ? 1 : -1;
+	    double jogv = (pmr->jvel * dir) / pmr->res;
+	    double jacc = pmr->jar / fabs(pmr->res);
+
+	    if (pmr->jogr)
+		jogv = -jogv;
+
+	    INIT_MSG();
+	    WRITE_MSG(SET_ACCEL, &jacc);
+	    WRITE_MSG(JOG_VELOCITY, &jogv);
+	    SEND_MSG();
+	}
 	break;
 
     default:
@@ -3250,6 +3382,14 @@ STATIC void check_speed_and_resolution(motorRecord * pmr)
 	pmr->bacc = 0.1;
 	MARK_AUX(M_BACC);
     }
+    /* Sanity check on jog velocity and acceleration rate. */
+    if (pmr->jvel == 0.0)
+	pmr->jvel = pmr->velo;
+    else
+	range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+
+    if (pmr->jar == 0.0)
+	pmr->jar = pmr->velo / pmr->accl;
 }
 
 /*
