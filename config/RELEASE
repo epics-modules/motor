@@ -11,9 +11,9 @@
 
 #SUPPORT=/usr/local/epics/3.13.2/support
 
-# Define the following if MPF is defined and serial motor controller
-# support is required.
-#MPF_SERIAL=$(SUPPORT)/mpfSerial/mpfSerial1-1
+# Define the following if MPF is defined (i.e., if either serial
+# or GPIB motor controller support is required).
+#MPF_SERIAL=$(SUPPORT)/mpfSerial/mpfSerial1-2
 
 # If the EPICS GPIB Module from Benjamin Franksen is used, then remove the '#'
 # from the following and modify the motorApp/CommSrc/Makefile.Vx file per
@@ -23,9 +23,9 @@
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then MPF must be defined.
-#MPF=$(SUPPORT)/mpf/mpf1-5
+#MPF=$(SUPPORT)/mpf/mpf1-6
 
-#EPICS_BASE=$(SUPPORT)/base/3-13-2
+#EPICS_BASE=$(SUPPORT)/base/3-13-4
 
 # The following must be defined if motorExApp is to be built.
 #TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
