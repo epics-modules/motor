@@ -2,9 +2,9 @@
 FILENAME...	serialIO.h
 USAGE...	.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-04-29 14:30:12 $
+Last Modified:	$Date: 2003-05-07 13:42:47 $
 */
  
 /*****************************************************************
@@ -34,7 +34,7 @@ struct serialInfo *serialIOInit(int card, char *task);
 int serialIOSend(struct serialInfo *serialInfo, char const *buffer,
 		 int buffer_len, int timeout);
 int serialIORecv(struct serialInfo *serialInfo, char *buffer, int buffer_len,
-                    int terminator, int timeout);
+                    char *terminator, int timeout);
 #ifdef __cplusplus
 }
 #endif
