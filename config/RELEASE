@@ -9,7 +9,7 @@
 #
 # Add your declarations here
 
-SUPPORT=/local/epics/3.13.2/support
+#SUPPORT=/usr/local/epics/3.13.2/support
 
 # Define the following if MPF is defined and serial motor controller
 # support is required.
@@ -28,3 +28,8 @@ SUPPORT=/local/epics/3.13.2/support
 #HIDEOS=$(SUPPORT)/hideos/install
 
 #EPICS_BASE=$(SUPPORT)/base/3-13-2
+
+# The following must be defined if motorExApp is to be built.
+#TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
+#MSITOP=/usr/local/epics/extensions
+
