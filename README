@@ -1,7 +1,7 @@
-Motor Record R5-1 Release Notice
+Motor Record R5-3 Release Notice
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base R3.14.2.
+The motor record software in this release is compatible with EPICS base R3.14.4.
 
 
 Contents
@@ -88,6 +88,37 @@ Known Problems
 	any intervening motor moves.  For example, if the UEIP field is
 	toggled between "Yes" and "No" 10 times, the "Motor motion timeout
 	ERROR" message will appear.
+
+4) The OMS VME58 servo motor controller board (i.e., model -8S) is unable to
+	move off an activated limit switch.  Users are advised to avoid this
+	situation.
+
+
+Modification Log from R5-2 to R5-3
+==================================
+
+1) The update (polling) rate for the "OMS VME8/44" device driver was incorrect.
+
+	File modified: - omsSetup() in drvOms.cc.
+
+2) When TWV is set to less than MRES, the following scenario would result.
+	First, tweak forward (TWF).  Since DIFF < MRES, the motor is not moved.
+	Next, tweak reverse (TWR).  Next TWF again.  The motor record does not
+	respond; i.e., DVAL and RVAL are not updated; VAL is not posted.
+	A single tweak, back and forth, confirms that the motor record is not
+	responding.
+	The problem was that do_work() in motorRecord.c was performing the "no
+	move" test before testing for new positions and posting new positions.
+
+	File modified: - do_work() in motorRecord.cc
+
+3) The motor record would lock-up when a user tried to move off an activated
+	limit switch with the OMS VME58 servo motor controller board (i.e.,
+	model -8S).  See above "Known Problems" item #4.
+
+	File modified: - set_status() in drvOms58.cc; had to force CDIR to
+			match the limit switch polarity for record level code
+			to see the limit switch error condition.
 
 
 Modification Log from R5-1 to R5-2
