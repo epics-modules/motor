@@ -8,14 +8,14 @@ DIRS += MotorSrc
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then the "CommSrc" module must be built.  MPF_SERIAL must be defined
 # in <ioctop>/config/RELEASE.
-ifdef MPF_SERIAL
+ifdef MPF
 DIRS += CommSrc
 endif
 
 # 
 # Select individual device/driver support modules by removing the comment.
-#DIRS += OmsSrc
-#DIRS += SoftMotorSrc
+DIRS += OmsSrc
+DIRS += SoftMotorSrc
 #DIRS += V544Src
 
 ifdef MX
@@ -24,11 +24,11 @@ endif
 
 # The following modules require MPF_SERIAL.
 # Select individual device/driver support modules by removing the comment.
-ifdef MPF_SERIAL
-#DIRS += NewportSrc
-#DIRS += ImsSrc
-#DIRS += AcsSrc
-#DIRS += MclennanSrc
+ifdef MPF
+DIRS += NewportSrc
+DIRS += ImsSrc
+DIRS += AcsSrc
+DIRS += MclennanSrc
 endif
 
 DIRS += Db
