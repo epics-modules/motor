@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.c
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 19:22:33 $
+Last Modified:	$Date: 2002-07-11 20:37:34 $
 */
 
 /*
@@ -47,9 +47,12 @@ Last Modified:	$Date: 2002-07-05 19:22:33 $
 DESIGN LIMITATIONS...
     1 - Like all controllers, the IM483 must be powered-on when EPICS is first
 	booted up.
-    2 - Like the Newport MM3000, the IM483's position can only be set to zero.
-    3 - The IM483 uses an internal look-up table for acceleration/deceleration.
-	Translation between the IM483 and the ACCL/BACC fields is not possible.
+    2 - The IM483 cannot be power cycled while EPICS is up and running.  The
+	consequences are permanent communication lose with the IM483 until
+	EPICS is rebooted.
+    3 - Like the Newport MM3000, the IM483's position can only be set to zero.
+    4 - The IM483 uses an internal look-up table for acceleration/deceleration.
+	Translation between the IM483 and the ACCL/BACC fields is not obvious.
 */
 
 #include	<vxWorks.h>
