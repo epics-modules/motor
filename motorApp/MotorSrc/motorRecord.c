@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-05-11 21:24:21 $
+Last Modified:	$Date: 2001-05-14 19:52:30 $
 */
 
 /*
@@ -1281,6 +1281,9 @@ DialLLM = (DIR==+) ? userLLM - OFFset : -userHLM + OFFset
 Offset:
 OFFset	= userVAL - DialVAL * DIR
 
+DEFINITIONS:
+    preferred direction - the direction in which the motor moves during the
+			    backlash-takeout part of a motor motion.
 LOGIC:
     Initialize.
     
@@ -1425,6 +1428,13 @@ LOGIC:
 	ELSE
 	    Calculate....
 	    
+	    IF (UEIP set to YES, AND, MSTA indicates an encoder is present),
+			OR, ReadbackLink is in use (URIP).
+		Set "use relative move" indicator (use_rel) to ON.
+	    ELSE
+		Set "use relative move" indicator (use_rel) to OFF.
+	    ENDIF
+
 	    IF new raw commanded position = current raw feedback position.
 		IF not done moving, AND, [either no motion-in-progress, OR,
 					    retry-in-progress].
@@ -1433,6 +1443,15 @@ LOGIC:
 		    NOTE: maybeRetry() can send control here even though the
 			move is to the same raw position.
 		ENDIF
+	    ENDIF
+	    ....
+	    ....
+	    IF the dial DIFF is within the retry deadband.
+		IF the move is in the "preferred direction".
+		    Update last target positions.
+		    Terminate move. Set DMOV TRUE.
+		    NORMAL RETURN.
+		ENDIF		    
 	    ENDIF
 	    ....
 	    ....
@@ -1918,8 +1937,7 @@ stop_all:   /* Cancel any operations. */
 	    double bvel = pmr->bvel / fabs(pmr->res);	/* backlash speed  */
 	    double bacc = bvel / pmr->bacc;	/* backlash accel. */
 	    double slop = 0.95 * pmr->rdbd;
-	    /*** Use if encoder or ReadbackLink is in use. ***/
-	    int use_rel = ((pmr->msta & EA_PRESENT) && pmr->ueip) || pmr->urip;
+	    BOOLEAN use_rel;
 	    double dMdR = pmr->mres / pmr->res;
 	    double relpos = pmr->diff / pmr->res;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->res;
@@ -1932,6 +1950,12 @@ stop_all:   /* Cancel any operations. */
 	     */
 	    double mRelPos = (NINT(relpos / dMdR) + ((relpos > 0) ? .5 : -.5)) * dMdR;
 	    double mRelBPos = (NINT(relbpos / dMdR) + ((relbpos > 0) ? .5 : -.5)) * dMdR;
+
+	    /*** Use if encoder or ReadbackLink is in use. ***/
+	    if (((pmr->msta & EA_PRESENT) && pmr->ueip) || pmr->urip)
+		use_rel = ON;
+	    else
+		use_rel = OFF;
 
 	    rpos = NINT(rbvpos);
 	    npos = NINT(newpos);
@@ -1971,21 +1995,15 @@ stop_all:   /* Cancel any operations. */
 	    /*
 	     * If we're within retry deadband, move only in preferred dir.
 	     */
-	    if (use_rel)
+	    if (fabs(pmr->diff) < slop)
 	    {
-		if ((fabs(pmr->diff) < slop) &&
-		    ((mRelPos > 0) != (pmr->bdst > 0)))
+		if (((use_rel == OFF) && ((newpos > currpos) != (pmr->bdst > 0))) ||
+		    ((use_rel == ON)  && ((mRelPos > 0)      != (pmr->bdst > 0))))
 		{
-		    pmr->dmov = TRUE;
-		    MARK(M_DMOV);
-		    return(OK);
-		}
-	    }
-	    else
-	    {
-		if ((fabs(pmr->diff) < slop) &&
-		    ((newpos > currpos) != (pmr->bdst > 0)))
-		{
+		    pmr->ldvl = pmr->dval;
+		    pmr->lval = pmr->val;
+		    pmr->lrvl = pmr->rval;
+
 		    pmr->dmov = TRUE;
 		    MARK(M_DMOV);
 		    return(OK);
