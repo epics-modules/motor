@@ -86,6 +86,22 @@ action (i.e., "setting" a soft motor) results in the record being processed;
 which, in most cases, will clear DMOV.
 	Files modified: devSoft.h, devSoft.c, devSoftAux.c
 
+4) A problem with issuing a stop command (via either the STOP or SPMG field)
+was found with ALL OMS boards and ALL versions of the OMS device drivers.  The
+root cause of this problem is a statement in the OMS manual that is not
+entirely correct; i.e., the AC and VL commands are not completely queued.
+
+The motor record issues both the target move and the backlash move on the same
+command line to the motor controller.  Each move (target and backlash) has its'
+own acceleration rate.  The problem was that when a STOP command was issued
+during the target move, the backlash acceleration would go into effect.  This
+could result in a prolonged deceleration if the backlash acceleration rate
+(BACC) is much smaller than the target acceleration rate (ACCL).
+
+With this release both the devOms and the devOms58 device support issue the
+target acceleration rate (ACCL) with the STOP command.
+	File modified: devOmsCom.c
+
 
 Modification Log from V3.5 to V4.0
 ==================================
