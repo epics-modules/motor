@@ -4,6 +4,12 @@ include $(TOP)/config/CONFIG_APP
 #----------------------------------------
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 
+# If the EPICS GPIB Module from Benjamin Franksen is used,
+# then remove the '#' from the following and add GPIB to
+# the config/RELEASE file .  If GPIB driver support is from
+# EPICS base, then leave this line commented out.
+#USR_CFLAGS += -DGPIB
+
 SRCS.c += ../gpibIO.c
 
 # Uncomment the following for device drivers that need serial
@@ -20,7 +26,7 @@ SRCS.c += ../gpibIO.c
 # or GPIB communication support via MPF.  In addition, the
 # MPF directory must be defined in the config/RELEASE file.
 #SRCS.cc += ../serialIOMPF.cc
-#MPFLIBOBJS = gpibIO.o serialIOMPF.o
+#MPFLIBOBJS = $(SRCS.cc:../%.cc=%.o) $(SRCS.c:../%.c=%.o)
 #motorCOM_mpf: $(MPFLIBOBJS)
 #	$(LINK.c) $@ $(MPFLIBOBJS)
 #INSTALLS += motorCOM_mpf
