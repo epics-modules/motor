@@ -10,6 +10,7 @@
  * .00  11-24-2003   kag  initialized from drvMCB4B.c
  * .01  02-06-2004   rls  Eliminate erroneous "Motor motion timeout ERROR".
  * .02  02-12-2004   rls  Copied from drvMicos.c. Upgraded from R3.14.x
+ * .03  02-17-2004   rls  Removed Debug calls to tickGet().
  */
 
 
@@ -307,8 +308,8 @@ static RTN_STATUS send_mess(int card, const char *com, char c)
 
     strcpy(buff, com);
     strcat(buff, OUTPUT_TERMINATOR);
-    Debug(2, "%.2f : send_mess: sending message to card %d, message=%s\n",
-                    tickGet()/60., card, buff);
+    Debug(2, "send_mess: sending message to card %d, message=%s\n",
+		    card, buff);
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
     cntrl->serialInfo->serialIOSend(buff, strlen(buff), SERIAL_TIMEOUT);
 
@@ -335,8 +336,7 @@ static int recv_mess(int card, char *com, int flag)
 
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
 
-    Debug(3, "%.2f : recv_mess entry: card %d, flag=%d\n", 
-            tickGet()/60., card, flag);
+    Debug(3, "recv_mess entry: card %d, flag=%d\n", card, flag);
     if (flag == FLUSH)
         timeout = 0;
     else
@@ -347,16 +347,13 @@ static int recv_mess(int card, char *com, int flag)
     if (len < 3) com[0] = '\0'; 
     else com[len-3] = '\0';
     if (len > 0) {
-        Debug(2, "%.2f : recv_mess: card %d, message = \"%s\"\n", 
-            tickGet()/60., card, com);
+        Debug(2, "recv_mess: card %d, message = \"%s\"\n", card, com);
     }
     if (len == 0) {
         if (flag != FLUSH)  {
-            Debug(1, "%.2f: recv_mess: card %d ERROR: no response\n", 
-                tickGet()/60., card);
+            Debug(1, "recv_mess: card %d ERROR: no response\n", card);
         } else {
-            Debug(3, "%.2f: recv_mess: card %d flush returned no characters\n", 
-                tickGet()/60., card);
+            Debug(3, "recv_mess: card %d flush returned no characters\n", card);
         }
     }
     return (len);
