@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.c
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-29 21:13:24 $
+Last Modified:	$Date: 2002-04-19 18:14:28 $
 */
 
 /*
@@ -35,8 +35,12 @@ Last Modified:	$Date: 2002-03-29 21:13:24 $
  *
  * Modification Log:
  * -----------------
- * .01	02/10/00 rls copied from drvMM4000.c
- * .02  10/02/01 rls allow one retry after a communication error.
+ * .01 02/10/00 rls copied from drvMM4000.c
+ * .02 10/02/01 rls allow one retry after a communication error.
+ * .03 04/15/02 rls Bug fix for limit switches. Set RA_DIRECTION in
+ *		    set_status() based on (new - old) commanded position.
+ *		    Removed support for "ASCII record separator (IS2) = /x1E"
+ *		    from send_mess().
  */
 
 /*
@@ -183,11 +187,6 @@ static long report(int level)
 			   card, 
 			   brdptr->ident);
 		    break;
-		case GPIB_PORT:
-		    printf("    IM483SM controller %d port type = GPIB, id: %s \n", 
-			   card, 
-			   brdptr->ident);
-		    break;
 		default:
 		    printf("    IM483SM controller %d port type = Unknown, id: %s \n", 
 			   card, 
@@ -223,10 +222,34 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 }
 
 
-/**************************************************************
- * Parse status and position strings for a card and signal
- * set_status()
- ************************************************************/
+/********************************************************************************
+*										*
+* FUNCTION NAME: set_status							*
+*										*
+* LOGIC:									*
+*   Initialize.									*
+*   Send "Moving Status" query.							*
+*   Read response.								*
+*   IF normal response to query.						*
+*	Set communication status to NORMAL.					*
+*   ELSE									*
+*	IF communication status is NORMAL.					*
+*	    Set communication status to RETRY.					*
+*	    NORMAL EXIT.							*
+*	ELSE									*
+*	    Set communication status error.					*
+*	    ERROR EXIT.								*
+*	ENDIF									*
+*   ENDIF									*
+*										*
+*   IF "Moving Status" indicates any motion (i.e. status != 0).			*
+*	Clear "Done Moving" status bit.						*
+*   ELSE									*
+*	Set "Done Moving" status bit.						*
+*   ENDIF									*
+*										*
+*   										*
+********************************************************************************/
 
 STATIC int set_status(int card, int signal)
 {
@@ -238,6 +261,7 @@ STATIC int set_status(int card, int signal)
     int status;
     int rtn_state;
     double motorData;
+    BOOLEAN plusdir;
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
@@ -286,21 +310,42 @@ STATIC int set_status(int card, int signal)
 	}
     }
 
+    /* 
+     * Parse motor position
+     * Position string format: 1TP5.012,2TP1.123,3TP-100.567,...
+     * Skip to substring for this motor, convert to double
+     */
+
+    send_mess(card, "Z 0", NULL);
+    recv_mess(card, buff, 1);
+
+    motorData = atof(&buff[5]);
+
+    if (motorData == motor_info->position)
+	motor_info->no_motion_count++;
+    else
+    {
+	epicsInt32 newposition;
+
+	newposition = NINT(motorData);
+	if (newposition >= motor_info->position)
+	    motor_info->status |= RA_DIRECTION;
+	else
+	    motor_info->status &= ~RA_DIRECTION;
+	motor_info->position = newposition;
+	motor_info->no_motion_count = 0;
+    }
+
+    plusdir = (motor_info->status & RA_DIRECTION) ? ON : OFF;
+
     send_mess(card, "] 0", NULL);
     recv_mess(card, buff, 1);
     status = atoi(&buff[5]);
 
-    if (status == 0)
-	motor_info->status &= ~RA_OVERTRAVEL;
-    else
-    {
+    if ((plusdir == ON && (status & 1)) || (plusdir == OFF && (status & 2)))
 	motor_info->status |= RA_OVERTRAVEL;
-	/* Set direction based on which LS activated. */
-	if (status == L_ALIMIT)
-	    motor_info->status |= RA_DIRECTION;
-	else
-	    motor_info->status &= ~RA_DIRECTION;
-    }
+    else
+	motor_info->status &= ~RA_OVERTRAVEL;
 
     send_mess(card, "] 1", NULL);
     recv_mess(card, buff, 1);
@@ -319,28 +364,14 @@ STATIC int set_status(int card, int signal)
     motor_info->status &= ~EA_SLIP_STALL;
     motor_info->status &= ~EA_HOME;
 
-    /* 
-     * Parse motor position
-     * Position string format: 1TP5.012,2TP1.123,3TP-100.567,...
-     * Skip to substring for this motor, convert to double
-     */
-
-    send_mess(card, "Z 0", NULL);
-    recv_mess(card, buff, 1);
-
-    motorData = atof(&buff[5]);
-
-    if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    if (motor_state[card]->motor_info[signal].encoder_present == NO)
+	motor_info->encoder_position = 0;
     else
     {
-	motor_info->position = NINT(motorData);
-	if (motor_state[card]->motor_info[signal].encoder_present == YES)
-	    motor_info->encoder_position = (epicsInt32) motorData;
-	else
-	    motor_info->encoder_position = 0;
-
-	motor_info->no_motion_count = 0;
+	send_mess(card, "z 0", NULL);
+	recv_mess(card, buff, 1);
+	motorData = atof(&buff[5]);
+	motor_info->encoder_position = (int32_t) motorData;
     }
 
     motor_info->status &= ~RA_PROBLEM;
@@ -375,9 +406,8 @@ STATIC int set_status(int card, int signal)
 /*****************************************************/
 STATIC int send_mess(int card, char const *com, char inchar)
 {
-    char *head, *end, local_buff[MAX_MSG_SIZE];
+    char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
-    BOOLEAN lastcmnd = OFF;
     int size;
 
     size = strlen(com);
@@ -405,43 +435,17 @@ STATIC int send_mess(int card, char const *com, char inchar)
 	return (-1);
     }
 
-    head = (char *) com;
-    end = head + size;
+    /* Make a local copy of the string and add the command line terminator. */
+    strcpy(local_buff, com);
+    strcat(local_buff, "\r");
 
-    while (lastcmnd == OFF)
-    {
-	int size;
-	char *delimit;
+    if (inchar != (char) NULL)
+	local_buff[0] = inchar;	    /* put in axis */
 
-	delimit = strchr(head, ';');
-	if (delimit != NULL)
-	{
-	    if (*(delimit + 1) == NULL)	/* Test for trailing command terminator. */
-		lastcmnd = ON;
-	    size = delimit - head;
-	}
-	else
-	{
-	    size = end - head;
-	    lastcmnd = ON;
-	}
+    Debug(2, "send_mess(): message = %s\n", local_buff);
 
-	strncpy(local_buff, head, size);
-	head += size + 1;
-	local_buff[size++] = '\r';	/* Add the command line terminator. */
-	local_buff[size] = '\0';
-    
-	if (inchar != (char) NULL)
-	    local_buff[0] = inchar;		/* put in axis */
-    
-	Debug(2, "send_mess(): message = %s\n", local_buff);
-    
-	cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
-    
-	serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
-	if (lastcmnd == OFF)
-	    recv_mess(card, local_buff, 1);
-    }
+    cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
+    serialIOSend(cntrl->serialInfo, local_buff, strlen(local_buff), SERIAL_TIMEOUT);
 
     return (0);
 }
