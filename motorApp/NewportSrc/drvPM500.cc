@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-28 14:57:30 $
+Last Modified:	$Date: 2003-11-07 22:20:55 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -96,12 +96,6 @@ static char PM500_axis_names[PM500_NUM_CHANNELS] = {'X', 'Y', 'Z', 'A', 'B',
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
-
-/* This is a temporary fix to introduce a delayed reading of the motor
- * position after a move completes
- */
-volatile double drvPM500ReadbackDelay = 0.;
-
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
@@ -277,20 +271,7 @@ STATIC int set_status(int card, int signal)
     if (status_char == 'B')
 	motor_info->status &= ~RA_DONE;
     else
-    {
 	motor_info->status |= RA_DONE;
-/* TEMPORARY FIX, Mark Rivers, 2/1/99. The PM500 has reported that the
- * motor is done moving, which means that the "jerk time" is done.  However,
- * the axis can still be settling.  For now we put in a delay and poll the
- * motor position again. This is not a good long-term solution.
- */
-	if (motor_info->pid_present == YES && drvPM500ReadbackDelay != 0.)
-	{
-	    epicsThreadSleep(drvPM500ReadbackDelay);
-	    send_mess(card, READ_POSITION, (char) NULL);
-	    recv_mess(card, cntrl->position_string, 1);
-	}
-    }
 
     if (status_char == 'E') 
         motor_info->status |= RA_PROBLEM;

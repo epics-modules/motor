@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-04 15:50:57 $
+Last Modified:	$Date: 2003-11-07 22:21:50 $
 */
 
 /*
@@ -77,12 +77,6 @@ int ESP300_num_cards = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
-
-/* This is a temporary fix to introduce a delayed reading of the motor
- * position after a move completes
- */
-volatile double drvESP300ReadbackDelay = 0.;
-
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);

@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-27 21:58:23 $
+Last Modified:	$Date: 2003-11-07 22:26:59 $
 */
 
 /*****************************************************************
@@ -86,12 +86,6 @@ STATIC char IM483PL_axis[8] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
-
-/* This is a temporary fix to introduce a delayed reading of the motor
- * position after a move completes
- */
-volatile double drvIM483PLReadbackDelay = 0.;
-
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
@@ -281,20 +275,7 @@ STATIC int set_status(int card, int signal)
     if (status != 0)
 	motor_info->status &= ~RA_DONE;
     else
-    {
 	motor_info->status |= RA_DONE;
-/* TEMPORARY FIX, Mark Rivers, 2/1/99. The IM483 has reported that the
- * motor is done moving, which means that the "jerk time" is done.  However,
- * the axis can still be settling.  For now we put in a delay and poll the
- * motor position again. This is not a good long-term solution.
- */
-	if (motor_info->pid_present == YES && drvIM483PLReadbackDelay != 0.)
-	{
-	    epicsThreadSleep(drvIM483PLReadbackDelay);
-	    send_mess(card, "? Z 0", IM483PL_axis[signal]);
-	    recv_mess(card, buff, 1);
-	}
-    }
 
     /* 
      * Parse motor position

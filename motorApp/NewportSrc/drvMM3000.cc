@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-10-23 19:57:28 $
+Last Modified:	$Date: 2003-11-07 22:22:11 $
 */
 
 /*
@@ -105,12 +105,6 @@ int MM3000_num_cards = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
-
-/* This is a temporary fix to introduce a delayed reading of the motor
- * position after a move completes
- */
-volatile double drvMM3000ReadbackDelay = 0.;
-
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
@@ -290,20 +284,7 @@ STATIC int set_status(int card, int signal)
     plusdir = (motor_info->status & RA_DIRECTION) ? true : false;
 
     if (mstat.Bits.inmotion == false)
-    {
 	motor_info->status |= RA_DONE;
-/* TEMPORARY FIX, Mark Rivers, 2/1/99. The MM3000 has reported that the
- * motor is done moving, which means that the "jerk time" is done.  However,
- * the axis can still be settling.  For now we put in a delay and poll the
- * motor position again. This is not a good long-term solution.
- */
-	if (motor_info->pid_present == YES && drvMM3000ReadbackDelay != 0.)
-	{
-	    epicsThreadSleep(drvMM3000ReadbackDelay);
-	    send_mess(card, READ_POSITION, (char) NULL);
-	    recv_mess(card, cntrl->position_string, 1);
-	}
-    }
     else
 	motor_info->status &= ~RA_DONE;
 
