@@ -5,24 +5,29 @@
 #       The order of the following declarations will be retained
 #       within those definitions.
 #
+# Note that "#!" marks lines that can be uncommented.
+#
 # Add your declarations here
+
+#!SUPPORT=
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
-ASYN=$(SUPPORT)/asyn/2-2beta
+# Recommended ASYN release: R3-2
+#!ASYN=$(SUPPORT)/asyn3-2
 
-# Recommended EPICS release: R3.14.5
-EPICS_BASE=$(SUPPORT)/../base-3.14.5
+# Recommended EPICS release: R3.14.6
+EPICS_BASE=$(SUPPORT)/../base-3.14.6
 
 # The following must be defined if motorExApp is to be built.
-#TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
-#MSI=
+#!TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
+#!MSI=
 
 # The following must be defined if the "WithMPF" example in motorExApp is to
 # be built.
 # Recommended IPAC release: R2.7a
-#IPAC=$(SUPPORT)/ipac2-7a
+#!IPAC=$(SUPPORT)/ipac2-7a
 
 # The following must be defined for the MXmotor device driver.
-#MX=$(SUPPORT)/mx/mx
+#!MX=$(SUPPORT)/mx/mx
 
