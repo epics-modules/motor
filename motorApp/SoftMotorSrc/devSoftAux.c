@@ -2,9 +2,9 @@
 FILENAME...	devSoftAux.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:36:31 $
+Last Modified:	$Date: 2002-02-11 17:34:35 $
 */
 
 /*
@@ -101,7 +101,8 @@ long soft_init_record(struct motorRecord *mr)
     /* Allocate space for private field. */
     mr->dpvt = (struct soft_private *) malloc(sizeof(struct soft_private));
     ptr = (struct soft_private *) mr->dpvt;
-    ptr->dinp_value = mr->dmov;	/* Must match after initialzation. */
+    ptr->dinp_value = (mr->dmov == 0) ? MOVING : DONE; /* Must match after initialzation. */
+    ptr->initialized = OFF;
 
     cbptr = &ptr->callback;
     callbackSetCallback((void (*)(struct callbackPvt *)) soft_motor_callback,

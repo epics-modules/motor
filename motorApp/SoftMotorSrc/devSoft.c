@@ -2,9 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-05-14 20:13:47 $
+Last Modified:	$Date: 2002-02-11 17:34:31 $
 */
 
 /*
@@ -25,6 +25,16 @@ Last Modified:	$Date: 2001-05-14 20:13:47 $
  *
  * Modification Log:
  * -----------------
+ *
+ * .00 02-06-02 rls - Don't process from events unless interruptAccept is TRUE.
+ *		    - When done transitions from false to true it is not
+ *		      communicated to the motor record until after the last
+ *		      readback update.
+ *		    - In soft_process(), call dbProcess() instead of directly
+ *		      calling motor record's process().
+ *		    - In soft_rdbl_func(), reset motor record's target to actual
+ *		      position after last readback if motion was not initiated
+ *		      by this record.
  */
 
 
@@ -83,7 +93,10 @@ STATIC long update(struct motorRecord *mr)
 	ptr->load_position = FALSE;
     }
 #endif
-    mr->msta = ptr->dinp_value ? RA_DONE : 0;
+    if (ptr->dinp_value == MOVING)
+	mr->msta &= ~RA_DONE;
+    else
+	mr->msta |= RA_DONE;
     return(ptr->callback_flag);
 }
 
@@ -150,6 +163,9 @@ FUNCTION... void soft_dinp_func(struct motorRecord *, short)
 USAGE... Update soft channel device input links and
     process soft channel motor record when done moving.
 LOGIC...
+    IF FALSE to TRUE transition.
+	Set WAIT for last readback indicator.
+    
     Get DINP_VALUE via DINP link.
     IF Get() succeeds and DINP_VALUE is true
         Process soft channel record
@@ -159,14 +175,36 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 
-    ptr->dinp_value = newdinp;
-    if (ptr->dinp_value)
-	soft_process(mr);
+    if (interruptAccept != TRUE)
+	return;
+    
+    /* Test for hard motor started moving or initialization. */
+    if (newdinp == 0)
+    {
+	ptr->dinp_value = MOVING;
+	if (mr->dmov == TRUE)	/* Hard motor is moving independent of soft motor. */
+	{
+	    unsigned short mask = (DBE_VALUE | DBE_LOG);
+
+	    mr->dmov = FALSE;
+	    db_post_events(mr, &mr->dmov, mask);
+	    mr->pp = TRUE;
+	    db_post_events(mr, &mr->pp, mask);
+	}
+    }
+    else		/* Hard motor is done moving. */
+    {
+	ptr->dinp_value = WAIT;	/* Wait for last update to set soft motor Done. */
+	soft_process(mr);	/* Process in case there is no readback callback. */
+    }
 }
 
 
 void soft_rinp_func(struct motorRecord *mr, long newrinp)
 {
+    if (interruptAccept != TRUE)
+	return;
+    
     mr->rmp = newrinp;
     soft_process(mr);
 }
@@ -174,11 +212,26 @@ void soft_rinp_func(struct motorRecord *mr, long newrinp)
 
 void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
 {       
+    struct soft_private *ptr = (struct soft_private *) mr->dpvt;
+
+    if (interruptAccept != TRUE)
+	return;
+
     newrdbl = newrdbl / mr->res;
-    if ((mr->msta & EA_PRESENT) && mr->ueip)
-	mr->rep = NINT(newrdbl);
-    else
-	mr->rmp	= NINT(newrdbl);
+    mr->rmp = NINT(newrdbl);
+
+    if (ptr->dinp_value == WAIT || ptr->initialized == OFF)
+    {
+	/* Reset Target to Actual positions. */
+	unsigned short mask = (DBE_VALUE | DBE_LOG);
+
+	mr->dmov = FALSE;
+	db_post_events(mr, &mr->dmov, mask);
+	mr->pp = TRUE;
+	db_post_events(mr, &mr->pp, mask);
+	ptr->dinp_value = DONE;
+	ptr->initialized = ON;
+    }    
     soft_process(mr);
 }
 
@@ -196,11 +249,10 @@ LOGIC...
 STATIC void soft_process(struct motorRecord *mr)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
-    struct rset *prset = (struct rset *) (mr->rset);
 
     dbScanLock((struct dbCommon *) mr);
     ptr->callback_flag = CALLBACK_DATA;
-    (*prset->process) (mr);	/* Process the soft channel record. */
+    dbProcess((struct dbCommon *) mr);	/* Process the soft channel record. */
     ptr->callback_flag = NOTHING_DONE;
     dbScanUnlock((struct dbCommon *) mr);
 }
