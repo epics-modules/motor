@@ -75,12 +75,12 @@ serialIO::serialIO(int card, char *serverName, int *createdOK)
     status = msgQReceive(msgQId, (char *)&pmess, sizeof(pmess), 
                                           2*CLOCKS_PER_SEC);
     if (status == ERROR) {
-        epicsPrintf("serialIOInit: error calling msgQReceive, status = %d\n",
+        epicsPrintf("serialIO: error calling msgQReceive, status = %d\n",
                                 status);
         *createdOK = 0;
     }
     if (pmess->getType() != messageTypeConnect) {
-        epicsPrintf("serialIOInit: incorrect message type received = %d\n",
+        epicsPrintf("serialIO: incorrect message type received = %d\n",
                                 pmess->getType());
         *createdOK = 0;
     }
