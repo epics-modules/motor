@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.18 $
+Version:	$Revision: 1.19 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:42:37 $
+Last Modified:	$Date: 2004-09-21 14:00:35 $
 */
 
 /*
@@ -62,6 +62,7 @@ Last Modified:	$Date: 2004-07-16 19:42:37 $
  *		http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
  * .07  02-03-04 rls - Eliminate erroneous "Motor motion timeout ERROR".
  * .08  03-02-04 rls - Reduce omsGet() timeout from 1sec. to 250msec.
+ * .09  09-20-04 rls - support for 32axes/controller.
  */
 
 /*========================stepper motor driver ========================
@@ -134,18 +135,18 @@ static char *oms_addrs = 0x0;
 static volatile unsigned omsInterruptVector = 0;
 static volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 static volatile int motionTO = 10;
-static char oms_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
+static char *oms_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 
 /*----------------functions-----------------*/
 
 /* Common local function declarations. */
-static long report(int level);
+static long report(int);
 static long init();
 static void query_done(int, int, struct mess_node *);
-static int set_status(int card, int signal);
-static RTN_STATUS send_mess(int card, char const *com, char c);
+static int set_status(int, int);
+static RTN_STATUS send_mess(int, char const *, char *);
 static int recv_mess(int, char *, int);
-static void motorIsr(int card);
+static void motorIsr(int);
 static int motor_init();
 static void oms_reset();
 
@@ -420,7 +421,7 @@ errorexit:	errMessage(-1, "Invalid device directive");
 /* send a message to the OMS board		     */
 /*		send_mess()			     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char outbuf[MAX_MSG_SIZE];
     RTN_STATUS return_code;
@@ -446,12 +447,13 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     /* Flush receive buffer */
     recv_mess(card, (char *) NULL, -1);
 
-    if (inchar == NULL)
+    if (name == NULL)
 	strcpy(outbuf, com);
     else
     {
-	strcpy(outbuf, "A? ");
-	outbuf[1] = inchar;
+	strcpy(outbuf, "A");
+	strcat(outbuf, name);
+	strcat(outbuf, " ");
 	strcat(outbuf, com);
     }
     strcat(outbuf, "\n");		/* Add the command line terminator. */

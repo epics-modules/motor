@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:51:24 $
+Last Modified:	$Date: 2004-09-21 14:04:57 $
 */
 
 /*
@@ -81,6 +81,7 @@ Last Modified:	$Date: 2004-07-16 19:51:24 $
  *		http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
  * .26  02-03-04  rls - Eliminate erroneous "Motor motion timeout ERROR".
  * .27  07-16-04  rls - removed unused <driver>Setup() argument.
+ * .28  09-20-04  rls - support for 32axes/controller.
  */
 
 #include	<vxLib.h>
@@ -115,8 +116,8 @@ extern "C" {
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
 
 /* jps: INFO messages - add RV and move QA to top */
-#define	ALL_INFO	"QA EA"	/* jps: add RV */
-#define	AXIS_INFO	"QA"		/* jps: add RV */
+#define	ALL_INFO	"QA EA"
+#define	AXIS_INFO	"QA"
 #define	ENCODER_QUERY	"EA ID"
 #define	AXIS_CLEAR	"CA"		/* Clear done of addressed axis */
 #define	DONE_QUERY	"RA"		/* ?? Is this needed?? */
@@ -145,16 +146,16 @@ static volatile unsigned omsInterruptVector = 0;
 static volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 static volatile int max_io_tries = MAX_COUNT;
 static volatile int motionTO = 10;
-static char oms58_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
+static char *oms58_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 
 /*----------------functions-----------------*/
 
 /* Common local function declarations. */
-static long report(int level);
+static long report(int);
 static long init();
 static void query_done(int, int, struct mess_node *);
-static int set_status(int card, int signal);
-static RTN_STATUS send_mess(int card, char const *com, char c);
+static int set_status(int, int);
+static RTN_STATUS send_mess(int, char const *, char *);
 static int recv_mess(int, char *, int);
 static void motorIsr(int card);
 static int motor_init();
@@ -216,8 +217,8 @@ static long report(int level)
 		printf("    Oms Vme58 motor card #%d not found.\n", card);
 	    else
 		printf("    Oms Vme58 motor card #%d @ 0x%X, id: %s \n", card,
-		       (uint_t) motor_state[card]->localaddr,
-		       motor_state[card]->ident);
+		       (uint_t) brdptr->localaddr,
+		       brdptr->ident);
 	}
     }
     return (0);
@@ -367,7 +368,7 @@ static int set_status(int card, int signal)
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
     status.All = motor_info->status.All;
 
-    if (motor_state[card]->motor_info[signal].encoder_present == YES)
+    if (motor_info->encoder_present == YES)
     {
 	/* get 4 peices of info from axis */
 	send_mess(card, ALL_INFO, oms58_axis[signal]);
@@ -583,7 +584,7 @@ errorexit:	errMessage(-1, "Invalid device directive");
 /* send a message to the OMS board		     */
 /* send_mess()			     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char inchar)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     volatile struct vmex_motor *pmotor;
     epicsInt16 putIndex;
@@ -623,12 +624,13 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
     }
 
 
-    if (inchar == NULL)
+    if (name == NULL)
 	strcpy(outbuf, com);
     else
     {
-	strcpy(outbuf, "A? ");
-	outbuf[1] = inchar;
+	strcpy(outbuf, "A");
+	strcat(outbuf, name);
+	strcat(outbuf, " ");
 	strcat(outbuf, com);
     }
     strcat(outbuf, "\n");		/* Add the command line terminator. */
