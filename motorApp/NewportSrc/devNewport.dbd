@@ -1,8 +1,11 @@
-# Newport MM3000 and MM4000/5 Driver support.
+# Newport MM3000, MM4000/5, PM500 and ESP300 Device Driver support.
 device(motor,VME_IO,devMM3000,"MM3000")
 device(motor,VME_IO,devMM4000,"MM4000")
 device(motor,VME_IO,devPM500, "PM500")
+device(motor,VME_IO,devESP300,"ESP300")
 driver(drvMM3000)
 driver(drvMM4000)
 driver(drvPM500)
+driver(drvESP300)
+registrar(NewportRegister)
 
