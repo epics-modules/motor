@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-10-23 19:52:16 $
+Last Modified:	$Date: 2003-11-03 18:43:15 $
 */
 
 /*
@@ -43,6 +43,17 @@ Last Modified:	$Date: 2003-10-23 19:52:16 $
  * .04 03-21-03 rls - Elminate three redundant DMOV monitor postings.
  *		    - Consolidate do_work() backlash correction logic.
  * .05 04-16-03 rls - Home velocity field (HVEL) added.
+ * .06 06-03-03 rls - Set DBE_LOG on all calls to db_post_events().
+ * .07 10-29-03 rls - If move is in the preferred direction and the backlash
+ *		      speed and acceleration are the same as the slew speed and
+ *		      acceleration, then skip the backlash move and go directly
+ *		      to the target position.  Bug fix for doing backlash in
+ *		      wrong direction when MRES < 0.
+ * .08 10-31-03 rls - Fix for bug introduced with R4.5.1; record locks-up when
+ *			BDST != 0, DLY != 0 and new target position before
+ *			backlash correction move.
+ *		    - Update readback after DLY timeout.
+ *
  */
 
 #define VERSION 5.2
@@ -319,7 +330,8 @@ static void callbackFunc(struct callback *pcb)
      */
     if (pmr->mip & MIP_DELAY_REQ)
     {
-	pmr->mip |= MIP_DELAY_ACK;
+	pmr->mip &= ~MIP_DELAY_REQ;	/* Turn off REQ. */
+	pmr->mip |= MIP_DELAY_ACK;	/* Turn on ACK. */
 	scanOnce(pmr);
     }
 }
@@ -1046,7 +1058,12 @@ static long process(dbCommon *arg)
 	    if (pmr->pp)
 	    {
 		if (pmr->val != pmr->lval)
+		{
 		    pmr->mip = MIP_DONE;
+		    /* Bug fix, record locks-up when BDST != 0, DLY != 0 and
+		     * new target position before backlash correction move.*/
+		    goto enter_do_work;
+		}
 		else
 		    status = postProcess(pmr);
 	    }
@@ -1056,8 +1073,17 @@ static long process(dbCommon *arg)
 	    {
 		if (pmr->mip & MIP_DELAY_ACK || (pmr->dly <= 0.0))
 		{
+		    if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
+		    {
+			pmr->mip |= MIP_DELAY;
+			INIT_MSG();
+			WRITE_MSG(GET_INFO, NULL);
+			SEND_MSG();
+			pmr->dmov = FALSE;
+			goto process_exit;
+		    }
 		    pmr->mip &= ~MIP_DELAY;
-		    MARK(M_MIP);/* done delaying */
+		    MARK(M_MIP);	/* done delaying */
 		    maybeRetry(pmr);
 		}
 		else
@@ -1074,6 +1100,8 @@ static long process(dbCommon *arg)
 	    }
 	}
     }	/* END of (process_reason == CALLBACK_DATA). */
+
+enter_do_work:
 
     /* check for soft-limit violation */
     if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
@@ -1318,8 +1346,23 @@ LOGIC:
 			move is to the same raw position.
 		ENDIF
 	    ENDIF
-	    ....
-	    ....
+
+	    Set VAL and RVAL based on DVAL; mark DVAL, VAL and RVAL for
+	    dbposting.
+
+	    IF this is not a retry.
+		Reset retry counter and mark RCNT for dbposting.
+	    ENDIF
+	    
+	    IF (relative move indicator is OFF, AND, sign of absolute move
+		matches sign of backlash distance), OR, (relative move indicator
+		is ON, AND, sign of relative move matches sign of backlash
+		distance)
+		Set preferred direction indicator ON.
+	    ELSE
+		Set preferred direction indicator OFF.
+	    ENDIF
+	    
 	    IF the dial DIFF is within the retry deadband.
 		IF the move is in the "preferred direction".
 		    Update last target positions.
@@ -1817,7 +1860,6 @@ static RTN_STATUS do_work(motorRecord * pmr)
 	    double bacc = bvel / pmr->bacc;	/* backlash accel. */
 	    double slop = 0.95 * pmr->rdbd;
 	    bool use_rel, preferred_dir;
-	    double dMdR = pmr->mres / pmr->mres;
 	    double relpos = pmr->diff / pmr->mres;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 	    long rpos, npos;
@@ -1827,8 +1869,8 @@ static RTN_STATUS do_work(motorRecord * pmr)
 	     * motor steps by truncating any fractional part, instead of
 	     * converting to nearest integer, so we prepare for that.
 	     */
-	    double mRelPos = (NINT(relpos / dMdR) + ((relpos > 0) ? .5 : -.5)) * dMdR;
-	    double mRelBPos = (NINT(relbpos / dMdR) + ((relbpos > 0) ? .5 : -.5)) * dMdR;
+	    double mRelPos = NINT(relpos) + ((relpos > 0) ? .5 : -.5);
+	    double mRelBPos = NINT(relbpos) + ((relbpos > 0) ? .5 : -.5);
 
 	    /*** Use if encoder or ReadbackLink is in use. ***/
 	    if (((pmr->msta & EA_PRESENT) && pmr->ueip) || pmr->urip)
@@ -1871,11 +1913,11 @@ static RTN_STATUS do_work(motorRecord * pmr)
 		MARK(M_RCNT);
 	    }
 
-	    if (((use_rel == false) && ((newpos > currpos) != (pmr->bdst > 0))) ||
-		((use_rel == true)  && ((mRelPos > 0)      != (pmr->bdst > 0))))
-		preferred_dir = false;
-	    else
+	    if (((use_rel == false) && ((pmr->dval > pmr->ldvl) == (pmr->bdst > 0))) ||
+		((use_rel == true)  && ((pmr->diff > 0)         == (pmr->bdst > 0))))
 		preferred_dir = true;
+	    else
+		preferred_dir = false;
 
 	    /*
 	     * If we're within retry deadband, move only in preferred dir.
