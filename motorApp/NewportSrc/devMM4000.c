@@ -2,9 +2,9 @@
 FILENAME...	devMM4000.c
 USAGE...	Motor record device level support for Newport MM4000.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 14:58:03 $
+Last Modified:	$Date: 2000-07-17 17:13:46 $
 */
 
 /*
@@ -45,6 +45,7 @@ Last Modified:	$Date: 2000-06-14 14:58:03 $
 #include	<vxWorks.h>
 #include	<stdio.h>
 #include	<string.h>
+#include	<math.h>
 #include        <semLib.h>	/* jps: include for init_record wait */
 #include	<logLib.h>
 
@@ -73,11 +74,6 @@ extern "C" {
 #include	"drvMMCom.h"
 
 #define STATIC static
-
-#define ABS(f) ((f)>0 ? (f) : -(f))
-#define SIGN(f) (long)((f)>0 ? 1 : -1)
-#define MAX(a,b) ((a)>(b) ? (a) : (b))
-#define MIN(a,b) ((a)<(b) ? (a) : (b))
 
 /* ----------------Create the dsets for devMM4000----------------- */
 STATIC struct driver_table *drvtabptr;
@@ -167,14 +163,14 @@ STATIC long MM4000_init_record(struct motorRecord *mr)
 /* start building a transaction */
 STATIC long MM4000_start_trans(struct motorRecord *mr)
 {
-    return(motor_start_trans_com(mr, MM4000_cards, NULL));
+    return(motor_start_trans_com(mr, MM4000_cards));
 }
 
 
 /* end building a transaction */
 STATIC long MM4000_end_trans(struct motorRecord *mr)
 {
-    return(motor_end_trans_com(mr, drvtabptr, "\r"));
+    return(motor_end_trans_com(mr, drvtabptr));
 }
 
 
@@ -306,7 +302,7 @@ STATIC long MM4000_build_trans(motor_cmnd command, double *parms, struct motorRe
 	    * If the record soft limits are set tighter than the MM4000 limits
 	    * the record will prevent JOG motion beyond its soft limits 
 	    */
-	    sprintf(buff, "%dVA%.*f;", axis, maxdigits, ABS(cntrl_units));
+	    sprintf(buff, "%dVA%.*f;", axis, maxdigits, fabs(cntrl_units));
 	    strcat(motor_call->message, buff);
 	    if (dval > 0.)
 		sprintf(buff, "%dPA%.*f;", axis, maxdigits, mr->dhlm);
