@@ -2,9 +2,9 @@
 FILENAME...	drvPmac.cc
 USAGE...	Driver level support for Delta Tau PMAC model.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-21 15:24:37 $
+Last Modified:	$Date: 2004-09-27 20:09:48 $
 */
 
 /*
@@ -38,6 +38,7 @@ Last Modified:	$Date: 2004-09-21 15:24:37 $
  * -----------------
  * .00 04/17/04 rls - Copied from drvOms.cc
  * .01 09/21/04 rls - support for 32axes/controller.
+ * .02 09/27/04 rls - convert "Mbox_addrs" from logical to physical address.
  */
 
 #include	<vxLib.h>
@@ -91,7 +92,6 @@ int Pmac_num_cards = 0;
 
 /* --- Local data common to all Pmac drivers. --- */
 static char *Pmac_addrs = 0x0;	/* Base address of DPRAM. */
-static char *Mbox_addrs = 0x0;	/* Base address of Mailbox. */
 static epicsAddressType Pmac_ADDRS_TYPE;
 static volatile unsigned PmacInterruptVector = 0;
 static volatile epicsUInt8 PmacInterruptLevel = Pmac_INT_LEVEL;
@@ -577,8 +577,8 @@ static int motorIsrEnable(int card)
     long status;
     
     status = devConnectInterrupt(intVME, PmacInterruptVector + card,
-// Tornado 2.0.2    (void (*)()) motorIsr, (void *) card);
-		    (devLibVOIDFUNCPTR) motorIsr, (void *) card);// Tornado 2.2
+		    (void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
+// Tornado 2.2	    (devLibVOIDFUNCPTR) motorIsr, (void *) card);
     
 
     status = devEnableInterruptLevel(Pmac_INTERRUPT_TYPE,
@@ -592,8 +592,8 @@ static void motorIsrDisable(int card)
     long status;
 
     status = devDisconnectInterrupt(intVME, PmacInterruptVector + card,
-// Tornado 2.0.2    (void (*)()) motorIsr);
-		    (devLibVOIDFUNCPTR) motorIsr);// Tornado 2.2
+		    (void (*)()) motorIsr);// Tornado 2.0.2
+// Tornado 2.2	    (devLibVOIDFUNCPTR) motorIsr);
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",
 		  PmacInterruptVector + card);
@@ -601,10 +601,24 @@ static void motorIsrDisable(int card)
 }
 
 
-/*****************************************************/
-/* Configuration function for  module_types data     */
-/* areas. PmacSetup()                                */
-/*****************************************************/
+/*****************************************************
+ * FUNCTION... PmacSetup()
+ *
+ * USAGE...Configuration function for PMAC.
+ *                                
+ * LOGIC...
+ *  Check for valid input on maximum number of cards.
+ *  Based on VMEbus address type, check for valid Mailbox and DPRAM addresses.
+ *  Bus probe the logical mailbox address.
+ *  IF mailbox address valid.
+ *	Register 122 bytes of memory (0-121) based on mailbox base address.
+ *	Save physical address of mailbox base address in "Mbox_addrs".
+ *	Page-select DPRAM by writing to Mbox_addrs+0x121.
+ *  ELSE
+ *	Log error and set both Mbox_addrs and Pmac_num_cards to zero.
+ *  ENDIF
+ *****************************************************/
+
 int PmacSetup(int num_cards,	/* maximum number of cards in rack */
 	     int addrs_type,	/* VME address type; 24 - A24 or 32 - A32. */
 	     void *mbox,	/* Mailbox base address. */
@@ -613,7 +627,9 @@ int PmacSetup(int num_cards,	/* maximum number of cards in rack */
 	     int int_level,	/* interrupt level (1-6) */
 	     int scan_rate)	/* polling rate - in HZ */
 {
-    void *erraddr = 0;
+    char *Mbox_addrs;		/* Base address of Mailbox. */
+    volatile void *localaddr;
+    void *probeAddr, *erraddr = 0;
     long status;
 
     if (num_cards < 1 || num_cards > Pmac_NUM_CARDS)
@@ -643,12 +659,25 @@ int PmacSetup(int num_cards,	/* maximum number of cards in rack */
 	    break;
     }
 
-    // Test MailBox address
+    // Test MailBox address.
     Mbox_addrs = (char *) mbox;
-    status = devNoResponseProbe(Pmac_ADDRS_TYPE, (unsigned int) (Mbox_addrs + 0x121), 1);
+    status = devNoResponseProbe(Pmac_ADDRS_TYPE, (unsigned int)
+				(Mbox_addrs + 0x121), 1);
 
     if (PROBE_SUCCESS(status))
     {
+	status = devRegisterAddress(__FILE__, Pmac_ADDRS_TYPE, (size_t)
+				    Mbox_addrs, 122, (volatile void **) &localaddr);
+	Debug(9, "motor_init: devRegisterAddress() status = %d\n", (int) status);
+
+	if (!RTN_SUCCESS(status))
+	{
+	    errPrintf(status, __FILE__, __LINE__, "Can't register address 0x%x\n",
+		      (unsigned int) probeAddr);
+	    return (ERROR);
+	}
+
+	Mbox_addrs = localaddr;		/* Convert to physical address.*/
 	Pmac_addrs = (char *) addrs;
 	*(Mbox_addrs + 0x121) = (char) ((unsigned long) Pmac_addrs >> 14); /* Select VME A19-A14 for DPRAM. */
     }
