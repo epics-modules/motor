@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 15:09:40 $
+Last Modified:	$Date: 2000-07-17 18:34:02 $
 */
 
 /*
@@ -64,17 +64,23 @@ typedef enum CommStatus CommStatus;
 #endif
 
 /*
-Valid command types for the driver. The order is of importance; 0 is
+Valid message types for the driver. The order is of importance; 0 is
 lowest importance.  Device support will choose the greatest one to
 use as the driver transaction type.
 */
 
-#define UNDEFINED (unsigned char)0	/* garbage type */
-#define IMMEDIATE (unsigned char)1	/* 'i' an execute immediate, no reply */
-#define MOVE_TERM (unsigned char)2	/* 't' terminate a previous active motion */
-#define MOTION    (unsigned char)3	/* 'm' will produce motion updates */
-#define VELOCITY  (unsigned char)4	/* 'v' make motion updates till MOVE_TERM */
-#define INFO      (unsigned char)5	/* 'f' get curr motor/encoder pos and stat */
+enum msg_types {
+    UNDEFINED,		/* garbage type */
+    IMMEDIATE,		/* execute immediate, no reply */
+    MOVE_TERM,		/* terminate a previous active motion */
+    MOTION,		/* move */
+    VELOCITY,		/* make motion updates till MOVE_TERM */
+    INFO		/* get curr motor/encoder pos and stat */
+};
+
+#ifndef __cplusplus
+typedef enum msg_types msg_types;
+#endif
 
 /* Macros used to set/clear bits in any_motor_in_motion variable. */
 #define SET_MM_ON(v,a)  v|=(1<<a)
@@ -93,7 +99,7 @@ struct mess_node
 		    callbackRequest(CALLBACK *) use pointer to mess_node. */
     int signal;
     int card;
-    unsigned char type;
+    msg_types type;
     char message[MAX_MSG_SIZE];
     long position;
     long encoder_position;
@@ -110,7 +116,6 @@ struct mess_node
 typedef struct mess_card_query
 {
     char *card_name;
-    char *axis_names;
     int total_axis;
 } MOTOR_CARD_QUERY;
 
@@ -195,7 +200,7 @@ struct controller	/* Controller board information. */
 struct driver_table
 {
     int (*init) (void);
-    int (*send) (struct mess_node *, struct driver_table *, char *);
+    int (*send) (struct mess_node *, struct driver_table *);
     int (*free) (struct mess_node *, struct driver_table *);
     int (*get_card_info) (int, MOTOR_CARD_QUERY *, struct driver_table *);
     int (*get_axis_info) (int, int, MOTOR_AXIS_QUERY *, struct driver_table *);
@@ -213,11 +218,12 @@ struct driver_table
     void (*query_done) (int, int, struct mess_node *);
     void (*strtstat) (int);			/* Optional; start status function or NULL. */
     const BOOLEAN *const init_indicator;	/* Driver initialized indicator. */
+    char *axis_names;				/* Axis name array or NULL. */
 };
 
 /* Function prototypes. */
 
-extern int motor_send(struct mess_node *, struct driver_table *, char *);
+extern int motor_send(struct mess_node *, struct driver_table *);
 extern int motor_free(struct mess_node *, struct driver_table *);
 extern int motor_card_info(int, MOTOR_CARD_QUERY *, struct driver_table *);
 extern int motor_axis_info(int, int, MOTOR_AXIS_QUERY *, struct driver_table *);
