@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8 and VME44.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 16:16:13 $
+Last Modified:	$Date: 2000-07-14 21:46:43 $
 */
 
 /*
@@ -89,11 +89,10 @@ extern "C" {
 
 #define CMD_CLEAR       '\030'	/* Control-X, clears command errors only */
 
-#define ALL_INFO        "A? QA RP RE EA\n"	/* jps: move QA to top. */
-#define AXIS_INFO       "A? QA RP\n"	/* jps: move QA to top. */
-#define ENCODER_QUERY   "A? EA\n"
-#define	DONE_QUERY	"A? RA\n"
-
+#define	ALL_INFO	"QA RP RE EA"	/* jps: move QA to top. */
+#define	AXIS_INFO	"QA RP"		/* jps: move QA to top. */
+#define	ENCODER_QUERY	"EA"
+#define	DONE_QUERY	"RA"
 
 /*----------------debugging-----------------*/
 #ifdef	DEBUG
@@ -121,6 +120,7 @@ STATIC volatile unsigned omsInterruptVector = 0;
 STATIC volatile uint8_t omsInterruptLevel = OMS_INT_LEVEL;
 STATIC volatile int max_io_tries = MAX_COUNT;
 STATIC volatile int motionTO = 10;
+STATIC char oms_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
 
 /*----------------functions-----------------*/
 
@@ -163,7 +163,8 @@ struct driver_table oms_access =
     set_status,
     query_done,
     NULL,
-    &initialized
+    &initialized,
+    oms_axis
 };
 
 struct
@@ -207,11 +208,11 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 {
     char buffer[40];
 
-    send_mess(card, DONE_QUERY, oms_trans_axis[axis]);
+    send_mess(card, DONE_QUERY, oms_axis[axis]);
     recv_mess(card, buffer, 1);
 
     if (nodeptr->status & RA_PROBLEM)
-	send_mess(card, AXIS_STOP, oms_trans_axis[axis]);
+	send_mess(card, AXIS_STOP, oms_axis[axis]);
 }
 
 
@@ -221,7 +222,7 @@ STATIC int set_status(int card, int signal)
     char *p, *tok_save;
     struct axis_status *ax_stat;
     struct encoder_status *en_stat;
-    char q_buf[50], outbuf[50];
+    char q_buf[50];
     int i, pos;
     int rtn_state;
 
@@ -230,12 +231,12 @@ STATIC int set_status(int card, int signal)
     if (motor_state[card]->motor_info[signal].encoder_present == YES)
     {
 	/* get 4 peices of info from axis */
-	send_mess(card, ALL_INFO, oms_trans_axis[signal]);
+	send_mess(card, ALL_INFO, oms_axis[signal]);
 	recv_mess(card, q_buf, 4);
     }
     else
     {
-	send_mess(card, AXIS_INFO, oms_trans_axis[signal]);
+	send_mess(card, AXIS_INFO, oms_axis[signal]);
 	recv_mess(card, q_buf, 2);
     }
 
@@ -281,7 +282,7 @@ STATIC int set_status(int card, int signal)
 	    if (motor_info->no_motion_count > motionTO)
 	    {
 		motor_info->status |= RA_PROBLEM;
-		send_mess(card, AXIS_STOP, oms_trans_axis[signal]);
+		send_mess(card, AXIS_STOP, oms_axis[signal]);
 		motor_info->no_motion_count = 0;
 		errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
 		    card, signal);
@@ -350,10 +351,7 @@ STATIC int set_status(int card, int signal)
         (motor_info->motor_motion != 0) &&
 	(motor_info->motor_motion->postmsgptr != 0))
     {
-	strcpy(outbuf, "A? ");
-	strcat(outbuf, motor_info->motor_motion->postmsgptr);
-	strcat(outbuf, "\n");
-	send_mess(card, outbuf, oms_trans_axis[signal]);
+	send_mess(card, motor_info->motor_motion->postmsgptr, oms_axis[signal]);
 	motor_info->motor_motion->postmsgptr = NULL;
     }
 
@@ -391,10 +389,15 @@ STATIC int send_mess(int card, char const *com, char inchar)
     /* Flush receive buffer */
     recv_mess(card, (char *) NULL, -1);
 
-    strcpy(outbuf, com);
-
-    if (inchar != (char) NULL)
-	outbuf[1] = inchar;		/* put in axis */
+    if (inchar == NULL)
+	strcpy(outbuf, com);
+    else
+    {
+	strcpy(outbuf, "A? ");
+	outbuf[1] = inchar;
+	strcat(outbuf, com);
+    }
+    strcat(outbuf, "\n");		/* Add the command line terminator. */
 
     Debug(9, "send_mess: ready to send message.\n");
 
@@ -1003,7 +1006,7 @@ STATIC int motor_init()
 	    pmotorState->irqdata->irqEnable = FALSE;
 	    pmotor->control = 0;
 
-	    send_mess(card_index, "EF\n", (char) NULL);
+	    send_mess(card_index, "EF", (char) NULL);
 	    send_mess(card_index, ERROR_CLEAR, (char) NULL);
 	    send_mess(card_index, STOP_ALL, (char) NULL);
 
@@ -1038,7 +1041,7 @@ STATIC int motor_init()
 
 	    for (total_encoders = 0, motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
-		send_mess(card_index, ENCODER_QUERY, oms_trans_axis[motor_index]);
+		send_mess(card_index, ENCODER_QUERY, oms_axis[motor_index]);
 		if (recv_mess(card_index, encoder_pos, 1) == -1)
 		{
 		    /* Command error - no encoder */
