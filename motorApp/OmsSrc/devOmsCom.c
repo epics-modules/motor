@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.c
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-03-27 21:33:09 $
+Last Modified:	$Date: 2002-04-01 22:37:19 $
 */
 
 /*
@@ -46,6 +46,7 @@ Last Modified:	$Date: 2002-03-27 21:33:09 $
  *			see done flag from previous operation.
  * .06 03-27-02   rls - Eliminated RES. All input positions, velocities and
  *			accelerations are in motor steps.
+ *		      - Eliminated SET_ENC_RATIO.
  */
 
 #include	<vxWorks.h>
@@ -80,8 +81,7 @@ struct motor_table const oms_table[] =
     {IMMEDIATE, " VL", 1},	/* SET_VELO */
     {IMMEDIATE, " AC", 1},	/* SET_ACCEL */
     {IMMEDIATE, " GD", 0},	/* jps: from GO to GD */
-    {IMMEDIATE, " ER", 2},	/* SET_ENC_RATIO */
-    {INFO, " ", 0},		/* GET_INFO */
+    {INFO,      " ",   0},	/* GET_INFO */
     {MOVE_TERM, " ST", 0},	/* STOP_AXIS */
     {VELOCITY, " CA JG", 1},	/* JOG */
     {IMMEDIATE," KP", 1},	/* SET_PGAIN */
@@ -172,17 +172,9 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
     char buffer[40];
     unsigned char cmnd_type;
     long rtnind;
-    double absres, steptoencoder;
 
     rtnind = OK;
     motor_call = &trans->motor_call;
-
-    if ((mr->msta & EA_PRESENT) && mr->ueip == YES)
-	absres = mr->eres;
-    else
-	absres = mr->mres;
-    absres = fabs(absres);
-    steptoencoder = fabs(mr->mres) / absres; /* This is equal to either 1.0 or MRES/ERES. */
 
     cmnd_type = oms_table[command].type;
     if (cmnd_type > motor_call->type)
@@ -253,9 +245,7 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    }
 	    else if (command == STOP_AXIS)
 	    {
-		double acc;
-
-		acc = mr->velo / absres / mr->accl;
+		double acc = (mr->velo / fabs(mr->mres)) / mr->accl;
 	    
 		/* Put in acceleration. */
 		strcat(motor_call->message, oms_table[SET_ACCEL].command);
@@ -308,21 +298,13 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 			{
 			    long vbase, vel;
 
-			    vbase = NINT(mr->vbas / absres);
-			    vel = NINT(parms[itera] * steptoencoder);
+			    vbase = NINT(mr->vbas / fabs(mr->mres));
+			    vel = NINT(parms[itera]);
 
 			    if (vel <= vbase)
 				vel = vbase + 1;
 			    sprintf(buffer, "%ld", vel);
 			}
-			break;
-
-		    case MOVE_ABS:
-		    case MOVE_REL:
-		    case SET_VEL_BASE:
-		    case SET_ACCEL:
-		    case JOG:
-			sprintf(buffer, "%ld", NINT(parms[itera] * steptoencoder));
 			break;
 
 		    default:
