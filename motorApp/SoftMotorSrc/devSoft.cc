@@ -2,9 +2,9 @@
 FILENAME...	devSoft.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-01-22 22:22:04 $
+Last Modified:	$Date: 2004-12-20 21:24:08 $
 */
 
 /*
@@ -78,7 +78,7 @@ struct motor_dset devMotorSoft =
     end
 };
 
-epicsExportAddress(dset,devMotorSoft);
+extern "C" {epicsExportAddress(dset,devMotorSoft);}
 
 STATIC CALLBACK_VALUE update(struct motorRecord *mr)
 {
