@@ -2,8 +2,4 @@ include "base.dbd"
 include "motorRecord.dbd"
 include "devSoftMotor.dbd"
 include "devOms.dbd"
-# Only for IPAC R2.6 and above.
-driver(drvIpac)
-registrar(vipc616Registrar)
-registrar(tyGSOctalRegistrar)
 
