@@ -24,6 +24,9 @@ SRCS += devPM500.cc  drvPM500.cc
 # ESP300 device driver.
 SRCS += devESP300.cc drvESP300.cc
 
+# XPS C8 device driver
+SRCS += Socket.cpp xps_c8_driver.cpp devXPSC8.cc  drvXPSC8.cc
+
 Newport_LIBS += motor asyn
 Newport_LIBS += $(EPICS_BASE_IOC_LIBS)
 
