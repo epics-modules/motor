@@ -2,9 +2,9 @@
 FILENAME...	devMM4000.c
 USAGE...	Motor record device level support for Newport MM4000.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 17:13:46 $
+Last Modified:	$Date: 2001-04-21 18:28:53 $
 */
 
 /*
@@ -39,6 +39,7 @@ Last Modified:	$Date: 2000-07-17 17:13:46 $
  * .03  10-30-98        mlr     Minor code cleanup, improved formatting
  * .04  02-01-99        mlr     Added temporary fix to delay reading motor
  *                              positions at the end of a move.
+ * .05  04-21-01	rls	Added jog velocity motor command.
  */
 
 
@@ -96,6 +97,7 @@ struct motor_dset devMM4000 =
 /* --------------------------- program data --------------------- */
 
 /* This table is used to define the command types */
+/* WARNING! this must match "motor_cmnd" in motor.h */
 
 static int MM4000_table[] = {
     MOTION, 	/* MOVE_ABS */
@@ -118,7 +120,8 @@ static int MM4000_table[] = {
     IMMEDIATE,	/* DISABL_TORQUE */
     IMMEDIATE,	/* PRIMITIVE */
     IMMEDIATE,	/* SET_HIGH_LIMIT */
-    IMMEDIATE	/* SET_LOW_LIMIT */
+    IMMEDIATE,	/* SET_LOW_LIMIT */
+    VELOCITY	/* JOG_VELOCITY */
 };
 
 

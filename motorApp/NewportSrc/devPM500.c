@@ -3,9 +3,9 @@ FILENAME...	devPM500.c
 USAGE...	Motor record device level support for the Newport PM500 motor
 		controller.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-11-08 20:41:33 $
+Last Modified:	$Date: 2001-04-21 18:29:31 $
 */
 
 /*
@@ -37,7 +37,7 @@ Last Modified:	$Date: 2000-11-08 20:41:33 $
  * -----------------
  * .00  10-25-98	mlr     initialized from devPM500
  * .01  06-02-00 rls	integrated into standard motor record
- *      ...
+ * .05  04-21-01	rls	Added jog velocity motor command. 
  */
 
 
@@ -119,7 +119,8 @@ static int PM500_table[] = {
     IMMEDIATE,	/* DISABL_TORQUE */
     IMMEDIATE,	/* PRIMITIVE */
     IMMEDIATE,	/* SET_HIGH_LIMIT */
-    IMMEDIATE	/* SET_LOW_LIMIT */
+    IMMEDIATE,	/* SET_LOW_LIMIT */
+    VELOCITY	/* JOG_VELOCITY */
 };
 
 

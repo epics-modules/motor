@@ -2,9 +2,9 @@
 FILENAME...	devMM3000.c
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 17:11:36 $
+Last Modified:	$Date: 2001-04-21 18:27:38 $
 */
 
 /*
@@ -37,7 +37,7 @@ Last Modified:	$Date: 2000-07-17 17:11:36 $
  * -----------------
  * .00  10-16-97	mlr     initialized from devOms58
  * .01  07-19-99	rls	initialized from drvMM4000
- *      ...
+ * .02  04-21-01	rls	Added jog velocity motor command.
  */
 
 #include	<vxWorks.h>
@@ -94,6 +94,7 @@ struct motor_dset devMM3000 =
 /* --------------------------- program data --------------------- */
 
 /* This table is used to define the command types */
+/* WARNING! this must match "motor_cmnd" in motor.h */
 
 static int MM3000_table[] = {
     MOTION, 	/* MOVE_ABS */
@@ -117,6 +118,7 @@ static int MM3000_table[] = {
     IMMEDIATE,	/* PRIMITIVE */
     IMMEDIATE,	/* SET_HIGH_LIMIT */
     IMMEDIATE,	/* SET_LOW_LIMIT */
+    VELOCITY	/* JOG_VELOCITY */
 };
 
 
