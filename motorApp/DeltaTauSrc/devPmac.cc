@@ -2,9 +2,9 @@
 FILENAME...	devPmac.cc
 USAGE... Device level support for Delta Tau PMAC.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-06-07 19:27:05 $
+Last Modified:	$Date: 2004-09-15 18:49:33 $
 */
 
 /*
@@ -40,6 +40,7 @@ Last Modified:	$Date: 2004-06-07 19:27:05 $
 
 
 #include <string.h>
+#include <math.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -202,7 +203,7 @@ static RTN_STATUS Pmac_build_trans(motor_cmnd command, double *parms, struct mot
     switch (command)
     {
 	case MOVE_ABS:
-	    sprintf(buff, "?MA %d", intval);
+	    sprintf(buff, " J=%d ", intval);
 	    break;
 	
 	case MOVE_REL:
@@ -217,26 +218,28 @@ static RTN_STATUS Pmac_build_trans(motor_cmnd command, double *parms, struct mot
 	    sprintf(buff, "? F1000 1");
 	    break;
 	
-	case LOAD_POS:	/* Use "Position Bias". */
-	    sprintf(buff, "M%.2d64=%d", axis, intval);
+	case LOAD_POS:
+    	    /*??? How to do this???? */
+	    send = false;
 	    break;
 	
 	case SET_VEL_BASE:
-	    sprintf(buff, "?VI %d", intval);
+	    send = false;	// No way to set VBAS with PMAC???
 	    break;
 	
 	case SET_VELOCITY:
-	    sprintf(buff, "?VM %d", intval);
+    	    /* Convert input (steps/s) to steps/ms. */
+	    sprintf(buff, " I%.2d22=%f ", axis, (*parms / 1000.0));
 	    break;
 	
 	case SET_ACCEL:
-	    sprintf(buff, "?A=%d", intval);
+    	    /* Convert input (steps/s^2) to steps/ms^2. */
+	    sprintf(buff, " I%.2d19=%f ", axis, (*parms / 1000.0));
 	    break;
 	
 	case GO:
-	    /* The MDrive starts moving immediately on move commands, GO command
-	     * does nothing. Use it to set ACCL = DECL. */
-	    sprintf(buff, "?A=D");
+	    /* The PMAC starts moving immediately on J=# command, GO command
+	     * does nothing.*/
 	    break;
 	
 	case PRIMITIVE:
@@ -247,18 +250,19 @@ static RTN_STATUS Pmac_build_trans(motor_cmnd command, double *parms, struct mot
 	    break;
 	
 	case STOP_AXIS:
-	    sprintf(buff, "?SL 0");
+	    strcpy(buff, "J/");
 	    break;
 	
 	case JOG_VELOCITY:
-	    sprintf(buff, "I%.2d22=%d", axis, intval);
+	    sprintf(buff, "I%.2d22=%f",  axis, (fabs(*parms) / 1000.0));
 	    break;
 
 	case JOG:
+	    sprintf(buff, "I%.2d22=%f ", axis, (fabs(*parms) / 1000.0));
 	    if (intval >= 0)
-		sprintf(buff, "#%.2dJ+", axis);
+		strcat(buff, "J+");
 	    else
-		sprintf(buff, "#%.2dJ-", axis);
+		strcat(buff, "J-");
 	    break;
 	
 	case SET_PGAIN:
