@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-03 17:17:26 $
+Last Modified:	$Date: 2003-02-12 18:15:18 $
 */
 
 /*
@@ -37,6 +37,7 @@ Last Modified:	$Date: 2003-02-03 17:17:26 $
  *	- VME8     ver 1.97-8
  *		   ver 2.16-8
  *	- VS4-040  ver 1.04
+ *	- VX2-006  ver 1.04
  *
  * Modification Log:
  * -----------------
@@ -62,6 +63,7 @@ Last Modified:	$Date: 2003-02-03 17:17:26 $
 
 ========================stepper motor driver ========================*/
 
+#include	<vxLib.h>
 #include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
@@ -75,9 +77,11 @@ Last Modified:	$Date: 2003-02-03 17:17:26 $
 #include	<dbCommon.h>
 #include	<devSup.h>
 #include	<drvSup.h>
+extern "C" {
 #include	<recSup.h>
-#include        <devLib.h>
+#include	<devLib.h>
 #include	<errlog.h>
+}
 #include	<errMdef.h>
 #include	<intLib.h>
 #include	<epicsThread.h>
@@ -88,7 +92,7 @@ Last Modified:	$Date: 2003-02-03 17:17:26 $
 #define PRIVATE_FUNCTIONS 1	/* normal:1, debug:0 */
 #define STATIC static
 
-/* Define for return test on locationProbe() */
+/* Define for return test on devNoResponseProbe() */
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
 
 #define CMD_CLEAR       '\030'	/* Control-X, clears command errors only */
@@ -912,7 +916,8 @@ STATIC int motor_init()
     char axis_pos[50], encoder_pos[50];
     char *tok_save, *pos_ptr;
     int total_encoders = 0, total_axis = 0;
-    void *localaddr, *probeAddr;
+    volatile void *localaddr;
+    void *probeAddr;
 
     tok_save = NULL;
 
@@ -936,12 +941,22 @@ STATIC int motor_init()
 
     for (card_index = 0; card_index < oms44_num_cards; card_index++)
     {
+	int8_t *startAddr;
+	int8_t *endAddr;
+
 	Debug(2, "motor_init: card %d\n", card_index);
 
 	probeAddr = oms_addrs + (card_index * OMS_BRD_SIZE);
-	Debug(9, "motor_init: locationProbe() on addr 0x%x\n",
-	      (uint_t) probeAddr);
-	status = locationProbe(OMS_ADDRS_TYPE, (char *) probeAddr);
+	startAddr = (int8_t *) probeAddr + 1;
+	endAddr = startAddr + OMS_BRD_SIZE;
+
+	Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n", (uint_t) probeAddr);
+	/* Scan memory space to assure card id */
+	do
+	{
+	    status = devNoResponseProbe(OMS_ADDRS_TYPE, startAddr, 1);
+	    startAddr += 0x2;
+	} while (PROBE_SUCCESS(status) && startAddr < endAddr);
 
 	if (PROBE_SUCCESS(status))
 	{
@@ -1071,8 +1086,12 @@ STATIC void oms_reset()
     {
 	if (motor_state[card] != NULL)
 	{
+	    char *memptr, byteread;
+
 	    pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
-	    if (vxMemProbe((char *) pmotor, READ, sizeof(short), (char *) &status) == OK)
+	    memptr = (char *) &pmotor->data;
+	    status = vxMemProbe(memptr, READ, sizeof(char), (char *) &byteread);
+	    if (status == OK)
 		pmotor->control &= 0x5f;
 	}
     }
