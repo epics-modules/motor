@@ -5,7 +5,7 @@ file {
 }
 display {
 	object {
-		x=40
+		x=188
 		y=29
 		width=450
 		height=790
@@ -2668,56 +2668,6 @@ text {
 	}
 	textix="EGU:"
 }
-composite {
-	object {
-		x=423
-		y=398
-		width=22
-		height=20
-	}
-	"composite name"=""
-	children {
-		text {
-			object {
-				x=425
-				y=398
-				width=20
-				height=10
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="EGU"
-		}
-		text {
-			object {
-				x=425
-				y=408
-				width=20
-				height=10
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="sec"
-		}
-		polyline {
-			object {
-				x=423
-				y=408
-				width=22
-				height=0
-			}
-			"basic attribute" {
-				clr=14
-			}
-			points {
-				(423,408)
-				(445,408)
-			}
-		}
-	}
-}
 "message button" {
 	object {
 		x=265
@@ -2748,5 +2698,55 @@ composite {
 	clrmod="alarm"
 	align="horiz. centered"
 	limits {
+	}
+}
+composite {
+	object {
+		x=420
+		y=398
+		width=28
+		height=22
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=425
+				y=398
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="EGU"
+		}
+		text {
+			object {
+				x=420
+				y=410
+				width=28
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="sec^2"
+		}
+		polyline {
+			object {
+				x=423
+				y=408
+				width=22
+				height=0
+			}
+			"basic attribute" {
+				clr=14
+			}
+			points {
+				(423,408)
+				(445,408)
+			}
+		}
 	}
 }
