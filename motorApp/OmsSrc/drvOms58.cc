@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-05 16:41:44 $
+Last Modified:	$Date: 2003-10-28 16:41:14 $
 */
 
 /*
@@ -1033,7 +1033,6 @@ STATIC int motor_init()
 	    pmotorState->motor_in_motion = 0;
 	    pmotorState->cmnd_response = false;
 
-	    pmotorState->irqdata = (struct irqdatastr *) NULL;
 	    /* Disable all interrupts */
 	    pmotor->control.cntrlReg = 0;
 
