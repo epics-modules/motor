@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.c
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-25 13:36:44 $
+Last Modified:	$Date: 2001-10-02 22:42:36 $
 */
 
 /*
@@ -35,7 +35,8 @@ Last Modified:	$Date: 2000-07-25 13:36:44 $
  *
  * Modification Log:
  * -----------------
- * .01	02/10/2000	rls     copied from drvMM4000.c
+ * .01	02/10/00 rls copied from drvMM4000.c
+ * .02  10/02/01 rls allow one retry after a communication error.
  */
 
 /*
@@ -244,10 +245,27 @@ STATIC int set_status(int card, int signal)
 
     send_mess(card, "^", NULL);
     rtn_state = recv_mess(card, buff, 1);
-    if (rtn_state <= 0)
-	cntrl->status = COMM_ERR;
-    else
+    if (rtn_state > 0)
+    {
 	cntrl->status = NORMAL;
+	motor_info->status &= ~CNTRL_COMM_ERR;
+    }
+    else
+    {
+	if (cntrl->status == NORMAL)
+	{
+	    cntrl->status = RETRY;
+	    return(0);
+	}
+	else
+	{
+	    cntrl->status = COMM_ERR;
+	    motor_info->status |= CNTRL_COMM_ERR;
+	    motor_info->status |= RA_PROBLEM;
+	    return(1);
+	}
+    }
+
     status = atoi(&buff[4]);
 
     if (status != 0)
@@ -307,7 +325,6 @@ STATIC int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-
     send_mess(card, "Z 0", NULL);
     recv_mess(card, buff, 1);
 
@@ -347,11 +364,6 @@ STATIC int set_status(int card, int signal)
 	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
-
-    if (cntrl->status == COMM_ERR)
-	motor_info->status |= CNTRL_COMM_ERR;
-    else
-	motor_info->status &= ~CNTRL_COMM_ERR;
 
     return(rtn_state);
 }
@@ -535,7 +547,6 @@ int IM483SMConfig(int card,	/* card being configured */
     }
     return (0);
 }
-
 
 
 /*****************************************************/
