@@ -26,3 +26,7 @@
 # hostAdd("mercury","155.77.2.56")
 # nfsMountAll("mercury")
 # nfsMount("mercury","/home/mercury5/iocinfo","/iocinfo")
+#
+# The following line eliminates "cksum: out of data" messages due to DHCP
+#proxyPortFwdOff(67)
+
