@@ -22,7 +22,7 @@ cd startup
 dbLoadDatabase("$(TOP)/dbd/WithMPFVx.dbd")
 WithMPFVx_registerRecordDeviceDriver(pdbbase)
 
-dbLoadRecords("$(TOP)/db/WithMPF.db")
+dbLoadTemplate("motor.substitutions")
 
 # Configure the ASYN server code. This MUST be configured too!
 < st_asynserver.cmd.Vx

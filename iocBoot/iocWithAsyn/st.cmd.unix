@@ -5,7 +5,7 @@
 
 dbLoadDatabase("$(TOP)/dbd/WithMPF.dbd")
 WithMPF_registerRecordDeviceDriver(pdbbase)
-dbLoadRecords("$(TOP)/db/WithMPF.db")
+dbLoadTemplate("motor.substitutions")
 
 
 # The following commands are for a local serial line
