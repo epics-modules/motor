@@ -363,12 +363,10 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
                 p = strtok_r(NULL, ";", &tok_save)) {
         strcpy(buff, p);
         strcat(buff, OUTPUT_TERMINATOR);
-        Debug(2, "send_mess: sending message to card %d, message=%s\n",
-                  card, buff);
+        Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
 	cntrl->serialInfo->serialIOSendRecv(buff, strlen(buff), response,
 			    BUFF_SIZE, INPUT_TERMINATOR, SERIAL_TIMEOUT);
-        Debug(2, "send_mess: card %d, response=%s\n",
-                  card, response);
+        Debug(2, "send_mess: card %d, response=%s\n", card, response);
     }
 
     return(OK);
@@ -411,16 +409,13 @@ STATIC int recv_mess(int card, char *com, int flag)
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
     if (len < 2) com[0] = '\0'; else com[len-2] = '\0';
     if (len > 0) {
-        Debug(2, "recv_mess: card %d, flag=%d, message = \"%s\"\n", 
-            card, flag, com);
+        Debug(2, "recv_mess: card %d, flag=%d, message = \"%s\"\n", card, flag, com);
     }
     if (len == 0) {
         if (flag != FLUSH)  {
-            Debug(1, "recv_mess: card %d read ERROR: no response\n", 
-                card);
+            Debug(1, "recv_mess: card %d read ERROR: no response\n", card);
         } else {
-            Debug(3, "recv_mess: card %d flush returned no characters\n", 
-                card);
+            Debug(3, "recv_mess: card %d flush returned no characters\n", card);
         }
     }
     /* The PM600 always echoes the command sent to it, before sending the response.  It is terminated
@@ -476,8 +471,7 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
                 p = strtok_r(NULL, ";", &tok_save)) {
         strcpy(buff, p);
         strcat(buff, OUTPUT_TERMINATOR);
-        Debug(2, "send_recv_mess: sending message to card %d, message=%s\n",
-                    card, buff);
+        Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, buff);
 	len = cntrl->serialInfo->serialIOSendRecv(buff, strlen(buff), 
                          response, BUFF_SIZE, INPUT_TERMINATOR, SERIAL_TIMEOUT);
     }
@@ -485,12 +479,10 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
     if (len < 2) response[0] = '\0'; else response[len-2] = '\0';
     if (len > 0) {
-        Debug(2, "send_recv_mess: card %d, response = \"%s\"\n", 
-            card, response);
+        Debug(2, "send_recv_mess: card %d, response = \"%s\"\n", card, response);
     }
     if (len == 0) {
-        Debug(1, "send_recv_mess: card %d ERROR: no response\n",
-               card);
+        Debug(1, "send_recv_mess: card %d ERROR: no response\n", card);
     }
     /* The PM600 always echoes the command sent to it, before sending the response.  It is terminated
        with a carriage return.  So we need to delete all characters up to and including the first
