@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.c
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-04-18 21:01:05 $
+Last Modified:	$Date: 2000-06-14 16:10:05 $
 */
 
 /*
@@ -45,7 +45,7 @@ Last Modified:	$Date: 2000-04-18 21:01:05 $
 
 
 #include	<vxWorks.h>
-#include	<stdioLib.h>
+#include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
 #include	<taskLib.h>
@@ -618,6 +618,7 @@ STATIC int motor_init()
 	    continue;
 	
 	brdptr = motor_state[card_index];
+	brdptr->cmnd_response = OFF;
 	total_cards = card_index + 1;
 	cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
 
