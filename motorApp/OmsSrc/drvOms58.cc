@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-03 17:18:44 $
+Last Modified:	$Date: 2003-02-12 18:18:48 $
 */
 
 /*
@@ -68,7 +68,7 @@ Last Modified:	$Date: 2003-02-03 17:18:44 $
  *			boards after the "hole" to work.
  */
 
-
+#include	<vxLib.h>
 #include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
@@ -83,9 +83,11 @@ Last Modified:	$Date: 2003-02-03 17:18:44 $
 #include	<dbCommon.h>
 #include	<devSup.h>
 #include	<drvSup.h>
+extern "C" {
 #include	<recSup.h>
-#include        <devLib.h>
+#include	<devLib.h>
 #include	<errlog.h>
+}
 #include	<errMdef.h>
 #include	<epicsThread.h>
 
@@ -98,7 +100,7 @@ Last Modified:	$Date: 2003-02-03 17:18:44 $
 
 #define STATIC static
 
-/* Define for return test on locationProbe() */
+/* Define for return test on devNoResponseProbe() */
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
 
 /* jps: INFO messages - add RV and move QA to top */
@@ -918,7 +920,7 @@ STATIC int motor_init()
     int total_encoders = 0, total_axis = 0, total_pidcnt = 0;
     volatile void *localaddr;
     void *probeAddr;
-    
+
     tok_save = NULL;
 
     /* Check for setup */
@@ -946,15 +948,15 @@ STATIC int motor_init()
 
 	Debug(2, "motor_init: card %d\n", card_index);
 
-	probeAddr = (void *) (oms_addrs + (card_index * OMS_BRD_SIZE));
+	probeAddr = oms_addrs + (card_index * OMS_BRD_SIZE);
 	startAddr = (int8_t *) probeAddr;
 	endAddr = startAddr + OMS_BRD_SIZE;
 
-	Debug(9, "motor_init: locationProbe() on addr 0x%x\n", (uint_t) probeAddr);
-	/* Perform scan of vme58 memory space to assure card id */
+	Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n", (uint_t) probeAddr);
+	/* Scan memory space to assure card id */
 	do
 	{
-	    status = locationProbe(OMS_ADDRS_TYPE, (char *) startAddr);
+	    status = devNoResponseProbe(OMS_ADDRS_TYPE, (unsigned int) startAddr, 2);
 	    startAddr += 0x100;
 	} while (PROBE_SUCCESS(status) && startAddr < endAddr);
 
@@ -1142,7 +1144,7 @@ STATIC void oms_nanoSleep(int time)
 
 	sysAuxClkDisable();
 	sysAuxClkRateSet(omsNanoRate);	/* tick = 1ms */
-	sysAuxClkConnect(&oms_nanoWakup, 0);
+//	sysAuxClkConnect(&oms_nanoWakup, 0);
 	sysAuxClkEnable();
 
 	semTake(nanoSem, 1);	/* Maximum sleep time = 1 system clock tick */
