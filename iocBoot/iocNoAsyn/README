@@ -1,7 +1,9 @@
-To start the ioc from this directory, execute the following command.
-This command assumes that your EPICS_HOST_ARCH environment variable
-is set correctly.
+To run this MX example, uncomment the following;
+in <motor>/motorExApp/NoMPF/Makefile: #NoMPF_LIBS += MXmotor
+in <motor>/motorExApp/NoMPF/NoMPFInclude.dbd: #include "devMXmotor.dbd" 
+and rebuild.
 
-../../bin/${EPICS_HOST_ARCH}/NoMPF st.cmd.unix
+Assuming the EPICS_HOST_ARCH environment variable is set correctly,
+start the ioc from this directory by executing the following command.
 
 ../../bin/${EPICS_HOST_ARCH}/NoMPF st.cmd.mx
