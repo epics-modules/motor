@@ -14,8 +14,8 @@ endif
 
 # 
 # Select individual device/driver support modules by removing the comment.
-DIRS += OmsSrc
-DIRS += SoftMotorSrc
+#DIRS += OmsSrc
+#DIRS += SoftMotorSrc
 #DIRS += V544Src
 
 ifdef MX
@@ -25,11 +25,11 @@ endif
 # The following modules require MPF_SERIAL.
 # Select individual device/driver support modules by removing the comment.
 ifdef MPF
-DIRS += NewportSrc
-DIRS += ImsSrc
-DIRS += AcsSrc
-DIRS += MclennanSrc
-DIRS += PiSrc
+#DIRS += NewportSrc
+#DIRS += ImsSrc
+#DIRS += AcsSrc
+#DIRS += MclennanSrc
+#DIRS += PiSrc
 endif
 
 DIRS += Db
