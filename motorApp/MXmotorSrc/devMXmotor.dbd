@@ -1,5 +1,6 @@
 # Soft Channel driver support.
 device(motor,VME_IO,devMXmotor,"MXmotor")
 driver(drvMXmotor)
+registrar(MXmotorRegister)
 
 
