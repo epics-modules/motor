@@ -5,17 +5,20 @@
 #cd "... IOC st.cmd complete directory path ... "
 
 < cdCommands
-
-#< ../nfsCommands
+< ../MPFconfig.cmd
  
 cd appbin
-ld < ipServerLib
+ld < mpfLib
+ld < ipLib
+ld < mpfserialserverLib
+# !GPIB! #ld < mpfgpibserverLib
 
 cd startup
 
 #start message router
 routerInit
-tcpMessageRouterServerStart(1,9900,"164.54.53.78",1500,40)
+# 3rd argument is VxWorks "inet on backplane" boot parameter.
+tcpMessageRouterServerStart(MPF_Remote_Server,9900,Remote_IP,1500,40)
 
 ###############################################################################
 # Initialize IP carrier
