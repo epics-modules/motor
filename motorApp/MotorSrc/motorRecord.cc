@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:54:19 $
+Last Modified:	$Date: 2003-05-23 19:45:08 $
 */
 
 /*
@@ -2477,7 +2477,6 @@ pidcof:
 
 	if ((pmr->mip & MIP_JOGF) || (pmr->mip & MIP_JOGR))
 	{
-	    int dir = (pmr->dir == motorDIR_Pos) ? 1 : -1;
 	    double jogv = (pmr->jvel * dir) / pmr->mres;
 	    double jacc = pmr->jar / fabs(pmr->mres);
 
@@ -3038,11 +3037,11 @@ static void
      */
     if (pmr->urip && initcall == false)
     {
-	long status;
+	long rtnstat;
 
 	old_drbv = pmr->drbv;
-	status = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &(pmr->drbv), NULL, NULL);
-	if (!RTN_SUCCESS(status))
+	rtnstat = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &(pmr->drbv), NULL, NULL);
+	if (!RTN_SUCCESS(rtnstat))
 	    pmr->drbv = old_drbv;
 	else
 	{
