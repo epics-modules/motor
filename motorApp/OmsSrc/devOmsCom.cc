@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-06-21 21:43:36 $
+Last Modified:	$Date: 2004-08-27 21:38:42 $
 */
 
 /*
@@ -53,6 +53,7 @@ Last Modified:	$Date: 2004-06-21 21:43:36 $
  * .09  06-04-03 rls extended device directive support PREM and POST.
  * .10  06-16-03 rls Converted to R3.14.x.
  * .11  06-16-04 rls Terminate "LP" command with ";" to prevent MAXv stale data.
+ * .12  08-27-04 rls Terminate "JG" command with ";" to prevent MAXv stale data.
  */
 
 #include <string.h>
@@ -375,52 +376,60 @@ errorexit:		    errMessage(-1, "Invalid device directive");
 
 		switch (command)
 		{
-		    case SET_PGAIN:
-		    case SET_IGAIN:
-		    case SET_DGAIN:
-			*parms *= 1999.9;
-			sprintf(buffer, "%.1f", parms[itera]);
-			break;
+		case SET_PGAIN:
+		case SET_IGAIN:
+		case SET_DGAIN:
+		    *parms *= 1999.9;
+		    sprintf(buffer, "%.1f", parms[itera]);
+		    break;
 
-		    case SET_VELOCITY:	/* OMS errors if VB = VL. */
-			{
-			    long vbase, vel;
+		case SET_VELOCITY:  /* OMS errors if VB = VL. */
+		    {
+			long vbase, vel;
 
-			    vbase = NINT(mr->vbas / fabs(mr->mres));
-			    vel = NINT(parms[itera]);
+			vbase = NINT(mr->vbas / fabs(mr->mres));
+			vel = NINT(parms[itera]);
 
-			    if (vel <= vbase)
-				vel = vbase + 1;
-			    sprintf(buffer, "%ld", vel);
-			}
-			break;
-			
-		    case MOVE_REL:
-			{
-			    /* Code around OMS bug that ignores MR+/-1. */
-			    long relmove;
+			if (vel <= vbase)
+			    vel = vbase + 1;
+			sprintf(buffer, "%ld", vel);
+		    }
+		    break;
 
-			    relmove = NINT(parms[itera]);
-			    if (relmove == 1 || relmove == -1)
-				sprintf(buffer, "%ld.5", relmove);
-			    else
-				sprintf(buffer, "%ld", relmove);
-			}
-			break;
+		case MOVE_REL:
+		    {
+			/* Code around OMS bug that ignores MR+/-1. */
+			long relmove;
 
-		    default:
-			sprintf(buffer, "%ld", NINT(parms[itera]));
+			relmove = NINT(parms[itera]);
+			if (relmove == 1 || relmove == -1)
+			    sprintf(buffer, "%ld.5", relmove);
+			else
+			    sprintf(buffer, "%ld", relmove);
+		    }
+		    break;
+
+		default:
+		    sprintf(buffer, "%ld", NINT(parms[itera]));
 		}
 		strcat(motor_call->message, buffer);
 	    }
 
-	    if (command == SET_ENC_RATIO)
+	    switch (command)
 	    {
+	    case SET_ENC_RATIO:
 		sprintf(buffer, " UU%f", parms[0]/parms[1]);
 		strcat(motor_call->message, buffer);
-	    }
-	    if (command == LOAD_POS)
+		break;
+
+	    case LOAD_POS:
+	    case JOG:
+	    case JOG_VELOCITY:
 		strcat(motor_call->message, ";");
+
+	    default:
+		break;   
+	    }       
 	}
     }
     return(rtnind);
