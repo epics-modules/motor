@@ -1,6 +1,6 @@
 # This example if for OMS VME8/44 controllers.  Since OMS controllers
 # communicate across the VME backplace, this example does not require
-# MPF.
+# ASYN.
 
 # "#!" marks lines that can be uncommented.
 
@@ -26,17 +26,17 @@ dbLoadRecords("$(TOP)/db/NoMPF.db")
 #!dbLoadRecords("$(TOP)/motorExApp/Db/SoftMotorEx.db","user=rls,motor=m1", startup)
 
 # OMS VME driver setup parameters: 
-#     (1)cards, (2)axes per card, (3)base address(short, 16-byte boundary), 
-#     (4)interrupt vector (0=disable or  64 - 255), (5)interrupt level (1 - 6),
-#     (6)motor task polling rate (min=1Hz,max=60Hz)
-#!omsSetup(1, 8, 0xFC00, 180, 5, 10)
+#     (1)cards, (2)base address(short, 16-byte boundary), 
+#     (3)interrupt vector (0=disable or  64 - 255), (4)interrupt level (1 - 6),
+#     (5)motor task polling rate (min=1Hz,max=60Hz)
+#!omsSetup(1, 0xFC00, 180, 5, 10)
 #!drvOMSdebug = 4
 
 # OMS VME58 driver setup parameters: 
-#     (1)cards, (2)axes per card, (3)base address(short, 4k boundary), 
-#     (4)interrupt vector (0=disable or  64 - 255), (5)interrupt level (1 - 6),
-#     (6)motor task polling rate (min=1Hz,max=60Hz)
-#!oms58Setup(1, 8, 0x1000, 190, 5, 10)
+#     (1)cards, (2)base address(short, 4k boundary), 
+#     (3)interrupt vector (0=disable or  64 - 255), (4)interrupt level (1 - 6),
+#     (5)motor task polling rate (min=1Hz,max=60Hz)
+#!oms58Setup(1, 0x1000, 190, 5, 10)
 #!drvOms58debug = 4
 
 iocInit
