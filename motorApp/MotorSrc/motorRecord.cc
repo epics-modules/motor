@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 20:38:45 $
+Last Modified:	$Date: 2003-02-13 21:54:00 $
 */
 
 /*
@@ -67,11 +67,15 @@ Last Modified:	$Date: 2002-10-31 20:38:45 $
 #define STATIC static
 
 /*----------------debugging-----------------*/
-#ifdef	DEBUG
-    volatile int motorRecordDebug = 0;
-    #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
+#ifdef __GNUG__
+    #ifdef	DEBUG
+	volatile int motorRecordDebug = 0;
+	#define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
+    #else
+	#define Debug(l, f, args...)
+    #endif
 #else
-    #define Debug(l, f, args...)
+    #define Debug()
 #endif
 
 
