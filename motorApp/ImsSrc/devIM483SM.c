@@ -3,9 +3,9 @@ FILENAME...	devIM483SM.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-04-21 18:15:43 $
+Last Modified:	$Date: 2001-05-16 16:22:16 $
 */
 
 /*
@@ -35,7 +35,8 @@ Last Modified:	$Date: 2001-04-21 18:15:43 $
  *
  * Modification Log:
  * -----------------
- * .01	02/10/2000	rls	copied from devMM4000.c
+ * .01	02/10/00  rls	copied from devMM4000.c
+ * .02  05/16/01  rls	Added support for changing jog velocity while jogging.
  */
 
 
@@ -290,10 +291,9 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
 	    sprintf(buff, "@ 0");
 	    break;
 	
+	case JOG_VELOCITY:
 	case JOG:
-	    /* Can't get jogging to work without communication errors.
 	    sprintf(buff, "M%.*f;", maxdigits, cntrl_units);
-	    */
 	    break;
 	
 	case SET_PGAIN:
