@@ -6,5 +6,4 @@ driver(drvIM483SM)
 driver(drvIM483PL)
 driver(drvMDrive)
 registrar(IMSmotorRegister)
-
-
+variable(drvMDrivedebug)
