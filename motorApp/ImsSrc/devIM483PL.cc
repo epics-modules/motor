@@ -3,9 +3,9 @@ FILENAME...	devIM483PL.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-15 13:00:12 $
+Last Modified:	$Date: 2003-05-16 19:18:07 $
 */
 
 /*
@@ -77,7 +77,7 @@ STATIC RTN_STATUS IM483PL_end_trans(struct motorRecord *);
 
 struct motor_dset devIM483PL =
 {
-    {8, NULL, IM483PL_init, IM483PL_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) IM483PL_init, (DEVSUPFUN) IM483PL_init_record, NULL},
     motor_update_values,
     IM483PL_start_trans,
     IM483PL_build_trans,
@@ -131,20 +131,6 @@ STATIC long IM483PL_init(void *arg)
     if (after == 0)
     {
 	drvtabptr = &IM483PL_access;
-/*
-	char iocshID[] = "iocsh";
-        struct iocshCommand *found;
-	
-	found = (iocshCommand *)registryFind (iocshID, "_IM483PL_access");
-	if (found == NULL)
-	    return(rtnval);
-*/
-    /*
-	IF before DB initialization.
-	    Initialize IM483PL driver (i.e., call init()). See comment in
-		drvIM483PL.c init().
-	ENDIF
-    */
 	(drvtabptr->init)();
     }
 
@@ -183,7 +169,8 @@ STATIC RTN_STATUS IM483PL_build_trans(motor_cmnd command, double *parms, struct 
     struct controller *brdptr;
     struct IM483controller *cntrl;
     char buff[110];
-    int axis, card, maxdigits, size;
+    int axis, card, maxdigits;
+    unsigned int size;
     double dval, cntrl_units;
     RTN_STATUS rtnval;
     bool send;
