@@ -15,6 +15,7 @@ ld < NoMPFLib
 cd startup
 dbLoadDatabase("../../dbd/NoMPFApp.dbd")
 dbLoadRecords("../../db/NoMPF.db")
+#dbLoadRecords("../../motorExApp/Db/SoftMotorEx.db","user=rls,motor=m1", startup)
 
 # OMS VME driver setup parameters: 
 #     (1)cards, (2)axes per card, (3)base address(short, 16-byte boundary), 
