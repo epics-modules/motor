@@ -1,10 +1,10 @@
 /*
-FILENAME...	devOms.c
+FILENAME...	devOms.cc
 USAGE... Device level support for OMS VME8 and VME44 models.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:04:11 $
+Last Modified:	$Date: 2004-06-21 21:44:09 $
 */
 
 /*
