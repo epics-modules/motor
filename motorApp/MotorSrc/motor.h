@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 20:23:08 $
+Last Modified:	$Date: 2004-12-21 17:43:36 $
 */
 
 /*
@@ -41,6 +41,8 @@ Last Modified:	$Date: 2004-09-20 20:23:08 $
  *		    - Converted MSTA #define's to bit field.
  * .03 08-30-04 rls - Added osiUnistd.h for RTEMS.
  * .04 09-20-04 rls - Increase max. axis / board to 32 for Delta Tau PMAC.
+ * .05 12-21-04 rls - Changed pre-compiler instructions for LSB/MSB_First
+ *		      to support MS Visual C.
  */
 
 #ifndef	INCmotorh
@@ -113,11 +115,15 @@ enum motor_cmnd {
 #define YES		1
 
 // Define, from top to bottom, how bit fields are packed.
-// This works for SunPro, 
-#if #cpu(i386) && !#cpu(sparc)
-    #define LSB_First (TRUE)  // LSB is packed first.
+// This works for VxWorks, SunPro, Linux g++, MS Visual C.
+#ifdef _WIN32
+#define LSB_First (TRUE)  // LSB is packed first.
 #else
-    #define MSB_First (TRUE)  // MSB is packed first.
+#if #cpu(i386) && !#cpu(sparc)
+#define LSB_First (TRUE)  // LSB is packed first.
+#else
+#define MSB_First (TRUE)  // MSB is packed first.
+#endif
 #endif
 
 /* -------------------------------------------------- */
