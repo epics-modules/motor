@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 19:33:11 $
+Last Modified:	$Date: 2003-05-23 19:42:46 $
 */
 
 /*
@@ -162,6 +162,7 @@ typedef union
 	unsigned int na5:1;
 	unsigned int na6:1;
 	unsigned int na7:1;
+#endif
     } Bits;
 } SINPUTS;
 
