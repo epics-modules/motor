@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.13 $
+Version:	$Revision: 1.14 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:36:40 $
+Last Modified:	$Date: 2004-09-20 20:45:05 $
 */
 
 /*
@@ -39,6 +39,7 @@ Last Modified:	$Date: 2003-12-12 21:36:40 $
  * .01 10-02-01 rls added RETRY to CommStatus enumeration.
  * .02 10-24-03 rls moved irqdatastr to OmsSrc.
  * .03 12-12-03 rls Converted MSTA #define's to bit field.
+ * .04 09-20-04 rls support for 32 axes / controller, maximum.
  */
 
 
@@ -195,13 +196,13 @@ struct driver_table
     struct controller ***card_array;
     int *cardcnt_ptr;
     int *any_inmotion_ptr;
-    RTN_STATUS (*sendmsg) (int, char const *, char);
+    RTN_STATUS (*sendmsg) (int, char const *, char *);
     int (*getmsg) (int, char *, int);
     int (*setstat) (int, int);
     void (*query_done) (int, int, struct mess_node *);
     void (*strtstat) (int);			/* Optional; start status function or NULL. */
     const bool *const init_indicator;		/* Driver initialized indicator. */
-    char *axis_names;				/* Axis name array or NULL. */
+    char **axis_names;				/* Axis name array or NULL. */
 };
 
 
