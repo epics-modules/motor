@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:10:49 $
+Last Modified:	$Date: 2003-05-23 19:33:11 $
 */
 
 /*
@@ -144,6 +144,7 @@ typedef union
     epicsUInt8 All;
     struct
     {
+#ifdef MSB_First
 	unsigned int na7:1;
 	unsigned int na6:1;
 	unsigned int na5:1;
@@ -152,6 +153,15 @@ typedef union
 	unsigned int homels:1;		/* Home limit switch.  */
 	unsigned int ls_plus:1;		/* Plus limit switch.  */
 	unsigned int ls_minus:1;	/* Minus limit switch. */
+#else
+	unsigned int ls_minus:1;	/* Minus limit switch. */
+	unsigned int ls_plus:1;		/* Plus limit switch.  */
+	unsigned int homels:1;		/* Home limit switch.  */
+	unsigned int na3:1;
+	unsigned int na4:1;
+	unsigned int na5:1;
+	unsigned int na6:1;
+	unsigned int na7:1;
     } Bits;
 } SINPUTS;
 
