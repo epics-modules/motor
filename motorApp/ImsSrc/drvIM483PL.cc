@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 21:04:06 $
+Last Modified:	$Date: 2004-12-21 17:26:44 $
 */
 
 /*****************************************************************
@@ -37,6 +37,11 @@ of this distribution.
  * .07 09/20/04 rls - increase BUFF_SIZE; response was exceeding 13 characters.
  *                  - support for 32axes/controller.
  *                  - remove '?' command line padding.
+ * .08 12/14/04 rls - asyn R4.0 support.
+ *		    - make debug variables always available.
+ *		    - MS Visual C compatibility; make all epicsExportAddress
+ *		      extern "C" linkage.
+ *		    - retry on initial communication.
  */
 
 /*
@@ -73,15 +78,15 @@ DESIGN LIMITATIONS...
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvIM483PLdebug = 0;
 	#define Debug(l, f, args...) {if (l <= drvIM483PLdebug) printf(f, ## args);}
-	epicsExportAddress(int, drvIM483PLdebug);
     #else
 	#define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
+volatile int drvIM483PLdebug = 0;
+extern "C" {epicsExportAddress(int, drvIM483PLdebug);}
 
 /* --- Local data. --- */
 int IM483PL_num_cards = 0;
@@ -91,8 +96,8 @@ static char *IM483PL_axis[] = {"A", "B", "C", "D", "E", "F", "G", "H"};
 #include	"motordrvComCode.h"
 
 /*----------------functions-----------------*/
-int recv_mess(int, char *, int);
-RTN_STATUS send_mess(int, char const *, char *);
+static int recv_mess(int, char *, int);
+static RTN_STATUS send_mess(int, char const *, char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -128,16 +133,11 @@ struct driver_table IM483PL_access =
 struct
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvIM483PL = {2, report, init};
 
-epicsExportAddress(drvet, drvIM483PL);
+extern "C" {epicsExportAddress(drvet, drvIM483PL);}
 
 static struct thread_args targs = {SCAN_RATE, &IM483PL_access};
 
@@ -376,20 +376,22 @@ exit:
 /* send a message to the IM483PL board		     */
 /* send_mess()			                     */
 /*****************************************************/
-RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
-    int size;
+    int comsize, namesize;
+    int nwrite;
 
-    size = strlen(com);
+    comsize = (com == NULL) ? 0 : strlen(com);
+    namesize = (name == NULL) ? 0 : strlen(name);
 
-    if (size > MAX_MSG_SIZE)
+    if ((comsize + namesize) > MAX_MSG_SIZE)
     {
 	errlogMessage("drvIM483PL.c:send_mess(); message size violation.\n");
 	return(ERROR);
     }
-    else if (size == 0)	/* Normal exit on empty input message. */
+    else if (comsize == 0)	/* Normal exit on empty input message. */
 	return(OK);
 
     if (!motor_state[card])
@@ -399,7 +401,7 @@ RTN_STATUS send_mess(int card, char const *com, char *name)
     }
 
     /* Make a local copy of the string and add the command line terminator. */
-    if (name != NULL)
+    if (namesize != 0)
     {
 	strcpy(local_buff, name);	    /* put in axis */
 	strcat(local_buff, com);
@@ -407,14 +409,11 @@ RTN_STATUS send_mess(int card, char const *com, char *name)
     else
 	strcpy(local_buff, com);
 
-    strcat(local_buff, "\n");
-
-
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
     pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
-		       COMM_TIMEOUT);
+		       COMM_TIMEOUT, &nwrite);
 
     return(OK);
 }
@@ -424,12 +423,11 @@ RTN_STATUS send_mess(int card, char const *com, char *name)
 /* receive a message from the IM483 board           */
 /* recv_mess()			                     */
 /*****************************************************/
-int recv_mess(int card, char *com, int flag)
+static int recv_mess(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    int timeout;
-    int flush = 0;
-    int len = 0;
+    int nread = 0;
+    asynStatus status = asynError;
     int eomReason;
 
     /* Check that card exists */
@@ -439,20 +437,19 @@ int recv_mess(int card, char *com, int flag)
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
 
     if (flag == FLUSH)
-	timeout = 0;
+	pasynOctetSyncIO->flush(cntrl->pasynUser);
     else
-	timeout	= COMM_TIMEOUT;
+	status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+				    COMM_TIMEOUT, &nread, &eomReason);
 
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n",
-                            1, flush, timeout, &eomReason);
-
-    if (len == 0)
+    if ((status != asynSuccess) || (nread <= 0))
+    {
 	com[0] = '\0';
-    else
-	com[len - 1] = '\0';
+	nread = 0;
+    }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return(len);
+    return(nread);
 }
 
 
@@ -530,6 +527,8 @@ static int motor_init()
     int total_axis = 0;
     int status;
     asynStatus success_rtn;
+    static const char output_terminator[] = "\n";
+    static const char input_terminator[]  = "\n";
 
     initialized = true;	/* Indicate that driver is initialized. */
 
@@ -549,18 +548,30 @@ static int motor_init()
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
+						&cntrl->pasynUser, NULL);
 
 	if (success_rtn == asynSuccess)
 	{
+	    pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
+					   strlen(output_terminator));
+	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
+					  strlen(input_terminator));
 	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
             pasynOctetSyncIO->flush(cntrl->pasynUser);
     
 	    for (total_axis = 0; total_axis < MAX_AXES; total_axis++)
 	    {
-		send_mess(card_index, " Z 0", IM483PL_axis[total_axis]);
-		status = recv_mess(card_index, buff, 1);
+		int retry = 0;
+
+		do
+		{
+		    send_mess(card_index, " Z 0", IM483PL_axis[total_axis]);
+		    status = recv_mess(card_index, buff, 1);
+		    retry++;
+		} while (status <= 0 && retry < 3);
+
 		if (status <= 0)
 		    break;
 	    }

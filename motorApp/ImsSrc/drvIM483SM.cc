@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 21:05:39 $
+Last Modified:	$Date: 2004-12-21 17:25:13 $
 */
  
 /*****************************************************************
@@ -35,6 +35,11 @@ of this distribution.
  * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .06 07/01/04 rls Converted from MPF to asyn.
  * .07 09/20/04 rls support for 32axes/controller.
+ * .08 12/14/04 rls - asyn R4.0 support.
+ *		    - make debug variables always available.
+ *		    - MS Visual C compatibility; make all epicsExportAddress
+ *		      extern "C" linkage.
+ *		    - retry on initial communication.
  */
 
 /*
@@ -70,16 +75,15 @@ DESIGN LIMITATIONS...
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef	DEBUG
-	volatile int drvIM483SMdebug = 0;
 	#define Debug(l, f, args...) {if (l <= drvIM483SMdebug) printf(f, ## args);}
-	epicsExportAddress(int, drvIM483SMdebug);
     #else
 	#define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
-
+volatile int drvIM483SMdebug = 0;
+extern "C" {epicsExportAddress(int, drvIM483SMdebug);}
 
 /* --- Local data. --- */
 int IM483SM_num_cards = 0;
@@ -125,16 +129,11 @@ struct driver_table IM483SM_access =
 struct
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvIM483SM = {2, report, init};
 
-epicsExportAddress(drvet, drvIM483SM);
+extern "C" {epicsExportAddress(drvet, drvIM483SM);}
 
 static struct thread_args targs = {SCAN_RATE, &IM483SM_access};
 
@@ -376,9 +375,9 @@ exit:
 /*****************************************************/
 static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
-    char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
     int size;
+    int nwrite;
 
     size = strlen(com);
 
@@ -402,15 +401,11 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    /* Make a local copy of the string and add the command line terminator. */
-    strcpy(local_buff, com);
-    strcat(local_buff, "\r");
-
-    Debug(2, "send_mess(): message = %s\n", local_buff);
+    Debug(2, "send_mess(): message = %s\n", com);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
-    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
-		       COMM_TIMEOUT);
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, size, COMM_TIMEOUT,
+			    &nwrite);
 
     return(OK);
 }
@@ -423,9 +418,8 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 static int recv_mess(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    int timeout;
-    int flush = 0;
-    int len = 0;
+    int nread = 0;
+    asynStatus status = asynError;
     int eomReason;
 
     /* Check that card exists */
@@ -435,20 +429,19 @@ static int recv_mess(int card, char *com, int flag)
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
 
     if (flag == FLUSH)
-	timeout = 0;
+	pasynOctetSyncIO->flush(cntrl->pasynUser);
     else
-	timeout	= COMM_TIMEOUT;
+	status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+				    COMM_TIMEOUT, &nread, &eomReason);
 
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
-                            2, flush, timeout, &eomReason);
-
-    if (len < 2)
+    if ((status != asynSuccess) || (nread <= 0))
+    {
 	com[0] = '\0';
-    else
-	com[len - 2] = '\0';
+	nread = 0;
+    }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return(len);
+    return(nread);
 }
 
 
@@ -526,6 +519,8 @@ static int motor_init()
     int total_axis = 0;
     int status;
     asynStatus success_rtn;
+    static const char output_terminator[] = "\r";
+    static const char input_terminator[] = "\r\n";
 
     initialized = true;	/* Indicate that driver is initialized. */
 
@@ -544,63 +539,73 @@ static int motor_init()
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser);
+	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, 
+						&cntrl->pasynUser, NULL);
 
 	if (success_rtn == asynSuccess)
 	{
-	    int itera;
+	    int itera, retry = 0;
 	    char *src, *dest;
 
-	    /* Send a message to the board, see if it exists */
-	    /* flush any junk at input port - should not be any data available */
-            pasynOctetSyncIO->flush(cntrl->pasynUser);
-    
-	    send_mess(card_index, "\003", (char) NULL);	/* Reset device. */
-	    epicsThreadSleep(1.0);
-	    send_mess(card_index, " ", (char) NULL);
-
-	    /* Save controller identification message. */
-	    src = buff;
-	    dest = brdptr->ident;
-	    *src = (char) NULL;
-
-	    for (itera = 0; itera < 50; itera++)
+	    pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
+					   strlen(output_terminator));
+	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
+					  strlen(input_terminator));
+	    do
 	    {
-		if (*src == (char) NULL)
+		/* Send a message to the board, see if it exists */
+		/* flush any junk at input port - should not be any data available */
+		pasynOctetSyncIO->flush(cntrl->pasynUser);
+
+		send_mess(card_index, "\003", (char) NULL); /* Reset device. */
+		epicsThreadSleep(1.0);
+		send_mess(card_index, " ", (char) NULL);
+
+		/* Save controller identification message. */
+		src = buff;
+		dest = brdptr->ident;
+		*src = (char) NULL;
+
+		for (itera = 0; itera < 50; itera++)
 		{
-		    status = recv_mess(card_index, buff, 1);
-		    if (status <= 0)
+		    if (*src == (char) NULL)
 		    {
+			status = recv_mess(card_index, buff, 1);
+			if (status <= 0)
+			{
+			    if (itera != 0)
+			    {
+				*dest = (char) NULL;
+				status = 1;
+			    }
+			    break;
+			}
+			src = buff;
+			while (isspace(*src++));
+			--src;
 			if (itera != 0)
 			{
-			    *dest = (char) NULL;
-			    status = 1;
+			    *dest++ = ' ';
+			    itera++;
 			}
-			break;
 		    }
-		    src = buff;
-		    while(isspace(*src++));
-		    --src;
-		    if (itera != 0)
+		    else if (isspace(*src))
 		    {
-			*dest++ = ' ';
-			itera++;
+			while (isspace(*src++));
+			src -= 2;
 		    }
+		    else if (strncmp(src, "AD", 2) == 0)
+		    {
+			strcpy(dest, "AMS");
+			src += 22;
+			dest += 3;
+			itera += 3;
+		    }
+		    *dest++ = *src++;
 		}
-		else if (isspace(*src))
-		{
-		    while(isspace(*src++));
-		    src -= 2;
-		}
-		else if (strncmp(src, "AD", 2) == 0)
-		{
-		    strcpy(dest, "AMS");
-		    src += 22;
-		    dest += 3;
-		    itera += 3;
-		}
-		*dest++ = *src++;
-	    }
+		retry++;
+		/* Return value is length of response string */
+	    } while (status == 0 && retry < 3);
 	}
 
 	if (success_rtn == asynSuccess && status > 0)
