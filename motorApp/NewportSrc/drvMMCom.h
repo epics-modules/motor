@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:50:34 $
+Last Modified:	$Date: 2003-05-23 19:24:40 $
 */
 
 /*
@@ -42,6 +42,7 @@ Last Modified:	$Date: 2001-12-14 20:50:34 $
 #ifndef	INCdrvMMComh
 #define	INCdrvMMComh 1
 
+#include "motor.h"
 #include "motordrvCom.h"
 
 enum MM_model
@@ -85,20 +86,32 @@ struct MMcontroller
     CommStatus status;		/* Controller communication status. */
 };
 
+
 /* Motor status response for MM[3000/4000/4005]. */
 typedef union
 {
     epicsUInt8 All;
     struct
     {
-	BOOLEAN bit7		:1;	/* Bit #7 N/A. */
-	BOOLEAN bit6		:1;	/* Bit #6 N/A. */
-	BOOLEAN homels		:1;	/* Home LS. */
-	BOOLEAN minusTL		:1;	/* Minus Travel Limit. */
-	BOOLEAN plustTL		:1;	/* Plus Travel Limit. */
-	BOOLEAN direction	:1;	/* Motor direction: 0 - minus; 1 - plus. */
-	BOOLEAN NOT_power	:1;	/* Motor power 0 - ON; 1 - OFF. */
-	BOOLEAN inmotion	:1;	/* In-motion indicator. */
+#ifdef MSB_First
+	bool bit7	:1;	/* Bit #7 N/A. */
+	bool bit6	:1;	/* Bit #6 N/A. */
+	bool homels	:1;	/* Home LS. */
+	bool minusTL	:1;	/* Minus Travel Limit. */
+	bool plustTL	:1;	/* Plus Travel Limit. */
+	bool direction	:1;	/* Motor direction: 0 - minus; 1 - plus. */
+	bool NOT_power	:1;	/* Motor power 0 - ON; 1 - OFF. */
+	bool inmotion	:1;	/* In-motion indicator. */
+#else
+	bool inmotion	:1;	/* In-motion indicator. */
+	bool NOT_power	:1;	/* Motor power 0 - ON; 1 - OFF. */
+	bool direction	:1;	/* Motor direction: 0 - minus; 1 - plus. */
+	bool plustTL	:1;	/* Plus Travel Limit. */
+	bool minusTL	:1;	/* Minus Travel Limit. */
+	bool homels	:1;	/* Home LS. */
+	bool bit6	:1;	/* Bit #6 N/A. */
+	bool bit7	:1;	/* Bit #7 N/A. */
+#endif
     } Bits;
 } MOTOR_STATUS;
 
