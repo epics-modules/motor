@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.c
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:34:24 $
+Last Modified:	$Date: 2000-06-14 16:13:56 $
 */
 
 /*
@@ -60,7 +60,7 @@ Last Modified:	$Date: 2000-03-03 22:34:24 $
 
 
 #include	<vxWorks.h>
-#include	<stdioLib.h>
+#include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
 #include	<taskLib.h>
@@ -208,10 +208,16 @@ static long report(int level)
     else
     {
 	for (card = 0; card < oms58_num_cards; card++)
-	    if (motor_state[card])
-		printf("    Oms Vme58 motor card %d @ 0x%X, id: %s \n", card,
+	{
+	    struct controller *brdptr = motor_state[card];
+
+	    if (brdptr == NULL)
+		printf("    Oms Vme58 motor card #%d not found.\n", card);
+	    else
+		printf("    Oms Vme58 motor card #%d @ 0x%X, id: %s \n", card,
 		       (uint_t) motor_state[card]->localaddr,
 		       motor_state[card]->ident);
+	}
     }
     return (0);
 }
@@ -908,8 +914,8 @@ STATIC int motor_init()
 	if (PROBE_SUCCESS(status))
 	{
 	    status = devRegisterAddress(__FILE__, OMS_ADDRS_TYPE,
-					(size_t) probeAddr, OMS_BRD_SIZE,
-					(volatile void **) &localaddr);
+					(void *) probeAddr, OMS_BRD_SIZE,
+					(void **) &localaddr);
 	    Debug(9, "motor_init: devRegisterAddress() status = %d\n", (int) status);
 	    if (!RTN_SUCCESS(status))
 	    {
@@ -927,6 +933,7 @@ STATIC int motor_init()
 	    pmotorState = motor_state[card_index];
 	    pmotorState->localaddr = (char *) localaddr;
 	    pmotorState->motor_in_motion = 0;
+	    pmotorState->cmnd_response = OFF;
 
 	    pmotorState->irqdata = (struct irqdatastr *) NULL;
 	    /* Disable all interrupts */
