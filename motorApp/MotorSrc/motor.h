@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-05-14 19:46:46 $
+Last Modified:	$Date: 2001-12-14 20:45:23 $
 */
 
 /*
@@ -52,7 +52,8 @@ typedef enum BOOLEAN_VALUES {OFF = 0, ON = 1} BOOLEAN;
 
 #define NINT(f)	(long)((f)>0 ? (f)+0.5 : (f)-0.5)	/* Nearest integer. */
 
-/* Motor Record Command Set.  !WARNING! this enumeration must match the following;
+/* Motor Record Command Set. !WARNING! this enumeration must match ALL of the
+   following;
     - "oms_table" in devOmsCom.c
     - "MM4000_table" in devMM4000.c
 */
@@ -112,7 +113,8 @@ typedef enum motor_cmnd motor_cmnd;
 #define EA_PRESENT		0x100	/* encoder is present */
 #define RA_PROBLEM		0x200	/* driver stopped polling */
 #define RA_MOVING		0x400	/* non-zero velocity present */
-#define GAIN_SUPPORT		0x800	/* Motor supports closed-loop position control. */
+#define GAIN_SUPPORT		0x800	/* Motor supports closed-loop position
+					    control. */
 #define CNTRL_COMM_ERR		0x1000	/* Controller communication error. */
 
 /*
