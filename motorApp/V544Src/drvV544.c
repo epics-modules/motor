@@ -280,7 +280,6 @@ STATIC motor_task(int a1, int a2, int a3, int a4, int a5, int a6, int a7,
 STATIC query_axis(int card)
 {
     volatile struct vmex_motor *pmotor;
-    MOTOR_RETURN *mess_ret;
     register struct mess_node *motor_motion;
     register struct mess_info *motor_info;
     int i;
@@ -300,6 +299,9 @@ STATIC query_axis(int card)
 	 */
 	if (motor_motion && set_status(card, i))
 	{
+	    MOTOR_RETURN *mess_ret;
+	    BOOLEAN ls_active;
+
 	    if (drvV544debug >= 4)
 		printf("query_axis: motor %d, pos=%d, enc=%d, vel=%d, status=0x%04x\n",
 		       (card * V544_NUM_CHANNELS) + i,
@@ -322,8 +324,22 @@ STATIC query_axis(int card)
 	    mess_ret->status = motor_motion->status;
 	    mess_ret->type = motor_motion->type;
 
-	    if (motor_motion->status & RA_OVERTRAVEL ||
-		motor_motion->status & RA_PROBLEM)
+	    if (motor_motion->status & RA_DIRECTION)
+	    {
+		if (motor_motion->status & RA_PLUS_LS)
+		    ls_active = ON;
+		else
+		    ls_active = OFF;
+	    }
+	    else
+	    {
+		if (motor_motion->status & RA_MINUS_LS)
+		    ls_active = ON;
+		else
+		    ls_active = OFF;
+	    }
+
+	    if (ls_active == ON || motor_motion->status & RA_PROBLEM)
 	    {
 		/* Assure motion is stopped */
 		send_cmnd(card, i, 0, 0, 0, CS_IDLE);
@@ -391,7 +407,7 @@ STATIC set_status(int card, int signal)
     uint16_t motorStatusReg;
     uint16_t motorCmndReg;
     int rtn_state = 0;
-
+    BOOLEAN plusdir, ls_active = OFF;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
@@ -419,49 +435,42 @@ STATIC set_status(int card, int signal)
 	motorPos = (motorPosReg.coarse << 16) | motorPosReg.fine;
 
 	/* Set direction base on position history */
-	if (motorPos > motor_info->position)
-	{
-	    /* Positive motion - check clockwise limit */
-	    motor_info->status |= RA_DIRECTION;
-
-	    if ((motorStatusReg & STAT_CWL) && (motorCmndReg & CS_DONE))
-		motor_info->status |= RA_OVERTRAVEL;
-	    else
-		motor_info->status &= ~RA_OVERTRAVEL;
-
-	    motor_info->no_motion_count = 0;
-	}
-	else if (motorPos < motor_info->position)
-	{
-	    /* Negative motion - check counterclockwise limit */
-	    motor_info->status &= ~RA_DIRECTION;
-	    motorVel *= -1;
-
-	    if ((motorStatusReg & STAT_CCWL) && (motorCmndReg & CS_DONE))
-		motor_info->status |= RA_OVERTRAVEL;
-	    else
-		motor_info->status &= ~RA_OVERTRAVEL;
-
-	    motor_info->no_motion_count = 0;
-	}
+	if (motorPos == motor_info->position)
+	    motor_info->no_motion_count++;
 	else
 	{
-	    /*
-	     * No motion - check both limits and set direction accordingly.
-	     */
-	    if (motorStatusReg & (STAT_CCWL | STAT_CWL))
-	    {
-		motor_info->status |= RA_OVERTRAVEL;
+	    epicsInt32 newposition;
 
-		if (motorStatusReg & STAT_CWL)
-		    motor_info->status |= RA_DIRECTION;	        /* Positive Limit */
-		else
-		    motor_info->status &= ~RA_DIRECTION;	/* Negative Limit */
-	    }
-
-	    motor_info->no_motion_count++;
-
+	    newposition = NINT(motorPos);
+	    if (newposition >= motor_info->position)
+		motor_info->status |= RA_DIRECTION;
+	    else
+		motor_info->status &= ~RA_DIRECTION;
+	    motor_info->position = newposition;
+	    motor_info->no_motion_count = 0;
 	}
+
+	plusdir = (motor_info->status & RA_DIRECTION) ? ON : OFF;
+
+	if (motorStatusReg & STAT_CWL)
+	{
+	    motor_info->status |= RA_PLUS_LS;
+	    if (plusdir == ON)
+		ls_active = ON;
+	}
+	else
+	    motor_info->status &= ~RA_PLUS_LS;
+
+
+	if (motorStatusReg & STAT_CCWL)
+	{
+	    motor_info->status |= RA_MINUS_LS;
+	    if (plusdir == OFF)
+		ls_active = ON;
+	}
+	else
+	    motor_info->status &= ~RA_MINUS_LS;
+
 
 	if (motor_info->no_motion_count > motionTO)
 	{
@@ -485,8 +494,8 @@ STATIC set_status(int card, int signal)
 	else
 	    motor_info->status &= ~RA_HOME;
 
-	rtn_state = (!motor_info->no_motion_count ||
-		     (motor_info->status & (RA_OVERTRAVEL | RA_DONE | RA_PROBLEM))) ? 1 : 0;
+	rtn_state = (!motor_info->no_motion_count || ls_active == ON ||
+	 (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
     }
     else if (motor_info->no_motion_count++ > motionTO)
     {
