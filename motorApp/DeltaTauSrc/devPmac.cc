@@ -2,9 +2,9 @@
 FILENAME...	devPmac.cc
 USAGE... Device level support for Delta Tau PMAC.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-10-07 15:04:58 $
+Last Modified:	$Date: 2004-12-20 21:05:19 $
 */
 
 /*
@@ -67,7 +67,7 @@ struct motor_dset devPmac =
     Pmac_end_trans
 };
 
-epicsExportAddress(dset,devPmac);
+extern "C" {epicsExportAddress(dset,devPmac);}
 
 /* This table is used to define the command types */
 /* WARNING! this must match "motor_cmnd" in motor.h */

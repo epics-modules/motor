@@ -3,9 +3,9 @@ FILENAME...	devIM483PL.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 20:54:43 $
+Last Modified:	$Date: 2004-12-20 21:06:43 $
 */
 
 /*
@@ -71,7 +71,7 @@ struct motor_dset devIM483PL =
     IM483PL_end_trans
 };
 
-epicsExportAddress(dset,devIM483PL);
+extern "C" {epicsExportAddress(dset,devIM483PL);}
 
 /* --------------------------- program data --------------------- */
 

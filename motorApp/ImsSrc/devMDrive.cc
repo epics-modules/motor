@@ -3,9 +3,9 @@ FILENAME...	devMDrive.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MDrive series of controllers.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 20:57:05 $
+Last Modified:	$Date: 2004-12-20 21:06:43 $
 */
 
 /*
@@ -72,7 +72,7 @@ struct motor_dset devMDrive =
     MDrive_end_trans
 };
 
-epicsExportAddress(dset,devMDrive);
+extern "C" {epicsExportAddress(dset,devMDrive);}
 
 /* --------------------------- program data --------------------- */
 

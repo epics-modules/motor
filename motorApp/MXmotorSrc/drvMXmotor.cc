@@ -2,9 +2,9 @@
 FILENAME...	drvMXmotor.cc
 USAGE...	Motor record driver level support for MX device driver.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 21:10:56 $
+Last Modified:	$Date: 2004-12-20 21:07:26 $
 */
 
 /*
@@ -95,7 +95,7 @@ struct
     long (*init) (void);
 } drvMXmotor = {2, report, init};
 
-epicsExportAddress(drvet,drvMXmotor);
+extern "C" {epicsExportAddress(drvet,drvMXmotor);}
 
 static struct thread_args targs = {SCAN_RATE, &MXmotor_access};
 

@@ -3,9 +3,9 @@ FILENAME...	devMVP2001.cc
 USAGE...	Motor record device level support for MicroMo
 		MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-03 20:02:57 $
+Last Modified:	$Date: 2004-12-20 21:09:09 $
 */
 
 /*
@@ -116,7 +116,7 @@ struct motor_dset devMVP2001 =
     MVP2001_end_trans
 };
 
-epicsExportAddress(dset,devMVP2001);
+extern "C" {epicsExportAddress(dset,devMVP2001);}
 
 /* --------------------------- program data --------------------- */
 

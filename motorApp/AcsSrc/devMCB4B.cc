@@ -66,7 +66,7 @@ struct motor_dset devMCB4B =
     MCB4B_end_trans
 };
 
-epicsExportAddress(dset,devMCB4B);
+extern "C" {epicsExportAddress(dset,devMCB4B);}
 
 
 /* --------------------------- program data --------------------- */

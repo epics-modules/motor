@@ -133,7 +133,7 @@ struct
 #endif
 } drvPM304 = {2, report, init};
 
-epicsExportAddress(drvet, drvPM304);
+extern "C" {epicsExportAddress(drvet, drvPM304);}
 
 STATIC struct thread_args targs = {SCAN_RATE, &PM304_access};
 

@@ -3,9 +3,9 @@ FILENAME...	devPM500.cc
 USAGE...	Motor record device level support for the Newport PM500 motor
 		controller.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 16:01:52 $
+Last Modified:	$Date: 2004-12-20 21:10:53 $
 */
 
 /*
@@ -73,7 +73,7 @@ struct motor_dset devPM500 =
     PM500_end_trans
 };
 
-epicsExportAddress(dset,devPM500);
+extern "C" {epicsExportAddress(dset,devPM500);}
 
 /* --------------------------- program data --------------------- */
 

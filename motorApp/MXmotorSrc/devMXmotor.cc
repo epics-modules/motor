@@ -2,9 +2,9 @@
 FILENAME...	devMXmotor.cc
 USAGE...	Motor record device level support for MX device driver.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:35:18 $
+Last Modified:	$Date: 2004-12-20 21:07:26 $
 */
 
 /*
@@ -54,7 +54,7 @@ struct motor_dset devMXmotor =
     MXmotor_end_trans
 };
 
-epicsExportAddress(dset,devMXmotor);
+extern "C" {epicsExportAddress(dset,devMXmotor);}
 
 
 /* This table is used to define the command types */

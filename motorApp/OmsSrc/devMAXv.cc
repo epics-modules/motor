@@ -2,9 +2,9 @@
 FILENAME...	devMAXV.cc
 USAGE... Device level support for OMS MAXv model.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-06-21 21:42:30 $
+Last Modified:	$Date: 2004-12-20 21:11:53 $
 */
 
 /*
@@ -60,7 +60,7 @@ struct motor_dset devMAXv =
     MAXv_end_trans
 };
 
-epicsExportAddress(dset,devMAXv);
+extern "C" {epicsExportAddress(dset,devMAXv);}
 
 static struct board_stat **MAXv_cards;
 static const char errmsg[] = {"\n\n!!!ERROR!!! - Oms MAXv driver uninitialized.\n"};

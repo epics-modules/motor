@@ -75,7 +75,7 @@ struct motor_dset devPM304 =
     PM304_end_trans
 };
 
-epicsExportAddress(dset,devPM304);
+extern "C" {epicsExportAddress(dset,devPM304);}
 
 
 /* --------------------------- program data --------------------- */

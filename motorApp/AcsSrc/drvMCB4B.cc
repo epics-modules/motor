@@ -110,7 +110,7 @@ struct
 #endif
 } drvMCB4B = {2, report, init};
 
-epicsExportAddress(drvet, drvMCB4B);
+extern "C" {epicsExportAddress(drvet, drvMCB4B);}
 
 STATIC struct thread_args targs = {SCAN_RATE, &MCB4B_access};
 

@@ -2,9 +2,9 @@
 FILENAME...	devMM4000.cc
 USAGE...	Motor record device level support for Newport MM4000.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 16:06:25 $
+Last Modified:	$Date: 2004-12-20 21:10:53 $
 */
 
 /*
@@ -73,7 +73,7 @@ struct motor_dset devMM4000 =
     MM4000_end_trans
 };
 
-epicsExportAddress(dset,devMM4000);
+extern "C" {epicsExportAddress(dset,devMM4000);}
 
 /* --------------------------- program data --------------------- */
 

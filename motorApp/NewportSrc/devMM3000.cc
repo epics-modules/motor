@@ -2,9 +2,9 @@
 FILENAME...	devMM3000.cc
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 16:05:25 $
+Last Modified:	$Date: 2004-12-20 21:10:53 $
 */
 
 /*
@@ -71,7 +71,7 @@ struct motor_dset devMM3000 =
     MM3000_end_trans
 };
 
-epicsExportAddress(dset,devMM3000);
+extern "C" {epicsExportAddress(dset,devMM3000);}
 
 /* --------------------------- program data --------------------- */
 

@@ -58,7 +58,7 @@ struct motor_dset devMicos =
     Micos_end_trans
 };
 
-epicsExportAddress(dset,devMicos);
+extern "C" {epicsExportAddress(dset,devMicos);}
 
 /* --------------------------- program data --------------------- */
 /* This table is used to define the command types */
