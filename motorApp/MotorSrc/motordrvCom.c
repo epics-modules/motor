@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-06-14 15:11:37 $
+Last Modified:	$Date: 2000-07-17 18:43:40 $
 */
 
 /*
@@ -74,8 +74,6 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick);
 static void process_messages(struct driver_table *tabptr, ULONG tick);
 static struct mess_node *get_head_node(struct driver_table *tabptr);
 static struct mess_node *motor_malloc(struct circ_queue *freelistptr, FAST_LOCK *lockptr);
-
-char oms_trans_axis[] = {'X', 'Y', 'Z', 'T', 'U', 'V', 'R', 'S'};
 
 
 /*
@@ -173,8 +171,8 @@ int motor_task(int scan_rate, int msw_tab_ptr, int lsw_tab_ptr, int a4, int a5,
 
 static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
 {
-    int index;
     struct controller *brdptr;
+    int index;
 
     brdptr = (*tabptr->card_array)[card];
 
@@ -211,7 +209,27 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
 	    mess_ret->status = motor_motion->status;
 	    mess_ret->type = motor_motion->type;
 
-	    if (motor_motion->status & RA_OVERTRAVEL ||
+	    if (motor_motion->status & RA_DONE && motor_motion->type == MOTION &&
+		(strlen(motor_motion->message) != NULL))
+	    {
+		char axis_name;
+
+		if (tabptr->axis_names == NULL)
+		    axis_name = NULL;
+		else
+		    axis_name = tabptr->axis_names[index];
+
+		mess_ret->status &= ~RA_DONE;	/* Hide DONE from record. */
+		/* Send backlash command to controller. */
+		(*tabptr->sendmsg) (card, motor_motion->message, axis_name);
+		if (brdptr->cmnd_response == ON)
+		{
+		    char inbuf[MAX_MSG_SIZE];
+		    (*tabptr->getmsg) (card, inbuf, 1);
+		}
+		motor_motion->message[0] = NULL;
+	    }
+	    else if (motor_motion->status & RA_OVERTRAVEL ||
 		motor_motion->status & RA_DONE ||
 		motor_motion->status & RA_PROBLEM)
 	    {
@@ -241,23 +259,35 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 
     while ((node = get_head_node(tabptr)))
     {
-	if ((node->card >= 0 && node->card < *tabptr->cardcnt_ptr) &&
-	    (*tabptr->card_array)[node->card] &&
-	    (node->signal >= 0 && node->signal < (*tabptr->card_array)[node->card]->total_axis))
+	int card, axis;
+
+	card = node->card;
+	axis = node->signal;
+
+	if ((card >= 0 && card < *tabptr->cardcnt_ptr) &&
+	    (*tabptr->card_array)[card] &&
+	    (axis >= 0 && axis < (*tabptr->card_array)[card]->total_axis))
 	{
 	    struct mess_info *motor_info;
 	    struct controller *brdptr;
+	    char *head, *tail, inbuf[MAX_MSG_SIZE], outbuf[MAX_MSG_SIZE];
+	    char axis_name;
 
-	    motor_info = &((*tabptr->card_array)[node->card]->motor_info[node->signal]);
+	    if (tabptr->axis_names == NULL)
+		axis_name = NULL;
+	    else
+		axis_name = tabptr->axis_names[axis];
+
+	    motor_info = &((*tabptr->card_array)[card]->motor_info[axis]);
 	    motor_motion = motor_info->motor_motion;
-	    brdptr = (*tabptr->card_array)[node->card];
+	    brdptr = (*tabptr->card_array)[card];
 
 	    switch (node->type)
 	    {
 	    case VELOCITY:
-		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
+		(*tabptr->sendmsg) (card, node->message, axis_name);
 		if (brdptr->cmnd_response == ON)
-		    (*tabptr->getmsg) (node->card, node->message, 1);
+		    (*tabptr->getmsg) (card, inbuf, 1);
 
 		/*
 		 * this is tricky - another motion is here there is a very
@@ -273,27 +303,46 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 		 */
 
 		if (!motor_motion)	/* if NULL */
-		    (*tabptr->card_array)[node->card]->motor_in_motion++;
+		    (*tabptr->card_array)[card]->motor_in_motion++;
 		else
 		    motor_free(motor_motion, tabptr);
 
-		SET_MM_ON(*tabptr->any_inmotion_ptr, node->card);
+		SET_MM_ON(*tabptr->any_inmotion_ptr, card);
 		motor_info->motor_motion = node;
 		motor_info->status_delay = tick;
 		break;
 
 	    case MOTION:
-		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
+		head = node->message;
+		/* Search for ASCII record separator (IS2) = /x1E. */
+		tail = strchr(head, '\x1E');
+		if (tail == NULL)
+		{
+		    strcpy(outbuf, head);
+		    /* Empty "message" signals query_axis() there are no more messages. */
+		    *head = NULL;
+		}
+		else
+		{
+		    int size = tail - head;	/* Copy 1st command to local buffer. */
+		    strncpy(outbuf, head, size);
+		    outbuf[size] = NULL;
+
+		    strcpy(head, ++tail);	/* Move 2nd command to front of message buffer. */
+		    if ((tail = strchr(head, '\x1E')) != NULL)
+			*tail = NULL;		/* Remove record separator from buffer. */
+		}
+		(*tabptr->sendmsg) (card, outbuf, axis_name);
 		if (brdptr->cmnd_response == ON)
-		    (*tabptr->getmsg) (node->card, node->message, 1);
+		    (*tabptr->getmsg) (card, inbuf, 1);
 
 		/* this is tricky - see velocity comment */
 		if (!motor_motion)	/* if NULL */
-		    (*tabptr->card_array)[node->card]->motor_in_motion++;
+		    (*tabptr->card_array)[card]->motor_in_motion++;
 		else
 		    motor_free(motor_motion, tabptr);
 
-		SET_MM_ON(*tabptr->any_inmotion_ptr, node->card);
+		SET_MM_ON(*tabptr->any_inmotion_ptr, card);
 		motor_info->no_motion_count = 0;
 		motor_info->motor_motion = node;
 		motor_info->status_delay = tick;
@@ -308,8 +357,8 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 		    taskDelay((int) (2 - delay));	/* 2 RTOS tick delay. */
 
 		if (tabptr->strtstat != NULL)
-		    (*tabptr->strtstat) (node->card);
-		(*tabptr->setstat) (node->card, node->signal);
+		    (*tabptr->strtstat) (card);
+		(*tabptr->setstat) (card, axis);
 
 		node->position = motor_info->position;
 		node->encoder_position = motor_info->encoder_position;
@@ -331,16 +380,18 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 		break;
 
 	    case MOVE_TERM:
-		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
+		if (motor_motion != NULL)
+		    motor_motion->message[0] = NULL;	/* Clear 2nd command from buffer. */
+		(*tabptr->sendmsg) (card, node->message, axis_name);
 		if (brdptr->cmnd_response == ON)
-		    (*tabptr->getmsg) (node->card, node->message, 1);
+		    (*tabptr->getmsg) (card, inbuf, 1);
 		motor_free(node, tabptr);	/* free message buffer */
 		break;
 
 	    default:
-		(*tabptr->sendmsg) (node->card, node->message, (char) NULL);
+		(*tabptr->sendmsg) (card, node->message, axis_name);
 		if (brdptr->cmnd_response == ON)
-		    (*tabptr->getmsg) (node->card, node->message, 1);
+		    (*tabptr->getmsg) (card, inbuf, 1);
 		motor_free(node, tabptr);	/* free message buffer */
 		motor_info->status_delay = tick;
 		break;
@@ -396,7 +447,7 @@ static struct mess_node *get_head_node(struct driver_table *tabptr)
  *  Insert new node at tail of queue.
  */
 
-int motor_send(struct mess_node *u_msg, struct driver_table *tabptr, char *cmnd_line_terminator)
+int motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
 {
     struct mess_node *new_message;
     struct circ_queue *qptr;
@@ -427,8 +478,6 @@ int motor_send(struct mess_node *u_msg, struct driver_table *tabptr, char *cmnd_
 	default:
 	    return (-1);
     }
-
-    strcat(new_message->message, cmnd_line_terminator);
 
     FASTLOCK(tabptr->quelockptr);
     qptr = tabptr->queptr;
@@ -511,7 +560,6 @@ int motor_card_info(int card, MOTOR_CARD_QUERY * cq, struct driver_table *tabptr
     {
 	cq->total_axis = brdptr->total_axis;
 	cq->card_name = brdptr->ident;
-	cq->axis_names = oms_trans_axis;
     }
     else
 	cq->total_axis = 0;
