@@ -8,14 +8,86 @@
 
 <center>
 <h1>
+<b><u>Motor Record Version 4.2 Release Notice</u></b></h1></center>
+This release of the motor record is compatible with EPICS R3.13.2 and above.
+<p><b>!WARNING!</b>
+<br>motorRecord.dbd has been modified.&nbsp; This requires you to 'rebuild'
+any and all user trees (i.e., &lt;ioctop>) that load the motor record (see
+README item #20 for details).
+<br>&nbsp;
+<br>&nbsp;
+<center>
+<h4>
+<u>Modifications to Existing Features</u></h4></center>
+<b><u>Precedence between field pairs</u></b>
+<p>At boot-up, if one field of a field pair (i.e., VMAX/SMAX, VBAS/SBAS,
+VELO/S, BVEL/SBAK) is zero and the other field is nonzero, the nonzero
+field takes precedence.&nbsp; If both fields of a given field pair are
+nonzero, the RPS member of the field pair (i.e., SMAX, SBAS, S, SBAK) takes
+precedence.&nbsp; This requirement was lost with the release of V4.0.
+<p><b><u>Moving Off a Limit Switch with a Oms58 device</u></b>
+<p>An error occurs with the OMS VME58 when the user runs the motor into
+a limit switch and then attempts to move away from the limit switch.&nbsp;
+If either an absolute or incremental move is utilized to move away from
+the limit switch, the OMS VME58 ignores the 1st move attempt.&nbsp; Subsequent
+moves work.&nbsp; In addition, the user can jog off a limit switch.&nbsp;
+This error was hidden in most applications if RTRY was nonzero.
+<p><b><u>Separate motion commands for target and backlash moves</u></b>
+<p>The record level support assumed that the motor controller would accept
+two motion commands on the same command line.&nbsp; This occurs when backlash
+compensation is enabled.&nbsp; Since the IM483[PL/SM] controller does not
+have this capability, support for a command line "record separator" character
+was added.&nbsp; The record separator is defined as an ASCII (IS2) character
+= /x1E.&nbsp; Currently, only one record separator is allowed in a command
+line.
+<p><b><u>Errors introduced in V4.0</u></b>
+<p>Unfortunately, several errors were introduced into the motor record
+with V4.0.&nbsp; The following have been fixed:
+<ul>
+<li>
+If the "ncards" argument of the omsSetup() function in st.cmd file was
+not accurate (i.e., did not match the actual number of OMS VME8/44 boards
+in the VME crate); the "dbior" command could result in erroneous information
+or a bus error.</li>
+
+<li>
+Jog request would not work after the state of the UEIP field was changd.</li>
+
+<li>
+Backlash correction was not occurring after a JOG.</li>
+
+<li>
+The motor record would 'hang' in the moving state on the rare occasion
+when a target position (i.e., VAL or DVAL) fell almost exactly half way
+between two integer RVAL values, and the retry feature was enabled (i.e.,
+RTRY is nonzero)</li>
+</ul>
+
+<center>
+<h4>
+<b><u>New Features</u></b></h4></center>
+<b><u>Newport PM500 device support</u></b>
+<p>Device driver support for the Newport PM500 is available for this release
+of the motor record.&nbsp; This device/driver is based on Mark River's
+PM500 V2.0 release.
+<p><b><u>Intelligent Motion Systems, Inc. IM483 device support</u></b>
+<p>Device driver support for Intelligent Motion Systems (IMS) IM483[I/IE]
+is available with this release.&nbsp; Two different device/drivers are
+available for the same motor&nbsp; controller.&nbsp; The two device/drivers,
+IM483PL and IM483SM, correspond to the two available IM483 communication
+modes, <i>party line </i>and <i>single mode</i>, respectively (see the
+IMS Software Reference Manual for details).
+<br>&nbsp;
+<center>
+<h1>
 <u>Motor Record Version 4.1 Release Notice</u></h1></center>
 Although the motor record software in this release is compatible with EPICS
 baseR3.13.1.1 and above, the directory structure, the "make" files and
 the configuration files are intended for the "unbundled" architecture of
 EPICS R3.13.2 and above.
 <center>
-<h3>
-<u>Modifications to Existing Features</u></h3></center>
+<h4>
+<u>Modifications to Existing Features</u></h4></center>
 
 <h4>
 <b><u>OMS VME58 retry problem</u></b></h4>
@@ -28,10 +100,10 @@ occurred more often when the Oms setup parameters called for a high frequency
 (e.g., 60 Hz) "polling" rate and OMS board interrupts were enabled.
 <h4>
 <b><u>OMS Stop problem</u></b></h4>
-A problem with issuing a stop command (via either the STOP&nbsp;or SPMG
-field) was found with <b>all</b> OMS boards and <b>all </b>versions of
-the OMS device drivers.&nbsp; The root cause of this problem is a statment
-in the OMS manual <i>that is not entirely correct</i>; the AC and VL commands
+A problem with issuing a stop command (via either the STOP or SPMG field)
+was found with <b>all</b> OMS boards and <b>all </b>versions of the OMS
+device drivers.&nbsp; The root cause of this problem is a statement in
+the OMS manual <i>that is not entirely correct</i>; the AC and VL commands
 are not completely queued.
 <br>&nbsp;
 <br>&nbsp;
@@ -42,8 +114,8 @@ Release 4.0 of the motor record is <u>only</u> compatible with EPICS baseR3.13.1
 and above.&nbsp; This document describes changes made to the motor record
 and its' associated device driver support between versions 3.5 and 4.0.
 <center>
-<h3>
-<u>Modifications to Existing Features</u></h3></center>
+<h4>
+<u>Modifications to Existing Features</u></h4></center>
 
 <h4>
 <b><u>GAIN Field Removed</u></b></h4>
@@ -153,8 +225,8 @@ status updates on PowerPC (PPC) platforms.&nbsp; All users of the OMS VME58
 controller on a PPC platform must upgrade to Motor Record version 4.0 for
 full functionality.
 <center>
-<h3>
-<u>New Features</u></h3></center>
+<h4>
+<u>New Features</u></h4></center>
 <b><u>Newport MM3000 Device Support</u></b>
 <p>Device driver support for the MM3000 exist for this release of the motor
 record.&nbsp; Note the following differences between the MM4000 and MM3000
@@ -207,8 +279,8 @@ and above.&nbsp; This document describes changes made to the motor record
 and its' associated device driver support between versions 3.4 and 3.5.&nbsp;
 Those changes are as follows:
 <center>
-<h3>
-<u>Modifications to Existing Features</u></h3></center>
+<h4>
+<u>Modifications to Existing Features</u></h4></center>
 
 <h4>
 <u>Command Primitives</u></h4>
@@ -248,8 +320,8 @@ ADEL, CVEL, POSM, ALST, MLST
 <br>&nbsp;
 <br>&nbsp;
 <center>
-<h3>
-<u>New Features</u></h3></center>
+<h4>
+<u>New Features</u></h4></center>
 
 <h4>
 <u>Device Directives</u></h4>
@@ -433,9 +505,8 @@ or through the individual PID gain parameter fields (i.e., PCOF, ICOF,
 DCOF).&nbsp; Let the motor controller PID parameters be represented by
 CKP, CKI and CKD; then the relationship between these two methods is as
 follows:
-<blockquote><u>For the MM4000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-<u>For all OMS controllers</u></blockquote>
+<blockquote><u>For the MM4000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <u>For
+all OMS controllers</u></blockquote>
 
 <ul>
 <li>
