@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 19:24:40 $
+Last Modified:	$Date: 2003-05-28 14:58:16 $
 */
 
 /*
@@ -44,6 +44,7 @@ Last Modified:	$Date: 2003-05-23 19:24:40 $
 
 #include "motor.h"
 #include "motordrvCom.h"
+#include "serialIO.h"
 
 enum MM_model
 {
@@ -67,7 +68,7 @@ typedef enum MM_motor_type MM_motor_type;
 struct MMcontroller
 {
     PortType port_type;		/* GPIB_PORT or RS232_PORT */
-    struct serialInfo *serialInfo;  /* For RS-232 */
+    serialIO *serialInfo;  	/* For RS-232 */
     int gpib_link;
     int gpib_address;
     struct gpibInfo *gpibInfo;  /* For GPIB */
