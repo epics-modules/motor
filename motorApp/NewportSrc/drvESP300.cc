@@ -2,9 +2,9 @@
 FILENAME...	drvESP300.cc
 USAGE...	Motor record driver level support for Newport ESP300.
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-28 20:05:41 $
+Version:	$Revision: 1.12 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-30 04:05:06 $
 */
 
 /*
@@ -437,6 +437,7 @@ static int recv_mess(int card, char *com, int flag)
     double timeout = 0.;
     int flush = 1;
     int len = 0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -449,7 +450,7 @@ static int recv_mess(int card, char *com, int flag)
 	timeout	= SERIAL_TIMEOUT;
     }
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
-                            "\n", 1, flush, timeout);
+                            "\n", 1, flush, timeout, &eomReason);
     if (len > 3 && com[0] == 'E')
     {
 	long error;
@@ -457,7 +458,7 @@ static int recv_mess(int card, char *com, int flag)
 	error = strtol(&com[1], NULL, 0);
 	if (error >= 35 && error <= 42)
 	    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
-                                    "\n", 1, flush, timeout);
+                                    "\n", 1, flush, timeout, &eomReason);
     }
 
     if (len <= 0)

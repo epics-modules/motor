@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.10 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-28 20:05:42 $
+Version:	$Revision: 1.11 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-30 04:05:06 $
 */
 
 /*
@@ -473,6 +473,7 @@ STATIC int recv_mess(int card, char *com, int flag)
     double timeout = 0.;
     int flush = 1;
     int len = 0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -485,7 +486,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 	timeout	= SERIAL_TIMEOUT;
     }
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) 
-                            "\n", 1, flush, timeout);
+                            "\n", 1, flush, timeout, &eomReason);
     if (len > 3 && com[0] == 'E')
     {
 	long error;
@@ -493,7 +494,8 @@ STATIC int recv_mess(int card, char *com, int flag)
 	error = strtol(&com[1], NULL, 0);
 	if (error >= 35 && error <= 42)
 	    len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
-                                    (char *) "\n", 1, flush, timeout);
+                                    (char *) "\n", 1, flush, timeout,
+                                    &eomReason);
     }
 
     if (len <= 0)

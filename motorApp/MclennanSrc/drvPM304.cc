@@ -346,6 +346,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
     char buff[BUFF_SIZE];
     char response[BUFF_SIZE];
     struct PM304controller *cntrl;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -366,7 +367,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
         strcat(buff, OUTPUT_TERMINATOR);
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
 	pasynSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), response,
-			    BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT);
+			    BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT, &eomReason);
         Debug(2, "send_mess: card %d, response=%s\n", card, response);
     }
 
@@ -390,6 +391,7 @@ STATIC int recv_mess(int card, char *com, int flag)
     char *pos;
     char temp[BUFF_SIZE];
     int flush;
+    int eomReason;
     struct PM304controller *cntrl;
 
     com[0] = '\0';
@@ -410,7 +412,7 @@ STATIC int recv_mess(int card, char *com, int flag)
         timeout = TIMEOUT;
     }
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
-                            INPUT_TERMINATOR, 1, flush, timeout);
+                            INPUT_TERMINATOR, 1, flush, timeout, &eomReason);
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
     if (len < 2) com[0] = '\0'; else com[len-2] = '\0';
@@ -456,6 +458,7 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     struct PM304controller *cntrl;
     int len=0;
     char *pos;
+    int eomReason;
     char temp[BUFF_SIZE];
 
     response[0] = '\0';
@@ -479,7 +482,8 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
         strcat(buff, OUTPUT_TERMINATOR);
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, buff);
 	len = pasynSyncIO->writeRead(cntrl->pasynUser, buff, strlen(buff), 
-                         response, BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT);
+                         response, BUFF_SIZE, INPUT_TERMINATOR, 1, TIMEOUT,
+                         &eomReason);
     }
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */

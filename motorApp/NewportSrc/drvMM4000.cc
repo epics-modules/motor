@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.10 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-28 20:05:42 $
+Version:	$Revision: 1.11 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-30 04:05:06 $
 */
 
 /*
@@ -520,6 +520,7 @@ static int recv_mess(int card, char *com, int flag)
     double timeout = 0.;
     int flush = 0;
     int len = 0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -529,7 +530,7 @@ static int recv_mess(int card, char *com, int flag)
 
     timeout	= TIMEOUT;
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r", 
-                            1, flush, timeout);
+                            1, flush, timeout, &eomReason);
 
     if (len <= 0)
     {

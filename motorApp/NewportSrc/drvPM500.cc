@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.9 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-28 20:05:42 $
+Version:	$Revision: 1.10 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-30 04:05:07 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -399,6 +399,7 @@ static int recv_mess(int card, char *com, int flag)
     double timeout = 0.;
     int flush=1;
     int len = 0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -411,7 +412,7 @@ static int recv_mess(int card, char *com, int flag)
 	timeout	= SERIAL_TIMEOUT;
     }
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, "\r", 
-                            1, flush, timeout);
+                            1, flush, timeout, &eomReason);
 
     if (len <= 0)
     {

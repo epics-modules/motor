@@ -318,6 +318,7 @@ STATIC int recv_mess(int card, char *com, int flag)
     int len=0;
     struct MCB4Bcontroller *cntrl;
     int flush;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -338,7 +339,7 @@ STATIC int recv_mess(int card, char *com, int flag)
         timeout = TIMEOUT;
     }
     len = pasynSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE, 
-                            "\r", 1, flush, timeout);
+                            "\r", 1, flush, timeout, &eomReason);
 
     /* The response from the MCB4B is terminated with CR.  Remove */
     if (len < 1) com[0] = '\0'; 
