@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.14 $
+Version:	$Revision: 1.15 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:37:50 $
+Last Modified:	$Date: 2004-01-22 21:57:51 $
 */
 
 /*
@@ -60,6 +60,7 @@ Last Modified:	$Date: 2003-12-12 21:37:50 $
  *			followed by a single TWR appear to be ignored.
  * .11 12-12-03 rls - Changed MSTA access to bit field.
  * .12 12-12-03 rls - Added status update field (STUP).
+ * .13 12-23-03 rls - Prevent STUP from activating DLY or setting DMOV true.
  *
  */
 
@@ -1085,11 +1086,9 @@ static long process(dbCommon *arg)
 	    }
 	    status = 0;
 	}
-	else
+	else if (pmr->stup != motorSTUP_BUSY)
 	{
 	    mmap_field mmap_bits;
-
-	    mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
 
 	    /* Motor has stopped. */
 	    /* Assume we're done moving until we find out otherwise. */
@@ -1127,6 +1126,8 @@ static long process(dbCommon *arg)
 	    /* Are we "close enough" to desired position? */
 	    if (pmr->dmov && !(pmr->rhls || pmr->rlls))
 	    {
+		mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
+
 		if (pmr->mip & MIP_DELAY_ACK || (pmr->dly <= 0.0))
 		{
 		    if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
@@ -1138,11 +1139,14 @@ static long process(dbCommon *arg)
 			pmr->dmov = FALSE;
 			goto process_exit;
 		    }
-		    pmr->mip &= ~MIP_DELAY;
-		    MARK(M_MIP);	/* done delaying */
-		    maybeRetry(pmr);
+		    else if (pmr->stup != motorSTUP_ON)
+		    {
+			pmr->mip &= ~MIP_DELAY;
+			MARK(M_MIP);	/* done delaying */
+			maybeRetry(pmr);
+		    }
 		}
-		else
+		else if (MARKED(M_DMOV) && !(pmr->mip & MIP_DELAY_REQ))
 		{
 		    pmr->mip |= MIP_DELAY_REQ;
 		    MARK(M_MIP);
@@ -1151,7 +1155,7 @@ static long process(dbCommon *arg)
 
 		    pmr->dmov = FALSE;
 		    pmr->pact = 0;
-		    return(OK);
+		    goto process_exit;
 		}
 	    }
 	}
@@ -1199,7 +1203,13 @@ enter_do_work:
     if (pmr->dmov)
 	recGblFwdLink(pmr);	/* Process the forward-scan-link record. */
     
-process_exit:    
+process_exit:
+    if (process_reason == CALLBACK_DATA && pmr->stup == motorSTUP_BUSY)
+    {
+	pmr->stup = motorSTUP_OFF;
+	MARK_AUX(M_STUP);
+    }
+
     /*** We're done.  Report the current state of the motor. ***/
     recGblGetTimeStamp(pmr);
     alarm_sub(pmr);			/* If we've violated alarm limits, yell. */
@@ -1888,9 +1898,9 @@ static RTN_STATUS do_work(motorRecord * pmr)
     if (stop_or_pause == true)
 	return(OK);
     
-    if (pmr->stup == YES)
+    if (pmr->stup == motorSTUP_ON)
     {
-	pmr->stup = NO;
+	pmr->stup = motorSTUP_BUSY;
 	MARK_AUX(M_STUP);
 	INIT_MSG();
 	WRITE_MSG(GET_INFO, NULL);
@@ -2147,6 +2157,9 @@ static long special(DBADDR *paddr, int after)
 		if (pmr->mip & MIP_HOME)
 		    return(ERROR);	/* Prevent record processing. */
 		break;
+	    case motorRecordSTUP:
+		if (pmr->stup != motorSTUP_OFF)
+		    return(ERROR);	/* Prevent record processing. */
 	}
 	return(OK);
     }
@@ -2613,6 +2626,15 @@ pidcof:
 
     case motorRecordHVEL:
 	range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
+	break;
+
+    case motorRecordSTUP:
+	if (pmr->stup != motorSTUP_ON)
+	{
+	    pmr->stup = motorSTUP_OFF;
+	    db_post_events(pmr, &pmr->stup, DBE_VAL_LOG);
+	    return(ERROR);	/* Prevent record processing. */
+	}
 	break;
 
     default:
