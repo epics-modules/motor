@@ -21,7 +21,7 @@
 #MPF=$(SUPPORT)/mpf2-4
 
 # Recommended EPICS release: R3.14.4
-#EPICS_BASE=$(SUPPORT)/../base
+EPICS_BASE=$(SUPPORT)/../base
 
 # The following must be defined if motorExApp is to be built.
 #TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
