@@ -4,9 +4,9 @@ FILENAME..	devSoft.h
 USAGE... 	This file contains information that is common to
 		all Soft channel device support modules.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:26 $
+Last Modified:	$Date: 2000-03-03 22:36:52 $
 */
 
 /*
@@ -37,11 +37,13 @@ extern long soft_init_record(struct motorRecord *);
 extern void soft_dinp_func(struct motorRecord *, short);
 extern void soft_rdbl_func(struct motorRecord *, double);
 extern void soft_rinp_func(struct motorRecord *, long);
+extern void soft_motor_callback(CALLBACK *);
 
 #define MAXMSGS 20
 
 struct soft_private
 {
+    CALLBACK callback;
     long callback_flag;
     short dinp_value;			/* Value from DINP link. */
     BOOLEAN default_done_behavior;	/* If the DINP is not programmed, exhibit

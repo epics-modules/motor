@@ -2,8 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:25 $
+Last Modified:	$Date: 2000-03-03 22:35:49 $
 */
 
 /*
@@ -116,6 +117,15 @@ STATIC long build(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    status = OK;
 	    break;
 
+	case LOAD_POS:
+	    {
+		struct soft_private *ptr = (struct soft_private *) mr->dpvt;
+    
+		mr->msta = RA_DONE;
+		callbackRequest(&ptr->callback);
+	    }
+	    break;
+
 	default:
 	    status = ERROR;
     }
@@ -181,5 +191,21 @@ STATIC void soft_process(struct motorRecord *mr)
     (*prset->process) (mr);	/* Process the soft channel record. */
     ptr->callback_flag = NOTHING_DONE;
     dbScanUnlock((struct dbCommon *) mr);
+}
+
+
+/*
+FUNCTION... void soft_motor_callback(CALLBACK *)
+USAGE...	Process motor record after the following events:
+		    - LOAD_POS motor command.
+LOGIC...
+*/
+
+void soft_motor_callback(CALLBACK *cbptr)
+{
+    struct motorRecord *mr;
+
+    callbackGetUser(mr, cbptr);
+    soft_process(mr);
 }
 
