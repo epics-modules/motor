@@ -1,4 +1,5 @@
 # Micro Mo MVP 2001 Driver support.
 device(motor,VME_IO,devMVP2001,"MVP2001")
 driver(drvMVP2001)
+#variable(drvMVP2001debug)
 

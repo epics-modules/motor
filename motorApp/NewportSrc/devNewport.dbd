@@ -8,4 +8,8 @@ driver(drvMM4000)
 driver(drvPM500)
 driver(drvESP300)
 registrar(NewportRegister)
+#variable(drvESP300debug)
+#variable(drvMM3000debug)
+#variable(drvMM4000debug)
+#variable(drvPM500debug)
 

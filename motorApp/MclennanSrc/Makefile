@@ -2,7 +2,8 @@
 TOP = ../..
 include $(TOP)/configure/CONFIG
 
-# The following are used for debugging messages.
+# Both the following line, and a line in the *.dbd file,
+# must be uncommented to use diagnostic debugging messages.
 #USR_CXXFLAGS += -DDEBUG
 
 DBD += devMclennanMotor.dbd
