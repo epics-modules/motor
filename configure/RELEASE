@@ -17,8 +17,10 @@
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then MPF must be defined.
-#MPF=$(SUPPORT)/mpf2-2
+# Recommended MPF release: R2.4
+#MPF=$(SUPPORT)/mpf2-4
 
+# Recommended EPICS release: R3.14.4
 #EPICS_BASE=$(SUPPORT)/../base
 
 # The following must be defined if motorExApp is to be built.
@@ -27,6 +29,7 @@
 
 # The following must be defined if the "WithMPF" example in motorExApp is to
 # be built.
+# Recommended IPAC release: R2.5
 #IPAC=$(SUPPORT)/ipac2-5
 
 #GPIB is not yet supported!
