@@ -2,9 +2,9 @@
 FILENAME...	devMM3000.cc
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-22 19:53:39 $
+Last Modified:	$Date: 2003-05-23 16:05:25 $
 */
 
 /*
@@ -154,7 +154,7 @@ STATIC RTN_STATUS MM3000_end_trans(struct motorRecord *mr)
     msgptr = motor_call->message;
     last = strlen(msgptr) - 1;
     if (msgptr[last] == ';')
-	msgptr[last] = NULL;
+	msgptr[last] = (char) NULL;
 
     return(motor_end_trans_com(mr, drvtabptr));
 }
@@ -169,6 +169,7 @@ STATIC RTN_STATUS MM3000_build_trans(motor_cmnd command, double *parms, struct m
     struct MMcontroller *cntrl;
     char buff[30];
     int axis, card;
+    unsigned int size;
     int intval;
     RTN_STATUS rtnval;
 
@@ -329,7 +330,12 @@ STATIC RTN_STATUS MM3000_build_trans(motor_cmnd command, double *parms, struct m
 	default:
 	    rtnval = ERROR;
     }
-    strcat(motor_call->message, buff);
+
+    size = strlen(buff);
+    if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
+	errlogMessage("MM3000_build_trans(): buffer overflow.\n");
+    else
+	strcat(motor_call->message, buff);
 
     return(rtnval);
 }
