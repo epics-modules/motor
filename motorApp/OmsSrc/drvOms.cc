@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-12 18:22:04 $
+Last Modified:	$Date: 2003-02-14 14:55:14 $
 */
 
 /*
@@ -476,9 +476,7 @@ STATIC int recv_mess(int card, char *com, int amount)
     char junk;
     char inchar;
     int piece, head_size, tail_size;
-    int return_code;
 
-    return_code = 0;
     inchar = '\0';
 
     /* Check that card exists */
