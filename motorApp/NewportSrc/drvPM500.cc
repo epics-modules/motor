@@ -2,9 +2,9 @@
 FILENAME...	drvPM500.cc
 USAGE...	Motor record driver level support for Newport PM500.
 
-Version:	$Revision: 1.12 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-21 14:57:12 $
+Version:	$Revision: 1.13 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-09-28 23:52:59 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -346,6 +346,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
     int size;
+    int nwrite;
 
     size = strlen(com);
 
@@ -372,7 +373,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
     pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), 
-                       SERIAL_TIMEOUT);
+                       SERIAL_TIMEOUT, &nwrite);
 
     return(OK);
 }
@@ -399,7 +400,8 @@ static int recv_mess(int card, char *com, int flag)
     struct MMcontroller *cntrl;
     double timeout = 0.;
     int flush=1;
-    int len = 0;
+    int nread = 0;
+    asynStatus status;
     int eomReason;
 
     /* Check that card exists */
@@ -412,24 +414,24 @@ static int recv_mess(int card, char *com, int flag)
         flush=0;
 	timeout	= SERIAL_TIMEOUT;
     }
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, "\r", 
-                            1, flush, timeout, &eomReason);
+    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, "\r", 
+                            1, flush, timeout, &nread, &eomReason);
 
-    if (len <= 0)
+    if ((status != asynSuccess) || (nread <= 0))
     {
 	com[0] = '\0';
-	len = 0;
+	nread = 0;
     }
     else
     {
-	com[len-1] = '\0';
+	com[nread-1] = '\0';
 	/* Test for "system error" response. */
 	if (strncmp(com, "SE", 2) == 0)
 	    errlogMessage("recv_mess(): PM500 system error.\n");
     }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return(len);
+    return(nread);
 }
 
 

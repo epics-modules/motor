@@ -287,6 +287,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
     char buff[BUFF_SIZE];
     struct MCB4Bcontroller *cntrl;
+    int nwrite;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -305,7 +306,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
     Debug(2, "send_mess: sending message to card %d, message=%s\n",\
                      card, buff);
 
-    pasynOctetSyncIO->write(cntrl->pasynUser, buff, strlen(buff), TIMEOUT);
+    pasynOctetSyncIO->write(cntrl->pasynUser, buff, strlen(buff), TIMEOUT, &nwrite);
 
     return (OK);
 }
@@ -318,7 +319,8 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 STATIC int recv_mess(int card, char *com, int flag)
 {
     double timeout;
-    int len=0;
+    int nread=0;
+    asynStatus status;
     struct MCB4Bcontroller *cntrl;
     int flush;
     int eomReason;
@@ -341,18 +343,18 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE, 
-                            "\r", 1, flush, timeout, &eomReason);
+    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE, 
+                            "\r", 1, flush, timeout, &nread, &eomReason);
 
     /* The response from the MCB4B is terminated with CR.  Remove */
-    if (len < 1) com[0] = '\0'; 
-    else com[len-1] = '\0';
+    if (nread < 1) com[0] = '\0'; 
+    else com[nread-1] = '\0';
     
-    if (len > 0) {
+    if (nread > 0) {
         Debug(2, "recv_mess: card %d, message = \"%s\"\n",\
                    card, com);
     }
-    if (len == 0) {
+    if (nread == 0) {
         if (flag != FLUSH)  {
             Debug(1, "recv_mess: card %d ERROR: no response\n",\
                   card);
@@ -362,7 +364,7 @@ STATIC int recv_mess(int card, char *com, int flag)
         }
     }
 
-    return (len);
+    return (nread);
 }
 
 
