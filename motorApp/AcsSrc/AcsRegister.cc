@@ -2,9 +2,9 @@
 FILENAME...	AcsRegister.cc
 USAGE...	Register ACS motor device driver shell commands.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-04-20 20:50:11 $
+Last Modified:	$Date: 2004-06-08 22:32:58 $
 */
 
 /*****************************************************************
@@ -46,7 +46,7 @@ static void setupMCB4BCallFunc(const iocshArgBuf *args)
 }
 static void configMCB4BCallFunc(const iocshArgBuf *args)
 {
-    MCB4BConfig(args[0].ival, args[2].sval);
+    MCB4BConfig(args[0].ival, args[1].sval);
 }
 
 static void AcsRegister(void)
