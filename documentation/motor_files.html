@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.51 [en] (X11; U; SunOS 5.6 sun4u) [Netscape]">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; U; SunOS 5.6 sun4u) [Netscape]">
 </head>
 <body>
 
@@ -13,19 +13,19 @@ Motor record source code file organization</h1></center>
 <h4>
 Record source files</h4>
 
-<blockquote>motorRecord.dbd
-<br>motor.h
-<br>motorRecord.c</blockquote>
+<blockquote>MotorSrc/motorRecord.dbd
+<br>MotorSrc/motor.h
+<br>MotorSrc/motorRecord.c</blockquote>
 
 <h4>
 Device driver source files</h4>
 
 <blockquote><b><u>Common to all motor Record device drivers</u></b>
-<br>motordevCom.h
-<br>motordevCom.c
-<br>motordrvCom.h
-<br>motordrvComCode.h
-<br>motordrvCom.c</blockquote>
+<br>MotorSrc/motordevCom.h
+<br>MotorSrc/motordevCom.c
+<br>MotorSrc/motordrvCom.h
+<br>MotorSrc/motordrvComCode.h
+<br>MotorSrc/motordrvCom.c</blockquote>
 
 <ul><b><u>Oregon Micro Systems</u></b>
 <p><u>Common to all OMS device drivers</u>
@@ -39,15 +39,13 @@ Device driver source files</h4>
 <p><b><u>Newport Motion Master</u></b>
 <p><u>Common to all Motion Master device drivers</u>
 <br>drvMMCom.h
-<br>gpibIO.h
-<br>gpibIO.c
-<br>serialIO.h
-<br>serialIO.cc
-<p><u>MM3000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-<u>MM4000</u>
-<br>devMM3000.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; devMM4000.c
-<br>drvMM3000.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; drvMM4000.c
+<p><u>MM3000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<u>MM4000</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<u>PM500</u>
+<br>NewportSrc/devMM3000.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NewportSrc/devMM4000.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NewportSrc/devPM500.c
+<br>NewportSrc/drvMM3000.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NewportSrc/drvMM4000.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NewportSrc/drvPM500.c
 <p><b><u>Highland V544</u></b>
 <br>devV544.c
 <br>drvV544.h
@@ -55,7 +53,23 @@ Device driver source files</h4>
 <p><b><u>Soft Channel</u></b>
 <br>devSoft.h
 <br>devSoft.c
-<br>devSoftAux.c</ul>
+<br>devSoftAux.c
+<p><b><u>Intelligent Motion Systems</u></b>
+<p>ImsSrc/drvIM483.h
+<br>ImsSrc/devIM483PL.c
+<br>ImsSrc/devIM483SM.c
+<br>ImsSrc/drvIM483PL.c
+<br>ImsSrc/drvIM483SM.c</ul>
+
+<h4>
+<b>Communication files</b></h4>
+
+<blockquote>CommSrc/serialIO.h
+<br>CommSrc/serialIO.cc
+<br>CommSrc/serialIOMPF.cc</blockquote>
+
+<blockquote>CommSrc/gpibIO.h
+<br>CommSrc/gpibIO.c</blockquote>
 
 </body>
 </html>
