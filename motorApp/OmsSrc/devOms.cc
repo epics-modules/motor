@@ -2,9 +2,9 @@
 FILENAME...	devOms.c
 USAGE... Device level support for OMS VME8 and VME44 models.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:10:18 $
+Last Modified:	$Date: 2003-02-03 17:13:30 $
 */
 
 /*
@@ -67,7 +67,7 @@ extern struct driver_table oms_access;
 STATIC long oms_init(void *);
 STATIC long oms_init_record(void *);
 STATIC long oms_start_trans(struct motorRecord *);
-STATIC long oms_end_trans(struct motorRecord *);
+STATIC RTN_STATUS oms_end_trans(struct motorRecord *);
 
 struct motor_dset devOMS =
 {
@@ -112,7 +112,7 @@ STATIC long oms_start_trans(struct motorRecord *mr)
     return(rtnval);
 }
 
-STATIC long oms_end_trans(struct motorRecord *mr)
+STATIC RTN_STATUS oms_end_trans(struct motorRecord *mr)
 {
     if (*(oms_access.init_indicator) == NO)
     {

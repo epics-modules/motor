@@ -2,9 +2,9 @@
 FILENAME...	devOms58.c
 USAGE...	Motor record device level support for OMS VME58.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-21 21:10:18 $
+Last Modified:	$Date: 2003-02-03 17:13:59 $
 */
 
 /*
@@ -68,7 +68,7 @@ extern struct driver_table oms58_access;
 STATIC long oms_init(void *);
 STATIC long oms_init_record(void *);
 STATIC long oms_start_trans(struct motorRecord *);
-STATIC long oms_end_trans(struct motorRecord *);
+STATIC RTN_STATUS oms_end_trans(struct motorRecord *);
 
 struct motor_dset devOms58 =
 {
@@ -113,7 +113,7 @@ STATIC long oms_start_trans(struct motorRecord *mr)
     return(rtnval);
 }
 
-STATIC long oms_end_trans(struct motorRecord *mr)
+STATIC RTN_STATUS oms_end_trans(struct motorRecord *mr)
 {
     if (*(oms58_access.init_indicator) == NO)
     {
