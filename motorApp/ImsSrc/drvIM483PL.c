@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.c
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:49:10 $
+Last Modified:	$Date: 2002-03-29 21:15:24 $
 */
 
 /*
@@ -334,12 +334,17 @@ STATIC int set_status(int card, int signal)
     else
     {
 	motor_info->position = NINT(motorData);
-	if (motor_state[card]->motor_info[signal].encoder_present == YES)
-	    motor_info->encoder_position = (epicsInt32) motorData;
-	else
-	    motor_info->encoder_position = 0;
-
 	motor_info->no_motion_count = 0;
+    }
+
+    if (motor_state[card]->motor_info[signal].encoder_present == NO)
+	motor_info->encoder_position = 0;
+    else
+    {
+	send_mess(card, "? z 0", IM483PL_axis[signal]);
+	recv_mess(card, buff, 1);
+	motorData = atof(&buff[5]);
+	motor_info->encoder_position = (int32_t) motorData;
     }
 
     motor_info->status &= ~RA_PROBLEM;
@@ -377,13 +382,18 @@ STATIC int send_mess(int card, char const *com, char inchar)
     char *head, *end, local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
     BOOLEAN lastcmnd = OFF;
+    int size;
 
-    if (strlen(com) > MAX_MSG_SIZE)
+    size = strlen(com);
+
+    if (size > MAX_MSG_SIZE)
     {
 	logMsg((char *) "drvIM483PL.c:send_mess(); message size violation.\n",
 	       0, 0, 0, 0, 0, 0);
 	return (-1);
     }
+    else if (size == 0)	/* Normal exit on empty input message. */
+	return (0);
     
     if (!motor_state[card])
     {
@@ -393,7 +403,7 @@ STATIC int send_mess(int card, char const *com, char inchar)
     }
 
     head = (char *) com;
-    end = head + strlen(com);
+    end = head + size;
 
     while (lastcmnd == OFF)
     {
@@ -614,13 +624,14 @@ STATIC int motor_init()
 		motor_info->encoder_position = 0;
 		motor_info->position = 0;
 		brdptr->motor_info[motor_index].motor_motion = NULL;
+		/* Assume encoder support, i.e., IM483IE. */
+		motor_info->encoder_present = YES;
+		motor_info->status |= EA_PRESENT;
 
                 /* Determine if encoder present based on open/closed loop mode. */
 		loop_state = NULL;
 		if (loop_state != 0)
 		{
-                    motor_info->encoder_present = YES;
-		    motor_info->status |= EA_PRESENT;
 		    motor_info->pid_present = YES;
 		    motor_info->status |= GAIN_SUPPORT;
 		}
