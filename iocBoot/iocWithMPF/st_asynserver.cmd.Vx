@@ -71,9 +71,30 @@
 #   cardParams  - carrier-specific init parameters.
 # ipacAddVIPC616_01(const char *cardParams);
 # ipacAddMVME162(const char *cardParams)
+#
+# For SBS VIPC616-01 IP carrier board.  A32 and A24 examples follow:
+# - A32 addressing.
+# - default I/O Base Address (0x6000).
+# - IP modules occupy 32MB of memory from 0x9000 0000 to 0x91FF FFFF.
+# - IP module A at 0x90000000,
+#      module B at 0x90800000,
+#      module C at 0x91000000,
+#      module D at 0x91800000
+#!ipacAddVIPC616_01("6000,A0000000")
+
+# - A24 addressing.
+# - default I/O Base Address (0x6000).
+# - default IP module base address at 0x00D0 0000
+#   occupies 512 bytes of memory from 0x00D0 0000 to 0x00D0 01FF.
+# - IP module A at 0x0x00D0 007F,
+#      module B at 0x0x00D0 0100,
+#      module C at 0x0x00D0 017F,
+#      module D at 0x0x00D0 01FF
 
 #!ipacAddVIPC616_01("6000,A0000000")
-#!ipacAddMVME162("A:l=3,3 m=0xA0000000,64")
+
+# For MVME162 and MVME172 CPU board IP carrier.
+#!ipacAddMVME162("A:l=3,3 m=0xe0000000,64;B:l=3,3 m=0xe0010000,64;C:l=3,3 m=0xe0020000,64;D:l=3,3 m=0xe0030000,64")
 
 # Allocate the number of tyGSOctal modules to support.
 # ----------------------------------------------------
