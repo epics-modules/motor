@@ -14,8 +14,8 @@ endif
 
 # 
 # Select individual device/driver support modules by removing the comment.
-#DIRS += OmsSrc
-#DIRS += SoftMotorSrc
+DIRS += OmsSrc
+DIRS += SoftMotorSrc
 #DIRS += V544Src
 
 ifdef MX
@@ -30,6 +30,8 @@ ifdef MPF
 #DIRS += AcsSrc
 #DIRS += MclennanSrc
 #DIRS += PiSrc
+#DIRS += MicroMoSrc
+#DIRS += MicosSrc
 endif
 
 DIRS += Db
