@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.16 $
+Version:	$Revision: 1.17 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-02 16:16:43 $
+Last Modified:	$Date: 2004-03-02 19:20:23 $
 */
 
 /*
@@ -61,6 +61,7 @@ Last Modified:	$Date: 2004-03-02 16:16:43 $
  *			described in;
  *		http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/Problems.html
  * .07  02-03-04 rls - Eliminate erroneous "Motor motion timeout ERROR".
+ * .08  03-02-04 rls - Reduce omsGet() timeout from 1sec. to 250msec.
  */
 
 /*========================stepper motor driver ========================
@@ -628,9 +629,9 @@ static int omsGet(int card, char *pchar, bool timeout)
     if (irqdata->irqEnable)
     {
 	/* Get character from isr - if available */
-	while (irqdata->recv_rng->isEmpty() && timeout == true && retry < 100)
+	while (irqdata->recv_rng->isEmpty() && timeout == true && retry < 5)
 	{
-	    irqdata->recv_sem->wait(0.01);	/* Wait for character */
+	    irqdata->recv_sem->wait(0.05);	/* Wait 250ms for character */
 	    retry ++;
 	}
 	if (!irqdata->recv_rng->isEmpty())
