@@ -3,9 +3,9 @@ FILENAME...	drvOmsCom.h
 USAGE... 	This file contains OMS driver "include" information
 		that is common to all OMS models.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-14 20:30:12 $
+Last Modified:	$Date: 2000-09-05 22:13:07 $
 */
 
 /*
@@ -55,5 +55,15 @@ Last Modified:	$Date: 2000-07-14 20:30:12 $
 #define ERROR_CLEAR     "IC"
 #define STOP_ALL        "AA SA"
 #define ALL_POS         "AA RP"
+
+struct encoder_status
+{
+    char slip_enable;
+    char pos_enable;
+    char slip_detect;
+    char pos_dead;
+    char axis_home;
+    char unused;
+};
 
 #endif	/* INCdrvOmsComh */
