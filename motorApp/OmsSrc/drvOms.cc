@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-02-03 20:09:00 $
+Last Modified:	$Date: 2004-03-02 16:16:43 $
 */
 
 /*
@@ -1193,7 +1193,7 @@ static void oms_reset()
 	    memptr = (char *) &pmotor->data;
 	    status = vxMemProbe(memptr, READ, sizeof(char), (char *) &byteread);
 	    if (status == OK)
-		pmotor->control &= 0x5f;
+		pmotor->control = 0;	/* Disable all interrupts. */
 	}
     }
 }
