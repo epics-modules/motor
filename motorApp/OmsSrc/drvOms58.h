@@ -3,9 +3,9 @@ FILENAME...	drvOms58.h
 USAGE...	OMS driver level "include" information that is specific to OMS
 		model VME58.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:53:00 $
+Last Modified:	$Date: 2005-03-21 18:14:12 $
 */
 
 /*
@@ -36,15 +36,16 @@ Last Modified:	$Date: 2001-12-14 20:53:00 $
  *
  * Modification Log:
  * -----------------
- * .01  01-18-93	jbk     initialized
- * .02  11-14-94	jps     copy drvOms.c and modify to point to vme58 driver
+ * .01  01-18-93 jbk initialized
+ * .02  11-14-94 jps copy drvOms.c and modify to point to vme58 driver
  *      ...
- * .06  12-07-94	jps	first released version w/interrupt supprt
- * .07	12-20-94	jps	rearrange the device init routines
- * .08  05-03-96	jps     convert 32bit card accesses to 16bit - vme58PCB
- *				version D does not support 32bit accesses.
- * .09  05-09-97	jps     increase maximum card count to 15
- * .10  08-22-01	rls     "int" type specifications for all bit-fields.
+ * .06  12-07-94 jps first released version w/interrupt supprt
+ * .07	12-20-94 jps rearrange the device init routines
+ * .08  05-03-96 jps convert 32bit card accesses to 16bit - vme58PCB
+ *		     version D does not support 32bit accesses.
+ * .09  05-09-97 jps increase maximum card count to 15
+ * .10  08-22-01 rls "int" type specifications for all bit-fields.
+ * .11  03-21-05 rls replace VxWorks specific "uint16_t" with "epicsUInt16".
  *  
  */
 
@@ -70,16 +71,16 @@ Last Modified:	$Date: 2001-12-14 20:53:00 $
 /* VME58 DUAL-PORT MEMORY MAP */
 typedef struct
 {
-    uint16_t encPos[2];
-    uint16_t cmndPos[2];
-    uint16_t cmndVel[2];
-    uint16_t accel[2];
-    uint16_t maxVel[2];
-    uint16_t baseVel[2];
-    uint16_t dFltrGain[2];
-    uint16_t dFltrPole[2];
-    uint16_t dFltrZero[2];
-    uint16_t reserved[46];
+    epicsUInt16 encPos[2];
+    epicsUInt16 cmndPos[2];
+    epicsUInt16 cmndVel[2];
+    epicsUInt16 accel[2];
+    epicsUInt16 maxVel[2];
+    epicsUInt16 baseVel[2];
+    epicsUInt16 dFltrGain[2];
+    epicsUInt16 dFltrPole[2];
+    epicsUInt16 dFltrZero[2];
+    epicsUInt16 reserved[46];
 } MOTOR_DATA_REGS;
 
 /* Definitions for VME58 I/O Registers */
