@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.1 $
+# Version:		$Revision: 1.2 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2000-02-08 22:18:43 $
+# Last Modified:	$Date: 2000-08-16 19:09:06 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -265,7 +265,7 @@ recordtype(motor) {
 		promptgroup(GUI_COMMON)
 		interest(1)
 	}
-	field(RES,DBF_FLOAT) {
+	field(RES,DBF_DOUBLE) {
 		prompt("Step Size (EGU)")
 		special(SPC_NOMOD)
 		interest(1)
