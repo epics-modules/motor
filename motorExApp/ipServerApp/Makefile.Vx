@@ -1,0 +1,27 @@
+# Makefile.Vx
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+LIBOBJS += $(MPF_BIN)/mpfLib
+LIBOBJS += $(MPF_BIN)/ipLib
+
+LIBOBJS += $(MPF_SERIAL_BIN)/OctalUART.o
+LIBOBJS += $(MPF_SERIAL_BIN)/SerialPort.o
+LIBOBJS += $(MPF_SERIAL_BIN)/serialPortSniff.o
+LIBOBJS += $(MPF_SERIAL_BIN)/serialServer.o
+
+LIBOBJS += $(MPF_GPIB_BIN)/Gpib.o
+LIBOBJS += $(MPF_GPIB_BIN)/gpibSniff.o
+LIBOBJS += $(MPF_GPIB_BIN)/GpibGsTi9914.o
+LIBOBJS += $(MPF_GPIB_BIN)/gpibServer.o
+
+LIBNAME = ipServerLib
+
+#Note that the command line that builds the
+#library $(LIBNAME) may be HUGE (>3kB)
+#
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE

@@ -1,0 +1,31 @@
+# Makefile.Host
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+DB += NoMPF.db
+DB += WithMPF.db
+
+include $(TOP)/config/RULES.Db
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
+# !!WARNING!! Delete the following line after coping
+#	this file to your application.
+MOTOR = $(TOP)
+
+MSI = $(MSITOP)/bin/$(HOST_ARCH)/msi
+
+#The following builds the NoMPF.db file
+../NoMPF.db: ../NoMPF.substitutions $(MOTOR)/db/basic_motor.db
+	echo "building NoMPF.db"
+	$(RM)  ../NoMPF.db
+	$(MSI) -V -I $(MOTOR)/db -S ../NoMPF.substitutions > ../NoMPF.db
+
+#The following builds the WithMPF.db file
+../WithMPF.db: ../WithMPF.substitutions $(MOTOR)/db/basic_motor.db
+	echo "building WithMPF.db"
+	$(RM)  ../WithMPF.db
+	$(MSI) -V -I $(MOTOR)/db -S ../WithMPF.substitutions > ../WithMPF.db
+

@@ -1,0 +1,44 @@
+grecord(motor,"$(user):rotary")
+{
+    field(DTYP,"Soft Channel")
+    field(OUT,"$(user):convertDriveValue.A  PP MS")
+    field(RDBL,"$(user):convertReadbackValue.VAL  NPP MS")
+    field(URIP,"Yes")
+    field(STOO,"$(user):linear.STOP  PP MS")
+    field(DINP,"$(user):linear.DMOV  NPP MS")
+    field(MRES,"0.001")
+    field(RRES,"1.000")
+    field(PREC,"3")
+    field(DHLM,"45")
+    field(DLLM,"-45")
+    field(TWV,"5")
+    field(RTRY,"0")
+    field(EGU,"deg.")
+}
+grecord(motor,"$(user):linear")
+{
+    field(DTYP,"OMS VME58")
+    field(VBAS,"1.0")
+    field(VELO,"25.0")
+    field(OUT,"#C0 S0 @")
+    field(MRES,"0.001")
+    field(PREC,"3")
+    field(DHLM,"1000")
+    field(DLLM,"-1000")
+    field(RTRY,"0")
+    field(TWV,"1")
+    field(EGU,"mm.")
+}
+grecord(calcout,"$(user):convertDriveValue")
+{
+    field(DESC,"Convert rotary to linear")
+    field(CALC,"TAN(A / 57.296) * 1000")
+    field(OUT,"$(user):linear.DVAL  PP MS")
+}
+grecord(calcout,"$(user):convertReadbackValue")
+{
+    field(DESC,"Convert linear to rotary")
+    field(CALC,"ATAN(A / 1000) * 57.296")
+    field(INPA,"$(user):linear.DRBV  CP MS")
+}
+
