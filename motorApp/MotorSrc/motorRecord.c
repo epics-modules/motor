@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-06-05 15:38:44 $
+Last Modified:	$Date: 2001-06-08 16:17:14 $
 */
 
 /*
@@ -124,6 +124,11 @@ Last Modified:	$Date: 2001-06-05 15:38:44 $
  *		      position is followed by a target position that violates
  *		      the travel limit, while 1st move is in progress.
  *		      Modified do_work() to set DMOV true only if MIP is DONE.
+ * .38  06-08-01 rls  Bug fix for MIP left in STOP state if STOP set TRUE or
+ *		      SPMG set to STOP in between MIP set to RETRY in
+ *		      maybeRetry() and MIP set to MOVE in do_work().  Modified
+ *		      do_work() STOP and SPMG processing to set MIP <- DONE and
+ *		      DMOV <- TRUE when MIP == RETRY.
  */
 
 #define VERSION 4.4
@@ -1487,34 +1492,14 @@ STATIC long do_work(motorRecord * pmr)
     int dir_positive = (pmr->dir == motorDIR_Pos);
     int dir = dir_positive ? 1 : -1;
     int set = pmr->set;
-    int stopped = (pmr->spmg == motorSPMG_Stop || pmr->spmg == motorSPMG_Pause);
+    BOOLEAN stop_or_pause = (pmr->spmg == motorSPMG_Stop ||
+			     pmr->spmg == motorSPMG_Pause) ? ON : OFF;
     int old_lvio = pmr->lvio;
     const unsigned short monitor_mask = DBE_VALUE;
     mmap_field mmap_bits;
 
     Debug(3, "do_work: begin\n", 0);
     
-    /*** Process Stop button. ***/
-    if (pmr->stop != 0)
-    {
-	pmr->stop = 0;
-	if (pmr->mip == MIP_DONE || pmr->mip == MIP_STOP)
-	{
-	    /* Send message (just in case), but don't put MIP in STOP state. */
-	    INIT_MSG();
-	    WRITE_MSG(STOP_AXIS, NULL);
-	    SEND_MSG();
-	    return(OK);
-	}
-	else
-	{
-	    /* Stop motor. */
-	    pmr->pp = TRUE;
-	    pmr->jogf = pmr->jogr = 0;
-	    goto stop_all;
-	}
-    }
-
     /*** Process Stop/Pause/Go_Pause/Go switch. ***
     *
     * STOP	means make the motor stop and, when it does, make the drive
@@ -1536,20 +1521,32 @@ STATIC long do_work(motorRecord * pmr)
     *       Note that a great many fields (.val, .rvl, .off, .twf, .homf,
     *       .jogf, etc.) can make .dval change.
     */
-    if (pmr->spmg != pmr->lspg)
+    if (pmr->spmg != pmr->lspg || pmr->stop != 0)
     {
-	pmr->lspg = pmr->spmg;
-	if (pmr->spmg == motorSPMG_Stop ||
-	    pmr->spmg == motorSPMG_Pause)
+	BOOLEAN stop = (pmr->stop != 0) ? ON : OFF;
+
+	if (pmr->spmg != pmr->lspg)
+	    pmr->lspg = pmr->spmg;
+	else
+	    pmr->stop = 0;
+
+	if (stop_or_pause == ON || stop == ON)
 	{
 	    /*
 	     * If STOP, make drive values agree with readback values (when the
 	     * motor actually stops).
 	     */
-	    if (pmr->spmg == motorSPMG_Stop)
+	    if (pmr->spmg == motorSPMG_Stop || stop == ON)
 	    {
-		if (pmr->mip == MIP_DONE || pmr->mip == MIP_STOP)
+		if (pmr->mip == MIP_DONE || pmr->mip == MIP_STOP || pmr->mip == MIP_RETRY)
 		{
+		    if (pmr->mip == MIP_RETRY)
+		    {
+			pmr->mip = MIP_DONE;
+			MARK(M_MIP);
+			pmr->dmov = TRUE;
+			MARK(M_DMOV);
+		    }
 		    /* Send message (just in case), but don't put MIP in STOP state. */
 		    INIT_MSG();
 		    WRITE_MSG(STOP_AXIS, NULL);
@@ -1557,7 +1554,10 @@ STATIC long do_work(motorRecord * pmr)
 		    return(OK);
 		}
 		else if (pmr->movn)
+		{
 		    pmr->pp = TRUE;	/* Do when motor stops. */
+		    pmr->jogf = pmr->jogr = 0;
+		}
 		else
 		{
 		    pmr->val = pmr->rbv;
@@ -1568,7 +1568,7 @@ STATIC long do_work(motorRecord * pmr)
 		    MARK(M_RVAL);
 		}
 	    }
-stop_all:   /* Cancel any operations. */
+	    /* Cancel any operations. */
 	    if (pmr->mip & MIP_HOMF)
 	    {
 		pmr->homf = 0;
@@ -1701,7 +1701,7 @@ stop_all:   /* Cancel any operations. */
 	    ((pmr->homf && !(pmr->mip & MIP_HOMF) && !pmr->hls) ||
 	     (pmr->homr && !(pmr->mip & MIP_HOMR) && !pmr->lls)))
 	{
-	    if (stopped)
+	    if (stop_or_pause == ON)
 	    {
 		pmr->dmov = FALSE;
 		MARK(M_DMOV);
@@ -1765,7 +1765,8 @@ stop_all:   /* Cancel any operations. */
 	 * Jog motor.  Move continuously until we hit a software limit or a
 	 * limit switch, or until user releases button.
 	 */
-	if (!(pmr->mip & MIP_JOG) && !stopped && !pmr->lvio && (pmr->mip & MIP_JOG_REQ))
+	if (!(pmr->mip & MIP_JOG) && stop_or_pause == OFF && !pmr->lvio &&
+	    (pmr->mip & MIP_JOG_REQ))
 	{
 	    /* check for limit violation */
 	    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
@@ -1916,7 +1917,7 @@ stop_all:   /* Cancel any operations. */
 	return(OK);
     }
 
-    if (pmr->spmg == motorSPMG_Stop || pmr->spmg == motorSPMG_Pause)
+    if (stop_or_pause == ON)
 	return(OK);
     
     /* IF DVAL field has changed, OR, NOT done moving. */
