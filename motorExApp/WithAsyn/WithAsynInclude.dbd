@@ -1,5 +1,7 @@
 include "base.dbd"
 include "motorRecord.dbd"
+include "mpf.dbd"
+include "devStringMpf.dbd"
 include "mpfSerial.dbd"
 include "devAcsMotor.dbd"
 include "devImsMotor.dbd"
