@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-06-08 16:17:14 $
+Last Modified:	$Date: 2001-08-22 18:37:27 $
 */
 
 /*
@@ -317,38 +317,38 @@ typedef union
     unsigned long All;
     struct
     {
-	unsigned long M_VAL	:1;
-	unsigned long M_DVAL	:1;
-	unsigned long M_HLM	:1;
-	unsigned long M_LLM	:1;
-	unsigned long M_DMOV	:1;
-	unsigned long M_SPMG	:1;
-	unsigned long M_RCNT	:1;
-	unsigned long M_MRES	:1;
-	unsigned long M_ERES	:1;
-	unsigned long M_UEIP	:1;
-	unsigned long M_URIP	:1;
-	unsigned long M_LVIO	:1;
-	unsigned long M_RVAL	:1;
-	unsigned long M_RLV	:1;
-	unsigned long M_OFF	:1;
-	unsigned long M_RBV	:1;
-	unsigned long M_DHLM	:1;
-	unsigned long M_DLLM	:1;
-	unsigned long M_DRBV	:1;
-	unsigned long M_RDBD	:1;
-	unsigned long M_MOVN	:1;
-	unsigned long M_HLS	:1;
-	unsigned long M_LLS	:1;
-	unsigned long M_RRBV	:1;
-	unsigned long M_RMP	:1;
-	unsigned long M_REP	:1;
-	unsigned long M_MSTA	:1;
-	unsigned long M_ATHM	:1;
-	unsigned long M_TDIR	:1;
-	unsigned long M_MIP	:1;
-	unsigned long M_DIFF	:1;
-	unsigned long M_RDIF	:1;
+	unsigned int M_VAL	:1;
+	unsigned int M_DVAL	:1;
+	unsigned int M_HLM	:1;
+	unsigned int M_LLM	:1;
+	unsigned int M_DMOV	:1;
+	unsigned int M_SPMG	:1;
+	unsigned int M_RCNT	:1;
+	unsigned int M_MRES	:1;
+	unsigned int M_ERES	:1;
+	unsigned int M_UEIP	:1;
+	unsigned int M_URIP	:1;
+	unsigned int M_LVIO	:1;
+	unsigned int M_RVAL	:1;
+	unsigned int M_RLV	:1;
+	unsigned int M_OFF	:1;
+	unsigned int M_RBV	:1;
+	unsigned int M_DHLM	:1;
+	unsigned int M_DLLM	:1;
+	unsigned int M_DRBV	:1;
+	unsigned int M_RDBD	:1;
+	unsigned int M_MOVN	:1;
+	unsigned int M_HLS	:1;
+	unsigned int M_LLS	:1;
+	unsigned int M_RRBV	:1;
+	unsigned int M_RMP	:1;
+	unsigned int M_REP	:1;
+	unsigned int M_MSTA	:1;
+	unsigned int M_ATHM	:1;
+	unsigned int M_TDIR	:1;
+	unsigned int M_MIP	:1;
+	unsigned int M_DIFF	:1;
+	unsigned int M_RDIF	:1;
     } Bits;
 } mmap_field;
 
@@ -358,17 +358,17 @@ typedef union
     unsigned long All;
     struct
     {
-	unsigned long M_S	:1;
-	unsigned long M_SBAS	:1;
-	unsigned long M_SBAK	:1;
-	unsigned long M_SREV	:1;
-	unsigned long M_UREV	:1;
-	unsigned long M_VELO	:1;
-	unsigned long M_VBAS	:1;
-	unsigned long M_BVEL	:1;
-	unsigned long M_MISS	:1;
-	unsigned long M_ACCL	:1;
-	unsigned long M_BACC	:1;
+	unsigned int M_S	:1;
+	unsigned int M_SBAS	:1;
+	unsigned int M_SBAK	:1;
+	unsigned int M_SREV	:1;
+	unsigned int M_UREV	:1;
+	unsigned int M_VELO	:1;
+	unsigned int M_VBAS	:1;
+	unsigned int M_BVEL	:1;
+	unsigned int M_MISS	:1;
+	unsigned int M_ACCL	:1;
+	unsigned int M_BACC	:1;
     } Bits;
 } nmap_field;
 
