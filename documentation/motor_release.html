@@ -8,10 +8,32 @@
 
 <center>
 <h1>
+<b><u>Motor Record Version 4.4 Release Notice</u></b></h1></center>
+
+<center>
+<h4>
+<u>Modifications to Existing Features</u></h4></center>
+<b><u>Disable Travel Limits</u></b>
+<p>The travel limits can be disabled by setting both dial high and low
+limits equal to zero; i.e., DHLM = DLLM = 0.
+<p><b><u>RVAL ignored error</u></b>
+<p>A problem was discovered with entering target positions through RVAL.&nbsp;
+If the difference between the current and the next target position (i.e.,
+RDIF, DIFF) was less than the retry deadband (RDBD), and the next target
+position was in the "preferred direction", then the new RVAL was ignored.&nbsp;
+This error occured on releases as far back as V3.4.
+<center><b><u>New Features</u></b></center>
+<b><u>Jog velocity and acceleration parameters</u></b>
+<p>Two new fields (JVEL and JAR) were added to&nbsp; support jog velocity
+and acceleration parameters.&nbsp; These fields are only supported with
+Oregon Micro Systems, Inc device driver support.&nbsp; The JVEL field allows
+the user to change the jog velocity of the motor on-the-fly.
+<center>
+<h1>
 <b><u>Motor Record Version 4.3 Release Notice</u></b></h1></center>
 This release of the motor record is strictly a bug fix release; no new
 features have been added.
-<p><b><u>STOP field hangs record</u></b><b><u></u></b>
+<p><b><u>STOP field hangs record</u></b>
 <p>An error was introduced into the motor record with the release of V4.2
 (see README file item #14 under V4.2 ).&nbsp; This error occurred if the
 STOP field was activated when the motor was not moving (i.e., MIP = 0).&nbsp;
@@ -19,10 +41,10 @@ The motor record would become "stuck", and not respond to a move request
 (due to the internal state machine associated with IP being set to the
 "stop" state), until the condition was cleared by either a SPMG-stop or
 some other user action that forced the MIP field to zero.
-<p><b><u>HIDEOS support removed</u></b><b><u></u></b>
+<p><b><u>HIDEOS support removed</u></b>
 <p>HIDEOS is no longer supported.&nbsp; MPF is the only supported alternative
 to HIDEOS.
-<br><b><u></u></b>&nbsp;
+<br>&nbsp;
 <center>
 <h1>
 <b><u>Motor Record Version 4.2 Release Notice</u></b></h1></center>
