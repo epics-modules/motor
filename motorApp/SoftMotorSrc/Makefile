@@ -1,3 +1,21 @@
-TOP=../..
-include $(TOP)/config/CONFIG_APP
-include $(TOP)/config/RULES_ARCHS
+# Makefile
+TOP = ../..
+include $(TOP)/configure/CONFIG
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+# The following are used for debugging messages.
+USR_CFLAGS += -DDEBUG
+USR_CXXFLAGS += -DDEBUG
+
+DBD += devSoftMotor.dbd
+
+LIBRARY_IOC = softMotor
+
+# The following is required for the Soft Channel (i.e., MotorSoft) device driver.
+SRCS += devSoft.cc devSoftAux.cc
+
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
