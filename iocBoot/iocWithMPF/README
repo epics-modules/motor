@@ -1,0 +1,14 @@
+To run this Newport MM4000/5, MPF example on a Unix OS;
+in <motor>/configure/RELEASE: MPF= must be defined.
+in <motor>/motorApp/Makefile: #DIRS += NewportSrc must be uncommented.
+in <motor>/motorExApp/Makefile: #DIRS += WithMPF must be uncommented.
+and rebuild.
+
+Assuming the EPICS_HOST_ARCH environment variable is set correctly,
+start the ioc from this directory by executing the following command.
+
+../../bin/${EPICS_HOST_ARCH}/WithMPF st.cmd.sun
+OR,
+../../bin/${EPICS_HOST_ARCH}/WithMPF st.cmd.linux
+
+
