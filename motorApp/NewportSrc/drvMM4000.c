@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.c
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-10-02 21:33:56 $
+Last Modified:	$Date: 2001-10-02 22:17:59 $
 */
 
 /*
@@ -162,24 +162,6 @@ struct
     DRVSUPFUN init;
 #endif
 } drvMM4000 = {2, report, init};
-
-
-/* Motor status. */
-typedef union
-{
-    uint8_t All;
-    struct
-    {
-	BOOLEAN bit7		:1;	/* Bit #7 N/A. */
-	BOOLEAN bit6		:1;	/* Bit #6 N/A. */
-	BOOLEAN homels		:1;	/* Home LS. */
-	BOOLEAN minusTL		:1;	/* Minus Travel Limit. */
-	BOOLEAN plustTL		:1;	/* Plus Travel Limit. */
-	BOOLEAN direction	:1;	/* Motor direction: 0 - minus; 1 - plus. */
-	BOOLEAN NOT_power	:1;	/* Motor power 0 - ON; 1 - OFF. */
-	BOOLEAN inmotion	:1;	/* In-motion indicator. */
-    } Bits;
-} MOTOR_STATUS;
 
 
 /*********************************************************
