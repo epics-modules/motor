@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.c
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-05-14 20:50:54 $
+Last Modified:	$Date: 2002-02-25 17:49:05 $
 */
 
 /*
@@ -255,6 +255,7 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    {
 		if (strlen(mr->prem) != 0)
 		{
+		    strcat(motor_call->message, " ");
 		    strcat(motor_call->message, mr->prem);
 		    strcat(motor_call->message, " ");
 		}
