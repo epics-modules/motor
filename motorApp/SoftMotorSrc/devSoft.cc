@@ -1,10 +1,10 @@
 /*
-FILENAME...	devSoft.c
+FILENAME...	devSoft.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-14 15:00:21 $
+Last Modified:	$Date: 2003-05-19 17:14:03 $
 */
 
 /*
@@ -57,6 +57,8 @@ NOTES...
 #include	"motor.h"
 #include	"devSoft.h"
 
+#include	"epicsExport.h"
+
 #define	STATIC	static
 
 STATIC CALLBACK_VALUE update(struct motorRecord *);
@@ -68,13 +70,14 @@ STATIC void soft_process(struct motorRecord *);
 
 struct motor_dset devMotorSoft =
 {
-    {8, NULL, soft_init, soft_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) soft_init, (DEVSUPFUN) soft_init_record, NULL},
     update,
     start,
     build,
     end
 };
 
+epicsExportAddress(dset,devMotorSoft);
 
 STATIC CALLBACK_VALUE update(struct motorRecord *mr)
 {
