@@ -7,8 +7,10 @@ Configuring PMAC
 ----------------
 
 - Set the "VMEbus Address Modifier" (I90):
-	- $39 for A24 addressing (default).
-	- $9 for A32 addressing.
+	- $39 for A24 non privileged data access (default).
+	- $3D for A24 supervisory data access.
+	- $9  for A32 non privileged data access.
+	- $D  for A32 supervisory data access.
 
 - Enable both "supervisory" and "non-privileged" VMEbus data access by setting
 	the "VMEbus Address Modifier Don't Care Bits" (I91) to $4 (default).
