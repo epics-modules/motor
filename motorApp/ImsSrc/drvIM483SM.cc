@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-16 20:43:35 $
+Last Modified:	$Date: 2003-05-19 17:10:22 $
 */
  
 /*****************************************************************
@@ -46,23 +46,14 @@ DESIGN LIMITATIONS...
 	Translation between the IM483 and the ACCL/BACC fields is not obvious.
 */
 
-#include	<string.h>
-#include	<math.h>
-
-#include 	<epicsThread.h>
-#include	<alarm.h>
-#include	<dbDefs.h>
-#include	<dbAccess.h>
-#include	<recSup.h>
-#include	<devSup.h>
-#include        <errMdef.h>
-#include	<ctype.h>
-
-#include	"motor.h"
-#include	"drvIM483.h"
-#include        "serialIO.h"
-
-#include	"epicsExport.h"
+#include <string.h>
+#include <ctype.h>
+#include <epicsThread.h>
+#include <drvSup.h>
+#include "motor.h"
+#include "drvIM483.h"
+#include "serialIO.h"
+#include "epicsExport.h"
 
 #define STATIC static
 
@@ -261,7 +252,7 @@ STATIC int set_status(int card, int signal)
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
 
-    send_mess(card, "^", NULL);
+    send_mess(card, "^", (char) NULL);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
@@ -299,7 +290,7 @@ STATIC int set_status(int card, int signal)
 	if (motor_info->pid_present == YES && drvIM483SMReadbackDelay != 0.)
 	{
 	    epicsThreadSleep(drvIM483SMReadbackDelay);
-	    send_mess(card, "Z 0", NULL);
+	    send_mess(card, "Z 0", (char) NULL);
 	    recv_mess(card, buff, 1);
 	}
     }
@@ -310,7 +301,7 @@ STATIC int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, "Z 0", NULL);
+    send_mess(card, "Z 0", (char) NULL);
     recv_mess(card, buff, 1);
 
     motorData = atof(&buff[5]);
@@ -332,7 +323,7 @@ STATIC int set_status(int card, int signal)
 
     plusdir = (motor_info->status & RA_DIRECTION) ? true : false;
 
-    send_mess(card, "] 0", NULL);
+    send_mess(card, "] 0", (char) NULL);
     recv_mess(card, buff, 1);
     status = atoi(&buff[5]);
 
@@ -355,7 +346,7 @@ STATIC int set_status(int card, int signal)
     else
 	motor_info->status &= ~RA_MINUS_LS;
 
-    send_mess(card, "] 1", NULL);
+    send_mess(card, "] 1", (char) NULL);
     recv_mess(card, buff, 1);
     status = buff[5];
 
@@ -376,7 +367,7 @@ STATIC int set_status(int card, int signal)
 	motor_info->encoder_position = 0;
     else
     {
-	send_mess(card, "z 0", NULL);
+	send_mess(card, "z 0", (char) NULL);
 	recv_mess(card, buff, 1);
 	motorData = atof(&buff[5]);
 	motor_info->encoder_position = (int32_t) motorData;
@@ -400,7 +391,7 @@ STATIC int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, NULL);
+	send_mess(card, buff, (char) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -477,7 +468,7 @@ STATIC int recv_mess(int card, char *com, int flag)
     else
 	timeout	= SERIAL_TIMEOUT;
 
-    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, "\r\n", timeout);
+    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, (char *) "\r\n", timeout);
 
     if (len < 2)
 	com[0] = '\0';
@@ -603,25 +594,25 @@ STATIC int motor_init()
 		recv_mess(card_index, buff, FLUSH);
 	    while (strlen(buff) != 0);
     
-	    send_mess(card_index, "\003", NULL);	/* Reset device. */
+	    send_mess(card_index, "\003", (char) NULL);	/* Reset device. */
 	    epicsThreadSleep(1.0);
-	    send_mess(card_index, " ", NULL);
+	    send_mess(card_index, " ", (char) NULL);
 
 	    /* Save controller identification message. */
 	    src = buff;
 	    dest = brdptr->ident;
-	    *src = NULL;
+	    *src = (char) NULL;
 
 	    for (itera = 0; itera < 50; itera++)
 	    {
-		if (*src == NULL)
+		if (*src == (char) NULL)
 		{
 		    status = recv_mess(card_index, buff, 1);
 		    if (status <= 0)
 		    {
 			if (itera != 0)
 			{
-			    *dest = NULL;
+			    *dest = (char) NULL;
 			    status = 1;
 			}
 			break;
@@ -670,7 +661,7 @@ STATIC int motor_init()
 		brdptr->motor_info[motor_index].motor_motion = NULL;
 
                 /* Determine if encoder present based on open/closed loop mode. */
-		loop_state = NULL;
+		loop_state = 0;
 		if (loop_state != 0)
 		{
                     motor_info->encoder_present = YES;
