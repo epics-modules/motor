@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-12 18:15:18 $
+Last Modified:	$Date: 2003-02-12 18:22:04 $
 */
 
 /*
@@ -954,7 +954,7 @@ STATIC int motor_init()
 	/* Scan memory space to assure card id */
 	do
 	{
-	    status = devNoResponseProbe(OMS_ADDRS_TYPE, startAddr, 1);
+	    status = devNoResponseProbe(OMS_ADDRS_TYPE, (unsigned int) startAddr, 1);
 	    startAddr += 0x2;
 	} while (PROBE_SUCCESS(status) && startAddr < endAddr);
 
