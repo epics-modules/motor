@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.h
 USAGE... This file contains driver "include" information that is specific to
 	 the MicroMo MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-03-03 20:02:58 $
+Last Modified:	$Date: 2004-03-16 15:14:55 $
 */
 
 /*
@@ -119,7 +119,7 @@ typedef union
 
 /* Function prototypes. */
 extern RTN_STATUS MVP2001Setup(int, int, int);
-extern RTN_STATUS MVP2001Config(int, int, const char *);
+extern RTN_STATUS MVP2001Config(int, int, int, const char *);
 
 #endif	/* INCdrvMVP2001h */
 
