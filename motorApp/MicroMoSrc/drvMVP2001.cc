@@ -3,9 +3,9 @@ FILENAME...	drvMVP2001.cc
 USAGE...	Motor record driver level support for MicroMo
 		MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:26:11 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-30 04:22:14 $
 */
 
 /*
@@ -488,6 +488,7 @@ static int recv_mess(int card, char *com, int flag)
     int timeout;
     int flush = 0;
     int len=0, lenTemp=0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -501,9 +502,9 @@ static int recv_mess(int card, char *com, int flag)
 	timeout	= COMM_TIMEOUT;
 
     len = pasynSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE, (char *) "\n",
-                            1, flush, timeout);
+                            1, flush, timeout, &eomReason);
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n",
-                            1, flush, timeout);
+                            1, flush, timeout, &eomReason);
 
     Debug(5, "bytes: 1st call: %d\t2nd call: %d\n", lenTemp, len);
     

@@ -325,6 +325,7 @@ static int recv_mess(int card, char *com, int flag)
     int timeout;
     int flush = 0;
     int len=0;
+    int eomReason;
     struct MicosController *cntrl;
 
     /* Check that card exists */
@@ -343,7 +344,7 @@ static int recv_mess(int card, char *com, int flag)
         timeout = COMM_TIMEOUT;
     
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\3",
-                            1, flush, timeout);
+                            1, flush, timeout, &eomReason);
 
     /* The response from the Micos is terminated with <CR><LF><ETX>.  Remove */
     if (len < 3) com[0] = '\0'; 

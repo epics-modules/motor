@@ -3,9 +3,9 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.5 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:40:25 $
+Version:	$Revision: 1.6 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-30 04:20:56 $
 */
 
 /*
@@ -445,6 +445,7 @@ static int recv_mess(int card, char *com, int flag)
     int flush = 0;
     int timeout;
     int len=0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -458,7 +459,7 @@ static int recv_mess(int card, char *com, int flag)
 	timeout	= COMM_TIMEOUT;
 
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\n", 
-                            1, flush, timeout);
+                            1, flush, timeout, &eomReason);
 
     if (len == 0)
 	com[0] = '\0';

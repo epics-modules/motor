@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.9 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:14:18 $
+Version:	$Revision: 1.10 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-07-30 04:17:07 $
 */
  
 /*****************************************************************
@@ -428,6 +428,7 @@ static int recv_mess(int card, char *com, int flag)
     int timeout;
     int flush = 0;
     int len = 0;
+    int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -441,7 +442,7 @@ static int recv_mess(int card, char *com, int flag)
 	timeout	= COMM_TIMEOUT;
 
     len = pasynSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, (char *) "\r\n",
-                            2, flush, timeout);
+                            2, flush, timeout, &eomReason);
 
     if (len < 2)
 	com[0] = '\0';
