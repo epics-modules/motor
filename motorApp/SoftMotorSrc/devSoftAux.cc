@@ -2,9 +2,9 @@
 FILENAME...	devSoftAux.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.1 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 19:42:20 $
+Last Modified:	$Date: 2002-10-21 21:09:00 $
 */
 
 /*
@@ -36,15 +36,14 @@ in the same file; each defines (redefines) the DBR's.
 */
 
 
-#include	<vxWorks.h>
-#include	<taskLib.h>
-#include	<msgQLib.h>
 #include	<cadef.h>
-#include	<logLib.h>
+#include	<errlog.h>
+#include        <epicsEvent.h>
+#include        <epicsRingPointer.h>
+#include        <callback.h>
+#include	<epicsThread.h>
 
 #include	"motorRecord.h"
-
-typedef enum BOOLEAN_VALUES {OFF = 0, ON = 1} BOOLEAN;
 #include	"devSoft.h"
 
 #define	STATIC	static
@@ -52,9 +51,10 @@ typedef enum BOOLEAN_VALUES {OFF = 0, ON = 1} BOOLEAN;
 STATIC void soft_dinp(struct event_handler_args);
 STATIC void soft_rdbl(struct event_handler_args);
 STATIC void soft_rinp(struct event_handler_args);
-STATIC int soft_motor_task(int, int, int, int, int, int, int, int, int, int);
-STATIC SEM_ID soft_motor_sem;
-STATIC MSG_Q_ID soft_motor_msgQ;
+STATIC EPICSTHREADFUNC soft_motor_task(void *);
+STATIC epicsThreadId soft_motor_id;
+STATIC epicsEventId soft_motor_sem;
+STATIC epicsRingPointerId soft_motor_msgQ;
 
 STATIC void soft_dinp(struct event_handler_args args)
 {
@@ -72,51 +72,65 @@ STATIC void soft_rinp(struct event_handler_args args)
     soft_rinp_func((struct motorRecord *) args.usr, *((long *) args.dbr));
 }
 
-long soft_init(int after)
+long soft_init(void *after)
 {
-    if (after == 0)
+    int before_after = (int) after;
+    if (before_after == 0)
     {
-	int dbCaTask_tid, soft_motor_priority;
+	epicsThreadId dbCaTask_tid;
+	unsigned int soft_motor_priority;
+	int retry = 0;
+
+        soft_motor_sem = epicsEventCreate(epicsEventEmpty);
+	soft_motor_msgQ = epicsRingPointerCreate(MAXMSGS);
+
 	/* 
 	 * Fix for DMOV processing before the last DRBV update; i.e., lower
 	 * the priority of the "soft_motor" task below the priority of the
 	 * "dbCaLink" task.
 	 */
-	dbCaTask_tid = taskNameToId("dbCaLink");
-	if (dbCaTask_tid == ERROR)
-	    logMsg((char *) "soft_init(): dbCaLink not found.\n", 0, 0, 0, 0, 0, 0);
-	taskPriorityGet(dbCaTask_tid, &soft_motor_priority);
-	soft_motor_priority += 1;
+	while((dbCaTask_tid = epicsThreadGetId("dbCaLink")) == 0 && retry < 10)
+	{
+	    epicsThreadSleep(0.1);
+	    retry++;
+	}
 
-	soft_motor_sem = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
-	soft_motor_msgQ = msgQCreate(MAXMSGS, 4, MSG_Q_FIFO);
-	taskSpawn((char *) "soft_motor", soft_motor_priority,
-		  VX_FP_TASK | VX_STDIO, 5000, soft_motor_task, 0, 0, 0, 0, 0,
-		  0, 0, 0, 0, 0);
+	if (dbCaTask_tid == 0)
+	{
+	    errMessage(0, "cannot find dbCaLink task.");
+	    return(-1);
+	}
+	soft_motor_priority = epicsThreadGetPriority(dbCaTask_tid);
+	soft_motor_priority -= 1;
+
+	soft_motor_id = epicsThreadCreate((char *) "soft_motor", soft_motor_priority, 5000,
+					  (EPICSTHREADFUNC) soft_motor_task, NULL);
     }
     else
-	semGive(soft_motor_sem);	/* Start soft_motor_task(). */
-    return((long) OK);
+	epicsEventSignal(soft_motor_sem);	/* Start soft_motor_task(). */
+    return((long) 0);
 }
 
 
-long soft_init_record(struct motorRecord *mr)
+long soft_init_record(void *arg)
 {
+    struct motorRecord *mr = (struct motorRecord *) arg;
     struct soft_private *ptr;
     CALLBACK *cbptr;
-    STATUS status;
+    int status = 0;
     static int count = 0;
 
     if (++count > MAXMSGS)
-	return(ERROR);
-    status = msgQSend(soft_motor_msgQ, (char *) &mr, 4, NO_WAIT,
-		      MSG_PRI_NORMAL);
+	return(-1);
+
+    if (!epicsRingPointerPush(soft_motor_msgQ, (void *) mr))
+        status = -1;
 
     /* Allocate space for private field. */
     mr->dpvt = (struct soft_private *) malloc(sizeof(struct soft_private));
     ptr = (struct soft_private *) mr->dpvt;
     ptr->dinp_value = (mr->dmov == 0) ? SOFTMOVE : DONE; /* Must match after initialzation. */
-    ptr->initialized = OFF;
+    ptr->initialized = false;
 
     cbptr = &ptr->callback;
     callbackSetCallback((void (*)(struct callbackPvt *)) soft_motor_callback,
@@ -127,25 +141,25 @@ long soft_init_record(struct motorRecord *mr)
 }
 
 
-STATIC int soft_motor_task(int a1, int a2, int a3, int a4, int a5, int a6,
-			   int a7, int a8, int a9, int a10)
+STATIC EPICSTHREADFUNC soft_motor_task(void *parm)
 {
     struct motorRecord *mr;
     chid dinp, rdbl, rinp;
 
-    semTake(soft_motor_sem, WAIT_FOREVER);	/* Wait for dbLockInitRecords() to execute. */
-    SEVCHK(ca_task_initialize(),"ca_task_initialize");
+    epicsEventWait(soft_motor_sem);	/* Wait for dbLockInitRecords() to execute. */
+    SEVCHK(ca_context_create(ca_enable_preemptive_callback),
+	   "soft_motor_task: ca_context_create() error");
 
-    while (msgQReceive(soft_motor_msgQ, (char *) &mr, 4, NO_WAIT) != ERROR)
+    while ((mr = (struct motorRecord *) epicsRingPointerPop(soft_motor_msgQ)))
     {
 	struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 	if (mr->dinp.value.constantStr == NULL)
 	{
-	    ptr->default_done_behavior = ON;
+	    ptr->default_done_behavior = true;
 	}
 	else
 	{
-	    ptr->default_done_behavior = OFF;
+	    ptr->default_done_behavior = false;
 	    SEVCHK(ca_search(mr->dinp.value.pv_link.pvname, &dinp),
 		   "ca_search() failure");
 	    SEVCHK(ca_add_event(DBR_SHORT, dinp, soft_dinp, mr, NULL),"ca_add_event() failure");
@@ -167,8 +181,8 @@ STATIC int soft_motor_task(int a1, int a2, int a3, int a4, int a5, int a6,
 	}
     }
 
-    msgQDelete(soft_motor_msgQ);
-    taskSuspend(NULL);		/* Wait Forever. */
-    return(ERROR);
+    epicsRingPointerDelete(soft_motor_msgQ);
+    epicsThreadSuspendSelf();		/* Wait Forever. */
+    return(NULL);
 }
 

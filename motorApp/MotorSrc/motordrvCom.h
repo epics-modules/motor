@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:48:00 $
+Last Modified:	$Date: 2002-10-21 21:08:10 $
 */
 
 /*
@@ -43,7 +43,11 @@ Last Modified:	$Date: 2001-12-14 20:48:00 $
 #ifndef	INCmotordrvComh
 #define	INCmotordrvComh 1
 
-#include <rngLib.h>
+#include <callback.h>
+#include <epicsTypes.h>
+#include <epicsEvent.h>
+#include <epicsTime.h>
+#include <epicsRingPointer.h>
 
 
 /* Controller communication port type, followed by status. */
@@ -150,10 +154,8 @@ struct irqdatastr	/* Used only for VME44. */
     /* Interrupt Handling control elements */
     int irqErrno;	/* Error indicator from isr */
     epicsUInt8 irqEnable;
-    RING_ID recv_rng;	/* message receiving control */
-    SEM_ID recv_sem;
-    RING_ID send_rng;	/* message transmitting control */
-    SEM_ID send_sem;
+    epicsRingPointerId recv_rng;	/* message receiving control */
+    epicsEvent *recv_sem;
 };
 
 struct mess_info
@@ -164,7 +166,7 @@ struct mess_info
     epicsInt32 encoder_position;	/* one pos for each axis */
     epicsInt32 velocity;		/* Raw velocity readback(not implemented) */
     int no_motion_count;
-    ULONG status_delay;		/* Insure 10ms delay between motion/velocity
+    epicsTime status_delay;     /* Insure 10ms delay between motion/velocity
 				 * commands and status query. */
     unsigned long status;	/* one pos for each axis */
     int pid_present;		/* PID control indicator for VME58 (YES/NO). */
@@ -178,7 +180,7 @@ struct controller	/* Controller board information. */
     char ident[50];	/* identification string for this card */
     int total_axis;	/* total axis on this card */
     char *localaddr;	/* address of this card */
-    BOOLEAN cmnd_response; /* Indicates controller communication response
+    bool cmnd_response; /* Indicates controller communication response
 	    * to VELOCITY, MOTION and MOVE_TERM type commands. */
     struct irqdatastr *irqdata;	/* VME44 only; IRQ data. */
     void *DevicePrivate; /* Pointer to device specific structure.  For
@@ -198,10 +200,10 @@ struct driver_table
     int (*get_card_info) (int, MOTOR_CARD_QUERY *, struct driver_table *);
     int (*get_axis_info) (int, int, MOTOR_AXIS_QUERY *, struct driver_table *);
     struct circ_queue *queptr;
-    FAST_LOCK *quelockptr;
+    epicsEvent *quelockptr;
     struct circ_queue *freeptr;
-    FAST_LOCK *freelockptr;
-    SEM_ID *semptr;
+    epicsEvent *freelockptr;
+    epicsEvent *semptr;
     struct controller ***card_array;
     int *cardcnt_ptr;
     int *any_inmotion_ptr;
@@ -210,9 +212,17 @@ struct driver_table
     int (*setstat) (int, int);
     void (*query_done) (int, int, struct mess_node *);
     void (*strtstat) (int);			/* Optional; start status function or NULL. */
-    const BOOLEAN *const init_indicator;	/* Driver initialized indicator. */
+    const bool *const init_indicator;		/* Driver initialized indicator. */
     char *axis_names;				/* Axis name array or NULL. */
 };
+
+
+struct thread_args
+{
+    int motor_scan_rate;
+    struct driver_table *table;
+};
+
 
 /* Function prototypes. */
 
@@ -220,6 +230,6 @@ extern int motor_send(struct mess_node *, struct driver_table *);
 extern int motor_free(struct mess_node *, struct driver_table *);
 extern int motor_card_info(int, MOTOR_CARD_QUERY *, struct driver_table *);
 extern int motor_axis_info(int, int, MOTOR_AXIS_QUERY *, struct driver_table *);
-extern int motor_task(int a1, int, int, int, int, int, int, int, int, int a10);
+extern int motor_task(struct thread_args *);
 
 #endif	/* INCmotordrvComh */

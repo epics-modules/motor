@@ -3,9 +3,9 @@ FILENAME...	motordevCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record device support modules.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-17 17:48:55 $
+Last Modified:	$Date: 2002-10-21 21:07:14 $
 */
 
 /*
@@ -32,6 +32,7 @@ Last Modified:	$Date: 2000-07-17 17:48:55 $
 #ifndef	INCmotordevCom
 #define	INCmotordevCom 1
 
+#include <epicsEvent.h>
 #include "motor.h"
 #include "motordrvCom.h"
 
@@ -40,12 +41,10 @@ Last Modified:	$Date: 2000-07-17 17:48:55 $
 #define YES 1
 #define NO 0
 
-#define SEM_TIMEOUT  50
-
 /* Axis status. */
 struct axis_stat
 {
-    BOOLEAN in_use;	/* Indicates axis assigned to a motor record. */
+    bool in_use;	/* Indicates axis assigned to a motor record. */
 };
 
 /* Controller board status. */
@@ -61,16 +60,16 @@ struct board_stat
 struct motor_trans
 {
     int state;
-    FAST_LOCK lock;
+    epicsEvent *lock;
     struct mess_node motor_call;
     int callback_changed;
     int motor_pos;
     int encoder_pos;
     int vel;
     unsigned long status;
-    SEM_ID initSem;
+    epicsEvent *initSem;
     struct driver_table *tabptr;
-    BOOLEAN dpm;	/* For OMS VME58 only, drive power monitoring. */
+    bool dpm;		/* For OMS VME58 only, drive power monitoring. */
 };
 
 extern long motor_update_values(struct motorRecord *);

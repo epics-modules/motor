@@ -4,9 +4,9 @@ FILENAME..	devOmsCom.h
 USAGE... 	This file contains OMS device information that is
 		common to all OMS device support modules.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-14 20:01:20 $
+Last Modified:	$Date: 2002-10-21 21:10:48 $
 */
 
 /*
@@ -34,6 +34,6 @@ Last Modified:	$Date: 2000-07-14 20:01:20 $
 
 #include "motordevCom.h"
 
-extern long oms_build_trans(motor_cmnd, double *, struct motorRecord *);
+extern RTN_VALUES oms_build_trans(motor_cmnd, double *, struct motorRecord *);
 
 #endif	/* INCdevOmsComh */

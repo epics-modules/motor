@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.1 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 18:48:44 $
+Last Modified:	$Date: 2002-10-21 21:06:04 $
 */
 
 /*
@@ -55,28 +55,19 @@ Last Modified:	$Date: 2002-07-05 18:48:44 $
  */
 
 
-#include	<vxWorks.h>
-#include	<taskLib.h>
 #include	<stdlib.h>
 #include	<string.h>
-#ifdef __cplusplus
-extern "C" {
 #include	<callback.h>
-}
-#else
-#include	<callback.h>
-#endif
-#include	<fast_lock.h>
-#include	<tickLib.h>
+#include 	<epicsThread.h>
 
 #include	"motor.h"
 #include	"motordrvCom.h"
 
 /* Function declarations. */
-static int query_axis(int card, struct driver_table *tabptr, ULONG tick);
-static void process_messages(struct driver_table *tabptr, ULONG tick);
+static int query_axis(int card, struct driver_table *tabptr, epicsTime tick);
+static void process_messages(struct driver_table *tabptr, epicsTime tick);
 static struct mess_node *get_head_node(struct driver_table *tabptr);
-static struct mess_node *motor_malloc(struct circ_queue *freelistptr, FAST_LOCK *lockptr);
+static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent *lockptr);
 
 
 /*
@@ -99,12 +90,12 @@ static struct mess_node *motor_malloc(struct circ_queue *freelistptr, FAST_LOCK 
  *	ENDIF
  *	Pend on semaphore with "wait_time" timeout argument - call semTake().
  *	Update elapsed time.
- *	IF the "any_motor_in_motion" indicator is ON.
+ *	IF the "any_motor_in_motion" indicator is true.
  *	    IF VME58 instance of this task.
  *		Start data area update on all cards - Call start_status().
  *	    ENDIF
  *	    FOR each OMS board.
- *		IF motor data structure defined, AND, motor-in-motion indicator ON.
+ *		IF motor data structure defined, AND, motor-in-motion indicator true.
  *		    Update OMS board status - call query_axis().
  *		ENDIF
  *	    ENDFOR
@@ -118,40 +109,44 @@ static struct mess_node *motor_malloc(struct circ_queue *freelistptr, FAST_LOCK 
  */
 /*****************************************************/
 
-int motor_task(int scan_rate, int msw_tab_ptr, int lsw_tab_ptr, int a4, int a5,
-	       int a6, int a7, int a8, int a9, int a10)
+int motor_task(struct thread_args *args)
 {
     struct driver_table *tabptr;
-    ULONG tick_used, tick_curr;
-    STATUS sem_ret;
-    int wait_time, itera;
+    bool sem_ret;
+    epicsTimeStamp scan_timestamp;
+    epicsTime scan_time, previous_time, current_time;
+    double scan_sec, wait_time, time_lapse;
+    int itera;
 
-    if (sizeof(int) >= sizeof(char *))
-	tabptr = (struct driver_table *) msw_tab_ptr;
-    else
-	tabptr = (struct driver_table *) ((long) msw_tab_ptr << 16 | (long) lsw_tab_ptr);
+    tabptr = args->table;
     
-    tick_used = tickGet();
+    previous_time = epicsTime::getCurrent();
+
+    scan_sec = 1 / (double) args->motor_scan_rate;	/* Convert HZ to seconds. */
+    scan_timestamp.secPastEpoch = 0;
+    scan_timestamp.nsec = (epicsUInt32) (scan_sec * 10E9); /* Convert sec. to nanoseconds. */
+    scan_time = scan_timestamp;
 
     for(;;)
     {
 	if (*tabptr->any_inmotion_ptr == 0)
-	    wait_time = WAIT_FOREVER;
+	    wait_time = 1000;	/* Wait forever = 1,000 seconds. */
 	else
 	{
-	    tick_curr = tickGet() - tick_used;
-	    if (tick_curr < (ULONG) scan_rate)
+	    current_time = epicsTime::getCurrent();
+	    time_lapse = current_time - previous_time;
+	    if (time_lapse < scan_sec)
 	    {
-		wait_time = scan_rate - tick_curr;
-		if (wait_time < 1)		
-		    wait_time = 1;
+		wait_time = scan_time - current_time;
+		if (wait_time < 0.010)		
+		    wait_time = 0.010;
 	    }
 	    else
-		wait_time = 1;
+		wait_time = 0.010;
 	}
 
-	sem_ret = semTake(*tabptr->semptr, wait_time);
-	tick_used = tickGet();
+	sem_ret = tabptr->semptr->wait(wait_time);
+	previous_time = epicsTime::getCurrent();
 
 	if (*tabptr->any_inmotion_ptr)
 	{
@@ -162,17 +157,17 @@ int motor_task(int scan_rate, int msw_tab_ptr, int lsw_tab_ptr, int a4, int a5,
 	    {
 		struct controller *brdptr = (*tabptr->card_array)[itera];
 		if (brdptr != NULL && brdptr->motor_in_motion)
-		    query_axis(itera, tabptr, tick_used);
+		    query_axis(itera, tabptr, previous_time);
 	    }
 	}
-	if (sem_ret != ERROR)
-	    process_messages(tabptr, tick_used);
+	if (sem_ret)
+	    process_messages(tabptr, previous_time);
     }
     return(0);
 }
 
 
-static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
+static int query_axis(int card, struct driver_table *tabptr, epicsTime tick)
 {
     struct controller *brdptr;
     int index;
@@ -183,21 +178,19 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
     {
 	register struct mess_info *motor_info;
 	register struct mess_node *motor_motion;
-	ULONG delay;
+	double delay;
 
 	motor_info = &(brdptr->motor_info[index]);
 	if ((motor_motion = motor_info->motor_motion) != 0)
 	{
 	    if (tick >= motor_info->status_delay)
 		delay = tick - motor_info->status_delay;
-	    else
-		delay = tick + (0xFFFFFFFF - motor_info->status_delay);
 	}
 
-	if (motor_motion && (delay >= 2) && (*tabptr->setstat) (card, index))
+	if (motor_motion && (delay >= 0.01) && (*tabptr->setstat) (card, index))
 	{
 	    struct mess_node *mess_ret;
-	    BOOLEAN ls_active;
+	    bool ls_active;
 
 	    motor_motion->position = motor_info->position;
 	    motor_motion->encoder_position = motor_info->encoder_position;
@@ -216,19 +209,19 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
 	    if (motor_motion->status & RA_DIRECTION)
 	    {
 		if (motor_motion->status & RA_PLUS_LS)
-		    ls_active = ON;
+		    ls_active = true;
 		else
-		    ls_active = OFF;
+		    ls_active = false;
 	    }
 	    else
 	    {
 		if (motor_motion->status & RA_MINUS_LS)
-		    ls_active = ON;
+		    ls_active = true;
 		else
-		    ls_active = OFF;
+		    ls_active = false;
 	    }
 	    
-	    if (ls_active == ON ||
+	    if (ls_active == true ||
 		motor_motion->status & RA_DONE ||
 		motor_motion->status & RA_PROBLEM)
 	    {
@@ -251,10 +244,10 @@ static int query_axis(int card, struct driver_table *tabptr, ULONG tick)
 }
 
 
-static void process_messages(struct driver_table *tabptr, ULONG tick)
+static void process_messages(struct driver_table *tabptr, epicsTime tick)
 {
     struct mess_node *node, *motor_motion;
-    ULONG delay;
+    double delay;
 
     while ((node = get_head_node(tabptr)))
     {
@@ -273,7 +266,7 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 	    char axis_name;
 
 	    if (tabptr->axis_names == NULL)
-		axis_name = NULL;
+		axis_name = '0';
 	    else
 		axis_name = tabptr->axis_names[axis];
 
@@ -285,7 +278,7 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 	    {
 	    case VELOCITY:
 		(*tabptr->sendmsg) (card, node->message, axis_name);
-		if (brdptr->cmnd_response == ON)
+		if (brdptr->cmnd_response == true)
 		    (*tabptr->getmsg) (card, inbuf, 1);
 
 		/*
@@ -313,7 +306,7 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 
 	    case MOTION:
 		(*tabptr->sendmsg) (card, node->message, axis_name);
-		if (brdptr->cmnd_response == ON)
+		if (brdptr->cmnd_response == true)
 		    (*tabptr->getmsg) (card, inbuf, 1);
 
 		/* this is tricky - see velocity comment */
@@ -331,10 +324,8 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 	    case INFO:
 		if (tick >= motor_info->status_delay)
 		    delay = tick - motor_info->status_delay;
-		else
-		    delay = tick + (0xFFFFFFFF - motor_info->status_delay);
-		if (delay < 2)	/* Status update delay - needed for OMS. */
-		    taskDelay((int) (2 - delay));	/* 2 RTOS tick delay. */
+		if (delay < 0.01)	/* Status update delay - needed for OMS. */
+		    epicsThreadSleep(delay);	/* 2 RTOS tick delay. */
 
 		if (tabptr->strtstat != NULL)
 		    (*tabptr->strtstat) (card);
@@ -361,16 +352,16 @@ static void process_messages(struct driver_table *tabptr, ULONG tick)
 
 	    case MOVE_TERM:
 		if (motor_motion != NULL)
-		    motor_motion->message[0] = NULL;	/* Clear 2nd command from buffer. */
+		    motor_motion->message[0] = '0';	/* Clear 2nd command from buffer. */
 		(*tabptr->sendmsg) (card, node->message, axis_name);
-		if (brdptr->cmnd_response == ON)
+		if (brdptr->cmnd_response == true)
 		    (*tabptr->getmsg) (card, inbuf, 1);
 		motor_free(node, tabptr);	/* free message buffer */
 		break;
 
 	    default:
 		(*tabptr->sendmsg) (card, node->message, axis_name);
-		if (brdptr->cmnd_response == ON)
+		if (brdptr->cmnd_response == true)
 		    (*tabptr->getmsg) (card, inbuf, 1);
 		motor_free(node, tabptr);	/* free message buffer */
 		motor_info->status_delay = tick;
@@ -398,7 +389,7 @@ static struct mess_node *get_head_node(struct driver_table *tabptr)
     struct circ_queue *qptr;
     struct mess_node *node;
 
-    FASTLOCK(tabptr->quelockptr);
+    tabptr->quelockptr->wait();
     qptr = tabptr->queptr;
     node = qptr->head;
 
@@ -410,7 +401,9 @@ static struct mess_node *get_head_node(struct driver_table *tabptr)
 	if (node == qptr->tail)
 	    qptr->tail = NULL;
     }
-    FASTUNLOCK(tabptr->quelockptr);
+
+    tabptr->quelockptr->signal();
+
     return (node);
 }
 
@@ -459,7 +452,9 @@ int motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
 	    return (-1);
     }
 
-    FASTLOCK(tabptr->quelockptr);
+    /* Lock queue */
+    tabptr->quelockptr->wait();
+
     qptr = tabptr->queptr;
     if (qptr->tail)
     {
@@ -471,17 +466,20 @@ int motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
 	qptr->tail = new_message;
 	qptr->head = new_message;
     }
-    FASTUNLOCK(tabptr->quelockptr);
 
-    semGive(*tabptr->semptr);
+
+    /* Unlock message queue */
+    tabptr->quelockptr->signal();
+
+    tabptr->semptr->signal();
     return (0);
 }
 
-static struct mess_node *motor_malloc(struct circ_queue *freelistptr, FAST_LOCK *lockptr)
+static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent *lockptr)
 {
     struct mess_node *node;
 
-    FASTLOCK(lockptr);
+    lockptr->wait();
 
     if (!freelistptr->head)
 	node = (struct mess_node *) malloc(sizeof(struct mess_node));
@@ -492,7 +490,9 @@ static struct mess_node *motor_malloc(struct circ_queue *freelistptr, FAST_LOCK 
 	if (!freelistptr->head)
 	    freelistptr->tail = (struct mess_node *) NULL;
     }
-    FASTUNLOCK(lockptr);
+
+    lockptr->signal();
+
     return (node);
 }
 
@@ -501,7 +501,8 @@ int motor_free(struct mess_node * node, struct driver_table *tabptr)
     struct circ_queue *freelistptr;
     
     freelistptr = tabptr->freeptr;
-    FASTLOCK(tabptr->freelockptr);
+
+    tabptr->freelockptr->wait();
 
     node->next = (struct mess_node *) NULL;
 
@@ -516,7 +517,8 @@ int motor_free(struct mess_node * node, struct driver_table *tabptr)
 	freelistptr->tail = node;
     }
 
-    FASTUNLOCK(tabptr->freelockptr);
+    tabptr->freelockptr->signal();
+
     return (0);
 }
 

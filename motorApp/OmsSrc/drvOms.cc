@@ -2,9 +2,9 @@
 FILENAME...	drvOms.c
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.1 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 19:39:28 $
+Last Modified:	$Date: 2002-10-21 21:10:19 $
 */
 
 /*
@@ -62,7 +62,6 @@ Last Modified:	$Date: 2002-07-05 19:39:28 $
 
 ========================stepper motor driver ========================*/
 
-#include	<vxWorks.h>
 #include	<stdio.h>
 #include	<sysLib.h>
 #include	<string.h>
@@ -89,6 +88,7 @@ extern "C" {
 #endif
 #include	<errMdef.h>
 #include	<intLib.h>
+#include	<epicsThread.h>
 
 #include	"motor.h"
 #include	"drvOms.h"
@@ -153,8 +153,6 @@ STATIC int omsError(int card);
 STATIC int motorIsrEnable(int card);
 STATIC void motorIsrDisable(int card);
 
-/*----------------functions-----------------*/
-
 struct driver_table oms_access =
 {
     NULL,
@@ -191,6 +189,10 @@ struct
 #endif
 } drvOms = {2, report, init};
 
+STATIC struct thread_args targs = {SCAN_RATE, &oms_access};
+
+/*----------------functions-----------------*/
+
 static long report(int level)
 {
     int card;
@@ -210,7 +212,7 @@ static long report(int level)
 
 static long init()
 {
-    initialized = ON;	/* Indicate that driver is initialized. */
+    initialized = true;	/* Indicate that driver is initialized. */
     (void) motor_init();
     return ((long) 0);
 }
@@ -237,7 +239,7 @@ STATIC int set_status(int card, int signal)
     char q_buf[50];
     int index, pos;
     int rtn_state;
-    BOOLEAN ls_active;
+    bool ls_active;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
 
@@ -275,7 +277,7 @@ STATIC int set_status(int card, int signal)
 
 	    if (ax_stat->overtravel == 'L')
 	    {
-		ls_active = ON;
+		ls_active = true;
 		if (motor_info->status & RA_DIRECTION)
 		    motor_info->status |= RA_PLUS_LS;
 		else
@@ -283,7 +285,7 @@ STATIC int set_status(int card, int signal)
 	    }
 	    else
 	    {
-		ls_active = OFF;
+		ls_active = false;
 		motor_info->status &= ~(RA_PLUS_LS | RA_MINUS_LS);
 	    }
 
@@ -365,11 +367,11 @@ STATIC int set_status(int card, int signal)
     if (!(motor_info->status & RA_DIRECTION))
 	motor_info->velocity *= -1;
 
-    rtn_state = (!motor_info->no_motion_count || ls_active == ON ||
+    rtn_state = (!motor_info->no_motion_count || ls_active == true ||
      (motor_info->status & (RA_DONE | RA_PROBLEM))) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((motor_info->status & RA_DONE || ls_active == ON) &&
+    if ((motor_info->status & RA_DONE || ls_active == true) &&
 	(motor_info->motor_motion != 0) &&
 	(motor_info->motor_motion->postmsgptr != 0))
     {
@@ -595,11 +597,18 @@ STATIC int omsGet(int card, char *pchar, int timeout)
     if (pmotorState->irqdata->irqEnable)
     {
 	/* Get character from isr - if available */
-	while ((getCnt = rngBufGet(pmotorState->irqdata->recv_rng, pchar, 1)) == 0 &&
-	       retry < timeout)
+	while (epicsRingPointerIsEmpty(pmotorState->irqdata->recv_rng) && retry < timeout)
 	{
-	    semTake(pmotorState->irqdata->recv_sem, 1);	/* Wait for character */
+	    pmotorState->irqdata->recv_sem->wait(0.01);	/* Wait for character */
 	    retry += 5000;	/* Compensate for semaphore timeout */
+	}
+	if (!epicsRingPointerIsEmpty(pmotorState->irqdata->recv_rng))
+	{
+	    void *rtnptr;
+
+	    rtnptr = epicsRingPointerPop(pmotorState->irqdata->recv_rng);
+	    *pchar = (char) rtnptr;
+	    getCnt = 1;
 	}
     }
     else
@@ -627,56 +636,30 @@ STATIC int omsPut(int card, char *pmess)
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
-    int key;
-    char *p;
-    int putCnt;
+    char *putptr;
     int trys;
 
     pmotorState = motor_state[card];
     pmotor = (struct vmex_motor *) pmotorState->localaddr;
 
-    /*
-     * This section enables the transmitt interrupt - it is not used because
-     * of driver-failure during worst-case testing.
-     */
-    if (FALSE)
+    /* Send next message */
+    for (putptr = pmess; *putptr != '\0'; putptr++)
     {
-	/* Put string into isr transmitt buffer */
-	putCnt = strlen(pmess);
-	if (rngBufPut(pmotorState->irqdata->send_rng, pmess, putCnt) != putCnt)
+	trys = 0;
+	while (!(pmotor->status & STAT_TRANS_BUF_EMPTY))
 	{
-	    Debug(1, "omsPut: Put ring full.\n");
-	    return (ERROR);
-	}
-
-	/* Turn-on transmit buffer interrupt */
-	key = intLock();
-	pmotor->control |= IRQ_TRANS_BUF;
-	intUnlock(key);
-
-	return (semTake(pmotorState->irqdata->send_sem, MAX_COUNT / 5000));
-    }
-    else
-    {
-	/* Send next message */
-	for (p = pmess; *p != '\0'; p++)
-	{
-	    trys = 0;
-	    while (!(pmotor->status & STAT_TRANS_BUF_EMPTY))
+	    if (trys > max_io_tries)
 	    {
-		if (trys > max_io_tries)
-		{
-		    Debug(1, "omsPut: Time_out occurred in send\n");
-		    return (ERROR);
-		}
-		if (pmotor->status & STAT_ERROR)
-		{
-		    Debug(1, "omsPut: error occurred in send\n");
-		}
-		trys++;
+		Debug(1, "omsPut: Time_out occurred in send\n");
+		return (ERROR);
 	    }
-	    pmotor->data = *p;
+	    if (pmotor->status & STAT_ERROR)
+	    {
+		Debug(1, "omsPut: error occurred in send\n");
+	    }
+	    trys++;
 	}
+	pmotor->data = *putptr;
     }
     return (OK);
 }
@@ -766,7 +749,7 @@ STATIC void motorIsr(int card)
     /* Motion done handling */
     if (status & STAT_DONE)
 	/* Wake up polling task 'motor_task()' to issue callbacks */
-	semGive(motor_sem);
+	motor_sem.signal();
 
     /* If command error is present - clear it */
     if (status & STAT_ERROR)
@@ -781,32 +764,18 @@ STATIC void motorIsr(int card)
 	pmotorState->irqdata->irqErrno |= STAT_ERROR;
     }
 
-    /* Send message */
-/*    if (status & STAT_TRANS_BUF_EMPTY) */
-    if (FALSE)
-    {
-	if (rngBufGet(pmotorState->irqdata->send_rng, &dataChar, 1))
-	    pmotor->data = dataChar;
-	else
-	{
-	    /* Transmit done - disable irq */
-	    semGive(pmotorState->irqdata->send_sem);
-	    control &= ~IRQ_TRANS_BUF;
-	}
-    }
-
     /* Read Response */
     if (status & STAT_INPUT_BUF_FULL)
     {
 	dataChar = pmotor->data;
 
-	if (!rngBufPut(pmotorState->irqdata->recv_rng, &dataChar, 1))
+	if (!epicsRingPointerPush(pmotorState->irqdata->recv_rng, (void *) dataChar))
 	{
 	    logMsg((char *) "card %d recv ring full, lost '%c'\n", card,
 		   dataChar, 0, 0, 0, 0);
 	    pmotorState->irqdata->irqErrno |= STAT_INPUT_BUF_FULL;
 	}
-	semGive(pmotorState->irqdata->recv_sem);
+	pmotorState->irqdata->recv_sem->signal();
     }
     /* Update-interrupt state */
     pmotor->control = control;
@@ -825,7 +794,7 @@ STATIC int motorIsrEnable(int card)
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
 
     status = devConnectInterrupt(intVME, omsInterruptVector + card,
-		    (void (*)(void *)) motorIsr, (void *) card);
+		    (void (*)()) motorIsr, (void *) card);
     
     if (!RTN_SUCCESS(status))
     {
@@ -852,11 +821,8 @@ STATIC int motorIsrEnable(int card)
     pmotor->vector = omsInterruptVector + card;
 
 
-    pmotorState->irqdata->recv_rng = rngCreate(OMS_RESP_Q_SZ);
-    pmotorState->irqdata->recv_sem = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
-
-    pmotorState->irqdata->send_rng = rngCreate(MAX_MSG_SIZE * 2);
-    pmotorState->irqdata->send_sem = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
+    pmotorState->irqdata->recv_rng = epicsRingPointerCreate(OMS_RESP_Q_SZ);
+    pmotorState->irqdata->recv_sem = new epicsEvent(epicsEventEmpty);
 
     pmotorState->irqdata->irqEnable = TRUE;
     pmotorState->irqdata->irqErrno = 0;
@@ -885,7 +851,7 @@ STATIC void motorIsrDisable(int card)
     pmotor->control = 0;
 
     status = devDisconnectInterrupt(intVME, omsInterruptVector + card,
-				    (void (*)(void *)) motorIsr);
+				    (void (*)()) motorIsr);
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",
 		  omsInterruptVector + card);
@@ -893,11 +859,9 @@ STATIC void motorIsrDisable(int card)
     /* Remove interrupt control functions */
     pmotorState->irqdata->irqEnable = FALSE;
     pmotorState->irqdata->irqErrno = 0;
-    rngDelete(pmotorState->irqdata->recv_rng);
-    rngDelete(pmotorState->irqdata->send_rng);
+    epicsRingPointerDelete(pmotorState->irqdata->recv_rng);
 
-    semDelete(pmotorState->irqdata->recv_sem);
-    semDelete(pmotorState->irqdata->send_sem);
+    delete pmotorState->irqdata->recv_sem;
 }
 
 
@@ -947,9 +911,9 @@ int omsSetup(int num_cards,	/* maximum number of cards in rack */
 
     /* Set motor polling task rate */
     if (scan_rate >= 1 && scan_rate <= sysClkRateGet())
-	motor_scan_rate = sysClkRateGet() / scan_rate;
+	targs.motor_scan_rate = sysClkRateGet() / scan_rate;
     else
-	motor_scan_rate = SCAN_RATE;
+	targs.motor_scan_rate = SCAN_RATE;
     return(0);
 }
 
@@ -962,7 +926,7 @@ STATIC int motor_init()
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
     long status;
-    int card_index, motor_index, arg3, arg4;
+    int card_index, motor_index;
     char axis_pos[50], encoder_pos[50];
     char *tok_save, *pos_ptr;
     int total_encoders = 0, total_axis = 0;
@@ -1000,8 +964,8 @@ STATIC int motor_init()
 	if (PROBE_SUCCESS(status))
 	{
 	    status = devRegisterAddress(__FILE__, OMS_ADDRS_TYPE,
-					(void *) probeAddr, OMS_BRD_SIZE,
-					(void **) &localaddr);
+					(size_t) probeAddr, OMS_BRD_SIZE,
+					(volatile void **) &localaddr);
 	    Debug(9, "motor_init: devRegisterAddress() status = %d\n",
 		  (int) status);
 	    if (!RTN_SUCCESS(status))
@@ -1019,7 +983,7 @@ STATIC int motor_init()
 	    pmotorState = motor_state[card_index];
 	    pmotorState->localaddr = (char *) localaddr;
 	    pmotorState->motor_in_motion = 0;
-	    pmotorState->cmnd_response = OFF;
+	    pmotorState->cmnd_response = false;
 
 	    /* Disable Interrupts */
 	    pmotorState->irqdata = (struct irqdatastr *) malloc(sizeof(struct irqdatastr));
@@ -1097,35 +1061,17 @@ STATIC int motor_init()
 	}
     }
 
-    motor_sem = semBCreate(SEM_Q_PRIORITY, SEM_EMPTY);
     any_motor_in_motion = 0;
 
-    FASTLOCKINIT(&queue_lock);
-    FASTLOCK(&queue_lock);
     mess_queue.head = (struct mess_node *) NULL;
     mess_queue.tail = (struct mess_node *) NULL;
-    FASTUNLOCK(&queue_lock);
 
-    FASTLOCKINIT(&freelist_lock);
-    FASTLOCK(&freelist_lock);
     free_list.head = (struct mess_node *) NULL;
     free_list.tail = (struct mess_node *) NULL;
-    FASTUNLOCK(&freelist_lock);
 
     Debug(3, "Motors initialized\n");
 
-    if (sizeof(int) >= sizeof(char *))
-    {
-	arg3 = (int) (&oms_access);
-	arg4 = 0;
-    }
-    else
-    {
-	arg3 = (int) ((long) &oms_access >> 16);
-	arg4 = (int) ((long) &oms_access & 0xFFFF);
-    }
-    taskSpawn((char *) "Oms_motor", 64, VX_FP_TASK | VX_STDIO, 5000, motor_task,
-	      motor_scan_rate, arg3, arg4, 0, 0, 0, 0, 0, 0, 0);
+    epicsThreadCreate((const char *) "Oms_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     Debug(3, "Started motor_task\n");
     return (0);

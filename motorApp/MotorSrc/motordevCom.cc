@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.1 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 18:52:58 $
+Last Modified:	$Date: 2002-10-21 21:06:04 $
 */
 
 /*
@@ -44,23 +44,14 @@ Last Modified:	$Date: 2002-07-05 18:52:58 $
  */
 
 
-#include	<vxWorks.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	<math.h>
 #include	<callback.h>
-#include	<fast_lock.h>
-#ifdef __cplusplus
-extern "C" {
 #include	<dbAccess.h>
+#include	<recGbl.h>
 #include	<recSup.h>
 #include	<dbEvent.h>
-}
-#else
-#include	<dbAccess.h>
-#include	<recSup.h>
-#include	<dbEvent.h>
-#endif
 #include	<devSup.h>
 
 #include	"motorRecord.h"
@@ -104,7 +95,7 @@ long motor_init_com(int after, int brdcnt, struct driver_table *tabptr,
 				 card_query.total_axis * sizeof(struct axis_stat));
     
 		for (motor = 0; motor < card_query.total_axis; motor++)
-		   brdptr->axis_stat[motor].in_use = OFF;
+		   brdptr->axis_stat[motor].in_use = false;
 	    }
 	}
     }
@@ -128,19 +119,19 @@ LOGIC...
     ...
     Error check "card" index, "signal" index and motor "in_use" indicator.
     IF error detected.
-	Set the MSTA PROBLEM bit ON.
+	Set the MSTA PROBLEM bit true.
 	Set RMP <- REP <- 0.
 	ERROR RETURN.
     ENDIF
     
     Get motor information - call get_axis_info() via driver table.
     Update MSTA.
-    Set axis assigned to a motor record indicator ON.
+    Set axis assigned to a motor record indicator true.
 
     Set Initialize encoder indicator based on (MSTA indicates an encoder is
 	present, AND, UEIP set to YES).
 
-    IF Initialize encoder indicator is ON.
+    IF Initialize encoder indicator is true.
 	...
 	...
     ELSE
@@ -153,14 +144,14 @@ LOGIC...
     Set Command Primitive Initialization string indicator based on (non-NULL "init"
 	pointer, AND, non-zero string length.
 
-    IF (Initialize position, OR, encoder, OR, string indicators are ON)
+    IF (Initialize position, OR, encoder, OR, string indicators are true)
 	Create initialization semaphore.
 	...
 	...
-	IF Initialize encoder indicator is ON.
+	IF Initialize encoder indicator is true.
 	    Send Set Encoder Ratio command to controller.
 	ENDIF
-	IF Initialize position indicator is ON.
+	IF Initialize position indicator is true.
 	    Send Load Position command to controller.
 	ENDIF
 	IF Command Primitive Initialization string present.
@@ -183,7 +174,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     struct motor_dset *pdset = (struct motor_dset *) (mr->dset);
     struct board_stat *brdptr;
     int card, signal;
-    BOOLEAN initEncoder, initPos, initString;
+    bool initEncoder, initPos, initString;
     struct motor_trans *ptrans;
     MOTOR_AXIS_QUERY axis_query;
     struct mess_node *motor_call;
@@ -198,9 +189,11 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     ptrans->state = IDLE_STATE;
     ptrans->callback_changed = NO;
     ptrans->tabptr = tabptr;
-    ptrans->dpm = OFF;
+    ptrans->dpm = false;
 
-    FASTLOCKINIT(&ptrans->lock);
+    /* Semaphore on private to record field data transfers */
+    ptrans->lock = new epicsEvent(epicsEventFull);
+                                                        
     motor_call = &(ptrans->motor_call);
 
     callbackSetCallback((void (*)(struct callbackPvt *)) motor_callback,
@@ -251,7 +244,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     /* query motor for all info to fill into record */
     (tabptr->get_axis_info) (card, signal, &axis_query, tabptr);
     mr->msta = axis_query.status;	/* status info */
-    brdptr->axis_stat[signal].in_use = ON;
+    brdptr->axis_stat[signal].in_use = true;
 
 /*jps: setting the encoder ratio was moved from init_record() remove  callbacks during iocInit */
     /*
@@ -260,8 +253,8 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
      * per engineering unit (EGU).  Send an array containing this information
      * to device support.
      */
-    initEncoder = ((mr->msta & EA_PRESENT) && mr->ueip) ? ON : OFF;
-    if (initEncoder == ON)
+    initEncoder = ((mr->msta & EA_PRESENT) && mr->ueip) ? true : false;
+    if (initEncoder == true)
     {
 	if (fabs(mr->mres) < 1.e-9)
 	    mr->mres = 1.;
@@ -281,27 +274,27 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 	ep_mp[1] = 1.;
     }
 
-    initPos = (mr->dval != 0 && mr->mres != 0 && axis_query.position == 0) ? ON : OFF;
+    initPos = (mr->dval != 0 && mr->mres != 0 && axis_query.position == 0) ? true : false;
     /* Test for command primitive initialization string. */
-    initString = (mr->init != NULL && strlen(mr->init)) ? ON : OFF;
+    initString = (mr->init != NULL && strlen(mr->init)) ? true : false;
     
     /* Program the device if an encoder is present */
-    if (initPos == ON || initEncoder == ON || initString == ON)
+    if (initPos == true || initEncoder == true || initString == true)
     {
 	/* Semaphore used to hold initialization until device is programmed - cleared by callback. */
-	ptrans->initSem = semBCreate(SEM_Q_FIFO, SEM_EMPTY);
+	ptrans->initSem = new epicsEvent(epicsEventEmpty);
 
 	/* Switch to special init callback so that record will not be processed during iocInit. */
 	callbackSetCallback((void (*)(struct callbackPvt *)) motor_init_callback,
 			    &(motor_call->callback));
-	if (initEncoder == ON)
+	if (initEncoder == true)
 	{
 	    (*pdset->start_trans)(mr);
 	    (*pdset->build_trans)(SET_ENC_RATIO, ep_mp, mr);
 	    (*pdset->end_trans)(mr);
 	}
 
-	if (initPos == ON)
+	if (initPos == true)
 	{
 	    double setPos = mr->dval / mr->mres;
 
@@ -310,7 +303,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 	    (*pdset->end_trans)(mr);
 	}
 
-	if (initString == ON)
+	if (initString == true)
 	{
 	    (*pdset->start_trans)(mr);
 	    (*pdset->build_trans)(PRIMITIVE, NULL, mr);
@@ -323,10 +316,10 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 	(*pdset->end_trans)(mr);
 
 	/* Wait for callback w/timeout */
-	if ((rtnStat = semTake(ptrans->initSem, SEM_TIMEOUT)) == ERROR)
+	if (ptrans->initSem->wait(1.0) == FALSE)
 	    recGblRecordError(S_dev_NoInit, (void *) mr,
 		(char *) "dev_NoInit (init_record_com: callback2 timeout");
-	semDelete(ptrans->initSem);
+	delete(ptrans->initSem);
 
 	/* Restore regular record callback */
 	callbackSetCallback((void (*)(struct callbackPvt *)) motor_callback,
@@ -340,7 +333,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
     mr->rmp = axis_query.position;	/* raw motor pulse count */
     mr->rep = axis_query.encoder_position;	/* raw encoder pulse count */
     mr->msta = axis_query.status;	/* status info */
-    return(OK);
+    return(0);
 }
 
 /*
@@ -361,7 +354,7 @@ long motor_update_values(struct motorRecord * mr)
     rc = NOTHING_DONE;
     ptrans = (struct motor_trans *) mr->dpvt;
 
-    FASTLOCK(&ptrans->lock);
+    ptrans->lock->wait();
 
     /* raw motor pulse count */
     if (ptrans->callback_changed == YES)
@@ -373,7 +366,10 @@ long motor_update_values(struct motorRecord * mr)
 	ptrans->callback_changed = NO;
 	rc = CALLBACK_DATA;
     }
-    FASTUNLOCK(&ptrans->lock);
+
+    /* load event for next transfer */
+    ptrans->lock->signal();
+
     return (rc);
 }
 
@@ -424,7 +420,7 @@ long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
     struct mess_node *motor_call;
     long rc;
 
-    rc = OK;
+    rc = 0;
     motor_call = &(trans->motor_call);
     if ((*trans->tabptr->card_array)[motor_call->card] == NULL)
     {
@@ -434,7 +430,7 @@ long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
 	mr->dmov = TRUE;
 	db_post_events(mr, &mr->dmov, DBE_VALUE);
 	mr->msta |= CNTRL_COMM_ERR;
-	return(rc = ERROR);
+	return(rc = -1);
     }
 
     switch (trans->state)
@@ -447,7 +443,7 @@ long motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
 
 	case IDLE_STATE:
 	default:
-	    rc = ERROR;
+	    rc = -1;
     }
     return (rc);
 }
@@ -462,11 +458,11 @@ NOTES... This function MUST BE reentrant.
 static void motor_callback(struct mess_node * motor_return)
 {
     struct motorRecord *mr = (struct motorRecord *) motor_return->mrecord;
-    struct rset *prset = (struct rset *) (motor_return->mrecord->rset);
     struct motor_trans *ptrans;
 
     ptrans = (struct motor_trans *) mr->dpvt;
-    FASTLOCK(&ptrans->lock);
+
+    ptrans->lock->wait();
 
     ptrans->callback_changed = YES;
     ptrans->motor_pos = motor_return->position;
@@ -474,7 +470,8 @@ static void motor_callback(struct mess_node * motor_return)
     ptrans->vel = motor_return->velocity;
     ptrans->status = motor_return->status;
 
-    FASTUNLOCK(&ptrans->lock);
+    /* load event for next transfer */
+    ptrans->lock->signal();
 
     /* free the return data buffer */
     (ptrans->tabptr->free) (motor_return, ptrans->tabptr);
@@ -493,7 +490,8 @@ static void motor_init_callback(struct mess_node * motor_return)
     struct motor_trans *ptrans;
 
     ptrans = (struct motor_trans *) mr->dpvt;
-    FASTLOCK(&ptrans->lock);
+
+    ptrans->lock->wait();
 
     ptrans->callback_changed = YES;
     ptrans->motor_pos = motor_return->position;
@@ -503,9 +501,10 @@ static void motor_init_callback(struct mess_node * motor_return)
 
     /* free the return data buffer */
     (ptrans->tabptr->free) (motor_return, ptrans->tabptr);
-    semGive(ptrans->initSem);
+    ptrans->initSem->signal();
 
-    FASTUNLOCK(&ptrans->lock);
+    /* load event for next transfer */
+    ptrans->lock->signal();
     return;
 }
 

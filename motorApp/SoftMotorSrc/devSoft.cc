@@ -2,9 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.1 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 19:43:17 $
+Last Modified:	$Date: 2002-10-21 21:08:59 $
 */
 
 /*
@@ -45,18 +45,11 @@ NOTES...
 */
 
 
-#include	<vxWorks.h>
 #include	<dbDefs.h>
 #include	<dbFldTypes.h>
-#ifdef __cplusplus
-extern "C" {
+#include	<dbAccess.h>
 #include	<dbEvent.h>
 #include	<recSup.h>
-}
-#else
-#include	<dbEvent.h>
-#include	<recSup.h>
-#endif
 
 #include	"motorRecord.h"
 #include	"motor.h"
@@ -66,7 +59,7 @@ extern "C" {
 
 STATIC long update(struct motorRecord *);
 STATIC long start(struct motorRecord *);
-STATIC long build(motor_cmnd, double *, struct motorRecord *);
+STATIC RTN_STATUS build(motor_cmnd, double *, struct motorRecord *);
 STATIC long end(struct motorRecord *);
 STATIC void soft_process(struct motorRecord *);
 
@@ -103,7 +96,7 @@ STATIC long update(struct motorRecord *mr)
 
 STATIC long start(struct motorRecord *mr)
 {
-    return((long) OK);
+    return((long) 0);
 }
 
 
@@ -113,14 +106,14 @@ STATIC long end(struct motorRecord *mr)
 
     if (ptr->default_done_behavior == YES)
 	mr->msta = RA_DONE;
-    return((long) OK);
+    return((long) 0);
 }
 
 
-STATIC long build(motor_cmnd command, double *parms, struct motorRecord *mr)
+STATIC RTN_STATUS build(motor_cmnd command, double *parms, struct motorRecord *mr)
 {
     const short int stop = 1;
-    long status;
+    long int status;
 
     switch (command)
     {
@@ -154,7 +147,7 @@ STATIC long build(motor_cmnd command, double *parms, struct motorRecord *mr)
 	default:
 	    status = ERROR;
     }
-    return(status);
+    return(status == 0 ? OK : ERROR);
 }
 
 
@@ -191,8 +184,8 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
     {
 	if (mr->dmov == FALSE)
 	    ptr->dinp_value = SOFTMOVE;
-	else	/* Hard motor is moving independent of soft motor. */
-	{
+	else if (mr->lock == menuYesNoNO)
+	{	/* Hard motor is moving independent of soft motor. */
 	    unsigned short mask = (DBE_VALUE | DBE_LOG);
 
 	    ptr->dinp_value = HARDMOVE;
@@ -232,7 +225,7 @@ void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
     newrdbl = newrdbl / mr->mres;
     mr->rmp = NINT(newrdbl);
 
-    if (ptr->initialized == OFF)
+    if (ptr->initialized == false)
     {
 	/* Reset Target to Actual position. */
 	unsigned short mask = (DBE_VALUE | DBE_LOG);
@@ -243,7 +236,7 @@ void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
 	db_post_events(mr, &mr->pp, mask);
 
 	ptr->dinp_value = DONE;
-	ptr->initialized = ON;
+	ptr->initialized = true;
     }    
     soft_process(mr);
 }
@@ -282,7 +275,7 @@ void soft_motor_callback(CALLBACK *cbptr)
 {
     struct motorRecord *mr;
 
-    callbackGetUser(mr, cbptr);
+    callbackGetUser((void *) mr, cbptr);
     soft_process(mr);
 }
 

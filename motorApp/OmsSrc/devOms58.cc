@@ -1,16 +1,16 @@
 /*
-FILENAME...	devOms.c
-USAGE... Device level support for OMS VME8 and VME44 models.
+FILENAME...	devOms58.c
+USAGE...	Motor record device level support for OMS VME58.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.1 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-07-14 20:19:08 $
+Last Modified:	$Date: 2002-10-21 21:10:18 $
 */
 
 /*
  *      Original Author: Jim Kowalkowski
- *      Date: 01/18/93
- *      Current Author: Ron Sluiter
+ *      Current Author: Joe Sullivan
+ *      Date: 11/14/94
  *
  *      Experimental Physics and Industrial Control System (EPICS)
  *
@@ -36,50 +36,41 @@ Last Modified:	$Date: 2000-07-14 20:19:08 $
  * Modification Log:
  * -----------------
  * .01  01-18-93	jbk     initialized
- *      ...
+ * .02  11-14-94	jps     copy devOMS.c and modify to point to vme58 driver
  * .03  03-19-96	tmm     v1.10: modified encoder-ratio calculation
- * .04  11-26-96	jps     allow for bumpless-reboot on position
- * .04a 02-19-97	tmm     fixed for EPICS 3.13
+ * .04  06-20-96	jps     allow for bumpless-reboot on position
+ * .04a 02-19-97    	tmm     fixed for EPICS 3.13
+ *      ...
  */
 
 
-#include	<vxWorks.h>
-#include        <semLib.h>	/* jps: include for init_record wait */
 #include	<alarm.h>
 #include	<callback.h>
 #include	<dbDefs.h>
 #include	<dbAccess.h>
 #include	<dbCommon.h>
-#include	<fast_lock.h>
 #include	<devSup.h>
 #include	<drvSup.h>
-#ifdef __cplusplus
-extern "C" {
 #include	<recSup.h>
 #include	<errlog.h>
-}
-#else
-#include	<recSup.h>
-#include	<errlog.h>
-#endif
 
 #include	"motorRecord.h"
 #include	"motor.h"
-#include	"drvOms.h"
+#include	"drvOms58.h"
 #include	"devOmsCom.h"
 
 #define STATIC static
 
-extern int oms44_num_cards;
-extern struct driver_table oms_access;
+extern int oms58_num_cards;
+extern struct driver_table oms58_access;
 
 /* ----------------Create the dsets for devOMS----------------- */
-STATIC long oms_init(int);
-STATIC long oms_init_record(struct motorRecord *);
+STATIC long oms_init(void *);
+STATIC long oms_init_record(void *);
 STATIC long oms_start_trans(struct motorRecord *);
 STATIC long oms_end_trans(struct motorRecord *);
 
-struct motor_dset devOMS =
+struct motor_dset devOms58 =
 {
     {8, NULL, oms_init, oms_init_record, NULL},
     motor_update_values,
@@ -88,30 +79,33 @@ struct motor_dset devOMS =
     oms_end_trans
 };
 
-STATIC struct board_stat **oms_cards;
-STATIC const char errmsg[] = {"\n\n!!!ERROR!!! - Oms driver uninitialized.\n"};
 
-STATIC long oms_init(int after)
+STATIC struct board_stat **oms_cards;
+STATIC const char errmsg[] = {"\n\n!!!ERROR!!! - Oms58 driver uninitialized.\n"};
+
+STATIC long oms_init(void *arg)
 {
-    if (*(oms_access.init_indicator) == NO)
+    int after = (int) arg;
+    if (*(oms58_access.init_indicator) == NO)
     {
 	errlogSevPrintf(errlogMinor, "%s", errmsg);
-    	return(ERROR);
+	return(ERROR);
     }
     else
-	return(motor_init_com(after, oms44_num_cards, &oms_access, &oms_cards));
+	return(motor_init_com(after, oms58_num_cards, &oms58_access, &oms_cards));
 }
 
-STATIC long oms_init_record(struct motorRecord *mr)
+STATIC long oms_init_record(void *arg)
 {
-    return(motor_init_record_com(mr, oms44_num_cards, &oms_access, oms_cards));
+    struct motorRecord *mr = (struct motorRecord *) arg;
+    return(motor_init_record_com(mr, oms58_num_cards, &oms58_access, oms_cards));
 }
 
 STATIC long oms_start_trans(struct motorRecord *mr)
 {
     struct motor_trans *trans;
     long rtnval;
-
+    
     rtnval = motor_start_trans_com(mr, oms_cards);
     /* Initialize a STOP_AXIS command termination string pointer. */
     trans = (struct motor_trans *) mr->dpvt;
@@ -121,12 +115,14 @@ STATIC long oms_start_trans(struct motorRecord *mr)
 
 STATIC long oms_end_trans(struct motorRecord *mr)
 {
-    if (*(oms_access.init_indicator) == NO)
+    if (*(oms58_access.init_indicator) == NO)
     {
 	errlogSevPrintf(errlogMinor, "%s", errmsg);
 	return(ERROR);
     }
     else
-	return(motor_end_trans_com(mr, &oms_access));
+	return(motor_end_trans_com(mr, &oms58_access));
 }
+
+
 

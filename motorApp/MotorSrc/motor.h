@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 17:10:31 $
+Last Modified:	$Date: 2002-10-21 21:04:30 $
 */
 
 /*
@@ -35,6 +35,8 @@ Last Modified:	$Date: 2002-07-05 17:10:31 $
  *
  * Modification Log:
  * -----------------
+ *
+ * .01  10-21-02 rls  Convert to R3.14.x and C++.
  */
 
 #ifndef	INCmotorh
@@ -48,7 +50,15 @@ Last Modified:	$Date: 2002-07-05 17:10:31 $
 message size for each device. */
 #define MAX_MSG_SIZE	300
 
-typedef enum BOOLEAN_VALUES {OFF = 0, ON = 1} BOOLEAN;
+#if defined(OK)
+#undef OK
+#endif
+
+#if defined(ERROR)
+#undef ERROR
+#endif
+
+typedef enum RTN_VALUES {OK = 0, ERROR = 1} RTN_STATUS;
 
 #define NINT(f)	(long)((f)>0 ? (f)+0.5 : (f)-0.5)	/* Nearest integer. */
 
@@ -83,9 +93,6 @@ enum motor_cmnd {
 	JOG_VELOCITY	/* Change Jog velocity. */
 };
 
-#ifndef __cplusplus
-typedef enum motor_cmnd motor_cmnd;
-#endif
 
 /* -------------------------------------------------- */
 
@@ -126,34 +133,15 @@ typedef enum motor_cmnd motor_cmnd;
    RA_DONE.
 */
 
-#ifdef __cplusplus
-struct local_dset
-{
-    long number;			/*number of support routines*/
-    long (*report) (FILE, int);		/*print report*/
-    long (*init) (int);			/*init support*/
-    long (*init_record) (void *);	/*init support for particular record*/
-    long (*get_ioint_info)
-	(int, struct dbCommon *, IOSCANPVT *); /* get io interrupt information*/
-};
-#endif
 
 /* device support entry table */
 struct motor_dset
 {
-#ifdef __cplusplus
-    struct local_dset base;
+    struct dset base;
     long (*update_values) (struct motorRecord *);
     long (*start_trans) (struct motorRecord *);
-    long (*build_trans) (motor_cmnd, double *, struct motorRecord *);
+    RTN_STATUS (*build_trans) (motor_cmnd, double *, struct motorRecord *);
     long (*end_trans) (struct motorRecord *);
-#else
-    struct dset base;
-    DEVSUPFUN update_values;
-    DEVSUPFUN start_trans;
-    DEVSUPFUN build_trans;
-    DEVSUPFUN end_trans;
-#endif
 };
 
 #endif	/* INCmotorh */

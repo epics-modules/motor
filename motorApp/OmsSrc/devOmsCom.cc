@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.c
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.1 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-07-05 19:37:50 $
+Last Modified:	$Date: 2002-10-21 21:10:19 $
 */
 
 /*
@@ -51,9 +51,8 @@ Last Modified:	$Date: 2002-07-05 19:37:50 $
  *			  motor steps.
  */
 
-#include	<vxWorks.h>
 #include	<string.h>
-#include	<logLib.h>
+#include	<errlog.h>
 #include	<math.h>
 
 #include	"motorRecord.h"
@@ -67,7 +66,7 @@ motor.h
 
 struct motor_table
 {
-    unsigned char type;
+    msg_types type;
     const char *command;
     int num_parms;
 };
@@ -123,7 +122,7 @@ LOGIC...
 		    Read motor controller's GPIO configuration.
 		    IF bit corresponding to current axis is configured as an
 			    output bit.
-			Set "Driver Power Monitoring" indicator ON.
+			Set "Driver Power Monitoring" indicator true.
 		    ELSE
 			Output ERROR message.
 		    ENDIF
@@ -152,7 +151,7 @@ LOGIC...
 	    IF command type is MOTION or VELOCITY.
 		Process PREM and POST fields.
 	    ENDIF
-	    IF Overtravel status indicator ON, AND, input command is a MOVE.
+	    IF Overtravel status indicator true, AND, input command is a MOVE.
 		NOTE: This logic is here as a workaround for the "Moving off a
 		limit switch" OMS firmware error.
 
@@ -173,10 +172,10 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     char buffer[40];
-    unsigned char cmnd_type;
+    msg_types cmnd_type;
     long rtnind;
 
-    rtnind = OK;
+    rtnind = 0;
     motor_call = &trans->motor_call;
 
     cmnd_type = oms_table[command].type;
@@ -185,7 +184,7 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
     
     /* concatenate onto the dpvt message field */
     if (trans->state != BUILD_STATE)
-	return(rtnind = ERROR);
+	return(rtnind = -1);
 
     if ((command == PRIMITIVE) && (mr->init != NULL) &&
 	(strlen(mr->init) != 0))
@@ -214,10 +213,10 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 			response = 0;	/* Force an error. */
 		    bitselect = (1 << motor_call->signal);
 		    if ((response & bitselect) == 0)
-			trans->dpm = ON;
+			trans->dpm = true;
 		    else
-			logMsg((char *) "Invalid VME58 configuration; RB = 0x%x\n",
-			       response, 0, 0, 0, 0 ,0);
+			errPrintf(0, __FILE__, __LINE__,
+			    "Invalid VME58 configuration; RB = 0x%x\n", response);
 		}
 		end++;
 		strcpy(buffer, end);
@@ -244,7 +243,7 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    {
 		*parms = 0.00005;
 		mr->pcof = 0.00005;
-		rtnind = ERROR;
+		rtnind = -1;
 	    }
 	    else if (command == STOP_AXIS)
 	    {
