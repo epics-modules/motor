@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.13 $
+Version:	$Revision: 1.14 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-07 21:23:22 $
+Last Modified:	$Date: 2003-12-12 21:37:50 $
 */
 
 /*
@@ -55,10 +55,15 @@ Last Modified:	$Date: 2003-11-07 21:23:22 $
  *		    - Update readback after DLY timeout.
  * .09 11-06-03 rls - Fix backlash after jog; added more state nodes to MIP so
  *			that commands can be broken up.
+ * .10 12-11-03 rls - Bug fix for tweaks ignored. When TWV < MRES and user
+ *			does TWF followed by TWR; then, a single TWF
+ *			followed by a single TWR appear to be ignored.
+ * .11 12-12-03 rls - Changed MSTA access to bit field.
+ * .12 12-12-03 rls - Added status update field (STUP).
  *
  */
 
-#define VERSION 5.2
+#define VERSION 5.3
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -252,6 +257,7 @@ typedef union
 	unsigned int M_MISS	:1;
 	unsigned int M_ACCL	:1;
 	unsigned int M_BACC	:1;
+	unsigned int M_STUP	:1;
     } Bits;
 } nmap_field;
 
@@ -668,13 +674,16 @@ static long postProcess(motorRecord * pmr)
     {
 	if (fabs(pmr->bdst) >  fabs(pmr->mres))
 	{
+	    msta_field msta;
+
 	    /* First part of jog done. Do backlash correction. */
 	    double vbase = pmr->vbas / fabs(pmr->mres);
 	    double vel = pmr->velo / fabs(pmr->mres);
 	    double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
 
 	    /* Use if encoder or ReadbackLink is in use. */
-	    int use_rel = ((pmr->msta & EA_PRESENT) && pmr->ueip) || pmr->urip;
+	    msta.All = pmr->msta;
+	    int use_rel = (msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip;
 	    double relpos = pmr->diff / pmr->mres;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
@@ -737,6 +746,8 @@ static long postProcess(motorRecord * pmr)
     }
     else if (pmr->mip & MIP_JOG_BL1)
     {
+	msta_field msta;
+	
 	/* First part of jog done. Do backlash correction. */
 	double bvel = pmr->bvel / fabs(pmr->mres);
 	double bacc = bvel / pmr->bacc;
@@ -744,7 +755,8 @@ static long postProcess(motorRecord * pmr)
 	double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
 
 	/* Use if encoder or ReadbackLink is in use. */
-	int use_rel = ((pmr->msta & EA_PRESENT) && pmr->ueip) || pmr->urip;
+	msta.All = pmr->msta;
+	int use_rel = (msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip;
 	double relpos = pmr->diff / pmr->mres;
 	double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
@@ -1224,7 +1236,7 @@ DEFINITIONS:
 			    backlash-takeout part of a motor motion.
 LOGIC:
     Initialize.
-    
+
     IF Stop button activated, AND, NOT processing a STOP request.
 	Set MIP field to indicate processing a STOP request.
 	Mark MIP field as changed.  Set Post process command field TRUE.
@@ -1232,7 +1244,7 @@ LOGIC:
 	Send STOP_AXIS message to controller.
     	NORMAL RETURN.
     ENDIF
-    
+
     IF Stop/Pause/Move/Go field has changed.
         Update Last Stop/Pause/Move/Go field.
 	IF SPMG field set to STOP, OR, PAUSE.
@@ -1264,7 +1276,7 @@ LOGIC:
 	    Clear MIP and RCNT. Mark both as changed.
 	ENDIF
     ENDIF
-    
+
     IF MRES, OR, ERES, OR, UEIP are marked as changed.
 	IF UEIP set to YES, AND, MSTA indicates an encoder is present.
 	    IF |MRES| and/or |ERES| is very near zero.
@@ -1288,7 +1300,7 @@ LOGIC:
 	ENDIF
 	NORMAL RETURN
     ENDIF
-    
+
     IF OMSL set to CLOSED_LOOP, AND, DOL type set to DB_LINK.
 	Use DOL field to get DB link - call dbGetLink().
 	IF error return from dbGetLink().
@@ -1349,22 +1361,26 @@ LOGIC:
     ELSE
 	Update LVIO field.
     ENDIF
-    
+
     IF LVIO field has changed.
         Mark LVIO field.
     ENDIF
-    
+
     IF Limit violation occurred.
 	Restore VAL, DVAL and RVAL to previous, valid values.
 	IF MIP state is DONE
 	    Set DMOV TRUE.
 	ENDIF
     ENDIF
-    
+
     IF Stop/Pause/Move/Go field set to STOP, OR, PAUSE.
     	NORMAL RETURN.
     ENDIF
-    
+
+    IF Status Update request is YES.
+	Send an INFO command.
+    ENDIF
+
     IF DVAL field has changed, OR, NOT done moving.
 	Mark DVAL as changed.
 	Calculate new DIFF and RDIF fields and mark as changed.
@@ -1559,12 +1575,14 @@ static RTN_STATUS do_work(motorRecord * pmr)
 	/* encoder pulses, motor pulses */
 	double ep_mp[2];
 	long m;
+	msta_field msta;
 
 	if (MARKED(M_MRES))
 	    pmr->res = pmr->mres;	/* After R4.5, RES is always = MRES. */
 
 	/* Set the encoder ratio.  Note this is blatantly device dependent. */
-	if ((pmr->msta & EA_PRESENT) && pmr->ueip)
+	msta.All = pmr->msta;
+	if (msta.Bits.EA_PRESENT && pmr->ueip)
 	{
 	    /* defend against divide by zero */
 	    if (fabs(pmr->mres) < 1.e-9)
@@ -1602,7 +1620,7 @@ static RTN_STATUS do_work(motorRecord * pmr)
 	/* Make sure retry deadband is achievable */
 	enforceMinRetryDeadband(pmr);
 
-	if (pmr->msta & EA_PRESENT)
+	if (msta.Bits.EA_PRESENT)
 	{
 	    INIT_MSG();
 	    WRITE_MSG(SET_ENC_RATIO, ep_mp);
@@ -1870,6 +1888,15 @@ static RTN_STATUS do_work(motorRecord * pmr)
     if (stop_or_pause == true)
 	return(OK);
     
+    if (pmr->stup == YES)
+    {
+	pmr->stup = NO;
+	MARK_AUX(M_STUP);
+	INIT_MSG();
+	WRITE_MSG(GET_INFO, NULL);
+	SEND_MSG();
+    }
+
     /* IF DVAL field has changed, OR, NOT done moving. */
     if (pmr->dval != pmr->ldvl || !pmr->dmov)
     {
@@ -1916,11 +1943,27 @@ static RTN_STATUS do_work(motorRecord * pmr)
 	    double mRelPos = NINT(relpos) + ((relpos > 0) ? .5 : -.5);
 	    double mRelBPos = NINT(relbpos) + ((relbpos > 0) ? .5 : -.5);
 
+	    msta_field msta;
+	    msta.All = pmr->msta;
+
 	    /*** Use if encoder or ReadbackLink is in use. ***/
-	    if (((pmr->msta & EA_PRESENT) && pmr->ueip) || pmr->urip)
+	    if ((msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip)
 		use_rel = true;
 	    else
 		use_rel = false;
+
+	    /*
+	     * Post new values, recalc .val to reflect the change in .dval. (We
+	     * no longer know the origin of the .dval change.  If user changed
+	     * .val, we're ok as we are, but if .dval was changed directly, we
+	     * must make .val agree.)
+	     */
+	    pmr->val = pmr->dval * dir + pmr->off;
+	    if (pmr->val != pmr->lval)
+		MARK(M_VAL);
+	    pmr->rval = NINT(pmr->dval / pmr->mres);
+	    if (pmr->rval != pmr->lrvl)
+		MARK(M_RVAL);
 
 	    rpos = NINT(rbvpos);
 	    npos = NINT(newpos);
@@ -1936,20 +1979,13 @@ static RTN_STATUS do_work(motorRecord * pmr)
 			MARK(M_MIP);
 		    }
 		}
+		/* Update previous target positions. */
+		pmr->ldvl = pmr->dval;
+		pmr->lval = pmr->val;
+		pmr->lrvl = pmr->rval;
 		return(OK);
 	    }
 
-	    /*
-	     * Post new values, recalc .val to reflect the change in .dval. (We
-	     * no longer know the origin of the .dval change.  If user changed
-	     * .val, we're ok as we are, but if .dval was changed directly, we
-	     * must make .val agree.)
-	     */
-	    pmr->val = pmr->dval * dir + pmr->off;
-	    pmr->rval = NINT(pmr->dval / pmr->mres);
-	    MARK(M_DVAL);
-	    MARK(M_VAL);
-	    MARK(M_RVAL);
 	    /* reset retry counter if this is not a retry */
 	    if ((pmr->mip & MIP_RETRY) == 0)
 	    {
@@ -2050,6 +2086,7 @@ static RTN_STATUS do_work(motorRecord * pmr)
 		    pmr->pp = TRUE;	/* Do backlash from posprocess(). */
 		}
 
+		pmr->cdir = (pmr->rdif < 0.0) ? 0 : 1;
 		WRITE_MSG(SET_VEL_BASE, &vbase);
 		WRITE_MSG(SET_VELOCITY, &velocity);
 		WRITE_MSG(SET_ACCEL, &accel);
@@ -2058,8 +2095,6 @@ static RTN_STATUS do_work(motorRecord * pmr)
 		else
 		    WRITE_MSG(MOVE_ABS, &position);
 		WRITE_MSG(GO, NULL);
-
-		pmr->cdir = (pmr->rdif < 0.0) ? 0 : 1;
 		SEND_MSG();
 	    }
 	}
@@ -2084,6 +2119,9 @@ static long special(DBADDR *paddr, int after)
     motor_cmnd command;
     double temp_dbl;
     float *temp_flt;
+    msta_field msta;
+
+    msta.All = pmr->msta;
 
     Debug(3, "special: after = %d\n", after);
 
@@ -2499,7 +2537,7 @@ velcheckB:
 	temp_flt = &pmr->dcof;
 	command = SET_DGAIN;
 pidcof:
-	if ((pmr->msta & GAIN_SUPPORT) != 0)
+	if (msta.Bits.GAIN_SUPPORT != 0)
 	{
 	    if (*temp_flt < 0.0)	/* Validity check;  0.0 <= gain <= 1.0 */
 	    {
@@ -2528,7 +2566,7 @@ pidcof:
 	break;
 
     case motorRecordCNEN:
-	if ((pmr->msta & GAIN_SUPPORT) != 0)
+	if (msta.Bits.GAIN_SUPPORT != 0)
 	{
 	    double tempdbl;
 
@@ -2826,6 +2864,8 @@ static long get_alarm_double(const DBADDR  *paddr, struct dbr_alDouble * pad)
 *******************************************************************************/
 static void alarm_sub(motorRecord * pmr)
 {
+    msta_field msta;
+
     if (pmr->udf == TRUE)
     {
 	recGblSetSevr((dbCommon *) pmr, UDF_ALARM, INVALID_ALARM);
@@ -2842,9 +2882,13 @@ static void alarm_sub(motorRecord * pmr)
 	recGblSetSevr((dbCommon *) pmr, LOW_ALARM, pmr->hlsv);
 	return;
     }
-    if ((pmr->msta & CNTRL_COMM_ERR) != 0)
+    
+    msta.All = pmr->msta;
+
+    if (msta.Bits.CNTRL_COMM_ERR != 0)
     {
-	pmr->msta &= ~CNTRL_COMM_ERR;
+	msta.Bits.CNTRL_COMM_ERR =  0;
+	pmr->msta = msta.All;
 	MARK(M_MSTA);
 	recGblSetSevr((dbCommon *) pmr, COMM_ALARM, INVALID_ALARM);
     }
@@ -2875,10 +2919,13 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
     unsigned short local_mask;
     mmap_field mmap_bits;
     nmap_field nmap_bits;
+    msta_field msta;
     
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     nmap_bits.All = pmr->nmap; /* Initialize for MARKED_AUX. */
     
+    msta.All = pmr->msta;
+
     if ((local_mask = mask | (MARKED(M_RBV) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->rbv, local_mask);
@@ -2925,9 +2972,9 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
     {
 	db_post_events(pmr, &pmr->msta, local_mask);
 	UNMARK(M_MSTA);
-	if (pmr->msta & GAIN_SUPPORT)
+	if (msta.Bits.GAIN_SUPPORT)
 	{
-	    unsigned short pos_maint = (pmr->msta & EA_POSITION) ? 1 : 0;
+	    unsigned short pos_maint = (msta.Bits.EA_POSITION) ? 1 : 0;
 	    if (pos_maint != pmr->cnen)
 	    {
 		pmr->cnen = pos_maint;
@@ -3026,6 +3073,8 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 	db_post_events(pmr, &pmr->movn, local_mask);
     if ((local_mask = mask | (MARKED(M_DMOV) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->dmov, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_STUP) ? DBE_VAL_LOG : 0)))
+	db_post_events(pmr, &pmr->stup, local_mask);
 
     UNMARK_ALL;
 }
@@ -3037,7 +3086,6 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 static void
  process_motor_info(motorRecord * pmr, bool initcall)
 {
-    unsigned long status = pmr->msta;
     double old_drbv = pmr->drbv;
     double old_rbv = pmr->rbv;
     long old_rrbv = pmr->rrbv;
@@ -3048,11 +3096,13 @@ static void
     short old_athm = pmr->athm;
     int dir = (pmr->dir == motorDIR_Pos) ? 1 : -1;
     bool ls_active;
+    msta_field msta;
 
     /*** Process record fields. ***/
 
     /* Calculate raw and dial readback values. */
-    if ((status & EA_PRESENT) && pmr->ueip)
+    msta.All = pmr->msta;
+    if (msta.Bits.EA_PRESENT && pmr->ueip)
     {
 	/* An encoder is present and the user wants us to use it. */
 	pmr->rrbv = pmr->rep;
@@ -3077,13 +3127,13 @@ static void
 	MARK(M_RBV);
 
     /* Get current or most recent direction. */
-    pmr->tdir = (status & RA_DIRECTION) ? 1 : 0;
+    pmr->tdir = (msta.Bits.RA_DIRECTION) ? 1 : 0;
     if (pmr->tdir != old_tdir)
 	MARK(M_TDIR);
 
     /* Get states of high, low limit switches. */
-    pmr->rhls = (status & RA_PLUS_LS)  &&  pmr->cdir;
-    pmr->rlls = (status & RA_MINUS_LS) && !pmr->cdir;
+    pmr->rhls = (msta.Bits.RA_PLUS_LS)  &&  pmr->cdir;
+    pmr->rlls = (msta.Bits.RA_MINUS_LS) && !pmr->cdir;
 
     ls_active = (pmr->rhls || pmr->rlls) ? true : false;
     
@@ -3095,7 +3145,7 @@ static void
 	MARK(M_LLS);
 
     /* Get motor-now-moving indicator. */
-    if (ls_active == true || (status & (RA_DONE | RA_PROBLEM)))
+    if (ls_active == true || msta.Bits.RA_DONE || msta.Bits.RA_PROBLEM)
 	pmr->movn = 0;
     else
 	pmr->movn = 1;
@@ -3103,10 +3153,10 @@ static void
 	MARK(M_MOVN);
     
     /* Get state of motor's or encoder's home switch. */
-    if ((status & EA_PRESENT) && pmr->ueip)
-	pmr->athm = (status & EA_HOME) ? 1 : 0;
+    if (msta.Bits.EA_PRESENT && pmr->ueip)
+	pmr->athm = (msta.Bits.EA_HOME) ? 1 : 0;
     else
-	pmr->athm = (status & RA_HOME) ? 1 : 0;
+	pmr->athm = (msta.Bits.RA_HOME) ? 1 : 0;
 
     if (pmr->athm != old_athm)
 	MARK(M_ATHM);
