@@ -28,7 +28,7 @@ WithMPF_LIBS		+= Acs
 #WithMPF_LIBS		+= Ims
 WithMPF_LIBS		+= Newport
 WithMPF_LIBS		+= motor
-WithMPFVx_LIBS		+= asyn
+WithMPF_LIBS		+= asyn
 WithMPF_LIBS 		+= $(EPICS_BASE_IOC_LIBS)
 
 #WithMPFVx_LIBS		+= PI
