@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.c
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 20:45:17 $
+Last Modified:	$Date: 2003-05-23 19:48:44 $
 */
 
 /*
@@ -266,7 +266,7 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 	    char axis_name;
 
 	    if (tabptr->axis_names == NULL)
-		axis_name = '0';
+		axis_name = NULL;
 	    else
 		axis_name = tabptr->axis_names[axis];
 
