@@ -3,9 +3,9 @@ FILENAME...	drvIM483SM.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:39:30 $
+Last Modified:	$Date: 2004-02-03 19:51:50 $
 */
  
 /*****************************************************************
@@ -32,6 +32,7 @@ of this distribution.
  *		    Removed support for "ASCII record separator (IS2) = /x1E"
  *		    from send_mess().
  * .04 03/07/03 rls R3.14 conversion.
+ * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 /*
@@ -288,7 +289,10 @@ STATIC int set_status(int card, int signal)
     motorData = atof(&buff[5]);
 
     if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	epicsInt32 newposition;

@@ -3,9 +3,9 @@ FILENAME...	drvMDrive.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:39:31 $
+Last Modified:	$Date: 2004-02-03 19:51:50 $
 */
 
 /*
@@ -36,6 +36,7 @@ Last Modified:	$Date: 2003-12-12 21:39:31 $
  * Modification Log:
  * -----------------
  * .01 03/21/03 rls copied from drvIM483PL.c
+ * .02 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 /*
@@ -312,7 +313,10 @@ STATIC int set_status(int card, int signal)
     motorData = atof(buff);
 
     if (motorData == motor_info->position)
-	motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	epicsInt32 newposition;

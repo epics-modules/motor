@@ -24,6 +24,7 @@
  * .07  02-11-2003 mlr  Added support for PM600 model.  Added send_recv_mess which
  *                      simplifies and cleans up.
  * .08  03/27/03   rls  R3.14 conversion.
+ * .09  02/03/04   rls  Eliminate erroneous "Motor motion timeout ERROR".
  */
 
 
@@ -287,7 +288,10 @@ STATIC int set_status(int card, int signal)
     Debug(2, "set_status, position query, card %d, response=%s\n", card, response);
 
     if (motorData == motor_info->position)
-        motor_info->no_motion_count++;
+    {
+	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
+	    motor_info->no_motion_count++;
+    }
     else
     {
 	status.Bits.RA_DIRECTION = (motorData >= motor_info->position) ? 1 : 0;
