@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=325
-		y=35
+		x=147
+		y=98
 		width=450
 		height=790
 	}
@@ -91,7 +91,7 @@ polyline {
 	object {
 		x=0
 		y=752
-		width=246
+		width=260
 		height=3
 	}
 	"basic attribute" {
@@ -101,12 +101,12 @@ polyline {
 	}
 	points {
 		(1,754)
-		(245,753)
+		(259,753)
 	}
 }
 polyline {
 	object {
-		x=243
+		x=258
 		y=472
 		width=3
 		height=319
@@ -117,8 +117,8 @@ polyline {
 		width=2
 	}
 	points {
-		(245,473)
-		(244,790)
+		(260,473)
+		(259,790)
 	}
 }
 polyline {
@@ -140,7 +140,7 @@ polyline {
 }
 rectangle {
 	object {
-		x=244
+		x=259
 		y=475
 		width=85
 		height=22
@@ -151,7 +151,7 @@ rectangle {
 }
 text {
 	object {
-		x=244
+		x=259
 		y=476
 		width=85
 		height=20
@@ -176,7 +176,7 @@ rectangle {
 }
 text {
 	object {
-		x=315
+		x=318
 		y=290
 		width=100
 		height=19
@@ -190,7 +190,7 @@ text {
 }
 text {
 	object {
-		x=203
+		x=206
 		y=290
 		width=100
 		height=19
@@ -204,7 +204,7 @@ text {
 }
 text {
 	object {
-		x=91
+		x=94
 		y=290
 		width=100
 		height=19
@@ -249,7 +249,7 @@ polyline {
 }
 "text entry" {
 	object {
-		x=204
+		x=207
 		y=446
 		width=100
 		height=24
@@ -264,7 +264,7 @@ polyline {
 }
 "text entry" {
 	object {
-		x=92
+		x=95
 		y=317
 		width=100
 		height=24
@@ -344,7 +344,7 @@ text {
 }
 "text entry" {
 	object {
-		x=204
+		x=207
 		y=395
 		width=100
 		height=24
@@ -359,7 +359,7 @@ text {
 }
 "text entry" {
 	object {
-		x=92
+		x=95
 		y=395
 		width=100
 		height=24
@@ -374,7 +374,7 @@ text {
 }
 "text entry" {
 	object {
-		x=204
+		x=207
 		y=420
 		width=100
 		height=24
@@ -389,7 +389,7 @@ text {
 }
 "text entry" {
 	object {
-		x=92
+		x=95
 		y=343
 		width=100
 		height=24
@@ -404,7 +404,7 @@ text {
 }
 "text entry" {
 	object {
-		x=204
+		x=207
 		y=343
 		width=100
 		height=24
@@ -419,7 +419,7 @@ text {
 }
 "text entry" {
 	object {
-		x=92
+		x=95
 		y=369
 		width=100
 		height=24
@@ -434,7 +434,7 @@ text {
 }
 text {
 	object {
-		x=2
+		x=6
 		y=256
 		width=31
 		height=18
@@ -448,7 +448,7 @@ text {
 }
 "choice button" {
 	object {
-		x=33
+		x=37
 		y=253
 		width=100
 		height=21
@@ -462,7 +462,7 @@ text {
 }
 text {
 	object {
-		x=137
+		x=150
 		y=256
 		width=31
 		height=18
@@ -476,7 +476,7 @@ text {
 }
 composite {
 	object {
-		x=173
+		x=186
 		y=232
 		width=100
 		height=42
@@ -485,7 +485,7 @@ composite {
 	children {
 		menu {
 			object {
-				x=173
+				x=186
 				y=232
 				width=100
 				height=18
@@ -498,7 +498,7 @@ composite {
 		}
 		"text entry" {
 			object {
-				x=173
+				x=186
 				y=249
 				width=100
 				height=25
@@ -515,7 +515,7 @@ composite {
 }
 text {
 	object {
-		x=281
+		x=301
 		y=256
 		width=31
 		height=18
@@ -529,7 +529,7 @@ text {
 }
 "choice button" {
 	object {
-		x=312
+		x=332
 		y=253
 		width=100
 		height=21
@@ -543,7 +543,7 @@ text {
 }
 "text entry" {
 	object {
-		x=316
+		x=319
 		y=343
 		width=100
 		height=24
@@ -558,7 +558,7 @@ text {
 }
 "text entry" {
 	object {
-		x=316
+		x=319
 		y=395
 		width=100
 		height=24
@@ -634,7 +634,7 @@ text {
 		clr=14
 		fill="outline"
 	}
-	textix="Maximum"
+	textix="Maximum Spd"
 }
 rectangle {
 	object {
@@ -767,17 +767,17 @@ text {
 		x=3
 		y=680
 		width=130
-		height=14
+		height=18
 	}
 	"basic attribute" {
 		clr=14
 		fill="outline"
 	}
-	textix="Readback Delay (s)"
+	textix="Readback Delay"
 }
 text {
 	object {
-		x=6
+		x=3
 		y=705
 		width=80
 		height=18
@@ -790,9 +790,9 @@ text {
 }
 "text entry" {
 	object {
-		x=138
+		x=134
 		y=502
-		width=100
+		width=94
 		height=25
 	}
 	control {
@@ -805,9 +805,9 @@ text {
 }
 "text entry" {
 	object {
-		x=138
+		x=134
 		y=527
-		width=100
+		width=94
 		height=25
 	}
 	control {
@@ -820,9 +820,9 @@ text {
 }
 menu {
 	object {
-		x=138
+		x=134
 		y=727
-		width=100
+		width=94
 		height=20
 	}
 	control {
@@ -833,9 +833,9 @@ menu {
 }
 "text entry" {
 	object {
-		x=138
+		x=134
 		y=577
-		width=100
+		width=94
 		height=25
 	}
 	control {
@@ -848,9 +848,9 @@ menu {
 }
 "text entry" {
 	object {
-		x=168
+		x=164
 		y=602
-		width=70
+		width=64
 		height=25
 	}
 	control {
@@ -891,7 +891,7 @@ text {
 }
 text {
 	object {
-		x=253
+		x=268
 		y=522
 		width=73
 		height=18
@@ -904,7 +904,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=522
 		width=100
 		height=18
@@ -919,7 +919,7 @@ text {
 }
 text {
 	object {
-		x=253
+		x=268
 		y=542
 		width=73
 		height=18
@@ -932,7 +932,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=542
 		width=100
 		height=18
@@ -947,7 +947,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=502
 		width=100
 		height=18
@@ -963,7 +963,7 @@ text {
 }
 text {
 	object {
-		x=253
+		x=268
 		y=502
 		width=73
 		height=18
@@ -976,7 +976,7 @@ text {
 }
 text {
 	object {
-		x=253
+		x=268
 		y=562
 		width=73
 		height=18
@@ -989,7 +989,7 @@ text {
 }
 text {
 	object {
-		x=253
+		x=268
 		y=602
 		width=73
 		height=18
@@ -1002,7 +1002,7 @@ text {
 }
 text {
 	object {
-		x=253
+		x=268
 		y=582
 		width=73
 		height=18
@@ -1015,7 +1015,7 @@ text {
 }
 text {
 	object {
-		x=253
+		x=268
 		y=622
 		width=73
 		height=18
@@ -1028,7 +1028,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=642
 		width=100
 		height=18
@@ -1043,7 +1043,7 @@ text {
 }
 text {
 	object {
-		x=252
+		x=267
 		y=642
 		width=73
 		height=18
@@ -1056,7 +1056,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=562
 		width=100
 		height=18
@@ -1071,7 +1071,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=602
 		width=100
 		height=18
@@ -1086,7 +1086,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=582
 		width=100
 		height=18
@@ -1101,7 +1101,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=622
 		width=100
 		height=18
@@ -1117,9 +1117,9 @@ text {
 }
 "choice button" {
 	object {
-		x=138
+		x=134
 		y=627
-		width=100
+		width=94
 		height=25
 	}
 	control {
@@ -1131,9 +1131,9 @@ text {
 }
 "choice button" {
 	object {
-		x=138
+		x=134
 		y=652
-		width=100
+		width=94
 		height=25
 	}
 	control {
@@ -1145,9 +1145,9 @@ text {
 }
 "text entry" {
 	object {
-		x=138
+		x=134
 		y=552
-		width=100
+		width=94
 		height=25
 	}
 	control {
@@ -1160,7 +1160,7 @@ text {
 }
 text {
 	object {
-		x=252
+		x=267
 		y=682
 		width=73
 		height=18
@@ -1173,7 +1173,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=662
 		width=100
 		height=18
@@ -1188,7 +1188,7 @@ text {
 }
 text {
 	object {
-		x=252
+		x=267
 		y=662
 		width=73
 		height=18
@@ -1201,7 +1201,7 @@ text {
 }
 "text entry" {
 	object {
-		x=331
+		x=346
 		y=702
 		width=100
 		height=20
@@ -1216,7 +1216,7 @@ text {
 }
 text {
 	object {
-		x=252
+		x=267
 		y=705
 		width=73
 		height=18
@@ -1229,7 +1229,7 @@ text {
 }
 "text update" {
 	object {
-		x=331
+		x=346
 		y=682
 		width=100
 		height=18
@@ -1289,9 +1289,9 @@ text {
 }
 "text entry" {
 	object {
-		x=138
+		x=134
 		y=677
-		width=100
+		width=94
 		height=25
 	}
 	control {
@@ -1306,7 +1306,7 @@ text {
 	object {
 		x=88
 		y=702
-		width=150
+		width=140
 		height=25
 	}
 	control {
@@ -1360,7 +1360,7 @@ text {
 }
 text {
 	object {
-		x=406
+		x=418
 		y=776
 		width=30
 		height=10
@@ -1369,11 +1369,12 @@ text {
 		clr=14
 		fill="outline"
 	}
-	textix="V2.3"
+	textix="V2.4"
+	align="horiz. centered"
 }
 composite {
 	object {
-		x=252
+		x=267
 		y=751
 		width=181
 		height=20
@@ -1382,7 +1383,7 @@ composite {
 	children {
 		"text entry" {
 			object {
-				x=283
+				x=298
 				y=751
 				width=150
 				height=20
@@ -1398,7 +1399,7 @@ composite {
 		}
 		text {
 			object {
-				x=252
+				x=267
 				y=751
 				width=30
 				height=10
@@ -1411,7 +1412,7 @@ composite {
 		}
 		text {
 			object {
-				x=252
+				x=267
 				y=761
 				width=30
 				height=10
@@ -1426,7 +1427,7 @@ composite {
 }
 text {
 	object {
-		x=252
+		x=267
 		y=727
 		width=50
 		height=18
@@ -1439,7 +1440,7 @@ text {
 }
 "choice button" {
 	object {
-		x=305
+		x=320
 		y=724
 		width=125
 		height=20
@@ -1486,7 +1487,7 @@ text {
 }
 "text entry" {
 	object {
-		x=348
+		x=350
 		y=3
 		width=90
 		height=20
@@ -2181,9 +2182,9 @@ polyline {
 }
 text {
 	object {
-		x=193
+		x=205
 		y=0
-		width=150
+		width=100
 		height=14
 	}
 	"basic attribute" {
@@ -2194,9 +2195,9 @@ text {
 }
 "text update" {
 	object {
-		x=193
+		x=205
 		y=13
-		width=150
+		width=100
 		height=14
 	}
 	monitor {
@@ -2302,7 +2303,7 @@ text {
 }
 polyline {
 	object {
-		x=197
+		x=200
 		y=285
 		width=0
 		height=187
@@ -2312,13 +2313,13 @@ polyline {
 		fill="outline"
 	}
 	points {
-		(197,285)
-		(197,472)
+		(200,285)
+		(200,472)
 	}
 }
 polyline {
 	object {
-		x=310
+		x=313
 		y=285
 		width=0
 		height=187
@@ -2328,7 +2329,367 @@ polyline {
 		fill="outline"
 	}
 	points {
-		(310,285)
-		(310,472)
+		(313,285)
+		(313,472)
 	}
+}
+composite {
+	object {
+		x=423
+		y=317
+		width=22
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=425
+				y=317
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="EGU"
+		}
+		text {
+			object {
+				x=425
+				y=327
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="sec"
+		}
+		polyline {
+			object {
+				x=423
+				y=327
+				width=22
+				height=0
+			}
+			"basic attribute" {
+				clr=14
+			}
+			points {
+				(423,327)
+				(445,327)
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=423
+		y=343
+		width=22
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=425
+				y=343
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="EGU"
+		}
+		text {
+			object {
+				x=425
+				y=353
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="sec"
+		}
+		polyline {
+			object {
+				x=423
+				y=353
+				width=22
+				height=0
+			}
+			"basic attribute" {
+				clr=14
+			}
+			points {
+				(423,353)
+				(445,353)
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=423
+		y=369
+		width=22
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=425
+				y=369
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="EGU"
+		}
+		text {
+			object {
+				x=425
+				y=379
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="sec"
+		}
+		polyline {
+			object {
+				x=423
+				y=379
+				width=22
+				height=0
+			}
+			"basic attribute" {
+				clr=14
+			}
+			points {
+				(423,379)
+				(445,379)
+			}
+		}
+	}
+}
+text {
+	object {
+		x=423
+		y=425
+		width=20
+		height=13
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="EGU"
+}
+text {
+	object {
+		x=423
+		y=399
+		width=20
+		height=13
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="sec"
+}
+composite {
+	object {
+		x=231
+		y=504
+		width=23
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=234
+				y=504
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="EGU"
+		}
+		text {
+			object {
+				x=231
+				y=514
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="step"
+		}
+		polyline {
+			object {
+				x=232
+				y=514
+				width=22
+				height=0
+			}
+			"basic attribute" {
+				clr=14
+			}
+			points {
+				(232,514)
+				(254,514)
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=231
+		y=530
+		width=23
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=234
+				y=530
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="EGU"
+		}
+		text {
+			object {
+				x=231
+				y=540
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="step"
+		}
+		polyline {
+			object {
+				x=232
+				y=540
+				width=22
+				height=0
+			}
+			"basic attribute" {
+				clr=14
+			}
+			points {
+				(232,540)
+				(254,540)
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=231
+		y=556
+		width=23
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=234
+				y=556
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="EGU"
+		}
+		text {
+			object {
+				x=231
+				y=566
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="step"
+		}
+		polyline {
+			object {
+				x=232
+				y=566
+				width=22
+				height=0
+			}
+			"basic attribute" {
+				clr=14
+			}
+			points {
+				(232,566)
+				(254,566)
+			}
+		}
+	}
+}
+text {
+	object {
+		x=232
+		y=583
+		width=20
+		height=13
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="EGU"
+}
+text {
+	object {
+		x=232
+		y=683
+		width=20
+		height=13
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="sec"
+}
+text {
+	object {
+		x=321
+		y=7
+		width=20
+		height=13
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="EGU:"
 }
