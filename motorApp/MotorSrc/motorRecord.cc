@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 19:45:08 $
+Last Modified:	$Date: 2003-05-30 19:35:20 $
 */
 
 /*
@@ -303,11 +303,11 @@ field (DMOV) is TRUE.
 
 struct callback		/* DLY feature callback structure. */
 {
-    CALLBACK callback;
+    CALLBACK dly_callback;
     struct motorRecord *precord;
 };
 
-static void callbackFunc(struct callback * pcb)
+static void callbackFunc(struct callback *pcb)
 {
     motorRecord *pmr = pcb->precord;
 
@@ -407,8 +407,8 @@ static long init_record(dbCommon* arg, int pass)
     pcallback = (struct callback *) (calloc(1, sizeof(struct callback)));
     pmr->cbak = (void *) pcallback;
     callbackSetCallback((void (*)(struct callbackPvt *)) callbackFunc,
-			&pcallback->callback);
-    callbackSetPriority(pmr->prio, &pcallback->callback);
+			&pcallback->dly_callback);
+    callbackSetPriority(pmr->prio, &pcallback->dly_callback);
     pcallback->precord = pmr;
 
     /*
@@ -1066,7 +1066,7 @@ static long process(dbCommon *arg)
 		    pmr->mip |= MIP_DELAY_REQ;
 		    MARK(M_MIP);
 
-                    callbackRequestDelayed(&pcallback->callback, (double) pmr->dly);
+                    callbackRequestDelayed(&pcallback->dly_callback, (double) pmr->dly);
 
 		    pmr->dmov = FALSE;
 		    pmr->pact = 0;
