@@ -10,7 +10,16 @@
 # Add your declarations here
 
 SUPPORT=/local/epics/3.13.2/support
-EPICS_BASE=$(SUPPORT)/base/3-13-2
+
+# Define the following if MPF is defined and serial motor controller
+# support is required.
+#MPF_SERIAL=$(SUPPORT)/mpfSerial/mpfSerial1-1
+
+# If the EPICS GPIB Module from Benjamin Franksen is used, then remove the '#'
+# from the following and modify the motorApp/CommSrc/Makefile.Vx file per
+# instructions found there.  If GPIB driver support is from EPICS base, then
+# leave this line commented out.
+#GPIB=$(SUPPORT)/gpib
 
 # If any motor controller communication mechanism besides the
 # VME backplane is required, then either MPF or HIDEOS must
@@ -18,7 +27,4 @@ EPICS_BASE=$(SUPPORT)/base/3-13-2
 #MPF=$(SUPPORT)/mpf/mpf1-5
 #HIDEOS=$(SUPPORT)/hideos/install
 
-# Define the following if MPF is defined and serial motor controller
-# support is required.
-#MPF_SERIAL=$(SUPPORT)/mpfSerial/mpfSerial1-1
-
+#EPICS_BASE=$(SUPPORT)/base/3-13-2
