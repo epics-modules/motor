@@ -2,9 +2,9 @@
 FILENAME...	drvMM3000.cc
 USAGE...	Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-22 19:53:40 $
+Last Modified:	$Date: 2003-05-23 18:41:17 $
 */
 
 /*
@@ -252,7 +252,7 @@ STATIC int set_status(int card, int signal)
     motor_info = &(motor_state[card]->motor_info[signal]);
 
     sprintf(outbuff, "%dMS", signal + 1);
-    send_mess(card, outbuff, NULL);
+    send_mess(card, outbuff, (char) NULL);
     charcnt = recv_mess(card, inbuff, 1);
     if (charcnt > 0)
     {
@@ -414,12 +414,17 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char inchar)
 {
     struct MMcontroller *cntrl;
     char local_buff[BUFF_SIZE];
+    int size;
 
-    if (strlen(com) > MAX_MSG_SIZE)
+    size = strlen(com);
+
+    if (size > MAX_MSG_SIZE)
     {
 	errlogMessage("drvMM3000:send_mess(); message size violation.\n");
 	return(ERROR);
     }
+    else if (size == 0)	/* Normal exit on empty input message. */
+	return(OK);
     
     if (!motor_state[card])
     {
@@ -520,7 +525,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 	    {
 		long error;
 
-		error = strtol(&com[1], NULL, NULL);
+		error = strtol(&com[1], NULL, 0);
 		if (error >= 35 && error <= 42)
 		    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, (char *) "\n", timeout);
 	    }
@@ -698,7 +703,7 @@ STATIC int motor_init()
 	    send_mess(card_index, STOP_ALL, (char) NULL);	/* Stop all motors */
 	    send_mess(card_index, GET_IDENT, (char) NULL);	/* Read controller ID string */
 	    recv_mess(card_index, buff, 1);
-	    strcpy(brdptr->ident, &buff[0]);  /* Skip "VE" */
+	    strncpy(brdptr->ident, &buff[0], 50);  /* Skip "VE" */
 
 	    send_mess(card_index, "RC", (char) NULL);
 	    recv_mess(card_index, buff, 1);
