@@ -1,12 +1,12 @@
 
 file {
-	name="/home/beams/BCDA/epics/synApps_4_4/support/motor4-4-1/motorApp/op/adl/motorx_all.adl"
+	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-6/support/motor/motorApp/op/adl/motorx_all.adl"
 	version=030003
 }
 display {
 	object {
-		x=147
-		y=98
+		x=40
+		y=29
 		width=450
 		height=790
 	}
@@ -137,31 +137,6 @@ polyline {
 		(1,474)
 		(448,474)
 	}
-}
-rectangle {
-	object {
-		x=259
-		y=475
-		width=85
-		height=22
-	}
-	"basic attribute" {
-		clr=54
-	}
-}
-text {
-	object {
-		x=259
-		y=476
-		width=85
-		height=20
-	}
-	"basic attribute" {
-		clr=0
-		fill="outline"
-	}
-	textix="Status"
-	align="horiz. centered"
 }
 rectangle {
 	object {
@@ -2336,7 +2311,7 @@ polyline {
 composite {
 	object {
 		x=423
-		y=317
+		y=318
 		width=22
 		height=20
 	}
@@ -2345,7 +2320,7 @@ composite {
 		text {
 			object {
 				x=425
-				y=317
+				y=318
 				width=20
 				height=10
 			}
@@ -2357,7 +2332,7 @@ composite {
 		text {
 			object {
 				x=425
-				y=327
+				y=328
 				width=20
 				height=10
 			}
@@ -2369,7 +2344,7 @@ composite {
 		polyline {
 			object {
 				x=423
-				y=327
+				y=328
 				width=22
 				height=0
 			}
@@ -2377,8 +2352,8 @@ composite {
 				clr=14
 			}
 			points {
-				(423,327)
-				(445,327)
+				(423,328)
+				(445,328)
 			}
 		}
 	}
@@ -2386,7 +2361,7 @@ composite {
 composite {
 	object {
 		x=423
-		y=343
+		y=345
 		width=22
 		height=20
 	}
@@ -2395,7 +2370,7 @@ composite {
 		text {
 			object {
 				x=425
-				y=343
+				y=345
 				width=20
 				height=10
 			}
@@ -2407,7 +2382,7 @@ composite {
 		text {
 			object {
 				x=425
-				y=353
+				y=355
 				width=20
 				height=10
 			}
@@ -2419,7 +2394,7 @@ composite {
 		polyline {
 			object {
 				x=423
-				y=353
+				y=355
 				width=22
 				height=0
 			}
@@ -2427,8 +2402,8 @@ composite {
 				clr=14
 			}
 			points {
-				(423,353)
-				(445,353)
+				(423,355)
+				(445,355)
 			}
 		}
 	}
@@ -2436,7 +2411,7 @@ composite {
 composite {
 	object {
 		x=423
-		y=369
+		y=372
 		width=22
 		height=20
 	}
@@ -2445,7 +2420,7 @@ composite {
 		text {
 			object {
 				x=425
-				y=369
+				y=372
 				width=20
 				height=10
 			}
@@ -2457,7 +2432,7 @@ composite {
 		text {
 			object {
 				x=425
-				y=379
+				y=382
 				width=20
 				height=10
 			}
@@ -2469,7 +2444,7 @@ composite {
 		polyline {
 			object {
 				x=423
-				y=379
+				y=382
 				width=22
 				height=0
 			}
@@ -2477,18 +2452,18 @@ composite {
 				clr=14
 			}
 			points {
-				(423,379)
-				(445,379)
+				(423,382)
+				(445,382)
 			}
 		}
 	}
 }
 text {
 	object {
-		x=423
+		x=424
 		y=425
 		width=20
-		height=13
+		height=12
 	}
 	"basic attribute" {
 		clr=14
@@ -2497,8 +2472,8 @@ text {
 }
 text {
 	object {
-		x=423
-		y=399
+		x=58
+		y=401
 		width=20
 		height=13
 	}
@@ -2692,4 +2667,86 @@ text {
 		clr=14
 	}
 	textix="EGU:"
+}
+composite {
+	object {
+		x=423
+		y=398
+		width=22
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=425
+				y=398
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="EGU"
+		}
+		text {
+			object {
+				x=425
+				y=408
+				width=20
+				height=10
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="sec"
+		}
+		polyline {
+			object {
+				x=423
+				y=408
+				width=22
+				height=0
+			}
+			"basic attribute" {
+				clr=14
+			}
+			points {
+				(423,408)
+				(445,408)
+			}
+		}
+	}
+}
+"message button" {
+	object {
+		x=265
+		y=478
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(M).STUP"
+		clr=0
+		bclr=54
+	}
+	label="STATUS"
+	press_msg="1"
+}
+"text update" {
+	object {
+		x=346
+		y=479
+		width=88
+		height=16
+	}
+	monitor {
+		chan="$(P)$(M).STAT"
+		clr=6
+		bclr=3
+	}
+	clrmod="alarm"
+	align="horiz. centered"
+	limits {
+	}
 }
