@@ -2,9 +2,9 @@
 FILENAME...	drvMAXv.cc
 USAGE...	Motor record driver level support for OMS model MAXv.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 21:30:34 $
+Last Modified:	$Date: 2004-12-20 22:00:58 $
 */
 
 /*
@@ -44,6 +44,10 @@ Last Modified:	$Date: 2004-09-20 21:30:34 $
  * 02  09-20-04 rls - support for 32axes/controller.
  *                  - added MAXvConfig() with initilization string.  Axis type
  *                    MUST be set before iocInit is called.
+ * 03  12-14-04 rls - MS Visual C compiler support.
+ *                  - eliminate calls to devConnectInterrupt() due to C++
+ *		      problems with devLib.h; i.e. "sorry, not implemented:
+ *		      `tree_list' not supported..." compiler error message.
  *
  */
 
@@ -160,7 +164,7 @@ struct
     long (*init) (void);
 } drvMAXv = {2, report, init};
 
-epicsExportAddress(drvet, drvMAXv);
+extern "C" {epicsExportAddress(drvet, drvMAXv);}
 
 static struct thread_args targs = {SCAN_RATE, &MAXv_access};
 
@@ -847,9 +851,8 @@ static int motorIsrSetup(int card)
 
     pmotor = (struct MAXv_motor *) (motor_state[card]->localaddr);
 
-    status = devConnectInterrupt(intVME, MAXvInterruptVector + card,
-			(void (*)()) motorIsr, (void *) card);// Tornado 2.0.2
-// Tornado 2.2		(devLibVOIDFUNCPTR) motorIsr, (void *) card);
+    status = pdevLibVirtualOS->pDevConnectInterruptVME(
+	MAXvInterruptVector + card, (void (*)()) motorIsr, (void *) card);
 
     if (!RTN_SUCCESS(status))
     {
