@@ -122,6 +122,15 @@ Modification Log from V4.3 to V4.4
 				       DMOV true only if MIP is DONE.
 
 7) Removed Hideos file motorApp/CommSrc/serialIO.cc from distribution.
+
+8) The following scenario would put the motor record into an invalid state.
+	At the end of a move a "retry" is requested.  The MIP field is set to
+	RETRY in maybeRetry(), but before the retry request can be processed
+	in do_work() the STOP field is set TRUE.  This results in a STOP
+	command being issued, but no subsequent processing callbacks, which
+	leaves the record's MIP in the STOP state and DMOV false.
+	File modified: motorRecord.c - Modified do_work() STOP and SPMG
+	     processing to set MIP <- DONE and DMOV <- TRUE when MIP == RETRY.
 					
 Modification Log from V4.2 to V4.3
 ==================================
