@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.11 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-05-14 19:52:30 $
+Last Modified:	$Date: 2001-06-05 15:38:44 $
 */
 
 /*
@@ -120,6 +120,10 @@ Last Modified:	$Date: 2001-05-14 19:52:30 $
  *		      - Eliminated unused MIP_LOAD_ER.
  *		      - Added Mark Rivers Soft Channel changes as a
  *			conditionial option; DMR_SOFTMOTOR_MODS.
+ * .37  06-05-01 rls  Bug fix for MIP left in MOVE state if valid target
+ *		      position is followed by a target position that violates
+ *		      the travel limit, while 1st move is in progress.
+ *		      Modified do_work() to set DMOV true only if MIP is DONE.
  */
 
 #define VERSION 4.4
@@ -1406,13 +1410,21 @@ LOGIC:
 	ENDIF
     ENDIF
 
-    Update LVIO field.
+    IF Software travel limits are disabled.
+	Set LVIO OFF.
+    ELSE
+	Update LVIO field.
+    ENDIF
     
     IF LVIO field has changed.
         Mark LVIO field.
     ENDIF
     
     IF Limit violation occurred.
+	Restore VAL, DVAL and RVAL to previous, valid values.
+	IF MIP state is DONE
+	    Set DMOV TRUE.
+	ENDIF
     ENDIF
     
     IF Stop/Pause/Move/Go field set to STOP, OR, PAUSE.
@@ -1896,8 +1908,11 @@ stop_all:   /* Cancel any operations. */
 	MARK(M_DVAL);
 	pmr->rval = pmr->lrvl;
 	MARK(M_RVAL);
-	pmr->dmov = TRUE;
-	MARK(M_DMOV);
+	if (pmr->mip == MIP_DONE)
+	{
+	    pmr->dmov = TRUE;
+	    MARK(M_DMOV);
+	}
 	return(OK);
     }
 
@@ -1961,11 +1976,11 @@ stop_all:   /* Cancel any operations. */
 	    npos = NINT(newpos);
 	    if (npos == rpos)
 	    {
-		if (pmr->dmov == FALSE && (pmr->mip == 0 || pmr->mip == MIP_RETRY))
+		if (pmr->dmov == FALSE && (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY))
 		{
 		    pmr->dmov = TRUE;
 		    MARK(M_DMOV);
-		    if (pmr->mip != 0)
+		    if (pmr->mip != MIP_DONE)
 		    {
 			pmr->mip = MIP_DONE;
 			MARK(M_MIP);
@@ -2010,7 +2025,7 @@ stop_all:   /* Cancel any operations. */
 		}
 	    }
 
-	    if (pmr->mip == 0 || pmr->mip == MIP_RETRY)
+	    if (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY)
 	    {
 		pmr->mip = MIP_MOVE;
 		MARK(M_MIP);
@@ -2609,14 +2624,14 @@ pidcof:
     case motorRecordJOGF:
 	if (pmr->jogf == 0)
 	    pmr->mip &= ~MIP_JOG_REQ;
-	else if (pmr->mip == 0 && !pmr->hls)
+	else if (pmr->mip == MIP_DONE && !pmr->hls)
 	    pmr->mip |= MIP_JOG_REQ;
 	break;
 
     case motorRecordJOGR:
 	if (pmr->jogr == 0)
 	    pmr->mip &= ~MIP_JOG_REQ;
-	else if (pmr->mip == 0 && !pmr->lls)
+	else if (pmr->mip == MIP_DONE && !pmr->lls)
 	    pmr->mip |= MIP_JOG_REQ;
 	break;
 
