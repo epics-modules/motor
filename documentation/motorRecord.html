@@ -40,21 +40,24 @@ Contents</h2>
 <a NAME="Overview"></a>
 <h2>
 Overview</h2>
-This documentation describes version 4.1 of the EPICS motor record, and
-related EPICS software required to build and use it.&nbsp; Version 4.1
-of the motor record is compatible with EPICS baseR3.13.1.1 and above.
+This documentation describes version 4.2 of the EPICS motor record, and
+related EPICS software required to build and use it.&nbsp; Version 4.2
+of the motor record is compatible with EPICS baseR3.13.2 and above.
 <p>The motor record is intended to support motors of all kinds, but currently
 supports only the following variety of motor controllers (in addition to
 Soft Channel support):
 <ul>
 <li>
-Oregon Microsystems VME8, VME44 and VME58 series.</li>
+Oregon Micro Systems, Inc. models; VME8, VME44 and VME58.</li>
 
 <li>
-Highland Technologies V540.</li>
+Highland Technologies model V540.</li>
 
 <li>
-Newport MM3000, MM4000 and MM4005.</li>
+Newport models MM3000, MM4000, MM4005 and PM500.</li>
+
+<li>
+Intelligent Motion Systems, Inc. model IM483.</li>
 </ul>
 The record maintains two coordinate systems for motor position ("user"
 and "dial" coordinates); displays drive and readback values; enforces limits
@@ -143,7 +146,7 @@ described below.
 </ul>
 
 <hr>
-<table BORDER >
+<table BORDER NOSAVE >
 <caption><a NAME="Fields_alphabetical"></a>
 <h2>
 Alphabetical list of record-specific fields</h2>
@@ -1054,7 +1057,7 @@ down to find the actual item.</caption>
 
 <td>Step Size (EGU)&nbsp;</td>
 
-<td>FLOAT</td>
+<td>DOUBLE</td>
 
 <td></td>
 </tr>
@@ -1196,7 +1199,7 @@ down to find the actual item.</caption>
 
 <td>R/W&nbsp;</td>
 
-<td>Speed (revs/sec)</td>
+<td>Speed (RPS)</td>
 
 <td>FLOAT&nbsp;</td>
 
@@ -1512,6 +1515,22 @@ record's SCAN field is set to "Passive."</td>
 
 <td>No access allowed</td>
 </tr>
+
+<tr VALIGN=TOP>
+<td>Note: In the <b>Prompt </b>column above:</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>EGU</td>
+
+<td>Engineering Units</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>RPS</td>
+
+<td>Revolutions Per Second</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -1814,8 +1833,9 @@ systems can be configured to the opposite polarity of the motor controller's.</t
 <td>FLOAT&nbsp;</td>
 
 <td>Encoder resolution: the distance or angle, in engineering units, associated
-with a single encoder step. ERES may be positive or negative, but currently
-it must have the same sign as MRES.&nbsp;</td>
+with a single encoder step. ERES may be positive or negative; it must have
+the same sign as MRES; and it must be nonzero.&nbsp; If the user sets ERES
+to zero, the record will overwrite it with MRES.&nbsp;</td>
 </tr>
 
 <tr VALIGN=TOP>
@@ -1871,7 +1891,19 @@ MRES.&nbsp;</td>
 
 <td>Switch: nonzero value tells the record to read the encoder (if the
 hardware indicates an encoder is present) and to ignore the value read
-back from the hardware's step-count register.&nbsp;</td>
+back from the hardware's step-count register.&nbsp;
+<p>The state of the UEIP, together with the MSTA encoder indicator, determine:
+<ol>
+<li>
+if the RRBV is set to either the feedback (REP) or the command (RMP) position.</li>
+
+<li>
+if the RES is set to either the feedback (ERES) or the command (MRES) resolution.</li>
+
+<li>
+whether absolute or relative position commands are used.</li>
+</ol>
+</td>
 </tr>
 
 <tr VALIGN=TOP>
@@ -1970,6 +2002,11 @@ checking.</td>
 For example, if the minimum is entered and it exceeds the maximum, then
 the maximum is set to the new minimum value.&nbsp; A VMAX value of zero
 disables maximum velocity range checking.
+<p>At boot-up, if one field of a field pair (i.e., VMAX/SMAX, VBAS/SBAS,
+VELO/S, BVEL/SBAK) is zero and the other field is nonzero, the nonzero
+field takes precedence.&nbsp; If both fields of a given field pair are
+nonzero, the RPS member of the field pair (i.e., SMAX, SBAS, S, SBAK) takes
+precedence.
 <p>Slew (VELO/S) and backup (BVEL/SBAK) velocity fields are silently forced
 by the motor record to be within the range set by VMAX/SMAX and VBAS/SBAS,
 inclusively.
@@ -1999,7 +2036,7 @@ one motor pulse.&nbsp;</td>
 
 <td>R/W</td>
 
-<td>Speed (revs/sec)&nbsp;</td>
+<td>Speed (RPS)&nbsp;</td>
 
 <td>FLOAT&nbsp;</td>
 
@@ -2571,7 +2608,7 @@ RHLS.&nbsp;</td>
 
 <td>R</td>
 
-<td>At Low Limit Switch&nbsp;</td>
+<td>At Low Limit Switch</td>
 
 <td>SHORT</td>
 </tr>
@@ -2955,7 +2992,7 @@ Status/readback fields</h2>
 <tr VALIGN=TOP>
 <td>DMOV&nbsp;</td>
 
-<td>R&nbsp;</td>
+<td>R</td>
 
 <td>Done moving to value&nbsp;</td>
 
@@ -3482,11 +3519,11 @@ by MEDM and other channel-access clients.&nbsp;</td>
 
 <td>For VME based devices (i.e., OMS VME8/44, OMS VME58 and V544) this
 is the VME card number, derived from the output link. Cards are numbered
-from zero according to their VME addresses.&nbsp; Oregon Microsystems series
-VME8 and VME44 cards occur in the same series, since they are handled by
-the same driver.&nbsp; Oregon Microsystems VME58 cards are numbered separately,
-as are Highland Technology V540 cards.&nbsp; This field is set to -1 for
-non-VME based device/drivers.</td>
+from zero according to their VME addresses.&nbsp; Oregon Micro Systems
+series VME8 and VME44 cards occur in the same series, since they are handled
+by the same driver.&nbsp; Oregon Micro Systems VME58 cards are numbered
+separately, as are Highland Technology V540 cards.&nbsp; This field is
+set to -1 for non-VME based device/drivers.</td>
 </tr>
 
 <tr NOSAVE>
@@ -3830,27 +3867,27 @@ device drivers.</td>
 <tr>
 <td>devOmsCom.c</td>
 
-<td>Device support common to all Oregon Microsystems device drivers.</td>
+<td>Device support common to all Oregon Micro Systems device drivers.</td>
 </tr>
 
 <tr>
 <td>devOmsCom.h&nbsp;</td>
 
-<td>Device support header file common to all Oregon Microsystems device
+<td>Device support header file common to all Oregon Micro Systems device
 drivers.</td>
 </tr>
 
 <tr>
 <td>drvOmsCom.h</td>
 
-<td>Driver support header file common to all Oregon Microsystems device
+<td>Driver support header file common to all Oregon Micro Systems device
 drivers.</td>
 </tr>
 
 <tr>
 <td></td>
 
-<td>NOTE: The above files are required for any and all Oregon Microsystems
+<td>NOTE: The above files are required for any and all Oregon Micro Systems
 device drivers.</td>
 </tr>
 
@@ -3863,13 +3900,13 @@ device drivers.</td>
 <tr VALIGN=TOP>
 <td>devOms.c&nbsp;</td>
 
-<td>Device support for Oregon Microsystems VME8 and VME44 series boards</td>
+<td>Device support for Oregon Micro Systems VME8 and VME44 series boards</td>
 </tr>
 
 <tr VALIGN=TOP>
 <td>drvOms.c</td>
 
-<td>Driver for Oregon Microsystems VME8 and VME44 series boards</td>
+<td>Driver for Oregon Micro Systems VME8 and VME44 series boards</td>
 </tr>
 
 <tr VALIGN=TOP>
@@ -3887,13 +3924,13 @@ device drivers.</td>
 <tr VALIGN=TOP>
 <td>devOms58.c&nbsp;</td>
 
-<td>Device support for Oregon Microsystems VME58 series boards</td>
+<td>Device support for Oregon Micro Systems VME58 series boards</td>
 </tr>
 
 <tr VALIGN=TOP>
 <td>drvOms58.c&nbsp;</td>
 
-<td>Driver for Oregon Microsystems VME58 series boards</td>
+<td>Driver for Oregon Micro Systems VME58 series boards</td>
 </tr>
 
 <tr VALIGN=TOP>
@@ -3939,30 +3976,6 @@ device drivers.</td>
 </tr>
 
 <tr>
-<td>gpibIO.h</td>
-
-<td>GPIB communication include file.</td>
-</tr>
-
-<tr>
-<td>gpibIO.c</td>
-
-<td>GPIB interface via Hideos.</td>
-</tr>
-
-<tr>
-<td>serialIO.h&nbsp;</td>
-
-<td>Serial communication include file.</td>
-</tr>
-
-<tr>
-<td>serialIO.cc</td>
-
-<td>Serial communication interface via Hideos.</td>
-</tr>
-
-<tr>
 <td></td>
 
 <td>NOTE: The above files are required for any and all Newport Motion Master
@@ -3994,9 +4007,15 @@ device drivers.</td>
 </tr>
 
 <tr>
-<td></td>
+<td>devPM500.c</td>
 
-<td></td>
+<td>Device support for Newport PM500.</td>
+</tr>
+
+<tr>
+<td>drvPM500.c</td>
+
+<td>Driver for Newport PM500.</td>
 </tr>
 
 <tr>
@@ -4024,6 +4043,84 @@ they are record oriented (devSoft.c) or CA oriented (devSoftAux.c).</td>
 <td>devSoft.h</td>
 
 <td>Header included by devSoft.c and devSoftAux.c</td>
+</tr>
+
+<tr>
+<td></td>
+
+<td></td>
+</tr>
+
+<tr>
+<td>gpibIO.h</td>
+
+<td>GPIB communication include file.</td>
+</tr>
+
+<tr>
+<td>gpibIO.c</td>
+
+<td>GPIB interface via Hideos.</td>
+</tr>
+
+<tr>
+<td>serialIO.h&nbsp;</td>
+
+<td>Serial communication include file.</td>
+</tr>
+
+<tr>
+<td>serialIO.cc</td>
+
+<td>Serial communication interface via Hideos.</td>
+</tr>
+
+<tr>
+<td>serialIOMPF.cc</td>
+
+<td>Serial communication interface via MPF.</td>
+</tr>
+
+<tr>
+<td></td>
+
+<td></td>
+</tr>
+
+<tr>
+<td>drvIM483.h</td>
+
+<td>Common header included by all IMS device drivers.</td>
+</tr>
+
+<tr>
+<td>dev483PL.c</td>
+
+<td>Device support for IM483 in <i>party line</i> communication mode.</td>
+</tr>
+
+<tr>
+<td>dev483SM.c</td>
+
+<td>Device support for IM483 in <i>single mode</i> communication mode.</td>
+</tr>
+
+<tr>
+<td>drv483PL.c</td>
+
+<td>Driver for IM483 in <i>party line</i> communication mode.</td>
+</tr>
+
+<tr>
+<td>drv483SM.c</td>
+
+<td>Driver for IM483 in <i>single mode </i>communication mode.</td>
+</tr>
+
+<tr>
+<td></td>
+
+<td></td>
 </tr>
 
 <tr>
@@ -4220,16 +4317,36 @@ intVectBase, intLevel, pollRate)</tt>
 pollRate)</tt>
 <br><tt>&nbsp; v544Setup(nCards, nAxes,&nbsp; baseAddress, intVectBase,
 intLevel, pollRate)</tt>
+<p><tt>MM3000Setup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+pollRate)</tt>
+<br><tt>MM3000Config(card#, portType, GPIB link or hideos_card#, GPIB address
+or hideos_task name)</tt>
 <p><tt>MM4000Setup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 pollRate)</tt>
 <br><tt>MM4000Config(card#, portType, GPIB link or hideos_card#, GPIB address
-or hideos_task name)</tt></td>
+or hideos_task name)</tt><tt></tt>
+<p><tt>IM483SMSetup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+pollRate)&nbsp;</tt>
+<br><tt>IM483SMConfig(card#, portType, GPIB link or hideos_card#, GPIB
+address or hideos_task name)&nbsp;</tt><tt></tt>
+<p><tt>IM483[PL/SM]Setup(nCommNet, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+pollRate)&nbsp;</tt>
+<br><tt>IM483[PL/sm]Config(CommNet#, portType, GPIB link or hideos_card#,
+GPIB address or hideos_task name)&nbsp;</tt>
+<br><tt></tt>&nbsp;</td>
 </tr>
 
 <tr VALIGN=TOP>
 <td>nCards</td>
 
 <td>the actual number of cards may be less, but not greater than this</td>
+</tr>
+
+<tr>
+<td>nCommNet</td>
+
+<td>the number of Communication networks&nbsp; (e.g., the number of RS-422
+networks for a IM483PL device).</td>
 </tr>
 
 <tr>
