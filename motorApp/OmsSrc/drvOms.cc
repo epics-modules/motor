@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-11-07 22:28:38 $
+Last Modified:	$Date: 2003-12-03 19:12:35 $
 */
 
 /*
@@ -41,18 +41,20 @@ Last Modified:	$Date: 2003-11-07 22:28:38 $
  *
  * Modification Log:
  * -----------------
- * .00  02-22-02 rls	- "total_cards" changed from total detected to total
+ * .00  02-22-02 rls - "total_cards" changed from total detected to total
  *			cards that "memory is allocated for".  This allows
  *			boards after the "hole" to work.
- * .01  06-05-03  rls   Convert to R3.14.x.
- * .02  06-05-03  rls   extended device directive support to PREM and POST.
- * .03  10-23-03  rls - VX2 spurious interrupt fix; support transmit buffer
+ * .01  06-05-03 rls - Convert to R3.14.x.
+ * .02  06-05-03 rls - extended device directive support to PREM and POST.
+ * .03  10-23-03 rls - VX2 spurious interrupt fix; support transmit buffer
  *			empty interrupt in omsPut() and motorIsr().
- * .04  10-28-03  rls - moved OMS specific "irqdatastr" from motordrvCom.h
+ * .04  10-28-03 rls - moved OMS specific "irqdatastr" from motordrvCom.h
  *			drvOms.h and DevicePrivate.
- *		      - removed "max_io_tries" from timeout calculations.
- *		      - changed omsGet() timeout argument to type bool.
- *		      - changed recv_rng and send_rng from C to C++ interface.
+ *		     - removed "max_io_tries" from timeout calculations.
+ *		     - changed omsGet() timeout argument to type bool.
+ *		     - changed recv_rng and send_rng from C to C++ interface.
+ * .05  12-03-03 rls - update rate bug fix.
+ *
  */
 
 /*========================stepper motor driver ========================
@@ -466,7 +468,7 @@ static RTN_STATUS send_mess(int card, char const *com, char inchar)
 
     if (return_code == OK)
     {
-	Debug(4, "sent message (%s)\n", outbuf);
+	Debug(4, "sent message: (%s)\n", outbuf);
     }
     else
     {
@@ -610,8 +612,7 @@ static int recv_mess(int card, char *com, int amount)
     else
 	com[i] = '\0';
 
-    Debug(4, "recv_mess: card %d", card);
-    Debug(4, " com %s", com);
+    Debug(4, "recv_mess: card %d, msg: (%s)\n", card, com);
     return (0);
 }
 
@@ -958,7 +959,7 @@ int omsSetup(int num_cards,	/* maximum number of cards in rack */
 	     void *addrs,	/* Base Address(0x0-0xb000 on 4K boundary) */
 	     unsigned vector,	/* noninterrupting(0), valid vectors(64-255) */
 	     int int_level,	/* interrupt level (1-6) */
-	     int scan_rate)	/* polling rate - 1/60 sec units */
+	     int scan_rate)	/* polling rate - in HZ */
 {
 
     if (num_cards < 1 || num_cards > OMS_NUM_CARDS)
@@ -994,10 +995,14 @@ int omsSetup(int num_cards,	/* maximum number of cards in rack */
 	omsInterruptLevel = int_level;
 
     /* Set motor polling task rate */
-    if (scan_rate >= 1 && scan_rate <= sysClkRateGet())
-	targs.motor_scan_rate = sysClkRateGet() / scan_rate;
+    if (scan_rate >= 1 && scan_rate <= MAX_SCAN_RATE)
+	targs.motor_scan_rate = scan_rate;
     else
+    {
 	targs.motor_scan_rate = SCAN_RATE;
+	errlogPrintf("%s(%d): invalid poll rate - %d HZ\n", __FILE__, __LINE__,
+		      scan_rate);
+    }
     return(0);
 }
 
@@ -1068,7 +1073,7 @@ static int motor_init()
 	    if (!RTN_SUCCESS(status))
 	    {
 		errPrintf(status, __FILE__, __LINE__,
-			  "Can't register address 0x%x\n", probeAddr);
+			  "Can't register address 0x%x\n", (unsigned) probeAddr);
 		return (ERROR);
 	    }
 
