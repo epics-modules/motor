@@ -3,9 +3,9 @@ FILENAME...	drvOms.h
 USAGE... This file contains OMS driver "include" information that is
 		specific to OMS models VME8 and VME44.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-12-14 20:52:57 $
+Last Modified:	$Date: 2003-10-24 14:39:38 $
 */
 
 /*
@@ -32,6 +32,8 @@ Last Modified:	$Date: 2001-12-14 20:52:57 $
  *
  * Modification Log:
  * -----------------
+ * .00 10-23-03 rls - VX2 spurious interrupt fix; enable all interrupts, including
+ *		      transmit buffer empty.
  */
 
 #ifndef	INCdrvOmsh
@@ -75,7 +77,7 @@ Last Modified:	$Date: 2001-12-14 20:52:57 $
 #define IRQ_INPUT_BUF	0x20
 #define IRQ_DONE	0x10
 
-#define IRQ_ENABLE_ALL	(IRQ_ENABLE|IRQ_DONE|IRQ_INPUT_BUF)
+#define IRQ_ENABLE_ALL	(IRQ_ENABLE|IRQ_TRANS_BUF|IRQ_INPUT_BUF|IRQ_DONE)
 
 struct vmex_motor
 {
