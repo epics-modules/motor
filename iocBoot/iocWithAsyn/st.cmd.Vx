@@ -11,7 +11,7 @@
 #cd "... IOC st.cmd complete directory path ... "
 
 < cdCommands 
-#< ../nfsCommands.rls
+#< ../nfsCommands
 
 cd topbin
 
