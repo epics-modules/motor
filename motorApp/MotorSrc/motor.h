@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.13 $
+Version:	$Revision: 1.14 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-21 17:43:36 $
+Last Modified:	$Date: 2005-03-30 19:19:58 $
 */
 
 /*
@@ -82,7 +82,7 @@ enum motor_cmnd {
 	MOVE_REL,	/* Relative Move. */
 	HOME_FOR,	/* Home Forward. */
 	HOME_REV,	/* Home Reverse. */
-	LOAD_POS,	/* Load Zero Position. */
+	LOAD_POS,	/* Load Position. */
 	SET_VEL_BASE,	/* Set Minimum Velocity. */
 	SET_VELOCITY,	/* Set Jog and Trajectory Velocity. */
 	SET_ACCEL,	/* Set Acceleration. */

@@ -168,9 +168,7 @@ The state of the UEIP, together with the MSTA encoder indicator, determine;
 
 1) if the RRBV is set to either the feedback (REP) or the command (RMP)
 position.
-2) if the RES is set to either the feedback (ERES) or the command (MRES)
-resolution.
-3) whether absolute or relative position commands are used.
+2) whether absolute or relative position commands are used.
 
 
 The algorithm used in moves to a (dial-coordinate) position called "TARGET"
