@@ -16,7 +16,7 @@
 #define	INCdrvMCB4Bh 1
 
 #include "motordrvCom.h"
-#include "serialIO.h"
+#include "asynDriver.h"
 
 /* MCB4B default profile. */
 
@@ -27,9 +27,8 @@
 
 struct MCB4Bcontroller
 {
-    serialIO *serialInfo;   /* For RS-232 */
-    int serial_card;        /* Card on which Hideos/MPF is running */
-    char serial_task[20];   /* Hideos/MPF task/server name for serial port */
+    asynUser *pasynUser;   /* asynUser structure */
+    char port[80];   /* asyn port name */
 };
 
 #endif	/* INCdrvMCB4Bh */

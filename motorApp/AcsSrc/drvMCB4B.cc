@@ -20,14 +20,14 @@
 #include "motor.h"
 #include "AcsRegister.h"
 #include "drvMCB4B.h"
-#include "serialIO.h"
+#include "asynSyncIO.h"
 #include "epicsExport.h"
 
 #define STATIC static
 
 #define WAIT 1
 
-#define SERIAL_TIMEOUT 2000 /* Command timeout in msec */
+#define TIMEOUT 2.0 /* Command timeout in sec */
 
 #define BUFF_SIZE 100       /* Maximum length of string to/from MCB4B */
 
@@ -35,8 +35,8 @@
     #ifdef DEBUG
 	volatile int drvMCB4BDebug = 0;
 	#define Debug(L, FMT, V...) { if(L <= drvMCB4BDebug) \
-                        { errlogPrintf("%s(%d):",__FILE__,__LINE__); \
-                          errlogPrintf(FMT,##V); } }
+                        { printf("%s(%d):",__FILE__,__LINE__); \
+                          printf(FMT,##V); } }
     #else
 	#define Debug(L, FMT, V...)
     #endif
@@ -116,16 +116,20 @@ STATIC struct thread_args targs = {SCAN_RATE, &MCB4B_access};
 static long report(int level)
 {
   int card;
+  struct MCB4Bcontroller *cntrl;
 
   if (MCB4B_num_cards <=0)
     printf("    NO MCB4B controllers found\n");
   else
     {
-      for (card = 0; card < MCB4B_num_cards; card++)
-          if (motor_state[card])
-             printf("    MCB4B controller %d, id: %s \n",
-                   card,
+      for (card = 0; card < MCB4B_num_cards; card++) {
+          if (motor_state[card]) {
+             cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
+             printf("    MCB4B controller %d, port=%s, id: %s \n",
+                   card, cntrl->port, 
                    motor_state[card]->ident);
+          }
+      }
     }
   return (0);
 }
@@ -292,11 +296,11 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
 
     strcpy(buff, com);
     strcat(buff, OUTPUT_TERMINATOR);
-/*
-    Debug(2, "%.2f : send_mess: sending message to card %d, message=%s\n",
-                    tickGet()/60., card, buff);
-*/
-    cntrl->serialInfo->serialIOSend(buff, strlen(buff), SERIAL_TIMEOUT);
+
+    Debug(2, "send_mess: sending message to card %d, message=%s\n",
+                     card, buff);
+
+    pasynSyncIO->write(cntrl->pasynUser, buff, strlen(buff), TIMEOUT);
 
     return (OK);
 }
@@ -308,9 +312,10 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char c)
 /*****************************************************/
 STATIC int recv_mess(int card, char *com, int flag)
 {
-    int timeout;
+    double timeout;
     int len=0;
     struct MCB4Bcontroller *cntrl;
+    int flush;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -321,35 +326,35 @@ STATIC int recv_mess(int card, char *com, int flag)
 
     cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
 
-/*
-    Debug(3, "%.2f : recv_mess entry: card %d, flag=%d\n", 
-            tickGet()/60., card, flag);
-*/
-    if (flag == FLUSH)
-        timeout = 0;
-    else
-        timeout = SERIAL_TIMEOUT;
-    len = cntrl->serialInfo->serialIORecv(com, MAX_MSG_SIZE, (char *) "\r", timeout);
+    Debug(3, "recv_mess entry: card %d, flag=%d\n", 
+            card, flag);
+    if (flag == FLUSH) {
+        flush = 1;
+        timeout = 0.;
+    } else {
+        flush = 0;
+        timeout = TIMEOUT;
+    }
+    len = pasynSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE, 
+                            "\r", 1, flush, timeout);
 
     /* The response from the MCB4B is terminated with CR.  Remove */
     if (len < 1) com[0] = '\0'; 
     else com[len-1] = '\0';
     
-/*
     if (len > 0) {
-        Debug(2, "%.2f : recv_mess: card %d, message = \"%s\"\n", 
-            tickGet()/60., card, com);
+        Debug(2, "recv_mess: card %d, message = \"%s\"\n", 
+                   card, com);
     }
     if (len == 0) {
         if (flag != FLUSH)  {
-            Debug(1, "%.2f: recv_mess: card %d ERROR: no response\n", 
-                tickGet()/60., card);
+            Debug(1, "recv_mess: card %d ERROR: no response\n", 
+                  card);
         } else {
-            Debug(3, "%.2f: recv_mess: card %d flush returned no characters\n", 
-                tickGet()/60., card);
+            Debug(3, "recv_mess: card %d flush returned no characters\n", 
+                  card);
         }
     }
-*/
 
     return (len);
 }
@@ -400,8 +405,7 @@ MCB4BSetup(int num_cards,   	/* maximum number of controllers in system */
 /*****************************************************/
 RTN_STATUS
 MCB4BConfig(int card,		/* card being configured */
-            int location,	/* card for RS-232 */
-            const char *name)	/* server_task for RS-232 */
+            const char *name)	/* port name for asyn */
 {
     struct MCB4Bcontroller *cntrl;
 
@@ -411,8 +415,7 @@ MCB4BConfig(int card,		/* card being configured */
     motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
     motor_state[card]->DevicePrivate = malloc(sizeof(struct MCB4Bcontroller));
     cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
-    cntrl->serial_card = location;
-    strcpy(cntrl->serial_task, name);
+    strcpy(cntrl->port, name);
     return (OK);
 }
 
@@ -432,7 +435,7 @@ STATIC int motor_init()
     char buff[BUFF_SIZE];
     int total_axis = 0;
     int status = 0;
-    bool success_rtn;
+    int success_rtn;
 
     initialized = true;   /* Indicate that driver is initialized. */
 
@@ -454,20 +457,18 @@ STATIC int motor_init()
         cntrl = (struct MCB4Bcontroller *) brdptr->DevicePrivate;
 
         /* Initialize communications channel */
-        success_rtn = false;
 
-	cntrl->serialInfo = new serialIO(cntrl->serial_card,
-				     cntrl->serial_task, &success_rtn);
+	success_rtn = pasynSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser);
+        Debug(1, "motor_init, return from pasynSyncIO->connect for port %s = %d, pasynUser=%p\n", 
+              cntrl->port, success_rtn, cntrl->pasynUser);
 
-        if (success_rtn == true)
+        if (success_rtn == 0)
         {
             int retry = 0;
 
             /* Send a message to the board, see if it exists */
             /* flush any junk at input port - should not be any data available */
-            do {
-                recv_mess(card_index, buff, FLUSH);
-            } while (strlen(buff) != 0);
+            pasynSyncIO->flush(cntrl->pasynUser);
             do
             {
                 send_mess(card_index, "#00X", 0);
@@ -478,7 +479,7 @@ STATIC int motor_init()
         }
 
 
-        if (success_rtn == true && status > 0)
+        if (success_rtn == 0 && status > 0)
         {
             brdptr->localaddr = (char *) NULL;
             brdptr->motor_in_motion = 0;

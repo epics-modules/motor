@@ -23,7 +23,7 @@ SRCS += devPM500.cc  drvPM500.cc
 # ESP300 device driver.
 SRCS += devESP300.cc drvESP300.cc
 
-Newport_LIBS += motor motorCOM_mpf
+Newport_LIBS += motor asyn
 Newport_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES

@@ -14,7 +14,7 @@ SRCS += AcsRegister.cc
 # Advanced Control Systems driver support.
 SRCS += devMCB4B.c drvMCB4B.c
 
-Acs_LIBS += motor motorCOM_mpf
+Acs_LIBS += motor asyn
 Acs_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES

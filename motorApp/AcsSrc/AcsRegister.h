@@ -2,9 +2,9 @@
 FILENAME...	AcsRegister.h
 USAGE... This file contains function prototypes for ACS IOC shell commands.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-27 13:39:40 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-04-20 20:50:12 $
 */
 
 /*
@@ -41,5 +41,5 @@ Last Modified:	$Date: 2003-05-27 13:39:40 $
 
 /* Function prototypes. */
 extern RTN_STATUS MCB4BSetup(int, int, int);
-extern RTN_STATUS MCB4BConfig(int, int, const char *);
+extern RTN_STATUS MCB4BConfig(int, const char *);
 

@@ -3,9 +3,9 @@ FILENAME...	drvMMCom.h
 USAGE... This file contains Newport Motion Master (MM) driver "include"
 	    information that is specific to Motion Master models 3000/4000.
 
-Version:	$Revision: 1.8 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-06-16 15:04:45 $
+Version:	$Revision: 1.9 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2004-04-20 20:52:12 $
 */
 
 /*
@@ -45,7 +45,8 @@ Last Modified:	$Date: 2003-06-16 15:04:45 $
 
 #include "motor.h"
 #include "motordrvCom.h"
-#include "serialIO.h"
+#include "asynDriver.h"
+#include "asynSyncIO.h"
 
 enum MM_model
 {
@@ -68,13 +69,9 @@ typedef enum MM_motor_type MM_motor_type;
 /* Motion Master specific data is stored in this structure. */
 struct MMcontroller
 {
-    PortType port_type;		/* GPIB_PORT or RS232_PORT */
-    serialIO *serialInfo;  	/* For RS-232 */
-    int gpib_link;
-    int gpib_address;
-    struct gpibInfo *gpibInfo;  /* For GPIB */
-    int serial_card;            /* Card on which Hideos is running */
-    char serial_task[20];       /* Hideos task name for serial port */
+    asynUser *pasynUser;  	/* For RS-232 */
+    int asyn_address;		/* Use for GPIB or other address with asyn */
+    char asyn_port[80];     	/* asyn port name */
     char status_string[80];     /* String containing status of motors */
     char position_string[80];   /* String containing position of motors */
     MM_model model;		/* Motion Master Model. */
