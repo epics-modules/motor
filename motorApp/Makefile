@@ -6,18 +6,24 @@ include $(TOP)/config/CONFIG_APP
 DIRS += MotorSrc
 
 # If any motor controller communication mechanism besides the VME backplane is
-# required, then the following module must be uncommented.  In addition, it
-# must appear 2nd in this list of directories.
-#DIRS += CommSrc
+# required, then the "CommSrc" module must be built.  MPF_SERIAL must be defined
+# in <ioctop>/config/RELEASE.
+ifdef MPF_SERIAL
+DIRS += CommSrc
+endif
 
 # 
-# Individual device/driver support modules may be commented
-# out here.
-#DIRS += NewportSrc
+# Select individual device/driver support modules by removing the comment.
 #DIRS += OmsSrc
 #DIRS += SoftMotorSrc
 #DIRS += V544Src
+
+# The following modules require MPF_SERIAL.
+# Select individual device/driver support modules by removing the comment.
+ifdef MPF_SERIAL
+#DIRS += NewportSrc
 #DIRS += ImsSrc
+endif
 
 DIRS += Db
 include $(TOP)/config/RULES_DIRS
