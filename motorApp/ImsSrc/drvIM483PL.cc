@@ -3,9 +3,9 @@ FILENAME...	drvIM483PL.cc
 USAGE...	Motor record driver level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-15 13:00:12 $
+Last Modified:	$Date: 2003-05-19 17:09:07 $
 */
 
 /*****************************************************************
@@ -47,23 +47,13 @@ DESIGN LIMITATIONS...
 	Translation between the IM483 and the ACCL/BACC fields is not obvious.
 */
 
-#include	<string.h>
-#include	<math.h>
-
-#include 	<epicsThread.h>
-#include	<alarm.h>
-#include	<dbDefs.h>
-#include	<dbAccess.h>
-#include	<recSup.h>
-#include	<devSup.h>
-#include        <errMdef.h>
-#include	<ctype.h>
-
-#include	"motor.h"
-#include	"drvIM483.h"
-#include        "serialIO.h"
-
-#include	"epicsExport.h"
+#include <string.h>
+#include <epicsThread.h>
+#include <drvSup.h>
+#include "motor.h"
+#include "drvIM483.h"
+#include "serialIO.h"
+#include "epicsExport.h"
 
 #define STATIC static
 
@@ -473,7 +463,7 @@ STATIC int recv_mess(int card, char *com, int flag)
     else
 	timeout	= SERIAL_TIMEOUT;
 
-    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, "\n", timeout);
+    len = serialIORecv(cntrl->serialInfo, com, BUFF_SIZE, (char *) "\n", timeout);
 
     if (len == 0)
 	com[0] = '\0';
@@ -577,7 +567,7 @@ STATIC int motor_init()
 	    continue;
 	
 	brdptr = motor_state[card_index];
-	brdptr->ident[0] = NULL;	/* No controller identification message. */
+	brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
 	brdptr->cmnd_response = true;
 	total_cards = card_index + 1;
 	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
@@ -627,7 +617,7 @@ STATIC int motor_init()
 		motor_info->status |= EA_PRESENT;
 
                 /* Determine if encoder present based on open/closed loop mode. */
-		loop_state = NULL;
+		loop_state = 0;
 		if (loop_state != 0)
 		{
 		    motor_info->pid_present = YES;

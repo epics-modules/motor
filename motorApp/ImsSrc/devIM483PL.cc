@@ -3,9 +3,9 @@ FILENAME...	devIM483PL.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-16 19:18:07 $
+Last Modified:	$Date: 2003-05-19 17:08:02 $
 */
 
 /*
@@ -43,25 +43,12 @@ Last Modified:	$Date: 2003-05-16 19:18:07 $
  * .05  03/07/03 rls R3.14 conversion.
  */
 
-
-#include	<errlog.h>
-#include	<registry.h>
-#include	<string.h>
-#include	<alarm.h>
-#include	<callback.h>
-#include	<dbDefs.h>
-#include	<dbAccess.h>
-#include	<dbCommon.h>
-#include	<recSup.h>
-#include	<devSup.h>
-#include	<drvSup.h>
-
-#include	"motorRecord.h"
-#include	"motor.h"
-#include	"motordevCom.h"
-#include	"drvIM483.h"
-
-#include	"epicsExport.h"
+#include <string.h>
+#include "motorRecord.h"
+#include "motor.h"
+#include "motordevCom.h"
+#include "drvIM483.h"
+#include "epicsExport.h"
 
 #define STATIC static
 
