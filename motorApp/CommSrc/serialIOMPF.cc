@@ -1,4 +1,13 @@
 /*
+FILENAME...	serialIOMPF.cc
+USAGE...	Interface between MPF and motor record device drivers.
+
+Version:	$Revision: 1.4 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2002-01-24 19:22:44 $
+*/
+
+/*
  * These routines provide a simple interface to MPF serial I/O.  They hide 
  * the details of MPF They are intended for use by applications which do
  * simple synchronous reads and writes, and no control operations like setting
@@ -8,6 +17,12 @@
  * Date:   4/24/98
  * Modifications:
  *         9/30/99   Converted to MPF
+ * .01  01-23-02 RLS - Changed NODEBUG macro to DEBUG.
+ *		     - Changed DEBUG macro to Debug.
+ *		     - Increased timeout from 2 to 10 seconds in call to
+ *			msgQReceive() from serialIO().  This prevents timeouts
+ *			if a satellite CPU board is slow to boot.
+ *
  */
 
 #include <vxWorks.h>
@@ -45,10 +60,10 @@ private:
         MSG_Q_ID msgQId;
 };
 
-#ifndef	NODEBUG
-#define DEBUG(l, f, args...) {if (l <= serialIODebug) printf(f, ## args);}
+#ifdef	DEBUG
+    #define Debug(l, f, args...) {if (l <= serialIODebug) printf(f, ## args);}
 #else
-#define DEBUG(l, f, args...)
+    #define Debug(l, f, args...)
 #endif
 
 volatile int serialIODebug = 0;
@@ -62,19 +77,18 @@ serialIO::serialIO(int card, char *serverName, int *createdOK)
     *createdOK = 1;
     // Create a message queue for the callback
     msgQId = msgQCreate(4, sizeof(Message *), MSG_Q_FIFO);
-    DEBUG(5, "serialIOInit: message queue created, ID=%p\n", msgQId);
+    Debug(5, "serialIOInit: message queue created, ID=%p\n", msgQId);
     pMessageClient = new MessageClient(serialIOCallback,(void *)this);
-    DEBUG(5, "serialIOInit: message client created=%p\n", pMessageClient);
+    Debug(5, "serialIOInit: message client created=%p\n", pMessageClient);
     status = pMessageClient->bind(serverName, card);
     if (status) {
         epicsPrintf("serialIOInit: Cannot bind to MPF server %s\n", serverName);
         *createdOK = 0;
     }
     else
-        DEBUG(1, "serialIOInit: Bound to MPF server %s\n", serverName);
+        Debug(1, "serialIOInit: Bound to MPF server %s\n", serverName);
     // Wait for connect message to be received, 2 second timeout
-    status = msgQReceive(msgQId, (char *)&pmess, sizeof(pmess), 
-                                          2*CLOCKS_PER_SEC);
+    status = msgQReceive(msgQId, (char *) &pmess, sizeof(pmess), 10 * CLOCKS_PER_SEC);
     if (status == ERROR) {
         epicsPrintf("serialIO: error calling msgQReceive, status = %d\n",
                                 status);
@@ -102,10 +116,10 @@ int serialIO::serialIOSend(char const *buffer, int buffer_len, int timeout)
     psm->timeout = timeout/1000;
     status = pMessageClient->send(psm);
     if (status) {
-        DEBUG(1, "serialIOSend: error sending message %s\n", buffer);
+        Debug(1, "serialIOSend: error sending message %s\n", buffer);
         goto finish;
     }
-    DEBUG(2, "serialIOSend: sent message %s\n", buffer);
+    Debug(2, "serialIOSend: sent message %s\n", buffer);
 
     // Wait for response back from server
     wait = 2*timeout/1000*CLOCKS_PER_SEC;
@@ -115,13 +129,13 @@ int serialIO::serialIOSend(char const *buffer, int buffer_len, int timeout)
         epicsPrintf("serialIOSend: error calling msgQReceive=%d\n", status);
         goto finish;
     }
-    DEBUG(5, "serialIOSend:  got message, pmess=%p\n", pmess);
+    Debug(5, "serialIOSend:  got message, pmess=%p\n", pmess);
     if (pmess->getType() == messageTypeChar8Array) {
         prm = (Char8ArrayMessage *)pmess;
         status = prm->status;
-        if (status) DEBUG(1, "serialIOSend: error receiving message, status=%d\n", 
+        if (status) Debug(1, "serialIOSend: error receiving message, status=%d\n", 
                                                 status);
-        DEBUG(4, "serialIOSend: received message, status=%d\n", status);
+        Debug(4, "serialIOSend: received message, status=%d\n", status);
     } else {
         epicsPrintf("serialIOInit: incorrect message type received = %d\n",
                                 pmess->getType());
@@ -163,7 +177,7 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, int terminator,
                         status);
         goto done;
     }
-    DEBUG(2, "serialIORecv: sent message status = %d, timeout=%d\n", 
+    Debug(2, "serialIORecv: sent message status = %d, timeout=%d\n", 
                                              status, timeout);
     wait = 2*timeout/1000*CLOCKS_PER_SEC;
     if (wait < MIN_MSGQ_WAIT) wait = MIN_MSGQ_WAIT;
@@ -181,17 +195,17 @@ int serialIO::serialIORecv(char *buffer, int buffer_len, int terminator,
     }
     prm = (Char8ArrayMessage *)pmess;
     if (prm->status != 0) {
-        DEBUG(1,"serialIORecv: error, return status = %d\n", prm->status);
+        Debug(1,"serialIORecv: error, return status = %d\n", prm->status);
         goto cleanup;
     }
     nrec = prm->getSize();
     if (nrec > buffer_len) nrec=buffer_len;
     memcpy(buffer, prm->value, nrec);
-    DEBUG(2,"serialIORecv: Received %d bytes\n", nrec);
+    Debug(2,"serialIORecv: Received %d bytes\n", nrec);
     // Append a NULL byte to the response if there is room
     if (nrec < buffer_len) buffer[nrec] = '\0';
 
-    DEBUG(2,"serialIORecv: Received %d bytes, message = \n%s\n", nrec, buffer);
+    Debug(2,"serialIORecv: Received %d bytes, message = \n%s\n", nrec, buffer);
 cleanup:
     delete prm;
 
@@ -206,11 +220,11 @@ void serialIO::serialIOCallback(Message *message, void *pointer)
 
     // If this is a Connect message or a Char8ArrayMessage then send it to
     // the message queue.
-    DEBUG(5, "serialIOCallback: message type=%d\n", message->getType());
+    Debug(5, "serialIOCallback: message type=%d\n", message->getType());
     if(message->getType()==messageTypeConnect) {
         ConnectMessage *pcm = (ConnectMessage *)message;
         if (pcm->status != connectYes) {
-            DEBUG(1, "serialIOCallback: disconnect message?, status=%d\n", 
+            Debug(1, "serialIOCallback: disconnect message?, status=%d\n", 
                                                 pcm->status);
             delete message;
             return;
