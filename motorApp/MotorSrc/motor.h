@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-23 19:44:05 $
+Last Modified:	$Date: 2003-06-06 21:09:09 $
 */
 
 /*
@@ -150,6 +150,9 @@ struct motor_dset
 #else
     #define MSB_First (TRUE)  // MSB is packed first.
 #endif
+
+/* All db_post_events() calls set both VALUE and LOG bits. */
+#define DBE_VAL_LOG (unsigned int) (DBE_VALUE | DBE_LOG)
 
 #endif	/* INCmotorh */
 

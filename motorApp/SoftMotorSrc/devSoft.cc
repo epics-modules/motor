@@ -2,9 +2,9 @@
 FILENAME...	devSoft.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-19 17:14:03 $
+Last Modified:	$Date: 2003-06-06 21:09:24 $
 */
 
 /*
@@ -190,14 +190,12 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
 	if (mr->dmov == FALSE)
 	    ptr->dinp_value = SOFTMOVE;
 	else if (mr->lock == menuYesNoNO)
-	{	/* Hard motor is moving independent of soft motor. */
-	    unsigned short mask = (DBE_VALUE | DBE_LOG);
-
+	{   /* Hard motor is moving independent of soft motor. */
 	    ptr->dinp_value = HARDMOVE;
 	    mr->dmov = FALSE;
-	    db_post_events(mr, &mr->dmov, mask);
+	    db_post_events(mr, &mr->dmov, DBE_VAL_LOG);
 	    mr->pp = TRUE;
-	    db_post_events(mr, &mr->pp, mask);
+	    db_post_events(mr, &mr->pp, DBE_VAL_LOG);
 	}
     }
     else		/* Hard motor is done moving. */

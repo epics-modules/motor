@@ -3,9 +3,9 @@ FILENAME: motordevCom.c
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 20:44:26 $
+Last Modified:	$Date: 2003-06-06 21:09:10 $
 */
 
 /*
@@ -428,7 +428,7 @@ RTN_STATUS motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabp
 	 * and communication error TRUE.
 	 */
 	mr->dmov = TRUE;
-	db_post_events(mr, &mr->dmov, DBE_VALUE);
+	db_post_events(mr, &mr->dmov, DBE_VAL_LOG);
 	mr->msta |= CNTRL_COMM_ERR;
 	return(rc = ERROR);
     }

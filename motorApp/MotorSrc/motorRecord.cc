@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-30 19:35:20 $
+Last Modified:	$Date: 2003-06-06 21:09:09 $
 */
 
 /*
@@ -341,7 +341,7 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
     if (pmr->rdbd < min_rdbd)
     {
 	pmr->rdbd = min_rdbd;
-	db_post_events(pmr, &pmr->rdbd, DBE_VALUE);
+	db_post_events(pmr, &pmr->rdbd, DBE_VAL_LOG);
     }
 }
 
@@ -574,7 +574,6 @@ LOGIC:
 static long postProcess(motorRecord * pmr)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
-    const unsigned short monitor_mask = DBE_VALUE;
 #ifdef DMR_SOFTMOTOR_MODS
     int dir_positive = (pmr->dir == motorDIR_Pos);
     int dir = dir_positive ? 1 : -1;
@@ -638,14 +637,14 @@ static long postProcess(motorRecord * pmr)
 	    {
 		pmr->mip &= ~MIP_HOMF;
 		pmr->homf = 0;
-		db_post_events(pmr, &pmr->homf, monitor_mask);
+		db_post_events(pmr, &pmr->homf, DBE_VAL_LOG);
 	    }
 	    else if (pmr->mip & MIP_HOMR)
 	    {
     
 		pmr->mip &= ~MIP_HOMR;
 		pmr->homr = 0;
-		db_post_events(pmr, &pmr->homr, monitor_mask);
+		db_post_events(pmr, &pmr->homr, DBE_VAL_LOG);
 	    }
 	}
     }
@@ -1353,7 +1352,6 @@ static RTN_STATUS do_work(motorRecord * pmr)
     bool stop_or_pause = (pmr->spmg == motorSPMG_Stop ||
 			     pmr->spmg == motorSPMG_Pause) ? true : false;
     int old_lvio = pmr->lvio;
-    const unsigned short monitor_mask = DBE_VALUE;
     mmap_field mmap_bits;
 
     Debug(3, "do_work: begin\n");
@@ -1430,12 +1428,12 @@ static RTN_STATUS do_work(motorRecord * pmr)
 	    if (pmr->mip & MIP_HOMF)
 	    {
 		pmr->homf = 0;
-		db_post_events(pmr, &pmr->homf, monitor_mask);
+		db_post_events(pmr, &pmr->homf, DBE_VAL_LOG);
 	    }
 	    else if (pmr->mip & MIP_HOMR)
 	    {
 		pmr->homr = 0;
-		db_post_events(pmr, &pmr->homr, monitor_mask);
+		db_post_events(pmr, &pmr->homr, DBE_VAL_LOG);
 	    }
 	    pmr->mip = MIP_STOP;
 	    MARK(M_MIP);
@@ -1991,7 +1989,6 @@ static long special(DBADDR *paddr, int after)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
-    const unsigned short monitor_mask = DBE_VALUE;
     int dir_positive = (pmr->dir == motorDIR_Pos);
     int dir = dir_positive ? 1 : -1;
     bool changed = false;
@@ -2018,7 +2015,7 @@ static long special(DBADDR *paddr, int after)
 		if (pmr->disa == pmr->disv || pmr->disp)
 		    return(OK);
 		pmr->dmov = FALSE;
-		db_post_events(pmr, &pmr->dmov, monitor_mask);
+		db_post_events(pmr, &pmr->dmov, DBE_VAL_LOG);
 		return(OK);
 
 	    case motorRecordHOMF:
@@ -2039,13 +2036,13 @@ static long special(DBADDR *paddr, int after)
 	if (pmr->vbas < 0.0)
 	{
 	    pmr->vbas = 0.0;	    
-	    db_post_events(pmr, &pmr->vbas, monitor_mask);
+	    db_post_events(pmr, &pmr->vbas, DBE_VAL_LOG);
 	}
 
 	if ((pmr->urev != 0.0) && (pmr->sbas != (temp_dbl = pmr->vbas / fabs_urev)))
 	{
 	    pmr->sbas = temp_dbl;
-	    db_post_events(pmr, &pmr->sbas, monitor_mask);
+	    db_post_events(pmr, &pmr->sbas, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2054,13 +2051,13 @@ static long special(DBADDR *paddr, int after)
 	if (pmr->sbas < 0.0)
 	{
 	    pmr->sbas = 0.0;
-	    db_post_events(pmr, &pmr->sbas, monitor_mask);
+	    db_post_events(pmr, &pmr->sbas, DBE_VAL_LOG);
 	}
 
 	if (pmr->vbas != (temp_dbl = fabs_urev * pmr->sbas))
 	{
 	    pmr->vbas = temp_dbl;
-	    db_post_events(pmr, &pmr->vbas, monitor_mask);
+	    db_post_events(pmr, &pmr->vbas, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2069,13 +2066,13 @@ static long special(DBADDR *paddr, int after)
 	if (pmr->vmax < 0.0)
 	{
 	    pmr->vmax = 0.0;
-	    db_post_events(pmr, &pmr->vmax, monitor_mask);
+	    db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
 	}
 
 	if ((pmr->urev != 0.0) && (pmr->smax != (temp_dbl = pmr->vmax / fabs_urev)))
 	{
 	    pmr->smax = temp_dbl;
-	    db_post_events(pmr, &pmr->smax, monitor_mask);
+	    db_post_events(pmr, &pmr->smax, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2084,13 +2081,13 @@ static long special(DBADDR *paddr, int after)
 	if (pmr->smax < 0.0)
 	{
 	    pmr->smax = 0.0;
-	    db_post_events(pmr, &pmr->smax, monitor_mask);
+	    db_post_events(pmr, &pmr->smax, DBE_VAL_LOG);
 	}
 
 	if (pmr->vmax != (temp_dbl = fabs_urev * pmr->smax))
 	{
 	    pmr->vmax = temp_dbl;
-	    db_post_events(pmr, &pmr->vmax, monitor_mask);
+	    db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2101,7 +2098,7 @@ static long special(DBADDR *paddr, int after)
 	if ((pmr->urev != 0.0) && (pmr->s != (temp_dbl = pmr->velo / fabs_urev)))
 	{
 	    pmr->s = temp_dbl;
-	    db_post_events(pmr, &pmr->s, monitor_mask);
+	    db_post_events(pmr, &pmr->s, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2112,7 +2109,7 @@ static long special(DBADDR *paddr, int after)
 	if (pmr->velo != (temp_dbl = fabs_urev * pmr->s))
 	{
 	    pmr->velo = temp_dbl;
-	    db_post_events(pmr, &pmr->velo, monitor_mask);
+	    db_post_events(pmr, &pmr->velo, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2123,7 +2120,7 @@ static long special(DBADDR *paddr, int after)
 	if ((pmr->urev != 0.0) && (pmr->sbak != (temp_dbl = pmr->bvel / fabs_urev)))
 	{
 	    pmr->sbak = temp_dbl;
-	    db_post_events(pmr, &pmr->sbak, monitor_mask);
+	    db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2134,7 +2131,7 @@ static long special(DBADDR *paddr, int after)
 	if (pmr->bvel != (temp_dbl = fabs_urev * pmr->sbak))
 	{
 	    pmr->bvel = temp_dbl;
-	    db_post_events(pmr, &pmr->bvel, monitor_mask);
+	    db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2143,7 +2140,7 @@ static long special(DBADDR *paddr, int after)
 	if (pmr->accl <= 0.0)
 	{
 	    pmr->accl = 0.1;
-	    db_post_events(pmr, &pmr->accl, monitor_mask);
+	    db_post_events(pmr, &pmr->accl, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2152,7 +2149,7 @@ static long special(DBADDR *paddr, int after)
 	if (pmr->bacc <= 0.0)
 	{
 	    pmr->bacc = 0.1;
-	    db_post_events(pmr, &pmr->bacc, monitor_mask);
+	    db_post_events(pmr, &pmr->bacc, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2294,7 +2291,7 @@ static long special(DBADDR *paddr, int after)
 	    changed = true;
 	}
 	if (changed == true)
-	    db_post_events(pmr, &pmr->frac, monitor_mask);
+	    db_post_events(pmr, &pmr->frac, DBE_VAL_LOG);
 	break;
 
 	/* new mres: make urev agree, and change (velo,bvel,vbas) to leave */
@@ -2339,7 +2336,7 @@ velcheckB:
 	if (pmr->vmax != (temp_dbl = fabs_urev * pmr->smax))
 	{
 	    pmr->vmax = temp_dbl;
-	    db_post_events(pmr, &pmr->vmax, monitor_mask);
+	    db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2378,25 +2375,25 @@ velcheckB:
 	/* Set to SET mode  */
     case motorRecordSSET:
 	pmr->set = 1;
-	db_post_events(pmr, &pmr->set, DBE_VALUE);
+	db_post_events(pmr, &pmr->set, DBE_VAL_LOG);
 	break;
 
 	/* Set to USE mode  */
     case motorRecordSUSE:
 	pmr->set = 0;
-	db_post_events(pmr, &pmr->set, DBE_VALUE);
+	db_post_events(pmr, &pmr->set, DBE_VAL_LOG);
 	break;
 
 	/* Set freeze-offset to freeze mode */
     case motorRecordFOF:
 	pmr->foff = 1;
-	db_post_events(pmr, &pmr->foff, DBE_VALUE);
+	db_post_events(pmr, &pmr->foff, DBE_VAL_LOG);
 	break;
 
 	/* Set freeze-offset to variable mode */
     case motorRecordVOF:
 	pmr->foff = 0;
-	db_post_events(pmr, &pmr->foff, DBE_VALUE);
+	db_post_events(pmr, &pmr->foff, DBE_VAL_LOG);
 	break;
 
 	/* New backlash distance.  Make sure retry deadband is achievable. */
@@ -2440,7 +2437,7 @@ pidcof:
 
 	    SEND_MSG();
 	    if (changed == 1)
-		db_post_events(pmr, temp_flt, monitor_mask);
+		db_post_events(pmr, temp_flt, DBE_VAL_LOG);
 	}
 	break;
 
@@ -2516,9 +2513,9 @@ pidcof:
 	    if (pmr->vmax != 0.0 && pmr->vbas > pmr->vmax)
 	    {
 		pmr->vmax = pmr->vbas;
-		db_post_events(pmr, &pmr->vmax, monitor_mask);
+		db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
 		pmr->smax = pmr->sbas;
-		db_post_events(pmr, &pmr->smax, monitor_mask);
+		db_post_events(pmr, &pmr->smax, DBE_VAL_LOG);
 	    }
 velcheckA:
 	    range_check(pmr, &pmr->velo, pmr->vbas, pmr->vmax);
@@ -2526,7 +2523,7 @@ velcheckA:
 	    if ((pmr->urev != 0.0) && (pmr->s != (temp_dbl = pmr->velo / fabs_urev)))
 	    {
 		pmr->s = temp_dbl;
-		db_post_events(pmr, &pmr->s, monitor_mask);
+		db_post_events(pmr, &pmr->s, DBE_VAL_LOG);
 	    }
     
 	    range_check(pmr, &pmr->bvel, pmr->vbas, pmr->vmax);
@@ -2534,7 +2531,7 @@ velcheckA:
 	    if ((pmr->urev != 0.0) && (pmr->sbak != (temp_dbl = pmr->bvel / fabs_urev)))
 	    {
 		pmr->sbak = temp_dbl;
-		db_post_events(pmr, &pmr->sbak, monitor_mask);
+		db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
 	    }
 
 	    range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
@@ -2796,49 +2793,49 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     nmap_bits.All = pmr->nmap; /* Initialize for MARKED_AUX. */
     
-    if ((local_mask = mask | (MARKED(M_RBV) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_RBV) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->rbv, local_mask);
 	UNMARK(M_RBV);
     }
     
-    if ((local_mask = mask | (MARKED(M_RRBV) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_RRBV) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->rrbv, local_mask);
 	UNMARK(M_RRBV);
     }
     
-    if ((local_mask = mask | (MARKED(M_DRBV) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_DRBV) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->drbv, local_mask);
 	UNMARK(M_DRBV);
     }
     
-    if ((local_mask = mask | (MARKED(M_RMP) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_RMP) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->rmp, local_mask);
 	UNMARK(M_RMP);
     }
     
-    if ((local_mask = mask | (MARKED(M_REP) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_REP) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->rep, local_mask);
 	UNMARK(M_REP);
     }
     
-    if ((local_mask = mask | (MARKED(M_DIFF) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_DIFF) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->diff, local_mask);
 	UNMARK(M_DIFF);
     }
     
-    if ((local_mask = mask | (MARKED(M_RDIF) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_RDIF) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->rdif, local_mask);
 	UNMARK(M_RDIF);
     }
     
-    if ((local_mask = mask | (MARKED(M_MSTA) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_MSTA) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->msta, local_mask);
 	UNMARK(M_MSTA);
@@ -2860,33 +2857,33 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     nmap_bits.All = pmr->nmap; /* Initialize for MARKED_AUX. */
 
-    if ((local_mask = mask | (MARKED(M_VAL) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_VAL) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->val, local_mask);
-    if ((local_mask = mask | (MARKED(M_DVAL) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_DVAL) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->dval, local_mask);
-    if ((local_mask = mask | (MARKED(M_RVAL) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_RVAL) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->rval, local_mask);
-    if ((local_mask = mask | (MARKED(M_TDIR) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_TDIR) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->tdir, local_mask);
-    if ((local_mask = mask | (MARKED(M_MIP) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_MIP) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->mip, local_mask);
-    if ((local_mask = mask | (MARKED(M_HLM) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_HLM) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->hlm, local_mask);
-    if ((local_mask = mask | (MARKED(M_LLM) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_LLM) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->llm, local_mask);
-    if ((local_mask = mask | (MARKED(M_SPMG) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_SPMG) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->spmg, local_mask);
-    if ((local_mask = mask | (MARKED(M_RCNT) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_RCNT) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->rcnt, local_mask);
-    if ((local_mask = mask | (MARKED(M_RLV) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_RLV) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->rlv, local_mask);
-    if ((local_mask = mask | (MARKED(M_OFF) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_OFF) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->off, local_mask);
-    if ((local_mask = mask | (MARKED(M_DHLM) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_DHLM) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->dhlm, local_mask);
-    if ((local_mask = mask | (MARKED(M_DLLM) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_DLLM) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->dllm, local_mask);
-    if ((local_mask = mask | (MARKED(M_HLS) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_HLS) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->hls, local_mask);
 	if ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0))
@@ -2894,7 +2891,7 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 	else
 	    db_post_events(pmr, &pmr->rlls, local_mask);
     }
-    if ((local_mask = mask | (MARKED(M_LLS) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_LLS) ? DBE_VAL_LOG : 0)))
     {
 	db_post_events(pmr, &pmr->lls, local_mask);
 	if ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0))
@@ -2902,46 +2899,46 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 	else
 	    db_post_events(pmr, &pmr->rhls, local_mask);
     }
-    if ((local_mask = mask | (MARKED(M_ATHM) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_ATHM) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->athm, local_mask);
-    if ((local_mask = mask | (MARKED(M_MRES) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_MRES) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->mres, local_mask);
-    if ((local_mask = mask | (MARKED(M_ERES) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_ERES) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->eres, local_mask);
-    if ((local_mask = mask | (MARKED(M_UEIP) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_UEIP) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->ueip, local_mask);
-    if ((local_mask = mask | (MARKED(M_URIP) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_URIP) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->urip, local_mask);
-    if ((local_mask = mask | (MARKED(M_LVIO) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_LVIO) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->lvio, local_mask);
-    if ((local_mask = mask | (MARKED(M_RDBD) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_RDBD) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->rdbd, local_mask);
 
-    if ((local_mask = mask | (MARKED_AUX(M_S) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_S) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->s, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_SBAS) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_SBAS) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->sbas, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_SBAK) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_SBAK) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->sbak, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_SREV) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_SREV) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->srev, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_UREV) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_UREV) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->urev, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_VELO) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_VELO) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->velo, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_VBAS) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_VBAS) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->vbas, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_BVEL) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_BVEL) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->bvel, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_MISS) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_MISS) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->miss, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_ACCL) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_ACCL) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->accl, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_BACC) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED_AUX(M_BACC) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->bacc, local_mask);
-    if ((local_mask = mask | (MARKED(M_MOVN) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_MOVN) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->movn, local_mask);
-    if ((local_mask = mask | (MARKED(M_DMOV) ? DBE_VALUE : 0)))
+    if ((local_mask = mask | (MARKED(M_DMOV) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->dmov, local_mask);
 
     UNMARK_ALL;
@@ -3171,7 +3168,6 @@ static void load_pos(motorRecord * pmr)
 
 static void check_speed_and_resolution(motorRecord * pmr)
 {
-    const unsigned short monitor_mask = DBE_VALUE;
     double fabs_urev = fabs(pmr->urev);
 
     /*
@@ -3211,8 +3207,8 @@ static void check_speed_and_resolution(motorRecord * pmr)
 	pmr->smax = pmr->vmax / fabs_urev;
     else
 	pmr->smax = pmr->vmax = 0.0;
-    db_post_events(pmr, &pmr->vmax, monitor_mask);
-    db_post_events(pmr, &pmr->smax, monitor_mask);
+    db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
+    db_post_events(pmr, &pmr->smax, DBE_VAL_LOG);
 
     /* SBAS (revolutions/sec) <--> VBAS (EGU/sec) */
     if (pmr->sbas != 0.0)
@@ -3225,8 +3221,8 @@ static void check_speed_and_resolution(motorRecord * pmr)
 	range_check(pmr, &pmr->vbas, 0.0, pmr->vmax);
 	pmr->sbas = pmr->vbas / fabs_urev;
     }
-    db_post_events(pmr, &pmr->vbas, monitor_mask);
-    db_post_events(pmr, &pmr->sbas, monitor_mask);
+    db_post_events(pmr, &pmr->vbas, DBE_VAL_LOG);
+    db_post_events(pmr, &pmr->sbas, DBE_VAL_LOG);
 
     
     /* S (revolutions/sec) <--> VELO (EGU/sec) */
@@ -3240,8 +3236,8 @@ static void check_speed_and_resolution(motorRecord * pmr)
 	range_check(pmr, &pmr->velo, pmr->vbas, pmr->vmax);
 	pmr->s = pmr->velo / fabs_urev;
     }
-    db_post_events(pmr, &pmr->velo, monitor_mask);
-    db_post_events(pmr, &pmr->s, monitor_mask);
+    db_post_events(pmr, &pmr->velo, DBE_VAL_LOG);
+    db_post_events(pmr, &pmr->s, DBE_VAL_LOG);
 
     /* SBAK (revolutions/sec) <--> BVEL (EGU/sec) */
     if (pmr->sbak != 0.0)
@@ -3254,8 +3250,8 @@ static void check_speed_and_resolution(motorRecord * pmr)
 	range_check(pmr, &pmr->bvel, pmr->vbas, pmr->vmax);
 	pmr->sbak = pmr->bvel / fabs_urev;
     }
-    db_post_events(pmr, &pmr->sbak, monitor_mask);
-    db_post_events(pmr, &pmr->bvel, monitor_mask);
+    db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
+    db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
 
     /* Sanity check on acceleration time. */
     if (pmr->accl == 0.0)
@@ -3383,7 +3379,7 @@ INPUT...	parm - pointer to parameter to be range check.
 */
 static void range_check(motorRecord *pmr, float *parm_ptr, double min, double max)
 {
-    const unsigned short monitor_mask = DBE_VALUE;
+    const unsigned short monitor_mask = DBE_VAL_LOG;
     bool changed = false;
     double parm_val = *parm_ptr;
 
@@ -3401,7 +3397,7 @@ static void range_check(motorRecord *pmr, float *parm_ptr, double min, double ma
     if (changed == true)
     {
 	*parm_ptr = parm_val;
-	db_post_events(pmr, parm_ptr, monitor_mask);
+	db_post_events(pmr, parm_ptr, DBE_VAL_LOG);
     }
 }
 
