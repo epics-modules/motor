@@ -1,12 +1,12 @@
 # This configures the MPF server stuff.  GPIB support is commented out, but can
 # be added by simply deleting the "# !GPIB! #" comments.
 
-#< ../nfsCommands
-
 #The following must be added for many board support packages
 #cd "... IOC st.cmd complete directory path ... "
 
 < cdCommands
+
+#< ../nfsCommands
  
 cd appbin
 ld < ipServerLib
