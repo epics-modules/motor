@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-02-06 17:43:35 $
+Last Modified:	$Date: 2002-02-12 17:46:10 $
 */
 
 /*
@@ -2129,7 +2129,7 @@ STATIC long do_work(motorRecord * pmr)
 		    }
 		    WRITE_MSG(GO, NULL);
 		}
-		pmr->cdir = (pmr->diff >= 0.0) ? 0 : 1;
+		pmr->cdir = (pmr->rdif >= 0.0) ? 0 : 1;
 		SEND_MSG();
 	    }
 	}
