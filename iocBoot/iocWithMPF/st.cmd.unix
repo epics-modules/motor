@@ -31,7 +31,7 @@ MM4000Setup(1, 10)
 #     (2) ASYN port name
 #     (3) address (GPIB only)
 MM4000Config(0, "L0")
-var drvMM4000debug 4
+#!var drvMM4000debug 4
 
 # Newport PM500 driver setup parameters:
 #     (1) maximum number of controllers in system
