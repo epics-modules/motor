@@ -49,6 +49,27 @@ was detected.  The erroneous intermittent retries occurred more often when the
 Oms setup parameters called for a high frequency (e.g., 60 Hz) "polling" rate
 and Oms interrupts were enabled.
 	File modified: drvOms58.c
+	Function modifications:
+		start_status()	- Wait forever for control register update bit
+					to clear before setting.
+		set_status()	- Request Data Area Update after DONE detected
+					so that both ASCII command data and
+					shared memory data match.
+		motorIsr()	- Only write to control register if update bit
+					is off (the ISR was clearing the
+					update bit rather than the VME58 board.
+
+2) Moved the Serial/GPIB communication label definitions from Newport specific
+drvMMCom.h to the more general motordrvCom.h.  New motor controllers will
+require these labels.
+	Files modified: drvMMCom.h, motordrvCom.h, drvMM4000.c, drvMM3000.c
+
+3) With previous releases, when using the motor record with soft channel
+device support, the DMOV field would become stuck on if the user put the motor
+in SET mode and entered a new DVAL or RVAL.  With this release, the above user
+action (i.e., "setting" a soft motor) results in the record being processed;
+which, in most cases, will clear DMOV.
+	Files modified: devSoft.h, devSoft.c, devSoftAux.c
 
 
 Modification Log from V3.5 to V4.0
