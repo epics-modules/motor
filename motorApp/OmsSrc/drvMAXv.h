@@ -3,9 +3,9 @@ FILENAME...	drvMAXv.h
 USAGE...	OMS driver level "include" information that is specific to OMS
 		model MAXv.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-06-21 21:42:31 $
+Last Modified:	$Date: 2004-09-20 21:31:05 $
 */
 
 /*
@@ -130,7 +130,7 @@ typedef union
     epicsUInt32 All;
     struct
     {
-	unsigned int na3		:5;	/* N/A bits 3 to 7. */
+	unsigned int na3		:5;	/* N/A bits 27-31. */
 	unsigned int data_avail		:1;
 	unsigned int text_response	:1;
 	unsigned int cmndError		:1;	/* Command error dectect */
@@ -167,7 +167,7 @@ struct MAXv_motor
     epicsUInt8 utility[BUFFER_SIZE];
     epicsUInt32 naD00[176];	/* N/A byte offset 0xD00 - 0xFBF. */
     STATUS1	status1_flag;
-    epicsUInt32 status1_irq_enable;
+    STATUS1	status1_irq_enable;
     epicsUInt32 status2_flag;
     epicsUInt32 status2_irq_enable;
     epicsUInt32 IACK_vector;
