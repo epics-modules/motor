@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.11 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:36:37 $
+Last Modified:	$Date: 2004-08-30 16:28:41 $
 */
 
 /*
@@ -39,6 +39,7 @@ Last Modified:	$Date: 2003-12-12 21:36:37 $
  * .01 10-21-02 rls - Convert to R3.14.x and C++.
  * .02 12-12-03 rls - Added MAX_SCAN_RATE.
  *		    - Converted MSTA #define's to bit field.
+ * .03 08-30-04 rls - Added osiUnistd.h for RTEMS.
  */
 
 #ifndef	INCmotorh
@@ -47,6 +48,7 @@ Last Modified:	$Date: 2003-12-12 21:36:37 $
 #include <stdio.h>
 #include <dbScan.h>
 #include <devSup.h>
+#include <osiUnistd.h> 
 
 /* Maximum message size of all supported devices; see drv[device].h for maximum
 message size for each device. */
