@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.c
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:01 $
+Last Modified:	$Date: 2000-04-19 15:29:43 $
 */
 
 /*
@@ -166,6 +166,15 @@ long oms_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 		    *parms = 0.00005;
 		    mr->pcof = 0.00005;
 		    rtnind = ERROR;
+		}
+		else if (command == STOP_AXIS)
+		{
+		    double  acc = (mr->velo / fabs(mr->res)) / mr->accl;
+		
+		    /* Put in acceleration. */
+		    strcat(motor_call->message, oms_table[SET_ACCEL].command);
+		    sprintf(buffer, "%ld", NINT(acc));
+		    strcat(motor_call->message, buffer);
 		}
     
 		if (cmnd_type == MOTION || cmnd_type == VELOCITY)
