@@ -2,9 +2,9 @@
 FILENAME...	drvMM4000.cc
 USAGE...	Motor record driver level support for Newport MM4000.
 
-Version:	$Revision: 1.16 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-21 15:35:00 $
+Version:	$Revision: 1.17 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2005-03-30 00:48:40 $
 */
 
 /*
@@ -769,7 +769,10 @@ static int motor_init()
     free_list.head = (struct mess_node *) NULL;
     free_list.tail = (struct mess_node *) NULL;
 
-    epicsThreadCreate((char *) "MM4000_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
+    epicsThreadCreate((char *) "MM4000_motor", 
+                      epicsThreadPriorityMedium,
+                      epicsThreadGetStackSize(epicsThreadStackMedium),
+                      (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     return(OK);
 }

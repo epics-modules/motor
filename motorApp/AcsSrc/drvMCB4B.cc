@@ -523,7 +523,9 @@ STATIC int motor_init()
 
     Debug(3, "motor_init: spawning motor task\n");
 
-    epicsThreadCreate((char *) "tMCB4B", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
+    epicsThreadCreate((char *) "tMCB4B", epicsThreadPriorityMedium, 
+                      epicsThreadGetStackSize(epicsThreadStackMedium), 
+                      (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     return(OK);
 }
