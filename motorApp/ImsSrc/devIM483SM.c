@@ -3,9 +3,9 @@ FILENAME...	devIM483SM.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-01 22:33:46 $
+Last Modified:	$Date: 2002-04-15 20:07:24 $
 */
 
 /*
@@ -35,9 +35,11 @@ Last Modified:	$Date: 2002-04-01 22:33:46 $
  *
  * Modification Log:
  * -----------------
- * .01	02/10/00  rls	copied from devMM4000.c
- * .02  05/16/01  rls	Added support for changing jog velocity while jogging.
- * .03  03/01/02  rls   eliminated "ASCII record separator (IS2) = /x1E".
+ * .01	02/10/00 rls copied from devMM4000.c
+ * .02  05/16/01 rls Added support for changing jog velocity while jogging.
+ * .03  03/01/02 rls eliminated "ASCII record separator (IS2) = /x1E".
+ * .04  04/15/02 rls Must support PRIMITIVE in build_trans() for INIT field to
+ *			work. 
  */
 
 
@@ -281,6 +283,7 @@ STATIC long IM483SM_build_trans(motor_cmnd command, double *parms, struct motorR
 	    send = OFF;
 	    break;
 	
+	case PRIMITIVE:
 	case GET_INFO:
 	    /* These commands are not actually done by sending a message, but
 	       rather they will indirectly cause the driver to read the status

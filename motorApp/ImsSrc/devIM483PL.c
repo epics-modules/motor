@@ -3,9 +3,9 @@ FILENAME...	devIM483PL.c
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-04-01 22:33:45 $
+Last Modified:	$Date: 2002-04-15 20:07:22 $
 */
 
 /*
@@ -35,9 +35,11 @@ Last Modified:	$Date: 2002-04-01 22:33:45 $
  *
  * Modification Log:
  * -----------------
- * .01	07/10/00  rls	copied from devIM483SM.c
- * .02  05/16/01  rls	Added support for changing jog velocity while jogging.
- * .03  03/01/02  rls   eliminated "ASCII record separator (IS2) = /x1E".
+ * .01	07/10/00 rls copied from devIM483SM.c
+ * .02  05/16/01 rls Added support for changing jog velocity while jogging.
+ * .03  03/01/02 rls eliminated "ASCII record separator (IS2) = /x1E".
+ * .04  04/15/02 rls Must support PRIMITIVE in build_trans() for INIT field to
+ *			work, and add axis name place holder (?) to message.
  */
 
 
@@ -211,7 +213,10 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
 	return(rtnval = ERROR);
 
     if (command == PRIMITIVE && mr->init != NULL && strlen(mr->init) != 0)
+    {
+	strcat(motor_call->message, "? ");
 	strcat(motor_call->message, mr->init);
+    }
 
     switch (command)
     {
@@ -281,6 +286,7 @@ STATIC long IM483PL_build_trans(motor_cmnd command, double *parms, struct motorR
 	    send = OFF;
 	    break;
 	
+	case PRIMITIVE:
 	case GET_INFO:
 	    /* These commands are not actually done by sending a message, but
 	       rather they will indirectly cause the driver to read the status
