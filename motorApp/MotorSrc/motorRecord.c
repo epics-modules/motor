@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.c
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.14 $
+Version:	$Revision: 1.15 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2001-10-02 23:16:52 $
+Last Modified:	$Date: 2002-02-06 17:43:35 $
 */
 
 /*
@@ -133,6 +133,10 @@ Last Modified:	$Date: 2001-10-02 23:16:52 $
  *		    - Removed erroneous setting of PP <- TRUE in init_record().
  *		    - Replaced PDIF with CDIR field (see README V4.5 item #2).
  *		    - Simplified "tdir" logic in process().
+ * .40 02-06-02 rls - Added "initcall" function argument to process_motor_info()
+ *		      so that init_record() can call process_motor_info()
+ *		      without reading the external readback device (RDBL).
+ *		      init_record() was causing LINK alarms.
  */
 
 #define VERSION 4.5
@@ -184,7 +188,7 @@ extern "C" {
 /*----------------debugging-----------------*/
 
 #ifdef	DEBUG
-    #define Debug(l, f, args...) { if(l<=motorRecordDebug) printf(f,## args); }
+    #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
 #else
     #define Debug(l, f, args...)
 #endif
@@ -197,7 +201,7 @@ STATIC long do_work(motorRecord *);
 STATIC void alarm(motorRecord *);
 STATIC void monitor(motorRecord *);
 STATIC void post_MARKed_fields(motorRecord *, unsigned short);
-STATIC void process_motor_info(motorRecord *);
+STATIC void process_motor_info(motorRecord *, BOOLEAN);
 STATIC void load_pos(motorRecord *);
 STATIC void check_speed_and_resolution(motorRecord *);
 STATIC void set_dial_highlimit(motorRecord *, struct motor_dset *);
@@ -273,17 +277,17 @@ Support for tracking the progress of motor from one invocation of 'process()'
 to the next.  The field 'pmr->mip' stores the motion in progress using these
 fields.  ('pmr' is a pointer to motorRecord.)
 *******************************************************************************/
-#define MIP_DONE	0x0000	/* No motion is in progress.                 */
-#define MIP_JOGF	0x0001	/* A jog-forward command is in progress.     */
-#define MIP_JOGR	0x0002	/* A jog-reverse command is in progress.     */
-#define MIP_JOG_BL	0x0004	/* Done jogging; now take out backlash.      */
+#define MIP_DONE	0x0000	/* No motion is in progress. */
+#define MIP_JOGF	0x0001	/* A jog-forward command is in progress. */
+#define MIP_JOGR	0x0002	/* A jog-reverse command is in progress. */
+#define MIP_JOG_BL	0x0004	/* Done jogging; now take out backlash. */
 #define MIP_JOG		(MIP_JOGF | MIP_JOGR | MIP_JOG_BL)
-#define MIP_HOMF	0x0008	/* A home-forward command is in progress.    */
-#define MIP_HOMR	0x0010	/* A home-reverse command is in progress.    */
+#define MIP_HOMF	0x0008	/* A home-forward command is in progress. */
+#define MIP_HOMR	0x0010	/* A home-reverse command is in progress. */
 #define MIP_HOME	(MIP_HOMF | MIP_HOMR)
-#define MIP_MOVE	0x0020	/* A move not resulting from Jog* or Hom*.   */
-#define MIP_RETRY	0x0040	/* A retry is in progress.                   */
-#define MIP_LOAD_P	0x0080	/* A load-position command is in progress.   */
+#define MIP_MOVE	0x0020	/* A move not resulting from Jog* or Hom*. */
+#define MIP_RETRY	0x0040	/* A retry is in progress. */
+#define MIP_LOAD_P	0x0080	/* A load-position command is in progress. */
 #define MIP_STOP	0x0200	/* We're trying to stop.  When combined with */
 /*                                 MIP_JOG* or MIP_HOM*, the jog or home     */
 /*                                 command is performed after motor stops    */
@@ -614,7 +618,7 @@ STATIC long init_record(motorRecord * pmr, int pass)
     /* v3.2 Set .res according to whether an encoder is in use. */
     pmr->res = ((pmr->msta & EA_PRESENT) && pmr->ueip) ? pmr->eres : pmr->mres;
 
-    process_motor_info(pmr);
+    process_motor_info(pmr, ON);
     enforceMinRetryDeadband(pmr);
 
     /*
@@ -1018,14 +1022,11 @@ LOGIC:
     IF function was invoked by a callback, OR, process delay acknowledged is ON?
 	Set process reason indicator to CALLBACK_DATA.
 	Call process_motor_info().
+	IF DMOV is TRUE.
+	    GOTO Exit.
 	IF motor-in-motion indicator (MOVN) is ON.
-	    IF [The UEIP {"Use Encoder If Present"} is set to NO], AND,
-	       [The URIP {"Use RDBL Link If Present"} is set to NO], AND,
+	    IF [Sign of RDIF is NOT the same as sign of CDIR], AND,
 	       [Dist. to target {DIFF} > 2 x (|Backlash Dist.| + Retry Deadband)], AND,
-	       [Previous RDIF (pre_rdif) is nonzero], AND
-	       [The polarity of the raw dist. to target {RDIF} has changed], AND,
-	       [Raw Velocity is nonzero], AND,
-	       [Raw Readback Value {RRBV} has been changed], AND,
 	       [MIP indicates this move is either (a result of a retry),OR,
 	    		(not from a Jog* or Hom*)]
 		Send Stop Motor command.
@@ -1056,8 +1057,6 @@ LOGIC:
 		ENDIF
 	    ENDIF
 	ENDIF
-	Save previous RDIF (pre_rdif) for target direction reversal detection in
-		above Stop logic.
     ENDIF
     IF Software travel limits are disabled.
 	Clear Limit violation field.
@@ -1089,6 +1088,7 @@ LOGIC:
     IF Done Moving field (DMOV) is TRUE.
 	Process the forward-scan-link record, call recGblFwdLink().
     ENDIF
+Exit:
     Update record timestamp, call recGblGetTimeStamp().
     Process alarms, call alarm().
     Monitor changes to record fields, call monitor().
@@ -1138,7 +1138,7 @@ STATIC long process(motorRecord * pmr)
 	 * Get position and status from motor controller. Get readback-link
 	 * value if link exists.
 	 */
-	process_motor_info(pmr);
+	process_motor_info(pmr, OFF);
 
 	/* For Soft Channel device support; skip most record processing if
 	 * called due to readback updates.
@@ -1262,6 +1262,7 @@ process_exit:
     alarm(pmr);			/* If we've violated alarm limits, yell. */
     monitor(pmr);		/* If values have changed, broadcast them. */
     pmr->pact = 0;
+    Debug(4, "process:---------------------- end; motor \"%s\"\n", pmr->name);
     return (status);
 }
 
@@ -1684,7 +1685,7 @@ STATIC long do_work(motorRecord * pmr)
 	if (!RTN_SUCCESS(status))
 	{
 	    pmr->udf = TRUE;
-	    return (1);
+	    return(ERROR);
 	}
 	pmr->udf = FALSE;
 	/* Later, we'll act on this new value of .val. */
@@ -3111,7 +3112,7 @@ STATIC void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 	process_motor_info()
 *******************************************************************************/
 STATIC void
- process_motor_info(motorRecord * pmr)
+ process_motor_info(motorRecord * pmr, BOOLEAN initcall)
 {
     unsigned long status = pmr->msta;
     double old_drbv = pmr->drbv;
@@ -3184,7 +3185,7 @@ STATIC void
      * have been read and propagated to .rbv in case .rdbl is a link involving
      * that field.
      */
-    if (pmr->urip)
+    if (pmr->urip && initcall == OFF)
     {
 	long status;
 
