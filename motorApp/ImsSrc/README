@@ -1,5 +1,6 @@
-MDrive 17,23,34
-===============
+
+                             MDrive 17,23,34
+==============================================================================
 
 Configuring MDrive for party mode.
 ----------------------------------
@@ -8,7 +9,7 @@ The following is a modified version of the procedure defined in Section 2.1,
 "Interfacing RS-485 Communications", page #25, of the "MDrive Motion Control"
 manual; Revision 02.05.2004.
 
-1. Connect the first MDrive Motion Control to the Host PC configured for Single
+1. Configure the first MDrive Motion Control to the Host PC configured for Single
         Mode Operation.
 	
 2. Establish communications.
@@ -36,3 +37,47 @@ manual; Revision 02.05.2004.
 
 9. Repeat steps 1 through 8 for each additional MDrive in the system using
         successive device names "1" through "9".
+	
+
+                             IM483
+==============================================================================
+
+
+Configuring IM483's for Party Mode communication.
+------------------------------------------------
+
+The following is a modified version of the procedure defined in the
+"Communication" section, page #9, of the "Software Reference Manual"; Revision
+051794.
+
+1) Power down the IM483's.  Configure each IM483 module for stand alone (single
+mode) communications.  For the APS Diviero chassis, jumper J4 for Stand Alone
+(1-2) and J7 for Master (1-2).
+
+2) Connect an RS-232 serial connection (9600,none,8,1) from a host terminal to
+the first ("A") controller's front panel connector.
+
+3) Power up the IM483.
+
+4) Assign the axis name.  At the host terminal, enter the letter "A" (0x41)
+followed by a space charter (0x20).
+
+5) The IM483 controller should respond by echoing the "A" character and the
+sign-on message at the host terminal, i.e.,
+
+A   1342     4038 ADVANCED MICRO SYSTEMS, INC
+MAX-2000 v1.15i
+
+6) Change the "Limit Polarity" to active high.  At the host terminal, enter
+"l1<enter>".  The IM483 should echo your input at the host terminal.
+
+7) Store parameters.  At the  host  terminal, enter "S<enter>".
+
+8) Move RS-232 connection to next controller.  At the host terminal, enter
+control c (^c).  Repeat steps 4 through 7 while incrementing the axis name
+(i.e, A, B, C, etc.).
+
+9) Set all the IM483's for Party Mode communication.  For the APS Diviero
+chassis, configure all of the IM483's for Party Mode by setting J4 to (2-3).
+Connect the RS-232 port to the Master IM483 and set all the remaining IM483's
+to Slave mode by setting J7 to (2-3).
