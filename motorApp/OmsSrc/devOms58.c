@@ -2,9 +2,9 @@
 FILENAME...	devOms58.c
 USAGE...	Motor record device level support for OMS VME58.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-02-08 22:19:01 $
+Last Modified:	$Date: 2000-07-14 20:24:20 $
 */
 
 /*
@@ -114,7 +114,7 @@ STATIC long oms_start_trans(struct motorRecord *mr)
     struct motor_trans *trans;
     long rtnval;
     
-    rtnval = motor_start_trans_com(mr, oms_cards, ADDRESS);
+    rtnval = motor_start_trans_com(mr, oms_cards);
     /* Initialize a STOP_AXIS command termination string pointer. */
     trans = (struct motor_trans *) mr->dpvt;
     trans->motor_call.termstring = " ID";
@@ -129,7 +129,7 @@ STATIC long oms_end_trans(struct motorRecord *mr)
 	return(ERROR);
     }
     else
-	return(motor_end_trans_com(mr, &oms58_access, "\r"));
+	return(motor_end_trans_com(mr, &oms58_access));
 }
 
 
