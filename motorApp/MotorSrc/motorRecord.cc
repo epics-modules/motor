@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-05-12 19:07:03 $
+Last Modified:	$Date: 2003-05-19 17:54:19 $
 */
 
 /*
@@ -65,6 +65,7 @@ Last Modified:	$Date: 2003-05-12 19:07:03 $
 #undef GEN_SIZE_OFFSET
 
 #include	"motor.h"
+#include	"epicsExport.h"
 
 
 /*----------------debugging-----------------*/
@@ -107,27 +108,28 @@ static long get_control_double(const DBADDR *, struct dbr_ctrlDouble *);
 static long get_alarm_double(const DBADDR  *, struct dbr_alDouble *);
 
 
-struct rset motorRSET =
+rset motorRSET =
 {
     RSETNUMBER,
     NULL,
     NULL,
-    init_record,
-    process,
-    special,
+    (RECSUPFUN) init_record,
+    (RECSUPFUN) process,
+    (RECSUPFUN) special,
     NULL,
     NULL,
     NULL,
     NULL,
-    get_units,
-    get_precision,
+    (RECSUPFUN) get_units,
+    (RECSUPFUN) get_precision,
     NULL,
     NULL,
     NULL,
-    get_graphic_double,
-    get_control_double,
-    get_alarm_double
+    (RECSUPFUN) get_graphic_double,
+    (RECSUPFUN) get_control_double,
+    (RECSUPFUN) get_alarm_double
 };
+epicsExportAddress(rset, motorRSET);
 
 
 /*******************************************************************************
