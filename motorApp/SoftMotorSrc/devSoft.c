@@ -2,9 +2,9 @@
 FILENAME...	devSoft.c
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:35:49 $
+Last Modified:	$Date: 2001-05-14 20:13:47 $
 */
 
 /*
@@ -75,6 +75,14 @@ STATIC long update(struct motorRecord *mr)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 
+#ifdef DMR_SOFTMOTOR_MODS
+    if (ptr->load_position)
+    {
+	mr->rmp = ptr->new_position;
+	mr->rep = ptr->new_position;
+	ptr->load_position = FALSE;
+    }
+#endif
     mr->msta = ptr->dinp_value ? RA_DONE : 0;
     return(ptr->callback_flag);
 }
@@ -121,6 +129,10 @@ STATIC long build(motor_cmnd command, double *parms, struct motorRecord *mr)
 	    {
 		struct soft_private *ptr = (struct soft_private *) mr->dpvt;
     
+#ifdef DMR_SOFTMOTOR_MODS
+		ptr->load_position = TRUE;
+		ptr->new_position = *parms;
+#endif
 		mr->msta = RA_DONE;
 		callbackRequest(&ptr->callback);
 	    }

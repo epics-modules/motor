@@ -4,9 +4,9 @@ FILENAME..	devSoft.h
 USAGE... 	This file contains information that is common to
 		all Soft channel device support modules.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-03-03 22:36:52 $
+Last Modified:	$Date: 2001-05-14 20:13:48 $
 */
 
 /*
@@ -45,6 +45,10 @@ struct soft_private
 {
     CALLBACK callback;
     long callback_flag;
+#ifdef DMR_SOFTMOTOR_MODS
+    BOOLEAN load_position;
+    long new_position;
+#endif
     short dinp_value;			/* Value from DINP link. */
     BOOLEAN default_done_behavior;	/* If the DINP is not programmed, exhibit
 					 * "immediate done" default behavior. */
