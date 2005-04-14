@@ -37,12 +37,12 @@
 
 #ifdef __GNUG__
     #ifdef DEBUG
-	volatile int drvMCB4BDebug = 0;
-	#define Debug(L, FMT, V...) { if(L <= drvMCB4BDebug) \
-                        { printf("%s(%d):",__FILE__,__LINE__); \
-                          printf(FMT,##V); } }
+        volatile int drvMCB4BDebug = 0;
+        #define Debug(L, FMT, V...) { if(L <= drvMCB4BDebug) \
+                            { printf("%s(%d):",__FILE__,__LINE__); \
+                              printf(FMT,##V); } }
     #else
-	#define Debug(L, FMT, V...)
+        #define Debug(L, FMT, V...)
     #endif
 #else
     #define Debug()
@@ -51,10 +51,10 @@
 /* Debugging notes:
  *   drvMCB4BDebug == 0  No debugging information is printed
  *   drvMCB4BDebug >= 1  Warning information is printed
- *   drvMCB4BDebug >= 2  Time-stamped messages are printed for each string 
+ *   drvMCB4BDebug >= 2  Time-stamped messages are printed for each string
  *                       sent to and received from the controller
  *   drvMCB4BDebug >= 3  Additional debugging messages
- */    
+ */
 
 int MCB4B_num_cards = 0;
 
@@ -131,7 +131,7 @@ static long report(int level)
           if (motor_state[card]) {
              cntrl = (struct MCB4Bcontroller *) motor_state[card]->DevicePrivate;
              printf("    MCB4B controller %d, port=%s, id: %s \n",
-                   card, cntrl->port, 
+                   card, cntrl->port,
                    motor_state[card]->ident);
           }
       }
@@ -215,21 +215,21 @@ STATIC int set_status(int card, int signal)
     status.Bits.RA_PLUS_LS = 0;
     status.Bits.RA_MINUS_LS = 0;
     if (response[5] == '1') {
-	status.Bits.RA_PLUS_LS = 1;
-	status.Bits.RA_DIRECTION = 1;
-	ls_active = true;
+        status.Bits.RA_PLUS_LS = 1;
+        status.Bits.RA_DIRECTION = 1;
+        ls_active = true;
     }
     if (response[6] == '1') {
-	status.Bits.RA_MINUS_LS = 1;
-	status.Bits.RA_DIRECTION = 0;
-	ls_active = true;
+        status.Bits.RA_MINUS_LS = 1;
+        status.Bits.RA_DIRECTION = 0;
+        ls_active = true;
     }
 
     /* encoder status */
-    status.Bits.EA_SLIP	      = 0;
+    status.Bits.EA_SLIP       = 0;
     status.Bits.EA_POSITION   = 0;
     status.Bits.EA_SLIP_STALL = 0;
-    status.Bits.EA_HOME	      = 0;
+    status.Bits.EA_HOME       = 0;
 
     /* Request the position of this motor */
     sprintf(command, "#%02dP", signal);
@@ -240,12 +240,12 @@ STATIC int set_status(int card, int signal)
 
     if (motorData == motor_info->position)
     {
-	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
-	    motor_info->no_motion_count++;
+        if (nodeptr != 0)   /* Increment counter only if motor is moving. */
+            motor_info->no_motion_count++;
     }
     else
     {
-	status.Bits.RA_DIRECTION = (motorData >= motor_info->position) ? 1 : 0;
+        status.Bits.RA_DIRECTION = (motorData >= motor_info->position) ? 1 : 0;
         motor_info->position = motorData;
         motor_info->encoder_position = motorData;
         motor_info->no_motion_count = 0;
@@ -260,11 +260,10 @@ STATIC int set_status(int card, int signal)
         motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
+        status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
-	nodeptr->postmsgptr != 0)
+    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 && nodeptr->postmsgptr != 0)
     {
         send_mess(card, nodeptr->postmsgptr, (char) NULL);
         /* The MCB4B always sends back a response, read it and discard */
@@ -284,7 +283,7 @@ STATIC int set_status(int card, int signal)
 STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
     struct MCB4Bcontroller *cntrl;
-    int nwrite;
+    size_t nwrite;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -313,7 +312,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 STATIC int recv_mess(int card, char *com, int flag)
 {
     double timeout;
-    int nread=0;
+    size_t nread=0;
     asynStatus status;
     struct MCB4Bcontroller *cntrl;
     int flush;
@@ -338,11 +337,12 @@ STATIC int recv_mess(int card, char *com, int flag)
         timeout = TIMEOUT;
     }
     if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
-    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE, 
+        status = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
                                     timeout, &nread, &eomReason);
 
-    if (nread < 1) com[0] = '\0'; 
-    
+    if (nread < 1)
+        com[0] = '\0';
+
     if (nread > 0) {
         Debug(2, "recv_mess: card %d, message = \"%s\"\n",\
                    card, com);
@@ -367,7 +367,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 /* MCB4BSetup()                                     */
 /*****************************************************/
 RTN_STATUS
-MCB4BSetup(int num_cards,   	/* maximum number of controllers in system */
+MCB4BSetup(int num_cards,       /* maximum number of controllers in system */
            int scan_rate)       /* polling rate - 1/60 sec units */
 {
     int itera;
@@ -379,9 +379,9 @@ MCB4BSetup(int num_cards,   	/* maximum number of controllers in system */
 
     /* Set motor polling task rate */
     if (scan_rate >= 1 && scan_rate <= 60)
-	targs.motor_scan_rate = scan_rate;
+        targs.motor_scan_rate = scan_rate;
     else
-	targs.motor_scan_rate = SCAN_RATE;
+        targs.motor_scan_rate = SCAN_RATE;
 
    /*
     * Allocate space for motor_state structure pointers.  Note this must be done
@@ -404,8 +404,8 @@ MCB4BSetup(int num_cards,   	/* maximum number of controllers in system */
 /* MCB4BConfig()                                    */
 /*****************************************************/
 RTN_STATUS
-MCB4BConfig(int card,		/* card being configured */
-            const char *name)	/* port name for asyn */
+MCB4BConfig(int card,           /* card being configured */
+            const char *name)   /* port name for asyn */
 {
     struct MCB4Bcontroller *cntrl;
 
@@ -457,8 +457,7 @@ STATIC int motor_init()
         cntrl = (struct MCB4Bcontroller *) brdptr->DevicePrivate;
 
         /* Initialize communications channel */
-
-	success_rtn = pasynOctetSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser, NULL);
+        success_rtn = pasynOctetSyncIO->connect(cntrl->port, 0, &cntrl->pasynUser, NULL);
         Debug(1, "motor_init, return from pasynOctetSyncIO->connect for port %s = %d, pasynUser=%p\n",\
               cntrl->port, success_rtn, cntrl->pasynUser);
 
@@ -498,7 +497,7 @@ STATIC int motor_init()
                 /* send_mess(card_index, buff, 0); */
                 /* Stop motor */
                 sprintf(buff,"#%02dQ", motor_index);
-                send_mess(card_index, buff, 0);     
+                send_mess(card_index, buff, 0);
                 recv_mess(card_index, buff, WAIT);    /* Throw away response */
                 strcpy(brdptr->ident, "MCB-4B");
                 motor_info->status.All = 0;
@@ -523,8 +522,8 @@ STATIC int motor_init()
 
     Debug(3, "motor_init: spawning motor task\n");
 
-    epicsThreadCreate((char *) "tMCB4B", epicsThreadPriorityMedium, 
-                      epicsThreadGetStackSize(epicsThreadStackMedium), 
+    epicsThreadCreate((char *) "tMCB4B", epicsThreadPriorityMedium,
+                      epicsThreadGetStackSize(epicsThreadStackMedium),
                       (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     return(OK);
