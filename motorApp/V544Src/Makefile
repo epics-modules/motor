@@ -1,3 +1,3 @@
 TOP=../..
-include $(TOP)/config/CONFIG_APP
-include $(TOP)/config/RULES_ARCHS
+include $(TOP)/configure/CONFIG_APP
+include $(TOP)/configure/RULES_ARCHS
