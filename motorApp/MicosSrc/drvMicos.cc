@@ -14,9 +14,9 @@
  * .04  07-12-2004   rls  Converted from MPF to asyn.
  * .05  09-20-2004   rls  support for 32axes/controller.
  * .08  12-16-2004   rls  - asyn R4.0 support.
- *		    	  - make debug variables always available.
- *		          - MS Visual C compatibility; make all epicsExportAddress
- *				extern "C" linkage.
+ *                - make debug variables always available.
+ *                - MS Visual C compatibility; make all epicsExportAddress
+ *              extern "C" linkage.
  */
 
 
@@ -29,7 +29,7 @@
 
 #define WAIT 1
 
-#define COMM_TIMEOUT 2	/* Command timeout in seconds. */
+#define COMM_TIMEOUT 2  /* Command timeout in seconds. */
 
 #define BUFF_SIZE 100       /* Maximum length of string to/from Micos */
 
@@ -42,10 +42,10 @@ struct mess_queue
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) {if (l <= drvMicosDebug) printf(f, ## args);}
+    #ifdef  DEBUG
+    #define Debug(l, f, args...) {if (l <= drvMicosDebug) printf(f, ## args);}
     #else
-	#define Debug(l, f, args...)
+    #define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
@@ -56,10 +56,10 @@ extern "C" {epicsExportAddress(int, drvMicosDebug);}
 /* Debugging notes:
  *   drvMicosDebug == 0  No debugging information is printed
  *   drvMicosDebug >= 1  Warning information is printed
- *   drvMicosDebug >= 2  Time-stamped messages are printed for each string 
+ *   drvMicosDebug >= 2  Time-stamped messages are printed for each string
  *                       sent to and received from the controller
  *   drvMicosDebug >= 3  Additional debugging messages
- */    
+ */
 
 volatile int Micos_num_cards = 0;
 volatile int Micos_num_axis = 0;
@@ -224,22 +224,22 @@ static int set_status(int card, int signal)
     /* check limits */
     status.Bits.RA_PLUS_LS = status.Bits.RA_MINUS_LS = 0;
     if ((bytes[5] & 0x04) & (bytes[3] & 0x04)) {  /* if +lim AND pos move */
-	status.Bits.RA_PLUS_LS = 1;
-	ls_active = true;
+    status.Bits.RA_PLUS_LS = 1;
+    ls_active = true;
     }
     if ((bytes[5] & 0x01) & !(bytes[3] & 0x04)) {  /* if -lim AND neg move */
-	status.Bits.RA_MINUS_LS = 1;
-	ls_active = true;
+    status.Bits.RA_MINUS_LS = 1;
+    ls_active = true;
     }
 
     /* encoder status */
-    status.Bits.EA_SLIP	      = 0;
+    status.Bits.EA_SLIP       = 0;
     status.Bits.EA_POSITION   = 0;
     status.Bits.EA_SLIP_STALL = 0;
-    status.Bits.EA_HOME	      = 0;
+    status.Bits.EA_HOME       = 0;
     if ((bytes[3] & 0x08) | (bytes[3] & 0x40)) {
         printf("drvMicos: set_status: EA_SLIP_STALL = 1, %ld\n", bytes[3]);
-	status.Bits.EA_SLIP_STALL = 1;
+    status.Bits.EA_SLIP_STALL = 1;
     }
 
     /* Request the position of this motor */
@@ -255,12 +255,12 @@ static int set_status(int card, int signal)
     /* derive direction information */
     if (motorData == motor_info->position)
     {
-	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
-	    motor_info->no_motion_count++;
+    if (nodeptr != 0)   /* Increment counter only if motor is moving. */
+        motor_info->no_motion_count++;
     }
     else
     {
-	status.Bits.RA_DIRECTION = (bytes[3] & 0x04) ? 1 : 0;
+    status.Bits.RA_DIRECTION = (bytes[3] & 0x04) ? 1 : 0;
         motor_info->position = motorData;
         motor_info->encoder_position = motorData;
         motor_info->no_motion_count = 0;
@@ -275,11 +275,11 @@ static int set_status(int card, int signal)
         motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		 status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
+         status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
     if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
-	nodeptr->postmsgptr != 0)
+    nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
         send_mess(card, buff, (char) NULL);
@@ -301,7 +301,7 @@ static RTN_STATUS send_mess(int card, const char *com, char *name)
 {
     struct MicosController *cntrl;
     int size;
-    int nwrite;
+    size_t nwrite;
 
     size = strlen(com);
 
@@ -318,8 +318,7 @@ static RTN_STATUS send_mess(int card, const char *com, char *name)
 
     Debug(2, "send_mess: sending message to card %d, message=%s\n", card, buff);
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
-    pasynOctetSyncIO->write(cntrl->pasynUser, com, size, COMM_TIMEOUT,
-			    &nwrite);
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, size, COMM_TIMEOUT, &nwrite);
 
     return (OK);
 }
@@ -332,7 +331,7 @@ static RTN_STATUS send_mess(int card, const char *com, char *name)
 static int recv_mess(int card, char *com, int flag)
 {
     struct MicosController *cntrl;
-    int nread = 0;
+    size_t nread = 0;
     asynStatus status = asynError;
     int eomReason;
 
@@ -347,23 +346,23 @@ static int recv_mess(int card, char *com, int flag)
 
     Debug(3, "recv_mess entry: card %d, flag=%d\n", card, flag);
     if (flag == FLUSH)
-	pasynOctetSyncIO->flush(cntrl->pasynUser);
+    pasynOctetSyncIO->flush(cntrl->pasynUser);
     else
-	status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
-				    COMM_TIMEOUT, &nread, &eomReason);
-    
+    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+                    COMM_TIMEOUT, &nread, &eomReason);
+
     if ((status != asynSuccess) || (nread <= 0))
     {
-	com[0] = '\0';
-	nread = 0;
-	if (flag != FLUSH)
-	{
-	    Debug(1, "recv_mess: card %d ERROR: no response\n", card);
-	}
+    com[0] = '\0';
+    nread = 0;
+    if (flag != FLUSH)
+    {
+        Debug(1, "recv_mess: card %d ERROR: no response\n", card);
+    }
     }
     else
     {
-	Debug(2, "recv_mess: card %d, message = \"%s\"\n", card, com);
+    Debug(2, "recv_mess: card %d, message = \"%s\"\n", card, com);
     }
     return (nread);
 }
@@ -393,9 +392,9 @@ MicosSetup(int num_cards,   /* maximum number of "controllers" in system */
 
     /* Set motor polling task rate */
     if (scan_rate >= 1 && scan_rate <= 60)
-	targs.motor_scan_rate = scan_rate;
+    targs.motor_scan_rate = scan_rate;
     else
-	targs.motor_scan_rate = SCAN_RATE;
+    targs.motor_scan_rate = SCAN_RATE;
 
    /*
     * Allocate space for motor_state structure pointers.  Note this must be done
@@ -418,8 +417,8 @@ MicosSetup(int num_cards,   /* maximum number of "controllers" in system */
 /* MicosConfig()                                    */
 /*****************************************************/
 RTN_STATUS
-MicosConfig(int card,		/* "controller" being configured */
-	    const char *name)	/* asyn server task name */
+MicosConfig(int card,       /* "controller" being configured */
+        const char *name)   /* asyn server task name */
 {
     struct MicosController *cntrl;
 
@@ -428,7 +427,7 @@ MicosConfig(int card,		/* "controller" being configured */
 
     motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
     motor_state[card]->DevicePrivate = malloc(sizeof(struct MicosController));
-    
+
     cntrl = (struct MicosController *) motor_state[card]->DevicePrivate;
     strcpy(cntrl->asyn_port, name);
     return(OK);
@@ -477,17 +476,17 @@ static int motor_init()
 
         /* Initialize communications channel */
         errind = false;
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
-						&cntrl->pasynUser, NULL);
-        
-	if (success_rtn == asynSuccess)
+    success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
+                        &cntrl->pasynUser, NULL);
+
+    if (success_rtn == asynSuccess)
         {
             int retry = 0;
 
-	    pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
-					   strlen(output_terminator));
-	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
-					  strlen(input_terminator));
+        pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
+                       strlen(output_terminator));
+        pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
+                      strlen(input_terminator));
 
             /* Each "controller" can have max 16 axes. */
             total_axis = Micos_num_axis;
@@ -529,12 +528,12 @@ static int motor_init()
                 sprintf(buff, "%c%def", CTLA, motor_index);
                 send_mess(card_index, buff, 0);
                 /* Don't turn on motor power, too dangerous */
-		   /*sprintf(buff,"#%02dW=1", motor_index); */
+           /*sprintf(buff,"#%02dW=1", motor_index); */
                 /* send_mess(card_index, buff, 0); */
                 /* Stop motor */
                 sprintf(buff,"%c%dab1", CTLA, motor_index);
                 send_mess(card_index, buff, 0);
-		   /* recv_mess(card_index, buff, WAIT);    Throw away response */
+           /* recv_mess(card_index, buff, WAIT);    Throw away response */
                 strcpy(brdptr->ident, "MICOS");
 
                 motor_info->status.All = 0;
@@ -543,9 +542,9 @@ static int motor_init()
                 motor_info->position = 0;
 
                 motor_info->encoder_present = YES;
-		motor_info->status.Bits.EA_PRESENT = 1;
-		motor_info->pid_present = YES;
-		motor_info->status.Bits.GAIN_SUPPORT = 1;
+        motor_info->status.Bits.EA_PRESENT = 1;
+        motor_info->pid_present = YES;
+        motor_info->status.Bits.GAIN_SUPPORT = 1;
 
                 set_status(card_index, motor_index);  /* Read status of each motor */
             }
@@ -556,7 +555,7 @@ static int motor_init()
     }
 
     Debug(3, "motor_init: spawning motor task\n");
-    
+
     any_motor_in_motion = 0;
 
     mess_queue.head = (struct mess_node *) NULL;
@@ -566,8 +565,8 @@ static int motor_init()
     free_list.tail = (struct mess_node *) NULL;
 
     epicsThreadCreate((char *) "tMicos", epicsThreadPriorityMedium,
-		      epicsThreadGetStackSize(epicsThreadStackMedium),
-		      (EPICSTHREADFUNC) motor_task, (void *) &targs);
+              epicsThreadGetStackSize(epicsThreadStackMedium),
+              (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     return (0);
 }

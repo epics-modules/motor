@@ -1,11 +1,11 @@
 /*
-FILENAME...	drvIM483PL.cc
-USAGE...	Motor record driver level support for Intelligent Motion
-		Systems, Inc. IM483(I/IE).
+FILENAME... drvIM483PL.cc
+USAGE...    Motor record driver level support for Intelligent Motion
+        Systems, Inc. IM483(I/IE).
 
-Version:	$Revision: 1.13 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-30 19:01:27 $
+Version:    $Revision: 1.14 $
+Modified By:    $Author: dkline $
+Last Modified:  $Date: 2005-04-14 18:51:51 $
 */
 
 /*****************************************************************
@@ -28,9 +28,9 @@ of this distribution.
  * .01 07/10/00 rls copied from drvIM483SM.c
  * .02 10/02/01 rls allow one retry after a communication error.
  * .03 04/15/02 rls Bug fix for limit switches. Set RA_DIRECTION in
- *		    set_status() based on (new - old) commanded position.
- *		    Removed support for "ASCII record separator (IS2) = /x1E"
- *		    from send_mess().
+ *          set_status() based on (new - old) commanded position.
+ *          Removed support for "ASCII record separator (IS2) = /x1E"
+ *          from send_mess().
  * .04 03/07/03 rls R3.14 conversion.
  * .05 02/03/04 rls Eliminate erroneous "Motor motion timeout ERROR".
  * .06 07/01/04 rls Converted from MPF to asyn.
@@ -38,22 +38,22 @@ of this distribution.
  *                  - support for 32axes/controller.
  *                  - remove '?' command line padding.
  * .08 12/14/04 rls - asyn R4.0 support.
- *		    - make debug variables always available.
- *		    - MS Visual C compatibility; make all epicsExportAddress
- *		      extern "C" linkage.
- *		    - retry on initial communication.
+ *          - make debug variables always available.
+ *          - MS Visual C compatibility; make all epicsExportAddress
+ *            extern "C" linkage.
+ *          - retry on initial communication.
  */
 
 /*
 DESIGN LIMITATIONS...
     1 - Like all controllers, the IM483 must be powered-on when EPICS is first
-	booted up.
+    booted up.
     2 - The IM483 cannot be power cycled while EPICS is up and running.  The
-	consequences are permanent communication lose with the IM483 until
-	EPICS is rebooted.
+    consequences are permanent communication lose with the IM483 until
+    EPICS is rebooted.
     3 - Like the Newport MM3000, the IM483's position can only be set to zero.
     4 - The IM483 uses an internal look-up table for acceleration/deceleration.
-	Translation between the IM483 and the ACCL/BACC fields is not obvious.
+    Translation between the IM483 and the ACCL/BACC fields is not obvious.
 */
 
 #include <string.h>
@@ -65,22 +65,22 @@ DESIGN LIMITATIONS...
 #include "epicsExport.h"
 
 /* Read Limit Status response values. */
-#define L_ALIMIT	1
-#define L_BLIMIT	2
-#define L_BOTH_LIMITS	3
+#define L_ALIMIT    1
+#define L_BLIMIT    2
+#define L_BOTH_LIMITS   3
 
 
-#define IM483PL_NUM_CARDS	8
-#define MAX_AXES		8
-#define BUFF_SIZE 50		/* Maximum length of string to/from IM483PL */
+#define IM483PL_NUM_CARDS   8
+#define MAX_AXES        8
+#define BUFF_SIZE 50        /* Maximum length of string to/from IM483PL */
 
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) {if (l <= drvIM483PLdebug) printf(f, ## args);}
+    #ifdef  DEBUG
+        #define Debug(l, f, args...) {if (l <= drvIM483PLdebug) printf(f, ## args);}
     #else
-	#define Debug(l, f, args...)
+        #define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
@@ -93,7 +93,7 @@ int IM483PL_num_cards = 0;
 static char *IM483PL_axis[] = {"A", "B", "C", "D", "E", "F", "G", "H"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
-#include	"motordrvComCode.h"
+#include    "motordrvComCode.h"
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
@@ -149,24 +149,24 @@ static long report(int level)
     int card;
 
     if (IM483PL_num_cards <=0)
-	printf("    No IM483PL controllers configured.\n");
+        printf("    No IM483PL controllers configured.\n");
     else
     {
-	for (card = 0; card < IM483PL_num_cards; card++)
-	{
-	    struct controller *brdptr = motor_state[card];
+        for (card = 0; card < IM483PL_num_cards; card++)
+        {
+            struct controller *brdptr = motor_state[card];
 
-	    if (brdptr == NULL)
-		printf("    IM483PL controller %d connection failed.\n", card);
-	    else
-	    {
-		struct IM483controller *cntrl;
+            if (brdptr == NULL)
+                printf("    IM483PL controller %d connection failed.\n", card);
+            else
+            {
+                struct IM483controller *cntrl;
 
-		cntrl = (struct IM483controller *) brdptr->DevicePrivate;
-	    	printf("    IM483PL controller #%d, port=%s, id: %s \n", card,
-		       cntrl->asyn_port, brdptr->ident);
-	    }
-	}
+                cntrl = (struct IM483controller *) brdptr->DevicePrivate;
+                printf("    IM483PL controller #%d, port=%s, id: %s \n", card,
+                cntrl->asyn_port, brdptr->ident);
+            }
+        }
     }
     return(OK);
 }
@@ -174,7 +174,7 @@ static long report(int level)
 
 static long init()
 {
-   /* 
+   /*
     * We cannot call motor_init() here, because that function can do GPIB I/O,
     * and hence requires that the drvGPIB have already been initialized.
     * That cannot be guaranteed, so we need to call motor_init from device
@@ -183,7 +183,7 @@ static long init()
     /* Check for setup */
     if (IM483PL_num_cards <= 0)
     {
-	Debug(1, "init(): IM483PL driver disabled. IM483PLSetup() missing from startup script.\n");
+        Debug(1, "init(): IM483PL driver disabled. IM483PLSetup() missing from startup script.\n");
     }
     return((long) 0);
 }
@@ -195,32 +195,32 @@ static void query_done(int card, int axis, struct mess_node *nodeptr)
 
 
 /********************************************************************************
-*										*
-* FUNCTION NAME: set_status							*
-*										*
-* LOGIC:									*
-*   Initialize.									*
-*   Send "Moving Status" query.							*
-*   Read response.								*
-*   IF normal response to query.						*
-*	Set communication status to NORMAL.					*
-*   ELSE									*
-*	IF communication status is NORMAL.					*
-*	    Set communication status to RETRY.					*
-*	    NORMAL EXIT.							*
-*	ELSE									*
-*	    Set communication status error.					*
-*	    ERROR EXIT.								*
-*	ENDIF									*
-*   ENDIF									*
-*										*
-*   IF "Moving Status" indicates any motion (i.e. status != 0).			*
-*	Clear "Done Moving" status bit.						*
-*   ELSE									*
-*	Set "Done Moving" status bit.						*
-*   ENDIF									*
-*										*
-*   										*
+*                                       *
+* FUNCTION NAME: set_status                         *
+*                                       *
+* LOGIC:                                    *
+*   Initialize.                                 *
+*   Send "Moving Status" query.                         *
+*   Read response.                              *
+*   IF normal response to query.                        *
+*   Set communication status to NORMAL.                 *
+*   ELSE                                    *
+*   IF communication status is NORMAL.                  *
+*       Set communication status to RETRY.                  *
+*       NORMAL EXIT.                            *
+*   ELSE                                    *
+*       Set communication status error.                 *
+*       ERROR EXIT.                             *
+*   ENDIF                                   *
+*   ENDIF                                   *
+*                                       *
+*   IF "Moving Status" indicates any motion (i.e. status != 0).         *
+*   Clear "Done Moving" status bit.                     *
+*   ELSE                                    *
+*   Set "Done Moving" status bit.                       *
+*   ENDIF                                   *
+*                                       *
+*                                           *
 ********************************************************************************/
 
 static int set_status(int card, int signal)
@@ -244,32 +244,32 @@ static int set_status(int card, int signal)
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
-	cntrl->status = NORMAL;
-	status.Bits.CNTRL_COMM_ERR = 0;
+        cntrl->status = NORMAL;
+        status.Bits.CNTRL_COMM_ERR = 0;
     }
     else
     {
-	if (cntrl->status == NORMAL)
-	{
-	    cntrl->status = RETRY;
-	    rtn_state = 0;
-	    goto exit;
-	}
-	else
-	{
-	    cntrl->status = COMM_ERR;
-	    status.Bits.CNTRL_COMM_ERR = 1;
-	    status.Bits.RA_PROBLEM     = 1;
-	    rtn_state = 1;
-	    goto exit;
-	}
+        if (cntrl->status == NORMAL)
+        {
+            cntrl->status = RETRY;
+            rtn_state = 0;
+            goto exit;
+        }
+        else
+        {
+            cntrl->status = COMM_ERR;
+            status.Bits.CNTRL_COMM_ERR = 1;
+            status.Bits.RA_PROBLEM     = 1;
+            rtn_state = 1;
+            goto exit;
+        }
     }
 
     rtnval = atoi(&buff[4]);
 
     status.Bits.RA_DONE = (rtnval != 0) ? 0 : 1;
 
-    /* 
+    /*
      * Parse motor position
      * Position string format: 1TP5.012,2TP1.123,3TP-100.567,...
      * Skip to substring for this motor, convert to double
@@ -282,17 +282,17 @@ static int set_status(int card, int signal)
 
     if (motorData == motor_info->position)
     {
-	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
-	    motor_info->no_motion_count++;
+        if (nodeptr != 0)   /* Increment counter only if motor is moving. */
+            motor_info->no_motion_count++;
     }
     else
     {
-	epicsInt32 newposition;
+        epicsInt32 newposition;
 
-	newposition = NINT(motorData);
-	status.Bits.RA_DIRECTION = (newposition >= motor_info->position) ? 1 : 0;
-	motor_info->position = newposition;
-	motor_info->no_motion_count = 0;
+        newposition = NINT(motorData);
+        status.Bits.RA_DIRECTION = (newposition >= motor_info->position) ? 1 : 0;
+        motor_info->position = newposition;
+        motor_info->no_motion_count = 0;
     }
 
     plusdir = (status.Bits.RA_DIRECTION) ? true : false;
@@ -304,21 +304,21 @@ static int set_status(int card, int signal)
     /* Set limit switch error indicators. */
     if (rtnval & 1)
     {
-	status.Bits.RA_PLUS_LS = 1;
-	if (plusdir == true)
-	    ls_active = true;
+        status.Bits.RA_PLUS_LS = 1;
+        if (plusdir == true)
+            ls_active = true;
     }
     else
-	status.Bits.RA_PLUS_LS = 0;
+        status.Bits.RA_PLUS_LS = 0;
 
     if (rtnval & 2)
     {
-	status.Bits.RA_MINUS_LS = 1;
-	if (plusdir == false)
-	    ls_active = true;
+        status.Bits.RA_MINUS_LS = 1;
+        if (plusdir == false)
+            ls_active = true;
     }
     else
-	status.Bits.RA_MINUS_LS = 0;
+        status.Bits.RA_MINUS_LS = 0;
 
     send_mess(card, " ] 1", IM483PL_axis[signal]);
     recv_mess(card, buff, 1);
@@ -330,21 +330,21 @@ static int set_status(int card, int signal)
     status.Bits.EA_POSITION = 0;
 
     /* encoder status */
-    status.Bits.EA_SLIP	      = 0;
+    status.Bits.EA_SLIP       = 0;
     status.Bits.EA_SLIP_STALL = 0;
-    status.Bits.EA_HOME	      = 0;
+    status.Bits.EA_HOME       = 0;
 
     if (motor_state[card]->motor_info[signal].encoder_present == NO)
-	motor_info->encoder_position = 0;
+        motor_info->encoder_position = 0;
     else
     {
-	send_mess(card, " z 0", IM483PL_axis[signal]);
-	recv_mess(card, buff, 1);
-	motorData = atof(&buff[5]);
-	motor_info->encoder_position = (int32_t) motorData;
+        send_mess(card, " z 0", IM483PL_axis[signal]);
+        recv_mess(card, buff, 1);
+        motorData = atof(&buff[5]);
+        motor_info->encoder_position = (int32_t) motorData;
     }
 
-    status.Bits.RA_PROBLEM	= 0;
+    status.Bits.RA_PROBLEM  = 0;
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
@@ -352,18 +352,17 @@ static int set_status(int card, int signal)
     motor_info->velocity = 0;
 
     if (!status.Bits.RA_DIRECTION)
-	motor_info->velocity *= -1;
+        motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
+        status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
-	nodeptr->postmsgptr != 0)
+    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 && nodeptr->postmsgptr != 0)
     {
-	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, IM483PL_axis[signal]);
-	nodeptr->postmsgptr = NULL;
+        strcpy(buff, nodeptr->postmsgptr);
+        send_mess(card, buff, IM483PL_axis[signal]);
+        nodeptr->postmsgptr = NULL;
     }
 
 exit:
@@ -373,47 +372,46 @@ exit:
 
 
 /*****************************************************/
-/* send a message to the IM483PL board		     */
-/* send_mess()			                     */
+/* send a message to the IM483PL board           */
+/* send_mess()                               */
 /*****************************************************/
 static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
     int comsize, namesize;
-    int nwrite;
+    size_t nwrite;
 
     comsize = (com == NULL) ? 0 : strlen(com);
     namesize = (name == NULL) ? 0 : strlen(name);
 
     if ((comsize + namesize) > MAX_MSG_SIZE)
     {
-	errlogMessage("drvIM483PL.c:send_mess(); message size violation.\n");
-	return(ERROR);
+        errlogMessage("drvIM483PL.c:send_mess(); message size violation.\n");
+        return(ERROR);
     }
-    else if (comsize == 0)	/* Normal exit on empty input message. */
-	return(OK);
+    else if (comsize == 0)  /* Normal exit on empty input message. */
+        return(OK);
 
     if (!motor_state[card])
     {
-	errlogPrintf("drvIM483PL.c:send_mess() - invalid card #%d\n", card);
-	return(ERROR);
+        errlogPrintf("drvIM483PL.c:send_mess() - invalid card #%d\n", card);
+        return(ERROR);
     }
 
     /* Make a local copy of the string and add the command line terminator. */
     if (namesize != 0)
     {
-	strcpy(local_buff, name);	    /* put in axis */
-	strcat(local_buff, com);
+        strcpy(local_buff, name);       /* put in axis */
+        strcat(local_buff, com);
     }
     else
-	strcpy(local_buff, com);
+        strcpy(local_buff, com);
 
     Debug(2, "send_mess(): message = %s\n", local_buff);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
-    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff),
-		       COMM_TIMEOUT, &nwrite);
+    pasynOctetSyncIO->write(cntrl->pasynUser, local_buff, strlen(local_buff), COMM_TIMEOUT, &nwrite);
 
     return(OK);
 }
@@ -421,31 +419,30 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 
 /*****************************************************/
 /* receive a message from the IM483 board           */
-/* recv_mess()			                     */
+/* recv_mess()                               */
 /*****************************************************/
 static int recv_mess(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    int nread = 0;
+    size_t nread = 0;
     asynStatus status = asynError;
     int eomReason;
 
     /* Check that card exists */
     if (!motor_state[card])
-	return(ERROR);
+        return(ERROR);
 
     cntrl = (struct IM483controller *) motor_state[card]->DevicePrivate;
 
     if (flag == FLUSH)
-	pasynOctetSyncIO->flush(cntrl->pasynUser);
+        pasynOctetSyncIO->flush(cntrl->pasynUser);
     else
-	status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
-				    COMM_TIMEOUT, &nread, &eomReason);
+        status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, COMM_TIMEOUT, &nread, &eomReason);
 
     if ((status != asynSuccess) || (nread <= 0))
     {
-	com[0] = '\0';
-	nread = 0;
+        com[0] = '\0';
+        nread = 0;
     }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
@@ -458,33 +455,32 @@ static int recv_mess(int card, char *com, int flag)
 /* IM483PLSetup()                                     */
 /*****************************************************/
 RTN_STATUS
-IM483PLSetup(int num_cards,	/* maximum number of controllers in system.  */
-	     int scan_rate)	/* polling rate - 1/60 sec units.  */
+IM483PLSetup(int num_cards, /* maximum number of controllers in system.  */
+         int scan_rate) /* polling rate - 1/60 sec units.  */
 {
     int itera;
 
     if (num_cards < 1 || num_cards > IM483PL_NUM_CARDS)
-	IM483PL_num_cards = IM483PL_NUM_CARDS;
+        IM483PL_num_cards = IM483PL_NUM_CARDS;
     else
-	IM483PL_num_cards = num_cards;
+        IM483PL_num_cards = num_cards;
 
     /* Set motor polling task rate */
     if (scan_rate >= 1 && scan_rate <= 60)
-	targs.motor_scan_rate = scan_rate;
+        targs.motor_scan_rate = scan_rate;
     else
-	targs.motor_scan_rate = SCAN_RATE;
+        targs.motor_scan_rate = SCAN_RATE;
 
-   /* 
+   /*
     * Allocate space for motor_state structures.  Note this must be done
     * before IM483Config is called, so it cannot be done in motor_init()
     * This means that we must allocate space for a card without knowing
     * if it really exists, which is not a serious problem
     */
-    motor_state = (struct controller **) malloc(IM483PL_num_cards *
-						sizeof(struct controller *));
+    motor_state = (struct controller **) malloc(IM483PL_num_cards * sizeof(struct controller *));
 
     for (itera = 0; itera < IM483PL_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = (struct controller *) NULL;
 
     return(OK);
 }
@@ -495,8 +491,8 @@ IM483PLSetup(int num_cards,	/* maximum number of controllers in system.  */
 /* IM483PLConfig()                                    */
 /*****************************************************/
 RTN_STATUS
-IM483PLConfig(int card,		/* card being configured */
-              const char *name)	/* asyn server task name */
+IM483PLConfig(int card,         /* card being configured */
+              const char *name) /* asyn server task name */
 {
     struct IM483controller *cntrl;
 
@@ -513,10 +509,10 @@ IM483PLConfig(int card,		/* card being configured */
 
 
 /*****************************************************/
-/* initialize all software and hardware		     */
+/* initialize all software and hardware          */
 /* This is called from the initialization routine in */
 /* device support.                                   */
-/* motor_init()			                     */
+/* motor_init()                              */
 /*****************************************************/
 static int motor_init()
 {
@@ -530,86 +526,83 @@ static int motor_init()
     static const char output_terminator[] = "\n";
     static const char input_terminator[]  = "\n";
 
-    initialized = true;	/* Indicate that driver is initialized. */
+    initialized = true; /* Indicate that driver is initialized. */
 
     /* Check for setup */
     if (IM483PL_num_cards <= 0)
-	return(ERROR);
+        return(ERROR);
 
     for (card_index = 0; card_index < IM483PL_num_cards; card_index++)
     {
-	if (!motor_state[card_index])
-	    continue;
-	
-	brdptr = motor_state[card_index];
-	brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
-	brdptr->cmnd_response = true;
-	total_cards = card_index + 1;
-	cntrl = (struct IM483controller *) brdptr->DevicePrivate;
+        if (!motor_state[card_index])
+            continue;
 
-	/* Initialize communications channel */
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
-						&cntrl->pasynUser, NULL);
+        brdptr = motor_state[card_index];
+        brdptr->ident[0] = (char) NULL; /* No controller identification message. */
+        brdptr->cmnd_response = true;
+        total_cards = card_index + 1;
+        cntrl = (struct IM483controller *) brdptr->DevicePrivate;
 
-	if (success_rtn == asynSuccess)
-	{
-	    pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
-					   strlen(output_terminator));
-	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
-					  strlen(input_terminator));
-	    /* Send a message to the board, see if it exists */
-	    /* flush any junk at input port - should not be any data available */
+        /* Initialize communications channel */
+        success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0, &cntrl->pasynUser, NULL);
+
+        if (success_rtn == asynSuccess)
+        {
+            pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator, strlen(output_terminator));
+            pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator, strlen(input_terminator));
+            /* Send a message to the board, see if it exists */
+            /* flush any junk at input port - should not be any data available */
             pasynOctetSyncIO->flush(cntrl->pasynUser);
-    
-	    for (total_axis = 0; total_axis < MAX_AXES; total_axis++)
-	    {
-		int retry = 0;
 
-		do
-		{
-		    send_mess(card_index, " Z 0", IM483PL_axis[total_axis]);
-		    status = recv_mess(card_index, buff, 1);
-		    retry++;
-		} while (status <= 0 && retry < 3);
+            for (total_axis = 0; total_axis < MAX_AXES; total_axis++)
+            {
+                int retry = 0;
 
-		if (status <= 0)
-		    break;
-	    }
-	    brdptr->total_axis = total_axis;
-	}
+                do
+                {
+                    send_mess(card_index, " Z 0", IM483PL_axis[total_axis]);
+                    status = recv_mess(card_index, buff, 1);
+                    retry++;
+                } while (status <= 0 && retry < 3);
 
-	if (success_rtn == asynSuccess && total_axis > 0)
-	{
-	    brdptr->localaddr = (char *) NULL;
-	    brdptr->motor_in_motion = 0;
+                if (status <= 0)
+                    break;
+            }
+            brdptr->total_axis = total_axis;
+        }
 
-	    for (motor_index = 0; motor_index < total_axis; motor_index++)
-	    {
-		struct mess_info *motor_info = &brdptr->motor_info[motor_index];
-		int loop_state;
+        if (success_rtn == asynSuccess && total_axis > 0)
+        {
+            brdptr->localaddr = (char *) NULL;
+            brdptr->motor_in_motion = 0;
 
-		motor_info->status.All = 0;
-		motor_info->no_motion_count = 0;
-		motor_info->encoder_position = 0;
-		motor_info->position = 0;
-		brdptr->motor_info[motor_index].motor_motion = NULL;
-		/* Assume encoder support, i.e., IM483IE. */
-		motor_info->encoder_present = YES;
-		motor_info->status.Bits.EA_PRESENT = 1;
+            for (motor_index = 0; motor_index < total_axis; motor_index++)
+            {
+                struct mess_info *motor_info = &brdptr->motor_info[motor_index];
+                int loop_state;
+
+                motor_info->status.All = 0;
+                motor_info->no_motion_count = 0;
+                motor_info->encoder_position = 0;
+                motor_info->position = 0;
+                brdptr->motor_info[motor_index].motor_motion = NULL;
+                /* Assume encoder support, i.e., IM483IE. */
+                motor_info->encoder_present = YES;
+                motor_info->status.Bits.EA_PRESENT = 1;
 
                 /* Determine if encoder present based on open/closed loop mode. */
-		loop_state = 0;
-		if (loop_state != 0)
-		{
-		    motor_info->pid_present = YES;
-		    motor_info->status.Bits.GAIN_SUPPORT = 1;
-		}
+                loop_state = 0;
+                if (loop_state != 0)
+                {
+                    motor_info->pid_present = YES;
+                    motor_info->status.Bits.GAIN_SUPPORT = 1;
+                }
 
-		set_status(card_index, motor_index);  /* Read status of each motor */
-	    }
-	}
-	else
-	    motor_state[card_index] = (struct controller *) NULL;
+                set_status(card_index, motor_index);  /* Read status of each motor */
+            }
+        }
+        else
+            motor_state[card_index] = (struct controller *) NULL;
     }
 
     any_motor_in_motion = 0;
@@ -621,9 +614,9 @@ static int motor_init()
     free_list.tail = (struct mess_node *) NULL;
 
     epicsThreadCreate((char *) "IM483PL_motor", epicsThreadPriorityMedium,
-		      epicsThreadGetStackSize(epicsThreadStackMedium),
-		      (EPICSTHREADFUNC) motor_task, (void *) &targs);
-    
+              epicsThreadGetStackSize(epicsThreadStackMedium),
+              (EPICSTHREADFUNC) motor_task, (void *) &targs);
+
     return(OK);
 }
 

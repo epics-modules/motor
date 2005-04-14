@@ -1,16 +1,16 @@
 /*
-FILENAME...	drvMM3000.cc
-USAGE...	Motor record driver level support for Newport MM3000.
+FILENAME... drvMM3000.cc
+USAGE...    Motor record driver level support for Newport MM3000.
 
-Version:	$Revision: 1.17 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-30 19:10:48 $
+Version:    $Revision: 1.18 $
+Modified By:    $Author: dkline $
+Last Modified:  $Date: 2005-04-14 18:52:47 $
 */
 
 /*
  *      Original Author: Mark Rivers
  *      Date: 10/20/97
- *	Current Author: Ron Sluiter
+ *  Current Author: Ron Sluiter
  *
  *      Experimental Physics and Industrial Control System (EPICS)
  *
@@ -22,16 +22,16 @@ Last Modified:	$Date: 2005-03-30 19:10:48 $
  *      and (W-31-109-ENG-38) at Argonne National Laboratory.
  *
  *      Initial development by:
- *	      The Controls and Automation Group (AT-8)
- *	      Ground Test Accelerator
- *	      Accelerator Technology Division
- *	      Los Alamos National Laboratory
+ *        The Controls and Automation Group (AT-8)
+ *        Ground Test Accelerator
+ *        Accelerator Technology Division
+ *        Los Alamos National Laboratory
  *
  *      Co-developed with
- *	      The Controls and Computing Group
- *	      Accelerator Systems Division
- *	      Advanced Photon Source
- *	      Argonne National Laboratory
+ *        The Controls and Computing Group
+ *        Accelerator Systems Division
+ *        Advanced Photon Source
+ *        Argonne National Laboratory
  *
  * Modification Log:
  * -----------------
@@ -39,26 +39,26 @@ Last Modified:	$Date: 2005-03-30 19:10:48 $
  * .02 10-30-97 mlr Replaced driver calls with gpipIO functions
  * .03 10-30-98 mlr Minor code cleanup, improved formatting
  * .04 02-01-99 mlr Added temporary fix to delay reading motor positions at
- *			the end of a move.
+ *          the end of a move.
  * .05 04-18-00 rls MM3000 takes 2 to 5 seconds to respond to queries after
- *			hitting a hard travel limit.  Adjusted GPIB and SERIAL
- *			timeouts accordingly.  Deleted communication retries.
- *			Reworked travel limit processing so that direction
- *			status bit matches limit switch.  Copied recv_mess()
- *			logic from drvMM4000.c.  Use TPE command to determine
- *			if motor has an encoder.
+ *          hitting a hard travel limit.  Adjusted GPIB and SERIAL
+ *          timeouts accordingly.  Deleted communication retries.
+ *          Reworked travel limit processing so that direction
+ *          status bit matches limit switch.  Copied recv_mess()
+ *          logic from drvMM4000.c.  Use TPE command to determine
+ *          if motor has an encoder.
  * .06 10/02/01 rls - allow one retry after a communication error.
- *		    - use motor status response bit-field.
- * .07 05-22-03	rls - Converted to R3.14.2.
+ *          - use motor status response bit-field.
+ * .07 05-22-03 rls - Converted to R3.14.2.
  * .08 10/23/03 rls - recv_mess() eats the controller error response, outputs
- *			an error message and retries.
+ *          an error message and retries.
  * .09 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
  * .10 07/09/04 rls - removed unused <driver>Setup() argument.
  * .11 07/28/04 rls - "epicsExport" debug variable.
  * .12 09/21/04 rls - support for 32axes/controller.
  * .13 12/21/04 rls - MS Visual C compatibility; make all epicsExportAddress
- *		      extern "C" linkage.
- *		    - make debug variables always available.
+ *            extern "C" linkage.
+ *          - make debug variables always available.
  *
  */
 
@@ -89,18 +89,18 @@ Last Modified:	$Date: 2005-03-30 19:10:48 $
 #define M_MINUS_LIMIT     0x10
 #define M_HOME_SIGNAL     0x20
 
-#define MM3000_NUM_CARDS	4
+#define MM3000_NUM_CARDS    4
 #define BUFF_SIZE 100       /* Maximum length of string to/from MM3000 */
 
 /* The MM3000 does not respond for 2 to 5 seconds after hitting a travel limit. */
-#define SERIAL_TIMEOUT	5.0	/* Command timeout in sec. */
+#define SERIAL_TIMEOUT  5.0 /* Command timeout in sec. */
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) { if(l<=drvMM3000debug) printf(f,## args); }
+    #ifdef  DEBUG
+    #define Debug(l, f, args...) { if(l<=drvMM3000debug) printf(f,## args); }
     #else
-	#define Debug(l, f, args...)
+    #define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
@@ -112,7 +112,7 @@ extern "C" {epicsExportAddress(int, drvMM3000debug);}
 int MM3000_num_cards = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
-#include	"motordrvComCode.h"
+#include    "motordrvComCode.h"
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
@@ -168,26 +168,26 @@ static long report(int level)
     int card;
 
     if (MM3000_num_cards <=0)
-	printf("    No MM3000 controllers configured.\n");
+    printf("    No MM3000 controllers configured.\n");
     else
     {
-	for (card = 0; card < MM3000_num_cards; card++)
-	{
-	    struct controller *brdptr = motor_state[card];
+    for (card = 0; card < MM3000_num_cards; card++)
+    {
+        struct controller *brdptr = motor_state[card];
 
-	    if (brdptr == NULL)
-		printf("    MM3000 controller %d connection failed.\n", card);
-	    else
-	    {
-		struct MMcontroller *cntrl;
+        if (brdptr == NULL)
+        printf("    MM3000 controller %d connection failed.\n", card);
+        else
+        {
+        struct MMcontroller *cntrl;
 
-		cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
-	    	printf("    MM3000 controller %d asyn port= %s, address=%d, id: %s \n", 
-			   card, cntrl->asyn_port, cntrl->asyn_address,
-			   brdptr->ident);
-		    break;
-	    }
-	}
+        cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
+            printf("    MM3000 controller %d asyn port= %s, address=%d, id: %s \n",
+               card, cntrl->asyn_port, cntrl->asyn_address,
+               brdptr->ident);
+            break;
+        }
+    }
     }
     return(OK);
 }
@@ -195,7 +195,7 @@ static long report(int level)
 
 static long init()
 {
-   /* 
+   /*
     * We cannot call motor_init() here, because that function can do GPIB I/O,
     * and hence requires that the drvGPIB have already been initialized.
     * That cannot be guaranteed, so we need to call motor_init from device
@@ -204,7 +204,7 @@ static long init()
     /* Check for setup */
     if (MM3000_num_cards <= 0)
     {
-	Debug(1, "init(): MM3000 driver disabled. MM3000Setup() missing from startup script.\n");
+    Debug(1, "init(): MM3000 driver disabled. MM3000Setup() missing from startup script.\n");
     }
     return((long) 0);
 }
@@ -243,25 +243,25 @@ STATIC int set_status(int card, int signal)
     charcnt = recv_mess(card, inbuff, 1);
     if (charcnt > 0)
     {
-	cntrl->status = NORMAL;
-	status.Bits.CNTRL_COMM_ERR = 0;
+    cntrl->status = NORMAL;
+    status.Bits.CNTRL_COMM_ERR = 0;
     }
     else
     {
-	if (cntrl->status == NORMAL)
-	{
-	    cntrl->status = RETRY;
-	    rtn_state = 0;
-	    goto exit;
-	}
-	else
-	{
-	    cntrl->status = COMM_ERR;
-	    status.Bits.CNTRL_COMM_ERR = 1;
-	    status.Bits.RA_PROBLEM     = 1;
-	    rtn_state = 1;
-	    goto exit;
-	}
+    if (cntrl->status == NORMAL)
+    {
+        cntrl->status = RETRY;
+        rtn_state = 0;
+        goto exit;
+    }
+    else
+    {
+        cntrl->status = COMM_ERR;
+        status.Bits.CNTRL_COMM_ERR = 1;
+        status.Bits.RA_PROBLEM     = 1;
+        rtn_state = 1;
+        goto exit;
+    }
     }
 
     mstat.All = inbuff[0];
@@ -277,21 +277,21 @@ STATIC int set_status(int card, int signal)
 
     /* Set Travel limit switch status bits. */
     if (mstat.Bits.plustTL == false)
-	status.Bits.RA_PLUS_LS = 0;
+    status.Bits.RA_PLUS_LS = 0;
     else
     {
-	status.Bits.RA_PLUS_LS = 1;
-	if (plusdir == true)
-	    ls_active = true;
+    status.Bits.RA_PLUS_LS = 1;
+    if (plusdir == true)
+        ls_active = true;
     }
 
     if (mstat.Bits.minusTL == false)
-	status.Bits.RA_MINUS_LS = 0;
+    status.Bits.RA_MINUS_LS = 0;
     else
     {
-	status.Bits.RA_MINUS_LS = 1;
-	if (plusdir == false)
-	    ls_active = true;
+    status.Bits.RA_MINUS_LS = 1;
+    if (plusdir == false)
+        ls_active = true;
     }
 
     status.Bits.RA_HOME = (mstat.Bits.homels == false) ? 0 : 1;
@@ -299,34 +299,34 @@ STATIC int set_status(int card, int signal)
     status.Bits.EA_POSITION = (mstat.Bits.NOT_power == false) ? 1 : 0;
 
     /* encoder status */
-    status.Bits.EA_SLIP 	= 0;
-    status.Bits.EA_SLIP_STALL	= 0;
-    status.Bits.EA_HOME		= 0;
+    status.Bits.EA_SLIP     = 0;
+    status.Bits.EA_SLIP_STALL   = 0;
+    status.Bits.EA_HOME     = 0;
 
     sprintf(outbuff, "%dTP", signal + 1);
     send_mess(card, outbuff, (char) NULL);
     charcnt = recv_mess(card, inbuff, 1);
     if (charcnt > 0)
     {
-	cntrl->status = NORMAL;
-	status.Bits.CNTRL_COMM_ERR = 0;
+    cntrl->status = NORMAL;
+    status.Bits.CNTRL_COMM_ERR = 0;
     }
     else
     {
-	if (cntrl->status == NORMAL)
-	{
-	    cntrl->status = RETRY;
-	    rtn_state = 0;
-	    goto exit;
-	}
-	else
-	{
-	    cntrl->status = COMM_ERR;
-	    status.Bits.CNTRL_COMM_ERR = 1;
-	    status.Bits.RA_PROBLEM     = 1;
-	    rtn_state = 1;
-	    goto exit;
-	}
+    if (cntrl->status == NORMAL)
+    {
+        cntrl->status = RETRY;
+        rtn_state = 0;
+        goto exit;
+    }
+    else
+    {
+        cntrl->status = COMM_ERR;
+        status.Bits.CNTRL_COMM_ERR = 1;
+        status.Bits.RA_PROBLEM     = 1;
+        rtn_state = 1;
+        goto exit;
+    }
     }
 
     tok_save = NULL;
@@ -335,18 +335,18 @@ STATIC int set_status(int card, int signal)
 
     if (motorData == motor_info->position)
     {
-	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
-	    motor_info->no_motion_count++;
+    if (nodeptr != 0)   /* Increment counter only if motor is moving. */
+        motor_info->no_motion_count++;
     }
     else
     {
-	motor_info->position = (epicsInt32) motorData;
-	if (motor_state[card]->motor_info[signal].encoder_present == YES)
-	    motor_info->encoder_position = (epicsInt32) motorData;
-	else
-	    motor_info->encoder_position = 0;
+    motor_info->position = (epicsInt32) motorData;
+    if (motor_state[card]->motor_info[signal].encoder_present == YES)
+        motor_info->encoder_position = (epicsInt32) motorData;
+    else
+        motor_info->encoder_position = 0;
 
-	motor_info->no_motion_count = 0;
+    motor_info->no_motion_count = 0;
     }
 
     status.Bits.RA_PROBLEM = 0;
@@ -357,18 +357,18 @@ STATIC int set_status(int card, int signal)
     motor_info->velocity = 0;
 
     if (!status.Bits.RA_DIRECTION)
-	motor_info->velocity *= -1;
+    motor_info->velocity *= -1;
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		 status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
+         status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
     if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
-	nodeptr->postmsgptr != 0)
+    nodeptr->postmsgptr != 0)
     {
-	strcpy(outbuff, nodeptr->postmsgptr);
-	send_mess(card, outbuff, (char) NULL);
-	nodeptr->postmsgptr = NULL;
+    strcpy(outbuff, nodeptr->postmsgptr);
+    send_mess(card, outbuff, (char) NULL);
+    nodeptr->postmsgptr = NULL;
     }
 
 exit:
@@ -378,44 +378,43 @@ exit:
 
 
 /*****************************************************/
-/* send a message to the MM3000 board		     */
-/* send_mess()			                     */
+/* send a message to the MM3000 board            */
+/* send_mess()                               */
 /*****************************************************/
 STATIC RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
     int size;
-    int nwrite;
+    size_t nwrite;
 
     size = strlen(com);
 
     if (size > MAX_MSG_SIZE)
     {
-	errlogMessage("drvMM3000:send_mess(); message size violation.\n");
-	return(ERROR);
+    errlogMessage("drvMM3000:send_mess(); message size violation.\n");
+    return(ERROR);
     }
-    else if (size == 0)	/* Normal exit on empty input message. */
-	return(OK);
-    
+    else if (size == 0) /* Normal exit on empty input message. */
+    return(OK);
+
     if (!motor_state[card])
     {
-	errlogPrintf("drvMM3000:send_mess() - invalid card #%d\n", card);
-	return(ERROR);
+    errlogPrintf("drvMM3000:send_mess() - invalid card #%d\n", card);
+    return(ERROR);
     }
 
     if (name != NULL)
     {
-	errlogPrintf("drvMM3000:send_mess() - invalid argument = %s\n", name);
-	return(ERROR);
+    errlogPrintf("drvMM3000:send_mess() - invalid argument = %s\n", name);
+    return(ERROR);
     }
 
     Debug(2, "send_mess(): message = %s\n", com);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
-    pasynOctetSyncIO->write(cntrl->pasynUser, com, strlen(com), 
-                            SERIAL_TIMEOUT, &nwrite);
-    
+    pasynOctetSyncIO->write(cntrl->pasynUser, com, strlen(com), SERIAL_TIMEOUT, &nwrite);
+
     return(OK);
 }
 
@@ -424,42 +423,42 @@ STATIC RTN_STATUS send_mess(int card, char const *com, char *name)
  * FUNCTION... recv_mess(int card, char *com, int flag)
  *
  * INPUT ARGUMENTS...
- *	card - controller card # (0,1,...).
- *	*com - caller's response buffer.
- *	flag	| FLUSH  = flush controller's output buffer; set timeout = 0.
- *		| !FLUSH = retrieve response into caller's buffer; set timeout.
+ *  card - controller card # (0,1,...).
+ *  *com - caller's response buffer.
+ *  flag    | FLUSH  = flush controller's output buffer; set timeout = 0.
+ *      | !FLUSH = retrieve response into caller's buffer; set timeout.
  *
  * LOGIC...
  *  Initialize:
- *	- receive timeout to zero
- *	- received string length to zero.
+ *  - receive timeout to zero
+ *  - received string length to zero.
  *
  *  IF controller card does not exist.
- *	ERROR RETURN.
+ *  ERROR RETURN.
  *  ENDIF
  *
  *  SWITCH on port type.
- *	CASE port type is GPIB.
- *	    BREAK.
- *	CASE port type is RS232.
- *	    IF input "flag" indicates NOT flushing the input buffer.
- *		Set receive timeout nonzero.
- *	    ENDIF
- *	    Call pasynOctetSyncIO->read().
+ *  CASE port type is GPIB.
+ *      BREAK.
+ *  CASE port type is RS232.
+ *      IF input "flag" indicates NOT flushing the input buffer.
+ *      Set receive timeout nonzero.
+ *      ENDIF
+ *      Call pasynOctetSyncIO->read().
  *
- *	    NOTE: The MM3000 sometimes responds to an MS command with an error
- *		message (see MM3000 User's Manual Appendix A).  This is an
- *		unconfirmed MM3000 bug.  Retry read if this is a Hard Travel
- *		limit switch error. This effectively flushes the error message.
+ *      NOTE: The MM3000 sometimes responds to an MS command with an error
+ *      message (see MM3000 User's Manual Appendix A).  This is an
+ *      unconfirmed MM3000 bug.  Retry read if this is a Hard Travel
+ *      limit switch error. This effectively flushes the error message.
  *
- *	    IF input "com" buffer length is > 3 characters, AND, the 1st
- *			character is an "E" (Maybe this an unsolicited error
- *			message response?).
- *	   	Call pasynOctetSyncIO->read().
- *	    ENDIF
- *	    BREAK
+ *      IF input "com" buffer length is > 3 characters, AND, the 1st
+ *          character is an "E" (Maybe this an unsolicited error
+ *          message response?).
+ *      Call pasynOctetSyncIO->read().
+ *      ENDIF
+ *      BREAK
  *    ENDSWITCH
- *		
+ *
  *  NORMAL RETURN.
  */
 
@@ -468,48 +467,48 @@ STATIC int recv_mess(int card, char *com, int flag)
     struct MMcontroller *cntrl;
     double timeout = 0.;
     int flush = 1;
-    int nread = 0;
+    size_t nread = 0;
     int eomReason;
     asynStatus status;
 
     /* Check that card exists */
     if (!motor_state[card])
-	return(ERROR);
+    return(ERROR);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
     if (flag != FLUSH) {
         flush = 0;
-	timeout	= SERIAL_TIMEOUT;
+    timeout = SERIAL_TIMEOUT;
     }
     if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
     status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
                                     timeout, &nread, &eomReason);
     if (nread > 3 && com[0] == 'E')
     {
-	long error;
+    long error;
 
-	error = strtol(&com[1], NULL, 0);
-	if (error >= 35 && error <= 42) {
+    error = strtol(&com[1], NULL, 0);
+    if (error >= 35 && error <= 42) {
             if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
-	    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE, 
+        status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
                                             timeout, &nread, &eomReason);
         }
     }
 
     if ((status != asynSuccess) || (nread <= 0))
     {
-	com[0] = '\0';
-	nread = 0;
+    com[0] = '\0';
+    nread = 0;
     }
     else
     {
-	/* Test for "system error" response. */
-	if (com[0] == 'E')
-	{
-	    errPrintf( -1, __FILE__, __LINE__, "%s\n", com);
-	    return(recv_mess(card, com, flag));
-	}
+    /* Test for "system error" response. */
+    if (com[0] == 'E')
+    {
+        errPrintf( -1, __FILE__, __LINE__, "%s\n", com);
+        return(recv_mess(card, com, flag));
+    }
     }
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
@@ -522,33 +521,33 @@ STATIC int recv_mess(int card, char *com, int flag)
 /* MM3000Setup()                                     */
 /*****************************************************/
 RTN_STATUS
-MM3000Setup(int num_cards,	/* maximum number of controllers in system.  */
-	    int scan_rate)	/* polling rate - 1/60 sec units.  */
+MM3000Setup(int num_cards,  /* maximum number of controllers in system.  */
+        int scan_rate)  /* polling rate - 1/60 sec units.  */
 {
     int itera;
 
     if (num_cards < 1 || num_cards > MM3000_NUM_CARDS)
-	MM3000_num_cards = MM3000_NUM_CARDS;
+    MM3000_num_cards = MM3000_NUM_CARDS;
     else
-	MM3000_num_cards = num_cards;
+    MM3000_num_cards = num_cards;
 
     /* Set motor polling task rate */
     if (scan_rate >= 1 && scan_rate <= 60)
-	targs.motor_scan_rate = scan_rate;
+    targs.motor_scan_rate = scan_rate;
     else
-	targs.motor_scan_rate = SCAN_RATE;
+    targs.motor_scan_rate = SCAN_RATE;
 
-   /* 
+   /*
     * Allocate space for motor_state structures.  Note this must be done
     * before MM3000Config is called, so it cannot be done in motor_init()
     * This means that we must allocate space for a card without knowing
     * if it really exists, which is not a serious problem
     */
     motor_state = (struct controller **) malloc(MM3000_num_cards *
-						sizeof(struct controller *));
+                        sizeof(struct controller *));
 
     for (itera = 0; itera < MM3000_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+    motor_state[itera] = (struct controller *) NULL;
 
     return(OK);
 }
@@ -559,7 +558,7 @@ MM3000Setup(int num_cards,	/* maximum number of controllers in system.  */
 /* MM3000Config()                                    */
 /*****************************************************/
 RTN_STATUS
-MM3000Config(int card,		/* card being configured */
+MM3000Config(int card,      /* card being configured */
             const char *port,   /* asyn port name */
             int address)        /* asyn address (GPIB) */
 {
@@ -580,10 +579,10 @@ MM3000Config(int card,		/* card being configured */
 
 
 /*****************************************************/
-/* initialize all software and hardware		     */
+/* initialize all software and hardware          */
 /* This is called from the initialization routine in */
 /* device support.                                   */
-/* motor_init()			                     */
+/* motor_init()                              */
 /*****************************************************/
 STATIC int motor_init()
 {
@@ -597,115 +596,115 @@ STATIC int motor_init()
     int status=0;
     asynStatus success_rtn;
 
-    initialized = true;	/* Indicate that driver is initialized. */
-    
+    initialized = true; /* Indicate that driver is initialized. */
+
     /* Check for setup */
     if (MM3000_num_cards <= 0)
-	return(ERROR);
+    return(ERROR);
 
     tok_save = NULL;
 
     for (card_index = 0; card_index < MM3000_num_cards; card_index++)
     {
-	if (!motor_state[card_index])
-	    continue;
+    if (!motor_state[card_index])
+        continue;
 
-	brdptr = motor_state[card_index];
-	brdptr->cmnd_response = false;
-	total_cards = card_index + 1;
-	cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
+    brdptr = motor_state[card_index];
+    brdptr->cmnd_response = false;
+    total_cards = card_index + 1;
+    cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
 
-	/* Initialize communications channel */
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
+    /* Initialize communications channel */
+    success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port,
                           cntrl->asyn_address, &cntrl->pasynUser, NULL);
-	if (success_rtn == asynSuccess)
-	{
-	    /* Send a message to the board, see if it exists */
-	    /* flush any junk at input port - should not be any data available */
-	    pasynOctetSyncIO->flush(cntrl->pasynUser);
-    
-	    send_mess(card_index, GET_IDENT, (char) NULL);
-	    status = recv_mess(card_index, axis_pos, 1);  
-	    /* Return value is length of response string */
-	}
+    if (success_rtn == asynSuccess)
+    {
+        /* Send a message to the board, see if it exists */
+        /* flush any junk at input port - should not be any data available */
+        pasynOctetSyncIO->flush(cntrl->pasynUser);
 
-	if (success_rtn == asynSuccess && status > 0)
-	{
-	    brdptr->localaddr = (char *) NULL;
-	    brdptr->motor_in_motion = 0;
-	    send_mess(card_index, STOP_ALL, (char) NULL);	/* Stop all motors */
-	    send_mess(card_index, GET_IDENT, (char) NULL);	/* Read controller ID string */
-	    recv_mess(card_index, buff, 1);
-	    strncpy(brdptr->ident, &buff[0], MAX_IDENT_LEN);  /* Skip "VE" */
+        send_mess(card_index, GET_IDENT, (char) NULL);
+        status = recv_mess(card_index, axis_pos, 1);
+        /* Return value is length of response string */
+    }
 
-	    send_mess(card_index, "RC", (char) NULL);
-	    recv_mess(card_index, buff, 1);
-	    bufptr = strtok_r(buff, "=", &tok_save);
-	    bufptr = strtok_r(NULL, " ", &tok_save);
+    if (success_rtn == asynSuccess && status > 0)
+    {
+        brdptr->localaddr = (char *) NULL;
+        brdptr->motor_in_motion = 0;
+        send_mess(card_index, STOP_ALL, (char) NULL);   /* Stop all motors */
+        send_mess(card_index, GET_IDENT, (char) NULL);  /* Read controller ID string */
+        recv_mess(card_index, buff, 1);
+        strncpy(brdptr->ident, &buff[0], MAX_IDENT_LEN);  /* Skip "VE" */
 
-	    /* The return string will tell us how many axes this controller has */
-	    for (total_axis = 0; bufptr != NULL; total_axis++)
-	    {
-		if (strcmp(bufptr, "unused") == 0)
-		{
-		    cntrl->type[total_axis] = UNUSED;
-		    bufptr = NULL;
-		}
-		else
-		{
-		    if (strcmp(bufptr, "stepper1.5M") == 0)
-			cntrl->type[total_axis] = STEPPER;
-		    else if (strcmp(bufptr, "dc") == 0)
-			cntrl->type[total_axis] = DC;
-		    else
-			errlogPrintf("drvMM3000:motor_init() - invalid RC response = %s\n",
-			       bufptr);
+        send_mess(card_index, "RC", (char) NULL);
+        recv_mess(card_index, buff, 1);
+        bufptr = strtok_r(buff, "=", &tok_save);
+        bufptr = strtok_r(NULL, " ", &tok_save);
 
-		    bufptr = strtok_r(NULL, "=", &tok_save);
-		    bufptr = strtok_r(NULL, " ", &tok_save);
-		}
+        /* The return string will tell us how many axes this controller has */
+        for (total_axis = 0; bufptr != NULL; total_axis++)
+        {
+        if (strcmp(bufptr, "unused") == 0)
+        {
+            cntrl->type[total_axis] = UNUSED;
+            bufptr = NULL;
+        }
+        else
+        {
+            if (strcmp(bufptr, "stepper1.5M") == 0)
+            cntrl->type[total_axis] = STEPPER;
+            else if (strcmp(bufptr, "dc") == 0)
+            cntrl->type[total_axis] = DC;
+            else
+            errlogPrintf("drvMM3000:motor_init() - invalid RC response = %s\n",
+                   bufptr);
 
-    		/* Initialize. */
-		brdptr->motor_info[total_axis].motor_motion = NULL;
-	    }
+            bufptr = strtok_r(NULL, "=", &tok_save);
+            bufptr = strtok_r(NULL, " ", &tok_save);
+        }
 
-	    brdptr->total_axis = total_axis;
+            /* Initialize. */
+        brdptr->motor_info[total_axis].motor_motion = NULL;
+        }
 
-	    for (motor_index = 0; motor_index < total_axis; motor_index++)
-	    {
-		struct mess_info *motor_info = &brdptr->motor_info[motor_index];
+        brdptr->total_axis = total_axis;
 
-		motor_info->status.All = 0;
-		motor_info->no_motion_count = 0;
-		motor_info->encoder_position = 0;
-		motor_info->position = 0;
+        for (motor_index = 0; motor_index < total_axis; motor_index++)
+        {
+        struct mess_info *motor_info = &brdptr->motor_info[motor_index];
 
-		if (cntrl->type[total_axis] == DC)
-		    motor_info->encoder_present = YES;
-		else
-		{
-		    sprintf(buff, "%dTPE", motor_index + 1);
-		    send_mess(card_index, buff, (char) NULL);
-		    recv_mess(card_index, buff, 1);
+        motor_info->status.All = 0;
+        motor_info->no_motion_count = 0;
+        motor_info->encoder_position = 0;
+        motor_info->position = 0;
 
-		    if (strcmp(buff, "E01") == 0)
-			motor_info->encoder_present = NO;
-		    else
-			motor_info->encoder_present = YES;
-		}
-                
-		if (motor_info->encoder_present == YES)
-		{
-		    motor_info->status.Bits.EA_PRESENT = 1;
-		    motor_info->pid_present = YES;
-		    motor_info->status.Bits.GAIN_SUPPORT = 1;
-		}
+        if (cntrl->type[total_axis] == DC)
+            motor_info->encoder_present = YES;
+        else
+        {
+            sprintf(buff, "%dTPE", motor_index + 1);
+            send_mess(card_index, buff, (char) NULL);
+            recv_mess(card_index, buff, 1);
 
-		set_status(card_index, motor_index);  /* Read status of each motor */
-	    }
-	}
-	else
-	    motor_state[card_index] = (struct controller *) NULL;
+            if (strcmp(buff, "E01") == 0)
+            motor_info->encoder_present = NO;
+            else
+            motor_info->encoder_present = YES;
+        }
+
+        if (motor_info->encoder_present == YES)
+        {
+            motor_info->status.Bits.EA_PRESENT = 1;
+            motor_info->pid_present = YES;
+            motor_info->status.Bits.GAIN_SUPPORT = 1;
+        }
+
+        set_status(card_index, motor_index);  /* Read status of each motor */
+        }
+    }
+    else
+        motor_state[card_index] = (struct controller *) NULL;
     }
 
     any_motor_in_motion = 0;
@@ -717,8 +716,8 @@ STATIC int motor_init()
     free_list.tail = (struct mess_node *) NULL;
 
     epicsThreadCreate((char *) "MM3000_motor", epicsThreadPriorityMedium,
-		      epicsThreadGetStackSize(epicsThreadStackMedium),
-		      (EPICSTHREADFUNC) motor_task, (void *) &targs);
+              epicsThreadGetStackSize(epicsThreadStackMedium),
+              (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     return(OK);
 }
