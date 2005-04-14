@@ -7,21 +7,19 @@ include $(TOP)/configure/CONFIG
 DIRS += MotorSrc
 
 # Select individual device/driver modules by removing the "#!" comment.
-
-#!DIRS += DeltaTauSrc
-#!DIRS += OmsSrc
-#!DIRS += SoftMotorSrc
-#!DIRS += V544Src
+DIRS += DeltaTauSrc
+DIRS += OmsSrc
+DIRS += SoftMotorSrc
 
 # All the following modules require ASYN.
 ifdef ASYN
-#!DIRS += NewportSrc
-#!DIRS += ImsSrc
-#!DIRS += AcsSrc
-#!DIRS += MclennanSrc
-#!DIRS += PiSrc
-#!DIRS += MicroMoSrc
-#!DIRS += MicosSrc
+DIRS += NewportSrc
+DIRS += ImsSrc
+DIRS += AcsSrc
+DIRS += MclennanSrc
+DIRS += PiSrc
+DIRS += MicroMoSrc
+DIRS += MicosSrc
 endif
 
 ifdef MX
