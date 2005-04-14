@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-24 17:39:22 $
+Last Modified:	$Date: 2005-04-14 20:16:34 $
 */
 
 /*
@@ -209,7 +209,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
 		struct driver_table *tabptr = trans->tabptr;
 		int size = (end - &mr->init[0]) + 1;
 		strncpy(buffer, mr->init, size);
-		buffer[size] = NULL;
+		buffer[size] = (char) NULL;
 		if (strcmp(buffer, "@DPM_ON@") == 0)
 		{
 		    int response, bitselect;
@@ -289,7 +289,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
 
 			    /* Copy device directive to prem_buff. */
 			    strncpy(prem_buff, mr->prem, size);
-			    prem_buff[size] = NULL;
+			    prem_buff[size] = (char) NULL;
 
 			    if (strncmp(prem_buff, "@PUT(", 5) != 0)
 				goto errorexit;
