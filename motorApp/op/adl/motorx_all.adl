@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-6/support/motor/motorApp/op/adl/motorx_all.adl"
-	version=030003
+	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-7/support/motor/motorApp/op/adl/motorx_all.adl"
+	version=030004
 }
 display {
 	object {
@@ -1344,7 +1344,7 @@ text {
 		clr=14
 		fill="outline"
 	}
-	textix="V2.4"
+	textix="V2.5"
 	align="horiz. centered"
 }
 composite {
@@ -2748,5 +2748,39 @@ composite {
 				(445,408)
 			}
 		}
+	}
+}
+rectangle {
+	object {
+		x=240
+		y=163
+		width=49
+		height=24
+	}
+	"basic attribute" {
+		clr=1
+		fill="outline"
+		width=2
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)$(M).JOGF"
+	}
+}
+rectangle {
+	object {
+		x=190
+		y=164
+		width=49
+		height=24
+	}
+	"basic attribute" {
+		clr=1
+		fill="outline"
+		width=2
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)$(M).JOGR"
 	}
 }
