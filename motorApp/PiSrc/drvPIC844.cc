@@ -3,9 +3,9 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.11 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-30 19:12:48 $
+Last Modified:	$Date: 2005-04-14 20:14:11 $
 */
 
 /*
@@ -402,7 +402,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     char local_buff[MAX_MSG_SIZE];
     struct PIC844controller *cntrl;
     int comsize, namesize;
-    int nwrite;
+    size_t nwrite;
 
     comsize = (com == NULL) ? 0 : strlen(com);
     namesize = (name == NULL) ? 0 : strlen(name);
@@ -450,7 +450,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 static int recv_mess(int card, char *com, int flag)
 {
     struct PIC844controller *cntrl;
-    int nread = 0;
+    size_t nread = 0;
     asynStatus status = asynError;
     int eomReason;
 
