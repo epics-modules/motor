@@ -3,9 +3,9 @@ FILENAME...	devMDrive.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MDrive series of controllers.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-20 21:06:43 $
+Last Modified:	$Date: 2005-04-14 20:31:05 $
 */
 
 /*
@@ -41,6 +41,7 @@ Last Modified:	$Date: 2004-12-20 21:06:43 $
  * .04  03/16/04 rls Protect against NULL "parms" argument in
  *                   MDrive_build_trans().
  * .05  09/20/04 rls remove '?' command string padding.
+ * .06  04/06/05 rls Bug fix for not setting accel = decel.
  */
 
 #include <string.h>
@@ -259,12 +260,17 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
 	
 	case SET_ACCEL:
 	    sprintf(buff, "A=%d", intval);
+	    strcpy(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, MDrive_cards);
+	    sprintf(buff, "D=A");
+	    motor_call->type = MDrive_table[command];
 	    break;
 	
 	case GO:
 	    /* The MDrive starts moving immediately on move commands, GO command
-	     * does nothing. Use it to set ACCL = DECL. */
-	    sprintf(buff, "A=D");
+	     * does nothing. */
+	    send = false;
 	    break;
 	
 	case PRIMITIVE:
