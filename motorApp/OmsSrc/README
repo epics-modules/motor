@@ -16,13 +16,20 @@ For all MAXv motors.
 --------------------
 
 Configure the MAXv's limit switch sense by placing one of the following MAXv
-controller commands in the INIT field.  This command determines which TTL
-signal level defines an active limit switch input:
+controller commands in the 2nd argument of MAXvConfig(); the initialization
+string.  This command determines which TTL signal level defines an active
+limit switch input:
 
-LL; - low (default).
-LH; - high.
+LL - low (default).
+LH - high.
 
-Note: Separate multiple commands in the INIT field with ";".
+In addition, the one of the following MAXv controller commands must appear in 
+the 2nd argument of MAXvConfig() to configure the type of axis:
+PSO - open loop stepper axis.
+PSE - stepper axis with encoder.
+PSM - servo axis
+
+Note: Separate multiple commands in the initialization string with ";".
 
 
 Configuring the MAXv for an open loop stepper motor (default).
@@ -74,4 +81,45 @@ IMPORTANT NOTES
 1. The EPICS motor record does NOT support the encoder mode.  The encoder mode
 	is enabled with the ER#,# and results in all distance, velocity and
 	acceleration parameters being input in encoder counts.
+
+
+SSCAN THROUGH-PUT NOTES
+-----------------------
+
+The following results where done using the following;
+
+- SSCAN support module R2.5.1, with scan.db configured as follows;
+     - Read(R1PV)  set to "time".
+     - Drive(P1PV) set to motor record VAL field.
+     - #PTS(NPTS)  set to 1000.
+     - Step Size(P1SI) set to MRES of the motor record.
+
+- Motor record R5.7
+- EPICS base R3.14.7
+- WRS Tornado 2.2.1
+- MVME5100
+
+OMS VME44 with firmware version 2.35-4E:
+---------------------------------------
+- Set slew velocity (VELO) = (500,000 * MRES).
+- Set base velocity (VBAS) = (499,999 * MRES).
+- Acceleration time (ACCL) does not matter.
+
+- 970.0ms/scan pt.; sysClkRateSet(60),   interrupts disabled and 60HZ polling rate.
+-  22.2ms/scan pt.; sysClkRateSet(4000), interrupts disabled and 60HZ polling rate.
+
+- 18.4ms/scan pt.; sysClkRateSet(60),   interrupts  enabled and  1HZ polling rate.
+- 18.4ms/scan pt.; sysClkRateSet(4000), interrupts  enabled and  1HZ polling rate.
+- 18.4ms/scan pt.; sysClkRateSet(4000), interrupts  enabled and 60HZ polling rate.
+
+
+OMS MAXv-8000 ver:1.25
+----------------------
+- Set slew velocity (VELO) = (500,000 * MRES).
+- Set base velocity (VBAS) = (499,999 * MRES).
+- Acceleration time (ACCL) does not matter.
+
+- 51.6ms/scan pt.; sysClkRateSet(60),   interrupts  enabled and  1HZ polling rate.
+- 11.7ms/scan pt.; sysClkRateSet(4000), interrupts  enabled and  1HZ polling rate.
+- 11.9ms/scan pt.; sysClkRateSet(4000), interrupts  enabled and 60HZ polling rate.
 
