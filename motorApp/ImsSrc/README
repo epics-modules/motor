@@ -98,3 +98,45 @@ control c (^c).  Repeat steps 4 through 7 while incrementing the axis name
 chassis, configure all of the IM483's for Party Mode by setting J4 to (2-3).
 Connect the RS-232 port to the Master IM483 and set all the remaining IM483's
 to Slave mode by setting J7 to (2-3).
+
+
+SSCAN THROUGH-PUT NOTES
+-----------------------
+
+The following results where done using the following;
+
+- SSCAN support module R2.5.1, with scan.db configured as follows;
+     - Read(R1PV)  set to "time".
+     - Drive(P1PV) set to motor record VAL field.
+     - #PTS(NPTS)  set to 1000.
+     - Step Size(P1SI) set to MRES of the motor record.
+- Motor record R5.7; configured as follows;
+     - Set slew velocity (VELO) 5.0 = (500 * MRES).
+     - Set base velocity (VBAS) 4.9 = (499 * MRES).
+     - Acceleration time (ACCL) does not matter.
+- EPICS base R3.14.7
+- WRS Tornado 2.2.1
+- MVME5100
+- IM483SM with firmware version; 1342 4038 AMS, INC MAX-2000 v1.15i
+
+
+Controller | sysClkRate | polling rate | ms/scan pt.
+-----------|------------|--------------|------------
+IMS483SM   |    60      |     1HZ      | 121.0
+-----------|------------|--------------|------------
+IMS483SM   |    60      |     1HZ      | 834.2 with VBAS/VELO removed
+-----------|------------|--------------|------------
+IMS483SM   |    60      |    10HZ      | 121.0
+-----------|------------|--------------|------------
+IMS483SM   |    60      |    10HZ      | 154.4 with VBAS/VELO removed
+-----------|------------|--------------|------------
+IMS483SM   |    60      |    60HZ      | 121.0
+-----------|------------|--------------|------------
+IMS483SM   |    60      |    60HZ      | 102.9 with VBAS/VELO removed
+-----------|------------|--------------|------------
+IMS483SM   |   100      |     1HZ      | 121.0
+-----------|------------|--------------|------------
+IMS483SM   |  1000      |  1000HZ      | 121.0
+-----------|------------|--------------|------------
+IMS483SM   |  1000      |  1000HZ      |  96.0 with VBAS/VELO removed
+
