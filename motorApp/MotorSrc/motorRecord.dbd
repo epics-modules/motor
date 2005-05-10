@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.13 $
+# Version:		$Revision: 1.14 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2004-01-22 21:19:03 $
+# Last Modified:	$Date: 2005-05-10 16:19:23 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -549,7 +549,7 @@ recordtype(motor) {
 		special(SPC_NOMOD)
 	}
 	field(CDIR,DBF_SHORT) {
-		prompt("Command direction")
+		prompt("Raw cmnd direction")
 		special(SPC_NOMOD)
 	}
 	field(RRBV,DBF_LONG) {
