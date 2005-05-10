@@ -113,7 +113,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvMicos);}
 
-static struct thread_args targs = {SCAN_RATE, &Micos_access};
+static struct thread_args targs = {SCAN_RATE, &Micos_access, 0.0};
 
 /*********************************************************
  * Print out driver status report

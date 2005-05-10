@@ -112,7 +112,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvMCB4B);}
 
-STATIC struct thread_args targs = {SCAN_RATE, &MCB4B_access};
+STATIC struct thread_args targs = {SCAN_RATE, &MCB4B_access, 0.0};
 
 
 /*********************************************************

@@ -2,9 +2,9 @@
 FILENAME... drvMM3000.cc
 USAGE...    Motor record driver level support for Newport MM3000.
 
-Version:    $Revision: 1.18 $
-Modified By:    $Author: dkline $
-Last Modified:  $Date: 2005-04-14 18:52:47 $
+Version:    $Revision: 1.19 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2005-05-10 16:36:45 $
 */
 
 /*
@@ -158,7 +158,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvMM3000);}
 
-STATIC struct thread_args targs = {SCAN_RATE, &MM3000_access};
+STATIC struct thread_args targs = {SCAN_RATE, &MM3000_access, 0.0};
 
 /*********************************************************
  * Print out driver status report

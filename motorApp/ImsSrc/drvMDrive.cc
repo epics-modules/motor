@@ -3,9 +3,9 @@ FILENAME... drvMDrive.cc
 USAGE...    Motor record driver level support for Intelligent Motion
         Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:    $Revision: 1.17 $
-Modified By:    $Author: dkline $
-Last Modified:  $Date: 2005-04-14 18:51:52 $
+Version:    $Revision: 1.18 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2005-05-10 16:34:13 $
 */
 
 /*
@@ -136,7 +136,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvMDrive);}
 
-static struct thread_args targs = {SCAN_RATE, &MDrive_access};
+static struct thread_args targs = {SCAN_RATE, &MDrive_access, 0.0};
 
 
 /*********************************************************

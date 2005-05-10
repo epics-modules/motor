@@ -102,7 +102,7 @@ struct
 epicsExportAddress(drvet, drvXPSC8);
 
 /* I don't know where the XPSC8_access is set?*/
-STATIC struct thread_args targs = {SCAN_RATE, &XPSC8_access};
+STATIC struct thread_args targs = {SCAN_RATE, &XPSC8_access, 0.0};
 
 /*********************************************************
  * Print out driver status report

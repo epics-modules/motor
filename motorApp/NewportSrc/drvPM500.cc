@@ -2,9 +2,9 @@
 FILENAME... drvPM500.cc
 USAGE...    Motor record driver level support for Newport PM500.
 
-Version:    $Revision: 1.17 $
-Modified By:    $Author: dkline $
-Last Modified:  $Date: 2005-04-14 18:52:48 $
+Version:    $Revision: 1.18 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2005-05-10 16:36:46 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -149,7 +149,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvPM500);}
 
-static struct thread_args targs = {SCAN_RATE, &PM500_access};
+static struct thread_args targs = {SCAN_RATE, &PM500_access, 0.0};
 
 /*********************************************************
  * Print out driver status report

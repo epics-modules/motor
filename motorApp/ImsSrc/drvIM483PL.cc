@@ -3,9 +3,9 @@ FILENAME... drvIM483PL.cc
 USAGE...    Motor record driver level support for Intelligent Motion
         Systems, Inc. IM483(I/IE).
 
-Version:    $Revision: 1.14 $
-Modified By:    $Author: dkline $
-Last Modified:  $Date: 2005-04-14 18:51:51 $
+Version:    $Revision: 1.15 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2005-05-10 16:34:12 $
 */
 
 /*****************************************************************
@@ -139,7 +139,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvIM483PL);}
 
-static struct thread_args targs = {SCAN_RATE, &IM483PL_access};
+static struct thread_args targs = {SCAN_RATE, &IM483PL_access, 0.0};
 
 /*********************************************************
  * Print out driver status report

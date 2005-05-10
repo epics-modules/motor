@@ -2,9 +2,9 @@
 FILENAME... drvMM4000.cc
 USAGE...    Motor record driver level support for Newport MM4000.
 
-Version:    $Revision: 1.18 $
-Modified By:    $Author: dkline $
-Last Modified:  $Date: 2005-04-14 18:52:47 $
+Version:    $Revision: 1.19 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2005-05-10 16:36:46 $
 */
 
 /*
@@ -167,7 +167,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvMM4000);}
 
-static struct thread_args targs = {SCAN_RATE, &MM4000_access};
+static struct thread_args targs = {SCAN_RATE, &MM4000_access, 0.0};
 
 /*********************************************************
  * Print out driver status report
