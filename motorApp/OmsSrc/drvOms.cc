@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.22 $
+Version:	$Revision: 1.23 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-30 19:12:09 $
+Last Modified:	$Date: 2005-05-10 16:50:22 $
 */
 
 /*
@@ -39,6 +39,7 @@ Last Modified:	$Date: 2005-03-30 19:12:09 $
  *	- VS4-040  ver 1.04
  *	- VX2-006  ver 1.05 (1.04 has control register initialization problem)
  *
+ *
  * Modification Log:
  * -----------------
  * .00  02-22-02 rls - "total_cards" changed from total detected to total
@@ -68,6 +69,7 @@ Last Modified:	$Date: 2005-03-30 19:12:09 $
  *		       problems with devLib.h; i.e. "sorry, not implemented:
  *		       `tree_list' not supported..." compiler error message.
  * .11  03-23-05 rls - Make OSI.
+ * .12  05-02-05 rls - Bug fix for stale data delay; set delay = 10ms.
  */
 
 /*========================stepper motor driver ========================
@@ -138,6 +140,7 @@ static volatile unsigned omsInterruptVector = 0;
 static volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 static volatile int motionTO = 10;
 static char *oms_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
+static double quantum;
 
 /*----------------functions-----------------*/
 
@@ -191,7 +194,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvOms);}
 
-static struct thread_args targs = {SCAN_RATE, &oms_access};
+static struct thread_args targs = {SCAN_RATE, &oms_access, 0.010};
 
 /*----------------functions-----------------*/
 
@@ -644,12 +647,17 @@ static int omsGet(int card, char *pchar, bool timeout)
     }
     else
     {
+	int maxtrys = (int) (0.250 / quantum);	/* Wait 250ms for character */
+
 	/* Direct read from card */
 	pmotor = (struct vmex_motor *) pmotorState->localaddr;
 
 	if (timeout == true)
-	    while (retry++ < 10 && !(pmotor->status & STAT_INPUT_BUF_FULL))
-		epicsThreadSleep(0.001);
+	    while (retry++ < maxtrys && !(pmotor->status & STAT_INPUT_BUF_FULL))
+	    {
+		Debug(5, "omsGet: wait count = %d\n", retry);
+		epicsThreadSleep(quantum);
+	    }
 
 	if (pmotor->status & STAT_INPUT_BUF_FULL)
 	{
@@ -671,7 +679,6 @@ static RTN_STATUS omsPut(int card, char *pmess)
     struct irqdatastr *irqdata;
     int key;
     char *putptr;
-    int trys;
 
     pmotorState = motor_state[card];
     irqdata = (struct irqdatastr *) pmotorState->DevicePrivate;
@@ -703,10 +710,12 @@ static RTN_STATUS omsPut(int card, char *pmess)
 	/* Send next message */
 	for (putptr = pmess; *putptr != '\0'; putptr++)
 	{
-	    trys = 0;
+	    int trys = 0;
+	    int maxtrys = (int) (0.01 / quantum);
+
 	    while (!(pmotor->status & STAT_TRANS_BUF_EMPTY))
 	    {
-		if (trys > 10)	/* Set timeout to 0.01 sec. */
+		if (trys > maxtrys)	/* Set timeout to 0.01 sec. */
 		{
 		    Debug(1, "omsPut: Time_out occurred in send\n");
 		    return(ERROR);
@@ -716,7 +725,8 @@ static RTN_STATUS omsPut(int card, char *pmess)
 		    Debug(1, "omsPut: error occurred in send\n");
 		}
 		trys++;
-		epicsThreadSleep(0.001);
+		Debug(5, "omsPut: wait count = %d\n", trys);
+		epicsThreadSleep(quantum);
 	    }
 	    pmotor->data = *putptr;
 	}
@@ -1021,6 +1031,7 @@ static int motor_init()
     void *probeAddr;
 
     tok_save = NULL;
+    quantum = epicsThreadSleepQuantum();
 
     /* Check for setup */
     if (oms44_num_cards <= 0)
