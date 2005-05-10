@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.12 $
+Version:	$Revision: 1.13 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-21 18:53:22 $
+Last Modified:	$Date: 2005-05-10 16:31:21 $
 */
 
 /*
@@ -43,6 +43,7 @@ Last Modified:	$Date: 2004-12-21 18:53:22 $
  *			0 < delay <= (quantum * 2).
  * .03 02/11/04 rls Limit valid "delay" in process_messages() to;
  *			0 <= delay <= (quantum * 2).
+ * .04 05/10/05 rls "Stale data delay" bug fix.
  */
 
 
@@ -71,10 +72,10 @@ extern "C" {epicsExportAddress(int, motordrvComdebug);}
 
 
 /* Function declarations. */
-static int query_axis(int card, struct driver_table *tabptr, epicsTime tick);
-static void process_messages(struct driver_table *tabptr, epicsTime tick);
-static struct mess_node *get_head_node(struct driver_table *tabptr);
-static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent *lockptr);
+static double query_axis(int, struct driver_table *, epicsTime, double);
+static void process_messages(struct driver_table *, epicsTime, double);
+static struct mess_node *get_head_node(struct driver_table *);
+static struct mess_node *motor_malloc(struct circ_queue *, epicsEvent *);
 
 
 /*
@@ -83,7 +84,10 @@ static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent
  *  WHILE FOREVER
  *	IF no motors in motion for this board type.
  *	    Set "wait_time" to WAIT_FOREVER.
- *	ELSE
+ *	ELSE IF stale data timer is active (stale_data_delay != 0).
+ *	    Set "wait_time" to the remaining stale data time.
+ *	    Clear stale data timer active indicator (stale_data_delay = 0).
+ *      ELSE
  *	    Update current_time.
  *	    Set "time_lapse" to time elapsed (in seconds) since last timeout
  *		return from semaphore pend.
@@ -122,7 +126,7 @@ int motor_task(struct thread_args *args)
     struct driver_table *tabptr;
     bool sem_ret;
     epicsTime previous_time, current_time;
-    double scan_sec, wait_time, time_lapse;
+    double scan_sec, wait_time, time_lapse, stale_data_max_delay, stale_data_delay = 0.0;
     const double quantum = epicsThreadSleepQuantum();
     int itera;
 
@@ -130,10 +134,22 @@ int motor_task(struct thread_args *args)
     previous_time = epicsTime::getCurrent();
     scan_sec = 1 / (double) args->motor_scan_rate;	/* Convert HZ to seconds. */
 
+    if (args->update_delay == 0.0)
+	stale_data_max_delay = 0.0;
+    else if (args->update_delay < quantum * 2.0)
+	stale_data_max_delay = quantum * 2.0;
+    else
+	stale_data_max_delay = args->update_delay;
+
     for(;;)
     {
 	if (*tabptr->any_inmotion_ptr == 0)
 	    wait_time = 1000;	/* Wait forever = 1,000 seconds. */
+	else if (stale_data_delay != 0)
+	{
+	    wait_time = stale_data_delay;
+	    stale_data_delay = 0;
+	}
 	else
 	{
 	    current_time = epicsTime::getCurrent();
@@ -148,6 +164,8 @@ int motor_task(struct thread_args *args)
 		wait_time = quantum;
 	}
 
+	Debug(5, "motor_task: wait_time = %f\n", wait_time);
+
 	sem_ret = tabptr->semptr->wait(wait_time);
 	previous_time = epicsTime::getCurrent();
 
@@ -160,22 +178,24 @@ int motor_task(struct thread_args *args)
 	    {
 		struct controller *brdptr = (*tabptr->card_array)[itera];
 		if (brdptr != NULL && brdptr->motor_in_motion)
-		    query_axis(itera, tabptr, previous_time);
+		    stale_data_delay = query_axis(itera, tabptr, previous_time, stale_data_max_delay);
 	    }
 	}
 	if (sem_ret)
-	    process_messages(tabptr, previous_time);
+	    process_messages(tabptr, previous_time, stale_data_max_delay);
     }
     return(0);
 }
 
 
-static int query_axis(int card, struct driver_table *tabptr, epicsTime tick)
+static double query_axis(int card, struct driver_table *tabptr, epicsTime tick,
+			 double max_delay)
 {
     struct controller *brdptr;
+    double rtndelay = 0.0;
     int index;
-    /* quantum_x_2 to insure at least one quantum delay. */
-    const double quantum_x_2 = epicsThreadSleepQuantum() * 2.0;
+
+    Debug(5, "query_axis: enter\n");
 
     brdptr = (*tabptr->card_array)[card];
 
@@ -186,75 +206,86 @@ static int query_axis(int card, struct driver_table *tabptr, epicsTime tick)
 	double delay = 0.0;
 
 	motor_info = &(brdptr->motor_info[index]);
-	if ((motor_motion = motor_info->motor_motion) != 0)
+	motor_motion = motor_info->motor_motion;
+	if (motor_motion != 0)
 	{
 	    if (tick >= motor_info->status_delay)
 		delay = tick - motor_info->status_delay;
-	}
-
-	if (motor_motion && (delay >= quantum_x_2) && (*tabptr->setstat) (card, index))
-	{
-	    struct mess_node *mess_ret;
-	    bool ls_active;
-
-	    motor_motion->position = motor_info->position;
-	    motor_motion->encoder_position = motor_info->encoder_position;
-	    motor_motion->velocity = motor_info->velocity;
-	    motor_motion->status = motor_info->status;
-
-	    mess_ret = (struct mess_node *) motor_malloc(tabptr->freeptr, tabptr->freelockptr);
-	    mess_ret->callback = motor_motion->callback;
-	    mess_ret->mrecord = motor_motion->mrecord;
-	    mess_ret->position = motor_motion->position;
-	    mess_ret->encoder_position = motor_motion->encoder_position;
-	    mess_ret->velocity = motor_motion->velocity;
-	    mess_ret->status = motor_motion->status;
-	    mess_ret->type = motor_motion->type;
-
-	    if (motor_motion->status.Bits.RA_DIRECTION)
-	    {
-		if (motor_motion->status.Bits.RA_PLUS_LS)
-		    ls_active = true;
-		else
-		    ls_active = false;
-	    }
 	    else
+		delay = 0.0;
+
+	    if (delay < max_delay)
 	    {
-		if (motor_motion->status.Bits.RA_MINUS_LS)
-		    ls_active = true;
+		delay = max_delay - delay;
+		if (delay > rtndelay)
+		    rtndelay = delay;
+	    }
+	    else if ((*tabptr->setstat) (card, index))
+	    {
+		struct mess_node *mess_ret;
+		bool ls_active;
+
+		motor_motion->position = motor_info->position;
+		motor_motion->encoder_position = motor_info->encoder_position;
+		motor_motion->velocity = motor_info->velocity;
+		motor_motion->status = motor_info->status;
+
+		mess_ret = (struct mess_node *) motor_malloc(tabptr->freeptr, tabptr->freelockptr);
+		mess_ret->callback = motor_motion->callback;
+		mess_ret->mrecord = motor_motion->mrecord;
+		mess_ret->position = motor_motion->position;
+		mess_ret->encoder_position = motor_motion->encoder_position;
+		mess_ret->velocity = motor_motion->velocity;
+		mess_ret->status = motor_motion->status;
+		mess_ret->type = motor_motion->type;
+
+		if (motor_motion->status.Bits.RA_DIRECTION)
+		{
+		    if (motor_motion->status.Bits.RA_PLUS_LS)
+			ls_active = true;
+		    else
+			ls_active = false;
+		}
 		else
-		    ls_active = false;
-	    }
-	    
-	    if (ls_active == true ||
-		motor_motion->status.Bits.RA_DONE ||
-		motor_motion->status.Bits.RA_PROBLEM)
-	    {
-		(*tabptr->query_done) (card, index, motor_motion);
-		brdptr->motor_in_motion--;
-		motor_free(motor_motion, tabptr);
-		motor_motion = (struct mess_node *) NULL;
-		motor_info->motor_motion = (struct mess_node *) NULL;
-	    }
+		{
+		    if (motor_motion->status.Bits.RA_MINUS_LS)
+			ls_active = true;
+		    else
+			ls_active = false;
+		}
 
-	    callbackRequest(&mess_ret->callback);
+		if (ls_active == true ||
+		    motor_motion->status.Bits.RA_DONE ||
+		    motor_motion->status.Bits.RA_PROBLEM)
+		{
+		    (*tabptr->query_done) (card, index, motor_motion);
+		    brdptr->motor_in_motion--;
+		    motor_free(motor_motion, tabptr);
+		    motor_motion = (struct mess_node *) NULL;
+		    motor_info->motor_motion = (struct mess_node *) NULL;
+		}
 
-	    if (brdptr->motor_in_motion == 0)
-	    {
-		SET_MM_OFF(*tabptr->any_inmotion_ptr, card);
+		callbackRequest(&mess_ret->callback);
+
+		if (brdptr->motor_in_motion == 0)
+		{
+		    SET_MM_OFF(*tabptr->any_inmotion_ptr, card);
+		}
 	    }
 	}
     }
-    return (0);
+    Debug(5, "query_axis: exit\n");
+    return(rtndelay);
 }
 
 
-static void process_messages(struct driver_table *tabptr, epicsTime tick)
+static void process_messages(struct driver_table *tabptr, epicsTime tick,
+			     double max_delay)
 {
     struct mess_node *node, *motor_motion;
     double delay;
-    /* quantum_x_2 to insure at least one quantum delay. */
-    const double quantum_x_2 = epicsThreadSleepQuantum() * 2.0;
+
+    Debug(5, "process_messages: entry\n");
 
     while ((node = get_head_node(tabptr)))
     {
@@ -331,11 +362,11 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 	    case INFO:
 		/* Status update delay - needed for OMS. */
 		delay = tick - motor_info->status_delay;
+		/* Limit delay to; 0 < delay <= max_delay. */
 		if (delay < 0.0)	/* Protect against negative delay. */
 		    delay = 0.0;
-		/* Limit delay to; 0 < delay <= (quantum * 2). */
-		if (delay >= 0.0 && delay < quantum_x_2)
-		    epicsThreadSleep(quantum_x_2 - delay);
+		if (delay < max_delay)
+		    epicsThreadSleep(max_delay - delay);
 
 		if (tabptr->strtstat != NULL)
 		    (*tabptr->strtstat) (card);
@@ -388,6 +419,7 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick)
 	    callbackRequest((CALLBACK *) node);
 	}
     }
+    Debug(5, "process_messages: exit\n");
 }
 
 
