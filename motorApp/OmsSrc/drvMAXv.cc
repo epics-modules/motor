@@ -2,9 +2,9 @@
 FILENAME...	drvMAXv.cc
 USAGE...	Motor record driver level support for OMS model MAXv.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-30 19:12:09 $
+Last Modified:	$Date: 2005-05-10 18:19:06 $
 */
 
 /*
@@ -36,7 +36,7 @@ Last Modified:	$Date: 2005-03-30 19:12:09 $
  * NOTES
  * -----
  * Verified with firmware:
- *	- MAXv ver ????
+ *	- MAXv ver:1.25
  *
  * Modification Log:
  * -----------------
@@ -49,6 +49,7 @@ Last Modified:	$Date: 2005-03-30 19:12:09 $
  *		      problems with devLib.h; i.e. "sorry, not implemented:
  *		      `tree_list' not supported..." compiler error message.
  * 04  03-21-05 rls - Make MAXv OSI.
+ * 05  05-02-05 rls - Bug fix for stale data delay; set delay = 10ms.
  */
 
 #include	<string.h>
@@ -161,7 +162,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvMAXv);}
 
-static struct thread_args targs = {SCAN_RATE, &MAXv_access};
+static struct thread_args targs = {SCAN_RATE, &MAXv_access, 0.010};
 
 /*----------------functions-----------------*/
 
