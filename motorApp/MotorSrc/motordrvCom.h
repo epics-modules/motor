@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.14 $
+Version:	$Revision: 1.15 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 20:45:05 $
+Last Modified:	$Date: 2005-05-10 16:29:33 $
 */
 
 /*
@@ -40,6 +40,7 @@ Last Modified:	$Date: 2004-09-20 20:45:05 $
  * .02 10-24-03 rls moved irqdatastr to OmsSrc.
  * .03 12-12-03 rls Converted MSTA #define's to bit field.
  * .04 09-20-04 rls support for 32 axes / controller, maximum.
+ * .05 05/10/05 rls Added "update_delay" for "Stale data delay" bug fix.
  */
 
 
@@ -208,8 +209,11 @@ struct driver_table
 
 struct thread_args
 {
-    int motor_scan_rate;	/* Poll rate in HZ. */
+    int motor_scan_rate; /* Poll rate in HZ. */
     struct driver_table *table;
+    double update_delay; /* Some controllers (OMS VME58) require a delay
+    between a move command and a status update to prevent "stale" data.  A
+    zero value disables this delay. */
 };
 
 
