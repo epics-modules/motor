@@ -3,9 +3,9 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-04-14 20:14:11 $
+Last Modified:	$Date: 2005-05-10 16:42:48 $
 */
 
 /*
@@ -133,7 +133,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvPIC844);}
 
-static struct thread_args targs = {SCAN_RATE, &PIC844_access};
+static struct thread_args targs = {SCAN_RATE, &PIC844_access, 0.0};
 
 /*********************************************************
  * Print out driver status report
