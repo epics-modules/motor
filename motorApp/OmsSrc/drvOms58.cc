@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-30 19:12:08 $
+Last Modified:	$Date: 2005-05-10 18:30:26 $
 */
 
 /*
@@ -87,6 +87,7 @@ Last Modified:	$Date: 2005-03-30 19:12:08 $
  *			problems with devLib.h; i.e. "sorry, not implemented:
  *			`tree_list' not supported..." compiler error message.
  * .30  03-23-05 rls - Make OSI.
+ * .31  05-02-05 rls - Bug fix for stale data delay; set delay = 10ms.
  */
 
 #include	<string.h>
@@ -199,7 +200,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvOms58);}
 
-static struct thread_args targs = {SCAN_RATE, &oms58_access};
+static struct thread_args targs = {SCAN_RATE, &oms58_access, 0.010};
 
 /*----------------functions-----------------*/
 
@@ -441,7 +442,10 @@ static int set_status(int card, int signal)
 
     /* Wait for data area update to complete on card */
     while (cntrlReg.All & pmotor->control.cntrlReg)
+    {
+	Debug(5, "set_status: DPRAM delay.\n");
 	epicsThreadSleep(quantum);
+    }
 
     pmotorData = &pmotor->data[signal];
 
@@ -502,7 +506,7 @@ static int set_status(int card, int signal)
     }
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
+		status.Bits.RA_DONE || status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
     if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
@@ -656,7 +660,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 
 	deltaIndex = pmotor->outPutIndex - pmotor->outGetIndex;
 	delta = (deltaIndex < 0) ? BUFFER_SIZE + deltaIndex : deltaIndex;
-	Debug(5, "send_mess: Waiting for ack: index delta=%d\n", delta);
+	Debug(5, "send_mess(): buffer wait; index delta=%d\n", delta);
 #endif
 	epicsThreadSleep(quantum);
     };
