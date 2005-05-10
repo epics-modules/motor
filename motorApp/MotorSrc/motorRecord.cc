@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.22 $
+Version:	$Revision: 1.23 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-18 22:36:36 $
+Last Modified:	$Date: 2005-05-10 16:28:33 $
 */
 
 /*
@@ -70,9 +70,10 @@ Last Modified:	$Date: 2005-03-18 22:36:36 $
  *			compatibility.
  * .20 12-02-04 rls - fixed incorrect slew acceleration calculation.
  * .21 03-13-05 rls - Removed record level round-up position code in do_work().
+ * .22 04-04-05 rls - Clear homing and jog request after LS or travel limit error.
  */
 
-#define VERSION 5.6
+#define VERSION 5.7
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -123,6 +124,7 @@ static void set_dial_highlimit(motorRecord *, struct motor_dset *);
 static void set_dial_lowlimit(motorRecord *, struct motor_dset *);
 static void set_userlimits(motorRecord *);
 static void range_check(motorRecord *, float *, double, double);
+static void clear_buttons(motorRecord *);
 
 /*** Record Support Entry Table (RSET) functions. ***/
 
@@ -212,7 +214,7 @@ field to all listeners.  monitor() does this.
 /* Bit field for "mmap". */
 typedef union
 {
-    unsigned long All;
+    epicsUInt32 All;
     struct
     {
 	unsigned int M_VAL	:1;
@@ -253,7 +255,7 @@ typedef union
 /* Bit field for "nmap". */
 typedef union
 {
-    unsigned long All;
+    epicsUInt32 All;
     struct
     {
 	unsigned int M_S	:1;
@@ -268,6 +270,10 @@ typedef union
 	unsigned int M_ACCL	:1;
 	unsigned int M_BACC	:1;
 	unsigned int M_STUP	:1;
+	unsigned int M_JOGF	:1;
+	unsigned int M_JOGR	:1;
+	unsigned int M_HOMF	:1;
+	unsigned int M_HOMR	:1;
     } Bits;
 } nmap_field;
 
@@ -662,6 +668,9 @@ static long postProcess(motorRecord * pmr)
 	    WRITE_MSG(GO, NULL);
 	    SEND_MSG();
 	    pmr->pp = TRUE;
+	    pmr->cdir = (pmr->mip & MIP_HOMF) ? 1 : 0;
+	    if (pmr->mres < 0.0)
+		pmr->cdir = !pmr->cdir;
 	}
 	else
 	{
@@ -669,14 +678,14 @@ static long postProcess(motorRecord * pmr)
 	    {
 		pmr->mip &= ~MIP_HOMF;
 		pmr->homf = 0;
-		db_post_events(pmr, &pmr->homf, DBE_VAL_LOG);
+		MARK_AUX(M_HOMF);
 	    }
 	    else if (pmr->mip & MIP_HOMR)
 	    {
     
 		pmr->mip &= ~MIP_HOMR;
 		pmr->homr = 0;
-		db_post_events(pmr, &pmr->homr, DBE_VAL_LOG);
+		MARK_AUX(M_HOMR);
 	    }
 	}
     }
@@ -1197,8 +1206,7 @@ enter_do_work:
 	if (pmr->lvio && !pmr->set)
 	{
 	    pmr->stop = 1;
-	    /* Clear all the buttons that cause motion. */
-	    pmr->jogf = pmr->jogr = pmr->homf = pmr->homr = 0;
+	    clear_buttons(pmr);
 	}
     }
     /* Do we need to examine the record to figure out what work to perform? */
@@ -1537,7 +1545,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		else if (pmr->movn)
 		{
 		    pmr->pp = TRUE;	/* Do when motor stops. */
-		    pmr->jogf = pmr->jogr = 0;
+		    clear_buttons(pmr);
 		}
 		else
 		{
@@ -1550,16 +1558,9 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		}
 	    }
 	    /* Cancel any operations. */
-	    if (pmr->mip & MIP_HOMF)
-	    {
-		pmr->homf = 0;
-		db_post_events(pmr, &pmr->homf, DBE_VAL_LOG);
-	    }
-	    else if (pmr->mip & MIP_HOMR)
-	    {
-		pmr->homr = 0;
-		db_post_events(pmr, &pmr->homr, DBE_VAL_LOG);
-	    }
+	    if (pmr->mip & MIP_HOME)
+		clear_buttons(pmr);
+	    
 	    pmr->mip = MIP_STOP;
 	    MARK(M_MIP);
 	    INIT_MSG();
@@ -1729,6 +1730,9 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		MARK(M_DMOV);
 		pmr->rcnt = 0;
 		MARK(M_RCNT);
+		pmr->cdir = (pmr->mip & MIP_HOMF) ? 1 : 0;
+		if (pmr->mres < 0.0)
+		    pmr->cdir = !pmr->cdir;
 	    }
 	    return(OK);
 	}
@@ -3105,6 +3109,14 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
 	db_post_events(pmr, &pmr->dmov, local_mask);
     if ((local_mask = mask | (MARKED_AUX(M_STUP) ? DBE_VAL_LOG : 0)))
 	db_post_events(pmr, &pmr->stup, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_JOGF) ? DBE_VAL_LOG : 0)))
+	db_post_events(pmr, &pmr->jogf, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_JOGR) ? DBE_VAL_LOG : 0)))
+	db_post_events(pmr, &pmr->jogr, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_HOMF) ? DBE_VAL_LOG : 0)))
+	db_post_events(pmr, &pmr->homf, local_mask);
+    if ((local_mask = mask | (MARKED_AUX(M_HOMR) ? DBE_VAL_LOG : 0)))
+	db_post_events(pmr, &pmr->homr, local_mask);
 
     UNMARK_ALL;
 }
@@ -3176,7 +3188,11 @@ static void
 
     /* Get motor-now-moving indicator. */
     if (ls_active == true || msta.Bits.RA_DONE || msta.Bits.RA_PROBLEM)
+    {
 	pmr->movn = 0;
+	if (ls_active == true)
+	    clear_buttons(pmr);
+    }
     else
 	pmr->movn = 1;
     if (pmr->movn != old_movn)
@@ -3564,6 +3580,35 @@ static void range_check(motorRecord *pmr, float *parm_ptr, double min, double ma
     {
 	*parm_ptr = parm_val;
 	db_post_events(pmr, parm_ptr, DBE_VAL_LOG);
+    }
+}
+
+
+/*
+FUNCTION... void clear_buttons(motorRecord *)
+USAGE... Clear all motion request buttons.
+*/
+static void clear_buttons(motorRecord *pmr)
+{
+    if (pmr->jogf)
+    {
+	pmr->jogf = 0;
+	MARK_AUX(M_JOGF);
+    }
+    if (pmr->jogr)
+    {
+	pmr->jogr = 0;
+	MARK_AUX(M_JOGR);
+    }
+    if (pmr->homf)
+    {
+	pmr->homf = 0;
+	MARK_AUX(M_HOMF);
+    }
+    if (pmr->homr)
+    {
+	pmr->homr = 0;
+	MARK_AUX(M_HOMR);
     }
 }
 
