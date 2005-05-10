@@ -93,6 +93,61 @@ Known Problems
 	situation.  This problem is fixed with the MAXv model.
 
 
+Modification Log from R5-6 to R5-7
+==================================
+
+1) ASYN R4-3 compatibility change to nbytesTransfered argument of
+	pasynOctetSyncIO read and write members.
+
+	Files modified: All drivers using ASYN.
+
+2) IMS MDrive bug fix for not setting acceleration = deceleration correctly.
+
+	File modified: devMDrive.c
+
+3) Bug fix for homing and jog request not cleared after a limit switch error.
+
+	File modified: motorRecord.cc - Added clear_buttons() function.
+				      - db_post_events home and jog buttons.
+
+4) A delay was added to the driver support with R3-5 to prevent motor
+	controller status updates from reading "stale data".  This problem
+	arose under the following scenario;
+	- Start a motor move which is in the opposite direction from the
+	previous move.
+	- Immediately (e.g., < 1ms) ask the controller for status information
+	that includes the motor's direction.
+	- For OMS controllers the required dealy is 10ms.  Intermittently, the
+	status information returned from the OMS controller would indicate that
+	the direction had not changed; hence the term "stale data".
+	
+	This problem was fixed by inserting a delay between the start of motor
+	motion and the first status update.  Unfortunately, the delay was
+	implemented in such a way as to have an undesirable side effect for VME
+	based controllers (i.e., OMS) that interrupt on motion complete.
+	Namely, if the motor move time was less than approximately two VxWorks
+	system clock ticks (33.33 ms for a 60HZ system clock), than the
+	response time to the controller signally motion complete was based on
+	the polling rate, rather than the done interrupt latency.
+
+	This problem has been fixed by having query_axis() in motordrvCom.c
+	return the remaining delay time to motor_task(), so that motor_task()
+	can delay for the remainder of the delay rather than the larger polling
+	rate.
+	
+	In order to avoid having all device drivers delay for the maximum
+	stale data delay time, each device driver now passes the stale data
+	delay time in the "thread_args" structure at "motor_task" thread
+	creation.
+
+	Files modified: - numerous changes to motordrvCom.cc
+			- "update_delay" added to thread_args in motordrvCom.h.
+			- "targs" modified in all drivers with "update_delay"
+			  initialization.
+
+
+
+
 Modification Log from R5-5 to R5-6
 ==================================
 
