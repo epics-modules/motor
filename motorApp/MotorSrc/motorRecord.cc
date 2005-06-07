@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.23 $
+Version:	$Revision: 1.24 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-05-10 16:28:33 $
+Last Modified:	$Date: 2005-06-07 14:32:29 $
 */
 
 /*
@@ -71,6 +71,8 @@ Last Modified:	$Date: 2005-05-10 16:28:33 $
  * .20 12-02-04 rls - fixed incorrect slew acceleration calculation.
  * .21 03-13-05 rls - Removed record level round-up position code in do_work().
  * .22 04-04-05 rls - Clear homing and jog request after LS or travel limit error.
+ * .23 05-31-05 rls - Bug fix for DMOV going true before last readback update
+ *			when LS error occurs.
  */
 
 #define VERSION 5.7
@@ -1122,6 +1124,9 @@ static long process(dbCommon *arg)
 	    /* Do another update after LS error. */
 	    if (pmr->mip != MIP_DONE && (pmr->rhls || pmr->rlls))
 	    {
+		/* Restore DMOV to false and UNMARK it so it is not posted. */
+		pmr->dmov = FALSE;
+		UNMARK(M_DMOV);
 		INIT_MSG();
 		WRITE_MSG(GET_INFO, NULL);
 		SEND_MSG();
