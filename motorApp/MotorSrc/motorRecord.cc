@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.24 $
+Version:	$Revision: 1.25 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-06-07 14:32:29 $
+Last Modified:	$Date: 2005-06-23 18:50:50 $
 */
 
 /*
@@ -73,6 +73,10 @@ Last Modified:	$Date: 2005-06-07 14:32:29 $
  * .22 04-04-05 rls - Clear homing and jog request after LS or travel limit error.
  * .23 05-31-05 rls - Bug fix for DMOV going true before last readback update
  *			when LS error occurs.
+ * .24 06-17-05 rls - Bug fix for STOP not working after target position changed.
+ *                  - Don't send SET_ACCEL command when acceleration = 0.0.
+ *                  - Avoid STUP errors from devices that do not have "GET_INFO"
+ *                    command (e.g. Soft Channel).
  */
 
 #define VERSION 5.7
@@ -722,7 +726,8 @@ static long postProcess(motorRecord * pmr)
 		if (vel <= vbase)
 		    vel = vbase + 1;
 		WRITE_MSG(SET_VELOCITY, &vel);
-		WRITE_MSG(SET_ACCEL, &acc);
+		if (acc > 0.0)	/* Don't SET_ACCEL if vel = vbase. */
+		    WRITE_MSG(SET_ACCEL, &acc);
 		if (use_rel)
 		    WRITE_MSG(MOVE_REL, &relbpos);
 		else
@@ -737,7 +742,8 @@ static long postProcess(motorRecord * pmr)
 		if (bvel <= vbase)
 		    bvel = vbase + 1;
 		WRITE_MSG(SET_VELOCITY, &bvel);
-		WRITE_MSG(SET_ACCEL, &bacc);
+		if (bacc > 0.0)	/* Don't SET_ACCEL if bvel = vbase. */
+		    WRITE_MSG(SET_ACCEL, &bacc);
 		if (use_rel)
 		{
 		    relpos = (relpos - relbpos) * pmr->frac;
@@ -791,7 +797,8 @@ static long postProcess(motorRecord * pmr)
 	if (bvel <= vbase)
 	    bvel = vbase + 1;
 	WRITE_MSG(SET_VELOCITY, &bvel);
-	WRITE_MSG(SET_ACCEL, &bacc);
+	if (bacc > 0.0)	/* Don't SET_ACCEL if bvel = vbase. */
+	    WRITE_MSG(SET_ACCEL, &bacc);
 	if (use_rel)
 	{
 	    relpos = (relpos - relbpos) * pmr->frac;
@@ -1138,7 +1145,9 @@ static long process(dbCommon *arg)
 	    
 	    if (pmr->pp)
 	    {
-		if (pmr->val != pmr->lval)
+		if ((pmr->val != pmr->lval) &&
+		   !(pmr->mip & MIP_STOP)   &&
+		   !(pmr->mip & MIP_JOG_STOP))
 		{
 		    pmr->mip = MIP_DONE;
 		    /* Bug fix, record locks-up when BDST != 0, DLY != 0 and
@@ -1532,7 +1541,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	     */
 	    if (pmr->spmg == motorSPMG_Stop || stop == true)
 	    {
-		if (pmr->mip == MIP_DONE || pmr->mip == MIP_STOP || pmr->mip == MIP_RETRY)
+		if ((pmr->mip == MIP_DONE) || (pmr->mip & MIP_STOP) ||
+		    (pmr->mip & MIP_RETRY))
 		{
 		    if (pmr->mip == MIP_RETRY)
 		    {
@@ -1911,11 +1921,18 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     
     if (pmr->stup == motorSTUP_ON)
     {
+	RTN_STATUS status;
+
 	pmr->stup = motorSTUP_BUSY;
 	MARK_AUX(M_STUP);
 	INIT_MSG();
-	WRITE_MSG(GET_INFO, NULL);
-	SEND_MSG();
+	status = WRITE_MSG(GET_INFO, NULL);
+	/* Avoid errors from devices that do not have "GET_INFO" (e.g. Soft
+	   Channel). */
+	if (status == ERROR)
+	    pmr->stup = motorSTUP_OFF;
+	else
+	    SEND_MSG();
     }
 
     /* IF DVAL field has changed, OR, NOT done moving. */
@@ -2102,7 +2119,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		pmr->cdir = (pmr->rdif < 0.0) ? 0 : 1;
 		WRITE_MSG(SET_VEL_BASE, &vbase);
 		WRITE_MSG(SET_VELOCITY, &velocity);
-		WRITE_MSG(SET_ACCEL, &accel);
+		if (accel > 0.0)	/* Don't SET_ACCEL = 0.0 */
+		    WRITE_MSG(SET_ACCEL, &accel);
 		if (use_rel == true)
 		    WRITE_MSG(MOVE_REL, &position);
 		else
@@ -2114,11 +2132,18 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     }
     else if (proc_ind == NOTHING_DONE && pmr->stup == motorSTUP_OFF)
     {
+	RTN_STATUS status;
+	
 	pmr->stup = motorSTUP_BUSY;
 	MARK_AUX(M_STUP);
 	INIT_MSG();
-	WRITE_MSG(GET_INFO, NULL);
-	SEND_MSG();
+	status = WRITE_MSG(GET_INFO, NULL);
+	/* Avoid errors from devices that do not have "GET_INFO" (e.g. Soft
+	   Channel). */
+	if (status == ERROR)
+	    pmr->stup = motorSTUP_OFF;
+	else
+	    SEND_MSG();
     }
     return(OK);
 }
