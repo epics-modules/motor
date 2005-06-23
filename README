@@ -117,7 +117,7 @@ Modification Log from R5-6 to R5-7
 	previous move.
 	- Immediately (e.g., < 1ms) ask the controller for status information
 	that includes the motor's direction.
-	- For OMS controllers the required dealy is 10ms.  Intermittently, the
+	- For OMS controllers the required delay is 10ms.  Intermittently, the
 	status information returned from the OMS controller would indicate that
 	the direction had not changed; hence the term "stale data".
 	
@@ -145,7 +145,47 @@ Modification Log from R5-6 to R5-7
 			- "targs" modified in all drivers with "update_delay"
 			  initialization.
 
+5) With this release, if the absolute values of both the save/restore's target
+	position and the controller's commanded position are greater than the
+	re-try deadband (RDBD) at boot-up, then DVAL will be initialized from
+	the controller's value.  In other words, if the absolute value of
+	the controller's commanded position is greater than the re-try deadband
+	at boot-up, than the controller's position takes precedence over the
+	save/restore value.
 
+	- Modified motor_init_record_com() in motordevCom.c so that a "Load
+		Pos" command is issued only if,
+		|controller's commanded position| > RDBD.
+
+6) Bug fix for DMOV going true before last readback update when LS error occurs.
+
+	File modified: process() in motorRecord.cc restores DMOV to false and
+			UNMARK's it so it is not posted until after the last
+			readback update.
+
+7) A bug was introduced with R5-1 item #2 below.  This bug resulted in the STOP
+	field not functioning after a target position change.  For example, if
+	the user tweaked (TWF) the target position while the motor was moving,
+	activating the STOP field would not stop motor motion the first time; a
+	second STOP field activation would work.
+
+	File modified: process() in motorRecord.cc.  Before calling
+			postProcess(), if the target position has changed
+			and MIP is not MIP_STOP or MIP_JOG_STOP, then set MIP
+			to MIP_DONE and let do_work() process the new target
+			position.
+
+8) In order to avoid device level "Overriding invalid acceleration" warning
+	messages, record support does not send SET_ACCEL commands when
+	acceleration = 0.
+
+	File modified: postProcess() and do_work() in motorRecord.cc.
+
+9) Avoid STUP errors from devices that do not have a "GET_INFO" command (i.e.,
+	Soft Channel).
+
+	File modified: do_work in motorRecord.cc.  If WRITE_MSG(GET_INFO, NULL)
+			returns an error, set STUP to motorSTUP_OFF.
 
 
 Modification Log from R5-5 to R5-6
