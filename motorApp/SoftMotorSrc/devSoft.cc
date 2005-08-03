@@ -2,9 +2,9 @@
 FILENAME...	devSoft.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-20 21:24:08 $
+Last Modified:	$Date: 2005-08-03 15:02:13 $
 */
 
 /*
@@ -38,6 +38,9 @@ Last Modified:	$Date: 2004-12-20 21:24:08 $
  * .01 10-29-02 rls - LOCK field added to prevent synchronization due to
  *		      changing readback.
  * .02 06-16-03 rls   Convert to R3.14.x.
+ * .03 08-03-05 rls - Added debug messages.
+ *		    - Fix compiler error with "gcc version 3.4.2 20041017 (Red
+ *		      Hat 3.4.2-6.fc3)".
  */
 
 
@@ -60,13 +63,25 @@ NOTES...
 
 #include	"epicsExport.h"
 
-#define	STATIC	static
+/*----------------debugging-----------------*/
+#ifdef __GNUG__
+  #ifdef	DEBUG
+    #define Debug(l, f, args...) {if (l <= devSoftdebug) \
+				    errlogPrintf(f, ## args);}
+  #else
+    #define Debug(l, f, args...)
+  #endif
+#else
+  #define Debug
+#endif
+volatile int devSoftdebug = 0;
+extern "C" {epicsExportAddress(int, devSoftdebug);}
 
-STATIC CALLBACK_VALUE update(struct motorRecord *);
-STATIC long start(struct motorRecord *);
-STATIC RTN_STATUS build(motor_cmnd, double *, struct motorRecord *);
-STATIC RTN_STATUS end(struct motorRecord *);
-STATIC void soft_process(struct motorRecord *);
+static CALLBACK_VALUE update(struct motorRecord *);
+static long start(struct motorRecord *);
+static RTN_STATUS build(motor_cmnd, double *, struct motorRecord *);
+static RTN_STATUS end(struct motorRecord *);
+static void soft_process(struct motorRecord *);
 
 
 struct motor_dset devMotorSoft =
@@ -80,7 +95,7 @@ struct motor_dset devMotorSoft =
 
 extern "C" {epicsExportAddress(dset,devMotorSoft);}
 
-STATIC CALLBACK_VALUE update(struct motorRecord *mr)
+static CALLBACK_VALUE update(struct motorRecord *mr)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
     msta_field status;
@@ -96,22 +111,30 @@ STATIC CALLBACK_VALUE update(struct motorRecord *mr)
 
     status.All = mr->msta;
 
+    Debug(5, "update(): dmov=%d for %s.\n", mr->dmov, mr->name);
+
     if (ptr->dinp_value == SOFTMOVE || ptr->dinp_value == HARDMOVE)
+    {
+	Debug(5, "update(): DMOV=0 for %s.\n", mr->name);
 	status.Bits.RA_DONE = 0;
+    }
     else
+    {
+	Debug(5, "update(): DMOV=1 for %s.\n", mr->name);
 	status.Bits.RA_DONE = 1;
+    }
     mr->msta = status.All;
     return(ptr->callback_flag);
 }
 
 
-STATIC long start(struct motorRecord *mr)
+static long start(struct motorRecord *mr)
 {
     return((long) OK);
 }
 
 
-STATIC RTN_STATUS end(struct motorRecord *mr)
+static RTN_STATUS end(struct motorRecord *mr)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 
@@ -127,7 +150,7 @@ STATIC RTN_STATUS end(struct motorRecord *mr)
 }
 
 
-STATIC RTN_STATUS build(motor_cmnd command, double *parms, struct motorRecord *mr)
+static RTN_STATUS build(motor_cmnd command, double *parms, struct motorRecord *mr)
 {
     const short int stop = 1;
     long int status = 0;
@@ -176,21 +199,22 @@ FUNCTION... void soft_dinp_func(struct motorRecord *, short)
 USAGE... Update soft channel device input links and
     process soft channel motor record when done moving.
 LOGIC...
-    IF TRUE to FALSE transition.
+    IF DINP link value is FALSE.
 	IF this soft motor's DMOV is FALSE.
 	    This is a soft motor initiated move.
 	    Set SOFTMOVE indicator.
-	ELSE
+	ELSE IF LOCK field set to NO.
 	    This is NOT a soft motor initiated move.
 	    Set HARDMOVE indicator.
 	    Set soft motor's DMOV FALSE.
-	    Set PP TRUE.
+	    Set PostProcess (PP) TRUE.
 	ENDIF
+    ELSE
+	IF DINP state is HARDMOVE.
+	    Set PostProcess (PP) True.
+	Set DINP state to DONE.
+	Process soft channel record.
     ENDIF    
-    Get DINP_VALUE via DINP link.
-    IF Get() succeeds and DINP_VALUE is true
-        Process soft channel record
-    ENDIF
 */
 void soft_dinp_func(struct motorRecord *mr, short newdinp)
 {
@@ -203,9 +227,13 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
     if (newdinp == 0)
     {
 	if (mr->dmov == FALSE)
+	{
+	    Debug(5, "soft_dinp_func(): SOFTMOVE set for %s.\n", mr->name);
 	    ptr->dinp_value = SOFTMOVE;
+	}
 	else if (mr->lock == menuYesNoNO)
 	{   /* Hard motor is moving independent of soft motor. */
+	    Debug(5, "soft_dinp_func(): HARDMOVE set for %s.\n", mr->name);
 	    ptr->dinp_value = HARDMOVE;
 	    mr->dmov = FALSE;
 	    db_post_events(mr, &mr->dmov, DBE_VAL_LOG);
@@ -218,6 +246,7 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
 	if (ptr->dinp_value == HARDMOVE)
 	    mr->pp = TRUE;
 	ptr->dinp_value = DONE;
+	Debug(5, "soft_dinp_func(): Done moving set for %s.\n", mr->name);
 	soft_process(mr);		/* Process in case there is no readback callback. */
     }
 }
@@ -243,6 +272,8 @@ void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
     newrdbl = newrdbl / mr->mres;
     mr->rmp = NINT(newrdbl);
 
+    Debug(5, "soft_rdbl_func(): updated RMP = %d.\n", mr->rmp);
+    
     if (ptr->initialized == false)
     {
 	/* Reset Target to Actual position. */
@@ -261,7 +292,7 @@ void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
 
 
 /*
-FUNCTION... STATIC void soft_process(struct motorRecord *)
+FUNCTION... static void soft_process(struct motorRecord *)
 USAGE...	Process the soft channel motor record.
 LOGIC...
 	Lock soft channel record - call dbScanLock().
@@ -270,7 +301,7 @@ LOGIC...
 	Unlock soft channel record - call dbScanUnlock().
 */
 
-STATIC void soft_process(struct motorRecord *mr)
+static void soft_process(struct motorRecord *mr)
 {
     struct soft_private *ptr = (struct soft_private *) mr->dpvt;
 
@@ -291,17 +322,9 @@ LOGIC...
 
 void soft_motor_callback(CALLBACK *cbptr)
 {
-#ifdef __GNUG__
-    struct motorRecord *mr;
-
-    callbackGetUser((void *) mr, cbptr);
-    soft_process(mr);
-
-#else
     void *mr;
 
     callbackGetUser(mr, cbptr);
     soft_process((motorRecord *) mr);
-#endif
 }
 
