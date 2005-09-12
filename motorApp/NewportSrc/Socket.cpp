@@ -36,7 +36,8 @@ typedef int BOOL;
 #define CREATESOCKETFAILED -2
 #define OPTREFUSED         -3
 
-#define MAX_NB_SOCKETS     100
+#define MAX_NB_SOCKETS     40
+#define SOCKET_TIMEOUT	   100
 
 /* typedefs */
 
@@ -133,23 +134,29 @@ void SendAndReceive (int SocketIndex, char *buffer, char *valueRtrn)
     int  iRvcd=0;
     clock_t start, finish;
     double timeEllapse = 0.0;
+    
 	
     if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
     {
         /* Send String to controller and wait for response */
-
-        write (sockFd[SocketIndex], buffer, strlen(buffer) + 1);
-/*	printf("SendAndRecieve after write\n");*/
+	
+	/*printf("Timeout: %lf, CLOCKS_PER_SEC %i ",TimeoutSocket[SocketIndex],CLOCKS_PER_SEC);*/
+        
+	write (sockFd[SocketIndex], buffer, strlen(buffer) + 1);
+	/*printf("SendAndRecieve after write\n");*/
         /* Read error ? */
-        iRvcd = read (sockFd[SocketIndex], pBuf, SIZEBUFFER);
+/*        iRvcd = read (sockFd[SocketIndex], pBuf, SIZEBUFFER);*/
         start = clock();
 /*	printf("SendAndRecieve after read\n");*/
 	
-        while ((iRvcd <= 0) && (timeEllapse < TimeoutSocket[SocketIndex]))
+        while ((iRvcd <= 0) && (timeEllapse < SOCKET_TIMEOUT))
         {
-            iRvcd = read (sockFd[SocketIndex], pBuf, SIZEBUFFER);
+            
+	    /*printf("SendAndRecieve above read\n");*/
+	    iRvcd = read (sockFd[SocketIndex], pBuf, SIZEBUFFER);
             finish = clock();
             timeEllapse = (double)(finish - start) / CLOCKS_PER_SEC;
+	    
             /* waiting ... */
         }
     }
