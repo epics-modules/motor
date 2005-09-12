@@ -6,6 +6,21 @@
 #include <string.h>		/* Added by JHK */
 #include <sys/socket.h>
 
+/* Bug Fix 
+23rd May JHK
+GatheringExternalConfigurationSet- change array size to allow for the long list of 
+ExternalLatchPosition axes 
+
+9th June JHK
+GroupMoveAbsolute and Home use Send() insted of SendAndReceive() because the read 
+socket function hangs once the IOC has been rebooted once.
+
+30th June JHK
+GroupMoveAbort use Send() insted of SendAndReceive() because the abort hangs until
+the motors stop.
+
+5th July JHK
+MultipleAxesPVTExecution use Send() insted of SendAndReceive() */
 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -13,7 +28,7 @@
 #include "Socket.h" 
 #define DLL _declspec(dllexport)
 #include "xps_c8_driver.h" 	/* Renamed by JHK */
-#define SIZE_BUFFER  500
+#define SIZE_BUFFER  256
 
 #define SIZE_NAME    100
 
@@ -519,9 +534,9 @@ int __stdcall GatheringExternalConfigurationSet (int SocketIndex, int NbElements
 	char  seps[] = " \t;";
 	int   indice;
 	char  list [SIZE_BUFFER];
-
-	char (*stringArray0)[SIZE_NAME];
-	stringArray0 = new char [NbElements][SIZE_NAME];
+	
+	char (*stringArray0)[SIZE_BUFFER];
+	stringArray0 = new char [NbElements][SIZE_BUFFER];
 	indice = 0;
 	strcpy (list, TypeList);
 	token = strtok( list, seps );
@@ -1045,14 +1060,14 @@ int __stdcall GroupHomeSearch (int SocketIndex, char * GroupName)
 	/* return function : ==0 -> OK ; < 0 -> NOK */ 
 
 
-	/*SendAndReceive (SocketIndex, ExecuteMethod, ReturnedValue); */
-	SendOnly (SocketIndex, ExecuteMethod, ReturnedValue);	 
+	/*SendAndReceive (SocketIndex, ExecuteMethod, ReturnedValue);*/
+	SendOnly (SocketIndex, ExecuteMethod, ReturnedValue);	
 	if (strlen (ReturnedValue) > 0) 
 		sscanf (ReturnedValue, "%i", &ret); 
 
 	/* Get the returned values in the out parameters */ 
 	
-	ret = 0;	/* Added by JHK */
+	ret = 0;	 /* Added by JHK */
 	
 
 	/* Get the returned values in the out parameters */ 
@@ -1320,11 +1335,14 @@ int __stdcall GroupMoveAbort (int SocketIndex, char * GroupName)
 
 	/* Send this string and wait return function from controller */ 
 	/* return function : ==0 -> OK ; < 0 -> NOK */ 
-	SendAndReceive (SocketIndex, ExecuteMethod, ReturnedValue); 
+	/*SendAndReceive (SocketIndex, ExecuteMethod, ReturnedValue);*/
+	
+	SendOnly (SocketIndex, ExecuteMethod, ReturnedValue); 
 	if (strlen (ReturnedValue) > 0) 
 		sscanf (ReturnedValue, "%i", &ret); 
 
-	/* Get the returned values in the out parameters */ 
+	/* Get the returned values in the out parameters */
+	ret = 0;	/* Added by JHK */ 
 	return (ret); 
 }
 
@@ -1357,7 +1375,7 @@ int __stdcall GroupMoveAbsolute (int SocketIndex, char * GroupName, int NbElemen
 /*	printf("xps_c8_driver.cpp: GroupMoveAbs Calling SendAndRecieve\n");*/ 
 		
 	/*SendAndReceive (SocketIndex, ExecuteMethod, ReturnedValue);*/
-	SendOnly (SocketIndex, ExecuteMethod, ReturnedValue);	 
+	SendOnly (SocketIndex, ExecuteMethod, ReturnedValue);
 	if (strlen (ReturnedValue) > 0) 
 		sscanf (ReturnedValue, "%i", &ret); 
 
@@ -2958,7 +2976,8 @@ int __stdcall MultipleAxesPVTExecution (int SocketIndex, char * GroupName, char 
 
 	/* Send this string and wait return function from controller */ 
 	/* return function : ==0 -> OK ; < 0 -> NOK */ 
-	SendAndReceive (SocketIndex, ExecuteMethod, ReturnedValue); 
+	/*SendAndReceive (SocketIndex, ExecuteMethod, ReturnedValue); */
+	SendOnly (SocketIndex, ExecuteMethod, ReturnedValue); 
 	if (strlen (ReturnedValue) > 0) 
 		sscanf (ReturnedValue, "%i", &ret); 
 
