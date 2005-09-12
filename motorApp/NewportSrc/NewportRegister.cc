@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.cc
 USAGE...	Register Newport motor device driver shell commands.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-07-28 20:24:01 $
+Last Modified:	$Date: 2005-09-12 19:40:40 $
 */
 
 /*****************************************************************
@@ -40,8 +40,18 @@ static const iocshArg XPSconfigArg3 = {"Number of Axes", iocshArgInt};
 // NewportXPSC8 NameConfig arguments
 static const iocshArg XPSNameconfigArg0 = {"Card being configured", iocshArgInt};
 static const iocshArg XPSNameconfigArg1 = {"Axis being configured", iocshArgInt};
-static const iocshArg XPSNameconfigArg2 = {"Group Name", iocshArgString};
-static const iocshArg XPSNameconfigArg3 = {"Positioner Name", iocshArgString};
+static const iocshArg XPSNameconfigArg2 = {"Group Number", iocshArgInt};
+static const iocshArg XPSNameconfigArg3 = {"Group size", iocshArgInt};
+static const iocshArg XPSNameconfigArg4 = {"Axis in group number", iocshArgInt};
+static const iocshArg XPSNameconfigArg5 = {"Group Name", iocshArgString};
+static const iocshArg XPSNameconfigArg6 = {"Positioner Name", iocshArgString};
+// Newport XPS Gathering Test args
+static const iocshArg XPSArg0 = {"Element Period*10^4", iocshArgInt};
+// XPS tcl execute function
+static const iocshArg tclcallArg0 = {"tcl name", iocshArgString};
+static const iocshArg tclcallArg1 = {"Task name", iocshArgString};
+static const iocshArg tclcallArg2 = {"Function args", iocshArgString};
+
 
 static const iocshArg * const NewportSetupArgs[2] = {&setupArg0, 
                                                      &setupArg1};
@@ -55,10 +65,19 @@ static const iocshArg * const NewportXPSC8ConfigArgs[4] = {&XPSconfigArg0,
                                                            &XPSconfigArg2, 
                                                            &XPSconfigArg3};
 
-static const iocshArg * const NewportXPSC8NameArgs[4] = {&XPSNameconfigArg0, 
+static const iocshArg * const NewportXPSC8NameArgs[7] = {&XPSNameconfigArg0, 
                                                          &XPSNameconfigArg1,
                                                          &XPSNameconfigArg2,
-                                                         &XPSNameconfigArg3};
+							 &XPSNameconfigArg3,
+                                                         &XPSNameconfigArg4,
+							 &XPSNameconfigArg5,		
+                                                         &XPSNameconfigArg6};
+static const iocshArg * const XPSArgs[1] = {&XPSArg0};
+
+static const iocshArg * const tclcallArgs[3] = {&tclcallArg0,
+						&tclcallArg1,
+						&tclcallArg2};
+							 
 static const iocshFuncDef setupMM3000 = {"MM300Setup", 2, NewportSetupArgs};
 static const iocshFuncDef setupMM4000 = {"MM4000Setup",2, NewportSetupArgs};
 static const iocshFuncDef setupPM500  = {"PM500Setup", 2, NewportSetupArgs};
@@ -70,8 +89,11 @@ static const iocshFuncDef configMM4000 = {"MM4000Config", 3, NewportConfigArgs};
 static const iocshFuncDef configPM500  = {"PM500Config",  3, NewportConfigArgs};
 static const iocshFuncDef configESP300 = {"ESP300Config", 3, NewportConfigArgs};
 static const iocshFuncDef configXPSC8  = {"XPSC8Config",  4, NewportXPSC8ConfigArgs};
-static const iocshFuncDef nameXPSC8    = {"XPSC8NameConfig", 4, NewportXPSC8NameArgs};
+static const iocshFuncDef nameXPSC8    = {"XPSC8NameConfig",7, NewportXPSC8NameArgs};
 
+static const iocshFuncDef XPSC8GatheringTest = {"xpsgathering",1, XPSArgs};
+
+static const iocshFuncDef TCLRun = {"tclcall",3, tclcallArgs};
 
 static void setupMM3000CallFunc(const iocshArgBuf *args)
 {
@@ -125,8 +147,20 @@ static void configXPSC8CallFunc(const iocshArgBuf *args)
 
 static void nameXPSC8CallFunc(const  iocshArgBuf *args)
 {
-    XPSC8NameConfig(args[0].ival, args[1].ival, args[2].sval, args[3].sval);
+    XPSC8NameConfig(args[0].ival, args[1].ival, args[2].ival, args[3].ival,\
+     			args[4].ival, args[5].sval, args[6].sval);
 }
+
+static void XPSC8GatheringTestCallFunc(const  iocshArgBuf *args)
+{
+    xpsgathering(args[0].ival);
+}
+
+static void TCLRunCallFunc(const  iocshArgBuf *args)
+{
+    tclcall(args[0].sval, args[1].sval, args[2].sval);
+}
+
 
 static void NewportRegister(void)
 {
@@ -142,6 +176,13 @@ static void NewportRegister(void)
     iocshRegister(&configESP300, configESP300CallFunc);
     iocshRegister(&configXPSC8,  configXPSC8CallFunc);
     iocshRegister(&nameXPSC8,    nameXPSC8CallFunc);
+    iocshRegister(&TCLRun,       TCLRunCallFunc);
+#ifdef vxWorks
+    iocshRegister(&XPSC8GatheringTest, XPSC8GatheringTestCallFunc);
+
+#endif
+
+
 }
 
 epicsExportRegistrar(NewportRegister);
