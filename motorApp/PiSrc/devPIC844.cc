@@ -3,9 +3,9 @@ FILENAME...	devPIC844.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-20 21:12:51 $
+Last Modified:	$Date: 2005-10-04 19:47:12 $
 */
 
 /*
@@ -44,7 +44,6 @@ Last Modified:	$Date: 2004-12-20 21:12:51 $
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
-#include "drvPI.h"
 #include "epicsExport.h"
 
 extern struct driver_table PIC844_access;
@@ -151,7 +150,6 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct PIC844controller *cntrl;
     char buff[110];
     int axis, card, maxdigits;
     unsigned int size;
@@ -173,7 +171,6 @@ static RTN_STATUS PIC844_build_trans(motor_cmnd command, double *parms, struct m
     if (brdptr == NULL)
 	return(rtnval = ERROR);
 
-    cntrl = (struct PIC844controller *) brdptr->DevicePrivate;
     cntrl_units = dval;
     maxdigits = 2;
     
