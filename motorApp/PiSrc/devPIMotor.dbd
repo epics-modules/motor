@@ -1,7 +1,19 @@
-# Intelligent Motion Systems driver support.
+# Physik Instrumente (PI) GmbH & Co. C-844 driver support.
 device(motor,VME_IO,devPIC844,"PIC844")
 driver(drvPIC844)
 registrar(PImotorRegister)
 variable(drvPIC844debug)
+
+# PI C630 support.
+device(motor,VME_IO,devPIC630,"PI C630")
+driver(drvPIC630)
+registrar(PIC630Register)
+variable(drvPIC630debug)
+
+# Physik Instrumente (PI) GmbH & Co. C-848 driver support.
+device(motor,VME_IO,devPIC848,"PIC848")
+driver(drvPIC848)
+registrar(PIC848motorRegister)
+variable(drvPIC848debug)
 
 
