@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.25 $
+Version:	$Revision: 1.26 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-06-23 18:50:50 $
+Last Modified:	$Date: 2005-10-11 20:56:13 $
 */
 
 /*
@@ -77,6 +77,8 @@ Last Modified:	$Date: 2005-06-23 18:50:50 $
  *                  - Don't send SET_ACCEL command when acceleration = 0.0.
  *                  - Avoid STUP errors from devices that do not have "GET_INFO"
  *                    command (e.g. Soft Channel).
+ * .25 10-11-05 rls - CDIR not set correctly when jogging with DIR="Neg".
+ *
  */
 
 #define VERSION 5.7
@@ -1797,6 +1799,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
 		if (pmr->mres < 0.0)
 		    pmr->cdir = !pmr->cdir;
+		if (dir == -1)
+		    pmr->cdir = !pmr->cdir;
 
 		INIT_MSG();
 		WRITE_MSG(SET_ACCEL, &jacc);
@@ -3198,7 +3202,7 @@ static void
     if (pmr->rbv != old_rbv)
 	MARK(M_RBV);
 
-    /* Get current or most recent direction. */
+    /* Set most recent raw direction. */
     pmr->tdir = (msta.Bits.RA_DIRECTION) ? 1 : 0;
     if (pmr->tdir != old_tdir)
 	MARK(M_TDIR);
