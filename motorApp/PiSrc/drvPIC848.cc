@@ -3,14 +3,14 @@ FILENAME...	drvPIC848.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 	GmbH & Co. C-848 motor controller.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-10-04 19:45:51 $
+Last Modified:	$Date: 2005-10-18 21:31:10 $
 */
 
 /*
  *      Original Author: Ron Sluiter
- *      Date: 12/17/03
+ *      Date: 10/18/05
  *
  *      Experimental Physics and Industrial Control System (EPICS)
  *
@@ -35,27 +35,13 @@ Last Modified:	$Date: 2005-10-04 19:45:51 $
  *
  * Modification Log:
  * -----------------
- * .01 12/17/03 rls - copied from drvIM483PL.cc
- * .02 02/03/04 rls - Eliminate erroneous "Motor motion timeout ERROR".
- * .03 07/12/04 rls - Converted from MPF to asyn.
- * .04 09/09/04 rls - Retry on initial comm. (PIC844 comm. locks up when IOC
- *                    is power cycled).
- * .05 09/21/04 rls - support for 32axes/controller.
- * .06 12/16/04 rls - asyn R4.0 support.
- *		    - make debug variables always available.
- *		    - MS Visual C compatibility; make all epicsExportAddress
- *		      extern "C" linkage.
- * .07 08/31/04 rls - Bug fix for no "break"'s in axis #4 switch/case stmts.
- *			in set_status().
+ * .01 10/18/05 rls - copied from drvPIC844.cc
  */
 
 /*
 DESIGN LIMITATIONS...
     1 - Like all controllers, the PIC848 must be powered-on when EPICS is first
     booted up.
-    2 - The PIC848 cannot be power cycled while EPICS is up and running.  The
-    consequences are permanent communication lose with the PIC848 until
-    EPICS is rebooted.
 */
 
 #include <string.h>
@@ -554,6 +540,13 @@ static int motor_init()
 		status = recv_mess(card_index, buff, 1);
 		retry++;
 	    } while (status == 0 && retry < 3);
+	}
+
+	if (success_rtn == asynSuccess && status > 0)
+	{
+	    strcpy(brdptr->ident, &buff[0]);
+	    brdptr->localaddr = (char *) NULL;
+	    brdptr->motor_in_motion = 0;
 
             /* Determine # of axes. Request stage name.  See if it responds */
 	    for (total_axis = 0; total_axis < MAX_AXES; total_axis++)
@@ -564,13 +557,6 @@ static int motor_init()
 		    break;
 	    }
 	    brdptr->total_axis = total_axis;
-	}
-
-	if (success_rtn == asynSuccess && status > 0)
-	{
-	    strcpy(brdptr->ident, &buff[0]);
-	    brdptr->localaddr = (char *) NULL;
-	    brdptr->motor_in_motion = 0;
 
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
