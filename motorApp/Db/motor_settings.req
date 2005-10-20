@@ -34,4 +34,5 @@ $(P)$(M).VMAX
 $(P)$(M).PCOF
 $(P)$(M).ICOF
 $(P)$(M).DCOF
+$(P)$(M).HVEL
 $(P)$(M)_able.VAL
