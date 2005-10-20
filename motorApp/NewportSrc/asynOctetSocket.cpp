@@ -120,8 +120,8 @@ void SetTCPTimeout(int SocketIndex, double TimeOut)
 /***************************************************************************************/
 void SendAndReceive (int SocketIndex, char *buffer, char *valueRtrn)
 {
-    int nbytesOut = 0; 
-    int nbytesIn = 0;
+    size_t nbytesOut = 0; 
+    size_t nbytesIn = 0;
     int eomReason;
     /*clock_t start, finish;
     double timeEllapse = 0.0;*/
@@ -164,7 +164,7 @@ void SendAndReceive (int SocketIndex, char *buffer, char *valueRtrn)
 	     * sendOnly so re-send the command */
 	     
 	    if (writeReadStatus < 0){
-	        Debug(10,"Address %x\n",pasynUserArray[SocketIndex]);
+	        Debug(10,"Address %p\n",pasynUserArray[SocketIndex]);
 	        Debug(1,"Error WriteReadStatus = %i Retry ",writeReadStatus);
 		Debug(2,"Sock=%i Tout=%g In=%s Out=%s \n  Command sent again! loop %i\n",SocketIndex,
 					TimeoutSocket[SocketIndex],valueRtrn,buffer,loop);
@@ -214,8 +214,8 @@ void SendAndReceive (int SocketIndex, char *buffer, char *valueRtrn)
 void SendOnly (int SocketIndex, char *buffer, char *valueRtrn)
 {
     char dummyReturn[MAX_MSG_SIZE];
-    int nbytesOut = 0; 
-    int nbytesIn = 0;
+    size_t nbytesOut = 0; 
+    size_t nbytesIn = 0;
     int eomReason;
     char const dummyBuffer[40] = "FirmwareVersionGet (char *)";
     char *output;
