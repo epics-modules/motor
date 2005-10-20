@@ -3,9 +3,6 @@
 / */ 
 
 
-/*#ifndef DLL
-#define DLL _declspec(dllimport)
-#endif*/
 #ifdef WINDOWS				/* Copied from old version*/
 #ifndef DLL
 #define DLL _declspec(dllimport)
@@ -14,7 +11,6 @@
 #define __stdcall
 #define DLL
 #endif
-
 
 #ifdef __cplusplus
 extern "C"
