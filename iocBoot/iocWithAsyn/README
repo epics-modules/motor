@@ -1,7 +1,6 @@
 To build any examples;
 
-- in <motor>/configure/RELEASE: EPICS_BASE, TEMPLATE_TOP and MSI must
-  be defined.
+- in <motor>/configure/RELEASE: EPICS_BASE and MOTOR must be defined.
 
 - in <motor>/Makefile: the following two lines must be uncommented;
   #DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
