@@ -1,3 +1,4 @@
 # Soft Channel driver support.
 device(motor,CONSTANT,devMotorSoft,"Soft Channel")
+#variable(devSoftdebug)
 
