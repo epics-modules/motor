@@ -3,9 +3,9 @@ FILENAME: motordevCom.cc
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-06-07 14:30:36 $
+Last Modified:	$Date: 2005-10-20 20:01:41 $
 */
 
 /*
@@ -45,6 +45,7 @@ Last Modified:	$Date: 2005-06-07 14:30:36 $
  * .06  02/03/04 rls Initialize PID parameters from motor_init_record_com().
  * .07  06/07/05 rls Use RDBD as threshold for controller's position takes
  *                   precedence over the save/restore value at initialization.
+ * .08  10/18/05 rls Use MAX_TIMEOUT.
  */
 
 
@@ -353,7 +354,7 @@ long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_tab
 	(*pdset->end_trans)(mr);
 
 	/* Wait for callback w/timeout */
-	if (ptrans->initSem->wait(1.0) == FALSE)
+	if (ptrans->initSem->wait(MAX_TIMEOUT) == FALSE)
 	    recGblRecordError(S_dev_NoInit, (void *) mr,
 		(char *) "dev_NoInit (init_record_com: callback2 timeout");
 	delete(ptrans->initSem);

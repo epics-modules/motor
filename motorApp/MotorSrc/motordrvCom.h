@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-05-10 16:29:33 $
+Last Modified:	$Date: 2005-10-20 20:01:40 $
 */
 
 /*
@@ -41,6 +41,7 @@ Last Modified:	$Date: 2005-05-10 16:29:33 $
  * .03 12-12-03 rls Converted MSTA #define's to bit field.
  * .04 09-20-04 rls support for 32 axes / controller, maximum.
  * .05 05/10/05 rls Added "update_delay" for "Stale data delay" bug fix.
+ * .06 10/18/05 rls Added MAX_TIMEOUT for all devices drivers.
  */
 
 
@@ -57,6 +58,8 @@ Last Modified:	$Date: 2005-05-10 16:29:33 $
 #include "motor.h"
 
 #define MAX_IDENT_LEN 100
+#define MAX_TIMEOUT   5.0 /* Maximum communication timeout for all devices
+			   drivers (in sec.). */
 
 /* Controller communication port type, followed by status. */
 enum PortType
