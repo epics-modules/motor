@@ -8,6 +8,8 @@ include $(TOP)/configure/CONFIG
 
 DBD += devNewport.dbd
 
+INC += xps_c8_driver.h
+
 LIBRARY_IOC = Newport
 
 SRCS += NewportRegister.cc
