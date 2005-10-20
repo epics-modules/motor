@@ -70,3 +70,30 @@ Note the response to the SU? commands and set MRES to that value.
     the diagnostic messages loaded), or go to step #1, and reverse the steps;
     comment out the "USR_CFLAGS += -DDEBUG" line in the NewportSrc/Makefile.Vx,
     etc., etc.,
+    
+
+Newport ESP100
+==============
+
+Configuration
+-------------
+
+- Unlike the ESP300, the ESP100 must be told what type of motor it is connected
+to.  This is done using the "Set Motor Type" command; QM.  "QM" arguments are
+as follows:
+0 - motor type undefined (default).
+1 - DC servo motor.
+2 - stepper motor.
+3 - commutated stepper motor.
+4 - commutated brushless DC servo motor.
+After setting the motor type, the value must be saved to non-volatile memory
+using the "SM" command.
+
+Example
+-------
+
+Setting and saving an ESP100 for use with a DC servo motor driven stage (e.g.,
+850G);
+
+        1QM 1<CR>
+        SM<CR>
