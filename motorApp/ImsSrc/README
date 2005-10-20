@@ -10,7 +10,10 @@ The following is a modified version of the procedure defined in Section 2.1,
 "MDrive Motion Control" manual; Revision 01.24.2005.
 
 1. Connect the first MDrive Motion Control to the Host PC configured for Single
-        Mode Operation.
+        Mode Operation. Since the MDrive uses RS-485, a RS-232 to RS-485
+	converter is required for a Host PC to MDrive communication connection.
+	Set the PC Host RS-232 port characteristics to 9600 Baud, 8 Data bits,
+	1 Stop bit, No parity, No flow control.
 	
 2. Establish communications.
 	If you can see the sign-on message "Copyright 2001-2003 by Intelligent
@@ -52,7 +55,7 @@ IMPORTANT NOTES
 MDrive Facts
 ------------
 
-* Step resolution    -  200 steps / 1 motor revolution.
+* Default step resolution -  51,200 steps / 1 motor revolution (MS=256).
 * Encoder resolution - 2048 ticks / 1 motor revolution.
 
 
@@ -140,3 +143,9 @@ IMS483SM   |  1000      |  1000HZ      | 121.0
 -----------|------------|--------------|------------
 IMS483SM   |  1000      |  1000HZ      |  96.0 with VBAS/VELO removed
 
+
+KNOWN PROBLEMS
+==============
+
+- The MDrive overshoots the target position on small moves when the velocity
+base is large.
