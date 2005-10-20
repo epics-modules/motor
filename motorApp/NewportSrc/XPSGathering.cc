@@ -175,17 +175,17 @@ printf(" socket=%i, gathering=%s\n",socket,gatheringdata);
 
 		     
 		 if(j == (numAxes-1)) {
-		     if(fscanf(trajFile," %lf,%*lf",&trajStep) != 1) printf("trajerror\n");}
+		     if(fscanf(trajFile," %lf,%*f",&trajStep) != 1) printf("trajerror\n");}
 		 
 		 if (j == 0){   
-	             if(fscanf(trajFile,"%lf, %lf,%*lf,",&trajTime,&trajStep) != 2) printf("trajerror\n");}
+	             if(fscanf(trajFile,"%lf, %lf,%*f,",&trajTime,&trajStep) != 2) printf("trajerror\n");}
 		 
 		 if (j > 0 && j < (numAxes-1)){
-		     if(fscanf(trajFile," %lf,%*lf,",&trajStep) != 1) printf("trajerror\n");}
+		     if(fscanf(trajFile," %lf,%*f,",&trajStep) != 1) printf("trajerror\n");}
 		 
 		 if(i == 0) {
 		     posTheory[j] = motorReadbacks[j][i];
-		     printf("posTheory = %lf ",posTheory[j]);}
+		     printf("posTheory = %f ",posTheory[j]);}
 		 else{
 		     posTheory[j]+= trajStep;}
 		     
