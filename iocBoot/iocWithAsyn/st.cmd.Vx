@@ -79,6 +79,8 @@ dbLoadTemplate("motor.substitutions")
 #     (1) controller
 #     (2) ASYN port name
 #!MCB4BConfig(0, "a-Serial[0]")
+#!asynOctetSetInputEos("a-Serial[0]",0,"\r")
+#!asynOctetSetOutputEos("a-Serial[0]",0,"\r")
 #!drvMCB4BDebug=4
 
 # Newport ESP300 driver setup parameters: 

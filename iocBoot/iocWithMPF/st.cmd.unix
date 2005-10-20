@@ -74,6 +74,8 @@ MM4000Config(0, "L0")
 #     (2) ASYN port name
 #!MCB4BConfig(0, "L0")
 #!var drvMCB4BDebug 4
+#!asynOctetSetInputEos("L0",0,"\r")
+#!asynOctetSetOutputEos("L0",0,"\r")
 
 # Newport ESP300 driver setup parameters: 
 #     (1) maximum number of controllers in system
