@@ -37,9 +37,9 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version 5.6 of the EPICS motor
+<h2>Overview</h2> This documentation describes version 5.7 of the EPICS motor
 record, and related EPICS software required to build and use it.&nbsp; Version
-5.6 of the motor record is compatible with EPICS base R3.14.7 and above.
+5.7 of the motor record is compatible with EPICS base R3.14.7 and above.
 <p>
 The motor record is intended to support motors of all kinds, but currently 
 supports only the following variety of motor controllers (in addition to Soft 
@@ -54,7 +54,7 @@ Channel support):
     Highland Technologies model V540.
   </li>
   <li>
-    Newport models MM3000, MM4000, MM4005, MM4006, PM500, ESP300 and XPSC8.
+    Newport models MM3000, MM4000/5/6, PM500, ESP300/100 and XPSC8.
   </li>
   <li>
     Intelligent Motion Systems, Inc. (IMS) models IM483 and MDrive.
@@ -66,7 +66,7 @@ Channel support):
     Mclennan models PM304 and PM600.
   </li>
   <li>
-    Physik Instrumente (PI) GmbH & Co. model C-844.
+    Physik Instrumente (PI) GmbH & Co. model C-630, C-844 and C-848.
   </li>
   <li>
     MicroMo model MVP 2001 B02.
@@ -245,7 +245,7 @@ below.
   <tr>
     <td><a href="#Fields_private">CDIR</a></td>
     <td>R</td>
-    <td>Command direction</td>
+    <td>Raw commanded direction</td>
     <td>SHORT</td>
     <td><br>
     </td>
@@ -2356,7 +2356,7 @@ below.
       <blockquote>
 	<ol>
 	  <li>
-	    DIRECTION: (0:Negative, 1:Positive)
+	    DIRECTION: last raw direction; (0:Negative, 1:Positive)
 	  </li>
 	  <li>
 	    DONE: motion is complete.
@@ -2938,7 +2938,7 @@ below.
     <td>CDIR<br>
     </td>
     <td>R</td>
-    <td>Command direction<br>
+    <td>Raw commanded direction<br>
     </td>
     <td>SHORT<br>
     </td>

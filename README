@@ -1,4 +1,4 @@
-Motor Record R5-6 Release Notice
+Motor Record R5-7 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base R3-14-7.
@@ -91,6 +91,20 @@ Known Problems
 3) The OMS VME58 servo motor controller board (i.e., model -8S) is unable to
 	move off an activated limit switch.  Users are advised to avoid this
 	situation.  This problem is fixed with the MAXv model.
+
+4) With R5-3 of the motorRecord, negative encoder resolutions (ERES) are
+	supported.  This allows the user to change the sign of ERES rather than
+	reverse encoder wires when the motor and encoder direction are reversed.
+
+	There is a peculiarity with the OMS controller boards when they are
+	configured with MRES and ERES of opposite polarity.  Since both the
+	commanded and feedback positions are set with the same command (LP),
+	the user must enter the opposite polarity when setting the OMS motor
+	controllers position.
+
+	For example, if MRES is positive and ERES is negative and the user
+	wants to set the current position to 10.00 inches, then -10.00 must be
+	entered in the VAL or DVAL field.
 
 
 Modification Log from R5-6 to R5-7
@@ -186,6 +200,47 @@ Modification Log from R5-6 to R5-7
 
 	File modified: do_work in motorRecord.cc.  If WRITE_MSG(GET_INFO, NULL)
 			returns an error, set STUP to motorSTUP_OFF.
+
+10) Added debug messages to Soft Channel device support and fixed error when
+	devSoft.cc was compiled with "gcc version 3.4.2 20041017 (Red Hat
+	3.4.2-6.fc3)".
+
+	File modified: devSoft.cc
+
+11) Kurt Goetze added support for the Physik Instrumente (PI) model C-630
+	motion controller.
+
+	Files added: to PiSrc directory; drvPIC630.h, devPIC630.cc,
+					 drvPIC630.cc
+
+12) Bug fix for PI C-844 driver processing of axis #4.
+
+	File modified: drvPIC844.cc, missing break"'s in axis #4 switch/case
+					stmts. in set_status().
+
+13) Added support for the Physik Instrumente (PI) GmbH & Co. C-848 motor
+	controller.
+
+	Files added:	- devPIC848.cc, drvPIC848.h, drvPIC848.cc
+
+14) A bug was reported by David Maden that occurred when a motor was jogged
+	into a limit switch with the DIR field set to "Neg".  Under these
+	conditions, the motor record was not processing the limit error
+	condition correctly.  This resulted in the motor record not setting
+	either of the limit error indicator fields (HLS/LLS) and becoming stuck
+	in the "Moving" state.
+	
+	File modified: do_work() in motorRecord.cc; complement CDIR when
+			jogging if DIR="Neg".
+
+15) Added maximum communication timeout for all devices drivers (MAX_TIMEOUT).
+	This value is set in motordrvCom.h to 5 seconds.  This helps prevent
+	the "dev_NoInit (init_record_com: callback2 timeout" error message at
+	motor record initialization.
+	
+	Files modified: - Added MAX_TIMEOUT to motordrvCom.h.
+			- Reference MAX_TIMEOUT in motor_init_record_com() in
+			  motordevCom.cc.
 
 
 Modification Log from R5-5 to R5-6

@@ -5,11 +5,59 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R5.6 Notice</title>
+  <title>EPICS Motor Record Release R5.7 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+<CENTER>
+  <H1><B><U>Motor Record Version 5.7 Release Notice</U></B></H1>
+</CENTER>
+
+<BR>
+<B><U>Requirements</U></B><BR>
+<BR>
+EPICS base R3.14.7 or greater.&nbsp; See the "Required Modules" section of the 
+Motor Record web page for details.<BR>
+
+<CENTER>
+  <H4><U>Modifications to Existing Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <U><B>Initial Position</B></U>
+  <P>
+  With this release, if the absolute values of both the save/restore's target 
+  position and the controller's commanded position are greater than the re-try 
+  deadband (RDBD) at boot-up, then DVAL will be initialized from the controller's 
+  value.  In other words, if the absolute value of the controller's commanded 
+  position is greater than the re-try deadband at boot-up, than the controller's 
+  position takes precedence over the save/restore value.
+  </P>
+</DIV>
+
+<CENTER>
+  <H4><U>New Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Physik Instrumente (PI) C-630</B></U>
+  </P>
+  <P>
+  Kurt Goetze added support for the Physik Instrumente (PI) model C-630 motion 
+  controller.
+  </P>
+
+  <P>
+  <U><B>Physik Instrumente (PI) C-848</B></U>
+  </P>
+  <P>
+  Support added for the Physik Instrumente (PI) C-848 motor controller.
+  </P>
+</DIV>
+
 
 <CENTER>
   <h1><b><u>Motor Record Version 5.6 Release Notice</u></b></h1>
