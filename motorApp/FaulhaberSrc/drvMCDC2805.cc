@@ -1,16 +1,15 @@
 /*
 FILENAME... drvMCDC2805.cc
-USAGE...    Motor record driver level support for Intelligent Motion
-        Systems, Inc. MCDC2805 series; M17, M23, M34.
+USAGE...    Motor record driver level support for Faulhaber MCDC2805
 
-Version:    $Revision: 1.1 $
+Version:    $Revision: 1.2 $
 Modified By:    $Author: rivers $
-Last Modified:  $Date: 2005-11-04 20:40:44 $
+Last Modified:  $Date: 2005-11-04 23:05:34 $
 */
 
 /*
- *      Original Author: Ron Sluiter
- *      Date: 03/21/03
+ *      Original Author: Mark Rivers
+ *      Date: 10/20/2005
  *
  *      Experimental Physics and Industrial Control System (EPICS)
  *

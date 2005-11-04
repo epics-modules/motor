@@ -1,16 +1,15 @@
 /*
 FILENAME...	drvMCDC2805.h
-USAGE... This file contains driver "include" information that is specific to
-	Intelligent Motion Systems, Inc. MCDC2805(I/IE) and MDrive controllers.
+USAGE... This file contains driver "include" information for the Faulhaber MCDC 2805 controller.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-11-04 20:40:44 $
+Last Modified:	$Date: 2005-11-04 23:05:35 $
 */
 
 /*
- *      Original Author: Ron Sluiter
- *      Date: 02/10/2000
+ *      Original Author: Mark Rivers
+ *      Date: 10/20/2005
  *
  *      Experimental Physics and Industrial Control System (EPICS)
  *
@@ -37,9 +36,7 @@ Last Modified:	$Date: 2005-11-04 20:40:44 $
  *
  * Modification Log:
  * -----------------
- * .01	02/10/2000 rls copied from drvMM4000.h
- * .02  07/01/2004 rls Converted from MPF to asyn.
- * .03  03/18/2005 rls Added MDrive input configuration structure.
+ * .01	10/20/2005 mlr Converted from MDrive.h
  */
 
 #ifndef	INCdrvMCDC2805h

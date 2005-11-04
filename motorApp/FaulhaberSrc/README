@@ -1,3 +1,7 @@
+               Faulhaber MCDC2805 driver
+                       Mark Rivers
+                       Nov. 4, 2005
+
 This driver supports the Faulhaber MCDC2805 servo controller.
 
 It assumes the following wiring:

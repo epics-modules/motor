@@ -3,14 +3,14 @@ FILENAME...	devMCDC2805.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MCDC2805 series of controllers.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-11-04 20:40:44 $
+Last Modified:	$Date: 2005-11-04 23:05:34 $
 */
 
 /*
- *      Original Author: Ron Sluiter
- *      Date: 03/21/03
+ *      Original Author: Mark Rivers
+ *      Date: 10/20/05
  *
  *      Experimental Physics and Industrial Control System (EPICS)
  *
