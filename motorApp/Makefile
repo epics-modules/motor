@@ -22,6 +22,7 @@ ifdef ASYN
 #!DIRS += PiSrc
 #!DIRS += MicroMoSrc
 #!DIRS += MicosSrc
+#!DIRS += FaulhaberSrc
 endif
 
 ifdef MX
