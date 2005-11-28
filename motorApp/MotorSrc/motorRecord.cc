@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.26 $
+Version:	$Revision: 1.27 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-10-11 20:56:13 $
+Last Modified:	$Date: 2005-11-28 16:11:10 $
 */
 
 /*
@@ -78,10 +78,14 @@ Last Modified:	$Date: 2005-10-11 20:56:13 $
  *                  - Avoid STUP errors from devices that do not have "GET_INFO"
  *                    command (e.g. Soft Channel).
  * .25 10-11-05 rls - CDIR not set correctly when jogging with DIR="Neg".
+ * .26 11-23-05 rls - Malcolm Walters bug fixes for;
+ *		      - get_units() returned wrong units for VMAX.
+ *		      - get_graphic_double() and get_control_double() returned
+ *			incorrect values for VELO.
  *
  */
 
-#define VERSION 5.7
+#define VERSION 5.8
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -2748,6 +2752,7 @@ static long get_units(const DBADDR *paddr, char *units)
     {
 
     case motorRecordVELO:
+    case motorRecordVMAX:
     case motorRecordBVEL:
     case motorRecordVBAS:
 	strncpy(s, pmr->egu, DB_UNITS_SIZE);
@@ -2820,6 +2825,11 @@ static long get_graphic_double(const DBADDR *paddr, struct dbr_grDouble * pgd)
 	}
 	break;
 
+    case motorRecordVELO:
+	pgd->upper_disp_limit = pmr->vmax;
+	pgd->lower_disp_limit = pmr->vbas;
+	break;
+
     default:
 	recGblGetGraphicDouble((dbAddr *) paddr, pgd);
 	break;
@@ -2864,6 +2874,11 @@ static long
 	    pcd->upper_ctrl_limit = pmr->dllm / pmr->mres;
 	    pcd->lower_ctrl_limit = pmr->dhlm / pmr->mres;
 	}
+	break;
+
+    case motorRecordVELO:
+	pcd->upper_ctrl_limit = pmr->vmax;
+	pcd->lower_ctrl_limit = pmr->vbas;
 	break;
 
     default:
