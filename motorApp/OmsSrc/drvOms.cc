@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.23 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-05-10 16:50:22 $
+Version:	$Revision: 1.24 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2005-12-03 23:34:43 $
 */
 
 /*
@@ -881,7 +881,7 @@ static int motorIsrEnable(int card)
 
 #ifdef vxWorks
     status = pdevLibVirtualOS->pDevConnectInterruptVME(
-	omsInterruptVector + card, (void (*)()) motorIsr, (void *) card);
+	omsInterruptVector + card, (void (*)(void *)) motorIsr, (void *) card);
 
     if (!RTN_SUCCESS(status))
     {
