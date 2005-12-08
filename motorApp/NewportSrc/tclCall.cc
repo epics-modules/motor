@@ -12,12 +12,15 @@
 #include <stdio.h>
 #include "xps_c8_driver.h"
 #include "Socket.h"
+#define  epicsExportSharedSymbols
+#include <shareLib.h>
+#include "tclCall.h"
 
 #define TIMEOUT 		1
 
 static int getsocket(void);
 
-void tclcall(char const *name,char const *taskName,char const *args){
+epicsShareFunc void tclcall(char const *name,char const *taskName,char const *args){
 
 	int status = 0;
 	int socket;
