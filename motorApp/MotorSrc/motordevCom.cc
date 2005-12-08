@@ -3,9 +3,9 @@ FILENAME: motordevCom.cc
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.8 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-10-20 20:01:41 $
+Version:	$Revision: 1.9 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2005-12-08 00:12:54 $
 */
 
 /*
@@ -61,8 +61,11 @@ Last Modified:	$Date: 2005-10-20 20:01:41 $
 
 #include	"motorRecord.h"
 #include	"motor.h"
-#include	"motordevCom.h"
 #include	"motordrvCom.h"
+
+#define          epicsExportSharedSymbols
+#include        <shareLib.h>
+#include	"motordevCom.h"
 
 static void motor_callback(struct mess_node * motor_return);
 static void motor_init_callback(struct mess_node * motor_return);
@@ -71,7 +74,7 @@ static void motor_init_callback(struct mess_node * motor_return);
    "motor_cmnds" in motor.h .
 */
 
-long motor_init_com(int after, int brdcnt, struct driver_table *tabptr,
+epicsShareFunc long motor_init_com(int after, int brdcnt, struct driver_table *tabptr,
 	      struct board_stat ***sptr)	/* Initialize motor record device support. */
 {
     MOTOR_CARD_QUERY card_query;
@@ -173,7 +176,7 @@ LOGIC...
     NORMAL RETURN.
 */
 
-long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *tabptr,
+epicsShareFunc long motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *tabptr,
 	      struct board_stat *sptr[])
 {
     struct motor_dset *pdset = (struct motor_dset *) (mr->dset);
@@ -384,7 +387,7 @@ USAGE... Update the following motor record fields with the latest driver data:
 NOTES... This function MUST BE reentrant.
 */
 
-CALLBACK_VALUE motor_update_values(struct motorRecord * mr)
+epicsShareFunc CALLBACK_VALUE motor_update_values(struct motorRecord * mr)
 {
     struct motor_trans *ptrans;
     CALLBACK_VALUE rc;
@@ -418,7 +421,7 @@ USAGE... Start building a transaction.
 NOTES... This function MUST BE reentrant.
 */
 
-long motor_start_trans_com(struct motorRecord *mr, struct board_stat **sptr)
+epicsShareFunc long motor_start_trans_com(struct motorRecord *mr, struct board_stat **sptr)
 {
     int card = mr->out.value.vmeio.card;
     int axis = mr->out.value.vmeio.signal;
@@ -452,7 +455,7 @@ USAGE... Finish building a transaction.
 NOTES... This function MUST BE reentrant.
 */
 
-RTN_STATUS motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
+epicsShareFunc RTN_STATUS motor_end_trans_com(struct motorRecord *mr, struct driver_table *tabptr)
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;

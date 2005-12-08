@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.13 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-05-10 16:31:21 $
+Version:	$Revision: 1.14 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2005-12-08 00:13:22 $
 */
 
 /*
@@ -54,6 +54,9 @@ Last Modified:	$Date: 2005-05-10 16:31:21 $
 #include        <epicsExport.h>
 
 #include	"motor.h"
+
+#define          epicsExportSharedSymbols
+#include        <shareLib.h>
 #include	"motordrvCom.h"
 
 /*----------------debugging-----------------*/
@@ -121,7 +124,7 @@ static struct mess_node *motor_malloc(struct circ_queue *, epicsEvent *);
  */
 /*****************************************************/
 
-int motor_task(struct thread_args *args)
+epicsShareFunc int motor_task(struct thread_args *args)
 {
     struct driver_table *tabptr;
     bool sem_ret;
@@ -463,7 +466,7 @@ static struct mess_node *get_head_node(struct driver_table *tabptr)
  *  Insert new node at tail of queue.
  */
 
-RTN_STATUS motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
+epicsShareFunc RTN_STATUS motor_send(struct mess_node *u_msg, struct driver_table *tabptr)
 {
     struct mess_node *new_message;
     struct circ_queue *qptr;
@@ -539,7 +542,7 @@ static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent
     return (node);
 }
 
-int motor_free(struct mess_node * node, struct driver_table *tabptr)
+epicsShareFunc int motor_free(struct mess_node * node, struct driver_table *tabptr)
 {
     struct circ_queue *freelistptr;
     
@@ -574,7 +577,7 @@ int motor_free(struct mess_node * node, struct driver_table *tabptr)
  */
 
 /* return the card information to caller */
-int motor_card_info(int card, MOTOR_CARD_QUERY * cq, struct driver_table *tabptr)
+epicsShareFunc int motor_card_info(int card, MOTOR_CARD_QUERY * cq, struct driver_table *tabptr)
 {
     struct controller *brdptr;
 
@@ -593,7 +596,7 @@ int motor_card_info(int card, MOTOR_CARD_QUERY * cq, struct driver_table *tabptr
 }
 
 /* return information for an axis to the caller */
-int motor_axis_info(int card, int signal, MOTOR_AXIS_QUERY * aq, struct driver_table *tabptr)
+epicsShareFunc int motor_axis_info(int card, int signal, MOTOR_AXIS_QUERY * aq, struct driver_table *tabptr)
 {
     struct controller *brdptr;
 
