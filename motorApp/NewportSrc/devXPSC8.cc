@@ -25,7 +25,6 @@
 
 #include        <string.h>
 #include        <epicsMutex.h>
-#include        <epicsExport.h>
 #include        <epicsThread.h>
 #include        "motorRecord.h"
 #include        "motor.h"
@@ -33,6 +32,7 @@
 
 #include        "drvXPSC8.h"
 #include        "xps_c8_driver.h"
+#include        <epicsExport.h>
 
 #define STATIC static
 extern struct driver_table XPSC8_access;
@@ -80,7 +80,7 @@ struct motor_dset devXPSC8 =
     XPSC8_build_trans,
     XPSC8_end_trans
 };
-epicsExportAddress(dset,devXPSC8);
+extern "C" {epicsExportAddress(dset, devXPSC8);}
 
 
 /* --------------------------- program data --------------------- */
