@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.16 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-10-20 20:01:40 $
+Version:	$Revision: 1.17 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2005-12-08 00:11:26 $
 */
 
 /*
@@ -222,10 +222,10 @@ struct thread_args
 
 /* Function prototypes. */
 
-extern RTN_STATUS motor_send(struct mess_node *, struct driver_table *);
-extern int motor_free(struct mess_node *, struct driver_table *);
-extern int motor_card_info(int, MOTOR_CARD_QUERY *, struct driver_table *);
-extern int motor_axis_info(int, int, MOTOR_AXIS_QUERY *, struct driver_table *);
-extern int motor_task(struct thread_args *);
+epicsShareFunc RTN_STATUS motor_send(struct mess_node *, struct driver_table *);
+epicsShareFunc int motor_free(struct mess_node *, struct driver_table *);
+epicsShareFunc int motor_card_info(int, MOTOR_CARD_QUERY *, struct driver_table *);
+epicsShareFunc int motor_axis_info(int, int, MOTOR_AXIS_QUERY *, struct driver_table *);
+epicsShareFunc int motor_task(struct thread_args *);
 
 #endif	/* INCmotordrvComh */

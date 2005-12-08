@@ -3,9 +3,9 @@ FILENAME...	motordevCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record device support modules.
 
-Version:	$Revision: 1.5 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-12-12 21:36:38 $
+Version:	$Revision: 1.6 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2005-12-08 00:11:26 $
 */
 
 /*
@@ -71,12 +71,12 @@ struct motor_trans
     bool dpm;		/* For OMS VME58 only, drive power monitoring. */
 };
 
-extern CALLBACK_VALUE motor_update_values(struct motorRecord *);
-extern long motor_init_com(int, int, struct driver_table *,
+epicsShareFunc CALLBACK_VALUE motor_update_values(struct motorRecord *);
+epicsShareFunc long motor_init_com(int, int, struct driver_table *,
 			   struct board_stat ***);
-extern long motor_init_record_com(struct motorRecord *, int,
+epicsShareFunc long motor_init_record_com(struct motorRecord *, int,
 			    struct driver_table *, struct board_stat *[]);
-extern long motor_start_trans_com(struct motorRecord *, struct board_stat *[]);
-extern RTN_STATUS motor_end_trans_com(struct motorRecord *, struct driver_table *);
+epicsShareFunc long motor_start_trans_com(struct motorRecord *, struct board_stat *[]);
+epicsShareFunc RTN_STATUS motor_end_trans_com(struct motorRecord *, struct driver_table *);
 
 #endif	/* INCmotordevComh */
