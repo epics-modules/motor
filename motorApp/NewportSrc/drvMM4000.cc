@@ -2,9 +2,9 @@
 FILENAME... drvMM4000.cc
 USAGE...    Motor record driver level support for Newport MM4000.
 
-Version:    $Revision: 1.19 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2005-05-10 16:36:46 $
+Version:    $Revision: 1.20 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2005-12-08 00:04:13 $
 */
 
 /*
@@ -65,6 +65,7 @@ Last Modified:  $Date: 2005-05-10 16:36:46 $
 #include <string.h>
 #include <math.h>
 #include <epicsThread.h>
+#include <epicsStrtok_r.h>
 #include <drvSup.h>
 #include "motor.h"
 #include "NewportRegister.h"
@@ -407,9 +408,9 @@ static int set_status(int card, int signal)
 
     strcpy(buff, cntrl->position_string);
     tok_save = NULL;
-    p = strtok_r(buff, ",", &tok_save);
+    p = epicsStrtok_r(buff, ",", &tok_save);
     for (itera = 0; itera < signal; itera++)
-    p = strtok_r(NULL, ",", &tok_save);
+    p = epicsStrtok_r(NULL, ",", &tok_save);
     Debug(6, "set_status(): position substring = %s\n", p);
     motorData = atof(p+3) / cntrl->drive_resolution[signal];
 
@@ -694,8 +695,8 @@ static int motor_init()
         recv_mess(card_index, axis_pos, 1);
 
         /* The return string will tell us how many axes this controller has */
-        for (total_axis = 0, tok_save = NULL, pos_ptr = strtok_r(axis_pos, ",", &tok_save);
-            pos_ptr != 0; pos_ptr = strtok_r(NULL, ",", &tok_save), total_axis++)
+        for (total_axis = 0, tok_save = NULL, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
+            pos_ptr != 0; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
         brdptr->motor_info[total_axis].motor_motion = NULL;
 
         brdptr->total_axis = total_axis;
