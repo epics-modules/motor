@@ -4,7 +4,6 @@
 
 
 #include <string.h>		/* Added by JHK */
-#include <sys/socket.h>
 
 /* Bug Fix 
 23rd May JHK
