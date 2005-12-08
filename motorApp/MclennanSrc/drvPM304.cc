@@ -33,6 +33,7 @@
 
 #include    <string.h>
 #include    <epicsThread.h>
+#include    <epicsStrtok_r.h>
 #include    <drvSup.h>
 #include        "motor.h"
 #include        "drvPM304.h"
@@ -362,9 +363,9 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
     /* Device support can send us multiple commands separated with ';'
      * characters.  The PM304 cannot handle more than 1 command on a line
      * so send them separately */
-    for (p = strtok_r((char *) com, ";", &tok_save);
+    for (p = epicsStrtok_r((char *) com, ";", &tok_save);
                 ((p != NULL) && (strlen(p) != 0));
-                p = strtok_r(NULL, ";", &tok_save)) {
+                p = epicsStrtok_r(NULL, ";", &tok_save)) {
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, p);
     pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
                 BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
@@ -477,9 +478,9 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     /* Device support can send us multiple commands separated with ';'
      * characters.  The PM304 cannot handle more than 1 command on a line
      * so send them separately */
-    for (p = strtok_r((char *) out, ";", &tok_save);
+    for (p = epicsStrtok_r((char *) out, ";", &tok_save);
                 ((p != NULL) && (strlen(p) != 0));
-                p = strtok_r(NULL, ";", &tok_save)) {
+                p = epicsStrtok_r(NULL, ";", &tok_save)) {
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, p);
     status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
                          response, BUFF_SIZE, TIMEOUT,
