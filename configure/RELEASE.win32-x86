@@ -1,0 +1,32 @@
+# RELEASE - Location of external products
+#
+# Note: This file will be scanned to automatically generate
+#       include path definitions etc.
+#       The order of the following declarations will be retained
+#       within those definitions.
+#
+# Note that "#!" marks lines that can be uncommented.
+#
+# Add your declarations here
+
+#!GATEWAY=
+#!SUPPORT=
+
+# If any motor controller communication mechanism besides the VME backplane is
+# required, then ASYN must be defined.
+# Recommended ASYN release: R4-2
+ASYN=J:/epics/devel/asyn/4-4beta
+
+# Recommended EPICS release: R3.14.7
+EPICS_BASE=H:/epics/base-3.14.8
+
+# The following must be defined if the "WithMPF" example in motorExApp is to
+# be built.
+# Recommended IPAC release: R2-8
+#!IPAC=$(SUPPORT)/ipacR2-8
+
+# The following must be defined for the MXmotor device driver.
+#!MX=$(SUPPORT)/mx/mx
+
+# The following is needed for the various *.substitutions files in iocBoot.
+MOTOR=J:/epics/devel/motor/5-7beta
