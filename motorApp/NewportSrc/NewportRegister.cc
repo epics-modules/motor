@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.cc
 USAGE...	Register Newport motor device driver shell commands.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-09-12 19:40:40 $
+Last Modified:	$Date: 2005-12-07 23:59:21 $
 */
 
 /*****************************************************************
@@ -20,6 +20,7 @@ of this distribution.
 
 #include <iocsh.h>
 #include "NewportRegister.h"
+#include "tclCall.h"
 #include "epicsExport.h"
 
 extern "C"
