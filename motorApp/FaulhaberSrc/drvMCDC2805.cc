@@ -2,9 +2,9 @@
 FILENAME... drvMCDC2805.cc
 USAGE...    Motor record driver level support for Faulhaber MCDC2805
 
-Version:    $Revision: 1.2 $
+Version:    $Revision: 1.3 $
 Modified By:    $Author: rivers $
-Last Modified:  $Date: 2005-11-04 23:05:34 $
+Last Modified:  $Date: 2005-12-08 00:07:47 $
 */
 
 /*
@@ -337,7 +337,7 @@ static int set_status(int card, int signal)
     motor_info->encoder_position = 0;
     else
     {
-       motor_info->encoder_position = (int32_t) motorData;
+       motor_info->encoder_position = (int) motorData;
     }
 
     status.Bits.RA_PROBLEM  = 0;

@@ -3,9 +3,9 @@ FILENAME... drvIM483PL.cc
 USAGE...    Motor record driver level support for Intelligent Motion
         Systems, Inc. IM483(I/IE).
 
-Version:    $Revision: 1.15 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2005-05-10 16:34:12 $
+Version:    $Revision: 1.16 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2005-12-08 00:08:40 $
 */
 
 /*****************************************************************
@@ -341,7 +341,7 @@ static int set_status(int card, int signal)
         send_mess(card, " z 0", IM483PL_axis[signal]);
         recv_mess(card, buff, 1);
         motorData = atof(&buff[5]);
-        motor_info->encoder_position = (int32_t) motorData;
+        motor_info->encoder_position = (int) motorData;
     }
 
     status.Bits.RA_PROBLEM  = 0;

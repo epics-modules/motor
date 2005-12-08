@@ -451,7 +451,7 @@ STATIC int set_status(int card, int signal)
     {
         motor_info->position = NINT(motorData);  
         if (motor_state[card]->motor_info[signal].encoder_present == YES)
-            motor_info->encoder_position = (int32_t) motorData;
+            motor_info->encoder_position = (int) motorData;
         else
             motor_info->encoder_position = 0;
 
