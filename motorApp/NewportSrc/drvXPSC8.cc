@@ -23,13 +23,13 @@
 #include        <stdio.h>
 #include        <epicsThread.h>
 #include        <epicsMutex.h>
-#include        <epicsExport.h>
 #include        <epicsString.h>
 #include        <drvSup.h>
 #include        "motor.h"
 
 #include        "drvXPSC8.h"
 #include        "xps_c8_driver.h"
+#include        <epicsExport.h>
 
 #define STATIC static
 
@@ -104,7 +104,7 @@ struct
 #endif
 } drvXPSC8 = {2, report, init};
 
-epicsExportAddress(drvet, drvXPSC8);
+extern "C" {epicsExportAddress(drvet, drvXPSC8);}
 
 /* I don't know where the XPSC8_access is set?*/
 STATIC struct thread_args targs = {SCAN_RATE, &XPSC8_access, 0.0};
