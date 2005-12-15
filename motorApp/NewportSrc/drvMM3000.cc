@@ -2,9 +2,9 @@
 FILENAME... drvMM3000.cc
 USAGE...    Motor record driver level support for Newport MM3000.
 
-Version:    $Revision: 1.20 $
+Version:    $Revision: 1.21 $
 Modified By:    $Author: rivers $
-Last Modified:  $Date: 2005-12-08 00:03:35 $
+Last Modified:  $Date: 2005-12-15 20:19:02 $
 */
 
 /*
@@ -63,8 +63,9 @@ Last Modified:  $Date: 2005-12-08 00:03:35 $
  */
 
 #include <string.h>
+#include <stdio.h>
 #include <epicsThread.h>
-#include <epicsStrtok_r.h>
+#include <epicsString.h>
 #include <drvSup.h>
 #include "motor.h"
 #include "NewportRegister.h"

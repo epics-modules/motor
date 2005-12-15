@@ -32,8 +32,9 @@
 
 
 #include    <string.h>
+#include    <stdio.h>
 #include    <epicsThread.h>
-#include    <epicsStrtok_r.h>
+#include    <epicsString.h>
 #include    <drvSup.h>
 #include        "motor.h"
 #include        "drvPM304.h"
