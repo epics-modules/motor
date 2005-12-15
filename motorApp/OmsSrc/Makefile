@@ -9,7 +9,8 @@ include $(TOP)/configure/CONFIG
 
 DBD += devOms.dbd
 
-LIBRARY_IOC = oms
+LIBRARY_IOC_DEFAULT += oms
+LIBRARY_IOC_WIN32 += -nil-
 
 # The following is required for the OMS VME8/44 (i.e., devOMS) device driver.
 SRCS += devOms.cc drvOms.cc
