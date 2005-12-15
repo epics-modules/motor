@@ -1,0 +1,13 @@
+include "base.dbd"
+include "motorSupport.dbd"
+# Comment out the following line for win32-x86, since drvAsynSerialPort does not build yet
+#include "drvAsynSerialPort.dbd"
+include "devAcsMotor.dbd"
+include "devImsMotor.dbd"
+include "devMclennanMotor.dbd"
+include "devMicos.dbd"
+include "devMicroMo.dbd"
+include "devNewport.dbd"
+include "devPIMotor.dbd"
+include "devSoftMotor.dbd"
+
