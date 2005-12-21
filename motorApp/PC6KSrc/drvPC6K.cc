@@ -3,9 +3,9 @@ FILENAME...	drvPC6K.cc
 USAGE...	Motor record driver level support for Parker Computmotor
                 6K Series motor controllers
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-12-21 22:58:24 $
+Last Modified:	$Date: 2005-12-21 23:04:11 $
 
 */
 
@@ -432,8 +432,8 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com,
 {
     struct PC6KController *cntrl;
     int size;
-    int nwrite;
-    int nread = 0;
+    size_t nwrite;
+    size_t nread = 0;
     double timeout = 0.;
     asynStatus status;
     int eomReason;
@@ -495,7 +495,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct PC6KController *cntrl;
     int size;
-    int nwrite;
+    size_t nwrite;
 
     size = strlen(com);
 
@@ -552,7 +552,7 @@ static int recv_mess(int card, char *com, int flag)
 {
     struct PC6KController *cntrl;
     double timeout = 0.;
-    int nread = 0;
+    size_t nread = 0;
     asynStatus status;
     int eomReason;
 
@@ -650,11 +650,12 @@ PC6KUpLoad(int card,               /* Controller Number */
 	    const char *progName)   /* PC6K program name - NULL=execute */
 {
     FILE *fd;
-    char nextLine[BUFF_SIZE], replyBuff[BUFF_SIZE];
+    char nextLine[BUFF_SIZE];
+    // char replyBuff[BUFF_SIZE];
     // char eos_str[] = "-";
     // char *eos_ptr = NULL;
-    
-    int recvCnt, i, lineLen;
+    // int recvCnt;
+    int i, lineLen;
 
     if (card < 0 || card >= total_cards)
       {
