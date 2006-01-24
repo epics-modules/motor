@@ -42,6 +42,15 @@ dbLoadTemplate("motor.substitutions")
 #!MM4000Config(0, "a-Serial[0]")
 #!drvMM4000debug=4
 
+# The MM4000 driver does not set end of string (EOS).
+#  for RS232 serial,
+#!asynOctetSetInputEos( "a-Serial[0]",0,"\r")
+#!asynOctetSetOutputEos("a-Serial[0]",0,"\r")
+#  for GPIB,
+#!asynInterposeEosConfig("L0", 10, 1, 1)
+#!asynOctetSetInputEos( "L0",10,"\r")
+#!asynOctetSetOutputEos("L0",10,"\r")
+
 # Newport PM500 driver setup parameters:
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz,max=60Hz)
