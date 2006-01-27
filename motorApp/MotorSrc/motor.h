@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.14 $
+Version:	$Revision: 1.15 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-30 19:19:58 $
+Last Modified:	$Date: 2006-01-27 23:51:47 $
 */
 
 /*
@@ -43,6 +43,7 @@ Last Modified:	$Date: 2005-03-30 19:19:58 $
  * .04 09-20-04 rls - Increase max. axis / board to 32 for Delta Tau PMAC.
  * .05 12-21-04 rls - Changed pre-compiler instructions for LSB/MSB_First
  *		      to support MS Visual C.
+ * .06 01-27-06 rls - Added LT_EPICSBASE macro for test EPICS base versions.
  */
 
 #ifndef	INCmotorh
@@ -52,6 +53,10 @@ Last Modified:	$Date: 2005-03-30 19:19:58 $
 #include <dbScan.h>
 #include <devSup.h>
 #include <osiUnistd.h> 
+#include <epicsVersion.h>
+
+/* Less than EPICS base version test.*/
+#define LT_EPICSBASE(v,r,l) ((EPICS_VERSION<=(v)) && (EPICS_REVISION<=(r)) && (EPICS_MODIFICATION<(l)))
 
 /* Maximum message size of all supported devices; see drv[device].h for maximum
 message size for each device. */
