@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.24 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-12-03 23:34:43 $
+Version:	$Revision: 1.25 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2006-01-27 23:56:09 $
 */
 
 /*
@@ -870,7 +870,6 @@ static int motorIsrEnable(int card)
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
     struct irqdatastr *irqdata;
-    long status;
     epicsUInt8 cardStatus;
 
     Debug(5, "motorIsrEnable: Entry card#%d\n", card);
@@ -880,30 +879,39 @@ static int motorIsrEnable(int card)
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
 
 #ifdef vxWorks
-    status = pdevLibVirtualOS->pDevConnectInterruptVME(
-	omsInterruptVector + card, (void (*)(void *)) motorIsr, (void *) card);
-
-    if (!RTN_SUCCESS(status))
     {
-	errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n",
-		  omsInterruptVector + card);
-	irqdata->irqEnable = FALSE;	/* Interrupts disable on card */
-	pmotor->control = 0;
-	return (ERROR);
+	long status;
+	status = pdevLibVirtualOS->pDevConnectInterruptVME(
+	    omsInterruptVector + card,
+#if LT_EPICSBASE(3,14,8)
+            (void (*)()) motorIsr,
+#else
+            (void (*)(void *)) motorIsr,
+#endif
+	    (void *) card);
+    
+	if (!RTN_SUCCESS(status))
+	{
+	    errPrintf(status, __FILE__, __LINE__,
+		      "Can't connect to vector %d\n",
+		      omsInterruptVector + card);
+	    irqdata->irqEnable = FALSE;	/* Interrupts disable on card */
+	    pmotor->control = 0;
+	    return (ERROR);
+	}
+    
+	status = devEnableInterruptLevel(OMS_INTERRUPT_TYPE,
+					 omsInterruptLevel);
+	if (!RTN_SUCCESS(status))
+	{
+	    errPrintf(status, __FILE__, __LINE__,
+		      "Can't enable enterrupt level %d\n",
+		      omsInterruptLevel);
+	    irqdata->irqEnable = FALSE;	/* Interrupts disable on card */
+	    pmotor->control = 0;
+	    return (ERROR);
+	}
     }
-
-    status = devEnableInterruptLevel(OMS_INTERRUPT_TYPE,
-				     omsInterruptLevel);
-    if (!RTN_SUCCESS(status))
-    {
-	errPrintf(status, __FILE__, __LINE__,
-		  "Can't enable enterrupt level %d\n",
-		  omsInterruptLevel);
-	irqdata->irqEnable = FALSE;	/* Interrupts disable on card */
-	pmotor->control = 0;
-	return (ERROR);
-    }
-
 #endif
     
     /* Setup card for interrupt-on-done */
@@ -1022,7 +1030,7 @@ static int motor_init()
 {
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
-    long status;
+    long status = 0;
     int card_index, motor_index;
     char axis_pos[50], encoder_pos[50];
     char *tok_save, *pos_ptr;
