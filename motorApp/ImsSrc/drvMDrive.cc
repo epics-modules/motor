@@ -3,9 +3,9 @@ FILENAME... drvMDrive.cc
 USAGE...    Motor record driver level support for Intelligent Motion
 	Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:    $Revision: 1.20 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2005-12-08 00:08:40 $
+Version:    $Revision: 1.21 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2006-01-31 22:09:14 $
 */
 
 /*
@@ -359,7 +359,7 @@ static int set_status(int card, int signal)
 	send_mess(card, "PR C2", MDrive_axis[signal]);
 	recv_mess(card, buff, 1);
 	motorData = atof(buff);
-	motor_info->encoder_position = (int) motorData;
+	motor_info->encoder_position = (epicsInt32) motorData;
     }
 
     status.Bits.RA_PROBLEM  = 0;
