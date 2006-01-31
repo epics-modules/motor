@@ -1,7 +1,8 @@
 Motor Record R5-8 Release Notice
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base R3-14-7.
+The motor record software in this release is compatible with EPICS base
+R3.14.8.2.
 
 
 Contents
