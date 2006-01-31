@@ -1,4 +1,4 @@
-Motor Record R5-7 Release Notice
+Motor Record R5-8 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base R3-14-7.
@@ -17,11 +17,14 @@ This <supporttop> contains the following motor record related items:
 		one with ASYN (i.e., motorExApp/WithMPF). See the README files
 		under <motor>/iocBoot/* for configuration instructions.
 
-As distributed, this support directory only builds the following:
-	- motor; Record support and common code for all device/drivers.
+As distributed, this support directory builds the following:
+	- Record support and common code for all device/drivers; libmotor.a.
+	- All non-asyn dependent device drivers; liboms.a, libsoftMotor.a,
+          libDeltaTau.a.
+        - If ASYN is defined, all other device drivers are built.
 
-Optionally, any of the following device/driver libraries can be built by
-uncommenting the appropriate line in ./motorApp/Makefile.
+Any of the following device/driver libraries can be omitted from the build by
+commenting out the appropriate line in ./motorApp/Makefile.
 	Acs - Advanced Control Systems controllers; AcsSrc directory.
 	DeltaTau - Delta Tau controllers; DeltaTauSrc directory.
 	Ims - Intelligent Motion Systems (IMS) controllers; ImsSrc directory.
@@ -105,6 +108,49 @@ Known Problems
 	For example, if MRES is positive and ERES is negative and the user
 	wants to set the current position to 10.00 inches, then -10.00 must be
 	entered in the VAL or DVAL field.
+
+
+Modification Log from R5-7 to R5-8
+==================================
+
+1) Mark Rivers added support for the Faulhaber MCDC2805 servo controller.
+
+	Files added: the <motor>/motorApp/FaulhaberSrc directory and it's
+	                contents were added.
+
+2) Mark Rivers added support for building the motor record distribution from
+	a win32-x86 host; i.e., MS Visual C++ compiler.  Since the strtok_r()
+	function does not exist on Windows, all calls to strtok_r() have been
+	replaced with calls to epicsStrtok_r(). Numerous files were modified
+	by adding the "epicsShareFunc" declaration to global functions. The
+	epicsStrtok_r() appears in EPICS base beginning with R3.14.8.  Hence,
+	the Mclennan and Newport porting of the motor record distribution are
+	dependent on R3.14.8 and above.
+
+	Files added: 	- RELEASE.win32-x86 in <motor>/configure.
+			- st.cmd.win32 in <motor>/iocBoot/iocWithMPF.
+	Files modified: for epicsStrtok_r();
+			- <motor>/motorApp/MclennanSrc/drvPM304.cc
+			- <motor>/motorApp/NewportSrc/drvMM3000.cc
+			- <motor>/motorApp/NewportSrc/drvMM4000.cc
+
+3) Joe Sullivan added support for Parker Hannifin, Compumotor Division, 6K
+	Series controllers.
+
+	Files added: the <motor>/motorApp/PC6KSrc directory and it's
+	                contents were added.
+
+4) Malcolm Walters (Diamond) contributed bug fixes to motorRecord.cc for;
+	- get_units() returned wrong units for VMAX.
+	- get_graphic_double() and get_control_double() returned incorrect
+	  values for VELO.
+
+5) <motor>/motorApp/Makefile was modified to build everything by default.
+       	This makes integration into synApps easier.  Users can comment out
+	particular directories if they do not want them built.
+
+	File modified: <motor>/motorApp/Makefile
+
 
 
 Modification Log from R5-6 to R5-7
@@ -749,7 +795,7 @@ Modification Log from R4-5 to R5-1
 	move in the direction of the limit switch when the limit error
 	condition exits.  A delay has been added to work around the problem.
 
-	File modified: - drvOms58.c; conditional delay added to query_done().
+	File modified: - drvOms58.cc; conditional delay added to query_done().
 
 12) With release R4-5, DBE_LOG was omitted from the event select mask of all
 	db_post_events() calls.  This prevented archival clients from being
