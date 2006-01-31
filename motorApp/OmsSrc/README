@@ -1,5 +1,5 @@
-
-	MAXv
+==============================================================================
+               MAXv            MAXv            MAXv            MAXv
 ==============================================================================
 
 For all MAXv motors.
@@ -23,7 +23,8 @@ Note: Separate multiple commands in the initialization string with ";".
 
 Example
 -------
-config0="AX LH PSM; AY LL PSO; AZ LL PSO; AT LL PSO; AU LH PSO; AV LH PSO; AR LH PSO; AS LH PSO;"
+config0="AX LH PSM; AY LL PSO; AZ LL PSO; AT LL PSO; AU LH PSO; AV LH PSO; \
+AR LH PSO; AS LH PSO;"
 MAXvConfig(0, config0)
 
 Configuring the MAXv for an open loop stepper motor (default).
@@ -55,7 +56,8 @@ NOTES:
   respond to both supervisory and non-privileged access.  Hence, the MAXv's
   AM's must match the CPU board's AM's exactly.
 
-VME8, VME44, VS4, VX2
+==============================================================================
+               VME8, VME44, VS4, VX2           VME8, VME44, VS4, VX2
 ==============================================================================
 
 OMS array base address
@@ -70,7 +72,8 @@ OMS incremental address
   base address.
 
 
-VME58
+==============================================================================
+               VME58           VME58           VME58           VME58
 ==============================================================================
 
 VME58 array base address
