@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.27 $
+Version:	$Revision: 1.28 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-11-28 16:11:10 $
+Last Modified:	$Date: 2006-02-23 13:45:57 $
 */
 
 /*
@@ -82,10 +82,12 @@ Last Modified:	$Date: 2005-11-28 16:11:10 $
  *		      - get_units() returned wrong units for VMAX.
  *		      - get_graphic_double() and get_control_double() returned
  *			incorrect values for VELO.
+ * .27 02-14-06 rls - Bug fix for record issuing moves when |DIFF| < |RDBD|.
+ *                  - removed "slop" from do_work.
  *
  */
 
-#define VERSION 5.8
+#define VERSION 5.9
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -1474,11 +1476,11 @@ LOGIC:
 	    ENDIF
 	    
 	    IF the dial DIFF is within the retry deadband.
-		IF the move is in the "preferred direction".
+		IF MIP state is DONE.
 		    Update last target positions.
 		    Terminate move. Set DMOV TRUE.
-		    NORMAL RETURN.
 		ENDIF		    
+		NORMAL RETURN.
 	    ENDIF
 	    ....
 	    ....
@@ -1975,7 +1977,6 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
 	    double bvel = pmr->bvel / fabs(pmr->mres);	/* backlash speed  */
 	    double bacc = (bvel - vbase) / pmr->bacc;	/* backlash accel. */
-	    double slop = 0.95 * pmr->rdbd;
 	    bool use_rel, preferred_dir;
 	    double relpos = pmr->diff / pmr->mres;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
@@ -2038,24 +2039,21 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		preferred_dir = false;
 
 	    /*
-	     * If we're within retry deadband, move only in preferred dir.
+	     * Don't move if we're within retry deadband.
 	     */
-	    if (fabs(pmr->diff) < slop)
-	    {
-		if (preferred_dir == false)
-		{
-		    if (pmr->mip == MIP_DONE)
-		    {
-			pmr->ldvl = pmr->dval;
-			pmr->lval = pmr->val;
-			pmr->lrvl = pmr->rval;
-    
-			pmr->dmov = TRUE;
-			MARK(M_DMOV);
-		    }
-		    return(OK);
-		}
-	    }
+            if (fabs(pmr->diff) <= pmr->rdbd)
+            {
+                if (pmr->mip == MIP_DONE)
+                {
+                    pmr->ldvl = pmr->dval;
+                    pmr->lval = pmr->val;
+                    pmr->lrvl = pmr->rval;
+
+                    pmr->dmov = TRUE;
+                    MARK(M_DMOV);
+                }
+                return(OK);
+            }
 
 	    if (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY)
 	    {
@@ -2091,9 +2089,10 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 			position = currpos + pmr->frac * (newpos - currpos);
 		}
 		/* Is current position within backlash or retry range? */
-		else if ((fabs(pmr->diff) < slop) ||
+		else if ((fabs(pmr->diff) < pmr->rdbd) ||
 			 (use_rel == true  && ((relbpos < 0) == (relpos > 0))) ||
-			 (use_rel == false && (((currpos + slop) > bpos) == (newpos > currpos))))
+			 (use_rel == false && (((currpos + pmr->rdbd) > bpos) ==
+                                               (newpos > currpos))))
 		{
 /******************************************************************************
  * Backlash correction imposes a much larger penalty on overshoot than on
