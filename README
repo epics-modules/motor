@@ -1,4 +1,4 @@
-Motor Record R5-8 Release Notice
+Motor Record R5-9 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
@@ -111,13 +111,36 @@ Known Problems
 	entered in the VAL or DVAL field.
 
 
+Modification Log from R5-8 to R5-9
+==================================
+
+1) The motor record was ignoring the retry deadband (RDBD) when a new target
+	position was entered if the move was in the "preferred direction";
+	even when backlash correction was disabled (i.e., BDST == 0).
+
+	File modified: do_work() in motorRecord.cc
+
+2) Added Kevin Peterson's (UNI-CAT) motorUtil task to the motor record
+	distribution.  The motorUtil task monitors and maintains 3 PV's;
+	$(P)alldone, $(P)allstop, $(P)moving.  motorUtil is a replacement for
+	the all_com_##.db distributed with the STD support module.  See the
+	motorUtil.db file for details.
+
+	Files added: to <motor>/motorApp/MotorSrc - motorUtil.cc
+						  - motorUtilAux.cc
+		     to <motor>/motorApp/Db       - motorUtil.db
+	Files modified: - <motor>/motorApp/MotorSrc/Makefile
+			- <motor>/motorApp/MotorSrc/motorSupport.dbd
+			- updated examples with motorUtil.
+
+
 Modification Log from R5-7 to R5-8
 ==================================
 
 1) Mark Rivers added support for the Faulhaber MCDC2805 servo controller.
 
 	Files added: the <motor>/motorApp/FaulhaberSrc directory and it's
-	                contents were added.
+			contents were added.
 
 2) Mark Rivers added support for building the motor record distribution from
 	a win32-x86 host; i.e., MS Visual C++ compiler.  Since the strtok_r()
@@ -139,7 +162,7 @@ Modification Log from R5-7 to R5-8
 	Series controllers.
 
 	Files added: the <motor>/motorApp/PC6KSrc directory and it's
-	                contents were added.
+			contents were added.
 
 4) Malcolm Walters (Diamond) contributed bug fixes to motorRecord.cc for;
 	- get_units() returned wrong units for VMAX.
@@ -397,7 +420,7 @@ Modification Log from R5-3 to R5-4
 2) OMS MAXv device support was added.
 
 	Files added: to the motorApp/OmsSrc directory; drvMAXv.h, devMAXv.cc
-                     and drvMAXv.cc.
+			and drvMAXv.cc.
 
 3) In order to support the maximum number of motors per board for the Delta Tau
 	PMAC motor controller (32), several changes have been made to all
