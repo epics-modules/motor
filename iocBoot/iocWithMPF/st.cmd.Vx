@@ -205,5 +205,5 @@ dbLoadTemplate("motor.substitutions")
 iocInit
 
 # motorUtil (allstop & alldone)
-motorUtilInit("USER:")
+motorUtilInit("IOC:")
 

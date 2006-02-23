@@ -23,7 +23,7 @@ dbLoadDatabase("$(TOP)/dbd/NoMPFVx.dbd")
 NoMPFVx_registerRecordDeviceDriver(pdbbase)
 
 dbLoadTemplate("motor.substitutions")
-#!dbLoadRecords("$(TOP)/motorApp/Db/SoftMotorEx.db","user=USER,motor=m1", startup)
+#!dbLoadRecords("$(TOP)/motorApp/Db/SoftMotorEx.db","user=IOC,motor=m1", startup)
 
 # OMS VME driver setup parameters: 
 #     (1)cards, (2)base address(short, 16-byte boundary), 
@@ -77,5 +77,5 @@ dbLoadTemplate("motor.substitutions")
 iocInit
 
 # motorUtil (allstop & alldone)
-motorUtilInit("USER:")
+motorUtilInit("IOC:")
 
