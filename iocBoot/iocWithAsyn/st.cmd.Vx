@@ -23,6 +23,7 @@ dbLoadDatabase("$(TOP)/dbd/WithMPFVx.dbd")
 WithMPFVx_registerRecordDeviceDriver(pdbbase)
 
 dbLoadTemplate("motor.substitutions")
+dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 
 # Configure the ASYN server code. This MUST be configured too!
 < st_asynserver.cmd.Vx

@@ -23,6 +23,8 @@ dbLoadDatabase("$(TOP)/dbd/NoMPFVx.dbd")
 NoMPFVx_registerRecordDeviceDriver(pdbbase)
 
 dbLoadTemplate("motor.substitutions")
+dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
+
 #!dbLoadRecords("$(TOP)/motorApp/Db/SoftMotorEx.db","user=IOC,motor=m1", startup)
 
 # OMS VME driver setup parameters: 

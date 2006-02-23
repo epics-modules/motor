@@ -6,6 +6,7 @@
 dbLoadDatabase("$(TOP)/dbd/WithMPFWin32.dbd")
 WithMPFWin32_registerRecordDeviceDriver(pdbbase)
 dbLoadTemplate("motor.substitutions")
+dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 
 # This is for WIN32, local serial ports not supported.  Must use IP terminal server.
 
