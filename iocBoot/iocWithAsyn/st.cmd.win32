@@ -134,3 +134,7 @@ MM4000Config(0, "L0")
 #!var drvMDrivedebug 4
 
 iocInit
+
+# motorUtil (allstop & alldone)
+motorUtilInit("USER:")
+

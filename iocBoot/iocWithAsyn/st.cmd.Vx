@@ -202,5 +202,8 @@ dbLoadTemplate("motor.substitutions")
 #!asynOctetSetInputEos("tcp2",0,"")
 #!asynOctetSetOutputEos("tcp2",0,"")
 
-
 iocInit
+
+# motorUtil (allstop & alldone)
+motorUtilInit("USER:")
+
