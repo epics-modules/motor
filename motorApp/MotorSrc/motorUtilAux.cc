@@ -2,14 +2,12 @@
 FILENAME...     motorUtilAux.cc
 USAGE...        Motor Record Utility Support.
 
-Version:        $Revision: 1.1 $
+Version:        $Revision: 1.2 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2006-02-23 19:51:50 $
+Last Modified:  $Date: 2006-03-06 19:20:55 $
 */
 
-
 /*
-*
 *  Original Author: Kevin Peterson (kmpeters@anl.gov)
 *  Date: December 11, 2002
 *
@@ -18,14 +16,16 @@ Last Modified:  $Date: 2006-02-23 19:51:50 $
 *  Argonne National Laboratory
 *
 *  Current Author: Ron Sluiter
-* 
-*/
-
-/*
-Notes:
-- A Channel Access (CA) oriented file had to be created separate from the
-primary motorUtil.cc file because CA and record access code cannot both reside
-in the same file; each defines (redefines) the DBR's.
+*
+* Notes:
+* - A Channel Access (CA) oriented file had to be created separate from the
+* primary motorUtil.cc file because CA and record access code cannot both
+* reside in the same file; each defines (redefines) the DBR's.
+*
+* Modification Log:
+* -----------------
+* .01 03-06-06 rls Fixed wrong call; replaced dbGetNRecordTypes() with
+*                  dbGetNRecords().
 */
 
 #include <string.h>
@@ -57,7 +57,7 @@ char ** getMotorList()
 
     while (!status)
     {
-        num_entries = dbGetNRecordTypes(pdbentry);
+        num_entries = dbGetNRecords(pdbentry);
         paprecords = (char **) callocMustSucceed(num_entries, sizeof(char *),
                                                  "getMotorList(1st)");
         status = dbFirstRecord(pdbentry);
