@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.28 $
+Version:	$Revision: 1.29 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-02-23 13:45:57 $
+Last Modified:	$Date: 2006-03-08 21:09:11 $
 */
 
 /*
@@ -84,7 +84,9 @@ Last Modified:	$Date: 2006-02-23 13:45:57 $
  *			incorrect values for VELO.
  * .27 02-14-06 rls - Bug fix for record issuing moves when |DIFF| < |RDBD|.
  *                  - removed "slop" from do_work.
- *
+ * .28 03-08-06 rls - Moved STUP processing to top of do_work() so that things
+ *                    like LVIO true and SPMG set to PAUSE do not prevent
+ *                    status update.
  */
 
 #define VERSION 5.9
@@ -1289,24 +1291,20 @@ DEFINITIONS:
 LOGIC:
     Initialize.
 
-    IF Stop button activated, AND, NOT processing a STOP request.
-	Set MIP field to indicate processing a STOP request.
-	Mark MIP field as changed.  Set Post process command field TRUE.
-	Clear Jog forward and reverse request.  Clear Stop request.
-	Send STOP_AXIS message to controller.
-    	NORMAL RETURN.
+    IF Status Update request is YES.
+	Send an INFO command.
     ENDIF
 
-    IF Stop/Pause/Move/Go field has changed.
-        Update Last Stop/Pause/Move/Go field.
-	IF SPMG field set to STOP, OR, PAUSE.
-	    IF SPMG field set to STOP.
+    IF Stop/Pause/Move/Go field has changed, OR, STOP field true.
+        Update Last SPMG or clear STOP field.
+	IF SPMG field set to STOP or PAUSE, OR, STOP was true.
+	    IF SPMG field set to STOP, OR, STOP was true.
 		IF MIP state is DONE, STOP or RETRY.
 		    Shouldn't be moving, but send a STOP command without
 			changing to the STOP state.
 		    NORMAL RETURN.
 		ELSE IF Motor is moving (MOVN).
-		    Set Post process command TRUE.
+		    Set Post process command TRUE. Clear Jog and Home requests.
 		ELSE
 		    Set VAL <- RBV and mark as changed.
 		    Set DVAL <- DRBV and mark as changed.
@@ -1429,10 +1427,6 @@ LOGIC:
     	NORMAL RETURN.
     ENDIF
 
-    IF Status Update request is YES.
-	Send an INFO command.
-    ENDIF
-
     IF DVAL field has changed, OR, NOT done moving.
 	Mark DVAL as changed.
 	Calculate new DIFF and RDIF fields and mark as changed.
@@ -1511,6 +1505,22 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
     Debug(3, "do_work: begin\n");
     
+    if (pmr->stup == motorSTUP_ON)
+    {
+	RTN_STATUS status;
+
+	pmr->stup = motorSTUP_BUSY;
+	MARK_AUX(M_STUP);
+	INIT_MSG();
+	status = WRITE_MSG(GET_INFO, NULL);
+	/* Avoid errors from devices that do not have "GET_INFO" (e.g. Soft
+	   Channel). */
+	if (status == ERROR)
+	    pmr->stup = motorSTUP_OFF;
+	else
+	    SEND_MSG();
+    }
+
     /*** Process Stop/Pause/Go_Pause/Go switch. ***
     *
     * STOP	means make the motor stop and, when it does, make the drive
@@ -1929,22 +1939,6 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     if (stop_or_pause == true)
 	return(OK);
     
-    if (pmr->stup == motorSTUP_ON)
-    {
-	RTN_STATUS status;
-
-	pmr->stup = motorSTUP_BUSY;
-	MARK_AUX(M_STUP);
-	INIT_MSG();
-	status = WRITE_MSG(GET_INFO, NULL);
-	/* Avoid errors from devices that do not have "GET_INFO" (e.g. Soft
-	   Channel). */
-	if (status == ERROR)
-	    pmr->stup = motorSTUP_OFF;
-	else
-	    SEND_MSG();
-    }
-
     /* IF DVAL field has changed, OR, NOT done moving. */
     if (pmr->dval != pmr->ldvl || !pmr->dmov)
     {
