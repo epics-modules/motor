@@ -51,7 +51,7 @@ motorSim_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
 
-SCRIPTS += motorSimTest.boot
+# SCRIPTS += motorSimTest.boot
 DB += motorSimTest.db
 
 include $(TOP)/configure/RULES
