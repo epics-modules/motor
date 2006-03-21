@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.29 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-03-08 21:09:11 $
+Version:	$Revision: 1.30 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2006-03-21 22:45:05 $
 */
 
 /*
@@ -488,6 +488,7 @@ static long init_record(dbCommon* arg, int pass)
 	    case (PV_LINK):
 	    case (DB_LINK):
 	    case (CA_LINK):
+	    case (INST_IO):
 		pmr->card = -1;
 		break;
 	    default:

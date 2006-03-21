@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.15 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-01-27 23:51:47 $
+Version:	$Revision: 1.16 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2006-03-21 22:45:05 $
 */
 
 /*
@@ -82,7 +82,7 @@ typedef enum CALLBACK_VALUES {NOTHING_DONE = 0, CALLBACK_DATA = 1} CALLBACK_VALU
     - "MM4000_table" in devMM4000.c
 */
 
-enum motor_cmnd {
+typedef enum  {
 	MOVE_ABS,	/* Absolute Move. */
 	MOVE_REL,	/* Relative Move. */
 	HOME_FOR,	/* Home Forward. */
@@ -105,7 +105,7 @@ enum motor_cmnd {
 	SET_HIGH_LIMIT,	/* Set High Travel Limit. */
 	SET_LOW_LIMIT,	/* Set Low Travel Limit. */
 	JOG_VELOCITY	/* Change Jog velocity. */
-};
+} motor_cmnd;
 
 
 /* -------------------------------------------------- */
@@ -119,8 +119,8 @@ enum motor_cmnd {
 #define NO		0
 #define YES		1
 
-// Define, from top to bottom, how bit fields are packed.
-// This works for VxWorks, SunPro, Linux g++, MS Visual C.
+/* Define, from top to bottom, how bit fields are packed. */
+/* This works for VxWorks, SunPro, Linux g++, MS Visual C. */
 #ifdef _WIN32
 #define LSB_First (TRUE)  // LSB is packed first.
 #else
