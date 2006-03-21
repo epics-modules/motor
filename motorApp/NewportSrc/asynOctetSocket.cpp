@@ -17,12 +17,12 @@ typedef int BOOL;
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "asynDriver.h"
-#include "asynOctetSyncIO.h"
-#include        <epicsThread.h>
-#include        <epicsMutex.h>
-#include        <epicsExport.h>
-#include        <epicsString.h>
+#include <epicsThread.h>
+#include <epicsMutex.h>
+#include <epicsExport.h>
+#include <epicsString.h>
+#include <asynDriver.h>
+#include <asynOctetSyncIO.h>
 
 
 /* defines */
@@ -52,21 +52,22 @@ asynStatus status;
 #define DEBUG
 
 #ifdef __GNUG__
-    #ifdef	DEBUG
-        volatile int asynXPSC8Debug = 10;
-	#define Debug(l, f, args...) { if(l<=asynXPSC8Debug) printf(f,## args); }
-	epicsExportAddress(int, asynXPSC8Debug);
+    #ifdef DEBUG
+        volatile int asynXPSC8Debug = 0;
+        #define Debug(l, f, args...) { if(l<=asynXPSC8Debug) printf(f,## args); }
+        epicsExportAddress(int, asynXPSC8Debug);
     #else
-	#define Debug(l, f, args...)
+        #define Debug(l, f, args...)
     #endif
 #else
     #define Debug()
 #endif
 
 
+
 /***************************************************************************************/
 /* The drvXPSC8.cc must assign the aysn port string to the IP field 
-   and replace the xps port int with the asyn addr int		*/
+   and replace the xps port int with the asyn addr int                */
 int ConnectToServer(char *Ip_Address, int Ip_Port, double TimeOut)
 {
 
@@ -77,9 +78,9 @@ int ConnectToServer(char *Ip_Address, int Ip_Port, double TimeOut)
 
     /* Select a free socket */
     while ((UsedSocket[SocketIndex] == TRUE) && (SocketIndex < MAX_NB_SOCKETS))
-	{
-		SocketIndex++;
-	}
+        {
+            SocketIndex++;
+        }
 
     if (SocketIndex == MAX_NB_SOCKETS)
         return -1;
@@ -93,7 +94,7 @@ int ConnectToServer(char *Ip_Address, int Ip_Port, double TimeOut)
     if (status != asynSuccess )
     {
         ErrorSocket[SocketIndex] = CREATESOCKETFAILED;
-	printf("Error Socket connect failed asynStatus=%i  \n",status);
+        printf("Error Socket connect failed asynStatus=%i  \n",status);
         return -1;
     }
 
@@ -116,6 +117,7 @@ void SetTCPTimeout(int SocketIndex, double TimeOut)
     }
 }
 
+
 /***************************************************************************************/
 void SendAndReceive (int SocketIndex, char *buffer, char *valueRtrn)
 {
@@ -126,201 +128,210 @@ void SendAndReceive (int SocketIndex, char *buffer, char *valueRtrn)
     double timeEllapse = 0.0;*/
     char *output, *input;
     int writeReadStatus = -99;
+    asynUser *pasynUser;
     int loop = 0, bufferLength;
 
     /* Check to see if the Socket is valid! */
     
     bufferLength = strlen(buffer);
-    if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
-    {
-        if (bufferLength > MAX_MSG_SIZE)
-        {
-	    /* Error string too long */
-	    printf("Error buffer>Max SendAndRecieve Out=%s In=%s\n",valueRtrn,buffer);
-	    printf("asynStatus=%i  ",status);
-	    strcpy(valueRtrn,"-3");
-	    return;
-	}
-    	
-	while ((writeReadStatus < 0) && (loop < MAX_RETRY))
-	{
-	    status = pasynOctetSyncIO->writeRead(pasynUserArray[SocketIndex],
-						(char const *)buffer, 
-						bufferLength,
-						valueRtrn,
-						MAX_MSG_SIZE,
-						TimeoutSocket[SocketIndex],
-						&nbytesOut,
-						&nbytesIn,
-						&eomReason);
-	
-	    Debug(12,"buffer %s\n bufferlen %i\n valueRtrn %s\n",buffer,bufferLength,valueRtrn);
-	    Debug(12,"nbytesOut %i nbytesIn %i eomReason %i\n",nbytesOut,nbytesIn,eomReason); 
-	    output = valueRtrn;
-	    if (output != NULL) sscanf (output, "%i", &writeReadStatus);
-	    
-	    /* If the XPS returns a status <0 it is probably still confused from a 
-	     * sendOnly so re-send the command */
-	     
-	    if (writeReadStatus < 0){
-	        Debug(10,"Address %p\n",pasynUserArray[SocketIndex]);
-	        Debug(1,"Error WriteReadStatus = %i Retry ",writeReadStatus);
-		Debug(2,"Sock=%i Tout=%g In=%s Out=%s \n  Command sent again! loop %i\n",SocketIndex,
-					TimeoutSocket[SocketIndex],valueRtrn,buffer,loop);
-	    } else {
-	    
-	    /* If the XPS returns a non error status check to see if the data
-	     * is what you expected because it frequently returns the answere
-	     * to the previous call! */
-
-	        output = valueRtrn;
-		input = buffer;
-		strchr (output, ',');
-	        while ( (input=strchr (input, '*')) != NULL ) { /* Number required */
-		    input++; /* Move ptr past * */
-		    if ((output=strchr (output, ',')) == NULL) { /* No comma after number */
-		        Debug(2,"Error Not enough numbers in=%s out=%s\n",valueRtrn,buffer);
-		        writeReadStatus = -98;
-		    }
-		    output++; /* move ptr past , */
-		Debug(15,"Look for number in return string %s\n",output);
-		}
-	    }
-	    loop++;
-	}
-	
-	if ( status != asynSuccess ) 
-    	{
-	    /* Asyn command error */
-	    Debug(5,"Error buffer %s\n bufferlen %i\n valueRtrn %s\n",buffer,bufferLength,valueRtrn);
-	    Debug(5,"Error nbytesOut %i nbytesIn %i eomReason %i\n",nbytesOut,nbytesIn,eomReason); 
-	    
-	    printf("Error SendAndRecieve read In=%s Out=%s nbytesOut=%i",valueRtrn,buffer,nbytesOut);
-	    printf(" asynStatus=%i \n",status);
-	    return;
-	}
-    
-    } else {
+    if ((SocketIndex < 0) || (SocketIndex >= MAX_NB_SOCKETS) || (UsedSocket[SocketIndex] != TRUE)) {
         /* Not allowed action socket was not created */
-	printf("Error Socket Invalid SendAndRecieve In=%s Out=%s\n",valueRtrn,buffer);
-	printf("asynStatus=%i  ",status);
-	strcpy(valueRtrn,"-22");
-	return;
+        printf("Error Socket Invalid SendAndRecieve In=%s Out=%s\n",valueRtrn,buffer);
+        printf("asynStatus=%i  ",status);
+        strcpy(valueRtrn,"-22");
+        return;
     }
-    return;
+    if (bufferLength > MAX_MSG_SIZE) {
+        /* Error string too long */
+        printf("Error buffer>Max SendAndRecieve Out=%s In=%s\n",valueRtrn,buffer);
+        printf("asynStatus=%i  ",status);
+        strcpy(valueRtrn,"-3");
+        return;
+    }
+    
+    pasynUser = pasynUserArray[SocketIndex];
+    while ((writeReadStatus < 0) && (loop < MAX_RETRY)) {
+        status = pasynOctetSyncIO->writeRead(pasynUser,
+                                             (char const *)buffer, 
+                                             bufferLength,
+                                             valueRtrn,
+                                             MAX_MSG_SIZE,
+                                             TimeoutSocket[SocketIndex],
+                                             &nbytesOut,
+                                             &nbytesIn,
+                                             &eomReason);
+        if ( status != asynSuccess ) {
+            /* Asyn command error */
+            asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                      "SendAndReceive error calling writeRead, status=%d, %s\n",
+                      status, pasynUser->errorMessage);
+            continue; /* Try again */
+        }
+    
+        Debug(12,"buffer %s\n bufferlen %i\n valueRtrn %s\n", buffer, bufferLength, valueRtrn);
+        Debug(12,"nbytesOut %i nbytesIn %i eomReason %i\n", nbytesOut, nbytesIn, eomReason); 
+        output = valueRtrn;
+        if (output != NULL) sscanf (output, "%i", &writeReadStatus);
+
+        /* If the XPS returns a status <0 it is probably still confused from a 
+         * sendOnly so re-send the command */
+         
+        if (writeReadStatus < 0){
+            asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                      "SendAndReceive error writeReadStatus=%d\n",
+                      writeReadStatus);
+            Debug(2,"Sock=%i Tout=%g In=%s Out=%s \n  Command sent again! loop %i\n",SocketIndex,
+                  TimeoutSocket[SocketIndex],valueRtrn,buffer,loop);
+        } else {
+            
+            /* If the XPS returns a non error status check to see if the data
+             * is what you expected because it frequently returns the answer
+             * to the previous call! */
+
+            output = valueRtrn;
+            input = buffer;
+            strchr (output, ',');
+            while ( (input=strchr (input, '*')) != NULL ) { /* Number required */
+                input++; /* Move ptr past * */
+                if ((output=strchr (output, ',')) == NULL) { /* No comma after number */
+                    asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                              "SendAndReceive not enough numbers in %s out=%s\n",
+                              valueRtrn, buffer);
+                    writeReadStatus = -98;
+                    break;
+                }
+                output++; /* move ptr past , */
+            }
+        }
+        loop++;
+    }
 }
+
+
 /***************************************************************************************/
 void SendOnly (int SocketIndex, char *buffer, char *valueRtrn)
 {
     char dummyReturn[MAX_MSG_SIZE];
-    size_t nbytesOut = 0; 
     size_t nbytesIn = 0;
+    size_t nbytesOut = 0;
     int eomReason;
     char const dummyBuffer[40] = "FirmwareVersionGet (char *)";
     char *output;
     int writeReadStatus = -99;
+    asynUser *pasynUser;
     int loop = 0;
     
     /* Valid Socket? */
-    if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
-    {
-        if (strlen(buffer) > MAX_MSG_SIZE)
-        {
-	    /* Error string too long */
-	    strcpy(valueRtrn,"-3");
-	    return;
-	}
-
-Above_Write:
-	status = pasynOctetSyncIO->write(pasynUserArray[SocketIndex],(char const *)buffer, 
-				  	strlen(buffer),TimeoutSocket[SocketIndex], &nbytesIn);
-
-	if ((status != asynSuccess) || (nbytesIn <= 0))
-    	{
-	    printf("****Error SendOnly status=%i",status);
-	    /* Error during write message */
-	    strcpy(valueRtrn,"-72");
-	    return;
-	}
-
-/* When a send only is performed but the XPS is expecting to give a response it
- * becomes confused for a period of time.  A writeRead is sent and the readback 
- * checked until the XPS returns a sensible value */
-
-Above_Dummy_writeRead:	 
-	 status = pasynOctetSyncIO->writeRead(pasynUserArray[SocketIndex],
-						(char const *)dummyBuffer, 
-						strlen(dummyBuffer),
-						dummyReturn,
-						MAX_MSG_SIZE,
-						TimeoutSocket[SocketIndex],
-						&nbytesOut,
-						&nbytesIn,
-						&eomReason);
-
-	 output = dummyReturn;
-	 if (output != NULL) sscanf (output, "%i", &writeReadStatus);
-	 else Debug(5,"SendOnly Dummywriteread Output Null\n");
-	    
-	 if (writeReadStatus < 0 && output != NULL){
-	        Debug(2,"SendOnly DumyWriteReadStatus = %i Retry ",writeReadStatus);
-		Debug(3,"Sock=%i Timeout=%g DumyReturn=%s \n DummyIn=%s OrigCommand=%s\n"\
-		" Dummy sent again\n",SocketIndex,TimeoutSocket[SocketIndex],
-							dummyReturn,dummyBuffer,buffer);
-	 } 
-	 loop++;
-	 if (writeReadStatus == -3 && loop < MAX_RETRY) /* Command Not executed by XPS so retry */
-	     goto Above_Write;
-	 if (writeReadStatus < 0 && loop < MAX_RETRY) /* The XPS is still confused so re-send*/
-	     goto Above_Dummy_writeRead;
-	    
-    } else {
-        /* Not allowed action */
-	strcpy(valueRtrn,"-22");
+    if ((SocketIndex < 0) || (SocketIndex >= MAX_NB_SOCKETS) || (UsedSocket[SocketIndex] != TRUE)) {
+        /* Not allowed action socket was not created */
+        printf("Error Socket Invalid SendOnly In=%s Out=%s\n",valueRtrn,buffer);
+        printf("asynStatus=%i  ",status);
+        strcpy(valueRtrn,"-22");
         return;
     }
+    if (strlen(buffer) > MAX_MSG_SIZE) {
+        /* Error string too long */
+        strcpy(valueRtrn,"-3");
+        return;
+    }
+
+    pasynUser = pasynUserArray[SocketIndex];
+Above_Write:
+    status = pasynOctetSyncIO->write(pasynUser, (char const *)buffer, 
+                                      strlen(buffer), TimeoutSocket[SocketIndex], &nbytesOut);
+
+    if ((status != asynSuccess) || (nbytesOut <=0)) {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "SendOnly error calling writs, status=%d, nbytesOut=%d, %s\n",
+                  status, nbytesOut, pasynUser->errorMessage);
+        /* Error during write message */
+        strcpy(valueRtrn,"-72");
+        return;
+    }
+
+    /* It seems to be necessary to sleep a little while after sending a command?? */
+    epicsThreadSleep(0.02);
+
+    /* When a send only is performed but the XPS is expecting to give a response it
+     * becomes confused for a period of time.  A writeRead is sent and the readback 
+     * checked until the XPS returns a sensible value */
+
+Above_Dummy_writeRead:         
+    status = pasynOctetSyncIO->writeRead(pasynUser,
+                                         (char const *)dummyBuffer, 
+                                         strlen(dummyBuffer),
+                                         dummyReturn,
+                                         MAX_MSG_SIZE,
+                                         TimeoutSocket[SocketIndex],
+                                         &nbytesOut,
+                                         &nbytesIn,
+                                         &eomReason);
+    if ((status != asynSuccess) || (nbytesIn <=0)) {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "SendOnly error calling writeRead, status=%d, nbytesIn=%d, %s\n",
+                  status, nbytesIn, pasynUser->errorMessage);
+        /* Error during write message */
+        strcpy(valueRtrn,"-72");
+        return;
+    }
+
+    output = dummyReturn;
+    if (output != NULL) sscanf (output, "%i", &writeReadStatus);
+    else Debug(5,"SendOnly Dummywriteread Output Null\n");
+           
+    if (writeReadStatus < 0 && output != NULL){
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "SendOnly error calling writeRead, writeReadStatus = %d, nbytesIn=%d, %s\n",
+                  status, nbytesIn, pasynUser->errorMessage);
+    } 
+    loop++;
+    if (writeReadStatus == -3 && loop < MAX_RETRY) /* Command Not executed by XPS so retry */
+        goto Above_Write;
+    if (writeReadStatus < 0 && loop < MAX_RETRY) /* The XPS is still confused so re-send*/
+        goto Above_Dummy_writeRead;
+        
     strcpy(valueRtrn,"0");
     return;
 }
 
+
 /***************************************************************************************/
 void CloseSocket(int SocketIndex)
 {
     if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
     {
         status = pasynOctetSyncIO->disconnect(pasynUserArray[SocketIndex]);
-	
-	TimeoutSocket[SocketIndex] = TIMEOUT;
-	ErrorSocket[SocketIndex] = 0;
-	UsedSocket[SocketIndex] = FALSE;
+        TimeoutSocket[SocketIndex] = TIMEOUT;
+        ErrorSocket[SocketIndex] = 0;
+        UsedSocket[SocketIndex] = FALSE;
     }
 }
 
 /***************************************************************************************/
 void CloseAllSockets(void)
 {
-	int i;
+    int i;
+
     for (i = 0; i < MAX_NB_SOCKETS; i++)
     {
-	if (UsedSocket[i] == TRUE)
-	{
+        if (UsedSocket[i] == TRUE)
+        {
             status = pasynOctetSyncIO->disconnect(pasynUserArray[i]);
-		    
-	    TimeoutSocket[i] = TIMEOUT;
-	    ErrorSocket[i] = 0;
-	    UsedSocket[i] = FALSE;
-	}
+            TimeoutSocket[i] = TIMEOUT;
+            ErrorSocket[i] = 0;
+            UsedSocket[i] = FALSE;
+        }
     }
 }
 
 /***************************************************************************************/
 void ResetAllSockets(void)
 {
-	int i;
+    int i;
     for (i = 0; i < MAX_NB_SOCKETS; i++)
     {
-		if (UsedSocket[i] == TRUE)
-		    UsedSocket[i] = FALSE;
+        if (UsedSocket[i] == TRUE)
+        UsedSocket[i] = FALSE;
     }
 }
 
@@ -339,3 +350,4 @@ char * GetError(int SocketIndex)
     }
     return("");
 }
+
