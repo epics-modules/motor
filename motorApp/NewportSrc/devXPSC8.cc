@@ -11,8 +11,8 @@
  * 
  * 1) The use of multiaxis groups has been enabled with the addition of 
  * variables to the drvXPSC8.cc: XPSC8Name_config function used in the st.cmd. 
- * 2) A cue feature has now been added so that if a command is sent while
- * a group is busy it is cued until the group becomes static.
+ * 2) A queue feature has now been added so that if a command is sent while
+ * a group is busy it is queued until the group becomes static.
  * 3) The driver waits for a time specified in drvXPSC8.h: XPSC8_QUE_PAUSE when
  * a command is issued. It then performs all the motions specified in the lapsed
  * time as a single syncronised motion.  The pause is performed in drvXPSC8.cc:
@@ -48,14 +48,14 @@ extern struct driver_table XPSC8_access;
 #define DEBUG
 
 #ifdef __GNUG__
-    #ifdef	DEBUG
-	volatile int devXPSC8Debug = 3;
-	#define Debug(L, FMT, V...) { if(L <= devXPSC8Debug) \
-			{ printf("%s(%d):",__FILE__,__LINE__); \
-			  printf(FMT,##V); } }
-	epicsExportAddress(int, devXPSC8Debug);
+    #ifdef        DEBUG
+        volatile int devXPSC8Debug = 0;
+        #define Debug(L, FMT, V...) { if(L <= devXPSC8Debug) \
+                        { printf("%s(%d):",__FILE__,__LINE__); \
+                          printf(FMT,##V); } }
+        epicsExportAddress(int, devXPSC8Debug);
     #else 
-	#define Debug(L, FMT, V...)
+        #define Debug(L, FMT, V...)
     #endif  
 #else 
     #define Debug()
@@ -192,16 +192,16 @@ STATIC RTN_STATUS XPSC8_end_trans(struct motorRecord *mr)
 
 
 /* add a part to the transaction */
-STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command,\
-					 double *parms, \
-					 struct motorRecord *mr)
+STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command,
+                                    double *parms,
+                                    struct motorRecord *mr)
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
     struct XPSC8controller *control;
     struct XPSC8axis         *cntrl;
-    struct XPSC8group   *groupcntrl;	/*XPS group specific data */
+    struct XPSC8group   *groupcntrl;   /*XPS group specific data */
     double dval=0.0,resolution,steps;
     int ival=0;
     RTN_STATUS rtnval=OK;
@@ -234,13 +234,13 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command,\
     groupnumber = cntrl->groupnumber;
     
     groupcntrl = (struct XPSC8group *)&control->group[groupnumber];
-    groupsize = groupcntrl->groupsize;	 /* Number of motors in group */
+    groupsize = groupcntrl->groupsize;   /* Number of motors in group */
 
-    cntrl->resolution = mr->mres;    /* Read in the motor resolution */
+    cntrl->resolution = mr->mres;        /* Read in the motor resolution */
     resolution = cntrl->resolution;
-    steps = resolution * dval;		/* This could be a position or velocity */
+    steps = resolution * dval;           /* This could be a position or velocity */
     
-/*    mr->dllm = cntrl->minlimit;*/        /* set the epics limits to the XPS limits */
+/*    mr->dllm = cntrl->minlimit;*/      /* set the epics limits to the XPS limits */
 /*    mr->dhlm = cntrl->maxlimit; */   
     
     Debug(10, "XPSC8_build_trans: card=%d, signal=%d, command=%d, ival=%d"\
@@ -268,57 +268,56 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command,\
                                 &cntrl->groupstatus);
     if (status != 0) 
         printf("BuildTrans Error performing GroupStatusGet status=%d\n", status); 
-        	   
-    groupstatus = cntrl->groupstatus;	/* Update groupstatus */            	  
-	         
+ 
+    groupstatus = cntrl->groupstatus;      /* Update groupstatus */
+         
     switch (command) {
     case MOVE_ABS:/* command 0*/
-  
-	
-	if ((groupstatus < 10) || (groupstatus == 47)) {
+        if ((groupstatus < 10) || (groupstatus == 47)) {
             /* ie not initialized state or Jogging!*/
-		break;}
-		
-	/* If there is no cue, update the cue array to make sure you don't move */
-	/* the wrong motors */
-	if ((groupcntrl->cuesize == 0) && (groupstatus > 9 && groupstatus < 20)){
-	    status = GroupPositionCurrentGet(cntrl->devpollsocket,
-                                         cntrl->groupname,
-                                         groupsize,
-                                         groupcntrl->positionarray); /* Array! */
+            break;
+        }
 
-	    if (status != 0) {
-            	printf(" Error performing GroupPositionCurrentGet\n");
-            }	    
-	}
+        /* If there is no queue, update the queue array to make sure you don't move */
+        /* the wrong motors */
+        if ((groupcntrl->queuesize == 0) && (groupstatus > 9 && groupstatus < 20)){
+            status = GroupPositionCurrentGet(cntrl->devpollsocket,
+                                             cntrl->groupname,
+                                             groupsize,
+                                             groupcntrl->positionarray); /* Array! */
 
-	
-	/* Always add the move to the cue */
-	groupcntrl->positionarray[axisingroup] =  steps;   
-	++groupcntrl->cuesize;		/* Add 1 to cue total */
-	if (groupcntrl->cuesize == 1)
-		groupcntrl->cueflag = 1;/* If first call set flag */     
-	if (groupcntrl->cuesize > 1)
-	    	Debug(2,"******Adding move to an existing cue***\n"); 
-		
-	 /* The communication and looping has been moved to drvXPSC8 send_mess */
-	              
+            if (status != 0) {
+                printf(" Error performing GroupPositionCurrentGet\n");
+            }    
+        }
+
+        /* Always add the move to the queue */
+        groupcntrl->positionarray[axisingroup] =  steps;   
+        ++groupcntrl->queuesize;                /* Add 1 to queue total */
+        if (groupcntrl->queuesize == 1)
+            groupcntrl->queueflag = 1;/* If first call set flag */     
+        if (groupcntrl->queuesize > 1)
+            Debug(2,"******Adding move to an existing queue***\n"); 
+
+         /* The communication and looping has been moved to drvXPSC8 send_mess */
+              
         break;
 
     case MOVE_REL:/*1*/
-    	/* The motor record seems to impliment the relative move by 
-	   calculating the new position and calling MOVE_ABS */
+        /* The motor record seems to impliment the relative move by 
+           calculating the new position and calling MOVE_ABS */
 
     case HOME_FOR: 
         
     case HOME_REV: /*3*/
-        if (cntrl->groupstatus == 43 ) {	/* Allready Homing */
-	    break;}
-	
-	/* If motion has been killed the group will need to be initialized*/
+        if (cntrl->groupstatus == 43 ) {        /* Already Homing */
+            break;
+        }
+
+        /* If motion has been killed the group will need to be initialized*/
         /* and homed before the motors can be driven again */
         
-	if (cntrl->groupstatus < 10 ) {
+        if (cntrl->groupstatus < 10 ) {
             /* ie not initialized state!*/
             status = GroupInitialize(cntrl->devpollsocket,cntrl->groupname);
             if (status != 0) {
@@ -332,9 +331,9 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command,\
             
             goto home_rev_end; 
         }
-	
-	/* Else kill all the motions an home */
-	
+
+        /* Else kill all the motions an home */
+ 
         status = GroupKill(cntrl->devpollsocket,cntrl->groupname);
         if (status != 0) {
             printf(" Error performing GroupKill\n");
@@ -350,21 +349,21 @@ STATIC RTN_STATUS XPSC8_build_trans(motor_cmnd command,\
             printf(" Error performing GroupHomeSearch\n");
         } 
         Debug(2, "XPSC8_build_trans:******* Perform GroupHomeSearch\n"); 
-	Debug(2, "XPSC8_build_trans:groupsize=%i\n",groupsize);      
+        Debug(2, "XPSC8_build_trans:groupsize=%i\n",groupsize);      
              
-	
-home_rev_end:			/* Used for goto statment above */
 
-		/* When a group is homed the drive cue is emptied */
-		
-	groupcntrl->cuesize = 0;		/* Reset cue */
-	groupcntrl->cueflag = 0;
-	
+home_rev_end:                        /* Used for goto statment above */
+
+        /* When a group is homed the drive queue is emptied */
+
+        groupcntrl->queuesize = 0;   /* Reset queue */
+        groupcntrl->queueflag = 0;
+
         break;
 
     case LOAD_POS:/* 4*/
         /* command 4 Not used*/
-	
+
         break;
 
     case SET_VEL_BASE: 
@@ -381,8 +380,8 @@ home_rev_end:			/* Used for goto statment above */
                                                cntrl->maxjerktime);
         if (status != 0) {
             printf(" Error performing PositionerSGammaParameters Set Vel\n");
-	    printf(" steps=%f resoulution=%f DVAL=%f\n",steps,resolution,dval);
-	}    
+            printf(" steps=%f resoulution=%f DVAL=%f\n",steps,resolution,dval);
+        }    
         else cntrl->velocity = steps;
         break;
 
@@ -394,20 +393,20 @@ home_rev_end:			/* Used for goto statment above */
                                                cntrl->maxjerktime);
         if (status != 0) {
             printf(" Error performing PositionerSGammaParameters Set Accel %i\n",
-	    							status);
-	    printf(" steps=%f resoulution=%f DVAL=%f\n",steps,resolution,dval);							
-	if (status == -17) 
-            printf("devXPSC8 BuildTrans: One of the parameters was out of range!");
-	      }	  
+                   status);
+            printf(" steps=%f resoulution=%f DVAL=%f\n",steps,resolution,dval);
+            if (status == -17) 
+                printf("devXPSC8 BuildTrans: One of the parameters was out of range!");
+        }  
         else cntrl->accel = steps;
         break;
 
     case GO:          /* 8 */ 
         if (groupstatus == 20) { /* If disabled then enable */
-	    status = GroupMotionEnable(cntrl->devpollsocket,cntrl->groupname);
-	    if (status != 0) 
+            status = GroupMotionEnable(cntrl->devpollsocket,cntrl->groupname);
+            if (status != 0) 
                 printf(" Error performing GroupMotionEnable %i\n",status);
-	}
+        }
         break;
 
     case SET_ENC_RATIO:        /* These must be set in the Stages.ini file */
@@ -418,28 +417,29 @@ home_rev_end:			/* Used for goto statment above */
 
     case STOP_AXIS: /* 11 */
         /* The whole group must stop, not just 1 axis */
-	/* Update status to see if the group is moving */
-	
-	if (cntrl->groupstatus > 42) { 
+        /* Update status to see if the group is moving */
+
+        if (cntrl->groupstatus > 42) { 
             /* Then the group is moving! */              
             status = GroupMoveAbort(cntrl->devpollsocket,cntrl->groupname);
             if (status != 0) {
-	        printf(" Error performing GroupMoveAbort = %i %s(\n",\
-	    					status,cntrl->groupname);
-		
-		}		
-	/* When a group is stopped the drive cue is emptied and reset*/
-	    
-	    status = GroupPositionCurrentGet(cntrl->devpollsocket,
-                                         cntrl->groupname,
-                                         groupsize,
-                                         groupcntrl->positionarray); 
-	     if (status != 0) {
-                printf(" Error performing GroupPositionCurrentGet\n");
-             }
-	}
-	groupcntrl->cuesize = 0;		/* Reset cue */
-	groupcntrl->cueflag = 0;
+                printf(" Error performing GroupMoveAbort = %i %s(\n",\
+                       status,cntrl->groupname);
+
+            }
+
+            /* When a group is stopped the drive queue is emptied and reset*/
+    
+            status = GroupPositionCurrentGet(cntrl->devpollsocket,
+                                             cntrl->groupname,
+                                             groupsize,
+                                             groupcntrl->positionarray); 
+            if (status != 0) {
+               printf(" Error performing GroupPositionCurrentGet\n");
+            }
+        }
+        groupcntrl->queuesize = 0;                /* Reset queue */
+        groupcntrl->queueflag = 0;
         break;
 
     case JOG:    

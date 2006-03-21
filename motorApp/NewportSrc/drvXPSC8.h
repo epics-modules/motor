@@ -22,7 +22,7 @@
 					   performing a move from stationary*/
 #define XPSC8_QUE_PAUSE_MOVING	0.1	/* Poll time the driver waits to check if
 					   the motor is still moving after a 
-					   cue has been started*/
+					   queue has been started*/
 					   
 #define TIMEOUT 		0.5	/* TCP/IP timeout */
 #define NOTREF 			42
@@ -59,10 +59,10 @@ struct XPSC8axis
 };
 
 struct XPSC8group{	/* This structure is for each group not axis */
-    double positionarray[XPSC8_NUM_CHANNELS];	/* Used to store cued moves */
+    double positionarray[XPSC8_NUM_CHANNELS];	/* Used to store queued moves */
     int groupsize;		/* (1-8) Number of members of a group */
-    int cuesize;		/* Number of axes in the cue */
-    int cueflag;		/* 1 = move/wait loop needs to be started */ 
+    int queuesize;		/* Number of axes in the queue */
+    int queueflag;		/* 1 = move/wait loop needs to be started */ 
     };
 
 struct XPSC8controller{
