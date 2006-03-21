@@ -2,6 +2,10 @@
 // Created source file api.cpp for API description 
 // 
 
+  
+#ifdef __rtems__
+#include <rtems.h>
+#endif
 
 #include <string.h>		/* Added by JHK */
 
