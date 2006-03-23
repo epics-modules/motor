@@ -9,4 +9,5 @@ include "drvAsynSerialPort.dbd"
 #include "devNewport.dbd"
 #include "devPIMotor.dbd"
 #include "devSoftMotor.dbd"
+#include "motorSimSupport.dbd"
 
