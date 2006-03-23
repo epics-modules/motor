@@ -1,0 +1,21 @@
+record(motor,"$(P)$(M)")
+{
+	field(DESC,"$(DESC)")
+	field(DTYP,"$(DTYP)")
+	field(DIR,"$(DIR)")
+	field(VELO,"$(VELO)")
+	field(VBAS,"$(VBAS)")
+	field(ACCL,"$(ACCL)")
+	field(BDST,"$(BDST)")
+	field(BVEL,"$(BVEL)")
+	field(BACC,"$(BACC)")
+	field(OUT,"@asyn($(PORT),$(ADDR))")
+	field(MRES,"$(MRES)")
+	field(PREC,"$(PREC)")
+	field(EGU,"$(EGU)")
+	field(DHLM,"$(DHLM)")
+	field(DLLM,"$(DLLM)")
+	field(INIT,"$(INIT)")
+	field(TWV,"1")
+}
+
