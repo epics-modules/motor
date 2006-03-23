@@ -27,7 +27,7 @@ WithMPFVx_SRCS += WithMPFVx_registerRecordDeviceDriver.cpp
 WithMPF_SRCS_DEFAULT += WithMPFMain.cpp
 
 # Support from EPICS base
-WithMPF_OBJS_vxWorks	+= $(EPICS_BASE_BIN)/vxComLibrary
+WithMPF_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 # Support from IPAC R2.5 and below.
 #!WithMPFVx_LDOBJS_vxWorks += $(IPAC_BIN)/ipacLib
@@ -41,9 +41,10 @@ WithMPF_OBJS_vxWorks	+= $(EPICS_BASE_BIN)/vxComLibrary
 #!WithMPF_LIBS   += Ims
 #!WithMPF_LIBS   += Newport
 #!WithMPF_LIBS   += softMotor
-WithMPF_LIBS     += motor
-WithMPF_LIBS     += asyn
-WithMPF_LIBS     += $(EPICS_BASE_IOC_LIBS)
+#!WithMPF_LIBS   += motorSimSupport
+WithMPF_LIBS   += motor
+WithMPF_LIBS   += asyn
+WithMPF_LIBS   += $(EPICS_BASE_IOC_LIBS)
 
 #!WithMPFVx_LIBS += Mclennan
 #!WithMPFVx_LIBS += Micos
@@ -53,13 +54,14 @@ WithMPF_LIBS     += $(EPICS_BASE_IOC_LIBS)
 #!WithMPFVx_LIBS += Ims
 #!WithMPFVx_LIBS += Newport
 #!WithMPFVx_LIBS += softMotor
-WithMPFVx_LIBS   += motor
+#!WithMPFVx_LIBS += motorSimSupport
+WithMPFVx_LIBS += motor
 
 # Support from IPAC R2.6 and above.
-WithMPFVx_LIBS 		+= Ipac TyGSOctal
+WithMPFVx_LIBS += Ipac TyGSOctal
 
-WithMPFVx_LIBS		+= asyn
-WithMPFVx_LIBS 		+= $(EPICS_BASE_IOC_LIBS)
+WithMPFVx_LIBS += asyn
+WithMPFVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
 
