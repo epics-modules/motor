@@ -17,6 +17,7 @@ NoMPF_SRCS_DEFAULT += NoMPFMain.cpp
 #!NoMPF_LIBS += softMotor
 #!NoMPF_LIBS += oms
 NoMPF_LIBS += motor
+NoMPF_LIBS += asyn
 NoMPF_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 NoMPFVx_SRCS += NoMPFVx_registerRecordDeviceDriver.cpp
@@ -24,6 +25,8 @@ NoMPFVx_SRCS += NoMPFVx_registerRecordDeviceDriver.cpp
 #!NoMPFVx_LIBS += oms
 #!NoMPFVx_LIBS += DeltaTau
 NoMPFVx_LIBS += motor
+NoMPFVx_LIBS += asyn
+
 
 NoMPFVx_OBJS += $(EPICS_BASE_BIN)/vxComLibrary
 NoMPFVx_LIBS += $(EPICS_BASE_IOC_LIBS)
