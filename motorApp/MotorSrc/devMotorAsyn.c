@@ -61,11 +61,11 @@ typedef struct {
 typedef struct
 {
     struct motorRecord * pmr;
-    uint32_t status;  /**< bit mask of errors and other binary information. The
+    epicsUInt32 status;  /**< bit mask of errors and other binary information. The
 			 bit positions are in motor.h */
-    int32_t position; /**< Current motor position in motor steps (if not
+    epicsInt32 position; /**< Current motor position in motor steps (if not
 			 servoing) or demand position (if servoing) */
-    int32_t encoder_position; /**< Current motor position in encoder units 
+    epicsInt32 encoder_position; /**< Current motor position in encoder units 
 				 (only available if a servo system). */
     motor_cmnd move_cmd;
     double param;
@@ -439,7 +439,7 @@ static void positionCallback(void *drvPvt, asynUser *pasynUser,
         pmr->name, value);
 
     dbScanLock((dbCommon *)pmr);
-    pPvt->position = (int32_t)floor(value+0.5);
+    pPvt->position = (epicsInt32)floor(value+0.5);
     pPvt->needUpdate = 1;
     dbScanUnlock((dbCommon*)pmr);
     scanOnce(pmr);
@@ -456,7 +456,7 @@ static void encoderCallback(void *drvPvt, asynUser *pasynUser,
         pmr->name, value);
 
     dbScanLock((dbCommon *)pmr);
-    pPvt->encoder_position = (int32_t)floor(value+0.5);
+    pPvt->encoder_position = (epicsInt32)floor(value+0.5);
     pPvt->needUpdate = 1;
     dbScanUnlock((dbCommon*)pmr);
     scanOnce(pmr);

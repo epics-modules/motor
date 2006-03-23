@@ -82,7 +82,7 @@ typedef struct drvmotorAxisPvt {
     double min_velocity;
     double accel;
     /* Received status */
-    int32_t status;
+    epicsInt32 status;
     struct drvmotorPvt *pPvt;
 } drvmotorAxisPvt;
 
@@ -463,7 +463,7 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
     int ivalue;
     double dvalue;
     int i, bit_num;
-    int32_t changedmask = 0;
+    epicsInt32 changedmask = 0;
 
     /* We are called back with an array of things that have changed.
        First put these into a single int32 word for passing up to higher layers

@@ -53,9 +53,9 @@ epicsExportAddress(dset,devMotorSim);
 */
 typedef struct motorStatus_t 
 {
-    uint32_t status;  /**< bit mask of errors and other binary information. The bit positions are in motor.h */
-    int32_t  position;         /**< Current motor position in motor steps (if not servoing) or demand position (if servoing) */
-    int32_t  encoder_position; /**< Current motor position in encoder units (only available if a servo system). */
+    epicsUInt32 status;  /**< bit mask of errors and other binary information. The bit positions are in motor.h */
+    epicsInt32  position;         /**< Current motor position in motor steps (if not servoing) or demand position (if servoing) */
+    epicsInt32  encoder_position; /**< Current motor position in encoder units (only available if a servo system). */
 } motorStatus_t;
 
 typedef struct
