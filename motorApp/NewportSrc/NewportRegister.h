@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.h
 USAGE... This file contains function prototypes for Newport IOC shell commands.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-03-21 23:02:27 $
+Last Modified:	$Date: 2006-03-23 00:49:47 $
 */
 
 /*
@@ -50,16 +50,9 @@ extern RTN_STATUS MM4000Config(int, const char *, int);
 extern RTN_STATUS  PM500Config(int, const char *, int);
 extern RTN_STATUS ESP300Config(int, const char *, int);
  
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern RTN_STATUS  XPSC8Setup(int, int);
 extern RTN_STATUS  XPSC8Config(int, const char *, int, int);
 extern RTN_STATUS XPSC8NameConfig(int, int, int, int, int, \
 				const char *, const char *);
 extern RTN_STATUS xpsgathering(int);
 
-#ifdef __cplusplus
-}
-#endif
