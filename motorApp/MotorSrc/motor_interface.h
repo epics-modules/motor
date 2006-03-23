@@ -215,11 +215,6 @@ typedef struct motorAxisHandle * AXIS_HDL;
 #define MOTOR_AXIS_OK (0)
 #define MOTOR_AXIS_ERROR (-1)
 
-#ifndef vxWorks
-typedef unsigned int uint32_t;
-typedef int int32_t;
-#endif
-
 /**\struct motorAxisParam_t
 
     This is an enumeration of parameters that affect the behaviour of the
