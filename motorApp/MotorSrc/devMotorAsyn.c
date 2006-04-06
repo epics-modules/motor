@@ -292,7 +292,9 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	pmsg->command = pPvt->move_cmd;
 	pmsg->dvalue = pPvt->param;
 	pPvt->move_cmd = -1;
-	pPvt->needUpdate = 1;
+	/* Do we need to set needUpdate and schedule a process here? */
+	/* or can we always guarantee to get at least one callback? */
+	/* Do we really need the callback? I assume so */
 	break;
     case SET_ENC_RATIO:
 	pmsg->command = motorEncRatio;
@@ -340,6 +342,8 @@ static RTN_STATUS build_trans( motor_cmnd command,
     case GET_INFO:
 	pmsg->command = motorStatus;
 	pmsg->interface = float64ArrayType;
+	/* Check this - needUpdate can cause the callback mechanism to get
+	stuck. Must ensure that the record will be processed after this */
 	pPvt->needUpdate = 1; 
 	break;
     default:
