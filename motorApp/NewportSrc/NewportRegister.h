@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.h
 USAGE... This file contains function prototypes for Newport IOC shell commands.
 
-Version:	$Revision: 1.8 $
+Version:	$Revision: 1.9 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-03-23 00:49:47 $
+Last Modified:	$Date: 2006-04-06 23:58:48 $
 */
 
 /*
@@ -39,6 +39,8 @@ Last Modified:	$Date: 2006-03-23 00:49:47 $
 #include "motor.h"
 #include "motordrvCom.h"
 #include "tclCall.h"
+
+#include "drvXPSAsyn.h"
 
 /* Function prototypes. */
 extern RTN_STATUS MM3000Setup(int, int);
