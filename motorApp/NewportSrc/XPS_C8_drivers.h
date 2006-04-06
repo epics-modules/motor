@@ -3,10 +3,14 @@
 // 
 
 
+#ifdef _WIN32
 #ifndef DLL
 #define DLL _declspec(dllimport)
 #endif
-
+#else
+#define DLL
+#define __stdcall
+#endif
 
 
 #ifdef __cplusplus

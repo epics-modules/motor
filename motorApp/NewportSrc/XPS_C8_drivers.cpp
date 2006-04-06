@@ -6,8 +6,13 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <stdarg.h> 
-#include "socket.h" 
+#include <string.h>
+#include "Socket.h" 
+#ifdef _WIN32
 #define DLL _declspec(dllexport)
+#else
+#define DLL
+#endif
 #include "XPS_C8_drivers.h" 
 
 
