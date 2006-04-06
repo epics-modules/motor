@@ -2,9 +2,9 @@
 FILENAME...     motorUtilAux.cc
 USAGE...        Motor Record Utility Support.
 
-Version:        $Revision: 1.2 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2006-03-06 19:20:55 $
+Version:        $Revision: 1.3 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2006-04-06 19:38:48 $
 */
 
 /*
@@ -39,7 +39,9 @@ char **getMotorList();
 /* ----- --------------------- ----- */
 
 /* ----- External Declarations ----- */
+extern "C" {
 extern struct dbBase *pdbbase;
+}
 extern int numMotors;
 /* ----- --------------------- ----- */
 
