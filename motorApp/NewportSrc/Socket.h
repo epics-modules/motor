@@ -1,7 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Socket.h
 
+#ifdef _WIN
 #include <afxsock.h>		// MFC socket extensions
+#endif
 
 int  ConnectToServer (char *Ip_Address, int Ip_Port, double TimeOut);
 void SetTCPTimeout (int SocketID, double Timeout);
