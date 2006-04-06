@@ -299,7 +299,7 @@ static asynStatus readInt32(void *drvPvt, asynUser *pasynUser,
         return(asynError);
     }
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
-              "drvMotorAsyn::readInt32, value=%d", *value);
+              "drvMotorAsyn::readInt32, value=%d\n", *value);
     return(asynSuccess);
 }
 
@@ -337,7 +337,7 @@ static asynStatus readFloat64(void *drvPvt, asynUser *pasynUser,
         return(asynError);
     }
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
-              "drvMotorAsyn::readFloat64, value=%f", *value);
+              "drvMotorAsyn::readFloat64, value=%f\n", *value);
     return(status);
 }
 
@@ -367,6 +367,11 @@ static asynStatus writeInt32(void *drvPvt, asynUser *pasynUser,
     case motorStop:
 	status = (*pPvt->drvset->stop)(pAxis->axis, pAxis->accel);
 	break;
+    case motorHome:
+	status = (*pPvt->drvset->home)(pAxis->axis, pAxis->min_velocity,
+				       pAxis->max_velocity, pAxis->accel,
+				       (value == 0) ? 0 : 1);
+	break;
     case motorSetClosedLoop:
 	status = (*pPvt->drvset->setInteger)(pAxis->axis, motorAxisClosedLoop,
 					     value);
@@ -379,7 +384,7 @@ static asynStatus writeInt32(void *drvPvt, asynUser *pasynUser,
 	break;
     }
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
-	      "drvMotorAsyn::writeInt32, value=%d", value);
+	      "drvMotorAsyn::writeInt32, value=%d\n", value);
     return(status);
 }
 
@@ -410,11 +415,12 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
 	break;
     case motorMoveVel:
 	status = (*pPvt->drvset->velocityMove)(pAxis->axis, pAxis->min_velocity,
-				       abs(value), (value < 0) ? 0 : 1);
+				       value, pAxis->accel);
 	break;
     case motorHome:
-	status = (*pPvt->drvset->home)(pAxis->axis, pAxis->min_velocity, abs(value), pAxis->accel,
-			       (value < 0) ? 0 : 1);
+	status = (*pPvt->drvset->home)(pAxis->axis, pAxis->min_velocity,
+				       pAxis->max_velocity, pAxis->accel,
+				       (value == 0) ? 0 : 1);
 	break;
     case motorVelocity:
 	pAxis->max_velocity = value;
@@ -441,7 +447,8 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
         return(asynError);
     }
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
-              "drvMotorAsyn::writeFloat64, reason=%s, value=%f", motorCommands[command].commandString, value);
+              "drvMotorAsyn::writeFloat64, reason=%d, value=%f\n",
+	      command, value);
     return(status);
 }
 

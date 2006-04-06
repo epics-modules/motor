@@ -239,11 +239,11 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	break;
     case HOME_FOR:
 	pPvt->move_cmd = motorHome;
-	pPvt->param = *param;
+	pPvt->param = 1;
 	break;
     case HOME_REV:
 	pPvt->move_cmd = motorHome;
-	pPvt->param = -(*param);
+	pPvt->param = 0;
 	break;
     default:
 	need_call = 1;
