@@ -288,18 +288,30 @@ typedef int (*motorAxisInitFunc)( void );
 static int motorAxisInit( void );
 #endif
 
-typedef enum {motorAxisErrInfo,motorAxisErrMinor,motorAxisErrMajor,motorAxisErrFatal} motorAxisSev_t;
+typedef enum
+  {
+    motorAxisTraceError   =0x0001,
+    motorAxisTraceIODevice=0x0002,
+    motorAxisTraceIOFilter=0x0004,
+    motorAxisTraceIODriver=0x0008,
+    motorAxisTraceFlow    =0x0010
+  } motorAxisLogMask_t;
 
-typedef int (*motorAxisLogFunc)( const motorAxisSev_t severity,const char *pFormat, ...);
+typedef int (*motorAxisLogFunc)( void * userParam,
+                                 const motorAxisLogMask_t logMask,
+                                 const char *pFormat, ...);
 typedef int (*motorAxisSetLogFunc)( motorAxisLogFunc logFunc );
+typedef int (*motorAxisSetLogParamFunc)( AXIS_HDL pAxis, void * param );
 
 /** Provide an external logging routine.
 
     This is an optional function which allows external software to hook
     the driver log routine into an external logging system. The
     external log function is a standard printf style routine with the
-    exception that it has a first parameter which is a message
-    severity indicator. This can have one of four values -
+    exception that it has a first parameter that can be used to set external
+    data on an axis by axis basis and a second parameter which is a message
+    tracing indicator. This is set to be compatible with the asynTrace reasons
+    - enabling tracing of errors, flow, and device filter and driver layers.
     infomational, minor, major or fatal.
 
     \param logFunc [in] Pointer to function of motorAxisLogFunc type.
@@ -309,6 +321,23 @@ typedef int (*motorAxisSetLogFunc)( motorAxisLogFunc logFunc );
 
 #ifdef DEFINE_MOTOR_PROTOTYPES
 static int motorAxisSetLog( motorAxisLogFunc logFunc );
+#endif
+
+
+/** Provide an external logging routine axis specific user parameter.
+
+    This is an optional function which allows external software to provide
+    axis specific data to the logging function to be used when logging
+    information about this axis. If the logging information is not axis
+    specific a NULL pointer should be supplied to the logging routine.
+
+    \param param [in] Pointer to a user parameter to be used for logging on this axis
+
+    \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure. 
+*/
+
+#ifdef DEFINE_MOTOR_PROTOTYPES
+static int motorAxisSetLogParam( AXIS_HDL pAxis, void * param );
 #endif
 
 /**@}*/
@@ -660,6 +689,7 @@ typedef struct
     motorAxisReportFunc          report;            /**< Standard EPICS driver report function (optional) */
     motorAxisInitFunc            init;              /**< Standard EPICS dirver initialisation function (optional) */
     motorAxisSetLogFunc          setLog;            /**< Defines an external logging function (optional) */
+    motorAxisSetLogParamFunc     setLogParam;       /**< Defines a parameter to be used when calling the logging function for an axis */
     motorAxisOpenFunc            open;              /**< Driver open function */
     motorAxisCloseFunc           close;             /**< Driver close function */
     motorAxisSetCallbackFunc     setCallback;       /**< Provides a callback function the driver can call when the status updates */
