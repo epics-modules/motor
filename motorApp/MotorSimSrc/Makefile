@@ -16,7 +16,6 @@ DBD += motorSimSupport.dbd
 
 # The following are compiled and added to the Support library
 motorSimSupport_SRCS += route.c
-motorSimSupport_SRCS += paramLib.c
 motorSimSupport_SRCS += devMotorSim.c
 motorSimSupport_SRCS += drvMotorSim.c
 motorSimSupport_SRCS += motorSimRegister.cc
