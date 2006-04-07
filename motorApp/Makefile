@@ -9,9 +9,10 @@ include $(TOP)/configure/CONFIG
 DIRS += MotorSrc
 
 # Select individual device/driver modules by removing the "#!" comment.
-DIRS += DeltaTauSrc
+#!DIRS += DeltaTauSrc
 DIRS += OmsSrc
 DIRS += SoftMotorSrc
+DIRS += MotorSimSrc
 
 # All the following modules require ASYN.
 ifdef ASYN
@@ -25,6 +26,9 @@ DIRS += MicosSrc
 DIRS += FaulhaberSrc
 DIRS += PC6KSrc
 endif
+
+# Install the edl files
+#DIRS += opi
 
 ifdef MX
 DIRS += MXmotorSrc
