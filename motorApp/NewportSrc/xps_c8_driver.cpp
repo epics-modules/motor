@@ -28,7 +28,7 @@ MultipleAxesPVTExecution use Send() insted of SendAndReceive() */
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <stdarg.h> 
-#include "Socket.h" 
+#include "socket.h" 
 #include "xps_c8_driver.h" 	/* Renamed by JHK */
 #define SIZE_BUFFER  256
 
@@ -979,7 +979,7 @@ int __stdcall GPIODigitalGet (int SocketIndex, char * GPIOName, unsigned short *
 		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
-		if (pt != NULL) sscanf (pt, "%u", DigitalValue);
+		if (pt != NULL) sscanf (pt, "%hu", DigitalValue);
 	} 
 	return (ret); 
 }
@@ -2001,7 +2001,7 @@ int __stdcall PositionerCorrectorNotchFiltersGet (int SocketIndex, char * Positi
 
 
 /***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainAcceleration) 
+int __stdcall PositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char * PositionerName, int ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
@@ -2022,14 +2022,14 @@ int __stdcall PositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char * P
 
 
 /***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainAcceleration) 
+int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * PositionerName, int * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
 	char ReturnedValue [SIZE_BUFFER]; 
 
 	/* Convert to string */ 
-	sprintf (ExecuteMethod, "PositionerCorrectorPIDFFAccelerationGet (%s,bool *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *)", PositionerName);
+	sprintf (ExecuteMethod, "PositionerCorrectorPIDFFAccelerationGet (%s,int *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *)", PositionerName);
 
 	/* Send this string and wait return function from controller */ 
 	/* return function : ==0 -> OK ; < 0 -> NOK */ 
@@ -2087,7 +2087,7 @@ int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * P
 
 
 /***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity) 
+int __stdcall PositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * PositionerName, int ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
@@ -2108,14 +2108,14 @@ int __stdcall PositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * Posit
 
 
 /***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity) 
+int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * PositionerName, int * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
 	char ReturnedValue [SIZE_BUFFER]; 
 
 	/* Convert to string */ 
-	sprintf (ExecuteMethod, "PositionerCorrectorPIDFFVelocityGet (%s,bool *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *)", PositionerName);
+	sprintf (ExecuteMethod, "PositionerCorrectorPIDFFVelocityGet (%s,int *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *)", PositionerName);
 
 	/* Send this string and wait return function from controller */ 
 	/* return function : ==0 -> OK ; < 0 -> NOK */ 
@@ -2173,7 +2173,7 @@ int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Posit
 
 
 /***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity, double FeedForwardGainAcceleration, double Friction) 
+int __stdcall PositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char * PositionerName, int ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity, double FeedForwardGainAcceleration, double Friction) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
@@ -2194,14 +2194,14 @@ int __stdcall PositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char * Po
 
 
 /***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity, double * FeedForwardGainAcceleration, double * Friction) 
+int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * PositionerName, int * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity, double * FeedForwardGainAcceleration, double * Friction) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
 	char ReturnedValue [SIZE_BUFFER]; 
 
 	/* Convert to string */ 
-	sprintf (ExecuteMethod, "PositionerCorrectorPIDDualFFVoltageGet (%s,bool *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *)", PositionerName);
+	sprintf (ExecuteMethod, "PositionerCorrectorPIDDualFFVoltageGet (%s,int *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *)", PositionerName);
 
 	/* Send this string and wait return function from controller */ 
 	/* return function : ==0 -> OK ; < 0 -> NOK */ 
@@ -2265,7 +2265,7 @@ int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * Po
 
 
 /***********************************************************************/ 
-int __stdcall PositionerCorrectorPIPositionSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double IntegrationTime) 
+int __stdcall PositionerCorrectorPIPositionSet (int SocketIndex, char * PositionerName, int ClosedLoopStatus, double KP, double KI, double IntegrationTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
@@ -2286,14 +2286,14 @@ int __stdcall PositionerCorrectorPIPositionSet (int SocketIndex, char * Position
 
 
 /***********************************************************************/ 
-int __stdcall PositionerCorrectorPIPositionGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * IntegrationTime) 
+int __stdcall PositionerCorrectorPIPositionGet (int SocketIndex, char * PositionerName, int * ClosedLoopStatus, double * KP, double * KI, double * IntegrationTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
 	char ReturnedValue [SIZE_BUFFER]; 
 
 	/* Convert to string */ 
-	sprintf (ExecuteMethod, "PositionerCorrectorPIPositionGet (%s,bool *,double *,double *,double *)", PositionerName);
+	sprintf (ExecuteMethod, "PositionerCorrectorPIPositionGet (%s,int *,double *,double *,double *)", PositionerName);
 
 	/* Send this string and wait return function from controller */ 
 	/* return function : ==0 -> OK ; < 0 -> NOK */ 
@@ -2611,14 +2611,14 @@ int __stdcall PositionerMotionDoneSet (int SocketIndex, char * PositionerName, d
 
 
 /***********************************************************************/ 
-int __stdcall PositionerPositionCompareGet (int SocketIndex, char * PositionerName, double * MinimumPosition, double * MaximumPosition, double * PositionStep, bool * EnableState) 
+int __stdcall PositionerPositionCompareGet (int SocketIndex, char * PositionerName, double * MinimumPosition, double * MaximumPosition, double * PositionStep, int * EnableState) 
 { 
 	int ret = -1; 
 	char ExecuteMethod [SIZE_BUFFER]; 
 	char ReturnedValue [SIZE_BUFFER]; 
 
 	/* Convert to string */ 
-	sprintf (ExecuteMethod, "PositionerPositionCompareGet (%s,double *,double *,double *,bool *)", PositionerName);
+	sprintf (ExecuteMethod, "PositionerPositionCompareGet (%s,double *,double *,double *,int *)", PositionerName);
 
 	/* Send this string and wait return function from controller */ 
 	/* return function : ==0 -> OK ; < 0 -> NOK */ 
