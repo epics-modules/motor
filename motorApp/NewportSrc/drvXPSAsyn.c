@@ -228,12 +228,18 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
         {
         case motorAxisPosition:
         {
-            PRINT( pAxis->logParam, ERROR, "motorAxisSetDouble: XPS does not support setting position");
+            PRINT( pAxis->logParam, ERROR, "motorAxisSetDouble: XPS does not support setting position\n");
             break;
         }
         case motorAxisEncoderRatio:
         {
-            PRINT( pAxis->logParam, ERROR, "motorAxisSetDouble: XPS does not support setting encoder ratio");
+            PRINT( pAxis->logParam, ERROR, "motorAxisSetDouble: XPS does not support setting encoder ratio\n");
+            break;
+        }
+        case motorAxisResolution:
+        {
+            pAxis->stepSize = value;
+            PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d stepSize to %f\n", pAxis->card, pAxis->axis, value );
             break;
         }
         case motorAxisLowLimit:
@@ -247,7 +253,7 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
                       "for low limit=%f, status=%d\n", deviceValue, status);
             } else { 
                 pAxis->lowLimit = deviceValue;
-                PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d low limit to %f", pAxis->card, pAxis->axis, deviceValue );
+                PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d low limit to %f\n", pAxis->card, pAxis->axis, deviceValue );
                 ret_status = MOTOR_AXIS_OK;
             }
             break;
@@ -263,29 +269,29 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
                       "for high limit=%f, status=%d\n", deviceValue, status);
             } else { 
                 pAxis->highLimit = deviceValue;
-                PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d high limit to %f", pAxis->card, pAxis->axis, deviceValue );
+                PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d high limit to %f\n", pAxis->card, pAxis->axis, deviceValue );
                 ret_status = MOTOR_AXIS_OK;
             }
             break;
         }
         case motorAxisPGain:
         {
-            PRINT( pAxis->logParam, ERROR, "XPS does not support setting proportional gain");
+            PRINT( pAxis->logParam, ERROR, "XPS does not support setting proportional gain\n");
             break;
         }
         case motorAxisIGain:
         {
-            PRINT( pAxis->logParam, ERROR, "XPS does not support setting integral gain");
+            PRINT( pAxis->logParam, ERROR, "XPS does not support setting integral gain\n");
             break;
         }
         case motorAxisDGain:
         {
-            PRINT( pAxis->logParam, ERROR, "XPS does not support setting derivative gain");
+            PRINT( pAxis->logParam, ERROR, "XPS does not support setting derivative gain\n");
             break;
         }
         case motorAxisClosedLoop:
         {
-            PRINT( pAxis->logParam, ERROR, "XPS does not support changing closed loop or torque");
+            PRINT( pAxis->logParam, ERROR, "XPS does not support changing closed loop or torque\n");
             break;
         }
         default:
@@ -393,7 +399,7 @@ static int motorAxisMove( AXIS_HDL pAxis, double position, int relative,
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
 
-    PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f",
+    PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f\n",
           pAxis->card, pAxis->axis, position, min_velocity, max_velocity, acceleration);
     return MOTOR_AXIS_OK;
 }
@@ -464,7 +470,7 @@ static int motorAxisVelocityMove(  AXIS_HDL pAxis, double min_velocity, double v
     }
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
-    PRINT(pAxis->logParam, FLOW, "motorAxisVelocityMove card %d, axis %d move velocity=%f, accel=%f",
+    PRINT(pAxis->logParam, FLOW, "motorAxisVelocityMove card %d, axis %d move velocity=%f, accel=%f\n",
           pAxis->card, pAxis->axis, velocity, acceleration);
     return status;
 }
@@ -490,7 +496,6 @@ static int motorAxisStop( AXIS_HDL pAxis, double acceleration )
     /* We need to read the status, because a jog is stopped differently from a move */ 
 
     status = GroupStatusGet(pAxis->pollSocket, pAxis->groupName, &pAxis->axisStatus);
-printf("motorAxisStop, axisStatus=%d\n", pAxis->axisStatus);
     if (status != 0) {
         PRINT(pAxis->logParam, ERROR, " Error performing GroupStatusGet status=%d%\n",\
               status);
@@ -499,7 +504,6 @@ printf("motorAxisStop, axisStatus=%d\n", pAxis->axisStatus);
     if (pAxis->axisStatus == 47) {
         deviceAcceleration = acceleration * pAxis->stepSize;
         status = GroupJogParametersSet(pAxis->moveSocket, pAxis->positionerName, 1, &deviceVelocity, &deviceAcceleration);
-printf("Set jog velocity to %f, acceleration to %f\n", deviceVelocity, deviceAcceleration);
         if (status != 0) {
             PRINT(pAxis->logParam, ERROR, " Error performing GroupJogParametersSet status=%d\n",\
                   status);
@@ -516,7 +520,7 @@ printf("Set jog velocity to %f, acceleration to %f\n", deviceVelocity, deviceAcc
         }
     }
 
-    PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d to stop with accel=%f",
+    PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d to stop with accel=%f\n",
           pAxis->card, pAxis->axis, acceleration );
     return MOTOR_AXIS_OK;
 }
@@ -760,8 +764,7 @@ int XPSConfig(int card,           /* Controller number */
 
 int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
                   int axis,                   /* axis number 0-7 */
-                  const char *positionerName, /* groupName.positionerName e.g. Diffractometer.Phi */
-                  int stepsPerUnit      )     /* steps per user unit */
+                  const char *positionerName) /* groupName.positionerName e.g. Diffractometer.Phi */
 {
     XPSController *pController;
     AXIS_HDL pAxis;
@@ -792,7 +795,6 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     index = strchr(pAxis->groupName, '.');
     if (index != NULL) *index = '\0';  /* Terminate group name at place of '.' */
 
-    pAxis->stepSize = 1./stepsPerUnit;
     /* Read some information from the controller for this axis */
     status = PositionerSGammaParametersGet(pAxis->pollSocket,
                                            pAxis->positionerName,
