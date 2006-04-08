@@ -4,7 +4,7 @@
 < envPaths
 
 dbLoadDatabase("$(TOP)/dbd/WithMPF.dbd")
-motorSim_registerRecordDeviceDriver(pdbbase)
+WithMPF_registerRecordDeviceDriver(pdbbase)
 dbLoadTemplate("motor.substitutions")
 
 # Create simulated motors: ( start card , start axis , low limit, high limit, home posn, # cards, # axes to setup)
