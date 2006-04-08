@@ -1,6 +1,6 @@
 TOP = ../..
 include $(TOP)/configure/CONFIG
-ARCH = vxWorks-68040
+ARCH = linux-x86
 #ARCH = vxWorks-ppc604
 TARGETS = cdCommands
 TARGETS += envPaths
