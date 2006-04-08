@@ -60,6 +60,7 @@ static motorCommandStruct motorCommands[] = {
     {motorVelBase,    "VEL_BASE"},
     {motorAccel,      "ACCEL"},
     {motorPosition,   "POSITION"},
+    {motorResolution, "RESOLUTION"},
     {motorEncRatio,   "ENC_RATIO"},
     {motorPgain,      "PGAIN"},
     {motorIgain,      "IGAIN"},
@@ -84,6 +85,7 @@ typedef struct drvmotorAxisPvt {
     /* Received status */
     epicsInt32 status;
     struct drvmotorPvt *pPvt;
+    asynUser *pasynUser;
 } drvmotorAxisPvt;
 
 typedef struct drvmotorPvt {
@@ -136,7 +138,10 @@ static asynStatus disconnect        (void *drvPvt, asynUser *pasynUser);
 static void intCallback(void *drvPvt, unsigned int num, unsigned int *changed);
 static void setDefaults(drvmotorAxisPvt *pAxis);
 static int config      (drvmotorPvt *pPvt);
-     
+static int logFunc     (void *userParam,
+                        const motorAxisLogMask_t logMask,
+                        const char *pFormat, ...);
+
 static asynCommon drvMotorCommon = {
     report,
     connect,
@@ -262,7 +267,17 @@ int drvAsynMotorConfigure(const char *portName, const char *driverName, int card
 	pAxis->axis = (*pPvt->drvset->open)(card, i, "");
 	pAxis->num = i;
 	pAxis->pPvt = pPvt;
+        /* Create asynUser for debugging */
+        pAxis->pasynUser = pasynManager->createAsynUser(0, 0);
+        /* Connect to device */
+        status = pasynManager->connectDevice(pAxis->pasynUser, portName, i);
+        if (status != asynSuccess) {
+            errlogPrintf("drvAsynMotorConfigure, connectDevice failed\n");
+            return -1;
+        }
 	(*pPvt->drvset->setCallback)(pAxis->axis, intCallback, (void *)pAxis);
+	(*pPvt->drvset->setLogParam)(pAxis->axis, pAxis->pasynUser);
+	(*pPvt->drvset->setLog)(logFunc);
 	setDefaults(pAxis);
     }
 
@@ -432,6 +447,7 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
 	pAxis->accel = value;
 	break;
     case motorPosition:
+    case motorResolution:
     case motorEncRatio:
     case motorPgain:
     case motorIgain:
@@ -457,6 +473,39 @@ static void setDefaults(drvmotorAxisPvt *pAxis)
     pAxis->max_velocity = 200.0;
     pAxis->min_velocity = 0.0;
     pAxis->accel = 100.0;
+}
+
+static int logFunc(void *userParam,
+                   const motorAxisLogMask_t logMask,
+                   const char *pFormat, ...)
+{
+    va_list     pvar;
+    asynUser    *pasynUser = (asynUser *)userParam;
+    int         reason;
+
+    reason=pasynTrace->getTraceMask(pasynUser);
+    va_start(pvar, pFormat);
+    switch(logMask) {
+    case motorAxisTraceError:
+        if (reason & ASYN_TRACE_ERROR) vfprintf(stdout, pFormat, pvar);
+        break;
+    case motorAxisTraceIODevice:
+        if (reason & ASYN_TRACEIO_DEVICE) vfprintf(stdout, pFormat, pvar);
+        break;
+    case motorAxisTraceIOFilter:
+        if (reason & ASYN_TRACEIO_FILTER) vfprintf(stdout, pFormat, pvar);
+        break;
+    case motorAxisTraceIODriver:
+        if (reason & ASYN_TRACEIO_DRIVER) vfprintf(stdout, pFormat, pvar);
+        break;
+    case motorAxisTraceFlow:
+        if (reason & ASYN_TRACE_FLOW) vfprintf(stdout, pFormat, pvar);
+        break;
+    default:
+        asynPrint(pasynUser, ASYN_TRACE_ERROR, "drvMotorAsyn:logFunc unknown logMask %d\n", logMask);
+    }
+    va_end (pvar);
+    return(MOTOR_AXIS_OK);
 }
 
 static void intCallback(void *axisPvt, unsigned int nChanged,
