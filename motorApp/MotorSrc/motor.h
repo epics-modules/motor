@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.16 $
+Version:	$Revision: 1.17 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-03-21 22:45:05 $
+Last Modified:	$Date: 2006-04-08 20:11:56 $
 */
 
 /*
@@ -77,7 +77,7 @@ typedef enum CALLBACK_VALUES {NOTHING_DONE = 0, CALLBACK_DATA = 1} CALLBACK_VALU
 #define NINT(f)	(long)((f)>0 ? (f)+0.5 : (f)-0.5)	/* Nearest integer. */
 
 /* Motor Record Command Set. !WARNING! this enumeration must match ALL of the
-   following;
+   following (up to and including JOG_VELOCITY);
     - "oms_table" in devOmsCom.c
     - "MM4000_table" in devMM4000.c
 */
@@ -104,7 +104,8 @@ typedef enum  {
 	PRIMITIVE,	/* Primitive Controller command. */
 	SET_HIGH_LIMIT,	/* Set High Travel Limit. */
 	SET_LOW_LIMIT,	/* Set Low Travel Limit. */
-	JOG_VELOCITY	/* Change Jog velocity. */
+	JOG_VELOCITY,	/* Change Jog velocity. */
+	SET_RESOLUTION	/* Set resolution */
 } motor_cmnd;
 
 
