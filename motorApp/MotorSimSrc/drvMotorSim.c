@@ -210,6 +210,11 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
             PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d to position %f", pAxis->card, pAxis->axis, value );
             break;
         }
+        case motorAxisResolution:
+        {
+            PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d resolution to %f", pAxis->card, pAxis->axis, value );
+            break;
+        }
         case motorAxisEncoderRatio:
         {
             PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d to enc. ratio to %f", pAxis->card, pAxis->axis, value );
