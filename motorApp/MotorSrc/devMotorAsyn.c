@@ -343,7 +343,7 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	pmsg->command = motorStatus;
 	pmsg->interface = float64ArrayType;
 	/* Check this - needUpdate can cause the callback mechanism to get
-	stuck. Must ensure that the record will be processed after this */
+	   stuck. Must ensure that the record will be processed after this */
 	pPvt->needUpdate = 1; 
 	break;
     default:
@@ -427,9 +427,11 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
 
     dbScanLock((dbCommon *)pmr);
     pPvt->status = value;
-    pPvt->needUpdate = 1;
     dbScanUnlock((dbCommon*)pmr);
-    scanOnce(pmr);
+    if (!pPvt->needUpdate) {
+	pPvt->needUpdate = 1;
+	scanOnce(pmr);
+    }
 }
 
 static void positionCallback(void *drvPvt, asynUser *pasynUser,
@@ -444,9 +446,11 @@ static void positionCallback(void *drvPvt, asynUser *pasynUser,
 
     dbScanLock((dbCommon *)pmr);
     pPvt->position = (epicsInt32)floor(value+0.5);
-    pPvt->needUpdate = 1;
     dbScanUnlock((dbCommon*)pmr);
-    scanOnce(pmr);
+    if (!pPvt->needUpdate) {
+	pPvt->needUpdate = 1;
+	scanOnce(pmr);
+    }
 }
 
 static void encoderCallback(void *drvPvt, asynUser *pasynUser,
@@ -461,7 +465,9 @@ static void encoderCallback(void *drvPvt, asynUser *pasynUser,
 
     dbScanLock((dbCommon *)pmr);
     pPvt->encoder_position = (epicsInt32)floor(value+0.5);
-    pPvt->needUpdate = 1;
     dbScanUnlock((dbCommon*)pmr);
-    scanOnce(pmr);
+    if (!pPvt->needUpdate) {
+	pPvt->needUpdate = 1;
+	scanOnce(pmr);
+    }
 }
