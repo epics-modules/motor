@@ -92,6 +92,7 @@ static long init_record(struct motorRecord * pmr )
     asynStatus status;
     asynInterface *pasynInterface;
     motorAsynPvt *pPvt;
+    double resolution;
 
     /* Allocate motorAsynPvt private structure */
     pPvt = callocMustSucceed(1, sizeof(motorAsynPvt), "devMotorAsyn init_record()");
@@ -188,6 +189,11 @@ static long init_record(struct motorRecord * pmr )
 	       pmr->name,pPvt->pasynUser->errorMessage);
     }
 
+    /* Send the motor resolution to the driver.  This should be done in the record
+     * in the future */
+    resolution = pmr->mres;
+    build_trans(SET_RESOLUTION, &resolution, pmr);
+
     return(0);
 bad:
     pmr->pact=1;
@@ -227,6 +233,10 @@ static RTN_STATUS build_trans( motor_cmnd command,
     motorAsynMessage *pmsg;
     int need_call=0;
 
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+              "devMotorAsyn::send_msg: %s command=%d, pact=%d\n",
+              pmr->name, command, pmr->pact);
+
     /* These primitives don't cause a call to the Asyn layer */
     switch ( command ) {
     case MOVE_ABS:
@@ -253,10 +263,6 @@ static RTN_STATUS build_trans( motor_cmnd command,
     if (!need_call) {
 	return (OK);
     }
-
-    asynPrint(pasynUser, ASYN_TRACE_FLOW,
-              "devMotorAsyn::send_msg: %s command=%d, pact=%d\n",
-              pmr->name, command, pmr->pact);
 
     /* If we are already in COMM_ALARM then this server is not reachable,
      * return */
@@ -345,6 +351,10 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	/* Check this - needUpdate can cause the callback mechanism to get
 	   stuck. Must ensure that the record will be processed after this */
 	pPvt->needUpdate = 1; 
+	break;
+    case SET_RESOLUTION:
+	pmsg->command = motorResolution;
+	pmsg->dvalue = *param;
 	break;
     default:
 	status = ERROR;
