@@ -226,6 +226,7 @@ typedef enum
 {
     motorAxisPosition,         /**< (double) Sets the current motor actual position to a given value in motor units. 
                                  Returns the current motor actual position in motor units */
+    motorAxisResolution,       /**< (double) Number of motor units per engineering unit */
     motorAxisEncoderRatio,     /**< (double) Number of encoder counts in one motor count (encoder counts/motor counts) */
     motorAxisLowLimit,         /**< (double) Low soft limit in motor units */
     motorAxisHighLimit,        /**< (double) High soft limit in motor units */

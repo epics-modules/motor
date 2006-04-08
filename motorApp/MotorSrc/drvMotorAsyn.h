@@ -19,6 +19,7 @@ typedef enum {
     /* Parameters - these must match the definitions in motor_interface.h */
     motorPosition = motorAxisPosition,
     motorEncRatio = motorAxisEncoderRatio,
+    motorResolution = motorAxisResolution,
     motorPgain = motorAxisPGain,
     motorIgain = motorAxisIGain,
     motorDgain = motorAxisDGain,
