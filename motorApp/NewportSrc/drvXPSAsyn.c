@@ -100,7 +100,7 @@ typedef struct
   epicsTimeStamp now;
 } motorXPS_t;
 
-static int motorXPSLogMsg( void * param, const motorAxisLogMask_t logMask, const char *pFormat, ...);
+static int motorXPSLogMsg(void * param, const motorAxisLogMask_t logMask, const char *pFormat, ...);
 #define PRINT   (drv.print)
 #define FLOW    motorAxisTraceFlow
 #define ERROR   motorAxisTraceError
@@ -120,7 +120,7 @@ static XPSController *pXPSController=NULL;
 
 static char* getXPSError(AXIS_HDL pAxis, int status, char *buffer);
 
-static void motorAxisReportAxis( AXIS_HDL pAxis, int level )
+static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
     if (level > 0)
     {
@@ -131,7 +131,7 @@ static void motorAxisReportAxis( AXIS_HDL pAxis, int level )
     }
 }
 
-static void motorAxisReport( int level )
+static void motorAxisReport(int level)
 {
     int i, j;
 
@@ -144,12 +144,12 @@ static void motorAxisReport( int level )
 }
 
 
-static int motorAxisInit( void )
+static int motorAxisInit(void)
 {
   return MOTOR_AXIS_OK;
 }
 
-static int motorAxisSetLog( motorAxisLogFunc logFunc )
+static int motorAxisSetLog(motorAxisLogFunc logFunc)
 {
   if (logFunc == NULL) drv.print=motorXPSLogMsg;
   else drv.print = logFunc;
@@ -157,7 +157,7 @@ static int motorAxisSetLog( motorAxisLogFunc logFunc )
   return MOTOR_AXIS_OK;
 }
 
-static int motorAxisSetLogParam( AXIS_HDL pAxis, void * param )
+static int motorAxisSetLogParam(AXIS_HDL pAxis, void * param)
 {
   if (pAxis == NULL) return MOTOR_AXIS_ERROR;
   else
@@ -167,7 +167,7 @@ static int motorAxisSetLogParam( AXIS_HDL pAxis, void * param )
   return MOTOR_AXIS_OK;
 }
 
-static AXIS_HDL motorAxisOpen( int card, int axis, char * param )
+static AXIS_HDL motorAxisOpen(int card, int axis, char * param)
 {
   AXIS_HDL pAxis;
 
@@ -178,44 +178,44 @@ static AXIS_HDL motorAxisOpen( int card, int axis, char * param )
   return pAxis;
 }
 
-static int motorAxisClose( AXIS_HDL pAxis )
+static int motorAxisClose(AXIS_HDL pAxis)
 {
   return MOTOR_AXIS_OK;
 }
 
-static int motorAxisGetInteger( AXIS_HDL pAxis, motorAxisParam_t function, int * value )
+static int motorAxisGetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int * value)
 {
   if (pAxis == NULL) return MOTOR_AXIS_ERROR;
   else
     {
-      return motorParam->getInteger( pAxis->params, (paramIndex) function, value );
+      return motorParam->getInteger(pAxis->params, (paramIndex) function, value);
     }
 }
 
-static int motorAxisGetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double * value )
+static int motorAxisGetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double * value)
 {
   if (pAxis == NULL) return MOTOR_AXIS_ERROR;
   else
     {
-      return motorParam->getDouble( pAxis->params, (paramIndex) function, value );
+      return motorParam->getDouble(pAxis->params, (paramIndex) function, value);
     }
 }
 
-static int motorAxisSetCallback( AXIS_HDL pAxis, motorAxisCallbackFunc callback, void * param )
+static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, void * param)
 {
   if (pAxis == NULL) return MOTOR_AXIS_ERROR;
   else
     {
-      return motorParam->setCallback( pAxis->params, callback, param );
+      return motorParam->setCallback(pAxis->params, callback, param);
     }
 }
 
-static int motorAxisPrimitive( AXIS_HDL pAxis, int length, char * string )
+static int motorAxisPrimitive(AXIS_HDL pAxis, int length, char * string)
 {
   return MOTOR_AXIS_OK;
 }
 
-static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double value )
+static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
     int status;
@@ -228,18 +228,18 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
         {
         case motorAxisPosition:
         {
-            PRINT( pAxis->logParam, ERROR, "motorAxisSetDouble: XPS does not support setting position\n");
+            PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: XPS does not support setting position\n");
             break;
         }
         case motorAxisEncoderRatio:
         {
-            PRINT( pAxis->logParam, ERROR, "motorAxisSetDouble: XPS does not support setting encoder ratio\n");
+            PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: XPS does not support setting encoder ratio\n");
             break;
         }
         case motorAxisResolution:
         {
             pAxis->stepSize = value;
-            PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d stepSize to %f\n", pAxis->card, pAxis->axis, value );
+            PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d stepSize to %f\n", pAxis->card, pAxis->axis, value);
             break;
         }
         case motorAxisLowLimit:
@@ -253,7 +253,7 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
                       "for low limit=%f, status=%d\n", deviceValue, status);
             } else { 
                 pAxis->lowLimit = deviceValue;
-                PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d low limit to %f\n", pAxis->card, pAxis->axis, deviceValue );
+                PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d low limit to %f\n", pAxis->card, pAxis->axis, deviceValue);
                 ret_status = MOTOR_AXIS_OK;
             }
             break;
@@ -269,29 +269,29 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
                       "for high limit=%f, status=%d\n", deviceValue, status);
             } else { 
                 pAxis->highLimit = deviceValue;
-                PRINT( pAxis->logParam, FLOW, "Set card %d, axis %d high limit to %f\n", pAxis->card, pAxis->axis, deviceValue );
+                PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d high limit to %f\n", pAxis->card, pAxis->axis, deviceValue);
                 ret_status = MOTOR_AXIS_OK;
             }
             break;
         }
         case motorAxisPGain:
         {
-            PRINT( pAxis->logParam, ERROR, "XPS does not support setting proportional gain\n");
+            PRINT(pAxis->logParam, ERROR, "XPS does not support setting proportional gain\n");
             break;
         }
         case motorAxisIGain:
         {
-            PRINT( pAxis->logParam, ERROR, "XPS does not support setting integral gain\n");
+            PRINT(pAxis->logParam, ERROR, "XPS does not support setting integral gain\n");
             break;
         }
         case motorAxisDGain:
         {
-            PRINT( pAxis->logParam, ERROR, "XPS does not support setting derivative gain\n");
+            PRINT(pAxis->logParam, ERROR, "XPS does not support setting derivative gain\n");
             break;
         }
         case motorAxisClosedLoop:
         {
-            PRINT( pAxis->logParam, ERROR, "XPS does not support changing closed loop or torque\n");
+            PRINT(pAxis->logParam, ERROR, "XPS does not support changing closed loop or torque\n");
             break;
         }
         default:
@@ -299,11 +299,11 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
             break;
         }
     }
-    if (ret_status != MOTOR_AXIS_ERROR ) status = motorParam->setDouble( pAxis->params, function, value );
+    if (ret_status != MOTOR_AXIS_ERROR) status = motorParam->setDouble(pAxis->params, function, value);
     return ret_status;
 }
 
-static int motorAxisSetInteger( AXIS_HDL pAxis, motorAxisParam_t function, int value )
+static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
     int status;
@@ -338,13 +338,13 @@ static int motorAxisSetInteger( AXIS_HDL pAxis, motorAxisParam_t function, int v
         PRINT(pAxis->logParam, ERROR, "motorAxisSetInteger: unknown function %d\n", function);
         break;
     }
-    if (ret_status != MOTOR_AXIS_ERROR ) status = motorParam->setInteger( pAxis->params, function, value );
+    if (ret_status != MOTOR_AXIS_ERROR) status = motorParam->setInteger(pAxis->params, function, value);
     return ret_status;
 }
 
 
-static int motorAxisMove( AXIS_HDL pAxis, double position, int relative, 
-                          double min_velocity, double max_velocity, double acceleration )
+static int motorAxisMove(AXIS_HDL pAxis, double position, int relative, 
+                          double min_velocity, double max_velocity, double acceleration)
 {
     int status;
     char errorString[100];
@@ -356,7 +356,7 @@ static int motorAxisMove( AXIS_HDL pAxis, double position, int relative,
     if (pAxis->axisStatus >= 20 && pAxis->axisStatus <= 36) {
         status = GroupMotionEnable(pAxis->pollSocket, pAxis->groupName);
         if (status) {
-            PRINT( pAxis->logParam, ERROR, "motorAxisMove: error performing GroupMotionEnable %d\n",status);
+            PRINT(pAxis->logParam, ERROR, "motorAxisMove: error performing GroupMotionEnable %d\n",status);
             /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
             return MOTOR_AXIS_ERROR;
         }
@@ -369,7 +369,7 @@ static int motorAxisMove( AXIS_HDL pAxis, double position, int relative,
                                            pAxis->maxJerkTime);
     if (status != 0) {
         ErrorStringGet(pAxis->pollSocket, status, errorString);
-        PRINT( pAxis->logParam, ERROR, " Error performing PositionerSGammaParametersSet %d: %s\n",
+        PRINT(pAxis->logParam, ERROR, " Error performing PositionerSGammaParametersSet %d: %s\n",
               status, errorString);
         return MOTOR_AXIS_ERROR;
     }
@@ -381,7 +381,7 @@ static int motorAxisMove( AXIS_HDL pAxis, double position, int relative,
                                    1,
                                    &deviceUnits); 
         if (status != 0 && status != -27) {
-            PRINT( pAxis->logParam, ERROR, " Error performing GroupMoveRelative %d\n",status);
+            PRINT(pAxis->logParam, ERROR, " Error performing GroupMoveRelative %d\n",status);
             /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
             return MOTOR_AXIS_ERROR;
         }
@@ -391,7 +391,7 @@ static int motorAxisMove( AXIS_HDL pAxis, double position, int relative,
                                    1,
                                    &deviceUnits); 
         if (status != 0 && status != -27) {
-            PRINT( pAxis->logParam, ERROR, " Error performing GroupMoveAbsolute %d\n",status);
+            PRINT(pAxis->logParam, ERROR, " Error performing GroupMoveAbsolute %d\n",status);
             /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
             return MOTOR_AXIS_ERROR;
         }
@@ -404,7 +404,7 @@ static int motorAxisMove( AXIS_HDL pAxis, double position, int relative,
     return MOTOR_AXIS_OK;
 }
 
-static int motorAxisHome( AXIS_HDL pAxis, double min_velocity, double max_velocity, double acceleration, int forwards )
+static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocity, double acceleration, int forwards)
 {
     int status;
     int groupStatus;
@@ -418,7 +418,7 @@ static int motorAxisHome( AXIS_HDL pAxis, double min_velocity, double max_veloci
     if (groupStatus >= 10 && groupStatus <= 18) {
         status = GroupKill(pAxis->pollSocket, pAxis->groupName);
         if (status) {
-            PRINT( pAxis->logParam, ERROR, "motorAxisHome: error calling GroupKill error=%s\n",
+            PRINT(pAxis->logParam, ERROR, "motorAxisHome: error calling GroupKill error=%s\n",
                   getXPSError(pAxis, status, errorBuffer));
             return MOTOR_AXIS_ERROR;
         }
@@ -448,7 +448,7 @@ static int motorAxisHome( AXIS_HDL pAxis, double min_velocity, double max_veloci
 }
 
 
-static int motorAxisVelocityMove(  AXIS_HDL pAxis, double min_velocity, double velocity, double acceleration )
+static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double velocity, double acceleration)
 {
     int status = MOTOR_AXIS_ERROR;
     double deviceVelocity, deviceAcceleration;
@@ -475,17 +475,17 @@ static int motorAxisVelocityMove(  AXIS_HDL pAxis, double min_velocity, double v
     return status;
 }
 
-static int motorAxisProfileMove( AXIS_HDL pAxis, int npoints, double positions[], double times[], int relative, int trigger )
+static int motorAxisProfileMove(AXIS_HDL pAxis, int npoints, double positions[], double times[], int relative, int trigger)
 {
   return MOTOR_AXIS_ERROR;
 }
 
-static int motorAxisTriggerProfile( AXIS_HDL pAxis )
+static int motorAxisTriggerProfile(AXIS_HDL pAxis)
 {
   return MOTOR_AXIS_ERROR;
 }
 
-static int motorAxisStop( AXIS_HDL pAxis, double acceleration )
+static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
 {
     int status;
     double deviceVelocity=0.;
@@ -521,7 +521,7 @@ static int motorAxisStop( AXIS_HDL pAxis, double acceleration )
     }
 
     PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d to stop with accel=%f\n",
-          pAxis->card, pAxis->axis, acceleration );
+          pAxis->card, pAxis->axis, acceleration);
     return MOTOR_AXIS_OK;
 }
 
@@ -533,6 +533,7 @@ static void XPSPoller(XPSController *pController)
     AXIS_HDL pAxis;
     int status;
     int i;
+    int axisDone;
     int anyMoving;
     int forcedFastPolls=0;
     double actualVelocity, theoryVelocity, acceleration;
@@ -565,15 +566,15 @@ static void XPSPoller(XPSController *pController)
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
                 continue;
             } else {
-                /* Set done flag by default */
-                motorParam->setInteger(pAxis->params, motorAxisDone, 1);
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 0);
+                /* Set done flag by default */
+                axisDone = 1;
                 if (pAxis->axisStatus >= 10 && pAxis->axisStatus <= 18) {
                     /* These states mean ready from move/home/jog etc */
                 }
                 if (pAxis->axisStatus >= 43 && pAxis->axisStatus <= 48) {
                     /* These states mean it is moving/homeing/jogging etc*/
-                    motorParam->setInteger(pAxis->params, motorAxisDone, 0);
+                    axisDone = 0;
                     anyMoving = 1;
                     if (pAxis->axisStatus == 47) {
                         /* We are jogging.  When the velocity gets back to 0 disable jogging */
@@ -594,14 +595,21 @@ static void XPSPoller(XPSController *pController)
                         }
                     }
                 }
+                /* Set the axis done parameter */
+                motorParam->setInteger(pAxis->params, motorAxisDone, axisDone);
                 if (pAxis->axisStatus == 11) {
-                    motorParam->setInteger( pAxis->params, motorAxisHomeSignal, 1 );
+                    motorParam->setInteger(pAxis->params, motorAxisHomeSignal, 1);
+                } else {
+                    motorParam->setInteger(pAxis->params, motorAxisHomeSignal, 0);
                 }
                 if ((pAxis->axisStatus >= 0 && pAxis->axisStatus <= 9) || 
                     (pAxis->axisStatus >= 20 && pAxis->axisStatus <= 42)) {
                     /* Not initialized, homed or disabled */
-                    motorParam->setInteger( pAxis->params, motorAxisHighHardLimit, 1 );
-                    motorParam->setInteger( pAxis->params, motorAxisLowHardLimit,  1 );
+                     PRINT(pAxis->logParam, FLOW, "axis %d in bad state %d\n",
+                           pAxis->axis, pAxis->axisStatus);
+                    /* motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, 1);
+                     * motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  1);
+                     */
                 }
             }
 
@@ -611,11 +619,11 @@ static void XPSPoller(XPSController *pController)
                                              &pAxis->currentPosition);
             if (status != 0) {
                 PRINT(pAxis->logParam, ERROR, "XPSPoller: error calling GroupPositionCurrentGet, status=%d\n");
-                motorParam->setInteger( pAxis->params, motorAxisCommError, 1 );
+                motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
             } else {
-                motorParam->setInteger( pAxis->params, motorAxisCommError, 0 );
-                motorParam->setDouble(  pAxis->params, motorAxisPosition,      (pAxis->currentPosition/pAxis->stepSize) );
-                motorParam->setDouble(  pAxis->params, motorAxisEncoderPosn,   (pAxis->currentPosition/pAxis->stepSize) );
+                motorParam->setInteger(pAxis->params, motorAxisCommError, 0);
+                motorParam->setDouble(pAxis->params, motorAxisPosition,    (pAxis->currentPosition/pAxis->stepSize));
+                motorParam->setDouble(pAxis->params, motorAxisEncoderPosn, (pAxis->currentPosition/pAxis->stepSize));
             }
 
             status = PositionerErrorGet(pAxis->pollSocket,
@@ -623,21 +631,29 @@ static void XPSPoller(XPSController *pController)
                                         &pAxis->positionerError);
             if (status != 0) {
                 PRINT(pAxis->logParam, ERROR, "XPSPoller: error calling PositionerErrorGet, status=%d\n");
-                motorParam->setInteger( pAxis->params, motorAxisCommError, 1 );
+                motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
             } else {
-                motorParam->setInteger( pAxis->params, motorAxisCommError, 0 );
+                motorParam->setInteger(pAxis->params, motorAxisCommError, 0);
                 /* These are hard limits */
-                motorParam->setInteger( pAxis->params, motorAxisHighHardLimit, (pAxis->positionerError & XPSC8_END_OF_RUN_PLUS) ?1:0 );
-                motorParam->setInteger( pAxis->params, motorAxisLowHardLimit,  (pAxis->positionerError & XPSC8_END_OF_RUN_MINUS)?1:0 );
+                if (pAxis->positionerError & XPSC8_END_OF_RUN_PLUS) {
+                    motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, 1);
+                } else {
+                    motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, 0);
+                }
+                if (pAxis->positionerError & XPSC8_END_OF_RUN_MINUS) {
+                    motorParam->setInteger(pAxis->params, motorAxisLowHardLimit, 1);
+                } else {
+                    motorParam->setInteger(pAxis->params, motorAxisLowHardLimit, 0);
+                }
             }
 
             /* We would like a way to query the actual velocity, but this is not possible.  If we could we could
              * set the direction, and Moving flags
-             *     motorParam->setInteger( pAxis->params, motorAxisDirection,     (pAxis->currentVelocity >  0) );
-             *     motorParam->setInteger( pAxis->params, motorAxisMoving,        (pAxis->nextpoint.axis[0].v != 0) );
+             *     motorParam->setInteger(pAxis->params, motorAxisDirection,     (pAxis->currentVelocity >  0));
+             *     motorParam->setInteger(pAxis->params, motorAxisMoving,        (pAxis->nextpoint.axis[0].v != 0));
              */
 
-            motorParam->callCallback( pAxis->params );
+            motorParam->callCallback(pAxis->params);
 
             epicsMutexUnlock(pAxis->mutexId);
 
@@ -662,7 +678,7 @@ static char *getXPSError(AXIS_HDL pAxis, int status, char *buffer)
     return buffer;
 }
 
-static int motorXPSLogMsg( void * param, const motorAxisLogMask_t mask, const char *pFormat, ...)
+static int motorXPSLogMsg(void * param, const motorAxisLogMask_t mask, const char *pFormat, ...)
 {
 
     va_list     pvar;
@@ -732,6 +748,8 @@ int XPSConfig(int card,           /* Controller number */
     for (axis=0; axis<numAxes; axis++) {
         pAxis = &pController->pAxis[axis];
         pAxis->pController = pController;
+        pAxis->card = card;
+        pAxis->axis = axis;
         pAxis->pollSocket = pollSocket;
         pAxis->ip = epicsStrDup(ip);
         pAxis->moveSocket = TCP_ConnectToServer((char *)ip, port, TCP_TIMEOUT);
