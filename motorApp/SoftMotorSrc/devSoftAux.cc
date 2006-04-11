@@ -2,9 +2,9 @@
 FILENAME...	devSoftAux.cc
 USAGE...	Motor record device level support for Soft channel.
 
-Version:	$Revision: 1.9 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-03-30 19:18:16 $
+Version:	$Revision: 1.10 $
+Modified By:	$Author: peterd $
+Last Modified:	$Date: 2006-04-11 10:11:24 $
 */
 
 /*
@@ -28,6 +28,7 @@ Last Modified:	$Date: 2005-03-30 19:18:16 $
  * .01 06-16-03 rls Convert to R3.14.x.
  * .02 12-14-04 rls With EPICS R3.14.7 changes to epicsThread.h, need explicit
  *		    #include <stdlib.h>
+ * .03 2006-04-10 pnd Convert to linked lists to remove arbitrary maximum
  */
 
 
@@ -42,7 +43,7 @@ in the same file; each defines (redefines) the DBR's.
 #include <cadef.h>
 #include <errlog.h>
 #include <epicsEvent.h>
-#include <epicsRingPointer.h>
+#include <ellLib.h>
 #include <callback.h>
 #include <epicsThread.h>
 
@@ -58,7 +59,7 @@ STATIC void soft_rinp(struct event_handler_args);
 STATIC EPICSTHREADFUNC soft_motor_task(void *);
 STATIC epicsThreadId soft_motor_id;
 STATIC epicsEventId soft_motor_sem;
-STATIC epicsRingPointerId soft_motor_msgQ;
+STATIC ELLLIST soft_motor_list;
 
 STATIC void soft_dinp(struct event_handler_args args)
 {
@@ -86,7 +87,7 @@ long soft_init(void *after)
 	int retry = 0;
 
         soft_motor_sem = epicsEventCreate(epicsEventEmpty);
-	soft_motor_msgQ = epicsRingPointerCreate(MAXMSGS);
+	ellInit(&soft_motor_list);
 
 	/* 
 	 * Fix for DMOV processing before the last DRBV update; i.e., lower
@@ -120,16 +121,18 @@ long soft_init(void *after)
 long soft_init_record(void *arg)
 {
     struct motorRecord *mr = (struct motorRecord *) arg;
+    struct motor_node *list_entry;
     struct soft_private *ptr;
     CALLBACK *cbptr;
     int status = 0;
-    static int count = 0;
 
-    if (++count > MAXMSGS)
+    list_entry = (struct motor_node *) malloc(sizeof(struct motor_node));
+    if (!list_entry) {
 	return(ERROR);
+    }
 
-    if (!epicsRingPointerPush(soft_motor_msgQ, (void *) mr))
-        status = ERROR;
+    list_entry->pmr = mr;
+    ellAdd(&soft_motor_list, (ELLNODE*)list_entry);
 
     /* Allocate space for private field. */
     mr->dpvt = (struct soft_private *) malloc(sizeof(struct soft_private));
@@ -149,15 +152,21 @@ long soft_init_record(void *arg)
 STATIC EPICSTHREADFUNC soft_motor_task(void *parm)
 {
     struct motorRecord *mr;
+    struct motor_node *node;
     chid dinp, rdbl, rinp;
 
     epicsEventWait(soft_motor_sem);	/* Wait for dbLockInitRecords() to execute. */
     SEVCHK(ca_context_create(ca_enable_preemptive_callback),
 	   "soft_motor_task: ca_context_create() error");
 
-    while ((mr = (struct motorRecord *) epicsRingPointerPop(soft_motor_msgQ)))
+    while ((node = (struct motor_node *)ellGet(&soft_motor_list)))
     {
-	struct soft_private *ptr = (struct soft_private *) mr->dpvt;
+	struct soft_private *ptr;
+
+	mr = node->pmr;
+	free(node);
+
+	ptr = (struct soft_private *) mr->dpvt;
 	if (mr->dinp.value.constantStr == NULL)
 	{
 	    ptr->default_done_behavior = true;
@@ -186,7 +195,7 @@ STATIC EPICSTHREADFUNC soft_motor_task(void *parm)
 	}
     }
 
-    epicsRingPointerDelete(soft_motor_msgQ);
+    ellFree(&soft_motor_list);
     epicsThreadSuspendSelf();		/* Wait Forever. */
     return(NULL);
 }

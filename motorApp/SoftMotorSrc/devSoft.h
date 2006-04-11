@@ -4,9 +4,9 @@ FILENAME..	devSoft.h
 USAGE... 	This file contains information that is common to
 		all Soft channel device support modules.
 
-Version:	$Revision: 1.10 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-23 16:18:12 $
+Version:	$Revision: 1.11 $
+Modified By:	$Author: peterd $
+Last Modified:	$Date: 2006-04-11 10:11:24 $
 */
 
 /*
@@ -30,16 +30,16 @@ Last Modified:	$Date: 2004-09-23 16:18:12 $
  * .01 06-16-03 rls Converted to R3.14.x.
  * .02 09-23-04 rls Increase the maximum number of Soft Channel motor records
  *                  from 20 to 50.
+ * .03 2006-04-10 pnd Convert to linked lists to remove arbitrary maximum
  */
 
 #ifndef	INCdevSofth
 #define	INCdevSofth 1
 
 #include <callback.h>
+#include <ellLib.h>
 
 typedef enum DONE_STATES {SOFTMOVE = 0, HARDMOVE = 1, DONE = 2} DONE_STATES;
-
-#define MAXMSGS 50
 
 struct soft_private
 {
@@ -50,6 +50,11 @@ struct soft_private
 					 * "immediate done" default behavior. */
     bool initialized;			/* 1st RDBL call after interruptAccept is TRUE
 					 * sets this ON. */
+};
+
+struct motor_node {
+    ELLNODE	node;
+    struct motorRecord *pmr;
 };
 
 extern long soft_init(void *);
