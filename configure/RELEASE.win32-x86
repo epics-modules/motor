@@ -17,6 +17,8 @@
 # Recommended ASYN release: R4-2
 ASYN=J:/epics/devel/asyn/4-5beta
 
+SNCSEQ=$(SUPPORT)/seq/2-0-11
+
 # Recommended EPICS release: R3.14.7
 EPICS_BASE=H:/epics/base-3.14.9beta
 
