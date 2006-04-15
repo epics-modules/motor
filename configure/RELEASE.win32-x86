@@ -15,10 +15,10 @@
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
 # Recommended ASYN release: R4-2
-ASYN=J:/epics/devel/asyn/4-4beta
+ASYN=J:/epics/devel/asyn/4-5beta
 
 # Recommended EPICS release: R3.14.7
-EPICS_BASE=H:/epics/base-3.14.8
+EPICS_BASE=H:/epics/base-3.14.9beta
 
 # The following must be defined if the "WithMPF" example in motorExApp is to
 # be built.
