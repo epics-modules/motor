@@ -44,6 +44,8 @@ WithMPF_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 #!WithMPF_LIBS   += motorSimSupport
 WithMPF_LIBS   += motor
 WithMPF_LIBS   += asyn
+# Needed for Newport SNL programs
+#!WithMPF_LIBS   += seq pv
 WithMPF_LIBS   += $(EPICS_BASE_IOC_LIBS)
 
 #!WithMPFVx_LIBS += Mclennan
@@ -61,6 +63,8 @@ WithMPFVx_LIBS += motor
 WithMPFVx_LIBS += Ipac TyGSOctal
 
 WithMPFVx_LIBS += asyn
+# Needed for Newport SNL programs
+#!WithMPFVx_LIBS   += seq pv
 WithMPFVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
