@@ -41,7 +41,7 @@ SRCS_vxWorks += XPSGathering.cc
 # Function which will run a tcl script on an XPS
 SRCS += tclCall.cc
 
-Newport_LIBS += motor asyn
+Newport_LIBS += motor asyn seq pv
 Newport_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
