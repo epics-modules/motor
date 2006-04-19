@@ -194,6 +194,15 @@ static long init_record(struct motorRecord * pmr )
        locks or scan queues are initialised, so calls to scanOnce(),
        dbScanLock() etc will fail. */
     pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
+
+    /* Send the motor resolution to the driver.  This should be done in the record
+     * in the future ? */
+/*  DON'T DO THIS FOR NOW.  THE NUMBER CAN COME TOO LATE TO BE OF USE TO THE DRIVER
+    resolution = pmr->mres;
+    pasynUser->reason = motorResolution;
+    pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser,
+			      resolution);
+*/
     pasynUser->reason = motorStatus;
     pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
 			   &pPvt->status);
@@ -204,11 +213,7 @@ static long init_record(struct motorRecord * pmr )
     pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
 			   &pPvt->encoder_position);
     pasynManager->freeAsynUser(pasynUser);
-
-    /* Send the motor resolution to the driver.  This should be done in the record
-     * in the future */
-    resolution = pmr->mres;
-    build_trans(SET_RESOLUTION, &resolution, pmr);
+    pPvt->needUpdate = 1;
 
     return(0);
 bad:
@@ -448,12 +453,17 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
         "%s devMotorAsyn::statusCallback new value=%d\n",
         pmr->name, value);
 
-    dbScanLock((dbCommon *)pmr);
-    pPvt->status = value;
-    dbScanUnlock((dbCommon*)pmr);
-    if (!pPvt->needUpdate) {
-	pPvt->needUpdate = 1;
-	scanOnce(pmr);
+    if (interruptAccept) {
+        dbScanLock((dbCommon *)pmr);
+        pPvt->status = value;
+        dbScanUnlock((dbCommon*)pmr);
+        if (!pPvt->needUpdate) {
+	    pPvt->needUpdate = 1;
+	    scanOnce(pmr);
+        }
+    } else {
+        pPvt->status = value;
+        pPvt->needUpdate = 1;
     }
 }
 
@@ -467,12 +477,17 @@ static void positionCallback(void *drvPvt, asynUser *pasynUser,
         "%s devMotorAsyn::positionCallback new value=%f\n",
         pmr->name, value);
 
-    dbScanLock((dbCommon *)pmr);
-    pPvt->position = (epicsInt32)floor(value+0.5);
-    dbScanUnlock((dbCommon*)pmr);
-    if (!pPvt->needUpdate) {
-	pPvt->needUpdate = 1;
-	scanOnce(pmr);
+    if (interruptAccept) {
+        dbScanLock((dbCommon *)pmr);
+        pPvt->position = (epicsInt32)floor(value+0.5);
+        dbScanUnlock((dbCommon*)pmr);
+        if (!pPvt->needUpdate) {
+	    pPvt->needUpdate = 1;
+	    scanOnce(pmr);
+        }
+    } else {
+        pPvt->position = (epicsInt32)floor(value+0.5);
+        pPvt->needUpdate = 1;
     }
 }
 
@@ -486,11 +501,16 @@ static void encoderCallback(void *drvPvt, asynUser *pasynUser,
         "%s devMotorAsyn::encoderCallback new value=%f\n",
         pmr->name, value);
 
-    dbScanLock((dbCommon *)pmr);
-    pPvt->encoder_position = (epicsInt32)floor(value+0.5);
-    dbScanUnlock((dbCommon*)pmr);
-    if (!pPvt->needUpdate) {
-	pPvt->needUpdate = 1;
-	scanOnce(pmr);
+    if (interruptAccept) {
+        dbScanLock((dbCommon *)pmr);
+        pPvt->encoder_position = (epicsInt32)floor(value+0.5);
+        dbScanUnlock((dbCommon*)pmr);
+        if (!pPvt->needUpdate) {
+   	    pPvt->needUpdate = 1;
+	    scanOnce(pmr);
+        }
+    } else {
+        pPvt->encoder_position = (epicsInt32)floor(value+0.5);
+        pPvt->needUpdate = 1;
     }
 }
