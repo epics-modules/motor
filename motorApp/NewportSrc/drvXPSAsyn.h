@@ -14,9 +14,10 @@ int XPSConfig(int card,           /* Controller number */
               int movingPollRate, /* Rate to poll (Hz) when an axis is in motion */
               int idlePollRate);  /* Rate to poll (Hz) when an axis is idle */
 
-int XPSConfigAxis(int card,                    /* specify which controller 0-up*/
-                  int axis,                    /* axis number 0-7 */
-                  const char *positionerName); /* groupName.positionerName e.g. Diffractometer.Phi */
+int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
+                  int axis,                   /* axis number 0-7 */
+                  const char *positionerName, /* groupName.positionerName e.g. Diffractometer.Phi */
+                  int stepsPerUnit);          /* steps per user unit */
 
 #ifdef __cplusplus
 }

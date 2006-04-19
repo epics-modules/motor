@@ -782,7 +782,8 @@ int XPSConfig(int card,           /* Controller number */
 
 int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
                   int axis,                   /* axis number 0-7 */
-                  const char *positionerName) /* groupName.positionerName e.g. Diffractometer.Phi */
+                  const char *positionerName, /* groupName.positionerName e.g. Diffractometer.Phi */
+                  int stepsPerUnit)           /* steps per user unit */
 {
     XPSController *pController;
     AXIS_HDL pAxis;
@@ -813,6 +814,7 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     index = strchr(pAxis->groupName, '.');
     if (index != NULL) *index = '\0';  /* Terminate group name at place of '.' */
 
+    pAxis->stepSize = 1./stepsPerUnit;
     /* Read some information from the controller for this axis */
     status = PositionerSGammaParametersGet(pAxis->pollSocket,
                                            pAxis->positionerName,
