@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.cc
 USAGE...	Register Newport motor device driver shell commands.
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.11 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-04-08 20:07:14 $
+Last Modified:	$Date: 2006-04-19 21:49:48 $
 */
 
 /*****************************************************************
@@ -65,6 +65,7 @@ static const iocshArg XPSConfigArg5 = {"Idle poll rate", iocshArgInt};
 static const iocshArg XPSConfigAxisArg0 = {"Card number", iocshArgInt};
 static const iocshArg XPSConfigAxisArg1 = {"Axis number", iocshArgInt};
 static const iocshArg XPSConfigAxisArg2 = {"Axis name", iocshArgString};
+static const iocshArg XPSConfigAxisArg3 = {"Steps per unit", iocshArgInt};
 
 static const iocshArg * const NewportSetupArgs[2] = {&setupArg0, 
                                                      &setupArg1};
@@ -97,9 +98,10 @@ static const iocshArg * const XPSConfigArgs[6] = {&XPSConfigArg0,
                                                   &XPSConfigArg2, 
                                                   &XPSConfigArg4, 
                                                   &XPSConfigArg5};
-static const iocshArg * const XPSConfigAxisArgs[3] = {&XPSConfigAxisArg0, 
+static const iocshArg * const XPSConfigAxisArgs[4] = {&XPSConfigAxisArg0, 
                                                       &XPSConfigAxisArg1,
-                                                      &XPSConfigAxisArg2}; 
+                                                      &XPSConfigAxisArg2,
+                                                      &XPSConfigAxisArg3}; 
 
 static const iocshFuncDef setupMM3000 = {"MM300Setup", 2, NewportSetupArgs};
 static const iocshFuncDef setupMM4000 = {"MM4000Setup",2, NewportSetupArgs};
@@ -114,7 +116,7 @@ static const iocshFuncDef configPM500  = {"PM500Config",  3, NewportConfigArgs};
 static const iocshFuncDef configESP300 = {"ESP300Config", 3, NewportConfigArgs};
 static const iocshFuncDef configXPSC8  = {"XPSC8Config",  4, NewportXPSC8ConfigArgs};
 static const iocshFuncDef configXPS    = {"XPSConfig",    6, XPSConfigArgs};
-static const iocshFuncDef configXPSAxis= {"XPSConfigAxis",3, XPSConfigAxisArgs};
+static const iocshFuncDef configXPSAxis= {"XPSConfigAxis",4, XPSConfigAxisArgs};
 static const iocshFuncDef nameXPSC8    = {"XPSC8NameConfig",7, NewportXPSC8NameArgs};
 
 static const iocshFuncDef XPSC8GatheringTest = {"xpsgathering",1, XPSArgs};
@@ -184,7 +186,7 @@ static void configXPSCallFunc(const iocshArgBuf *args)
 
 static void configXPSAxisCallFunc(const iocshArgBuf *args)
 {
-    XPSConfigAxis(args[0].ival, args[1].ival, args[2].sval);
+    XPSConfigAxis(args[0].ival, args[1].ival, args[2].sval, args[3].ival);
 }
 
 static void nameXPSC8CallFunc(const  iocshArgBuf *args)
