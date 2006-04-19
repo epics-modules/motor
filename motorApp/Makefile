@@ -12,7 +12,7 @@ DIRS += MotorSrc
 #!DIRS += DeltaTauSrc
 DIRS += OmsSrc
 DIRS += SoftMotorSrc
-DIRS += MotorSimSrc
+#!DIRS += MotorSimSrc
 
 # All the following modules require ASYN.
 ifdef ASYN
@@ -25,6 +25,7 @@ DIRS += MicroMoSrc
 DIRS += MicosSrc
 DIRS += FaulhaberSrc
 DIRS += PC6KSrc
+DIRS += NewFocusSrc
 endif
 
 # Install the edl files
