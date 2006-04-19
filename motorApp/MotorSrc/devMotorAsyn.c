@@ -189,6 +189,22 @@ static long init_record(struct motorRecord * pmr )
 	       pmr->name,pPvt->pasynUser->errorMessage);
     }
 
+    /* Initiate calls to get the initial motor parameters
+       Have to do it the long-winded way, because before iocInit, none of the
+       locks or scan queues are initialised, so calls to scanOnce(),
+       dbScanLock() etc will fail. */
+    pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
+    pasynUser->reason = motorStatus;
+    pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
+			   &pPvt->status);
+    pasynUser->reason = motorPosition;
+    pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
+			   &pPvt->position);
+    pasynUser->reason = motorEncoderPosition;
+    pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
+			   &pPvt->encoder_position);
+    pasynManager->freeAsynUser(pasynUser);
+
     /* Send the motor resolution to the driver.  This should be done in the record
      * in the future */
     resolution = pmr->mres;
@@ -382,7 +398,6 @@ static void asynCallback(asynUser *pasynUser)
     motorAsynPvt *pPvt = (motorAsynPvt *)pasynUser->userPvt;
     motorRecord *pmr = pPvt->pmr;
     motorAsynMessage *pmsg = pasynUser->userData;
-    rset *prset = (rset *)pmr->rset;
     int status;
 
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
@@ -401,9 +416,7 @@ static void asynCallback(asynUser *pasynUser)
 	pasynUser->reason = motorEncoderPosition;
 	pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
 			       &pPvt->encoder_position);
-	dbScanLock((dbCommon *)pmr);
-	(*prset->process)(pmr);
-	dbScanUnlock((dbCommon *)pmr);
+	scanOnce(pmr);
 	break;
 
     default:

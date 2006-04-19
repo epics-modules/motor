@@ -24,6 +24,7 @@ motor_SRCS += devMotorAsyn.c
 motor_SRCS += paramLib.c
 motor_SRCS += motorUtil.cc motorUtilAux.cc
 
+motor_LIBS += asyn
 motor_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES

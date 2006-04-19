@@ -513,12 +513,13 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
 {
     drvmotorAxisPvt *pAxis = (drvmotorAxisPvt *)axisPvt;
     drvmotorPvt *pPvt = pAxis->pPvt;
-    int addr, reason;
+    int addr;
+    unsigned int reason;
     ELLLIST *pclientList;
     interruptNode *pnode;
     int ivalue;
     double dvalue;
-    int i, bit_num;
+    unsigned int i, bit_num;
     epicsInt32 changedmask = 0;
 
     /* We are called back with an array of things that have changed.
