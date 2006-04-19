@@ -89,12 +89,14 @@ int ConnectToServer(char *IpAddress, int IpPort, double timeout)
     psock->pasynUserCommon = pasynUserCommon;
 
     /* Connect to controller */
+/* No need to do this, it will be done automatically and it gives an error if already connected 
     status = pasynCommonSyncIO->connectDevice(pasynUserCommon);
     if (status != asynSuccess) {
         printf("ConnectToServer, error calling pasynCommonSyncIO->connectDevice %s\n", 
                pasynUserCommon->errorMessage);
         return -1;
     }
+*/
 
     psock->timeout = timeout;
     psock->connected = 1;
