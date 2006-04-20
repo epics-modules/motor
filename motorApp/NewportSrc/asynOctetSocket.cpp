@@ -118,7 +118,7 @@ void SetTCPTimeout(int SocketIndex, double TimeOut)
 
 
 /***************************************************************************************/
-void SendAndReceive (int SocketIndex, char *buffer, char *valueRtrn, int returnSize)
+void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int returnSize)
 {
     size_t nbytesOut; 
     size_t nbytesIn;
