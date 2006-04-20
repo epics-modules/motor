@@ -20,8 +20,6 @@ drvAsynMotorConfigure("XPS1", "motorXPS", 0, 2)
 XPSConfigAxis(0,0,"GROUP1.POSITIONER",1000)
 XPSConfigAxis(0,1,"GROUP2.POSITIONER",1000)
 
-epicsThreadSleep(1)
-
 #asynSetTraceMask newport-xps3:5001:0   0 255
 #asynSetTraceIOMask newport-xps3:5001:0 0 2
 #asynSetTraceMask XPS1 0 255
