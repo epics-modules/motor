@@ -9,7 +9,8 @@
 #include <string.h>
 #include "Socket.h" 
 #ifdef _WIN32
-#define DLL _declspec(dllexport)
+/* #define DLL _declspec(dllexport) */
+#define DLL
 #else
 #define DLL
 #endif
@@ -17,7 +18,8 @@
 
 
 
-#define SIZE_BUFFER  32768
+/* #define SIZE_BUFFER  32768 */
+#define SIZE_BUFFER  1024
 
 #define SIZE_NAME    100
 
