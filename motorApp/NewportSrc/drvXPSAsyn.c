@@ -106,8 +106,8 @@ static int motorXPSLogMsg(void * param, const motorAxisLogMask_t logMask, const 
 #define ERROR   motorAxisTraceError
 
 #define XPS_MAX_AXES 8
-#define XPSC8_END_OF_RUN_MINUS  0x80000100
-#define XPSC8_END_OF_RUN_PLUS   0x80000200
+#define XPSC8_END_OF_RUN_MINUS  0x00000100
+#define XPSC8_END_OF_RUN_PLUS   0x00000200
 
 #define TCP_TIMEOUT 0.5
 static motorXPS_t drv={ NULL, NULL, motorXPSLogMsg, { 0, 0 } };
@@ -727,7 +727,7 @@ int XPSConfig(int card,           /* Controller number */
         printf("XPSConfig: card must in range 0 to %d\n", numXPSControllers-1);
         return MOTOR_AXIS_ERROR;
     }
-    if ((numAxes < 1) || (numAxes >= XPS_MAX_AXES)) {
+    if ((numAxes < 1) || (numAxes > XPS_MAX_AXES)) {
         printf("XPSConfig: numAxes must in range 1 to %d\n", XPS_MAX_AXES);
         return MOTOR_AXIS_ERROR;
     }
@@ -823,6 +823,10 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
                                            &pAxis->minJerkTime,
                                            &pAxis->maxJerkTime);
     pAxis->mutexId = epicsMutexMustCreate();
+
+    /* Send a signal to the poller task which will make it do a poll, 
+     * updating values for this axis to use the new resolution (stepSize) */
+    epicsEventSignal(pAxis->pController->pollEventId);
     
     return MOTOR_AXIS_OK;
 }
