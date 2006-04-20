@@ -4,9 +4,10 @@
 
 
 #ifdef _WIN32
-#ifndef DLL
-#define DLL _declspec(dllimport)
-#endif
+/* #ifndef DLL */
+/* #define DLL _declspec(dllimport) */
+#define DLL
+#define __stdcall
 #else
 #define DLL
 #define __stdcall
