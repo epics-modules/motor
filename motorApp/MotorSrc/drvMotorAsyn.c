@@ -481,25 +481,23 @@ static int logFunc(void *userParam,
 {
     va_list     pvar;
     asynUser    *pasynUser = (asynUser *)userParam;
-    int         reason;
 
-    reason=pasynTrace->getTraceMask(pasynUser);
     va_start(pvar, pFormat);
     switch(logMask) {
     case motorAxisTraceError:
-        if (reason & ASYN_TRACE_ERROR) vfprintf(stdout, pFormat, pvar);
+        pasynTrace->vprint(pasynUser, ASYN_TRACE_ERROR, pFormat, pvar);
         break;
     case motorAxisTraceIODevice:
-        if (reason & ASYN_TRACEIO_DEVICE) vfprintf(stdout, pFormat, pvar);
+        pasynTrace->vprint(pasynUser, ASYN_TRACEIO_DEVICE, pFormat, pvar);
         break;
     case motorAxisTraceIOFilter:
-        if (reason & ASYN_TRACEIO_FILTER) vfprintf(stdout, pFormat, pvar);
+        pasynTrace->vprint(pasynUser, ASYN_TRACEIO_FILTER, pFormat, pvar);
         break;
     case motorAxisTraceIODriver:
-        if (reason & ASYN_TRACEIO_DRIVER) vfprintf(stdout, pFormat, pvar);
+        pasynTrace->vprint(pasynUser, ASYN_TRACEIO_DRIVER, pFormat, pvar);
         break;
     case motorAxisTraceFlow:
-        if (reason & ASYN_TRACE_FLOW) vfprintf(stdout, pFormat, pvar);
+        pasynTrace->vprint(pasynUser, ASYN_TRACE_FLOW, pFormat, pvar);
         break;
     default:
         asynPrint(pasynUser, ASYN_TRACE_ERROR, "drvMotorAsyn:logFunc unknown logMask %d\n", logMask);
