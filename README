@@ -14,9 +14,9 @@ This <supporttop> contains the following motor record related items:
 	- device/driver libraries for various controllers.
 	- motor record/device/driver level documentation.
 	- motor record release documentation.
-	- two example applications; one without ASYN (i.e. motorExApp/NoMPF) and
-		one with ASYN (i.e., motorExApp/WithMPF). See the README files
-		under <motor>/iocBoot/* for configuration instructions.
+	- two example applications; one without ASYN (i.e. motorExApp/NoMPF)
+	  and one with ASYN (i.e., motorExApp/WithMPF). See the README files
+	  under <motor>/iocBoot/* for configuration instructions.
 
 As distributed, this support directory builds the following:
 	- Record support and common code for all device/drivers; libmotor.a.
@@ -57,7 +57,8 @@ needs.  See individual files for instructions.
 		If any example applications (motorExApp) are to be built, then
 			TEMPLATE_TOP and MSITOP must be defined.
 
-	- <motor>/motorApp/Makefile: Define which device/driver modules to build.
+	- <motor>/motorApp/Makefile: Defines which device/driver modules to
+	  build.
 	- ./Makefile: uncomment the following to build example applications.
 		#DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
 		#DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
@@ -98,7 +99,8 @@ Known Problems
 
 4) With R5-3 of the motorRecord, negative encoder resolutions (ERES) are
 	supported.  This allows the user to change the sign of ERES rather than
-	reverse encoder wires when the motor and encoder direction are reversed.
+	reverse encoder wires when the motor and encoder direction are
+	reversed.
 
 	There is a peculiarity with the OMS controller boards when they are
 	configured with MRES and ERES of opposite polarity.  Since both the
@@ -115,7 +117,7 @@ Modification Log from R5-8 to R5-9
 ==================================
 
 1) The motor record was ignoring the retry deadband (RDBD) when a new target
-	position was entered if the move was in the "preferred direction";
+	position was entered and the move was in the "preferred direction";
 	even when backlash correction was disabled (i.e., BDST == 0).
 
 	File modified: do_work() in motorRecord.cc
@@ -133,6 +135,61 @@ Modification Log from R5-8 to R5-9
 			- <motor>/motorApp/MotorSrc/motorSupport.dbd
 			- updated examples with motorUtil.
 
+3) Bug fix for the status update field (STUP) not being processed under certain
+        circumstances; e.g., LVIO true, SPMG set to PAUSE, etc..
+	
+	File modified: motorRecord.cc - moved STUP processing to top of
+					do_work().
+
+4) Peter Denison (Diamond Light Source) enhanced the Soft Channel device
+	support by eliminating the 50 soft motor limit (MAXMSGS) and replacing
+	it with an unlimited linked list.
+
+	Files modified: - <motor>/motorApp/SoftMotorSrc/devSoft.h
+			- <motor>/motorApp/SoftMotorSrc/devSoftAux.cc
+
+5) Peter Denison (Diamond), Nick Rees (Diamond) and Mark Rivers (APS) have
+	added a new motor record device support architecture based on ASYN;
+	called "asyn motor" support.  The asyn motor support "is an attempt to
+	define a clean, extensible API for motor controller drivers to
+	support".  This is a preliminary release of work in progress.  Do not
+	use "asynMotor" device support at this time, except for development and
+	testing purposes only.
+	
+	Directory added - MotorSimSrc; motor simulation software.
+	Files added	- <motor>/motorApp/MotorSrc/devMotorAsyn.c
+			- <motor>/motorApp/MotorSrc/drvMotorAsyn.c
+			- <motor>/motorApp/MotorSrc/drvMotorAsyn.h
+			- <motor>/motorApp/MotorSrc/paramLib.c
+			- <motor>/motorApp/MotorSrc/paramLib.h
+	Files modified	- <motor>/motorApp/MotorSrc/motorSupport.dbd
+
+6) Joe Sullivan added support for the New Focus Model 8750 Network Controller.
+
+	Directory added - NewFocusSrc.
+
+7) Joe Sullivan added support for the Physik Instrumente (PI) GmbH & Co. Model
+	E-662 piezo controller.
+
+	Files added	- <motor>/motorApp/PiSrc/PIC662Register.cc
+			- <motor>/motorApp/PiSrc/devPIC662.cc
+			- <motor>/motorApp/PiSrc/drvPIC662.cc
+			- <motor>/motorApp/PiSrc/drvPIC662.h			
+
+8) Mark Rivers added asyn motor support for the Newport XPS-C8 motor
+	controller.  This is a preliminary release of work in progress.  Do not
+	use "motorXPS" driver support at this time, except for development and
+	testing purposes only.
+	
+	Files added	- <motor>/motorApp/NewportSrc/XPS_C8_drivers.cpp
+			- <motor>/motorApp/NewportSrc/XPS_C8_drivers.h
+
+9) Mark Rivers added the Trajectory Scanning software for both the Newport
+	MM4005 and XPS-C8 motor controllers to the motor record distribution.
+	
+	Files added	- <motor>/motorApp/NewportSrc/MM4005_trajectoryScan.st
+			- <motor>/motorApp/NewportSrc/XPS_trajectoryScan.st
+	
 
 Modification Log from R5-7 to R5-8
 ==================================
