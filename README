@@ -177,18 +177,24 @@ Modification Log from R5-8 to R5-9
                         - <motor>/motorApp/PiSrc/drvPIC662.h                    
 
 8) Mark Rivers added asyn motor support for the Newport XPS-C8 motor
-        controller.  This is a preliminary release of work in progress.  Do not
-        use "motorXPS" driver support at this time, except for development and
-        testing purposes only.
-        
+        controller.  This is a preliminary release of work in progress.
+        However, it has fewer problems than the previous XPS support, so we
+        recommend using the new asyn support for the XPS, with the
+        understanding that it is still under development.
+
         Files added     - <motor>/motorApp/NewportSrc/XPS_C8_drivers.cpp
                         - <motor>/motorApp/NewportSrc/XPS_C8_drivers.h
+                        - <motor>/motorApp/NewportSrc/Socket.h
+                        - <motor>/motorApp/NewportSrc/drvXPSAsyn.h
+                        - <motor>/motorApp/NewportSrc/drvXPSAsyn.c
 
 9) Mark Rivers added the Trajectory Scanning software for both the Newport
         MM4005 and XPS-C8 motor controllers to the motor record distribution.
         
         Files added     - <motor>/motorApp/NewportSrc/MM4005_trajectoryScan.st
                         - <motor>/motorApp/NewportSrc/XPS_trajectoryScan.st
+                        - <motor>/motorApp/Db/MM4005_trajectoryScan.db
+                        - <motor>/motorApp/Db/XPS_trajectoryScan.db
         
 
 Modification Log from R5-7 to R5-8
