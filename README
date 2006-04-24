@@ -195,7 +195,16 @@ Modification Log from R5-8 to R5-9
                         - <motor>/motorApp/NewportSrc/XPS_trajectoryScan.st
                         - <motor>/motorApp/Db/MM4005_trajectoryScan.db
                         - <motor>/motorApp/Db/XPS_trajectoryScan.db
-        
+
+10) Brian Tieman and Ron Sluiter added support for the standalone, RS-232
+	versions of the OMS PC68 and PC78 model controllers.  The same device
+	(OMS PC68/78) and driver (drvOmsPC68) support both models.
+
+	Files added	- <motor>/motorApp/OmsSrc/devOmsPC68.cc
+			- <motor>/motorApp/OmsSrc/drvOmsPC68.cc
+			- <motor>/motorApp/OmsSrc/drvOmsPC68.h
+	Files modified	- <motor>/motorApp/OmsSrc/devOms.dd
+
 
 Modification Log from R5-7 to R5-8
 ==================================
