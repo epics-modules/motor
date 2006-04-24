@@ -12,6 +12,9 @@ DBD += devOms.dbd
 LIBRARY_IOC_DEFAULT += oms
 LIBRARY_IOC_WIN32 += -nil-
 
+# The following is required for the OMS PC68/78 (i.e., devOmsPC68) device driver.
+SRCS += devOmsPC68.cc drvOmsPC68.cc
+
 # The following is required for the OMS VME8/44 (i.e., devOMS) device driver.
 SRCS += devOms.cc drvOms.cc
 
