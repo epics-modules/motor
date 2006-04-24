@@ -1,8 +1,19 @@
-# Oregon Micro Systems VME8/44 and VME58 Driver support.
+# Oregon Micro Systems VME8/44 driver support.
 device(motor,VME_IO,devOMS,"OMS VME8/44")
-device(motor,VME_IO,devOms58,"OMS VME58")
-device(motor,VME_IO,devMAXv,"OMS MAXv")
 driver(drvOms)
+
+# Oregon Micro Systems VME58 driver support.
+device(motor,VME_IO,devOms58,"OMS VME58")
 driver(drvOms58)
+
+# Oregon Micro Systems MAXv driver support.
+device(motor,VME_IO,devMAXv,"OMS MAXv")
 driver(drvMAXv)
+
+# Oregon Micro Systems PC68/78 RS-232 serial driver support.
+device(motor,VME_IO,devOmsPC68,"OMS PC68/78")
+driver(drvOmsPC68)
+registrar(OmsPC68Register)
+variable(drvOmsPC68debug)
+
 

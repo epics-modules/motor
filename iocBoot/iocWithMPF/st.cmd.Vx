@@ -227,6 +227,18 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!asynOctetSetInputEos("tcp2",0,"")
 #!asynOctetSetOutputEos("tcp2",0,"")
 
+
+# OMS PC68/78 stand-alone serial driver setup parameters: 
+#     (1) maximum number of controllers in system
+#     (2) motor task polling rate (min=1Hz,max=60Hz)
+#!OmsPC68Setup(1, 10)
+
+# OMS PC68/78 stand-alone serial driver configuration parameters: 
+#     (1) Card# being configured
+#     (2) asyn port name
+#!OmsPC68Config(0, "L0")
+#!var drvOmsPC68debug 4
+
 iocInit
 
 # motorUtil (allstop & alldone)
