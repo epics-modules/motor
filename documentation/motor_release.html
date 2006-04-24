@@ -5,11 +5,109 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R5.8 Notice</title>
+  <title>EPICS Motor Record Release R5.9 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+
+<CENTER>
+  <H1><B><U>Motor Record Version 5.9 Release Notice</U></B></H1>
+</CENTER>
+
+<BR>
+<B><U>Requirements</U></B><BR>
+<BR>
+EPICS base R3.14.8.2 or greater.&nbsp; See the "Required Modules" section of the 
+Motor Record web page for details.<BR>
+
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Soft Motor allocation limit</B></U>
+  </P>
+  <P>
+  Peter Denison (Diamond Light Source) enhanced the Soft Channel device support by 
+  eliminating the 50 soft motor limit and replacing it with an unlimited linked list.
+  </P>
+</DIV>
+
+
+<CENTER>
+  <H4><U>New Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>All motors done/stop/moving utility</B></U>
+  </P>
+  <P>
+  Kevin Peterson's (UNI-CAT) motorUtil task was added to the motor record 
+  distribution. The motorUtil task monitors and maintains 3 PV's; $(P)alldone, $(P)allstop, 
+  $(P)moving. motorUtil is a replacement for the all_com_##.db distributed with 
+  the STD support module.  See the motorUtil.db file for details.
+  </P>
+
+  <P>
+  <U><B>Asyn Motor</B></U>
+  </P>
+  <P>
+  Peter Denison (Diamond), Nick Rees (Diamond) and Mark Rivers (APS) have added a 
+  new motor record device support architecture based on ASYN; called "asyn motor" 
+  support.  The asyn motor support <I>is an attempt to define a clean, extensible 
+  API for motor controller drivers to support</I>.  This is a preliminary release 
+  of work in progress.  Do not use <I>asynMotor</I> device support at this time, except 
+  for development and testing purposes only.
+  </P>
+
+  <P>
+  <U><B>New Focus 8750 Network Controller</B></U>
+  </P>
+  <P>
+  Joe Sullivan added support for the New Focus Model 8750 Network Controller.
+  </P>
+
+  <P>
+  <U><B>Physik Instrumente (PI) E-662 piezo controller</B></U>
+  </P>
+  <P>
+  Joe Sullivan added support for the Physik Instrumente (PI) GmbH & Co. Model E-662 
+  piezo controller.
+  </P>
+
+  <P>
+  <U><B>Newport XPS-C8 asyn motor support</B></U>
+  </P>
+  <P>
+  Mark Rivers added asyn motor support for the Newport XPS-C8 motor controller. 
+  This is a preliminary release of work in progress. However, it has fewer 
+  problems than the previous XPS support, so we recommend using the new asyn 
+  support for the XPS, with the understanding that it is still under development.
+  </P>
+
+  <P>
+  <U><B>Trajectory Scanning</B></U>
+  </P>
+  <P>
+  Mark Rivers added the Trajectory Scanning software for both the Newport MM4005 
+  and XPS-C8 motor controllers to the motor record distribution.
+  </P>
+
+  <P>
+  <U><B>OMS PC68 and PC78 support</B></U>
+  </P>
+  <P>
+  Brian Tieman and Ron Sluiter added support for the standalone, RS-232 versions 
+  of the OMS PC68 and PC78 model controllers.  The same device driver (OMS PC68/78) 
+  supports both models.
+  </P>
+</DIV>
+
 
 <CENTER>
   <H1><B><U>Motor Record Version 5.8 Release Notice</U></B></H1>
