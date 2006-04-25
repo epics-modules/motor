@@ -512,7 +512,7 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
     }
     
     if (pAxis->axisStatus == 44) {
-        status = GroupMoveAbort(pAxis->pollSocket, pAxis->groupName);
+        status = GroupMoveAbort(pAxis->moveSocket, pAxis->groupName);
         if (status != 0) {
             PRINT(pAxis->logParam, ERROR, " Error performing GroupMoveAbort axis=%s status=%d\n",\
                   pAxis->positionerName, status);
