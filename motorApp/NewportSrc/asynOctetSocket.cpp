@@ -16,6 +16,7 @@ typedef int BOOL;
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <epicsThread.h>
@@ -36,6 +37,8 @@ typedef int BOOL;
 #define PORT_NAME_SIZE     100
 #define ERROR_STRING_SIZE  100
 #define DEFAULT_TIMEOUT    0.2
+
+#define MAX_RETRIES 2
 
 static int  nextSocket = 0;
 
@@ -126,6 +129,8 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
     int bufferLength;
     socketStruct *psock;
     int status;
+    int retries;
+    int errStat;
 
     /* Check to see if the Socket is valid! */
     
@@ -165,19 +170,42 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
     } else {
         /* This is typically used for the "Move" commands, and we don't want to wait for the response */
         /* Fake the response by putting "-1" (for error) or "0" (for success) in the return string */
-        status = pasynOctetSyncIO->write(psock->pasynUser,
-                                         (char const *)buffer, 
-                                         bufferLength,
-                                         -psock->timeout,
-                                         &nbytesOut);
-        if ( status != asynSuccess ) {
-            asynPrint(psock->pasynUser, ASYN_TRACE_ERROR,
-                      "SendAndReceive error calling write, output=%s status=%d, error=%s\n",
-                      buffer, status, psock->pasynUser->errorMessage);
-            strcpy(valueRtrn, "-1");
+        for (retries=0; retries<MAX_RETRIES; retries++) {
+            status = pasynOctetSyncIO->writeRead(psock->pasynUser,
+                                                 (char const *)buffer, 
+                                                 bufferLength,
+                                                 valueRtrn,
+                                                 returnSize,
+                                                 -psock->timeout,
+                                                 &nbytesOut,
+                                                 &nbytesIn,
+                                                 &eomReason);
+            if (status == asynError) {
+                asynPrint(psock->pasynUser, ASYN_TRACE_ERROR,
+                          "SendAndReceive error calling write, output=%s status=%d, error=%s\n",
+                          buffer, status, psock->pasynUser->errorMessage);
+                strcpy(valueRtrn, "-1");
+                break;
+            }
+            asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
+                      "SendAndReceive, sent: '%s'\n", buffer);    
+            /* A timeout is OK */
+            if (status == asynTimeout) {
+                asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
+                          "SendAndReceive, timeout on read\n");
+                break;
+            } else {
+                asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
+                          "SendAndReceive, read: '%s'\n", valueRtrn);
+                errStat = atoi(valueRtrn);
+                if (errStat == 0) break;    /* All done */
+                if (errStat == -1) continue; /* Error that previous command not complete */
+                asynPrint(psock->pasynUser, ASYN_TRACE_ERROR,
+                          "SendAndReceive unexpected response =%s\n",
+                          valueRtrn);
+                break;
+            }
         }
-        asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
-                  "SendAndReceive, sent: '%s'\n", buffer);    
         strcpy(valueRtrn, "0");
     }
 }
