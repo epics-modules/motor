@@ -109,7 +109,7 @@ static int motorXPSLogMsg(void * param, const motorAxisLogMask_t logMask, const 
 #define XPSC8_END_OF_RUN_MINUS  0x00000100
 #define XPSC8_END_OF_RUN_PLUS   0x00000200
 
-#define TCP_TIMEOUT 0.5
+#define TCP_TIMEOUT 2.0
 static motorXPS_t drv={ NULL, NULL, motorXPSLogMsg, { 0, 0 } };
 static int numXPSControllers;
 /* Pointer to array of controller strutures */
@@ -174,7 +174,6 @@ static AXIS_HDL motorAxisOpen(int card, int axis, char * param)
   if (card > numXPSControllers) return(NULL);
   if (axis > pXPSController[card].numAxes) return(NULL);
   pAxis = &pXPSController[card].pAxis[axis];
-  pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS);
   return pAxis;
 }
 
@@ -352,6 +351,9 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
 
     if (pAxis == NULL) return MOTOR_AXIS_ERROR;
 
+    PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f\n",
+          pAxis->card, pAxis->axis, position, min_velocity, max_velocity, acceleration);
+
     /* Look at the last poll value of the positioner status.  If it is disabled, then enable it */
     if (pAxis->axisStatus >= 20 && pAxis->axisStatus <= 36) {
         status = GroupMotionEnable(pAxis->pollSocket, pAxis->groupName);
@@ -399,8 +401,6 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
 
-    PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f\n",
-          pAxis->card, pAxis->axis, position, min_velocity, max_velocity, acceleration);
     return MOTOR_AXIS_OK;
 }
 
@@ -562,7 +562,7 @@ static void XPSPoller(XPSController *pController)
                                     pAxis->groupName, 
                                     &pAxis->axisStatus);
             if (status != 0) {
-                PRINT(pAxis->logParam, ERROR, "XPSPoller: error calling GroupStatusGet, status=%d\n");
+                PRINT(pAxis->logParam, ERROR, "XPSPoller: error calling GroupStatusGet, status=%d\n", status);
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
                 continue;
             } else {
@@ -762,6 +762,7 @@ int XPSConfig(int card,           /* Controller number */
         printf("XPSConfig: pollSocket=%d, moveSocket=%d, ip=%s, port=%d,"
               " axis=%d controller=%d\n",
               pAxis->pollSocket, pAxis->moveSocket, ip, port, axis, card);
+        pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS);
     }
 
     FirmwareVersionGet(pollSocket, pController->firmwareVersion);
