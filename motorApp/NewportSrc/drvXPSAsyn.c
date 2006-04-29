@@ -104,6 +104,7 @@ static int motorXPSLogMsg(void * param, const motorAxisLogMask_t logMask, const 
 #define PRINT   (drv.print)
 #define FLOW    motorAxisTraceFlow
 #define ERROR   motorAxisTraceError
+#define IODRIVER  motorAxisTraceIODriver
 
 #define XPS_MAX_AXES 8
 #define XPSC8_END_OF_RUN_MINUS  0x00000100
@@ -566,6 +567,7 @@ static void XPSPoller(XPSController *pController)
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
                 continue;
             } else {
+                PRINT(pAxis->logParam, IODRIVER, "XPSPoller: %s axisStatus=%d\n", pAxis->positionerName, pAxis->axisStatus);
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 0);
                 /* Set done flag by default */
                 axisDone = 1;
