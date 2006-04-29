@@ -257,11 +257,7 @@ int drvAsynMotorConfigure(const char *portName, const char *driverName, int card
     pPvt->card = card;
     config(pPvt);
 
-    pPvt->axisData = pasynManager->memMalloc(num_axes * sizeof(drvmotorAxisPvt));
-    if (!pPvt->axisData) {
-	errlogPrintf("drvAsynMotorConfigure ERROR: Cannot allocate memory\n");
-	return -1;
-    }
+    pPvt->axisData = callocMustSucceed(num_axes, sizeof(drvmotorAxisPvt), "drvAsynMotorConfigure");
     for ( i = 0; i < num_axes; i++) {
 	pAxis = &pPvt->axisData[i];
 	pAxis->axis = (*pPvt->drvset->open)(card, i, "");
