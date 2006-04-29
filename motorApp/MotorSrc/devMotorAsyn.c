@@ -450,7 +450,7 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
     motorRecord *pmr = pPvt->pmr;
 
     asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
-        "%s devMotorAsyn::statusCallback new value=%d\n",
+        "%s devMotorAsyn::statusCallback new value=0x%x\n",
         pmr->name, value);
 
     if (interruptAccept) {
