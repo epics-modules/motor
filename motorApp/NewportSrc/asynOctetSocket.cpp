@@ -235,7 +235,7 @@ void CloseSocket(int SocketIndex)
 }
 
 /***************************************************************************************/
-void CloseAllSockets(void)
+void CloseXPSSockets(void)
 {
     int i;
 
@@ -243,13 +243,6 @@ void CloseAllSockets(void)
         if (socketStructs[i].connected) CloseSocket(i);
     }
 }
-
-/***************************************************************************************/
-void ResetAllSockets(void)
-{
-    CloseAllSockets();
-}
-
 
 /***************************************************************************************/
 char * GetError(int SocketIndex)
