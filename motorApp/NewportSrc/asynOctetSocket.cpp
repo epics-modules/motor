@@ -71,7 +71,8 @@ int ConnectToServer(char *IpAddress, int IpPort, double timeout)
     /* Create a new asyn port */
     epicsSnprintf(ipString, PORT_NAME_SIZE, "%s:%d TCP", IpAddress, IpPort);
     epicsSnprintf(portName, PORT_NAME_SIZE, "%s:%d:%d", IpAddress, IpPort, nextSocket);
-    drvAsynIPPortConfigure(portName, ipString, 0, 0, 1);
+    /* Create port with noAutoConnect and noProcessEos options */
+    drvAsynIPPortConfigure(portName, ipString, 0, 1, 1);
 
     /* Connect to driver with asynOctet interface */
     status = pasynOctetSyncIO->connect(portName, 0, &pasynUser, NULL);
@@ -92,14 +93,12 @@ int ConnectToServer(char *IpAddress, int IpPort, double timeout)
     psock->pasynUserCommon = pasynUserCommon;
 
     /* Connect to controller */
-/* No need to do this, it will be done automatically and it gives an error if already connected 
     status = pasynCommonSyncIO->connectDevice(pasynUserCommon);
     if (status != asynSuccess) {
-        printf("ConnectToServer, error calling pasynCommonSyncIO->connectDevice %s\n", 
-               pasynUserCommon->errorMessage);
+        printf("ConnectToServer, error calling pasynCommonSyncIO->connectDevice port=%s error=%s\n", 
+               portName, pasynUserCommon->errorMessage);
         return -1;
     }
-*/
 
     psock->timeout = timeout;
     psock->connected = 1;
@@ -224,7 +223,7 @@ void CloseSocket(int SocketIndex)
     }
     psock = &socketStructs[SocketIndex];
     pasynUser = psock->pasynUserCommon;
-    status = pasynCommonSyncIO->disconnect(pasynUser);
+    status = pasynCommonSyncIO->disconnectDevice(pasynUser);
     if (status != asynSuccess ) {
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
                   "CloseSocket: error calling pasynCommonSyncIO->disconnect, status=%d, %s\n",
