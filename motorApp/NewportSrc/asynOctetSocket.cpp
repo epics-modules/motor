@@ -234,7 +234,7 @@ void CloseSocket(int SocketIndex)
 }
 
 /***************************************************************************************/
-void CloseXPSSockets(void)
+void closeXPSSockets(void)
 {
     int i;
 
