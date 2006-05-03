@@ -11,8 +11,8 @@ int XPSConfig(int card,           /* Controller number */
               const char *ip,     /* XPS IP address or IP name */
               int port,           /* IP port number that XPS is listening on */
               int numAxes,        /* Number of axes this controller supports */
-              int movingPollRate, /* Rate to poll (Hz) when an axis is in motion */
-              int idlePollRate);  /* Rate to poll (Hz) when an axis is idle */
+              int movingPollPeriod, /* Time to poll (msec) when an axis is in motion */
+              int idlePollPeriod);  /* Time to poll (msec) when an axis is idle. 0 for no polling */
 
 int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
                   int axis,                   /* axis number 0-7 */
