@@ -14,9 +14,9 @@
 #include "epicsThread.h"
 #include "epicsEvent.h"
 #include "epicsString.h"
+#include "epicsStdio.h"
 #include "epicsMutex.h"
 #include "ellLib.h"
-#include "asynDriver.h"
 
 #include "drvSup.h"
 #include "epicsExport.h"
@@ -53,7 +53,6 @@ typedef enum { none, positionMove, velocityMove, homeReverseMove, homeForwardsMo
 
 typedef struct {
     epicsMutexId XPSC8Lock;
-    asynUser *pasynUser;   /* For everything except moving */
     int numAxes;
     char firmwareVersion[100];
     double movingPollPeriod;
@@ -69,14 +68,10 @@ typedef struct motorAxisHandle
     int pollSocket;
     PARAMS params;
     double currentPosition;
-    double setpointPosition;
-    double targetPosition;
     double velocity;
     double accel;
     double minJerkTime; /* for the SGamma function */
     double maxJerkTime;
-    double jogVelocity;
-    double jogAccel;
     double highLimit;
     double lowLimit;
     double stepSize;
@@ -85,7 +80,6 @@ typedef struct motorAxisHandle
     char *groupName;
     int axisStatus;
     int positionerError;
-    int moving;         /* 1 = moving! */
     int card;
     int axis;
     void *logParam;
@@ -565,7 +559,6 @@ static void XPSPoller(XPSController *pController)
             if (status != 0) {
                 PRINT(pAxis->logParam, ERROR, "XPSPoller: error calling GroupStatusGet, status=%d\n", status);
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
-                continue;
             } else {
                 PRINT(pAxis->logParam, IODRIVER, "XPSPoller: %s axisStatus=%d\n", pAxis->positionerName, pAxis->axisStatus);
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 0);
@@ -659,16 +652,16 @@ static void XPSPoller(XPSController *pController)
 
             epicsMutexUnlock(pAxis->mutexId);
 
-            if (forcedFastPolls > 0) {
-                timeout = pController->movingPollPeriod;
-                forcedFastPolls--;
-            } else if (anyMoving) {
-                timeout = pController->movingPollPeriod;
-            } else {
-                timeout = pController->idlePollPeriod;
-            }
-
         } /* Next axis */
+
+        if (forcedFastPolls > 0) {
+            timeout = pController->movingPollPeriod;
+            forcedFastPolls--;
+        } else if (anyMoving) {
+            timeout = pController->movingPollPeriod;
+        } else {
+            timeout = pController->idlePollPeriod;
+        }
 
     } /* End while */
 
