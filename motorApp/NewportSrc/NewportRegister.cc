@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.cc
 USAGE...	Register Newport motor device driver shell commands.
 
-Version:	$Revision: 1.11 $
+Version:	$Revision: 1.12 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-04-19 21:49:48 $
+Last Modified:	$Date: 2006-05-03 16:55:35 $
 */
 
 /*****************************************************************
@@ -33,19 +33,15 @@ static const iocshArg setupArg1 = {"Polling rate", iocshArgInt};
 static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
 static const iocshArg configArg1 = {"asyn port name", iocshArgString};
 static const iocshArg configArg2 = {"asyn address (GPIB)", iocshArgInt};
-// NewportXPSC8 Config arguments
-static const iocshArg XPSconfigArg0 = {"Card being configured", iocshArgInt};
-static const iocshArg XPSconfigArg1 = {"IP", iocshArgString};
-static const iocshArg XPSconfigArg2 = {"Port", iocshArgInt};
-static const iocshArg XPSconfigArg3 = {"Number of Axes", iocshArgInt};
-// NewportXPSC8 NameConfig arguments
-static const iocshArg XPSNameconfigArg0 = {"Card being configured", iocshArgInt};
-static const iocshArg XPSNameconfigArg1 = {"Axis being configured", iocshArgInt};
-static const iocshArg XPSNameconfigArg2 = {"Group Number", iocshArgInt};
-static const iocshArg XPSNameconfigArg3 = {"Group size", iocshArgInt};
-static const iocshArg XPSNameconfigArg4 = {"Axis in group number", iocshArgInt};
-static const iocshArg XPSNameconfigArg5 = {"Group Name", iocshArgString};
-static const iocshArg XPSNameconfigArg6 = {"Positioner Name", iocshArgString};
+// Newport Asyn Setup arguments
+static const iocshArg asynSetupArg0 = {"Max. controller count", iocshArgInt};
+// Newport Asyn Config arguments
+static const iocshArg asynConfigArg0 = {"Card being configured", iocshArgInt};
+static const iocshArg asynConfigArg1 = {"asyn port name", iocshArgString};
+static const iocshArg asynConfigArg2 = {"asyn address (GPIB)", iocshArgInt};
+static const iocshArg asynConfigArg3 = {"Number of Axes", iocshArgInt};
+static const iocshArg asynConfigArg4 = {"Moving poll rate", iocshArgInt};
+static const iocshArg asynConfigArg5 = {"Idle poll rate", iocshArgInt};
 // Newport XPS Gathering Test args
 static const iocshArg XPSArg0 = {"Element Period*10^4", iocshArgInt};
 // XPS tcl execute function
@@ -69,23 +65,16 @@ static const iocshArg XPSConfigAxisArg3 = {"Steps per unit", iocshArgInt};
 
 static const iocshArg * const NewportSetupArgs[2] = {&setupArg0, 
                                                      &setupArg1};
-static const iocshArg * const NewportXPSC8SetupArgs[2] = {&setupArg0, 
-                                                          &setupArg1};
+static const iocshArg * const NewportAsynSetupArgs[2] = {&asynSetupArg0};
 static const iocshArg * const NewportConfigArgs[3] = {&configArg0, 
                                                       &configArg1,
                                                       &configArg2};
-static const iocshArg * const NewportXPSC8ConfigArgs[4] = {&XPSconfigArg0, 
-                                                           &XPSconfigArg1,
-                                                           &XPSconfigArg2, 
-                                                           &XPSconfigArg3};
-
-static const iocshArg * const NewportXPSC8NameArgs[7] = {&XPSNameconfigArg0, 
-                                                         &XPSNameconfigArg1,
-                                                         &XPSNameconfigArg2,
-							 &XPSNameconfigArg3,
-                                                         &XPSNameconfigArg4,
-							 &XPSNameconfigArg5,		
-                                                         &XPSNameconfigArg6};
+static const iocshArg * const NewportAsynConfigArgs[6] = {&asynConfigArg0, 
+                                                          &asynConfigArg1,
+                                                          &asynConfigArg2,
+                                                          &asynConfigArg3,
+                                                          &asynConfigArg4,
+                                                          &asynConfigArg5};
 static const iocshArg * const XPSArgs[1] = {&XPSArg0};
 
 static const iocshArg * const tclcallArgs[3] = {&tclcallArg0,
@@ -105,19 +94,18 @@ static const iocshArg * const XPSConfigAxisArgs[4] = {&XPSConfigAxisArg0,
 
 static const iocshFuncDef setupMM3000 = {"MM300Setup", 2, NewportSetupArgs};
 static const iocshFuncDef setupMM4000 = {"MM4000Setup",2, NewportSetupArgs};
+static const iocshFuncDef setupMM4000Asyn = {"MM4000AsynSetup",1, NewportAsynSetupArgs};
 static const iocshFuncDef setupPM500  = {"PM500Setup", 2, NewportSetupArgs};
 static const iocshFuncDef setupESP300 = {"ESP300Setup",2, NewportSetupArgs};
-static const iocshFuncDef setupXPSC8  = {"XPSC8Setup", 2, NewportXPSC8SetupArgs};
 static const iocshFuncDef setupXPS  =   {"XPSSetup",   1, XPSSetupArgs};
 
 static const iocshFuncDef configMM3000 = {"MM3000Config", 3, NewportConfigArgs};
 static const iocshFuncDef configMM4000 = {"MM4000Config", 3, NewportConfigArgs};
+static const iocshFuncDef configMM4000Asyn = {"MM4000AsynConfig", 6, NewportAsynConfigArgs};
 static const iocshFuncDef configPM500  = {"PM500Config",  3, NewportConfigArgs};
 static const iocshFuncDef configESP300 = {"ESP300Config", 3, NewportConfigArgs};
-static const iocshFuncDef configXPSC8  = {"XPSC8Config",  4, NewportXPSC8ConfigArgs};
 static const iocshFuncDef configXPS    = {"XPSConfig",    6, XPSConfigArgs};
 static const iocshFuncDef configXPSAxis= {"XPSConfigAxis",4, XPSConfigAxisArgs};
-static const iocshFuncDef nameXPSC8    = {"XPSC8NameConfig",7, NewportXPSC8NameArgs};
 
 static const iocshFuncDef XPSC8GatheringTest = {"xpsgathering",1, XPSArgs};
 
@@ -133,6 +121,11 @@ static void setupMM4000CallFunc(const iocshArgBuf *args)
     MM4000Setup(args[0].ival, args[1].ival);
 }
 
+static void setupMM4000AsynCallFunc(const iocshArgBuf *args)
+{
+    MM4000AsynSetup(args[0].ival);
+}
+
 static void setupPM500CallFunc(const iocshArgBuf *args)
 {
     PM500Setup(args[0].ival, args[1].ival);
@@ -141,11 +134,6 @@ static void setupPM500CallFunc(const iocshArgBuf *args)
 static void setupESP300CallFunc(const iocshArgBuf *args)
 {
     ESP300Setup(args[0].ival, args[1].ival);
-}
-
-static void setupXPSC8CallFunc(const iocshArgBuf *args)
-{
-    XPSC8Setup(args[0].ival, args[1].ival);
 }
 
 static void setupXPSCallFunc(const iocshArgBuf *args)
@@ -163,6 +151,12 @@ static void configMM4000CallFunc(const iocshArgBuf *args)
     MM4000Config(args[0].ival, args[1].sval, args[2].ival);
 }
 
+static void configMM4000AsynCallFunc(const iocshArgBuf *args)
+{
+    MM4000AsynConfig(args[0].ival, args[1].sval, args[2].ival, 
+                 args[3].ival, args[4].ival, args[5].ival);
+}
+
 static void configPM500CallFunc(const iocshArgBuf *args)
 {
     PM500Config(args[0].ival,  args[1].sval, args[2].ival);
@@ -171,11 +165,6 @@ static void configPM500CallFunc(const iocshArgBuf *args)
 static void configESP300CallFunc(const iocshArgBuf *args)
 {
     ESP300Config(args[0].ival, args[1].sval, args[2].ival);
-}
-
-static void configXPSC8CallFunc(const iocshArgBuf *args)
-{
-    XPSC8Config(args[0].ival, args[1].sval, args[2].ival, args[3].ival);
 }
 
 static void configXPSCallFunc(const iocshArgBuf *args)
@@ -187,12 +176,6 @@ static void configXPSCallFunc(const iocshArgBuf *args)
 static void configXPSAxisCallFunc(const iocshArgBuf *args)
 {
     XPSConfigAxis(args[0].ival, args[1].ival, args[2].sval, args[3].ival);
-}
-
-static void nameXPSC8CallFunc(const  iocshArgBuf *args)
-{
-    XPSC8NameConfig(args[0].ival, args[1].ival, args[2].ival, args[3].ival,\
-     			args[4].ival, args[5].sval, args[6].sval);
 }
 
 static void XPSC8GatheringTestCallFunc(const  iocshArgBuf *args)
@@ -210,19 +193,18 @@ static void NewportRegister(void)
 {
     iocshRegister(&setupMM3000, setupMM3000CallFunc);
     iocshRegister(&setupMM4000, setupMM4000CallFunc);
+    iocshRegister(&setupMM4000Asyn, setupMM4000AsynCallFunc);
     iocshRegister(&setupPM500,  setupPM500CallFunc);
     iocshRegister(&setupESP300, setupESP300CallFunc);
-    iocshRegister(&setupXPSC8,  setupXPSC8CallFunc);
     iocshRegister(&setupXPS,    setupXPSCallFunc);
 
     iocshRegister(&configMM3000, configMM3000CallFunc);
     iocshRegister(&configMM4000, configMM4000CallFunc);
+    iocshRegister(&configMM4000Asyn, configMM4000AsynCallFunc);
     iocshRegister(&configPM500,  configPM500CallFunc);
     iocshRegister(&configESP300, configESP300CallFunc);
-    iocshRegister(&configXPSC8,  configXPSC8CallFunc);
     iocshRegister(&configXPS,    configXPSCallFunc);
     iocshRegister(&configXPSAxis,configXPSAxisCallFunc);
-    iocshRegister(&nameXPSC8,    nameXPSC8CallFunc);
     iocshRegister(&TCLRun,       TCLRunCallFunc);
 #ifdef vxWorks
     iocshRegister(&XPSC8GatheringTest, XPSC8GatheringTestCallFunc);

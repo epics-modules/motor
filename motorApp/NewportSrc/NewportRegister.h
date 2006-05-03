@@ -2,9 +2,9 @@
 FILENAME...	NewportRegister.h
 USAGE... This file contains function prototypes for Newport IOC shell commands.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-04-06 23:58:48 $
+Last Modified:	$Date: 2006-05-03 16:54:13 $
 */
 
 /*
@@ -41,6 +41,7 @@ Last Modified:	$Date: 2006-04-06 23:58:48 $
 #include "tclCall.h"
 
 #include "drvXPSAsyn.h"
+#include "drvMM4000Asyn.h"
 
 /* Function prototypes. */
 extern RTN_STATUS MM3000Setup(int, int);
@@ -52,9 +53,5 @@ extern RTN_STATUS MM4000Config(int, const char *, int);
 extern RTN_STATUS  PM500Config(int, const char *, int);
 extern RTN_STATUS ESP300Config(int, const char *, int);
  
-extern RTN_STATUS  XPSC8Setup(int, int);
-extern RTN_STATUS  XPSC8Config(int, const char *, int, int);
-extern RTN_STATUS XPSC8NameConfig(int, int, int, int, int, \
-				const char *, const char *);
 extern RTN_STATUS xpsgathering(int);
 
