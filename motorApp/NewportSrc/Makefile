@@ -19,6 +19,7 @@ SRCS += devMM3000.cc drvMM3000.cc
 
 # MM4000/5 (i.e., MM4000) device driver.
 SRCS += devMM4000.cc drvMM4000.cc
+SRCS += drvMM4000Asyn.c
 SRCS += MM4005_trajectoryScan.st
 SRCS_vxWorks += XPS_trajectoryScan.st
 
