@@ -166,8 +166,8 @@ static AXIS_HDL motorAxisOpen(int card, int axis, char * param)
 {
   AXIS_HDL pAxis;
 
-  if (card > numXPSControllers) return(NULL);
-  if (axis > pXPSController[card].numAxes) return(NULL);
+  if (card >= numXPSControllers) return(NULL);
+  if (axis >= pXPSController[card].numAxes) return(NULL);
   pAxis = &pXPSController[card].pAxis[axis];
   return pAxis;
 }
