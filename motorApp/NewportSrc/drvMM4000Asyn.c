@@ -378,7 +378,6 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
 static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double velocity, double acceleration)
 {
     int status;
-    double position;
 
     if (pAxis == NULL) return(MOTOR_AXIS_ERROR);
 
@@ -387,9 +386,10 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
      * If the record soft limits are set tighter than the MM4000 limits
      * the record will prevent JOG motion beyond its soft limits
      */
-    if (velocity >= 0) position = pAxis->highLimit/pAxis->stepSize;
-    else               position = pAxis->lowLimit/pAxis->stepSize;
-    status = motorAxisMove(pAxis, position, 0, min_velocity, velocity, acceleration); 
+    if (velocity > 0.)
+        status = motorAxisMove(pAxis,  pAxis->highLimit/pAxis->stepSize, 0, min_velocity, velocity, acceleration); 
+    else
+        status = motorAxisMove(pAxis,  pAxis->lowLimit/pAxis->stepSize, 0, min_velocity, -velocity, acceleration); 
 
     return status;
 }
