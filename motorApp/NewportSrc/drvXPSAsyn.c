@@ -22,7 +22,7 @@
 #include "epicsExport.h"
 #define DEFINE_MOTOR_PROTOTYPES 1
 #include "motor_interface.h"
-#include "xps_c8_driver.h"
+#include "XPS_C8_drivers.h"
 
 motorAxisDrvSET_t motorXPS = 
   {
