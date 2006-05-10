@@ -6,13 +6,21 @@ dbLoadDatabase("../../dbd/WithMPF.dbd")
 WithMPF_registerRecordDeviceDriver(pdbbase)
 
 ### Motors
-dbLoadTemplate  "motor.substitutions.xps"
+dbLoadTemplate "motor.substitutions.xps"
+
+dbLoadTemplate "XPSAux.substitutions"
 
 # cards (total controllers)
 XPSSetup(1)
 
 # card, IP, PORT, number of axes, active poll period (ms), idle poll period (ms)
 XPSConfig(0, "newport-xps3", 5001, 2, 10, 500)
+
+# asynPort, IP address, IP port, poll period (ms)
+XPSAuxConfig("XPS_AUX1", "newport-xps3", 5001, 50)
+#asynSetTraceMask("XPS_AUX1", 0, 255)
+#asynSetTraceIOMask("XPS_AUX1", 0, 2)
+
 # asyn port, driver name, controller index, max. axes)
 drvAsynMotorConfigure("XPS1", "motorXPS", 0, 2)
 
@@ -24,6 +32,8 @@ XPSConfigAxis(0,1,"GROUP2.POSITIONER",1000)
 #asynSetTraceIOMask newport-xps3:5001:0 0 2
 #asynSetTraceMask XPS1 0 255
 #asynSetTraceIOMask XPS1 0 2
+#asynSetTraceMask newport-xps3:5001:3   0 255
+#asynSetTraceIOMask newport-xps3:5001:3 0 2
 
 iocInit
 
