@@ -1,6 +1,6 @@
-////////////////////////////////////////////////////////////////////
-// Created header file XPS_C8_drivers.h for API headings 
-// 
+/*
+ * Created header file XPS_C8_drivers.h for API headings 
+ */ 
 
 
 #ifdef _WIN32
@@ -13,6 +13,9 @@
 #define __stdcall
 #endif
 
+#ifndef __cplusplus
+typedef int bool;
+#endif
 
 #ifdef __cplusplus
 extern "C"
