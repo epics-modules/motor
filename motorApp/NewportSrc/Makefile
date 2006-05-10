@@ -34,7 +34,7 @@ SRCS += devESP300.cc drvESP300.cc
 SRCS += asynOctetSocket.cpp 
 #SRCS += xps_c8_driver.cpp 
 SRCS += devXPSC8.cc  drvXPSC8.cc 
-SRCS += XPS_C8_drivers.cpp drvXPSAsyn.cc
+SRCS += XPS_C8_drivers.cpp drvXPSAsyn.c drvXPSAsynAux.c
 
 # XPS Gathering Test C script function -> int xpsgathering(void)
 SRCS_vxWorks += XPSGathering.cc
