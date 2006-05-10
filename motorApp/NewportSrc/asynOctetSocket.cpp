@@ -257,9 +257,11 @@ void strncpyWithEOS(char * szStringOut, const char * szStringIn, int nNumberOfCh
 {
     char *eos = "\n";
 
+/*
     if ((nNumberOfCharToCopy + (int)strlen(eos)) > nStringOutSize) {
         return;
     }
-    strcpy(szStringOut, szStringIn);
-    strcat(szStringOut, eos);
+*/
+    strncpy(szStringOut, szStringIn, nStringOutSize);
+    /* strcat(szStringOut, eos); */
 }
