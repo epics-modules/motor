@@ -1,0 +1,9 @@
+record(ai,"$(P)$(R)")
+{
+        field(SCAN,"$(SCAN)")
+        field(DTYP,"asynFloat64Average")
+        field(INP,"@asyn($(PORT) $(CHAN))READ_AI")
+        field(HOPR,"$(HOPR)")
+        field(LOPR,"$(LOPR)")
+        field(PREC,"$(PREC)")
+}

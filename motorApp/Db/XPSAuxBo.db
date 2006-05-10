@@ -1,0 +1,8 @@
+grecord(bo,"$(P)$(R)")
+{
+        field(DTYP,"asynUInt32Digital")
+        field(OUT,"@asynMask($(PORT) $(CHAN) $(MASK))WRITE_BO")
+        field(VAL, "1")
+        field(ZNAM, "Low")
+        field(ONAM, "High")
+}

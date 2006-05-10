@@ -1,0 +1,9 @@
+grecord(ao,"$(P)$(R)") {
+	field(DTYP,"asynFloat64")
+	field(OUT,"@asyn($(PORT) $(CHAN))WRITE_AO")
+	field(DRVL,"$(DRVL)")
+	field(LOPR,"$(LOPR)")
+	field(DRVH,"$(DRVH)")
+	field(HOPR,"$(HOPR)")
+	field(PREC,"$(PREC)")
+}

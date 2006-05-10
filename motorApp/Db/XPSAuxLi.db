@@ -1,0 +1,7 @@
+grecord(longin,"$(P)$(R)")
+{
+        field(PINI, "YES")
+        field(DTYP,"asynUInt32Digital")
+        field(INP,"@asynMask($(PORT) $(CHAN) 0xffffffff)READ_BI")
+        field(SCAN, "$(SCAN)")
+}
