@@ -1,251 +1,286 @@
-/*
-DESCRIPTION
-This module implements a client which periodically
-sends a request to the slave spawned by a concurrent
-server.  This code illustrates how many clients
-to be handled in parallel if the server has a
-concurrent architecture.
-*/
+///////////////////////////////////////////////////////////////////////////////
+// Socket.cpp
 
-/* includes */
+#include "Socket.h" 
 
-#ifdef vxWorks
-#else
-#define TRUE 1
-#define FALSE 0
-typedef int BOOL;
-#endif
+#define TIMEOUT 300
+#define SMALL_BUFFER_SIZE 256
+#define MAX_NB_SOCKETS  100
 
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <osiSock.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <time.h>
+void Delay(double timedelay);
 
-/* defines */
-
-#define MAX_MSG_SIZE       80
-#define TIMEOUT             0.5
-#define SIZEBUFFER        256
-#define CONNREFUSED        -1
-#define CREATESOCKETFAILED -2
-#define OPTREFUSED         -3
-
-#define MAX_NB_SOCKETS     40
-#define SOCKET_TIMEOUT	   100
-
-/* typedefs */
-
-typedef int SOCK_FD;
-
-/* global variables */
-
-SOCK_FD sockFd[MAX_NB_SOCKETS];
-BOOL    UsedSocket[MAX_NB_SOCKETS] = { FALSE };
-double  TimeoutSocket[MAX_NB_SOCKETS];
-int     ErrorSocket[MAX_NB_SOCKETS];
-
-
-
+CAsyncSocket m_sConnectSocket[MAX_NB_SOCKETS];
+BOOL         UsedSocket[MAX_NB_SOCKETS] = { FALSE};
+double       TimeoutSocket[MAX_NB_SOCKETS];
+int          NbSockets = 0;
 
 /***************************************************************************************/
 int ConnectToServer(char *Ip_Address, int Ip_Port, double TimeOut)
 {
-/*	printf("Socket.cpp ConnectToServer: Top/n");*/
-    int flag = 1;
-    u_long srvInet;
-    struct sockaddr_in srvAddr;
-    int SocketIndex = 0;
+	int flag = 1;
+	int socketID = 0;
+	DWORD sockPendingFlag = 1;
 
-	int    status;
-	char * optval=0;
-	osiSocklen_t  optlen;
-	status = getsockopt (SocketIndex,IPPROTO_TCP,TCP_NODELAY, optval, &optlen);
-
-	/* Select a free socket */
-	while ((UsedSocket[SocketIndex] == TRUE) && (SocketIndex < MAX_NB_SOCKETS))
+	if (!AfxSocketInit())
 	{
-		SocketIndex++;
+		AfxMessageBox("Fatal Error: MFC Socket initialization failed");
+		return -1;
+	}
+	/* Select a socket number */
+	if (NbSockets < MAX_NB_SOCKETS)
+	{
+		while ((UsedSocket[socketID] == TRUE) && (socketID < MAX_NB_SOCKETS))
+			socketID++;
+
+		if (socketID == MAX_NB_SOCKETS)
+			return -1;
+	}
+	else
+		return -1;
+	UsedSocket[socketID] = TRUE;
+	NbSockets++;
+
+	/* Socket creation */
+	if ((m_sConnectSocket[socketID].Create() == 0)
+		|| (m_sConnectSocket[socketID].SetSockOpt(TCP_NODELAY,(char *)&flag,(int)sizeof( flag ),IPPROTO_TCP) == 0))
+	{
+		UsedSocket[socketID] = FALSE;
+		NbSockets--;
+		return -1;
 	}
 
-	if (SocketIndex == MAX_NB_SOCKETS)
-        return -1;
+	/* Connect */
+	if (m_sConnectSocket[socketID].Connect(Ip_Address,Ip_Port) == 0)
+	{
+		int SocketError = m_sConnectSocket[socketID].GetLastError();
+		if (SocketError != WSAEWOULDBLOCK)
+		{
+			UsedSocket[socketID] = FALSE;
+			NbSockets--;
+			return -1;
+		}
+	}
 
-    /* Create socket */
-    ErrorSocket[SocketIndex] = 0;
-    if ((sockFd[SocketIndex] = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 )
-    {
-        ErrorSocket[SocketIndex] = CREATESOCKETFAILED;
-        return -1;
-    }
+	/* Set timeout */
+	if (TimeOut > 0)
+	{
+		if (TimeOut < 1e-3)
+			TimeoutSocket[socketID] = 1e-3;
+		else
+			TimeoutSocket[socketID] = TimeOut;
+	}
+	else
+		TimeoutSocket[socketID]	= TIMEOUT;
 
-    /* Convert the server's IP address from ASCII dot notation to */
-    /* a network byte-ordered integer */
-    srvInet = inet_addr (Ip_Address);
+	/* Socket array */
+	struct fd_set *Sockets = new struct fd_set;
+	FD_ZERO(Sockets);
+	FD_SET(m_sConnectSocket[socketID], Sockets);
 
-    /* Initialize servers address */
-    memset ((char *)&srvAddr, 0, sizeof(srvAddr));
-    srvAddr.sin_family      = AF_INET;	
-    srvAddr.sin_port        = htons (Ip_Port);
-    srvAddr.sin_addr.s_addr = srvInet;
+	/* Time structure */
+	struct timeval *TimeOutStruct = new struct timeval;
+	TimeOutStruct->tv_sec = (long) TimeoutSocket[socketID];
+	TimeOutStruct->tv_usec = (long) ((TimeoutSocket[socketID] - (long)TimeoutSocket[socketID])* 1e9);
 
-    if (setsockopt (sockFd[SocketIndex], 
-                    IPPROTO_TCP, 
-                    TCP_NODELAY,
-                    (char *)&flag, 
-                    (int)sizeof(flag)) != 0 )
-    {
-        ErrorSocket[SocketIndex] = OPTREFUSED;
-        return -1;
-    }
+	/* Checking connection is ok */
+	int SelectReturn = select(0, NULL, Sockets, NULL, TimeOutStruct);
+	if (SelectReturn == SOCKET_ERROR 
+		|| SelectReturn == 0)
+	{
+		UsedSocket[socketID] = FALSE;
+		NbSockets--;
+		return -1;
+	}
 
-    /* Connect to server */
-    if (connect(sockFd[SocketIndex], (sockaddr *)&srvAddr, sizeof(srvAddr)) < 0)
-    {
-        ErrorSocket[SocketIndex] = CONNREFUSED;
-        return -1;
-    }
-    
-    if (TimeOut > 0) TimeoutSocket[SocketIndex] = TimeOut;
-    else             TimeoutSocket[SocketIndex] = TIMEOUT;
-    UsedSocket[SocketIndex] = TRUE;
-    
-	return SocketIndex;
+	/* Force no pending */
+	if (m_sConnectSocket[socketID].IOCtl(FIONBIO,&sockPendingFlag) == 0)
+	{
+		m_sConnectSocket[socketID].Close();
+		UsedSocket[socketID] = FALSE;
+		NbSockets--;
+		return -1;
+	}
+	
+	/* Delay unless -1 return for the first API */
+	Sleep(10);
+
+	/* Return socket ID */
+	return socketID;
 }
 
 /***************************************************************************************/
 void SetTCPTimeout(int SocketIndex, double TimeOut)
 {
-    if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
-    {
-       if (TimeOut > 0) TimeoutSocket[SocketIndex] = TimeOut;
-    }
-}
-
-/***************************************************************************************/
-void SendAndReceive (int SocketIndex, char *buffer, char *valueRtrn)
-{
-    char pBuf[SIZEBUFFER]={'\0'};
-    int  iRvcd=0;
-    clock_t start, finish;
-    double timeEllapse = 0.0;
-    
-	
-    if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
-    {
-        /* Send String to controller and wait for response */
-	
-	/*printf("Timeout: %lf, CLOCKS_PER_SEC %i ",TimeoutSocket[SocketIndex],CLOCKS_PER_SEC);*/
-        
-	write (sockFd[SocketIndex], buffer, strlen(buffer) + 1);
-	/*printf("SendAndRecieve after write\n");*/
-        /* Read error ? */
-/*        iRvcd = read (sockFd[SocketIndex], pBuf, SIZEBUFFER);*/
-        start = clock();
-/*	printf("SendAndRecieve after read\n");*/
-	
-        while ((iRvcd <= 0) && (timeEllapse < SOCKET_TIMEOUT))
-        {
-            
-	    /*printf("SendAndRecieve above read\n");*/
-	    iRvcd = read (sockFd[SocketIndex], pBuf, SIZEBUFFER);
-            finish = clock();
-            timeEllapse = (double)(finish - start) / CLOCKS_PER_SEC;
-	    
-            /* waiting ... */
-        }
-    }
-    if (iRvcd > 0) pBuf[iRvcd] = '\0';
-    strcpy(valueRtrn, pBuf);
-}
-/***************************************************************************************/
-void SendOnly (int SocketIndex, char *buffer, char *valueRtrn)
-{
-    char pBuf[SIZEBUFFER]={'\0'};
-    int  iRvcd=0;
-    clock_t start, finish;
-    double timeEllapse = 0.0;
-	
-    if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
-    {
-        /* Send String to controller and wait for response */
-
-        write (sockFd[SocketIndex], buffer, strlen(buffer) + 1);
-/*	printf("---------------------SendOnly after write\n");*/
-        /* Read error ? */
-/*        iRvcd = read (sockFd[SocketIndex], pBuf, SIZEBUFFER);
-        start = clock();
-	printf("SendAndRecieve after read\n");
-	
-        while ((iRvcd <= 0) && (timeEllapse < TimeoutSocket[SocketIndex]))
-        {
-            iRvcd = read (sockFd[SocketIndex], pBuf, SIZEBUFFER);
-            finish = clock();
-            timeEllapse = (double)(finish - start) / CLOCKS_PER_SEC;
-            
-        }*/
-    }
-    /*if (iRvcd > 0) pBuf[iRvcd] = '\0';*/
-    pBuf[iRvcd] = '\0';
-    strcpy(valueRtrn, pBuf);
-}
-
-/***************************************************************************************/
-void CloseSocket(int SocketIndex)
-{
-    if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
-    {
-        close (sockFd[SocketIndex]);
-		TimeoutSocket[SocketIndex] = TIMEOUT;
-		ErrorSocket[SocketIndex] = 0;
-		UsedSocket[SocketIndex] = FALSE;
-    }
-}
-
-/***************************************************************************************/
-void CloseAllSockets(void)
-{
-	int i;
-    for (i = 0; i < MAX_NB_SOCKETS; i++)
-    {
-		if (UsedSocket[i] == TRUE)
+	if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
+	{
+		if (TimeOut > 0)
 		{
-            close (sockFd[i]);
-		    TimeoutSocket[i] = TIMEOUT;
-		    ErrorSocket[i] = 0;
-		    UsedSocket[i] = FALSE;
+			if (TimeOut < 1e-3)
+				TimeoutSocket[SocketIndex] = 1e-3;
+			else
+				TimeoutSocket[SocketIndex] = TimeOut;
 		}
-    }
+	}
 }
 
 /***************************************************************************************/
-void ResetAllSockets(void)
+void SendAndReceive(int socketID, char sSendString[], char sReturnString[], int iReturnStringSize)
 {
-	int i;
-    for (i = 0; i < MAX_NB_SOCKETS; i++)
-    {
-		if (UsedSocket[i] == TRUE)
-		    UsedSocket[i] = FALSE;
-    }
-}
+	char    sSocketBuffer[SMALL_BUFFER_SIZE + 1] = {'\0'};
+	int     iReceiveByteNumber = 0;
+	int     iErrorNo = 0;
+	fd_set  readFds;
+	int     iSelectStatus;
+	double  dTimeout;
+	struct timeval cTimeout;
+	clock_t start, stop;
 
+	if ((socketID >= 0) && (socketID < MAX_NB_SOCKETS) && (UsedSocket[socketID] == TRUE))
+	{
+		/* Clear receive buffer */
+		do
+		{
+			iReceiveByteNumber = m_sConnectSocket[socketID].Receive(sSocketBuffer,SMALL_BUFFER_SIZE);
+		}
+		while (iReceiveByteNumber != SOCKET_ERROR);
+		sReturnString[0] = '\0';
+
+		/* Send String to controller and wait for response */
+		m_sConnectSocket[socketID].Send(sSendString,strlen(sSendString));
+
+		/* Get reply with timeout */
+		dTimeout = TimeoutSocket[socketID]; 
+		do
+		{
+			/* Get time */
+			start = clock();
+
+			/* Check reply */
+			iReceiveByteNumber = m_sConnectSocket[socketID].Receive(sSocketBuffer,SMALL_BUFFER_SIZE);
+			iErrorNo = GetLastError() & 0xffff;
+			
+			/* Wait for reply */
+			if ((iReceiveByteNumber == SOCKET_ERROR) && (iErrorNo == WSAEWOULDBLOCK))
+			{
+				FD_ZERO(&readFds);
+				FD_SET(m_sConnectSocket[socketID].m_hSocket, &readFds);
+				cTimeout.tv_sec = (long)dTimeout;
+				cTimeout.tv_usec = (long)((dTimeout - (long)dTimeout) * 1e6);
+				iSelectStatus = select(FD_SETSIZE, (fd_set *)&readFds, (fd_set *) NULL, (fd_set *) NULL, &cTimeout);
+				if ((iSelectStatus > 0) && (FD_ISSET(m_sConnectSocket[socketID].m_hSocket, &readFds)))
+					iReceiveByteNumber = m_sConnectSocket[socketID].Receive(sSocketBuffer,SMALL_BUFFER_SIZE);
+				else
+				{
+					iErrorNo = GetLastError() & 0xffff;
+					sprintf(sSocketBuffer,"-2,%s,EndOfAPI",sSendString);
+					strncpyWithEOS(sReturnString, sSocketBuffer, strlen(sSocketBuffer), iReturnStringSize);
+					iReceiveByteNumber = SOCKET_ERROR;
+				}
+			}
+
+			/* Concatenation */
+			if ((iReceiveByteNumber >= 0) && (iReceiveByteNumber <= SMALL_BUFFER_SIZE))
+			{
+				sSocketBuffer[iReceiveByteNumber] = '\0';
+				strncat(sReturnString, sSocketBuffer, iReturnStringSize - strlen(sReturnString) - 1);
+			}
+
+			/* Calculate new timeout */
+			stop = clock();
+			dTimeout = dTimeout - (double)(stop - start) / CLOCKS_PER_SEC;
+			if (dTimeout < 1e-3)
+				dTimeout = 1e-3;
+		}
+		while ((iReceiveByteNumber != SOCKET_ERROR) && (strstr(sSocketBuffer, "EndOfAPI") == NULL));
+	}
+	else
+		sReturnString[0] = '\0';
+
+	return;
+}
 
 /***************************************************************************************/
-char * GetError(int SocketIndex)
+void CloseSocket(int socketID)
 {
-    if ((SocketIndex >= 0) && (SocketIndex < MAX_NB_SOCKETS) && (UsedSocket[SocketIndex] == TRUE))
-    {
-        switch (ErrorSocket[SocketIndex])
-        {
-        case CONNREFUSED:         return("The attempt to connect was rejected.");
-        case CREATESOCKETFAILED:  return("Create Socket failed.");
-        case OPTREFUSED:          return("SetSockOption() Refused.");
-        }
-    }
-    return("");
+	if ((socketID >= 0) && (socketID < MAX_NB_SOCKETS))
+	{
+		if (UsedSocket[socketID] == TRUE)
+		{
+			m_sConnectSocket[socketID].Close();
+			UsedSocket[socketID] = FALSE;
+			TimeoutSocket[socketID] = TIMEOUT;
+			NbSockets--;
+		}
+	}
 }
+
+/***************************************************************************************/
+char * GetError(int socketID)
+{
+	if ((socketID >= 0) && (socketID < MAX_NB_SOCKETS))
+	{
+		int error = m_sConnectSocket[socketID].GetLastError();
+		switch (error)
+		{
+		case WSANOTINITIALISED:
+			return (_T("A successful AfxSocketInit must occur before using this API."));
+		case WSAENETDOWN:
+			return(_T("The Windows Sockets implementation detected that the network subsystem failed."));
+		case WSAEADDRINUSE:
+			return(_T("The specified address is already in use."));
+		case WSAEINPROGRESS:
+			return(_T("A blocking Windows Sockets call is in progress."));
+		case WSAEADDRNOTAVAIL:
+			return(_T("The specified address is not available from the local machine."));
+		case WSAEAFNOSUPPORT:
+			return(_T("Addresses in the specified family cannot be used with this socket."));
+		case WSAECONNREFUSED:
+			return(_T("The attempt to connect was rejected."));
+		case WSAEDESTADDRREQ:
+			return(_T("A destination address is required."));
+		case WSAEFAULT:
+			return(_T("The nSockAddrLen argument is incorrect."));
+		case WSAEINVAL:
+			return(_T("Invalid host address."));
+		case WSAEISCONN:
+			return(_T("The socket is already connected."));
+		case WSAEMFILE:
+			return(_T("No more file descriptors are available."));
+		case WSAENETUNREACH:
+			return(_T("The network cannot be reached from this host at this time."));
+		case WSAENOBUFS:
+			return(_T("No buffer space is available. The socket cannot be connected."));
+		case WSAENOTSOCK:
+			return(_T("The descriptor is not a socket."));
+		case WSAETIMEDOUT:
+			return(_T("Attempt to connect timed out without establishing a connection."));
+		case WSAEWOULDBLOCK:
+			return(_T("The socket is marked as nonblocking and the connection cannot be completed immediately."));
+		case WSAEPROTONOSUPPORT:
+			return(_T("The specified port is not supported."));
+		case WSAEPROTOTYPE:
+			return(_T("The specified port is the wrong type for this socket."));
+		case WSAESOCKTNOSUPPORT:
+			return(_T("The specified socket type is not supported in this address family."));
+		}
+		return(_T(""));
+	}
+	else
+		return(_T(""));
+}
+
+/***************************************************************************************/
+void strncpyWithEOS(char * szStringOut, const char * szStringIn, int nNumberOfCharToCopy, int nStringOutSize)
+{
+	if (nNumberOfCharToCopy < nStringOutSize)
+	{
+		strncpy (szStringOut, szStringIn, nNumberOfCharToCopy);
+		szStringOut[nNumberOfCharToCopy] = '\0';
+	}
+	else
+	{
+		strncpy (szStringOut, szStringIn, nStringOutSize - 1);
+		szStringOut[nStringOutSize - 1] = '\0';
+	}
+}
+
