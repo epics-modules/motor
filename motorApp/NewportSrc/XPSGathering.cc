@@ -2,7 +2,7 @@
 /**/
 #include <stdio.h>
 /*#include <stdbool.h>*/
-#include "xps_c8_driver.h"
+#include "XPS_C8_drivers.h"
 #include "Socket.h"
 #include <hostLib.h>
 #include <remLib.h>
