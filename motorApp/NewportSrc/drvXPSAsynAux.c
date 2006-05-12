@@ -25,7 +25,7 @@
 #include <asynUInt32Digital.h>
 #include <asynDrvUser.h>
 
-#include <xps_c8_driver.h>
+#include <XPS_C8_drivers.h>
 
 typedef struct {
     char *portName;
@@ -43,12 +43,11 @@ typedef struct {
 } drvXPSAsynAuxPvt;
 
 typedef enum {
-    readAi,
-    readAo,
-    writeAo,
-    readBi,
-    readBo,
-    writeBo
+    analogInput,
+    analogOutput,
+    analogGain,
+    binaryInput,
+    binaryOutput
 } drvXPSAsynAuxCommand;
 
 typedef struct {
@@ -57,12 +56,11 @@ typedef struct {
 } drvXPSAsynAuxCommandStruct;
 
 static drvXPSAsynAuxCommandStruct drvXPSAsynAuxCommands[] = {
-    {readAi,    "READ_AI"},
-    {readAo,    "READ_A0"},
-    {writeAo,   "WRITE_AO"},
-    {readBi,    "READ_BI"},
-    {readBo,    "READ_BO"},
-    {writeBo,   "WRITE_BO"}
+    {analogInput,  "ANALOG_INPUT"},
+    {analogOutput, "ANALOG_OUTPUT"},
+    {analogGain,   "ANALOG_GAIN"},
+    {binaryInput,  "BINARY_INPUT"},
+    {binaryOutput, "BINARY_OUTPUT"}
 };
 
 #define TCP_TIMEOUT 1.0
@@ -259,7 +257,7 @@ static asynStatus readFloat64(void *drvPvt, asynUser *pasynUser,
     pasynManager->getAddr(pasynUser, &channel);
 
     switch(command) {
-    case readAi:
+    case analogInput:
         if ((channel < 0) || (channel >= MAX_ANALOG_INPUTS)) {
             epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
                           "drvXPSAsynAux::readFloat64 channel out of range=%d",
@@ -268,7 +266,7 @@ static asynStatus readFloat64(void *drvPvt, asynUser *pasynUser,
         }
         GPIOName = analogInputNames[channel];
         break;
-    case readAo:
+    case analogOutput:
         if ((channel < 0) || (channel >= MAX_ANALOG_OUTPUTS)) {
             epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
                           "drvXPSAsynAux::readFloat64 channel out of range=%d",
@@ -308,7 +306,7 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
     pasynManager->getAddr(pasynUser, &channel);
 
     switch(command) {
-    case writeAo:
+    case analogOutput:
         if ((channel < 0) || (channel >= MAX_ANALOG_OUTPUTS)) {
             epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
                           "drvXPSAsynAux::writeFloat64 channel out of range=%d",
@@ -341,30 +339,58 @@ static asynStatus readUInt32D(void *drvPvt, asynUser *pasynUser,
     drvXPSAsynAuxPvt *pPvt = (drvXPSAsynAuxPvt *)drvPvt;
     int channel;
     drvXPSAsynAuxCommand command = pasynUser->reason;
-    char *GPIOName;
     int status;
     unsigned short rawValue;
 
     pasynManager->getAddr(pasynUser, &channel);
 
     switch(command) {
-    case readBi:
+    case binaryInput:
         if ((channel < 0) || (channel >= MAX_DIGITAL_INPUTS)) {
             epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
                           "drvXPSAsynAux::readUInt32D readBi channel out of range=%d",
                           channel);
             return(asynError);
         }
-        GPIOName = digitalInputNames[channel];
+        status = GPIODigitalGet(pPvt->socketID, digitalInputNames[channel], &rawValue);
+        if (status) {
+            epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                          "drvXPSAsynAux::readUInt32D error calling GPIODigitalGet=%d",
+                          status);
+            return(asynError);
+        }
+        *value = rawValue & mask;
         break;
-    case readBo:
+    case binaryOutput:
         if ((channel < 0) || (channel >= MAX_DIGITAL_OUTPUTS)) {
             epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
                           "drvXPSAsynAux::readUInt32D readBo channel out of range=%d",
                           channel);
             return(asynError);
         }
-        GPIOName = digitalOutputNames[channel];
+        status = GPIODigitalGet(pPvt->socketID, digitalOutputNames[channel], &rawValue);
+        if (status) {
+            epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                          "drvXPSAsynAux::readUInt32D error calling GPIODigitalGet=%d",
+                          status);
+            return(asynError);
+        }
+        *value = rawValue & mask;
+        break;
+    case analogGain:
+        if ((channel < 0) || (channel >= MAX_ANALOG_OUTPUTS)) {
+            epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                          "drvXPSAsynAux::readUInt32D channel out of range=%d",
+                          channel);
+            return(asynError);
+        }
+        status = GPIOAnalogGainGet(pPvt->socketID, 1, analogInputNames[channel], value);
+        if (status) {
+            epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                          "drvXPSAsynAux::writeUInt32D error calling GPIOAnalogGainSet=%d",
+                          status);
+            return(asynError);
+        }
         break;
     default:
         epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
@@ -372,14 +398,6 @@ static asynStatus readUInt32D(void *drvPvt, asynUser *pasynUser,
                       command);
         return(asynError);
     }
-    status = GPIODigitalGet(pPvt->socketID, GPIOName, &rawValue);
-    if (status) {
-        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                      "drvXPSAsynAux::readUInt32D error calling GPIODigitalGet=%d",
-                      status);
-        return(asynError);
-    }
-    *value = rawValue & mask;
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
               "drvXPSAsynAux::readUInt32D, value=%x\n", *value);
     return(asynSuccess);
@@ -397,7 +415,7 @@ static asynStatus writeUInt32D(void *drvPvt, asynUser *pasynUser,
     pasynManager->getAddr(pasynUser, &channel);
 
     switch(command) {
-    case writeBo:
+    case binaryOutput:
         if ((channel < 0) || (channel >= MAX_DIGITAL_OUTPUTS)) {
             epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
                           "drvXPSAsynAux::writeUInt32D channel out of range=%d",
@@ -405,6 +423,33 @@ static asynStatus writeUInt32D(void *drvPvt, asynUser *pasynUser,
             return(asynError);
         }
         GPIOName = digitalOutputNames[channel];
+        status = GPIODigitalSet(pPvt->socketID, GPIOName, mask, value);
+        if (status) {
+            epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                          "drvXPSAsynAux::writeUInt32D error calling GPIODigitalSet=%d",
+                          status);
+            return(asynError);
+        }
+        asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
+                  "drvXPSAsynAux::writeUInt32D, set binary output value=%d\n", value);
+        break;
+    case analogGain:
+        if ((channel < 0) || (channel >= MAX_ANALOG_OUTPUTS)) {
+            epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                          "drvXPSAsynAux::writeUInt32D channel out of range=%d",
+                          channel);
+            return(asynError);
+        }
+        GPIOName = analogInputNames[channel];
+        status = GPIOAnalogGainSet(pPvt->socketID, 1, GPIOName, &value);
+        if (status) {
+            epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                          "drvXPSAsynAux::writeUInt32D error calling GPIOAnalogGainSet=%d",
+                          status);
+            return(asynError);
+        }
+        asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
+                  "drvXPSAsynAux::writeUInt32D, set gain value=%d\n", value);
         break;
     default:
         epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
@@ -412,15 +457,6 @@ static asynStatus writeUInt32D(void *drvPvt, asynUser *pasynUser,
                       command);
         return(asynError);
     }
-    status = GPIODigitalSet(pPvt->socketID, GPIOName, mask, value);
-    if (status) {
-        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                      "drvXPSAsynAux::writeUInt32D error calling GPIODigitalSet=%d",
-                      status);
-        return(asynError);
-    }
-    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
-              "drvXPSAsynAux::writeUInt32D, value=%x\n", value);
     return(asynSuccess);
 }
 
@@ -472,7 +508,7 @@ static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
             mask = pUInt32DigitalInterrupt->mask;
             changedBits = digitalValues[addr] ^ digitalValuesPrev[addr];
             if (firstTime) changedBits = 0xffff;
-            if ((mask & changedBits) && (reason == readBi)) {
+            if ((mask & changedBits) && (reason == binaryInput)) {
                 pUInt32DigitalInterrupt->callback(pUInt32DigitalInterrupt->userPvt, pasynUser,
                                                   mask & digitalValues[addr]);
             }
@@ -490,7 +526,7 @@ static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
             pfloat64Interrupt = pnode->drvPvt;
             addr = pfloat64Interrupt->addr;
             reason = pfloat64Interrupt->pasynUser->reason;
-            if (reason == readAi) {
+            if (reason == analogInput) {
                 pfloat64Interrupt->callback(pfloat64Interrupt->userPvt,
                                             pfloat64Interrupt->pasynUser,
                                             analogValues[addr]);
