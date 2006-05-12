@@ -19,12 +19,10 @@ program XPS_trajectoryScan("P=13BMC:,R=traj1,M1=m33,M2=m34,M3=m35,M4=m36,M5=m37,
  *
  * Modifications:
 */
-/* typrdef to remove warnings from xps_c8_driver.h */
-%%typedef int bool;
 
 %% #include <string.h>
 %% #include <stdio.h>
-%% #include "xps_c8_driver.h"
+%% #include "XPS_C8_drivers.h"
 %% #include "Socket.h"
 %% #include <hostLib.h>
 %% #include <remLib.h>

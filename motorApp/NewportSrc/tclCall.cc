@@ -10,7 +10,7 @@
 
 
 #include <stdio.h>
-#include "xps_c8_driver.h"
+#include "XPS_C8_drivers.h"
 #include "Socket.h"
 #define  epicsExportSharedSymbols
 #include <shareLib.h>
