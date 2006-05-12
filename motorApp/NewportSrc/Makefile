@@ -8,8 +8,6 @@ include $(TOP)/configure/CONFIG
 
 DBD += devNewport.dbd
 
-INC += xps_c8_driver.h
-
 LIBRARY_IOC = Newport
 
 SRCS += NewportRegister.cc
@@ -30,10 +28,7 @@ SRCS += devPM500.cc  drvPM500.cc
 SRCS += devESP300.cc drvESP300.cc
 
 # XPS C8 device driver
-#SRCS += Socket.cpp 
 SRCS += asynOctetSocket.cpp 
-#SRCS += xps_c8_driver.cpp 
-SRCS += devXPSC8.cc  drvXPSC8.cc 
 SRCS += XPS_C8_drivers.cpp drvXPSAsyn.c drvXPSAsynAux.c
 
 # XPS Gathering Test C script function -> int xpsgathering(void)
