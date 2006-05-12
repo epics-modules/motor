@@ -2,8 +2,23 @@ record(ai,"$(P)$(R)")
 {
         field(SCAN,"$(SCAN)")
         field(DTYP,"asynFloat64Average")
-        field(INP,"@asyn($(PORT) $(CHAN))READ_AI")
+        field(INP,"@asyn($(PORT) $(CHAN))ANALOG_INPUT")
         field(HOPR,"$(HOPR)")
         field(LOPR,"$(LOPR)")
         field(PREC,"$(PREC)")
 }
+
+grecord(mbbo,"$(P)$(R)Gain") {
+    field(DESC,"Input gain")
+    field(DTYP, "asynUInt32Digital")
+    field(OUT,"@asynMask($(PORT) $(CHAN) 0xFFFF)ANALOG_GAIN")
+    field(ZRVL,"1")
+    field(ZRST,"1")
+    field(ONVL,"2")
+    field(ONST,"2")
+    field(TWVL,"4")
+    field(TWST,"4")
+    field(THVL,"8")
+    field(THST,"8")
+}
+

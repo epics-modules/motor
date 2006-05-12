@@ -1,6 +1,6 @@
 grecord(ao,"$(P)$(R)") {
 	field(DTYP,"asynFloat64")
-	field(OUT,"@asyn($(PORT) $(CHAN))WRITE_AO")
+	field(OUT,"@asyn($(PORT) $(CHAN))ANALOG_OUTPUT")
 	field(DRVL,"$(DRVL)")
 	field(LOPR,"$(LOPR)")
 	field(DRVH,"$(DRVH)")
