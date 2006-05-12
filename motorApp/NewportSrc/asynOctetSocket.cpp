@@ -253,15 +253,17 @@ char * GetError(int SocketIndex)
     return socketStructs[SocketIndex].errorString;
 }
 
+/***************************************************************************************/
 void strncpyWithEOS(char * szStringOut, const char * szStringIn, int nNumberOfCharToCopy, int nStringOutSize)
 {
-    char *eos = "\n";
-
-/*
-    if ((nNumberOfCharToCopy + (int)strlen(eos)) > nStringOutSize) {
-        return;
-    }
-*/
-    strncpy(szStringOut, szStringIn, nStringOutSize);
-    /* strcat(szStringOut, eos); */
+        if (nNumberOfCharToCopy < nStringOutSize)
+        {
+                strncpy (szStringOut, szStringIn, nNumberOfCharToCopy);
+                szStringOut[nNumberOfCharToCopy] = '\0';
+        }
+        else
+        {
+                strncpy (szStringOut, szStringIn, nStringOutSize - 1);
+                szStringOut[nStringOutSize - 1] = '\0';
+        }
 }
