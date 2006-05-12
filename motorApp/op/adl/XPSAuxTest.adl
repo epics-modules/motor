@@ -5,10 +5,10 @@ file {
 }
 display {
 	object {
-		x=890
-		y=225
-		width=400
-		height=400
+		x=839
+		y=49
+		width=150
+		height=100
 	}
 	clr=14
 	bclr=4
@@ -89,10 +89,10 @@ display {
 }
 "related display" {
 	object {
-		x=100
-		y=53
-		width=156
-		height=22
+		x=17
+		y=39
+		width=110
+		height=25
 	}
 	display[0] {
 		label="XPS Auxilliary"
@@ -101,4 +101,5 @@ display {
 	}
 	clr=14
 	bclr=4
+	label="XPSAux"
 }
