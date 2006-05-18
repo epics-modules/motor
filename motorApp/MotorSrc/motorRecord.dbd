@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.14 $
-# Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2005-05-10 16:19:23 $
+# Version:		$Revision: 1.15 $
+# Modified By:		$Author: peterd $
+# Last Modified:	$Date: 2006-05-18 19:51:07 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -124,72 +124,72 @@ recordtype(motor) {
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(VELO,DBF_FLOAT) {
+	field(VELO,DBF_DOUBLE) {
 		prompt("Velocity (EGU/s)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(VBAS,DBF_FLOAT) {
+	field(VBAS,DBF_DOUBLE) {
 		prompt("Base Velocity (EGU/s)")
 		promptgroup(GUI_COMMON)
 		asl(ASL0)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(VMAX,DBF_FLOAT) {
+	field(VMAX,DBF_DOUBLE) {
 		prompt("Max. Velocity (EGU/s)")
 		promptgroup(GUI_COMMON)
 		asl(ASL0)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(S,DBF_FLOAT) {
+	field(S,DBF_DOUBLE) {
 		prompt("Speed (revolutions/sec)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(SBAS,DBF_FLOAT) {
+	field(SBAS,DBF_DOUBLE) {
 		prompt("Base Speed (RPS)")
 		promptgroup(GUI_COMMON)
 		asl(ASL0)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(SMAX,DBF_FLOAT) {
+	field(SMAX,DBF_DOUBLE) {
 		prompt("Max. Speed (RPS)")
 		promptgroup(GUI_COMMON)
 		asl(ASL0)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(ACCL,DBF_FLOAT) {
+	field(ACCL,DBF_DOUBLE) {
 		prompt("Seconds to Velocity")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
 		initial("0.2")
 	}
-	field(BDST,DBF_FLOAT) {
+	field(BDST,DBF_DOUBLE) {
 		prompt("BL Distance (EGU)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(BVEL,DBF_FLOAT) {
+	field(BVEL,DBF_DOUBLE) {
 		prompt("BL Velocity (EGU/s)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(SBAK,DBF_FLOAT) {
+	field(SBAK,DBF_DOUBLE) {
 		prompt("BL Speed (RPS)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(BACC,DBF_FLOAT) {
+	field(BACC,DBF_DOUBLE) {
 		prompt("BL Seconds to Velocity")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
@@ -246,7 +246,7 @@ recordtype(motor) {
 		interest(1)
 		initial("200")
 	}
-	field(UREV,DBF_FLOAT) {
+	field(UREV,DBF_DOUBLE) {
 		prompt("EGU's per Revolution")
 		promptgroup(GUI_COMMON)
 		asl(ASL0)
@@ -254,7 +254,7 @@ recordtype(motor) {
 		pp(TRUE)
 		interest(1)
 	}
-	field(MRES,DBF_FLOAT) {
+	field(MRES,DBF_DOUBLE) {
 		prompt("Motor Step Size (EGU)")
 		promptgroup(GUI_COMMON)
 		asl(ASL0)
@@ -262,14 +262,14 @@ recordtype(motor) {
 		pp(TRUE)
 		interest(1)
 	}
-	field(ERES,DBF_FLOAT) {
+	field(ERES,DBF_DOUBLE) {
 		prompt("Encoder Step Size (EGU)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		pp(TRUE)
 		interest(1)
 	}
-	field(RRES,DBF_FLOAT) {
+	field(RRES,DBF_DOUBLE) {
 		prompt("Readback Step Size (EGU")
 		promptgroup(GUI_COMMON)
 		interest(1)
@@ -305,34 +305,34 @@ recordtype(motor) {
 		interest(1)
 		size(16)
 	}
-	field(HLM,DBF_FLOAT) {
+	field(HLM,DBF_DOUBLE) {
 		prompt("User High Limit")
 		special(SPC_MOD)
 		pp(TRUE)
 	}
-	field(LLM,DBF_FLOAT) {
+	field(LLM,DBF_DOUBLE) {
 		prompt("User Low Limit")
 		special(SPC_MOD)
 		pp(TRUE)
 	}
-	field(DHLM,DBF_FLOAT) {
+	field(DHLM,DBF_DOUBLE) {
 		prompt("Dial High Limit")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		pp(TRUE)
 	}
-	field(DLLM,DBF_FLOAT) {
+	field(DLLM,DBF_DOUBLE) {
 		prompt("Dial Low Limit")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		pp(TRUE)
 	}
-	field(HOPR,DBF_FLOAT) {
+	field(HOPR,DBF_DOUBLE) {
 		prompt("High Operating Range")
 		promptgroup(GUI_COMMON)
 		interest(1)
 	}
-	field(LOPR,DBF_FLOAT) {
+	field(LOPR,DBF_DOUBLE) {
 		prompt("Low Operating Range")
 		promptgroup(GUI_COMMON)
 		interest(1)
@@ -353,25 +353,25 @@ recordtype(motor) {
 		prompt("Raw Low Limit Switch")
 		special(SPC_NOMOD)
 	}
-	field(HIHI,DBF_FLOAT) {
+	field(HIHI,DBF_DOUBLE) {
 		prompt("Hihi Alarm Limit (EGU)")
 		promptgroup(GUI_COMMON)
 		pp(TRUE)
 		interest(2)
 	}
-	field(LOLO,DBF_FLOAT) {
+	field(LOLO,DBF_DOUBLE) {
 		prompt("Lolo Alarm Limit (EGU)")
 		promptgroup(GUI_COMMON)
 		pp(TRUE)
 		interest(2)
 	}
-	field(HIGH,DBF_FLOAT) {
+	field(HIGH,DBF_DOUBLE) {
 		prompt("High Alarm Limit (EGU)")
 		promptgroup(GUI_COMMON)
 		pp(TRUE)
 		interest(2)
 	}
-	field(LOW,DBF_FLOAT) {
+	field(LOW,DBF_DOUBLE) {
 		prompt("Low Alarm Limit (EGU)")
 		promptgroup(GUI_COMMON)
 		pp(TRUE)
@@ -412,7 +412,7 @@ recordtype(motor) {
 		interest(2)
 		menu(menuAlarmSevr)
 	}
-	field(RDBD,DBF_FLOAT) {
+	field(RDBD,DBF_DOUBLE) {
 		prompt("Retry Deadband (EGU)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
@@ -487,7 +487,7 @@ recordtype(motor) {
 		pp(TRUE)
 		interest(1)
 	}
-	field(TWV,DBF_FLOAT) {
+	field(TWV,DBF_DOUBLE) {
 		prompt("Tweak Step Size (EGU)")
 		promptgroup(GUI_COMMON)
 		interest(1)
@@ -619,7 +619,7 @@ recordtype(motor) {
 		special(SPC_NOMOD)
 		interest(3)
 	}
-	field(DLY,DBF_FLOAT) {
+	field(DLY,DBF_DOUBLE) {
 		prompt("Readback settle time (s)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
@@ -632,21 +632,21 @@ recordtype(motor) {
 		size(4)
 		extra("void		*cbak")
 	}
-	field(PCOF,DBF_FLOAT) {
+	field(PCOF,DBF_DOUBLE) {
 		promptgroup(GUI_COMMON)
 		prompt("Proportional Gain")
 		special(SPC_MOD)
 		interest(1)
 		initial("0")
 	}
-	field(ICOF,DBF_FLOAT) {
+	field(ICOF,DBF_DOUBLE) {
 		promptgroup(GUI_COMMON)
 		prompt("Integral Gain")
 		special(SPC_MOD)
 		interest(1)
 		initial("0")
 	}
-	field(DCOF,DBF_FLOAT) {
+	field(DCOF,DBF_DOUBLE) {
 		promptgroup(GUI_COMMON)
 		prompt("Derivative Gain")
 		special(SPC_MOD)
@@ -695,13 +695,13 @@ recordtype(motor) {
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(JVEL,DBF_FLOAT) {
+	field(JVEL,DBF_DOUBLE) {
 		prompt("Jog Velocity (EGU/s)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
 	}
-	field(JAR,DBF_FLOAT) {
+	field(JAR,DBF_DOUBLE) {
 		prompt("Jog Accel. (EGU/s^2)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
@@ -721,7 +721,7 @@ recordtype(motor) {
 		menu(menuYesNo)
 		initial("YES")
 	}
-	field(HVEL,DBF_FLOAT) {
+	field(HVEL,DBF_DOUBLE) {
 		prompt("Home Velocity (EGU/s)")
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)

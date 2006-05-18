@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.30 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-03-21 22:45:05 $
+Version:	$Revision: 1.31 $
+Modified By:	$Author: peterd $
+Last Modified:	$Date: 2006-05-18 19:51:06 $
 */
 
 /*
@@ -139,7 +139,7 @@ static void check_speed_and_resolution(motorRecord *);
 static void set_dial_highlimit(motorRecord *, struct motor_dset *);
 static void set_dial_lowlimit(motorRecord *, struct motor_dset *);
 static void set_userlimits(motorRecord *);
-static void range_check(motorRecord *, float *, double, double);
+static void range_check(motorRecord *, double *, double, double);
 static void clear_buttons(motorRecord *);
 
 /*** Record Support Entry Table (RSET) functions. ***/
@@ -387,7 +387,7 @@ Make RDBD >= MRES.
 ******************************************************************************/
 static void enforceMinRetryDeadband(motorRecord * pmr)
 {
-    float min_rdbd;
+    double min_rdbd;
 
     min_rdbd = fabs(pmr->mres);
 
@@ -562,7 +562,7 @@ static long init_record(dbCommon* arg, int pass)
     pmr->lrvl = pmr->rval;
     pmr->lvio = 0;		/* init limit-violation field */
 
-    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
 	;
     else if ((pmr->drbv > pmr->dhlm + pmr->mres) || (pmr->drbv < pmr->dllm - pmr->mres))
     {
@@ -1197,7 +1197,7 @@ static long process(dbCommon *arg)
 		    pmr->mip |= MIP_DELAY_REQ;
 		    MARK(M_MIP);
 
-                    callbackRequestDelayed(&pcallback->dly_callback, (double) pmr->dly);
+                    callbackRequestDelayed(&pcallback->dly_callback, pmr->dly);
 
 		    pmr->dmov = FALSE;
 		    pmr->pact = 0;
@@ -1210,7 +1210,7 @@ static long process(dbCommon *arg)
 enter_do_work:
 
     /* check for soft-limit violation */
-    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
 	pmr->lvio = false;
     else
     {
@@ -1716,7 +1716,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     		return(OK);
 	    }
 	    /* check for limit violation */
-	    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+	    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
 		;
 	    else if ((pmr->homf && (pmr->dval > pmr->dhlm - pmr->velo)) ||
 		     (pmr->homr && (pmr->dval < pmr->dllm + pmr->velo)))
@@ -1778,7 +1778,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    (pmr->mip & MIP_JOG_REQ))
 	{
 	    /* check for limit violation */
-	    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+	    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
 		;
 	    else if ((pmr->jogf && (pmr->dval > pmr->dhlm - pmr->velo)) ||
 		     (pmr->jogr && (pmr->dval < pmr->dllm + pmr->velo)))
@@ -1911,7 +1911,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     }
 
     /* Record limit violation */
-    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == (float) 0.0))
+    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
 	pmr->lvio = false;
     else
 	pmr->lvio = (pmr->dval > pmr->dhlm) ||
@@ -2166,7 +2166,7 @@ static long special(DBADDR *paddr, int after)
     RTN_STATUS rtnval;
     motor_cmnd command;
     double temp_dbl;
-    float *temp_flt;
+    double *pcoeff;
     msta_field msta;
 
     msta.All = pmr->msta;
@@ -2577,34 +2577,32 @@ velcheckB:
 	break;
 
     case motorRecordPCOF:
-	temp_flt = &pmr->pcof;
+	pcoeff = &pmr->pcof;
 	command = SET_PGAIN;
 	goto pidcof;
     case motorRecordICOF:
-	temp_flt = &pmr->icof;
+	pcoeff = &pmr->icof;
 	command = SET_IGAIN;
 	goto pidcof;
     case motorRecordDCOF:
-	temp_flt = &pmr->dcof;
+	pcoeff = &pmr->dcof;
 	command = SET_DGAIN;
 pidcof:
 	if (msta.Bits.GAIN_SUPPORT != 0)
 	{
-	    if (*temp_flt < 0.0)	/* Validity check;  0.0 <= gain <= 1.0 */
+	    if (*pcoeff < 0.0)	/* Validity check;  0.0 <= gain <= 1.0 */
 	    {
-		*temp_flt = 0.0;
+		*pcoeff = 0.0;
 		changed = true;
 	    }
-	    else if (*temp_flt > 1.0)
+	    else if (*pcoeff > 1.0)
 	    {
-		*temp_flt = 1.0;
+		*pcoeff = 1.0;
 		changed = true;
 	    }
-
-	    temp_dbl = *temp_flt;
 
 	    INIT_MSG();
-	    rtnval = (*pdset->build_trans)(command, &temp_dbl, pmr);
+	    rtnval = (*pdset->build_trans)(command, pcoeff, pmr);
             /* If an error occured, build_trans() has reset the gain
 	     * parameter to a valid value for this controller. */
 	    if (rtnval != OK)
@@ -2612,21 +2610,19 @@ pidcof:
 
 	    SEND_MSG();
 	    if (changed == 1)
-		db_post_events(pmr, temp_flt, DBE_VAL_LOG);
+		db_post_events(pmr, pcoeff, DBE_VAL_LOG);
 	}
 	break;
 
     case motorRecordCNEN:
 	if (msta.Bits.GAIN_SUPPORT != 0)
 	{
-	    double tempdbl;
-
 	    INIT_MSG();
-	    tempdbl = pmr->cnen;
+	    temp_dbl = pmr->cnen;
 	    if (pmr->cnen != 0)
-		WRITE_MSG(ENABLE_TORQUE, &tempdbl);
+		WRITE_MSG(ENABLE_TORQUE, &temp_dbl);
 	    else
-		WRITE_MSG(DISABL_TORQUE, &tempdbl);
+		WRITE_MSG(DISABL_TORQUE, &temp_dbl);
 	    SEND_MSG();
 	}
 
@@ -3596,14 +3592,14 @@ static void set_userlimits(motorRecord *pmr)
 }
 
 /*
-FUNCTION... void range_check(motorRecord *, float *, double, double)
+FUNCTION... void range_check(motorRecord *, double *, double, double)
 USAGE... Limit parameter to valid range; i.e., min. <= parameter <= max.
 
 INPUT...	parm - pointer to parameter to be range check.
 		min  - minimum value.
 		max  - 0 = max. range check disabled; !0 = maximum value.
 */
-static void range_check(motorRecord *pmr, float *parm_ptr, double min, double max)
+static void range_check(motorRecord *pmr, double *parm_ptr, double min, double max)
 {
     bool changed = false;
     double parm_val = *parm_ptr;
