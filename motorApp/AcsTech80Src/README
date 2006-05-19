@@ -1,0 +1,58 @@
+ACSTech80 SPiiPlus Motor Controller
+===================================
+
+
+**** EXAMPLE CONFIGURATION FOR VXWORKS TARGETS ****
+
+xxxApp/src/Makefile
+-------------------
+xxx_vxWorks_LIBS += acsTech80
+
+xxxApp/src/xxxCommonInclude.dbd
+--------------------------------
+include "devSPiiPlus.dbd"
+
+
+iocBoot/iocxxx/serial.cmd
+---------------------------
+
+# serial 61 is connected to the SPiiPlus Motor Controller
+#drvAsynIPPortConfigure("portName","hostInfo",priority,noAutoConnect,
+#                        noProcessEos)
+drvAsynIPPortConfigure("serial61", "164.54.116.61:701", 0, 0, 0)
+asynOctetSetInputEos("serial61",0,"\r")
+asynOctetSetOutputEos("serial61",0,"\r")
+
+.
+.
+.
+
+# ACS Tech80 - SPiiPlus driver setup parameters:
+#     (1) maximum number of controllers in system
+#     (2) motor task polling rate (min=1Hz, max=60Hz)
+SPiiPlusSetup(1, 60)
+
+# ACS Tech80 - SPiiPlus driver configuration parameters:
+#     (1) controller being configured
+#     (2) asyn port name (string)
+SPiiPlusConfig(0, "serial61")
+
+
+iocBoot/iocxxx/motor.substitutions
+----------------------------------
+{xxx:, 1,     m$(N),  "SPiiPlus",     0,      0,      "motor $(N)",   degrees,        Pos,    10,             0.,             1.,             0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
+{xxx:, 2      m$(N),  "SPiiPlus",     0,      1,      "motor $(N)",   degrees,        Pos,    60,             0.,             1.5,            0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
+
+
+****************** SPiiPlus Setup *******************************
+
+Install the "SPiiPlus_EPICS.prg" file in the SPiiPlus motor controller 
+using the ACSTech80 WINDOWS software. 
+
+This file contains the EPICS interface programs need by the
+motorRecord driver to control one SPiiPlus motors (AXIS 0). For 
+each motor used, copy the contents of Buffer #0 it's corresponding
+buffer.  (Motor 1 - buffer #0, Motor 2 - buffer #1, ... etc()
+
+Each motor is assigned a SPiiPlus buffer with a copy of all the programs 
+that are currently in buffer #0. 

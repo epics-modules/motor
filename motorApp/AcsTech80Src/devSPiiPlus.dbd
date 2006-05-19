@@ -1,0 +1,5 @@
+# ACS Tech 80 Device Driver support.
+device(motor,VME_IO,devSPiiPlus,"SPiiPlus")
+driver(drvSPiiPlus)
+registrar(ACSTech80Register)
+#variable(drvSPiiPlusdebug)
