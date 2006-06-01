@@ -17,7 +17,7 @@ ld < WithMPFVx.munch
 
 cd startup
 dbLoadDatabase("$(TOP)/dbd/WithMPFVx.dbd")
-WithMPF_registerRecordDeviceDriver(pdbbase)
+WithMPFVx_registerRecordDeviceDriver(pdbbase)
 dbLoadTemplate("motor.substitutions")
 
 # Create simulated motors: ( start card , start axis , low limit, high limit, home posn, # cards, # axes to setup)
