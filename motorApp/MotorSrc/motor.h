@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.17 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-04-08 20:11:56 $
+Version:	$Revision: 1.18 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2006-06-02 21:19:09 $
 */
 
 /*
@@ -123,12 +123,12 @@ typedef enum  {
 /* Define, from top to bottom, how bit fields are packed. */
 /* This works for VxWorks, SunPro, Linux g++, MS Visual C. */
 #ifdef _WIN32
-#define LSB_First (TRUE)  // LSB is packed first.
+#define LSB_First (TRUE)  /* LSB is packed first. */
 #else
 #if #cpu(i386) && !#cpu(sparc)
-#define LSB_First (TRUE)  // LSB is packed first.
+#define LSB_First (TRUE)  /* LSB is packed first. */
 #else
-#define MSB_First (TRUE)  // MSB is packed first.
+#define MSB_First (TRUE)  /* MSB is packed first. */
 #endif
 #endif
 
