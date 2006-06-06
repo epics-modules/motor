@@ -26,15 +26,13 @@
 
 motorAxisDrvSET_t motorXPS = 
   {
-    20,
+    14,
     motorAxisReport,            /**< Standard EPICS driver report function (optional) */
     motorAxisInit,              /**< Standard EPICS dirver initialisation function (optional) */
     motorAxisSetLog,            /**< Defines an external logging function (optional) */
-    motorAxisSetLogParam,       /**< Defines an external logging function user parameter (optional) */
     motorAxisOpen,              /**< Driver open function */
     motorAxisClose,             /**< Driver close function */
     motorAxisSetCallback,       /**< Provides a callback function the driver can call when the status updates */
-    motorAxisPrimitive,         /**< Passes a controller dependedent string */
     motorAxisSetDouble,         /**< Pointer to function to set a double value */
     motorAxisSetInteger,        /**< Pointer to function to set an integer value */
     motorAxisGetDouble,         /**< Pointer to function to get a double value */
@@ -82,6 +80,7 @@ typedef struct motorAxisHandle
     int positionerError;
     int card;
     int axis;
+    motorAxisLogFunc print;
     void *logParam;
     epicsMutexId mutexId;
 } motorAxis;
@@ -91,11 +90,12 @@ typedef struct
   AXIS_HDL pFirst;
   epicsThreadId motorThread;
   motorAxisLogFunc print;
+  void *logParam;
   epicsTimeStamp now;
 } motorXPS_t;
 
 static int motorXPSLogMsg(void * param, const motorAxisLogMask_t logMask, const char *pFormat, ...);
-#define PRINT   (drv.print)
+#define PRINT   (pAxis->print)
 #define FLOW    motorAxisTraceFlow
 #define ERROR   motorAxisTraceError
 #define IODRIVER  motorAxisTraceIODriver
@@ -105,7 +105,7 @@ static int motorXPSLogMsg(void * param, const motorAxisLogMask_t logMask, const 
 #define XPSC8_END_OF_RUN_PLUS   0x00000200
 
 #define TCP_TIMEOUT 2.0
-static motorXPS_t drv={ NULL, NULL, motorXPSLogMsg, { 0, 0 } };
+static motorXPS_t drv={ NULL, NULL, motorXPSLogMsg, 0, { 0, 0 } };
 static int numXPSControllers;
 /* Pointer to array of controller strutures */
 static XPSController *pXPSController=NULL;
@@ -144,22 +144,35 @@ static int motorAxisInit(void)
   return MOTOR_AXIS_OK;
 }
 
-static int motorAxisSetLog(motorAxisLogFunc logFunc)
+static int motorAxisSetLog( AXIS_HDL pAxis, motorAxisLogFunc logFunc, void * param )
 {
-  if (logFunc == NULL) drv.print=motorXPSLogMsg;
-  else drv.print = logFunc;
-
-  return MOTOR_AXIS_OK;
-}
-
-static int motorAxisSetLogParam(AXIS_HDL pAxis, void * param)
-{
-  if (pAxis == NULL) return MOTOR_AXIS_ERROR;
-  else
+    if (pAxis == NULL) 
     {
-      pAxis->logParam = param;
+        if (logFunc == NULL)
+        {
+            drv.print=motorXPSLogMsg;
+            drv.logParam = NULL;
+        }
+        else
+        {
+            drv.print=logFunc;
+            drv.logParam = param;
+        }
     }
-  return MOTOR_AXIS_OK;
+    else
+    {
+        if (logFunc == NULL)
+        {
+            pAxis->print=motorXPSLogMsg;
+            pAxis->logParam = NULL;
+        }
+        else
+        {
+            pAxis->print=logFunc;
+            pAxis->logParam = param;
+        }
+    }
+    return MOTOR_AXIS_OK;
 }
 
 static AXIS_HDL motorAxisOpen(int card, int axis, char * param)
@@ -202,11 +215,6 @@ static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, 
     {
       return motorParam->setCallback(pAxis->params, callback, param);
     }
-}
-
-static int motorAxisPrimitive(AXIS_HDL pAxis, int length, char * string)
-{
-  return MOTOR_AXIS_OK;
 }
 
 static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)

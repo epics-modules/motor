@@ -26,15 +26,13 @@
 
 motorAxisDrvSET_t motorMM4000 = 
   {
-    20,
+    14,
     motorAxisReport,            /**< Standard EPICS driver report function (optional) */
     motorAxisInit,              /**< Standard EPICS dirver initialisation function (optional) */
     motorAxisSetLog,            /**< Defines an external logging function (optional) */
-    motorAxisSetLogParam,       /**< Defines an external logging function user parameter (optional) */
     motorAxisOpen,              /**< Driver open function */
     motorAxisClose,             /**< Driver close function */
     motorAxisSetCallback,       /**< Provides a callback function the driver can call when the status updates */
-    motorAxisPrimitive,         /**< Passes a controller dependedent string */
     motorAxisSetDouble,         /**< Pointer to function to set a double value */
     motorAxisSetInteger,        /**< Pointer to function to set an integer value */
     motorAxisGetDouble,         /**< Pointer to function to get a double value */
@@ -78,6 +76,7 @@ typedef struct motorAxisHandle
     int card;
     int axis;
     int maxDigits;
+    motorAxisLogFunc print;
     void *logParam;
     epicsMutexId mutexId;
 } motorAxis;
@@ -87,6 +86,7 @@ typedef struct
     AXIS_HDL pFirst;
     epicsThreadId motorThread;
     motorAxisLogFunc print;
+    void *logParam;
     epicsTimeStamp now;
 } motorMM4000_t;
 
@@ -113,7 +113,7 @@ static int sendAndReceive(MM4000Controller *pController, char *outputString, cha
 
 
 #define TCP_TIMEOUT 2.0
-static motorMM4000_t drv={ NULL, NULL, motorMM4000LogMsg, { 0, 0 } };
+static motorMM4000_t drv={ NULL, NULL, motorMM4000LogMsg, 0, { 0, 0 } };
 static int numMM4000Controllers;
 /* Pointer to array of controller strutures */
 static MM4000Controller *pMM4000Controller=NULL;
@@ -161,22 +161,35 @@ static int motorAxisInit(void)
   return MOTOR_AXIS_OK;
 }
 
-static int motorAxisSetLog(motorAxisLogFunc logFunc)
+static int motorAxisSetLog( AXIS_HDL pAxis, motorAxisLogFunc logFunc, void * param )
 {
-  if (logFunc == NULL) drv.print=motorMM4000LogMsg;
-  else drv.print = logFunc;
-
-  return MOTOR_AXIS_OK;
-}
-
-static int motorAxisSetLogParam(AXIS_HDL pAxis, void * param)
-{
-  if (pAxis == NULL) return MOTOR_AXIS_ERROR;
-  else
+    if (pAxis == NULL) 
     {
-      pAxis->logParam = param;
+        if (logFunc == NULL)
+        {
+            drv.print=motorMM4000LogMsg;
+            drv.logParam = NULL;
+        }
+        else
+        {
+            drv.print=logFunc;
+            drv.logParam = param;
+        }
     }
-  return MOTOR_AXIS_OK;
+    else
+    {
+        if (logFunc == NULL)
+        {
+            pAxis->print=motorMM4000LogMsg;
+            pAxis->logParam = NULL;
+        }
+        else
+        {
+            pAxis->print=logFunc;
+            pAxis->logParam = param;
+        }
+    }
+    return MOTOR_AXIS_OK;
 }
 
 static AXIS_HDL motorAxisOpen(int card, int axis, char * param)
@@ -219,11 +232,6 @@ static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, 
     {
       return motorParam->setCallback(pAxis->params, callback, param);
     }
-}
-
-static int motorAxisPrimitive(AXIS_HDL pAxis, int length, char * string)
-{
-  return MOTOR_AXIS_OK;
 }
 
 static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)

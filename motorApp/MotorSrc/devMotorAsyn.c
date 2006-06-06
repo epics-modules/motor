@@ -1,5 +1,23 @@
-/* devMotorAsyn.c */
-/* Example device support module */
+/* 
+ * devMotorAsyn.c
+ * 
+ * Motor record common Asyn device support layer
+ * 
+ * Copyright (C) 2005-6 Peter Denison, Diamond Light Source
+ *
+ * This software is distributed subject to the EPICS Open Licence, which can
+ * be found at http://www.aps.anl.gov/epics/licence/open.php
+ * 
+ * Notwithstanding the above, explicit permission is granted for APS to 
+ * redistribute this software.
+ *
+ * Version: $Revision: 1.10 $
+ * Modified by: $Author: peterd $
+ * Last Modified: $Date: 2006-06-06 08:50:14 $
+ *
+ * Original Author: Peter Denison
+ * Current Author: Peter Denison
+ */
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -116,7 +134,7 @@ static long init_record(struct motorRecord * pmr )
     status = pasynManager->connectDevice(pasynUser, port, signal);
     if (status != asynSuccess) {
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
-                  "devMcaAsyn::init_record, %s connectDevice failed to %s\n",
+                  "devMotorAsyn::init_record, %s connectDevice failed to %s\n",
                   pmr->name, port);
         goto bad;
     }
@@ -358,6 +376,12 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	pmsg->ivalue = 0;
 	pmsg->interface = int32Type;
 	break;
+    case PRIMITIVE:
+	asynPrint(pasynUser, ASYN_TRACE_ERROR,
+		  "devMotorAsyn::send_msg: %s: PRIMITIVE no longer supported\n",
+		  pmr->name);
+	return(ERROR);
+	break;
     case SET_HIGH_LIMIT:
 	pmsg->command = motorHighLim;
 	pmsg->dvalue = *param;
@@ -378,7 +402,10 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	pmsg->dvalue = *param;
 	break;
     default:
-	status = ERROR;
+	asynPrint(pasynUser, ASYN_TRACE_ERROR,
+		  "devMotorAsyn::send_msg: %s: motor command %d not recognised\n",
+		  pmr->name, command);
+	return(ERROR);
     }
     
     /* Queue asyn request, so we get a callback when driver is ready */
@@ -398,6 +425,11 @@ static RTN_STATUS end_trans(struct motorRecord * pmr )
   return(OK);
 }
 
+/**
+ * Called once the request comes off the Asyn internal queue.
+ *
+ * The request is still "on its way down" at this point
+ */
 static void asynCallback(asynUser *pasynUser)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)pasynUser->userPvt;
@@ -443,6 +475,9 @@ static void asynCallback(asynUser *pasynUser)
     }
 }
 
+/**
+ * True callback to notify that controller status has changed.
+ */
 static void statusCallback(void *drvPvt, asynUser *pasynUser,
 			   epicsInt32 value)
 {
@@ -467,6 +502,9 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
     }
 }
 
+/**
+ * True callback to notify that controller position has changed.
+ */
 static void positionCallback(void *drvPvt, asynUser *pasynUser,
 			     epicsFloat64 value)
 {
@@ -491,6 +529,9 @@ static void positionCallback(void *drvPvt, asynUser *pasynUser,
     }
 }
 
+/**
+ * True callback to notify that controller encoder position has changed.
+ */
 static void encoderCallback(void *drvPvt, asynUser *pasynUser,
 			    epicsFloat64 value)
 {

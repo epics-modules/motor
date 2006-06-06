@@ -11,7 +11,7 @@ cd "$(INSTALL)"
 # build architecture, so they can be used liberally to do architecture
 # specific things. Alternatively, you can include an architecture
 # specific file.
-$(VXWORKS_ONLY)ld < bin/$(ARCH)/test.munch
+$(VXWORKS_ONLY)ld < bin/$(ARCH)/motorSim.munch
 
 ## This drvTS initializer is needed if the IOC has a hardware event system
 #TSinit
@@ -21,7 +21,7 @@ dbLoadDatabase("dbd/motorSim.dbd")
 motorSim_registerRecordDeviceDriver(pdbbase)
 
 ## Load record instances
-dbLoadRecords("db/motorSimTest.db","DEVICE=npr78")
+dbLoadRecords("db/motorSimTest.db","DEVICE=motorSim")
 #dbLoadRecords("db/dbExample2.db","user=npr78,no=1,scan=1 second")
 #dbLoadRecords("db/dbExample2.db","user=npr78,no=2,scan=2 second")
 #dbLoadRecords("db/dbExample2.db","user=npr78,no=3,scan=5 second")

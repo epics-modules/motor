@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void motorSimCreate( int card, int axis, double hiLimit, double lowLimit, double home, int nCards, int nAxes );
+void motorSimCreate( int card, int axis, int hiLimit, int lowLimit, int home, int nCards, int nAxes );
 
 #ifdef __cplusplus
 }

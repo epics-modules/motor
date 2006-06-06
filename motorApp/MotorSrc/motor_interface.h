@@ -165,8 +165,9 @@ The latter could be used for the primitive record approach, and the
 former for the motor record.
 
 Finally, in the PREM and the POST fields aren't seen in this
-implementation - I assume they are handled via device support calling
-motorAxisPrimitive.
+implementation - This functionality is no longer supported through the
+motor record and should be done by linking to controller specific
+device support.
 
 \section Status Analysis of commands that provide status information
 
@@ -301,8 +302,8 @@ typedef enum
 typedef int (*motorAxisLogFunc)( void * userParam,
                                  const motorAxisLogMask_t logMask,
                                  const char *pFormat, ...);
-typedef int (*motorAxisSetLogFunc)( motorAxisLogFunc logFunc );
-typedef int (*motorAxisSetLogParamFunc)( AXIS_HDL pAxis, void * param );
+
+typedef int (*motorAxisSetLogFunc)( AXIS_HDL pAxis, motorAxisLogFunc logFunc, void * param );
 
 /** Provide an external logging routine.
 
@@ -315,30 +316,19 @@ typedef int (*motorAxisSetLogParamFunc)( AXIS_HDL pAxis, void * param );
     - enabling tracing of errors, flow, and device filter and driver layers.
     infomational, minor, major or fatal.
 
+    If pAxis is NULL, then this logging function and parameter should be used as
+    a default - i.e. when logging is not taking place in the context of a single
+    axis (a background polling task, for example).
+
+    \param pAxis   [in] Pointer to axis handle returned by motorAxisOpen.
     \param logFunc [in] Pointer to function of motorAxisLogFunc type.
+    \param param   [in] Pointer to the user parameter to be used for logging on this axis
 
     \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure. 
 */
 
 #ifdef DEFINE_MOTOR_PROTOTYPES
-static int motorAxisSetLog( motorAxisLogFunc logFunc );
-#endif
-
-
-/** Provide an external logging routine axis specific user parameter.
-
-    This is an optional function which allows external software to provide
-    axis specific data to the logging function to be used when logging
-    information about this axis. If the logging information is not axis
-    specific a NULL pointer should be supplied to the logging routine.
-
-    \param param [in] Pointer to a user parameter to be used for logging on this axis
-
-    \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure. 
-*/
-
-#ifdef DEFINE_MOTOR_PROTOTYPES
-static int motorAxisSetLogParam( AXIS_HDL pAxis, void * param );
+static int motorAxisSetLog( AXIS_HDL pAxis, motorAxisLogFunc logFunc, void * param );
 #endif
 
 /**@}*/
@@ -423,25 +413,6 @@ static int motorAxisSetCallback( AXIS_HDL pAxis, motorAxisCallbackFunc callback,
 /**\defgroup parameters Routines that set axis control parameters
  @{
 */
-
-typedef int (*motorAxisStringFunc)( AXIS_HDL pAxis, int, char * );
-
-/** Pass a controller specific string to the controller
-
-    This optional routine passes a controller specific string down to the controller.
-    The exact string format depends on the controller. The length parameter allows
-    the string to contain embedded nulls.
-
-    \param pAxis    [in]   Pointer to axis handle returned by motorAxisOpen.
-    \param length   [in]   Length of the string to be passed to the controller.
-    \param string   [in]   Character string to be passed to the controller.
-
-    \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure. 
-*/
-
-#ifdef DEFINE_MOTOR_PROTOTYPES
-static int motorAxisPrimitive( AXIS_HDL pAxis, int length, char * string );
-#endif
 
 typedef int (*motorAxisSetDoubleFunc)( AXIS_HDL pAxis, motorAxisParam_t, double );
 
@@ -690,11 +661,9 @@ typedef struct
     motorAxisReportFunc          report;            /**< Standard EPICS driver report function (optional) */
     motorAxisInitFunc            init;              /**< Standard EPICS dirver initialisation function (optional) */
     motorAxisSetLogFunc          setLog;            /**< Defines an external logging function (optional) */
-    motorAxisSetLogParamFunc     setLogParam;       /**< Defines a parameter to be used when calling the logging function for an axis */
     motorAxisOpenFunc            open;              /**< Driver open function */
     motorAxisCloseFunc           close;             /**< Driver close function */
     motorAxisSetCallbackFunc     setCallback;       /**< Provides a callback function the driver can call when the status updates */
-    motorAxisStringFunc          primitive;         /**< Passes a controller dependedent string */
     motorAxisSetDoubleFunc       setDouble;         /**< Pointer to function to set a double value */
     motorAxisSetIntegerFunc      setInteger;        /**< Pointer to function to set an integer value */
     motorAxisGetDoubleFunc       getDouble;         /**< Pointer to function to get a double value */
