@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.8 $
- * Modified by: $Author: peterd $
- * Last Modified: $Date: 2006-06-06 08:50:14 $
+ * Version: $Revision: 1.9 $
+ * Modified by: $Author: rivers $
+ * Last Modified: $Date: 2006-06-15 19:23:36 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -348,18 +348,19 @@ static asynStatus readInt32(void *drvPvt, asynUser *pasynUser,
     }
 
     switch(command) {
+    case -1:   /* This is commands we know about but don't want int32 interface for */
+        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                      "drvMotorAsyn::readInt32 invalid command=%d",
+                      command);
+        return(asynError);
     case motorStatus:
 	*value = pAxis->status;
 	break;
     case motorPosition:
     case motorEncoderPosition:
+    default:
 	(*pPvt->drvset->getInteger)(pAxis->axis, command, value);
 	break;
-    default:
-        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                      "drvMotorAsyn::readInt32 invalid command=%d",
-                      command);
-        return(asynError);
     }
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
               "drvMotorAsyn::readInt32, value=%d\n", *value);
@@ -391,6 +392,11 @@ static asynStatus readFloat64(void *drvPvt, asynUser *pasynUser,
     }
 
     switch(command) {
+    case -1:
+        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                      "drvMotorAsyn::readFloat64 invalid command=%d",
+                      command);
+        return(asynError);
     case motorVelocity:
 	*value = pAxis->max_velocity;
 	break;
@@ -402,13 +408,9 @@ static asynStatus readFloat64(void *drvPvt, asynUser *pasynUser,
 	break;
     case motorPosition:
     case motorEncoderPosition:
+    default:
 	(*pPvt->drvset->getDouble)(pAxis->axis, command, value);
 	break;
-    default:
-        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                      "drvMotorAsyn::readFloat64 invalid command=%d",
-                      command);
-        return(asynError);
     }
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
               "drvMotorAsyn::readFloat64, value=%f\n", *value);
@@ -449,6 +451,11 @@ static asynStatus writeInt32(void *drvPvt, asynUser *pasynUser,
     }
 
     switch(command) {
+    case -1:
+        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                      "drvMotorAsyn::writeInt32D invalid command=%d",
+                      command);
+        return(asynError);
     case motorStop:
 	status = (*pPvt->drvset->stop)(pAxis->axis, pAxis->accel);
 	break;
@@ -462,10 +469,7 @@ static asynStatus writeInt32(void *drvPvt, asynUser *pasynUser,
 					     value);
 	break;
     default:
-        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                      "drvMotorAsyn::writeInt32D invalid command=%d",
-                      command);
-        return(asynError);
+	status = (*pPvt->drvset->setInteger)(pAxis->axis, command, value);
 	break;
     }
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
@@ -501,6 +505,11 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
 	      command, pasynUser, pAxis);
 
     switch(command) {
+    case -1:
+        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                      "drvMotorAsyn::writeFloat64 invalid command=%d",
+                      command);
+        return(asynError);
     case motorMoveRel:
 	status = (*pPvt->drvset->move)(pAxis->axis, value, 1, pAxis->min_velocity,
 			       pAxis->max_velocity, pAxis->accel);
@@ -535,13 +544,9 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
     case motorDgain:
     case motorHighLim:
     case motorLowLim:
+    default:
 	status = (*pPvt->drvset->setDouble)(pAxis->axis, command, value);
 	break;
-    default:
-        epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                      "drvMotorAsyn::writeFloat64 invalid command=%d",
-                      command);
-        return(asynError);
     }
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
               "drvMotorAsyn::writeFloat64, reason=%d, value=%f\n",
