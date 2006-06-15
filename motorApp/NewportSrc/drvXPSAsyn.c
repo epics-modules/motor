@@ -1,5 +1,4 @@
 #include <stddef.h>
-#include "epicsThread.h"
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
@@ -17,12 +16,17 @@
 #include "epicsStdio.h"
 #include "epicsMutex.h"
 #include "ellLib.h"
+#include "iocsh.h"
 
 #include "drvSup.h"
 #include "epicsExport.h"
 #define DEFINE_MOTOR_PROTOTYPES 1
 #include "motor_interface.h"
 #include "XPS_C8_drivers.h"
+#include "XPSAsynInterpose.h"
+#include "tclCall.h"
+
+extern int xpsgathering(int);
 
 motorAxisDrvSET_t motorXPS = 
   {
@@ -294,6 +298,18 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         case motorAxisClosedLoop:
         {
             PRINT(pAxis->logParam, ERROR, "XPS does not support changing closed loop or torque\n");
+            break;
+        }
+        case minJerkTime:
+        {
+            pAxis->minJerkTime = value;
+            ret_status = MOTOR_AXIS_OK;
+            break;
+        }
+        case maxJerkTime:
+        {
+            pAxis->maxJerkTime = value;
+            ret_status = MOTOR_AXIS_OK;
             break;
         }
         default:
@@ -765,7 +781,7 @@ int XPSConfig(int card,           /* Controller number */
         printf("XPSConfig: pollSocket=%d, moveSocket=%d, ip=%s, port=%d,"
               " axis=%d controller=%d\n",
               pAxis->pollSocket, pAxis->moveSocket, ip, port, axis, card);
-        pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS);
+        pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS + XPS_NUM_PARAMS);
     }
 
     FirmwareVersionGet(pollSocket, pController->firmwareVersion);
@@ -834,4 +850,92 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     
     return MOTOR_AXIS_OK;
 }
+
+
+/* Code for iocsh registration */
+
+/* Newport XPS Gathering Test */
+static const iocshArg XPSGatheringArg0 = {"Element Period*10^4", iocshArgInt};
+static const iocshArg * const XPSGatheringArgs[1] = {&XPSGatheringArg0};
+static const iocshFuncDef XPSC8GatheringTest = {"xpsgathering", 1, XPSGatheringArgs};
+static void XPSC8GatheringTestCallFunc(const iocshArgBuf *args)
+{
+    xpsgathering(args[0].ival);
+}
+
+/* XPS tcl execute function */
+static const iocshArg tclcallArg0 = {"tcl name", iocshArgString};
+static const iocshArg tclcallArg1 = {"Task name", iocshArgString};
+static const iocshArg tclcallArg2 = {"Function args", iocshArgString};
+static const iocshArg * const tclcallArgs[3] = {&tclcallArg0,
+                                                &tclcallArg1,
+                                                &tclcallArg2};
+static const iocshFuncDef TCLRun = {"tclcall", 3, tclcallArgs};
+static void TCLRunCallFunc(const  iocshArgBuf *args)
+{
+    tclcall(args[0].sval, args[1].sval, args[2].sval);
+}
+
+
+/* XPSSetup */
+static const iocshArg XPSSetupArg0 = {"Number of XPS controllers", iocshArgInt};
+static const iocshArg * const XPSSetupArgs[1] =  {&XPSSetupArg0};
+static const iocshFuncDef setupXPS = {"XPSSetup", 1, XPSSetupArgs};
+static void setupXPSCallFunc(const iocshArgBuf *args)
+{
+    XPSSetup(args[0].ival);
+}
+
+
+/* XPSConfig */
+static const iocshArg XPSConfigArg0 = {"Card being configured", iocshArgInt};
+static const iocshArg XPSConfigArg1 = {"IP", iocshArgString};
+static const iocshArg XPSConfigArg2 = {"Port", iocshArgInt};
+static const iocshArg XPSConfigArg3 = {"Number of Axes", iocshArgInt};
+static const iocshArg XPSConfigArg4 = {"Moving poll rate", iocshArgInt};
+static const iocshArg XPSConfigArg5 = {"Idle poll rate", iocshArgInt};
+static const iocshArg * const XPSConfigArgs[6] = {&XPSConfigArg0,
+                                                  &XPSConfigArg1,
+                                                  &XPSConfigArg2,
+                                                  &XPSConfigArg2,
+                                                  &XPSConfigArg4,
+                                                  &XPSConfigArg5};
+static const iocshFuncDef configXPS = {"XPSConfig", 6, XPSConfigArgs};
+static void configXPSCallFunc(const iocshArgBuf *args)
+{
+    XPSConfig(args[0].ival, args[1].sval, args[2].ival, args[3].ival,
+              args[4].ival, args[5].ival);
+}
+
+
+/* XPSConfigAxis */
+static const iocshArg XPSConfigAxisArg0 = {"Card number", iocshArgInt};
+static const iocshArg XPSConfigAxisArg1 = {"Axis number", iocshArgInt};
+static const iocshArg XPSConfigAxisArg2 = {"Axis name", iocshArgString};
+static const iocshArg XPSConfigAxisArg3 = {"Steps per unit", iocshArgInt};
+static const iocshArg * const XPSConfigAxisArgs[4] = {&XPSConfigAxisArg0,
+                                                      &XPSConfigAxisArg1,
+                                                      &XPSConfigAxisArg2,
+                                                      &XPSConfigAxisArg3};
+static const iocshFuncDef configXPSAxis = {"XPSConfigAxis", 4, XPSConfigAxisArgs};
+
+static void configXPSAxisCallFunc(const iocshArgBuf *args)
+{
+    XPSConfigAxis(args[0].ival, args[1].ival, args[2].sval, args[3].ival);
+}
+
+
+static void XPSRegister(void)
+{
+
+    iocshRegister(&setupXPS,      setupXPSCallFunc);
+    iocshRegister(&configXPS,     configXPSCallFunc);
+    iocshRegister(&configXPSAxis, configXPSAxisCallFunc);
+    iocshRegister(&TCLRun,        TCLRunCallFunc);
+#ifdef vxWorks
+    iocshRegister(&XPSC8GatheringTest, XPSC8GatheringTestCallFunc);
+#endif
+}
+
+epicsExportRegistrar(XPSRegister);
 
