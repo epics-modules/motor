@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.31 $
-Modified By:	$Author: peterd $
-Last Modified:	$Date: 2006-05-18 19:51:06 $
+Version:	$Revision: 1.32 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2006-06-30 18:50:27 $
 */
 
 /*
@@ -87,9 +87,11 @@ Last Modified:	$Date: 2006-05-18 19:51:06 $
  * .28 03-08-06 rls - Moved STUP processing to top of do_work() so that things
  *                    like LVIO true and SPMG set to PAUSE do not prevent
  *                    status update.
+ * .29 06-30-06 rls - Change do_work() test for "don't move if within RDBD",
+ *                    from float to integer; avoid equality test errors.
  */
 
-#define VERSION 5.9
+#define VERSION 6.0
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -1975,8 +1977,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    bool use_rel, preferred_dir;
 	    double relpos = pmr->diff / pmr->mres;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
+            long rdbdpos = NINT(pmr->rdbd / pmr->mres); /* retry deadband steps */
 	    long rpos, npos;
-
 	    msta_field msta;
 	    msta.All = pmr->msta;
 
@@ -1999,9 +2001,11 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    if (pmr->rval != pmr->lrvl)
 		MARK(M_RVAL);
 
+	    /* Don't move if we're within retry deadband. */
+
 	    rpos = NINT(rbvpos);
 	    npos = NINT(newpos);
-	    if (npos == rpos)
+	    if (abs(npos - rpos) < rdbdpos)
 	    {
 		if (pmr->dmov == FALSE && (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY))
 		{
@@ -2032,23 +2036,6 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		preferred_dir = true;
 	    else
 		preferred_dir = false;
-
-	    /*
-	     * Don't move if we're within retry deadband.
-	     */
-            if (fabs(pmr->diff) <= pmr->rdbd)
-            {
-                if (pmr->mip == MIP_DONE)
-                {
-                    pmr->ldvl = pmr->dval;
-                    pmr->lval = pmr->val;
-                    pmr->lrvl = pmr->rval;
-
-                    pmr->dmov = TRUE;
-                    MARK(M_DMOV);
-                }
-                return(OK);
-            }
 
 	    if (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY)
 	    {
