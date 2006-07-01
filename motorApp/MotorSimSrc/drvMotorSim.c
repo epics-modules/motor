@@ -2,9 +2,9 @@
 FILENAME...	drvMotorSim.c
 USAGE...	Simulated Motor Support.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: peterd $
-Last Modified:	$Date: 2006-06-06 08:50:14 $
+Last Modified:	$Date: 2006-07-01 20:08:55 $
 */
 
 /*

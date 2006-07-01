@@ -12,6 +12,7 @@ DBD += motorSupport.dbd
 
 INC += motor.h motordevCom.h motordrvCom.h
 INC += motordrvComCode.h
+INC += asynMotorStatus.h
 INC += motor_interface.h
 INC += paramLib.h
 
@@ -19,6 +20,7 @@ LIBRARY_IOC += motor
 
 # The following are required for all motor record configurations.
 motor_SRCS += motorRecord.cc motordevCom.cc motordrvCom.cc
+motor_SRCS += asynMotorStatusBase.c
 motor_SRCS += drvMotorAsyn.c
 motor_SRCS += devMotorAsyn.c
 motor_SRCS += paramLib.c

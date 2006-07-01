@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.10 $
+ * Version: $Revision: 1.11 $
  * Modified by: $Author: peterd $
- * Last Modified: $Date: 2006-06-06 08:50:14 $
+ * Last Modified: $Date: 2006-07-01 20:08:56 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -37,6 +37,7 @@
 #include <asynFloat64.h>
 #include <asynFloat64Array.h>
 #include <asynEpicsUtils.h>
+#include "asynMotorStatus.h"
 
 #include "motorRecord.h"
 #include "motor.h"
@@ -51,9 +52,7 @@ static long start_trans(struct motorRecord *);
 static RTN_STATUS build_trans( motor_cmnd, double *, struct motorRecord *);
 static RTN_STATUS end_trans(struct motorRecord *);
 static void asynCallback(asynUser *);
-static void statusCallback(void *, asynUser *, epicsInt32);
-static void positionCallback(void *, asynUser *, epicsFloat64);
-static void encoderCallback(void *, asynUser *, epicsFloat64);
+static void statusCallback(void *, asynUser *, struct MotorStatus *);
 
 typedef enum {int32Type, float64Type, float64ArrayType} interfaceType;
 
@@ -95,9 +94,9 @@ typedef struct
     void *asynFloat64Pvt;
     asynFloat64Array *pasynFloat64Array;
     void *asynFloat64ArrayPvt;
-    void *registrarPvt1;
-    void *registrarPvt2;
-    void *registrarPvt3;
+    asynMotorStatus *pasynMotorStatus;
+    void *asynMotorStatusPvt;
+    void *registrarPvt;
 } motorAsynPvt;
 
 
@@ -172,39 +171,29 @@ static long init_record(struct motorRecord * pmr )
     pPvt->pasynFloat64Array = (asynFloat64Array *)pasynInterface->pinterface;
     pPvt->asynFloat64ArrayPvt = pasynInterface->drvPvt;
 
-    /* Now connect the various callbacks, one for status, position and
-       encoder position */
+    /* Get the asynMotorStatus interface */
+    pasynInterface = pasynManager->findInterface(pasynUser,
+                                                 asynMotorStatusType, 1);
+    if (!pasynInterface) {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "devMotorAsyn::init_record, %s find motorStatus interface failed\n",
+                  pmr->name);
+        goto bad;
+    }
+    pPvt->pasynMotorStatus = (asynMotorStatus *)pasynInterface->pinterface;
+    pPvt->asynMotorStatusPvt = pasynInterface->drvPvt;
+
+    /* Now connect the callback, to the combined MotorStatus interface */
     pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
     pasynUser->reason = motorStatus;
-    status = pPvt->pasynInt32->registerInterruptUser(pPvt->asynInt32Pvt,
-						     pasynUser,
-						     statusCallback,
-						     pPvt,&pPvt->registrarPvt1);
+    status = pPvt->pasynMotorStatus->registerInterruptUser(pPvt->asynMotorStatusPvt,
+							   pasynUser,
+							   statusCallback,
+							   pPvt,
+							   &pPvt->registrarPvt);
     if(status!=asynSuccess) {
 	printf("%s devMotorAsyn::init_record registerInterruptUser %s\n",
 	       pmr->name, pasynUser->errorMessage);
-    }
-
-    pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
-    pasynUser->reason = motorPosition;
-    status = pPvt->pasynFloat64->registerInterruptUser(pPvt->asynFloat64Pvt,
-						       pasynUser,
-						       positionCallback,
-						       pPvt,&pPvt->registrarPvt2);
-    if(status!=asynSuccess) {
-	printf("%s devMotorAsyn::init_record registerInterruptUser %s\n",
-	       pmr->name,pPvt->pasynUser->errorMessage);
-    }
-
-    pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
-    pasynUser->reason = motorEncoderPosition;
-    status = pPvt->pasynFloat64->registerInterruptUser(pPvt->asynFloat64Pvt,
-						       pasynUser,
-						       encoderCallback,
-						       pPvt,&pPvt->registrarPvt3);
-    if(status!=asynSuccess) {
-	printf("%s devMotorAsyn::init_record registerInterruptUser %s\n",
-	       pmr->name,pPvt->pasynUser->errorMessage);
     }
 
     /* Initiate calls to get the initial motor parameters
@@ -479,7 +468,7 @@ static void asynCallback(asynUser *pasynUser)
  * True callback to notify that controller status has changed.
  */
 static void statusCallback(void *drvPvt, asynUser *pasynUser,
-			   epicsInt32 value)
+			   struct MotorStatus *value)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)drvPvt;
     motorRecord *pmr = pPvt->pmr;
@@ -490,68 +479,20 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
 
     if (interruptAccept) {
         dbScanLock((dbCommon *)pmr);
-        pPvt->status = value;
+        pPvt->status = value->status;
+        pPvt->position = (epicsInt32)floor(value->position+0.5);
+        pPvt->encoder_position = (epicsInt32)floor(value->encoder_posn+0.5);
+	/*	pPvt->veolcity = (epicsInt32)floor(value->velocity+0.5);*/
         dbScanUnlock((dbCommon*)pmr);
         if (!pPvt->needUpdate) {
 	    pPvt->needUpdate = 1;
 	    scanOnce(pmr);
         }
     } else {
-        pPvt->status = value;
-        pPvt->needUpdate = 1;
-    }
-}
-
-/**
- * True callback to notify that controller position has changed.
- */
-static void positionCallback(void *drvPvt, asynUser *pasynUser,
-			     epicsFloat64 value)
-{
-    motorAsynPvt *pPvt = (motorAsynPvt *)drvPvt;
-    motorRecord *pmr = pPvt->pmr;
-
-    asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
-        "%s devMotorAsyn::positionCallback new value=%f\n",
-        pmr->name, value);
-
-    if (interruptAccept) {
-        dbScanLock((dbCommon *)pmr);
-        pPvt->position = (epicsInt32)floor(value+0.5);
-        dbScanUnlock((dbCommon*)pmr);
-        if (!pPvt->needUpdate) {
-	    pPvt->needUpdate = 1;
-	    scanOnce(pmr);
-        }
-    } else {
-        pPvt->position = (epicsInt32)floor(value+0.5);
-        pPvt->needUpdate = 1;
-    }
-}
-
-/**
- * True callback to notify that controller encoder position has changed.
- */
-static void encoderCallback(void *drvPvt, asynUser *pasynUser,
-			    epicsFloat64 value)
-{
-    motorAsynPvt *pPvt = (motorAsynPvt *)drvPvt;
-    motorRecord *pmr = pPvt->pmr;
-
-    asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
-        "%s devMotorAsyn::encoderCallback new value=%f\n",
-        pmr->name, value);
-
-    if (interruptAccept) {
-        dbScanLock((dbCommon *)pmr);
-        pPvt->encoder_position = (epicsInt32)floor(value+0.5);
-        dbScanUnlock((dbCommon*)pmr);
-        if (!pPvt->needUpdate) {
-   	    pPvt->needUpdate = 1;
-	    scanOnce(pmr);
-        }
-    } else {
-        pPvt->encoder_position = (epicsInt32)floor(value+0.5);
+        pPvt->status = value->status;
+        pPvt->position = (epicsInt32)floor(value->position+0.5);
+        pPvt->encoder_position = (epicsInt32)floor(value->encoder_posn+0.5);
+	/*	pPvt->veolcity = (epicsInt32)floor(value->velocity+0.5);*/
         pPvt->needUpdate = 1;
     }
 }
