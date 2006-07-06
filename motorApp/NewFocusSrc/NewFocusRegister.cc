@@ -41,26 +41,26 @@ static const iocshArg * const NewFocusConfigArgs[3] = {&configArg0,
                                                       &configArg1,
                                                       &configArg2};
 
-static const iocshFuncDef setupPMNC8750 = {"PMNC8750Setup", 3, NewFocusSetupArgs};
+static const iocshFuncDef setupPMNC87xx = {"PMNC87xxSetup", 3, NewFocusSetupArgs};
 
-static const iocshFuncDef configPMNC8750 = {"PMNC8750Config", 3, NewFocusConfigArgs};
+static const iocshFuncDef configPMNC87xx = {"PMNC87xxConfig", 3, NewFocusConfigArgs};
 
 
-static void setupPMNC8750CallFunc(const iocshArgBuf *args)
+static void setupPMNC87xxCallFunc(const iocshArgBuf *args)
 {
-  PMNC8750Setup(args[0].ival, args[1].ival, args[2].ival);
+  PMNC87xxSetup(args[0].ival, args[1].ival, args[2].ival);
 }
 
-static void configPMNC8750CallFunc(const iocshArgBuf *args)
+static void configPMNC87xxCallFunc(const iocshArgBuf *args)
 {
-    PMNC8750Config(args[0].ival, args[1].sval, args[2].ival);
+    PMNC87xxConfig(args[0].ival, args[1].sval, args[2].ival);
 }
 
 static void NewFocusRegister(void)
 {
-    iocshRegister(&setupPMNC8750, setupPMNC8750CallFunc);
+    iocshRegister(&setupPMNC87xx, setupPMNC87xxCallFunc);
 
-    iocshRegister(&configPMNC8750, configPMNC8750CallFunc);
+    iocshRegister(&configPMNC87xx, configPMNC87xxCallFunc);
 }
 
 epicsExportRegistrar(NewFocusRegister);

@@ -40,6 +40,6 @@ Last Modified:	2004/07/28 18:45:16
 #include "motordrvCom.h"
 
 /* Function prototypes. */
-extern RTN_STATUS PMNC8750Setup(int, int, int);
-extern RTN_STATUS PMNC8750Config(int, const char *, int);
+extern RTN_STATUS PMNC87xxSetup(int, int, int);
+extern RTN_STATUS PMNC87xxConfig(int, const char *, int);
 
