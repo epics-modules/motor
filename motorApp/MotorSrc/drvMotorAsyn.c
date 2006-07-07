@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.10 $
+ * Version: $Revision: 1.11 $
  * Modified by: $Author: peterd $
- * Last Modified: $Date: 2006-07-01 20:08:56 $
+ * Last Modified: $Date: 2006-07-07 20:50:19 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -737,10 +737,13 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
     pnode = (interruptNode *)ellFirst(pclientList);
     while (pnode) {
 	asynMotorStatusInterrupt *pmotorStatusInterrupt = pnode->drvPvt;
+	addr = pmotorStatusInterrupt->addr;
 	reason = pmotorStatusInterrupt->pasynUser->reason;
-	pmotorStatusInterrupt->callback(pmotorStatusInterrupt->userPvt, 
-		    pmotorStatusInterrupt->pasynUser,
-		    &pAxis->status );
+	if (addr == pAxis->num) {
+	    pmotorStatusInterrupt->callback(pmotorStatusInterrupt->userPvt, 
+					    pmotorStatusInterrupt->pasynUser,
+					    &pAxis->status );
+	}
 	pnode = (interruptNode *)ellNext(&pnode->node);
     }
     pasynManager->interruptEnd(pPvt->motorStatusInterruptPvt);
