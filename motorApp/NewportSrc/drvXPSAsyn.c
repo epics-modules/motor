@@ -251,6 +251,14 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         case motorAxisLowLimit:
         {
             deviceValue = value*pAxis->stepSize;
+            /* We need to read the current highLimit because otherwise we could be setting it to an invalid value */
+            status = PositionerUserTravelLimitsGet(pAxis->pollSocket,
+                                                   pAxis->positionerName,
+                                                   &pAxis->lowLimit, &pAxis->highLimit);
+            if (status != 0) {
+                PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: error performing PositionerUserTravelLimitsGet "
+                      "for high limit=%f, status=%d\n", deviceValue, status);
+            }
             status = PositionerUserTravelLimitsSet(pAxis->pollSocket,
                                                    pAxis->positionerName,
                                                    deviceValue, pAxis->highLimit);
@@ -267,6 +275,14 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         case motorAxisHighLimit:
         {
             deviceValue = value*pAxis->stepSize;
+            /* We need to read the current highLimit because otherwise we could be setting it to an invalid value */
+            status = PositionerUserTravelLimitsGet(pAxis->pollSocket,
+                                                   pAxis->positionerName,
+                                                   &pAxis->lowLimit, &pAxis->highLimit);
+            if (status != 0) {
+                PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: error performing PositionerUserTravelLimitsGet "
+                      "for high limit=%f, status=%d\n", deviceValue, status);
+            }
             status = PositionerUserTravelLimitsSet(pAxis->pollSocket,
                                                    pAxis->positionerName,
                                                    pAxis->lowLimit, deviceValue);
