@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.12 $
+ * Version: $Revision: 1.13 $
  * Modified by: $Author: peterd $
- * Last Modified: $Date: 2006-07-20 17:10:37 $
+ * Last Modified: $Date: 2006-08-10 08:12:47 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -80,12 +80,7 @@ typedef struct
 {
     struct motorRecord * pmr;
     int moveRequestPending;
-    epicsUInt32 status;  /**< bit mask of errors and other binary information. The
-			 bit positions are in motor.h */
-    epicsInt32 position; /**< Current motor position in motor steps (if not
-			 servoing) or demand position (if servoing) */
-    epicsInt32 encoder_position; /**< Current motor position in encoder units 
-				 (only available if a servo system). */
+    struct MotorStatus status;
     motor_cmnd move_cmd;
     double param;
     int needUpdate;
@@ -221,14 +216,8 @@ static long init_record(struct motorRecord * pmr )
 			      resolution);
 */
     pasynUser->reason = motorStatus;
-    pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
-			   &pPvt->status);
-    pasynUser->reason = motorPosition;
-    pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
-			   &pPvt->position);
-    pasynUser->reason = motorEncoderPosition;
-    pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
-			   &pPvt->encoder_position);
+    pPvt->pasynMotorStatus->read(pPvt->asynMotorStatusPvt, pasynUser,
+				 &pPvt->status);
     pasynManager->freeAsynUser(pasynUser);
     pPvt->needUpdate = 1;
 
@@ -246,10 +235,10 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
     rc = NOTHING_DONE;
 
     if ( pPvt->needUpdate ) {
-	pmr->rmp = pPvt->position;
-	pmr->rep = pPvt->encoder_position;
-	/* pmr->rvel = ptrans->vel; */
-	pmr->msta = pPvt->status;
+	pmr->rmp = (epicsInt32)round(pPvt->status.position);
+	pmr->rep = (epicsInt32)round(pPvt->status.encoder_posn);
+	/* pmr->rvel = (epicsInt32)round(pPvt->status.velocity); */
+	pmr->msta = pPvt->status.status;
 	rc = CALLBACK_DATA;
 	pPvt->needUpdate = 0;
     }
@@ -393,9 +382,6 @@ static RTN_STATUS build_trans( motor_cmnd command,
     case GET_INFO:
 	pmsg->command = motorStatus;
 	pmsg->interface = float64ArrayType;
-	/* Check this - needUpdate can cause the callback mechanism to get
-	   stuck. Must ensure that the record will be processed after this */
-	pPvt->needUpdate = 1; 
 	break;
     case SET_RESOLUTION:
 	pmsg->command = motorResolution;
@@ -446,14 +432,8 @@ static void asynCallback(asynUser *pasynUser)
     switch (pmsg->command) {
     case motorStatus:
 	/* Read the current status of the device */
-	pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
-			       &pPvt->status);
-	pasynUser->reason = motorPosition;
-	pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
-			       &pPvt->position);
-	pasynUser->reason = motorEncoderPosition;
-	pPvt->pasynInt32->read(pPvt->asynInt32Pvt, pasynUser,
-			       &pPvt->encoder_position);
+	pPvt->pasynMotorStatus->read(pPvt->asynMotorStatusPvt, pasynUser,
+				     &pPvt->status);
 	break;
 
     case motorMoveAbs:
@@ -502,25 +482,20 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
     motorRecord *pmr = pPvt->pmr;
 
     asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
-        "%s devMotorAsyn::statusCallback new value=0x%x\n",
-        pmr->name, value);
+	      "%s devMotorAsyn::statusCallback new value=[p:%f,s:%x] %c%c\n",
+	      pmr->name, value->position, value->status,
+	      pPvt->needUpdate?'N':' ', pPvt->moveRequestPending?'P':' ');
 
     if (dbScanLockOK) {
         dbScanLock((dbCommon *)pmr);
-        pPvt->status = value->status;
-        pPvt->position = (epicsInt32)floor(value->position+0.5);
-        pPvt->encoder_position = (epicsInt32)floor(value->encoder_posn+0.5);
-	/*	pPvt->velocity = (epicsInt32)floor(value->velocity+0.5);*/
+        pPvt->status = *value;
         if (!pPvt->needUpdate && !pPvt->moveRequestPending) {
 	    pPvt->needUpdate = 1;
 	    pmr->rset->process((dbCommon*)pmr);
         }
         dbScanUnlock((dbCommon*)pmr);
     } else {
-        pPvt->status = value->status;
-        pPvt->position = (epicsInt32)floor(value->position+0.5);
-        pPvt->encoder_position = (epicsInt32)floor(value->encoder_posn+0.5);
-	/*	pPvt->veolcity = (epicsInt32)floor(value->velocity+0.5);*/
+        pPvt->status = *value;
         pPvt->needUpdate = 1;
     }
 }

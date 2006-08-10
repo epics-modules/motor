@@ -2,9 +2,9 @@
 FILENAME...	drvMotorSim.c
 USAGE...	Simulated Motor Support.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: peterd $
-Last Modified:	$Date: 2006-07-01 20:08:55 $
+Last Modified:	$Date: 2006-08-10 08:12:47 $
 */
 
 /*
@@ -539,7 +539,7 @@ static void motorSimTask( motorSim_t * pDrv )
     }
 }
 
-static int motorSimCreateAxis( motorSim_t * pDrv, int card, int axis, double lowLimit, double hiLimit, double home )
+static int motorSimCreateAxis( motorSim_t * pDrv, int card, int axis, double lowLimit, double hiLimit, double home, double start )
 {
   AXIS_HDL pAxis;
   AXIS_HDL * ppLast = &(pDrv->pFirst);
@@ -567,7 +567,7 @@ static int motorSimCreateAxis( motorSim_t * pDrv, int card, int axis, double low
 	  pars.axis[0].Vmax = 1.0;
 
 	  pAxis->endpoint.T = 0;
-	  pAxis->endpoint.axis[0].p = 0;
+	  pAxis->endpoint.axis[0].p = start;
 	  pAxis->endpoint.axis[0].v = 0;
 
 	  if ((pAxis->route = routeNew( &(pAxis->endpoint), &pars )) != NULL &&
@@ -581,6 +581,7 @@ static int motorSimCreateAxis( motorSim_t * pDrv, int card, int axis, double low
 	      pAxis->home = home;
               pAxis->print = motorSimLogMsg;
               pAxis->logParam = NULL;
+	      motorParam->setDouble(pAxis->params, motorAxisPosition, start);
 	      *ppLast = pAxis;
 	      pAxis->print( pAxis->logParam, TRACE_FLOW, "Created motor for card %d, signal %d OK", card, axis );
 	    }
@@ -615,7 +616,7 @@ static int motorSimCreateAxis( motorSim_t * pDrv, int card, int axis, double low
 }
 
 
-void motorSimCreate( int card, int axis, int lowLimit, int hiLimit, int home, int nCards, int nAxes )
+void motorSimCreate( int card, int axis, int lowLimit, int hiLimit, int home, int nCards, int nAxes, int startPosn )
 {
   int i;
   int j;
@@ -645,7 +646,7 @@ void motorSimCreate( int card, int axis, int lowLimit, int hiLimit, int home, in
     {
       for (j = axis; j < axis+nAxes; j++ )
 	{
-            motorSimCreateAxis( &drv, i, j, (double) lowLimit, (double) hiLimit, (double) home );
+            motorSimCreateAxis( &drv, i, j, (double) lowLimit, (double) hiLimit, (double) home, (double) startPosn );
 	}
     }
 }
