@@ -2,9 +2,9 @@
 FILENAME...     drvOmsPC68.cc
 USAGE...        Motor record driver level support for OMS PC68 serial device.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-04-24 18:12:00 $
+Last Modified:	$Date: 2006-08-18 21:12:33 $
 */
 
 /*
@@ -46,6 +46,9 @@ Last Modified:	$Date: 2006-04-24 18:12:00 $
  * .02 04/24/06 rls - support for both PC68 and PC78.
  *                  - test for encoder support.
  *                  - test for servo support.
+ * .03 08/11/06 rls - work around for erroneous response after response to
+ *                    "?KP" command at boot-up; resulted in 1st axis having
+ *                    same position (RP command) as last axis.
  */
 
 #include <string.h>
@@ -742,6 +745,14 @@ static int motor_init()
                 else
 		    pmotorState->motor_info[motor_index].pid_present = YES;
             }
+            
+            /* Testing for PID parameters (?KP) causes erroneous response from
+             * "report position" command at boot-up. Work around is the following
+             * dummy communication transaction.
+             */
+
+            send_mess (card_index, ALL_POS, (char) NULL);
+            recv_mess (card_index, axis_pos, 1);
 
             for (motor_index=0;motor_index<total_axis;motor_index++)
             {
