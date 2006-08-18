@@ -2,9 +2,9 @@
 FILENAME...	devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-04-14 20:16:34 $
+Last Modified:	$Date: 2006-08-18 21:13:31 $
 */
 
 /*
@@ -56,6 +56,7 @@ Last Modified:	$Date: 2005-04-14 20:16:34 $
  * .12  08-27-04 rls Terminate "JG" command with ";" to prevent MAXv stale data.
  * .13  03-21-05 rls OSI - built for solaris and linux hosts.
  * .14  03-23-05 rls restrict acceleration to valid values.
+ * .15  08-18-06 rls Output "slew <= base" error message only one time.
  */
 
 #include <string.h>
@@ -184,6 +185,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
     char buffer[40];
     msg_types cmnd_type;
     RTN_STATUS rtnind;
+    static bool invalid_velmsg_latch = false;
 
     rtnind = OK;
     motor_call = &trans->motor_call;
@@ -395,8 +397,12 @@ errorexit:		    errMessage(-1, "Invalid device directive");
 
 			if (vel <= vbase)
 			{
-			    errPrintf(-1, __FILE__, __LINE__,
+                            if (invalid_velmsg_latch == false)
+                            {
+                                invalid_velmsg_latch = true;  /* Ouput msg. one time. */
+			        errPrintf(-1, __FILE__, __LINE__,
 				"Overriding invalid velocity; slew <= base.\n");
+                            }
 			    vel = vbase + 1;
 			}
 			sprintf(buffer, "%ld", vel);
