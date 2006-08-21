@@ -2,9 +2,9 @@
 FILENAME... drvESP300.cc
 USAGE...    Motor record driver level support for Newport ESP300/100.
 
-Version:    $Revision: 1.22 $
+Version:    $Revision: 1.23 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2006-04-24 19:52:36 $
+Last Modified:  $Date: 2006-08-21 18:28:39 $
 */
 
 /*
@@ -50,6 +50,8 @@ Last Modified:  $Date: 2006-04-24 19:52:36 $
  *          - make debug variables always available.
  *          - MS Visual C compatibility; make all epicsExportAddress
  *            extern "C" linkage.
+ * .09 08/07/06 rls - GPIB under ASYN only allows 1 input EOS character.
+ *                    No output EOS. Adjustments accordingly.
  */
 
 
@@ -475,12 +477,21 @@ static int recv_mess(int card, char *com, int flag)
         }
     }
 
-    if ((status != asynSuccess) || (nread <= 0))
+    if ((status != asynSuccess) || (nread <= 0) || (com[nread - 1] != '\r'))
     {
         com[0] = '\0';
         nread = 0;
     }
-
+    else
+    {
+        /* ESP300 responses are always terminated with CR/LF combination (see
+         * ESP300 User' Manual Sec. 3.4 NOTE). ASYN strips LF; this code strips
+         * CR from buffer before returning to caller.
+         */
+        nread--;
+        com[nread] = '\0';  /* Strip trailing CR. */
+    }
+    
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
     return(nread);
 }
@@ -564,7 +575,8 @@ static int motor_init()
     int status;
     asynStatus success_rtn;
     static const char output_terminator[] = "\r";
-    static const char input_terminator[] = "\r\n";
+    static const char input_terminator[]  = "\n";
+    static const char errmsg[] = "drvESP300.c:motor_init: ASYN";
 
     initialized = true; /* Indicate that driver is initialized. */
 
@@ -584,13 +596,25 @@ static int motor_init()
 
         /* Initialize communications channel */
         success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port,
-                                                cntrl->asyn_address, &cntrl->pasynUser, NULL);
-        pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
-                                       strlen(output_terminator));
-        pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,
-                                      strlen(input_terminator));
+                                 cntrl->asyn_address, &cntrl->pasynUser, NULL);
+        if (success_rtn != asynSuccess)
+        {
+            errlogPrintf("%s connect error = %d\n", errmsg, (int) success_rtn);
+            goto errexit;
+        }
 
-        if (success_rtn == asynSuccess)
+        success_rtn = pasynOctetSyncIO->setOutputEos(cntrl->pasynUser,
+                       output_terminator, strlen(output_terminator));
+        /* Ignore output EOS error in case this is a GPIB port. */
+
+        success_rtn = pasynOctetSyncIO->setInputEos(cntrl->pasynUser,
+                       input_terminator, strlen(input_terminator));
+        if (success_rtn != asynSuccess)
+        {
+            errlogPrintf("%s setInputEos error = %d\n", errmsg, (int) success_rtn);
+            goto errexit;
+        }
+        else
         {
             int retry = 0;
 
@@ -607,6 +631,7 @@ static int motor_init()
             } while (status == 0 && retry < 3);
         }
 
+errexit:
         if (success_rtn == asynSuccess && status > 0)
         {
             brdptr->localaddr = (char *) NULL;
