@@ -2,8 +2,9 @@
 
 typedef enum {
     minJerkTime = MOTOR_AXIS_NUM_PARAMS,
-    maxJerkTime
+    maxJerkTime,
+    XPSStatus
 } XPSCommand;
 
-#define XPS_NUM_PARAMS 2
+#define XPS_NUM_PARAMS 3
 

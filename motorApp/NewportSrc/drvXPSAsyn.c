@@ -631,6 +631,8 @@ static void XPSPoller(XPSController *pController)
                     }
                 }
                 /* Set the axis done parameter */
+                /* Set the axis done parameter */
+                motorParam->setInteger(pAxis->params, XPSStatus, pAxis->axisStatus);
                 motorParam->setInteger(pAxis->params, motorAxisDone, axisDone);
                 if (pAxis->axisStatus == 11) {
                     motorParam->setInteger(pAxis->params, motorAxisHomeSignal, 1);

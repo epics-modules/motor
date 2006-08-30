@@ -15,7 +15,8 @@ typedef struct {
 
 static XPSCommandStruct XPSCommands[XPS_NUM_PARAMS] = {
     {minJerkTime,     "MIN_JERK_TIME"},
-    {maxJerkTime,     "MAX_JERK_TIME"}
+    {maxJerkTime,     "MAX_JERK_TIME"},
+    {XPSStatus,       "XPS_STATUS"}
 };
 
 typedef struct {
