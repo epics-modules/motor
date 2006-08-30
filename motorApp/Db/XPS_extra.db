@@ -17,7 +17,17 @@ grecord(ao,"$(P)$(R)MAX_JERK_TIME") {
 grecord(ai,"$(P)$(R)READBACK") {
     field(DESC,"Readback")
     field(PREC,"4")
+    field(PINI, "1")
     field(DTYP, "asynFloat64")
     field(SCAN, "I/O Intr")
     field(INP,"@asyn($(PORT))POSITION")
+}
+
+grecord(ai,"$(P)$(R)XPS_STATUS") {
+    field(DESC,"XPS Group Status")
+    field(DTYP, "asynInt32")
+    field(PINI, "1")
+    field(PREC,"0")
+    field(SCAN, "I/O Intr")
+    field(INP,"@asyn($(PORT))XPS_STATUS")
 }
