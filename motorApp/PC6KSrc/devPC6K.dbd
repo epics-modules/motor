@@ -1,7 +1,5 @@
-# Parker/Compumotor Device Driver support.
+# Parker/Compumtor Device Driver support.
 device(motor,VME_IO,devPC6K,"PC6K")
 driver(drvPC6K)
 registrar(ParkerRegister)
-#variable(drvPC6Kdebug)
-
-
+variable(drvPC6Kdebug)

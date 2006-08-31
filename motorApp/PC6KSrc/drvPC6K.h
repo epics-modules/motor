@@ -3,9 +3,9 @@ FILENAME...	drvPC6K.h
 USAGE...    This file contains Parker Compumotor driver "include"
 	    information that is specific to the 6K series serial controller
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-12-21 22:58:25 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: sullivan $
+Last Modified:	$Date: 2006-08-31 15:42:31 $
 */
 
 /*
@@ -53,9 +53,12 @@ Last Modified:	$Date: 2005-12-21 22:58:25 $
 
 /* End-of-string defines */
 #define PC6K_OUT_EOS   "\n" /* Command */
-#define PC6K_IN_EOS    "\n"  /* Reply */
+// #define PC6K_IN_EOS    "\n"  /* Reply */
+#define PC6K_IN_EOS    ">"  /* Reply */
 
+#define PC6K_QUERY_CNT 5
 enum PC6K_query_types {QSTATUS, QPOS, QEA_POS, QVEL, QDRIVE};
+
 
 enum PC6K_model
 {
@@ -82,7 +85,7 @@ struct PC6KController
     asynUser *pasynUser;  	/* For RS-232 */
     int asyn_address;		/* Use for GPIB or other address with asyn */
     char asyn_port[80];     	/* asyn port name */
-    char recv_string[sizeof(PC6K_query_types)][PC6K_MSG_SIZE]; /* Query result strings */
+    char recv_string[PC6K_QUERY_CNT][PC6K_MSG_SIZE]; /* Query result strings */
     double home_preset[MAX_AXIS]; /* Controller's home preset position (XF command). */
     PC6K_model model;		/* Motion Master Model. */
     PC6K_motor_type type[8];	/* For 6K8 only; Motor type array. */

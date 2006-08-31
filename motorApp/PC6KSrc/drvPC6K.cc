@@ -1,11 +1,11 @@
 /*
 FILENAME...	drvPC6K.cc
-USAGE...	Motor record driver level support for Parker Compumotor
+USAGE...	Motor record driver level support for Parker Computmotor
                 6K Series motor controllers
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-01-31 21:59:13 $
+Version:	$Revision: 1.4 $
+Modified By:	$Author: sullivan $
+Last Modified:	$Date: 2006-08-31 15:42:30 $
 
 */
 
@@ -62,11 +62,13 @@ Last Modified:	$Date: 2006-01-31 21:59:13 $
 #define CMD_LOWLS       "LSNEG"
 #define CMD_ERES        "ERES"
 #define CMD_DRES        "DRES"
-#define CMD_SCLA        "SCLA"
-#define CMD_SCLV        "SCLV"
-#define CMD_SCLD        "SCLD"
-#define CMD_SCALE       "SCALE"
+#define CMD_SCLA        "SCLA1"
+#define CMD_SCLV        "SCLV1"
+#define CMD_SCLD        "SCLD1"
+#define CMD_SCALE       "SCALE1"
 #define CMD_AXSDEF      "AXSDEF"  /* Axis definition xxxx_xxxx , 0=stepper, 1=servo */
+#define CMD_ECHO        "ECHO0"   /* Echo must be off */
+
 
 
 #define STOP_ALL        "!K"
@@ -112,9 +114,12 @@ int PC6K_num_cards = 0;
 volatile double drvPC6KReadbackDelay = 0.;
 
 /* NOTICE !!!! Command order must match drvPC6K.h/PC6K_query_types !!!! */
-static char *queryCmnds[]= {CMD_STATUS, CMD_POS, CMD_EA_POS, CMD_VEL, CMD_DRIVE};
+static struct {
+  char *cmnd;
+  int  cmndLen;
+} queryOps[]= {{CMD_STATUS, 0}, {CMD_POS, 0}, {CMD_EA_POS, 0}, {CMD_VEL, 0}, {CMD_DRIVE, 0}};
 
-#define QUERY_NUM (sizeof(queryCmnds)/sizeof(char *))
+#define QUERY_CNT PC6K_QUERY_CNT
 
 
 /*----------------functions-----------------*/
@@ -244,7 +249,7 @@ static int set_status(int card, int signal)
   struct mess_node *nodeptr;
   register struct mess_info *motor_info;
   char send_buff[80];
-  char *strstrRtn[QUERY_NUM];
+  char *strstrRtn[QUERY_CNT];
   char *recvStr;
   double vel;
   int rtn_state;
@@ -270,13 +275,14 @@ static int set_status(int card, int signal)
   do
     {
       strstrRtn[qindex] = NULL;
-      sprintf(send_buff, "%d%s", motor, queryCmnds[qindex]);
+      sprintf(send_buff, "%d%s", motor, queryOps[qindex].cmnd);
       if ((recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[qindex])) &&
 	  (cntrl->recv_string[qindex][0] == REPLY_CHAR))
 	{
-	strstrRtn[qindex] = &cntrl->recv_string[qindex][1];
+	  // Index into return string (add 1 to command length to account for REPLY_CHAR)
+	  strstrRtn[qindex] = &cntrl->recv_string[qindex][strlen(send_buff)+1];
         recvRetry = false;
-	recvNext = (++qindex >= QUERY_NUM) ? false : true;
+	recvNext = (++qindex >= QUERY_CNT) ? false : true;
 	}
       else
 	{
@@ -287,7 +293,7 @@ static int set_status(int card, int signal)
 
     
   /* Check for normal look termination - all queries successful */
-  if (qindex >= QUERY_NUM)
+  if (qindex >= QUERY_CNT)
     cntrl->status = NORMAL;
   else
     {
@@ -465,7 +471,7 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com,
 
     timeout = TIMEOUT;
     /* flush any junk at input port - should not be any data available */
-    // pasynOctetSyncIO->flush(cntrl->pasynUser); this is done by asyn
+    // pasynOctetSyncIO->flush(cntrl->pasynUser); 
 
     /* Perform atomic write/read operation  */
     status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, send_com, strlen(send_com), 
@@ -729,6 +735,7 @@ static int motor_init()
     int total_axis = 0;
     int recvCnt, retryCnt;
     int digits;
+    unsigned int i;
     bool nextAxis;
     bool cardFound = false;
     asynStatus success_rtn;
@@ -739,13 +746,17 @@ static int motor_init()
     if (PC6K_num_cards <= 0)
 	return(ERROR);
 
+    /* Initialize command definition array used during set_status() */
+    for (i=0; i < QUERY_CNT; i++)
+      queryOps[i].cmndLen = strlen(queryOps[i].cmnd);
+
     for (card_index = 0; card_index < PC6K_num_cards; card_index++)
     {
 	if (!motor_state[card_index])
 	    continue;
 
 	brdptr = motor_state[card_index];
-	brdptr->cmnd_response = false;
+	brdptr->cmnd_response = true;
 	total_cards = card_index + 1;
 	cntrl = (struct PC6KController *) brdptr->DevicePrivate;
 
@@ -770,7 +781,7 @@ static int motor_init()
 	      /* Return value is length of received string */
 	      recvCnt = send_recv_mess(card_index, GET_IDENT, buff);
 	      /* Check for valid response -- if not retry */
-	      if ((recvCnt > 0) && (buff[0] == REPLY_CHAR) && strstr(buff,"6K"))
+	      if ((recvCnt > 0) && strstr(buff, GET_IDENT) && strstr(buff,"6K"))
 		cardFound = true;
 	    } while(!cardFound  && ++retryCnt < 3);
 	}
@@ -780,19 +791,25 @@ static int motor_init()
 	
 	    strcpy(brdptr->ident, buff);  /* Save Controller ID  */
 
+	    send_recv_mess(card_index, CMD_ECHO, buff);       /* Turn off echo */
+
 	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;
 	    /* Stop all motors */
-	    send_mess(card_index, STOP_ALL, (char) NULL);   
+	    send_recv_mess(card_index, STOP_ALL, buff);   
             // All stop requires a delay before the controller starts responding
 	    //   again - handshake on some command 
 	    retryCnt = 0;
 	    do {
-	      recvCnt = send_recv_mess(card_index, CMD_DRIVE, buff);              
+	      recvCnt = send_recv_mess(card_index, CMD_DRIVE, buff); 
+              if (recvCnt && !strstr(buff, CMD_DRIVE))
+			recvCnt = 0;	                  
 	    } while (!recvCnt && ++retryCnt < 3);
 
 
-	    send_mess(card_index, COMEXEC_ENA, (char) NULL);   /* Enable continuous commands */
+	    /* send_mess(card_index, COMEXEC_ENA, (char) NULL); */   /* Enable continuous commands */
+	    send_recv_mess(card_index, COMEXEC_ENA, buff);   /* Enable continuous commands */
+	    // send_recv_mess(card_index, CMD_SCALE, buff);     /* Enable scaling  - unary */
 
 	    /* The find how many axes this controller has */
             total_axis = 0;
@@ -826,11 +843,19 @@ static int motor_init()
 	        motor_info->pid_present = YES;
 	        motor_info->status.Bits.GAIN_SUPPORT = 1;
 
+		/* Set unary scaling for Position and Velocities - program in counts */
+                // sprintf(send_buff, "%d%s", motor_index+1, CMD_SCLD);
+		// send_recv_mess(card_index, send_buff, buff);
+		// sprintf(send_buff, "%d%s", motor_index+1, CMD_SCLV);
+		// send_recv_mess(card_index, send_buff, buff);
+		// sprintf(send_buff, "%d%s", motor_index+1, CMD_SCLA);
+		// send_recv_mess(card_index, send_buff, buff);		
+
                 /* Determine if motor type = servo  */
                 sprintf(send_buff, "%d%s", motor_index+1, CMD_AXSDEF);
        	        if (send_recv_mess(card_index, send_buff, buff) > 0 && 
 		    (buff[0] == REPLY_CHAR) &&
-		    (buff[1] == '1'))
+		    (buff[strlen(send_buff)+1] == '1'))
 		    cntrl->type[motor_index] =  DC;
 		else
 		    cntrl->type[motor_index] = STEPPER;
@@ -843,7 +868,7 @@ static int motor_init()
 		  sprintf(send_buff, "%d%s", motor_index+1, CMD_DRES);
 
        	        if (send_recv_mess(card_index, send_buff, buff) > 0 && (buff[0] == REPLY_CHAR))
-		  cntrl->drive_resolution[motor_index] = 1.0 / atof(&buff[1]);
+		  cntrl->drive_resolution[motor_index] = 1.0 / atof(&buff[strlen(send_buff)+1]);
 		
 		digits = (int) -log10(cntrl->drive_resolution[motor_index]) + 2;
 		if (digits < 1)
@@ -853,12 +878,12 @@ static int motor_init()
                 /* Determine low limit */
                 sprintf(send_buff, "%d%s", motor_index+1, CMD_LOWLS);
        	        if (send_recv_mess(card_index, send_buff, buff) > 0 && (buff[0] == REPLY_CHAR))
-		    motor_info->low_limit = atof(&buff[1]);
+		  motor_info->low_limit = atof(&buff[strlen(send_buff)+1]);
 
                 /* Determine high limit */
 		sprintf(send_buff, "%d%s", motor_index+1, CMD_HIGHLS);
        	        if (send_recv_mess(card_index, send_buff, buff) > 0 && (buff[0] == REPLY_CHAR))
-		    motor_info->high_limit = atof(&buff[1]);
+		  motor_info->high_limit = atof(&buff[strlen(send_buff)+1]);
 
 
 		set_status(card_index, motor_index);  /* Read status of each motor */

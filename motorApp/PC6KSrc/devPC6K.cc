@@ -2,9 +2,9 @@
 FILENAME...	devPC6K.cc
 USAGE...	Motor record device level support for Parker Compumotor drivers
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-12-21 22:58:24 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: sullivan $
+Last Modified:	$Date: 2006-08-31 15:42:30 $
 */
 
 /*
@@ -155,27 +155,36 @@ STATIC RTN_STATUS PC6K_build_trans(motor_cmnd command, double *parms, struct mot
     char buff[110];
     int signal, axis, card, intval;
     int maxdigits;
+    int cmndArg;
     double dval, cntrl_units;
     unsigned int size;
+    bool sendMsg;
     RTN_STATUS rtnval;
 
     rtnval = OK;
     buff[0] = '\0';
+    sendMsg = true;
 
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     intval = (parms == NULL) ? 0 : NINT(parms[0]);
     dval = (parms == NULL) ? 0 : *parms;
 
+    motor_start_trans_com(mr, PC6K_cards);
+
     motor_call = &(trans->motor_call);
     card = motor_call->card;
     signal = motor_call->signal;
     axis = signal+1; /* Motors start at 1 */
+
+    motor_call->type = PC6K_table[command];
+
     brdptr = (*trans->tabptr->card_array)[card];
       if (brdptr == NULL)
 	return(rtnval = ERROR);
 
     cntrl = (struct PC6KController *) brdptr->DevicePrivate;
-    cntrl_units = dval * cntrl->drive_resolution[signal];
+    /* 6K Controllers expect Velocity and Acceleration settings in Revs/sec/sec */
+    cntrl_units = dval * cntrl->drive_resolution[signal]; 
     maxdigits = cntrl->res_decpts[signal];
 
     
@@ -201,7 +210,9 @@ STATIC RTN_STATUS PC6K_build_trans(motor_cmnd command, double *parms, struct mot
 	    if (strlen(mr->prem) != 0)
 	    {
 		strcat(motor_call->message, mr->prem);
-		strcat(motor_call->message, ":");
+		rtnval = motor_end_trans_com(mr, drvtabptr);
+		rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+		motor_call->type = PC6K_table[command];
 	    }
 	    if (strlen(mr->post) != 0)
 		motor_call->postmsgptr = (char *) &mr->post;
@@ -211,89 +222,146 @@ STATIC RTN_STATUS PC6K_build_trans(motor_cmnd command, double *parms, struct mot
 	    break;
     }
 
-
+    /* Parker 6K controllers do not support multiple commands per line */
     switch (command)
     {
         case MOVE_ABS:
-	  sprintf(buff, "%dMA1:%dMC0:%dD%d:", axis, axis, axis, intval);
-	    break;
-	
         case MOVE_REL:
-	  sprintf(buff, "%dMA0:%dMC0:%dD%d:", axis, axis, axis, intval);
-	    break;
+	  {
+	    cmndArg = (command == MOVE_ABS) ? 1 : 0;
+
+	    sprintf(buff, "%dMA%d", axis, cmndArg);
+	    strcat(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+	    motor_call->type = PC6K_table[command];
+
+	    sprintf(buff, "%dMC0", axis);
+	    strcat(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+	    motor_call->type = PC6K_table[command];
+
+	    sprintf(buff, "%dD%d", axis, intval);
+	  }
+
+	  break;
 	
 	case HOME_FOR:
-	    sprintf(buff, "%dHOM0:", axis);
+	    sprintf(buff, "%dHOM0", axis);
 	    break;
 	case HOME_REV:
-	    sprintf(buff, "%dHOM1:", axis);
+	    sprintf(buff, "%dHOM1", axis);
 	    break;
 	
 	case LOAD_POS:
 	  /* The Feedback position follows the Reference set position */
-	    sprintf(buff, "%dPSET%d:", axis, intval);
+	    sprintf(buff, "%dPSET%d", axis, intval);
 	    break;
 	
 	case SET_VEL_BASE:
+	    sendMsg = false;
 	    break;	    /* PC6K does not use base velocity */
 	
 	case SET_VELOCITY:
-	    sprintf(buff, "%dV%.*f:", axis, maxdigits, cntrl_units);
+	  // sprintf(buff, "%dV%.*f", axis, maxdigits, cntrl_units);
+	    sprintf(buff, "%dV%d", axis, intval);
 	    break;
 	
 	case SET_ACCEL:
 	  /* Set Accel, Avg Accel, Decel, Avg Decel - assume avg to be 1/2 accel */
-	    sprintf(buff, "%dA%.*f:%dAA%.*f:%dAD%.*f:%dADA%.*f:", 
-		    axis, maxdigits, cntrl_units,
-		    axis, maxdigits, cntrl_units/2,
-		    axis, maxdigits, cntrl_units,
-		    axis, maxdigits, cntrl_units/2);
+	  // sprintf(buff, "%dA%.*f", axis, maxdigits, cntrl_units);
+	    sprintf(buff, "%dA%d", axis, intval);
+	    strcat(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+	    motor_call->type = PC6K_table[command];
 
+	    // sprintf(buff, "%dAA%.*f", axis, maxdigits, cntrl_units/2);
+	    sprintf(buff, "%dAA%d", axis, intval/2);
+	    strcat(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+	    motor_call->type = PC6K_table[command];
+
+	    // sprintf(buff, "%dAD%.*f", axis, maxdigits, cntrl_units);
+	    sprintf(buff, "%dAD%d", axis, intval);
+	    strcat(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+	    motor_call->type = PC6K_table[command];
+
+	    // sprintf(buff, "%dADA%.*f", axis, maxdigits, cntrl_units/2);
+	    sprintf(buff, "%dADA%d", axis, intval/2);
 	    break;
 	
 	case GO:
-	    sprintf(buff, "%dGO:", axis); 
+	    sprintf(buff, "%dGO", axis); 
 	    break;
 	
 	case SET_ENC_RATIO:
 	  // sprintf(buff, "%dERES%d:%dDRESET:", axis, intval, axis);
+	    sendMsg = false;
 	    break;
 	
 	case GET_INFO:
 	    /* These commands are not actually done by sending a message, but
 	       rather they will indirectly cause the driver to read the status
 	       of all motors */
+	    sendMsg = false;
 	    break;
 	
 	case STOP_AXIS:
-   	    sprintf(buff, "!%dK:", axis);
+   	    sprintf(buff, "!%dS", axis);
 	    break;
 	
 	case JOG:
-   	    if (intval > 0)
-	      sprintf(buff, "%dMC1:%dV%.*f:%dD+:%dGO:", axis, axis, maxdigits, cntrl_units, axis, axis);
+
+	    sprintf(buff, "%dMC1", axis);
+	    strcat(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+	    motor_call->type = PC6K_table[command];
+
+	    // sprintf(buff, "%dV%.*f", axis, maxdigits, cntrl_units);
+	    sprintf(buff, "%dV%d", axis, intval);
+	    strcat(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+	    motor_call->type = PC6K_table[command];
+
+
+   	    if (intval >= 0)
+	      sprintf(buff, "%dD+", axis);
             else
-	      sprintf(buff, "%dMC1:%dV%.*f:%dD-:%dGO:", axis, axis, maxdigits, cntrl_units, axis, axis);
+	      sprintf(buff, "%dD-", axis);
+
+	    strcat(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PC6K_cards);
+	    motor_call->type = PC6K_table[command];
+
+	    sprintf(buff, "%dGO", axis);
 	    break;
 	
 	case SET_PGAIN:
-	    sprintf(buff, "%dSGP%d:", axis, intval);
+	    sprintf(buff, "%dSGP%d", axis, intval);
 	    break;
 	
 	case SET_IGAIN:
-	    sprintf(buff, "%dSGI%d:", axis, intval);
+	    sprintf(buff, "%dSGI%d", axis, intval);
 	    break;
 	
 	case SET_DGAIN:
-	    sprintf(buff, "%dSGV%d:", axis, intval); /* Velocity Gain */
+	    sprintf(buff, "%dSGV%d", axis, intval); /* Velocity Gain */
 	    break;
 	
 	case ENABLE_TORQUE:
-	    sprintf(buff, "%dDRIVE1:", axis);
+	    sprintf(buff, "%dDRIVE1", axis);
 	    break;
 	
 	case DISABL_TORQUE:
-	    sprintf(buff, "%dDRIVE0:", axis);
+	    sprintf(buff, "%dDRIVE0", axis);
 	    break;
 	
 	case SET_HIGH_LIMIT:
@@ -306,6 +374,7 @@ STATIC RTN_STATUS PC6K_build_trans(motor_cmnd command, double *parms, struct mot
 		mr->dhlm = motor_info->high_limit * mr->mres;
 		rtnval = ERROR;
 	    }
+	    sendMsg = false;
 	    break;
 	
 	case SET_LOW_LIMIT:
@@ -318,17 +387,25 @@ STATIC RTN_STATUS PC6K_build_trans(motor_cmnd command, double *parms, struct mot
 		mr->dllm = motor_info->low_limit * mr->mres;
 		rtnval = ERROR;
 	    }
+	    sendMsg = false;
 	    break;
 	
 	default:
+	    sendMsg = false;
 	    rtnval = ERROR;
     }
 
-    size = strlen(buff);
-    if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
-	errlogMessage("PC6K_build_trans(): buffer overflow.\n");
-    else
-	strcat(motor_call->message, buff);
+    if (sendMsg == true)
+      {
+	size = strlen(buff);
+	if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
+	  errlogMessage("PC6K_build_trans(): buffer overflow.\n");
+	else
+	  {
+	  strcat(motor_call->message, buff);
+	  motor_end_trans_com(mr, drvtabptr);
+	  }
+      }
 
     return(rtnval);
 }

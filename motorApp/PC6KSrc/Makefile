@@ -5,7 +5,7 @@ include $(TOP)/configure/CONFIG
 # The following are used for debugging messages.
 #USR_CXXFLAGS += -DDEBUG
 
-OPT_CXXFLAGS = 
+OPT_CXXFLAGS = -g -O0
 
 DBD += devPC6K.dbd
 

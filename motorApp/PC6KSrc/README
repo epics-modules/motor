@@ -21,11 +21,25 @@ Disable Echo
 Enable continuous command mode
 	COMEXEC1	
 
+Communication Settings
+	EOL13,10,0
+	EOT13,0,0
+	ERRLVL4
+	ERRDEF13,10,45,32
+	ERROK13,10,62,32
+	ERRBAD13,10,63,32
 
 ---------------- Network  Commands -------------------
 NTADDRxx,xx,xx,xx =    network IP
 NTMASKxxx,xxx,xxx,xxx = network mask
-NTFEN1 = network enable
+NTFEN2 = network enable
+
+Workstations cannot link to 6K Controllers without
+an explicit arp table entry using the 'arp' command.
+
+arp -s <6K IP addr> <6K MAC addr> <Workstation IP addr>
+       
+* Use the 6K 'TNT' command to see the ip and MAC address
 
 
 Commands 
