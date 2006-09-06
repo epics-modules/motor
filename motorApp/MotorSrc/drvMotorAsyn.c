@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.12 $
- * Modified by: $Author: peterd $
- * Last Modified: $Date: 2006-08-10 08:12:47 $
+ * Version: $Revision: 1.13 $
+ * Modified by: $Author: rivers $
+ * Last Modified: $Date: 2006-09-06 15:44:35 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -770,10 +770,16 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
 		}
 	    }
 	    /* If we've subscribed to the aggregate status */
-	    if (reason == motorStatus) {
+	    else if (reason == motorStatus) {
 		pint32Interrupt->callback(pint32Interrupt->userPvt,
 					  pint32Interrupt->pasynUser,
 					  pAxis->status.status);
+	    }
+            else {
+	        (*pPvt->drvset->getInteger)(pAxis->axis, reason, &ivalue);
+		pint32Interrupt->callback(pint32Interrupt->userPvt, 
+					  pint32Interrupt->pasynUser,
+					  ivalue);
 	    }
 	}
 	pnode = (interruptNode *)ellNext(&pnode->node);
