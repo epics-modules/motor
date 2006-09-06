@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.13 $
+ * Version: $Revision: 1.14 $
  * Modified by: $Author: peterd $
- * Last Modified: $Date: 2006-08-10 08:12:47 $
+ * Last Modified: $Date: 2006-09-06 12:27:47 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -235,8 +235,8 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
     rc = NOTHING_DONE;
 
     if ( pPvt->needUpdate ) {
-	pmr->rmp = (epicsInt32)round(pPvt->status.position);
-	pmr->rep = (epicsInt32)round(pPvt->status.encoder_posn);
+	pmr->rmp = (epicsInt32)floor(pPvt->status.position + 0.5);
+	pmr->rep = (epicsInt32)floor(pPvt->status.encoder_posn + 0.5);
 	/* pmr->rvel = (epicsInt32)round(pPvt->status.velocity); */
 	pmr->msta = pPvt->status.status;
 	rc = CALLBACK_DATA;
@@ -488,14 +488,14 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
 
     if (dbScanLockOK) {
         dbScanLock((dbCommon *)pmr);
-        pPvt->status = *value;
+        memcpy(&pPvt->status, value, sizeof(struct MotorStatus));
         if (!pPvt->needUpdate && !pPvt->moveRequestPending) {
 	    pPvt->needUpdate = 1;
 	    pmr->rset->process((dbCommon*)pmr);
         }
         dbScanUnlock((dbCommon*)pmr);
     } else {
-        pPvt->status = *value;
+        memcpy(&pPvt->status, value, sizeof(struct MotorStatus));
         pPvt->needUpdate = 1;
     }
 }
