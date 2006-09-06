@@ -2,13 +2,13 @@ file "$(MOTOR)/db/basic_asyn_motor.db"
 {
 pattern
 {P,     N,  M,      DTYP,           PORT, ADDR,  DESC,          EGU,   DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC,  DHLM,  DLLM,  INIT}
-{IOC:,  1,  m$(N),  "asynMotor",   XPS1,  0,  "motor $(N)",  degrees,  Pos,  .3,     .1,    .2,    0,     1,     .2,    0.001,  5,     10,   0,      ""}
+{IOC:,  1,  m$(N),  "asynMotor",   XPS1,  0,  "motor $(N)",  degrees,  Pos,  .3,     .1,    .2,    0,     1,     .2,    0.001,  5,   62.5,  50,      ""}
 {IOC:,  2,  m$(N),  "asynMotor",   XPS1,  1,  "motor $(N)",  degrees,  Pos,  .3,     .1,    .2,    0,     1,     .2,    0.001,  5,     10,   0,      ""}
 }
 file "$(MOTOR)/db/XPS_extra.db"
 {
 pattern
-{P,     R,  PORT}
-{IOC:,  m1, XPS1}
-{IOC:,  m2, XPS1}
+{P,     R,  PORT,  ADDR}
+{IOC:,  m1, XPS1,  0}
+{IOC:,  m2, XPS1   1}
 }
