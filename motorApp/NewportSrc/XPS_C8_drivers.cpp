@@ -476,6 +476,7 @@ long __stdcall GatheringConfigurationSet (int SocketIndex, int NbElements, char 
 			strcat (ExecuteMethod, ",");
 		}
 	}
+	delete stringArray0;
 	strcat (ExecuteMethod, ")");
 
 	/* Send this string and wait return function from controller */ 
@@ -583,6 +584,7 @@ long __stdcall GatheringExternalConfigurationSet (int SocketIndex, int NbElement
 			strcat (ExecuteMethod, ",");
 		}
 	}
+	delete stringArray0;
 	strcat (ExecuteMethod, ")");
 
 	/* Send this string and wait return function from controller */ 
@@ -779,6 +781,7 @@ long __stdcall GPIOAnalogGet (int SocketIndex, int NbElements, char * GPIONameLi
 			strcat (ExecuteMethod, ",");
 		}
 	}
+	delete stringArray0;
 	strcat (ExecuteMethod, ")");
 
 	/* Send this string and wait return function from controller */ 
@@ -845,6 +848,7 @@ long __stdcall GPIOAnalogSet (int SocketIndex, int NbElements, char * GPIONameLi
 			strcat (ExecuteMethod, ",");
 		}
 	}
+	delete stringArray0;
 	strcat (ExecuteMethod, ")");
 
 	/* Send this string and wait return function from controller */ 
@@ -896,6 +900,7 @@ long __stdcall GPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIONa
 			strcat (ExecuteMethod, ",");
 		}
 	}
+	delete stringArray0;
 	strcat (ExecuteMethod, ")");
 
 	/* Send this string and wait return function from controller */ 
@@ -962,6 +967,7 @@ long __stdcall GPIOAnalogGainSet (int SocketIndex, int NbElements, char * GPIONa
 			strcat (ExecuteMethod, ",");
 		}
 	}
+	delete stringArray0;
 	strcat (ExecuteMethod, ")");
 
 	/* Send this string and wait return function from controller */ 
