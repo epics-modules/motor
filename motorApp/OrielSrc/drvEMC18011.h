@@ -3,9 +3,9 @@ FILENAME...	drvEMC18011.h
 USAGE...    This file contains Parker Compumotor driver "include"
 	    information that is specific to the 6K series serial controller
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-07 20:18:09 $
+Last Modified:	$Date: 2006-09-07 21:19:43 $
 */
 
 /*

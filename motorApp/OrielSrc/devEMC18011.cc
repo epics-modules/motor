@@ -2,9 +2,9 @@
 FILENAME...	devEMC18011.cc
 USAGE...	Motor record device level support for Parker Compumotor drivers
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-07 20:18:09 $
+Last Modified:	$Date: 2006-09-07 21:19:43 $
 */
 
 /*
@@ -126,6 +126,9 @@ STATIC long EMC18011_init(void *arg)
 STATIC long EMC18011_init_record(void *arg)
 {
     struct motorRecord *mr = (struct motorRecord *) arg;
+    /* Disable change of direction testing in record support */
+    /* This device does it's own backlash correction */
+    mr->ntm = menuYesNoNO;
     return(motor_init_record_com(mr, *drvtabptr->cardcnt_ptr, drvtabptr, EMC18011_cards));
 }
 

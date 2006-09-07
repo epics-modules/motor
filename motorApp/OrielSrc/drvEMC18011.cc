@@ -3,9 +3,9 @@ FILENAME...	drvEMC18011.cc
 USAGE...	Motor record driver level support for Spectra-Physics
                 Encoder Mike Controller (Model: 18011)
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-07 20:18:09 $
+Last Modified:	$Date: 2006-09-07 21:19:43 $
 
 */
 
