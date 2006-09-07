@@ -105,6 +105,7 @@ Last Modified:	2005/03/30 19:10:48
 #define BUFF_SIZE 100       /* Maximum length of string to/from PMNC87xx */
 
 #define PMNC_TIMEOUT	3.0	/* Command timeout in sec. */
+#define MESS_ERR     -1
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
@@ -533,7 +534,7 @@ STATIC int send_recv_mess(int card, char const *send_com, char *recv_com, char c
     if (size > MAX_MSG_SIZE)
     {
 	errlogMessage("drvPMNC87xx:send_recv_mess(); message size violation.\n");
-	return(ERROR);
+	return(MESS_ERR);
     }
     else if (size == 0)	/* Normal exit on empty input message. */
 	return (OK);
@@ -541,7 +542,7 @@ STATIC int send_recv_mess(int card, char const *send_com, char *recv_com, char c
     if (!motor_state[card])
     {
 	errlogPrintf("drvPMNC87xx:send_recv_mess() - invalid card #%d\n", card);
-	return(ERROR);
+	return(MESS_ERR);
     }
 
     Debug(2, "send_recv_mess(): message = %s\n", send_com);
@@ -557,10 +558,11 @@ STATIC int send_recv_mess(int card, char const *send_com, char *recv_com, char c
     status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, send_com, size, 
                                          recv_com, BUFF_SIZE-1,
                                          PMNC_TIMEOUT, &nwrite, &nread, &eomReason);
-    if ((status != asynSuccess) || (nread <= 0))
+    if (status != asynSuccess)
     {
-	recv_com[0] = '\0';
-	nread = ERROR;
+      Debug(3, "send_recv_mess(): ERROR - staus =%d, nread = %d\n", (int) status, nread);
+      recv_com[0] = '\0';
+      return(MESS_ERR);
     }
 
     if (eos)
@@ -671,7 +673,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 
     /* Check that card exists */
     if (!motor_state[card])
-	return(ERROR);
+	return(MESS_ERR);
 
     cntrl = (struct PMNCcontroller *) motor_state[card]->DevicePrivate;
 
@@ -688,13 +690,11 @@ STATIC int recv_mess(int card, char *com, int flag)
     status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
                                     timeout, &nread, &eomReason);
 
-    if ((status != asynSuccess) || (nread <= 0))
+    if (status != asynSuccess)
     {
 	com[0] = '\0';
-	nread = 0;
+	return(MESS_ERR);
     }
-    else
-	com[nread-1] = '\0';
 
     if (flag == 0)
       // Reset  EOS to '\n'
@@ -814,18 +814,20 @@ STATIC int motor_init()
                           cntrl->asyn_address, &cntrl->pasynUser, NULL);
 	if (success_rtn == asynSuccess)
 	{
-	  int retry = 0;
+	  int retry;
 
 	      /* Set command End-of-string */
 	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser,PROMPT_EOS,strlen(PROMPT_EOS));
             pasynOctetSyncIO->setOutputEos(cntrl->pasynUser,CMND_EOS,strlen(CMND_EOS));
 	    
 
-	    /* Send a message to the board, see if it exists */
 	    /* flush any junk at input port - should not be any data available */
 	    pasynOctetSyncIO->flush(cntrl->pasynUser);
     
+	    rtnCnt = 0;
+	    retry = 0;
 
+	    /* Send a message to the board, see if it exists */
 	    do
 	    {
 	      rtnCnt = send_recv_mess(card_index, GET_IDENT, buff, NULL);
@@ -833,15 +835,31 @@ STATIC int motor_init()
 		/* Return value is length of response string */
 	    } while(rtnCnt <= 0 && retry < 3);
 
+
+	    // Resetting the controller loses the ethernet connection - bad idea
+	    if (NULL) 
+	      {
+   	     /* Reset Controller: takes > 5 sec */
+	      send_recv_mess(card_index, INIT_ALL, nobuff, NULL); 
+
+	      retry = 0;
+	      rtnCnt = 0;
+	      /* Wait for Controller to return */
+	      do
+		{
+		  rtnCnt = send_recv_mess(card_index, GET_IDENT, buff, NULL);
+		  retry++;
+		  /* Return value is length of response string */
+		} while(rtnCnt <= 0 && retry < 1000);
+
+	      }
+
 	}
 
 	if (success_rtn == asynSuccess && rtnCnt > 0)
 	{
 	    strncpy(brdptr->ident, &buff[0], MAX_IDENT_LEN);  /* Save Version info */	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;
-	    send_recv_mess(card_index, STOP_ALL, nobuff, NULL);	        /* Stop all motors */
-	    // send_recv_mess(card_index, INIT_ALL, nobuff, NULL);         /* Initalize all devices - takes > 5 sec */
-	    // send_recv_mess(card_index, MOTOR_ON, nobuff, NULL);	        /* Enable all motors */
 
 	    /* Set Motion Master model indicator. */
 	    bufptr = strstr(brdptr->ident, VER_STR);
@@ -878,7 +896,7 @@ STATIC int motor_init()
 		send_mess(card_index, GET_MPV, NULL);
 		/* Number of return strings will tell us how many axes this controller has */
 		/* Return format: A<driver#> M<motor#>=<parm> */
-		while (recv_mess(card_index, buff, 0))
+		while (recv_mess(card_index, buff, 0) > 0)
 		  {
 		     sscanf(buff, "A%d M%d", &driverIndex, &motor_index);
 		     axisdef[total_axis].driverType = PMD8753;
@@ -898,7 +916,7 @@ STATIC int motor_init()
 		send_mess(card_index, GET_DRT, NULL);
 		/* Number of return strings will tell us how many axes this controller has */
 		/* Return format: A<driver#> <driveType> */
-		while (recv_mess(card_index, buff, 0))
+		while (recv_mess(card_index, buff, 0) > 0)
 		  {
 		    sscanf(buff, "A%d=%d", &driverIndex, &driver.All);
 		    if (driver.ID == PMD8753)
