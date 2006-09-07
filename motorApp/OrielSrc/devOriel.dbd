@@ -1,0 +1,6 @@
+# Oriel Encoder/Motor Mike  Device Driver support.
+device(motor,VME_IO,devEMC18011,"EMC18011")
+driver(drvEMC18011)
+registrar(OrielRegister)
+variable(drvEMC18011debug)
+
