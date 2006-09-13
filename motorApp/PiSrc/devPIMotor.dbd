@@ -16,11 +16,16 @@ driver(drvPIC848)
 registrar(PIC848motorRegister)
 variable(drvPIC848debug)
 
-
 # Physik Instrumente (PI) GmbH & Co. E-662 driver support.
 device(motor,VME_IO,devPIC662,"PIC662")
 driver(drvPIC662)
 registrar(PIC662motorRegister)
 variable(drvPIC662debug)
+
+# Physik Instrumente (PI) GmbH & Co. C-862 driver support.
+device(motor,VME_IO,devPIC862,"PIC862")
+driver(drvPIC862)
+registrar(PIC862motorRegister)
+variable(drvPIC862debug)
 
 
