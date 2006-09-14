@@ -27,10 +27,10 @@ The following is a modified version of the procedure defined in Section 2.1,
 3. Using the command DN, name the MDrive Motion Control. This must be a number
         1-9. (DN="1"{enter}). Label the motor with the device name.
 
-4. Set Echo Mode EM=2{enter}.
-
-5. Define the plus, minus and home limit switches, if available, using the
+4. Define the plus, minus and home limit switches, if available, using the
 	S<1-4> command.
+
+5. Set Echo Mode EM=2{enter}.
 
 6. Set the party flag PY=1{enter}.
 
