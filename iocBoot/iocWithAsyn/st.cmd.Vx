@@ -142,6 +142,17 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #     (2) asyn port name (string)
 #!PIC662Config(0, "serial1")
 #!drvPIC662debug = 4
+
+# PI C-862 DC-motor driver setup parameters:
+#     (1) maximum number of controllers in system
+#     (2) motor task polling rate (min=1Hz, max=60Hz)
+#!PIC862Setup(1, 60)
+                                                                                
+# PI C-862 DC-motor driver configuration parameters:
+#     (1) controller being configured
+#     (2) asyn port name (string)
+#!PIC862Config(0, "serial1")
+#!drvPIC862debug = 4
                                                                                 
 # New Focus Picomotor Network Controller (model 8750) (setup parameters:  
 #     (1) maximum number of controllers in system 
