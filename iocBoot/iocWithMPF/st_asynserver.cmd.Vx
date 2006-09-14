@@ -104,6 +104,10 @@
 #!asynSetOption("L0", 0, "clocal", "Y")
 #!asynSetOption("L0", 0, "crtscts", "N")
 
+# ASYN trace masks
+#!asynSetTraceMask( "L0", 0, 0x9 )
+#!asynSetTraceIOMask( "L0", 0, 0x1 )
+
 #!asynSetOption("L1", 0, "baud", "9600")
 #!asynSetOption("L1", 0, "bits", "8")
 #!asynSetOption("L1", 0, "parity", "none")
