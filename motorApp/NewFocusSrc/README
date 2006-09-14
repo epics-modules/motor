@@ -1,5 +1,8 @@
-NewFocus PicoMotor Controler (8750)
+NewFocus PicoMotor Controller (87xx)
 ===================================
+
+This driver is compatable with the 8750 and 8752 PicoMotor
+Controllers. 
 
 
 **** EXAMPLE CONFIGURATION FOR VXWORKS TARGETS ****
@@ -21,22 +24,22 @@ tyGSAsynInit("serial1",  "UART_0", 1, 19200,'N',1,8,'N',"\n","\r")  /* NewFocus 
 .
 .
 
-# New Focus Picomotor Network Controller (model 8750) (setup parameters:  
+# New Focus Picomotor Network Controller (model 87xx) (setup parameters:  
 #     (1) maximum number of controllers in system 
 #     (2) maximum number of drivers per controller (1 - 3)  
 #     (3) motor task polling rate (min=1Hz,max=60Hz)  
-#drvPMNC8750debug=0
-PMNC8750Setup(1, 2, 10) 
+#drvPMNC87xxdebug=0
+PMNC87xxSetup(1, 2, 10) 
  
-# New Focuc Picomotor Network Controller (model 8750) configuration parameters:  
+# New Focuc Picomotor Network Controller (model 87xx) configuration parameters:  
 #     (1) controller# being configured, 
 #     (2) asyn port name (string)
-PMNC8750Config(0, "serial2")
+PMNC87xxConfig(0, "serial1")
 
 
 iocBoot/iocxxx/motor.substitutions
 ----------------------------------
-{xxx:, 1,     m$(N),  "PMNC8750",     0,      0,      "motor $(N)",   degrees,        Pos,    10,             0.,             1.,             0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
-{xxx:, 2      m$(N),  "PMNC8750",     0,      1,      "motor $(N)",   degrees,        Pos,    60,             0.,             1.5,            0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
-{xxx:, 3,     m$(N),  "PMNC8750",     0,      2,      "motor $(N)",   degrees,        Pos,    60,             0.,             1.,             0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
+{xxx:, 1,     m$(N),  "PMNC87xx",     0,      0,      "motor $(N)",   degrees,        Pos,    10,             0.,             1.,             0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
+{xxx:, 2      m$(N),  "PMNC87xx",     0,      1,      "motor $(N)",   degrees,        Pos,    60,             0.,             1.5,            0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
+{xxx:, 3,     m$(N),  "PMNC87xx",     0,      2,      "motor $(N)",   degrees,        Pos,    60,             0.,             1.,             0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
 
