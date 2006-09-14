@@ -30,3 +30,9 @@ $(P)$(M).FRAC
 $(P)$(M).OMSL
 $(P)$(M).JVEL
 $(P)$(M).JAR
+$(P)$(M).VMAX
+$(P)$(M).PCOF
+$(P)$(M).ICOF
+$(P)$(M).DCOF
+$(P)$(M).HVEL
+
