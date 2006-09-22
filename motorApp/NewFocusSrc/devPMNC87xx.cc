@@ -201,10 +201,6 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 
     switch (command)
     {
-	case SET_PGAIN:
-	case SET_IGAIN:
-	case SET_DGAIN:
-	               break;
 	case MOVE_ABS:
 	case MOVE_REL:
 	case HOME_FOR:
