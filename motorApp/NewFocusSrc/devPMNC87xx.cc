@@ -164,7 +164,7 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
     int axis, card;
     int drive, motor;
     unsigned int size;
-    int intval;
+    int intval, velval;
     RTN_STATUS rtnval;
     bool sendMsg;
 
@@ -327,18 +327,21 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 	    sprintf(buff, "HAL A%d", drive);  /* Using the smooth stop command */
 	    break;
 	case JOG:
+	     if (abs(intval) > MAX_VELOCITY)
+	       velval = MAX_VELOCITY;
+	     else
+	       velval = abs(intval);
+
 	    if (dType == PMD8753)
 	      {
 		if (intval >= 0)
-		  sprintf(buff, "FOR A%d=%d", drive, intval);
+		  sprintf(buff, "FOR A%d=%d", drive, velval);
 		else
-		  sprintf(buff, "REV A%d=%d", drive, abs(intval));
+		  sprintf(buff, "REV A%d=%d", drive, velval);
 	      }
 	    else if (dType == PMD8751)
 	      {
-		if (abs(intval) > 2000)
-		  intval = 2000;
-		sprintf(buff, "VEL A%d %d=%d", drive, motor, abs(intval));
+		sprintf(buff, "VEL A%d %d=%d", drive, motor, velval);
 
 		strcpy(motor_call->message, buff);
 		rtnval = motor_end_trans_com(mr, drvtabptr);
