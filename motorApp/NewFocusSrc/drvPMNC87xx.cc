@@ -133,7 +133,7 @@ STATIC int recv_mess(int, char *, int);
 STATIC RTN_STATUS send_mess(int, char const *, char *);
 STATIC int send_recv_mess(int, char const *, char *, char const *);
 STATIC int set_status(int, int);
-STATIC void start_status(int);
+// STATIC void start_status(int);
 static long report(int);
 static long init();
 STATIC int motor_init();
@@ -236,9 +236,9 @@ STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
  * start_status(int card)
  *            if card == -1 then start all cards
  *********************************************************/
-STATIC void start_status(int card)
-{
-}
+// STATIC void start_status(int card)
+// {
+// }
 
 /**************************************************************
  * Parse status and position strings for a card and signal
@@ -303,7 +303,7 @@ STATIC int set_status(int card, int signal)
 	pStr = cntrl->chan_select_string[driverID];
 	recvRtn = send_recv_mess(card, buff, pStr, NULL);
 	CHECKRTN;
-        Debug(2, "start_status(): ChanSelect_string=%s\n", pStr);
+        Debug(2, "set_status(): ChanSelect_string=%s\n", pStr);
         selectMotor = atoi(pStr);
       }
     else

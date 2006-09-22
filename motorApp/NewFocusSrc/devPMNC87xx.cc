@@ -243,14 +243,14 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 	  // if (dType == PMD8751)
 	  // sprintf(buff, "FIN A%d", drive);
 	  //  else
-	      trans->state = IDLE_STATE;	/* No command sent to the controller. */
+	  //    trans->state = IDLE_STATE;	/* No command sent to the controller. */
 	      sendMsg = false;
 	    break;
 	case HOME_REV:
 	  //  if (dType == PMD8751)
 	  //  sprintf(buff, "RIN A%d", drive);
 	  //  else
-	      trans->state = IDLE_STATE;	/* No command sent to the controller. */
+	  //  trans->state = IDLE_STATE;	/* No command sent to the controller. */
 	      sendMsg = false;
 	    break;
 	case LOAD_POS:
@@ -278,10 +278,10 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 	case SET_VEL_BASE:
 	    if (dType == PMD8753)
 	      {
-		if (abs(intval) > 1999)
-		  intval = 1999;
+		if (abs(intval) >= MAX_VELOCITY)
+		  intval = MAX_VELOCITY-1;
 		/* Set VEL to maximum to eliminate MPV out-of-range error */
-		sprintf(buff, "VEL A%d %d=2000", drive, motor);
+		sprintf(buff, "VEL A%d %d=%d", drive, motor, MAX_VELOCITY);
 		strcpy(motor_call->message, buff);
 
 		rtnval = motor_end_trans_com(mr, drvtabptr);
@@ -299,14 +299,19 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 
 	    break;
 	case SET_VELOCITY:
-     	    if (abs(intval) > 2000)
-   	        intval = 2000;
+	    if (abs(intval) > MAX_VELOCITY)
+   	        intval = MAX_VELOCITY;
 	    sprintf(buff, "VEL A%d %d=%d", drive, motor, abs(intval));
 	    break;
 	case SET_ACCEL:
 	    /* 
 	     * The value passed is in steps/sec/sec.  
 	     */
+	    if (intval < MIN_ACCEL)
+	      intval = MIN_ACCEL;
+	    else if (intval > MAX_ACCEL)
+	      intval = MAX_ACCEL;
+
 	    sprintf(buff, "ACC A%d %d=%d", drive, motor, intval);
 	    break;
 	case GO:

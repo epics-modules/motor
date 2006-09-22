@@ -47,6 +47,11 @@ Last Modified:	2004/08/17 21:28:22
 #include "asynDriver.h"
 #include "asynOctetSyncIO.h"
 
+/* Motor Characteristics - in steps */
+#define MAX_VELOCITY    2000 
+#define MIN_ACCEL       16
+#define MAX_ACCEL       32000
+
 /* Picomotor Network Controllers */
 enum PMNC_model
 {
