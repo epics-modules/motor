@@ -795,7 +795,7 @@ STATIC int motor_init()
     char *bufptr;
     int total_axis = 0;
     int driverIndex; 
-    int rtnCnt;
+    int rtnCnt = 0;
     asynStatus success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
