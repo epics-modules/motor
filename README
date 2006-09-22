@@ -155,6 +155,26 @@ Modification Log from R5-9 to R6-0
         File modified: Changed EOS from "\r\n" to "\n" in motor_init(). Process
                        the \r in recv_mess().
 
+6) Mohan Ramanathan and Ron Sluiter added support for the Physik Instrumente
+        (PI) GmbH & Co. Model C-862 motor controller.
+
+        Files added: Added devPIC862.cc, drvPIC862.cc, PIC862Register.cc and
+                    drvPIC862.h to the motorApp/PiSrc directory.
+
+7) Joe Sullivan added support for the ACS Tech80 SPiiPlus motor controller.
+
+        Files added: Added motorApp/AcsTech80Src directory.
+
+8) Joe Sullivan added support for the Spectra-Physics Encoder Mike Controller
+        (Model: 18011).
+
+        Files added: Added motorApp/OrielSrc directory.
+
+9) The New Focus Model 8750 Network Controller device support ("PMNC8750") has been
+        changed "PMNC87xx".  It now supports both the 8750 and 8752 models.
+
+        Files modified - All of motorApp/NewFocusSrc.
+
 
 Modification Log from R5-8 to R5-9
 ==================================
