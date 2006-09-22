@@ -232,12 +232,12 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
     {
 	case MOVE_ABS:
 	    if (dType == PMD8753)
-	      sprintf(buff, "REL A%d=%d G", drive, intval-motor_info->position);
+	      sprintf(buff, "REL A%d=%d", drive, intval-motor_info->position);
 	    else
-	      sprintf(buff, "ABS A%d=%d G", drive, intval);	      
+	      sprintf(buff, "ABS A%d=%d", drive, intval);	      
 	    break;
 	case MOVE_REL:
-	    sprintf(buff, "REL A%d=%d G", drive, intval);
+	    sprintf(buff, "REL A%d=%d", drive, intval);
 	    break;
 	case HOME_FOR:
 	  // if (dType == PMD8751)
@@ -260,6 +260,8 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 		/* Setting local driver position because the controller cannot be set */
 		sprintf(buff, "CHL A%d=%d", drive, motor);
 		motor_info->position = intval;
+		motor_info->encoder_position = intval;
+		cntrl->last_position[axis] = 0;  // Used to accumulate position history 
 	      }
 	    else if (dType == PMD8751)
 	      {
@@ -308,8 +310,7 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 	    sprintf(buff, "ACC A%d %d=%d", drive, motor, intval);
 	    break;
 	case GO:
-	    // GO included in motion commands - fake command to get response 
-	    sprintf(buff, "CHL %d", drive); 
+	    sprintf(buff, "GO A%d", drive); 
 	    break;
 	case SET_ENC_RATIO:
 	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
@@ -328,9 +329,9 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 	    if (dType == PMD8753)
 	      {
 		if (intval >= 0)
-		  sprintf(buff, "FOR A%d=%d G", drive, intval);
+		  sprintf(buff, "FOR A%d=%d", drive, intval);
 		else
-		  sprintf(buff, "REV A%d=%d G", drive, abs(intval));
+		  sprintf(buff, "REV A%d=%d", drive, abs(intval));
 	      }
 	    else if (dType == PMD8751)
 	      {
@@ -347,13 +348,22 @@ STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd command, double *parms, struct
 		// because the 8751 does not indicate motion with (FOR and REV)
 		// ** BUG? **
 		if (intval >= 0)
-		  sprintf(buff, "REL A%d=1000000 G",drive);  
+		  sprintf(buff, "REL A%d=1000000",drive);  
 		else
-		  sprintf(buff, "REL A%d=-1000000 G",drive);
-	      }
+		  sprintf(buff, "REL A%d=-1000000",drive);
+              }
 	    else
+              {
 	      sendMsg = false;
+              break;
+              }
 
+	    strcpy(motor_call->message, buff);
+	    rtnval = motor_end_trans_com(mr, drvtabptr);
+	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, PMNC87xx_cards);
+ 	    motor_call->type = PMNC87xx_table[command];
+
+	    sprintf(buff, "GO A%d", drive); 
 	    break;
 	case SET_PGAIN:
 	case SET_IGAIN:

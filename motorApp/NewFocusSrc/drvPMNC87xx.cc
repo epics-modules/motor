@@ -318,7 +318,8 @@ STATIC int set_status(int card, int signal)
     sprintf(buff, READ_STATUS, driverID);
     pStr = cntrl->status_string[driverID];
     /* STATUS command does not return a prompt - bug? */ 
-    recvRtn = send_recv_mess(card, buff, pStr, NL_EOS);
+    // recvRtn = send_recv_mess(card, buff, pStr, NL_EOS);
+    recvRtn = send_recv_mess(card, buff, pStr, NULL);
     CHECKRTN;
     Debug(2, "set_status(): Status_string=%s\n", pStr);
     if (sscanf(pStr, "A%d=0x%x",&recvDriver, &recvStatus) == 2)
@@ -558,6 +559,10 @@ STATIC int send_recv_mess(int card, char const *send_com, char *recv_com, char c
     status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, send_com, size, 
                                          recv_com, BUFF_SIZE-1,
                                          PMNC_TIMEOUT, &nwrite, &nread, &eomReason);
+    if (eos)
+      // Reset EOS to default 
+      pasynOctetSyncIO->setInputEos(cntrl->pasynUser,PROMPT_EOS,strlen(PROMPT_EOS));
+
     if (status != asynSuccess)
     {
       Debug(3, "send_recv_mess(): ERROR - staus =%d, nread = %d\n", (int) status, nread);
@@ -565,13 +570,7 @@ STATIC int send_recv_mess(int card, char const *send_com, char *recv_com, char c
       return(MESS_ERR);
     }
 
-    if (eos)
-      // Reset EOS to default 
-      pasynOctetSyncIO->setInputEos(cntrl->pasynUser,PROMPT_EOS,strlen(PROMPT_EOS));
-
-
     Debug(2, "send_recv_mess(): recv message = \"%s\"\n", recv_com);
-
     return(nread);
 
 }
@@ -669,6 +668,7 @@ STATIC int recv_mess(int card, char *com, int flag)
     int flush = 1;
     size_t nread = 0;
     int eomReason;
+    int rtnValue;
     asynStatus status;
 
     /* Check that card exists */
@@ -690,18 +690,23 @@ STATIC int recv_mess(int card, char *com, int flag)
     status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
                                     timeout, &nread, &eomReason);
 
-    if (status != asynSuccess)
-    {
-	com[0] = '\0';
-	return(MESS_ERR);
-    }
-
     if (flag == 0)
       // Reset  EOS to '\n'
       pasynOctetSyncIO->setInputEos(cntrl->pasynUser,PROMPT_EOS,strlen(PROMPT_EOS));
 
-    Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return (nread);
+    if (status != asynSuccess)
+      {
+	com[0] = '\0';
+	rtnValue = MESS_ERR;
+	Debug(3, "recv_mess(): ERROR - staus =%d, nread = %d\n", (int) status, nread);
+      }
+    else
+      {
+	Debug(2, "recv_mess(): message = \"%s\"\n", com);
+	rtnValue = nread;
+      }
+
+    return (rtnValue);
 }
 
 
@@ -837,7 +842,7 @@ STATIC int motor_init()
 
 
 	    // Resetting the controller loses the ethernet connection - bad idea
-	    if (NULL) 
+	    if (false) 
 	      {
    	     /* Reset Controller: takes > 5 sec */
 	      send_recv_mess(card_index, INIT_ALL, nobuff, NULL); 
@@ -957,6 +962,8 @@ STATIC int motor_init()
 		motor_info->no_motion_count = 0;
 		motor_info->encoder_position = 0;
 		motor_info->position = 0;
+		cntrl->last_position[motor_index] = 0;	/* Used to accumulate position on 8753 drivers */
+
 
 		/* Encoder Enable */
                 motor_info->encoder_present = YES;
