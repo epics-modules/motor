@@ -5,11 +5,74 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R5.9 Notice</title>
+  <title>EPICS Motor Record Release R6.0 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+
+<CENTER>
+  <H1><B><U>Motor Record Version 6.0 Release Notice</U></B></H1>
+</CENTER>
+
+<BR>
+<B><U>Requirements</U></B><BR>
+<BR>
+EPICS base R3.14.8.2 or greater.&nbsp; See the "Required Modules" section of the 
+Motor Record web page for details.<BR>
+
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>OMS MAXv Polling Rate</B></U>
+  </P>
+  <P>
+  The OMS MAXv polling rate, which set is from the MAXvSetup() st.cmd command, is 
+  allowed to be as high as the OS clock rate; i.e., (1/epicsThreadSleepQuantum()).
+  </P>
+  <P>
+  <U><B>Changes to New Focus Device Support</B></U>
+  </P>
+  <P>
+  The New Focus Model 8750 Network Controller device support ("PMNC8750") has been 
+  changed "PMNC87xx".  It now supports both the 8750 and 8752 models.
+  </P>
+</DIV>
+
+
+<CENTER>
+  <H4><U>New Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Physik Instrumente GmbH & Co. Model C-862</B></U>
+  </P>
+  <P>
+  Mohan Ramanathan and Ron Sluiter added support for the Physik Instrumente (PI) 
+  GmbH & Co. Model C-862 motor controller.
+  </P>
+
+  <P>
+  <U><B>ACS Tech80 SPiiPlus</B></U>
+  </P>
+  <P>
+  Joe Sullivan added support for the ACS Tech80 SPiiPlus motor controller.
+  </P>
+
+  <P>
+  <U><B>Spectra-Physics Encoder Mike</B></U>
+  </P>
+  <P>
+  Joe Sullivan added support for the Spectra-Physics Encoder Mike Controller (Model: 
+  18011).
+  </P>
+</DIV>
 
 
 <CENTER>
