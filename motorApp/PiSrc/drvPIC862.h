@@ -10,6 +10,7 @@
  * Modification Log:
  * -----------------
  * .00  09/05/2006  mr  copied from drvPIC848.h
+ * .01  09/25/2006 rls  COMM_TIMEOUT must be a float.
  */
 
 #ifndef	INCdrvPIC862h
@@ -20,7 +21,7 @@
 #include "asynDriver.h"
 #include "asynOctetSyncIO.h"
 
-#define COMM_TIMEOUT 2		/* Timeout in seconds. */
+#define COMM_TIMEOUT 2.0	/* Timeout in seconds. */
 
 struct PIC862controller
 {
