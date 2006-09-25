@@ -11,6 +11,8 @@ USAGE...	Motor record driver level support for Physik Instrumente (PI)
  * Modification Log:
  * -----------------
  * .00  09/05/2006  mr  copied from drvPIC848.cc
+ * .01  09/25/2006 rls  Set LS error indicator based on LS active high/low
+ *                      configuration indicator and the state of the LS.
  */
 
 
@@ -199,7 +201,7 @@ static int set_status(int card, int signal)
     
     int rtn_state, convert_cnt, charcnt;
     epicsInt32 motorData;
-    bool plusdir, ls_active = false, plusLS, minusLS;
+    bool plusdir, ls_active = false, plusLS, minusLS, LSactiveH;
     msta_field status;
 
     cntrl = (struct PIC862controller *) motor_state[card]->DevicePrivate;
@@ -252,8 +254,21 @@ static int set_status(int card, int signal)
     status.Bits.RA_DONE = (mstat1.Bits.trty_done) ? 1 : 0;
     status.Bits.EA_POSITION = (mstat1.Bits.motor_off) ? 0 : 1;
     status.Bits.RA_DIRECTION = (mstat3.Bits.mvdir_pol) ? 1 : 0;
-    plusLS  = !mstat5.Bits.plus_ls;
-    minusLS = !mstat5.Bits.minus_ls;
+
+    /* Set +/- LS indicator based on limit switch active high/low
+       configuration and the state of the limits switch. */
+
+    LSactiveH = (mstat4.Bits.lmt_high) ? true : false;
+    if (LSactiveH == true)
+    {
+        plusLS  = mstat5.Bits.plus_ls;
+        minusLS = mstat5.Bits.minus_ls;
+    }
+    else
+    {
+        plusLS  = !mstat5.Bits.plus_ls;
+        minusLS = !mstat5.Bits.minus_ls;
+    }
 
 
    /* Parse motor position */
@@ -268,10 +283,6 @@ static int set_status(int card, int signal)
     }
     else
     {
-
-
-//	status.Bits.RA_DIRECTION = (motorData >= motor_info->position) ? 1 : 0;
-
 	motor_info->position =  motor_info->encoder_position = motorData;
 	motor_info->no_motion_count = 0;
     }
@@ -303,14 +314,6 @@ static int set_status(int card, int signal)
     status.Bits.EA_HOME       = 0;
 
     status.Bits.RA_PROBLEM  = 0;
-
-    /* Parse motor velocity */
-/*
-    send_mess(card, "TV", (char) NULL);
-    recv_mess(card, buff, 1);
-    motorData = NINT(atof(&buff[2]));
-    motor_info->velocity = motorData;
-*/
 
     if (!status.Bits.RA_DIRECTION)
 	motor_info->velocity *= -1;
