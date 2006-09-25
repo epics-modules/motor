@@ -12,10 +12,13 @@ USAGE...	Motor record device level support for Physik Instrumente (PI)
  * Modification Log:
  * -----------------
  * .00  09/05/2006  mr  copied from devPIC848.cc
+ * .01  09/25/2006 rls  - strip trailing cmnd separator (",") from message.
+ *                      - simulate jogging with absolute moves to soft limit.
  */
 
 
 #include <string.h>
+#include <math.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -115,6 +118,18 @@ static long PIC862_start_trans(struct motorRecord *mr)
 /* end building a transaction */
 static RTN_STATUS PIC862_end_trans(struct motorRecord *mr)
 {
+    struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
+    struct mess_node *motor_call;
+    char *msgptr;
+    int last;
+
+    /* Remove trailing cmnd separator (",") from message. */
+    motor_call = &(trans->motor_call);
+    msgptr = motor_call->message;
+    last = strlen(msgptr) - 1;
+    if (msgptr[last] == ',')
+	msgptr[last] = (char) NULL;
+    
     motor_end_trans_com(mr, drvtabptr);
     return(OK);
 }
@@ -244,7 +259,16 @@ static RTN_STATUS PIC862_build_trans(motor_cmnd command, double *parms, struct m
 	    break;
 	
 	case JOG:
-	    sprintf(buff, "MR%d,", cntrl_units);
+	    /* 
+	    * C-862 does not have a jog command.  Simulate with move absolute
+	    * to the appropriate software limit.
+	    */
+	    sprintf(buff, "SV%d,", abs(cntrl_units));
+	    strcat(motor_call->message, buff);
+	    if (dval > 0.)
+		sprintf(buff, "MA%d,", (int) (mr->dhlm / mr->mres));
+	    else
+		sprintf(buff, "MA%d,", (int) (mr->dllm / mr->mres));
 	    break;
 	
 	case SET_PGAIN:
