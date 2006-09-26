@@ -11,6 +11,8 @@
  * -----------------
  * .00  09/05/2006  mr  copied from drvPIC848.h
  * .01  09/25/2006 rls  COMM_TIMEOUT must be a float.
+ * .02  09/26/2006 rsl  bit fields must be padded out to 16 bit words for
+ *                      WRS compiler.
  */
 
 #ifndef	INCdrvPIC862h
@@ -39,6 +41,7 @@ typedef union
     struct
     {
 #ifdef MSB_First
+	unsigned int na8		:8; /* NA8. */
 	unsigned int motor_off		:1; /* 7 - Motor loop OFF. */
 	unsigned int breakpt		:1; /* 6 - Breakpoint reached flag. */
 	unsigned int max_pos_err	:1; /* 5 - Maximum position error is exceeded. */
@@ -56,6 +59,7 @@ typedef union
 	unsigned int max_pos_err	:1; /* 5 - Maximum position error is exceeded. */
 	unsigned int breakpt		:1; /* 6 - Breakpoint reached flag. */
 	unsigned int motor_off		:1; /* 7 - Motor loop OFF. */
+	unsigned int na8		:8; /* NA8. */
 #endif
     } Bits;                                
 } C862_Status_Reg1;
@@ -67,6 +71,7 @@ typedef union
     struct
     {
 #ifdef MSB_First
+	unsigned int na8		:8; /* NA8. */
 	unsigned int brd_addr		:1; /* 7 - Board Addressed. */
 	unsigned int num_mode		:1; /* 6 - Number mode in Effect. */
 	unsigned int ldzero_dis		:1; /* 3 - Leading Zero Suppression disabled. */
@@ -84,6 +89,7 @@ typedef union
 	unsigned int ldzero_dis		:1; /* 3 - Leading Zero Suppression disabled. */
 	unsigned int num_mode		:1; /* 6 - Number mode in Effect. */
 	unsigned int brd_addr		:1; /* 7 - Board Addressed. */
+	unsigned int na8		:8; /* NA8. */
 #endif
     } Bits;                                
 } C862_Status_Reg2;
@@ -95,6 +101,7 @@ typedef union
     struct
     {
 #ifdef MSB_First
+	unsigned int na8		:8; /* NA8. */
 	unsigned int int_comm		:1; /* 7 - Command error flag. */
 	unsigned int move_err_ex	:1; /* 6 - Move Error Excess flag. */
 	unsigned int na34	        :2;
@@ -108,6 +115,7 @@ typedef union
 	unsigned int na34	        :2;
 	unsigned int move_err_ex	:1; /* 6 - Move Error Excess flag. */
 	unsigned int int_comm		:1; /* 7 - Command error flag. */
+	unsigned int na8		:8; /* NA8. */
 #endif
     } Bits;                                
 } C862_Status_Reg3;
@@ -119,7 +127,7 @@ typedef union
     struct
     {
 #ifdef MSB_First
-	unsigned int na44	        :4;
+	unsigned int na44	        :12;
 	unsigned int brake_on		:1; /* 3 - Brake ON. */
 	unsigned int find_prgs		:1; /* 2 - Find Edge Operation in Progress. */
 	unsigned int lmt_high		:1; /* 1 - Limit Switch Active Stet HIGH */
@@ -129,7 +137,7 @@ typedef union
 	unsigned int lmt_high		:1; /* 1 - Limit Switch Active Stet HIGH */
 	unsigned int find_prgs		:1; /* 2 - Find Edge Operation in Progress. */
 	unsigned int brake_on		:1; /* 3 - Brake ON. */
-	unsigned int na44	        :4;
+	unsigned int na44	        :12;
 #endif
     } Bits;                                
 } C862_Status_Reg4;
@@ -141,7 +149,7 @@ typedef union
     struct
     {
 #ifdef MSB_First
-	unsigned int na54	        :4;
+	unsigned int na54	        :12;
 	unsigned int minus_ls		:1; /* 3 - Negative limit signal flag. */
 	unsigned int plus_ls		:1; /* 2 - Positive limit signal flag. */
 	unsigned int index		:1; /* 1 - Reference signal flag */
@@ -151,7 +159,7 @@ typedef union
 	unsigned int index		:1; /* 1 - Reference signal flag */
 	unsigned int plus_ls		:1; /* 2 - Positive limit signal flag. */
 	unsigned int minus_ls		:1; /* 3 - Negative limit signal flag. */
-	unsigned int na54	        :4;
+	unsigned int na54	        :12;
 #endif
     } Bits;                                
 } C862_Status_Reg5;
