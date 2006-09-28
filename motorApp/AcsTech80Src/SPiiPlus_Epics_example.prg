@@ -299,7 +299,6 @@ ON acpar(Axis)=1;  CALL AC_TUNED_PAR; RET
 ON dcpar(Axis)=1;  CALL DC_TUNED_PAR; RET
 
 
-
 #8
 !THIS BUFFER STOPS MOTION PROGRAMS ON A PER AXIS BASES AND RETURNS TO DC MODE
 !Done(Axis) Flag is used by EPICS to check when op operation is complete
