@@ -13,6 +13,8 @@ USAGE...	Motor record driver level support for Physik Instrumente (PI)
  * .00  09/05/2006  mr  copied from drvPIC848.cc
  * .01  09/25/2006 rls  Set LS error indicator based on LS active high/low
  *                      configuration indicator and the state of the LS.
+ * .02  09/28/2006 rls  C-862 drops transmitted characters on move command;
+ *                      need "status update delay".
  */
 
 
@@ -100,7 +102,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvPIC862);}
 
-static struct thread_args targs = {SCAN_RATE, &PIC862_access, 0.0};
+static struct thread_args targs = {SCAN_RATE, &PIC862_access, 0.017};
 
 /*********************************************************
  * Print out driver status report
