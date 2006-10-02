@@ -3,9 +3,9 @@ FILENAME... drvMVP2001.cc
 USAGE...    Motor record driver level support for MicroMo
         MVP 2001 B02 (Linear, RS-485).
 
-Version:    $Revision: 1.9 $
+Version:    $Revision: 1.10 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2005-05-10 16:35:17 $
+Last Modified:  $Date: 2006-10-02 15:49:08 $
 */
 
 /*
@@ -67,22 +67,22 @@ Last Modified:  $Date: 2005-05-10 16:35:17 $
  * Modification Log:
  * -----------------
  * .01 08/27/02  kmp    copied from drvIM483PL.c (rev 1.7, mod .03) and
- *          customized for the MVP2001.
+ *                      customized for the MVP2001.
  * .02 08/27/02  kmp    changed message construction to allow for addresses
- *          larger than 9.
+ *                      larger than 9.
  * .03 09/06/02  kmp    added an extra loop to motor_init() that sends the HO
- *          command a second time to ensure the position is set to
- *          zero.  Previously, saved positions would not be loaded
- *          if the controller was power-cycled.
+ *                      command a second time to ensure the position is set to
+ *                      zero.  Previously, saved positions would not be loaded
+ *                      if the controller was power-cycled.
  * .04 02/06/04  rls    Eliminate erroneous "Motor motion timeout ERROR".
  * .05 02/13/04  rls    port to R3.14.x
  * .06 07/12/04  rls    Converted from MPF to asyn.
  * .07 12/16/04  rls    - asyn R4.0 support.
- *              - make debug variables always available.
- *              - MS Visual C compatibility; make all epicsExportAddress
- *            extern "C" linkage.
- *          - retry on initial communication.
- *
+ *                      - make debug variables always available.
+ *                      - MS Visual C compatibility; make all epicsExportAddress
+ *                        extern "C" linkage.
+ *                      - retry on initial communication.
+ * .08 10/02/06  rls    - Bug in recv_mess(); always returned nread=0.
  */
 
 /*
@@ -488,7 +488,6 @@ static int recv_mess(int card, char *com, int flag)
     asynStatus status = asynError;
     int timeout;
     int flush = 0;
-    int len=0;
     int eomReason;
 
     /* Check that card exists */
@@ -502,9 +501,9 @@ static int recv_mess(int card, char *com, int flag)
     else
     timeout = COMM_TIMEOUT;
 
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE,
+    status = pasynOctetSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE,
                  COMM_TIMEOUT, &lenTemp, &eomReason);
-    len = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
                  COMM_TIMEOUT, &nread, &eomReason);
 
     Debug(5, "bytes: 1st call: %d\t2nd call: %d\n", lenTemp, nread);
