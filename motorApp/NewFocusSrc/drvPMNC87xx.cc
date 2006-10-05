@@ -318,8 +318,10 @@ STATIC int set_status(int card, int signal)
     sprintf(buff, READ_STATUS, driverID);
     pStr = cntrl->status_string[driverID];
     /* STATUS command does not return a prompt - bug? */ 
-    // recvRtn = send_recv_mess(card, buff, pStr, NL_EOS);
-    recvRtn = send_recv_mess(card, buff, pStr, NULL);
+    if (cntrl->changeEOS)
+      recvRtn = send_recv_mess(card, buff, pStr, NL_EOS);
+    else
+      recvRtn = send_recv_mess(card, buff, pStr, NULL);
     CHECKRTN;
     Debug(2, "set_status(): Status_string=%s\n", pStr);
     if (sscanf(pStr, "A%d=0x%x",&recvDriver, &recvStatus) == 2)
@@ -889,7 +891,10 @@ STATIC int motor_init()
 		return(ERROR);
 		break;
 	      }
-	    
+
+	    /* Check for 'STA\n' version = 1.5.4 
+	    *  because this version requires a NL input EOS on the STA command */
+	    cntrl->changeEOS = (*(bufptr + strlen(VER_STR) + 2) == '4') ? true : false;
 	    
             total_axis = 0;
 	    driverIndex = 0;

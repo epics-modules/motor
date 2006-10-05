@@ -110,6 +110,8 @@ struct PMNCcontroller
     char chan_select_string[PMNC87xx_NUM_DRIVERS+1][25];  
 
     PMNC_model pmnc;                    /* Controller Type */ 
+    bool changeEOS;                    /* Flag for controller version that does not terminate the 
+                                        * STA command correctly */
     struct PMD_axis axisDef[MAX_AXIS];	/* Axis definition - New Focus Driver Model and Number */
     long last_position[MAX_AXIS]; /* Track last incremtal position to noMotion status */
     int total_drivers;               /* Count number of drivers connected to controller */
