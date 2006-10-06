@@ -1,0 +1,108 @@
+Digital Piezo Controller
+(c) 2003 Physik Instrumente GmbH
+
+Model: E-710
+
+Version: V5.023
+
+RS232:
+	9600,8,1,N (default)
+
+Commands:
+	<axis#><command>[<arg>]</n>
+	Where axis# starts at 1. 
+
+   * NO reply from motion commands
+   * Multiple command delimiter = "," 
+
+Reply:    <reply string></n>
+
+
+Position Resolution:  0.0001 micrometers
+Effective Resolution: 0.01 (holding position)
+
+Setup:
+     Position Error Tolerance Setting (Memory address 64)
+	This parameter controls the "On Target" flag (GI8) that is 
+        used to determine DONE. If the tolerance is too large the 
+	motorRecord will see DONE before the drive has reached 
+        it target position. 
+
+	Set the tolerance parameter to the retry deadband. 
+
+	<axis>DP0,64DR<#.###>  - sets RAM 
+	<axis>DP-1,64DR<#.###> - sets EERAM <used on power cycle>
+
+	example:
+	1DP0,64DR0.01   - set tolerance to 0.01 um
+	1DP-1,64DR0.01
+
+=================== MOTION =================
+ENABLE Servo
+	<axis#>SL[0/1]
+
+
+MOVE Absolute
+	<axis#>MA<position>
+
+MOVE Relative
+	<axis#>MR<position>
+
+GO HOME
+	<axis#>GH
+
+SET VELOCITY
+	<axis#>SV<velocity>
+
+	Units: um/ms or urad/ms (float or int)
+
+SET P-Term (Proportional Gain)
+	<axis#>SP<p>
+
+STOP MOTION ?
+	<axis#>MR0 	/* Zero relative move */
+	<axis#>SV0      /* Zero velocity */
+
+=================== STATUS =================
+
+READ Version Info
+	GI
+	Return: 
+		Digital Piezo Controller   V5.023<\n>
+                (c) 2003 Physik Instrumente GmbH<\n>
+
+
+READ Commanded position
+	<axis#>MA
+
+		Response: +0000.0000
+
+READ Feedback position 
+	<axis#>TP 	- tell position
+		Response: +0000.0000
+		Units: micrometer or microradian
+	<axis#>TS       - tell sensor
+
+
+READ Velocity (programmed)
+	<axis#>TV
+
+		Response: 0.000000e+1
+
+READ Status:
+	<axis#>GI8
+
+	Status Byte:
+		Bit 0: 0 = Servo on, 1 = Servo off 
+                Bit 1: 0 = Piezo voltage inside limits,1 = Piezo voltage at limit 
+                Bit 2: 0 = On Target: Position error smaller than tolerance 1 = Position error too large 
+                Bit 3: 0 = Target position higher than low limit, 1 = Target Position at low limit 
+                Bit 4: 0 = Target position smaller than high limit, 1 = Target position at high limit. 
+                Bit 5: 0 = AutoZero is not running 1 = AutoZero is running 
+                Bit 6: not used 
+                Bit 7: 0 = no error, 1 = last sent command not accepted, error during command processing. 
+                       [The bit is reset by this command.]
+
+
+
+
