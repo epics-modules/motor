@@ -16,6 +16,8 @@ SRCS += devPIC630.cc drvPIC630.cc PIC630Register.cc
 SRCS += devPIC848.cc drvPIC848.cc PIC848Register.cc
 SRCS += devPIC662.cc drvPIC662.cc PIC662Register.cc
 SRCS += devPIC862.cc drvPIC862.cc PIC862Register.cc
+SRCS += devPIE710.cc drvPIE710.cc PIE710Register.cc
+
 
 PI_LIBS += motor asyn
 PI_LIBS += $(EPICS_BASE_IOC_LIBS)
