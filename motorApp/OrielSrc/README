@@ -119,6 +119,18 @@ iocBoot/iocLinux
 	Set the DTYPE column to "EMC18011"
 
 
+=================== Motor Record Setup ================================
+
+EGU = microns
+VELO = [0.5 to 200] Maximum and Base velocity not used
+
+BDST = 0 	Controller does its own backlash 
+
+MRES = .010 (set to velocity resolution, position resolution is .10 microns)
+RDBD = .05  (position resolution is only 0.1 - will be rounded up)
+
+
+
 
 
 

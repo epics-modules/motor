@@ -3,9 +3,9 @@ FILENAME...	drvEMC18011.cc
 USAGE...	Motor record driver level support for Spectra-Physics
                 Encoder Mike Controller (Model: 18011)
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-07 21:19:43 $
+Last Modified:	$Date: 2006-11-02 21:05:56 $
 
 */
 
@@ -61,6 +61,8 @@ Last Modified:	$Date: 2006-09-07 21:19:43 $
 #define CMD_SELECT      "M"
 
 #define RTN_REMOTE     "ON LINE"
+#define RTN_READY      "RE"   // READY
+#define RTN_OVERLOAD   "OV"   // OVERLOAD
 
 
 #define EMC18011_NUM_CARDS	16
@@ -224,12 +226,14 @@ static int set_status(int card, int signal)
   struct mess_node *nodeptr;
   register struct mess_info *motor_info;
   char send_buff[80];
-  char Zstatus[2];
-  char *startptr, *endptr;
+  char Zstatus;
+  char *recvStr;
+  char *brkptr, *endptr;
   int rtn_state;
   int recvCnt;
   int motorData;
   int motor;
+  double datad;
   bool recvRetry;
   bool plusdir, ls_active = false;
   msta_field status;
@@ -242,35 +246,45 @@ static int set_status(int card, int signal)
 
   recvRetry = true;
 
+  /* Initialize motorData in-order to detect motor not moving */
+  motorData = motor_info->position;
+
   /* Status updates only available on selected motor */
   if (signal == cntrl->motorSelect)
     {
-      startptr = cntrl->recv_string[0];
-      send_mess(card, CMD_POS, NULL);
-      if ((recvCnt = recv_mess(card, startptr, 0)))
+      recvStr = cntrl->recv_string[0];
+      /* Get Zstatus (one character motion indicator) */
+      recvCnt = send_recv_mess(card, CMD_STATUS, recvStr, 1);
+      if (recvCnt == 1)
 	{
-	  double datad;
+	  /* Test for valid reply */
+	  Zstatus = *recvStr;
+	  if (Zstatus >= Z_STOPPED && Zstatus <= Z_LSUP)
+	    recvRetry = false;
+	  else
+	    Zstatus = Z_RUNUP;
 
-	  /* Convert position and check for error */
-	  datad = strtod(startptr, &endptr);
-	  if (startptr != endptr)
+	  /* Update position after motion has stopped */
+	  /* NOTE: This controller does not provide reliable position 
+	   *       feedback during motion (BUG?)  */
+	  if (Zstatus != Z_RUNUP && Zstatus != Z_RUNDOWN)
 	    {
-	      motorData = NINT(datad / cntrl->drive_resolution);
-	      recvRetry = false;
-	      if (motorData == motor_info->position && motor_info->no_motion_count)
+	      recvCnt = send_recv_mess(card, CMD_POS, recvStr);
+	      if (recvCnt > 0)
 		{
-		  Zstatus[0] = Zstatus[1] = 0x0; // Null terminate 
-  		  send_mess(card, CMD_STATUS, NULL);
-		  recvCnt = recv_mess(card, Zstatus, 0, 1);
-		  /* Check for valid response */
-		  if (recvCnt && *Zstatus >= Z_STOPPED && *Zstatus <= Z_LSUP)
-		    recvRetry = false;
+		  datad = strtod(recvStr, &endptr);
+		  if (brkptr != endptr)
+		    {
+		      motorData = NINT(datad / cntrl->drive_resolution);
+		      /* Release motor */
+		      cntrl->motorSelect = -1;
+		      cntrl->motorLock->signal();
+		      recvRetry = false;
+		    }
 		  else
-		    /* Invalid response - assume the motor is still moving */
-		    *Zstatus = Z_RUNUP;
+		    /* Don't indicate done until we get a valid position */
+		    Zstatus = Z_RUNUP;
 		}
-	      else
-		*Zstatus = Z_RUNUP;
 	    }
 	}
     }
@@ -278,9 +292,11 @@ static int set_status(int card, int signal)
     {
       /* Not the selected motor - no new information */
       recvRetry = false;
-      motorData = motor_info->position;
-      Zstatus[0] = Z_STOPPED;
+      Zstatus = Z_STOPPED;
+      epicsThreadSleep(0.1);  /* Pretend we did something - in-case of record retry loop */
     }
+
+  
 
   /* Check for normal look termination - all queries successful */
   if (recvRetry == false)
@@ -320,19 +336,19 @@ static int set_status(int card, int signal)
      * Parse the status/fault string
      */
 
-    Debug(5, "set_status(): status  = %s\n", Zstatus);
+    Debug(5, "set_status(): status  = %c\n", Zstatus);
 
-    plusdir = (*Zstatus == Z_STOPPED || *Zstatus == Z_RUNUP || *Zstatus == Z_LSUP) ? true : false;
+    plusdir = (Zstatus == Z_STOPPED || Zstatus == Z_RUNUP || Zstatus == Z_LSUP) ? true : false;
 
     status.Bits.RA_DIRECTION = plusdir ? 1 : 0;
 
     status.Bits.RA_HOME = 0;
 
-    status.Bits.RA_DONE = (*Zstatus == Z_STOPPED) ? 1 : 0;
+    status.Bits.RA_DONE = (Zstatus == Z_STOPPED) ? 1 : 0;
 
     /* Set Travel limit switch status bits. */
-    status.Bits.RA_PLUS_LS = (*Zstatus == Z_LSUP) ? 1 : 0;
-    status.Bits.RA_MINUS_LS = (*Zstatus == Z_LSDOWN) ? 1 : 0;
+    status.Bits.RA_PLUS_LS = (Zstatus == Z_LSUP) ? 1 : 0;
+    status.Bits.RA_MINUS_LS = (Zstatus == Z_LSDOWN) ? 1 : 0;
 
     ls_active = (status.Bits.RA_PLUS_LS || status.Bits.RA_MINUS_LS) ? true : false;
 
@@ -343,7 +359,9 @@ static int set_status(int card, int signal)
     status.Bits.EA_SLIP_STALL	= 0;
     status.Bits.EA_HOME		= 0;
 
-    if (motorData == motor_info->position)
+    /* Disable no motion test - this driver does not update position  */
+    // if (motorData == motor_info->position)
+    if (false)
     {
 	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
 	    motor_info->no_motion_count++;
@@ -643,6 +661,8 @@ static int motor_init()
 	total_cards = card_index + 1;
 	cntrl = (struct EMC18011Controller *) brdptr->DevicePrivate;
 
+	cntrl->motorLock = new epicsEvent;
+
 	/* Initialize communications channel */
 	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
                                             cntrl->asyn_address, &cntrl->pasynUser, NULL);
@@ -692,6 +712,9 @@ static int motor_init()
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
 		struct mess_info *motor_info = &brdptr->motor_info[motor_index];
+
+		brdptr->motor_info[motor_index].motor_motion = NULL;
+
 
 		motor_info->status.All = 0;
 		motor_info->no_motion_count = 0;

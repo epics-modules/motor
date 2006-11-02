@@ -3,9 +3,9 @@ FILENAME...	drvEMC18011.h
 USAGE...    This file contains Parker Compumotor driver "include"
 	    information that is specific to the 6K series serial controller
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-07 21:19:43 $
+Last Modified:	$Date: 2006-11-02 21:05:56 $
 */
 
 /*
@@ -46,6 +46,7 @@ Last Modified:	$Date: 2006-09-07 21:19:43 $
 #include "motordrvCom.h"
 #include "asynDriver.h"
 #include "asynOctetSyncIO.h"
+#include "epicsEvent.h"
 
 #define EMC18011_MAX_MOTORS  3
 #define EMC18011_MSG_SIZE 120
@@ -77,6 +78,7 @@ struct EMC18011Controller
     int motorSelect;            /* Keep track of currently selected motor - this   */
 				/* is the only one that can get status information */
     double drive_resolution;    /* This controller has a fixed drive resolution */
+    epicsEvent *motorLock;      /* Only one axis can move at a time */
     CommStatus status;		/* Controller communication status. */
 };
 

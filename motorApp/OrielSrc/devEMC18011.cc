@@ -2,9 +2,9 @@
 FILENAME...	devEMC18011.cc
 USAGE...	Motor record device level support for Parker Compumotor drivers
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-07 21:19:43 $
+Last Modified:	$Date: 2006-11-02 21:05:56 $
 */
 
 /*
@@ -45,6 +45,7 @@ Last Modified:	$Date: 2006-09-07 21:19:43 $
 #include "motordevCom.h"
 #include "drvEMC18011.h"
 #include "epicsExport.h"
+
 
 #define STATIC static
 
@@ -160,11 +161,13 @@ STATIC RTN_STATUS EMC18011_build_trans(motor_cmnd command, double *parms, struct
     double dval, cntrl_units;
     unsigned int size;
     bool sendMsg;
+    bool switchMotor;
     RTN_STATUS rtnval;
 
     rtnval = OK;
     buff[0] = '\0';
     sendMsg = true;
+    switchMotor = false;
 
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     intval = (parms == NULL) ? 0 : NINT(parms[0]);
@@ -180,10 +183,11 @@ STATIC RTN_STATUS EMC18011_build_trans(motor_cmnd command, double *parms, struct
     motor_call->type = EMC18011_table[command];
 
     brdptr = (*trans->tabptr->card_array)[card];
-      if (brdptr == NULL)
-	return(rtnval = ERROR);
+    if (brdptr == NULL)
+      return(rtnval = ERROR);
 
     cntrl = (struct EMC18011Controller *) brdptr->DevicePrivate;
+
     /* 6K Controllers expect Velocity and Acceleration settings in Revs/sec/sec */
     cntrl_units = dval * cntrl->drive_resolution;
 
@@ -194,47 +198,63 @@ STATIC RTN_STATUS EMC18011_build_trans(motor_cmnd command, double *parms, struct
     if (trans->state != BUILD_STATE)
 	return(rtnval = ERROR);
 
-    if (command == PRIMITIVE && mr->init != NULL && strlen(mr->init) != 0)
-    {
-	strcat(motor_call->message, mr->init);
-	strcat(motor_call->message, EMC18011_OUT_EOS);
-    }
+    /* SPECIAL: This controller can only address one motor at a time 
+     * Other motion requests have to wait until the current motion 
+     * is complete. Depend on motorRecord retries to complete pending 
+     * requests. Allow record to stop current motion. 
+     * Switch message type to INFO to get done flag 
+     */
 
     switch (command)
       {
       case JOG:
-      case SET_VELOCITY:
-	/* Before a motion is started - assure that the proper motor
-         * is selected. First Stop current motion - if any */
-	if (cntrl->motorSelect != signal)
+      case LOAD_POS:
+      case SET_VELOCITY: 
+      case GET_INFO:
+
+	/* Try to get motorLock then switch active motor */
+	if (cntrl->motorLock->tryWait())
 	  {
-	    strcat(motor_call->message, "S");
-	    rtnval = motor_end_trans_com(mr, drvtabptr);
-	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, EMC18011_cards);
-	    motor_call->type = EMC18011_table[command];
+	    if (cntrl->motorSelect != signal)
+	      {
+		cntrl->motorSelect = signal;
 
-	    sprintf(buff, "M%d", axis);
-	    strcat(motor_call->message, buff);
-	    rtnval = motor_end_trans_com(mr, drvtabptr);
-	    rtnval = (RTN_STATUS) motor_start_trans_com(mr, EMC18011_cards);
-	    motor_call->type = EMC18011_table[command];
-
-	    /* Keep track of currently selected motor */
-	    cntrl->motorSelect = signal;
+		sprintf(buff, "M%d", axis);
+     		strcat(motor_call->message, buff);
+		motor_call->type = IMMEDIATE;  /* Assure message gets sent */
+		rtnval = motor_end_trans_com(mr, drvtabptr);
+		rtnval = (RTN_STATUS) motor_start_trans_com(mr, EMC18011_cards);
+		motor_call->type = EMC18011_table[command];
+	      }
 	  }
 	break;
 
       default:
 	break;
       }
+	
+    /* Only communicate to selected motor */
+    if (cntrl->motorSelect != signal)
+      {
+	/* Assure continuous retries until other motion complete */
+	motor_call->type = INFO;
+	if (mr->rcnt > 0)
+	  mr->rcnt--;
+	return(rtnval = OK);
+      }
 
+    if (command == PRIMITIVE && mr->init != NULL && strlen(mr->init) != 0)
+    {
+	strcat(motor_call->message, mr->init);
+	rtnval = motor_end_trans_com(mr, drvtabptr);
+	rtnval = (RTN_STATUS) motor_start_trans_com(mr, EMC18011_cards);
+	motor_call->type = EMC18011_table[command];
+    }
 
     switch (command)
     {
 	case MOVE_ABS:
 	case MOVE_REL:
-	case HOME_FOR:
-	case HOME_REV:
 	case JOG:
 	    if (strlen(mr->prem) != 0)
 	    {
@@ -257,17 +277,16 @@ STATIC RTN_STATUS EMC18011_build_trans(motor_cmnd command, double *parms, struct
         case MOVE_ABS:
         case MOVE_REL:
 	  {
-	    
 	    char *xstart = &buff[1];
 
-            buff[0] = (command == MOVE_ABS) ? 'G' : 'T';
-
+	    buff[0] = (command == MOVE_ABS) ? 'G' : 'T';
+	    
 	    /* Maximum length for distance is 7 characters. */
 	    sprintf(xstart, "%.1f", cntrl_units);
 	    if (strlen(xstart) > 7)
 	      /* Sacrifice precision for quantity */
 	      sprintf(xstart, "%.0f", cntrl_units);
-
+	    
 	    if (strlen(xstart) > 7)
 	      {
 		/* Put out maximum distance string */
@@ -277,7 +296,6 @@ STATIC RTN_STATUS EMC18011_build_trans(motor_cmnd command, double *parms, struct
 		  strcpy(xstart, "9999999");
 	      }
 	  }
-
 	  break;
 	
 	case HOME_FOR:
