@@ -1,18 +1,21 @@
 
 file {
-	name="/tmp_mnt/home/sricat/BCDA/epics/3.13.0/share/stdApp/op/adl/topMotors8_1.2.adl"
-	version=020205
+	name="/home/oxygen/MOONEY/epics/synApps/support/motor/cvs/motorApp/op/adl/topMotors8.adl"
+	version=030101
 }
 display {
 	object {
-		x=10
+		x=301
 		y=25
-		width=135
+		width=145
 		height=205
 	}
 	clr=64
 	bclr=3
 	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
 }
 "color map" {
 	ncolors=65
@@ -84,611 +87,814 @@ display {
 		1a7309,
 	}
 }
-rectangle {
+text {
 	object {
-		x=130
-		y=166
-		width=5
-		height=18
+		x=0
+		y=0
+		width=30
+		height=14
 	}
 	"basic attribute" {
 		clr=14
 	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M8)_able.VAL"
+	textix="Card"
+}
+"text update" {
+	object {
+		x=35
+		y=0
+		width=20
+		height=14
+	}
+	monitor {
+		chan="$(P)$(M1).CARD"
+		clr=54
+		bclr=0
+	}
+	align="horiz. centered"
+	limits {
 	}
 }
-rectangle {
+text {
 	object {
-		x=130
-		y=146
-		width=5
-		height=18
+		x=60
+		y=0
+		width=75
+		height=14
 	}
 	"basic attribute" {
 		clr=14
 	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M7)_able.VAL"
+	textix="($(M1)..$(M8))"
+}
+"text update" {
+	object {
+		x=20
+		y=14
+		width=100
+		height=10
+	}
+	monitor {
+		chan="$(P)$(M1).DTYP"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
 	}
 }
-rectangle {
+"related display" {
 	object {
-		x=130
-		y=126
-		width=5
-		height=18
+		x=95
+		y=185
+		width=50
+		height=20
 	}
-	"basic attribute" {
-		clr=14
+	display[0] {
+		label="motor-parameter table"
+		name="8motor_form.adl"
+		args="P=$(P),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
 	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M6)_able.VAL"
-	}
+	clr=0
+	bclr=63
+	label="-More"
 }
-rectangle {
+composite {
 	object {
-		x=130
-		y=26
-		width=5
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M1)_able.VAL"
-	}
-}
-rectangle {
-	object {
-		x=130
-		y=46
-		width=5
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M2)_able.VAL"
-	}
-}
-rectangle {
-	object {
-		x=130
-		y=66
-		width=5
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M3)_able.VAL"
-	}
-}
-rectangle {
-	object {
-		x=130
-		y=86
-		width=5
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M4)_able.VAL"
-	}
-}
-rectangle {
-	object {
-		x=130
-		y=106
-		width=5
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M5)_able.VAL"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=71
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="$(P)$(M3).DMOV"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=179
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M8).LLS"
-	}
-}
-rectangle {
-	object {
-		x=125
-		y=171
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=30
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M8).LVIO"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=171
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="$(P)$(M8).DMOV"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=166
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M8).HLS"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=159
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M7).LLS"
-	}
-}
-rectangle {
-	object {
-		x=125
-		y=151
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=30
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M7).LVIO"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=151
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="$(P)$(M7).DMOV"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=146
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M7).HLS"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=139
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M6).LLS"
-	}
-}
-rectangle {
-	object {
-		x=125
-		y=131
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=30
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M6).LVIO"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=131
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="$(P)$(M6).DMOV"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=126
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M6).HLS"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=39
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M1).LLS"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=59
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M2).LLS"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=79
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M3).LLS"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=99
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M4).LLS"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=119
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M5).LLS"
-	}
-}
-rectangle {
-	object {
-		x=125
-		y=111
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=30
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M5).LVIO"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=111
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="$(P)$(M5).DMOV"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=106
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M5).HLS"
-	}
-}
-rectangle {
-	object {
-		x=125
-		y=91
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=30
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M4).LVIO"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=91
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="$(P)$(M4).DMOV"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=86
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M4).HLS"
-	}
-}
-rectangle {
-	object {
-		x=125
-		y=71
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=30
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M3).LVIO"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=66
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M3).HLS"
-	}
-}
-rectangle {
-	object {
-		x=125
-		y=51
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=30
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M2).LVIO"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=51
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="$(P)$(M2).DMOV"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=46
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M2).HLS"
-	}
-}
-rectangle {
-	object {
-		x=125
-		y=31
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=30
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M1).LVIO"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=31
-		width=5
-		height=8
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="$(P)$(M1).DMOV"
-	}
-}
-rectangle {
-	object {
-		x=120
-		y=26
-		width=10
-		height=5
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="$(P)$(M1).HLS"
+		x=30
+		y=25
+		width=115
+		height=160
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=140
+				y=166
+				width=5
+				height=18
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M8)_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=140
+				y=146
+				width=5
+				height=18
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M7)_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=140
+				y=126
+				width=5
+				height=18
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M6)_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=140
+				y=26
+				width=5
+				height=18
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M1)_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=140
+				y=46
+				width=5
+				height=18
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M2)_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=140
+				y=66
+				width=5
+				height=18
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M3)_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=140
+				y=86
+				width=5
+				height=18
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M4)_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=140
+				y=106
+				width=5
+				height=18
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M5)_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=71
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(M3).DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=179
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M8).LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=135
+				y=171
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M8).LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=171
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(M8).DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=166
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M8).HLS"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=159
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M7).LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=135
+				y=151
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M7).LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=151
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(M7).DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=146
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M7).HLS"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=139
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M6).LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=135
+				y=131
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M6).LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=131
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(M6).DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=126
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M6).HLS"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=39
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M1).LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=59
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M2).LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=79
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M3).LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=99
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M4).LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=119
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M5).LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=135
+				y=111
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M5).LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=111
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(M5).DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=106
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M5).HLS"
+			}
+		}
+		rectangle {
+			object {
+				x=135
+				y=91
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M4).LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=91
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(M4).DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=86
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M4).HLS"
+			}
+		}
+		rectangle {
+			object {
+				x=135
+				y=71
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M3).LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=66
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M3).HLS"
+			}
+		}
+		rectangle {
+			object {
+				x=135
+				y=51
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M2).LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=51
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(M2).DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=46
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M2).HLS"
+			}
+		}
+		rectangle {
+			object {
+				x=135
+				y=31
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M1).LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=31
+				width=5
+				height=8
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(M1).DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=26
+				width=10
+				height=5
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(M1).HLS"
+			}
+		}
+		"text entry" {
+			object {
+				x=30
+				y=145
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(M7).DESC"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=30
+				y=125
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(M6).DESC"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=30
+				y=105
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(M5).DESC"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=30
+				y=85
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(M4).DESC"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=30
+				y=65
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(M3).DESC"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=30
+				y=45
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(M2).DESC"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=30
+				y=25
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(M1).DESC"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=30
+				y=165
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(M8).DESC"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
 	}
 }
 "related display" {
 	object {
 		x=0
 		y=25
-		width=20
+		width=30
 		height=20
 	}
 	display[0] {
@@ -721,92 +927,15 @@ rectangle {
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M1)"
 	}
-	clr=14
-	bclr=51
-}
-"text entry" {
-	object {
-		x=20
-		y=145
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(M7).DESC"
-		clr=14
-		bclr=51
-	}
-}
-"text entry" {
-	object {
-		x=20
-		y=125
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(M6).DESC"
-		clr=14
-		bclr=51
-	}
-}
-"text entry" {
-	object {
-		x=20
-		y=105
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(M5).DESC"
-		clr=14
-		bclr=51
-	}
-}
-"text entry" {
-	object {
-		x=20
-		y=85
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(M4).DESC"
-		clr=14
-		bclr=51
-	}
-}
-"text entry" {
-	object {
-		x=20
-		y=65
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(M3).DESC"
-		clr=14
-		bclr=51
-	}
-}
-"text entry" {
-	object {
-		x=20
-		y=45
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(M2).DESC"
-		clr=14
-		bclr=51
-	}
+	clr=0
+	bclr=63
+	label="-$(M1)"
 }
 "related display" {
 	object {
 		x=0
 		y=105
-		width=20
+		width=30
 		height=20
 	}
 	display[0] {
@@ -839,14 +968,15 @@ rectangle {
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M5)"
 	}
-	clr=14
-	bclr=51
+	clr=0
+	bclr=63
+	label="-$(M5)"
 }
 "related display" {
 	object {
 		x=0
 		y=125
-		width=20
+		width=30
 		height=20
 	}
 	display[0] {
@@ -879,14 +1009,15 @@ rectangle {
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M6)"
 	}
-	clr=14
-	bclr=51
+	clr=0
+	bclr=63
+	label="-$(M6)"
 }
 "related display" {
 	object {
 		x=0
 		y=145
-		width=20
+		width=30
 		height=19
 	}
 	display[0] {
@@ -919,14 +1050,15 @@ rectangle {
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M7)"
 	}
-	clr=14
-	bclr=51
+	clr=0
+	bclr=63
+	label="-$(M7)"
 }
 "related display" {
 	object {
 		x=0
 		y=165
-		width=20
+		width=30
 		height=19
 	}
 	display[0] {
@@ -959,14 +1091,15 @@ rectangle {
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M8)"
 	}
-	clr=14
-	bclr=51
+	clr=0
+	bclr=63
+	label="-$(M8)"
 }
 "related display" {
 	object {
 		x=0
 		y=85
-		width=20
+		width=30
 		height=20
 	}
 	display[0] {
@@ -999,14 +1132,15 @@ rectangle {
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M4)"
 	}
-	clr=14
-	bclr=51
+	clr=0
+	bclr=63
+	label="-$(M4)"
 }
 "related display" {
 	object {
 		x=0
 		y=45
-		width=20
+		width=30
 		height=20
 	}
 	display[0] {
@@ -1039,14 +1173,15 @@ rectangle {
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M2)"
 	}
-	clr=14
-	bclr=51
+	clr=0
+	bclr=63
+	label="-$(M2)"
 }
 "related display" {
 	object {
 		x=0
 		y=65
-		width=20
+		width=30
 		height=20
 	}
 	display[0] {
@@ -1079,111 +1214,7 @@ rectangle {
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M3)"
 	}
-	clr=14
-	bclr=51
-}
-"text entry" {
-	object {
-		x=20
-		y=25
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(M1).DESC"
-		clr=14
-		bclr=51
-	}
-}
-"text entry" {
-	object {
-		x=20
-		y=165
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(M8).DESC"
-		clr=14
-		bclr=51
-	}
-}
-text {
-	object {
-		x=0
-		y=0
-		width=30
-		height=14
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Card"
-}
-"text update" {
-	object {
-		x=35
-		y=0
-		width=20
-		height=14
-	}
-	monitor {
-		chan="$(P)$(M1).CARD"
-		clr=54
-		bclr=0
-	}
-	align="horiz. centered"
-}
-text {
-	object {
-		x=60
-		y=0
-		width=75
-		height=14
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="($(M1)..$(M8))"
-}
-"text update" {
-	object {
-		x=20
-		y=14
-		width=100
-		height=10
-	}
-	monitor {
-		chan="$(P)$(M1).DTYP"
-		clr=54
-		bclr=3
-	}
-	align="horiz. centered"
-}
-"related display" {
-	object {
-		x=0
-		y=185
-		width=20
-		height=20
-	}
-	display[0] {
-		label="motor-parameter table"
-		name="8motor_form.adl"
-		args="P=$(P),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
-	}
-	clr=14
-	bclr=51
-}
-text {
-	object {
-		x=20
-		y=185
-		width=115
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="More"
+	clr=0
+	bclr=63
+	label="-$(M3)"
 }
