@@ -3,9 +3,9 @@ FILENAME...	drvPC6K.cc
 USAGE...	Motor record driver level support for Parker Computmotor
                 6K Series motor controllers
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-08-31 15:42:30 $
+Last Modified:	$Date: 2006-12-18 19:31:15 $
 
 */
 
@@ -51,7 +51,9 @@ Last Modified:	$Date: 2006-08-31 15:42:30 $
 #include "ParkerRegister.h"
 #include "drvPC6K.h"
 #include "asynOctetSyncIO.h"
+#include "asynCommonSyncIO.h"
 #include "epicsExport.h"
+#include "epicsExit.h"
 
 #define CMD_STATUS      "TAS"
 #define CMD_POS         "TPC"
@@ -121,6 +123,26 @@ static struct {
 
 #define QUERY_CNT PC6K_QUERY_CNT
 
+/* Track open asyn ports - close on IOC exit */
+#define MAX_SOCKETS        PC6K_NUM_CARDS+1
+#define PORT_NAME_SIZE     100
+#define ERROR_STRING_SIZE  100
+#define DEFAULT_TIMEOUT    0.2
+
+static int nextSocket = 0;
+
+/* Pointer to the connection info for each socket 
+   the asynUser structure is defined in asynDriver.h */
+typedef struct {
+    asynUser *pasynUser;
+    asynUser *pasynUserCommon;
+    double timeout;
+    char errorString[ERROR_STRING_SIZE];
+    bool connected;
+} socketStruct;
+static socketStruct socketStructs[MAX_SOCKETS];
+
+
 
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
@@ -133,6 +155,7 @@ static long report(int level);
 static long init();
 static int motor_init();
 static void query_done(int, int, struct mess_node *);
+void closePC6KSockets(void *);
 
 /*----------------functions-----------------*/
 
@@ -741,6 +764,7 @@ static int motor_init()
     asynStatus success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
+    nextSocket = 0;
 
     /* Check for setup */
     if (PC6K_num_cards <= 0)
@@ -763,9 +787,16 @@ static int motor_init()
 	/* Initialize communications channel */
 	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
                                             cntrl->asyn_address, &cntrl->pasynUser, NULL);
-
-	if (success_rtn == asynSuccess)
+	if (success_rtn != asynSuccess) 
+	      printf("drvPC68K:motor_init(), error calling pasynOctetSyncIO->connect port=%s error=%d\n", 
+		     cntrl->asyn_port, success_rtn);
+	else
 	{
+	     /* Save asyn sockets for IOC exit cleanup */
+	     socketStructs[nextSocket].pasynUserCommon = cntrl->pasynUser;
+	     socketStructs[nextSocket].connected = true;
+	     nextSocket++;
+
 
 	      /* Set command End-of-string */
 	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser,
@@ -907,7 +938,45 @@ static int motor_init()
                       epicsThreadGetStackSize(epicsThreadStackMedium),
                       (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
+    // void epicsAtExit( (*epicsExitFunc)(void *arg), void *arg);
+    epicsAtExit(&closePC6KSockets, NULL);
 
     return(OK);
 }
 
+/***************************************************************************************/
+static void CloseSocket(int SocketIndex)
+{
+    socketStruct *psock;
+    asynUser *pasynUser;
+    int status;
+
+    if ((SocketIndex < 0) || (SocketIndex >= nextSocket)) {
+        printf("drvPMNC CloseSocket: invalid SocketIndex %d\n", SocketIndex);
+        return;
+    }
+    psock = &socketStructs[SocketIndex];
+    pasynUser = psock->pasynUserCommon;
+    status = pasynCommonSyncIO->disconnectDevice(pasynUser);
+    if (status != asynSuccess ) {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "drvPMNC CloseSocket: error calling pasynCommonSyncIO->disconnect, status=%d, %s\n",
+                  status, pasynUser->errorMessage);
+        return;
+    } else
+      printf("drvPC6K CloseSocket: Disconnected SocketIndex %d\n",SocketIndex);
+
+    psock->connected = false;
+}
+
+/***************************************************************************************/
+void closePC6KSockets(void *arg)
+{
+    int i;
+
+    for (i=0; i<nextSocket; i++) {
+        if (socketStructs[i].connected) CloseSocket(i);
+    }
+}
+
+/*---------------------------------------------------------------------*/
