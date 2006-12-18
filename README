@@ -1,4 +1,4 @@
-Motor Record R6-0 Release Notice
+Motor Record R6-1 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
@@ -111,6 +111,40 @@ Known Problems
         For example, if MRES is positive and ERES is negative and the user
         wants to set the current position to 10.00 inches, then -10.00 must be
         entered in the VAL or DVAL field.
+
+
+Modification Log from R6-0 to R6-1
+==================================
+
+1) MicroMo model MVP 2001 B02 driver; bug fix for recv_mess() always returning
+        nread = 0.
+	
+	File modified: MicroMoSrc/drvMVP2001.cc
+
+2) New Focus models 8750 and 8752; check for special STA cmnd handling.
+        SocketClose() at exit added but disabled pending further testing.
+
+	File modified: NewFocusSrc/drvPMNC87xx.cc
+	
+3) Physik Instrumente (PI) GmbH & Co. C-862; added 17ms "status update delay"
+	to prevent dropped communication characters in controller; i.e.
+	erroneous command error responses.
+	
+	File modified: PiSrc/drvPIC862.cc
+
+4) All motorStatus[xx].adl displays modified to show motor position with text
+        rather than with bar graphs.
+	
+	Files modified: motorApp/op/adl/motorStatus[xx].adl
+
+5) Joe Sullivan added support for the Physik Instrumente (PI) GmbH & Co. model
+        E-710 motor controller.
+
+	Files added to motorApp/PiSrc: devPIE710.cc, drvPIE710.cc, drvPIE710.h
+
+6) Parker 6K Series; closeSocket() call at EXIT code added (requires asd8 BSP).
+
+	File modified: drvPC6K.cc
 
 
 Modification Log from R5-9 to R6-0

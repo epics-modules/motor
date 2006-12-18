@@ -5,11 +5,59 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R6.0 Notice</title>
+  <title>EPICS Motor Record Release R6.1 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+<CENTER>
+  <H1><B><U>Motor Record Version 6.1 Release Notice</U></B></H1>
+</CENTER>
+
+<BR>
+<B><U>Requirements</U></B><BR>
+<BR>
+EPICS base R3.14.8.2 or greater.&nbsp; See the "Required Modules" section of the 
+Motor Record web page for details.<BR>
+
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>PI C-862 communiation errors</B></U>
+  </P>
+  <P>
+  A 17ms "status update delay" was added to the driver to prevent the controller 
+  from dropping communication characters.  This problem resulted in erroneous 
+  error responses from the controller.
+  </P>
+  <P>
+  <U><B>motorStatus[xx].adl displays</B></U>
+  </P>
+  <P>
+  All motorStatus[xx].adl displays were modified to show motor position with text 
+  rather than with bar graphs.
+  </P>
+</DIV>
+
+
+<CENTER>
+  <H4><U>New Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Physik Instrumente GmbH & Co. Model E-710</B></U>
+  </P>
+  <P>
+  Joe Sullivan added support for the Physik Instrumente (PI) GmbH & Co. Model E-710 
+  motor controller.
+  </P>
+</DIV>
 
 
 <CENTER>
