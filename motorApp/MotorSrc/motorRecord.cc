@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.33 $
-Modified By:	$Author: peterd $
-Last Modified:	$Date: 2006-07-01 20:08:56 $
+Version:	$Revision: 1.34 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2006-12-18 20:13:31 $
 */
 
 /*
@@ -91,7 +91,7 @@ Last Modified:	$Date: 2006-07-01 20:08:56 $
  *                    from float to integer; avoid equality test errors.
  */
 
-#define VERSION 6.0
+#define VERSION 6.1
 
 #include	<stdlib.h>
 #include	<string.h>
