@@ -69,7 +69,9 @@ Last Modified:	2005/03/30 19:10:48
 #include "NewFocusRegister.h"
 #include "drvPMNCCom.h"
 #include "asynOctetSyncIO.h"
+#include "asynCommonSyncIO.h"
 #include "epicsExport.h"
+#include "epicsExit.h"
 
 #define STATIC static
 
@@ -125,8 +127,30 @@ int PMNC87xx_num_cards = 0;
 int PMNC87xx_num_drivers = 0;  /* Number of Drivers per Controller */
 char nobuff[BUFF_SIZE];        /* Scratch buffer - noreply commands */
 
+/* Track open asyn ports - close on IOC exit */
+#define MAX_SOCKETS        PMNC87xx_NUM_CARDS+1
+#define PORT_NAME_SIZE     100
+#define ERROR_STRING_SIZE  100
+#define DEFAULT_TIMEOUT    0.2
+
+static int nextSocket = 0;
+
+/* Pointer to the connection info for each socket 
+   the asynUser structure is defined in asynDriver.h */
+typedef struct {
+    asynUser *pasynUser;
+    asynUser *pasynUserCommon;
+    double timeout;
+    char errorString[ERROR_STRING_SIZE];
+    bool connected;
+} socketStruct;
+static socketStruct socketStructs[MAX_SOCKETS];
+
+
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
+
+
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
@@ -138,6 +162,7 @@ static long report(int);
 static long init();
 STATIC int motor_init();
 STATIC void query_done(int, int, struct mess_node *);
+void closePMNCSockets(void *);
 
 /*----------------functions-----------------*/
 
@@ -798,10 +823,12 @@ STATIC int motor_init()
     int total_axis = 0;
     int driverIndex; 
     int rtnCnt = 0;
-    asynStatus success_rtn;
+    asynStatus asynRtn;
+    bool connectOK;
 
     initialized = true;	/* Indicate that driver is initialized. */
-    
+    nextSocket = 0;
+
     /* Check for setup */
     if (PMNC87xx_num_cards <= 0)
 	return(ERROR);
@@ -817,11 +844,24 @@ STATIC int motor_init()
 	cntrl = (struct PMNCcontroller *) brdptr->DevicePrivate;
 
 	/* Initialize communications channel */
-	success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
-                          cntrl->asyn_address, &cntrl->pasynUser, NULL);
-	if (success_rtn == asynSuccess)
+	asynRtn = pasynOctetSyncIO->connect(cntrl->asyn_port, cntrl->asyn_address, &cntrl->pasynUser, NULL);
+	if (asynRtn != asynSuccess) {
+	      printf("drvPMNC:motor_init(), error calling pasynOctetSyncIO->connect port=%s error=%d\n", 
+		     cntrl->asyn_port, asynRtn);
+	} else {
+	     socketStructs[nextSocket].pasynUserCommon = cntrl->pasynUser;
+	     socketStructs[nextSocket].connected = true;
+	     nextSocket++;
+	}
+
+	connectOK = (asynRtn == asynSuccess) ? true : false;
+
+        if (connectOK)
 	{
-	  int retry;
+
+	    int retry;
+
+
 
 	      /* Set command End-of-string */
 	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser,PROMPT_EOS,strlen(PROMPT_EOS));
@@ -863,9 +903,10 @@ STATIC int motor_init()
 
 	}
 
-	if (success_rtn == asynSuccess && rtnCnt > 0)
+	if (connectOK && rtnCnt > 0)
 	{
-	    strncpy(brdptr->ident, &buff[0], MAX_IDENT_LEN);  /* Save Version info */	    brdptr->localaddr = (char *) NULL;
+	    strncpy(brdptr->ident, &buff[0], MAX_IDENT_LEN);  /* Save Version info */
+	    brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;
 
 	    /* Set Motion Master model indicator. */
@@ -894,7 +935,8 @@ STATIC int motor_init()
 
 	    /* Check for 'STA\n' version = 1.5.4 
 	    *  because this version requires a NL input EOS on the STA command */
-	    cntrl->changeEOS = (*(bufptr + strlen(VER_STR) + 2) == '4') ? true : false;
+	    cntrl->changeEOS = (*(bufptr + strlen(VER_STR) + 2) == '4') || 
+	                       (*(bufptr + strlen(VER_STR) + 2) == '3') ? true : false;
 	    
             total_axis = 0;
 	    driverIndex = 0;
@@ -995,7 +1037,47 @@ STATIC int motor_init()
 		      epicsThreadGetStackSize(epicsThreadStackMedium),
 		      (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
+    // void epicsAtExit( (*epicsExitFunc)(void *arg), void *arg);
+    /* Remove at exit call - not fully understood yet */
+    /* epicsAtExit(&closePMNCSockets, NULL); */
+
     return(OK);
+}
+
+
+/***************************************************************************************/
+STATIC void CloseSocket(int SocketIndex)
+{
+    socketStruct *psock;
+    asynUser *pasynUser;
+    int status;
+
+    if ((SocketIndex < 0) || (SocketIndex >= nextSocket)) {
+        printf("drvPMNC CloseSocket: invalid SocketIndex %d\n", SocketIndex);
+        return;
+    }
+    psock = &socketStructs[SocketIndex];
+    pasynUser = psock->pasynUserCommon;
+    status = pasynCommonSyncIO->disconnectDevice(pasynUser);
+    if (status != asynSuccess ) {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "drvPMNC CloseSocket: error calling pasynCommonSyncIO->disconnect, status=%d, %s\n",
+                  status, pasynUser->errorMessage);
+        return;
+    } else
+       printf("drvPMNC CloseSocket: Disconnected SocketIndex %d\n",SocketIndex);
+
+    psock->connected = false;
+}
+
+/***************************************************************************************/
+void closePMNCSockets(void *arg)
+{
+    int i;
+
+    for (i=0; i<nextSocket; i++) {
+        if (socketStructs[i].connected) CloseSocket(i);
+    }
 }
 
 /*---------------------------------------------------------------------*/
