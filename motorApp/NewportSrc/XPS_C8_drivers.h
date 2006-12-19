@@ -1,17 +1,16 @@
-/* //////////////////////////////////////////////////////////////////
- * Created header file XPS_C8_drivers.h for API headings 
- */ 
+/*////////////////////////////////////////////////////////////////////
+* Created header file xps_c8_drivers.h for API headings 
+*/ 
 
-#ifdef _WIN
-#ifndef DLL
-#define DLL _declspec(dllimport)
-#endif
+
+#ifdef _WIN32
+	#ifndef DLL
+		#define DLL _declspec(dllimport)
+	#endif
 #else
-#define DLL
-#define __stdcall
+	#define DLL 
+	#define __stdcall 
 #endif
-
-
 
 #ifdef __cplusplus
 extern "C"
