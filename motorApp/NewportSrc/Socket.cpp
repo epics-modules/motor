@@ -191,7 +191,7 @@ void SendAndReceive(int socketID, char sSendString[], char sReturnString[], int 
 			if (dTimeout < 1e-3)
 				dTimeout = 1e-3;
 		}
-		while ((iReceiveByteNumber != SOCKET_ERROR) && (strstr(sSocketBuffer, "EndOfAPI") == NULL));
+		while ((iReceiveByteNumber != SOCKET_ERROR) && (strstr(sReturnString, "EndOfAPI") == NULL));
 	}
 	else
 		sReturnString[0] = '\0';
