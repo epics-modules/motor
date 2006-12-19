@@ -20,6 +20,12 @@
 /******[ includes ]**************************************************/
 #include "xps_ftp.h"
 
+/* local functions */
+static int code(char*);
+static int sendFtpCommandAndReceive (int, char*, char*);
+static int getPort (int, char*);
+static void printRecv (char*, int);
+
 
 /******[ ftpConnect ]************************************************/
 int ftpConnect (char* ip, char* login, char* password, int* socketFD)
@@ -29,15 +35,7 @@ int ftpConnect (char* ip, char* login, char* password, int* socketFD)
   struct sockaddr_in sockAddr;
   int sockFD, receivedBytes;
 
-#ifdef WIN32
   memset(&sockAddr, 0, sizeof(sockAddr));
-#else
-  #ifdef vxWorks
-    bzero((char*)&sockAddr, sizeof(sockAddr)); 
-  #else
-    bzero(&sockAddr, sizeof(sockAddr)); 
-  #endif
-#endif
 
   sockFD = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -74,7 +72,7 @@ int ftpConnect (char* ip, char* login, char* password, int* socketFD)
 /******[ ftpDisconnect ]*********************************************/
 int ftpDisconnect (int socketFD)
 {
-#ifdef WIN32
+#ifdef _WIN32
   return closesocket(socketFD);
 #else
   return close(socketFD);
@@ -96,8 +94,8 @@ int ftpChangeDir (int socketFD, char* destination)
 }
 
 
-/******[ ftpRetreaveFile ]*******************************************/
-int ftpRetreaveFile(int socketFD, char *filename)
+/******[ ftpRetrieveFile ]*******************************************/
+int ftpRetrieveFile(int socketFD, char *filename)
 {
   int port_rcv, socketFDReceive, i;
   struct sockaddr_in adr_rcv;
@@ -106,15 +104,7 @@ int ftpRetreaveFile(int socketFD, char *filename)
   char returnString[RETURN_SIZE];
   FILE *file;
 
-#ifdef WIN32
   memset(&adr_rcv, 0, sizeof(adr_rcv));
-#else
-	#ifdef vxWorks
-	  bzero((char*)&adr_rcv, sizeof(adr_rcv)); 
-	#else
-	  bzero(&adr_rcv, sizeof(adr_rcv)); 
-	#endif
-#endif
      
   port_rcv = getPort(socketFD, ip); 
   
@@ -122,7 +112,7 @@ int ftpRetreaveFile(int socketFD, char *filename)
   
   adr_rcv.sin_family = AF_INET;
   adr_rcv.sin_addr.s_addr = inet_addr(ip);
-#ifdef WIN32
+#ifdef _WIN32
   adr_rcv.sin_port = htons((u_short)port_rcv);
 #else
   adr_rcv.sin_port = htons(port_rcv);
@@ -158,7 +148,7 @@ int ftpRetreaveFile(int socketFD, char *filename)
     }
   while(i!=0);
    
-#ifdef WIN32
+#ifdef _WIN32
   closesocket(socketFDReceive);
 #else
   close(socketFDReceive);
@@ -187,15 +177,7 @@ int ftpStoreFile(int socketFD, char *filename)
   char returnString[RETURN_SIZE];
   FILE *file;
 
-#ifdef WIN32
   memset(&adr_snd, 0, sizeof(adr_snd));
-#else
-	#ifdef vxWorks
-	  bzero((char*)&adr_snd, sizeof(adr_snd)); 
-	#else
-	  bzero(&adr_snd, sizeof(adr_snd)); 
-	#endif
-#endif
      
   port_snd = getPort(socketFD, ip); 
   
@@ -203,7 +185,7 @@ int ftpStoreFile(int socketFD, char *filename)
   
   adr_snd.sin_family = AF_INET;
   adr_snd.sin_addr.s_addr = inet_addr(ip);
-#ifdef WIN32
+#ifdef _WIN32
   adr_snd.sin_port = htons((u_short)port_snd);
 #else
   adr_snd.sin_port = htons(port_snd);
@@ -235,7 +217,7 @@ int ftpStoreFile(int socketFD, char *filename)
     }
   while(i != 0);
    
-#ifdef WIN32
+#ifdef _WIN32
   closesocket(socketFDSend);
 #else
   close(socketFDSend);
@@ -255,7 +237,7 @@ int ftpStoreFile(int socketFD, char *filename)
 
 
 /******[ code ]******************************************************/
-int code (char *str)
+static int code (char *str)
 {
   char tmp[3];
   strncpy(tmp, str, 3);
@@ -264,7 +246,7 @@ int code (char *str)
 
 
 /******[ sendFtpCommandAndReceive ]**********************************/
-int sendFtpCommandAndReceive (int socketFD, char* command, char* returnString)
+static int sendFtpCommandAndReceive (int socketFD, char* command, char* returnString)
 {
 	int receivedBytes;
 	char str_rec[RETURN_SIZE];
@@ -336,7 +318,7 @@ int sendFtpCommandAndReceive (int socketFD, char* command, char* returnString)
 
 
 /******[ getPort ]***************************************************/
-int  getPort (int socketFD, char* ip)
+static int  getPort (int socketFD, char* ip)
 {
   char command[COMMAND_SIZE], returnString[RETURN_SIZE], tmp[RETURN_SIZE];
   int count, i, j, port;
@@ -387,7 +369,7 @@ int  getPort (int socketFD, char* ip)
 
 
 /******[ printRecv ]**************************************************/
-void printRecv (char *str, int i)   
+static void printRecv (char *str, int i)   
 {
   int j;
   for (j = 0; j < i; j++)
