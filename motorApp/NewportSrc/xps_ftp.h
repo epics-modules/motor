@@ -25,9 +25,12 @@
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 #ifdef vxWorks
 #include <sockLib.h>
 #include "inetLib.h"
+#include <unistd.h>
 #endif
 #endif 
 
@@ -55,11 +58,5 @@ int ftpChangeDir (int, char*);
 int ftpConnect (char*, char*, char*, int*);
 int ftpDisconnect (int);
 int ftpChangeDir (int, char*);
-int ftpRetreaveFile (int, char*);
+int ftpRetrieveFile (int, char*);
 int ftpStoreFile(int, char*);
-
-/* localy used functions */
-int code(char*);
-int sendFtpCommandAndReceive (int, char*, char*);
-int getPort (int, char*);
-void printRecv (char*, int);
