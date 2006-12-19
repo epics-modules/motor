@@ -22,7 +22,7 @@ SRCS += devMM3000.cc drvMM3000.cc
 SRCS += devMM4000.cc drvMM4000.cc
 SRCS += drvMM4000Asyn.c
 SRCS += MM4005_trajectoryScan.st
-SRCS_vxWorks += XPS_trajectoryScan.st
+SRCS += XPS_trajectoryScan.st
 
 # PM500 device driver.
 SRCS += devPM500.cc  drvPM500.cc
@@ -32,16 +32,22 @@ SRCS += devESP300.cc drvESP300.cc
 
 # XPS C8 device driver
 SRCS += asynOctetSocket.cpp 
-SRCS += XPS_C8_drivers.cpp drvXPSAsyn.c drvXPSAsynAux.c XPSAsynInterpose.c
+SRCS += XPS_C8_drivers.cpp drvXPSAsyn.c drvXPSAsynAux.c XPSAsynInterpose.c xps_ftp.c
 
-# XPS Gathering Test C script function -> int xpsgathering(void)
-SRCS_vxWorks += XPSGathering.cc
+# XPS Gathering test function
+SRCS += XPSGathering.c
+SRCS += XPSGatheringRegister.c
 
 # Function which will run a tcl script on an XPS
 SRCS += tclCall.cc
 
 Newport_LIBS += motor asyn seq pv
 Newport_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+PROD_IOC += XPSGatheringMain
+XPSGatheringMain_SRCS += XPSGatheringMain.c
+XPSGatheringMain_LIBS += Newport motor asyn seq pv
+XPSGatheringMain_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
 
