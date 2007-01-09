@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-  <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.9 sun4u) [Netscape]">
+  <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
   <title>Motor Record and related software</title>
 </head>
 
@@ -1580,7 +1580,7 @@ below.
   <tr>
     <td>JAR</td>
     <td>R/W</td>
-    <td>Jog Acceleraton (EGU/s^2)</td>
+    <td>Jog Acceleration (EGU/s^2)</td>
     <td>FLOAT</td>
     <td>Default value: VELO / ACCL</td>
   </tr>
@@ -1776,7 +1776,7 @@ below.
     <td>Desired Output Loc</td>
     <td>INLINK</td>
     <td>If this field contains a valid EPICS link, and the OMSL field has the  value 
-      "closed_loop" (1), then every time the the motor record is processed, it will 
+      "closed_loop" (1), then every time the <span lang="en-us"></span>motor record is processed, it will 
       get a value for the VAL field from the link and move to that location, ignoring 
       all other drive fields. Closed-loop mode has not been tested extensively.&nbsp;</td>
   </tr>
@@ -1787,7 +1787,7 @@ below.
     <td>GBLCHOICE</td>
     <td>(0:"supervisory", 1:"closed_loop")&nbsp; <br>
       If this field has the value "closed_loop" (1), and the field DOL contains a 
-      valid EPICS link, then every time the the motor record is processed, it will get 
+      valid EPICS link, then every time the <span lang="en-us"></span>motor record is processed, it will get 
       a value for the VAL field from the link and move to that location, ignoring all 
       other drive fields. Closed-loop mode has not been tested extensively.&nbsp;</td>
   </tr>
@@ -2495,7 +2495,9 @@ below.
 
 <hr>
 <center>
+  <p>
   <a name="Servo_fields"></a>
+  </p>
 </center>
 
 <center>
@@ -2606,7 +2608,9 @@ below.
 <table border="1" cellpadding="5">
   <caption>
     <center>
+      <p>
       <a name="Fields_alarm"></a>
+      </p>
     </center>
 
     <center>
@@ -2822,7 +2826,8 @@ below.
 	</li>
 	<li>
 	  When drive-power status monitoring is enabled and a power failure is detected, 
-	  the device driver will respond by activating the the RA_OVERTRAVEL bit in the 
+	  the device driver will respond by activating the <span lang="en-us">
+      </span>RA_OVERTRAVEL bit in the 
 	  MSTA.&nbsp; This results in either HLS or LLS being activated depending on the 
 	  DIR field. In addition, the following message will appear in the error log; "Drive 
 	  power failure at VME58 card#?? motor#??".
@@ -3345,50 +3350,39 @@ section</a> ).
       vector, etc.</font></b>
       <table border="1" cellpadding="5">
 	<tbody>
-	<tr>
-	  <td colspan="2"><tt>&nbsp;&nbsp; omsSetup(nCards, Unused, baseAddress, 
-	  intVectBase, intLevel, pollRate)</tt> <br>
-	    <tt>&nbsp;oms58Setup(nCards, Unused, baseAddress, intVectBase, intLevel, 
-	    pollRate)</tt> <br>
-	    <tt>&nbsp; v544Setup(nCards, nAxes,&nbsp; baseAddress, intVectBase, intLevel, 
-	    pollRate)</tt>
-	    <p>
-	    <tt>MM3000Setup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-	    pollRate)</tt> <br>
-	    <tt>MM3000Config(card#, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;portType, &nbsp;link, 
-	    port)</tt> 
-	    </p>
+	<TR>
+	  <TD colspan="2"><TT>&nbsp; omsSetup(nCards, baseAddress, intVectBase, 
+	  intLevel, pollRate)</TT> <BR>
+	    <TT>oms58Setup(nCards, baseAddress, intVectBase, intLevel, pollRate)</TT> <BR>
+	    <P>
+	    <TT>MM3000Setup(nCards, pollRate)</TT> <BR>
+	    <TT>MM3000Config(card#, portName, GPIB#)</TT>
+	    </P>
 
-	    <p>
-	    <tt>MM4000Setup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-	    pollRate)</tt> <br>
-	    <tt>MM4000Config(card#, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;portType, &nbsp;link, 
-	    port)</tt> 
-	    </p>
+	    <P>
+	    <TT>MM4000Setup(nCards, pollRate)</TT> <BR>
+	    <TT>MM4000Config(card#, portName, GPIB#)</TT>
+	    </P>
 
-	    <p>
-	    <tt>IM483SMSetup(nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-	    pollRate)&nbsp;</tt> <br>
-	    <tt>IM483SMConfig(card#, &nbsp; &nbsp; &nbsp; &nbsp; portType, &nbsp;link, port)&nbsp;</tt> 
-	    
-	    </p>
+	    <P>
+	    <TT>IM483SMSetup(nCards, pollRate)&nbsp;</TT> <BR>
+	    <TT>IM483SMConfig(card#, portName)&nbsp;</TT>
 
-	    <p>
-	    <tt>IM483[PL/SM]Setup(nCommNet, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-	    pollRate)&nbsp;</tt> <br>
-	    <tt>IM483[PL/sm]Config(CommNet#, portType, &nbsp;link, port)&nbsp;</tt> <br>
-	    </p>
+	    </P>
 
-	    <p>
-	    ESP300Setup(<tt>nCards, Unused,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-	    &nbsp; &nbsp;pollRate</tt>)<br>
-	    ESP300Config(<tt>card#, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; portType, &nbsp;link, 
-	    port</tt>)<br>
-	    <br>
-	    <br>
-	    </p>
-	  </td>
-	</tr>
+	    <P>
+	    <TT>IM483PLSetup(nCommNet, pollRate)&nbsp;</TT> <BR>
+	    <TT>IM483PLConfig(CommNet#, portName)&nbsp;</TT> <BR>
+	    </P>
+
+	    <P>
+	    ESP300Setup(<TT>nCards, pollRate</TT>)<BR>
+	    ESP300Config(<TT>card#, portName, GPIB#</TT>)<BR>
+	    <BR>
+	    <BR>
+	    </P>
+	  </TD>
+	</TR>
 	<tr valign="top">
 	  <td>nCards</td>
 	  <td>the number of cards or controllers; may be less, but not greater than this 
@@ -3398,10 +3392,6 @@ section</a> ).
 	  <td>nCommNet</td>
 	  <td>the number of Communication networks&nbsp; (e.g., the number of RS-422 
 	  networks for a IM483PL device).</td>
-	</tr>
-	<tr>
-	  <td>nAxes</td>
-	  <td>the maximum number of motor axes controlled by any one card</td>
 	</tr>
 	<tr valign="top">
 	  <td>baseAddress</td>
@@ -3445,8 +3435,8 @@ section</a> ).
 	  don't set pollRate much higher than 10 Hz. pollRate must be in the range [1..60].</td>
 	</tr>
 	<tr>
-	  <td>portType</td>
-	  <td>0 - GPIB_PORT or 1 - RS232_PORT</td>
+	  <td>portName</td>
+	  <td>ASYN port name.</td>
 	</tr>
 	<tr>
 	  <td valign="top">link<br>
@@ -3455,22 +3445,20 @@ section</a> ).
 	  </td>
 	</tr>
 	<tr>
-	  <td valign="top">port<br>
+	  <td valign="top">GPIB#<br>
 	  </td>
-	  <td valign="top">GPIB address or MPF serial server task name<br>
+	  <td valign="top">GPIB address.<br>
 	  </td>
 	</tr>
-
-  </tbody>
+        </tbody>
       </table>
 
-      <pre># OMS VME8, VME44, VMEX driver setup parameters:<br>omsSetup(5, 8, 0xFC00, 
-      180, 5, 10)<br><br># OMS VME58 driver setup parameters:<br>oms58Setup(5, 8, 
-      0x2000, 190, 5, 10)<br><br># Highland Technology V544 driver setup parameters:<br> 
-      v544Setup(5, 4, 0xDD00, 200, 5, 10)</pre>
-      <b><font color="#ffffff">Start EPICS</font></b>
-
-      <pre>iocInit</pre>
+      <P>
+	# OMS VME8, VME44, VMEX driver setup parameters:<BR>omsSetup(5, 0xFC00, 180, 5, 
+	10)<BR><BR># OMS VME58 driver setup parameters:<BR>oms58Setup(5, 0x2000, 190, 5, 
+	10)
+      </P>
+      <P>#Start EPICS<BR>iocInit</P>
     </td>
   </tr>
 
