@@ -14,7 +14,7 @@
 	#define DLL 
 #endif
 
-#include "xps_c8_drivers.h" 
+#include "XPS_C8_drivers.h" 
 
 
 
