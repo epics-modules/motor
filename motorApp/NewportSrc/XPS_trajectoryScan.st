@@ -15,6 +15,7 @@ program XPS_trajectoryScan("P=13BMC:,R=traj1,M1=m1,M2=m2,M3=m3,M4=m4,M5=m5,M6=m6
 
 %% #include <string.h>
 %% #include <stdio.h>
+%% #include <math.h>
 %% #include "XPS_C8_drivers.h"
 %% #include "Socket.h"
 %% #include "xps_ftp.h"
@@ -50,6 +51,8 @@ option +r;
 #define MOVE_MODE_ABSOLUTE   1
 #define MOVE_MODE_HYBRID     2
 
+/* Buffer sizes */
+#define NAME_LEN 100
 
 /* Maximum number of motors on XPS */
 #define MAX_AXES 8
@@ -69,8 +72,10 @@ option +r;
 /* Polling interval for waiting for motors to reach their targets */
 #define POLL_INTERVAL 0.1
 
-/* getSocket timeout*/
-#define SOCKET_TIMEOUT 1.0
+/* Socket timeouts */
+#define POLL_TIMEOUT 1.0
+#define DRIVE_TIMEOUT 100000.  /* Forever */
+#define ABORT_TIMEOUT 10.
 
 /* Used within the exec state as a timeout within the while loops which wait for
  * the ss xpsTrajectoryRun to catch up */
@@ -216,12 +221,11 @@ int j;
 int k;
 int anyMoving;
 int ncomplete;
-int nextElement;
 int nextra;
 int dir;
 int    pollSocket;
+int    driveSocket;
 int    abortSocket;
-int    socket;
 int    positionSocket;
 int    xpsStatus;
 int    count;
@@ -232,12 +236,13 @@ double posTheory;
 double expectedTime;
 double initialPos[MAX_AXES];
 double trajVel;
-double velocityTrajectory[MAX_AXES][MAX_ELEMENTS];
-char   groupName[100];
-char   xpsAddress[20];
-char   axisName[100][MAX_AXES];
-char   macroBuf[10];
-char   motorName[100];
+double preDistance[MAX_AXES];
+double postDistance[MAX_AXES];
+char   groupName[NAME_LEN];
+char   xpsAddress[NAME_LEN];
+char   *axisName[MAX_AXES];
+char   macroBuf[NAME_LEN];
+char   motorName[NAME_LEN];
 int    xpsPort;
 
 /* Define PVs */
@@ -258,7 +263,7 @@ unsigned long startTime;
 %% static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar);
 %% static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar);
 
-%% static int getSocket(SS_ID ssId, struct UserVar *pVar);
+%% static int getSocket(SS_ID ssId, struct UserVar *pVar, double timeout);
 %% static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar);
 %% static void buildAndVerify(SS_ID ssId, struct UserVar *pVar);
 %% static int currentElement(SS_ID ssId, struct UserVar *pVar);
@@ -277,6 +282,7 @@ ss xpsTrajectoryScan {
             strcpy(xpsAddress, macValueGet("IPADDR"));
             xpsPort = atoi(macValueGet("PORT"));
             for (i=0; i<numAxes; i++) {
+                axisName[i] = malloc(NAME_LEN);
                 sprintf(macroBuf, "P%d", i+1);
                 sprintf(axisName[i], "%s.%s", groupName, macValueGet(macroBuf));
                 sprintf(macroBuf, "M%d", i+1);
@@ -297,18 +303,15 @@ ss xpsTrajectoryScan {
                 for (j=0; j<MAX_AXES; j++) {
                     motorTrajectory[j][i] = 0.0;
                 }
-                /* Velocity at each pulse/trajectory point */
-                velocityTrajectory[0][i] = 0.0;
             }
 
             /* Force numAxes to be <= MAX_AXES */
             if (numAxes > MAX_AXES) numAxes = MAX_AXES;
             
             /* Get sockets for communicating with XPS */
-            %%pVar->socket = getSocket(ssId, pVar);
-            %%pVar->pollSocket = getSocket(ssId, pVar);
-            %%pVar->abortSocket = getSocket(ssId, pVar);
-            %%pVar->positionSocket = getSocket(ssId, pVar);
+            %%pVar->pollSocket = getSocket(ssId, pVar, POLL_TIMEOUT);
+            %%pVar->driveSocket = getSocket(ssId, pVar, DRIVE_TIMEOUT);
+            %%pVar->abortSocket = getSocket(ssId, pVar, ABORT_TIMEOUT);
         
             for (j=0; j<numAxes; j++) {
                 motorCurrentIndex[j]   =  pvIndex(motorCurrent[j]);
@@ -472,33 +475,29 @@ ss xpsTrajectoryScan {
             for (j=0; j<numAxes; j++) pvPut(motorCurrent[j]);
 
             %%pVar->xpsStatus = getGroupStatus(ssId, pVar);
-        
-            nextElement = ncomplete + 1;            
-            %%pVar->ncomplete = currentElement(ssId, pVar);
-        
-            if (xpsStatus == 45)
+            if (xpsStatus == 45) {
+                %%pVar->ncomplete = currentElement(ssId, pVar);
                 sprintf(execMessage, "Executing element %d/%d", 
                         ncomplete, nelements);
-            pvPut(execMessage);
-            %%pVar->xpsStatus = getGroupStatus(ssId, pVar); 
-            /* 12 = ready from move */
-            if (xpsStatus == 12) {
+                pvPut(execMessage);
+            }
+            else if (xpsStatus == 12) {
+                /* 12 = ready from move */
                 execState = EXECUTE_STATE_FLYBACK;
                 execStatus = STATUS_SUCCESS;
                 strcpy(execMessage, " ");
+            }
+            else if (xpsStatus < 10) {
+                /* The xps group status reflects an error. */
+                execState = EXECUTE_STATE_FLYBACK;
+                execStatus = STATUS_FAILURE;
+                sprintf(execMessage,"XPS Status Error=%d", xpsStatus);
             }
             /* See if the elapsed time is more than expected, time out */
             if (difftime(time(0), startTime) > (expectedTime+10)) {
                 execState = EXECUTE_STATE_FLYBACK;
                 execStatus = STATUS_TIMEOUT;
                 strcpy(execMessage, "Timeout");
-            }
-            /* see if the xps group status reflects an error. */
-            /* 45 = performing a trajectory, <10 = notinitialised due to major error */
-            if (xpsStatus < 10) {
-                execState = EXECUTE_STATE_FLYBACK;
-                execStatus = STATUS_FAILURE;
-                sprintf(execMessage,"XPS Status Error=%d", xpsStatus);
             }
         } state wait_execute
 
@@ -578,7 +577,7 @@ ss xpsTrajectoryScan {
 
 /* This state set simply monitors the abort input.  It is a separate state set
  * so that it is always active, no matter what the state of the trajectoryScan
- * state set. It also uses a separate socket. */
+ * state set. */
 ss xpsTrajectoryAbort {
     state monitorAbort {
         when ((efTestAndClear(abortMon)) && (abort==1) &&
@@ -738,11 +737,11 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
 }
 
 /* Function to ask the XPS for a socket this requires Socket.h */
-static int getSocket(SS_ID ssId, struct UserVar *pVar)
+static int getSocket(SS_ID ssId, struct UserVar *pVar, double timeout)
 {
     int sock = 0;
     
-    sock = TCP_ConnectToServer(pVar->xpsAddress, pVar->xpsPort, SOCKET_TIMEOUT);
+    sock = TCP_ConnectToServer(pVar->xpsAddress, pVar->xpsPort, timeout);
     if (sock < 0) 
             printf(" Error TCP_ConnectToServer, status=%d\n",sock);
     return (sock);
@@ -759,7 +758,7 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
     
     /* Configure Gathering */
     /* Reset gathering.  This must be done because GatheringOneData just appends to in-memory list */    
-    status = GatheringReset(pVar->socket);
+    status = GatheringReset(pVar->pollSocket);
     if (status != 0) {
         printf(" Error performing GatheringReset, status=%d\n",status);
         return;
@@ -774,50 +773,50 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
     }
     
     /* Define what is to be saved in the GatheringExternal.dat */
-    status = GatheringExternalConfigurationSet(pVar->socket, pVar->numAxes, buffer);
+    status = GatheringConfigurationSet(pVar->pollSocket, pVar->numAxes, buffer);
     if (status != 0)
-            printf(" Error performing GatheringConfigurationSet, status=%d\n",status);
+            printf(" Error performing GatheringConfigurationSet, status=%d, buffer=%s\n",status, buffer);
 
     /* Define trajectory output pulses */
-    status = MultipleAxesPVTPulseOutputSet(pVar->socket, pVar->groupName, 1, pVar->nelements, pVar->time);
+    status = MultipleAxesPVTPulseOutputSet(pVar->pollSocket, pVar->groupName, 2, pVar->nelements+1, pVar->time);
 
     /* Define trigger */
-    sprintf(buffer, "Always;%s.PVTTrajectoryPulse", pVar->groupName);
-    status = EventExtendedConfigurationTriggerSet(pVar->socket, 2, buffer, "", "", "", "");
+    sprintf(buffer, "Always;%s.PVT.TrajectoryPulse", pVar->groupName);
+    status = EventExtendedConfigurationTriggerSet(pVar->pollSocket, 2, buffer, "", "", "", "");
     if (status != 0) {
-        printf(" Error performing EventExtendedConfigurationTriggerSet, status=%d\n",status);
+        printf(" Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s\n", status, buffer);
         return;
     }
 
     /* Define action */
-    status = EventExtendedConfigurationActionSet(pVar->socket, 1, "GatheringOneData", "", "", "", "");
+    status = EventExtendedConfigurationActionSet(pVar->pollSocket, 1, "GatheringOneData", "", "", "", "");
     if (status != 0) {
         printf(" Error performing EventExtendedConfigurationActionSet, status=%d\n",status);
         return;
     }
 
     /* Start gathering */
-    status= EventExtendedStart(pVar->socket, &eventId);
+    status= EventExtendedStart(pVar->pollSocket, &eventId);
     if (status != 0) {
         printf(" Error performing EventExtendedStart, status=%d\n",status);
         return;
     }
 
-    status = MultipleAxesPVTExecution(pVar->socket,pVar->groupName,
+    status = MultipleAxesPVTExecution(pVar->driveSocket,pVar->groupName,
                                       TRAJECTORY_FILE, 1);
     /* status -27 means the trajectory was aborted */
     if ((status != 0) && (status != -27))
         printf(" Error performing MultipleAxesPVTExecution, status=%d\n", status);
     
     /* Remove the event */
-    status = EventExtendedRemove(pVar->socket, eventId);
+    status = EventExtendedRemove(pVar->pollSocket, eventId);
     if (status != 0) {
         printf(" Error performing ExtendedEventRemove, status=%d\n",status);
         return;
     }
         
     /* Save the gathered data to a file */    
-    status = GatheringExternalStopAndSave(pVar->socket);
+    status = GatheringExternalStopAndSave(pVar->pollSocket);
     
     /* status -30 means gathering not started i.e. aborted before the end of
        1 trajectory element */
@@ -839,90 +838,107 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     double minp;
     double P0, P1, T0, T1;
     int ftpSocket;
-    char fileName[100];
+    char fileName[NAME_LEN];
+#define JERK_FACTOR 2.0
+    double distance, time, slewTime;
+    double preSign[MAX_AXES], postSign[MAX_AXES];
+    double maxVelocity[MAX_AXES], maxAcceleration[MAX_AXES], minJerkTime[MAX_AXES], maxJerkTime[MAX_AXES];
+    double preTimeMax, postTimeMax;
+    double preVelocity[MAX_AXES], preAccelTime[MAX_AXES], postVelocity[MAX_AXES], postAccelTime[MAX_AXES];
     
-    /* Set the velocity at each trajectory point 
-       Loop an extra 1 to add a zero vel element at the end 
-       of the scan */
+    /* We create trajectories with an extra element at the beginning and at the end.
+     * The distance and time of the first element is defined so that the motors will accelerate
+     * from 0 to the velocity of the first "real" element at their maximum allowed acceleration.
+     * Similarly, the distance and time of last element is defined so that the motors will decelerate
+     * from the velocity of the last "real" element to 0 at the maximum allowed acceleration.
+
+    /* Compute the velocity of each motor during the first real trajectory element, and the
+     * time required to reach this velocity. */
+    preTimeMax = 0.;
+    postTimeMax = 0.;
+    for (j=0; j<pVar->numAxes; j++) {
+        status = PositionerSGammaParametersGet(pVar->pollSocket, pVar->axisName[j], 
+                                               &maxVelocity[j], &maxAcceleration[j],
+                                               &minJerkTime[j], &maxJerkTime[j]);
+        if (status != 0) {
+            printf("Error calling positionerSGammaParametersSet, status=%d\n", status);
+        }
+        distance = pVar->motorTrajectory[j][1] - pVar->motorTrajectory[j][0];
+        if (distance >= 0.) preSign[j] = 1.0; else preSign[j] = -1.0;
+        preVelocity[j] = distance/pVar->timeTrajectory[0];
+        preAccelTime[j] = fabs(preVelocity[j]) / maxAcceleration[j];
+        time = preAccelTime[j] + JERK_FACTOR * minJerkTime[j]; 
+        if (time > preTimeMax) preTimeMax = time;
+        distance = pVar->motorTrajectory[j][pVar->nelements-1] - pVar->motorTrajectory[j][pVar->nelements-2];
+        if (distance >= 0.) postSign[j] = 1.0; else postSign[j] = -1.0;
+        postVelocity[j] = distance/pVar->timeTrajectory[pVar->nelements-1];
+        postAccelTime[j] = fabs(postVelocity[j]) / maxAcceleration[j];
+        time = postAccelTime[j] + JERK_FACTOR * minJerkTime[j]; 
+        if (time > postTimeMax) postTimeMax = time;
+printf("axis %d maxVelocity=%f maxAcceleration=%f minJerkTime=%f, maxJerkTime=%f\n",
+       j, maxVelocity[j], maxAcceleration[j], minJerkTime[j], maxJerkTime[j]);
+printf("        preVelocity=%f, preAccelTime=%f, postVelocity=%f, postAccelTime=%f\n", 
+       preVelocity[j], preAccelTime[j], postVelocity[j], postAccelTime[j]);
+    }
+
+    /* Compute the distance that each motor moves during its acceleration phase.  Only move it this far. */
+    for (j=0; j<pVar->numAxes; j++) {
+        slewTime = preTimeMax - preAccelTime[j] - JERK_FACTOR*minJerkTime[j];
+printf("Slew time = %f\n", slewTime);
+        if (slewTime < 0.) slewTime = 0.;
+        pVar->preDistance[j] = preSign[j] * (0.5 * maxAcceleration[j] * preAccelTime[j] * preAccelTime[j]) +
+                               slewTime * preVelocity[j];
+        slewTime = postTimeMax - postAccelTime[j] - JERK_FACTOR*minJerkTime[j];
+printf("Slew time = %f\n", slewTime);
+        if (slewTime < 0.) slewTime = 0.;
+        pVar->postDistance[j] = postSign[j] * (0.5 * maxAcceleration[j] * postAccelTime[j] * postAccelTime[j]) + 
+                               slewTime * postVelocity[j];
+printf("axis %d preDistance=%f, postDistance=%f, preTimeMax=%f, postTimeMax=%f\n", 
+        j, pVar->preDistance[j], pVar->postDistance[j], preTimeMax, postTimeMax);
+    }
+
+    /* TOTAL KLUGE FOR NOW */
+    preTimeMax = preTimeMax * 10.0;
+    postTimeMax = postTimeMax * 10.0;
+
+    /* Create the trajectory file */
+    trajFile =  fopen (TRAJECTORY_FILE, "w");
+
+    /* Create the initial acceleration element */
+    fprintf(trajFile,"%f", preTimeMax);
+    for (j=0; j<pVar->numAxes; j++) fprintf(trajFile,", %f, %f", pVar->preDistance[j], preVelocity[j]);
+    fprintf(trajFile,"\n");
     
-    pVar->timeTrajectory[pVar->nelements] = pVar->timeTrajectory[pVar->nelements-1];
-    
-    
-    for (i=0; i<(pVar->nelements); i++) {
+    for (i=0; i<pVar->nelements-1; i++) {
+        T0 = pVar->timeTrajectory[i];
+        T1 = pVar->timeTrajectory[i+1];
         for (j=0; j<pVar->numAxes; j++) {
-            if (pVar->timeTrajectory[i] == 0 && i > 0) {  
-                pVar->timeTrajectory[i] = pVar->timeTrajectory[i-1];
-            }
             P0 = pVar->motorTrajectory[j][i];
             P1 = pVar->motorTrajectory[j][i+1];
-            T0 = pVar->timeTrajectory[i];
-            T1 = pVar->timeTrajectory[i+1];
         
-            /* Average either side of the point */
-            pVar->velocityTrajectory[j][i] = (P0 + P1)/(T0 + T1);
-        
-            if (i == (pVar->nelements-1)) /* Set final velocity to zero */
-                pVar->velocityTrajectory[j][i] = 0.0;
-        
-            if (pVar->motorTrajectory[j][i] == 0) /* To prevent the motor reversing */
-                pVar->velocityTrajectory[j][i] = 0;
-        
-            if (pVar->motorTrajectory[j][i+1] == 0) /* prevent the motor over shooting */
-                pVar->velocityTrajectory[j][i] = 0;
-        
-        
-            /* Implement the accel time */
-            if ( i > 0 ) { /* i.e. not 1st point */
-                /* If the motor is slowing down to zero vel */
-                if (pVar->velocityTrajectory[j][i-1] > 0 && 
-                    pVar->velocityTrajectory[j][i] == 0 &&
-                    pVar->timeTrajectory[i] < pVar->accel) {
-                    pVar->timeTrajectory[i] = pVar->accel;
-                }
-                /* If the motor is accelerating from zero */
-                if (pVar->velocityTrajectory[j][i-1] == 0 && 
-                    pVar->velocityTrajectory[j][i] > 0 &&
-                    pVar->timeTrajectory[i] < pVar->accel) {
-                    pVar->timeTrajectory[i] = pVar->accel;
-                }   
-            }
-            if ( i == 0 ) { /* i.e. 1st point */
-                /* If the motor is accelerating from zero */
-        
-                if (pVar->velocityTrajectory[j][i] > 0 &&
-                    pVar->timeTrajectory[i] < pVar->accel) {
-                    pVar->timeTrajectory[i] = pVar->accel;
-                }   
-            }
-            /*printf("i %i,V %f, P0 %f, P1 %f, T0 %f, T1 %f\n",
-                      i,pVar->velocityTrajectory[j][i],P0,P1,T0,T1);*/
-        }
-    }
-    
-    trajFile =  fopen (TRAJECTORY_FILE, "w");
-            
-    /* Define each element in trajectory file.
-     * time,  pos,vel,  pos,vel,  pos,vel, etc */
-    for (i=0; i<pVar->nelements; i++) {
-        for (j=0; j<pVar->numAxes; j++) {
             if (pVar->moveMode == MOVE_MODE_RELATIVE) {
                 trajStep = pVar->motorTrajectory[j][i];
             } else {
                 trajStep = pVar->motorTrajectory[j][i+1] - pVar->motorTrajectory[j][i];
             }
-            trajVel = pVar->velocityTrajectory[j][i];
                 
+            /* Average either side of the point? */
+            trajVel = trajStep / T0;
             if (!(pVar->moveAxis[j])) {
                 trajStep = 0.0;    /* Axis turned off*/
                 trajVel = 0.0;
             }
         
             if (j == 0) fprintf(trajFile,"%f", pVar->timeTrajectory[i]);
-            fprintf(trajFile,"%f,%f, ",trajStep,trajVel);
+            fprintf(trajFile,", %f, %f",trajStep,trajVel);
             if (j == (pVar->numAxes-1)) fprintf(trajFile,"\n");
-         
         }    
     }
+
+    /* Create the final acceleration element. Final velocity must be 0. */
+    fprintf(trajFile,"%f", postTimeMax);
+    for (j=0; j<pVar->numAxes; j++) fprintf(trajFile,", %f, %f", pVar->postDistance[j], 0.);
+    fprintf(trajFile,"\n");
     fclose (trajFile);
     
     /* FTP the trajectory file from the local directory to the XPS */
@@ -949,7 +965,7 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
        
     /* Verify trajectory */
         
-    status = MultipleAxesPVTVerification(pVar->socket,pVar->groupName,TRAJECTORY_FILE);
+    status = MultipleAxesPVTVerification(pVar->pollSocket,pVar->groupName,TRAJECTORY_FILE);
      
     pVar->buildStatus = STATUS_FAILURE;
     if (status == 0) {
@@ -962,6 +978,8 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
         strcpy(pVar->buildMessage, "Vel Too High");
     else if (status == -70)
         strcpy(pVar->buildMessage, "Final Vel Non Zero");         
+    else if (status == -75)
+        strcpy(pVar->buildMessage, "Negative or Null Delta Time");         
     else
         sprintf(pVar->buildMessage, "Unknown trajectory verify error=%d", status);         
      
@@ -970,21 +988,21 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     if (status == 0){
         pVar->buildStatus = STATUS_SUCCESS;
     }    
-    /* You can't read the max vel and accel if the verification failed */
-    if (pVar->buildStatus == STATUS_SUCCESS) {
+    if (1) {  /* We may need to test for status here */
         for (j=0; j<pVar->numAxes; j++) {
-            status = MultipleAxesPVTVerificationResultGet(pVar->socket,pVar->axisName[j],
-                        fileName,&minp, &maxp, &pVar->motorMVA[j], &pVar->motorMAA[j]);
+            status = MultipleAxesPVTVerificationResultGet(pVar->pollSocket,pVar->axisName[j],
+                        fileName, &minp, &maxp, &pVar->motorMVA[j], &pVar->motorMAA[j]);
             if (status != 0) {
-                printf(" Error performing MultipleAxesPVTVerificationResultGet %i\n",status); 
+                printf(" Error performing MultipleAxesPVTVerificationResultGet for axis %s, status=%d\n",
+                       pVar->axisName[j], status); 
             }
-        }  
+        }
     } else {
         for (j=0; j<pVar->numAxes; j++) {
             pVar->motorMVA[j] = 0;
             pVar->motorMAA[j] = 0;     
-        }   
-    } 
+        }
+    }
            
     return; 
 }
