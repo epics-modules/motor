@@ -22,7 +22,6 @@ SRCS += devMM3000.cc drvMM3000.cc
 SRCS += devMM4000.cc drvMM4000.cc
 SRCS += drvMM4000Asyn.c
 SRCS += MM4005_trajectoryScan.st
-SRCS += XPS_trajectoryScan.st
 
 # PM500 device driver.
 SRCS += devPM500.cc  drvPM500.cc
@@ -33,6 +32,7 @@ SRCS += devESP300.cc drvESP300.cc
 # XPS C8 device driver
 SRCS += asynOctetSocket.cpp 
 SRCS += XPS_C8_drivers.cpp drvXPSAsyn.c drvXPSAsynAux.c XPSAsynInterpose.c xps_ftp.c
+SRCS += XPS_trajectoryScan.st
 
 # XPS Gathering test function
 SRCS += XPSGathering.c
