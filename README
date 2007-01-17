@@ -1,4 +1,4 @@
-Motor Record R6-1 Release Notice
+Motor Record R6-2 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
@@ -111,6 +111,16 @@ Known Problems
         For example, if MRES is positive and ERES is negative and the user
         wants to set the current position to 10.00 inches, then -10.00 must be
         entered in the VAL or DVAL field.
+
+Modification Log from R6-1 to R6-2
+==================================
+
+1) Bug fix for Newport PM500 initialization problem.  The PM500 driver was not
+        issuing the correct command when it queried for the number of axes at
+	boot up; correct command (XSTAT?), incorrect command (STAT?).  This
+	resulted in a "PM500 system error" message on the 1st axis.
+	
+	File modified: NewportSrc/drvPM500.cc
 
 
 Modification Log from R6-0 to R6-1
