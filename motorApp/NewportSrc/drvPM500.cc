@@ -2,9 +2,9 @@
 FILENAME... drvPM500.cc
 USAGE...    Motor record driver level support for Newport PM500.
 
-Version:    $Revision: 1.18 $
+Version:    $Revision: 1.19 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2005-05-10 16:36:46 $
+Last Modified:  $Date: 2007-01-17 15:34:46 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -46,6 +46,8 @@ Last Modified:  $Date: 2005-05-10 16:36:46 $
  * .09 12/21/04 rls - MS Visual C compatibility; make all epicsExportAddress
  *            extern "C" linkage.
  *          - make debug variables always available.
+ * .10 01/17/07 rls Bug fix for driver not issuing the correct command when it
+ *                  queried for the number of axes at boot up.
  */
 
 
@@ -577,8 +579,9 @@ static int motor_init()
              * Do this by querying status of each axis in order */
             for (total_axis = 0; total_axis < PM500_NUM_CHANNELS; total_axis++)
         {
+            int axis_name = (int) *PM500_axis_names[total_axis];
         brdptr->motor_info[total_axis].motor_motion = NULL;
-        sprintf(buff, "%cSTAT?", PM500_axis_names[total_axis]);
+            sprintf(buff, "%cSTAT?", axis_name);
                 send_mess(card_index, buff, (char) NULL);
                 recv_mess(card_index, buff, 1);
                 if (buff[1] == 'E')
