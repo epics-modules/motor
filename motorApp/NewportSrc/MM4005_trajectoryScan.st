@@ -14,27 +14,36 @@ program MM4005_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6
  *  Dec. 5, 2001 MLR    Fixed bug in computing following error
  *  Dec. 7, 2001 MLR    Fixed bug in converting from EPICS to MM4000 units when
  *                      building trajectory.
- *  Oct. 28, 2002 MLR   Fixed bug in reporting updated trajectory positions after padding
- *                      Was not a problem in executing trajectory, only in values reported
- *                      to EPICS
- *  Dec. 18, 2003 MLR   Changed flyback (now a misnomer) so it does EPICS move to current motor positions,
- *                      not start positions.  Start position move did not work because motors already thought
- *                      they were there (if no encoder error) and motor record did nothing.
- *  Feb. 12, 2004 MLR   Added delay after starting trajectory execution.  This is an attempt to
- *                      eliminate problem where MM4000 seems to sometimes ignore TP command right
- *                      after trajectory execution starts.  Also, first MS sometimes comes back saying
- *                      motors are not moving yet, so software thinks trajectory is done.
+ *  Oct. 28, 2002 MLR   Fixed bug in reporting updated trajectory positions after 
+ *                      padding. Was not a problem in executing trajectory, only in 
+ *                      values reported to EPICS
+ *  Dec. 18, 2003 MLR   Changed flyback (now a misnomer) so it does EPICS move to 
+ *                      current motor positions, not start positions.  
+ *                      Start position move did not work because motors already 
+ *                      thought they were there (if no encoder error) and motor 
+ *                      record did nothing.
+ *  Feb. 12, 2004 MLR   Added delay after starting trajectory execution.
+ *                      This is an attempt to eliminate problem where MM4000 seems 
+ *                      to sometimes ignore TP command right after trajectory 
+ *                      execution starts.  
+ *                      Also, first MS sometimes comes back saying motors are not 
+ *                      moving yet, so software thinks trajectory is done.
  *                      Converted to OSI
- *                      Converted to new version of seq which changes call to seq_pvPut
- *                      Changed flyback (now a misnomer) so it does EPICS move to current motor positions,
- *                      not start positions.  Start position move did not work because motors already thought
- *                      they were there (if no encoder error) and motor record did nothing.
- *  Oct.  1, 2004 MLR   Changed from using asynRecord (previously generic serial record) to using asynOctetSyncIO calls.
- *                      This fixed bugs in I/O due to timing, and is simpler and cleaner.
- *  Feb.  6, 2005 MLR   Changes for last version of asyn; terminators done differently
- *  Mar. 28, 2005 MLR   Increased number of pulses; added readback during trajectory download to prevent buffer overflow
+ *                      Converted to new version of seq which changes call to 
+ *                      seq_pvPut
+ *  Oct.  1, 2004 MLR   Changed from using asynRecord (previously generic serial 
+ *                      record) to using asynOctetSyncIO calls.
+ *                      This fixed bugs in I/O due to timing, and is simpler and 
+ *                      cleaner.
+ *  Feb.  6, 2005 MLR   Changes for last version of asyn; terminators done 
+ *                      differently.
+ *  Mar. 28, 2005 MLR   Increased number of pulses; added readback during trajectory
+ *                      download to prevent buffer overflow.
  *  Apr. 29, 2005 MLR   Changed timeout to 30 seconds - necessary?
  *  Apr. 12, 2006 MLR   Changed from strtok_r to epicsStrtok_r
+ *  Jan. 18, 2007 MLR   Use new include file, "trajectoryScan.h" to eliminate 
+ *                      duplication with new XPS trajectory scan SNL program.
+ *                      Clean up code, assign EPICS motor PVs in init().
 */
 
 %% #include <string.h>
@@ -44,37 +53,6 @@ program MM4005_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6
 
 /* This program must be compiled with the recursive option */
 option +r;
-
-/* State codes for Build, Read and Execute. Careful, these must match the
- * corresponding MBBI records, but there is no way to check this */
-#define BUILD_STATE_DONE            0
-#define BUILD_STATE_BUSY            1
-#define READ_STATE_DONE             0
-#define READ_STATE_BUSY             1
-#define EXECUTE_STATE_DONE          0
-#define EXECUTE_STATE_MOVE_START    1
-#define EXECUTE_STATE_EXECUTING     2
-#define EXECUTE_STATE_FLYBACK       3
-
-/* Status codes for Build, Execute and Read */
-#define STATUS_UNDEFINED 0
-#define STATUS_SUCCESS   1
-#define STATUS_FAILURE   2
-#define STATUS_ABORT     3
-#define STATUS_TIMEOUT   4
-
-/* Time modes */
-#define TIME_MODE_TOTAL         0
-#define TIME_MODE_PER_ELEMENT   1
-
-/* Move modes */
-#define MOVE_MODE_RELATIVE   0
-#define MOVE_MODE_ABSOLUTE   1
-#define MOVE_MODE_HYBRID     2
-
-
-/* Maximum number of motors on MM4005 */
-#define MAX_AXES 8
 
 /* Maximum # of trajectory elements.  The MM4005 allows 2000, and this is also
  * the channel access limit with a double data type.  However this uses 
@@ -92,8 +70,15 @@ option +r;
  */
 #define MAX_PULSES 2000
 
+/* Note that MAX_AXES, MAX_ELEMENTS, and MAX_PULSES must be defined before
+ * including the trajectoryScan.h */
+#include "trajectoryScan.h"
+
 /* Maximum size of string to/from MM4005, typically for TQ command. */
 #define MAX_MM4000_STRING 256
+
+/* Buffer sizes */
+#define NAME_LEN 100
 
 /* Maximum size of string in EPICS string PVs.  This is defined in 
  * epicsTypes.h, but in order to include that file it must be escaped, and then
@@ -107,247 +92,7 @@ option +r;
 /* Polling interval for waiting for motors to reach their targets */
 #define POLL_INTERVAL 0.1
 
-/* Define PVs */
-int    numAxes;     assign numAxes      to "{P}{R}NumAxes.VAL"; 
-                                                        monitor numAxes;
-int    nelements;   assign nelements    to "{P}{R}Nelements.VAL"; 
-                                                        monitor nelements;
-int    npulses;     assign npulses      to "{P}{R}Npulses.VAL"; 
-                                                        monitor npulses;
-int    startPulses; assign startPulses  to "{P}{R}StartPulses.VAL"; 
-                                                        monitor startPulses;
-int    endPulses;   assign endPulses    to "{P}{R}EndPulses.VAL"; 
-                                                        monitor endPulses;
-int    nactual;     assign nactual      to "{P}{R}Nactual.VAL"; 
-
-int    moveMode;    assign moveMode     to "{P}{R}MoveMode.VAL";    
-                                                        monitor moveMode;
-double time;        assign time         to "{P}{R}Time.VAL";      
-                                                        monitor time;
-double timeScale;   assign timeScale    to "{P}{R}TimeScale.VAL"; 
-                                                        monitor timeScale;
-int    timeMode;    assign timeMode     to "{P}{R}TimeMode.VAL";    
-                                                        monitor timeMode;
-double accel;       assign accel        to "{P}{R}Accel.VAL";     
-                                                        monitor accel;
-
-int    build;       assign build        to "{P}{R}Build.VAL";     
-                                                        monitor build;
-int    buildState;  assign buildState   to "{P}{R}BuildState.VAL"; 
-int    buildStatus; assign buildStatus  to "{P}{R}BuildStatus.VAL"; 
-string buildMessage;assign buildMessage to "{P}{R}BuildMessage.VAL";
-
-int    simMode;     assign simMode      to "{P}{R}SimMode.VAL";   
-                                                        monitor simMode;
-int    execute;     assign execute      to "{P}{R}Execute.VAL";   
-                                                        monitor execute;
-int    execState;   assign execState    to "{P}{R}ExecState.VAL";   
-int    execStatus;  assign execStatus   to "{P}{R}ExecStatus.VAL";   
-string execMessage; assign execMessage  to "{P}{R}ExecMessage.VAL";
-int    abort;       assign abort        to "{P}{R}Abort.VAL";   
-                                                        monitor abort;
-
-int    detOn;       assign detOn        to "{P}{R}DetOn.PROC";
-int    detOff;      assign detOff       to "{P}{R}DetOff.PROC";
-
-int    readback;    assign readback     to "{P}{R}Readback.VAL";   
-                                                        monitor readback;
-int    readState;   assign readState    to "{P}{R}ReadState.VAL";   
-int    readStatus;  assign readStatus   to "{P}{R}ReadStatus.VAL";   
-string readMessage; assign readMessage  to "{P}{R}ReadMessage.VAL";
-
-double timeTrajectory[MAX_ELEMENTS];
-                    assign timeTrajectory to  "{P}{R}TimeTraj.VAL"; 
-                                                        monitor timeTrajectory;
-
-int    moveAxis[MAX_AXES]; 
-                    assign moveAxis     to
-                                           {"{P}{R}M1Move.VAL",
-                                            "{P}{R}M2Move.VAL",
-                                            "{P}{R}M3Move.VAL",
-                                            "{P}{R}M4Move.VAL",
-                                            "{P}{R}M5Move.VAL",
-                                            "{P}{R}M6Move.VAL",
-                                            "{P}{R}M7Move.VAL",
-                                            "{P}{R}M8Move.VAL"};
-                                                        monitor moveAxis;
-
-double  motorTrajectory[MAX_AXES][MAX_ELEMENTS]; 
-                    assign motorTrajectory to
-                                           {"{P}{R}M1Traj.VAL",
-                                            "{P}{R}M2Traj.VAL",
-                                            "{P}{R}M3Traj.VAL",
-                                            "{P}{R}M4Traj.VAL",
-                                            "{P}{R}M5Traj.VAL",
-                                            "{P}{R}M6Traj.VAL",
-                                            "{P}{R}M7Traj.VAL",
-                                            "{P}{R}M8Traj.VAL"};
-                                                        monitor motorTrajectory;
-
-double  motorReadbacks[MAX_AXES][MAX_PULSES]; 
-                    assign  motorReadbacks to
-                                           {"{P}{R}M1Actual.VAL",
-                                            "{P}{R}M2Actual.VAL",
-                                            "{P}{R}M3Actual.VAL",
-                                            "{P}{R}M4Actual.VAL",
-                                            "{P}{R}M5Actual.VAL",
-                                            "{P}{R}M6Actual.VAL",
-                                            "{P}{R}M7Actual.VAL",
-                                            "{P}{R}M8Actual.VAL"};
-
-double  motorError[MAX_AXES][MAX_PULSES]; 
-                    assign  motorError  to
-                                           {"{P}{R}M1Error.VAL",
-                                            "{P}{R}M2Error.VAL",
-                                            "{P}{R}M3Error.VAL",
-                                            "{P}{R}M4Error.VAL",
-                                            "{P}{R}M5Error.VAL",
-                                            "{P}{R}M6Error.VAL",
-                                            "{P}{R}M7Error.VAL",
-                                            "{P}{R}M8Error.VAL"};
-
-double  motorCurrent[MAX_AXES]; 
-                    assign  motorCurrent to
-                                           {"{P}{R}M1Current.VAL",
-                                            "{P}{R}M2Current.VAL",
-                                            "{P}{R}M3Current.VAL",
-                                            "{P}{R}M4Current.VAL",
-                                            "{P}{R}M5Current.VAL",
-                                            "{P}{R}M6Current.VAL",
-                                            "{P}{R}M7Current.VAL",
-                                            "{P}{R}M8Current.VAL"};
-
-double  motorMDVS[MAX_AXES]; 
-                    assign  motorMDVS   to
-                                           {"{P}{R}M1MDVS.VAL",
-                                            "{P}{R}M2MDVS.VAL",
-                                            "{P}{R}M3MDVS.VAL",
-                                            "{P}{R}M4MDVS.VAL",
-                                            "{P}{R}M5MDVS.VAL",
-                                            "{P}{R}M6MDVS.VAL",
-                                            "{P}{R}M7MDVS.VAL",
-                                            "{P}{R}M8MDVS.VAL"};
-                                                        monitor motorMDVS;
-
-double  motorMDVA[MAX_AXES]; 
-                    assign  motorMDVA   to
-                                           {"{P}{R}M1MDVA.VAL",
-                                            "{P}{R}M2MDVA.VAL",
-                                            "{P}{R}M3MDVA.VAL",
-                                            "{P}{R}M4MDVA.VAL",
-                                            "{P}{R}M5MDVA.VAL",
-                                            "{P}{R}M6MDVA.VAL",
-                                            "{P}{R}M7MDVA.VAL",
-                                            "{P}{R}M8MDVA.VAL"};
-
-int     motorMDVE[MAX_AXES]; 
-                    assign  motorMDVE   to
-                                           {"{P}{R}M1MDVE.VAL",
-                                            "{P}{R}M2MDVE.VAL",
-                                            "{P}{R}M3MDVE.VAL",
-                                            "{P}{R}M4MDVE.VAL",
-                                            "{P}{R}M5MDVE.VAL",
-                                            "{P}{R}M6MDVE.VAL",
-                                            "{P}{R}M7MDVE.VAL",
-                                            "{P}{R}M8MDVE.VAL"};
-
-double  motorMVA[MAX_AXES]; 
-                    assign  motorMVA    to
-                                           {"{P}{R}M1MVA.VAL",
-                                            "{P}{R}M2MVA.VAL",
-                                            "{P}{R}M3MVA.VAL",
-                                            "{P}{R}M4MVA.VAL",
-                                            "{P}{R}M5MVA.VAL",
-                                            "{P}{R}M6MVA.VAL",
-                                            "{P}{R}M7MVA.VAL",
-                                            "{P}{R}M8MVA.VAL"};
-
-int     motorMVE[MAX_AXES]; 
-                    assign  motorMVE    to
-                                           {"{P}{R}M1MVE.VAL",
-                                            "{P}{R}M2MVE.VAL",
-                                            "{P}{R}M3MVE.VAL",
-                                            "{P}{R}M4MVE.VAL",
-                                            "{P}{R}M5MVE.VAL",
-                                            "{P}{R}M6MVE.VAL",
-                                            "{P}{R}M7MVE.VAL",
-                                            "{P}{R}M8MVE.VAL"};
-
-double  motorMAA[MAX_AXES]; 
-                    assign  motorMAA    to
-                                           {"{P}{R}M1MAA.VAL",
-                                            "{P}{R}M2MAA.VAL",
-                                            "{P}{R}M3MAA.VAL",
-                                            "{P}{R}M4MAA.VAL",
-                                            "{P}{R}M5MAA.VAL",
-                                            "{P}{R}M6MAA.VAL",
-                                            "{P}{R}M7MAA.VAL",
-                                            "{P}{R}M8MAA.VAL"};
-
-int     motorMAE[MAX_AXES]; 
-                    assign  motorMAE    to
-                                           {"{P}{R}M1MAE.VAL",
-                                            "{P}{R}M2MAE.VAL",
-                                            "{P}{R}M3MAE.VAL",
-                                            "{P}{R}M4MAE.VAL",
-                                            "{P}{R}M5MAE.VAL",
-                                            "{P}{R}M6MAE.VAL",
-                                            "{P}{R}M7MAE.VAL",
-                                            "{P}{R}M8MAE.VAL"};
-
-double  epicsMotorPos[MAX_AXES]; 
-                    assign  epicsMotorPos  to
-                                           {"{P}{M1}.VAL",
-                                            "{P}{M2}.VAL",
-                                            "{P}{M3}.VAL",
-                                            "{P}{M4}.VAL",
-                                            "{P}{M5}.VAL",
-                                            "{P}{M6}.VAL",
-                                            "{P}{M7}.VAL",
-                                            "{P}{M8}.VAL"};
-                                                        monitor epicsMotorPos;
-
-double  epicsMotorDir[MAX_AXES]; 
-                    assign  epicsMotorDir  to
-                                           {"{P}{M1}.DIR",
-                                            "{P}{M2}.DIR",
-                                            "{P}{M3}.DIR",
-                                            "{P}{M4}.DIR",
-                                            "{P}{M5}.DIR",
-                                            "{P}{M6}.DIR",
-                                            "{P}{M7}.DIR",
-                                            "{P}{M8}.DIR"};
-                                                        monitor epicsMotorDir;
-double  epicsMotorOff[MAX_AXES]; 
-                    assign  epicsMotorOff  to
-                                           {"{P}{M1}.OFF",
-                                            "{P}{M2}.OFF",
-                                            "{P}{M3}.OFF",
-                                            "{P}{M4}.OFF",
-                                            "{P}{M5}.OFF",
-                                            "{P}{M6}.OFF",
-                                            "{P}{M7}.OFF",
-                                            "{P}{M8}.OFF"};
-                                                        monitor epicsMotorOff;
-double  epicsMotorDone[MAX_AXES]; 
-                    assign  epicsMotorDone  to
-                                           {"{P}{M1}.DMOV",
-                                            "{P}{M2}.DMOV",
-                                            "{P}{M3}.DMOV",
-                                            "{P}{M4}.DMOV",
-                                            "{P}{M5}.DMOV",
-                                            "{P}{M6}.DMOV",
-                                            "{P}{M7}.DMOV",
-                                            "{P}{M8}.DMOV"};
-                                                        monitor epicsMotorDone;
-
-evflag buildMon;        sync build      buildMon;
-evflag executeMon;      sync execute    executeMon;
-evflag abortMon;        sync abort      abortMon;
-evflag readbackMon;     sync readback   readbackMon;
-evflag nelementsMon;    sync nelements  nelementsMon;
-evflag motorMDVSMon;    sync motorMDVS  motorMDVSMon;
-
+
 char stringOut[MAX_MM4000_STRING];
 char stringIn[MAX_MM4000_STRING];
 char *asynPort;
@@ -368,6 +113,8 @@ double posActual;
 double posTheory;
 double expectedTime;
 double initialPos[MAX_AXES];
+char macroBuf[NAME_LEN];
+char motorName[NAME_LEN];
 char *p;
 char *tok_save;
 
@@ -389,6 +136,7 @@ unsigned long startTime;
 %% static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar);
 %% static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar);
 
+
 ss trajectoryScan {
 
     /* Initialize things when first starting */
@@ -396,6 +144,18 @@ ss trajectoryScan {
         when() {
             /* Force numAxes to be <= MAX_AXES */
             if (numAxes > MAX_AXES) numAxes = MAX_AXES;
+            for (i=0; i<numAxes; i++) {
+                sprintf(macroBuf, "M%d", i+1);
+                sprintf(motorName, "%s%s.VAL", macValueGet("P"), macValueGet(macroBuf));
+                pvAssign(epicsMotorPos[i], motorName);
+                sprintf(motorName, "%s%s.DIR", macValueGet("P"), macValueGet(macroBuf));
+                pvAssign(epicsMotorDir[i], motorName);
+                sprintf(motorName, "%s%s.OFF", macValueGet("P"), macValueGet(macroBuf));
+                pvAssign(epicsMotorOff[i], motorName);
+                sprintf(motorName, "%s%s.DMOV", macValueGet("P"), macValueGet(macroBuf));
+                pvAssign(epicsMotorDone[i], motorName);
+            }
+
             asynPort = macValueGet("PORT");
             %%pVar->status = pasynOctetSyncIO->connect(pVar->asynPort, 0,
             %%                                     (asynUser **)&pVar->pasynUser,
@@ -426,6 +186,7 @@ ss trajectoryScan {
         } state monitor_inputs
     }
 
+
     /* Monitor inputs which control what to do (Build, Execute, Read) */
     state monitor_inputs {
         when(efTestAndClear(buildMon) && (build==1)) {
@@ -456,7 +217,7 @@ ss trajectoryScan {
         } state monitor_inputs
     }
 
-
+
     /* Build and verify trajectory */
     state build {
         when() {
@@ -549,8 +310,8 @@ ss trajectoryScan {
                     %%writeOnly(ssId, pVar, pVar->stringOut);
                 }
                 /* The following command is intended to prevent buffer overflow in
-                 * the MM4005 by reading introducing a delay (reading status) when downloading
-                 * many-element trajectories */
+                 * the MM4005 by reading introducing a delay (reading status) when 
+                 * downloading many-element trajectories */
                 if (((i+1) % 20) == 0) %%writeRead(ssId, pVar, "TB");
             }
             /* Define pulse output for trajectory */
@@ -631,7 +392,7 @@ ss trajectoryScan {
         } state monitor_inputs
     }
 
-
+
     state execute {
         when () {
             /* Set busy flag */
@@ -667,7 +428,7 @@ ss trajectoryScan {
         } state wait_execute
     }
 
-
+
     /* Wait for trajectory to complete */
     state wait_execute {
         when (execStatus == STATUS_ABORT) {
@@ -741,7 +502,7 @@ ss trajectoryScan {
         } state monitor_inputs
     }
 
-
+
     /* Read back actual positions */
     state readback {
         when() {
@@ -806,7 +567,7 @@ ss trajectoryScan {
     }
 }
 
-
+
 /* This state set simply monitors the abort input.  It is a separate state set
  * so that it is always active, no matter what the state of the trajectoryScan
  * state set. If an abort is received it sends the "AB" command to the MM4005, 
@@ -829,6 +590,8 @@ ss trajectoryAbort {
     }
 }
 
+
+/* C functions */
 %{
 
 /* writeOnly sends a command to the MM4005 */
@@ -865,7 +628,7 @@ static int writeRead(SS_ID ssId, struct UserVar *pVar, char *command)
     return(status);
 }
 
-
+
 /* getMotorPositions returns the positions of each motor */
 static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos)
 {
@@ -928,6 +691,7 @@ static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar)
     return(result);
 }
 
+
 /* waitMotors waits for all motors to stop moving.  It reads and posts the
  * motor positions during each loop. */
 static int waitMotors(SS_ID ssId, struct UserVar *pVar)
