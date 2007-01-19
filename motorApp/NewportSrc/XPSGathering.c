@@ -23,21 +23,22 @@ void xps_gathering()
 {
     int status,poll_socket,drive_socket,end=0;
     int ftpSocket;
-    char *gatheringData = "GROUP2.POSITIONER1.CurrentPosition;GROUP2.POSITIONER2.CurrentPosition";
-            
-                        
+    char *gatheringData = "GROUP2.POSITIONER1.SetpointPosition;"
+                          "GROUP2.POSITIONER1.CurrentPosition;"
+                          "GROUP2.POSITIONER1.CurrentVelocity;"
+                          "GROUP2.POSITIONER2.SetpointPosition;"
+                          "GROUP2.POSITIONER2.CurrentPosition;"
+                          "GROUP2.POSITIONER2.CurrentVelocity";
     char *positioner[NUM_AXES] = {"GROUP2.POSITIONER1", "GROUP2.POSITIONER2"};
     char group[] = "GROUP2";
     char outputfilename[500];
-    double maxp,minp,maxv,maxa;
-    char buffer[100];
-    double motorReadbacks[NUM_AXES][NUM_ELEMENTS+1];
-    double motorError[NUM_AXES][NUM_ELEMENTS+1];
-    double trajTime = 0,trajStep = 0;
+    double maxp, minp, maxv, maxa;
+    char buffer[1000];
+    int nitems;
+    double setpoint, actual, velocity;
     int i,j;
     int groupStatus;
-    double posTheory[NUM_AXES];
-    FILE *gatheringFile, *trajFile;
+    FILE *gatheringFile;
     int eventID;
     time_t start_time, end_time;
 
@@ -82,21 +83,23 @@ void xps_gathering()
    
     /* Define trajectory output pulses */
      printf("Defining output pulses ...\n");
-    status = MultipleAxesPVTPulseOutputSet(poll_socket, group, 1, NUM_ELEMENTS, PULSE_TIME);
+    status = MultipleAxesPVTPulseOutputSet(poll_socket, group, 1, 
+                                           NUM_ELEMENTS, PULSE_TIME);
  
     /*************************** Verify trajectory **********************/
     printf("Verifying trajectory ...\n");
     status = MultipleAxesPVTVerification(drive_socket, group, TRAJECTORY_FILE);
     if (status != 0) {
-        printf(" Error performing MultipleAxesPVTVerification, status=%d\n",status);
+        printf("Error performing MultipleAxesPVTVerification, status=%d\n",status);
         end = 1;
     }    
 
     printf("Reading verify results ...\n");
     printf(" MultipleAxesPVTVerificationResultGet\n");                
     for (i=0; i<NUM_AXES; i++) {
-        status = MultipleAxesPVTVerificationResultGet(poll_socket,positioner[i], outputfilename,
-                        &minp, &maxp, &maxv, &maxa);
+        status = MultipleAxesPVTVerificationResultGet(poll_socket,positioner[i], 
+                                                      outputfilename,
+                                                      &minp, &maxp, &maxv, &maxa);
         printf(" positioner 1%d, status %d, Max. pos. %g, Min. pos. %g, Max. vel. %g, Max. accel. %g\n",
                 i, status, maxp, minp, maxv, maxa);
     }
@@ -107,14 +110,14 @@ void xps_gathering()
     printf("Reseting gathering ...\n");
     status = GatheringReset(poll_socket);
     if (status != 0) {
-        printf(" Error performing GatheringReset, status=%d\n",status);
+        printf("Error performing GatheringReset, status=%d\n",status);
         return;
     }
 
     printf("Defining gathering ...\n");
-    status = GatheringConfigurationSet(poll_socket, 2, gatheringData);
+    status = GatheringConfigurationSet(poll_socket, NUM_AXES*3, gatheringData);
     if (status != 0) {
-        printf(" Error performing GatheringConfigurationSet, status=%d\n",status);
+        printf("Error performing GatheringConfigurationSet, status=%d\n",status);
         return;
     }
 
@@ -123,21 +126,24 @@ void xps_gathering()
                                                   "Always;GROUP2.PVT.TrajectoryPulse",
                                                   "","","","");
     if (status != 0) {
-        printf(" Error performing EventExtendedConfigurationTriggerSet, status=%d\n",status);
+        printf("Error performing EventExtendedConfigurationTriggerSet, status=%d\n",
+               status);
         return;
     }
 
     printf("Defining action ...\n");
-    status = EventExtendedConfigurationActionSet(poll_socket, 1, "GatheringOneData","","","","");
+    status = EventExtendedConfigurationActionSet(poll_socket, 1, "GatheringOneData",
+                                                 "", "", "", "");
     if (status != 0) {
-        printf(" Error performing EventExtendedConfigurationActionSet, status=%d\n",status);
+        printf("Error performing EventExtendedConfigurationActionSet, status=%d\n",
+               status);
         return;
     }
 
     printf("Starting gathering ...\n");
     status= EventExtendedStart(poll_socket, &eventID);
     if (status != 0) {
-        printf(" Error performing EventExtendedStart, status=%d\n",status);
+        printf("Error performing EventExtendedStart, status=%d\n", status);
         return;
     }
 
@@ -145,7 +151,7 @@ void xps_gathering()
     /********************* Run trajectory ****************************/
     status = GroupStatusGet(poll_socket, group, &groupStatus);
     if (status != 0) {
-        printf(" Error performing GroupStatusGet, status=%d\n",status);
+        printf("Error performing GroupStatusGet, status=%d\n", status);
         return;
     }
     printf("Group status before executing trajectory=%d\n", groupStatus);
@@ -155,12 +161,12 @@ void xps_gathering()
     end_time = time(NULL);
     printf("Time to execute trajectory=%f\n", difftime(end_time, start_time));
     if (status != 0) {
-        printf(" Error performing MultipleAxesPVTExecution, status=%d\n",status);    
+        printf("Error performing MultipleAxesPVTExecution, status=%d\n", status);    
         return;
     }
     status = GroupStatusGet(poll_socket, group, &groupStatus);
     if (status != 0) {
-        printf(" Error performing GroupStatusGet, status=%d\n",status);
+        printf("Error performing GroupStatusGet, status=%d\n", status);
         return;
     }
     printf("Group status after executing trajectory=%d\n", groupStatus);
@@ -169,7 +175,7 @@ void xps_gathering()
     printf("Removing event ...\n");
     status = EventExtendedRemove(poll_socket, eventID);
     if (status != 0) {
-        printf(" Error performing ExtendedEventRemove, status=%d\n",status);
+        printf("Error performing ExtendedEventRemove, status=%d\n", status);
         return;
     }
 
@@ -180,12 +186,12 @@ void xps_gathering()
     end_time = time(NULL);
     printf("Time to save gathering data=%f\n", difftime(end_time, start_time));
     if (status != 0) {
-        printf(" Error performing GatheringExternalStopAndSave, status=%d\n",status);
+        printf("Error performing GatheringExternalStopAndSave, status=%d\n", status);
         return;
     }
     status = GroupStatusGet(poll_socket, group, &groupStatus);
     if (status != 0) {
-        printf(" Error performing GroupStatusGet, status=%d\n",status);
+        printf("Error performing GroupStatusGet, status=%d\n", status);
         return;
     }
     printf("Group status after stopping gathering=%d\n", groupStatus);
@@ -208,59 +214,27 @@ void xps_gathering()
         return;
     }
    
-    printf("Returning before processing gathering file for now\n");
-    return;
- 
     printf("Opening gathering file ...\n");
-    gatheringFile = fopen("GATHERING_FILE", "r");
-    printf("Opening trajectory file ...\n");
-    trajFile = fopen("TRAJECTORY_FILE", "r");
-
-    for (i=0; i<NUM_ELEMENTS; ++i) {
-        for (j=0; j<NUM_AXES; ++j) {
-            motorReadbacks[j][i] = 0;
-            motorError[j][i] = 0;
-        }
+    gatheringFile = fopen(GATHERING_FILE, "r");
+    if (gatheringFile == NULL) {
+        perror("Errror opening gathering file");
+        return;
     }
 
     /* Read 1st 2 lines */
     for (i=0; i<2; i++) {
         fgets (buffer, 1000, gatheringFile);
-        printf("Line %d of GatheringEx = %s\n",i,buffer);
+        printf("Line %d of gathering file = %s\n", i, buffer);
     }
     for (i=0; i<NUM_ELEMENTS; i++) {
         for (j=0; j<NUM_AXES; j++) {
-            fscanf(gatheringFile,"%lf",&motorReadbacks[j][i]);
-             
-            if( j == (NUM_AXES-1)) {
-                if (fscanf(trajFile," %lf,%*f", &trajStep) != 1) printf("trajerror\n");
-            }
-         
-            if (j == 0) {   
-                if (fscanf(trajFile,"%lf,%lf,%*f,", &trajTime, &trajStep) != 2) printf("trajerror\n");
-            }
-        
-            if (j > 0 && j < (NUM_AXES-1)) {
-                if (fscanf(trajFile," %lf,%*f,", &trajStep) != 1) printf("trajerror\n");
-            }
-        
-            if (i == 0) {
-                posTheory[j] = motorReadbacks[j][i];
-                printf("posTheory = %f ",posTheory[j]);
-            }
-            else {
-                posTheory[j]+= trajStep;
-            }
-             
-            motorError[j][i] = posTheory[j] - motorReadbacks[j][i];
-            printf("i=%d J=%d ReadBack=%f    motorError=%f trajStep%f\n",
-                    i,j,motorReadbacks[j][i],motorError[j][i],trajStep);
+            nitems = fscanf(gatheringFile,"%lf %lf %lf ", &setpoint, &actual, &velocity);
+            if (nitems != 3) printf("nitems=%d, should be 3\n", nitems);
+            printf("Point=%d, axis=%d, setpoint=%f, actual=%f, error=%f, velocity=%f\n", 
+                   i+1, j+1, setpoint, actual, actual-setpoint, velocity);
         }
     }
-    
-    fclose (trajFile);
     fclose (gatheringFile);
-        
     return;
 }
 
