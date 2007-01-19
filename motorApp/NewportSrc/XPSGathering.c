@@ -82,7 +82,7 @@ void xps_gathering()
    
     /* Define trajectory output pulses */
      printf("Defining output pulses ...\n");
-    status = MultipleAxesPVTPulseOutputSet(poll_socket, group, 1, NUM_ELEMENTS-1, PULSE_TIME);
+    status = MultipleAxesPVTPulseOutputSet(poll_socket, group, 1, NUM_ELEMENTS, PULSE_TIME);
  
     /*************************** Verify trajectory **********************/
     printf("Verifying trajectory ...\n");
@@ -104,8 +104,6 @@ void xps_gathering()
     if (end == 1) return;    
  
    /***********************Configure Gathering and Timer******************/
-
-
     printf("Reseting gathering ...\n");
     status = GatheringReset(poll_socket);
     if (status != 0) {
@@ -120,14 +118,6 @@ void xps_gathering()
         return;
     }
 
-/*
-    printf("Gathering one data set manually ...\n");
-    status = GatheringDataAcquire(poll_socket);
-    if (status != 0) {
-        printf(" Error performing GatheringDataAcquire, status=%d\n",status);
-        return;
-    }
-*/
     printf("Defining trigger ...\n");
     status = EventExtendedConfigurationTriggerSet(poll_socket, 2, 
                                                   "Always;GROUP2.PVT.TrajectoryPulse",
@@ -152,7 +142,7 @@ void xps_gathering()
     }
 
 
-    /********************* Run traj ****************************/
+    /********************* Run trajectory ****************************/
     status = GroupStatusGet(poll_socket, group, &groupStatus);
     if (status != 0) {
         printf(" Error performing GroupStatusGet, status=%d\n",status);
