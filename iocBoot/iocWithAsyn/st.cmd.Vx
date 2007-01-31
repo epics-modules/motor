@@ -154,17 +154,17 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!PIC862Config(0, "serial1")
 #!drvPIC862debug = 4
                                                                                 
-# New Focus Picomotor Network Controller (model 8750) (setup parameters:  
+# New Focus Picomotor Network Controller (model 8750/2) (setup parameters:  
 #     (1) maximum number of controllers in system 
 #     (2) maximum number of drivers per controller (1 - 3)  
 #     (3) motor task polling rate (min=1Hz,max=60Hz)  
-#!PMNC8750Setup(1, 2, 10) 
+#!PMNC87xxSetup(1, 2, 10) 
  
-# New Focuc Picomotor Network Controller (model 8750) configuration parameters:  
+# New Focuc Picomotor Network Controller (model 8750/2) configuration parameters:  
 #     (1) controller# being configured, 
 #     (2) asyn port name (string)
-#!PMNC8750Config(0, "serial2")
-#!drvPMNC8750debug=4
+#!PMNC87xxConfig(0, "serial2")
+#!drvPMNC87xxdebug=4
 
 
 # Micos MoCo driver setup parameters:
