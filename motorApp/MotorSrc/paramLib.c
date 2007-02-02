@@ -225,6 +225,15 @@ static int paramSetCallback( PARAMS params, paramCallback callback, void * param
 {
     params->callback = callback;
     params->param = param;
+
+    /* Force a callback on all defined parameters if the callback changes */
+    if ( params->callback )
+    {
+        int i;
+        for (i = 0; i < params->nvals; i++)
+            if (params->vals[i].type != paramUndef) params->flags[i] = 1;
+    }
+
     return PARAM_OK;
 }
 
