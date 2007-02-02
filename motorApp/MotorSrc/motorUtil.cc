@@ -2,9 +2,9 @@
 FILENAME...     motorUtil.cc
 USAGE...        Motor Record Utility Support.
 
-Version:        $Revision: 1.1 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2006-02-23 19:51:50 $
+Version:        $Revision: 1.2 $
+Modified By:    $Author: peterd $
+Last Modified:  $Date: 2007-02-02 13:58:58 $
 */
 
 
@@ -24,6 +24,7 @@ Last Modified:  $Date: 2006-02-23 19:51:50 $
 #include <stdio.h>
 #include <string.h>
 #include <cadef.h>
+#include <dbDefs.h>
 #include <epicsString.h>
 #include <epicsRingPointer.h>
 #include <cantProceed.h>
@@ -54,7 +55,7 @@ static void moving(int, chid, short);
 
 typedef struct motor_pv_info
 {
-    char name[29];      /* pv names limited to 28 chars + term. in dbDefs.h */
+    char name[PVNAME_SZ];      /* pv names limited to 28 chars + term. in dbDefs.h */
     chid chid_dmov;     /* Channel id for <motor name>.DMOV */
     chid chid_stop;     /* Channel id for <motor name>.STOP */
     int in_motion;
@@ -81,6 +82,13 @@ RTN_STATUS motorUtilInit(char *vme_name)
 {
     RTN_STATUS status = OK;
     
+    if (strlen(vme) > PVNAME_SZ - 7 )
+    {
+        printf( "motorUtilInit: Prefix %s has more than %d characters. Exiting",
+                vme_name, PVNAME_SZ - 7 );
+        return ERROR;
+    }
+
     vme = epicsStrDup(vme_name);
 
     epicsThreadCreate((char *) "motorUtil", epicsThreadPriorityMedium,
@@ -92,7 +100,7 @@ RTN_STATUS motorUtilInit(char *vme_name)
 
 static int motorUtil_task(void *arg)
 {
-    char temp[34];
+    char temp[PVNAME_STRINGSZ+5];
     int itera, status;
 
     SEVCHK(ca_context_create(ca_enable_preemptive_callback),
