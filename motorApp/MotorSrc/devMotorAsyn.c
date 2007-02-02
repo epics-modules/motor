@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.14 $
+ * Version: $Revision: 1.15 $
  * Modified by: $Author: peterd $
- * Last Modified: $Date: 2006-09-06 12:27:47 $
+ * Last Modified: $Date: 2007-02-02 13:50:46 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -482,8 +482,8 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
     motorRecord *pmr = pPvt->pmr;
 
     asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
-	      "%s devMotorAsyn::statusCallback new value=[p:%f,s:%x] %c%c\n",
-	      pmr->name, value->position, value->status,
+	      "%s devMotorAsyn::statusCallback new value=[p:%f,e:%f,s:%x] %c%c\n",
+	      pmr->name, value->position, value->encoder_posn, value->status,
 	      pPvt->needUpdate?'N':' ', pPvt->moveRequestPending?'P':' ');
 
     if (dbScanLockOK) {
