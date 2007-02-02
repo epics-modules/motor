@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.35 $
+Version:	$Revision: 1.36 $
 Modified By:	$Author: peterd $
-Last Modified:	$Date: 2007-02-02 13:55:34 $
+Last Modified:	$Date: 2007-02-02 16:13:43 $
 */
 
 /*
@@ -2758,8 +2758,15 @@ static long get_units(const DBADDR *paddr, char *units)
     case motorRecordVMAX:
     case motorRecordBVEL:
     case motorRecordVBAS:
+    case motorRecordJVEL:
+    case motorRecordHVEL:
 	strncpy(s, pmr->egu, DB_UNITS_SIZE);
 	strcat(s, "/sec");
+	break;
+
+    case motorRecordJAR:
+	strncpy(s, pmr->egu, DB_UNITS_SIZE);
+	strcat(s, "/s/s");
 	break;
 
     case motorRecordACCL:
