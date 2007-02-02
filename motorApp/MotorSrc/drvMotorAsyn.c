@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.13 $
- * Modified by: $Author: rivers $
- * Last Modified: $Date: 2006-09-06 15:44:35 $
+ * Version: $Revision: 1.14 $
+ * Modified by: $Author: peterd $
+ * Last Modified: $Date: 2007-02-02 16:21:05 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -216,13 +216,12 @@ static asynUser *defaultAsynUser;
 
 
 int drvAsynMotorConfigure(const char *portName, const char *driverName,
-			  int card, int num_axes, int can_block)
+			  int card, int num_axes)
 {
     drvmotorPvt *pPvt;
     drvmotorAxisPvt *pAxis;
     asynStatus status;
     int i;
-    int attributes;
 
     pPvt = callocMustSucceed(1, sizeof(*pPvt), "drvAsynMotorConfigure");
     pPvt->portName = epicsStrDup(portName);
@@ -252,12 +251,8 @@ int drvAsynMotorConfigure(const char *portName, const char *driverName,
     pPvt->drvUser.pinterface  = (void *)&drvMotorDrvUser;
     pPvt->drvUser.drvPvt = pPvt;
 
-    attributes = ASYN_MULTIDEVICE;
-    if (can_block) {
-	attributes |= ASYN_CANBLOCK;
-    }
     status = pasynManager->registerPort(portName,
-                                        attributes,
+                                        ASYN_MULTIDEVICE | ASYN_CANBLOCK,
                                         1,  /*  autoconnect */
                                         0,  /* medium priority */
                                         0); /* default stack size */
@@ -344,7 +339,7 @@ int drvAsynMotorConfigure(const char *portName, const char *driverName,
 	    (*pPvt->drvset->setCallback)(pAxis->axis, intCallback, (void *)pAxis);
             (*pPvt->drvset->setLog)(pAxis->axis, logFunc, pAxis->pasynUser);
 	}
-	setDefaults(pAxis);
+	/* All other axis parameters are initialised to zero at allocation */
     }
     /* Create a fallback asynUser for logging, but only the first time */
     if (!defaultAsynUser) {
@@ -632,13 +627,6 @@ static asynStatus readMotorStatus(void *drvPvt, asynUser *pasynUser,
     return(asynSuccess);
 }
 
-static void setDefaults(drvmotorAxisPvt *pAxis)
-{
-    pAxis->max_velocity = 200.0;
-    pAxis->min_velocity = 0.0;
-    pAxis->accel = 100.0;
-}
-
 static int logFunc(void *userParam,
                    const motorAxisLogMask_t logMask,
                    const char *pFormat, ...)
@@ -928,17 +916,15 @@ static const iocshArg initArg0 = { "portName",iocshArgString};
 static const iocshArg initArg1 = { "driverName",iocshArgString};
 static const iocshArg initArg2 = { "cardNum",iocshArgInt};
 static const iocshArg initArg3 = { "numAxes",iocshArgInt};
-static const iocshArg initArg4 = { "canBlock",iocshArgInt};
-static const iocshArg * const initArgs[5] = {&initArg0,
+static const iocshArg * const initArgs[4] = {&initArg0,
                                              &initArg1,
 					     &initArg2,
-					     &initArg3,
-					     &initArg4};
-static const iocshFuncDef initFuncDef = {"drvAsynMotorConfigure",5,initArgs};
+					     &initArg3};
+static const iocshFuncDef initFuncDef = {"drvAsynMotorConfigure",4,initArgs};
 static void initCallFunc(const iocshArgBuf *args)
 {
     drvAsynMotorConfigure(args[0].sval, args[1].sval, args[2].ival,
-			  args[3].ival, args[4].ival);
+			  args[3].ival);
 }
 
 void motorRegister(void)
