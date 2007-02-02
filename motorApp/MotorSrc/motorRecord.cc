@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.34 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-12-18 20:13:31 $
+Version:	$Revision: 1.35 $
+Modified By:	$Author: peterd $
+Last Modified:	$Date: 2007-02-02 13:55:34 $
 */
 
 /*
@@ -2352,15 +2352,28 @@ static long special(DBADDR *paddr, int after)
 	offset = pmr->off;
 	if (dir_positive)
 	{
-	    command = SET_HIGH_LIMIT;
 	    tmp_limit = pmr->hlm - offset;
 	    MARK(M_DHLM);
 	}
 	else
 	{
-	    command = SET_LOW_LIMIT;
 	    tmp_limit = -(pmr->hlm) + offset;
 	    MARK(M_DLLM);
+	}
+
+	/* Which controller limit we set depends not only on dir, but
+	   also on the sign of MRES */
+	/* Direction +ve AND +ve MRES OR
+	   Direction -ve AND -ve MRES */
+	if (dir_positive ^ (pmr->mres < 0))
+	{
+	    command = SET_HIGH_LIMIT;
+	}
+	else
+	/* Direction -ve AND +ve MRES OR
+	   Direction +ve AND -ve MRES */
+	{
+	    command = SET_LOW_LIMIT;
 	}
 
 	tmp_raw = tmp_limit / pmr->mres;
@@ -2393,15 +2406,28 @@ static long special(DBADDR *paddr, int after)
 	offset = pmr->off;
 	if (dir_positive)
 	{
-	    command = SET_LOW_LIMIT;
 	    tmp_limit = pmr->llm - offset;
 	    MARK(M_DLLM);
 	}
 	else
 	{
-	    command = SET_HIGH_LIMIT;
 	    tmp_limit = -(pmr->llm) + offset;
 	    MARK(M_DHLM);
+	}
+
+	/* Which controller limit we set depends not only on dir, but
+	   also on the sign of MRES */
+	/* Direction +ve AND +ve MRES OR
+	   Direction -ve AND -ve MRES */
+	if (dir_positive ^ (pmr->mres < 0))
+	{
+	    command = SET_LOW_LIMIT;
+	}
+	else
+	/* Direction -ve AND +ve MRES OR
+	   Direction +ve AND -ve MRES */
+	{
+	    command = SET_HIGH_LIMIT;
 	}
 
 	tmp_raw = tmp_limit / pmr->mres;
