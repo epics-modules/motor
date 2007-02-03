@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.15 $
+ * Version: $Revision: 1.16 $
  * Modified by: $Author: peterd $
- * Last Modified: $Date: 2007-02-02 13:50:46 $
+ * Last Modified: $Date: 2007-02-03 12:07:17 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -30,6 +30,7 @@
 #include <recSup.h>
 #include <devSup.h>
 #include <alarm.h>
+#include <epicsEvent.h>
 #include <cantProceed.h> /* !! for callocMustSucceed() */
 
 #include <asynDriver.h>
@@ -94,6 +95,7 @@ typedef struct
     asynMotorStatus *pasynMotorStatus;
     void *asynMotorStatusPvt;
     void *registrarPvt;
+    epicsEventId initEvent;
 } motorAsynPvt;
 
 
@@ -104,6 +106,34 @@ static long init( int after )
 {
     dbScanLockOK = (after!=0);
     return 0;
+}
+
+static void init_controller(struct motorRecord *pmr )
+{
+    /* This routine is copied out of the old motordevCom and initialises the controller
+       based on the record values. I think most of it should be transferred to init_record
+       which is one reason why I have separated it into another routine */
+    motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
+    double position = pPvt->status.position;
+
+    if ((fabs(pmr->dval) > pmr->rdbd && pmr->mres != 0) &&
+        ((position * pmr->mres) < pmr->rdbd))
+    {
+        double setPos = pmr->dval / pmr->mres;
+        epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );
+
+        pPvt->initEvent = initEvent;
+
+        start_trans(pmr);
+        build_trans(LOAD_POS, &setPos, pmr);
+        end_trans(pmr);
+
+        if ( initEvent )
+        {
+            epicsEventMustWait(initEvent);
+            epicsEventDestroy(initEvent);
+        }
+    }
 }
 
 static long init_record(struct motorRecord * pmr )
@@ -220,6 +250,8 @@ static long init_record(struct motorRecord * pmr )
 				 &pPvt->status);
     pasynManager->freeAsynUser(pasynUser);
     pPvt->needUpdate = 1;
+
+    init_controller(pmr);
 
     return(0);
 bad:
@@ -470,6 +502,8 @@ static void asynCallback(asynUser *pasynUser)
                   "devMotorAsyn::asynCallback: %s error in freeAsynUser, %s\n",
                   pmr->name, pasynUser->errorMessage);
     }
+
+    if ( pPvt->initEvent ) epicsEventSignal(  pPvt->initEvent );
 }
 
 /**

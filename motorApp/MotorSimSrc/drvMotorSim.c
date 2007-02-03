@@ -2,9 +2,9 @@
 FILENAME...	drvMotorSim.c
 USAGE...	Simulated Motor Support.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: peterd $
-Last Modified:	$Date: 2006-08-10 08:12:47 $
+Last Modified:	$Date: 2007-02-03 12:07:17 $
 */
 
 /*
@@ -105,28 +105,28 @@ static motorSim_t drv={ NULL, NULL, motorSimLogMsg, NULL, { 0, 0 } };
 
 static void motorAxisReportAxis( AXIS_HDL pAxis, int level )
 {
-    printf( "Found driver for motorSim card %d, axis %d", pAxis->card, pAxis->axis );
+    printf( "Found driver for motorSim card %d, axis %d\n", pAxis->card, pAxis->axis );
 
     if (level > 0)
     {
         double lowSoftLimit=0.0;
         double hiSoftLimit=0.0;
 
-        printf( "Current position = %f, velocity = %f at current time: %f", 
+        printf( "Current position = %f, velocity = %f at current time: %f\n", 
                pAxis->nextpoint.axis[0].p, 
                pAxis->nextpoint.axis[0].v,
                pAxis->nextpoint.T );
-        printf( "Destination posn = %f, velocity = %f at desination time:  %f",
+        printf( "Destination posn = %f, velocity = %f at desination time:  %f\n",
                pAxis->endpoint.axis[0].p, 
                pAxis->endpoint.axis[0].v,
                pAxis->endpoint.T );
 
-        printf( "Hard limits: %f, %f", pAxis->lowHardLimit, pAxis->hiHardLimit );
+        printf( "Hard limits: %f, %f\n", pAxis->lowHardLimit, pAxis->hiHardLimit );
         motorParam->getDouble( pAxis->params, motorAxisHighLimit, &hiSoftLimit );
         motorParam->getDouble( pAxis->params, motorAxisLowLimit, &lowSoftLimit );
-        printf( "Soft limits: %f, %f", lowSoftLimit, hiSoftLimit );
+        printf( "Soft limits: %f, %f\n", lowSoftLimit, hiSoftLimit );
 
-        if (pAxis->homing) printf( "Currently homing axis" );
+        if (pAxis->homing) printf( "Currently homing axis\n" );
 
         motorParam->dump( pAxis->params );
     }
@@ -543,6 +543,7 @@ static int motorSimCreateAxis( motorSim_t * pDrv, int card, int axis, double low
 {
   AXIS_HDL pAxis;
   AXIS_HDL * ppLast = &(pDrv->pFirst);
+  start=0;
 
   for ( pAxis = pDrv->pFirst;
 	pAxis != NULL &&
@@ -569,6 +570,7 @@ static int motorSimCreateAxis( motorSim_t * pDrv, int card, int axis, double low
 	  pAxis->endpoint.T = 0;
 	  pAxis->endpoint.axis[0].p = start;
 	  pAxis->endpoint.axis[0].v = 0;
+	  pAxis->nextpoint.axis[0].p = start;
 
 	  if ((pAxis->route = routeNew( &(pAxis->endpoint), &pars )) != NULL &&
 	      (pAxis->params = motorParam->create( 0, MOTOR_AXIS_NUM_PARAMS )) != NULL &&
