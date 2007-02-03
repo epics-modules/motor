@@ -30,7 +30,7 @@ dbLoadRecords("db/motorSimTest.db","DEVICE=motorSim")
 ## Set this to see messages from mySub
 #mySubDebug 1
 
-motorSimCreate( 0, 0, -32000, 32000, 0, 1, 1 )
+motorSimCreate( 0, 0, -22000, 42000, 10000, 1, 3, 5000 )
 
 iocInit()
 
