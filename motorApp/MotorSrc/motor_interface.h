@@ -5,25 +5,100 @@
 extern "C" {
 #endif
 
-/**\mainpage Proposed EPICS Motor Axis API
+/**\mainpage EPICS Motor Axis API
 
-For a long time EPICS motor support has either been via the complex,
+\section usage How use this API
+
+This API is used to provide a general interface to motor controllers
+used by EPICS.  To provide EPICS motor support the driver must
+implement the motor axis API by defining a table of function pointers
+of type #motorAxisDrvSET_t. Most of the functions in this table
+correspond to operations that would normally be implemented to test a
+simple motor controller. In addition, existing examples of motor
+support can be copied for new motor controllers - good examples are
+the motor simulator (in directory MotorSimSrc), the Delta Tau (in
+pmacAsynMotor directory of the tpmac module) or the XPS controllers.
+
+However, there are a couple of things that should be bourne in mind
+and these are outined in the following three subsections.
+
+\subsection locking Locking and multi-thread considerations
+
+The driver writer can assume that any call to this library will be in
+the context of a thread that can block for a reasonable length of
+time. Hence, I/O to the controller can be synchronous. However, you
+cannot assume that only one thread is active, so routines must lock
+data structures when accessing them.
+
+This is particularly important when calling the callback routine. All
+asynchronous communication back to the upper level software is done
+through the callback function set by motorAxisSetCallback(). The rule is
+that the driver can assume that once this callback is completed all
+side effects have been handled by the upper level software. However,
+until it is called the driver must protect against updates.
+
+The way this is normally implemented is that each axis has a mutex
+semaphore that is used to lock the following three operations
+together:
+
+\li A call to get information from the hardware. This call often blocks while the data is returned from the controller.
+\li A call to update the parameters to represent the new hardware state.
+\li A callback to inform the upper level software that things have changed. In the case of the motor record this will often process the motor record in the context of the callback task.
+
+Note, in implementing this the upper level software makes sure that
+the motor API is never called in record processing context - so the
+axis mutex is always called before the dbScanLock mutex. Getting this
+out of order results in a deadlock.
+
+\subsection parameters Motor Parameters
+
+Motor state information is accessed using the motor parameter
+motorAxisGetInteger(), motorAxisSetInteger(), motorAxisGetDouble(),
+motorAxisSetDouble() and motorAxisCallbackFunc() routines (the latter
+set with motorAxisSetCallback()). Parameters are identified by the
+#motorAxisParam_t enumerated type. Since this is common to all motors,
+the paramLib library is provided in the motor application for drivers
+to use. Using this is optional, but it generally saves effort. A
+specific drivers get and callback routines are typically just wrappers
+around the corresponding paramLib routines, and the set routines are
+also wrappers, but inevitably have some controller specific action to
+pass the parameter value down to the controller.
+
+\subsection motortask Background controller polling task.
+
+All motor controllers will probably need a background polling task to
+update the state kept as parameters within the drivers. Typically,
+there is one task per controller, so multiple controllers can be
+polled simultaneously. The task typically If there is a state change this will result in
+upper level software being called back in the context this task, so may be
+a consideration in setting the task priority.
+
+\subsection reporting Using the motorAxisSetLog routine.
+
+The motorAxisSetLog() routine is provided to hook into higher level
+EPICS reporting routines without compromising the EPICS independence
+of this interface. Implementing is done most easily by copying an
+existing driver.
+
+\section history History
+
+For a long time EPICS motor support was either via the complex,
 and somewhat ill-defined motor record or via primitive record
-support. The two approaches have been mutually incompatible and led to
-much anguish. People who adopt the motor record get a standard
-interface across all controllers, but it is inextensable. Those who
-write their own driver using primitive records cannot port their
-databases to other motor controllers. Neither situation is very satisfactory.
+support. The two approaches were mutually incompatible and led to
+much anguish. People who adopted the motor record got a standard
+interface across all controllers, but it was inextensable. Those who
+wrote their own driver using primitive records could not port their
+databases to other motor controllers. Neither situation was very satisfactory.
 
-After looking at this for some time, the reason becames clear - the
-the interface between the generic software for the motor record and
-the underlying specific software for a given motor controller is very
+After looking at this for some time, the reason became clear - the the
+interface between the generic software for the motor record and the
+underlying specific software for a given motor controller was very
 complex, poorly defined and very specific to the motor record. Hence,
-this is an attempt to define a clean, extensible API for motor
-controller drivers to support, and we will be providing an interface
-between this API and both motor records and other primitive
-records. We intend to provide drivers for OMS, Delta Tau and some
-Newport systems and hope others will adopt this approach.
+this interface defines a clean, extensible API for motor controller
+drivers to support, and (through asyn device and drive support)
+provides an interface with both motor records and other primitive
+records. We are providing drivers for OMS, Delta Tau and some Newport
+systems and hope others will adopt this approach.
 
 To do this we have had to analyse the requirements needed to support
 the motor record, and the following is the results.
@@ -216,11 +291,11 @@ typedef struct motorAxisHandle * AXIS_HDL;
 #define MOTOR_AXIS_OK (0)
 #define MOTOR_AXIS_ERROR (-1)
 
-/**\struct motorAxisParam_t
+/**
 
     This is an enumeration of parameters that affect the behaviour of the
-    controller for this axis. The are used by the functions motorAxisSetDouble,
-    motorAxisSetInt and other associated functions.
+    controller for this axis. The are used by the functions motorAxisSetDouble(),
+    motorAxisSetInteger() and other associated functions.
 */
 
 typedef enum
@@ -387,10 +462,7 @@ typedef int (*motorAxisSetCallbackFunc)( AXIS_HDL pAxis, motorAxisCallbackFunc c
 /** Set a callback function to be called when motor axis information changes
 
     This routine sets a function to be called by the driver if the motor status
-    changes. The interest parameter indicates a minimum update period, ranging 
-    from 0 (for all updates that the driver detects) to some large number (possibly
-    in clock ticks) indicating a lack of interest. Normally 0 should not flood
-    a system.
+    changes.
 
     Only one callback function is allowed per AXIS_HDL, and so subsequent calls to
     this function using the original axis identifier will replace the original
@@ -418,10 +490,10 @@ typedef int (*motorAxisSetDoubleFunc)( AXIS_HDL pAxis, motorAxisParam_t, double 
 
 /** Sets a double parameter in the controller.
 
-    The parameters are described in the description of the motorAxisParam_t enumeration.
+    The function parameter is described in the description of the #motorAxisParam_t enumeration.
 
     \param pAxis     [in]   Pointer to axis handle returned by motorAxisOpen.
-    \param function  [in]   One of the motorAxisParam_t values indicating which parameter to set.
+    \param function  [in]   One of the# motorAxisParam_t values indicating which parameter to set.
     \param value     [in]   Value to be assigned to the parameter.
 
     \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure or not supported. 
@@ -435,10 +507,10 @@ typedef int (*motorAxisSetIntegerFunc)( AXIS_HDL pAxis,  motorAxisParam_t, int )
 
 /** Sets an integer parameter in the controller.
 
-    The parameters are described in the description of the motorAxisParam_t enumeration.
-
+    The function parameter is described in the description of the #motorAxisParam_t enumeration.
+ 
     \param pAxis     [in]   Pointer to axis handle returned by motorAxisOpen.
-    \param function  [in]   One of the motorAxisParam_t values indicating which parameter to set.
+    \param function  [in]   One of the #motorAxisParam_t values indicating which parameter to set.
     \param value     [in]   Value to be assigned to the parameter.
 
     \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure or not supported. 
@@ -452,10 +524,10 @@ typedef int (*motorAxisGetDoubleFunc)( AXIS_HDL pAxis, motorAxisParam_t, double 
 
 /** Gets a double parameter in the controller.
 
-    The parameters are described in the description of the motorAxisParam_t enumeration.
+    The function parameter is described in the description of the #motorAxisParam_t enumeration.
 
     \param pAxis     [in]   Pointer to axis handle returned by motorAxisOpen.
-    \param function  [in]   One of the motorAxisParam_t values indicating which parameter to get.
+    \param function  [in]   One of the #motorAxisParam_t values indicating which parameter to get.
     \param value     [out]  Value of the parameter.
 
     \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure or not supported. 
@@ -469,10 +541,10 @@ typedef int (*motorAxisGetIntegerFunc)( AXIS_HDL pAxis,  motorAxisParam_t, int *
 
 /** Gets an integer parameter in the controller.
 
-    The parameters are described in the description of the motorAxisParam_t enumeration.
+    The function parameter is described in the description of the #motorAxisParam_t enumeration.
 
     \param pAxis     [in]   Pointer to axis handle returned by motorAxisOpen.
-    \param function  [in]   One of the motorAxisParam_t values indicating which parameter to set.
+    \param function  [in]   One of the #motorAxisParam_t values indicating which parameter to set.
     \param value     [in]   Value of the parameter.
 
     \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure or not supported. 
@@ -491,13 +563,17 @@ static int motorAxisGetInteger( AXIS_HDL pAxis, motorAxisParam_t function, int *
 typedef int (*motorAxisMoveFunc)( AXIS_HDL pAxis, double position, int relative, double min_velocity, double max_velocity, double acceleraton );
 /** Moves the axis to a given demand position and then stops.
 
-    This is a normal move command. Moves consist of an acceleration phase, a coast phase and a deceleration phase.
-    If min_velocity is greater than zero and the controller supports this function, the system will not demand 
-    a non-zero velocity between + and - min_velocity. Move-on-move (i.e. a move command being issue before another
-    is completed should not generate an error - the motor should immediately start moving to the latest demanded position.
-    The function should return immediately the move has been started successfully.
-
-    NOTE: I haven't done anything about the pre- and post- move strings yet.
+    This is a normal move command. Moves consist of an acceleration
+    phase, a coast phase and a deceleration phase.  If min_velocity is
+    greater than zero and the controller supports this function, the
+    system will not demand a non-zero velocity between + and -
+    min_velocity. Move-on-move (i.e. a move command being issue before
+    another is completed should not generate an error - the motor
+    should immediately start moving to the latest demanded position.
+    The function should return immediately the move has been started
+    successfully. If any of the velocity or acceleration parameters
+    are zero, they should default to the controller default (which may
+    be the last time they we specified as non-zero).
 
     \param pAxis         [in]   Pointer to axis handle returned by motorAxisOpen.
     \param position      [in]   Position to move to in motor units.
@@ -505,8 +581,10 @@ typedef int (*motorAxisMoveFunc)( AXIS_HDL pAxis, double position, int relative,
                                 to the current position.
     \param min_velocity  [in]   Minimum startup velocity in motor units/second. If negative, it will be ignored.
     \param max_velocity  [in]   Maximum velocity during move in motor units/second.
+                                If zero, it should be default to something reasonable.
     \param acceleration  [in]   Maximum acceleration (or decelleration) during velocity ramp in 
-                                motor units/second squared. Should be positive.
+                                motor units/second squared. Should be positive.  If zero, 
+                                it should be default to something reasonable.
 
     \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure. 
 */
@@ -520,13 +598,17 @@ typedef int (*motorAxisHomeFunc)( AXIS_HDL pAxis, double min_velocity, double ma
 
     This initiates a homing operation. If the controller supports it the home procedure can be initially in either
     a forward or a reverse direction. min_velocity and max_velocity are the same as for the motorAxisMove function.
-    The routine returns as soon as the home has started successfully.
+    The routine returns as soon as the home has started successfully. If any of the velocity or acceleration parameters
+    are zero, they should default to the controller default (which may
+    be the last time they we specified as non-zero).
 
     \param pAxis         [in]   Pointer to axis handle returned by motorAxisOpen.
     \param min_velocity  [in]   Minimum startup velocity in motor units/second. If negative, it will be ignored.
     \param max_velocity  [in]   Maximum velocity during move in motor units/second.
+                                If zero, it should be default to something reasonable.
     \param acceleration  [in]   Maximum acceleration (or decelleration) during velocity ramp in 
-                                motor units/second squared. Should be positive.
+                                motor units/second squared. Should be positive. If zero, 
+                                it should be default to something reasonable.
     \param forwards      [in]   If zero, initial move is in negative direction, otherwise it is positive (possibly ignored).
 
     \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure. 
@@ -545,9 +627,11 @@ typedef int (*motorAxisVelocityMoveFunc)( AXIS_HDL pAxis, double min_velocity, d
 
     \param pAxis         [in]   Pointer to axis handle returned by motorAxisOpen.
     \param min_velocity  [in]   Minimum startup velocity in motor units/second. If negative, it will be ignored.
-    \param max_velocity  [in]   Maximum velocity during move in motor units/second.
+    \param max_velocity  [in]   Maximum velocity during move in motor units/second. If zero, it 
+                                should be default to something reasonable.
     \param acceleration  [in]   Maximum acceleration (or decelleration) during velocity ramp in 
-                                motor units/second squared. Should be positive.
+                                motor units/second squared. Should be positive. If zero, it should be default
+                                to something reasonable.
 
     \return Integer indicating 0 (MOTOR_AXIS_OK) for success or non-zero for failure. 
 */
