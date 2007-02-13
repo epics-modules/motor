@@ -2,9 +2,9 @@
 FILENAME...     drvOmsPC68.cc
 USAGE...        Motor record driver level support for OMS PC68 serial device.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-08-18 21:12:33 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: dkline $
+Last Modified:	$Date: 2007-02-13 13:02:27 $
 */
 
 /*
@@ -49,6 +49,7 @@ Last Modified:	$Date: 2006-08-18 21:12:33 $
  * .03 08/11/06 rls - work around for erroneous response after response to
  *                    "?KP" command at boot-up; resulted in 1st axis having
  *                    same position (RP command) as last axis.
+ * .04 02/09/07 dmk - modified to support interrupts.
  */
 
 #include <string.h>
@@ -62,10 +63,10 @@ Last Modified:	$Date: 2006-08-18 21:12:33 $
 #include "drvOmsPC68Com.h"
 #include "epicsExport.h"
 
-#define PC68_MAX_NUM_CARDS 10    /* Maximum # of cards. */
-#define BUFF_SIZE 100       /* Maximum length of string to/from OmsPC68 */
+#define PC68_MAX_NUM_CARDS  (10)    /* Maximum # of cards. */
+#define BUFF_SIZE           (100)   /* Maximum length of command string */
 
-#define TIMEOUT 2.0     /* Command timeout in sec. */
+#define TIMEOUT             (2.0)   /* Command timeout in sec. */
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
@@ -165,8 +166,8 @@ static long report(int level)
                 struct OmsPC68controller *cntrl;
 
                 cntrl = (struct OmsPC68controller *) brdptr->DevicePrivate;
-                printf("    PC68 controller #%d, port=%s, id: %s \n", card,
-                       cntrl->asyn_port, brdptr->ident);
+                printf("    PC68 controller #%d, port=%s, id: %s - err %d\n", card,
+                       cntrl->asyn_port, brdptr->ident,cntrl->errcnt);
             }
         }
     }
@@ -476,9 +477,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 
     cntrl = (struct OmsPC68controller *) motor_state[card]->DevicePrivate;
 
-    error_code = pasynOctetSyncIO->write(cntrl->pasynUser, outbuf, size,
-                                         TIMEOUT, &nwrite);
-
+    error_code = cntrl->pasynOctet->write(cntrl->octetPvt,cntrl->pasynUser,outbuf,size,&nwrite);
     if (error_code == OK)
     {
         Debug(4, "sent message: (%s)\n", outbuf);
@@ -556,7 +555,7 @@ static int recv_mess(int card, char *com, int amount)
         /* Process request to flush receive queue */
         Debug(7, "recv flush -------------");
         cntrl = (struct OmsPC68controller *) motor_state[card]->DevicePrivate;
-        pasynOctetSyncIO->flush(cntrl->pasynUser);
+        cntrl->pasynOctet->flush(cntrl->octetPvt,cntrl->pasynUser);
         return(0);
     }
 
@@ -647,11 +646,38 @@ static int omsGet(int card, char *pchar)
     struct OmsPC68controller *cntrl;
     
     cntrl = (struct OmsPC68controller *) motor_state[card]->DevicePrivate;
-    status = pasynOctetSyncIO->read(cntrl->pasynUser, pchar, 1, TIMEOUT, &nread, &eomReason);
+    status = cntrl->pasynOctet->read(cntrl->octetPvt,cntrl->pasynUser,pchar,1,&nread,&eomReason);
 
     return(nread);
 }
 
+static void asynCallback(void *drvPvt,asynUser *pasynUser,char *data,size_t len, int eomReason)
+{
+    int d,cnt,stat,done;
+    OmsPC68controller* pcntrl;
+    struct controller* pstate;
+
+    d = *(int*)data;
+    cnt  = (d & 0xFFFF0000) >> 16;
+    stat = (d & 0x0000FF00) >> 8;
+    done = (d & 0x000000FF);
+    pcntrl = (OmsPC68controller*)drvPvt;
+    pstate = motor_state[pcntrl->card];
+
+//printf("drvOmsPC68:asynCallback - %2.2d - cnt %6.6d - stat 0x%2.2X - done 0x%2.2X\n",pcntrl->card,cnt,stat,done);
+
+    if( pcntrl->card >= total_cards || pstate == NULL )
+    {
+        errlogPrintf("Invalid entry-card #%d\n", pcntrl->card);
+        return;
+    }
+
+    if( stat & STAT_DONE )
+        if( stat & STAT_ERROR_MSK )
+            ++pcntrl->errcnt;
+        else
+            motor_sem.signal();
+}
 //_____________________________________________________________________________
 /*****************************************************/
 /* initialize all software and hardware              */
@@ -665,6 +691,8 @@ static int motor_init()
     struct OmsPC68controller* cntrl;
     int card_index, status, success_rtn, total_axis, motor_index;
     char axis_pos[50], encoder_pos[50], *tok_save, *pos_ptr;
+    asynUser      *pasynUser;
+    asynInterface *pasynInterface;
 
     /* Check for setup */
     if (OmsPC68_num_cards <= 0)
@@ -684,9 +712,37 @@ static int motor_init()
         pmotorState = motor_state[card_index];
 
         /* Initialize communications channel */
-        cntrl = (struct OmsPC68controller *) pmotorState->DevicePrivate;
-        success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
-                                                &cntrl->pasynUser, NULL);
+        cntrl = (struct OmsPC68controller*)pmotorState->DevicePrivate;
+
+        pasynUser = pasynManager->createAsynUser(0,0);
+        pasynUser->userPvt = cntrl;
+        cntrl->pasynUser = pasynUser;
+
+        success_rtn = pasynManager->connectDevice(pasynUser,cntrl->asyn_port,0);
+        if( success_rtn )
+        {
+            Debug(1,"can't connect to port %s: %s\n",cntrl->asyn_port,pasynUser->errorMessage);
+            return(ERROR);
+        }
+
+        pasynInterface = pasynManager->findInterface(pasynUser,asynOctetType,1);
+        if( pasynInterface )
+        {
+            cntrl->pasynOctet = (asynOctet*)pasynInterface->pinterface;
+            cntrl->octetPvt = pasynInterface->drvPvt;
+        }
+        else
+        {
+            Debug(1,"%s driver not supported\n",asynOctetType);
+            return(ERROR);
+        }
+
+        success_rtn = cntrl->pasynOctet->registerInterruptUser(cntrl->octetPvt,pasynUser,asynCallback,cntrl,&cntrl->registrarPvt);
+        if( success_rtn )
+        {
+            Debug(1,"registerInterruptUser failed - %s: %s\n",cntrl->asyn_port,pasynUser->errorMessage);
+            return(ERROR);
+        }
 
         if (success_rtn == asynSuccess)
         {
@@ -694,7 +750,7 @@ static int motor_init()
 
             /* Send a message to the board, see if it exists */
             /* flush any junk at input port - should be no data available */
-            pasynOctetSyncIO->flush(cntrl->pasynUser);
+            cntrl->pasynOctet->flush(cntrl->octetPvt,cntrl->pasynUser);
 
             /* Try 3 times to connect to controller. */
             do
@@ -738,12 +794,12 @@ static int motor_init()
                 else
                     pmotorState->motor_info[motor_index].encoder_present = YES;
 
-		/* Test if motor has PID parameters. */
-		send_mess(card_index, PID_QUERY, oms_axis[motor_index]);
+                /* Test if motor has PID parameters. */
+                send_mess(card_index, PID_QUERY, oms_axis[motor_index]);
                 if (recv_mess(card_index, encoder_pos, 1) == -1)
-		    pmotorState->motor_info[motor_index].pid_present = NO;
+                    pmotorState->motor_info[motor_index].pid_present = NO;
                 else
-		    pmotorState->motor_info[motor_index].pid_present = YES;
+                    pmotorState->motor_info[motor_index].pid_present = YES;
             }
             
             /* Testing for PID parameters (?KP) causes erroneous response from
@@ -840,11 +896,12 @@ RTN_STATUS OmsPC68Config(int card, const char *name)
     if (card < 0 || card >= OmsPC68_num_cards)
         return(ERROR);
 
-    motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
-    motor_state[card]->DevicePrivate = malloc(sizeof(struct OmsPC68controller));
-    cntrl = (struct OmsPC68controller *) motor_state[card]->DevicePrivate;
+    motor_state[card] = (struct controller*)calloc(1,sizeof(struct controller));
+    motor_state[card]->DevicePrivate = calloc(1,sizeof(struct OmsPC68controller));
+    cntrl = (struct OmsPC68controller*) motor_state[card]->DevicePrivate;
 
-    strcpy(cntrl->asyn_port, name);
+    cntrl->card = card;
+    strcpy(cntrl->asyn_port,name);
     return(OK);
 }
 

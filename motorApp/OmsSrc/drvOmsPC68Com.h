@@ -2,9 +2,9 @@
 FILENAME...     drvOmsPC68Com.h
 USAGE... This file contains information common to all OMS PC68/78 controllers.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-04-24 18:11:59 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: dkline $
+Last Modified:	$Date: 2007-02-13 13:02:27 $
 */
 
 /*
@@ -42,15 +42,40 @@ Last Modified:	$Date: 2006-04-24 18:11:59 $
 #include "motor.h"
 #include "motordrvCom.h"
 #include "asynDriver.h"
-#include "asynOctetSyncIO.h"
+#include "asynOctet.h"
 
+/* status register */
+#define STAT_IRQ                0x80
+#define STAT_TRANS_BUF_EMPTY    0x40
+#define STAT_INPUT_BUF_FULL     0x20
+#define STAT_DONE               0x10
+#define STAT_OVERTRAVEL         0x08
+#define STAT_ENCODER_REQ        0x04
+#define STAT_UNUSED             0x02
+#define STAT_ERROR              0x01
+#define STAT_ERROR_MSK          0x0F
+
+/* done flag register */
+#define DONE_X	0x01
+#define DONE_Y	0x02
+#define DONE_Z	0x04
+#define DONE_T	0x08
+#define DONE_U	0x10
+#define DONE_V	0x20
+#define DONE_R	0x40
+#define DONE_S	0x80
 
 /* OmsPC68 specific data is stored in this structure. */
 struct OmsPC68controller
 {
-    asynUser *pasynUser;        /* For RS-232 */
+    int card;
+    int errcnt;
     char asyn_port[80];         /* asyn port name */
     CommStatus status;          /* Controller communication status. */
+    asynUser* pasynUser;
+    asynOctet* pasynOctet;
+    void* octetPvt;
+    void* registrarPvt;
 };
 
 
@@ -75,7 +100,7 @@ struct encoder_status
 #define AXIS_INFO       "QA RP"
 #define ENCODER_QUERY   "EA"
 #define DONE_QUERY      "RA"
-#define	PID_QUERY	"?KP"
+#define	PID_QUERY       "?KP"
 
 /* Function prototypes. */
 extern RTN_STATUS OmsPC68Setup(int, int);
