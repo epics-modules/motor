@@ -55,13 +55,16 @@ option +r;
 #define ABORT_TIMEOUT 10.
 
 /* Used within the exec state as a timeout within the while loops which wait for
- * the ss xpsTrajectoryRun to catch up */
-#define COUNT_TIMEOUT  100000
+ * the ss xpsTrajectoryRun to catch up.  The delays are 0.1 second, so 100 loops
+ * is 10 seconds. */
+#define COUNT_TIMEOUT  100
 
 /* The maximum size of the item names in gathering, e.g. "GROUP2.POSITIONER1.CurrentPosition" */
 #define MAX_GATHERING_AXIS_STRING 60
+/* Number of items per axis */
+#define NUM_GATHERING_ITEMS 2
 /* Total length of gathering string */
-#define MAX_GATHERING_STRING MAX_AXES*MAX_GATHERING_AXIS_STRING
+#define MAX_GATHERING_STRING MAX_GATHERING_AXIS_STRING * NUM_GATHERING_ITEMS * MAX_AXES
 
 /* Constants used for FTP to the XPS */
 #define TRAJECTORY_DIRECTORY "/Admin/public/Trajectories"
@@ -91,6 +94,10 @@ double initialPos[MAX_AXES];
 double trajVel;
 double preDistance[MAX_AXES];
 double postDistance[MAX_AXES];
+double motorLowLimit[MAX_AXES];
+double motorHighLimit[MAX_AXES];
+double motorMinPos[MAX_AXES];
+double motorMaxPos[MAX_AXES];
 double pulseTime;
 double pulsePeriod;
 char groupName[NAME_LEN];
@@ -125,7 +132,7 @@ unsigned long startTime;
 %% static void buildAndVerify(SS_ID ssId, struct UserVar *pVar);
 %% static int currentElement(SS_ID ssId, struct UserVar *pVar);
 %% static int getGroupStatus(SS_ID ssId, struct UserVar *pVar);
-%% static void readBackError(SS_ID ssId, struct UserVar *pVar);
+%% static void readGathering(SS_ID ssId, struct UserVar *pVar);
 %% static int trajectoryAbort(SS_ID ssId, struct UserVar *pVar);
 
 
@@ -140,6 +147,11 @@ ss xpsTrajectoryScan {
             strcpy(userName, macValueGet("USERNAME"));
             strcpy(password, macValueGet("PASSWORD"));
             xpsPort = atoi(macValueGet("PORT"));
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state init:"
+                       " xpsAddress=%s groupName=%s\n",
+                       xpsAddress, groupName);
+            }
             for (i=0; i<numAxes; i++) {
                 axisName[i] = malloc(NAME_LEN);
                 sprintf(macroBuf, "P%d", i+1);
@@ -189,6 +201,12 @@ ss xpsTrajectoryScan {
 
     /* Monitor inputs which control what to do (Build, Execute, Read) */
     state monitor_inputs {
+        entry {
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state monitor_inputs:"
+                       " entry\n");
+            }
+        }
         when(efTestAndClear(buildMon) && (build==1)) {
         } state build
 
@@ -213,6 +231,12 @@ ss xpsTrajectoryScan {
 
     /* Build and verify trajectory */
     state build {
+        entry {
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state build:"
+                       " entry\n");
+            }
+        }
         when() {
             /* Set busy flag while building */
             buildState = BUILD_STATE_BUSY;
@@ -250,12 +274,21 @@ ss xpsTrajectoryScan {
              * to do this until build is complete. */
             build=0;
             pvPut(build);
+            /* Set exec status to UNDEFINED */
+            execStatus = STATUS_UNDEFINED;
+            pvPut(execStatus);
+            strcpy(execMessage, " ");
+ 
         } state monitor_inputs
     }
 
 
     state execute {
-        when () {
+        entry {
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state execute:"
+                       " entry\n");
+            }
             %%waitMotors(ssId, pVar);
         
             /* Get the initial positions of the motors */
@@ -280,11 +313,6 @@ ss xpsTrajectoryScan {
             }
             %%waitEpicsMotors(ssId, pVar);
         
-            /* Set status to INVALID */
-            execStatus = STATUS_UNDEFINED;
-            pvPut(execStatus);
-            strcpy(execMessage, " ");
- 
            /* Define pulse output for trajectory */
             if (npulses > 0) {
                 /* Check validity, modify values if necessary */
@@ -309,12 +337,52 @@ ss xpsTrajectoryScan {
             } else {
                 pulsePeriod = 0.;
             }
+
+            /* Check that the trajectory won't exceed the software limits */
+            for (j=0; j<numAxes; j++) {
+                if (moveAxis[j]) {
+                    status = PositionerUserTravelLimitsGet(pollSocket,
+                                                           axisName[j],
+                                                           &motorLowLimit[j], 
+                                                           &motorHighLimit[j]);
+                    if ((epicsMotorPos[j] + motorMinPos[j]) < motorLowLimit[j]) {
+                        execStatus = STATUS_FAILURE;
+                        pvPut(execStatus);
+                        sprintf(execMessage, "Low soft limit violation on motor %d", j);
+                        pvPut(execMessage);
+                    }
+                    if ((epicsMotorPos[j] + motorMaxPos[j]) > motorHighLimit[j]) {
+                        execStatus = STATUS_FAILURE;
+                        pvPut(execStatus);
+                        sprintf(execMessage, "High soft limit violation on motor %d", j);
+                        pvPut(execMessage);
+                    }
+                }
+            }
+        }
  
+
+        when (execStatus == STATUS_FAILURE) {
+            /* Clear execute command, post.  This is a "busy" record, don't
+             * want to do this until execution is complete. */
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state execute:"
+                       " execStatus = STATUS_FAILURE\n");
+            }
+            execute=0;
+            pvPut(execute);
+        } state monitor_inputs
+
+
+        when (execStatus != STATUS_FAILURE) {
             %%pVar->xpsStatus = getGroupStatus(ssId, pVar);
             /* Setting execState here will cause the xpsTrajectoryRun SS to wake up */
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state execute:"
+                       " setting execState = EXECUTE_STATE_MOVE_START\n");
+            }
             execState = EXECUTE_STATE_MOVE_START;
             pvPut(execState);
-                
             count = 0;
             while (execState != EXECUTE_STATE_EXECUTING && 
                    count < COUNT_TIMEOUT ) {
@@ -350,7 +418,17 @@ ss xpsTrajectoryScan {
 
     /* Wait for trajectory to complete */
     state wait_execute {
+        entry {
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state wait_execute:"
+                       " entry\n");
+            }
+        }
         when (execStatus == STATUS_ABORT) {
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state wait_execute:"
+                       " execStatus = STATUS_ABORT\n");
+            }
             /* The trajectory_abort state set has detected an abort. It has
              * already posted the status and message.  Don't execute flyback
              * return to top */
@@ -362,7 +440,7 @@ ss xpsTrajectoryScan {
             pvPut(execute);
         } state monitor_inputs
 
-        when (execState==EXECUTE_STATE_EXECUTING) {
+        when (delay(0.1) && execState==EXECUTE_STATE_EXECUTING) {
             /* Get the current motor positions, post them */
             %%getMotorPositions(ssId, pVar, pVar->motorCurrent);
             for (j=0; j<numAxes; j++) pvPut(motorCurrent[j]);
@@ -395,25 +473,32 @@ ss xpsTrajectoryScan {
         } state wait_execute
 
         when (execState==EXECUTE_STATE_FLYBACK) {
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state wait_execute:"
+                       " execStatus = EXECUTE_STATE_FLYBACK\n");
+            }
             /* Stop the detector */
             detOff = 1;
             pvPut(detOff);
             pvPut(execState);
             pvPut(execStatus);
             pvPut(execMessage);
-        
-            /* Make sure the motors have stopped */
-            %%waitMotors(ssId, pVar);
-            %%waitEpicsMotors(ssId, pVar);        
+
+            /* Only do the following if the trajectory executed OK */
+            if (execStatus == STATUS_SUCCESS) { 
+                /* Make sure the motors have stopped */
+                %%waitMotors(ssId, pVar);
+                %%waitEpicsMotors(ssId, pVar);        
             
-            /* Get the current motor positions, post them */
-            %%getMotorPositions(ssId, pVar, pVar->motorCurrent);
-            for (j=0; j<numAxes; j++) pvPut(motorCurrent[j]);
-            for (j=0; j<numAxes; j++) {
-                epicsMotorPos[j] = motorCurrent[j];
-                pvPut(epicsMotorPos[j]);
+                /* Get the current motor positions, post them */
+                %%getMotorPositions(ssId, pVar, pVar->motorCurrent);
+                for (j=0; j<numAxes; j++) pvPut(motorCurrent[j]);
+                for (j=0; j<numAxes; j++) {
+                    epicsMotorPos[j] = motorCurrent[j];
+                    pvPut(epicsMotorPos[j]);
+                }
+                %%waitEpicsMotors(ssId, pVar);
             }
-            %%waitEpicsMotors(ssId, pVar);
             
             execState = EXECUTE_STATE_DONE;
             pvPut(execState);
@@ -427,6 +512,12 @@ ss xpsTrajectoryScan {
 
     /* Read back actual positions */
     state readback {
+        entry {
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryScan: state readback:"
+                       " entry\n");
+            }
+        }
         when() {
             /* Set busy flag */
             readState = READ_STATE_BUSY;
@@ -441,8 +532,11 @@ ss xpsTrajectoryScan {
                 }
             }
             
-            %%readBackError(ssId, pVar);
-            
+            %%readGathering(ssId, pVar);
+           
+            /* readGathering has set the actual number of positions read back */
+            pvPut(nactual);
+ 
             /* Post the readback and error arrays */
             for (j=0; j<numAxes; j++) {
                 pvPut(motorReadbacks[j]);
@@ -475,6 +569,10 @@ ss xpsTrajectoryAbort {
               (execState==EXECUTE_STATE_EXECUTING)) {
 
             execStatus = STATUS_ABORT;
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryAbort: state monitorAbort:"
+                       " setting execStatus = STATUS_ABORT\n");
+            }
             pvPut(execStatus);
             strcpy(execMessage, "Motion aborted");
             pvPut(execMessage);
@@ -496,6 +594,10 @@ ss xpsTrajectoryRun {
     state asyncExecute {
         when (efTestAndClear(execStateMon) && (execState == EXECUTE_STATE_MOVE_START)) {
             /*%%pVar->xpsStatus = getGroupStatus(ssId, pVar);*/
+            if (debugLevel > 0) {
+                printf("XPS_trajectoryScan: ss xpsTrajectoryRun: state asyncExecute:"
+                       " setting execState = EXECUTE_STATE_EXECUTING\n");
+            }
             execState = EXECUTE_STATE_EXECUTING;
             pvPut(execState);
 
@@ -506,13 +608,12 @@ ss xpsTrajectoryRun {
                 pvPut(detOn);
                 /* Get start time of execute */        
                 startTime = time(0);
-                /* Call the C function from here so that the main program can poll */
+                /* Call the C function from here so that the main state set can poll */
                 %%trajectoryExecute(ssId, pVar);
             } else {
                 execStatus = STATUS_FAILURE;
                 pvPut(execStatus);
             }
-    
         } state asyncExecute
     }
 }
@@ -645,47 +746,74 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
     char buffer[MAX_GATHERING_STRING];
     int eventId;
     
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " entry\n");
+    }
     /* Configure Gathering */
     /* Reset gathering.  
      * This must be done because GatheringOneData just appends to in-memory list */    
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling GatheringReset(%d)\n", pVar->pollSocket);
+    }
     status = GatheringReset(pVar->pollSocket);
     if (status != 0) {
         printf("Error performing GatheringReset, status=%d\n",status);
         return;
     }
 
-    /* Write list of gathering parameters */
+    /* Write list of gathering parameters.
+     * Note that there must be NUM_GATHERING_ITEMS per axis in this list. */
     strcpy(buffer, "");
     for (j=0; j<pVar->numAxes; j++) {
         strcat (buffer, pVar->axisName[j]);
         strcat (buffer, ".SetpointPosition;");
         strcat (buffer, pVar->axisName[j]);
         strcat (buffer, ".CurrentPosition;");
-        strcat (buffer, pVar->axisName[j]);
-        strcat (buffer, ".CurrentVelocity;");
-        if (j < (pVar->numAxes - 1)) strcat (buffer, ";");
     }
     
     /* Define what is to be saved in the GatheringExternal.dat.  
      * 3 pieces of information per axis. */
-    status = GatheringConfigurationSet(pVar->pollSocket, pVar->numAxes*3, buffer);
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling GatheringConfigurationSet(%d, %d, %s)\n",
+               pVar->pollSocket, pVar->numAxes*NUM_GATHERING_ITEMS, buffer);
+    }
+    status = GatheringConfigurationSet(pVar->pollSocket, 
+                                       pVar->numAxes*NUM_GATHERING_ITEMS, buffer);
     if (status != 0)
-            printf("Error performing GatheringConfigurationSet, status=%d, buffer=%s\n",
+            printf("Error performing GatheringConfigurationSet, status=%d, buffer=%p\n",
                    status, buffer);
 
     /* Define trajectory output pulses. 
      * startPulses and endPulses are defined as 1=first real element, need to add
-     * 1 to skip the acceleration element.  */
+     * 1 to each to skip the acceleration element.  
+     * The XPS is told the element to stop outputting pulses, and it seems to stop
+     * outputting at the start of that element.  So we need to have that element be
+     * the decceleration endPulses is the element, which means adding another +1. */
 
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling MultipleAxesPVTPulseOutputSet(%d, %s, %d, %d, %f)\n",
+                                           pVar->pollSocket, pVar->groupName,
+                                           pVar->startPulses+1, 
+                                           pVar->endPulses+2, 
+                                           pVar->pulsePeriod);
+    }
     status = MultipleAxesPVTPulseOutputSet(pVar->pollSocket, pVar->groupName,
                                            pVar->startPulses+1, 
-                                           pVar->endPulses+1, 
+                                           pVar->endPulses+2, 
                                            pVar->pulsePeriod);
 
     /* Define trigger */
     sprintf(buffer, "Always;%s.PVT.TrajectoryPulse", pVar->groupName);
-    status = EventExtendedConfigurationTriggerSet(pVar->pollSocket, 2, buffer, 
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling EventExtendedConfigurationTriggerSet(%d, %d, %s, %s, %s, %s, %s)\n",
+                                                  pVar->pollSocket, 2, buffer, 
                                                   "", "", "", "");
+    }
     if (status != 0) {
         printf("Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s\n", 
                status, buffer);
@@ -693,6 +821,13 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
     }
 
     /* Define action */
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling EventExtendedConfigurationActionSet(%d, %d, %s, %s, %s, %s, %s)\n",
+                                                 pVar->pollSocket, 1, 
+                                                 "GatheringOneData", 
+                                                 "", "", "", "");
+    }
     status = EventExtendedConfigurationActionSet(pVar->pollSocket, 1, 
                                                  "GatheringOneData", 
                                                  "", "", "", "");
@@ -703,19 +838,34 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
     }
 
     /* Start gathering */
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling EventExtendedStart(%d, %p)\n",
+                                            pVar->pollSocket, &eventId);
+    }
     status= EventExtendedStart(pVar->pollSocket, &eventId);
     if (status != 0) {
         printf("Error performing EventExtendedStart, status=%d\n",status);
         return;
     }
 
-    status = MultipleAxesPVTExecution(pVar->driveSocket,pVar->groupName,
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling MultipleAxesPVTExecution(%d, %s, %s, %d)\n",
+                                      pVar->driveSocket, pVar->groupName,
+                                      TRAJECTORY_FILE, 1);
+    }
+    status = MultipleAxesPVTExecution(pVar->driveSocket, pVar->groupName,
                                       TRAJECTORY_FILE, 1);
     /* status -27 means the trajectory was aborted */
     if ((status != 0) && (status != -27))
         printf("Error performing MultipleAxesPVTExecution, status=%d\n", status);
     
     /* Remove the event */
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling EventExtendedRemove(%d, %d)\n", pVar->pollSocket, eventId);
+    }
     status = EventExtendedRemove(pVar->pollSocket, eventId);
     if (status != 0) {
         printf("Error performing ExtendedEventRemove, status=%d\n",status);
@@ -723,6 +873,10 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
     }
         
     /* Save the gathered data to a file */    
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: trajectoryExecute:"
+               " calling GatheringStopAndSave(%d)\n", pVar->pollSocket);
+    }
     status = GatheringStopAndSave(pVar->pollSocket);
     
     /* status -30 means gathering not started i.e. aborted before the end of
@@ -739,21 +893,23 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
 {
     FILE *trajFile;
     int i, j, status;
+    int npoints;
     double trajStep;
     double trajVel;
-    double maxp;
-    double minp;
     double P0, P1, T0, T1;
     int ftpSocket;
     char fileName[NAME_LEN];
     double distance;
-    double preSign[MAX_AXES], postSign[MAX_AXES];
     double maxVelocity[MAX_AXES], maxAcceleration[MAX_AXES];
     double minJerkTime[MAX_AXES], maxJerkTime[MAX_AXES];
     double preTimeMax, postTimeMax;
-    double preVelocity[MAX_AXES], preAccelTime[MAX_AXES];
-    double postVelocity[MAX_AXES], postAccelTime[MAX_AXES];
+    double preVelocity[MAX_AXES], postVelocity[MAX_AXES];
+    double time;
     
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: buildAndVerify:"
+               " entry\n");
+    }
     /* We create trajectories with an extra element at the beginning and at the end.
      * The distance and time of the first element is defined so that the motors will
      * accelerate from 0 to the velocity of the first "real" element at their 
@@ -766,7 +922,13 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
      * and the time required to reach this velocity. */
     preTimeMax = 0.;
     postTimeMax = 0.;
+    /* Zero values since axes may not be used */
     for (j=0; j<pVar->numAxes; j++) {
+        preVelocity[j] = 0.;
+        postVelocity[j] = 0.;
+    }
+    for (j=0; j<pVar->numAxes; j++) {
+        if (!pVar->moveAxis[j]) break;
         status = PositionerSGammaParametersGet(pVar->pollSocket, pVar->axisName[j], 
                                                &maxVelocity[j], &maxAcceleration[j],
                                                &minJerkTime[j], &maxJerkTime[j]);
@@ -774,26 +936,34 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
             printf("Error calling positionerSGammaParametersSet, status=%d\n", 
                    status);
         }
-        distance = pVar->motorTrajectory[j][1] - pVar->motorTrajectory[j][0];
-        if (distance >= 0.) preSign[j] = 1.0; else preSign[j] = -1.0;
+        /* The calculation using maxAcceleration read from controller below
+         * is "correct" but subject to roundoff errors when sending ASCII commands
+         * to XPS.  Reduce acceleration 10% to account for this. */
+        maxAcceleration[j] = 0.9 * maxAcceleration[j];
+        if (pVar->moveMode == MOVE_MODE_RELATIVE) {
+            distance = pVar->motorTrajectory[j][0];
+        } else {
+            distance = pVar->motorTrajectory[j][1] - pVar->motorTrajectory[j][0];
+        }
         preVelocity[j] = distance/pVar->timeTrajectory[0];
-        preAccelTime[j] = fabs(preVelocity[j]) / maxAcceleration[j];
-        if (preAccelTime[j] > preTimeMax) preTimeMax = preAccelTime[j];
-        distance = pVar->motorTrajectory[j][pVar->nelements-1] - 
-                   pVar->motorTrajectory[j][pVar->nelements-2];
-        if (distance >= 0.) postSign[j] = 1.0; else postSign[j] = -1.0;
+        time = fabs(preVelocity[j]) / maxAcceleration[j];
+        if (time > preTimeMax) preTimeMax = time;
+        if (pVar->moveMode == MOVE_MODE_RELATIVE) {
+            distance = pVar->motorTrajectory[j][pVar->nelements-1];
+        } else {
+            distance = pVar->motorTrajectory[j][pVar->nelements-1] - 
+                       pVar->motorTrajectory[j][pVar->nelements-2];
+        }
         postVelocity[j] = distance/pVar->timeTrajectory[pVar->nelements-1];
-        postAccelTime[j] = fabs(postVelocity[j]) / maxAcceleration[j];
-        if (postAccelTime[j] > postTimeMax) postTimeMax = postAccelTime[j];
+        time = fabs(postVelocity[j]) / maxAcceleration[j];
+        if (time > postTimeMax) postTimeMax = time;
     }
 
-    /* Compute the distance that each motor moves during its acceleration phase.  i
+    /* Compute the distance that each motor moves during its acceleration phase.
      * Only move it this far. */
     for (j=0; j<pVar->numAxes; j++) {
-        pVar->preDistance[j] = preSign[j] * (0.5 * maxAcceleration[j] * 
-                                             preAccelTime[j] * preAccelTime[j]);
-        pVar->postDistance[j] = postSign[j] * (0.5 * maxAcceleration[j] * 
-                                             postAccelTime[j] * postAccelTime[j]);
+        pVar->preDistance[j] =  0.5 * preVelocity[j] *  preTimeMax; 
+        pVar->postDistance[j] = 0.5 * postVelocity[j] * postTimeMax;
     }
 
     /* Create the trajectory file */
@@ -804,8 +974,14 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     for (j=0; j<pVar->numAxes; j++) 
         fprintf(trajFile,", %f, %f", pVar->preDistance[j], preVelocity[j]);
     fprintf(trajFile,"\n");
-    
-    for (i=0; i<pVar->nelements-1; i++) {
+   
+    /* The number of points in the file is nelements for MOVE_MODE_RELATIVE and
+     * nelements-1 for other modes */
+    if (pVar->moveMode == MOVE_MODE_RELATIVE) 
+        npoints = pVar->nelements;
+    else 
+        npoints = pVar->nelements-1;
+    for (i=0; i<npoints; i++) {
         T0 = pVar->timeTrajectory[i];
         T1 = pVar->timeTrajectory[i+1];
         for (j=0; j<pVar->numAxes; j++) {
@@ -862,6 +1038,11 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     }
        
     /* Verify trajectory */
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: buildAndVerify:"
+               " calling MultipleAxesPVTVerification(%d, %s, %s)\n", 
+               pVar->pollSocket, pVar->groupName, TRAJECTORY_FILE);
+    }
     status = MultipleAxesPVTVerification(pVar->pollSocket, pVar->groupName,
                                          TRAJECTORY_FILE);
      
@@ -889,7 +1070,7 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     if (1) {  /* We may need to test for status here */
         for (j=0; j<pVar->numAxes; j++) {
             status = MultipleAxesPVTVerificationResultGet(pVar->pollSocket,
-                         pVar->axisName[j], fileName, &minp, &maxp, 
+                         pVar->axisName[j], fileName, &pVar->motorMinPos[j], &pVar->motorMaxPos[j], 
                          &pVar->motorMVA[j], &pVar->motorMAA[j]);
             if (status != 0) {
                 printf("Error performing MultipleAxesPVTVerificationResultGet for axis %s, status=%d\n",
@@ -939,16 +1120,20 @@ static int getGroupStatus(SS_ID ssId, struct UserVar *pVar)
 /* Function to load the GatheringExternal.dat file which was written
  * by the XPS after the trajectory was performed and read back the
  * actual motor positions and calculate the position errors */ 
-static void readBackError(SS_ID ssId, struct UserVar *pVar)
+static void readGathering(SS_ID ssId, struct UserVar *pVar)
 {
     char buffer[MAX_GATHERING_STRING];
     FILE *gatheringFile;
     int i,j;
     int nitems;
-    double setpointPosition, actualPosition, actualVelocity;
+    double setpointPosition, actualPosition;
     int ftpSocket;
     int status;
     
+    if (pVar->debugLevel > 0) {
+        printf("XPS_trajectoryScan: readGathering:"
+               " entry\n");
+    }
     /* FTP the gathering file from the XPS to the local directory */
     status = ftpConnect(pVar->xpsAddress, pVar->userName, pVar->password, &ftpSocket);
     if (status != 0) {
@@ -973,26 +1158,30 @@ static void readBackError(SS_ID ssId, struct UserVar *pVar)
 
     gatheringFile = fopen(GATHERING_FILE, "r");
     
-    /* Read 1st 2 lines which only contain the axis names*/
+    /* Read 1st 2 lines which only contain the axis names */
     for (i=0; i<2; i++) {
         fgets (buffer, MAX_GATHERING_STRING, gatheringFile);
     }
+    /* The next line is the motor positions at the start of the trajectory element
+     * where pulses began to be output.  Skip this line because this pulse just
+     * started the MCS counting, there are no data yet. */
+    fgets (buffer, MAX_GATHERING_STRING, gatheringFile);
     
-    for (i=0; i<pVar->nelements; i++) {
+    for (i=0; i<pVar->npulses; i++) {
         /* There is a bug in the current V2.0.1 firmware that puts 2 lines in the 
          * Gathering.dat file when there should be 1.  
          * Skip the first one.  
          * THIS fgets NEEDS TO BE REMOVED WHEN V2.1 FIRMWARE IS RELEASED.
          */
-        fgets (buffer, MAX_GATHERING_STRING, gatheringFile);
+        /* fgets (buffer, MAX_GATHERING_STRING, gatheringFile); */
         for (j=0; j<pVar->numAxes; j++) {
             /* Note the trailing white space in this format is required to make
              * fscanf read the newline */
-            nitems = fscanf(gatheringFile, "%lf %lf %lf ", 
-                            &setpointPosition, &actualPosition, &actualVelocity);
-            if (nitems != 3) {
-                printf("Error reading Gathering.dat file, nitems=%d, should be 3\n",
-                       nitems);
+            nitems = fscanf(gatheringFile, "%lf %lf ", 
+                            &setpointPosition, &actualPosition);
+            if (nitems != NUM_GATHERING_ITEMS) {
+                printf("Error reading Gathering.dat file, nitems=%d, should be %d\n",
+                       nitems, NUM_GATHERING_ITEMS);
                 goto done;
             }
             pVar->motorReadbacks[j][i] = actualPosition;
@@ -1001,7 +1190,8 @@ static void readBackError(SS_ID ssId, struct UserVar *pVar)
     }
     
     done:
-    fclose (gatheringFile); 
+    fclose (gatheringFile);
+    pVar->nactual = i; 
 
     return;
 }
