@@ -2,9 +2,9 @@
 FILENAME...     drvOmsPC68.cc
 USAGE...        Motor record driver level support for OMS PC68 serial device.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: dkline $
-Last Modified:	$Date: 2007-02-13 13:02:27 $
+Last Modified:	$Date: 2007-02-13 13:22:28 $
 */
 
 /*
@@ -245,25 +245,25 @@ static int set_status(int card, int signal)
 
     if (rtn_state > 0)
     {
-	cntrl->status = NORMAL;
-	status.Bits.CNTRL_COMM_ERR = 0;
+        cntrl->status = NORMAL;
+        status.Bits.CNTRL_COMM_ERR = 0;
     }
     else
     {
-	if (cntrl->status == NORMAL)
-	{
-	    cntrl->status = RETRY;
-	    rtn_state = OK;
-	    goto exit;
-	}
-	else
-	{
-	    cntrl->status = COMM_ERR;
-	    status.Bits.CNTRL_COMM_ERR = 1;
-	    status.Bits.RA_PROBLEM     = 1;
-	    rtn_state = 1;
-	    goto exit;
-	}
+        if (cntrl->status == NORMAL)
+        {
+            cntrl->status = RETRY;
+            rtn_state = OK;
+            goto exit;
+        }
+        else
+        {
+            cntrl->status = COMM_ERR;
+            status.Bits.CNTRL_COMM_ERR = 1;
+            status.Bits.RA_PROBLEM     = 1;
+            rtn_state = 1;
+            goto exit;
+        }
     }
 
     Debug(5, "info = (%s)\n", q_buf);
@@ -471,7 +471,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     }
     else
         if (size == 0)  /* Normal exit on empty input message. */
-        return(OK);
+            return(OK);
 
     Debug(2, "send_mess(): message = %s\n", com);
 
@@ -546,8 +546,8 @@ static int recv_mess(int card, char *com, int amount)
     /* Check that card exists */
     if (card >= total_cards)
     {
-	Debug(1, "recv_mess - invalid card #%d\n", card);
-	return(-1);
+        Debug(1, "recv_mess - invalid card #%d\n", card);
+        return(-1);
     }
 
     if (amount == -1)
@@ -621,13 +621,13 @@ static int recv_mess(int card, char *com, int amount)
 	    com[itera] = '\0';
 	    return(0);
 	}
-	com[itera++] = ',';
+    com[itera++] = ',';
     }
 
     if (itera > 0)
-	com[itera - 1] = '\0';
+        com[itera - 1] = '\0';
     else
-	com[itera] = '\0';
+        com[itera] = '\0';
 
     Debug(4, "recv_mess: card %d, msg: (%s)\n", card, com);
     return(itera);
@@ -657,10 +657,6 @@ static void asynCallback(void *drvPvt,asynUser *pasynUser,char *data,size_t len,
     OmsPC68controller* pcntrl;
     struct controller* pstate;
 
-    d = *(int*)data;
-    cnt  = (d & 0xFFFF0000) >> 16;
-    stat = (d & 0x0000FF00) >> 8;
-    done = (d & 0x000000FF);
     pcntrl = (OmsPC68controller*)drvPvt;
     pstate = motor_state[pcntrl->card];
 
@@ -671,6 +667,11 @@ static void asynCallback(void *drvPvt,asynUser *pasynUser,char *data,size_t len,
         errlogPrintf("Invalid entry-card #%d\n", pcntrl->card);
         return;
     }
+
+    d = *(int*)data;
+    cnt  = (d & 0xFFFF0000) >> 16;
+    stat = (d & 0x0000FF00) >> 8;
+    done = (d & 0x000000FF);
 
     if( stat & STAT_DONE )
         if( stat & STAT_ERROR_MSK )
