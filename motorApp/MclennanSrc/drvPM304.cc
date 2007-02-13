@@ -242,7 +242,14 @@ STATIC int set_status(int card, int signal)
                 epicsThreadSleep(drvPM304ReadbackDelay);
         }
 
-    status.Bits.RA_PROBLEM = (response[2] == '1') ? 1 : 0;
+        /* We used to check just response[2] for problem.
+         * However, it turns out that in firmware version 6.15 that bit=1 for no problem,
+         * but in 6.17 it is 0 for no problem!  Check the last 4 bits individually instead.
+        status.Bits.RA_PROBLEM = 0;
+        if ((response[4] == '1') || 
+            (response[5] == '1') || 
+            (response[6] == '1') || 
+            (response[7] == '1')) status.Bits.RA_PROBLEM = 1;
 
         if (response[1] == '1') {
         status.Bits.RA_PLUS_LS = 1;
@@ -265,7 +272,7 @@ STATIC int set_status(int card, int signal)
                 epicsThreadSleep(drvPM304ReadbackDelay);
         }
 
-    status.Bits.RA_PROBLEM = (response[1] == '1') ? 1 : 0;
+        status.Bits.RA_PROBLEM = (response[1] == '1') ? 1 : 0;
 
         if (response[2] == '1') {
         status.Bits.RA_PLUS_LS = 1;
