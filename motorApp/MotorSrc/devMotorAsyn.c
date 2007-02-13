@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.16 $
- * Modified by: $Author: peterd $
- * Last Modified: $Date: 2007-02-03 12:07:17 $
+ * Version: $Revision: 1.17 $
+ * Modified by: $Author: rivers $
+ * Last Modified: $Date: 2007-02-13 22:02:18 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -266,6 +266,9 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
 
     rc = NOTHING_DONE;
 
+    asynPrint(pPvt->pasynUser, ASYN_TRACEIO_DEVICE,
+        "%s devMotorAsyn::update_values, needUpdate=%d\n",
+        pmr->name, pPvt->needUpdate);
     if ( pPvt->needUpdate ) {
 	pmr->rmp = (epicsInt32)floor(pPvt->status.position + 0.5);
 	pmr->rep = (epicsInt32)floor(pPvt->status.encoder_posn + 0.5);
