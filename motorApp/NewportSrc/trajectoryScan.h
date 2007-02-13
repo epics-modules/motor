@@ -37,6 +37,8 @@
 #define MAX_AXES 8
 
 /* Define PVs */
+int     debugLevel;  assign debugLevel   to "{P}{R}DebugLevel.VAL"; 
+monitor debugLevel;
 int     numAxes;     assign numAxes      to "{P}{R}NumAxes.VAL"; 
 monitor numAxes;
 int     nelements;   assign nelements    to "{P}{R}Nelements.VAL"; 
