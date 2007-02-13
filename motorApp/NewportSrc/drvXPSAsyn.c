@@ -433,6 +433,9 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
             return MOTOR_AXIS_ERROR;
         }
     }
+    /* Tell paramLib that the motor is moving.  
+     * This will force a callback on the next poll, even if the poll says the motor is already done. */
+    motorParam->setInteger(pAxis->params, motorAxisDone, 0);
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
 
@@ -475,6 +478,9 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
         return MOTOR_AXIS_ERROR;
     }
 
+    /* Tell paramLib that the motor is moving.  
+     * This will force a callback on the next poll, even if the poll says the motor is already done. */
+    motorParam->setInteger(pAxis->params, motorAxisDone, 0);
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
     PRINT(pAxis->logParam, FLOW, "motorAxisHome: set card %d, axis %d to home\n",
@@ -503,6 +509,9 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
               status);
         return MOTOR_AXIS_ERROR;
     }
+    /* Tell paramLib that the motor is moving.  
+     * This will force a callback on the next poll, even if the poll says the motor is already done. */
+    motorParam->setInteger(pAxis->params, motorAxisDone, 0);
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
     PRINT(pAxis->logParam, FLOW, "motorAxisVelocityMove card %d, axis %d move velocity=%f, accel=%f\n",
@@ -796,9 +805,10 @@ int XPSConfig(int card,           /* Controller number */
         }
         /* Set the poll rate on the moveSocket to a negative number, which means that SendAndReceive should do only a write, no read */
         TCP_SetTimeout(pAxis->moveSocket, -0.1);
-        printf("XPSConfig: pollSocket=%d, moveSocket=%d, ip=%s, port=%d,"
-              " axis=%d controller=%d\n",
-              pAxis->pollSocket, pAxis->moveSocket, ip, port, axis, card);
+        /* printf("XPSConfig: pollSocket=%d, moveSocket=%d, ip=%s, port=%d,"
+         *     " axis=%d controller=%d\n",
+         *     pAxis->pollSocket, pAxis->moveSocket, ip, port, axis, card);
+         */
         pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS + XPS_NUM_PARAMS);
     }
 
