@@ -1,0 +1,723 @@
+# Database for Newport MM4005 trajectory scanning.
+#
+#                   Mark Rivers
+#                   August 12, 2000
+#
+# Note: This database is completely general for the MM4005, it makes no
+# assumptions about the motors defined on particular axis.  Thus it can be used
+# with the Newport diffractometer or any other set of up to 8 motors.
+#
+# Macro paramters:
+#   $(P)        - PV name prefix
+#   $(R)        - PV base record name
+#   $(NAXES)    - Number of axes to be used. Typically 6 for diffractometer.
+#   $(NELM)     - Maximum trajectory elements
+#   $(NPULSE)   - Maximum number of output pulses
+#   $(DONPV)    - Name of PV to turn detector on
+#   $(DONV)     - Value to write to PV to turn detector on
+#   $(DOFFPV)   - Name of PV to turn detector off
+#   $(DOFFV)    - Value to write to PV to turn detector off
+#
+#  Modifications:
+#  5-Jun-2002    Mark Rivers  Increased TMOT field of StringOutIn record from 5000 to
+#                             20000, it was timing out when # trajectory elements exceeded
+#                             about 64. Should make it to about 250 now.
+#  28-Mar-2004 Mark Rivers  Converted from serial to asyn records.
+
+#
+# PVs controlling the number of trajectory elements and the number of output
+# pulses
+#
+grecord(longout,"$(P)$(R)NumAxes") {
+    field(VAL, "$(NAXES)")
+    field(DESC,"# of axes being used")
+}
+grecord(longout,"$(P)$(R)Nelements") {
+    field(VAL, "10")
+    field(DESC,"# of elements in trajectory")
+}
+grecord(mbbi,"$(P)$(R)MoveMode") {
+    field(DESC,"Move mode")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Relative")
+    field(ONVL, "1")
+    field(ONST, "Absolute")
+    field(TWVL, "2")
+    field(TWST, "Hybrid")
+}
+grecord(longout,"$(P)$(R)Npulses") {
+    field(DESC,"Number of output pulses")
+    field(VAL, "10")
+}
+grecord(longout,"$(P)$(R)StartPulses") {
+    field(DESC,"Element # to start pulses")
+    field(VAL, "1")
+}
+grecord(longout,"$(P)$(R)EndPulses") {
+    field(DESC,"Element # to end pulses")
+    field(VAL, "1")
+}
+grecord(longout,"$(P)$(R)Nactual") {
+    field(DESC,"Actual # of output pulses")
+}
+
+#
+# PVs controlling the trajectory speed and acceleration
+#
+grecord(bo,"$(P)$(R)TimeMode") {
+    field(DESC,"Trajectory time mode")
+    field(VAL,"0")
+    field(ZNAM,"Total")
+    field(ONAM,"Per element")
+}
+grecord(ao,"$(P)$(R)Time") {
+    field(DESC,"Trajectory time")
+    field(VAL, "10.")
+    field(PREC, "3")
+}
+grecord(ao,"$(P)$(R)TimeScale") {
+    field(DESC,"Trajectory time scaling")
+    field(VAL, "1.")
+    field(PREC, "2")
+    field(DRVL, "0.01")
+    field(LOPR, "0.01")
+    field(DRVH, "100.0")
+    field(HOPR, "100.0")
+}
+grecord(waveform,"$(P)$(R)TimeTraj") {
+    field(DESC,"Time per element")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "3")
+}
+grecord(ao,"$(P)$(R)Accel") {
+    field(DESC,"Trajectory Acceleration")
+    field(VAL, "0.5")
+    field(PREC, "3")
+}
+
+#
+# PVs controlling which motors will move
+#
+grecord(bo,"$(P)$(R)M1Move") {
+    field(DESC,"Move M1 motor?")
+    field(VAL,"1")
+    field(ZNAM,"No")
+    field(ONAM,"Yes")
+}
+grecord(bo,"$(P)$(R)M2Move") {
+    field(DESC,"Move M2 motor?")
+    field(VAL,"0")
+    field(ZNAM,"No")
+    field(ONAM,"Yes")
+}
+grecord(bo,"$(P)$(R)M3Move") {
+    field(DESC,"Move M3 motor?")
+    field(VAL,"0")
+    field(ZNAM,"No")
+    field(ONAM,"Yes")
+}
+grecord(bo,"$(P)$(R)M4Move") {
+    field(DESC,"Move M4 motor?")
+    field(VAL,"0")
+    field(ZNAM,"No")
+    field(ONAM,"Yes")
+}
+grecord(bo,"$(P)$(R)M5Move") {
+    field(DESC,"Move M5 motor?")
+    field(VAL,"0")
+    field(ZNAM,"No")
+    field(ONAM,"Yes")
+}
+grecord(bo,"$(P)$(R)M6Move") {
+    field(DESC,"Move M6 motor?")
+    field(VAL,"0")
+    field(ZNAM,"No")
+    field(ONAM,"Yes")
+}
+grecord(bo,"$(P)$(R)M7Move") {
+    field(DESC,"Move M7 motor?")
+    field(VAL,"0")
+    field(ZNAM,"No")
+    field(ONAM,"Yes")
+}
+grecord(bo,"$(P)$(R)M8Move") {
+    field(DESC,"Move M8 motor?")
+    field(VAL,"0")
+    field(ZNAM,"No")
+    field(ONAM,"Yes")
+}
+
+#
+# PVs containing the trajectory definitions for each motor
+#
+grecord(waveform,"$(P)$(R)M1Traj") {
+    field(DESC,"M1 increments")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M2Traj") {
+    field(DESC,"M2 increments")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M3Traj") {
+    field(DESC,"M3 increments")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M4Traj") {
+    field(DESC,"M4 increments")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M5Traj") {
+    field(DESC,"M5 increments")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M6Traj") {
+    field(DESC,"M6 increments")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M7Traj") {
+    field(DESC,"M7 increments")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M8Traj") {
+    field(DESC,"M8 increments")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+
+#
+# PVs to build and execute the trajectory
+#
+grecord(bo,"$(P)$(R)SimMode") {
+    field(DESC,"Simulation mode")
+    field(VAL,"0")
+    field(ZNAM,"Real")
+    field(ONAM,"Simulate")
+}
+grecord(busy,"$(P)$(R)Build") {
+    field(DESC,"Build and check trajectory")
+    field(VAL,"0")
+}
+grecord(mbbi,"$(P)$(R)BuildState") {
+    field(DESC,"Trajectory build state")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Done")
+    field(ZRSV, "NO_ALARM")
+    field(ONVL, "1")
+    field(ONST, "Busy")
+    field(ONSV, "MINOR")
+}
+grecord(mbbi,"$(P)$(R)BuildStatus") {
+    field(DESC,"Trajectory build status")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Undefined")
+    field(ZRSV, "INVALID")
+    field(ONVL, "1")
+    field(ONST, "Success")
+    field(ONSV, "NO_ALARM")
+    field(TWVL, "2")
+    field(TWST, "Failure")
+    field(TWSV, "MAJOR")
+}
+grecord(stringout,"$(P)$(R)BuildMessage") {
+    field(DESC,"Trajectory build message")
+}
+grecord(busy,"$(P)$(R)Execute") {
+    field(DESC,"Start trajectory motion")
+    field(VAL,"0")
+}
+grecord(mbbi,"$(P)$(R)ExecState") {
+    field(DESC,"Trajectory execute state")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Done")
+    field(ZRSV, "NO_ALARM")
+    field(ONVL, "1")
+    field(ONST, "Move start")
+    field(ONSV, "MINOR")
+    field(TWVL, "2")
+    field(TWST, "Executing")
+    field(TWSV, "MINOR")
+    field(THVL, "3")
+    field(THST, "Flyback")
+    field(THSV, "MINOR")
+}
+grecord(mbbi,"$(P)$(R)ExecStatus") {
+    field(DESC,"Trajectory execute status")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Undefined")
+    field(ZRSV, "INVALID")
+    field(ONVL, "1")
+    field(ONST, "Success")
+    field(ONSV, "NO_ALARM")
+    field(TWVL, "2")
+    field(TWST, "Failure")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Abort")
+    field(THSV, "MAJOR")
+    field(FRVL, "4")
+    field(FRST, "Timeout")
+    field(FRSV, "MAJOR")
+}
+grecord(stringout,"$(P)$(R)ExecMessage") {
+    field(DESC,"Trajectory execute message")
+}
+grecord(bo,"$(P)$(R)Abort") {
+    field(DESC,"Abort trajectory motion")
+    field(VAL,"0")
+    field(ZNAM,"Done")
+    field(ONAM,"Abort")
+}
+
+#
+# PVs for readback of actual positions and errors
+#
+grecord(busy,"$(P)$(R)Readback") {
+    field(DESC,"Read back actual positions")
+    field(VAL,"0")
+}
+grecord(mbbi,"$(P)$(R)ReadState") {
+    field(DESC,"Readback state")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Done")
+    field(ZRSV, "NO_ALARM")
+    field(ONVL, "1")
+    field(ONST, "Busy")
+    field(ONSV, "MINOR")
+}
+grecord(mbbi,"$(P)$(R)ReadStatus") {
+    field(DESC,"Readback status")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Undefined")
+    field(ZRSV, "INVALID")
+    field(ONVL, "1")
+    field(ONST, "Success")
+    field(ONSV, "NO_ALARM")
+    field(TWVL, "2")
+    field(TWST, "Failure")
+    field(TWSV, "MAJOR")
+}
+grecord(stringout,"$(P)$(R)ReadMessage") {
+    field(DESC,"Trajectory read message")
+}
+
+grecord(waveform,"$(P)$(R)M1Actual") {
+    field(DESC,"M1 actual positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M2Actual") {
+    field(DESC,"M2 actual positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M3Actual") {
+    field(DESC,"M3 actual positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M4Actual") {
+    field(DESC,"M4 actual positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M5Actual") {
+    field(DESC,"M5 actual positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M6Actual") {
+    field(DESC,"M6 actual positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M7Actual") {
+    field(DESC,"M7 actual positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M8Actual") {
+    field(DESC,"M8 actual positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+
+#
+# PVs for readback of following errors
+#
+grecord(waveform,"$(P)$(R)M1Error") {
+    field(DESC,"M1 following errors")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M2Error") {
+    field(DESC,"M2 following errors")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M3Error") {
+    field(DESC,"M3 following errors")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M4Error") {
+    field(DESC,"M4 following errors")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M5Error") {
+    field(DESC,"M5 following errors")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M6Error") {
+    field(DESC,"M6 following errors")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M7Error") {
+    field(DESC,"M7 following errors")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+grecord(waveform,"$(P)$(R)M8Error") {
+    field(DESC,"M8 following errors")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "4")
+}
+
+#
+# PVs for display of current motor positions
+#
+grecord(ao,"$(P)$(R)M1Current") {
+    field(DESC,"M1 current position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M2Current") {
+    field(DESC,"M2 current position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M3Current") {
+    field(DESC,"M3 current position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M4Current") {
+    field(DESC,"M4 current position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M5Current") {
+    field(DESC,"M5 current position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M6Current") {
+    field(DESC,"M6 current position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M7Current") {
+    field(DESC,"M7 current position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M8Current") {
+    field(DESC,"M8 current position")
+    field(PREC, "4")
+}
+
+
+#
+# PVs for control of maximum speed change 
+# MDVS = Maximum Delta Velocity Set
+#
+grecord(ao,"$(P)$(R)M1MDVS") {
+    field(DESC,"M1 max speed change set")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M2MDVS") {
+    field(DESC,"M2 max speed change set")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M3MDVS") {
+    field(DESC,"M3 max speed change set")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M4MDVS") {
+    field(DESC,"M4 max speed change set")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M5MDVS") {
+    field(DESC,"M5 max speed change set")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M6MDVS") {
+    field(DESC,"M6 max speed change set")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M7MDVS") {
+    field(DESC,"M7 max speed change set")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M8MDVS") {
+    field(DESC,"M8 max speed change set")
+    field(PREC, "4")
+}
+
+#
+# PVs for readback of maximum speed change 
+# MDVA = Maximum Delta Velocity Actual
+#
+grecord(ao,"$(P)$(R)M1MDVA") {
+    field(DESC,"M1 max speed change")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M2MDVA") {
+    field(DESC,"M2 max speed change")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M3MDVA") {
+    field(DESC,"M3 max speed change")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M4MDVA") {
+    field(DESC,"M4 max speed change")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M5MDVA") {
+    field(DESC,"M5 max speed change")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M6MDVA") {
+    field(DESC,"M6 max speed change")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M7MDVA") {
+    field(DESC,"M7 max speed change")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M8MDVA") {
+    field(DESC,"M8 max speed change")
+    field(PREC, "4")
+}
+
+#
+# PVs for readback of maximum speed change element
+# MDVE = Maximum Delta Velocity Element
+#
+grecord(longout,"$(P)$(R)M1MDVE") {
+    field(DESC,"M1 max speed change element")
+}
+grecord(longout,"$(P)$(R)M2MDVE") {
+    field(DESC,"M2 max speed change element")
+}
+grecord(longout,"$(P)$(R)M3MDVE") {
+    field(DESC,"M3 max speed change element")
+}
+grecord(longout,"$(P)$(R)M4MDVE") {
+    field(DESC,"M4 max speed change element")
+}
+grecord(longout,"$(P)$(R)M5MDVE") {
+    field(DESC,"M5 max speed change element")
+}
+grecord(longout,"$(P)$(R)M6MDVE") {
+    field(DESC,"M6 max speed change element")
+}
+grecord(longout,"$(P)$(R)M7MDVE") {
+    field(DESC,"M7 max speed change element")
+}
+grecord(longout,"$(P)$(R)M8MDVE") {
+    field(DESC,"M8 max speed change element")
+}
+
+#
+# PVs for readback of maximum velocity
+# MDA = Maximum Velocity Actual
+#
+grecord(ao,"$(P)$(R)M1MVA") {
+    field(DESC,"M1 max velocity")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M2MVA") {
+    field(DESC,"M2 max velocity")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M3MVA") {
+    field(DESC,"M3 max velocity")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M4MVA") {
+    field(DESC,"M4 max velocity")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M5MVA") {
+    field(DESC,"M5 max velocity")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M6MVA") {
+    field(DESC,"M6 max velocity")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M7MVA") {
+    field(DESC,"M7 max velocity")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M8MVA") {
+    field(DESC,"M8 max velocity")
+    field(PREC, "4")
+}
+
+#
+# PVs for readback of maximum velocity element
+# MVE = Maximum Velocity Element
+#
+grecord(longout,"$(P)$(R)M1MVE") {
+    field(DESC,"M1 max velocity element")
+}
+grecord(longout,"$(P)$(R)M2MVE") {
+    field(DESC,"M2 max velocity element")
+}
+grecord(longout,"$(P)$(R)M3MVE") {
+    field(DESC,"M3 max velocity element")
+}
+grecord(longout,"$(P)$(R)M4MVE") {
+    field(DESC,"M4 max velocity element")
+}
+grecord(longout,"$(P)$(R)M5MVE") {
+    field(DESC,"M5 max velocity element")
+}
+grecord(longout,"$(P)$(R)M6MVE") {
+    field(DESC,"M6 max velocity element")
+}
+grecord(longout,"$(P)$(R)M7MVE") {
+    field(DESC,"M7 max velocity element")
+}
+grecord(longout,"$(P)$(R)M8MVE") {
+    field(DESC,"M8 max velocity element")
+}
+
+#
+# PVs for readback of maximum acceleration
+# MAA = Maximum Acceleration Actual
+#
+grecord(ao,"$(P)$(R)M1MAA") {
+    field(DESC,"M1 max acceleration")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M2MAA") {
+    field(DESC,"M2 max acceleration")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M3MAA") {
+    field(DESC,"M3 max acceleration")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M4MAA") {
+    field(DESC,"M4 max acceleration")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M5MAA") {
+    field(DESC,"M5 max acceleration")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M6MAA") {
+    field(DESC,"M6 max acceleration")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M7MAA") {
+    field(DESC,"M7 max acceleration")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M8MAA") {
+    field(DESC,"M8 max acceleration")
+    field(PREC, "4")
+}
+
+#
+# PVs for readback of maximum acceleration element
+# MAE = Maximum Acceleration Element
+#
+grecord(longout,"$(P)$(R)M1MAE") {
+    field(DESC,"M1 max acceleration element")
+}
+grecord(longout,"$(P)$(R)M2MAE") {
+    field(DESC,"M2 max acceleration element")
+}
+grecord(longout,"$(P)$(R)M3MAE") {
+    field(DESC,"M3 max acceleration element")
+}
+grecord(longout,"$(P)$(R)M4MAE") {
+    field(DESC,"M4 max acceleration element")
+}
+grecord(longout,"$(P)$(R)M5MAE") {
+    field(DESC,"M5 max acceleration element")
+}
+grecord(longout,"$(P)$(R)M6MAE") {
+    field(DESC,"M6 max acceleration element")
+}
+grecord(longout,"$(P)$(R)M7MAE") {
+    field(DESC,"M7 max acceleration element")
+}
+grecord(longout,"$(P)$(R)M8MAE") {
+    field(DESC,"M8 max acceleration element")
+}
+
+
+#
+# PVs for turning the detector on and off.
+#
+grecord(ao,"$(P)$(R)DetOn") {
+    field(DESC,"Turn detector on")
+    field(VAL,"$(DONV)")
+    field(OUT,"$(DONPV) PP MS")
+}
+grecord(ao,"$(P)$(R)DetOff") {
+    field(DESC,"Turn detector off")
+    field(VAL,"$(DOFFV)")
+    field(OUT,"$(DOFFPV) PP MS")
+}
+grecord(ao,"$(P)$(R)DebugLevel") {
+    field(DESC,"Debugging level")
+    field(VAL,"0")
+}
