@@ -117,10 +117,15 @@ Modification Log from R6-1 to R6-2
 
 1) Bug fix for Newport PM500 initialization problem.  The PM500 driver was not
         issuing the correct command when it queried for the number of axes at
-	boot up; correct command (XSTAT?), incorrect command (STAT?).  This
-	resulted in a "PM500 system error" message on the 1st axis.
-	
-	File modified: NewportSrc/drvPM500.cc
+        boot up; correct command (XSTAT?), incorrect command (STAT?).  This
+        resulted in a "PM500 system error" message on the 1st axis.
+        
+        File modified: NewportSrc/drvPM500.cc
+
+2) Bug fix for OMS device support overwriting PID parameter fields during
+        normalization calculation.
+
+        File modified: OmsSrc/devOmsCom.cc
 
 
 Modification Log from R6-0 to R6-1
