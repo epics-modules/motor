@@ -244,7 +244,7 @@ STATIC int set_status(int card, int signal)
 
         /* We used to check just response[2] for problem.
          * However, it turns out that in firmware version 6.15 that bit=1 for no problem,
-         * but in 6.17 it is 0 for no problem!  Check the last 4 bits individually instead.
+         * but in 6.17 it is 0 for no problem!  Check the last 4 bits individually instead. */
         status.Bits.RA_PROBLEM = 0;
         if ((response[4] == '1') || 
             (response[5] == '1') || 
