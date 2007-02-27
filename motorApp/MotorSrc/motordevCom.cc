@@ -3,9 +3,9 @@ FILENAME: motordevCom.cc
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:	$Revision: 1.9 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-12-08 00:12:54 $
+Version:	$Revision: 1.10 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2007-02-27 17:22:49 $
 */
 
 /*
@@ -46,6 +46,10 @@ Last Modified:	$Date: 2005-12-08 00:12:54 $
  * .07  06/07/05 rls Use RDBD as threshold for controller's position takes
  *                   precedence over the save/restore value at initialization.
  * .08  10/18/05 rls Use MAX_TIMEOUT.
+ * .09  02/27/07 rls Bug fix in motor_init_record_com() for logic that
+ *                   determines precedence between controller or save/restore
+ *                   motor position at boot-up; negative controller positions
+ *                   were not handled correctly.
  */
 
 
@@ -146,8 +150,8 @@ LOGIC...
 	Set local encoder ratio to unity.
     ENDIF
 
-    Set Initialize position indicator based on (|DVEL| > RDBD, AND, MRES != 0,
-	AND, the above "get_axis_info()" position < RDBD) [NOTE: |controller
+    Set Initialize position indicator based on (|DVAL| > RDBD, AND, MRES != 0,
+	AND, the above |"get_axis_info()" position| < RDBD) [NOTE: |controller
 	position| >= RDBD takes precedence over save/restore position].
     Set Command Primitive Initialization string indicator based on (non-NULL "init"
 	pointer, AND, non-zero string length.
@@ -286,8 +290,8 @@ epicsShareFunc long motor_init_record_com(struct motorRecord *mr, int brdcnt, st
     }
 
     initPos = (fabs(mr->dval) > mr->rdbd && mr->mres != 0 &&
-	      (float) (axis_query.position * mr->mres) < mr->rdbd)
-	      ? true : false;
+	       fabs(axis_query.position * mr->mres) < mr->rdbd)
+	       ? true : false;
     /* Test for command primitive initialization string. */
     initString = (mr->init != NULL && strlen(mr->init)) ? true : false;
     /* Test for PID support. */
