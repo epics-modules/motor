@@ -127,6 +127,13 @@ Modification Log from R6-1 to R6-2
 
         File modified: OmsSrc/devOmsCom.cc
 
+3) Bug fix in motor_init_record_com() for logic that determines precedence
+        between controller or save/restore motor position at boot-up.  Negative
+        controller positions were not handled correctly.
+
+        File modified: MotorSrc/motordevCom.cc; take absolute value of position
+                       from controller.
+
 
 Modification Log from R6-0 to R6-1
 ==================================
