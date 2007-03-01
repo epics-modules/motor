@@ -1,6 +1,6 @@
 
 file {
-	name="/home/oxygen/MOONEY/epics/synApps/support/motor/cvs/motorApp/op/adl/topMotors8.adl"
+	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-8/support/motor/motorApp/op/adl/topMotors8.adl"
 	version=030101
 }
 display {
@@ -908,21 +908,26 @@ composite {
 		args="P=$(P),M=$(M1)"
 	}
 	display[2] {
+		label="$(M1) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M1)"
+	}
+	display[3] {
 		label="$(M1) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M1)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M1) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M1)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M1),PV=$(M1)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M1) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M1)"
@@ -949,21 +954,26 @@ composite {
 		args="P=$(P),M=$(M5)"
 	}
 	display[2] {
+		label="$(M5) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M5)"
+	}
+	display[3] {
 		label="$(M5) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M5)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M5) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M5)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M5),PV=$(M5)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M5) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M5)"
@@ -990,21 +1000,26 @@ composite {
 		args="P=$(P),M=$(M6)"
 	}
 	display[2] {
+		label="$(M6) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M6)"
+	}
+	display[3] {
 		label="$(M6) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M6)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M6) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M6)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M6),PV=$(M6)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M6) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M6)"
@@ -1031,21 +1046,26 @@ composite {
 		args="P=$(P),M=$(M7)"
 	}
 	display[2] {
+		label="$(M7) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M7)"
+	}
+	display[3] {
 		label="$(M7) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M7)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M7) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M7)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M7),PV=$(M7)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M7) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M7)"
@@ -1072,21 +1092,26 @@ composite {
 		args="P=$(P),M=$(M8)"
 	}
 	display[2] {
+		label="$(M8) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M8)"
+	}
+	display[3] {
 		label="$(M8) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M8)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M8) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M8)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M8),PV=$(M8)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M8) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M8)"
@@ -1113,21 +1138,26 @@ composite {
 		args="P=$(P),M=$(M4)"
 	}
 	display[2] {
+		label="$(M4) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M4)"
+	}
+	display[3] {
 		label="$(M4) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M4)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M4) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M4)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M4),PV=$(M4)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M4) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M4)"
@@ -1154,21 +1184,26 @@ composite {
 		args="P=$(P),M=$(M2)"
 	}
 	display[2] {
+		label="$(M2) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M2)"
+	}
+	display[3] {
 		label="$(M2) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M2)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M2) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M2)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M2),PV=$(M2)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M2) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M2)"
@@ -1195,21 +1230,26 @@ composite {
 		args="P=$(P),M=$(M3)"
 	}
 	display[2] {
+		label="$(M4) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M4)"
+	}
+	display[3] {
 		label="$(M3) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M3)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M3) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M3)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M3),PV=$(M3)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M3) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M3)"

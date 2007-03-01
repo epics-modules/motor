@@ -548,21 +548,26 @@ composite {
 		args="P=$(P),M=$(M1)"
 	}
 	display[2] {
+		label="$(M1) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M1)"
+	}
+	display[3] {
 		label="$(M1) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M1)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M1) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M1)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M1),PV=$(M1)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M1) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M1)"
@@ -589,21 +594,26 @@ composite {
 		args="P=$(P),M=$(M4)"
 	}
 	display[2] {
+		label="$(M4) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M4)"
+	}
+	display[3] {
 		label="$(M4) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M4)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M4) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M4)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M4),PV=$(M4)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M4) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M4)"
@@ -630,21 +640,26 @@ composite {
 		args="P=$(P),M=$(M2)"
 	}
 	display[2] {
+		label="$(M2) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M2)"
+	}
+	display[3] {
 		label="$(M2) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M2)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M2) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M2)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M2),PV=$(M2)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M2) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M2)"
@@ -671,21 +686,26 @@ composite {
 		args="P=$(P),M=$(M3)"
 	}
 	display[2] {
+		label="$(M3) (Alt-Small)"
+		name="motorxU.adl"
+		args="P=$(P),M=$(M3)"
+	}
+	display[3] {
 		label="$(M3) (Medium)"
 		name="motorx_more.adl"
 		args="P=$(P),M=$(M3)"
 	}
-	display[3] {
+	display[4] {
 		label="$(M3) (Setup)"
 		name="motorx_setup.adl"
 		args="P=$(P),M=$(M3)"
 	}
-	display[4] {
+	display[5] {
 		label="Scan Parameters"
 		name="scanParms.adl"
 		args="P=$(P),Q=$(M3),PV=$(M3)"
 	}
-	display[5] {
+	display[6] {
 		label="$(M3) (Debug)"
 		name="motorx_all.adl"
 		args="P=$(P),M=$(M3)"
