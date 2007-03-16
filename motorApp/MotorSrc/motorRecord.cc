@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.37 $
-Modified By:	$Author: peterd $
-Last Modified:	$Date: 2007-02-03 12:01:49 $
+Version:	$Revision: 1.38 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2007-03-16 20:30:41 $
 */
 
 /*
@@ -89,9 +89,10 @@ Last Modified:	$Date: 2007-02-03 12:01:49 $
  *                    status update.
  * .29 06-30-06 rls - Change do_work() test for "don't move if within RDBD",
  *                    from float to integer; avoid equality test errors.
+ * .30 03-16-07 rls - Clear home request when soft-limit violation occurs.
  */
 
-#define VERSION 6.1
+#define VERSION 6.2
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -1723,8 +1724,18 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    else if ((pmr->homf && (pmr->dval > pmr->dhlm - pmr->velo)) ||
 		     (pmr->homr && (pmr->dval < pmr->dllm + pmr->velo)))
 	    {
-		pmr->lvio = 1;
+		pmr->lvio = 1;  /* Set limit violation ON. */
 		MARK(M_LVIO);
+                if (pmr->homf)
+                {
+                    pmr->homf = 0; /* Clear Home Forward request. */
+                    MARK_AUX(M_HOMF);
+                }
+                if (pmr->homr)
+                {
+                    pmr->homr = 0; /* Clear Home Reverse request. */
+                    MARK_AUX(M_HOMR);
+                }
 		return(OK);
 	    }
 	    pmr->mip = pmr->homf ? MIP_HOMF : MIP_HOMR;
