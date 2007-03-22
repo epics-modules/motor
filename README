@@ -7,7 +7,7 @@ R3.14.8.2.
 
 Contents
 ========
-	
+        
 This <supporttop> contains the following motor record related items:
         - motor record and device driver database definitions.
         - the record level support library.
@@ -134,39 +134,53 @@ Modification Log from R6-1 to R6-2
         File modified: MotorSrc/motordevCom.cc; take absolute value of position
                        from controller.
 
+4) Added Pete Jemian's motorxU.adl and modifications to the motor.db template
+        that provides the user with the ability to adjust the motor tweak (TWV)
+        and slew velocity (VELO/S) values by a factor of either 0.1 or 10.
+
+        File added: motorApp/op/adl/motorxU.adl
+        Files modified: - motorApp/Db/motor.db; scalcout records $(P)$(M)_vCh
+                                                      and $(P)$(M)_twCh added.
+                        - motorApp/op/adl/topMotors[4/8].adl; added motorxU.adl
+                          to menu selection.
+
+5) Clear home request when soft-limit violation occurs.
+
+        File modified: do_work() in motorRecord.cc
+
 
 Modification Log from R6-0 to R6-1
 ==================================
 
 1) MicroMo model MVP 2001 B02 driver; bug fix for recv_mess() always returning
         nread = 0.
-	
-	File modified: MicroMoSrc/drvMVP2001.cc
+
+        File modified: MicroMoSrc/drvMVP2001.cc
 
 2) New Focus models 8750 and 8752; check for special STA cmnd handling.
         SocketClose() at exit added but disabled pending further testing.
 
-	File modified: NewFocusSrc/drvPMNC87xx.cc
-	
+        File modified: NewFocusSrc/drvPMNC87xx.cc
+        
 3) Physik Instrumente (PI) GmbH & Co. C-862; added 17ms "status update delay"
-	to prevent dropped communication characters in controller; i.e.
-	erroneous command error responses.
-	
-	File modified: PiSrc/drvPIC862.cc
+        to prevent dropped communication characters in controller; i.e.
+        erroneous command error responses.
+        
+        File modified: PiSrc/drvPIC862.cc
 
 4) All motorStatus[xx].adl displays modified to show motor position with text
         rather than with bar graphs.
-	
-	Files modified: motorApp/op/adl/motorStatus[xx].adl
+        
+        Files modified: motorApp/op/adl/motorStatus[xx].adl
 
 5) Joe Sullivan added support for the Physik Instrumente (PI) GmbH & Co. model
         E-710 motor controller.
 
-	Files added to motorApp/PiSrc: devPIE710.cc, drvPIE710.cc, drvPIE710.h
+        Files added to motorApp/PiSrc: devPIE710.cc, drvPIE710.cc, drvPIE710.h
 
 6) Parker 6K Series; closeSocket() call at EXIT code added (requires asd8 BSP).
 
-	File modified: drvPC6K.cc
+        File modified: drvPC6K.cc
 
 
 Modification Log from R5-9 to R6-0
@@ -174,10 +188,10 @@ Modification Log from R5-9 to R6-0
 
 1) The OMS MAXv polling rate, which set is from the MAXvSetup() st.cmd command,
         is allowed to be as high as the OS clock rate; i.e.,
-	(1/epicsThreadSleepQuantum()).
-	
+        (1/epicsThreadSleepQuantum()).
+        
         File modified: drvMAXv.cc - changed polling rate error check to,
-	               1 <= polling rate <=  (1/epicsThreadSleepQuantum())
+                       1 <= polling rate <=  (1/epicsThreadSleepQuantum())
 
 2) Since R4-5 (item #9), RDBD must be >= MRES.  The test for this condition
         was done using floating point values.  This caused an occasional
@@ -198,11 +212,11 @@ Modification Log from R5-9 to R6-0
 
 4) Added a work around for OMS PC68/78 firmware error.  PC68/78 controllers
         make an erroneous response after they are queried with the "?KP"
-	command at boot-up.  This resulted in 1st axis having same position (RP
-	command) as last the axis.
+        command at boot-up.  This resulted in 1st axis having same position (RP
+        command) as last the axis.
 
-	File modified: Added a dummy comm. transaction to motor_init() in
-	               drvOmsPC68.cc.
+        File modified: Added a dummy comm. transaction to motor_init() in
+                       drvOmsPC68.cc.
 
 5) GPIB under ASYN allows only one input EOS character; no output EOS is
         allowed. Adjustments were made to the Newport ESP300 driver to
@@ -316,13 +330,13 @@ Modification Log from R5-8 to R5-9
                         - <motor>/motorApp/Db/XPS_trajectoryScan.db
 
 10) Brian Tieman and Ron Sluiter added support for the standalone, RS-232
-	versions of the OMS PC68 and PC78 model controllers.  The same device
-	(OMS PC68/78) and driver (drvOmsPC68) support both models.
+        versions of the OMS PC68 and PC78 model controllers.  The same device
+        (OMS PC68/78) and driver (drvOmsPC68) support both models.
 
-	Files added	- <motor>/motorApp/OmsSrc/devOmsPC68.cc
-			- <motor>/motorApp/OmsSrc/drvOmsPC68.cc
-			- <motor>/motorApp/OmsSrc/drvOmsPC68.h
-	Files modified	- <motor>/motorApp/OmsSrc/devOms.dd
+        Files added     - <motor>/motorApp/OmsSrc/devOmsPC68.cc
+                        - <motor>/motorApp/OmsSrc/drvOmsPC68.cc
+                        - <motor>/motorApp/OmsSrc/drvOmsPC68.h
+        Files modified  - <motor>/motorApp/OmsSrc/devOms.dd
 
 
 Modification Log from R5-7 to R5-8
