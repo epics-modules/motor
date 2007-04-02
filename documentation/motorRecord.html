@@ -91,6 +91,9 @@ Channel support):
   <li>
     Spectra-Physics, Encoder Mike Controller, Model 18011.
   </li>
+  <li>
+    Thorlabs, Piezo Controller, Model MDT695.
+  </li>
 </ul>
 The record maintains two coordinate systems for motor position ("user" and "dial 
 " coordinates); displays drive and readback values; enforces limits to motor 
@@ -1776,7 +1779,7 @@ below.
     <td>Desired Output Loc</td>
     <td>INLINK</td>
     <td>If this field contains a valid EPICS link, and the OMSL field has the  value 
-      "closed_loop" (1), then every time the <span lang="en-us"></span>motor record is processed, it will 
+      "closed_loop" (1), then every time the motor record is processed, it will 
       get a value for the VAL field from the link and move to that location, ignoring 
       all other drive fields. Closed-loop mode has not been tested extensively.&nbsp;</td>
   </tr>
@@ -1787,7 +1790,7 @@ below.
     <td>GBLCHOICE</td>
     <td>(0:"supervisory", 1:"closed_loop")&nbsp; <br>
       If this field has the value "closed_loop" (1), and the field DOL contains a 
-      valid EPICS link, then every time the <span lang="en-us"></span>motor record is processed, it will get 
+      valid EPICS link, then every time the motor record is processed, it will get 
       a value for the VAL field from the link and move to that location, ignoring all 
       other drive fields. Closed-loop mode has not been tested extensively.&nbsp;</td>
   </tr>
@@ -2826,8 +2829,7 @@ below.
 	</li>
 	<li>
 	  When drive-power status monitoring is enabled and a power failure is detected, 
-	  the device driver will respond by activating the <span lang="en-us">
-      </span>RA_OVERTRAVEL bit in the 
+	  the device driver will respond by activating the RA_OVERTRAVEL bit in the 
 	  MSTA.&nbsp; This results in either HLS or LLS being activated depending on the 
 	  DIR field. In addition, the following message will appear in the error log; "Drive 
 	  power failure at VME58 card#?? motor#??".

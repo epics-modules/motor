@@ -2,7 +2,7 @@ Motor Record R6-2 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
-R3.14.8.2.
+R3-14-9.
 
 
 Contents
@@ -122,8 +122,8 @@ Modification Log from R6-1 to R6-2
         
         File modified: NewportSrc/drvPM500.cc
 
-2) Bug fix for OMS device support overwriting PID parameter fields during
-        normalization calculation.
+2) A bug was introduced with R6-0.  The OMS device support was overwriting PID
+        parameter fields during normalization calculation.
 
         File modified: OmsSrc/devOmsCom.cc
 
@@ -147,6 +147,15 @@ Modification Log from R6-1 to R6-2
 5) Clear home request when soft-limit violation occurs.
 
         File modified: do_work() in motorRecord.cc
+
+
+6) Joe Sullivan added support for Thorlabs Piezo Control Module, model MDT695.
+
+        Directory added: motorApp/ThorLabsSrc
+
+7) Due to releasing R6-1 during Newport development, R6-1 can result in linker
+        errors on the symbol "xpsgathering".  Newport users should upgrade to
+        R6-2.
 
 
 Modification Log from R6-0 to R6-1

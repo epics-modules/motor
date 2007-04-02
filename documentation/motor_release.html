@@ -5,11 +5,66 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R6.1 Notice</title>
+  <title>EPICS Motor Record Release R6.2 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+<CENTER>
+  <H1><B><U>Motor Record Version 6.2 Release Notice</U></B></H1>
+</CENTER>
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Newport PM500 Initialization Problem</B></U>
+  </P>
+  <P>
+  The PM500 driver was not issuing the correct command when it queried for the 
+  number of axes at boot up. This resulted in a "PM500 system error" message on 
+  the 1st axis.
+  </P>
+  <P>
+  <U><B>Overwritten PID Parameters</B></U>
+  </P>
+  <P>
+  A bug was introduced with R6-0; the OMS device support was overwriting PID 
+  parameter fields during its' normalization calculation.
+  </P>
+  <P>
+  <U><B>Motor Position Initialization</B></U>
+  </P>
+  <P>
+  There was a bug in the logic that determines the precedence between using the 
+  controller's or save/restore's motor position at boot-up. Negative controller 
+  positions were not handled correctly.  
+  </P>
+  <U><B>Newport Build Problem</B></U>
+  </P>
+  <P>
+  Due to releasing R6-1 during Newport development, R6-1 can result in linker 
+  errors on the symbol "xpsgathering". Newport users should upgrade to R6-2.
+  </P>
+</DIV>
+
+
+<CENTER>
+  <H4><U>New Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Thorlabs model MDT695</B></U>
+  </P>
+  <P>
+  Joe Sullivan added support for Thorlabs Piezo Control Module, model MDT695.
+  </P>
+</DIV>
+
 
 <CENTER>
   <H1><B><U>Motor Record Version 6.1 Release Notice</U></B></H1>
