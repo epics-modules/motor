@@ -14,14 +14,14 @@
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
-# Required ASYN release: R4-6
-ASYN=$(SUPPORT)/asyn/4-6
+# Required ASYN release: R4-7
+ASYN=$(SUPPORT)/asyn/4-7
 
 # Need the sequencer for the MM4005 and XPS trajectory scanning
 SNCSEQ=$(SUPPORT)/seq/2-0-11
 
-# Recommended EPICS release: R3.14.8.2
-EPICS_BASE=$(SUPPORT)/../base-3.14.8.2
+# Recommended EPICS release: R3.14.9
+EPICS_BASE=$(SUPPORT)/../base-3.14.9
 
 # The following must be defined if the "WithMPF" example in motorExApp is to
 # be built.
