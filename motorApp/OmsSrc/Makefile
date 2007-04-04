@@ -28,6 +28,7 @@ SRCS += devMAXv.cc drvMAXv.cc
 SRCS += devOmsCom.cc
 
 oms_LIBS += motor
+oms_LIBS += asyn
 oms_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES

@@ -592,7 +592,8 @@ STATIC int send_recv_mess(int card, char const *send_com, char *recv_com, char c
 
     if (status != asynSuccess)
     {
-      Debug(3, "send_recv_mess(): ERROR - staus =%d, nread = %d\n", (int) status, nread);
+      int int_status = (int) status;
+      Debug(3, "send_recv_mess(): ERROR - staus =%d, nread = %d\n", int_status, nread);
       recv_com[0] = '\0';
       return(MESS_ERR);
     }
@@ -723,9 +724,10 @@ STATIC int recv_mess(int card, char *com, int flag)
 
     if (status != asynSuccess)
       {
+        int int_status = (int) status;
 	com[0] = '\0';
 	rtnValue = MESS_ERR;
-	Debug(3, "recv_mess(): ERROR - staus =%d, nread = %d\n", (int) status, nread);
+	Debug(3, "recv_mess(): ERROR - staus =%d, nread = %d\n", int_status, nread);
       }
     else
       {

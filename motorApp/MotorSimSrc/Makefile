@@ -20,6 +20,7 @@ motorSimSupport_SRCS += devMotorSim.c
 motorSimSupport_SRCS += drvMotorSim.c
 motorSimSupport_SRCS += motorSimRegister.cc
 
+motorSimSupport_LIBS += motor
 motorSimSupport_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #=============================
