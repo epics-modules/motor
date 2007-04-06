@@ -37,9 +37,9 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version R6-2 of the EPICS motor
+<h2>Overview</h2> This documentation describes version R6-3 of the EPICS motor
 record, and related EPICS software required to build and use it.&nbsp; Version
-R6-2 of the motor record is compatible with EPICS base R3.14.9 and above.
+R6-3 of the motor record is compatible with EPICS base R3.14.9 and above.
 <p>
 The motor record is intended to support motors of all kinds, but currently 
 supports only the following variety of motor controllers (in addition to Soft 
@@ -213,7 +213,7 @@ below.
     <td><a href="#Fields_motion">ACCL</a></td>
     <td>R/W</td>
     <td>Seconds to Velocity</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>acceleration time</td>
   </tr>
   <tr>
@@ -227,21 +227,21 @@ below.
     <td><a href="#Fields_motion">BACC</a></td>
     <td>R/W</td>
     <td>BL Seconds to Veloc.</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>backlash acceleration time</td>
   </tr>
   <tr>
     <td><a href="#Fields_motion">BDST</a></td>
     <td>R/W</td>
     <td>BL Distance (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>backlash distance</td>
   </tr>
   <tr>
     <td><a href="#Fields_motion">BVEL</a></td>
     <td>R/W</td>
     <td>BL Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>backlash speed</td>
   </tr>
   <tr>
@@ -278,7 +278,7 @@ below.
     <td><a href="#Servo_fields">DCOF</a></td>
     <td>R/W</td>
     <td>Derivative Gain</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -286,7 +286,7 @@ below.
     <td><a href="#Fields_limit">DHLM</a></td>
     <td>R/W*</td>
     <td>Dial High Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -317,7 +317,7 @@ below.
     <td><a href="#Fields_limit">DLLM</a></td>
     <td>R/W*</td>
     <td>Dial Low Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -325,7 +325,7 @@ below.
     <td><a href="#Fields_status">DLY</a></td>
     <td>R/W</td>
     <td>Readback settle time (s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -371,7 +371,7 @@ below.
     <td><a href="#Fields_res">ERES</a></td>
     <td>R/W*</td>
     <td>Encoder Step Size (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -394,7 +394,7 @@ below.
     <td><a href="#Fields_motion">FRAC</a></td>
     <td>R/W</td>
     <td>Move Fraction</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -410,7 +410,7 @@ below.
     <td><a href="#Fields_alarm">HIGH</a></td>
     <td>R/W*</td>
     <td>High Alarm Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -418,7 +418,7 @@ below.
     <td><a href="#Fields_alarm">HIHI</a></td>
     <td>R/W*</td>
     <td>Hihi Alarm Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -426,7 +426,7 @@ below.
     <td><a href="#Fields_limit">HLM</a></td>
     <td>R/W*</td>
     <td>User High Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -466,7 +466,7 @@ below.
     <td><a href="#Fields_limit">HOPR</a></td>
     <td>R/W</td>
     <td>High Operating Range</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -482,7 +482,7 @@ below.
     <td><a href="#Fields_motion">HVEL</a></td>
     <td>R/W*</td>
     <td>Home Velocity</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -490,7 +490,7 @@ below.
     <td><a href="#Servo_fields">ICOF</a></td>
     <td>R/W</td>
     <td>Integral Gain</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -506,7 +506,7 @@ below.
     <td><a href="#Fields_motion">JAR</a></td>
     <td>R/W</td>
     <td>Jog Acceleration (EGU/s^2)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -528,7 +528,7 @@ below.
     <td><a href="#Fields_motion">JVEL</a></td>
     <td>R/W</td>
     <td>Jog Velocity</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -544,7 +544,7 @@ below.
     <td><a href="#Fields_limit">LLM</a></td>
     <td>R/W*</td>
     <td>User Low Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -575,7 +575,7 @@ below.
     <td><a href="#Fields_alarm">LOLO</a></td>
     <td>R/W*</td>
     <td>Lolo Alarm Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -583,7 +583,7 @@ below.
     <td><a href="#Fields_limit">LOPR</a></td>
     <td>R/W</td>
     <td>Low Operating Range</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -591,7 +591,7 @@ below.
     <td><a href="#Fields_alarm">LOW</a></td>
     <td>R/W*</td>
     <td>Low Alarm Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -677,7 +677,7 @@ below.
     <td><a href="#Fields_res">MRES</a></td>
     <td>R/W*</td>
     <td>Motor Step Size (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -732,7 +732,7 @@ below.
     <td><a href="#Servo_fields">PCOF</a></td>
     <td>R/W</td>
     <td>Proportional Gain</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -795,7 +795,7 @@ below.
     <td><a href="#Fields_motion">RDBD</a></td>
     <td>R/W</td>
     <td>Retry Deadband (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -883,7 +883,7 @@ below.
     <td><a href="#Fields_res">RRES</a></td>
     <td>R/W</td>
     <td>Readback Step Size (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -915,7 +915,7 @@ below.
     <td><a href="#Fields_motion">S</a></td>
     <td>R/W</td>
     <td>Speed (RPS)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -923,7 +923,7 @@ below.
     <td><a href="#Fields_motion">SBAK</a></td>
     <td>R/W</td>
     <td>BL Speed (RPS)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -931,7 +931,7 @@ below.
     <td><a href="#Fields_motion">SBAS</a></td>
     <td>R/W</td>
     <td>Base Speed (RPS)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -946,7 +946,7 @@ below.
     <td><a href="#Fields_motion">SMAX</a></td>
     <td>R/W</td>
     <td>Max Velocity (RPS)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -1033,7 +1033,7 @@ below.
     <td><a href="#Fields_command">TWV</a></td>
     <td>R/W*</td>
     <td>Tweak Step Size (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -1048,7 +1048,7 @@ below.
     <td><a href="#Fields_res">UREV</a></td>
     <td>R/W*</td>
     <td>EGU's per Revolution</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -1071,7 +1071,7 @@ below.
     <td><a href="#Fields_motion">VBAS</a></td>
     <td>R/W</td>
     <td>Base Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -1079,7 +1079,7 @@ below.
     <td><a href="#Fields_motion">VELO</a></td>
     <td>R/W</td>
     <td>Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -1087,14 +1087,14 @@ below.
     <td><a href="#Fields_misc">VERS</a></td>
     <td>R</td>
     <td>Code Version</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>e.g., "1.95"</td>
   </tr>
   <tr>
     <td><a href="#Fields_motion">VMAX</a></td>
     <td>R/W</td>
     <td>Max Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -1315,7 +1315,7 @@ below.
     <td>MRES</td>
     <td>R/W*</td>
     <td>Motor Step Size (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>May be positive or negative</td>
   </tr>
   <tr valign="top">
@@ -1329,7 +1329,7 @@ below.
     <td>UREV</td>
     <td>R/W*</td>
     <td>EGU's per Revolution</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>May be positive or negative</td>
   </tr>
   <tr>
@@ -1389,7 +1389,7 @@ below.
     <td>ERES</td>
     <td>R/W*</td>
     <td>Encoder Step Size (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <TD>
       Encoder resolution: the distance or angle, in engineering units, associated 
       with a single encoder step. ERES may be positive or negative. If the user sets 
@@ -1400,7 +1400,7 @@ below.
     <td>RRES</td>
     <td>R/W</td>
     <td>Readback Step Size (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Readback-device resolution: the distance or angle, in engineering units,
     associated with a unit change of the number retrieved via the readback- location 
     input link (RDBL). RRES may be either positive or negative.&nbsp;</td>
@@ -1476,7 +1476,7 @@ below.
     <td>VMAX</td>
     <td>R/W</td>
     <td>Max Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; 0 &lt;= VMAX.&nbsp; VMAX=0 disables maximum velocity range
     checking.</td>
   </tr>
@@ -1484,21 +1484,21 @@ below.
     <td>SMAX</td>
     <td>R/W</td>
     <td>Max Velocity (RPS)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; 0 &lt;= SMAX</td>
   </tr>
   <tr>
     <td>VBAS</td>
     <td>R/W</td>
     <td>Base Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; 0 &lt;= VBAS</td>
   </tr>
   <tr>
     <td>SBAS</td>
     <td>R/W</td>
     <td>Base Speed (RPS)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; 0 &lt;= SBAS</td>
   </tr>
   <tr nosave="">
@@ -1535,14 +1535,14 @@ below.
     <td>VELO</td>
     <td>R/W</td>
     <td>Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; VBAS &lt;= VELO &lt;= VMAX</td>
   </tr>
   <tr valign="top">
     <td>S</td>
     <td>R/W</td>
     <td>Speed (RPS)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range;&nbsp; SBAS &lt;=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
     &lt;= SMAX</td>
   </tr>
@@ -1556,14 +1556,14 @@ below.
     <td>HVEL</td>
     <td>R/W</td>
     <td>Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Homing velocity; valid range; VBAS &lt;= HVEL &lt;= VMAX</td>
   </tr>
   <tr valign="top">
     <td>ACCL</td>
     <td>R/W</td>
     <td>Seconds to Velocity</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>The length, in seconds, of the acceleration and deceleration phases of a 
     motor motion.</td>
   </tr>
@@ -1577,14 +1577,14 @@ below.
     <td>JVEL</td>
     <td>R/W</td>
     <td>Jog Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; VBAS &lt;= VELO &lt;= VMAX</td>
   </tr>
   <tr>
     <td>JAR</td>
     <td>R/W</td>
     <td>Jog Acceleration (EGU/s^2)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Default value: VELO / ACCL</td>
   </tr>
   <tr nosave="">
@@ -1596,7 +1596,7 @@ below.
     <td>BDST</td>
     <td>R/W</td>
     <td>BL Distance (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>The signed distance, in dial coordinates, used for backlash takeout.</td>
   </tr>
   <tr>
@@ -1634,13 +1634,13 @@ below.
     <td>BVEL</td>
     <td>R/W</td>
     <td>BL Velocity (EGU/s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
   </tr>
   <tr valign="top">
     <td>SBAK</td>
     <td>R/W</td>
     <td>BL Speed (RPS)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
   </tr>
   <tr>
     <td colspan="5">BVEL is the speed, in engineering units per second, at which the 
@@ -1664,7 +1664,7 @@ below.
     <td>BACC</td>
     <td>R/W</td>
     <td>BL Seconds to Veloc.</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>The length, in seconds, of the acceleration and deceleration phases of a 
     backlash-takeout motion. See discussion of the acceleration field ACCL for more 
     specific information.</td>
@@ -1685,7 +1685,7 @@ below.
     <td>FRAC</td>
     <td>R/W</td>
     <td>Move Fraction</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
   </tr>
   <tr>
     <td colspan="5">This field supports closed-loop control of pathological devices 
@@ -1717,7 +1717,7 @@ below.
     <td>RDBD</td>
     <td>R/W</td>
     <td>Retry Deadband (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>When the motor has finished a complete motion, possibly including backlash
     takeout, the motor record will compare its current position with the desired
     position. If the magnitude of the difference is greater than RDBD, the motor
@@ -1867,7 +1867,7 @@ below.
     <td>HLM</td>
     <td>R/W*</td>
     <td>User High Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>The maximum allowed value of the VAL field. If HLM changes so that VAL is no 
     longer less than HLM, then the record will set the field LVIO to 1. If the DIR 
     field has the value "Pos", then HLM will always be consistent with DHLM, 
@@ -1877,7 +1877,7 @@ below.
     <td>LLM</td>
     <td>R/W*</td>
     <td>User Low Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>The minimum allowed value of the VAL field. If LLM changes so that VAL is no 
     longer greater than LLM, then the record will set the field LVIO to 1. If the 
     DIR field has the value "Pos", then LLM will always be consistent with DLLM, 
@@ -1887,7 +1887,7 @@ below.
     <td>DHLM</td>
     <td>R/W*</td>
     <td>Dial High Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>The maximum allowed value of the DVAL field. If DHLM changes so that DVAL is 
     no longer less than DHLM, then the record will set the field LVIO to 1.. If the 
     DIR field has the value "Pos", then DHLM will always be consistent with HLM, 
@@ -1897,7 +1897,7 @@ below.
     <td>DLLM</td>
     <td>R/W*</td>
     <td>Dial Low Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>The minimum allowed value of the DVAL field. If DLLM changes so that DVAL is 
     no longer greater than DLLM, then the record will set the field LVIO to 1. If 
     the DIR field has the value "Pos", then DLLM will always be consistent with LLM, 
@@ -1929,14 +1929,14 @@ below.
     <td>HOPR</td>
     <td>R/W</td>
     <td>High Operating Range</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Not used. See HLM and DHLM.</td>
   </tr>
   <tr valign="top">
     <td>LOPR</td>
     <td>R/W</td>
     <td>Low Operating Range</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Not used. See LLM and DLLM.</td>
   </tr>
   <tr valign="top">
@@ -2198,7 +2198,7 @@ below.
     <td>TWV</td>
     <td>R/W*</td>
     <td>Tweak Step Size (EGU)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>This field contains the distance the motor is to move in response to  the 
     TWF and TWR buttons.</td>
   </tr>
@@ -2317,7 +2317,7 @@ below.
     <td>DLY</td>
     <td>R/W</td>
     <td>Readback settle time (s)</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Delay (in seconds) the time between motor controller done and motor record 
     done (i.e., DMOV).</td>
   </tr>
@@ -2586,21 +2586,21 @@ below.
     <td>PCOF</td>
     <td>R/W</td>
     <td>Proportional Gain</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; 0.0 &lt;= PCOF &lt;= 1.0</td>
   </tr>
   <tr valign="top">
     <td>&nbsp;ICOF</td>
     <td>R/W</td>
     <td>Integral Gain</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; 0.0 &lt;= ICOF &lt;= 1.0</td>
   </tr>
   <tr valign="top">
     <td>&nbsp;DCOF</td>
     <td>R/W</td>
     <td>Derivative Gain</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Valid range; 0.0 &lt;= DCOF &lt;= 1.0</td>
   </tr>
 
@@ -2632,25 +2632,25 @@ below.
     <td>HIHI</td>
     <td>R/W*</td>
     <td>Hihi Alarm Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
   </tr>
   <tr valign="top">
     <td>LOLO</td>
     <td>R/W*</td>
     <td>Lolo Alarm Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
   </tr>
   <tr valign="top">
     <td>HIGH</td>
     <td>R/W*</td>
     <td>High Alarm Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
   </tr>
   <tr valign="top">
     <td>LOW</td>
     <td>R/W*</td>
     <td>Low Alarm Limit</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
   </tr>
   <tr valign="top">
     <td>HHSV</td>
@@ -2722,7 +2722,7 @@ below.
     <td>VERS</td>
     <td>R</td>
     <td>Code Version</td>
-    <td>FLOAT</td>
+    <td>DOUBLE</td>
     <td>Version number of the recMotor.c code.</td>
   </tr>
   <tr valign="top">
