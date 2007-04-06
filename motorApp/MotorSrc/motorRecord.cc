@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.38 $
+Version:	$Revision: 1.39 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2007-03-16 20:30:41 $
+Last Modified:	$Date: 2007-04-06 18:35:38 $
 */
 
 /*
@@ -90,9 +90,11 @@ Last Modified:	$Date: 2007-03-16 20:30:41 $
  * .29 06-30-06 rls - Change do_work() test for "don't move if within RDBD",
  *                    from float to integer; avoid equality test errors.
  * .30 03-16-07 rls - Clear home request when soft-limit violation occurs.
+ * .31 04-06-07 rls - RDBD was being used in motordevCom.cc
+ *                    motor_init_record_com() before the validation check.
  */
 
-#define VERSION 6.2
+#define VERSION 6.3
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -472,6 +474,7 @@ static long init_record(dbCommon* arg, int pass)
      * sure things are sane.
      */
     check_speed_and_resolution(pmr);
+    enforceMinRetryDeadband(pmr);
 
     /* Call device support to initialize itself and the driver */
     if (pdset->base.init_record)
@@ -527,7 +530,6 @@ static long init_record(dbCommon* arg, int pass)
     }
 
     process_motor_info(pmr, true);
-    enforceMinRetryDeadband(pmr);
 
     /*
      * If we're in closed-loop mode, initializing the user- and dial-coordinate
