@@ -2,9 +2,9 @@
 FILENAME...     drvOmsPC68.cc
 USAGE...        Motor record driver level support for OMS PC68 serial device.
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: dkline $
-Last Modified:	$Date: 2007-02-13 13:22:28 $
+Version:	$Revision: 1.5 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2007-04-17 21:08:44 $
 */
 
 /*
@@ -651,7 +651,7 @@ static int omsGet(int card, char *pchar)
     return(nread);
 }
 
-static void asynCallback(void *drvPvt,asynUser *pasynUser,char *data,size_t len, int eomReason)
+static void asynCallback(void *drvPvt,asynUser *pasynUser,char *data,size_t len, int eomReason, asynStatus status)
 {
     int d,cnt,stat,done;
     OmsPC68controller* pcntrl;
