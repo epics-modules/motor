@@ -3,9 +3,9 @@ FILENAME...	drvSPiiPlus.cc
 USAGE...	Motor record driver level support for ACS Tech80 
                 SPiiPlus
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-05-19 16:39:45 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2007-04-17 20:04:29 $
 
 */
 
@@ -41,9 +41,11 @@ Last Modified:	$Date: 2006-05-19 16:39:45 $
  */
 
 
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <epicsThread.h>
+#include <epicsString.h>
 #include <drvSup.h>
 #include "motor.h"
 #include "ACSTech80Register.h"
@@ -667,8 +669,8 @@ static int motor_init()
 
 
 	    /* The return string will tell us how many axes this controller has */
-	    for (total_axis = 0, tok_save = NULL, pos_ptr = strtok_r(axis_pos, " ", &tok_save);
-		    pos_ptr != 0; pos_ptr = strtok_r(NULL, " ", &tok_save), total_axis++)
+	    for (total_axis = 0, tok_save = NULL, pos_ptr = epicsStrtok_r(axis_pos, " ", &tok_save);
+		    pos_ptr != 0; pos_ptr = epicsStrtok_r(NULL, " ", &tok_save), total_axis++)
 		brdptr->motor_info[total_axis].motor_motion = NULL;
 
 	    brdptr->total_axis = total_axis;
