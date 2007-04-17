@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.14 $
- * Modified by: $Author: peterd $
- * Last Modified: $Date: 2007-02-02 16:21:05 $
+ * Version: $Revision: 1.15 $
+ * Modified by: $Author: rivers $
+ * Last Modified: $Date: 2007-04-17 21:05:13 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -171,7 +171,6 @@ static asynStatus disconnect        (void *drvPvt, asynUser *pasynUser);
 
 /* These are private functions, not used in any interfaces */
 static void intCallback(void *drvPvt, unsigned int num, unsigned int *changed);
-static void setDefaults(drvmotorAxisPvt *pAxis);
 static int config      (drvmotorPvt *pPvt);
 static int logFunc     (void *userParam,
                         const motorAxisLogMask_t logMask,
@@ -712,10 +711,11 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
 	if (addr == pAxis->num) {
 	    for (i = 0; i < nChanged; i++) {
 		if (changed[i] == reason) {
+                    /* Do we need to pass status!=asynSuccess sometimes? */
 		    (*pPvt->drvset->getDouble)(pAxis->axis, changed[i], &dvalue);
 		    pfloat64Interrupt->callback(pfloat64Interrupt->userPvt, 
 						pfloat64Interrupt->pasynUser,
-						dvalue);
+						dvalue, asynSuccess);
 		}
 	    }
 	}
@@ -731,9 +731,10 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
 	addr = pmotorStatusInterrupt->addr;
 	reason = pmotorStatusInterrupt->pasynUser->reason;
 	if (addr == pAxis->num) {
+            /* Do we need to pass status!=asynSuccess sometimes? */
 	    pmotorStatusInterrupt->callback(pmotorStatusInterrupt->userPvt, 
 					    pmotorStatusInterrupt->pasynUser,
-					    &pAxis->status );
+					    &pAxis->status, asynSuccess);
 	}
 	pnode = (interruptNode *)ellNext(&pnode->node);
     }
@@ -752,22 +753,25 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
 		if (BIT_ISSET(reason - motorStatusDirection, 1, &changedmask))
 		{
 		    (*pPvt->drvset->getInteger)(pAxis->axis, reason, &ivalue);
+                    /* Do we need to pass status!=asynSuccess sometimes? */
 		    pint32Interrupt->callback(pint32Interrupt->userPvt, 
 					      pint32Interrupt->pasynUser,
-					      ivalue);
+					      ivalue, asynSuccess);
 		}
 	    }
 	    /* If we've subscribed to the aggregate status */
 	    else if (reason == motorStatus) {
+                /* Do we need to pass status!=asynSuccess sometimes? */
 		pint32Interrupt->callback(pint32Interrupt->userPvt,
 					  pint32Interrupt->pasynUser,
-					  pAxis->status.status);
+					  pAxis->status.status, asynSuccess);
 	    }
             else {
 	        (*pPvt->drvset->getInteger)(pAxis->axis, reason, &ivalue);
+                /* Do we need to pass status!=asynSuccess sometimes? */
 		pint32Interrupt->callback(pint32Interrupt->userPvt, 
 					  pint32Interrupt->pasynUser,
-					  ivalue);
+					  ivalue, asynSuccess);
 	    }
 	}
 	pnode = (interruptNode *)ellNext(&pnode->node);
