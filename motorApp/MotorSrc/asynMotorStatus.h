@@ -36,7 +36,7 @@ typedef struct MotorStatus {
 
 typedef void (*interruptCallbackMotorStatus)(
               void *userPvt, asynUser *pasynUser,
-              struct MotorStatus *value, asynStatus status);
+              struct MotorStatus *value);
 typedef struct asynMotorStatusInterrupt {
     asynUser *pasynUser;
     int addr;
