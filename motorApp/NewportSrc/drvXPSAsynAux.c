@@ -473,7 +473,6 @@ static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
     int firstTime = 1;
     int i;
     int status;
-    asynStatus ioStatus = asynSuccess;
     asynUser *pasynUser;
     int addr, reason, mask, changedBits;
 
@@ -489,14 +488,12 @@ static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
         if (status) {
             asynPrint(pPvt->pasynUser, ASYN_TRACE_ERROR,
                       "drvXPSAsynAux::XPSAuxPoller error calling GPIOAnalogGet=%d\n", status);
-            ioStatus = asynError;
         }
         for (i=0; i<MAX_DIGITAL_INPUTS; i++) {
             status = GPIODigitalGet(pPvt->socketID, digitalInputNames[i], &digitalValues[i]);
             if (status) {
                 asynPrint(pPvt->pasynUser, ASYN_TRACE_ERROR,
                           "drvXPSAsynAux::XPSAuxPoller error calling GPIODigitalGet=%d\n", status);
-                ioStatus = asynError;
             }
         }
 
@@ -513,7 +510,7 @@ static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
             if (firstTime) changedBits = 0xffff;
             if ((mask & changedBits) && (reason == binaryInput)) {
                 pUInt32DigitalInterrupt->callback(pUInt32DigitalInterrupt->userPvt, pasynUser,
-                                                  mask & digitalValues[addr], ioStatus);
+                                                  mask & digitalValues[addr]);
             }
             pnode = (interruptNode *)ellNext(&pnode->node);
         }
@@ -532,7 +529,7 @@ static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
             if (reason == analogInput) {
                 pfloat64Interrupt->callback(pfloat64Interrupt->userPvt,
                                             pfloat64Interrupt->pasynUser,
-                                            analogValues[addr], ioStatus);
+                                            analogValues[addr]);
             }
             pnode = (interruptNode *)ellNext(&pnode->node);
         }

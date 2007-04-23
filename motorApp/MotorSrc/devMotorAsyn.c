@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.18 $
+ * Version: $Revision: 1.19 $
  * Modified by: $Author: rivers $
- * Last Modified: $Date: 2007-04-17 21:05:42 $
+ * Last Modified: $Date: 2007-04-23 20:26:36 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -54,7 +54,7 @@ static long start_trans(struct motorRecord *);
 static RTN_STATUS build_trans( motor_cmnd, double *, struct motorRecord *);
 static RTN_STATUS end_trans(struct motorRecord *);
 static void asynCallback(asynUser *);
-static void statusCallback(void *, asynUser *, struct MotorStatus *, asynStatus status);
+static void statusCallback(void *, asynUser *, struct MotorStatus *);
 
 typedef enum {int32Type, float64Type, float64ArrayType} interfaceType;
 
@@ -512,12 +512,10 @@ static void asynCallback(asynUser *pasynUser)
  * True callback to notify that controller status has changed.
  */
 static void statusCallback(void *drvPvt, asynUser *pasynUser,
-			   struct MotorStatus *value, asynStatus status)
+			   struct MotorStatus *value)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)drvPvt;
     motorRecord *pmr = pPvt->pmr;
-
-    /* We should probably do something sensible if status != asynSuccess !! */
 
     asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
 	      "%s devMotorAsyn::statusCallback new value=[p:%f,e:%f,s:%x] %c%c\n",
