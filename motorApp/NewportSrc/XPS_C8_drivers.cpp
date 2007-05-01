@@ -9,7 +9,11 @@
 #include "Socket.h" 
 
 #ifdef _WIN32
-	#define DLL _declspec(dllexport)
+        #ifdef _DLL  /* _DLL is defined by EPICS if we are being compiled to call DLLs */
+	    #define DLL _declspec(dllexport)
+        #else
+            #define DLL
+        #endif
 #else
 	#define DLL 
 #endif
