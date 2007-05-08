@@ -9,20 +9,12 @@ include $(TOP)/configure/CONFIG
 ifeq ($(OS_CLASS), vxWorks)
 DBD += WithMPFVx.dbd
 endif
-ifeq ($(OS_CLASS), WIN32)
-DBD += WithMPFWin32.dbd
-else
 DBD += WithMPF.dbd
-endif
 
 PROD_IOC_DEFAULT = WithMPF
 PROD_IOC_vxWorks = WithMPFVx
 
-ifeq ($(OS_CLASS), WIN32) 
-WithMPF_SRCS   += WithMPFWin32_registerRecordDeviceDriver.cpp
-else
 WithMPF_SRCS   += WithMPF_registerRecordDeviceDriver.cpp
-endif
 WithMPFVx_SRCS += WithMPFVx_registerRecordDeviceDriver.cpp
 WithMPF_SRCS_DEFAULT += WithMPFMain.cpp
 
