@@ -1,0 +1,6 @@
+# Smart Motor driver support.
+
+device(motor,VME_IO,devSmartMotor, "SmartMotor")
+driver(drvSmartMotor)
+registrar(SmartMotormotorRegister)
+variable(drvSmartMotordebug)

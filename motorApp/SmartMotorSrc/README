@@ -1,0 +1,19 @@
+The Animatics SmartMotor EPICS device driver supports both single
+and daisy chain serial connections.
+
+For daisy chain applications, the following program must be
+down loaded to each motor in the chain. Set "#" below to
+the address of each consecutive motor; starting with 1.
+
+SADDR#
+ECHO
+LIMD <- Omit from firmware 4.77 and above.
+LIMH
+END
+
+
+Design Restriction and Limitations
+==================================
+
+- This device driver only supports SmartMotor firmware versions 4.15
+and above.
