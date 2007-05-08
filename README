@@ -1,4 +1,4 @@
-Motor Record R6-2 Release Notice
+Motor Record R6-3 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
@@ -111,6 +111,37 @@ Known Problems
         For example, if MRES is positive and ERES is negative and the user
         wants to set the current position to 10.00 inches, then -10.00 must be
         entered in the VAL or DVAL field.
+
+Modification Log from R6-2 to R6-3
+==================================
+
+1)  <motor>/motorApp/NewportSrc was not building for the solaris-sparc-gnu
+        target.  Three changes were made to test the above change for the
+        solaris-sparc (SUNWspro) target and to make the motor record
+        distribution solaris-sparc (SUNWspro) compatible.
+        
+        Files modified: - "XPSGatheringMain_SYS_LIBS_solaris += socket nsl"
+                          added to motorApp/NewportSrc/Makefile.
+                        - "motorSimSupport_LIBS += motor" added to
+                          motorApp/MotorSimSrc/Makefile.
+                        - modified "Debug" statment arguments in
+                          motorApp/NewFocusSrc/drvPMNC87xx.cc
+                        - "oms_LIBS += asyn" added to motorApp/OmsSrc/Makefile.
+
+2) Mark River's found and fixed a bug in the motor record; RDBD was being used
+        in motordevCom.cc's motor_init_record_com() before the RDBD validation
+        check in motorRecord.cc's init_record().  This resulted in motor
+        positions not being initialized from save/restore at boot-up if RDBD
+        was not included in a save/restore save set.
+        
+        File modified: the enforceMinRetryDeadband() call in init_record() was
+                       moved to before the call to device support init_record.
+
+3) Added Shifu Xu's support for Animatics Corporation SmartMotor.
+
+        Directory added: motorApp/SmartMotorSrc
+
+
 
 Modification Log from R6-1 to R6-2
 ==================================
