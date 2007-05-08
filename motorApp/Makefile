@@ -29,6 +29,7 @@ DIRS += NewFocusSrc
 DIRS += AcsTech80Src
 DIRS += OrielSrc
 DIRS += ThorLabsSrc
+DIRS += SmartMotorSrc
 endif
 
 # Install the edl files
