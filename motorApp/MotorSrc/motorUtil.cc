@@ -2,9 +2,9 @@
 FILENAME...     motorUtil.cc
 USAGE...        Motor Record Utility Support.
 
-Version:        $Revision: 1.2 $
-Modified By:    $Author: peterd $
-Last Modified:  $Date: 2007-02-02 13:58:58 $
+Version:        $Revision: 1.3 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2007-05-10 20:14:21 $
 */
 
 
@@ -19,6 +19,13 @@ Last Modified:  $Date: 2007-02-02 13:58:58 $
 *  Argonne National Laboratory
 *
 *  Current Author: Ron Sluiter
+*
+* Modification Log:
+* -----------------
+* .01 05-10-07 rls - Bug fix for motorUtilInit()'s PVNAME_SZ error check using
+*                    an uninitialized variable.
+*                  - Added redundant initialization error check. 
+*
 */
 
 #include <stdio.h>
@@ -81,14 +88,22 @@ static chid chid_allstop, chid_moving, chid_alldone;
 RTN_STATUS motorUtilInit(char *vme_name)
 {
     RTN_STATUS status = OK;
+    static bool initialized = false;	/* motorUtil initialized indicator. */
     
-    if (strlen(vme) > PVNAME_SZ - 7 )
+    if (initialized == true)
     {
-        printf( "motorUtilInit: Prefix %s has more than %d characters. Exiting",
+        printf( "motorUtil already initialized. Exiting\n");
+        return ERROR;
+    }
+
+    if (strlen(vme_name) > PVNAME_SZ - 7 )
+    {
+        printf( "motorUtilInit: Prefix %s has more than %d characters. Exiting\n",
                 vme_name, PVNAME_SZ - 7 );
         return ERROR;
     }
 
+    initialized = true;
     vme = epicsStrDup(vme_name);
 
     epicsThreadCreate((char *) "motorUtil", epicsThreadPriorityMedium,
