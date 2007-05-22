@@ -16,6 +16,7 @@ record(bo, "$(P)allstop") {
 record(bi, "$(P)alldone") {
   field(ZNAM, "moving")
   field(ONAM, "done")
+  field(INP,  "1")
   field(DESC, "All IOC motors done moving.")
 }
 
