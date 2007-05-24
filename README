@@ -44,7 +44,7 @@ Configuration
 The following files can be edited to tailor this distribution to site specific
 needs.  See individual files for instructions.
         - <motor>/configure/RELEASE: Define location of external products.
-        
+
                 If only VMEbus based motor controllers (e.g., OMS, Highland
                 V544) and/or Soft Channel device support is used, then only
                 EPICS_BASE is required.
@@ -53,7 +53,7 @@ needs.  See individual files for instructions.
                 the following support modules are required;
                         - EPICS base R3-14-7
                         - ASYN R4-2
-                
+
                 If any example applications (motorExApp) are to be built, then
                         TEMPLATE_TOP and MSITOP must be defined.
 
@@ -64,7 +64,7 @@ needs.  See individual files for instructions.
                 #DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
         - ./motorExApp/Makefile: Define which, if any, example applications are
                 to be built.
-                
+
 
 
 Known Problems
@@ -133,7 +133,7 @@ Modification Log from R6-2 to R6-3
         check in motorRecord.cc's init_record().  This resulted in motor
         positions not being initialized from save/restore at boot-up if RDBD
         was not included in a save/restore save set.
-        
+
         File modified: the enforceMinRetryDeadband() call in init_record() was
                        moved to before the call to device support init_record.
 
@@ -141,6 +141,19 @@ Modification Log from R6-2 to R6-3
 
         Directory added: motorApp/SmartMotorSrc
 
+4) A bug was introduced into the shell command "motorUtilInit()" affecting
+        these versions of the motor distribution; R6-2, R6-2-1 and R6-2-2. This
+        bug resulted in the erroneous error message; "motorUtilInit: Prefix
+        %c: has more than 53 characters. Exiting".
+
+        File modified: motorApp/MotorSrc/motorUtil.cc
+
+5) The "alldone" PV in motorUtil.db defaulted to the "moving" state between
+        "iocInit" and "motorUtilInit", giving the false indication that motors
+        were moving during boot-up.  The "alldone" PV now defaults to the
+        "done" state.
+
+        File modified: motorApp/Db/motorUtil.db
 
 
 Modification Log from R6-1 to R6-2
@@ -150,7 +163,7 @@ Modification Log from R6-1 to R6-2
         issuing the correct command when it queried for the number of axes at
         boot up; correct command (XSTAT?), incorrect command (STAT?).  This
         resulted in a "PM500 system error" message on the 1st axis.
-        
+
         File modified: NewportSrc/drvPM500.cc
 
 2) A bug was introduced with R6-0.  The OMS device support was overwriting PID
@@ -201,16 +214,16 @@ Modification Log from R6-0 to R6-1
         SocketClose() at exit added but disabled pending further testing.
 
         File modified: NewFocusSrc/drvPMNC87xx.cc
-        
+
 3) Physik Instrumente (PI) GmbH & Co. C-862; added 17ms "status update delay"
         to prevent dropped communication characters in controller; i.e.
         erroneous command error responses.
-        
+
         File modified: PiSrc/drvPIC862.cc
 
 4) All motorStatus[xx].adl displays modified to show motor position with text
         rather than with bar graphs.
-        
+
         Files modified: motorApp/op/adl/motorStatus[xx].adl
 
 5) Joe Sullivan added support for the Physik Instrumente (PI) GmbH & Co. model
@@ -229,7 +242,7 @@ Modification Log from R5-9 to R6-0
 1) The OMS MAXv polling rate, which set is from the MAXvSetup() st.cmd command,
         is allowed to be as high as the OS clock rate; i.e.,
         (1/epicsThreadSleepQuantum()).
-        
+
         File modified: drvMAXv.cc - changed polling rate error check to,
                        1 <= polling rate <=  (1/epicsThreadSleepQuantum())
 
@@ -247,7 +260,7 @@ Modification Log from R5-9 to R6-0
         manipulate the velocity values are unaware of this restriction and
         create a torrent of these messages.  With this release the OMS device
         will only output this warning message once.
-        
+
         File modified: Added message latch to oms_build_trans() in devOmsCom.cc
 
 4) Added a work around for OMS PC68/78 firmware error.  PC68/78 controllers
@@ -544,7 +557,7 @@ Modification Log from R5-6 to R5-7
         condition correctly.  This resulted in the motor record not setting
         either of the limit error indicator fields (HLS/LLS) and becoming stuck
         in the "Moving" state.
-        
+
         File modified: do_work() in motorRecord.cc; complement CDIR when
                         jogging if DIR="Neg".
 
@@ -1199,7 +1212,7 @@ Modification Log from R4-4 to R4-5
         in terms of motor steps.
         - RES always equal to MRES.  RES preserved for backward compatibility
                 only.  All instances of RES have been replaced with MRES.
-        
+
         Files modified: - MotorSrc/motor.h
                         - MotorSrc/motorRecord.c
                         - MotorSrc/motordevCom.c
@@ -1267,7 +1280,7 @@ Modification Log from R4-4 to R4-5
                          - MotorSrc/motorRecord.c
                          - MotorSrc/motordrvCom.c
                          - All drivers; i.e., */drv*.c
-                
+
 17) Post all fields when recGblResetAlarms() returns an alarm.
 
 
@@ -1339,7 +1352,7 @@ Modification Log from R4-3 to R4-4
         code generated.
         Files modified: motorRecord.c   - mmap_field and nmap_field unions.
                         drvOms58.h      - all control/status registers.
-        
+
 
                                         
 Modification Log from R4-2 to R4-3
@@ -1730,7 +1743,7 @@ Modification Log from V3-5 to R4-0
         finite state machine was strictly enforced on jog request, jogging,
         stopping a jog and the backlash after jogging.  Jog processing is
         isolated from the JOG[F/R] fields.  Specifically,
-        
+
         - Added two new state indicators to MIP; MIP_JOG_REQ and MIP_JOG_STOP.
                 The jog states now consist of the following; Start (mip=0),
                 Request, Jogging, Stopping and Backlash.
@@ -1800,7 +1813,7 @@ Modification Log from V3-5 to R4-0
         maximum (i.e., VMAX/SMAX) value entered is always valid.  For example,
         if the minimum is entered and it exceeds the maximum, then the maximum
         is set to the new minimum value.
-        
+
         Files modified: motorRecord.dbd, motorRecord.c
 
 21) With MM4000 device support, a tweak request (TWF/TWR) occurring during the
@@ -1853,7 +1866,7 @@ Modification Log from V3-5 to R4-0
         processing the number of significant decimal points correctly when the
         controller used scientific notation for the motor resolution.
         Files modified: motor_init() in drvMM400.c
-        
+
 29) Through an odd set of circumstances the Oms58 driver was not performing
         status updates on PowerPC (PPC) platforms.  All users of the OMS VME58
         controller on a PPC platform must upgrade to Motor Record version 4.0
