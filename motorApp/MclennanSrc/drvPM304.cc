@@ -234,9 +234,9 @@ STATIC int set_status(int card, int signal)
     if (cntrl->model == MODEL_PM304) {
         /* The response string is an eight character string of ones and zeroes */
 
-        if (strcmp(response, "00000000") == 0)
+        if (response[3] == '0') {
             status.Bits.RA_DONE = 0;
-        else {
+        } else {
             status.Bits.RA_DONE = 1;
             if (drvPM304ReadbackDelay != 0.)
                 epicsThreadSleep(drvPM304ReadbackDelay);
