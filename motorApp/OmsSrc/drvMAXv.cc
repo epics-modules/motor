@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.12 $
+Version:        $Revision: 1.13 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-03-22 21:42:35 $
+Last Modified:  $Date: 2007-06-06 18:50:41 $
 */
 
 /*
@@ -53,6 +53,12 @@ Last Modified:  $Date: 2007-03-22 21:42:35 $
  * 05  05-02-05 rls - Bug fix for stale data delay; set delay = 10ms.
  * 06  05-17-06 rls - Allow polling rate up to 1/epicsThreadSleepQuantum().
  *                  - Protect against multiple MAXvSetup() calls.
+ * 07  06-05-07 rls - Added Jens Eden (BESSY) modifications;
+ *                    - register iocsh commands.
+ *                    - added USE_DEVLIB with RTEMS conditionial.
+ *                    - replaced errlogPrintf calls in ISR with
+ *                      epicsInterruptContextMessage calls.
+ *
  */
 
 #include <string.h>
@@ -62,6 +68,8 @@ Last Modified:  $Date: 2007-03-22 21:42:35 $
 #include <devLib.h>
 #include <dbAccess.h>
 #include <epicsThread.h>
+#include <epicsInterrupt.h>
+#include <iocsh.h>
 #include <epicsExit.h>
 #include <cantProceed.h>
 
@@ -74,6 +82,11 @@ Last Modified:  $Date: 2007-03-22 21:42:35 $
 
 /* Define for return test on devNoResponseProbe() */
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
+
+/* Are we using VME-Bus/devLib */
+#if (defined(vxWorks) || defined(__rtems__))
+    #define USE_DEVLIB
+#endif
 
 /* jps: INFO messages - add RV and move QA to top */
 #define ALL_INFO        "QA EA"
@@ -289,14 +302,14 @@ static int set_status(int card, int signal)
 
     if (motor_info->encoder_present == YES)
     {
-        /* get 4 peices of info from axis */
+        /* get 4 pieces of info from axis */
         send_mess(card, ALL_INFO, MAXv_axis[signal]);
         recv_mess(card, q_buf, 2);
         got_encoder = true;
     }
     else
     {
-        /* get 2 peices of info from axis */
+        /* get 2 pieces of info from axis */
         send_mess(card, AXIS_INFO, MAXv_axis[signal]);
         recv_mess(card, q_buf, 1);
         got_encoder = false;
@@ -698,12 +711,12 @@ static char *readbuf(volatile struct MAXv_motor *pmotor, char *bufptr)
 /* Configuration function for  module_types data     */
 /* areas. MAXvSetup()                                */
 /*****************************************************/
-RTN_VALUES MAXvSetup(int num_cards,     /* maximum number of cards in rack */
-              int addrs_type,   /* VME address type; 16 - A16, 24 - A24 or 32 - A32. */
-              void *addrs,      /* Base Address on 4K (0x1000) boundary. */
-              unsigned vector,  /* noninterrupting(0), valid vectors(64-255) */
-              int int_level,    /* interrupt level (1-6) */
-              int scan_rate)    /* polling rate - 1/60 sec units */
+RTN_VALUES MAXvSetup(int num_cards, /* maximum number of cards in rack */
+              int addrs_type,       /* VME address type; 16 - A16, 24 - A24 or 32 - A32. */
+              unsigned int addrs,   /* Base Address on 4K (0x1000) boundary. */
+              unsigned int vector,  /* noninterrupting(0), valid vectors(64-255) */
+              int int_level,        /* interrupt level (1-6) */
+              int scan_rate)        /* polling rate - 1/60 sec units */
 {
     int itera;
     char **strptr;
@@ -809,8 +822,10 @@ RTN_VALUES MAXvConfig(int card,                 /* number of card being configur
                       const char *initstr)      /* initialization string */
 {
     if (card < 0 || card >= MAXv_num_cards)
+    {
+        errlogPrintf("MAXvConfig: invalid card %d\n", card);
         return(ERROR);
-
+    }
     if (strlen(initstr) > INITSTR_SIZE)
     {
         errlogPrintf("MAXvConfig: initialization string > %d bytes.\n", INITSTR_SIZE);
@@ -831,10 +846,12 @@ static void motorIsr(int card)
     volatile struct controller *pmotorState;
     volatile struct MAXv_motor *pmotor;
     STATUS1 status1_flag;
+    static char errmsg[60];
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
-        errlogPrintf("Invalid entry-card #%d\n", card);
+        sprintf(errmsg, "%s(%d): Invalid entry-card #%d.\n", __FILE__, __LINE__, card);
+        epicsInterruptContextMessage(errmsg);
         return;
     }
 
@@ -849,8 +866,10 @@ static void motorIsr(int card)
 
     }
     if (status1_flag.Bits.cmndError)
-        errlogPrintf("command error detected by motorISR() on card %d\n",
-                     card);
+    {
+        sprintf(errmsg, "%s(%d): command error on card #%d.\n", __FILE__, __LINE__, card);
+        epicsInterruptContextMessage(errmsg);
+    }
 
     if (status1_flag.Bits.text_response != 0)   /* Don't clear this. */
         status1_flag.Bits.text_response = 0;
@@ -868,7 +887,7 @@ static int motorIsrSetup(int card)
 
     pmotor = (struct MAXv_motor *) (motor_state[card]->localaddr);
 
-#ifdef vxWorks
+#ifdef USE_DEVLIB
 
     status = pdevLibVirtualOS->pDevConnectInterruptVME(
         MAXvInterruptVector + card,
@@ -956,7 +975,7 @@ static int motor_init()
         Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n",
               (epicsUInt32) probeAddr);
         /* Scan memory space to assure card id */
-#ifdef vxWorks
+#ifdef USE_DEVLIB
         do
         {
             status = devNoResponseProbe(MAXv_ADDRS_TYPE, (unsigned int) startAddr, 2);
@@ -965,7 +984,7 @@ static int motor_init()
 #endif
         if (PROBE_SUCCESS(status))
         {
-#ifdef vxWorks
+#ifdef USE_DEVLIB
             status = devRegisterAddress(__FILE__, MAXv_ADDRS_TYPE,
                                         (size_t) probeAddr, MAXv_BRD_SIZE,
                                         (volatile void **) &localaddr);
@@ -1147,3 +1166,44 @@ static void MAXv_reset(void *arg)
     }
 }
 
+extern "C"
+{
+
+// Oms Setup arguments
+    static const iocshArg setupArg0 = {"Max. controller count", iocshArgInt};
+    static const iocshArg setupArg1 = {"VME address type", iocshArgInt};
+    static const iocshArg setupArg2 = {"Base Address on 4K (0x1000) boundary", iocshArgInt};
+    static const iocshArg setupArg3 = {"noninterrupting(0), valid vectors(64-255)", iocshArgInt};
+    static const iocshArg setupArg4 = {"interrupt level (1-6)", iocshArgInt};
+    static const iocshArg setupArg5 = {"polling rate - 1/60 sec units", iocshArgInt};
+// Oms Config arguments
+    static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
+    static const iocshArg configArg1 = {"initialization string", iocshArgString};
+
+    static const iocshArg * const OmsSetupArgs[6] = {&setupArg0, &setupArg1,
+        &setupArg2, &setupArg3, &setupArg4, &setupArg5};
+    static const iocshArg * const OmsConfigArgs[2] = {&configArg0, &configArg1};
+
+    static const iocshFuncDef setupMAXv = {"MAXvSetup", 6, OmsSetupArgs};
+
+    static const iocshFuncDef configMAXv = {"MAXvConfig", 2, OmsConfigArgs};
+
+    static void setupMAXvCallFunc(const iocshArgBuf *args)
+    {
+        MAXvSetup(args[0].ival, args[1].ival, args[2].ival, args[3].ival, args[4].ival, args[5].ival);
+    }
+
+    static void configMAXvCallFunc(const iocshArgBuf *args)
+    {
+        MAXvConfig(args[0].ival, args[1].sval);
+    }
+
+    static void OmsMAXvRegister(void)
+    {
+        iocshRegister(&setupMAXv, setupMAXvCallFunc);
+        iocshRegister(&configMAXv, configMAXvCallFunc);
+    }
+
+    epicsExportRegistrar(OmsMAXvRegister);
+
+} // extern "C"
