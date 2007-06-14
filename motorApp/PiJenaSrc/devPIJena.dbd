@@ -1,0 +1,7 @@
+# Piezosystem jena motor controllers
+device(motor,VME_IO,devPIJEDS,"PIJEDS")
+driver(drvPIJEDS)
+registrar(PIJEDSmotorRegister)
+variable(drvPIJEDSdebug)
+
+
