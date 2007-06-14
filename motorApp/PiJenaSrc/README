@@ -6,41 +6,33 @@ Model: EDS
 
 Tested Version: EDS2, DSM V1.959
 
-
 RS232: <Programmable>
 	9600,8,1,N (See setup warning below)
 	RX EOL: '/r' (13) <cr>
         TX FRAMING: '/023'<ascii text>/r/n'/021' 
 
-Commands:
-	<command>,<axis>,[<arg>]</r>
-	Where axis = 0, 1, ...,5
-
-   * Reply from motion commands '/023/021' (framing characters only)
-   * Single command per line
-
-Query Reply:    <command>,<axis>,<return  value>
-   *** WARNING *** Printing the EDS responses (during debugging) 
-	   lockup the vxWorks terminal session (using cu) because
-	   of the framing characters. 
-
 Position Resolution:  0.001 micrometers (um)
 
-DRIVER SUPPORT EXCEPTIONS: 
-   NO Relative Motion 
-   NO JOG command 
-   NO DONE indicator
-   NO Homing
-   NO Limit Switches
+=================== serial.cmd =============================
+# Piezosystem Jena EDS motor controller/driver setup parameters:
+#     (1) maximum number of controllers in system
+#     (2) maximum drives per controller
+#     (3) motor task polling rate (min=1Hz, max=60Hz)
+#drvPIJEDSdebug=1
+PIJEDSSetup(1, 2, 60)
 
-SET_STATUS NOTES:
-    DONE: No DONE indicator so the 'no motion' test is used
-	to set the DONE status.
+# Piezosystem Jena EDS controller/driver configuration parameters:
+#     (1) controller being configured
+#     (2) asyn port name (string)
+#     (3) asyn address (GPIB)
+PIJEDSConfig(0, "serial1", 0)
 
-    No Motion Test: Reference position is not available so 
-        the 'no motion' test was widen to a hard coded
-	tolerance value based on the MAXIMUM RESOLUTION. 
-	This was needed because of encoder jitter.
+================== motor.substitutions ==================
+
+{P,    N,	M,	  DTYP,		C,	S,	DESC,		EGU,	DIR,    VELO,VBAS,  ACCL,	   BDST,	 BVEL,	BACC,	MRES,	PREC,	DHLM,	DLLM, INIT}
+{xxx:, 9,      "m$(N)",  "PIJEDS",      0,      0,      "motor $(N)",   um,     Pos,    2.,   0,     .2,             0,           0,    .2,      .001,   5,      100,    0,   ""}
+{xxx:, 10,     "m$(N)",  "PIJEDS",      0,      1,      "motor $(N)",   um,     Pos,    2.,   0,     .2,             0,           0,    .2,      .001,   5,      100,    0,   ""}
+
 
 
 =================== CONTROLLER SETUP =================
@@ -55,6 +47,20 @@ SET_STATUS NOTES:
 
     PID parameters are not implemented in EPICS device driver because 
     the other motion calibration settings are not available from EPICS.
+
+
+
+============= COMMANDS SYNTAX ==================================
+	<command>,<axis>,[<arg>]</r>
+	Where axis = 0, 1, ...,5
+
+   * Reply from motion commands '/023/021' (framing characters only)
+   * Single command per line
+
+Query Reply:    <command>,<axis>,<return  value>
+   *** WARNING *** Printing the EDS responses (during debugging) 
+	   lockup the vxWorks terminal session (using cu) because
+	   of the framing characters. 
 
 
 =================== MOTION =================
@@ -104,6 +110,20 @@ SERVO ENABLE
 	stat,<axis>
 		16bit register - bit 7
 
+================== IMPLEMENTATION NOTES ==========================
+DRIVER SUPPORT EXCEPTIONS: 
+   NO Relative Motion 
+   NO JOG command 
+   NO DONE indicator
+   NO Homing
+   NO Limit Switches
 
+SET_STATUS:
+    DONE: No DONE indicator so the 'no motion' test is used
+	to set the DONE status.
 
+    No Motion Test: Reference position is not available so 
+        the 'no motion' test was widen to a hard coded
+	tolerance value based on the MAXIMUM RESOLUTION. 
+	This was needed because of encoder jitter.
 
