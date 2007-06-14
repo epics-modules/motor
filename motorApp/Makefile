@@ -30,6 +30,7 @@ DIRS += AcsTech80Src
 DIRS += OrielSrc
 DIRS += ThorLabsSrc
 DIRS += SmartMotorSrc
+DIRS += PiJenaSrc
 endif
 
 # Install the edl files
