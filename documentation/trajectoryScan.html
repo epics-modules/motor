@@ -1,0 +1,1042 @@
+<HTML>
+<HEAD><TITLE>Trajectory Scanning with the Newport Diffractometer</TITLE>
+</HEAD>
+<BODY>
+<CENTER>
+<H1> Trajectory Scanning with the Newport MM4005 and XPS Motor Controllers</H1>
+<H2> Mark Rivers</H2>
+<H2> January 20, 2007</H2>
+</CENTER>
+<H2>Contents</H2>
+<UL>
+  <LI><A href="#Overview">Overview</A> 
+  <LI><A href="#Implementation">Implementation</A> 
+  <LI><A href="#Safety</A> 
+  <LI><A href="#Notation">Notation</A> 
+  <LI><A href="#Defining a Trajectory">Defining a Trajectory</A> 
+  <LI><A href="#Building a Trajectory">Building a Trajectory</A> 
+  <LI><A href="#Executing a Trajectory">Executing a Trajectory</A> 
+  <LI><A href="#Reading Back a Trajectory">Reading Back a Trajectory</A> 
+  <LI><A href="#Interaction with EPICS Motor Records">Interaction with EPICS Motor Records</A> 
+  <LI><A href="#Communication with the MM4005">Communication with the MM4005</A> 
+  <LI><A href="#Hardware Notes">Hardware Notes</A> 
+  <LI><A href="#Installation">Installation</A> 
+  <LI><A href="#vxWorks startup file">vxWorks Startup File</A> 
+  <LI><A href="#MEDM screens">MEDM Screens</A> 
+  <LI><A href="#Example IDL Procedure">Example IDL Procedure</A> 
+  <LI><A href="#SPEC_Interface">SPEC Interface</A> 
+</UL>
+
+<P></P>
+<H2><A name=Overview>Overview</A></H2>
+<P>The Newport MM4005 and XPS motor controllers are capable of executing complex 
+coordinated motions. Trajectories can be defined which move any or all of 
+the axes through any set of complex motions. The controller will coordinate 
+these motions, keeping each axis very close to the theoretical position during 
+the entire motion. The controller can output logic pulses during the execution 
+of the trajectory, permitting external equipment to be synchronized to the 
+motion. These capabilities are ideally suited to “on-the-fly” data 
+collection.</P>
+
+<P>At the APS one application of the MM4005 and XPS is to drive the large Newport 
+diffractometer. This diffractometer has rather long settling times because of 
+the mass of the moving elements. However, with this trajectory scanning software 
+one can use SPEC, for example, to compute a set of diffractometer positions for 
+a scan in HKL space, and then download these positions to the controller. The 
+entire scan can be executed without stopping, collecting data in a multi-channel 
+scaler. This can reduce data collection times dramatically relative to 
+traditional step scanning.</P>
+
+<P>This document describes an EPICS interface to the trajectory capabilities of 
+the MM4005 and XPS. This interface is completely general for the controllers, it is not 
+specific to the Newport diffractometer. The interface lets any EPICS channel 
+access client do the following:</P>
+<UL>
+  <LI>Define the total number of trajectory elements. 
+  <LI>Define the absolute or relative position of each axis for each point in 
+  the trajectory. 
+  <LI>Define the time for each element of the trajectory, or alternatively the 
+  total execution time with equal time per trajectory element. 
+  <LI>Define the total number of output synchronization pulses. 
+  <LI>Define the trajectory elements where pulse outputs begin and end. 
+  <LI>Define detector triggers to start detectors at the beginning of the 
+  trajectory and stop them at the end of the trajectory. 
+  <LI>Build and verify the trajectory, checking for errors. 
+  <LI>Define a total time scaling factor from .01 to 100 which will speed up or 
+  slow down the trajectory execution relative to its original definition (MM4005 only). 
+  <LI>Execute the trajectory, checking for completion and errors. This can be 
+  done repeatedly without rebuilding if the only changes are in the start 
+  position or the execution time scale factor. 
+  <LI>Read back the actual position of each axis when each synchronization pulse 
+  was output. 
+  <LI>Read back the following error (actual-theoretical positions) when each 
+  synchronization pulse was output. 
+</UL>
+
+<P></P>
+<H2><A name=Implementation>Implementation</A></H2>
+<P>The EPICS implementation consists of the following:</P>
+<UL>
+  <LI>A database file, <CODE>trajectoryScan.db.</CODE> This database 
+  contains almost no "logic" with no links between records in the database. The 
+  records are simply variables which channel access clients and the State 
+  Notation Language (SNL) program use. 
+  <LI>SNL programs, <CODE>MM4005_trajectoryScan.st and XPS_trajectoryScan.st.
+  </CODE>.  These programs implement all of the logic for communicating with 
+  the controller and with channel access clients via the database. 
+  <LI>MEDM screens, <CODE>trajectoryScan.adl, 
+  trajectoryScanDebug.adl, trajectoryPlot.adl</CODE>. These screens are 
+  used to control the building, execution, readback, debugging and plotting of 
+  trajectory scans.
+</UL>
+
+<P></P>
+<H2><A name=Safety>Safety</A></H2>
+<P>The MM4005 and XPS are used at the APS to control the large Newport 
+diffractometer. This device is capable of moving large masses at high speeds. 
+The trajectory scanning software does not use the EPICS motor record, and so 
+does not obey any software limits defined in the motor record. It is very 
+important that:</P>
+<UL>
+  <LI>The controller be programmed via the front panel (MM4005) or Web interface (XPS)
+  to have safe software limits 
+  to prevent collisions whenever possible. The trajectory scanning software does 
+  obey the MM4005 and XPS internal soft limits. 
+  <LI>Care be taken to avoid trajectory execution whenever personnel could be 
+  harmed. The following error thresholds for each axis on the controller should be 
+  set tight enough that the motor power will turn off when a significant 
+  resistance is met. An emergency stop button should be within reach whenever 
+  personnel are working on the diffractometer, and the switch should be in the 
+  Stop position whenever personnel are working for extended periods or in 
+  vulnerable positions on the diffractometer.
+</UL>
+
+<P></P>
+<H2><A name=Notation>Notation</A></H2>
+<P>The database is loaded with <CODE>$(P)</CODE> (prefix) and <CODE>$(R)</CODE> 
+(record base) macros. For example, <CODE>$(P)</CODE> might be 
+<CODE>13IDC:</CODE> for the name of the IOC, and <CODE>$(R)</CODE> might be 
+<CODE>Traj1:</CODE> for the first trajectory in this IOC. The prefix and
+record bases are 
+omitted from the Process Variable (PV) names in this document, but one should be 
+aware that, for example, <CODE>Nelements</CODE> is really 
+<CODE>$(P)$(R)Nelements</CODE> or in this case 
+<CODE>13IDC:Traj1:Nelements</CODE>.</P>
+
+<P>There are 8 motors in the database, and thus 8 similar records for many 
+functions. For example, the records defining the trajectory positions are 
+<CODE>M1Traj, M2Traj ... M8Traj</CODE>. These are referred to in this document 
+either as <CODE>M1Traj ... M8Traj</CODE> or as <CODE>MnTraj</CODE>.</P>
+
+<P></P>
+<P></P>
+<H2><A name="Defining a Trajectory">Defining a Trajectory</A></H2>
+<P>The MM4005 and XPS always define a trajectory in terms of displacements (i.e. 
+relative positions) of each motor for each element of the trajectory. Each 
+trajectory element has an execution time associated with it, and hence there is 
+a velocity defined for each motor (displacement/time) for each trajectory 
+element. The MM4005 supports trajectories of up to 2000 elements, while the XPS
+supports an essentially unlimited number of elements</P>
+
+<P>During execution of the trajectory the MM4005/XPS can output a user-definable 
+number of logic pulses.&nbsp; The trajectory elements where these output pulses 
+begin and end can also be selected. On the MM4005 these pulses are evenly spaced in distance 
+along the trajectory, which is a distance in up to 8-dimensional space.  On the XPS
+the pulses are evenly spaced in time. 
+These output pulses are typically used for the channel-advance of a 
+multi-channel scaler, allowing detector pulses to be collected in hardware, with 
+no software overhead at each point.  At the time that each pulse is output the
+controller captures the theoretical and actual (encoder) position of each
+motor.  These positions can be read back when the trajectory is complete.</P>
+
+<P>It is important to remember that the number of data points in a scan is 
+determined by the number of output pulses, not by the number of trajectory 
+elements. For example, a constant velocity theta/2-theta scan over 10 degrees 
+can be defined with a only 1 trajectory element, but could be used to collect 1000 
+data points at .01 degree steps.</P>
+
+<P>The following table lists the EPICS Process Variables (PVs) which are used to 
+define the trajectory. Some of these are explained in more detail below.</P>
+<TABLE border=1>
+  <TBODY>
+  <TR>
+    <TD><STRONG>PV Name</STRONG></TD>
+    <TD><STRONG>Record Type</STRONG></TD>
+    <TD><STRONG>Description</STRONG></TD></TR>
+  <TR>
+    <TD><CODE>NumAxes</CODE></TD>
+    <TD>longout</TD>
+    <TD>The number of motors (axes) which are connected to the MM4005 or XPS.</TD></TR>
+  <TR>
+    <TD><CODE>Nelements</CODE></TD>
+    <TD>longout</TD>
+    <TD>The number of elements in the trajectory, i.e. the number of valid 
+      points in the <CODE>M1Traj...M8Traj</CODE> and <CODE>TimeTraj</CODE> 
+      arrays. Default=1.</TD></TR>
+  <TR>
+    <TD><CODE>MoveMode</CODE></TD>
+    <TD>mbbi</TD>
+    <TD>Defines the type of position information contained in 
+      <CODE>M1Traj...M8Traj</CODE>. 0=<CODE>Relative</CODE>, 
+      1=<CODE>Absolute</CODE>, 2=<CODE>Hydrid</CODE>. 
+      Default=<CODE>Relative</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>M1Traj ... M8Traj</CODE></TD>
+    <TD>waveform, double</TD>
+    <TD>The displacements or absolute positions of each motor for each element 
+      of the trajectory. No defaults.</TD></TR>
+  <TR>
+    <TD><CODE>M1Move ... M8Move</CODE></TD>
+    <TD>bo</TD>
+    <TD>Flag defining whether each motor is to be moved during the trajectory. 
+      0=<CODE>No</CODE>, 1=<CODE>Yes</CODE>. Default=<CODE>No</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>Npulses</CODE></TD>
+    <TD>longout</TD>
+    <TD>Number of synchronization pulses to be output by the MM4005/XPS. 
+      Default=200.</TD></TR>
+  <TR>
+    <TD><CODE>StartPulses</CODE></TD>
+    <TD>longout</TD>
+    <TD>The trajectory element number where synchronization pulses will start. 
+      Default=1.</TD></TR>
+  <TR>
+    <TD><CODE>EndPulses</CODE></TD>
+    <TD>longout</TD>
+    <TD>The trajectory element number where synchronization pulses should end. 
+      Default=<CODE>Nelements</CODE>. The SNL program sets 
+      <CODE>EndPulses=Nelements</CODE> whenever <CODE>Nelements</CODE> is 
+      changed, since this is what is normally desired. <CODE>EndPulses</CODE> 
+      can be changed again after changing <CODE>Nelements</CODE> if 
+      desired.</TD></TR>
+  <TR>
+    <TD><CODE>TimeMode</CODE></TD>
+    <TD>bo</TD>
+    <TD>The mode being used to define the time per trajectory element. 
+      0=<CODE>Total</CODE> means that the total time for the trajectory is being 
+      defined, and the <CODE>TimeTraj</CODE> array will be computed by setting 
+      the execution time for each element = <CODE>Time/Nelements</CODE>. 
+      1=<CODE>Per Element</CODE> means that the time per element has already 
+      been loaded into the <CODE>TimeTraj</CODE> array. This mode permits each 
+      element to have a different execution time. Default = 
+    <CODE>Total</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>Time</CODE></TD>
+    <TD>ao</TD>
+    <TD>Total trajectory execution time. Used when <CODE>TimeMode</CODE>=0. 
+      Default=10.</TD></TR>
+  <TR>
+    <TD><CODE>TimeTraj</CODE></TD>
+    <TD>waveform, double</TD>
+    <TD>The array containing the execution time per trajectory element. This 
+      array is computed by the SNL program if 
+      <CODE>TimeMode</CODE>=<CODE>Total</CODE>, and must be loaded by the user 
+      if <CODE>TimeMode</CODE>=<CODE>Per Element</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>Accel</CODE></TD>
+    <TD>ao</TD>
+    <TD>The acceleration time for the trajectory. Default=0.5 seconds.</TD></TR>
+  <TR>
+    <TD><CODE>M1Name ... M8Name</CODE></TD>
+    <TD>stringout</TD>
+    <TD>The name of each motor. These are used for the labels on MEDM screens 
+      and by channel access clients. These names are defined when the database 
+      is loaded. These PVs are not otherwise used and are not required for the 
+      trajectory definition.</TD></TR>
+  </TBODY>
+</TABLE>
+      
+<P>The EPICS interface permits the motor positions for each element of the 
+trajectory to be defined in one of 3 ways. This flexibility can remove the 
+burden of converting absolute positions to displacements from the EPICS channel 
+access client and let the SNL program do the calculations. <CODE>MoveMode 
+</CODE>can have the following 3 values:</P>
+<UL>
+  <LI><CODE>Relative</CODE>. 
+      This mode maps directly to the way the MM4005 works internally. 
+      Each trajectory element is a 
+      displacement or distance for the motor to move during that element. 
+  <LI><CODE>Absolute</CODE>. 
+      In this mode 
+      each trajectory element is an absolute motor position to which the controller 
+      will move at each point in the trajectory. In practice the SNL program 
+      computes an internal trajectory with <CODE>Nelements-1</CODE> elements where 
+      <CODE>InternalTraj[i] = MnTraj[i+1]-MnTraj[i]</CODE>. 
+      The SNL program drives all the motors to 
+      the first point in the trajectory, waits for them to get there, and then 
+      executes the internal trajectory. The disadvantage of 
+      <CODE>Absolute</CODE> mode is that a new 
+      trajectory needs to be downloaded and built each time the absolute position of 
+      any motor in the trajectory is changed.&nbsp; 
+  <LI><CODE>Hybrid</CODE>. 
+      In this mode the 
+      trajectory is defined in absolute coordinates, as in <CODE>Absolute</CODE> 
+      mode. Again, an internal trajectory is computed from 
+      <CODE>MnTraj[i+1]-MnTraj[i]</CODE>. However, 
+      when the trajectory is executed the motors are <STRONG>not</STRONG> moved to 
+      the position of the first point of the trajectory. Thus, 
+      <CODE>Hybrid</CODE> mode permits a trajectory to 
+      be defined in absolute coordinates, but executed as motions relative to the 
+      current positions of the motors when the trajectory is executed. Thus the 
+      motors can be moved using the EPICS motor record, and the trajectory executed 
+      at a new absolute position without downloading new values to 
+      <CODE>MnTraj</CODE> or rebuilding the trajectory. </LI>
+</UL>
+<P>Note that when programming <CODE>TimeTraj</CODE> in <CODE>Absolute</CODE> or 
+<CODE>Hybrid</CODE> mode <CODE>TimeTraj[i]</CODE> is the time to execute the 
+move from position <CODE>MnTraj[i]</CODE> to <CODE>MnTraj[i+1]</CODE>.</P>
+<P>The MM4005 requires the number of elements in a trajectory to be a multiple 
+of 4. This means that <CODE>Nelements</CODE> 
+should be a multiple of 4 in 
+<CODE>Relative</CODE> mode and a multiple of 4 
+plus 1 in <CODE>Absolute</CODE> or 
+<CODE>Hybrid</CODE> mode. However, this can be an 
+inconvenience for EPICS channel access clients. The SNL program works around 
+this restriction as follows. If 
+<CODE>Nelements</CODE> is not a multiple of 4 for 
+<CODE>MoveMode=Relative </CODE>or a multiple 
+of 4 plus 1 for 
+<CODE>MoveMode=Absolute</CODE> or 
+<CODE>Hybrid</CODE>, then up to 3 padding elements 
+are automatically added to the user defined trajectory to satisfy the 
+requirement. The padding elements always have a time of 0.1 seconds. The 
+displacements of the motors in these padding elements is computed to maintain 
+the same velocity as the last element in the original trajectory. Thus the 
+padding elements will cause the trajectory to execute for up to 0.3 seconds 
+longer than requested, and the motors will move slightly farther than requested. 
+However, there will be no velocity change, and hence no unexpected accelerations 
+during the padding elements.</P>
+<P>The number of trajectory elements, <CODE>Nelements </CODE>is limited as 
+follows.</P>
+<UL>
+  <LI>The MM4005 allows a maximum of 2000 trajectory elements. 
+  <LI>Channel access on EPICS 3.13 is also limited to 2000 points, since it has a 16,000 byte 
+      limit, and all arrays are double precision, requiring 8 bytes per element. 
+  <LI>There are 9 double precision arrays which are dimensioned 
+      <CODE>MAX_ELEMENTS</CODE> in the SNL program, and 9 waveform records 
+      (<CODE>MnTraj</CODE> and <CODE>TimeTraj</CODE>) which are dimensioned 
+      <CODE>NELM</CODE> in the database. If 2000 points are allowed then the total 
+      memory used in the IOC is 2000*9*8*2 = 288,000 bytes. This is a significant 
+      amount of memory for an IOC. <CODE>MAX_ELEMENTS</CODE> is presently 
+      defined to be 2000 in the SNL programs. This value can be changed (up to 
+      2000 for the MM4005) and the SNL program recompiled. The value of 
+      <CODE>NELM</CODE> can be set to any value up to <CODE>MAX_ELEMENTS</CODE> when 
+      the database is loaded. </LI></UL>
+<P>The number of output pulses, <CODE>Npulses</CODE> is limited as follows.</P>
+<UL>
+  <LI>The MM4005 allows a maximum of 2000 output pulses. 
+  <LI>Channel access R3.13 is also limited to 2000 points, since it has a 16,000 byte 
+  limit, and all arrays are double precision, requiring 8 bytes per element. 
+  <LI>There are 16 double precision arrays which are dimensioned 
+  <CODE>MAX_PULSES</CODE> in the SNL program, and 16 waveform records 
+  (<CODE>MnActual</CODE> and <CODE>MnError</CODE>) which are dimensioned 
+  <CODE>NPULSE</CODE> in the database. If 2000 points are allowed then the total 
+  memory used in the IOC is 2000*16*8*2 = 512,000 bytes. This is a significant 
+  amount of memory for an IOC. <CODE>MAX_PULSES</CODE> is presently defined 
+  to be 2000 in the SNL program. This value can be changed (up to 2000 for the MM4005) or 
+  and the SNL program recompiled. The value of <CODE>NPULSE</CODE> 
+  <STRONG>must</STRONG> be set to exactly the value of <CODE>MAX_PULSES</CODE> 
+  when the database is loaded. </LI></UL>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<H2><A name="Building a Trajectory">Building a Trajectory</A></H2>
+<P>After a trajectory has been defined by setting the values of the PVs 
+described in the previous section it must be built before it can be executed. 
+Building the trajectory consists of downloading it to the MM4005 and checking it 
+for errors such as excess velocities or accelerations.</P>
+<P>The following table describes the EPICS PVs used for building a 
+trajectory.</P>
+<TABLE border=1>
+  <TBODY>
+  <TR>
+    <TD><STRONG>PV Name</STRONG></TD>
+    <TD><STRONG>Record Type</STRONG></TD>
+    <TD><STRONG>Description</STRONG></TD></TR>
+  <TR>
+    <TD><CODE>Build</CODE></TD>
+    <TD>busy</TD>
+    <TD>Setting this PV to 1 will build the trajectory, downloading it to the 
+        controller. It will be set back to 0 automatically when the build is 
+        complete.</TD></TR>
+  <TR>
+    <TD><CODE>BuildState</CODE></TD>
+    <TD>mbbi</TD>
+    <TD>The trajectory build state. 0=<CODE>Done</CODE>, 
+        1=<CODE>Busy</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>BuildStatus</CODE></TD>
+    <TD>mbbi</TD>
+    <TD>The trajectory build status. 0=<CODE>Undefined</CODE>, 
+        1=<CODE>Success</CODE>, 2=<CODE>Failure</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>BuildMessage</CODE></TD>
+    <TD>stringout</TD>
+    <TD>Progress messages while the build is in progress and error message if 
+        <CODE>BuildStatus=Failure</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>M1MDVS ... M8MDVS</CODE> (MM4005 only)</TD>
+    <TD>ao</TD>
+    <TD>The maximum change in velocity allowed between trajectory elements. 
+        This value can be set. These values are read from the MM4005 when the SNL 
+        program starts, so the current values can be seen. The acronym is Maximum 
+        Delta Velocity Set.</TD></TR>
+  <TR>
+    <TD><CODE>M1MDVA ... M8MDVA</CODE> (MM4005 only)</TD>
+    <TD>ao</TD>
+    <TD>The actual maximum change in velocity between trajectory elements. 
+        This value is read from the MM4005 after the trajectory is built. 
+        <CODE>MnMDVE</CODE> gives the specific trajectory element in which this 
+        maximum change in velocity occurred. If <CODE>MnMDVA</CODE> is greater 
+        than <CODE>MnMDVS</CODE> then the trajectory build will fail. The acronym 
+        is Maximum Delta Velocity Actual. Read-Only.</TD></TR>
+  <TR>
+    <TD><CODE>M1MDVE ... M8MDVE</CODE> (MM4005 only)</TD>
+    <TD>longout</TD>
+    <TD>The trajectory element number where <CODE>MnMDVA</CODE> occurs. The 
+        acronym is Maximum Delta Velocity Element. Read-Only.</TD></TR>
+  <TR>
+    <TD><CODE>M1MVA ... M8MVA</CODE> (MM4005 only)</TD>
+    <TD>ao</TD>
+    <TD>The actual maximum velocity. This value is read from the MM4005 after 
+        the trajectory is built. <CODE>MnMVE</CODE> gives the specific trajectory 
+        element in which this maximum velocity occurred. If <CODE>MnMVA</CODE> is 
+        greater than the maximum velocity allowed for this motor then the build 
+        will fail. The acronym is Maximum Velocity Actual. Read-Only.</TD></TR>
+  <TR>
+    <TD><CODE>M1MVE ... M8MVE</CODE> (MM4005 only)</TD>
+    <TD>longout</TD>
+    <TD>The trajectory element number where <CODE>MnMVA</CODE> occurs. The 
+        acronym is Maximum Velocity Element. Read-Only.</TD></TR>
+  <TR>
+    <TD><CODE>M1MAA ... M8MAA</CODE> (MM4005 only)</TD>
+    <TD>ao</TD>
+    <TD>The actual maximum acceleration. This value is read from the MM4005 
+        after the trajectory is built. <CODE>MnMAE</CODE> gives the specific 
+        trajectory element in which this maximum acceleration occurred. If 
+        <CODE>MnMVA</CODE> is greater than the maximum acceleration allowed for 
+        this motor then the build will fail. The acronym is Maximum Acceleration 
+        Actual. Read-Only.</TD></TR>
+  <TR>
+    <TD><CODE>M1MAE ... M8MAE</CODE> (MM4005 only)</TD>
+    <TD>longout</TD>
+    <TD>The trajectory element number where <CODE>MnMAA</CODE> occurs. The 
+        acronym is Maximum Acceleration Element. Read-Only.</TD></TR>
+  </TBODY>
+</TABLE>
+
+<P>Channel access clients should do the following to build a trajectory:</P>
+<UL>
+  <LI>Set <CODE>Build</CODE>=1 
+  <LI>Repeatedly read <CODE>Build</CODE>, wait for it to go to 
+      0=<CODE>Done</CODE>. 
+  <LI>When <CODE>Build=Done</CODE> check <CODE>BuildStatus</CODE>. If it is not 
+      1=<CODE>Success</CODE>, then something went wrong. 
+  <LI><CODE>BuildMessage</CODE> can be used to determine what the error was, 
+      although this will probably require a human rather than a program. </LI>
+</UL>
+
+<P>If the build fails then it is useful to look at the 
+<CODE>trajectoryScanDebug.adl</CODE> MEDM screen to examine the maximum velocity 
+and acceleration values. See if one or more motors is being commanded to move 
+too fast.</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<H2><A name="Executing a Trajectory">Executing a Trajectory</A></H2>
+
+<P>After a trajectory has been successfully built it can be executed. The 
+trajectory execution consists of the following steps:</P>
+<UL>
+  <LI>Remember the initial positions of all the motors. 
+  <LI>Move to the start position defined by <CODE>MnTraj[0]</CODE>. This is only 
+      done if <CODE>MoveMode=Absolute</CODE>. 
+  <LI>Trigger the detector start PV. 
+  <LI>Execute the trajectory in either <CODE>Real</CODE> or 
+      <CODE>Simulate</CODE> mode, with the execution time scaled by 
+      <CODE>TimeScale</CODE>. Poll during execution and post channel access monitors 
+      for the current element being executed, for the current positions of the 
+      motors and for any errors. 
+  <LI>When the trajectory is complete:
+  <UL>
+    <LI>Trigger the detector stop PV. 
+    <LI>Move the motors back to their initial positions. </LI>
+  </UL></LI>
+</UL>
+
+<P>The following table describes the EPICS PVs used for executing a 
+trajectory.</P>
+<TABLE border=1>
+  <TBODY>
+  <TR>
+    <TD><STRONG>PV Name</STRONG></TD>
+    <TD><STRONG>Record Type</STRONG></TD>
+    <TD><STRONG>Description</STRONG></TD></TR>
+  <TR>
+    <TD><CODE>Execute</CODE></TD>
+    <TD>busy</TD>
+    <TD>Setting this PV to 1 will execute the trajectory, performing the steps 
+        described above. It will be set back to 0 automatically when the execution 
+        is complete.</TD></TR>
+  <TR>
+    <TD><CODE>ExecState</CODE></TD>
+    <TD>mbbi</TD>
+    <TD>The trajectory execution state. 0=<CODE>Done</CODE>, 1=<CODE>Move 
+        Start</CODE>, 2=<CODE>Executing</CODE>, 3=<CODE>Flyback</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>ExecStatus</CODE></TD>
+    <TD>mbbi</TD>
+    <TD>The trajectory execute status. 0=<CODE>Undefined</CODE>, 
+        1=<CODE>Success</CODE>, 2=<CODE>Failure</CODE>, 3=<CODE>Abort</CODE>, 
+        4=<CODE>Timeout</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>ExecMessage</CODE></TD>
+    <TD>stringout</TD>
+    <TD>Progress messages while the execution is in progress and error message 
+        if <CODE>ExecStatus</CODE> is not <CODE>Success</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>SimMode</CODE> (MM4005 only)</TD>
+    <TD>bo</TD>
+    <TD>Simulation mode. 0=<CODE>Real</CODE>, 1=<CODE>Simulate</CODE>. The 
+        MM4005 can execute a trajectory in simulation mode, not actually moving 
+        any motors. Default=<CODE>Real</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>TimeScale</CODE> (MM4005 only)</TD>
+    <TD>ao</TD>
+    <TD>Scaling time for the trajectory execution. Although a trajectory is 
+        defined with a particular time per element, the execution time can be 
+        scaled from this value. <CODE>TimeScale</CODE> can range from .01 (100 
+        times faster) to 100 (100 times slower). Default=1.0</TD></TR>
+  <TR>
+    <TD><CODE>Abort</CODE></TD>
+    <TD>bo</TD>
+    <TD>Setting <CODE>Abort</CODE>=1 will immediately abort any motion on the 
+        controller. It sends the AB command to the MM4005 which turns off the motor 
+        power to all motors. To recover from this it is usually necessary to 
+        re-home the motors, and to rebuild the trajectory at least twice before it 
+        will succeed. <CODE>Abort</CODE> is set back to 0 automatically.</TD></TR>
+  <TR>
+    <TD><CODE>M1Current ... M8Current</CODE></TD>
+    <TD>&nbsp;</TD>
+    <TD>The current position of each motor. These values are updated and 
+        posted during execution of the trajectory. They are <STRONG>not</STRONG> 
+        continuously updated when the trajectory is not executing because that 
+        could interfere with EPICS motor records. This conflict will be eliminated 
+        in a future release of the MM4005 support for the EPICS motor 
+        record.</TD></TR>
+  <TR>
+    <TD><CODE>DetOn</CODE></TD>
+    <TD>ao</TD>
+    <TD>The <CODE>.VAL</CODE> field of this PV is written to its 
+        <CODE>.OUT</CODE> field in order to turn on the detector just before the 
+        trajectory is executed. The <CODE>.VAL</CODE> and <CODE>.OUT</CODE> fields 
+        are defined when the database is loaded. This mechanism is a very flexible 
+        way to turn on any sort of detector or set of detectors, since any value 
+        can be written to any PV.</TD></TR>
+  <TR>
+    <TD><CODE>DetOff</CODE></TD>
+    <TD>ao</TD>
+    <TD>The <CODE>.VAL</CODE> field of this PV is written to its 
+        <CODE>.OUT</CODE> field in order to turn off the detector just after the 
+        trajectory is executed. The <CODE>.VAL</CODE> and <CODE>.OUT</CODE> fields 
+        are defined when the database is loaded. This mechanism is a very flexible 
+        way to turn off any sort of detector or set of detectors, since any value 
+        can be written to any PV.</TD></TR>
+  </TBODY>
+</TABLE>
+
+<P>Channel access clients should do the following to execute a trajectory:</P>
+<UL>
+  <LI>Set <CODE>Execute</CODE>=1 
+  <LI>Repeatedly read <CODE>Execute</CODE>, wait for it to go to 
+      0=<CODE>Done</CODE>. 
+  <LI>When Execute=<CODE>Done</CODE> check ExecStatus. If it is not 
+      1=<CODE>Success</CODE>, then something went wrong. 
+  <LI><CODE>ExecMessage</CODE> can be used to determine what the error was, 
+      although this will probably require a human rather than a program. </LI>
+</UL>
+
+<P>The execution can fail because the velocity or acceleration is too large, 
+even if the build succeeded, if <CODE>TimeScale</CODE> is less than 1.0.</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+
+<H2><A name="Reading Back a Trajectory">Reading Back a Trajectory</A></H2>
+
+<P>After a trajectory has been executed it is possible to read back from the 
+MM4005 or XPS the theoretical and actual positions of the motors when each 
+synchronization pulse was output. The EPICS interface presents this information 
+as the actual positions and the following errors (actual position minus 
+theoretical position) since these are usually of most interest to the user. 
+Obviously the theoretical position can be computed from the actual position and 
+the following error.</P>
+<P>Reading back this information from the MM4005 (but not the XPS) is rather slow, 
+but in many cases this does not 
+need to be done for each scan. Once it is established that the following errors 
+are small enough it is possible to execute scans without reading back from the 
+MM4005 each time. The readback time is determined by the speed of the 
+communications interface to the MM4005. Each point returned from the MM4005 is 
+about 200 characters. Using RS-232 at 19,200 baud this requires 0.1 seconds per 
+point, where the number of points is equal to the number of output pulses. This 
+is thus 30 seconds for a scan with 300 output pulses.</P>
+<P>The following table describes the EPICS PVs used for reading back a 
+trajectory.</P>
+<TABLE border=1>
+  <TBODY>
+  <TR>
+    <TD><STRONG>PV Name</STRONG></TD>
+    <TD><STRONG>Record Type</STRONG></TD>
+    <TD><STRONG>Description</STRONG></TD></TR>
+  <TR>
+    <TD><CODE>Readback</CODE></TD>
+    <TD>busy</TD>
+    <TD>Setting this PV to 1 will read back the results of the 
+        trajectory motion from the MM4005. It will be set back to 0 automatically 
+        when the readback is complete.</TD></TR>
+  <TR>
+    <TD><CODE>ReadState</CODE></TD>
+    <TD>mbbi</TD>
+    <TD>The readback state. 0=<CODE>Done</CODE>, 
+        1=<CODE>Busy</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>ReadStatus</CODE></TD>
+    <TD>mbbi</TD>
+    <TD>The readback status. 0=<CODE>Undefined</CODE>, 
+        1=<CODE>Success</CODE>, 2=<CODE>Failure</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>ReadMessage</CODE></TD>
+    <TD>stringout</TD>
+    <TD>Progress messages while the readback is in progress and 
+        error message if <CODE>ReadStatus</CODE> is not 
+        <CODE>Success</CODE>.</TD></TR>
+  <TR>
+    <TD><CODE>Nactual</CODE></TD>
+    <TD>longout</TD>
+    <TD>The actual number of pulses output by the MM4005. This value 
+        is normally equal to <CODE>Npulses</CODE>, but it could be less if a 
+        trajectory did not complete.</TD></TR>
+  <TR>
+    <TD><CODE>M1Actual ... M8Actual</CODE></TD>
+    <TD>waveform, double</TD>
+    <TD>The actual position of the motor when each pulse was output 
+        by the contoller during the trajectory scan.</TD></TR>
+  <TR>
+    <TD><CODE>M1Error ... M8Error</CODE></TD>
+    <TD>waveform, double</TD>
+    <TD>The following error of the motor when each pulse was output 
+        by the controller during the trajectory scan. The following error is defined 
+        as the actual position minus the theoretical position. </TD></TR>
+  </TBODY>
+</TABLE>
+
+<P>Channel access clients should do the following to read back a trajectory:</P>
+<UL>
+  <LI>Set <CODE>Readback</CODE>=1 
+  <LI>Repeatedly read <CODE>Readback</CODE>, wait for it to go to 
+      0=<CODE>Done.</CODE> 
+  <LI>When <CODE>Readback=Done</CODE> check <CODE>ReadStatus.</CODE> If it is 
+      not 1=<CODE>Success</CODE>, then something went wrong. 
+  <LI><CODE>ReadMessage </CODE>can be used to determine what the error was, 
+      although this will probably require a human rather than a program. </LI>
+</UL>
+
+<P>Note that the readback command reads the global trace buffer of the MM4005. 
+It can be used to read back this trace buffer even if the previous operation was 
+not a trajectory execution. This can be useful for debugging operations in 
+general.</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+
+<H2><A name="Interaction with EPICS Motor Records">Interaction with EPICS Motor 
+Records</A></H2>
+<P>The trajectory scanning does not use the EPICS motor records, but rather 
+talks directly to the controller. In order to keep the motor records in 
+sync with the actual motor positions the SNL program always returns the motors 
+to their original positions, i.e. the positions where the motor records think 
+they are, after a trajectory execution is complete. One should not move any 
+motors on an MM4005 while a trajectory scan is in progress.</P>
+
+<P>When a motion is aborted with the <CODE>Abort</CODE> PV it will be necessary 
+to home the motors and synchronize the motor records with the actual positions 
+of the motors.</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+
+<H2><A name="Communication with the MM4005">Communication with the 
+MM4005</A></H2>
+<P>The communication with the MM4005 uses asyn.  It can be used with either the
+RS-232 or GPIB interfaces.  Debugging can be enabled with the
+<CODE>asynSetTraceMask</CODE> and <CODE>asynSetTraceIOMask</CODE> commands.
+Communication with the XPS also uses asyn over a TCP/IP socket connection.  Debugging
+can be enabled and disabled in the same way.
+<P>The timeout for communication with the MM4005 is set to 30 seconds, because
+some commands can take a very long time to response. This was found to be necessary to allow for 
+the long time it takes the MM4005 to respond to the TB command after a VC 
+command is issued when verifying the trajectory. However, it would probably be 
+better to determine empirically how long it takes the MM4005 to verify 
+trajectories as a function of <CODE>Nelements</CODE> and <CODE>Npulses 
+</CODE>and have the SNL program wait that long after sending the VC command and 
+before sending the TB command. These measurements have not been done yet.</P>
+
+<H2><A name="Hardware Notes">Hardware Notes</A></H2>
+<P>The synchronization output pulses from the MM4005 are provided on pin 12 of 
+the DB-25 Auxilliary Connector. We have found it convenient to make a connector 
+with a short BNC pigtail coming from this pin. This pulse output from the MM4005 
+is an open-collector circuit. The maximum rating is 30V and 40 mA. </P>
+<P>When using the pulse output as the channel-advance input of the Struck 7201 
+or SIS 380x multi-scaler some modifications are required. The SIS 380x manual 
+states that with the LEMO TTL input configuration the inputs are pulled up to 
++5V with 1K Ohm resistors in a resistor pack. For our module the factory 
+configuration was actually a 4.7K Ohm resistor pack. These resistors did pull 
+the open-collector output up to +5V. However, when driving the cable over a long 
+distance (~80 feet) the rise time of the signal was quite slow, about 8 
+microseconds to go from 0V to the TTL threshold. This slow rise time caused the 
+SIS 380x to double count the channel advance signal most of the time. By 
+replacing the 4.7K Ohm resistor pack with a 200 Ohm pull-up resistor pack the 
+rise time was reduced to about 2 microseconds, and the module does not double 
+count. 200 Ohms is within the spec of the MM4005, since it will result in a 
+current of 5V/200 Ohm = 25 mA, which is less than the 40 mA maximum.</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<H2><A name=Installation>Installation</A></H2>
+<P>The source files for trajectory scanning are in the synApps
+<A href="http://www.aps.anl.gov/upd/people/sluiter/epics/modules/mechanism/motor/index.html">motor module
+</A>, in the motorApp/ tree. 
+</P><PRE>
+NewportSrc/MM4005_trajectoryScan.st
+NewportSrc/XPS_trajectoryScan.st
+Db/trajectoryScan.db
+op/adl/trajectoryScan.adl
+op/adl/trajectoryScanDebug.adl
+op/adl/trajectoryPlot.adl
+</PRE>
+
+<H2><A name="vxWorks startup file">vxWorks startup file</A></H2>
+<P>The following are the comments from the beginning of 
+<CODE>trajectoryScan.db</CODE> which describe the macro parameters which must be 
+supplied in the <CODE>dbLoadRecords</CODE> command in the vxWorks startup 
+script.</P>
+<PRE># Database for Newport MM4005 trajectory scanning.
+# 
+# Mark Rivers
+# August 12, 2000
+#
+# Note: This database is completely general for the MM4005, it makes no
+# assumptions about the motors defined on particular axis. Thus it can be used
+# with the Newport diffractometer or any other set of up to 8 motors.
+#
+# Macro paramters:
+# $(P)      - PV name prefix
+# $(R)      - PV base record name
+# $(NAXES)  - Number of axes to be used. Typically 6 for diffractometer.
+# $(NELM)   - Maximum number of trajectory elements
+# $(NPULSE) - Maximum number of output pulses
+# $(DONPV)  - Name of PV to turn detector on
+# $(DONV)   - Value to write to DONPV to turn detector on
+# $(DOFFPV) - Name of PV to turn detector off
+# $(DOFFV)  - Value to write to DOFFPV to turn detector off
+# $(C)      - Card # (0,1,2...) of the board with the IP slot for the
+#             generic serial records
+# $(IPSLOT) - IP slot (A-D) for the serial I/O module
+# $(CHAN)   - Channel (0-7) for the serial port
+# $(BAUD)   - Baud rate for the serial port
+#             Note: the MM4005 is assumed to be configured with 8 data bits,
+#             1 stop bit, no parity.
+</PRE>
+<P>The following is an example of the lines which must be put in the vxWorks 
+startup file to load <CODE>trajectoryScan.db.</CODE> Note that the command line 
+is longer than the vxWorks limit, so the command must be built using 
+<CODE>malloc</CODE>, <CODE>strcpy</CODE> and <CODE>strcat</CODE>.</P><PRE># Database for trajectory scanning with the MM4005/GPD
+# The required command string is longer than the vxWorks
+# command line, must use malloc and strcpy, strcat
+str = malloc(300)
+strcpy(str,"P=13IDC:,R=traj1,NAXES=6,NELM=1000,NPULSE=1000,C=0,IPSLOT=a,CHAN=2,BAUD=19200")
+strcat(str,",DONPV=13IDC:str:EraseStart,DONV=1,DOFFPV=13IDC:str:StopAll,DOFFV=1")
+strcat(str,",M1=Phi,M2=Kappa,M3=Omega,M4=Psi,M5=2-Theta,M6=Nu,M7=Unused,M8=Unused")
+dbLoadRecords("CARSApp/Db/trajectoryScan.db", str)
+</PRE>
+<P><CODE>DONPV</CODE> and <CODE>DOFFPV</CODE> in this example are for the 
+Struck/SIS multichannel scaler database (<CODE>Struck8.db</CODE>). For this 
+database writing a 1 to <CODE>EraseStart</CODE> clears and starts the 
+multichannel scaler, writing 1 to <CODE>StopAll</CODE> stops it. The names 
+<CODE>M1 ... M8 </CODE>are used to define the <CODE>MnName</CODE> records, which 
+in turn provide the motor labels on the MEDM displays.</P>
+<P>After <CODE>iocInit</CODE> is called in the startup script the SNL program 
+must be started. Here is an example:</P><PRE>seq &amp;trajectoryScan, "P=13IDC:, R=traj1" </PRE>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<H2><A name="MEDM screens">MEDM screens</A></H2>
+<P>The following show the MEDM screens with which the user can view and modify 
+the trajectory scanning parameters.</P>
+<P><CODE>trajectoryScan.adl</CODE> is the main screen used to define, build, 
+execute and read back trajectories. The only thing which cannot be done in MEDM 
+is to edit the <CODE>MnTraj</CODE> and <CODE>TimeTraj</CODE> arrays, since MEDM 
+does not provide a method to edit arrays. <CODE>trajectoryScan.adl</CODE> is 
+called with macro parameters <CODE>P, R, TITLE, and M1 ... M8. P</CODE> and 
+<CODE>R</CODE> are the prefix and record base used when the database was loaded. 
+<CODE>M1 ... M8</CODE> are the names of the motors. These are used to label the 
+plots in <CODE>trajectoryPlot.adl</CODE>. For example 
+<CODE>trajectoryScan.adl</CODE> in this screen shot was called with 
+<CODE>P=13IDC:, R=traj1, TITLE=GPD_Trajectory_Scan, M1=Phi, M2=Kappa, M3=Omega, 
+M4=Psi, M5=2-Theta, M6=Nu, M7=Unused, M8=Unused.</CODE></P>
+<P><IMG height=782 
+src="trajectoryScan.gif" 
+width=538></P>
+<P><CODE>trajectoryPlot.adl</CODE> is used to plot the requested trajectory in 
+position and time (<CODE>MnTraj</CODE>, <CODE>TimeTraj</CODE>), the readback 
+positions (<CODE>MnActual</CODE>) and the following errors 
+(<CODE>MnError</CODE>).</P>
+<P><IMG height=227 
+src="trajectoryPlot1.gif" 
+width=408><IMG height=227 
+src="TtrajectoryPlot2.gif" 
+width=408></P>
+<P><CODE>trajectoryScanDebug.adl</CODE> is used to display detailed information, 
+useful for debugging.</P>
+<P><IMG height=447 
+src="TtrajectoryScanDebug.gif" 
+width=1023></P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<H2><A name="Example IDL Procedure">Example IDL Procedure</A></H2>
+<P>The following IDL function illustrates how an EPICS channel access client can 
+define, build, execute and read back a trajectory.</P><PRE>function trajectory_demo1, build=build, execute=execute, read=read, $
+                          actual, error, counts
+
+;+
+; NAME:
+;       trajectory_demo1
+;
+; PURPOSE:
+;       This IDL function demonstates how a channel access client can 
+;       define, build, execute and read back a complex trajectory with the 
+;       MM4005.
+;
+;       The trajectory parameters are as follows:
+;       101 elements, 300 output pulses, 30 second execution time, 1 second
+;       acceleration time.
+;
+;       Only the Phi and Kappa axes are moved.
+;
+;       The Phi trajectory is a sin wave with two complete periods and an
+;       amplitude of +-8 degrees.
+;
+;       The Kappa trajectory is a sin wave with one complete period and an
+;       amplitude of +-20 degrees.
+;
+;       The readback includes the Phi, Kappa and Omega actual positions and
+;       following errors. Omega is interesting because although it was not
+;       moved during the trajectory it has some following error because of 
+;       the moving mass of the Kappa arm.
+;
+;       The function returns counts from an SIS multichannel scaler which is
+;       triggered by the output pulses.
+;
+; CATEGORY:
+;       EPICS trajectory scanning
+;
+; CALLING SEQUENCE:
+;       Result = TRAJECTORY_DEMO1(Actual, Error, Counts)
+;
+; INPUTS:
+;       None.
+;
+; KEYWORD PARAMETERS:
+;       BUILD:      Set this keyword to build the trajecotry
+;
+;       EXECUTE:    Set this keyword to execute the trajectory
+;
+;       READ:       Set this keyword to read back the trajectory into
+;                   Actual and Error
+;
+;       NOTE: Any or all of these keywords can be set.  If none is set then the
+;             function does not do anything.
+;
+; OUTPUTS:
+;       Result:     This function returns a status indicating whether the
+;                   selected operations were successful or not. 0=success,
+;                   anything else is a failure.
+;       Actual:     An array of [Nactual, 3] containing the actual positions of
+;                   the Phi, Kappa and Omega axes.
+;       Error:      An array of [Nactual, 3] containing the following errors of
+;                   the Phi, Kappa and Omega axes.
+;       Counts:     An array of [Nactual, 4] containing the counts from the
+;                   SIS 3801 multi-channel scaler. The EPICS_MED class library
+;                   is used to communicate with this device.
+;
+;       NOTE: The Actual, Error and Counts outputs are only returned if the 
+;             READ keyword it set.
+;
+; SIDE EFFECTS:
+;       This procedure can move the diffractometer.  Be careful!
+;
+; EXAMPLE:
+;       status = trajectory_demo1(/build)
+;       status = trajectory_demo1(/execute)
+;       status = trajectory_demo1(/read, actual, error, counts)
+;       plot, actual[*,0]
+;       plot, error[*,0]
+;       plot, counts[*,0]
+;
+; MODIFICATION HISTORY:
+;       Written by:     Mark Rivers, August 13, 2000
+;-
+
+    prefix  = '13IDC:'
+    traj    = prefix + 'traj1'
+    phi     = traj + 'M1'
+    kappa   = traj+'M2'
+    omega   = traj+'M3'
+    mcs     = prefix + 'str:'
+
+    ; Make sure the MCS is in External channel advance mode
+    t = caput(mcs+'ChannelAdvance', 'External')
+
+    if (keyword_set(build)) then begin
+
+        ; The trajectory definition is hybid mode, meaning the positions are
+        ; definined in absolute coordinates rather than displacements from on
+        ; element to the next. However, the motors do not move to the absolute
+        ; position of the first element before executing the trajectory.
+        MoveMode = 'Hybrid'
+        t = caput(traj+'MoveMode', MoveMode)
+
+        ; 101 elements in the trajectory. We use 4N+1 since we are defining the
+        ; trajectory in Hybrid mode
+        nelements = 101
+        t = caput(traj+'Nelements', nelements)
+
+        ; 300 output pulses during the trajectory
+        npulses = 300
+        t = caput(traj+'Npulses', npulses)
+
+        ; 30 seconds total time to execute the trajectory
+        t = caput(traj+'TimeMode', 'Total')
+        time = 30.
+        t = caput(traj+'Time', time)
+
+        ; 1 second acceleration time
+        accel = 1.
+        t = caput(traj+'Accel', accel)
+
+        ; The Phi and Kappa motors will move.
+        t = caput(phi+'Move', 1)
+        t = caput(kappa+'Move', 1)
+
+        ; The Phi trajectory is a sin wave with two complete periods and an
+        ; amplitude of +-8 degrees
+        phiTraj = 8.*sin(findgen(nelements)/(nelements-1.)*4.*!pi)
+        t = caput(phi+'Traj', phiTraj)
+
+        ; The Kappa trajectory is a sin wave with one complete period and an
+        ; amplitude of +-20 degrees
+        kappaTraj = 20.*sin(findgen(nelements)/(nelements-1.)*2.*!pi)
+        t = caput(kappa+'Traj', kappaTraj)
+
+        ; Trajectory is now defined.  Build it.
+        t = caput(traj+'Build', 1)
+        ; Wait for the build to complete. Wait 0.1 second between polls.
+        repeat begin
+            wait, 0.1
+            t = caget(traj+'Build', Build)
+        endrep until (Build eq 0)
+
+        ; Make sure the build was successful
+        t = caget(traj+'BuildStatus', BuildStatus, /string)
+        if (BuildStatus ne 'Success') then begin
+            t = caget(traj+'BuildMessage', BuildMessage)
+            print, 'Build failed, error = ', BuildMessage
+            return, BuildStatus
+        endif
+    endif
+
+    if (keyword_set(execute)) then begin
+        t = caput(traj+'Execute', 1)
+        ; Wait for the execute to complete. Wait 0.1 second between polls.
+        repeat begin
+            wait, 0.1
+            t = caget(traj+'Execute', Execute)
+        endrep until (Execute eq 0)
+
+        ; Make sure the execution was successful
+        t = caget(traj+'ExecStatus', ExecStatus, /string)
+        if (ExecStatus ne 'Success') then begin
+            t = caget(traj+'ExecMessage', ExecMessage)
+            print, 'Execution failed, error = ', ExecMessage
+            return, ExecStatus
+        endif
+    endif
+
+    if (keyword_set(read)) then begin
+        t = caput(traj+'Readback', 1)
+        ; Wait for the readback to complete. Wait 0.1 second between polls.
+        repeat begin
+            wait, 0.1
+            t = caget(traj+'Readback', Readback)
+        endrep until (Readback eq 0)
+
+        ; Make sure the readback was successful
+        t = caget(traj+'ReadStatus', ReadStatus, /string)
+        if (ReadStatus ne 'Success') then begin
+            t = caget(traj+'ReadMessage', ReadMessage)
+            print, 'Read failed, error = ', ReadMessage
+            return, ReadStatus
+        endif
+
+        ; Read the Phi and Kappa actual and error arrays into IDL, return to
+        ; caller
+        t = caget(traj+'Nactual', nactual)
+        t = caget(Phi+'Actual', PhiActual, max=nactual)
+        t = caget(Phi+'Error',  PhiError,  max=nactual)
+        t = caget(Kappa+'Actual', KappaActual, max=nactual)
+        t = caget(Kappa+'Error',  KappaError,  max=nactual)
+        t = caget(Omega+'Actual', OmegaActual, max=nactual)
+        t = caget(Omega+'Error',  OmegaError,  max=nactual)
+        actual = [[PhiActual], [KappaActual], [OmegaActual]]
+        error  = [[PhiError],  [KappaError],  [OmegaError]]
+
+        ; Read the counts from the SIS multichannel scaler
+        med = obj_new('EPICS_MED', mcs, 4)
+        counts = med-&gt;get_data()
+        counts = counts[0:nactual-1,*]
+    endif
+
+    return, 0
+end
+</PRE><PRE>&nbsp;</PRE>
+<H2><A name=SPEC_Interface>SPEC Interface</A></H2>
+<P>A set of SPEC macros allows SPEC to utilize trajectory scanning with EPICS 
+and the MM4005. 
+<P>The implementation is done at a low level, so that all of SPEC's standard 
+scans can be done "on-the-fly" utilizing this trajectory scanning software. This 
+was done by providing replacement macros for: <PRE>_ascan    # Used by all ascan and dscan macros
+mesh
+hklscan   # Used by hscan, kscan and lscan
+_hklmesh
+_hklline  # Used by hkcircle, hlcircle, klcircle, hkradial, hlradial and klradial
+_scanabort
+resume
+_loop
+</PRE>It adds the following new macros: <PRE>traj_index        # Converts a SPEC motor index to an MM4005 motor index
+traj_build        # Builds a trajectory
+traj_exec         # Executes a trajectory
+traj_read_counts  # Reads the data from the multi-channel scaler
+traj_read_actual  # Reads back the actual MM4005 motor positions
+traj_scans_on     # Enables trajectory scanning
+traj_scans_off    # Disables trajectory scanning, uses step scanning
+</PRE>The improvement in performance is dramatic. Using step scanning the 
+overhead per point is about 1 second, so a 500 point scan takes a minimum of 500 
+seconds or more than 8 minutes. Using trajectory scanning the total time to 
+execute a 500 point scan with .002 seconds per point is 3 seconds, including the 
+time to print and plot the data and write it to the data file. 
+<P>It is easy to switch back and forth between traditional step scanning and 
+trajectory scanning. <CODE>traj_scans_on</CODE> turns on trajectory scanning for 
+all subsequent scans. <CODE>traj_scans_off</CODE> reverts back to traditional 
+step scanning. 
+<P>It is possible to have the motor positions and HKL values which SPEC prints 
+on the screen, plots and stores in the SPEC data file be based upon the 
+<I>theoretical</I> motor positions during the scan. Alternatively SPEC can use 
+values based upon the <I>actual</I> motor positions at each point in the scan. 
+Using the actual motor positions is slower, because the values must be read from 
+the MM4005 at the end of the trajectory execution. Set the SPEC global variable 
+<CODE>TRAC_USE_ACTUAL=0</CODE> to use the theoretical motor positions, and 
+<CODE>TRAJ_USE_ACTUAL=1</CODE> to use the actual motor positions. 
+</P></BODY></HTML>
