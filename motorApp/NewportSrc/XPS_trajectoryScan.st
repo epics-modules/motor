@@ -814,6 +814,8 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
                                                   pVar->pollSocket, 2, buffer, 
                                                   "", "", "", "");
     }
+    status = EventExtendedConfigurationTriggerSet(pVar->pollSocket, 2, buffer, 
+                                                  "", "", "", "");
     if (status != 0) {
         printf("Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s\n", 
                status, buffer);
