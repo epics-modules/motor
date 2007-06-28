@@ -633,10 +633,14 @@ ss xpsTrajectoryPosition {
 /*  C functions  */
 %{
 
-/* getMotorPositions returns the positions of each motor */
+/* getMotorPositions returns the positions of each motor.
+ * It reads the positions from the controller, and then converts to 
+ * EPICS motor user coordinates */
 static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos)
 {
     int status;
+    int j;
+    int dir;
 
     /* Read the current positions of all the axes */
     
@@ -644,6 +648,11 @@ static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos)
                                      pVar->groupName,pVar->numAxes,pos);
     if (status != 0)
         printf("Error performing GroupPositionCurrentGet%i\n", status);
+    /* Convert from XPS units (which are EPICS motor dial units) to user units */
+    for (j=0; j<pVar->numAxes; j++) {
+        if (pVar->epicsMotorDir[j] == 0) dir=1; else dir=-1;
+        pos[j] = pos[j]*dir + pVar->epicsMotorOff[j];
+    }
   
     return(status);
 }
@@ -896,9 +905,8 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     FILE *trajFile;
     int i, j, status;
     int npoints;
-    double trajStep;
     double trajVel;
-    double P0, P1, T0, T1;
+    double D0, D1, T0, T1;
     int ftpSocket;
     char fileName[NAME_LEN];
     double distance;
@@ -930,7 +938,7 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
         postVelocity[j] = 0.;
     }
     for (j=0; j<pVar->numAxes; j++) {
-        if (!pVar->moveAxis[j]) break;
+        if (!pVar->moveAxis[j]) continue;
         status = PositionerSGammaParametersGet(pVar->pollSocket, pVar->axisName[j], 
                                                &maxVelocity[j], &maxAcceleration[j],
                                                &minJerkTime[j], &maxJerkTime[j]);
@@ -985,27 +993,36 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
         npoints = pVar->nelements-1;
     for (i=0; i<npoints; i++) {
         T0 = pVar->timeTrajectory[i];
-        T1 = pVar->timeTrajectory[i+1];
+        if (i < npoints-1)
+            T1 = pVar->timeTrajectory[i+1];
+        else
+            T1 = T0;
         for (j=0; j<pVar->numAxes; j++) {
-            P0 = pVar->motorTrajectory[j][i];
-            P1 = pVar->motorTrajectory[j][i+1];
-        
             if (pVar->moveMode == MOVE_MODE_RELATIVE) {
-                trajStep = pVar->motorTrajectory[j][i];
+                D0 = pVar->motorTrajectory[j][i];
+                if (i < npoints-1) 
+                    D1 = pVar->motorTrajectory[j][i+1];
+                else
+                    D1 = D0;
             } else {
-                trajStep = pVar->motorTrajectory[j][i+1] - 
+                D0 = pVar->motorTrajectory[j][i+1] - 
                            pVar->motorTrajectory[j][i];
+                if (i < npoints-1) 
+                    D1 = pVar->motorTrajectory[j][i+2] - 
+                           pVar->motorTrajectory[j][i+1];
+                else
+                    D1 = D0;
             }
                 
             /* Average either side of the point? */
-            trajVel = trajStep / T0;
+            trajVel = (D0 + D1) / (T0 + T1);
             if (!(pVar->moveAxis[j])) {
-                trajStep = 0.0;    /* Axis turned off*/
+                D0 = 0.0;    /* Axis turned off*/
                 trajVel = 0.0;
             }
         
             if (j == 0) fprintf(trajFile,"%f", pVar->timeTrajectory[i]);
-            fprintf(trajFile,", %f, %f",trajStep,trajVel);
+            fprintf(trajFile,", %f, %f",D0,trajVel);
             if (j == (pVar->numAxes-1)) fprintf(trajFile,"\n");
         }    
     }
@@ -1131,6 +1148,7 @@ static void readGathering(SS_ID ssId, struct UserVar *pVar)
     double setpointPosition, actualPosition;
     int ftpSocket;
     int status;
+    int dir;
     
     if (pVar->debugLevel > 0) {
         printf("XPS_trajectoryScan: readGathering:"
@@ -1170,12 +1188,6 @@ static void readGathering(SS_ID ssId, struct UserVar *pVar)
     fgets (buffer, MAX_GATHERING_STRING, gatheringFile);
     
     for (i=0; i<pVar->npulses; i++) {
-        /* There is a bug in the current V2.0.1 firmware that puts 2 lines in the 
-         * Gathering.dat file when there should be 1.  
-         * Skip the first one.  
-         * THIS fgets NEEDS TO BE REMOVED WHEN V2.1 FIRMWARE IS RELEASED.
-         */
-        /* fgets (buffer, MAX_GATHERING_STRING, gatheringFile); */
         for (j=0; j<pVar->numAxes; j++) {
             /* Note the trailing white space in this format is required to make
              * fscanf read the newline */
@@ -1186,8 +1198,10 @@ static void readGathering(SS_ID ssId, struct UserVar *pVar)
                        nitems, NUM_GATHERING_ITEMS);
                 goto done;
             }
-            pVar->motorReadbacks[j][i] = actualPosition;
             pVar->motorError[j][i] = actualPosition - setpointPosition;
+            /* Convert from XPS units to EPICS motor user units */
+            if (pVar->epicsMotorDir[j] == 0) dir=1; else dir=-1;
+            pVar->motorReadbacks[j][i] = actualPosition * dir + pVar->epicsMotorOff[j];
         }
     }
     
