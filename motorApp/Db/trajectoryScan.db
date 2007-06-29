@@ -1,9 +1,9 @@
-# Database for Newport MM4005 trajectory scanning.
+# Database for Newport MM4005 and XPS trajectory scanning.
 #
 #                   Mark Rivers
-#                   August 12, 2000
+#                   June 29, 2007
 #
-# Note: This database is completely general for the MM4005, it makes no
+# Note: This database is completely general for the MM4005 and XPS, it makes no
 # assumptions about the motors defined on particular axis.  Thus it can be used
 # with the Newport diffractometer or any other set of up to 8 motors.
 #
@@ -17,12 +17,7 @@
 #   $(DONV)     - Value to write to PV to turn detector on
 #   $(DOFFPV)   - Name of PV to turn detector off
 #   $(DOFFV)    - Value to write to PV to turn detector off
-#
-#  Modifications:
-#  5-Jun-2002    Mark Rivers  Increased TMOT field of StringOutIn record from 5000 to
-#                             20000, it was timing out when # trajectory elements exceeded
-#                             about 64. Should make it to about 250 now.
-#  28-Mar-2004 Mark Rivers  Converted from serial to asyn records.
+
 
 #
 # PVs controlling the number of trajectory elements and the number of output
