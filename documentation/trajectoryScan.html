@@ -1323,10 +1323,13 @@ the MM4005 at the end of the trajectory execution. Set the SPEC global variable
 <<P>&nbsp;</P>
 <H2><A name="Restrictions">
              Restrictions</A></H2>
-<P>The following are restrictions on the trajectory scanning.
+<P>The following are restrictions and problems with the trajectory scanning.
 <UL>
-  <LI>The XPS SNL code does not yet check that the trajectory is within the soft limits.
-  <LI>The Abort command is not implemented or tested on the XPS.
+  <LI>At short trajectory element times with velocity changes the XPS can exceed
+      the maximum acceleration, even when a simple calculation (delta velocity/delta time)
+      says that it should not.  The fix will be to use the actual spline function that the
+      XPS uses when calculating the velocities in the trajectory file.  We have not run into
+      this problem at trajectory times larger than 0.01 second.
 </UL>
 
 </BODY>
