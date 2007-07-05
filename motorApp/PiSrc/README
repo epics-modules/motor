@@ -16,3 +16,18 @@ Then the "Default jumbering ..." depicted in Fig. 2 of the GreensSpring XM
 Octal I/O manual is jumpered as follows; 1-5, 2-6, 9-13, 10-14.
 
 The correct jumpering for the C-844 is; 1-2, 5-6, 13-16.
+
+M-111.12S stage to ACS driver adapter
+=====================================
+
+DB15  ELCO   Func.
+----  ----   -----
+ 1    A      ph1+
+ 9    E      ph1-
+ 2    C      ph2+
+10    H      ph2-
+ 6    V      +5V
+14    W      lim+
+ 7    T,U,R  Gnd
+ 8    X      lim-
+
