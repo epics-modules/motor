@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.13 $
+Version:        $Revision: 1.14 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-06-06 18:50:41 $
+Last Modified:  $Date: 2007-08-15 20:43:02 $
 */
 
 /*
@@ -58,6 +58,8 @@ Last Modified:  $Date: 2007-06-06 18:50:41 $
  *                    - added USE_DEVLIB with RTEMS conditionial.
  *                    - replaced errlogPrintf calls in ISR with
  *                      epicsInterruptContextMessage calls.
+ * 08  08-20-07 rls - Make send_mess() and recv_mess() non-global.
+ *                  - removed unneeded stub start_status().
  *
  */
 
@@ -136,14 +138,13 @@ static long report(int);
 static long init();
 static void query_done(int, int, struct mess_node *);
 static int set_status(int, int);
-RTN_STATUS send_mess(int, char const *, char *);
-int recv_mess(int, char *, int);
+static RTN_STATUS send_mess(int, char const *, char *);
+static int recv_mess(int, char *, int);
 static void motorIsr(int);
 static int motor_init();
 static void MAXv_reset(void *);
 static char *readbuf(volatile struct MAXv_motor *, char *);
 
-static void start_status(int card);
 static int motorIsrSetup(int card);
 
 struct driver_table MAXv_access =
@@ -165,7 +166,7 @@ struct driver_table MAXv_access =
     recv_mess,
     set_status,
     query_done,
-    start_status,
+    NULL,
     &initialized,
     MAXv_axis
 };
@@ -225,16 +226,6 @@ static void query_done(int card, int axis, struct mess_node *nodeptr)
         send_mess(card, AXIS_STOP, MAXv_axis[axis]);
 }
 
-
-/*********************************************************
- * Start card data area update.
- * Each card will take 800-900us to complete update.
- * start_status(int card)
- *            if card == -1 then start all cards
- *********************************************************/
-static void start_status(int card)
-{
-}
 
 /******************************************************************************
 * FUNCTION NAME: set_status
@@ -325,16 +316,7 @@ static int set_status(int card, int signal)
 
             status.Bits.RA_DIRECTION = (ax_stat->direction == 'P') ? 1 : 0;
             status.Bits.RA_HOME =      (ax_stat->home == 'H')      ? 1 : 0;
-
-            if (ax_stat->done == 'D')
-            {
-                /* Request Data Area Update after DONE detected so that both
-                 * ASCII command data and shared memory data match. */
-                start_status(card);
-                status.Bits.RA_DONE = 1;
-            }
-            else
-                status.Bits.RA_DONE = 0;
+            status.Bits.RA_DONE =      (ax_stat->done == 'D')      ? 1 : 0;
 
             if (ax_stat->overtravel == 'L')
             {
@@ -491,7 +473,7 @@ errorexit:      errMessage(-1, "Invalid device directive");
 /* send a message to the OMS board                   */
 /* send_mess()                       */
 /*****************************************************/
-RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     volatile struct MAXv_motor *pmotor;
     epicsInt16 putIndex;
@@ -595,7 +577,7 @@ RTN_STATUS send_mess(int card, char const *com, char *name)
  *  ENDFOR
  *  
  */
-int recv_mess(int card, char *com, int amount)
+static int recv_mess(int card, char *com, int amount)
 {
     volatile struct MAXv_motor *pmotor;
     int itera;
@@ -1092,7 +1074,6 @@ static int motor_init()
                     errMessage(-1, "Interrupts Disabled!\n");
             }
 
-            start_status(card_index);
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 motor_info = (struct mess_info *) &pmotorState->motor_info[motor_index];
