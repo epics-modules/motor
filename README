@@ -155,6 +155,19 @@ Modification Log from R6-2 to R6-3
 
         File modified: motorApp/Db/motorUtil.db
 
+6)  Added Jens Eden's (BESSY) modifications to the OMS MAXv driver.
+        - register iocsh commands.
+        - added USE_DEVLIB with RTEMS conditional.
+        - replaced errlogPrintf calls in ISR with epicsInterruptContextMessage
+          calls.
+
+        File modified: motorApp/OmsSrc/drvMAXv.cc
+
+7) OMS MAXv driver clean-up; made send_mess() and recv_mess() non-global and
+        removed unneeded stub start_status().
+
+        File modified: motorApp/OmsSrc/drvMAXv.cc
+
 
 Modification Log from R6-1 to R6-2
 ==================================
