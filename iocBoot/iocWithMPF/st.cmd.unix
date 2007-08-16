@@ -117,6 +117,17 @@ MM4000Config(0, "L0")
 #!PIC844Config(0, "L0")
 #!var drvPIC844debug 4
 
+# PI C-848 driver setup parameters: 
+#     (1) maximum number of controllers in system
+#     (2) motor task polling rate (min=1Hz,max=60Hz)
+#!PIC848Setup(1, 2)
+
+# PI C-848 driver configuration parameters: 
+#     (1) controller# being configured,
+#     (2) ASYN port name
+#!PIC848Config(0, "L0")
+#!drvPIC848debug = 4
+
 # Micos MoCo driver setup parameters:
 # Load MicosSetup once.
 #     (1) max # of controller groups.  Controller groups are per serial

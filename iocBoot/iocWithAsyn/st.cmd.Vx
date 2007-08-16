@@ -132,6 +132,17 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!PIC844Config(0, "a-Serial[0]")
 #!drvPIC844debug = 4
 
+# PI C-848 driver setup parameters: 
+#     (1) maximum number of controllers in system
+#     (2) motor task polling rate (min=1Hz,max=60Hz)
+#!PIC848Setup(1, 2)
+
+# PI C-848 driver configuration parameters: 
+#     (1) controller# being configured,
+#     (2) ASYN port name
+#!PIC848Config(0, "a-Serial[0]")
+#!drvPIC848debug = 4
+
 # PI E-662 Piezo driver setup parameters:
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz, max=60Hz)
