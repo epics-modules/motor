@@ -168,6 +168,16 @@ Modification Log from R6-2 to R6-3
 
         File modified: motorApp/OmsSrc/drvMAXv.cc
 
+8) The OMS VME58 "stale data" problem referred to in item #4 under R5-7 was
+        caused by communicating via the ASCII commands while the DPRAM was
+        updating.  With this release the OMS VME58 driver's "stale data delay"
+        is set to zero.  In addition, a "Work around for intermittent wrong LS
+        status" that occurred only with version 2.35 firmware is removed.
+        Finally, start_status() is modified to wait for DPRAM update before
+        exiting.
+        
+        File modified" motorApp/OmsSrc/drvOms58.cc
+
 
 Modification Log from R6-1 to R6-2
 ==================================
