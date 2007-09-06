@@ -2,9 +2,9 @@
 FILENAME... drvSmartMotor.cc
 USAGE...    Motor record driver level support for Animatics Corporation SmartMotors.
 
-Version:        $Revision: 1.1 $
+Version:        $Revision: 1.2 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-05-08 14:45:16 $
+Last Modified:  $Date: 2007-09-06 20:25:53 $
 */
 
 /*
@@ -40,6 +40,7 @@ Last Modified:  $Date: 2007-05-08 14:45:16 $
  * Modification Log:
  * -----------------
  * .01 02/20/07 ses copied from drvSmartMotorPL.c
+ * .02 09/06/07 Eric Norum discovered this device needs an update delay.
  */
 
 #include <string.h>
@@ -136,7 +137,7 @@ extern "C"
     epicsExportAddress(drvet, drvSmartMotor);
 }
 
-static struct thread_args targs = {SCAN_RATE, &SmartMotor_access, 0.0};
+static struct thread_args targs = {SCAN_RATE, &SmartMotor_access, 0.1};
 
 
 /*********************************************************
