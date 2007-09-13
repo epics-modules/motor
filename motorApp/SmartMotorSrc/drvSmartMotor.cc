@@ -2,9 +2,9 @@
 FILENAME... drvSmartMotor.cc
 USAGE...    Motor record driver level support for Animatics Corporation SmartMotors.
 
-Version:        $Revision: 1.2 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-09-06 20:25:53 $
+Version:        $Revision: 1.3 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2007-09-13 16:36:38 $
 */
 
 /*
@@ -349,7 +349,7 @@ static int set_status(int card, int signal)
         send_mess(card, "RP", SmartMotor_addr[signal]);
         recv_mess(card, buff, 1);
         motorData = atof(buff);
-        motor_info->encoder_position = (int32_t) motorData;
+        motor_info->encoder_position = (epicsInt32) motorData;
     }
 
     status.Bits.RA_PROBLEM = 0;
