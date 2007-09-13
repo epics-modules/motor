@@ -15,6 +15,7 @@
         #else
             #define DLL
         #endif
+        #include "strtok_r.h"
 #else
 	#define DLL 
 #endif
@@ -3846,7 +3847,7 @@ int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * P
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD];
-        int temp; 
+        int temp;
 	char *ReturnedValue = (char *) malloc (sizeof(char) * SIZE_SMALL); 
 
 	/* Convert to string */ 

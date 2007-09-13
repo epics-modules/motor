@@ -34,6 +34,9 @@ Newport_SRCS += asynOctetSocket.cpp
 Newport_SRCS += XPS_C8_drivers.cpp drvXPSAsyn.c drvXPSAsynAux.c XPSAsynInterpose.c xps_ftp.c
 Newport_SRCS += XPS_trajectoryScan.st
 
+# strtok_r needed on WIN32
+Newport_SRCS_WIN32 += strtok_r.cpp
+
 # XPS Gathering test function
 Newport_SRCS += XPSGathering.c
 Newport_SRCS += XPSGatheringRegister.c
