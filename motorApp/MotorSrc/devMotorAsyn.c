@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.19 $
- * Modified by: $Author: rivers $
- * Last Modified: $Date: 2007-04-23 20:26:36 $
+ * Version: $Revision: 1.20 $
+ * Modified by: $Author: peterd $
+ * Last Modified: $Date: 2007-09-18 12:41:59 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -132,6 +132,7 @@ static void init_controller(struct motorRecord *pmr )
         {
             epicsEventMustWait(initEvent);
             epicsEventDestroy(initEvent);
+            pPvt->initEvent = 0;
         }
     }
 }
@@ -230,6 +231,12 @@ static long init_record(struct motorRecord * pmr )
 	       pmr->name, pasynUser->errorMessage);
     }
 
+    /* Once everything is set-up, we can do the initial setting of position.
+       This should be the first thing that pushes onto the Asyn queue.
+       It needs to be done before we get the initial values back from the
+       controller.*/
+    init_controller(pmr);
+
     /* Initiate calls to get the initial motor parameters
        Have to do it the long-winded way, because before iocInit, none of the
        locks or scan queues are initialised, so calls to scanOnce(),
@@ -249,8 +256,6 @@ static long init_record(struct motorRecord * pmr )
 				 &pPvt->status);
     pasynManager->freeAsynUser(pasynUser);
     pPvt->needUpdate = 1;
-
-    init_controller(pmr);
 
     return(0);
 bad:
