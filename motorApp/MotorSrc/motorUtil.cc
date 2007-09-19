@@ -2,9 +2,9 @@
 FILENAME...     motorUtil.cc
 USAGE...        Motor Record Utility Support.
 
-Version:        $Revision: 1.3 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-05-10 20:14:21 $
+Version:        $Revision: 1.4 $
+Modified By:    $Author: peterd $
+Last Modified:  $Date: 2007-09-19 15:57:41 $
 */
 
 
@@ -117,6 +117,7 @@ static int motorUtil_task(void *arg)
 {
     char temp[PVNAME_STRINGSZ+5];
     int itera, status;
+    epicsEventId wait_forever;
 
     SEVCHK(ca_context_create(ca_enable_preemptive_callback),
            "motorUtil: ca_context_create() error");
@@ -140,6 +141,13 @@ static int motorUtil_task(void *arg)
         strcat(temp, "alldone.VAL");
         chid_alldone = getChID(temp);
 
+	if (!chid_moving || !chid_alldone) {
+	    errlogPrintf("Failed to connect to %smoving or %salldone.\n"
+			 "Check prefix matches Db\n", vme, vme);
+	    ca_task_exit();
+	    return ERROR;
+	}
+
         /* loop over motors in motorlist and fill in motorArray */
         for (itera=0; itera < numMotors; itera++)
         {
@@ -162,10 +170,20 @@ static int motorUtil_task(void *arg)
         strcpy(temp, vme);
         strcat(temp, "allstop.VAL");
         chid_allstop = getChID(temp);
-        status = pvMonitor(0, chid_allstop, -1);
+	if (!chid_allstop) {
+	    errlogPrintf("Failed to connect to %sallstop\n",vme);
+	} else {
+	    status = pvMonitor(0, chid_allstop, -1);
+	}
     }
     
-    epicsThreadSuspendSelf(); /* Wait Forever */
+    /* Wait on a (never signalled) event here, rather than suspending the
+       thread, so as not to show up in the thread list as "SUSPENDED", which
+       is usually a sign of a fault. */
+    wait_forever = epicsEventCreate(epicsEventEmpty);
+    if (wait_forever) {
+	epicsEventMustWait(wait_forever);
+    }
     return(ERROR);
 }
 
@@ -175,15 +193,21 @@ static chid getChID(char *PVname)
     chid channelID = 0;
     int status;
 
+    if (motorUtil_debug)
+	errlogPrintf("getChID(%s)\n", PVname);
+
     /* In R3.14 ca_create_channel() will replace ca_search_and_connect() */
     status = ca_search_and_connect(PVname, &channelID, 0, 0);
-    status = ca_pend_io(TIMEOUT);
+    if (status == ECA_NORMAL) 
+    {
+	status = ca_pend_io(TIMEOUT);
+    }
 
     if (status != ECA_NORMAL)
     {
         SEVCHK(status, "ca_search_and_connect");
-        ca_task_exit(); /* this is serious */
-        errlogPrintf("(motorUtil_A.c) getChID error: %i\n", status);
+        errlogPrintf("motorUtil.cc: getChID(%s) error: %i\n", PVname, status);
+	channelID = 0;
     }
     return channelID;
 }
@@ -378,6 +402,7 @@ static void motorUtilRegister(void)
 }
 
 epicsExportRegistrar(motorUtilRegister);
+epicsExportAddress(int, motorUtil_debug);
 
 } // extern "C"
 
