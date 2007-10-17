@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.14 $
+Version:        $Revision: 1.15 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-08-15 20:43:02 $
+Last Modified:  $Date: 2007-10-17 19:23:17 $
 */
 
 /*
@@ -38,6 +38,8 @@ Last Modified:  $Date: 2007-08-15 20:43:02 $
  * Verified with firmware:
  *      - MAXv ver:1.25
  *      - MAXv ver:1.29 (has ECO #1432; fixes initialization problem).
+ *      - MAXv ver:1.31 (fixes DPRAM encoder position data problem when using
+ *                       mixed motor types.)
  *
  * Modification Log:
  * -----------------
