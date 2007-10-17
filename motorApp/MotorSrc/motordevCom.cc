@@ -3,9 +3,9 @@ FILENAME: motordevCom.cc
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:        $Revision: 1.11 $
+Version:        $Revision: 1.12 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-02-27 17:44:06 $
+Last Modified:  $Date: 2007-10-17 19:09:33 $
 */
 
 /*
@@ -50,6 +50,9 @@ Last Modified:  $Date: 2007-02-27 17:44:06 $
  *                   determines precedence between controller or save/restore
  *                   motor position at boot-up; negative controller positions
  *                   were not handled correctly.
+ * .10  10/17/07 rls Raised the precedence of the INIT string for controllers
+ *                   (PI C-848) that require an INIT string primitive before a
+ *                   LOAD_POS can be executed.
  */
 
 
@@ -307,6 +310,14 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
         /* Switch to special init callback so that record will not be processed during iocInit. */
         callbackSetCallback((void (*)(struct callbackPvt *)) motor_init_callback,
                             &(motor_call->callback));
+
+        if (initString == true)
+        {
+            (*pdset->start_trans)(mr);
+            (*pdset->build_trans)(PRIMITIVE, NULL, mr);
+            (*pdset->end_trans)(mr);
+        }
+        
         if (initEncoder == true)
         {
             (*pdset->start_trans)(mr);
@@ -320,13 +331,6 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
 
             (*pdset->start_trans)(mr);
             (*pdset->build_trans)(LOAD_POS, &setPos, mr);
-            (*pdset->end_trans)(mr);
-        }
-
-        if (initString == true)
-        {
-            (*pdset->start_trans)(mr);
-            (*pdset->build_trans)(PRIMITIVE, NULL, mr);
             (*pdset->end_trans)(mr);
         }
 
