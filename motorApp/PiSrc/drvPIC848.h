@@ -10,6 +10,8 @@
  * Modification Log:
  * -----------------
  * .00  09/20/2005  rls  copied from drvPIC630.h
+ * .01  10/17/2007  rls  - Added "reference" home switch indicator.
+                         - increased position resolution scaler.
  */
 
 #ifndef	INCdrvPIC848h
@@ -20,11 +22,14 @@
 #include "asynDriver.h"
 #include "asynOctetSyncIO.h"
 
-#define COMM_TIMEOUT 2		/* Timeout in seconds. */
-#define POS_RES 0.001		/* Position resolution. */
+#define COMM_TIMEOUT 2          /* Timeout in seconds. */
+#define POS_RES 0.000001        /* Position resolution. */
 
 struct PIC848controller
 {
+    bool reference[4];          /* reference sensor; if true, axis position can
+                                 * only be set to zero; if false, axis position
+                                 * must be set before axis can be moved. */
     asynUser *pasynUser;	/* asynUser structure */
     int asyn_address;		/* Use for GPIB or other address with asyn */
     CommStatus status;		/* Controller communication status. */
