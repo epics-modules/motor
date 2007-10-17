@@ -3,9 +3,9 @@ FILENAME...	drvPIC848.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 	GmbH & Co. C-848 motor controller.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-10-18 21:31:10 $
+Last Modified:	$Date: 2007-10-17 19:55:42 $
 */
 
 /*
@@ -36,6 +36,8 @@ Last Modified:	$Date: 2005-10-18 21:31:10 $
  * Modification Log:
  * -----------------
  * .01 10/18/05 rls - copied from drvPIC844.cc
+ * .02 10/17/07 rls - Added "Motor motion timeout" error check.
+ *                  - Set "reference" home switch indicator.
  */
 
 /*
@@ -74,6 +76,7 @@ extern "C" {epicsExportAddress(int, drvPIC848debug);}
 /* --- Local data. --- */
 int PIC848_num_cards = 0;
 static char *PIC848_axis[4] = {"A", "B", "C", "D"};
+static volatile int motionTO = 10;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -285,6 +288,17 @@ static int set_status(int card, int signal)
 	motor_info->no_motion_count = 0;
     }
 
+    if (motor_info->no_motion_count > motionTO)
+    {
+        status.Bits.RA_PROBLEM = 1;
+        send_mess(card, "HLT  #", PIC848_axis[signal]);
+        motor_info->no_motion_count = 0;
+        errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
+            card, signal);
+    }
+    else
+        status.Bits.RA_PROBLEM = 0;
+    
     plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
     /* Set limit switch error indicators. */
@@ -310,8 +324,6 @@ static int set_status(int card, int signal)
     status.Bits.EA_SLIP       = 0;
     status.Bits.EA_SLIP_STALL = 0;
     status.Bits.EA_HOME       = 0;
-
-    status.Bits.RA_PROBLEM  = 0;
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
@@ -573,7 +585,15 @@ static int motor_init()
 		motor_info->pid_present = YES;
 		motor_info->status.Bits.GAIN_SUPPORT = 1;
 
-		cntrl->drive_resolution[motor_index] = 0.0001;
+		cntrl->drive_resolution[motor_index] = POS_RES;
+
+                /* Determine if stage has a reference (home) switch. */
+		send_mess(card_index, "REF? #", PIC848_axis[motor_index]);
+		status = recv_mess(card_index, buff, 1);
+		if (strcmp(&buff[2],"0") == 0)
+                    cntrl->reference[motor_index] = false;
+                else
+                    cntrl->reference[motor_index] = true;
 
 		set_status(card_index, motor_index);  /* Read status of each motor */
 	    }
