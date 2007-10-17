@@ -3,9 +3,9 @@ FILENAME...	devPIC848.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. C-848 motor controller.
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-10-04 19:45:52 $
+Last Modified:	$Date: 2007-10-17 19:54:51 $
 */
 
 /*
@@ -37,6 +37,9 @@ Last Modified:	$Date: 2005-10-04 19:45:52 $
  * -----------------
  * .01 12/17/03 rls - copied from devIM483PL.cc
  * .02 01/22/03 rls - fix INIT field processing; support HOME and PID commands.
+ * .03 10/17/07 rls - Due LOAD_POS based on "reference" indicator.
+ *                  - If torque is disabled, clear error conditions before
+ *                    ENABLE_TORQUE command.
  */							      
 
 
@@ -158,6 +161,7 @@ static RTN_STATUS PIC848_build_trans(motor_cmnd command, double *parms, struct m
     double dval, cntrl_units, res;
     RTN_STATUS rtnval;
     bool send;
+    msta_field msta;
 
     send = true;		/* Default to send motor command. */
     rtnval = OK;
@@ -165,6 +169,8 @@ static RTN_STATUS PIC848_build_trans(motor_cmnd command, double *parms, struct m
     
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     dval = (parms == NULL) ? 0.0 : *parms;
+    
+    msta.All = mr->msta;
     
     rtnval = (RTN_STATUS) motor_start_trans_com(mr, PIC848_cards); 
 
@@ -227,10 +233,16 @@ static RTN_STATUS PIC848_build_trans(motor_cmnd command, double *parms, struct m
 	    break;
 	
 	case LOAD_POS:
-	    if (cntrl_units == 0.0)
-		sprintf(buff, "DFH  #");
-	    else
-		rtnval = ERROR;
+            if (cntrl->reference[motor_call->signal] == true)
+            {
+                if (cntrl_units == 0.0)
+                    sprintf(buff, "DFH  #");
+                else
+                    rtnval = ERROR;
+            }
+            else
+                sprintf(buff, "POS  #%+.*f", maxdigits, (cntrl_units * res));
+
 	    break;
 	
 	case SET_VEL_BASE:
@@ -240,9 +252,23 @@ static RTN_STATUS PIC848_build_trans(motor_cmnd command, double *parms, struct m
 	case SET_VELOCITY:
 	    sprintf(buff, "VEL  # %.*f", maxdigits, (cntrl_units * res));
 	    break;
-	
-	case ENABLE_TORQUE:
-	case DISABL_TORQUE:
+
+        case ENABLE_TORQUE:
+	    if (msta.Bits.EA_POSITION == 0) /* Test for torque disabled. */
+            {
+		/* Clear the axis status. */
+                sprintf(buff, "CLR  #");
+                rtnval = motor_end_trans_com(mr, drvtabptr);
+		rtnval = (RTN_STATUS) motor_start_trans_com(mr, PIC848_cards);
+                motor_call->type = PIC848_table[command];
+            }
+	    sprintf(buff, "SVO  #1");
+            break;
+
+        case DISABL_TORQUE:
+            sprintf(buff, "SVO  #0");
+            break;
+
 	case SET_ACCEL:
 	    /* The PIC848 does not support acceleration commands. */
 	case GO:
@@ -264,7 +290,7 @@ static RTN_STATUS PIC848_build_trans(motor_cmnd command, double *parms, struct m
 	
 	case JOG_VELOCITY:
 	case JOG:
-	    sprintf(buff, "VEL  #%.*f", maxdigits, cntrl_units);
+	    sprintf(buff, "VEL  #%.*f", maxdigits, (cntrl_units * res));
 	    break;
 	
 	case SET_PGAIN:
