@@ -176,13 +176,17 @@ Modification Log from R6-2 to R6-3
         Finally, start_status() is modified to wait for DPRAM update before
         exiting.
         
-        File modified" motorApp/OmsSrc/drvOms58.cc
+        File modified: motorApp/OmsSrc/drvOms58.cc
 
 9) Raised the precedence of INIT string in motor_init_record_com() for
         controllers (PI C-848) that require an INIT string primitive before a
         LOAD_POS can be executed.
         
-        File modified" motorApp/MotorSrc/motordevCom.cc
+        File modified: motorApp/MotorSrc/motordevCom.cc
+
+10) Numerous fixes for the PI C-848 controller.
+
+        Files modified: motorApp/PiSrc/[drvPIC848.h,devPIC848.cc,drvPIC848.cc]
 
 
 Modification Log from R6-1 to R6-2
