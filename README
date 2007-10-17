@@ -178,6 +178,12 @@ Modification Log from R6-2 to R6-3
         
         File modified" motorApp/OmsSrc/drvOms58.cc
 
+9) Raised the precedence of INIT string in motor_init_record_com() for
+        controllers (PI C-848) that require an INIT string primitive before a
+        LOAD_POS can be executed.
+        
+        File modified" motorApp/MotorSrc/motordevCom.cc
+
 
 Modification Log from R6-1 to R6-2
 ==================================
