@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.39 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2007-04-06 18:35:38 $
+Version:	$Revision: 1.40 $
+Modified By:	$Author: peterd $
+Last Modified:	$Date: 2007-11-02 14:39:59 $
 */
 
 /*
@@ -92,6 +92,7 @@ Last Modified:	$Date: 2007-04-06 18:35:38 $
  * .30 03-16-07 rls - Clear home request when soft-limit violation occurs.
  * .31 04-06-07 rls - RDBD was being used in motordevCom.cc
  *                    motor_init_record_com() before the validation check.
+ * .40 11-02-07 pnd - Use absolute value of mres to calculate rdbdpos
  */
 
 #define VERSION 6.3
@@ -1990,7 +1991,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    bool use_rel, preferred_dir;
 	    double relpos = pmr->diff / pmr->mres;
 	    double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
-            long rdbdpos = NINT(pmr->rdbd / pmr->mres); /* retry deadband steps */
+	    long rdbdpos = NINT(pmr->rdbd / fabs(pmr->mres)); /* retry deadband steps */
 	    long rpos, npos;
 	    msta_field msta;
 	    msta.All = pmr->msta;
