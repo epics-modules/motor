@@ -112,6 +112,7 @@ Known Problems
         wants to set the current position to 10.00 inches, then -10.00 must be
         entered in the VAL or DVAL field.
 
+
 Modification Log from R6-2 to R6-3
 ==================================
 
@@ -124,7 +125,7 @@ Modification Log from R6-2 to R6-3
                           added to motorApp/NewportSrc/Makefile.
                         - "motorSimSupport_LIBS += motor" added to
                           motorApp/MotorSimSrc/Makefile.
-                        - modified "Debug" statment arguments in
+                        - modified "Debug" statement arguments in
                           motorApp/NewFocusSrc/drvPMNC87xx.cc
                         - "oms_LIBS += asyn" added to motorApp/OmsSrc/Makefile.
 
@@ -187,6 +188,27 @@ Modification Log from R6-2 to R6-3
 10) Numerous fixes for the PI C-848 controller.
 
         Files modified: motorApp/PiSrc/[drvPIC848.h,devPIC848.cc,drvPIC848.cc]
+
+11) Two changes were made to the motor record to better support DC motors.
+
+        First, with this release, if retries are disabled (RTRY=0), then all
+        moves are done in absolute mode.  This allows a DC motor user to have
+        the readback values calculated based on either the local encoder (UEIP)
+        or the readback link (URIP), but still have all moves commanded in
+        absolute mode.  Previous releases the of the motor record would use
+        relative moves if either the local or external readbacks were enabled,
+        regardless of the state (enable/disable) of the retries.
+        
+        Second, the New Target Monitoring (NTM field) logic is changed to use
+        reference rather than feedback positions. This eliminates unwanted motor
+        record STOP commands at the end of DC motor moves.
+
+        File modified: motorApp/MotorSrc/motorRecord.cc
+
+12) Motor record bug fix for long moves at backlash velocity after a new target
+        position detected (tdir change).
+
+        File modified: motorApp/MotorSrc/motorRecord.cc
 
 
 Modification Log from R6-1 to R6-2
