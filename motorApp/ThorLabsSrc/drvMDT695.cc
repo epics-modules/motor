@@ -4,9 +4,9 @@ USAGE...	Motor record driver level support for ThorLabs
                 Piezo Control Module (Model: MDT695)
 		Compatable with MDT694, MDT693
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2007-05-23 14:56:06 $
+Last Modified:	$Date: 2007-11-15 18:47:10 $
 
 */
 
@@ -625,7 +625,7 @@ static int motor_init()
 		motor_info->no_motion_count = 0;
 		motor_info->encoder_position = 0;
 		motor_info->position = 0;
-
+		motor_info->motor_motion = NULL;
 
 		/* NO Encoder support - internal closed loop controller */
 	        motor_info->encoder_present = NO;
