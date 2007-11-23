@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.41 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2007-11-07 18:54:13 $
+Version:	$Revision: 1.42 $
+Modified By:	$Author: peterd $
+Last Modified:	$Date: 2007-11-23 13:43:19 $
 */
 
 /*
@@ -100,6 +100,7 @@ Last Modified:	$Date: 2007-11-07 18:54:13 $
  *                  - Do not post process previous move on "tdir" detection.
  *                    Clear post process indicator (pp). This fixes long moves
  *                    at backlash velocity after a new target position.
+ * .42 11-23-07 pnd - Correct use of MRES in NTM logic to use absolute value
  */
 
 #define VERSION 6.3
@@ -1120,7 +1121,7 @@ static long process(dbCommon *arg)
 
 	if (pmr->movn)
 	{
-            double cdiff = (pmr->rval - pmr->rmp) * pmr->mres; /* Commanded difference. */
+            double cdiff = (pmr->rval - pmr->rmp) * fabs(pmr->mres); /* Commanded difference. */
 	    int sign_cdiff = (cdiff < 0.0) ? 0 : 1;
 
 	    /* Test for new target position in opposite direction of current
