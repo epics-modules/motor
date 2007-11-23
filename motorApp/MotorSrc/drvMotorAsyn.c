@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.16 $
- * Modified by: $Author: rivers $
- * Last Modified: $Date: 2007-04-23 20:29:20 $
+ * Version: $Revision: 1.17 $
+ * Modified by: $Author: peterd $
+ * Last Modified: $Date: 2007-11-23 13:47:00 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -563,12 +563,15 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
 	break;
     case motorVelocity:
 	pAxis->max_velocity = value;
+	status = asynSuccess;
 	break;
     case motorVelBase:
 	pAxis->min_velocity = value;
+	status = asynSuccess;
 	break;
     case motorAccel:
 	pAxis->accel = value;
+	status = asynSuccess;
 	break;
     case motorPosition:
     case motorResolution:
