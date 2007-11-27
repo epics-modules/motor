@@ -5,11 +5,91 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R6.2 Notice</title>
+  <title>EPICS Motor Record Release R6.3 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+
+<CENTER>
+  <H1><B><U>Motor Record Version 6.3 Release Notice</U></B></H1>
+</CENTER>
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>save/restore of motor positions</B></U>
+  </P>
+  <P>
+  Mark River's found and fixed a bug in the motor record that resulted in motor 
+  positions not being initialized from save/restore at boot-up if RDBD field was 
+  not included in a save/restore save set.
+  </P>
+  <P>
+  <U><B>motorUtil error message</B></U>
+  </P>
+  <P>
+  A bug was introduced into the shell command "motorUtilInit()" affecting these 
+  versions of the motor distribution; R6-2, R6-2-1 and R6-2-2. This bug resulted 
+  in the erroneous error message; "motorUtilInit: Prefix %c: has more than 53 
+  characters. Exiting"
+  </P>
+  <P>
+  <U><B>DC motor support</B></U>
+  </P>
+  <P>
+  Two changes were made to the motor record to better support DC motors.
+  <UL>
+    <LI>
+      With this release, if retries are disabled (RTRY=0), then all moves are done in 
+      absolute mode.  This allows a DC motor user to have the readback values 
+      calculated based on either the local encoder (UEIP) or the readback link (URIP), 
+      but still have all moves commanded in absolute mode.  Previous releases the of 
+      the motor record would use relative moves if either the local or external 
+      readbacks were enabled, regardless of the state (enable/disable) of the retries.
+    </LI>
+    <LI>
+      The New Target Monitoring (NTM field) logic is changed to use reference rather 
+      than feedback positions. This eliminates unwanted motor record STOP commands at 
+      the end of DC motor moves.
+    </LI>
+  </UL>
+  </P>
+  <U><B></B></U>
+  </P>
+  <P>
+  </P>
+</DIV>
+
+
+<CENTER>
+  <H4><U>New Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Animatics Corporation SmartMotor</B></U>
+  </P>
+  <P>
+  Shifu Xu's support for the Animatics Corporation SmartMotor was added.
+  </P>
+  <P>
+  <U><B>piezosystem jena, Inc. EDS</B></U>
+  </P>
+  <P>
+  Joe Sullivan added support for the piezosystem jena GmbH EDS data interface module.
+  </P>
+  <U><B>Kohzu SC-800</B></U>
+  </P>
+  <P>
+  Ron Sluiter added support for the Kohzu SC-800 stepper motor controller.
+  </P>
+</DIV>
+
 
 <CENTER>
   <H1><B><U>Motor Record Version 6.2 Release Notice</U></B></H1>
@@ -551,7 +631,7 @@ Motor Record web page for details.<br>
   <P>
   The STUP field (Status Update) has been modified due to bug fixes.  The STUP 
   field functions as follows;
-  <ul>
+  <UL>
     <LI>
       Valid values for STUP are OFF(0), ON(1) and BUSY(2).
     </LI>
