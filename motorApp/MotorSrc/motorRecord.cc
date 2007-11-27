@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.42 $
-Modified By:	$Author: peterd $
-Last Modified:	$Date: 2007-11-23 13:43:19 $
+Version:	$Revision: 1.43 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2007-11-27 17:53:42 $
 */
 
 /*
@@ -101,6 +101,7 @@ Last Modified:	$Date: 2007-11-23 13:43:19 $
  *                    Clear post process indicator (pp). This fixes long moves
  *                    at backlash velocity after a new target position.
  * .42 11-23-07 pnd - Correct use of MRES in NTM logic to use absolute value
+ * .43 11-27-07 rls - Set VBAS before jogging.
  */
 
 #define VERSION 6.3
@@ -1829,6 +1830,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    {
 		double jogv = (pmr->jvel * dir) / pmr->mres;
 		double jacc = pmr->jar / fabs(pmr->mres);
+                double vbase = pmr->vbas / fabs(pmr->mres);
 
 		pmr->dmov = FALSE;
 		MARK(M_DMOV);
@@ -1847,6 +1849,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		    pmr->cdir = !pmr->cdir;
 
 		INIT_MSG();
+		WRITE_MSG(SET_VEL_BASE, &vbase);
 		WRITE_MSG(SET_ACCEL, &jacc);
 		WRITE_MSG(JOG, &jogv);
 		SEND_MSG();
