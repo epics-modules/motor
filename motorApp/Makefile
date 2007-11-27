@@ -31,6 +31,7 @@ DIRS += OrielSrc
 DIRS += ThorLabsSrc
 DIRS += SmartMotorSrc
 DIRS += PiJenaSrc
+DIRS += KohzuSrc
 endif
 
 # Install the edl files
