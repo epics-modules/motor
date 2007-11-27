@@ -37,6 +37,15 @@ MM4000Setup(1, 10)
 MM4000Config(0, "L0")
 #!var drvMM4000debug 4
 
+# The MM4000 driver does not set end of string (EOS).
+#  for RS232 serial,
+#!asynOctetSetInputEos( "a-Serial[0]",0,"\r")
+#!asynOctetSetOutputEos("a-Serial[0]",0,"\r")
+#  for GPIB,
+#!asynInterposeEosConfig("L0", 10, 1, 1)
+#!asynOctetSetInputEos( "L0",10,"\r")
+#!asynOctetSetOutputEos("L0",10,"\r")
+
 # Newport PM500 driver setup parameters:
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz,max=60Hz)
@@ -156,6 +165,19 @@ MM4000Config(0, "L0")
 #     (2) ASYN port name
 #!MDriveConfig(0, "L0")
 #!var drvMDrivedebug 4
+
+# Kohzu SC-800 motor controller setup parameters: 
+#     (1) maximum number of controllers in system
+#     (2) motor task polling rate (min=1Hz,max=60Hz)
+#!SC800Setup(1, 5)
+
+# Kohzu SC-800 motor controller configuration parameters: 
+#     (1) controller# being configured
+#     (2) ASYN port name
+#     (3) address (GPIB only)
+#!SC800Config(0, "L0", 0)
+#!var drvSC800debug 4
+
 
 iocInit
 
