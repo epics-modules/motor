@@ -1,0 +1,17 @@
+            EPICS motor record device driver README file
+==============================================================================
+
+           SC-800            SC-800            SC-800            SC-800
+==============================================================================
+
+Known problems:
+
+- The Stop command (STP) does not respond until the axis is completely stopped.
+From the SC-800 Operation Manual; "Response is transmitted at the time when
+the axis completely stops."  This results in "recv_mess(): TIMEOUT" error
+messages if the deceleration time is near the communication timeout (3 sec.).
+
+- With the motor record base speed (VBAS field) set to zero, the controller
+takes approximately 5-6 seconds to finish even a small move.
+
+- The home search can only be started in the positive direction.

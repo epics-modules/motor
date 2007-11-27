@@ -1,0 +1,7 @@
+# Kohzu motor controller support.
+
+# SC-800 support
+device(motor,VME_IO, devSC800, "SC-800")
+driver(drvSC800)
+registrar(SC800Register)
+variable(drvSC800debug)
