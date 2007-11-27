@@ -10,6 +10,8 @@ include "motorSupport.dbd"
 #include "devOms.dbd"
 #include "devSoftMotor.dbd"
 #include "motorSimSupport.dbd"
+#include "devSmartMotorMotor.dbd"
+#include "devKohzuMotor.dbd"
 
 #include "drvAsynSerialPort.dbd"
 #include "drvGsIP488.dbd"

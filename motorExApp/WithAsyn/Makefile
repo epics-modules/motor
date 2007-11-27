@@ -35,6 +35,8 @@ WithMPF_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 #!WithMPF_LIBS   += Newport
 #!WithMPF_LIBS   += softMotor
 #!WithMPF_LIBS   += motorSimSupport
+#!WithMPF_LIBS   += SmartMotor
+#!WithMPF_LIBS   += KohzuMotor
 WithMPF_LIBS   += motor
 WithMPF_LIBS   += asyn
 # Needed for Newport SNL programs
@@ -51,6 +53,8 @@ WithMPF_LIBS   += $(EPICS_BASE_IOC_LIBS)
 #!WithMPFVx_LIBS += Newport
 #!WithMPFVx_LIBS += softMotor
 #!WithMPFVx_LIBS += motorSimSupport
+#!WithMPFVx_LIBS += SmartMotor
+#!WithMPFVx_LIBS += KohzuMotor
 WithMPFVx_LIBS += motor
 
 # Support from IPAC R2.6 and above.

@@ -11,4 +11,5 @@ include "drvAsynSerialPort.dbd"
 #include "devOms.dbd"
 #include "devSoftMotor.dbd"
 #include "motorSimSupport.dbd"
-
+#include "devSmartMotorMotor.dbd"
+#include "devKohzuMotor.dbd"
