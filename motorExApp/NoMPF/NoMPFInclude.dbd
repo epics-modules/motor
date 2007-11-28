@@ -1,6 +1,0 @@
-include "base.dbd"
-include "asyn.dbd"
-include "motorSupport.dbd"
-#!include "devSoftMotor.dbd"
-#!include "devOms.dbd"
-#!include "devMXmotor.dbd"

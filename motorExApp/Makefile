@@ -1,9 +1,9 @@
 TOP = ..
 include $(TOP)/configure/CONFIG
 
-DIRS += NoMPF
+DIRS += NoAsyn
 ifdef ASYN
-DIRS += WithMPF
+DIRS += WithAsyn
 endif
 
 include $(TOP)/configure/RULES_DIRS
