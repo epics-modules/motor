@@ -1,13 +1,13 @@
 # This example if for running a motor record that uses the MX device
-# driver support on a Unix host.  This example does not require MPF.
+# driver support on a Unix host.  This example does not require Asyn.
 
 # Start errlog Task before any possible error messsage to prevent
 # erroneous "Interrupted system call" message on Linux OS host.
 errlogInit(0)
 
-dbLoadDatabase("../../dbd/NoMPF.dbd",0,0)
+dbLoadDatabase("../../dbd/NoAsyn.dbd",0,0)
 registerRecordDeviceDriver(pdbbase) 
-dbLoadRecords("../../db/NoMPF_MX.db","user=rls")
+dbLoadRecords("../../db/NoAsyn_MX.db","user=rls")
 MXmotorSetup(1, "MXexample.dat", 10)
 
 iocInit()

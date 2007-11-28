@@ -16,11 +16,11 @@ cd topbin
 # be added before any C++ code is loaded (see SPR #28980).
 sysCplusEnable=1
 
-ld < NoMPFVx.munch
+ld < NoAsynVx.munch
 
 cd startup
-dbLoadDatabase("$(TOP)/dbd/NoMPFVx.dbd")
-NoMPFVx_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase("$(TOP)/dbd/NoAsynVx.dbd")
+NoAsynVx_registerRecordDeviceDriver(pdbbase)
 
 dbLoadTemplate("motor.substitutions")
 dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
