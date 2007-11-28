@@ -5,31 +5,31 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
-DBD += NoMPF.dbd
-DBD += NoMPFVx.dbd
+DBD += NoAsyn.dbd
+DBD += NoAsynVx.dbd
 
-PROD_IOC_DEFAULT = NoMPF
-PROD_IOC_vxWorks = NoMPFVx
+PROD_IOC_DEFAULT = NoAsyn
+PROD_IOC_vxWorks = NoAsynVx
 
-NoMPF_SRCS += NoMPF_registerRecordDeviceDriver.cpp
-NoMPF_SRCS_DEFAULT += NoMPFMain.cpp
-#!NoMPF_LIBS += MXmotor
-#!NoMPF_LIBS += softMotor
-#!NoMPF_LIBS += oms
-NoMPF_LIBS += motor
-NoMPF_LIBS += asyn
-NoMPF_LIBS += $(EPICS_BASE_IOC_LIBS)
+NoAsyn_SRCS += NoAsyn_registerRecordDeviceDriver.cpp
+NoAsyn_SRCS_DEFAULT += NoAsynMain.cpp
+#!NoAsyn_LIBS += MXmotor
+#!NoAsyn_LIBS += softMotor
+#!NoAsyn_LIBS += oms
+NoAsyn_LIBS += motor
+NoAsyn_LIBS += asyn
+NoAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
 
-NoMPFVx_SRCS += NoMPFVx_registerRecordDeviceDriver.cpp
-#!NoMPFVx_LIBS += softMotor
-#!NoMPFVx_LIBS += oms
-#!NoMPFVx_LIBS += DeltaTau
-NoMPFVx_LIBS += motor
-NoMPFVx_LIBS += asyn
+NoAsynVx_SRCS += NoAsynVx_registerRecordDeviceDriver.cpp
+#!NoAsynVx_LIBS += softMotor
+#!NoAsynVx_LIBS += oms
+#!NoAsynVx_LIBS += DeltaTau
+NoAsynVx_LIBS += motor
+NoAsynVx_LIBS += asyn
 
 
-NoMPFVx_OBJS += $(EPICS_BASE_BIN)/vxComLibrary
-NoMPFVx_LIBS += $(EPICS_BASE_IOC_LIBS)
+NoAsynVx_OBJS += $(EPICS_BASE_BIN)/vxComLibrary
+NoAsynVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
 
