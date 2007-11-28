@@ -2,8 +2,8 @@ errlogInit(5000)
 < envPaths
 # Tell EPICS all about the record types, device-support modules, drivers,
 # etc. in this build from CARS
-dbLoadDatabase("../../dbd/WithMPF.dbd")
-WithMPF_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase("../../dbd/WithAsyn.dbd")
+WithAsyn_registerRecordDeviceDriver(pdbbase)
 
 ### Motors
 dbLoadTemplate "motor.substitutions.xps"

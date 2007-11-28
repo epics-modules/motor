@@ -3,8 +3,8 @@
 
 < envPaths
 
-dbLoadDatabase("$(TOP)/dbd/WithMPF.dbd")
-WithMPF_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase("$(TOP)/dbd/WithAsyn.dbd")
+WithAsyn_registerRecordDeviceDriver(pdbbase)
 dbLoadTemplate("motor.substitutions")
 dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 

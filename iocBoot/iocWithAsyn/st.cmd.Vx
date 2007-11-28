@@ -16,11 +16,11 @@ cd topbin
 # be added before any C++ code is loaded (see SPR #28980).
 sysCplusEnable=1
 
-ld < WithMPFVx.munch
+ld < WithAsynVx.munch
 
 cd startup
-dbLoadDatabase("$(TOP)/dbd/WithMPFVx.dbd")
-WithMPFVx_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase("$(TOP)/dbd/WithAsynVx.dbd")
+WithAsynVx_registerRecordDeviceDriver(pdbbase)
 
 dbLoadTemplate("motor.substitutions")
 dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
