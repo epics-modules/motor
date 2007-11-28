@@ -7,63 +7,63 @@ TOP = ../..
 include $(TOP)/configure/CONFIG
 
 ifeq ($(OS_CLASS), vxWorks)
-DBD += WithMPFVx.dbd
+DBD += WithAsynVx.dbd
 endif
-DBD += WithMPF.dbd
+DBD += WithAsyn.dbd
 
-PROD_IOC_DEFAULT = WithMPF
-PROD_IOC_vxWorks = WithMPFVx
+PROD_IOC_DEFAULT = WithAsyn
+PROD_IOC_vxWorks = WithAsynVx
 
-WithMPF_SRCS   += WithMPF_registerRecordDeviceDriver.cpp
-WithMPFVx_SRCS += WithMPFVx_registerRecordDeviceDriver.cpp
-WithMPF_SRCS_DEFAULT += WithMPFMain.cpp
+WithAsyn_SRCS   += WithAsyn_registerRecordDeviceDriver.cpp
+WithAsynVx_SRCS += WithAsynVx_registerRecordDeviceDriver.cpp
+WithAsyn_SRCS_DEFAULT += WithAsynMain.cpp
 
 # Support from EPICS base
-WithMPF_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 # Support from IPAC R2.5 and below.
-#!WithMPFVx_LDOBJS_vxWorks += $(IPAC_BIN)/ipacLib
-#!WithMPFVx_OBJS_vxWorks   += $(IPAC_BIN)/tyGSOctal
+#!WithAsynVx_LDOBJS_vxWorks += $(IPAC_BIN)/ipacLib
+#!WithAsynVx_OBJS_vxWorks   += $(IPAC_BIN)/tyGSOctal
 
-#!WithMPF_LIBS   += oms
-#!WithMPF_LIBS   += Mclennan
-#!WithMPF_LIBS   += Micos
-#!WithMPF_LIBS   += MicroMo
-#!WithMPF_LIBS   += PI
-#!WithMPF_LIBS   += Acs
-#!WithMPF_LIBS   += Ims
-#!WithMPF_LIBS   += Newport
-#!WithMPF_LIBS   += softMotor
-#!WithMPF_LIBS   += motorSimSupport
-#!WithMPF_LIBS   += SmartMotor
-#!WithMPF_LIBS   += KohzuMotor
-WithMPF_LIBS   += motor
-WithMPF_LIBS   += asyn
+#!WithAsyn_LIBS   += oms
+#!WithAsyn_LIBS   += Mclennan
+#!WithAsyn_LIBS   += Micos
+#!WithAsyn_LIBS   += MicroMo
+#!WithAsyn_LIBS   += PI
+#!WithAsyn_LIBS   += Acs
+#!WithAsyn_LIBS   += Ims
+#!WithAsyn_LIBS   += Newport
+#!WithAsyn_LIBS   += softMotor
+#!WithAsyn_LIBS   += motorSimSupport
+#!WithAsyn_LIBS   += SmartMotor
+#!WithAsyn_LIBS   += KohzuMotor
+WithAsyn_LIBS   += motor
+WithAsyn_LIBS   += asyn
 # Needed for Newport SNL programs
-#!WithMPF_LIBS   += seq pv
-WithMPF_LIBS   += $(EPICS_BASE_IOC_LIBS)
+#!WithAsyn_LIBS   += seq pv
+WithAsyn_LIBS   += $(EPICS_BASE_IOC_LIBS)
 
-#!WithMPFVx_LIBS += oms
-#!WithMPFVx_LIBS += Mclennan
-#!WithMPFVx_LIBS += Micos
-#!WithMPFVx_LIBS += MicroMo
-#!WithMPFVx_LIBS += PI
-#!WithMPFVx_LIBS += Acs
-#!WithMPFVx_LIBS += Ims
-#!WithMPFVx_LIBS += Newport
-#!WithMPFVx_LIBS += softMotor
-#!WithMPFVx_LIBS += motorSimSupport
-#!WithMPFVx_LIBS += SmartMotor
-#!WithMPFVx_LIBS += KohzuMotor
-WithMPFVx_LIBS += motor
+#!WithAsynVx_LIBS += oms
+#!WithAsynVx_LIBS += Mclennan
+#!WithAsynVx_LIBS += Micos
+#!WithAsynVx_LIBS += MicroMo
+#!WithAsynVx_LIBS += PI
+#!WithAsynVx_LIBS += Acs
+#!WithAsynVx_LIBS += Ims
+#!WithAsynVx_LIBS += Newport
+#!WithAsynVx_LIBS += softMotor
+#!WithAsynVx_LIBS += motorSimSupport
+#!WithAsynVx_LIBS += SmartMotor
+#!WithAsynVx_LIBS += KohzuMotor
+WithAsynVx_LIBS += motor
 
 # Support from IPAC R2.6 and above.
-WithMPFVx_LIBS += Ipac TyGSOctal
+WithAsynVx_LIBS += Ipac TyGSOctal
 
-WithMPFVx_LIBS += asyn
+WithAsynVx_LIBS += asyn
 # Needed for Newport SNL programs
-#!WithMPFVx_LIBS   += seq pv
-WithMPFVx_LIBS += $(EPICS_BASE_IOC_LIBS)
+#!WithAsynVx_LIBS   += seq pv
+WithAsynVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
 
