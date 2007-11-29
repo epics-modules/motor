@@ -698,7 +698,7 @@ int MM4000AsynConfig(int card,             /* Controller number */
     return MOTOR_AXIS_OK;
 }
 
-int sendOnly(MM4000Controller *pController, char *outputBuff)
+static int sendOnly(MM4000Controller *pController, char *outputBuff)
 {
     int nRequested=strlen(outputBuff);
     int nActual;
@@ -716,7 +716,7 @@ int sendOnly(MM4000Controller *pController, char *outputBuff)
 }
 
 
-int sendAndReceive(MM4000Controller *pController, char *outputBuff, char *inputBuff, int inputSize) 
+static int sendAndReceive(MM4000Controller *pController, char *outputBuff, char *inputBuff, int inputSize) 
 {
     int nWriteRequested=strlen(outputBuff);
     int nWrite;
