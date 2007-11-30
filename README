@@ -129,7 +129,7 @@ Modification Log from R6-2 to R6-3
                           motorApp/NewFocusSrc/drvPMNC87xx.cc
                         - "oms_LIBS += asyn" added to motorApp/OmsSrc/Makefile.
 
-2) Mark River's found and fixed a bug in the motor record; RDBD was being used
+2) Mark Rivers found and fixed a bug in the motor record; RDBD was being used
         in motordevCom.cc's motor_init_record_com() before the RDBD validation
         check in motorRecord.cc's init_record().  This resulted in motor
         positions not being initialized from save/restore at boot-up if RDBD
@@ -209,6 +209,19 @@ Modification Log from R6-2 to R6-3
         position detected (tdir change).
 
         File modified: motorApp/MotorSrc/motorRecord.cc
+
+13) Ron Sluiter added support for the Kohzu SC-800 stepper motor controller.
+
+        Directory added: motorApp/KohzuSrc
+
+14) Joe Sullivan added support for the piezosystem jena GmbH EDS controller.
+
+        Directory added: motorApp/PiJenaSrc
+
+15) The examples iocNoMPF and iocWithMPF were renamed iocNoAsyn and
+        iocWithAsyn, respectively.  
+
+        Directories renamed in <motor>/motorExApp and <motor>/iocBoot.
 
 
 Modification Log from R6-1 to R6-2
