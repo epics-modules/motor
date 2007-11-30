@@ -1,9 +1,9 @@
-The Animatics SmartMotor EPICS device driver supports both single
-and daisy chain serial connections.
+The Animatics SmartMotor EPICS device driver supports both single and daisy
+chained serial connections.
 
-For daisy chain applications, the following program must be
-down loaded to each motor in the chain. Set "#" below to
-the address of each consecutive motor; starting with 1.
+For RS232 daisy chained applications, the following program must be down loaded
+to each motor in the chain. Set "#" below to the address of each consecutive
+motor; starting with 1.
 
 SADDR#
 ECHO
@@ -11,9 +11,22 @@ LIMD <- Omit from firmware 4.77 and above.
 LIMH
 END
 
+For RS232 or RS485 non-daisy-chained applications, the EPICS device driver
+requires that echo mode be turned off (ECHO_OFF).
 
-Design Restriction and Limitations
-==================================
+From the Animatics "SmartMotor User's Guide";
+"A single RS-232 SmartMotor can operate in either state, but a daisy chain of
+RS-232 SmartMotors must operate in ECHO mode for data to get through the
+network.  RS-485 SmartMotors must operate in the ECHO_OFF mode or there will be
+data collisions."
+
+Device Driver Design Restriction and Limitations
+================================================
 
 - This device driver only supports SmartMotor firmware versions 4.15
-and above.
+  and above.
+
+- A network of RS-485 SmartMotor's is not supported by this device driver.
+
+- Non-daisy-chained SmartMotor's (i.e., a serial port for each SmartMotor) must
+  have their echo mode turned off (ECHO_OFF).
