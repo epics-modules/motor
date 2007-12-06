@@ -273,6 +273,23 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!SC800Config(0, "L0", 0)
 #!drvSC800debug=4
 
+# Faulhaber MCDC2805 driver setup parameters:
+#     (1)Max. controller count
+#     (2)Polling rate
+#!MCDC2805Setup(1, 10)
+
+# Faulhaber MCDC2805 driver configuration parameters:
+#     (1)Card being configured
+#     (2)# modules on this serial port
+#     (3)asyn port name
+#!MCDC2805Config(0, 1, "L0")
+#!drvMCDC2805debug=4
+
+# The MCDC2805 driver does not set end of string (EOS).
+#!asynOctetSetInputEos("L0",0,"\r")
+#!asynOctetSetOutputEos("L0",0,"\r")
+
+
 iocInit
 
 # motorUtil (allstop & alldone)
