@@ -79,6 +79,7 @@ int k;
 int anyMoving;
 int ncomplete;
 int nextra;
+int npoints;
 int dir;
 int pollSocket;
 int driveSocket;
@@ -222,7 +223,10 @@ ss xpsTrajectoryScan {
             /* If nelements changes, then change endPulses to this value,
              * since this is what the user normally wants.  endPulses can be
              * changed again after changing nelements if this is desired. */
-            endPulses = nelements;
+            if (moveMode == MOVE_MODE_RELATIVE)
+                endPulses = nelements;
+            else
+                endPulses = nelements-1;
             pvPut(endPulses);
         } state monitor_inputs
 
@@ -244,17 +248,21 @@ ss xpsTrajectoryScan {
             buildStatus=STATUS_UNDEFINED;
             pvPut(buildStatus);
             
+            if (moveMode == MOVE_MODE_RELATIVE)
+                npoints = nelements;
+            else
+                npoints = nelements-1;
             /* If total time mode, calc time per element and write,
                else use the array timeTraj  */
             if (timeMode == TIME_MODE_TOTAL) {
-                dtime = time/nelements;
+                dtime = time/npoints;
                 for (i=0; i<nelements; i++) timeTrajectory[i] = dtime;
                 pvPut(timeTrajectory);
             }
         
             /* Compute expected time for trajectory & check element period */
             expectedTime=0;
-            for (i=0; i<nelements; i++) {
+            for (i=0; i<npoints; i++) {
                 expectedTime += timeTrajectory[i];
             }
         
