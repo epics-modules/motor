@@ -2,9 +2,9 @@
 FILENAME...     drvOmsPC68.cc
 USAGE...        Motor record driver level support for OMS PC68 serial device.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: rivers $
-Last Modified:	$Date: 2007-04-23 20:45:38 $
+Last Modified:	$Date: 2008-01-11 21:53:05 $
 */
 
 /*
@@ -54,7 +54,9 @@ Last Modified:	$Date: 2007-04-23 20:45:38 $
 
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 #include <epicsThread.h>
+#include <epicsString.h>
 #include <dbAccess.h>
 #include <drvSup.h>
 #include <iocsh.h>
@@ -268,8 +270,8 @@ static int set_status(int card, int signal)
 
     Debug(5, "info = (%s)\n", q_buf);
 
-    for (index = 0, p = strtok_r(q_buf, ",", &tok_save); p;
-         p = strtok_r(NULL, ",", &tok_save), index++)
+    for (index = 0, p = epicsStrtok_r(q_buf, ",", &tok_save); p;
+         p = epicsStrtok_r(NULL, ",", &tok_save), index++)
     {
         switch (index)
         {
@@ -394,7 +396,7 @@ static int set_status(int card, int signal)
 
                 /* Point "start" to PV name argument. */
                 tail = NULL;
-                start = strtok_r(&buffer[5], ",", &tail);
+                start = epicsStrtok_r(&buffer[5], ",", &tail);
                 if (tail == NULL)
                     goto errorexit;
 
@@ -406,7 +408,7 @@ static int set_status(int card, int signal)
                 }
 
                 /* Point "start" to PV value argument. */
-                start = strtok_r(NULL, ")", &tail);
+                start = epicsStrtok_r(NULL, ")", &tail);
                 if (dbPutField(&addr, DBR_STRING, start, 1L))
                 {
                     errPrintf(-1, __FILE__, __LINE__, "invalid value: %s",
@@ -776,8 +778,8 @@ static int motor_init()
             send_mess (card_index, ALL_POS, (char) NULL);
             recv_mess (card_index, axis_pos, 1);
 
-            for (total_axis = 0, pos_ptr = strtok_r(axis_pos, ",", &tok_save);
-                 pos_ptr; pos_ptr = strtok_r(NULL, ",", &tok_save),
+            for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
+                 pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save),
                  total_axis++)
             {
                 pmotorState->motor_info[total_axis].motor_motion = NULL;

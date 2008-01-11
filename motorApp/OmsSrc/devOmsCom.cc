@@ -2,9 +2,9 @@
 FILENAME...     devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:        $Revision: 1.11 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-02-16 20:21:47 $
+Version:        $Revision: 1.12 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2008-01-11 21:53:05 $
 */
 
 /*
@@ -62,9 +62,11 @@ Last Modified:  $Date: 2007-02-16 20:21:47 $
  */
 
 #include <string.h>
+#include <stdio.h>
 #include <errlog.h>
 #include <math.h>
 #include <epicsThread.h>
+#include <epicsString.h>
 #include <dbAccess.h>
 
 #include "motorRecord.h"
@@ -300,7 +302,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
 
                             /* Point "start" to PV name argument. */
                             tail = NULL;
-                            start = strtok_r(&prem_buff[5], ",", &tail);
+                            start = epicsStrtok_r(&prem_buff[5], ",", &tail);
                             if (tail == NULL)
                                 goto errorexit;
 
@@ -311,12 +313,12 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
                             }
 
                             /* Point "start" to PV value argument. */
-                            start = strtok_r(NULL, ",", &tail);
+                            start = epicsStrtok_r(NULL, ",", &tail);
                             if (tail == NULL)
                             {
                                 delay = 0.0;
                                 tail = start;
-                                start = strtok_r(NULL, ")", &tail);
+                                start = epicsStrtok_r(NULL, ")", &tail);
                                 if (tail == NULL)
                                     goto errorexit;
                             }
@@ -324,7 +326,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
                             {
                                 char *last;
 
-                                last = strtok_r(NULL, ")", &tail);
+                                last = epicsStrtok_r(NULL, ")", &tail);
                                 if (last == NULL)
                                     goto errorexit;
                                 delay = atof(last);

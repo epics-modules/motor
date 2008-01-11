@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.15 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-10-17 19:23:17 $
+Version:        $Revision: 1.16 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2008-01-11 21:53:05 $
 */
 
 /*
@@ -66,9 +66,11 @@ Last Modified:  $Date: 2007-10-17 19:23:17 $
  */
 
 #include <string.h>
+#include <stdio.h>
 #include <dbCommon.h>
 #include <drvSup.h>
 #include <epicsVersion.h>
+#include <epicsString.h>
 #include <devLib.h>
 #include <dbAccess.h>
 #include <epicsThread.h>
@@ -308,8 +310,8 @@ static int set_status(int card, int signal)
         got_encoder = false;
     }
 
-    for (index = 0, p = strtok_r(q_buf, ",", &tok_save); p;
-         p = strtok_r(NULL, ",", &tok_save), index++)
+    for (index = 0, p = epicsStrtok_r(q_buf, ",", &tok_save); p;
+         p = epicsStrtok_r(NULL, ",", &tok_save), index++)
     {
         switch (index)
         {
@@ -421,7 +423,7 @@ static int set_status(int card, int signal)
                 
                 /* Point "start" to PV name argument. */
                 tail = NULL;
-                start = strtok_r(&buffer[5], ",", &tail);
+                start = epicsStrtok_r(&buffer[5], ",", &tail);
                 if (tail == NULL)
                     goto errorexit;
 
@@ -432,7 +434,7 @@ static int set_status(int card, int signal)
                 }
 
                 /* Point "start" to PV value argument. */
-                start = strtok_r(NULL, ")", &tail);
+                start = epicsStrtok_r(NULL, ")", &tail);
                 if (dbPutField(&addr, DBR_STRING, start, 1L))
                 {
                     errPrintf(-1, __FILE__, __LINE__, "invalid value: %s", start);
@@ -947,13 +949,13 @@ static int motor_init()
 
     for (card_index = 0; card_index < MAXv_num_cards; card_index++)
     {
-        int8_t *startAddr;
-        int8_t *endAddr;
+        epicsInt8 *startAddr;
+        epicsInt8 *endAddr;
 
         Debug(2, "motor_init: card %d\n", card_index);
 
         probeAddr = MAXv_addrs + (card_index * MAXv_BRD_SIZE);
-        startAddr = (int8_t *) probeAddr;
+        startAddr = (epicsInt8 *) probeAddr;
         endAddr = startAddr + MAXv_BRD_SIZE;
 
         Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n",
@@ -1017,8 +1019,8 @@ static int motor_init()
             send_mess(card_index, ALL_POS, (char) NULL);
             recv_mess(card_index, axis_pos, 1);
 
-            for (total_axis = 0, pos_ptr = strtok_r(axis_pos, ",", &tok_save);
-                 pos_ptr; pos_ptr = strtok_r(NULL, ",", &tok_save), total_axis++)
+            for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
+                 pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
             {
                 pmotorState->motor_info[total_axis].motor_motion = NULL;
                 pmotorState->motor_info[total_axis].status.All = 0;

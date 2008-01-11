@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.25 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-01-27 23:56:09 $
+Version:	$Revision: 1.26 $
+Modified By:	$Author: rivers $
+Last Modified:	$Date: 2008-01-11 21:53:05 $
 */
 
 /*
@@ -90,8 +90,10 @@ Last Modified:	$Date: 2006-01-27 23:56:09 $
 ========================stepper motor driver ========================*/
 
 #include	<string.h>
+#include	<stdio.h>
 #include	<drvSup.h>
 #include	<epicsVersion.h>
+#include	<epicsString.h>
 #include	<devLib.h>
 #include	<dbAccess.h>
 #include	<epicsThread.h>
@@ -266,8 +268,8 @@ static int set_status(int card, int signal)
 
     Debug(5, "info = (%s)\n", q_buf);
 
-    for (index = 0, p = strtok_r(q_buf, ",", &tok_save); p;
-	 p = strtok_r(NULL, ",", &tok_save), index++)
+    for (index = 0, p = epicsStrtok_r(q_buf, ",", &tok_save); p;
+	 p = epicsStrtok_r(NULL, ",", &tok_save), index++)
     {
 	switch (index)
 	{
@@ -385,7 +387,7 @@ static int set_status(int card, int signal)
 		
 		/* Point "start" to PV name argument. */
 		tail = NULL;
-		start = strtok_r(&buffer[5], ",", &tail);
+		start = epicsStrtok_r(&buffer[5], ",", &tail);
 		if (tail == NULL)
 		    goto errorexit;
 
@@ -396,7 +398,7 @@ static int set_status(int card, int signal)
 		}
 
 		/* Point "start" to PV value argument. */
-		start = strtok_r(NULL, ")", &tail);
+		start = epicsStrtok_r(NULL, ")", &tail);
 		if (dbPutField(&addr, DBR_STRING, start, 1L))
 		{
 		    errPrintf(-1, __FILE__, __LINE__, "invalid value: %s", start);
@@ -1061,13 +1063,13 @@ static int motor_init()
     
     for (card_index = 0; card_index < oms44_num_cards; card_index++)
     {
-	int8_t *startAddr;
-	int8_t *endAddr;
+	epicsInt8 *startAddr;
+	epicsInt8 *endAddr;
 
 	Debug(2, "motor_init: card %d\n", card_index);
 
 	probeAddr = oms_addrs + (card_index * OMS_BRD_SIZE);
-	startAddr = (int8_t *) probeAddr + 1;
+	startAddr = (epicsInt8 *) probeAddr + 1;
 	endAddr = startAddr + OMS_BRD_SIZE;
 
 	Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n",
@@ -1125,9 +1127,9 @@ static int motor_init()
 	    send_mess(card_index, ALL_POS, (char) NULL);
 	    recv_mess(card_index, axis_pos, 1);
 
-	    for (total_axis = 0, pos_ptr = strtok_r(axis_pos, ",", &tok_save);
+	    for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
 		 pos_ptr;
-		 pos_ptr = strtok_r(NULL, ",", &tok_save), total_axis++)
+		 pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
 	    {
 		pmotorState->motor_info[total_axis].motor_motion = NULL;
 		pmotorState->motor_info[total_axis].status.All = 0;
