@@ -1,4 +1,4 @@
-Motor Record R6-3 Release Notice
+Motor Record R6-4 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
@@ -111,6 +111,38 @@ Known Problems
         For example, if MRES is positive and ERES is negative and the user
         wants to set the current position to 10.00 inches, then -10.00 must be
         entered in the VAL or DVAL field.
+
+
+Modification Log from R6-3 to R6-4
+==================================
+
+1) The motor record was not posting raw actual velocity changes (RVEL field).
+
+        File modified: motor_update_values() in motordevCom.cc
+
+
+2) A problem with OMS VME58 version 2.35 firmware has arisen since the
+        modifications described in item #8 under R6-3 were made.  When the user
+        sets the motor record's position, the previous target and readback
+        positions are read from the controller on the next update.  This occurs
+        with the previous release (R6-3) because the "stale data delay" was
+        changed to zero for the drvOms58 driver.
+        
+        With this release the driver searches all VME58 board ID's for version
+        2.35 firmware.  If any board is found with this firmware version, the
+        "stale data delay" is set to two VxWorks system clock periods for all
+        VME58 boards.
+        
+        This problem is similar to the "intermittent wrong LS status" problem,
+        but in this case it is the Load Position (LOAD_POS) motor command that
+        results in "stale data" being read by the driver.  After extensive
+        testing, I am unable to re-create the original "intermittent wrong LS
+        status" problem.
+
+        File modified: motor_init() in motorApp/OmsSrc/drvOms58.cc. Added
+                       search for "VME58 ver 2.35"; if found, set
+                       "update_delay" to two clock periods.
+
 
 
 Modification Log from R6-2 to R6-3
