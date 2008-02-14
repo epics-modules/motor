@@ -3,9 +3,9 @@ FILENAME: motordevCom.cc
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:        $Revision: 1.12 $
+Version:        $Revision: 1.13 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-10-17 19:09:33 $
+Last Modified:  $Date: 2008-02-14 16:30:15 $
 */
 
 /*
@@ -53,6 +53,7 @@ Last Modified:  $Date: 2007-10-17 19:09:33 $
  * .10  10/17/07 rls Raised the precedence of the INIT string for controllers
  *                   (PI C-848) that require an INIT string primitive before a
  *                   LOAD_POS can be executed.
+ * .11  0214/08  rls Post RVEL changes.
  */
 
 
@@ -411,7 +412,11 @@ epicsShareFunc CALLBACK_VALUE motor_update_values(struct motorRecord * mr)
     {
         mr->rmp = ptrans->motor_pos;
         mr->rep = ptrans->encoder_pos;
-        mr->rvel = ptrans->vel;
+        if (mr->rvel != ptrans->vel)
+        {
+            mr->rvel = ptrans->vel;
+            db_post_events(mr, &mr->rvel, DBE_VAL_LOG);
+        }
         mr->msta = ptrans->status.All;
         ptrans->callback_changed = NO;
         rc = CALLBACK_DATA;
