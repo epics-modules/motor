@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.21 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2008-01-11 21:53:05 $
+Version:	$Revision: 1.22 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-02-14 19:31:47 $
 */
 
 /*
@@ -96,6 +96,12 @@ Last Modified:	$Date: 2008-01-11 21:53:05 $
  *                   - remove "Work around for intermittent wrong LS status" for
  *                     version 2.35 firmware.
  *                   - modify start_status() to wait for update before exiting.
+ * .33  02-06-08 rls - restored a modified version of the "work around for
+ *                     intermittent wrong LS status" for version 2.35 firmware.
+ *                     For details see README item #2 under R6-4 Modification
+ *                     Log.
+ * .34  02-07-08 rls - switched to logMsg for VxWorks build in ISR, rather than
+ *                     errlogPrintf().  No info with errlogPrintf() from ISR.
  */
 
 #include	<string.h>
@@ -108,7 +114,9 @@ Last Modified:	$Date: 2008-01-11 21:53:05 $
 #include	<dbAccess.h>
 #include	<epicsThread.h>
 #include	<epicsExit.h>
-
+#ifdef vxWorks
+#include        <logLib.h>
+#endif
 #include	"motorRecord.h"	/* For Driver Power Monitor feature only. */
 #include	"motor.h"
 #include	"motordevCom.h"	/* For Driver Power Monitor feature only. */
@@ -675,7 +683,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 
     pmotor->outPutIndex = putIndex;	/* Message Sent */
 
-    while (pmotor->outPutIndex != pmotor->outGetIndex)
+    while (putIndex != pmotor->outGetIndex)
     {
 #ifdef	DEBUG
 	epicsInt16 deltaIndex, delta;
@@ -947,7 +955,16 @@ static void motorIsr(int card)
 	motor_sem.signal();
 
     if (statusBuf.Bits.cmndError)
+#ifdef vxWorks
+    {
+        static int cardnum = card;
+	logMsg((char *) "command error detected by motorIsr() on card %d\n",
+               card, 0, 0, 0, 0, 0);
+
+    }
+#else
 	errlogPrintf("command error detected by motorISR() on card %d\n", card);
+#endif
 }
 
 static int motorIsrSetup(int card)
@@ -1201,6 +1218,17 @@ static int motor_init()
     free_list.tail = (struct mess_node *) NULL;
 
     Debug(3, "Motors initialized\n");
+
+
+#if (CPU == PPC604 || CPU == PPC603)
+    /* Work around for intermittent wrong LS status and stale LP data. */
+    for (card_index = 0; card_index < oms58_num_cards; card_index++)
+    {
+        if (strncmp(motor_state[card_index]->ident, "VME58 ver 2.35", 14) == 0)
+           targs.update_delay = quantum * 2.0;
+    }
+#endif
+
 
     epicsThreadCreate((char *) "Oms58_motor", epicsThreadPriorityMedium,
 		      epicsThreadGetStackSize(epicsThreadStackMedium),
