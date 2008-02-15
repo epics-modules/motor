@@ -2,9 +2,9 @@
 FILENAME...     drvOmsPC68.cc
 USAGE...        Motor record driver level support for OMS PC68 serial device.
 
-Version:	$Revision: 1.7 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2008-01-11 21:53:05 $
+Version:	$Revision: 1.8 $
+Modified By:	$Author: dkline $
+Last Modified:	$Date: 2008-02-15 12:38:57 $
 */
 
 /*
@@ -38,6 +38,19 @@ Last Modified:	$Date: 2008-01-11 21:53:05 $
  * Verified with firmware:
  *	- PC78 ver 1.14-46
  *      - PC68 ver 6.51-2008
+ *  - The data parameter passed to asynCallback() is represented as follows:
+ *
+ *    +-------------------------------------+
+ *    | Interrupt counter | Status | Done   |
+ *    +-------------------------------------+
+ *
+ *    Where:
+ *    - Interrupt counter - 16bits - Number of interrupts
+ *    - Status register   -  8bits - Status information
+ *    - Done register     -  8bits - Axis done status
+ *
+ *    More information can be found in the User Manual, ICMS document APS_1251701.
+ *
  *
  * Modification Log:
  * -----------------
@@ -50,6 +63,8 @@ Last Modified:	$Date: 2008-01-11 21:53:05 $
  *                    "?KP" command at boot-up; resulted in 1st axis having
  *                    same position (RP command) as last axis.
  * .04 02/09/07 dmk - modified to support interrupts.
+ * .05 02/15/08 dmk - removed unnecessary variants in asynCallback() and
+ *                    added notes. 
  */
 
 #include <string.h>
@@ -655,14 +670,12 @@ static int omsGet(int card, char *pchar)
 
 static void asynCallback(void *drvPvt,asynUser *pasynUser,char *data,size_t len, int eomReason)
 {
-    int d,cnt,stat,done;
+    int d,stat;
     OmsPC68controller* pcntrl;
     struct controller* pstate;
 
     pcntrl = (OmsPC68controller*)drvPvt;
     pstate = motor_state[pcntrl->card];
-
-//printf("drvOmsPC68:asynCallback - %2.2d - cnt %6.6d - stat 0x%2.2X - done 0x%2.2X\n",pcntrl->card,cnt,stat,done);
 
     if( pcntrl->card >= total_cards || pstate == NULL )
     {
@@ -671,15 +684,16 @@ static void asynCallback(void *drvPvt,asynUser *pasynUser,char *data,size_t len,
     }
 
     d = *(int*)data;
-    cnt  = (d & 0xFFFF0000) >> 16;
     stat = (d & 0x0000FF00) >> 8;
-    done = (d & 0x000000FF);
 
     if( stat & STAT_DONE )
         if( stat & STAT_ERROR_MSK )
             ++pcntrl->errcnt;
         else
             motor_sem.signal();
+
+//printf("drvOmsPC68:asynCallback - card %2.2d, error %d, status 0x%8.8X\n",pcntrl->card,pcntrl->errcnt,d);
+
 }
 //_____________________________________________________________________________
 /*****************************************************/
