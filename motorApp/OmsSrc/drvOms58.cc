@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.22 $
+Version:	$Revision: 1.23 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-02-14 19:31:47 $
+Last Modified:	$Date: 2008-02-26 22:14:25 $
 */
 
 /*
@@ -96,8 +96,8 @@ Last Modified:	$Date: 2008-02-14 19:31:47 $
  *                   - remove "Work around for intermittent wrong LS status" for
  *                     version 2.35 firmware.
  *                   - modify start_status() to wait for update before exiting.
- * .33  02-06-08 rls - restored a modified version of the "work around for
- *                     intermittent wrong LS status" for version 2.35 firmware.
+ * .33  02-06-08 rls - restored "update delay" for 2.24-8S and all 2.35
+ *                     firmware versions.
  *                     For details see README item #2 under R6-4 Modification
  *                     Log.
  * .34  02-07-08 rls - switched to logMsg for VxWorks build in ISR, rather than
@@ -1221,11 +1221,20 @@ static int motor_init()
 
 
 #if (CPU == PPC604 || CPU == PPC603)
-    /* Work around for intermittent wrong LS status and stale LP data. */
+    /* Work around for intermittent wrong LP data. */
     for (card_index = 0; card_index < oms58_num_cards; card_index++)
     {
-        if (strncmp(motor_state[card_index]->ident, "VME58 ver 2.35", 14) == 0)
-           targs.update_delay = quantum * 2.0;
+        char *ident_ptr = motor_state[card_index]->ident;
+        if (strncmp(ident_ptr, "VME58 ver 2.35", 14) == 0)
+            targs.update_delay = quantum * 2.0;
+
+        if (strncmp(ident_ptr, "VME58 ver 2.24-8S", 17) == 0)
+        {
+            double delay = 0.002;   /* Set update delay > 2 ms. */
+            if (quantum * 2.0 > delay)
+                delay = quantum * 2.0;
+            targs.update_delay = delay;
+        }
     }
 #endif
 
