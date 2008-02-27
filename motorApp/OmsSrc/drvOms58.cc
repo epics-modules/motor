@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.24 $
+Version:	$Revision: 1.25 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-02-27 22:25:39 $
+Last Modified:	$Date: 2008-02-27 22:54:38 $
 */
 
 /*
@@ -141,14 +141,14 @@ Last Modified:	$Date: 2008-02-27 22:25:39 $
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
-  #ifdef	DEBUG
-    #define Debug(l, f, args...) {if (l <= drvOms58debug) \
+    #ifdef	DEBUG
+        #define Debug(l, f, args...) {if (l <= drvOms58debug) \
 				    errlogPrintf(f, ## args);}
-  #else
-    #define Debug(l, f, args...)
-  #endif
+    #else
+        #define Debug(l, f, args...)
+    #endif
 #else
-  #define Debug
+    #define Debug
 #endif
 volatile int drvOms58debug = 0;
 extern "C" {epicsExportAddress(int, drvOms58debug);}
@@ -160,6 +160,7 @@ int oms58_num_cards = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
+
 
 /* --- Local data common to all OMS drivers. --- */
 static char *oms_addrs = 0x0;
@@ -228,29 +229,29 @@ static long report(int level)
     int card;
 
     if (oms58_num_cards <= 0)
-	printf("    No VME58 controllers configured.\n");
+        printf("    No VME58 controllers configured.\n");
     else
     {
-	for (card = 0; card < oms58_num_cards; card++)
-	{
-	    struct controller *brdptr = motor_state[card];
+        for (card = 0; card < oms58_num_cards; card++)
+        {
+            struct controller *brdptr = motor_state[card];
 
-	    if (brdptr == NULL)
-		printf("    Oms Vme58 motor card #%d not found.\n", card);
-	    else
-		printf("    Oms Vme58 motor card #%d @ 0x%X, id: %s \n", card,
-		       (epicsUInt32) brdptr->localaddr,
-		       brdptr->ident);
-	}
+            if (brdptr == NULL)
+                printf("    Oms Vme58 motor card #%d not found.\n", card);
+            else
+                printf("    Oms Vme58 motor card #%d @ 0x%X, id: %s \n", card,
+                       (epicsUInt32) brdptr->localaddr,
+                       brdptr->ident);
+        }
     }
-    return (0);
+    return(0);
 }
 
 static long init()
 {
-    initialized = true;	/* Indicate that driver is initialized. */
+    initialized = true; /* Indicate that driver is initialized. */
     (void) motor_init();
-    return ((long) 0);
+    return((long) 0);
 }
 
 
@@ -261,7 +262,7 @@ static void query_done(int card, int axis, struct mess_node *nodeptr)
     send_mess(card, DONE_QUERY, oms58_axis[axis]);
     recv_mess(card, buffer, 1);
     if (nodeptr->status.Bits.RA_PROBLEM)
-	send_mess(card, AXIS_STOP, oms58_axis[axis]);
+        send_mess(card, AXIS_STOP, oms58_axis[axis]);
 }
 
 
@@ -279,60 +280,60 @@ static void start_status(int card)
 
     if (card >= 0)
     {
-	if (motor_state[card] != NULL &&
-	    (pmotor = (struct vmex_motor *) motor_state[card]->localaddr) != NULL)
-	{
-	    /* Wait Forever for controller to update. */
-	    cntrlReg.All = pmotor->control.cntrlReg;
-	    while(cntrlReg.Bits.update != 0)
-	    {
-		Debug(1, "start_status(): Update Wait: card #%d\n", card);
-		epicsThreadSleep(quantum);
-		cntrlReg.All = pmotor->control.cntrlReg;
-	    };
+        if (motor_state[card] != NULL &&
+            (pmotor = (struct vmex_motor *) motor_state[card]->localaddr) != NULL)
+        {
+            /* Wait Forever for controller to update. */
+            cntrlReg.All = pmotor->control.cntrlReg;
+            while (cntrlReg.Bits.update != 0)
+            {
+                Debug(1, "start_status(): Update Wait: card #%d\n", card);
+                epicsThreadSleep(quantum);
+                cntrlReg.All = pmotor->control.cntrlReg;
+            };
 
-	    cntrlReg.Bits.update = 1;
-	    pmotor->control.cntrlReg = cntrlReg.All;
-           
-	    /* Wait Forever for controller to update. */
-	    cntrlReg.All = pmotor->control.cntrlReg;
-	    while(cntrlReg.Bits.update != 0)
+            cntrlReg.Bits.update = 1;
+            pmotor->control.cntrlReg = cntrlReg.All;
+
+            /* Wait Forever for controller to update. */
+            cntrlReg.All = pmotor->control.cntrlReg;
+            while (cntrlReg.Bits.update != 0)
             {
                 Debug(1, "start_status: DPRAM delay.\n");
                 epicsThreadSleep(quantum);
-		cntrlReg.All = pmotor->control.cntrlReg;
+                cntrlReg.All = pmotor->control.cntrlReg;
             }
-	}
+        }
     }
     else
     {
-	for (index = 0; index < total_cards; index++)
-	{
-	    if (motor_state[index] != NULL &&
-		(pmotor = (struct vmex_motor *) motor_state[index]->localaddr) != NULL)
-	    {
-		/* Wait Forever for controller to update. */
-		cntrlReg.All = pmotor->control.cntrlReg;
-		while(cntrlReg.Bits.update != 0)
-		{
-		    Debug(1, "start_status(): Update Wait: card #%d\n", index);
-		    epicsThreadSleep(quantum);
-		    cntrlReg.All = pmotor->control.cntrlReg;
-		};
-    
-		cntrlReg.Bits.update = 1;
-		pmotor->control.cntrlReg = cntrlReg.All;
+        for (index = 0; index < total_cards; index++)
+        {
+            if (motor_state[index] != NULL &&
+                (pmotor = (struct vmex_motor *) motor_state[index]->localaddr) != NULL)
+            {
+                /* Wait Forever for controller to update. */
+                cntrlReg.All = pmotor->control.cntrlReg;
+                while (cntrlReg.Bits.update != 0)
+                {
+                    Debug(1, "start_status(): Update Wait: card #%d\n", index);
+                    epicsThreadSleep(quantum);
+                    cntrlReg.All = pmotor->control.cntrlReg;
+                };
+
+                cntrlReg.Bits.update = 1;
+                pmotor->control.cntrlReg = cntrlReg.All;
 
                 /* Wait Forever for controller to update. */
                 cntrlReg.All = pmotor->control.cntrlReg;
-                while(cntrlReg.Bits.update != 0)
+                while (cntrlReg.Bits.update != 0)
                 {
                     Debug(1, "start_status: DPRAM delay.\n");
                     epicsThreadSleep(quantum);
                     cntrlReg.All = pmotor->control.cntrlReg;
                 }
-	    }
-	}
+            }
+        }
     }
 }
 
@@ -404,66 +405,66 @@ static int set_status(int card, int signal)
 
     if (motor_info->encoder_present == YES)
     {
-	/* get 4 peices of info from axis */
-	send_mess(card, ALL_INFO, oms58_axis[signal]);
-	recv_mess(card, q_buf, 2);
-	got_encoder = true;
+        /* get 4 peices of info from axis */
+        send_mess(card, ALL_INFO, oms58_axis[signal]);
+        recv_mess(card, q_buf, 2);
+        got_encoder = true;
     }
     else
     {
-	/* get 2 peices of info from axis */
-	send_mess(card, AXIS_INFO, oms58_axis[signal]);
-	recv_mess(card, q_buf, 1);
-	got_encoder = false;
+        /* get 2 peices of info from axis */
+        send_mess(card, AXIS_INFO, oms58_axis[signal]);
+        recv_mess(card, q_buf, 1);
+        got_encoder = false;
     }
 
     for (index = 0, p = epicsStrtok_r(q_buf, ",", &tok_save); p;
-	 p = epicsStrtok_r(NULL, ",", &tok_save), index++)
+        p = epicsStrtok_r(NULL, ",", &tok_save), index++)
     {
-	switch (index)
-	{
-	case 0:		/* axis status */
-	    ax_stat = (struct axis_status *) p;
+        switch (index)
+        {
+        case 0:     /* axis status */
+            ax_stat = (struct axis_status *) p;
 
-	    status.Bits.RA_DIRECTION = (ax_stat->direction == 'P') ? 1 : 0;
-	    status.Bits.RA_HOME =      (ax_stat->home == 'H')      ? 1 : 0;
+            status.Bits.RA_DIRECTION = (ax_stat->direction == 'P') ? 1 : 0;
+            status.Bits.RA_HOME =      (ax_stat->home == 'H')      ? 1 : 0;
 
-	    if (ax_stat->done == 'D')
-	    {
-		/* Request Data Area Update after DONE detected so that both
-		 * ASCII command data and shared memory data match. */
-		start_status(card);
-		status.Bits.RA_DONE = 1;
-	    }
-	    else
-		status.Bits.RA_DONE = 0;
+            if (ax_stat->done == 'D')
+            {
+                /* Request Data Area Update after DONE detected so that both
+                 * ASCII command data and shared memory data match. */
+                start_status(card);
+                status.Bits.RA_DONE = 1;
+            }
+            else
+                status.Bits.RA_DONE = 0;
 
-	    if (ax_stat->overtravel == 'L')
-	    {
-		ls_active = true;
-		if (status.Bits.RA_DIRECTION)
-		    status.Bits.RA_PLUS_LS = 1;
-		else
-		    status.Bits.RA_MINUS_LS = 1;
-	    }
-	    else
-	    {
-		ls_active = false;
-		status.Bits.RA_PLUS_LS  = 0;
-		status.Bits.RA_MINUS_LS = 0;
-	    }
-	    break;
-	case 1:		/* encoder status */
-	    en_stat = (struct encoder_status *) p;
+            if (ax_stat->overtravel == 'L')
+            {
+                ls_active = true;
+                if (status.Bits.RA_DIRECTION)
+                    status.Bits.RA_PLUS_LS = 1;
+                else
+                    status.Bits.RA_MINUS_LS = 1;
+            }
+            else
+            {
+                ls_active = false;
+                status.Bits.RA_PLUS_LS  = 0;
+                status.Bits.RA_MINUS_LS = 0;
+            }
+            break;
+        case 1:     /* encoder status */
+            en_stat = (struct encoder_status *) p;
 
-	    status.Bits.EA_SLIP       = (en_stat->slip_enable == 'E') ? 1 : 0;
-	    status.Bits.EA_POSITION   = (en_stat->pos_enable  == 'E') ? 1 : 0;
-	    status.Bits.EA_SLIP_STALL = (en_stat->slip_detect == 'S') ? 1 : 0;
-	    status.Bits.EA_HOME       = (en_stat->axis_home   == 'H') ? 1 : 0;
-	    break;
-	default:
-	    break;
-	}
+            status.Bits.EA_SLIP       = (en_stat->slip_enable == 'E') ? 1 : 0;
+            status.Bits.EA_POSITION   = (en_stat->pos_enable  == 'E') ? 1 : 0;
+            status.Bits.EA_SLIP_STALL = (en_stat->slip_detect == 'S') ? 1 : 0;
+            status.Bits.EA_HOME       = (en_stat->axis_home   == 'H') ? 1 : 0;
+            break;
+        default:
+            break;
+        }
     }
 
 
@@ -474,8 +475,8 @@ static int set_status(int card, int signal)
     /* Wait for data area update to complete on card */
     while (cntrlReg.All & pmotor->control.cntrlReg)
     {
-	Debug(5, "set_status: DPRAM delay.\n");
-	epicsThreadSleep(quantum);
+        Debug(5, "set_status: DPRAM delay.\n");
+        epicsThreadSleep(quantum);
     }
 
     pmotorData = &pmotor->data[signal];
@@ -485,25 +486,25 @@ static int set_status(int card, int signal)
 
     if (motorData == motor_info->position)
     {
-	if (nodeptr != 0)	/* Increment counter only if motor is moving. */
-	    motor_info->no_motion_count++;
+        if (nodeptr != 0)   /* Increment counter only if motor is moving. */
+            motor_info->no_motion_count++;
     }
     else
     {
-	motor_info->position = motorData;
-	motor_info->no_motion_count = 0;
+        motor_info->position = motorData;
+        motor_info->no_motion_count = 0;
     }
 
     if (motor_info->no_motion_count > motionTO)
     {
-	status.Bits.RA_PROBLEM = 1;
-	send_mess(card, AXIS_STOP, oms58_axis[signal]);
-	motor_info->no_motion_count = 0;
-	errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
-	    card, signal);
+        status.Bits.RA_PROBLEM = 1;
+        send_mess(card, AXIS_STOP, oms58_axis[signal]);
+        motor_info->no_motion_count = 0;
+        errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
+                        card, signal);
     }
     else
-	status.Bits.RA_PROBLEM = 0;
+        status.Bits.RA_PROBLEM = 0;
 
     /* get command velocity - word access only */
     motorData = pack2x16(pmotorData->cmndVel);
@@ -511,7 +512,7 @@ static int set_status(int card, int signal)
     motor_info->velocity = motorData;
 
     if (!(status.Bits.RA_DIRECTION))
-	motor_info->velocity *= -1;
+        motor_info->velocity *= -1;
 
     /* Get encoder position */
     motorData = pack2x16(pmotorData->encPos);
@@ -520,83 +521,83 @@ static int set_status(int card, int signal)
 
     if (nodeptr != NULL && ls_active == false)
     {
-	struct motor_trans *trans = (struct motor_trans *) nodeptr->mrecord->dpvt;
-	if (trans->dpm == true)
-	{
-	    unsigned char bitselect;
-	    unsigned char inputs = pmotor->control.ioLowReg;
-	    bitselect = (1 << signal);
-	    if ((inputs & bitselect) == 0)
-	    {
-		status.Bits.RA_PLUS_LS  = 1;	/* Turn on both limit switches. */
-		status.Bits.RA_MINUS_LS = 1;
-		errlogPrintf("Drive power failure at VME58 card#%d motor#%d\n",
-		       card, signal);
-	    }
-	}
+        struct motor_trans *trans = (struct motor_trans *) nodeptr->mrecord->dpvt;
+        if (trans->dpm == true)
+        {
+            unsigned char bitselect;
+            unsigned char inputs = pmotor->control.ioLowReg;
+            bitselect = (1 << signal);
+            if ((inputs & bitselect) == 0)
+            {
+                status.Bits.RA_PLUS_LS  = 1;    /* Turn on both limit switches. */
+                status.Bits.RA_MINUS_LS = 1;
+                errlogPrintf("Drive power failure at VME58 card#%d motor#%d\n",
+                             card, signal);
+            }
+        }
     }
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
-		status.Bits.RA_DONE || status.Bits.RA_PROBLEM) ? 1 : 0;
+                 status.Bits.RA_DONE || status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
     if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
-	nodeptr->postmsgptr != 0)
+        nodeptr->postmsgptr != 0)
     {
-	char buffer[40];
+        char buffer[40];
 
-	/* Test for a "device directive" in the POST string. */
-	if (nodeptr->postmsgptr[0] == '@')
-	{
-	    bool errind = false;
-	    char *end = strchr(&nodeptr->postmsgptr[1], '@');
-	    if (end == NULL)
-		errind = true;
-	    else
-	    {
-		DBADDR addr;
-		char *start, *tail;
-		int size = (end - &nodeptr->postmsgptr[0]) + 1;
+        /* Test for a "device directive" in the POST string. */
+        if (nodeptr->postmsgptr[0] == '@')
+        {
+            bool errind = false;
+            char *end = strchr(&nodeptr->postmsgptr[1], '@');
+            if (end == NULL)
+                errind = true;
+            else
+            {
+                DBADDR addr;
+                char *start, *tail;
+                int size = (end - &nodeptr->postmsgptr[0]) + 1;
 
-		/* Copy device directive to buffer. */
-		strncpy(buffer, nodeptr->postmsgptr, size);
-		buffer[size] = (char) NULL;
+                /* Copy device directive to buffer. */
+                strncpy(buffer, nodeptr->postmsgptr, size);
+                buffer[size] = (char) NULL;
 
-		if (strncmp(buffer, "@PUT(", 5) != 0)
-		    goto errorexit;
-		
-		/* Point "start" to PV name argument. */
-		tail = NULL;
-		start = epicsStrtok_r(&buffer[5], ",", &tail);
-		if (tail == NULL)
-		    goto errorexit;
+                if (strncmp(buffer, "@PUT(", 5) != 0)
+                    goto errorexit;
 
-		if (dbNameToAddr(start, &addr))	/* Get address of PV. */
-		{
-		    errPrintf(-1, __FILE__, __LINE__, "Invalid PV name: %s", start);
-		    goto errorexit;
-		}
+                /* Point "start" to PV name argument. */
+                tail = NULL;
+                start = epicsStrtok_r(&buffer[5], ",", &tail);
+                if (tail == NULL)
+                    goto errorexit;
 
-		/* Point "start" to PV value argument. */
-		start = epicsStrtok_r(NULL, ")", &tail);
-		if (dbPutField(&addr, DBR_STRING, start, 1L))
-		{
-		    errPrintf(-1, __FILE__, __LINE__, "invalid value: %s", start);
-		    goto errorexit;
-		}
-	    }
+                if (dbNameToAddr(start, &addr)) /* Get address of PV. */
+                {
+                    errPrintf(-1, __FILE__, __LINE__, "Invalid PV name: %s", start);
+                    goto errorexit;
+                }
 
-	    if (errind == true)
-errorexit:	errMessage(-1, "Invalid device directive");
-	    end++;
-	    strcpy(buffer, end);
-	}
-	else
-	    strcpy(buffer, nodeptr->postmsgptr);
+                /* Point "start" to PV value argument. */
+                start = epicsStrtok_r(NULL, ")", &tail);
+                if (dbPutField(&addr, DBR_STRING, start, 1L))
+                {
+                    errPrintf(-1, __FILE__, __LINE__, "invalid value: %s", start);
+                    goto errorexit;
+                }
+            }
 
-	strcpy(outbuf, buffer);
-	send_mess(card, outbuf, oms58_axis[signal]);
-	nodeptr->postmsgptr = NULL;
+            if (errind == true)
+errorexit:      errMessage(-1, "Invalid device directive");
+            end++;
+            strcpy(buffer, end);
+        }
+        else
+            strcpy(buffer, nodeptr->postmsgptr);
+
+        strcpy(outbuf, buffer);
+        send_mess(card, outbuf, oms58_axis[signal]);
+        nodeptr->postmsgptr = NULL;
     }
 
     /* Bug fix for DC servo moving away from limit switch, but move is not far enough to
@@ -604,16 +605,16 @@ errorexit:	errMessage(-1, "Invalid device directive");
      * MSTA.RA_DIRECTION.
      */
     if (ls_active == true && status.Bits.GAIN_SUPPORT &&
-	status.Bits.EA_POSITION == 0 && nodeptr != 0)
+        status.Bits.EA_POSITION == 0 && nodeptr != 0)
     {
-	struct motorRecord *mr = (struct motorRecord *) nodeptr->mrecord;
+        struct motorRecord *mr = (struct motorRecord *) nodeptr->mrecord;
 
-	if (mr->cdir != (short) status.Bits.RA_DIRECTION)
-	    mr->cdir = status.Bits.RA_DIRECTION;
+        if (mr->cdir != (short) status.Bits.RA_DIRECTION)
+            mr->cdir = status.Bits.RA_DIRECTION;
     }
 
-    motor_info->status.All = status.All;	/* Update status from local copy. */
-    return (rtn_state);
+    motor_info->status.All = status.All;    /* Update status from local copy. */
+    return(rtn_state);
 }
 
 
@@ -630,15 +631,15 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 
     if (strlen(com) > MAX_MSG_SIZE)
     {
-	errlogPrintf("drvOms58.cc:send_mess(); message size violation.\n");
-	return (ERROR);
+        errlogPrintf("drvOms58.cc:send_mess(); message size violation.\n");
+        return(ERROR);
     }
 
     /* Check that card exists */
     if (!motor_state[card])
     {
-	errlogPrintf("drvOms58.cc:send_mess() - invalid card #%d\n", card);
-	return (ERROR);
+        errlogPrintf("drvOms58.cc:send_mess() - invalid card #%d\n", card);
+        return(ERROR);
     }
 
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
@@ -654,49 +655,49 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     /* see if junk at input port - should not be any data available */
     if (pmotor->inGetIndex != pmotor->inPutIndex)
     {
-	Debug(1, "send_mess - clearing data in buffer\n");
-	recv_mess(card, NULL, -1);
+        Debug(1, "send_mess - clearing data in buffer\n");
+        recv_mess(card, NULL, -1);
     }
 
 
     if (name == NULL)
-	strcpy(outbuf, com);
+        strcpy(outbuf, com);
     else
     {
-	strcpy(outbuf, "A");
-	strcat(outbuf, name);
-	strcat(outbuf, " ");
-	strcat(outbuf, com);
+        strcpy(outbuf, "A");
+        strcat(outbuf, name);
+        strcat(outbuf, " ");
+        strcat(outbuf, com);
     }
-    strcat(outbuf, "\n");		/* Add the command line terminator. */
+    strcat(outbuf, "\n");       /* Add the command line terminator. */
 
     Debug(9, "send_mess: ready to send message.\n");
     putIndex = pmotor->outPutIndex;
     for (p = outbuf; *p != '\0'; p++)
     {
-	pmotor->outBuffer[putIndex++] = *p;
-	if (putIndex >= BUFFER_SIZE)
-	    putIndex = 0;
+        pmotor->outBuffer[putIndex++] = *p;
+        if (putIndex >= BUFFER_SIZE)
+            putIndex = 0;
     }
 
     Debug(4, "send_mess: sent card %d message:", card);
     Debug(4, "%s\n", outbuf);
 
-    pmotor->outPutIndex = putIndex;	/* Message Sent */
+    pmotor->outPutIndex = putIndex; /* Message Sent */
 
     while (putIndex != pmotor->outGetIndex)
     {
 #ifdef	DEBUG
-	epicsInt16 deltaIndex, delta;
+        epicsInt16 deltaIndex, delta;
 
-	deltaIndex = pmotor->outPutIndex - pmotor->outGetIndex;
-	delta = (deltaIndex < 0) ? BUFFER_SIZE + deltaIndex : deltaIndex;
-	Debug(5, "send_mess(): buffer wait; index delta=%d\n", delta);
+        deltaIndex = pmotor->outPutIndex - pmotor->outGetIndex;
+        delta = (deltaIndex < 0) ? BUFFER_SIZE + deltaIndex : deltaIndex;
+        Debug(5, "send_mess(): buffer wait; index delta=%d\n", delta);
 #endif
-	epicsThreadSleep(quantum);
+        epicsThreadSleep(quantum);
     };
 
-    return (return_code);
+    return(return_code);
 }
 
 /*
@@ -741,110 +742,110 @@ static int recv_mess(int card, char *com, int amount)
     /* Check that card exists */
     if (!motor_state[card])
     {
-	Debug(1, "resv_mess - invalid card #%d\n", card);
-	return (-1);
+        Debug(1, "resv_mess - invalid card #%d\n", card);
+        return(-1);
     }
 
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
 
     if (amount == -1)
     {
-	Debug(7, "-------------");
-	getIndex = pmotor->inGetIndex;
-	for (i = 0, trys = 0; trys < max_io_tries; trys++)
-	{
-	    while (getIndex != pmotor->inPutIndex)
-	    {
-		junk = pmotor->inBuffer[getIndex++];
-		/* handle circular buffer */
-		if (getIndex >= BUFFER_SIZE)
-		    getIndex = 0;
+        Debug(7, "-------------");
+        getIndex = pmotor->inGetIndex;
+        for (i = 0, trys = 0; trys < max_io_tries; trys++)
+        {
+            while (getIndex != pmotor->inPutIndex)
+            {
+                junk = pmotor->inBuffer[getIndex++];
+                /* handle circular buffer */
+                if (getIndex >= BUFFER_SIZE)
+                    getIndex = 0;
 
-		Debug(7, "%c", junk);
-		trys = 0;
-		i++;
-	    }
-	}
-	pmotor->inGetIndex = getIndex;
+                Debug(7, "%c", junk);
+                trys = 0;
+                i++;
+            }
+        }
+        pmotor->inGetIndex = getIndex;
 
-	Debug(7, "-------------");
-	Debug(1, "\nrecv_mess - cleared %d error data\n", i);
-	return (0);
+        Debug(7, "-------------");
+        Debug(1, "\nrecv_mess - cleared %d error data\n", i);
+        return(0);
     }
 
     for (i = 0; amount > 0; amount--)
     {
-	Debug(7, "-------------");
-	head_size = 0;
-	tail_size = 0;
+        Debug(7, "-------------");
+        head_size = 0;
+        tail_size = 0;
 
-	getIndex = pmotor->inGetIndex;
+        getIndex = pmotor->inGetIndex;
 
-	for (piece = 0, trys = 0; piece < 3 && trys < max_io_tries; trys++)
-	{
-	    if (getIndex != pmotor->inPutIndex)
-	    {
-		inchar = pmotor->inBuffer[getIndex++];
-		if (getIndex >= BUFFER_SIZE)
-		    getIndex = 0;
+        for (piece = 0, trys = 0; piece < 3 && trys < max_io_tries; trys++)
+        {
+            if (getIndex != pmotor->inPutIndex)
+            {
+                inchar = pmotor->inBuffer[getIndex++];
+                if (getIndex >= BUFFER_SIZE)
+                    getIndex = 0;
 
-		Debug(7, "%02x", inchar);
+                Debug(7, "%02x", inchar);
 
-		switch (piece)
-		{
-		case 0:	/* header */
-		    if (inchar == '\n' || inchar == '\r')
-			head_size++;
-		    else
-		    {
-			piece++;
-			com[i++] = inchar;
-		    }
-		    break;
-		case 1:	/* body */
-		    if (inchar == '\n' || inchar == '\r')
-		    {
-			piece++;
-			tail_size++;
-		    }
-		    else
-			com[i++] = inchar;
-		    break;
+                switch (piece)
+                {
+                case 0: /* header */
+                    if (inchar == '\n' || inchar == '\r')
+                        head_size++;
+                    else
+                    {
+                        piece++;
+                        com[i++] = inchar;
+                    }
+                    break;
+                case 1: /* body */
+                    if (inchar == '\n' || inchar == '\r')
+                    {
+                        piece++;
+                        tail_size++;
+                    }
+                    else
+                        com[i++] = inchar;
+                    break;
 
-		case 2:	/* trailer */
-		    tail_size++;
-		    if (tail_size >= head_size)
-			piece++;
-		    break;
-		}
-		trys = 0;
-	    }
-	}
-	pmotor->inGetIndex = getIndex;
+                case 2: /* trailer */
+                    tail_size++;
+                    if (tail_size >= head_size)
+                        piece++;
+                    break;
+                }
+                trys = 0;
+            }
+        }
+        pmotor->inGetIndex = getIndex;
 
-	Debug(7, "-------------\n");
-	if (trys >= max_io_tries)
-	{
-	    Debug(1, "Timeout occurred in recv_mess\n");
-	    com[i] = '\0';
+        Debug(7, "-------------\n");
+        if (trys >= max_io_tries)
+        {
+            Debug(1, "Timeout occurred in recv_mess\n");
+            com[i] = '\0';
 
-	    /* ----------------extra junk-------------- */
-	    /* jps: command error now cleared by motorIsr() */
-	    /* ----------------extra junk-------------- */
+            /* ----------------extra junk-------------- */
+            /* jps: command error now cleared by motorIsr() */
+            /* ----------------extra junk-------------- */
 
-	    return (-1);
-	}
-	com[i++] = ',';
+            return(-1);
+        }
+        com[i++] = ',';
     }
 
     if (i > 0)
-	com[i - 1] = '\0';
+        com[i - 1] = '\0';
     else
-	com[i] = '\0';
+        com[i] = '\0';
 
     Debug(4, "recv_mess: card %d", card);
     Debug(4, " com %s\n", com);
-    return (0);
+    return(0);
 }
 
 
@@ -852,49 +853,49 @@ static int recv_mess(int card, char *com, int amount)
 /* Configuration function for  module_types data     */
 /* areas. omsSetup()                                */
 /*****************************************************/
-int oms58Setup(int num_cards,	/* maximum number of cards in rack */
-	       void *addrs,	/* Base Address(0x0-0xb000 on 4K boundary) */
-	       unsigned vector,	/* noninterrupting(0), valid vectors(64-255) */
-	       int int_level,	/* interrupt level (1-6) */
-	       int scan_rate)	/* polling rate - 1/60 sec units */
+int oms58Setup(int num_cards,   /* maximum number of cards in rack */
+               void *addrs,     /* Base Address(0x0-0xb000 on 4K boundary) */
+               unsigned vector, /* noninterrupting(0), valid vectors(64-255) */
+               int int_level,   /* interrupt level (1-6) */
+               int scan_rate)   /* polling rate - 1/60 sec units */
 {
     if (num_cards < 1 || num_cards > OMS_NUM_CARDS)
-	oms58_num_cards = OMS_NUM_CARDS;
+        oms58_num_cards = OMS_NUM_CARDS;
     else
-	oms58_num_cards = num_cards;
+        oms58_num_cards = num_cards;
 
     /* Check range and boundary(4K) on base address */
     if (addrs > (void *) 0xF000 || ((epicsUInt32) addrs & 0xFFF))
     {
-	Debug(1, "omsSetup: invalid base address 0x%X\n", (epicsUInt32) addrs);
-	oms_addrs = (char *) OMS_NUM_ADDRS;
+        Debug(1, "omsSetup: invalid base address 0x%X\n", (epicsUInt32) addrs);
+        oms_addrs = (char *) OMS_NUM_ADDRS;
     }
     else
-	oms_addrs = (char *) addrs;
+        oms_addrs = (char *) addrs;
 
     omsInterruptVector = vector;
     if (vector < 64 || vector > 255)
     {
-	if (vector != 0)
-	{
-	    Debug(1, "omsSetup: invalid interrupt vector %d\n", vector);
-	    omsInterruptVector = (unsigned) OMS_INT_VECTOR;
-	}
+        if (vector != 0)
+        {
+            Debug(1, "omsSetup: invalid interrupt vector %d\n", vector);
+            omsInterruptVector = (unsigned) OMS_INT_VECTOR;
+        }
     }
 
     if (int_level < 1 || int_level > 6)
     {
-	Debug(1, "omsSetup: invalid interrupt level %d\n", int_level);
-	omsInterruptLevel = OMS_INT_LEVEL;
+        Debug(1, "omsSetup: invalid interrupt level %d\n", int_level);
+        omsInterruptLevel = OMS_INT_LEVEL;
     }
     else
-	omsInterruptLevel = int_level;
+        omsInterruptLevel = int_level;
 
     /* Set motor polling task rate */
     if (scan_rate >= 1 && scan_rate <= 60)
-	targs.motor_scan_rate = scan_rate;
+        targs.motor_scan_rate = scan_rate;
     else
-	targs.motor_scan_rate = SCAN_RATE;
+        targs.motor_scan_rate = SCAN_RATE;
     return(0);
 }
 
@@ -916,7 +917,7 @@ static void motorIsr(int card)
     {
         sprintf(errmsg, "%s(%d): Invalid entry-card #%d.\n", __FILE__, __LINE__, card);
         epicsInterruptContextMessage(errmsg);
-	return;
+        return;
     }
 
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
@@ -944,7 +945,7 @@ static void motorIsr(int card)
     /* Assure proper control register settings  */
     cntrlReg = pmotor->control.cntrlReg;
     if ((cntrlReg & 0x01) == 0)
-	pmotor->control.cntrlReg = (epicsUInt8) 0x90;
+        pmotor->control.cntrlReg = (epicsUInt8) 0x90;
 /* Questioniable Fix for undefined problem Ends Here. */
 
 #ifdef	DEBUG
@@ -958,8 +959,8 @@ static void motorIsr(int card)
 
     /* Motion done handling */
     if (statusBuf.Bits.done)
-	/* Wake up polling task 'motor_task()' to issue callbacks */
-	motor_sem.signal();
+        /* Wake up polling task 'motor_task()' to issue callbacks */
+        motor_sem.signal();
 
     if (statusBuf.Bits.cmndError)
     {
@@ -979,8 +980,7 @@ static int motorIsrSetup(int card)
 
     pmotor = (struct vmex_motor *) (motor_state[card]->localaddr);
 
-    status = pdevLibVirtualOS->pDevConnectInterruptVME(
-	omsInterruptVector + card,
+    status = pdevLibVirtualOS->pDevConnectInterruptVME(omsInterruptVector + card,
 #if LT_EPICSBASE(3,14,8)
         (void (*)()) motorIsr,
 #else
@@ -990,22 +990,22 @@ static int motorIsrSetup(int card)
 
     if (!RTN_SUCCESS(status))
     {
-	errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n", omsInterruptVector + card);
-	omsInterruptVector = 0;	/* Disable interrupts */
-	cntrlBuf.All = 0;
-	pmotor->control.cntrlReg = cntrlBuf.All;
-	return (ERROR);
+        errPrintf(status, __FILE__, __LINE__, "Can't connect to vector %d\n", omsInterruptVector + card);
+        omsInterruptVector = 0; /* Disable interrupts */
+        cntrlBuf.All = 0;
+        pmotor->control.cntrlReg = cntrlBuf.All;
+        return(ERROR);
     }
 
     status = devEnableInterruptLevel(OMS_INTERRUPT_TYPE,
-				     omsInterruptLevel);
+                                     omsInterruptLevel);
     if (!RTN_SUCCESS(status))
     {
-	errPrintf(status, __FILE__, __LINE__, "Can't enable enterrupt level %d\n", omsInterruptLevel);
-	omsInterruptVector = 0;	/* Disable interrupts */
-	cntrlBuf.All = 0;
-	pmotor->control.cntrlReg = cntrlBuf.All;
-	return (ERROR);
+        errPrintf(status, __FILE__, __LINE__, "Can't enable enterrupt level %d\n", omsInterruptLevel);
+        omsInterruptVector = 0; /* Disable interrupts */
+        cntrlBuf.All = 0;
+        pmotor->control.cntrlReg = cntrlBuf.All;
+        return(ERROR);
     }
 
     /* Setup card for interrupt-on-done */
@@ -1018,7 +1018,7 @@ static int motorIsrSetup(int card)
 
     pmotor->control.cntrlReg = cntrlBuf.All;
 #endif
-    return (OK);
+    return(OK);
 }
 
 /*****************************************************/
@@ -1045,169 +1045,169 @@ static int motor_init()
     /* Check for setup */
     if (oms58_num_cards <= 0)
     {
-	Debug(1, "motor_init: *OMS58 driver disabled* \n oms58Setup() is missing from startup script.\n");
-	return (ERROR);
+        Debug(1, "motor_init: *OMS58 driver disabled* \n oms58Setup() is missing from startup script.\n");
+        return(ERROR);
     }
 
     /* allocate space for total number of motors */
     motor_state = (struct controller **) malloc(oms58_num_cards *
-						sizeof(struct controller *));
+                                                sizeof(struct controller *));
 
     /* allocate structure space for each motor present */
 
     total_cards = oms58_num_cards;
 
     if (epicsAtExit(oms_reset, NULL) == ERROR)
-	Debug(1, "vme58 motor_init: oms_reset disabled\n");
+        Debug(1, "vme58 motor_init: oms_reset disabled\n");
 
     for (card_index = 0; card_index < oms58_num_cards; card_index++)
     {
-	epicsInt8 *startAddr;
-	epicsInt8 *endAddr;
+        epicsInt8 *startAddr;
+        epicsInt8 *endAddr;
 
-	Debug(2, "motor_init: card %d\n", card_index);
+        Debug(2, "motor_init: card %d\n", card_index);
 
-	probeAddr = oms_addrs + (card_index * OMS_BRD_SIZE);
-	startAddr = (epicsInt8 *) probeAddr;
-	endAddr = startAddr + OMS_BRD_SIZE;
+        probeAddr = oms_addrs + (card_index * OMS_BRD_SIZE);
+        startAddr = (epicsInt8 *) probeAddr;
+        endAddr = startAddr + OMS_BRD_SIZE;
 
-	Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n", (epicsUInt32) probeAddr);
-	/* Scan memory space to assure card id */
+        Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n", (epicsUInt32) probeAddr);
+        /* Scan memory space to assure card id */
 #ifdef vxWorks
-	do
-	{
-	    status = devNoResponseProbe(OMS_ADDRS_TYPE, (unsigned int) startAddr, 2);
-	    startAddr += 0x100;
-	} while (PROBE_SUCCESS(status) && startAddr < endAddr);
+        do
+        {
+            status = devNoResponseProbe(OMS_ADDRS_TYPE, (unsigned int) startAddr, 2);
+            startAddr += 0x100;
+        } while (PROBE_SUCCESS(status) && startAddr < endAddr);
 #endif
-	if (PROBE_SUCCESS(status))
-	{
+        if (PROBE_SUCCESS(status))
+        {
 #ifdef vxWorks
-	    status = devRegisterAddress(__FILE__, OMS_ADDRS_TYPE,
-					(size_t) probeAddr, OMS_BRD_SIZE,
-					(volatile void **) &localaddr);
-	    Debug(9, "motor_init: devRegisterAddress() status = %d\n", (int) status);
-	    if (!RTN_SUCCESS(status))
-	    {
-		errPrintf(status, __FILE__, __LINE__, "Can't register address 0x%x\n",
-			  (unsigned int) probeAddr);
-		return (ERROR);
-	    }
+            status = devRegisterAddress(__FILE__, OMS_ADDRS_TYPE,
+                                        (size_t) probeAddr, OMS_BRD_SIZE,
+                                        (volatile void **) &localaddr);
+            Debug(9, "motor_init: devRegisterAddress() status = %d\n", (int) status);
+            if (!RTN_SUCCESS(status))
+            {
+                errPrintf(status, __FILE__, __LINE__, "Can't register address 0x%x\n",
+                          (unsigned int) probeAddr);
+                return(ERROR);
+            }
 #endif
-	    Debug(9, "motor_init: localaddr = %x\n", (epicsUInt32) localaddr);
-	    pmotor = (struct vmex_motor *) localaddr;
+            Debug(9, "motor_init: localaddr = %x\n", (epicsUInt32) localaddr);
+            pmotor = (struct vmex_motor *) localaddr;
 
-	    Debug(9, "motor_init: malloc'ing motor_state\n");
-	    motor_state[card_index] = (struct controller *) malloc(sizeof(struct controller));
-	    pmotorState = motor_state[card_index];
-	    pmotorState->localaddr = (char *) localaddr;
-	    pmotorState->motor_in_motion = 0;
-	    pmotorState->cmnd_response = false;
+            Debug(9, "motor_init: malloc'ing motor_state\n");
+            motor_state[card_index] = (struct controller *) malloc(sizeof(struct controller));
+            pmotorState = motor_state[card_index];
+            pmotorState->localaddr = (char *) localaddr;
+            pmotorState->motor_in_motion = 0;
+            pmotorState->cmnd_response = false;
 
-	    /* Disable all interrupts */
-	    pmotor->control.cntrlReg = 0;
+            /* Disable all interrupts */
+            pmotor->control.cntrlReg = 0;
 
-	    send_mess(card_index, "EF", (char) NULL);
-	    send_mess(card_index, ERROR_CLEAR, (char) NULL);
-	    send_mess(card_index, STOP_ALL, (char) NULL);
+            send_mess(card_index, "EF", (char) NULL);
+            send_mess(card_index, ERROR_CLEAR, (char) NULL);
+            send_mess(card_index, STOP_ALL, (char) NULL);
 
-	    send_mess(card_index, GET_IDENT, (char) NULL);
-	    recv_mess(card_index, (char *) pmotorState->ident, 1);
-	    Debug(3, "Identification = %s\n", pmotorState->ident);
+            send_mess(card_index, GET_IDENT, (char) NULL);
+            recv_mess(card_index, (char *) pmotorState->ident, 1);
+            Debug(3, "Identification = %s\n", pmotorState->ident);
 
-	    send_mess(card_index, ALL_POS, (char) NULL);
-	    recv_mess(card_index, axis_pos, 1);
+            send_mess(card_index, ALL_POS, (char) NULL);
+            recv_mess(card_index, axis_pos, 1);
 
-	    for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
-		 pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
-	    {
-		pmotorState->motor_info[total_axis].motor_motion = NULL;
-		pmotorState->motor_info[total_axis].status.All = 0;
-	    }
+            for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
+                pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
+            {
+                pmotorState->motor_info[total_axis].motor_motion = NULL;
+                pmotorState->motor_info[total_axis].status.All = 0;
+            }
 
-	    Debug(3, "motor_init: Total axis = %d\n", total_axis);
-	    pmotorState->total_axis = total_axis;
+            Debug(3, "motor_init: Total axis = %d\n", total_axis);
+            pmotorState->total_axis = total_axis;
 
-	    /* Assure done is cleared */
-	    statusReg.All = pmotor->control.statusReg;
-	    omsReg = pmotor->control.doneReg;
-	    for (total_encoders = total_pidcnt = 0, motor_index = 0; motor_index < total_axis; motor_index++)
-	    {
-	    	/* Test if motor has an encoder. */
-		send_mess(card_index, ENCODER_QUERY, oms58_axis[motor_index]);
-		while (!pmotor->control.doneReg)	/* Wait for command to complete. */
-		    epicsThreadSleep(quantum * 2.0);
+            /* Assure done is cleared */
+            statusReg.All = pmotor->control.statusReg;
+            omsReg = pmotor->control.doneReg;
+            for (total_encoders = total_pidcnt = 0, motor_index = 0; motor_index < total_axis; motor_index++)
+            {
+                /* Test if motor has an encoder. */
+                send_mess(card_index, ENCODER_QUERY, oms58_axis[motor_index]);
+                while (!pmotor->control.doneReg)    /* Wait for command to complete. */
+                    epicsThreadSleep(quantum * 2.0);
 
-		statusReg.All = pmotor->control.statusReg;
+                statusReg.All = pmotor->control.statusReg;
 
-		if (statusReg.Bits.cmndError)
-		{
-		    Debug(2, "motor_init: No encoder on axis %d\n", motor_index);
-		    pmotorState->motor_info[motor_index].encoder_present = NO;
-		}
-		else
-		{
-		    total_encoders++;
-		    pmotorState->motor_info[motor_index].encoder_present = YES;
-		    recv_mess(card_index, encoder_pos, 1);
-		}
-		
-		/* Test if motor has PID parameters. */
-		send_mess(card_index, PID_QUERY, oms58_axis[motor_index]);
-		do	/* Wait for command to complete. */
-		{
-		    epicsThreadSleep(quantum);
-		    statusReg.All = pmotor->control.statusReg;
-		} while(statusReg.Bits.done == 0);
+                if (statusReg.Bits.cmndError)
+                {
+                    Debug(2, "motor_init: No encoder on axis %d\n", motor_index);
+                    pmotorState->motor_info[motor_index].encoder_present = NO;
+                }
+                else
+                {
+                    total_encoders++;
+                    pmotorState->motor_info[motor_index].encoder_present = YES;
+                    recv_mess(card_index, encoder_pos, 1);
+                }
+
+                /* Test if motor has PID parameters. */
+                send_mess(card_index, PID_QUERY, oms58_axis[motor_index]);
+                do  /* Wait for command to complete. */
+                {
+                    epicsThreadSleep(quantum);
+                    statusReg.All = pmotor->control.statusReg;
+                } while (statusReg.Bits.done == 0);
 
 
-		if (statusReg.Bits.cmndError)
-		{
-		    Debug(2, "motor_init: No PID parameters on axis %d\n", motor_index);
-		    pmotorState->motor_info[motor_index].pid_present = NO;
-		}
-		else
-		{
-		    total_pidcnt++;
-		    pmotorState->motor_info[motor_index].pid_present = YES;
-		}
-	    }
+                if (statusReg.Bits.cmndError)
+                {
+                    Debug(2, "motor_init: No PID parameters on axis %d\n", motor_index);
+                    pmotorState->motor_info[motor_index].pid_present = NO;
+                }
+                else
+                {
+                    total_pidcnt++;
+                    pmotorState->motor_info[motor_index].pid_present = YES;
+                }
+            }
 
-	    /* Enable interrupt-when-done if selected */
-	    if (omsInterruptVector)
-	    {
-		if (motorIsrSetup(card_index) == ERROR)
-		    errPrintf(0, __FILE__, __LINE__, "Interrupts Disabled!\n");
-	    }
+            /* Enable interrupt-when-done if selected */
+            if (omsInterruptVector)
+            {
+                if (motorIsrSetup(card_index) == ERROR)
+                    errPrintf(0, __FILE__, __LINE__, "Interrupts Disabled!\n");
+            }
 
-	    start_status(card_index);
-	    for (motor_index = 0; motor_index < total_axis; motor_index++)
-	    {
-		pmotorState->motor_info[motor_index].status.All = 0;
-		pmotorState->motor_info[motor_index].no_motion_count = 0;
-		pmotorState->motor_info[motor_index].encoder_position = 0;
-		pmotorState->motor_info[motor_index].position = 0;
+            start_status(card_index);
+            for (motor_index = 0; motor_index < total_axis; motor_index++)
+            {
+                pmotorState->motor_info[motor_index].status.All = 0;
+                pmotorState->motor_info[motor_index].no_motion_count = 0;
+                pmotorState->motor_info[motor_index].encoder_position = 0;
+                pmotorState->motor_info[motor_index].position = 0;
 
-		if (pmotorState->motor_info[motor_index].encoder_present == YES)
-		    pmotorState->motor_info[motor_index].status.Bits.EA_PRESENT = 1;
-		if (pmotorState->motor_info[motor_index].pid_present == YES)
-		    pmotorState->motor_info[motor_index].status.Bits.GAIN_SUPPORT = 1;
+                if (pmotorState->motor_info[motor_index].encoder_present == YES)
+                    pmotorState->motor_info[motor_index].status.Bits.EA_PRESENT = 1;
+                if (pmotorState->motor_info[motor_index].pid_present == YES)
+                    pmotorState->motor_info[motor_index].status.Bits.GAIN_SUPPORT = 1;
 
-		set_status(card_index, motor_index);
+                set_status(card_index, motor_index);
 
-		send_mess(card_index, DONE_QUERY, oms58_axis[motor_index]); /* Is this needed??? */
-		recv_mess(card_index, axis_pos, 1);
-	    }
+                send_mess(card_index, DONE_QUERY, oms58_axis[motor_index]); /* Is this needed??? */
+                recv_mess(card_index, axis_pos, 1);
+            }
 
-	    Debug(2, "motor_init: Init Address=0x%8.8x\n", (epicsUInt32) localaddr);
-	    Debug(3, "motor_init: Total encoders = %d\n", total_encoders);
-	    Debug(3, "motor_init: Total with PID = %d\n", total_pidcnt);
-	}
-	else
-	{
-	    Debug(3, "motor_init: Card NOT found!\n");
-	    motor_state[card_index] = (struct controller *) NULL;
-	}
+            Debug(2, "motor_init: Init Address=0x%8.8x\n", (epicsUInt32) localaddr);
+            Debug(3, "motor_init: Total encoders = %d\n", total_encoders);
+            Debug(3, "motor_init: Total with PID = %d\n", total_pidcnt);
+        }
+        else
+        {
+            Debug(3, "motor_init: Card NOT found!\n");
+            motor_state[card_index] = (struct controller *) NULL;
+        }
     }
 
     any_motor_in_motion = 0;
@@ -1239,13 +1239,12 @@ static int motor_init()
     }
 #endif
 
-
     epicsThreadCreate((char *) "Oms58_motor", epicsThreadPriorityMedium,
-		      epicsThreadGetStackSize(epicsThreadStackMedium),
-		      (EPICSTHREADFUNC) motor_task, (void *) &targs);
+                      epicsThreadGetStackSize(epicsThreadStackMedium),
+                      (EPICSTHREADFUNC) motor_task, (void *) &targs);
 
     Debug(3, "Started motor_task\n");
-    return (0);
+    return(0);
 }
 
 
@@ -1259,13 +1258,13 @@ static void oms_reset(void *arg)
 
     for (card = 0; card < total_cards; card++)
     {
-	if (motor_state[card] != NULL)
-	{
-	    pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
-	    cntrlBuf.All = pmotor->control.cntrlReg;
-	    cntrlBuf.Bits.intReqEna = 0;
-	    pmotor->control.cntrlReg = cntrlBuf.All;
-	}
+        if (motor_state[card] != NULL)
+        {
+            pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
+            cntrlBuf.All = pmotor->control.cntrlReg;
+            cntrlBuf.Bits.intReqEna = 0;
+            pmotor->control.cntrlReg = cntrlBuf.All;
+        }
     }
 }
 
