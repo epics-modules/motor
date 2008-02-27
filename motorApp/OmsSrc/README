@@ -209,3 +209,44 @@ VME58      |  4000      |   enabled  |    60HZ      |    9.8 with VBAS/VELO remo
 MAXv       |  4000      |   enabled  |    60HZ      |    9.8 with VBAS/VELO removed
 -----------|------------|------------|--------------|------------
 
+
+The following results where done using the following;
+
+- SSCAN support module R2.5.6, with scan.db configured as follows;
+     - Read(R1PV)  set to "time".
+     - Drive(P1PV) set to motor record VAL field.
+     - #PTS(NPTS)  set to 1000.
+     - Step Size(P1SI) set to MRES of the motor record.
+- Motor record R6-3; configured as follows;
+     - Set slew velocity (VELO) = (500,000 * MRES).
+     - Set base velocity (VBAS) = (499,999 * MRES).
+     - Acceleration time (ACCL) does not matter.
+- EPICS base R3.14.7
+- WRS Tornado 2.2.2
+- MVME5100
+- VME58 with firmware version 2.42-8
+- MAXv-8000 ver:1.31, s/n:000274, FPGA:B1:A6
+- MAXv with #UR8192
+- CROSS_COMPILER_TARGET_ARCHS = vxWorks-ppc604_long
+
+Controller | sysClkRate | interrupts | ms/scan pt.
+===========|============|============|============
+VME58      |    60      |   enabled  |  83.4 ms
+===========|============|============|============
+VME58      |   100      |   enabled  |  50.1 ms
+===========|============|============|============
+VME58      |   200      |   enabled  |  30.1 ms
+===========|============|============|============
+VME58      |  4000      |   enabled  |  13.1 ms
+===========|============|============|============
+MAXv       |    60      |   enabled  |  50.0 ms
+===========|============|============|============
+MAXv       |   100      |   enabled  |  30.0 ms
+===========|============|============|============
+MAXv       |   200      |   enabled  |  15.0 ms
+===========|============|============|============
+MAXv       |  1000      |   enabled  |   5.1 ms
+===========|============|============|============
+MAXv       |  4000      |   enabled  |   4.1 ms
+-----------|------------|------------|------------
+
