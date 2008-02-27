@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.16 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2008-01-11 21:53:05 $
+Version:        $Revision: 1.17 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2008-02-27 22:55:31 $
 */
 
 /*
@@ -62,6 +62,7 @@ Last Modified:  $Date: 2008-01-11 21:53:05 $
  *                      epicsInterruptContextMessage calls.
  * 08  08-20-07 rls - Make send_mess() and recv_mess() non-global.
  *                  - removed unneeded stub start_status().
+ * 09  02-26-08 rls - set "update delay" to zero.
  *
  */
 
@@ -184,7 +185,7 @@ struct
 
 extern "C" {epicsExportAddress(drvet, drvMAXv);}
 
-static struct thread_args targs = {SCAN_RATE, &MAXv_access, 0.010};
+static struct thread_args targs = {SCAN_RATE, &MAXv_access, 0.000};
 
 /*----------------functions-----------------*/
 
