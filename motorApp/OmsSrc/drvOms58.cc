@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.23 $
+Version:	$Revision: 1.24 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-02-26 22:14:25 $
+Last Modified:	$Date: 2008-02-27 22:25:39 $
 */
 
 /*
@@ -102,6 +102,8 @@ Last Modified:	$Date: 2008-02-26 22:14:25 $
  *                     Log.
  * .34  02-07-08 rls - switched to logMsg for VxWorks build in ISR, rather than
  *                     errlogPrintf().  No info with errlogPrintf() from ISR.
+ * .35  02-27-08 rls - replaced errlogPrintf calls in ISR with
+ *                      epicsInterruptContextMessage calls.
  */
 
 #include	<string.h>
@@ -114,9 +116,8 @@ Last Modified:	$Date: 2008-02-26 22:14:25 $
 #include	<dbAccess.h>
 #include	<epicsThread.h>
 #include	<epicsExit.h>
-#ifdef vxWorks
-#include        <logLib.h>
-#endif
+#include	<epicsInterrupt.h>
+
 #include	"motorRecord.h"	/* For Driver Power Monitor feature only. */
 #include	"motor.h"
 #include	"motordevCom.h"	/* For Driver Power Monitor feature only. */
@@ -908,10 +909,13 @@ static void motorIsr(int card)
     volatile struct vmex_motor *pmotor;
     STATUS_REG statusBuf;
     epicsUInt8 doneFlags, userIO, slipFlags, limitFlags, cntrlReg;
+    static char errmsg[60];
+    static char cmderrmsg[60];
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
-	errlogPrintf("Invalid entry-card #%d\n", card);
+        sprintf(errmsg, "%s(%d): Invalid entry-card #%d.\n", __FILE__, __LINE__, card);
+        epicsInterruptContextMessage(errmsg);
 	return;
     }
 
@@ -945,8 +949,11 @@ static void motorIsr(int card)
 
 #ifdef	DEBUG
     if (drvOms58debug >= 10)
-	errlogPrintf("entry card #%d,status=0x%X,done=0x%X\n", card,
-		     statusBuf.All, doneFlags);
+    {
+        sprintf(errmsg, "%s(%d): entry card #%d,status=0x%X,done=0x%X\n",
+                __FILE__, __LINE__, card, statusBuf.All, doneFlags);
+        epicsInterruptContextMessage(errmsg);
+    }
 #endif
 
     /* Motion done handling */
@@ -955,16 +962,10 @@ static void motorIsr(int card)
 	motor_sem.signal();
 
     if (statusBuf.Bits.cmndError)
-#ifdef vxWorks
     {
-        static int cardnum = card;
-	logMsg((char *) "command error detected by motorIsr() on card %d\n",
-               card, 0, 0, 0, 0, 0);
-
+        sprintf(cmderrmsg, "%s(%d): command error on card #%d.\n", __FILE__, __LINE__, card);
+        epicsInterruptContextMessage(cmderrmsg);
     }
-#else
-	errlogPrintf("command error detected by motorISR() on card %d\n", card);
-#endif
 }
 
 static int motorIsrSetup(int card)
