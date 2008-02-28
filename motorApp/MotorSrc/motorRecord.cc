@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.43 $
+Version:	$Revision: 1.44 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2007-11-27 17:53:42 $
+Last Modified:	$Date: 2008-02-28 17:44:23 $
 */
 
 /*
@@ -102,9 +102,12 @@ Last Modified:	$Date: 2007-11-27 17:53:42 $
  *                    at backlash velocity after a new target position.
  * .42 11-23-07 pnd - Correct use of MRES in NTM logic to use absolute value
  * .43 11-27-07 rls - Set VBAS before jogging.
+ * .44 02-28-08 rls - Prevent multiple LOAD_POS actions due to STUP's.
+ *                  - Remove redundant DMOV posting from special().
+ *                  - NTM logic is restored to using feedbacks; NTMF added.
  */
 
-#define VERSION 6.3
+#define VERSION 6.4
 
 #include	<stdlib.h>
 #include	<string.h>
@@ -998,11 +1001,10 @@ LOGIC:
 	Call process_motor_info().
 	IF motor-in-motion indicator (MOVN) is true.
 	    IF new target position in opposite direction of current motion.
-               [New target monitoring is enabled], AND,
-	       [Sign of the commanded difference is NOT the same as sign of CDIR], AND,
-	       [|commanded difference| > 2 x (|Backlash Dist.| + Retry Deadband)], AND,
-	       [MIP indicates this move is either (a result of a retry), OR, (a
-                normal move; not a Jog or Home)]
+	       [Sign of RDIF is NOT the same as sign of CDIR], AND,
+	       [Dist. to target {DIFF} > (NTMF x (|BDST| + RDBD)], AND,
+	       [MIP indicates this move is either (a result of a retry),OR,
+	    		(not from a Jog* or Hom*)]
 		Send Stop Motor command.
 		Set STOP indicator in MIP true.
 		Mark MIP as changed.
@@ -1122,15 +1124,15 @@ static long process(dbCommon *arg)
 
 	if (pmr->movn)
 	{
-            double cdiff = (pmr->rval - pmr->rmp) * fabs(pmr->mres); /* Commanded difference. */
-	    int sign_cdiff = (cdiff < 0.0) ? 0 : 1;
+	    int sign_rdif = (pmr->rdif < 0) ? 0 : 1;
+            double ntm_deadband =  pmr->ntmf * (fabs(pmr->bdst) + pmr->rdbd);
 
 	    /* Test for new target position in opposite direction of current
 	       motion.
 	     */	    
 	    if (pmr->ntm == menuYesNoYES &&
-		(sign_cdiff != pmr->cdir) &&
-		(fabs(cdiff) > 2 * (fabs(pmr->bdst) + pmr->rdbd)) &&
+		(sign_rdif != pmr->cdir) &&
+		(fabs(pmr->diff) > ntm_deadband) &&
 		(pmr->mip == MIP_RETRY || pmr->mip == MIP_MOVE))
 	    {
 
@@ -1698,7 +1700,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    WRITE_MSG(GET_INFO, NULL);
 	    SEND_MSG();
 	}
-	else
+        else if ((pmr->mip & MIP_LOAD_P) == 0) /* Test for LOAD_POS completion. */
 	    load_pos(pmr);
 
 	return(OK);
@@ -1981,10 +1983,9 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	MARK(M_RDIF);
 	if (set)
 	{
-	    load_pos(pmr);
-	    /*
-	     * device support will call us back when load is done.
-	     */
+            if ((pmr->mip & MIP_LOAD_P) == 0) /* Test for LOAD_POS completion. */
+                load_pos(pmr);
+	    /* device support will call us back when load is done. */
 	    return(OK);
 	}
 	else
@@ -2201,9 +2202,12 @@ static long special(DBADDR *paddr, int after)
 	    case motorRecordRLV:
 		if (pmr->disa == pmr->disv || pmr->disp)
 		    return(OK);
-		pmr->dmov = FALSE;
-		db_post_events(pmr, &pmr->dmov, DBE_VAL_LOG);
-		return(OK);
+                if (pmr->dmov == TRUE)
+                {
+                    pmr->dmov = FALSE;
+                    db_post_events(pmr, &pmr->dmov, DBE_VAL_LOG);
+                }
+    	        return(OK);
 
 	    case motorRecordHOMF:
 	    case motorRecordHOMR:
@@ -2714,6 +2718,15 @@ pidcof:
 	{
 	    pmr->stup = motorSTUP_OFF;
 	    db_post_events(pmr, &pmr->stup, DBE_VAL_LOG);
+	    return(ERROR);	/* Prevent record processing. */
+	}
+	break;
+
+    case motorRecordNTMF:
+	if (pmr->ntmf < 2)
+	{
+	    pmr->ntmf = 2;
+	    db_post_events(pmr, &pmr->ntmf, DBE_VAL_LOG);
 	    return(ERROR);	/* Prevent record processing. */
 	}
 	break;
