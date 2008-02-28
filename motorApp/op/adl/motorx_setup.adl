@@ -1,14 +1,14 @@
 
 file {
-	name="/home/oxygen6/SLUITER/local/epics/Vx_5-4_R3-13-7/support/motorR3_13/motorApp/op/adl/motorx_setup.adl"
-	version=030000
+	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-9/support/motor/cvs/motorApp/op/adl/motorx_setup.adl"
+	version=030102
 }
 display {
 	object {
-		x=322
-		y=33
+		x=970
+		y=138
 		width=400
-		height=588
+		height=632
 	}
 	clr=14
 	bclr=3
@@ -1192,8 +1192,8 @@ text {
 }
 "related display" {
 	object {
-		x=3
-		y=553
+		x=5
+		y=609
 		width=40
 		height=20
 	}
@@ -1303,8 +1303,8 @@ text {
 }
 text {
 	object {
-		x=368
-		y=573
+		x=367
+		y=619
 		width=25
 		height=10
 	}
@@ -1312,7 +1312,7 @@ text {
 		clr=0
 		fill="outline"
 	}
-	textix="V1.8"
+	textix="V1.9"
 }
 polyline {
 	object {
@@ -1362,9 +1362,9 @@ text {
 polyline {
 	object {
 		x=191
-		y=481
+		y=472
 		width=3
-		height=94
+		height=168
 	}
 	"basic attribute" {
 		clr=54
@@ -1372,8 +1372,8 @@ polyline {
 		width=3
 	}
 	points {
-		(192,482)
-		(192,573)
+		(192,473)
+		(192,638)
 	}
 }
 polyline {
@@ -1421,4 +1421,59 @@ text {
 		fill="outline"
 	}
 	textix="/s)"
+}
+text {
+	object {
+		x=215
+		y=568
+		width=85
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+	textix="NTM"
+}
+"choice button" {
+	object {
+		x=315
+		y=568
+		width=70
+		height=20
+	}
+	control {
+		chan="$(P)$(M).NTM"
+		clr=14
+		bclr=51
+	}
+	stacking="column"
+}
+text {
+	object {
+		x=215
+		y=593
+		width=85
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+	textix="NTM Factor"
+}
+"text entry" {
+	object {
+		x=316
+		y=590
+		width=80
+		height=25
+	}
+	control {
+		chan="$(P)$(M).NTMF"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
 }
