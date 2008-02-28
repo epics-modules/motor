@@ -37,9 +37,9 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version R6-3 of the EPICS motor
+<h2>Overview</h2> This documentation describes version R6-4 of the EPICS motor
 record, and related EPICS software required to build and use it.&nbsp; Version
-R6-3 of the motor record is compatible with EPICS base R3.14.9 and above.
+R6-4 of the motor record is compatible with EPICS base R3.14.9 and above.
 <p>
 The motor record is intended to support motors of all kinds, but currently 
 supports only the following variety of motor controllers (in addition to Soft 
@@ -712,6 +712,13 @@ below.
     <td>New Target Monitor</td>
     <td>RECCHOICE</td>
     <td>(0:"No", 1:"Yes")</td>
+  </tr>
+  <tr>
+    <td><a href="#Fields_misc">NTMF</a></td>
+    <td>R/W*</td>
+    <td>New Target Monitor Deadband Factor</td>
+    <td>SHORT</td>
+    <td>Determines NTM deadband; NTMF >= 2</td>
   </tr>
   <tr>
     <td><a href="#Fields_calib">OFF</a></td>
@@ -2915,6 +2922,15 @@ below.
       NTM defaults to "Yes".  It should be set to "No" only for soft motors. Soft 
       motors should be configured with NTM set to "No" to prevent Case #1 above from 
       interfering with "hard" motors using backlash correction.  </td>
+  </tr>
+  <tr>
+    <td>NTMF</td>
+    <td>R/W</td>
+    <td>New Target Monitor Deadband Factor</td>
+    <td>SHORT</td>
+    <td>Determines NTM deadband = NTMF * (|BDST| + RDBD).  NTMF must be >= 2.  The 
+    NTM deadband prevents NTM logic from issuing a STOP command at the end of a DC 
+    motor move that overshoots its' target position.</td>
   </tr>
   </tbody>
 </table>
