@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.15 $
-# Modified By:		$Author: peterd $
-# Last Modified:	$Date: 2006-05-18 19:51:07 $
+# Version:		$Revision: 1.16 $
+# Modified By:		$Author: sluiter $
+# Last Modified:	$Date: 2008-02-28 17:31:07 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -720,6 +720,13 @@ recordtype(motor) {
 		interest(1)
 		menu(menuYesNo)
 		initial("YES")
+	}
+	field(NTMF,DBF_USHORT) {
+                initial("2")
+                promptgroup(GUI_COMMON)
+		prompt("NTM Deadband Factor")
+		special(SPC_MOD)
+		interest(1)
 	}
 	field(HVEL,DBF_DOUBLE) {
 		prompt("Home Velocity (EGU/s)")
