@@ -5,11 +5,79 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R6.3 Notice</title>
+  <title>EPICS Motor Record Release R6-4 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+
+<CENTER>
+  <H1><B><U>Motor Record Version 6-4 Release Notice</U></B></H1>
+</CENTER>
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Stale SET position data from OMS VME58 controllers.</B></U>
+  </P>
+  <p>
+  A problem with certain OMS VME58 firmware versions (2.24-8S and all 2.35 
+  versions) has arisen since modifications made under R6-3.  When the user sets 
+  the motor record's position, the previous target and readback positions are read 
+  from the controller on the next update.  This occurs with the previous release (R6-3) 
+  because the "stale data delay" was changed from 10ms to zero for the drvOms58 
+  driver.
+  </P>
+  <P>
+  With this release the driver searches all VME58 board ID's for either 2.24-8S or 
+  any 2.35 version.  If any board is found with these versions, the "stale data 
+  delay" is set to a non-zero value for all VME58 boards in the system.
+  </p>
+  <P>
+  <U><B>"tdir=" error messages</B></U>
+  </P>
+  <p>
+  A problem was reported by Emma Shepherd (Diamond) with the previous release if 
+  the "Use RDBL Link" field (URIP) was set to "Yes".  The NTM logic was sending 
+  stop commands and issuing the "tdir=.." message to the console if the RDBL link 
+  was used.  This error was the result of changes to the NTM logic in R6-3.
+  </p>
+  <p>
+  With this release, the NTM logic is restored to using feedback rather than 
+  reference positions.  In addition, an "NTM deadband factor" field (NTMF) is 
+  added to allow the user to set the NTM deadband as follows;
+  </p>
+  <p>
+  NTM deadband = NTMF * (|BDST| + RDBD)
+  </p>
+  <p>
+  NTMF must be >= 2. If properly configured, the NTM deadband prevents NTM 
+  logic from issuing a STOP command at the end of a DC motor move that overshoots 
+  its' target position.
+  </p>
+</DIV>
+
+
+<CENTER>
+  <H4><U>New Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B></B></U>
+  </P>
+  <P>
+  </P>
+  <P>
+  <U><B></B></U>
+  </P>
+  <P>
+  </P>
+</DIV>
 
 
 <CENTER>
