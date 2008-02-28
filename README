@@ -121,17 +121,16 @@ Modification Log from R6-3 to R6-4
         File modified: motor_update_values() in motordevCom.cc
 
 
-2) A problem with OMS VME58 version 2.35 firmware has arisen since the
-        modifications described in item #8 under R6-3 were made.  When the user
-        sets the motor record's position, the previous target and readback
-        positions are read from the controller on the next update.  This occurs
-        with the previous release (R6-3) because the "stale data delay" was
-        changed to zero for the drvOms58 driver.
+2) A problem with OMS VME58 2.24-8S version firmware and all 2.35 firmware
+        versions has arisen since the modifications described in item #8 under
+        R6-3 were made.  When the user sets the motor record's position, the
+        previous target and readback positions are read from the controller on
+        the next update.  This occurs with the previous release (R6-3) because
+        the "stale data delay" was changed to zero for the drvOms58 driver.
         
-        With this release the driver searches all VME58 board ID's for version
-        2.35 firmware.  If any board is found with this firmware version, the
-        "stale data delay" is set to two VxWorks system clock periods for all
-        VME58 boards.
+        With this release the driver searches all VME58 board ID's for either
+        2.24-8S or any 2.35 version.  If any board is found, the "stale data
+        delay" is set to a non-zero value.
         
         This problem is similar to the "intermittent wrong LS status" problem,
         but in this case it is the Load Position (LOAD_POS) motor command that
@@ -140,9 +139,31 @@ Modification Log from R6-3 to R6-4
         status" problem.
 
         File modified: motor_init() in motorApp/OmsSrc/drvOms58.cc. Added
-                       search for "VME58 ver 2.35"; if found, set
-                       "update_delay" to two clock periods.
+                       ID search; if found, set "update_delay" non-zero.
 
+3) A problem was reported by Emma Shepherd (Diamond) with the previous release
+        if the "Use RDBL Link" field (URIP) was set to "Yes".  The NTM logic
+        was sending stop commands and issuing the "tdir=.." message to the
+        console if the RDBL link was used.  This error was the result of
+        changing the NTM logic as described in item #11 under R6-3
+        modifications.
+
+        With this release, the NTM logic is restored to using feedback rather
+        than reference positions.  In addition, an "NTM deadband factor" field
+        (NTMF) is added to allow the user to set the NTM deadband;
+                 NTM deadband = NTMF * (|BDST| + RDBD)
+        NTMF must be >= 2. If properly configured, the NTM deadband prevents
+        NTM logic from issuing a STOP command at the end of a DC motor move
+        that overshoots its' target position.
+        
+        Files modified: - MotorSrc/motorRecord.dbd; NTMF added.
+                        - MotorSrc/motorRecord.cc; NTM logic uses deadband
+                          based on NTMF.
+
+4) Changed the "update delay" for OMS MAXv's from 10ms to zero.
+
+        File modified: - MotorSrc/OmsSrc/drvMAXv.cc; set "update_delay" member
+                         of "targs" to zero.
 
 
 Modification Log from R6-2 to R6-3
