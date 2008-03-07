@@ -165,6 +165,27 @@ Modification Log from R6-3 to R6-4
         File modified: - MotorSrc/OmsSrc/drvMAXv.cc; set "update_delay" member
                          of "targs" to zero.
 
+5) Major changes have been made to the Access Security Level (ASL) attribute
+        of the motor record fields. With previous releases, the following
+        fields were set to ASL=0; FOF, VOF, SSET, SUSE, VBAS, VMAX, SBAS, SMAX,
+        UREV and MRES.  All other fields were set to ASL=1 by default.
+
+        With this release, the policy is to set all the fields that the user
+        requires to do the following to ASL = 0;
+        - move a motor; (VAL, DVAL, RVAL, TWF, TWR, TWV, RLV, JOGF, JOGR)
+        - stop a motor; (STOP, SPMG)
+        - enable/disable motor torque; (CNEN)
+        - set the position of a motor; (SSET, SUSE, SET)
+        - set the "user" offset of a motor; (FOF, VOF, FOFF,OFF)
+        - update the status of a motor; (STUP)
+
+        All other fields are set to ASL = 1.
+        
+        This means that out of the list of fields that were previously set to
+        ASL=0; VBAS, VMAX, SBAS, SMAX, UREV and MRES are now set to ASL=1. 
+        
+        File modified: - MotorSrc/motorRecord.dbd
+
 
 Modification Log from R6-2 to R6-3
 ==================================
