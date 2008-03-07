@@ -59,26 +59,55 @@
   logic from issuing a STOP command at the end of a DC motor move that overshoots 
   its' target position.
   </p>
+  
+  <p>
+  <U><B>Access Security Level changes</B></U>
+  </p>
+  
+  <p>
+  Major changes have been made to the Access Security Level (ASL) attribute of the 
+  motor record fields. With previous releases, the following fields were set to 
+  ASL=0; FOF, VOF, SSET, SUSE, VBAS, VMAX, SBAS, SMAX, UREV and MRES.  All other 
+  fields were set to ASL=1 by default.
+  </p>
+  <p>
+  With this release, the policy is to set all the fields that the user requires to 
+  do the following to ASL = 0;
+  <ul>
+    <li>
+      move a motor; (VAL, DVAL, RVAL, TWF, TWR, TWV, RLV, JOGF, JOGR)
+    </li>
+    <li>
+      stop a motor; (STOP, SPMG)
+    </li>
+    <li>
+      enable/disable motor torque; (CNEN)
+    </li>
+    <li>
+      set the position of a motor; (SSET, SUSE, SET)
+    </li>
+    <li>
+      set the "user" offset of a motor; (FOF, VOF, FOFF,OFF)
+    </li>
+    <li>
+      update the status of a motor; (STUP)
+    </li>
+  </ul>
+  </p>
+  <p>
+  All other fields are set to ASL = 1.
+  </p>
+  <p>
+  This means that out of the list of fields that were previously set to ASL=0; 
+  VBAS, VMAX, SBAS, SMAX, UREV and MRES are now set to ASL=1.
+  </p>
 </DIV>
-
 
 <CENTER>
   <H4><U>New Features</U></H4>
 </CENTER>
 
-<DIV align="left">
-  <P>
-  <U><B></B></U>
-  </P>
-  <P>
-  </P>
-  <P>
-  <U><B></B></U>
-  </P>
-  <P>
-  </P>
-</DIV>
-
+<br>
 
 <CENTER>
   <H1><B><U>Motor Record Version 6.3 Release Notice</U></B></H1>
