@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.17 $
+# Version:		$Revision: 1.18 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2008-03-07 18:46:48 $
+# Last Modified:	$Date: 2008-03-11 16:20:40 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -172,6 +172,7 @@ recordtype(motor) {
 	}
 	field(BDST,DBF_DOUBLE) {
 		prompt("BL Distance (EGU)")
+		asl(ASL0)
 		promptgroup(GUI_COMMON)
 		special(SPC_MOD)
 		interest(1)
