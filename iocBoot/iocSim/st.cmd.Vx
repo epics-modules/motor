@@ -13,11 +13,11 @@ cd topbin
 # be added before any C++ code is loaded (see SPR #28980).
 sysCplusEnable=1
 
-ld < WithMPFVx.munch
+ld(0,0,"WithAsynVx.munch")
 
 cd startup
-dbLoadDatabase("$(TOP)/dbd/WithMPFVx.dbd")
-WithMPFVx_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase("$(TOP)/dbd/WithAsynVx.dbd")
+WithAsynVx_registerRecordDeviceDriver(pdbbase)
 dbLoadTemplate("motor.substitutions")
 
 # Create simulated motors: ( start card , start axis , low limit, high limit, home posn, # cards, # axes to setup)
