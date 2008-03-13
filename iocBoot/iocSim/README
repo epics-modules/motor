@@ -10,15 +10,15 @@ To build this simulation example;
 
 - in <motor>/configure/RELEASE: ASYN must be defined.
 
-- in <motor>/motorExApp/Makefile: #DIRS += WithMPF must be uncommented.
+- in <motor>/motorExApp/Makefile: #DIRS += WithAsyn must be uncommented.
 
-- in <motor>/motorExApp/WithMPF/Makefile: uncomment both,
-  #!WithMPF_LIBS   += motorSimSupport
+- in <motor>/motorExApp/WithAsyn/Makefile: uncomment both,
+  #!WithAsyn_LIBS   += motorSimSupport
     and,
-  #!WithMPFVx_LIBS += motorSimSupport
+  #!WithAsynVx_LIBS += motorSimSupport
 
-- in both <motor>/motorExApp/WithMPF/WithMPFInclude.dbd, and in
-  <motor>/motorExApp/WithMPF/WithMPFVxInclude.dbd
+- in both <motor>/motorExApp/WithAsyn/WithAsynInclude.dbd, and in
+  <motor>/motorExApp/WithAsyn/WithAsynVxInclude.dbd
   uncomment,  #include "motorSimSupport.dbd"
 
 - in <motor>/iocBoot/iocSim/Makefile set the target architecture
@@ -30,5 +30,5 @@ To run this simulation example on a Unix OS;
 - Edit the st.cmd.unix file for either sun or linux.
 - Start the ioc from this directory by executing the following command.
 
-../../bin/${EPICS_HOST_ARCH}/WithMPF st.cmd.unix
+../../bin/${EPICS_HOST_ARCH}/WithAsyn st.cmd.unix
 
