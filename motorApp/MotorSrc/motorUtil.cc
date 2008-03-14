@@ -2,9 +2,9 @@
 FILENAME...     motorUtil.cc
 USAGE...        Motor Record Utility Support.
 
-Version:        $Revision: 1.4 $
-Modified By:    $Author: peterd $
-Last Modified:  $Date: 2007-09-19 15:57:41 $
+Version:        $Revision: 1.5 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2008-03-14 20:42:16 $
 */
 
 
@@ -25,7 +25,8 @@ Last Modified:  $Date: 2007-09-19 15:57:41 $
 * .01 05-10-07 rls - Bug fix for motorUtilInit()'s PVNAME_SZ error check using
 *                    an uninitialized variable.
 *                  - Added redundant initialization error check. 
-*
+* .02 03-11-08 rls - 64 bit compatability.
+*                  - add printChIDlist() to iocsh.
 */
 
 #include <stdio.h>
@@ -33,7 +34,6 @@ Last Modified:  $Date: 2007-09-19 15:57:41 $
 #include <cadef.h>
 #include <dbDefs.h>
 #include <epicsString.h>
-#include <epicsRingPointer.h>
 #include <cantProceed.h>
 #include <iocsh.h>
 #include <epicsExport.h>
@@ -248,8 +248,8 @@ static void stopAll(chid callback_chid, char *callback_value)
     short val = 1, release_val = 0;
     
     if (callback_chid != chid_allstop)
-        errlogPrintf("callback_chid = %08x, chid_allstop = %08x\n",
-               (unsigned int) callback_chid, (unsigned int) chid_allstop);
+        errlogPrintf("callback_chid = %p, chid_allstop = %p\n", callback_chid,
+                      chid_allstop);
     
     if (strcmp(callback_value, "release") != 0)
     {
@@ -370,17 +370,16 @@ void printChIDlist()
 
     for (itera=0; itera < numMotors; itera++)
     {
-        errlogPrintf("i = %i,\tname = %s\tchid_dmov = %08x\tchid_stop = \
-               %08x\tin_motion = %i\tindex = %i\n", itera,
-               motorArray[itera].name,
-               (unsigned int) motorArray[itera].chid_dmov,
-               (unsigned int) motorArray[itera].chid_stop, 
-               motorArray[itera].in_motion, motorArray[itera].index);
+        errlogPrintf("i = %i,\tname = %s\tchid_dmov = %p\tchid_stop = \
+               %p\tin_motion = %i\tindex = %i\n", itera,
+               motorArray[itera].name, motorArray[itera].chid_dmov,
+               motorArray[itera].chid_stop, motorArray[itera].in_motion,
+               motorArray[itera].index);
     }
     
-    errlogPrintf("chid_allstop = %08x\n", (unsigned int) chid_allstop);
-    errlogPrintf("chid_alldone = %08x\n", (unsigned int) chid_alldone);
-    errlogPrintf("chid_moving = %08x\n", (unsigned int) chid_moving);
+    errlogPrintf("chid_allstop = %p\n", chid_allstop);
+    errlogPrintf("chid_alldone = %p\n", chid_alldone);
+    errlogPrintf("chid_moving = %p\n",  chid_moving);
 }
 
 
@@ -396,9 +395,19 @@ static void motorUtilCallFunc(const iocshArgBuf *args)
     motorUtilInit(args[0].sval);
 }
 
+static const iocshArg ArgP = {"Print motorUtil chid list", iocshArgString};
+static const iocshArg * const printChIDArg[1]  = {&ArgP};
+static const iocshFuncDef printChIDDef  = {"printChIDlist", 1, printChIDArg};
+
+static void printChIDCallFunc(const iocshArgBuf *args)
+{
+    printChIDlist();
+}
+
 static void motorUtilRegister(void)
 {
     iocshRegister(&motorUtilDef,  motorUtilCallFunc);
+    iocshRegister(&printChIDDef,  printChIDCallFunc);
 }
 
 epicsExportRegistrar(motorUtilRegister);
