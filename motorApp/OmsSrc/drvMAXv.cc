@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.17 $
+Version:        $Revision: 1.18 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-02-27 22:55:31 $
+Last Modified:  $Date: 2008-03-14 20:39:29 $
 */
 
 /*
@@ -204,9 +204,8 @@ static long report(int level)
             if (brdptr == NULL)
                 printf("    Oms MAXv motor card #%d not found.\n", card);
             else
-                printf("    Oms MAXv motor card #%d @ 0x%X, id: %s \n", card,
-                       (epicsUInt32) motor_state[card]->localaddr,
-                       motor_state[card]->ident);
+                printf("    Oms MAXv motor card #%d @ %p, id: %s \n", card,
+                       motor_state[card]->localaddr, motor_state[card]->ident);
         }
     }
     return (0);
@@ -499,7 +498,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     }
 
     pmotor = (struct MAXv_motor *) motor_state[card]->localaddr;
-    Debug(9, "send_mess: pmotor = %x\n", (epicsUInt32) pmotor);
+    Debug(9, "send_mess: pmotor = %p\n", pmotor);
 
     return_code = OK;
 
@@ -959,8 +958,7 @@ static int motor_init()
         startAddr = (epicsInt8 *) probeAddr;
         endAddr = startAddr + MAXv_BRD_SIZE;
 
-        Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n",
-              (epicsUInt32) probeAddr);
+        Debug(9, "motor_init: devNoResponseProbe() on addr %p\n", probeAddr);
         /* Scan memory space to assure card id */
 #ifdef USE_DEVLIB
         do
@@ -984,7 +982,7 @@ static int motor_init()
             }
 #endif
 
-            Debug(9, "motor_init: localaddr = %x\n", (epicsUInt32) localaddr);
+            Debug(9, "motor_init: localaddr = %p\n", localaddr);
             pmotor = (struct MAXv_motor *) localaddr;
                 
             if (pmotor->firmware_status.Bits.running == 0)
@@ -1099,8 +1097,7 @@ static int motor_init()
                 recv_mess(card_index, axis_pos, 1);
             }
 
-            Debug(2, "motor_init: Init Address=0x%8.8x\n",
-                    (epicsUInt32) localaddr);
+            Debug(2, "motor_init: Init Address=%p\n", localaddr);
             Debug(3, "motor_init: Total encoders = %d\n", total_encoders);
             Debug(3, "motor_init: Total with PID = %d\n", total_pidcnt);
         }
