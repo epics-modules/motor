@@ -4,9 +4,9 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision: 1.17 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-12-08 00:11:26 $
+Version:	$Revision: 1.18 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-03-14 20:41:02 $
 */
 
 /*
@@ -52,7 +52,6 @@ Last Modified:	$Date: 2005-12-08 00:11:26 $
 #include <epicsTypes.h>
 #include <epicsEvent.h>
 #include <epicsTime.h>
-#include <epicsRingPointer.h>
 #include <epicsMessageQueue.h>
 
 #include "motor.h"
