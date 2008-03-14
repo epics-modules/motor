@@ -178,6 +178,7 @@ Modification Log from R6-3 to R6-4
         - set the position of a motor; (SSET, SUSE, SET)
         - set the "user" offset of a motor; (FOF, VOF, FOFF,OFF)
         - update the status of a motor; (STUP)
+        - adjust or turn off backlash; (BDST)
 
         All other fields are set to ASL = 1.
         
@@ -185,6 +186,18 @@ Modification Log from R6-3 to R6-4
         ASL=0; VBAS, VMAX, SBAS, SMAX, UREV and MRES are now set to ASL=1. 
         
         File modified: - MotorSrc/motorRecord.dbd
+
+6) Previous releases of the motor record distribution would not compile for
+        64-bit platforms.  Numerous minor modifications were made for this
+        release to attain 64-bit compatibility.  Note that at the time of
+        writing (03/14/08), this release was successfully compiled on a
+        Linux Fedora Core 6 x86_64 host using gcc version 4.1.2, but there
+        are bugs.  Since EPICS base (R3.14.9) has not had all the bugs wrung
+        out (Mantis ID's #309, #310), there are no immediate plans to debug
+        64-bit related problems.
+        
+        Files modified: - too numerous to mention.
+        
 
 
 Modification Log from R6-2 to R6-3
