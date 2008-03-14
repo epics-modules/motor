@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.25 $
+Version:	$Revision: 1.26 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-02-27 22:54:38 $
+Last Modified:	$Date: 2008-03-14 20:38:46 $
 */
 
 /*
@@ -104,6 +104,7 @@ Last Modified:	$Date: 2008-02-27 22:54:38 $
  *                     errlogPrintf().  No info with errlogPrintf() from ISR.
  * .35  02-27-08 rls - replaced errlogPrintf calls in ISR with
  *                      epicsInterruptContextMessage calls.
+ * .36  03-14-08 rls - 64-bit compatiability.
  */
 
 #include	<string.h>
@@ -239,9 +240,8 @@ static long report(int level)
             if (brdptr == NULL)
                 printf("    Oms Vme58 motor card #%d not found.\n", card);
             else
-                printf("    Oms Vme58 motor card #%d @ 0x%X, id: %s \n", card,
-                       (epicsUInt32) brdptr->localaddr,
-                       brdptr->ident);
+                printf("    Oms Vme58 motor card #%d @ %p, id: %s \n", card,
+                       brdptr->localaddr, brdptr->ident);
         }
     }
     return(0);
@@ -643,7 +643,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     }
 
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
-    Debug(9, "send_mess: pmotor = %x\n", (epicsUInt32) pmotor);
+    Debug(9, "send_mess: pmotor = %p\n", pmotor);
 
     return_code = OK;
 
@@ -865,9 +865,13 @@ int oms58Setup(int num_cards,   /* maximum number of cards in rack */
         oms58_num_cards = num_cards;
 
     /* Check range and boundary(4K) on base address */
+#ifdef __LP64__
+    if (addrs > (void *) 0xF000 || ((motorUInt64) addrs & 0xFFF))
+#else
     if (addrs > (void *) 0xF000 || ((epicsUInt32) addrs & 0xFFF))
+#endif
     {
-        Debug(1, "omsSetup: invalid base address 0x%X\n", (epicsUInt32) addrs);
+        Debug(1, "omsSetup: invalid base address %p\n", addrs);
         oms_addrs = (char *) OMS_NUM_ADDRS;
     }
     else
@@ -1071,7 +1075,7 @@ static int motor_init()
         startAddr = (epicsInt8 *) probeAddr;
         endAddr = startAddr + OMS_BRD_SIZE;
 
-        Debug(9, "motor_init: devNoResponseProbe() on addr 0x%x\n", (epicsUInt32) probeAddr);
+        Debug(9, "motor_init: devNoResponseProbe() on addr %p\n", probeAddr);
         /* Scan memory space to assure card id */
 #ifdef vxWorks
         do
@@ -1094,7 +1098,7 @@ static int motor_init()
                 return(ERROR);
             }
 #endif
-            Debug(9, "motor_init: localaddr = %x\n", (epicsUInt32) localaddr);
+            Debug(9, "motor_init: localaddr = %p\n", localaddr);
             pmotor = (struct vmex_motor *) localaddr;
 
             Debug(9, "motor_init: malloc'ing motor_state\n");
@@ -1199,7 +1203,7 @@ static int motor_init()
                 recv_mess(card_index, axis_pos, 1);
             }
 
-            Debug(2, "motor_init: Init Address=0x%8.8x\n", (epicsUInt32) localaddr);
+            Debug(2, "motor_init: Init Address=%p\n", localaddr);
             Debug(3, "motor_init: Total encoders = %d\n", total_encoders);
             Debug(3, "motor_init: Total with PID = %d\n", total_pidcnt);
         }

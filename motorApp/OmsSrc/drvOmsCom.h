@@ -3,9 +3,9 @@ FILENAME...	drvOmsCom.h
 USAGE... 	This file contains OMS driver "include" information
 		that is common to all OMS models.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2000-09-05 22:13:07 $
+Last Modified:	$Date: 2008-03-14 20:38:02 $
 */
 
 /*
@@ -41,6 +41,10 @@ Last Modified:	$Date: 2000-09-05 22:13:07 $
 #define	INCdrvOmsComh 1
 
 #include "motordrvCom.h"
+
+#ifdef __LP64__
+typedef long long motorUInt64;
+#endif
 
 /* Default profile. */
 
