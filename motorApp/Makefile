@@ -12,10 +12,10 @@ DIRS += MotorSrc
 DIRS += DeltaTauSrc
 DIRS += OmsSrc
 DIRS += SoftMotorSrc
-DIRS += MotorSimSrc
 
 # All the following modules require ASYN.
 ifdef ASYN
+DIRS += MotorSimSrc
 DIRS += NewportSrc
 DIRS += ImsSrc
 DIRS += AcsSrc
