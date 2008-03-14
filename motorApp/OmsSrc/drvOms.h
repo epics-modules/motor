@@ -3,9 +3,9 @@ FILENAME...	drvOms.h
 USAGE... This file contains OMS driver "include" information that is
 		specific to OMS models VME8 and VME44.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-10-28 16:40:05 $
+Last Modified:	$Date: 2008-03-14 20:36:10 $
 */
 
 /*
@@ -41,6 +41,7 @@ Last Modified:	$Date: 2003-10-28 16:40:05 $
 #define	INCdrvOmsh 1
 
 #include "drvOmsCom.h"
+#include "epicsRingBytes.h"
 
 /*
  * VME8/44 default profile
@@ -100,9 +101,9 @@ struct irqdatastr	/* Used only for VME44. */
     /* Interrupt Handling control elements */
     int irqErrno;	/* Error indicator from isr */
     epicsUInt8 irqEnable;
-    epicsRingPointer<char> *recv_rng;	/* message receiving control */
+    epicsRingBytesId recv_rng;	/* message receiving control */
     epicsEvent *recv_sem;
-    epicsRingPointer<char> *send_rng;	/* message transmitting control */
+    epicsRingBytesId send_rng;	/* message transmitting control */
 };
 
 #endif	/* INCdrvOmsh */
