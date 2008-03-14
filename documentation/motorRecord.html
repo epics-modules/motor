@@ -2800,11 +2800,11 @@ below.
 	      In the POST field; only "PUT(<i>pvname</i>, <i>pv-value</i>)".
 	    </li>
 	  </blockquote>
-	  See <i>Driver Power Monitoring</i> below for the DPM_ON directive. &nbsp;The PUT 
-	  directive supports changing the value of a database variable. &nbsp;Note that 
-	  the PREM supports a delay argument, but that POST does not. &nbsp;The <i>Readback 
-	  settle time field</i> (DLY) should be used to create a time delay after the PV 
-	  specified in the POST field is written.
+          See <i>Driver Power Monitoring</i> below for the DPM_ON directive. &nbsp;The PUT 
+          directive supports changing the value of a database variable. &nbsp;Note that 
+          the PREM supports a time delay argument before the motor move , but that POST 
+          does not. &nbsp;The <i>Readback settle time field</i> (DLY) should be used to 
+          create a time delay after the PV specified in the POST field is written.
 	</blockquote>
 	<li>
 	  Device directive strings are stripped of valid device directives (including @'s) 
