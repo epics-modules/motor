@@ -3,9 +3,9 @@ FILENAME...	devPIC844.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.5 $
+Version:	$Revision: 1.6 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-10-04 19:47:12 $
+Last Modified:	$Date: 2008-03-14 20:21:36 $
 */
 
 /*
@@ -107,7 +107,7 @@ static struct board_stat **PIC844_cards;
 static long PIC844_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

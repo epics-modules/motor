@@ -3,9 +3,9 @@ FILENAME...	devMVP2001.cc
 USAGE...	Motor record device level support for MicroMo
 		MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-20 21:09:09 $
+Last Modified:	$Date: 2008-03-14 20:13:20 $
 */
 
 /*
@@ -158,7 +158,7 @@ static struct board_stat **MVP2001_cards;
 static long MVP2001_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

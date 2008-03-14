@@ -3,9 +3,9 @@ FILENAME...	devMDT695.cc
 USAGE...	Motor record device level support for ThorLabs Piezo Control
                 Module (MDT695)
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-27 20:32:37 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-03-14 20:23:45 $
 */
 
 /*
@@ -110,7 +110,7 @@ static struct board_stat **MDT695_cards;
 STATIC long MDT695_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

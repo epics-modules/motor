@@ -3,9 +3,9 @@ FILENAME...	devPIE710.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. E-710 motor controller.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-12-18 17:42:56 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-03-14 20:21:36 $
 */
 
 /*
@@ -108,7 +108,7 @@ static struct board_stat **PIE710_cards;
 static long PIE710_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

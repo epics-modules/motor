@@ -3,9 +3,9 @@ FILENAME...	devPIJEDS.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. E-516 motor controller.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2007-06-14 15:56:59 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-03-14 20:20:03 $
 */
 
 /*
@@ -107,7 +107,7 @@ static struct board_stat **PIJEDS_cards;
 static long PIJEDS_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

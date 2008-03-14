@@ -2,9 +2,9 @@
 FILENAME...	devMM3000.cc
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-20 21:10:53 $
+Last Modified:	$Date: 2008-03-14 20:17:14 $
 */
 
 /*
@@ -113,7 +113,7 @@ static struct board_stat **MM3000_cards;
 STATIC long MM3000_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

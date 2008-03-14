@@ -2,9 +2,9 @@
 FILENAME...	devOms58.c
 USAGE...	Motor record device level support for OMS VME58.
 
-Version:	$Revision: 1.6 $
+Version:	$Revision: 1.7 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-01-24 20:01:37 $
+Last Modified:	$Date: 2008-03-14 20:19:06 $
 */
 
 /*
@@ -86,7 +86,8 @@ static const char errmsg[] = {"\n\n!!!ERROR!!! - Oms58 driver uninitialized.\n"}
 
 static long oms_init(void *arg)
 {
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
+
     if (*(oms58_access.init_indicator) == NO)
     {
 	errlogSevPrintf(errlogMinor, "%s", errmsg);

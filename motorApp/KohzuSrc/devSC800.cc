@@ -2,9 +2,9 @@
 FILENAME...     devSC800.cc
 USAGE...        Motor record device level support for Kohzu SC800 motor controller.
 
-Version:        $Revision: 1.1 $
+Version:        $Revision: 1.2 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-11-27 18:01:17 $
+Last Modified:  $Date: 2008-03-14 20:10:22 $
 */
 
 /*
@@ -111,7 +111,7 @@ static struct board_stat **SC800_cards;
 static long SC800_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

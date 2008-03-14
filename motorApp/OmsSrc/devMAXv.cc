@@ -2,9 +2,9 @@
 FILENAME...	devMAXV.cc
 USAGE... Device level support for OMS MAXv model.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-20 21:11:53 $
+Last Modified:	$Date: 2008-03-14 20:19:06 $
 */
 
 /*
@@ -67,7 +67,7 @@ static const char errmsg[] = {"\n\n!!!ERROR!!! - Oms MAXv driver uninitialized.\
 
 static long MAXv_init(void *arg)
 {
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (*(MAXv_access.init_indicator) == NO)
     {

@@ -2,9 +2,9 @@
 FILENAME...	devOms.cc
 USAGE... Device level support for OMS VME8 and VME44 models.
 
-Version:	$Revision: 1.7 $
+Version:	$Revision: 1.8 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-01-24 20:01:37 $
+Last Modified:	$Date: 2008-03-14 20:19:06 $
 */
 
 /*
@@ -87,7 +87,7 @@ static const char errmsg[] = {"\n\n!!!ERROR!!! - Oms driver uninitialized.\n"};
 
 static long oms_init(void *arg)
 {
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (*(oms_access.init_indicator) == NO)
     {

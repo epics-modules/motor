@@ -3,9 +3,9 @@ FILENAME...	devPM500.cc
 USAGE...	Motor record device level support for the Newport PM500 motor
 		controller.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-12-20 21:10:53 $
+Last Modified:	$Date: 2008-03-14 20:17:14 $
 */
 
 /*
@@ -114,7 +114,7 @@ static struct board_stat **PM500_cards;
 STATIC long PM500_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

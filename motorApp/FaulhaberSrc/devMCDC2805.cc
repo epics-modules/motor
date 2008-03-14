@@ -3,9 +3,9 @@ FILENAME...	devMCDC2805.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MCDC2805 series of controllers.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-11-04 23:05:34 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-03-14 20:09:24 $
 */
 
 /*
@@ -109,7 +109,7 @@ static struct board_stat **MCDC2805_cards;
 STATIC long MCDC2805_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

@@ -107,7 +107,7 @@ static struct board_stat **MCB4B_cards;
 STATIC long MCB4B_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     Debug(5, "MCB4B_init: entry\n");
     if (after == 0)

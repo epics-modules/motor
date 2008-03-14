@@ -2,9 +2,9 @@
 FILENAME...	devSPiiPlus.cc
 USAGE...	Motor record device level support for ACS Tech80 SPiiPlus
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-05-19 16:39:45 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-03-14 20:07:43 $
 */
 
 /*
@@ -109,7 +109,7 @@ static struct board_stat **SPiiPlus_cards;
 STATIC long SPiiPlus_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {
