@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.44 $
+Version:	$Revision: 1.45 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-02-28 17:44:23 $
+Last Modified:	$Date: 2008-03-26 15:59:22 $
 */
 
 /*
@@ -105,6 +105,8 @@ Last Modified:	$Date: 2008-02-28 17:44:23 $
  * .44 02-28-08 rls - Prevent multiple LOAD_POS actions due to STUP's.
  *                  - Remove redundant DMOV posting from special().
  *                  - NTM logic is restored to using feedbacks; NTMF added.
+ * .45 03-24-08 rls - Set DRBV based on RRBV only if URIP = NO.
+ *
  */
 
 #define VERSION 6.4
@@ -3254,7 +3256,8 @@ static void
     else
     {
 	pmr->rrbv = pmr->rmp;
-	pmr->drbv = pmr->rrbv * pmr->mres;
+        if (pmr->urip == motorUEIP_No)
+    	    pmr->drbv = pmr->rrbv * pmr->mres;
     }
 
     MARK(M_RMP);
