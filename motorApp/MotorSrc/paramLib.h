@@ -23,6 +23,7 @@ typedef struct
   int  (*getDouble)   ( PARAMS params, paramIndex index, double * value );
   int  (*setCallback) ( PARAMS params, paramCallback callback, void * param );
   void (*dump)        ( PARAMS params );
+  void (*forceCallback)( PARAMS params );
 } paramSupport;
 
 extern paramSupport * motorParam;
