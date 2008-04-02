@@ -40,7 +40,8 @@ motorAxisDrvSET_t motorMM4000 =
     motorAxisHome,              /**< Pointer to function to execute a more to reference or home */
     motorAxisMove,              /**< Pointer to function to execute a position move */
     motorAxisVelocityMove,      /**< Pointer to function to execute a velocity mode move */
-    motorAxisStop               /**< Pointer to function to stop motion */
+    motorAxisStop,              /**< Pointer to function to stop motion */
+    motorAxisforceCallback      /**< Pointer to function to request a poller status update */
   };
 
 epicsExportAddress(drvet, motorMM4000);
@@ -248,7 +249,10 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         {
         case motorAxisPosition:
         {
-            PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: MM4000 does not support setting position\n");
+            deviceValue = value*pAxis->stepSize;
+            sprintf(buff, "%dSH%.*f;%dDH;%dSH%.*f", pAxis->axis+1, pAxis->maxDigits, deviceValue,
+                    pAxis->axis+1, pAxis->axis+1,  pAxis->maxDigits, pAxis->homePreset);
+            ret_status = sendOnly(pAxis->pController, buff);
             break;
         }
         case motorAxisEncoderRatio:
@@ -430,6 +434,22 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
     return MOTOR_AXIS_OK;
 }
 
+static int motorAxisforceCallback(AXIS_HDL pAxis)
+{
+    if (pAxis == NULL)
+        return (MOTOR_AXIS_ERROR);
+
+    PRINT(pAxis->logParam, FLOW, "motorAxisforceCallback: request card %d, axis %d status update\n",
+          pAxis->card, pAxis->axis);
+    
+    /* Force a status update. */
+    motorParam->forceCallback(pAxis->params);
+
+    /* Send a signal to the poller task which will make it do a status update */
+    epicsEventSignal(pAxis->pController->pollEventId);
+    return (MOTOR_AXIS_OK);
+}
+
 
 static void MM4000Poller(MM4000Controller *pController)
 {
@@ -585,6 +605,8 @@ int MM4000AsynConfig(int card,             /* Controller number */
     int loopState;
     int digits;
     int modelNum;
+    int retry = 0;
+    asynStatus rtnval;
     char *p, *tokSave;
     char inputBuff[BUFFER_SIZE];
     char outputBuff[BUFFER_SIZE];
@@ -615,7 +637,16 @@ int MM4000AsynConfig(int card,             /* Controller number */
         return MOTOR_AXIS_ERROR;
     }
 
-    sendAndReceive(pController, "VE;", inputBuff, sizeof(inputBuff));
+    do
+    {
+        rtnval = sendAndReceive(pController, "VE;", inputBuff, sizeof(inputBuff));
+        retry++;
+        /* Return value is length of response string */
+    } while (rtnval != asynSuccess && retry < 3);
+
+    if (status != asynSuccess)
+        return (MOTOR_AXIS_ERROR);
+
     strcpy(pController->firmwareVersion, &inputBuff[2]);  /* Skip "VE" */
 
     /* Set Motion Master model indicator. */
