@@ -112,6 +112,18 @@ Known Problems
         wants to set the current position to 10.00 inches, then -10.00 must be
         entered in the VAL or DVAL field.
 
+5) There are several known problems with the status update field (STUP);
+        - the motor record gets stuck in the moving state (i.e., DMOV=0) if
+          a STUP request occurs at the same time as device support reports
+          motion complete (i.e., RA_DONE bit in MSTA field).
+        - a STUP request during a jog results in the motor stopping, then
+          resuming the jog.
+        - if the motor record's SCAN field is set to periodic scan, the
+          record's status is periodically updated unless the motor is moving.
+          In other words, the status update is skipped when DMOV=0 and record
+          is processed from a periodic scan.
+
+
 
 Modification Log from R6-3 to R6-4
 ==================================
@@ -199,6 +211,37 @@ Modification Log from R6-3 to R6-4
         Files modified: - too numerous to mention.
         
 
+7) Fixed a bug that was setting the Dial Readback Value (DRBV) based on RRBV
+        when URIP = Yes.  See "Getting Started with EPICS"/"Motor Record"/
+        "Feedback data flow" diagram for details.
+        
+        File modified: process_motor_info() in motorRecord.cc
+
+8) Added support to the asyn motor device driver architecture for the MR
+        GET_INFO command.
+        
+        Modifications in <motor>/motorApp/MotorSrc:
+        - added a new paramLib function member (forceCallback) to paramSupport
+          in paramLib.h
+        - added new parameter (forceCallback) to paramList and a new function
+          (paramForceCallback) in paramLib.c.  paramForceCallback()'s only
+          function is to set "forceCallback" so that the MR gets processed.
+        - added a new motorAxisDrvSET_t member (forceCallback) to
+          motor_interface.h.
+        - added a new asyn motorCommand (motorUpStatus) in drvMotorAsyn.h
+        - changed the GET_INFO case in devMotorAsyn.c build_trans() to use
+          the int32Type interface and the motorUpStatus command.
+        - added a motorUpStatus case to the command switch in devMotorAsyn.c
+          asynCallback().
+        - added a motorUpStatus case to the command switch in writeInt32() of
+          drvMotorAsyn.c which calls the driver's forceCallback().
+          
+        Modifications to <motor>/motorApp/NewportSrc/drvMM4000Asyn.c:
+        - added motorAxisforceCallback() to motorMM4000's motorAxisDrvSET_t.
+        - implemented the motorAxisPosition command in motorAxisSetDouble().
+        - added motorAxisforceCallback() which calls forceCallback() to set the
+          forceCallback parameter and then signals the poller task.
+                                        
 
 Modification Log from R6-2 to R6-3
 ==================================

@@ -32,7 +32,7 @@ typedef enum {
     /* Commands */
     motorMoveRel, motorMoveAbs, motorMoveVel, motorHome, motorStop,
     /* Status readback */
-    motorStatus,
+    motorStatus, motorUpStatus,
     /* Status bits split out */
     motorStatusDirection=motorAxisDirection,
     motorStatusDone, motorStatusHighLimit, motorStatusAtHome,

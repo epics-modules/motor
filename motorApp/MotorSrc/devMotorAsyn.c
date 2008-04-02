@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.21 $
- * Modified by: $Author: peterd $
- * Last Modified: $Date: 2007-09-20 10:34:47 $
+ * Version: $Revision: 1.22 $
+ * Modified by: $Author: sluiter $
+ * Last Modified: $Date: 2008-04-02 19:47:23 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -337,7 +337,8 @@ static RTN_STATUS build_trans( motor_cmnd command,
 
     /* If we are already in COMM_ALARM then this server is not reachable,
      * return */
-    if ((pmr->nsta == COMM_ALARM) || (pmr->stat == COMM_ALARM)) return(-1);
+    if ((pmr->nsta == COMM_ALARM) || (pmr->stat == COMM_ALARM))
+        return(ERROR);
 
    /* Make a copy of asynUser.  This is needed because we can have multiple
     * requests queued.  It will be freed in the callback */
@@ -424,8 +425,8 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	pmsg->dvalue = *param;
 	break;
     case GET_INFO:
-	pmsg->command = motorStatus;
-	pmsg->interface = float64ArrayType;
+	pmsg->command = motorUpStatus;
+	pmsg->interface = int32Type;
 	break;
     case SET_RESOLUTION:
 	pmsg->command = motorResolution;
@@ -485,6 +486,11 @@ static void asynCallback(asynUser *pasynUser)
 		      "returned %s\n", pmr->name, pasynUser->errorMessage);
 	}
 	break;
+
+    case motorUpStatus:
+        status = pPvt->pasynInt32->write(pPvt->asynInt32Pvt, pasynUser,
+                                         pmsg->ivalue);
+        break;
 
     case motorMoveAbs:
     case motorMoveRel:

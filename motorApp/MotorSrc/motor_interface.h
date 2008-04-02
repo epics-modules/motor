@@ -737,6 +737,20 @@ static int motorAxisStop( AXIS_HDL pAxis, double acceleration );
 
 /**@} end motion group*/
 
+typedef int (*motorAxisforceCallbackFunc)( AXIS_HDL pAxis );
+/** Update status request.
+
+    This request a poller status update.
+
+    \param pAxis         [in]   Pointer to axis handle returned by motorAxisOpen.
+
+    \return Integer indicating 0 (MOTOR_AXIS_OK) for success. 
+*/
+
+#ifdef DEFINE_MOTOR_PROTOTYPES
+static int motorAxisforceCallback( AXIS_HDL pAxis );
+#endif
+
 /** The driver support entry table */
 
 typedef struct
@@ -756,6 +770,7 @@ typedef struct
     motorAxisMoveFunc            move;              /**< Pointer to function to execute a position move */
     motorAxisVelocityMoveFunc    velocityMove;      /**< Pointer to function to execute a velocity mode move */
     motorAxisStopFunc            stop;              /**< Pointer to function to stop motion */
+    motorAxisforceCallbackFunc   forceCallback;     /**< Pointer to function to request a poller status update */
 } motorAxisDrvSET_t;
 
 #ifdef __cplusplus

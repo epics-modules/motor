@@ -33,6 +33,7 @@ typedef struct paramList
     int * flags;
     paramIndex * set_flags;
     paramVal * vals;
+    int forceCallback;
     paramCallback callback;
     void * param;
 } paramList;
@@ -261,7 +262,24 @@ static void paramCallCallback( PARAMS params )
         }
 
     }
-    if ( nFlags > 0 && params->callback != NULL ) params->callback( params->param, nFlags, params->set_flags );
+    if ( (params->forceCallback || nFlags > 0) && params->callback != NULL )
+        params->callback( params->param, nFlags, params->set_flags );
+    params->forceCallback=0;
+}
+
+/** Forces the next paramCallCallback to actually call the callback routine
+
+    Normally, paramCallCallback only calls the callback routine if a parameter
+    has changed. This routine forces the callback to be called even if no parameters
+    have changed.
+
+    \param params   [in]   Pointer to PARAM handle returned by paramCreate.
+
+    \return void
+*/
+static void paramForceCallback( PARAMS params )
+{
+    params->forceCallback=1;
 }
 
 /** Prints the current values in the parameter system to stdout
@@ -305,7 +323,8 @@ static paramSupport motorParamSupport =
   paramGetInteger,
   paramGetDouble,
   paramSetCallback,
-  paramDump
+  paramDump,
+  paramForceCallback
 };
 
 paramSupport * motorParam = &motorParamSupport;
