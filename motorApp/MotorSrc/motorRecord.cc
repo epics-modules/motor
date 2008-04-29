@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.45 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-26 15:59:22 $
+Version:	$Revision: 1.46 $
+Modified By:	$Author: peterd $
+Last Modified:	$Date: 2008-04-29 15:45:00 $
 */
 
 /*
@@ -225,6 +225,7 @@ fields.  ('pmr' is a pointer to motorRecord.)
 #define MIP_JOG_REQ	0x1000	/* Jog Request. */
 #define MIP_JOG_STOP	0x2000	/* Stop jogging. */
 #define MIP_JOG_BL2	0x4000	/* 2nd phase take out backlash. */
+#define MIP_EXTERNAL	0x8000	/* Move started by external source */
 
 /*******************************************************************************
 Support for keeping track of which record fields have been changed, so we can
@@ -1002,6 +1003,7 @@ LOGIC:
 	Set process reason indicator to CALLBACK_DATA.
 	Call process_motor_info().
 	IF motor-in-motion indicator (MOVN) is true.
+	    Set the Done Moving field (DMOV) FALSE, and mark it as changed, if not already
 	    IF new target position in opposite direction of current motion.
 	       [Sign of RDIF is NOT the same as sign of CDIR], AND,
 	       [Dist. to target {DIFF} > (NTMF x (|BDST| + RDBD)], AND,
@@ -1128,6 +1130,18 @@ static long process(dbCommon *arg)
 	{
 	    int sign_rdif = (pmr->rdif < 0) ? 0 : 1;
             double ntm_deadband =  pmr->ntmf * (fabs(pmr->bdst) + pmr->rdbd);
+
+	    /* Since other sources can now initiate motor moves (e.g. Asyn
+	     * motors, written to by other records), make dmov track the state
+	     * of movn (inverted).
+	     */
+	    if (pmr->dmov) {
+		pmr->dmov = FALSE;
+		MARK(M_DMOV);
+		pmr->mip |= MIP_EXTERNAL;
+		MARK(M_MIP);
+		pmr->pp = TRUE;
+	    }
 
 	    /* Test for new target position in opposite direction of current
 	       motion.
