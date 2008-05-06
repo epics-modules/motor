@@ -1,7 +1,7 @@
 
 file {
-	name="j:\epics\synApps5-1\CARS\CARSApp\op\adl\trajectoryScanDebug.adl"
-	version=030003
+	name="/home/epics/devel/motor/6-4beta/motorApp/op/adl/trajectoryScanDebug.adl"
+	version=030000
 }
 display {
 	object {
@@ -126,7 +126,7 @@ rectangle {
 }
 "text entry" {
 	object {
-		x=236
+		x=242
 		y=334
 		width=100
 		height=20
@@ -143,13 +143,13 @@ text {
 	object {
 		x=7
 		y=334
-		width=170
+		width=230
 		height=20
 	}
 	"basic attribute" {
 		clr=14
 	}
-	textix="DT of 1st time element"
+	textix="DT of 1st time element:"
 }
 text {
 	object {
@@ -1643,6 +1643,33 @@ composite {
 		bclr=4
 	}
 	align="horiz. right"
+	limits {
+	}
+}
+text {
+	object {
+		x=359
+		y=334
+		width=300
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Debugging level (0=off, 1=on):"
+}
+"text entry" {
+	object {
+		x=664
+		y=334
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)DebugLevel"
+		clr=14
+		bclr=51
+	}
 	limits {
 	}
 }
