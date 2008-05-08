@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.46 $
-Modified By:	$Author: peterd $
-Last Modified:	$Date: 2008-04-29 15:45:00 $
+Version:	$Revision: 1.47 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-05-08 21:44:41 $
 */
 
 /*
@@ -106,6 +106,7 @@ Last Modified:	$Date: 2008-04-29 15:45:00 $
  *                  - Remove redundant DMOV posting from special().
  *                  - NTM logic is restored to using feedbacks; NTMF added.
  * .45 03-24-08 rls - Set DRBV based on RRBV only if URIP = NO.
+ * .46 05-08-08 rls - Missing "break" in special().
  *
  */
 
@@ -2686,6 +2687,7 @@ pidcof:
 		WRITE_MSG(DISABL_TORQUE, &temp_dbl);
 	    SEND_MSG();
 	}
+	break;
 
     case motorRecordJOGF:
 	if (pmr->jogf == 0)
