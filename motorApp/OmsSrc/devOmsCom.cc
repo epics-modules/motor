@@ -2,9 +2,9 @@
 FILENAME...     devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:        $Revision: 1.12 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2008-01-11 21:53:05 $
+Version:        $Revision: 1.13 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2008-05-14 16:37:41 $
 */
 
 /*
@@ -59,6 +59,8 @@ Last Modified:  $Date: 2008-01-11 21:53:05 $
  * .15  08-18-06 rls Output "slew <= base" error message only one time.
  * .16  02-16-07 rls Bug fix for overwriting PID parameter fields during
  *                   normalization calculation.
+ * .17  05-14-08 rls Fixed stop acceleration calculation.
+ *
  */
 
 #include <string.h>
@@ -265,7 +267,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
             }
             else if (command == STOP_AXIS)
             {
-                double acc = (mr->velo / fabs(mr->mres)) / mr->accl;
+                double acc = ((mr->velo - mr->vbas) / fabs(mr->mres)) / mr->accl;
             
                 /* Put in acceleration. */
                 strcat(motor_call->message, oms_table[SET_ACCEL].command);
