@@ -2,9 +2,9 @@
 FILENAME...     devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:        $Revision: 1.13 $
+Version:        $Revision: 1.14 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-05-14 16:37:41 $
+Last Modified:  $Date: 2008-05-14 21:51:56 $
 */
 
 /*
@@ -60,6 +60,7 @@ Last Modified:  $Date: 2008-05-14 16:37:41 $
  * .16  02-16-07 rls Bug fix for overwriting PID parameter fields during
  *                   normalization calculation.
  * .17  05-14-08 rls Fixed stop acceleration calculation.
+ * .18  05-14-08 rls For MAXv, restore slew acceleration after STOP command.
  *
  */
 
@@ -188,6 +189,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
 {
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
+    struct controller *brdptr;
     char buffer[40];
     msg_types cmnd_type;
     RTN_STATUS rtnind;
@@ -267,12 +269,21 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
             }
             else if (command == STOP_AXIS)
             {
+                bool MAXv = false;
                 double acc = ((mr->velo - mr->vbas) / fabs(mr->mres)) / mr->accl;
             
+                brdptr = (*trans->tabptr->card_array)[motor_call->card];
+                if (strncmp(brdptr->ident, "MAXv", 4) == 0)
+                    MAXv = true;
+                
                 /* Put in acceleration. */
+                if (MAXv == true)
+                    strcat(motor_call->message, "FL");
                 strcat(motor_call->message, oms_table[SET_ACCEL].command);
                 sprintf(buffer, "%ld", NINT(acc));
                 strcat(motor_call->message, buffer);
+                if (MAXv == true)
+                    strcat(motor_call->message, "; WQ");
             }
 
             if (cmnd_type == MOTION || cmnd_type == VELOCITY)
