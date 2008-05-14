@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.18 $
+Version:        $Revision: 1.19 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-03-14 20:39:29 $
+Last Modified:  $Date: 2008-05-14 16:42:52 $
 */
 
 /*
@@ -63,6 +63,7 @@ Last Modified:  $Date: 2008-03-14 20:39:29 $
  * 08  08-20-07 rls - Make send_mess() and recv_mess() non-global.
  *                  - removed unneeded stub start_status().
  * 09  02-26-08 rls - set "update delay" to zero.
+ * 10  05-14-08 rls - read the commanded velocity.
  *
  */
 
@@ -376,7 +377,12 @@ static int set_status(int card, int signal)
     }
     else
         status.Bits.RA_PROBLEM = 0;
-    
+
+    /* get command velocity */
+    send_mess(card, "RV", MAXv_axis[signal]);
+    recv_mess(card, q_buf, 1);
+    motor_info->velocity = atoi(q_buf);
+
     /* Get encoder position */
     motorData = pmotor->encPos[signal];
 
