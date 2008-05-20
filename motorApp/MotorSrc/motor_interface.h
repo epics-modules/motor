@@ -324,10 +324,12 @@ typedef enum
     motorAxisMoving,           /**< non-zero velocity present (optional - not currently used in software?) */
     motorAxisHasClosedLoop,    /**< Motor supports closed-loop position control. */
     motorAxisCommError,        /**< Controller communication error. */
-    motorAxisLowHardLimit      /**< minus limit switch has been hit */
+    motorAxisLowHardLimit,     /**< minus limit switch has been hit */
+    motorAxisDeferMoves,       /**< Moves are not executed immediately, but are deferred until this parameter is set to zero */
+    motorAxisLastParam
 } motorAxisParam_t;
 
-#define MOTOR_AXIS_NUM_PARAMS ((int) motorAxisLowHardLimit + 1)
+#define MOTOR_AXIS_NUM_PARAMS ((int) motorAxisLastParam)
 
 /**\defgroup EPICS EPICS driver support interface routines
 @{

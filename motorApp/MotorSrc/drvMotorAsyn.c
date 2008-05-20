@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.19 $
+ * Version: $Revision: 1.20 $
  * Modified by: $Author: peterd $
- * Last Modified: $Date: 2008-05-19 15:30:20 $
+ * Last Modified: $Date: 2008-05-20 15:39:58 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -86,6 +86,7 @@ static motorCommandStruct motorCommands[] = {
     {motorHighLim,    "HIGH_LIMIT"},
     {motorLowLim,     "LOW_LIMIT"},
     {motorSetClosedLoop, "SET_CLOSED_LOOP"},
+    {motorDeferMoves, "DEFER"},
     {motorStatus,     "STATUS"},
     {motorStatusDirection, "STATUS_DIRECTION"}, 
     {motorStatusDone, "STATUS_DONE"},

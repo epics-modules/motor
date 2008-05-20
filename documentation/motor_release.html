@@ -112,6 +112,31 @@
 
 <DIV align="left">
   <P>
+  <U><B>Deferred moves for asyn motors</B></U>
+  </P>
+  <P>
+  The asyn motor framework now supports a flag to indicate that moves should be
+  deferred.  When at zero, moves proceed as normal.  When set to one, moves
+  should be deferred and remembered by the controller driver, but not executed
+  immediately. When set back to zero, the controller driver should then start
+  all the moves (or at least moves to the last requested demand positions) that
+  have been deferred, as near to simultaneously as is possible for the
+  particular model of controller. The flag is implemented per-controller, so
+  all axes on a particular controller instance are affected, but axes on other
+  controllers via the same driver are unaffected.
+  </P>
+  <P>
+  It is the responsibility of the motor controller driver to actually provide
+  such functionality, or to give an error if the parameter is not recognised.
+  Currently the Newport XPS controller driver and the Delta Tau PMAC driver
+  (in the tpmac module available from Diamond) support this.
+  </P>
+  <P>
+  To use the flag, connect to any asyn port/addr combination on the controller,
+  using the parameter "DEFER". e.g. for a bo record, use DTYP=asynUInt32Digital,
+  OUT=@asynMask(port,1,1)DEFER, ZNAM="Go", ONAM="Defer"
+  </P>
+  <P>
   <U><B>64-bit compatiablity</B></U>
   </P>
   <p>
