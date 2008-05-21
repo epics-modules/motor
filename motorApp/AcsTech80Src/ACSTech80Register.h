@@ -1,14 +1,14 @@
 /*
-FILENAME...	NewportRegister.h
-USAGE... This file contains function prototypes for Newport IOC shell commands.
+FILENAME...	ACSTech80Register.h
+USAGE... This file contains function prototypes for ACSTech80 Motor Controller IOC shell commands.
 
 Version:	1.4
-Modified By:	rivers
+Modified By:	sullivan
 Last Modified:	2004/07/28 18:45:16
 */
 
 /*
- *      Original Author: Ron Sluiter
+ *      Original Author: Joe Sullivan
  *      Date: 05/19/03
  *
  *      Experimental Physics and Industrial Control System (EPICS)
@@ -41,6 +41,7 @@ Last Modified:	2004/07/28 18:45:16
 
 /* Function prototypes. */
 extern RTN_STATUS SPiiPlusSetup(int, int);
-extern RTN_STATUS SPiiPlusConfig(int, const char *);
+extern RTN_STATUS SPiiPlusConfig(int, const char *, const char*);
+// extern RTN_STATUS SPiiPlusConfig(int, const char *);
 
 

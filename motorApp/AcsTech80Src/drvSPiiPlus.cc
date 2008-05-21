@@ -3,9 +3,9 @@ FILENAME...	drvSPiiPlus.cc
 USAGE...	Motor record driver level support for ACS Tech80 
                 SPiiPlus
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2007-04-17 20:04:29 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: sullivan $
+Last Modified:	$Date: 2008-05-21 21:18:53 $
 
 */
 
@@ -43,6 +43,7 @@ Last Modified:	$Date: 2007-04-17 20:04:29 $
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>
 #include <epicsThread.h>
 #include <epicsString.h>
@@ -53,19 +54,12 @@ Last Modified:	$Date: 2007-04-17 20:04:29 $
 #include "asynOctetSyncIO.h"
 #include "epicsExport.h"
 
-#define READ_RESOLUTION "TU;"
-#define READ_FAULT      "?D/FAULT(%d)"
-#define READ_STATUS     "?D/MST(%d)"
-#define READ_POSITION   "?RPOS(%d)"
-#define READ_EA_POSITION "?FPOS(%d)"
-#define READ_VELOCITY   "?FVEL(%d)"
-#define READ_ALL_POSITION   "?FPOS"
-#define READ_HOME       "?opReq(%d)"
-#define READ_DONE       "?Done(%d)"
-#define STOP_ALL        "halt all"
-#define MOTOR_ON        "enable(%d)"
+
+#define STOP_ALL         "halt all"
+#define MOTOR_ON         "enable(%d)"
 
 #define GET_IDENT       "?VR"
+#define SKIP_THIS       "#"
 
 #define ACS_EOS          "\r" /* End-of-string */
 
@@ -89,6 +83,17 @@ extern "C" {epicsExportAddress(int, drvSPiiPlusdebug);}
 
 /* --- Local data. --- */
 int SPiiPlus_num_cards = 0;
+
+static char *ACSPL_axis[] = {"X", "Y", "Z", "T", "A", "B", "C", "D"};
+
+// Array dimensions are defined in drvSPiiPlusy.h
+// First dimension order must match (enum)CMND_MODES
+// Second dimension (command list) order must match (enum)QUERY_TYPES 
+static char *queryCmnds[MODE_CNT][QUERY_CNT] = {
+  {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_CMND,QVEL_CMND,QHOME_CMND,QDONE_CMND},
+  {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_KIN_CMND,QVEL_CMND,SKIP_THIS,SKIP_THIS},
+  {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_CMND,QVEL_CMND,SKIP_THIS,SKIP_THIS}
+  };
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -224,6 +229,8 @@ static int set_status(int card, int signal)
     struct mess_node *nodeptr;
     register struct mess_info *motor_info;
     char send_buff[80];
+    char **cmndList;
+    int cmndID;
     int flags;
     double vel;
     MOTOR_STATUS mstat;
@@ -234,43 +241,47 @@ static int set_status(int card, int signal)
     long motorData;
     bool homing;
     bool plusdir, ls_active = false;
+    bool cmndErr;
     msta_field status;
 
     cntrl = (struct SPiiPlusController *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     status.All = motor_info->status.All;
 
-    sprintf(send_buff, READ_STATUS, signal);
-    recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[QSTATUS]);
-    if (recvCnt > 0)
-	{
-	  cntrl->status = NORMAL;
-  	  sprintf(send_buff, READ_DONE, signal);
-          recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[QDONE]);
 
-  	  sprintf(send_buff, READ_FAULT, signal);
-          recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[QFAULT]); 
+    // Get correct list of command for controller interface mode
+    cmndList = queryCmnds[cntrl->cmndMode];
 
-	  sprintf(send_buff, READ_POSITION, signal);
-	  recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[QPOS]);
-
-  	  sprintf(send_buff, READ_EA_POSITION, signal);
-          recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[QEA_POS]);
-
-  	  sprintf(send_buff, READ_VELOCITY, signal);
-          recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[QVEL]);
-
-	  sprintf(send_buff, READ_HOME, signal);
-	  recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[QHOME]);
-
-	}
+    for (cmndID=0, cmndErr=false; cmndID < QUERY_CNT && !cmndErr; cmndID++, cmndList++)
+      {
+	// Check for SKIP_THIS flag 
+	if (*cmndList[0] == '#')
+	    cntrl->recv_string[cmndID][0] = (char)NULL;
 	else
-	{
-	    if (cntrl->status == NORMAL)
-		cntrl->status = RETRY;
+	  {
+	    if (cmndID == QEA_POS && cntrl->cmndMode == CONNECT)
+	      sprintf(send_buff, *cmndList, ACSPL_axis[signal]);
 	    else
-		cntrl->status = COMM_ERR;
-	}
+	      sprintf(send_buff, *cmndList, signal);
+	  
+	    recvCnt = send_recv_mess(card, send_buff, cntrl->recv_string[cmndID]);
+
+	    // Check for TIMEOUT or Controller Error Reply 
+	    if (recvCnt <= 0 || strchr(cntrl->recv_string[cmndID], '?'))
+	      cmndErr = true;
+	  }
+      }
+
+    // Did we get all the way thru the command list?
+    if (!cmndErr)
+      cntrl->status = NORMAL;
+    else
+      {
+	if (cntrl->status == NORMAL)
+	  cntrl->status = RETRY;
+	else
+	  cntrl->status = COMM_ERR;
+      }
 
     if (cntrl->status != NORMAL)
     {
@@ -300,25 +311,33 @@ static int set_status(int card, int signal)
     mfault.All = atoi(cntrl->recv_string[QFAULT]);
     Debug(5, "set_status(): status byte = %x, fault int = %x\n", mstat.All, mfault.All);
 
-   vel = atof(cntrl->recv_string[QVEL]);
-   status.Bits.RA_DIRECTION = (vel >= 0) ? 1 : 0;
-
+    vel = atof(cntrl->recv_string[QVEL]);
+    status.Bits.RA_DIRECTION = (vel >= 0) ? 1 : 0;
 
     plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
-    status.Bits.RA_DONE = (atoi(cntrl->recv_string[QDONE])) ? 1 : 0;
-    // if (mstat.Bits.inmotion == false && mstat.Bits.inposition == true)
-    // {
-    //   status.Bits.RA_DONE = 1;
-    // }
-    // else
-    //   status.Bits.RA_DONE = 0;
+    if (cntrl->cmndMode == BUFFER)
+	status.Bits.RA_DONE = (atoi(cntrl->recv_string[QDONE])) ? 1 : 0;
+    else
+      {
+	// if (mstat.Bits.inmotion == false && mstat.Bits.inposition == true)
+	if (mstat.Bits.inposition == true)
+	  status.Bits.RA_DONE = 1;
+	else
+	  status.Bits.RA_DONE = 0;
+      }
 
-    
-    opReq = atoi(cntrl->recv_string[QHOME]);
-    homing = (opReq == OP_HOME_F || opReq == OP_HOME_R) ? true : false;
+    status.Bits.RA_MOVING = (mstat.Bits.inmotion == true) ? 1 : 0;
+
     status.Bits.RA_HOME = status.Bits.RA_DONE;
-
+    
+    if (cntrl->cmndMode == BUFFER)
+      {
+	opReq = atoi(cntrl->recv_string[QHOME]);
+	homing = (opReq == OP_HOME_F || opReq == OP_HOME_R) ? true : false;
+      }
+    else
+      homing = false;
 
     /* Set Travel limit switch status bits. */
     if ((mfault.Bits.rl == false && mfault.Bits.srl == false) ||  homing)
@@ -582,13 +601,17 @@ SPiiPlusSetup(int num_cards,	/* maximum number of controllers in system.  */
 
 /*****************************************************/
 /* Configure a controller                            */
-/* SPiiPlusConfig()                                    */
+/* SPiiPlusConfig()                                  */
 /*****************************************************/
+
 RTN_STATUS
 SPiiPlusConfig(int card,		/* card being configured */
-	       const char *name)   /* asyn port name */
+	       const char *name,        /* asyn port name */
+	       const char *modeStr)    /* command mode [BUFfer/DIRect] */
 {
     struct SPiiPlusController *cntrl;
+    int modeIdx;
+    char modeCas[4];
 
     if (card < 0 || card >= SPiiPlus_num_cards)
         return(ERROR);
@@ -598,6 +621,25 @@ SPiiPlusConfig(int card,		/* card being configured */
     cntrl = (struct SPiiPlusController *) motor_state[card]->DevicePrivate;
 
     strcpy(cntrl->asyn_port, name);
+
+    // Set controller command interface mode - BUFFER is the default 
+    // Assure upper case argument - only check first 3 letters 
+    modeCas[0]=NULL;
+    if (modeStr != NULL) {
+      for (modeIdx=0; modeIdx < 3; modeIdx++)
+	modeCas[modeIdx] = toupper(modeStr[modeIdx]);
+      modeCas[3]= (char) NULL;				
+    }
+				
+    if (!strncmp(modeCas, DIRECT_STR,3))
+      cntrl->cmndMode = DIRECT;
+    else if (!strncmp(modeCas, CONNECT_STR,3))
+      cntrl->cmndMode = CONNECT;
+    else
+      cntrl->cmndMode = BUFFER;
+
+    printf("SPiiPlus config mode = %d\n", (int)(cntrl->cmndMode));
+
     return(OK);
 }
 
@@ -614,12 +656,13 @@ static int motor_init()
     struct controller *brdptr;
     struct SPiiPlusController *cntrl;
     int card_index, motor_index;
-    char axis_pos[BUFF_SIZE];
+    // char axis_pos[BUFF_SIZE];
     char buff[BUFF_SIZE];
-    char write_buff[30];
-    char *tok_save, *pos_ptr;
+    char send_buff[30];
+    // char *tok_save, *pos_ptr;
     int total_axis = 0;
     int status;
+    bool foundAxis;
     asynStatus success_rtn;
 
     initialized = true;	/* Indicate that driver is initialized. */
@@ -653,10 +696,10 @@ static int motor_init()
 	    /* Send a message to the board, see if it exists */
 	    do
 	    {
-	      status = send_recv_mess(card_index, READ_ALL_POSITION, axis_pos);
+	      status = send_recv_mess(card_index, GET_IDENT, buff);
 		retry++;
 		/* Return value is length of response string */
-	    } while(status == 0 && retry < 3);
+	    } while(status == 0 && !strchr(buff, '?') && retry < 3);
 	}
 
 	if (success_rtn == asynSuccess && status > 0)
@@ -669,11 +712,16 @@ static int motor_init()
 
 
 	    /* The return string will tell us how many axes this controller has */
-	    for (total_axis = 0, tok_save = NULL, pos_ptr = epicsStrtok_r(axis_pos, " ", &tok_save);
-		    pos_ptr != 0; pos_ptr = epicsStrtok_r(NULL, " ", &tok_save), total_axis++)
-		brdptr->motor_info[total_axis].motor_motion = NULL;
+	    for (total_axis=0, foundAxis=true; foundAxis; total_axis++)
+	      {
+		sprintf(send_buff, QPOS_CMND, total_axis);
+		status = send_recv_mess(card_index, send_buff, buff);
+		if (status <= 0 || strchr(buff, '?'))
+		  foundAxis = false;
+	      }
 
-	    brdptr->total_axis = total_axis;
+	    
+	    brdptr->total_axis = --total_axis;
 
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
@@ -691,13 +739,13 @@ static int motor_init()
 		motor_info->status.Bits.GAIN_SUPPORT = 1;
 
                 /* Determine low limit */
-                sprintf(write_buff, "?SLLIMIT(%d)", motor_index);
-       	        status = send_recv_mess(card_index, write_buff, buff);  
+                // sprintf(send_buff, "?SLLIMIT(%d)", motor_index);
+       	        // status = send_recv_mess(card_index, send_buff, buff);  
                 // motor_info->low_limit = atof(buff);
 
                 /* Determine high limit */
-                sprintf(write_buff, "?SRLIMIT(%d)", motor_index);
-       	        status = send_recv_mess(card_index, write_buff, buff);  
+                // sprintf(send_buff, "?SRLIMIT(%d)", motor_index);
+       	        // status = send_recv_mess(card_index, send_buff, buff);  
                 // motor_info->high_limit = atof(buff);
 
 		set_status(card_index, motor_index);  /* Read status of each motor */

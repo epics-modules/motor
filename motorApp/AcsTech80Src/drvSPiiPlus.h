@@ -3,9 +3,9 @@ FILENAME...	drvSPiiPlus.h
 USAGE...    This file contains ACS Tech80 driver "include"
 	    information that is specific to the SPiiPlus serial controller
 
-Version:	$Revision: 1.1 $
+Version:	$Revision: 1.2 $
 Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-05-19 16:39:46 $
+Last Modified:	$Date: 2008-05-21 21:18:53 $
 
 */
 
@@ -38,6 +38,7 @@ Last Modified:	$Date: 2006-05-19 16:39:46 $
  * Modification Log:
  * -----------------
  * .01  04-07-05 jps initialized from drvMM4000.cc
+ * .02  10-31-07 jps added command mode switch (BUFFER/DIRECT)
  */
 
 #ifndef	INCdrvSPiiPlush
@@ -59,17 +60,42 @@ Last Modified:	$Date: 2006-05-19 16:39:46 $
 #define OP_HOME_R   5
 
 #define QUERY_CNT  7
-enum query_types {QSTATUS, QFAULT, QPOS, QEA_POS, QVEL, QHOME, QDONE};
+enum QUERY_TYPES {QSTATUS, QFAULT, QPOS, QEA_POS, QVEL, QHOME, QDONE};
+
+// Query Command Strings 
+#define QSTATUS_CMND     "?D/MST(%d)"
+#define QFAULT_CMND      "?D/FAULT(%d)"
+#define QPOS_CMND        "?APOS(%d)"
+#define QEA_POS_CMND     "?FPOS(%d)"
+#define QEA_POS_KIN_CMND "?FPOS%s"    // Read reverse kinimatic position ('CONNECT' mode)
+#define QVEL_CMND        "?FVEL(%d)"
+#define QHOME_CMND       "?opReq(%d)"
+#define QDONE_CMND       "?Done(%d)"
+
+
+/* Controller command interface modes 
+ *      BUFFER - motion initiated by executing ACSPL buffers  (ie: Nanomotion stages)
+ *      CONNECT - ACSPL 'CONNECT' command is being used (kinematics) (ie: Alio Hexapod)
+ *      DIRECT - direct access to physical motors via command interpreter
+ */ 
+#define MODE_CNT  3
+enum CMND_MODES {BUFFER, CONNECT, DIRECT};
+#define BUFFER_STR "BUF"
+#define CONNECT_STR "CON"
+#define DIRECT_STR "DIR"
+
 
 /* Motion Master specific data is stored in this structure. */
 struct SPiiPlusController
 {
     asynUser *pasynUser;  	/* For RS-232 */
     int asyn_address;		/* Use for GPIB or other address with asyn */
+    enum CMND_MODES cmndMode;     /* Controller command interface mode */
     char asyn_port[80];     	/* asyn port name */
     char recv_string[QUERY_CNT][ACS_MSG_SIZE];  /* Query result strings */
     double home_preset[MAX_AXIS]; /* Controller's home preset position (XF command). */
-    CommStatus status;		/* Controller communication status. */
+    
+    CommStatus status;		 /* Controller communication status. */
 };
 
 

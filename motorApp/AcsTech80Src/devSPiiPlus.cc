@@ -2,9 +2,9 @@
 FILENAME...	devSPiiPlus.cc
 USAGE...	Motor record device level support for ACS Tech80 SPiiPlus
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:07:43 $
+Version:	$Revision: 1.3 $
+Modified By:	$Author: sullivan $
+Last Modified:	$Date: 2008-05-21 21:18:52 $
 */
 
 /*
@@ -126,6 +126,7 @@ STATIC long SPiiPlus_init(void *arg)
 STATIC long SPiiPlus_init_record(void *arg)
 {
     struct motorRecord *mr = (struct motorRecord *) arg;
+
     return(motor_init_record_com(mr, *drvtabptr->cardcnt_ptr, drvtabptr, SPiiPlus_cards));
 }
 
@@ -211,26 +212,33 @@ STATIC RTN_STATUS SPiiPlus_build_trans(motor_cmnd command, double *parms, struct
     switch (command)
     {
 	case MOVE_ABS:
-	    // sprintf(buff, "ptp (%d), %d;", axis, intval);
-	  sprintf(buff, "Done(%d)=0;target_pos(%d)=%d;opReq(%d)=%d;", axis, axis, intval, axis, OP_ABS_MOVE);
+	  if (cntrl->cmndMode == BUFFER)
+	    sprintf(buff, "Done(%d)=0;target_pos(%d)=%d;opReq(%d)=%d;", axis, axis, intval, axis, OP_ABS_MOVE);
+	  else
+	    sprintf(buff, "ptp (%d), %d;", axis, intval);
+
 	  break;
 	
        case MOVE_REL:
-	    // sprintf(buff, "ptp/r (%d), %d;", axis, intval);
-	 sprintf(buff, "Done(%d)=0;target_pos(%d)=%d;opReq(%d)=%d;", axis, axis, intval, axis, OP_REL_MOVE);
+	  if (cntrl->cmndMode == BUFFER)
+	    sprintf(buff, "Done(%d)=0;target_pos(%d)=%d;opReq(%d)=%d;", axis, axis, intval, axis, OP_REL_MOVE);
+	  else
+	    sprintf(buff, "ptp/r (%d), %d;", axis, intval);
 	 break;
 	
 	case HOME_FOR:
-	  sprintf(buff, "Done(%d)=0;opReq(%d)=%d;", axis, axis, OP_HOME_F);
+	  if (cntrl->cmndMode == BUFFER)
+	    sprintf(buff, "Done(%d)=0;opReq(%d)=%d;", axis, axis, OP_HOME_F);
 	  break;
 
 	case HOME_REV:
-	  sprintf(buff, "Done(%d)=0;opReq(%d)=%d;", axis, axis, OP_HOME_R);
+	  if (cntrl->cmndMode == BUFFER)
+	    sprintf(buff, "Done(%d)=0;opReq(%d)=%d;", axis, axis, OP_HOME_R);
 	  break;
 	
 	case LOAD_POS:
 	  /* The Feedback position follows the Reference set position */
-	  sprintf(buff, "set RPOS(%d)=%d;", axis, intval);
+	  sprintf(buff, "set APOS(%d)=%d;", axis, intval);
 	  break;
 	
 	case SET_VEL_BASE:
@@ -241,21 +249,31 @@ STATIC RTN_STATUS SPiiPlus_build_trans(motor_cmnd command, double *parms, struct
 	  break;
 	
 	case SET_ACCEL:
-	  sprintf(buff, "ACC%d=%d;", axis, intval);
+	  if (cntrl->cmndMode == BUFFER)
+	    sprintf(buff, "ACC%d=%d;", axis, intval);
+     //  else (DIRECT)
+	  //    Leave setting to Controller MMI - too many other dependant settings 
+
 	  break;
 	
 	case GO:
-	  // Execute the ACS program buffer that corresponds to the axis
-          // ACS Buffer Execution command must be alone
-	  rtnval = motor_end_trans_com(mr, drvtabptr);
-	  rtnval = (RTN_STATUS) motor_start_trans_com(mr, SPiiPlus_cards);
-	  motor_call->type = SPiiPlus_table[command];
+	  if (cntrl->cmndMode == BUFFER)
+	    {
+	      // Execute the ACS program buffer that corresponds to the axis
+	      // ACS Buffer Execution command must be alone
+	      rtnval = motor_end_trans_com(mr, drvtabptr);
+	      rtnval = (RTN_STATUS) motor_start_trans_com(mr, SPiiPlus_cards);
+	      motor_call->type = SPiiPlus_table[command];
 
-	  sprintf(buff, "start %d, 1", axis);
+	      sprintf(buff, "start %d, 1", axis);
+	    }
+	  // else (DIRECT)
+	  //    Motion command initiates move 
 	  break;
 	
 	case SET_ENC_RATIO:
-	    sprintf(buff, "EFAC%d=%f;", axis, dval);
+	  // Leave this setting to the controller MMI - too much interdependence 
+	  //    sprintf(buff, "EFAC%d=%f;", axis, dval);
 	    break;
 	
 	case GET_INFO:
@@ -265,23 +283,31 @@ STATIC RTN_STATUS SPiiPlus_build_trans(motor_cmnd command, double *parms, struct
 	    break;
 	
 	case STOP_AXIS:
-	  // sprintf(buff, "halt (%d);", axis);
-	  sprintf(buff, "Done(%d)=0;stop_all(%d)=1;", axis, axis);
+	  if (cntrl->cmndMode == BUFFER)
+	    sprintf(buff, "Done(%d)=0;stop_all(%d)=1;", axis, axis);
+	  else
+	    sprintf(buff, "halt (%d);", axis);
+
 	    break;
 	
 	case JOG:
-	  // sprintf(buff, "jog/v (%d), %d;", axis, intval);
-	  sprintf(buff, "Done(%d)=0;jog_vel(%d)=%d; opReq(%d)=%d;", axis, axis, intval, axis, OP_JOG_MOVE);
-	  strcat(motor_call->message, buff);
+	  if (cntrl->cmndMode == BUFFER)
+	    {
+	      sprintf(buff, "Done(%d)=0;jog_vel(%d)=%d; opReq(%d)=%d;", axis, axis, intval, axis, OP_JOG_MOVE);
 
-	    // ACS Buffer Execution command must be alone
-            rtnval = motor_end_trans_com(mr, drvtabptr);
-            rtnval = (RTN_STATUS) motor_start_trans_com(mr, SPiiPlus_cards);
-	    motor_call->type = SPiiPlus_table[command];
+	      strcat(motor_call->message, buff);
 
-	    sprintf(buff, "start %d,1", axis);
+	      // ACS Buffer Execution command must be alone
+	      rtnval = motor_end_trans_com(mr, drvtabptr);
+	      rtnval = (RTN_STATUS) motor_start_trans_com(mr, SPiiPlus_cards);
+	      motor_call->type = SPiiPlus_table[command];
 
-	    break;
+	      sprintf(buff, "start %d,1", axis);
+	    }
+	  else
+	    sprintf(buff, "jog/v (%d), %d;", axis, intval);
+
+	  break;
 	
 	case SET_PGAIN:
 	    break;

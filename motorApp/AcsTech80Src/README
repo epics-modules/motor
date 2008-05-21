@@ -35,7 +35,11 @@ SPiiPlusSetup(1, 60)
 # ACS Tech80 - SPiiPlus driver configuration parameters:
 #     (1) controller being configured
 #     (2) asyn port name (string)
-SPiiPlusConfig(0, "serial61")
+#     (3) command interface mode [BUFfer/CONnect/DIRect]
+#		BUFFER - ACSPL buffer interface (ie Nanomotion Stages)
+#		CONNECT - ACSPL 'CONNECT' (kinematics) interface (ie: Alio Hexapod)
+#	        DIRECT  - ACSPL command interpreter interface to the physical motors
+SPiiPlusConfig(0, "serial61", "BUF")
 
 
 iocBoot/iocxxx/motor.substitutions
@@ -44,7 +48,7 @@ iocBoot/iocxxx/motor.substitutions
 {xxx:, 2      m$(N),  "SPiiPlus",     0,      1,      "motor $(N)",   degrees,        Pos,    60,             0.,             1.5,            0,              1,              .2,             1e-3,   3,              100,    -100,   ""}
 
 
-****************** SPiiPlus Setup *******************************
+****************** SPiiPlus 'BUFFER' Type Setup *******************************
 
 Install the "SPiiPlus_EPICS.prg" file in the SPiiPlus motor controller 
 using the ACSTech80 WINDOWS software. 
@@ -56,3 +60,22 @@ buffer.  (Motor 1 - buffer #0, Motor 2 - buffer #1, ... etc()
 
 Each motor is assigned a SPiiPlus buffer with a copy of all the programs 
 that are currently in buffer #0. 
+
+****************** SPiiPlus 'CONNECT' Type Setup *******************************
+
+ACSPL Variables - for direct and reverse kinematics
+    Reference Position: APOS[axis number] (0 - 7)
+    Feedback Position:  FPOS[axis name] (X, Y, Z, T, A, B, C, D)
+
+****************** SPiiPlus 'DIRECT' Type Setup *******************************
+
+ACSPL Variables - physical motor positions
+    Reference Position: APOS[axis number] (0 - 7)
+    Feedback Position:  FPOS[axis number] (0 - 7)
+
+
+***************** SPiiPlus Notes ***************************
+
+Axes Names: (only used in 'CONNECT' mode)
+  (Four Channel) X, Y, A, B   ***** NOT SUPPORTED *****
+  (Eight Channel) X, Y, Z, T, A, B, C, D
