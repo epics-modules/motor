@@ -30,7 +30,7 @@ extern int xps_gathering(int);
 
 motorAxisDrvSET_t motorXPS = 
   {
-    14,
+    15,
     motorAxisReport,            /**< Standard EPICS driver report function (optional) */
     motorAxisInit,              /**< Standard EPICS dirver initialisation function (optional) */
     motorAxisSetLog,            /**< Defines an external logging function (optional) */
@@ -45,7 +45,7 @@ motorAxisDrvSET_t motorXPS =
     motorAxisMove,              /**< Pointer to function to execute a position move */
     motorAxisVelocityMove,      /**< Pointer to function to execute a velocity mode move */
     motorAxisStop,              /**< Pointer to function to stop motion */
-    /*motorAxisforceCallback*/      /**< Pointer to function to request a poller status update */
+    motorAxisforceCallback      /**< Pointer to function to request a poller status update */
   };
 
 epicsExportAddress(drvet, motorXPS);
@@ -769,7 +769,7 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
 
 
 /*Commented out for now, in case we don't need this.*/
-/*static int motorAxisforceCallback(AXIS_HDL pAxis)
+static int motorAxisforceCallback(AXIS_HDL pAxis)
 {
      if (pAxis == NULL)
          return (MOTOR_AXIS_ERROR);
@@ -781,7 +781,7 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
 
      epicsEventSignal(pAxis->pController->pollEventId);
      return (MOTOR_AXIS_OK);
-}*/
+}
 
 
 
