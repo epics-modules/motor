@@ -671,65 +671,65 @@ int __stdcall EventExtendedConfigurationTriggerSet (int SocketIndex, int NbEleme
 
 	char (*stringArray0)[SIZE_NAME];
 	stringArray0 = new char [NbElements][SIZE_NAME];
+	memset(stringArray0,'\0', SIZE_NAME*NbElements);	
 	indice = 0;
 	strncpyWithEOS(list, ExtendedEventNameList, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray0[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray0[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
 	}
 	char (*stringArray1)[SIZE_NAME];
 	stringArray1 = new char [NbElements][SIZE_NAME];
+	memset(stringArray1,'\0', SIZE_NAME*NbElements);		
 	indice = 0;
 	strncpyWithEOS(list, EventParameter1List, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray1[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray1[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
 	}
 	char (*stringArray2)[SIZE_NAME];
 	stringArray2 = new char [NbElements][SIZE_NAME];
+	memset(stringArray2,'\0', SIZE_NAME*NbElements);		
 	indice = 0;
 	strncpyWithEOS(list, EventParameter2List, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray2[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray2[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
 	}
 	char (*stringArray3)[SIZE_NAME];
 	stringArray3 = new char [NbElements][SIZE_NAME];
+	memset(stringArray3,'\0', SIZE_NAME*NbElements);		
 	indice = 0;
 	strncpyWithEOS(list, EventParameter3List, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray3[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray3[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
 	}
 	char (*stringArray4)[SIZE_NAME];
 	stringArray4 = new char [NbElements][SIZE_NAME];
+	memset(stringArray4,'\0', SIZE_NAME*NbElements);		
 	indice = 0;
 	strncpyWithEOS(list, EventParameter4List, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray4[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray4[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
@@ -844,65 +844,65 @@ int __stdcall EventExtendedConfigurationActionSet (int SocketIndex, int NbElemen
 
 	char (*stringArray0)[SIZE_NAME];
 	stringArray0 = new char [NbElements][SIZE_NAME];
+	memset(stringArray0,'\0', SIZE_NAME*NbElements);
 	indice = 0;
 	strncpyWithEOS(list, ExtendedActionNameList, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray0[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray0[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
 	}
 	char (*stringArray1)[SIZE_NAME];
 	stringArray1 = new char [NbElements][SIZE_NAME];
+	memset(stringArray1,'\0', SIZE_NAME*NbElements);
 	indice = 0;
 	strncpyWithEOS(list, ActionParameter1List, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray1[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray1[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
 	}
 	char (*stringArray2)[SIZE_NAME];
 	stringArray2 = new char [NbElements][SIZE_NAME];
+	memset(stringArray2,'\0', SIZE_NAME*NbElements);	
 	indice = 0;
 	strncpyWithEOS(list, ActionParameter2List, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray2[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray2[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
 	}
 	char (*stringArray3)[SIZE_NAME];
 	stringArray3 = new char [NbElements][SIZE_NAME];
+	memset(stringArray3,'\0', SIZE_NAME*NbElements);	
 	indice = 0;
 	strncpyWithEOS(list, ActionParameter3List, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray3[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray3[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
 	}
 	char (*stringArray4)[SIZE_NAME];
 	stringArray4 = new char [NbElements][SIZE_NAME];
+	memset(stringArray4,'\0', SIZE_NAME*NbElements);	
 	indice = 0;
 	strncpyWithEOS(list, ActionParameter4List, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray4[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray4[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
@@ -1261,13 +1261,13 @@ int __stdcall GatheringConfigurationSet (int SocketIndex, int NbElements, char *
 
 	char (*stringArray0)[SIZE_NAME];
 	stringArray0 = new char [NbElements][SIZE_NAME];
+	memset(stringArray0,'\0', SIZE_NAME*NbElements);
 	indice = 0;
 	strncpyWithEOS(list, TypeList, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray0[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray0[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
@@ -1515,13 +1515,13 @@ int __stdcall GatheringExternalConfigurationSet (int SocketIndex, int NbElements
 
 	char (*stringArray0)[SIZE_NAME];
 	stringArray0 = new char [NbElements][SIZE_NAME];
+	memset(stringArray0,'\0', SIZE_NAME*NbElements);
 	indice = 0;
 	strncpyWithEOS(list, TypeList, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray0[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray0[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
@@ -1786,13 +1786,13 @@ int __stdcall GPIOAnalogGet (int SocketIndex, int NbElements, char * GPIONameLis
 
 	char (*stringArray0)[SIZE_NAME];
 	stringArray0 = new char [NbElements][SIZE_NAME];
+	memset(stringArray0,'\0', SIZE_NAME*NbElements);
 	indice = 0;
 	strncpyWithEOS(list, GPIONameList, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray0[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray0[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
@@ -1870,13 +1870,13 @@ int __stdcall GPIOAnalogSet (int SocketIndex, int NbElements, char * GPIONameLis
 
 	char (*stringArray0)[SIZE_NAME];
 	stringArray0 = new char [NbElements][SIZE_NAME];
+	memset(stringArray0,'\0', SIZE_NAME*NbElements);
 	indice = 0;
 	strncpyWithEOS(list, GPIONameList, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray0[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray0[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
@@ -1939,13 +1939,13 @@ int __stdcall GPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIONam
 
 	char (*stringArray0)[SIZE_NAME];
 	stringArray0 = new char [NbElements][SIZE_NAME];
+	memset(stringArray0,'\0', SIZE_NAME*NbElements);
 	indice = 0;
 	strncpyWithEOS(list, GPIONameList, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray0[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray0[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
@@ -2023,13 +2023,13 @@ int __stdcall GPIOAnalogGainSet (int SocketIndex, int NbElements, char * GPIONam
 
 	char (*stringArray0)[SIZE_NAME];
 	stringArray0 = new char [NbElements][SIZE_NAME];
+	memset(stringArray0,'\0', SIZE_NAME*NbElements);
 	indice = 0;
 	strncpyWithEOS(list, GPIONameList, SIZE_NOMINAL, SIZE_NOMINAL);
 	list_r = NULL;
 	token = strtok_r (list, seps, &list_r);
 	while ((NULL != token) && (indice < NbElements))
 	{
-		memset(stringArray0[indice],'\0', SIZE_NAME);
 		strncpyWithEOS(stringArray0[indice], token, SIZE_NAME, SIZE_NAME);
 		token = strtok_r (NULL, seps, &list_r);
 		indice++;
