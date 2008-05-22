@@ -46,8 +46,10 @@ int ftpConnect (char* ip, char* login, char* password, int* socketFD)
   if (connect(sockFD, (struct sockaddr *)&sockAddr, sizeof(sockAddr)) < 0) 
     return -1;
 
-  
-  receivedBytes = recv(sockFD, returnString, RETURN_SIZE, 0);
+  do {
+    receivedBytes = recv(sockFD, returnString, RETURN_SIZE, 0);
+  }
+  while (strchr(returnString,'\n')==NULL);
 
   /* login */
   sprintf(command, "USER %s", login);
