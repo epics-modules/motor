@@ -62,6 +62,7 @@ typedef struct {
     double idlePollPeriod;
     epicsEventId pollEventId;
     AXIS_HDL pAxis;  /* array of axes */
+    int movesDeferred;
 } XPSController;
 
 /** Struct that contains information about the XPS corrector loop.*/ 
@@ -109,6 +110,9 @@ typedef struct motorAxisHandle
     void *logParam;
     epicsMutexId mutexId;
     xpsCorrectorInfo_t xpsCorrectorInfo;
+    double deferred_position;
+    int deferred_move;
+    int deferred_relative;
 } motorAxis;
 
 typedef struct
@@ -173,9 +177,9 @@ static char* getXPSError(AXIS_HDL pAxis, int status, char *buffer);
 
 /*Utility functions for dealing with XPS groups and setting corrector information.*/
 static int isAxisInGroup(const AXIS_HDL pAxis);
-static int setXPSAxisPID(AXIS_HDL pAxis, const double * const value, int pidoption);
+static int setXPSAxisPID(AXIS_HDL pAxis, const double * value, int pidoption);
 static int getXPSAxisPID(AXIS_HDL pAxis);
-static void setXPSPIDValue(xpsCorrectorInfo_t *xpsCorrectorInfo, const double * const value, int pidoption); 
+static void setXPSPIDValue(xpsCorrectorInfo_t *xpsCorrectorInfo, const double * value, int pidoption); 
 
 /*Wrapper functions for the verbose PositionerCorrector functions.*/
 static int PositionerCorrectorPIPositionGetWrapper(AXIS_HDL pAxis);
@@ -187,6 +191,10 @@ static int PositionerCorrectorPIPositionSetWrapper(AXIS_HDL pAxis);
 static int PositionerCorrectorPIDFFVelocitySetWrapper(AXIS_HDL pAxis);
 static int PositionerCorrectorPIDFFAccelerationSetWrapper(AXIS_HDL pAxis);
 static int PositionerCorrectorPIDDualFFVoltageSetWrapper(AXIS_HDL pAxis);
+
+/*Deferred moves functions.*/
+static int processDeferredMoves(const XPSController * pController);
+static int processDeferredMovesInGroup(const XPSController * pController, char * groupName);
 
 static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
@@ -234,6 +242,13 @@ static int motorAxisInit(void)
       motorParam->setDouble(pAxis->params, motorAxisPGain, (pAxis->xpsCorrectorInfo).KP);
       motorParam->setDouble(pAxis->params, motorAxisIGain, (pAxis->xpsCorrectorInfo).KI);
       motorParam->setDouble(pAxis->params, motorAxisDGain, (pAxis->xpsCorrectorInfo).KD);
+
+      /*Initialise deferred move flags.*/
+      pAxis->deferred_relative = 0;
+      pAxis->deferred_position = 0;
+      /*Disable deferred move for the axis. Should not cause move of this axis
+       if other axes in same group do deferred move.*/
+      pAxis->deferred_move = 0; 
 
       motorParam->callCallback(pAxis->params);
       epicsMutexUnlock(pAxis->mutexId);
@@ -295,7 +310,14 @@ static int motorAxisGetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int * 
   if (pAxis == NULL) return MOTOR_AXIS_ERROR;
   else
     {
-      return motorParam->getInteger(pAxis->params, (paramIndex) function, value);
+      switch (function) {
+      case motorAxisDeferMoves:
+	*value = pAxis->pController->movesDeferred;
+	return MOTOR_AXIS_OK;
+	break;
+      default:
+	return motorParam->getInteger(pAxis->params, (paramIndex) function, value);
+      }
     }
 }
 
@@ -304,7 +326,14 @@ static int motorAxisGetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
   if (pAxis == NULL) return MOTOR_AXIS_ERROR;
   else
     {
-      return motorParam->getDouble(pAxis->params, (paramIndex) function, value);
+      switch (function) {
+      case motorAxisDeferMoves:
+	*value = pAxis->pController->movesDeferred;
+	return MOTOR_AXIS_OK;
+	break;
+      default:
+	return motorParam->getDouble(pAxis->params, (paramIndex) function, value);
+      }
     }
 }
 
@@ -315,6 +344,142 @@ static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, 
     {
       return motorParam->setCallback(pAxis->params, callback, param);
     }
+}
+
+/**
+ * Perform a deferred move (a coordinated group move) on all the axes in a group.
+ * @param pController Pointer to XPSController structure.
+ * @param groupName Pointer to string naming the group on which to perform the group move.
+ * @return motor driver status code.
+ */
+static int processDeferredMovesInGroup(const XPSController * pController, char * groupName)
+{
+  double *positions = NULL;
+  int positions_index = 0;
+  int first_loop = 1;
+  int axis = 0;
+  int NbPositioners = 0;
+  int relativeMove = 0;
+  int status = 0;
+
+  AXIS_HDL pAxis = NULL;
+
+  /*Loop over all axes in this controller.*/
+  for (axis=0; axis<pController->numAxes; axis++) {
+      pAxis = &pController->pAxis[axis];
+      
+      PRINT(pAxis->logParam, FLOW, "Executing deferred move on XPS: %d, Group: %s\n", pAxis->card, groupName);
+
+      /*Ignore axes in other groups.*/
+      if (!strcmp(pAxis->groupName, groupName)) {
+	if (first_loop) {
+	  /*Get the number of axes in this group, and allocate buffer for positions.*/
+	  NbPositioners = isAxisInGroup(pAxis);
+	  if ((positions = (double *)calloc(NbPositioners, sizeof(double))) == NULL) {
+	    PRINT(pAxis->logParam, ERROR, "Cannot allocate memory for positions array in processDeferredMovesInGroup.\n" );
+	    return MOTOR_AXIS_ERROR;
+	  }
+	  first_loop = 0;
+	}
+
+	/*Set relative flag for the actual move at the end of the funtion.*/
+	if (pAxis->deferred_relative) {
+	  relativeMove = 1;
+	}
+
+	/*Build position buffer.*/
+	if (pAxis->deferred_move) {
+	  positions[positions_index] = 
+	    pAxis->deferred_relative ? (pAxis->currentPosition + pAxis->deferred_position) : pAxis->deferred_position;
+	} else {
+	  positions[positions_index] = 
+	    pAxis->deferred_relative ? 0 : pAxis->currentPosition;
+	}
+
+	/*Reset deferred flag.*/
+	/*We need to do this for the XPS, because we cannot do partial group moves. Every axis
+	  in the group will be included the next time we do a group move.*/
+	pAxis->deferred_move = 0;
+
+	/*Next axis in this group.*/
+	positions_index++;
+      }
+  }
+  
+  /*Send the group move command.*/
+  if (relativeMove) {
+    status = GroupMoveRelative(pAxis->moveSocket,
+			       groupName,
+			       NbPositioners,
+			       positions);
+  } else {
+    status = GroupMoveAbsolute(pAxis->moveSocket,
+			       groupName,
+			       NbPositioners,
+			       positions);
+  }
+  
+  if (status!=0) {
+    PRINT(pAxis->logParam, ERROR, "Error peforming GroupMoveAbsolute/Relative in processDeferredMovesInGroup. XPS Return code: %d\n", status);
+    if (positions != NULL) {
+      free(positions);
+    }
+    return MOTOR_AXIS_ERROR;
+  }    
+
+  if (positions != NULL) {
+    free(positions);
+  }
+  
+  return MOTOR_AXIS_OK;
+  
+}
+
+/**
+ * Process deferred moves for a controller and groups.
+ * This function calculates which unique groups in the controller
+ * and passes the controller pointer and group name to processDeferredMovesInGroup.
+ * @return motor driver status code.
+ */
+static int processDeferredMoves(const XPSController * pController)
+{
+  int status = MOTOR_AXIS_ERROR;
+  int axis = 0;
+  int i = 0;
+  int dealWith = 0;
+  /*Array to cache up to XPS_MAX_AXES group names. Don't initialise to null*/
+  char *groupNames[XPS_MAX_AXES];
+  char *blankGroupName = " ";
+  AXIS_HDL pAxis = NULL;
+
+  /*Clear group name cache.*/
+  for (i=0; i<XPS_MAX_AXES; i++) {
+    groupNames[i] = blankGroupName;
+  }
+
+  /*Loop over axes, testing for unique groups.*/
+  for(axis=0; axis<pController->numAxes; axis++) {
+    pAxis = &pController->pAxis[axis];
+    
+    PRINT(pAxis->logParam, FLOW, "Processing deferred moves on XPS: %d\n", pAxis->card);
+    
+    /*Call processDeferredMovesInGroup only once for each group on this controller.
+      Positioners in the same group may not be adjacent in list, so we have to test for this.*/
+    for (i=0; i<XPS_MAX_AXES; i++) {
+      if (strcmp(pAxis->groupName, groupNames[i])) {
+	dealWith++;
+	groupNames[i] = pAxis->groupName;
+      }
+    }
+    if (dealWith == XPS_MAX_AXES) {
+      dealWith = 0;
+      /*Group name was not in cache, so deal with this group.*/
+      status = processDeferredMovesInGroup(pController, pAxis->groupName);
+    }
+    /*Next axis, and potentially next group.*/
+  }
+  
+  return status;
 }
 
 static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)
@@ -526,6 +691,19 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
             ret_status = MOTOR_AXIS_OK;
             break;
         }
+	case motorAxisDeferMoves:
+	{
+	  PRINT(pAxis->logParam, FLOW, "Setting deferred move mode on XPS %d to %d\n", pAxis->card, value);
+	  if (value == 0.0 && pAxis->pController->movesDeferred != 0) {
+	    status = processDeferredMoves(pAxis->pController);
+	  }
+	  pAxis->pController->movesDeferred = (int)value;
+	  if (status) {
+	    PRINT(pAxis->logParam, ERROR, "Deferred moved failed on XPS %d, status=%d\n", pAxis->card, status);
+	    ret_status = MOTOR_AXIS_ERROR;
+	  }
+	  break;
+	}
         default:
             PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble[%d,%d]: unknown function %d\n", pAxis->card, pAxis->axis, function);
             break;
@@ -535,10 +713,11 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
     return ret_status;
 }
 
+
 static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
-    int status;
+    int status = 0;
 
     if (pAxis == NULL) return MOTOR_AXIS_ERROR;
 
@@ -566,6 +745,19 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
             ret_status = MOTOR_AXIS_OK;
         }
         break;
+    case motorAxisDeferMoves:
+    {
+      PRINT(pAxis->logParam, FLOW, "Setting deferred move mode on XPS %d to %d\n", pAxis->card, value);
+      if (value == 0 && pAxis->pController->movesDeferred != 0) {
+	status = processDeferredMoves(pAxis->pController);
+      }
+      pAxis->pController->movesDeferred = value;
+      if (status) {
+	PRINT(pAxis->logParam, ERROR, "Deferred moved failed on XPS %d, status=%d\n", pAxis->card, status);
+	ret_status = MOTOR_AXIS_ERROR;
+      }
+      break;
+    }
     default:
         PRINT(pAxis->logParam, ERROR, "motorAxisSetInteger[%d,%d]: unknown function %d\n", pAxis->card, pAxis->axis, function);
         break;
@@ -578,7 +770,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
 static int motorAxisMove(AXIS_HDL pAxis, double position, int relative, 
                           double min_velocity, double max_velocity, double acceleration)
 {
-    int status;
+    int status = 0;
     char errorString[100];
     double deviceUnits;
 
@@ -611,25 +803,37 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
 
     deviceUnits = position * pAxis->stepSize;
     if (relative) {
+      if (pAxis->pController->movesDeferred == 0) {
         status = GroupMoveRelative(pAxis->moveSocket,
                                    pAxis->positionerName,
                                    1,
                                    &deviceUnits); 
-        if (status != 0 && status != -27) {
-            PRINT(pAxis->logParam, ERROR, " Error performing GroupMoveRelative[%d,%d] %d\n", pAxis->card, pAxis->axis, status);
-            /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
-            return MOTOR_AXIS_ERROR;
-        }
+      } else {
+	pAxis->deferred_position = deviceUnits;
+        pAxis->deferred_move = 1;
+	pAxis->deferred_relative = relative;
+      }
+      if (status != 0 && status != -27) {
+	PRINT(pAxis->logParam, ERROR, " Error performing GroupMoveRelative[%d,%d] %d\n", pAxis->card, pAxis->axis, status);
+	/* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
+	return MOTOR_AXIS_ERROR;
+      }
     } else {
+      if (pAxis->pController->movesDeferred == 0) {
         status = GroupMoveAbsolute(pAxis->moveSocket,
                                    pAxis->positionerName,
                                    1,
                                    &deviceUnits); 
-        if (status != 0 && status != -27) {
-            PRINT(pAxis->logParam, ERROR, " Error performing GroupMoveAbsolute[%d,%d] %d\n",pAxis->card, pAxis->axis, status);
-            /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
-            return MOTOR_AXIS_ERROR;
-        }
+      } else {
+	pAxis->deferred_position = deviceUnits;
+        pAxis->deferred_move = 1;
+	pAxis->deferred_relative = relative;
+      }
+      if (status != 0 && status != -27) {
+	PRINT(pAxis->logParam, ERROR, " Error performing GroupMoveAbsolute[%d,%d] %d\n",pAxis->card, pAxis->axis, status);
+	/* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
+	return MOTOR_AXIS_ERROR;
+      }
     }
     /* Tell paramLib that the motor is moving.  
      * This will force a callback on the next poll, even if the poll says the motor is already done. */
@@ -762,6 +966,10 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
         }
     }
 
+    /*Clear defer move flag for this axis.*/
+    pAxis->deferred_move = 0;
+
+
     PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d to stop with accel=%f\n",
           pAxis->card, pAxis->axis, acceleration);
     return MOTOR_AXIS_OK;
@@ -857,6 +1065,8 @@ static void XPSPoller(XPSController *pController)
                 /* Set the status */
                 motorParam->setInteger(pAxis->params, XPSStatus, pAxis->axisStatus);
                 /* Set the axis done parameter */
+		/* AND the done flag with the inverse of deferred_move.*/
+		axisDone &= !pAxis->deferred_move;
                 motorParam->setInteger(pAxis->params, motorAxisDone, axisDone);
                 if (pAxis->axisStatus == 11) {
                     motorParam->setInteger(pAxis->params, motorAxisHomeSignal, 1);
@@ -1167,7 +1377,7 @@ static int isAxisInGroup(const AXIS_HDL pAxis)
  *
  * @return Zero if success, non-zero if error (and equal to XPS API error if error is from XPS).
  */
-static int setXPSAxisPID(AXIS_HDL pAxis, const double * const value, int pidoption)
+static int setXPSAxisPID(AXIS_HDL pAxis, const double * value, int pidoption)
 {
   int status = 0;
   char correctorType[250] = {'\0'};
@@ -1324,7 +1534,7 @@ static int getXPSAxisPID(AXIS_HDL pAxis)
  * @param value The value to set.
  * @param pidoption Set to 0 for P, 1 for I and 2 for D.
  */
-static void setXPSPIDValue(xpsCorrectorInfo_t *xpsCorrectorInfo, const double * const value, int pidoption) 
+static void setXPSPIDValue(xpsCorrectorInfo_t *xpsCorrectorInfo, const double * value, int pidoption) 
 {
   if ((pidoption < 0) || (pidoption > 2)) {
     printf("ERROR: drvXPSAsyn::setXPSPIDValue. pidoption out of range\n");
