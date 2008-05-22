@@ -44,7 +44,8 @@ motorAxisDrvSET_t motorXPS =
     motorAxisHome,              /**< Pointer to function to execute a more to reference or home */
     motorAxisMove,              /**< Pointer to function to execute a position move */
     motorAxisVelocityMove,      /**< Pointer to function to execute a velocity mode move */
-    motorAxisStop               /**< Pointer to function to stop motion */
+    motorAxisStop,              /**< Pointer to function to stop motion */
+    /*motorAxisforceCallback*/      /**< Pointer to function to request a poller status update */
   };
 
 epicsExportAddress(drvet, motorXPS);
@@ -63,6 +64,25 @@ typedef struct {
     AXIS_HDL pAxis;  /* array of axes */
 } XPSController;
 
+/** Struct that contains information about the XPS corrector loop.*/ 
+typedef struct
+{
+  bool ClosedLoopStatus;
+  double KP; /**< Main proportional term from PID loop.*/
+  double KI; /**< Main integral term from PID loop.*/
+  double KD; /**< Main differential term from PID loop.*/
+  double KS;
+  double IntegrationTime;
+  double DerivativeFilterCutOffFrequency;
+  double GKP;
+  double GKI;
+  double GKD;
+  double KForm;
+  double FeedForwardGainVelocity;
+  double FeedForwardGainAcceleration;
+  double Friction;
+} xpsCorrectorInfo_t;
+
 typedef struct motorAxisHandle
 {
     XPSController *pController;
@@ -70,6 +90,7 @@ typedef struct motorAxisHandle
     int pollSocket;
     PARAMS params;
     double currentPosition;
+    double currentVelocity;
     double velocity;
     double accel;
     double minJerkTime; /* for the SGamma function */
@@ -87,6 +108,7 @@ typedef struct motorAxisHandle
     motorAxisLogFunc print;
     void *logParam;
     epicsMutexId mutexId;
+    xpsCorrectorInfo_t xpsCorrectorInfo;
 } motorAxis;
 
 typedef struct
@@ -97,6 +119,36 @@ typedef struct
   void *logParam;
   epicsTimeStamp now;
 } motorXPS_t;
+
+/** Struct for a list of strings describing the different corrector types possible on the XPS.*/
+typedef struct {
+  char *PIPosition;
+  char *PIDFFVelocity;
+  char *PIDFFAcceleration;
+  char *PIDDualFFVoltage;
+  char *NoCorrector;
+} CorrectorTypes_t;
+
+const static CorrectorTypes_t CorrectorTypes={
+  "PositionerCorrectorPIPosition",
+  "PositionerCorrectorPIDFFVelocity",
+  "PositionerCorrectorPIDFFAcceleration",
+  "PositionerCorrectorPIDDualFFVoltage",
+  "NoCorrector"
+};
+
+/** This is controlled via the XPSEnableSetPosition function (available via the IOC shell). */ 
+static int doSetPosition = 1;
+
+/**
+ * Parameter to control the sleep time used when setting position. 
+ * A function called XPSSetPosSleepTime(int) (millisec parameter) 
+ * is available in the IOC shell to control this.
+ */
+static double setPosSleepTime = 0.5;
+
+/** Deadband to use for the velocity comparison with zero. */
+#define XPS_VELOCITY_DEADBAND 0.0000001
 
 static int motorXPSLogMsg(void * param, const motorAxisLogMask_t logMask, const char *pFormat, ...);
 #define PRINT   (pAxis->print)
@@ -118,6 +170,23 @@ static XPSController *pXPSController=NULL;
 #define MIN(a,b) ((a)<(b)? (a): (b))
 
 static char* getXPSError(AXIS_HDL pAxis, int status, char *buffer);
+
+/*Utility functions for dealing with XPS groups and setting corrector information.*/
+static int isAxisInGroup(const AXIS_HDL pAxis);
+static int setXPSAxisPID(AXIS_HDL pAxis, const double * const value, int pidoption);
+static int getXPSAxisPID(AXIS_HDL pAxis);
+static void setXPSPIDValue(xpsCorrectorInfo_t *xpsCorrectorInfo, const double * const value, int pidoption); 
+
+/*Wrapper functions for the verbose PositionerCorrector functions.*/
+static int PositionerCorrectorPIPositionGetWrapper(AXIS_HDL pAxis);
+static int PositionerCorrectorPIDFFVelocityGetWrapper(AXIS_HDL pAxis);
+static int PositionerCorrectorPIDFFAccelerationGetWrapper(AXIS_HDL pAxis);
+static int PositionerCorrectorPIDDualFFVoltageGetWrapper(AXIS_HDL pAxis);
+
+static int PositionerCorrectorPIPositionSetWrapper(AXIS_HDL pAxis);
+static int PositionerCorrectorPIDFFVelocitySetWrapper(AXIS_HDL pAxis);
+static int PositionerCorrectorPIDFFAccelerationSetWrapper(AXIS_HDL pAxis);
+static int PositionerCorrectorPIDDualFFVoltageSetWrapper(AXIS_HDL pAxis);
 
 static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
@@ -145,6 +214,33 @@ static void motorAxisReport(int level)
 
 static int motorAxisInit(void)
 {
+  int controller = 0;
+  int axis = 0;
+  AXIS_HDL pAxis;
+
+  for(controller=0; controller<numXPSControllers; controller++) {
+    for(axis=0; axis<pXPSController[controller].numAxes; axis++) {
+      pAxis = &pXPSController[controller].pAxis[axis];
+
+      if (!pAxis->mutexId) break;
+      epicsMutexLock(pAxis->mutexId);
+
+      /*Set GAIN_SUPPORT.*/
+      motorParam->setInteger(pAxis->params, motorAxisHasClosedLoop, 1);
+      /*Readback PID and set in motor record.*/
+      /*NOTE: this will require PID to be allowed to be set greater than 1 in motor record.*/
+      /*And we need to implement this in Asyn layer.*/
+      getXPSAxisPID(pAxis);
+      motorParam->setDouble(pAxis->params, motorAxisPGain, (pAxis->xpsCorrectorInfo).KP);
+      motorParam->setDouble(pAxis->params, motorAxisIGain, (pAxis->xpsCorrectorInfo).KI);
+      motorParam->setDouble(pAxis->params, motorAxisDGain, (pAxis->xpsCorrectorInfo).KD);
+
+      motorParam->callCallback(pAxis->params);
+      epicsMutexUnlock(pAxis->mutexId);
+
+    }
+  } 
+
   return MOTOR_AXIS_OK;
 }
 
@@ -224,18 +320,120 @@ static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, 
 static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
-    int status;
+    int status = 0;
+    int axisIndex = 0;
+    int axisIndexInGrp = 0;
+    int axesInGroup = 0;
     double deviceValue;
-
+    double positions[XPS_MAX_AXES] = {0.0};
+    
     if (pAxis == NULL) return MOTOR_AXIS_ERROR;
     else
     {
         switch (function)
         {
         case motorAxisPosition:
-        {
-            PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble[%d,%d]: XPS does not support setting position\n", pAxis->card, pAxis->axis);
-            break;
+	{
+	  /*If the user has disabled setting the controller position, skip this.*/
+	  if (!doSetPosition) {
+	    PRINT(pAxis->logParam, ERROR, "XPS set position is disabled. Enable it using XPSEnableSetPosition(1).\n");
+	  } else {
+	    /*Test if this axis is in a XPS group.*/
+	    axesInGroup = isAxisInGroup(pAxis);
+
+	    if (axesInGroup>1) {
+	      /*We are in a group, so we need to read the positions of all the axes in the group,
+		kill the group, and set all the positions in the group using referencing mode.
+	        We read the positions seperately, rather than in one command, because we can't assume
+	        that the ordering is the same in the XPS as in the driver.*/
+	      for (axisIndex=0; axisIndex<pAxis->pController->numAxes; axisIndex++) {
+		status = GroupPositionCurrentGet(pAxis->pollSocket, 
+						 pAxis->pController->pAxis[axisIndex].positionerName, 
+						 1, 
+						 &positions[axisIndex]);
+	      }
+	      if (status != 0) {
+		PRINT(pAxis->logParam, ERROR, " Error performing GroupPositionCurrentGet(%d,%d). Aborting set position. XPS API Error: %d.\n", 
+		      pAxis->card, pAxis->axis, status);
+	      } else {
+		status = GroupKill(pAxis->pollSocket, 
+				   pAxis->groupName);
+		status = GroupInitialize(pAxis->pollSocket,
+					 pAxis->groupName);
+		if (status != 0) {
+		  PRINT(pAxis->logParam, ERROR, " Error performing GroupKill/GroupInitialize(%d,%d). Aborting set position. XPS API Error: %d.\n", 
+			pAxis->card, pAxis->axis, status);
+		} else {
+
+		  /*Wait after axis initialisation (we don't want to set position immediately after
+		    initialisation because the stage can oscillate slightly).*/
+		  epicsThreadSleep(setPosSleepTime);
+
+		  status = GroupReferencingStart(pAxis->pollSocket, 
+						 pAxis->groupName);
+		  axisIndexInGrp = 0;
+		  /*Set positions for all axes in the group using the cached values.*/
+		  for (axisIndex=0; axisIndex<pAxis->pController->numAxes; axisIndex++) {
+		    if (!strcmp(pAxis->groupName, pAxis->pController->pAxis[axisIndex].groupName)) {
+		      /*But skip the current axis, because we do this just after the loop.*/
+		      if (strcmp(pAxis->positionerName, pAxis->pController->pAxis[axisIndex].positionerName)) {
+			status = GroupReferencingActionExecute(pAxis->pollSocket, 
+							       pAxis->pController->pAxis[axisIndex].positionerName, 
+							       "SetPosition", 
+							       "None", 
+							       positions[axisIndexInGrp]);
+		      }
+		      ++axisIndexInGrp;
+		    }
+		  }
+		  /*Now reset the position of the axis we are interested in, using the argument passed into this function.*/
+		  status = GroupReferencingActionExecute(pAxis->pollSocket, 
+							 pAxis->positionerName, 
+							 "SetPosition", 
+							 "None", 
+							 value*(pAxis->stepSize));
+		  /*Stop referencing, then we are homed on all axes in group.*/
+		  status = GroupReferencingStop(pAxis->pollSocket, 
+						pAxis->groupName);
+		  if (status != 0) {
+		    PRINT(pAxis->logParam, ERROR, " Error performing referencing set position (%d,%d). XPS API Error: %d.", 
+			  pAxis->card, pAxis->axis, status);
+		  }
+		}
+	      }
+	    } else {
+	      /*We are not in a group, so we just need to use the XPS
+		referencing mode to set the position.*/
+	      status = GroupKill(pAxis->pollSocket, 
+				 pAxis->groupName);
+	      status = GroupInitialize(pAxis->pollSocket,
+				       pAxis->groupName);
+	      if (status != 0) {
+		PRINT(pAxis->logParam, ERROR, " Error performing GroupKill/GroupInitialize(%d,%d). XPS API Error: %d. Aborting set position.\n", 
+		      pAxis->card, pAxis->axis, status);
+	      } else {
+
+		/*Wait after axis initialisation (we don't want to set position immediately after
+		  initialisation because the stage can oscillate slightly).*/
+		epicsThreadSleep(setPosSleepTime);
+
+		status = GroupReferencingStart(pAxis->pollSocket, 
+					       pAxis->groupName);
+		status = GroupReferencingActionExecute(pAxis->pollSocket, 
+						       pAxis->positionerName, 
+						       "SetPosition", 
+						       "None", 
+						       value*(pAxis->stepSize));
+		status = GroupReferencingStop(pAxis->pollSocket, 
+					      pAxis->groupName);
+		if (status != 0) {
+		  PRINT(pAxis->logParam, ERROR, " Error performing referencing set position (%d,%d). XPS API Error: %d.", 
+			pAxis->card, pAxis->axis, status);
+		}
+	      }
+	    }
+	  }
+	  break;
         }
         case motorAxisEncoderRatio:
         {
@@ -298,18 +496,18 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         }
         case motorAxisPGain:
         {
-            PRINT(pAxis->logParam, ERROR, "XPS does not support setting proportional gain\n");
-            break;
+	  status = setXPSAxisPID(pAxis, &value, 0);
+	  break;
         }
         case motorAxisIGain:
         {
-            PRINT(pAxis->logParam, ERROR, "XPS does not support setting integral gain\n");
-            break;
+	  status = setXPSAxisPID(pAxis, &value, 1);
+	  break;
         }
         case motorAxisDGain:
         {
-            PRINT(pAxis->logParam, ERROR, "XPS does not support setting derivative gain\n");
-            break;
+	  status = setXPSAxisPID(pAxis, &value, 2);
+	  break;
         }
         case motorAxisClosedLoop:
         {
@@ -569,6 +767,23 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
     return MOTOR_AXIS_OK;
 }
 
+
+/*Commented out for now, in case we don't need this.*/
+/*static int motorAxisforceCallback(AXIS_HDL pAxis)
+{
+     if (pAxis == NULL)
+         return (MOTOR_AXIS_ERROR);
+
+     PRINT(pAxis->logParam, FLOW, "motorAxisforceCallback: request card %d, axis %d status update\n",
+           pAxis->card, pAxis->axis);
+
+     motorParam->forceCallback(pAxis->params);
+
+     epicsEventSignal(pAxis->pController->pollEventId);
+     return (MOTOR_AXIS_OK);
+}*/
+
+
 
 static void XPSPoller(XPSController *pController)
 {
@@ -657,6 +872,18 @@ static void XPSPoller(XPSController *pController)
                      * motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  1);
                      */
                 }
+
+		/*Test for following error, and set appropriate param.*/
+		if ((pAxis->axisStatus == 21 || pAxis->axisStatus == 22) ||
+		    (pAxis->axisStatus >= 24 && pAxis->axisStatus <= 26) ||
+		    (pAxis->axisStatus == 28 || pAxis->axisStatus == 35)) {
+		  PRINT(pAxis->logParam, FLOW, "XPS Axis %d in following error. XPS State Code: %d\n",
+                           pAxis->axis, pAxis->axisStatus);
+		  motorParam->setInteger(pAxis->params, motorAxisFollowingError, 1);
+		} else {
+		  motorParam->setInteger(pAxis->params, motorAxisFollowingError, 0);
+		}
+
             }
 
             status = GroupPositionCurrentGet(pAxis->pollSocket,
@@ -693,12 +920,20 @@ static void XPSPoller(XPSController *pController)
                 }
             }
 
-            /* We would like a way to query the actual velocity, but this is not possible.  If we could we could
-             * set the direction, and Moving flags
-             *     motorParam->setInteger(pAxis->params, motorAxisDirection,     (pAxis->currentVelocity >  0));
-             *     motorParam->setInteger(pAxis->params, motorAxisMoving,        (pAxis->nextpoint.axis[0].v != 0));
-             */
-
+            /*Read the current velocity and use it set motor direction and moving flag.*/
+	    status = GroupVelocityCurrentGet(pAxis->pollSocket,
+					     pAxis->positionerName,
+                                             1,
+                                             &pAxis->currentVelocity);
+	    if (status != 0) {
+	      PRINT(pAxis->logParam, ERROR, "XPSPoller: error calling GroupPositionVelocityGet[%d,%d], status=%d\n", pAxis->card, pAxis->axis, status);
+	      motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
+	    } else {
+	      motorParam->setInteger(pAxis->params, motorAxisCommError, 0);
+	      motorParam->setInteger(pAxis->params, motorAxisDirection, (pAxis->currentVelocity > XPS_VELOCITY_DEADBAND));
+	      motorParam->setInteger(pAxis->params, motorAxisMoving,    (fabs(pAxis->currentVelocity) > XPS_VELOCITY_DEADBAND));
+	    }
+	    
             motorParam->callCallback(pAxis->params);
 
             epicsMutexUnlock(pAxis->mutexId);
@@ -879,6 +1114,426 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     return MOTOR_AXIS_OK;
 }
 
+/**
+ * Function to enable/disable the write down of position to the 
+ * XPS controller. Call this function at IOC shell.
+ * @param setPos 0=disable, 1=enable
+ */
+void XPSEnableSetPosition(int setPos) 
+{
+  doSetPosition = setPos;
+}
+
+/**
+ * Function to set the threadSleep time used when setting the XPS position.
+ * The sleep is performed after the axes are initialised, to take account of any
+ * post initialisation wobble.
+ * @param posSleep The time in miliseconds to sleep.
+ */
+void XPSSetPosSleepTime(int posSleep) 
+{
+  setPosSleepTime = (double)posSleep / 1000.0;
+}
+
+
+/* Utility functions.*/
+
+/**
+ * Test if axis is configured as an XPS single axis or a group.
+ * This is done by comparing cached group names.
+ * @param pAxis Axis struct AXIS_HDL
+ * @return 1 if in group single group, or return the number of axes in the group.
+ */
+static int isAxisInGroup(const AXIS_HDL pAxis)
+{
+  int axisIndex=0;
+  int group=0;
+
+  for(axisIndex=0; axisIndex<pAxis->pController->numAxes; ++axisIndex) {
+    if (!strcmp(pAxis->groupName, pAxis->pController->pAxis[axisIndex].groupName)) {
+      ++group;
+    }
+  } 
+   
+  return group;
+}
+
+
+/**
+ * Function to set the XPS controller PID parameters.
+ * @param pAxis Axis struct AXIS_HDL
+ * @param value The desired value of the parameter.
+ * @param pidoption Set to 0 for P, 1 for I and 2 for D.
+ *
+ * @return Zero if success, non-zero if error (and equal to XPS API error if error is from XPS).
+ */
+static int setXPSAxisPID(AXIS_HDL pAxis, const double * const value, int pidoption)
+{
+  int status = 0;
+  char correctorType[250] = {'\0'};
+
+  /*The XPS function that we use to set the PID parameters is dependant on the 
+    type of corrector in use for that axis.*/
+  status = PositionerCorrectorTypeGet(pAxis->pollSocket,
+				      pAxis->positionerName,
+				      correctorType);
+  if (status != 0) {
+    PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorTypeGet. Card: %d, Axis: %d, XPS API Error: %d\n",
+	  pAxis->card, pAxis->axis, status);
+  } else {
+
+    if (!strcmp(correctorType, CorrectorTypes.PIPosition)) {
+      /*Read the PID parameters first.*/
+      status = PositionerCorrectorPIPositionGetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIPositionGet. Aborting setting PID. XPS API Error: %d\n", status);
+	return status;
+      }
+
+      /*Set the P, I or D parameter in the xpsCorrectorInfo struct.*/
+      setXPSPIDValue(&pAxis->xpsCorrectorInfo, value, pidoption); 
+
+      /*Now set the parameters in the XPS.*/
+      status = PositionerCorrectorPIPositionSetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIPositionSet. XPS API Error: %d\n", status);
+	return status;
+      }
+
+    } else if (!strcmp(correctorType, CorrectorTypes.PIDFFVelocity)) {
+      status = PositionerCorrectorPIDFFVelocityGetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDFFVelocityGet. Aborting setting PID. XPS API Error: %d\n", status);
+	return status;
+      }
+
+      setXPSPIDValue(&pAxis->xpsCorrectorInfo, value, pidoption); 
+
+      status = PositionerCorrectorPIDFFVelocitySetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDFFVelocitySet. XPS API Error: %d\n", status);
+	return status;
+      }
+
+    } else if (!strcmp(correctorType, CorrectorTypes.PIDFFAcceleration)) {
+      status = PositionerCorrectorPIDFFAccelerationGetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDFFAccelerationGet. Aborting setting PID. XPS API Error: %d\n", status);
+	return status;
+      }
+
+      setXPSPIDValue(&pAxis->xpsCorrectorInfo, value, pidoption); 
+
+      status = PositionerCorrectorPIDFFAccelerationSetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDFFAccelerationSet. XPS API Error: %d\n", status);
+	return status;
+      }
+
+    } else if (!strcmp(correctorType, CorrectorTypes.PIDDualFFVoltage)) {
+      status = PositionerCorrectorPIDDualFFVoltageGetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDDualFFVoltageGet. Aborting setting PID. XPS API Error: %d\n", status);
+	return status;
+      }
+
+      setXPSPIDValue(&pAxis->xpsCorrectorInfo, value, pidoption); 
+
+      status = PositionerCorrectorPIDDualFFVoltageSetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDDualFFVoltageSet. XPS API Error: %d\n", status);
+	return status;
+      }
+
+    } else if (!strcmp(correctorType, CorrectorTypes.NoCorrector)) {
+      printf("drvXPSAsyn::setXPSAxisPID. XPS corrector type is %s. Cannot set PID.\n", correctorType); 
+
+    } else {
+      printf("ERROR: drvXPSAsyn::setXPSAxisPID. %s is not a valid corrector type. PID not set.\n", correctorType); 
+    }
+  }
+
+  return status;
+}
+
+/**
+ * Function to read the PID values from the XPS (and any other XPS corrector info that is valid for the axis). 
+ * The read values are set in the AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Zero if success, non-zero if error (and equal to XPS API error if error is from XPS).
+ */
+static int getXPSAxisPID(AXIS_HDL pAxis) 
+{
+  int status = 0;
+  char correctorType[250] = {'\0'};
+  
+  /*The XPS function that we use to set the PID parameters is dependant on the 
+    type of corrector in use for that axis.*/
+  status = PositionerCorrectorTypeGet(pAxis->pollSocket,
+				      pAxis->positionerName,
+				      correctorType);
+  if (status != 0) {
+    PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorTypeGet. Card: %d, Axis: %d, XPS API Error: %d\n",
+	  pAxis->card, pAxis->axis, status);
+  } else {
+
+    if (!strcmp(correctorType, CorrectorTypes.PIPosition)) {
+      /*Read the PID parameters and set in pAxis.*/
+      status = PositionerCorrectorPIPositionGetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIPositionGet. XPS API Error: %d\n", status);
+	return status;
+      }
+      
+    } else if (!strcmp(correctorType, CorrectorTypes.PIDFFVelocity)) {
+      status = PositionerCorrectorPIDFFVelocityGetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDFFVelocityGet. XPS API Error: %d\n", status);
+	return status;
+      }
+
+    } else if (!strcmp(correctorType, CorrectorTypes.PIDFFAcceleration)) {
+      status = PositionerCorrectorPIDFFAccelerationGetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDFFAccelerationGet. XPS API Error: %d\n", status);
+	return status;
+      }
+
+    } else if (!strcmp(correctorType, CorrectorTypes.PIDDualFFVoltage)) {
+      status = PositionerCorrectorPIDDualFFVoltageGetWrapper(pAxis);
+      if (status != 0) {
+	PRINT(pAxis->logParam, ERROR, "Error with PositionerCorrectorPIDDualFFVoltageGet. XPS API Error: %d\n", status);
+	return status;
+      }
+
+    } else if (!strcmp(correctorType, CorrectorTypes.NoCorrector)) {
+	printf("drvXPSAsyn::setXPSAxisPID. XPS corrector type is %s.\n", correctorType); 
+	
+    } else {
+      printf("ERROR: drvXPSAsyn::setXPSAxisPID. %s is not a valid corrector type.\n", correctorType); 
+    }
+  }
+
+  return 0;
+}
+
+
+/**
+ * Set the P, I or D parameter in a xpsCorrectorInfo_t struct.
+ * @param xpsCorrectorInfo Pointer to a xpsCorrectorInfo_t struct.
+ * @param value The value to set.
+ * @param pidoption Set to 0 for P, 1 for I and 2 for D.
+ */
+static void setXPSPIDValue(xpsCorrectorInfo_t *xpsCorrectorInfo, const double * const value, int pidoption) 
+{
+  if ((pidoption < 0) || (pidoption > 2)) {
+    printf("ERROR: drvXPSAsyn::setXPSPIDValue. pidoption out of range\n");
+  } else {
+    switch (pidoption) {
+    case 0:
+      xpsCorrectorInfo->KP = *value;
+      break;
+    case 1:
+      xpsCorrectorInfo->KI = *value;
+      break;
+    case 2:
+      xpsCorrectorInfo->KD = *value;
+      break;
+    default:
+      /*Do nothing.*/
+      break;
+    }
+  }  
+}
+
+/**
+ * Wrapper function for PositionerCorrectorPIPositionGet.
+ * It will set parameters in a AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+static int PositionerCorrectorPIPositionGetWrapper(AXIS_HDL pAxis)
+{
+  xpsCorrectorInfo_t *xpsCorrectorInfo = &pAxis->xpsCorrectorInfo;
+  return PositionerCorrectorPIPositionGet(pAxis->pollSocket,
+					  pAxis->positionerName,
+					  &xpsCorrectorInfo->ClosedLoopStatus,
+					  &xpsCorrectorInfo->KP, 
+					  &xpsCorrectorInfo->KI, 
+					  &xpsCorrectorInfo->IntegrationTime);
+}
+
+/**
+ * Wrapper function for PositionerCorrectorPIDFFVelocityGet.
+ * It will set parameters in a AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+static int PositionerCorrectorPIDFFVelocityGetWrapper(AXIS_HDL pAxis)
+{
+  xpsCorrectorInfo_t *xpsCorrectorInfo = &pAxis->xpsCorrectorInfo;
+  return PositionerCorrectorPIDFFVelocityGet(pAxis->pollSocket,
+					     pAxis->positionerName,
+					     &xpsCorrectorInfo->ClosedLoopStatus,
+					     &xpsCorrectorInfo->KP, 
+					     &xpsCorrectorInfo->KI,
+					     &xpsCorrectorInfo->KD,
+					     &xpsCorrectorInfo->KS,
+					     &xpsCorrectorInfo->IntegrationTime,
+					     &xpsCorrectorInfo->DerivativeFilterCutOffFrequency,
+					     &xpsCorrectorInfo->GKP,
+					     &xpsCorrectorInfo->GKI,
+					     &xpsCorrectorInfo->GKD,
+					     &xpsCorrectorInfo->KForm,
+					     &xpsCorrectorInfo->FeedForwardGainVelocity);
+}
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIDFFAccelerationGet.
+ * It will set parameters in a AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+static int PositionerCorrectorPIDFFAccelerationGetWrapper(AXIS_HDL pAxis)
+{
+  xpsCorrectorInfo_t *xpsCorrectorInfo = &pAxis->xpsCorrectorInfo;
+  return PositionerCorrectorPIDFFAccelerationGet(pAxis->pollSocket,
+						 pAxis->positionerName,
+						 &xpsCorrectorInfo->ClosedLoopStatus,
+						 &xpsCorrectorInfo->KP, 
+						 &xpsCorrectorInfo->KI,
+						 &xpsCorrectorInfo->KD,
+						 &xpsCorrectorInfo->KS,
+						 &xpsCorrectorInfo->IntegrationTime,
+						 &xpsCorrectorInfo->DerivativeFilterCutOffFrequency,
+						 &xpsCorrectorInfo->GKP,
+						 &xpsCorrectorInfo->GKI,
+						 &xpsCorrectorInfo->GKD,
+						 &xpsCorrectorInfo->KForm,
+						 &xpsCorrectorInfo->FeedForwardGainAcceleration);
+}
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIDDualFFVoltageGet.
+ * It will set parameters in a AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+static int PositionerCorrectorPIDDualFFVoltageGetWrapper(AXIS_HDL pAxis)
+{
+  xpsCorrectorInfo_t *xpsCorrectorInfo = &pAxis->xpsCorrectorInfo;
+  return PositionerCorrectorPIDDualFFVoltageGet(pAxis->pollSocket,
+						pAxis->positionerName,
+						&xpsCorrectorInfo->ClosedLoopStatus,
+						&xpsCorrectorInfo->KP, 
+						&xpsCorrectorInfo->KI,
+						&xpsCorrectorInfo->KD,
+						&xpsCorrectorInfo->KS,
+						&xpsCorrectorInfo->IntegrationTime,
+						&xpsCorrectorInfo->DerivativeFilterCutOffFrequency,
+						&xpsCorrectorInfo->GKP,
+						&xpsCorrectorInfo->GKI,
+						&xpsCorrectorInfo->GKD,
+						&xpsCorrectorInfo->KForm,
+						&xpsCorrectorInfo->FeedForwardGainVelocity,
+						&xpsCorrectorInfo->FeedForwardGainAcceleration,
+						&xpsCorrectorInfo->Friction);
+}
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIPositionSet.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+static int PositionerCorrectorPIPositionSetWrapper(AXIS_HDL pAxis)
+{
+  xpsCorrectorInfo_t *xpsCorrectorInfo = &pAxis->xpsCorrectorInfo;
+  return PositionerCorrectorPIPositionSet(pAxis->pollSocket,
+					  pAxis->positionerName,
+					  xpsCorrectorInfo->ClosedLoopStatus,
+					  xpsCorrectorInfo->KP, 
+					  xpsCorrectorInfo->KI, 
+					  xpsCorrectorInfo->IntegrationTime);
+}
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIDFFVelocitySet.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+static int PositionerCorrectorPIDFFVelocitySetWrapper(AXIS_HDL pAxis)
+{
+  xpsCorrectorInfo_t *xpsCorrectorInfo = &pAxis->xpsCorrectorInfo;
+  return PositionerCorrectorPIDFFVelocitySet(pAxis->pollSocket,
+					     pAxis->positionerName,
+					     xpsCorrectorInfo->ClosedLoopStatus,
+					     xpsCorrectorInfo->KP, 
+					     xpsCorrectorInfo->KI,
+					     xpsCorrectorInfo->KD,
+					     xpsCorrectorInfo->KS,
+					     xpsCorrectorInfo->IntegrationTime,
+					     xpsCorrectorInfo->DerivativeFilterCutOffFrequency,
+					     xpsCorrectorInfo->GKP,
+					     xpsCorrectorInfo->GKI,
+					     xpsCorrectorInfo->GKD,
+					     xpsCorrectorInfo->KForm,
+					     xpsCorrectorInfo->FeedForwardGainVelocity);
+}
+
+/**
+ * Wrapper function for PositionerCorrectorPIDFFAccelerationSet.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+static int PositionerCorrectorPIDFFAccelerationSetWrapper(AXIS_HDL pAxis)
+{
+  xpsCorrectorInfo_t *xpsCorrectorInfo = &pAxis->xpsCorrectorInfo;
+  return PositionerCorrectorPIDFFAccelerationSet(pAxis->pollSocket,
+						 pAxis->positionerName,
+						 xpsCorrectorInfo->ClosedLoopStatus,
+						 xpsCorrectorInfo->KP, 
+						 xpsCorrectorInfo->KI,
+						 xpsCorrectorInfo->KD,
+						 xpsCorrectorInfo->KS,
+						 xpsCorrectorInfo->IntegrationTime,
+						 xpsCorrectorInfo->DerivativeFilterCutOffFrequency,
+						 xpsCorrectorInfo->GKP,
+						 xpsCorrectorInfo->GKI,
+						 xpsCorrectorInfo->GKD,
+						 xpsCorrectorInfo->KForm,
+						 xpsCorrectorInfo->FeedForwardGainAcceleration);
+}
+
+/**
+ * Wrapper function for PositionerCorrectorPIDDualFFVoltageSet.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+static int PositionerCorrectorPIDDualFFVoltageSetWrapper(AXIS_HDL pAxis)
+{
+  xpsCorrectorInfo_t *xpsCorrectorInfo = &pAxis->xpsCorrectorInfo;
+  return PositionerCorrectorPIDDualFFVoltageSet(pAxis->pollSocket,
+						pAxis->positionerName,
+						xpsCorrectorInfo->ClosedLoopStatus,
+						xpsCorrectorInfo->KP, 
+						xpsCorrectorInfo->KI,
+						xpsCorrectorInfo->KD,
+						xpsCorrectorInfo->KS,
+						xpsCorrectorInfo->IntegrationTime,
+						xpsCorrectorInfo->DerivativeFilterCutOffFrequency,
+						xpsCorrectorInfo->GKP,
+						xpsCorrectorInfo->GKI,
+						xpsCorrectorInfo->GKD,
+						xpsCorrectorInfo->KForm,
+						xpsCorrectorInfo->FeedForwardGainVelocity,
+						xpsCorrectorInfo->FeedForwardGainAcceleration,
+						xpsCorrectorInfo->Friction);
+}
+
 
 /* Code for iocsh registration */
 
@@ -953,12 +1608,33 @@ static void configXPSAxisCallFunc(const iocshArgBuf *args)
 }
 
 
+/* void XPSEnableSetPosition(int setPos) */
+static const iocshArg XPSEnableSetPositionArg0 = {"Set Position Flag", iocshArgInt};
+static const iocshArg * const XPSEnableSetPositionArgs[1] = {&XPSEnableSetPositionArg0};
+static const iocshFuncDef xpsEnableSetPosition = {"XPSEnableSetPosition", 1, XPSEnableSetPositionArgs};
+static void xpsEnableSetPositionCallFunc(const iocshArgBuf *args)
+{
+    XPSEnableSetPosition(args[0].ival);
+}
+
+/* void XPSSetPosSleepTime(int posSleep) */
+static const iocshArg XPSSetPosSleepTimeArg0 = {"Set Position Sleep Time", iocshArgInt};
+static const iocshArg * const XPSSetPosSleepTimeArgs[1] = {&XPSSetPosSleepTimeArg0};
+static const iocshFuncDef xpsSetPosSleepTime = {"XPSSetPosSleepTime", 1, XPSSetPosSleepTimeArgs};
+static void xpsSetPosSleepTimeCallFunc(const iocshArgBuf *args)
+{
+    XPSSetPosSleepTime(args[0].ival);
+}
+
+
 static void XPSRegister(void)
 {
 
     iocshRegister(&setupXPS,      setupXPSCallFunc);
     iocshRegister(&configXPS,     configXPSCallFunc);
     iocshRegister(&configXPSAxis, configXPSAxisCallFunc);
+    iocshRegister(&xpsEnableSetPosition, xpsEnableSetPositionCallFunc);
+    iocshRegister(&xpsSetPosSleepTime, xpsSetPosSleepTimeCallFunc);
     iocshRegister(&TCLRun,        TCLRunCallFunc);
 #ifdef vxWorks
     iocshRegister(&XPSC8GatheringTest, XPSC8GatheringTestCallFunc);
