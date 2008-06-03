@@ -241,7 +241,27 @@ Modification Log from R6-3 to R6-4
         - implemented the motorAxisPosition command in motorAxisSetDouble().
         - added motorAxisforceCallback() which calls forceCallback() to set the
           forceCallback parameter and then signals the poller task.
-                                        
+
+9) The OMS MAXv handles execution of queued acceleration commands differently
+        than earlier controllers.  In the case where the slew acceleration
+        (ACCL field) had been overridden by an acceleration command primitive in
+        the Pre-move field (PREM), this resulted in the inability to restore
+        the slew acceleration when a stop command was issued.
+
+        With this release, the common OMS device support (devOmsCom.cc) checks
+        the controller ID (ident) for a MAXv when a STOP command is issued and
+        if a MAXv is found, extra controller commands are added to force the
+        restoration of the slew acceleration.
+
+        File modified: OmsSrc/devOmsCom.cc
+
+10) Previous releases had a problem with the OMS MAXv device driver when it was
+        configured for more than one board, and, either A24 or A32 addressing
+        was specified. The driver was not sizing the address space occupied by
+        each MAXv correctly.
+        
+        Files modified: OmsSrc/drvMAXv.[cc/h]
+
 
 Modification Log from R6-2 to R6-3
 ==================================
