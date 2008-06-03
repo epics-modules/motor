@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.19 $
+Version:        $Revision: 1.20 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-05-14 16:42:52 $
+Last Modified:  $Date: 2008-06-03 18:58:08 $
 */
 
 /*
@@ -64,6 +64,7 @@ Last Modified:  $Date: 2008-05-14 16:42:52 $
  *                  - removed unneeded stub start_status().
  * 09  02-26-08 rls - set "update delay" to zero.
  * 10  05-14-08 rls - read the commanded velocity.
+ * 11  05-20-08 rls - A24/A32 address mode bug fix.
  *
  */
 
@@ -136,6 +137,7 @@ static volatile int motionTO = 10;
 static char *MAXv_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 static double quantum;
 static char **initstring = 0;
+static epicsUInt32 MAXv_brd_size;  /* card address boundary */
 
 /*----------------functions-----------------*/
 
@@ -705,7 +707,7 @@ static char *readbuf(volatile struct MAXv_motor *pmotor, char *bufptr)
 /*****************************************************/
 RTN_VALUES MAXvSetup(int num_cards, /* maximum number of cards in rack */
               int addrs_type,       /* VME address type; 16 - A16, 24 - A24 or 32 - A32. */
-              unsigned int addrs,   /* Base Address on 4K (0x1000) boundary. */
+              unsigned int addrs,   /* Base Address. */
               unsigned int vector,  /* noninterrupting(0), valid vectors(64-255) */
               int int_level,        /* interrupt level (1-6) */
               int scan_rate)        /* polling rate - 1/60 sec units */
@@ -732,43 +734,49 @@ RTN_VALUES MAXvSetup(int num_cards, /* maximum number of cards in rack */
 
     switch(addrs_type)
     {
-        case 16:
-            MAXv_ADDRS_TYPE = atVMEA16;
-            if ((epicsUInt32) addrs & 0xFFFF0000)
-            {
-                errlogPrintf("MAXvSetup(): invalid A16 address = 0x%X.\n",
-                             (epicsUInt32) addrs);
-                rtnind = ERROR;
-            }
-            else
-                MAXv_addrs = (char *) addrs;
-            break;
-        case 24:
-            MAXv_ADDRS_TYPE = atVMEA24;
-            if ((epicsUInt32) addrs & 0xF0000000)
-            {
-                errlogPrintf("MAXvSetup(): invalid A24 address = 0x%X.\n",
-                             (epicsUInt32) addrs);
-                rtnind = ERROR;
-            }
-            else
-                MAXv_addrs = (char *) addrs;
-            break;
-        case 32:
-            MAXv_ADDRS_TYPE = atVMEA32;
-            MAXv_addrs = (char *) addrs;
-            break;
-        default:
-            errlogPrintf("MAXvSetup(): invalid VME address type = %d.\n", addrs_type);
+    case 16:
+        MAXv_ADDRS_TYPE = atVMEA16;
+        if ((epicsUInt32) addrs & 0xFFFF0FFF)
+        {
+            errlogPrintf("MAXvSetup(): invalid A16 address = 0x%X.\n", (epicsUInt32) addrs);
             rtnind = ERROR;
-            break;
-    }
-
-    if ((epicsUInt32) addrs & 0x00000FFF)
-    {
-        errlogPrintf("MAXvSetup(): address = 0x%X, not aligned on 4K boundary.\n",
-                     (epicsUInt32) addrs);
+        }
+        else
+        {
+            MAXv_addrs = (char *) addrs;
+            MAXv_brd_size = 0x1000;
+        }
+        break;
+    case 24:
+        MAXv_ADDRS_TYPE = atVMEA24;
+        if ((epicsUInt32) addrs & 0xFF00FFFF)
+        {
+            errlogPrintf("MAXvSetup(): invalid A24 address = 0x%X.\n", (epicsUInt32) addrs);
+            rtnind = ERROR;
+        }
+        else
+        {
+            MAXv_addrs = (char *) addrs;
+            MAXv_brd_size = 0x10000;
+        }
+        break;
+    case 32:
+        MAXv_ADDRS_TYPE = atVMEA32;
+        if ((epicsUInt32) addrs & 0x00FFFFFF)
+        {
+            errlogPrintf("MAXvSetup(): invalid A32 address = 0x%X.\n", (epicsUInt32) addrs);
+            rtnind = ERROR;
+        }
+        else
+        {
+            MAXv_addrs = (char *) addrs;
+            MAXv_brd_size = 0x1000000;
+        }
+        break;
+    default:
+        errlogPrintf("MAXvSetup(): invalid VME address type = %d.\n", addrs_type);
         rtnind = ERROR;
+        break;
     }
 
     MAXvInterruptVector = vector;
@@ -960,9 +968,9 @@ static int motor_init()
 
         Debug(2, "motor_init: card %d\n", card_index);
 
-        probeAddr = MAXv_addrs + (card_index * MAXv_BRD_SIZE);
+        probeAddr = MAXv_addrs + (card_index * MAXv_brd_size);
         startAddr = (epicsInt8 *) probeAddr;
-        endAddr = startAddr + MAXv_BRD_SIZE;
+        endAddr = startAddr + MAXv_brd_size;
 
         Debug(9, "motor_init: devNoResponseProbe() on addr %p\n", probeAddr);
         /* Scan memory space to assure card id */
@@ -970,14 +978,14 @@ static int motor_init()
         do
         {
             status = devNoResponseProbe(MAXv_ADDRS_TYPE, (unsigned int) startAddr, 2);
-            startAddr += 0x100;
+            startAddr += (MAXv_brd_size / 10);
         } while (PROBE_SUCCESS(status) && startAddr < endAddr);
 #endif
         if (PROBE_SUCCESS(status))
         {
 #ifdef USE_DEVLIB
             status = devRegisterAddress(__FILE__, MAXv_ADDRS_TYPE,
-                                        (size_t) probeAddr, MAXv_BRD_SIZE,
+                                        (size_t) probeAddr, MAXv_brd_size,
                                         (volatile void **) &localaddr);
             Debug(9, "motor_init: devRegisterAddress() status = %d\n", (int) status);
             if (!RTN_SUCCESS(status))

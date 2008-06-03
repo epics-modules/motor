@@ -3,9 +3,9 @@ FILENAME...	drvMAXv.h
 USAGE...	OMS driver level "include" information that is specific to OMS
 		model MAXv.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-20 21:31:05 $
+Last Modified:	$Date: 2008-06-03 18:58:25 $
 */
 
 /*
@@ -50,7 +50,6 @@ Last Modified:	$Date: 2004-09-20 21:31:05 $
  */
 
 #define MAXv_NUM_CARDS           15
-#define MAXv_BRD_SIZE            0x1000	/* card address boundary */
 
 #define BUFFER_SIZE	1024
 
