@@ -5,6 +5,53 @@
 For all MAXv motors.
 --------------------
 
+# OMS MAXv driver setup parameters: 
+#     (1)number of cards in array.
+#     (2)VME Address Space - A(16,24,32).
+#     (3)Base Address (see README file).
+#     (4)interrupt vector (0=disable or  64 - 255).
+#     (5)interrupt level (1 - 6).
+#     (6)motor task polling rate (min=1Hz,max=60Hz).
+#!MAXvSetup(1, 16, 0xF000, 190, 5, 10)
+
+MAXv array base address
+-----------------------
+- defined the by 3rd argument to the MAXvSetup() call.
+- must be both a valid address and on a valid address boundry for the selected
+VME Address Space.  A valid address for an A16 address must be 4 hex digits;
+A24 - 6 hex digits; A32 - 8 hex digits.
+
+Each MAXv occupies the following space for the selected VME address space.
+
+VME space |   A16  |     A24   |     A32    |
+----------|--------|-----------|------------|
+MAXv size | 0x1000 | 0x10 0000 | 0x100 0000 |
+----------|--------|-----------|------------|
+valid MAXv| 0x0000 | 0x10 0000 | 0x100 0000 |
+addresses | 0x1000 | 0x11 0000 | 0x110 0000 |
+          | 0x1000 | 0x12 0000 | 0x120 0000 |
+          |   ...  |    ...    |     ...    |
+          | 0xF000 | 0x1F 0000 | 0x1F0 0000 |
+          |        | 0x20 0000 | 0x200 0000 |
+          |        |    ...    |     ...    |
+          |        | 0xFF 0000 | 0xFF0 0000 |
+----------|--------|-----------|------------|
+
+EXAMPLE
+-------
+
+3 MAXv boards, A24 address space, base address = 0xA0 0000.
+1st board's address - 0xA0 0000
+2nd board's address - 0xA1 0000
+3rd board's address - 0xA2 0000
+MAXvSetup(3, 24, 0xA00000, 190, 5, 10)
+
+
+NOTES:
+- Unlike the other OMS models, the MAXv VME Address Modifiers (AM) do not
+  respond to both supervisory and non-privileged access.  Hence, the MAXv's
+  AM's must match the CPU board's AM's exactly.
+
 Configure the MAXv's limit switch sense by placing one of the following MAXv
 controller commands in the 2nd argument of MAXvConfig(); the initialization
 string.  This command determines which TTL signal level defines an active
@@ -42,19 +89,6 @@ Configuring the MAXv for a servo motor.
 Set J8 for servo and add the command "PSM;" to MAXvConfig() initialization
 string.
 
-MAXv array base address
------------------------
-- defined the by 3rd argument to the MAXvSetup() call.
-
-MAXv incremental address
-------------------------
-- increment each additional MAXv's VMEbus address by 0x1000 from the array's
-  base address.
-
-NOTES:
-- Unlike the other OMS models, the MAXv VME Address Modifiers (AM) do not
-  respond to both supervisory and non-privileged access.  Hence, the MAXv's
-  AM's must match the CPU board's AM's exactly.
 
 ==============================================================================
                VME8, VME44, VS4, VX2           VME8, VME44, VS4, VX2
