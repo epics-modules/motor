@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.23 $
- * Modified by: $Author: peterd $
- * Last Modified: $Date: 2008-05-19 15:56:01 $
+ * Version: $Revision: 1.24 $
+ * Modified by: $Author: sluiter $
+ * Last Modified: $Date: 2008-06-04 21:56:30 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -142,7 +142,7 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     else
         asynPrint(pasynUser, ASYN_TRACE_FLOW,
                   "devMotorAsyn::init_controller, %s setting of position not required, position=%f, mres=%f, dval=%f, rdbd=%f",
-                  pmr->name, position, pmr->mres, pmr->dval, rdbd );
+                  pmr->name, position, pmr->mres, pmr->dval, pmr->rdbd);
 
 }
 
