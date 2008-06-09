@@ -3,9 +3,9 @@ FILENAME... drvMVP2001.cc
 USAGE...    Motor record driver level support for MicroMo
             MVP 2001 B02 (Linear, RS-485).
 
-Version:        $Revision: 1.11 $
+Version:        $Revision: 1.12 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-06-06 17:23:42 $
+Last Modified:  $Date: 2008-06-09 19:49:25 $
 */
 
 /*
@@ -84,6 +84,8 @@ Last Modified:  $Date: 2008-06-06 17:23:42 $
  *                      - retry on initial communication.
  * .08 10/02/06  rls    - Bug in recv_mess(); always returned nread=0.
  * .09 06/06/08  rls    - Bug fix setting RA_DONE based on inMotion.
+ * .10 06/09/08  rls    - Controller workaround for comm. errors; delay after
+ *                        each messages received for 0.1 second.
  */
 
 /*
@@ -511,6 +513,8 @@ static int recv_mess(int card, char *com, int flag)
         com[0] = '\0';
         nread = 0;
     }
+    else
+        epicsThreadSleep(0.1);  /* Fix for communication timeout. */
 
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
     return(nread);
