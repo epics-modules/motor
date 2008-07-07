@@ -2,9 +2,9 @@
 FILENAME...	devMM4000.cc
 USAGE...	Motor record device level support for Newport MM4000.
 
-Version:	$Revision: 1.4 $
+Version:	$Revision: 1.5 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:17:14 $
+Last Modified:	$Date: 2008-07-07 15:52:58 $
 */
 
 /*
@@ -81,28 +81,28 @@ extern "C" {epicsExportAddress(dset,devMM4000);}
 /* WARNING! this must match "motor_cmnd" in motor.h */
 
 static msg_types MM4000_table[] = {
-    MOTION, 	/* MOVE_ABS */
-    MOTION, 	/* MOVE_REL */
-    MOTION, 	/* HOME_FOR */
-    MOTION, 	/* HOME_REV */
-    IMMEDIATE,	/* LOAD_POS */
-    IMMEDIATE,	/* SET_VEL_BASE */
-    IMMEDIATE,	/* SET_VELOCITY */
-    IMMEDIATE,	/* SET_ACCEL */
-    IMMEDIATE,	/* GO */
-    IMMEDIATE,	/* SET_ENC_RATIO */
-    INFO,	/* GET_INFO */
-    MOVE_TERM,	/* STOP_AXIS */
-    VELOCITY,	/* JOG */
-    IMMEDIATE,	/* SET_PGAIN */
-    IMMEDIATE,	/* SET_IGAIN */
-    IMMEDIATE,	/* SET_DGAIN */
-    IMMEDIATE,	/* ENABLE_TORQUE */
-    IMMEDIATE,	/* DISABL_TORQUE */
-    IMMEDIATE,	/* PRIMITIVE */
-    IMMEDIATE,	/* SET_HIGH_LIMIT */
-    IMMEDIATE,	/* SET_LOW_LIMIT */
-    VELOCITY	/* JOG_VELOCITY */
+    MOTION,     /* MOVE_ABS */
+    MOTION,     /* MOVE_REL */
+    MOTION,     /* HOME_FOR */
+    MOTION,     /* HOME_REV */
+    IMMEDIATE,  /* LOAD_POS */
+    IMMEDIATE,  /* SET_VEL_BASE */
+    IMMEDIATE,  /* SET_VELOCITY */
+    IMMEDIATE,  /* SET_ACCEL */
+    IMMEDIATE,  /* GO */
+    IMMEDIATE,  /* SET_ENC_RATIO */
+    INFO,       /* GET_INFO */
+    MOVE_TERM,  /* STOP_AXIS */
+    VELOCITY,   /* JOG */
+    IMMEDIATE,  /* SET_PGAIN */
+    IMMEDIATE,  /* SET_IGAIN */
+    IMMEDIATE,  /* SET_DGAIN */
+    IMMEDIATE,  /* ENABLE_TORQUE */
+    IMMEDIATE,  /* DISABL_TORQUE */
+    IMMEDIATE,  /* PRIMITIVE */
+    IMMEDIATE,  /* SET_HIGH_LIMIT */
+    IMMEDIATE,  /* SET_LOW_LIMIT */
+    VELOCITY    /* JOG_VELOCITY */
 };
 
 
@@ -119,8 +119,8 @@ STATIC long MM4000_init(void *arg)
 
     if (after == 0)
     {
-	drvtabptr = &MM4000_access;
-	(drvtabptr->init)();
+        drvtabptr = &MM4000_access;
+        (drvtabptr->init)();
     }
 
     rtnval = motor_init_com(after, *drvtabptr->cardcnt_ptr, drvtabptr, &MM4000_cards);
@@ -175,171 +175,171 @@ STATIC RTN_STATUS MM4000_build_trans(motor_cmnd command, double *parms, struct m
     axis = motor_call->signal + 1;
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
-	return(rtnval = ERROR);
+        return(rtnval = ERROR);
 
     cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
     cntrl_units = dval * cntrl->drive_resolution[axis - 1];
     maxdigits = cntrl->res_decpts[axis - 1];
-    
+
     if (MM4000_table[command] > motor_call->type)
-	motor_call->type = MM4000_table[command];
+        motor_call->type = MM4000_table[command];
 
     if (trans->state != BUILD_STATE)
-	return(rtnval = ERROR);
+        return(rtnval = ERROR);
 
     if (command == PRIMITIVE && mr->init != NULL && strlen(mr->init) != 0)
     {
-	strcat(motor_call->message, mr->init);
-	strcat(motor_call->message, "\r");
+        strcat(motor_call->message, mr->init);
+        strcat(motor_call->message, "\r");
     }
 
     switch (command)
     {
-	case MOVE_ABS:
-	case MOVE_REL:
-	case HOME_FOR:
-	case HOME_REV:
-	case JOG:
-	    if (strlen(mr->prem) != 0)
-	    {
-		strcat(motor_call->message, mr->prem);
-		strcat(motor_call->message, ";");
-	    }
-	    if (strlen(mr->post) != 0)
-		motor_call->postmsgptr = (char *) &mr->post;
-	    break;
-        
-	default:
-	    break;
+    case MOVE_ABS:
+    case MOVE_REL:
+    case HOME_FOR:
+    case HOME_REV:
+    case JOG:
+        if (strlen(mr->prem) != 0)
+        {
+            strcat(motor_call->message, mr->prem);
+            strcat(motor_call->message, ";");
+        }
+        if (strlen(mr->post) != 0)
+            motor_call->postmsgptr = (char *) &mr->post;
+        break;
+
+    default:
+        break;
     }
 
 
     switch (command)
     {
-	case MOVE_ABS:
-	    sprintf(buff, "%dPA%.*f;", axis, maxdigits, cntrl_units);
-	    break;
-	
-	case MOVE_REL:
-	    sprintf(buff, "%dPR%.*f;", axis, maxdigits, cntrl_units);
-	    break;
-	
-	case HOME_FOR:
-	case HOME_REV:
-	    sprintf(buff, "%dOR;", axis);
-	    break;
-	
-	case LOAD_POS:
-	    if (cntrl->model == MM4000)
-		sprintf(buff, "%dSH%.*f;%dDH;%dSH%.*f", axis, maxdigits, cntrl_units,
-		    axis, axis, maxdigits, cntrl->home_preset[axis - 1]);
-	    break;
-	
-	case SET_VEL_BASE:
-	    break;	    /* MM4000 does not use base velocity */
-	
-	case SET_VELOCITY:
-	    sprintf(buff, "%dVA%.*f;", axis, maxdigits, cntrl_units);
-	    break;
-	
-	case SET_ACCEL:
-	    /* 
-	     * The value passed is in steps/sec/sec.  
-	     * Convert to user units/sec/sec
-	     */
-	    sprintf(buff, "%dAC%.*f;", axis, maxdigits, cntrl_units);
-	    break;
-	
-	case GO:
-	    /* 
-	     * The MM4000 starts moving immediately on move commands, GO command
-	     * does nothing
-	     */
-	    break;
-	
-	case SET_ENC_RATIO:
-	    /*
-	     * The MM4000 does not have the concept of encoder ratio, ignore this
-	     * command
-	     */
-	    break;
-	
-	case GET_INFO:
-	    /* These commands are not actually done by sending a message, but
-	       rather they will indirectly cause the driver to read the status
-	       of all motors */
-	    break;
-	
-	case STOP_AXIS:
-	    sprintf(buff, "%dST;", axis);
-	    break;
-	
-	case JOG:
-	    /* 
-	    * MM4000 does not have a jog command.  Simulate with move absolute
-	    * to the appropriate software limit. We can move to MM4000 soft limits.
-	    * If the record soft limits are set tighter than the MM4000 limits
-	    * the record will prevent JOG motion beyond its soft limits 
-	    */
-	    sprintf(buff, "%dVA%.*f;", axis, maxdigits, fabs(cntrl_units));
-	    strcat(motor_call->message, buff);
-	    if (dval > 0.)
-		sprintf(buff, "%dPA%.*f;", axis, maxdigits, mr->dhlm);
-	    else
-		sprintf(buff, "%dPA%.*f;", axis, maxdigits, mr->dllm);
-	    break;
-	
-	case SET_PGAIN:
-	    sprintf(buff, "%dKP%f;%dUF;", axis, dval, axis);
-	    break;
-	
-	case SET_IGAIN:
-	    sprintf(buff, "%dKI%f;%dUF;", axis, dval, axis);
-	    break;
-	
-	case SET_DGAIN:
-	    sprintf(buff, "%dKD%f;%dUF;", axis, dval, axis);
-	    break;
-	
-	case ENABLE_TORQUE:
-	    sprintf(buff, "MO;");
-	    break;
-	
-	case DISABL_TORQUE:
-	    sprintf(buff, "MF;");
-	    break;
-	
-	case SET_HIGH_LIMIT:
-	    motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis - 1];
-	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
+    case MOVE_ABS:
+        sprintf(buff, "%dPA%.*f;", axis, maxdigits, cntrl_units);
+        break;
 
-	    if (cntrl_units > motor_info->high_limit)
-	    {
-		mr->dhlm = motor_info->high_limit;
-		rtnval = ERROR;
-	    }
-	    break;
-	
-	case SET_LOW_LIMIT:
-	    motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis - 1];
-	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
+    case MOVE_REL:
+        sprintf(buff, "%dPR%.*f;", axis, maxdigits, cntrl_units);
+        break;
 
-	    if (cntrl_units < motor_info->low_limit)
-	    {
-		mr->dllm = motor_info->low_limit;
-		rtnval = ERROR;
-	    }
-	    break;
-	
-	default:
-	    rtnval = ERROR;
+    case HOME_FOR:
+    case HOME_REV:
+        sprintf(buff, "%dOR;", axis);
+        break;
+
+    case LOAD_POS:
+        if (cntrl->model == MM4000)
+            sprintf(buff, "%dSH%.*f;%dDH;%dSH%.*f", axis, maxdigits, cntrl_units,
+                    axis, axis, maxdigits, cntrl->home_preset[axis - 1]);
+        break;
+
+    case SET_VEL_BASE:
+        break;      /* MM4000 does not use base velocity */
+
+    case SET_VELOCITY:
+        sprintf(buff, "%dVA%.*f;", axis, maxdigits, cntrl_units);
+        break;
+
+    case SET_ACCEL:
+        /* 
+         * The value passed is in steps/sec/sec.  
+         * Convert to user units/sec/sec
+         */
+        sprintf(buff, "%dAC%.*f;", axis, maxdigits, cntrl_units);
+        break;
+
+    case GO:
+        /* 
+         * The MM4000 starts moving immediately on move commands, GO command
+         * does nothing
+         */
+        break;
+
+    case SET_ENC_RATIO:
+        /*
+         * The MM4000 does not have the concept of encoder ratio, ignore this
+         * command
+         */
+        break;
+
+    case GET_INFO:
+        /* These commands are not actually done by sending a message, but
+           rather they will indirectly cause the driver to read the status
+           of all motors */
+        break;
+
+    case STOP_AXIS:
+        sprintf(buff, "%dST;", axis);
+        break;
+
+    case JOG:
+        /* 
+        * MM4000 does not have a jog command.  Simulate with move absolute
+        * to the appropriate software limit. We can move to MM4000 soft limits.
+        * If the record soft limits are set tighter than the MM4000 limits
+        * the record will prevent JOG motion beyond its soft limits 
+        */
+        sprintf(buff, "%dVA%.*f;", axis, maxdigits, fabs(cntrl_units));
+        strcat(motor_call->message, buff);
+        if (dval > 0.)
+            sprintf(buff, "%dPA%.*f;", axis, maxdigits, mr->dhlm);
+        else
+            sprintf(buff, "%dPA%.*f;", axis, maxdigits, mr->dllm);
+        break;
+
+    case SET_PGAIN:
+        sprintf(buff, "%dKP%f;%dUF;", axis, dval, axis);
+        break;
+
+    case SET_IGAIN:
+        sprintf(buff, "%dKI%f;%dUF;", axis, dval, axis);
+        break;
+
+    case SET_DGAIN:
+        sprintf(buff, "%dKD%f;%dUF;", axis, dval, axis);
+        break;
+
+    case ENABLE_TORQUE:
+        sprintf(buff, "MO;");
+        break;
+
+    case DISABL_TORQUE:
+        sprintf(buff, "MF;");
+        break;
+
+    case SET_HIGH_LIMIT:
+        motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis - 1];
+        trans->state = IDLE_STATE;  /* No command sent to the controller. */
+
+        if (cntrl_units > motor_info->high_limit)
+        {
+            mr->dhlm = motor_info->high_limit;
+            rtnval = ERROR;
+        }
+        break;
+
+    case SET_LOW_LIMIT:
+        motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis - 1];
+        trans->state = IDLE_STATE;  /* No command sent to the controller. */
+
+        if (cntrl_units < motor_info->low_limit)
+        {
+            mr->dllm = motor_info->low_limit;
+            rtnval = ERROR;
+        }
+        break;
+
+    default:
+        rtnval = ERROR;
     }
 
     size = strlen(buff);
     if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
-	errlogMessage("MM4000_build_trans(): buffer overflow.\n");
+        errlogMessage("MM4000_build_trans(): buffer overflow.\n");
     else
-	strcat(motor_call->message, buff);
+        strcat(motor_call->message, buff);
 
     return(rtnval);
 }
