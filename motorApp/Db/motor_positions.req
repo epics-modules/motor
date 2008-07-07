@@ -1,3 +1,2 @@
 # FILE... motor_positions.req
 $(P)$(M).DVAL
-$(P)$(M).OFF
