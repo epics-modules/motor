@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen/MOONEY/epics/synApps/support/motor/cvs/motorApp/op/adl/motorStatus24.adl"
-	version=030101
+	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/motorStatus24.adl"
+	version=030102
 }
 display {
 	object {
@@ -102,4355 +102,4322 @@ text {
 }
 composite {
 	object {
-		x=5
+		x=95
 		y=40
-		width=130
-		height=285
+		width=40
+		height=33
 	}
 	"composite name"=""
 	children {
-		composite {
+		rectangle {
 			object {
 				x=95
 				y=40
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=96
+				y=41
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m17.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=51
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m17_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=59
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m17.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=55
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m17.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=51
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m17.HLS"
+			}
+		}
+		composite {
+			object {
+				x=96
+				y=50
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=95
-						y=40
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=96
-						y=41
-						width=38
-						height=10
+						y=51
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m17.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m17"
+						name="motorx_more.adl"
+						args="P=$(P),M=m17"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=130
+						x=96
 						y=51
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m17_able.VAL"
+						vis="if zero"
+						chan="$(P)m17.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=120
-						y=59
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m17.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=55
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m17.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=120
+						x=96
 						y=51
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m17.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=96
 						y=50
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=96
-								y=51
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m17"
-								name="motorx_more.adl"
-								args="P=$(P),M=m17"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=96
-								y=51
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m17.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=96
-								y=51
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=96
-								y=50
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="17"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=63
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m17.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="17"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=96
+				y=63
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m17.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=95
+		y=76
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=95
 				y=76
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=96
+				y=77
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m18.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=87
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m18_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=95
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m18.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=91
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m18.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=87
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m18.HLS"
+			}
+		}
+		composite {
+			object {
+				x=96
+				y=86
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=95
-						y=76
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=96
-						y=77
-						width=38
-						height=10
+						y=87
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m18.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m18"
+						name="motorx_more.adl"
+						args="P=$(P),M=m18"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=130
+						x=96
 						y=87
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m18_able.VAL"
+						vis="if zero"
+						chan="$(P)m18.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=120
-						y=95
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m18.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=91
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m18.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=120
+						x=96
 						y=87
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m18.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=96
 						y=86
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=96
-								y=87
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m18"
-								name="motorx_more.adl"
-								args="P=$(P),M=m18"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=96
-								y=87
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m18.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=96
-								y=87
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=96
-								y=86
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="18"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=99
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m18.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="18"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=96
+				y=99
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m18.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=95
+		y=112
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=95
 				y=112
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=96
+				y=113
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m19.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=123
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m19_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=131
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m19.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=127
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m19.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=123
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m19.HLS"
+			}
+		}
+		composite {
+			object {
+				x=96
+				y=122
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=95
-						y=112
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=96
-						y=113
-						width=38
-						height=10
+						y=123
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m19.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m19"
+						name="motorx_more.adl"
+						args="P=$(P),M=m19"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=130
+						x=96
 						y=123
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m19_able.VAL"
+						vis="if zero"
+						chan="$(P)m19.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=120
-						y=131
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m19.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=127
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m19.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=120
+						x=96
 						y=123
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m19.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=96
 						y=122
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=96
-								y=123
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m19"
-								name="motorx_more.adl"
-								args="P=$(P),M=m19"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=96
-								y=123
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m19.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=96
-								y=123
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=96
-								y=122
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="19"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=135
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m19.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="19"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=96
+				y=135
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m19.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=95
+		y=148
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=95
 				y=148
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=96
+				y=149
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m20.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=159
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m20_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=167
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m20.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=163
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m20.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=159
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m20.HLS"
+			}
+		}
+		composite {
+			object {
+				x=96
+				y=158
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=95
-						y=148
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=96
-						y=149
-						width=38
-						height=10
+						y=159
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m20.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m20"
+						name="motorx_more.adl"
+						args="P=$(P),M=m20"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=130
+						x=96
 						y=159
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m20_able.VAL"
+						vis="if zero"
+						chan="$(P)m20.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=120
-						y=167
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m20.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=163
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m20.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=120
+						x=96
 						y=159
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m20.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=96
 						y=158
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=96
-								y=159
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m20"
-								name="motorx_more.adl"
-								args="P=$(P),M=m20"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=96
-								y=159
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m20.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=96
-								y=159
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=96
-								y=158
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="20"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=171
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m20.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="20"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=96
+				y=171
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m20.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=95
+		y=184
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=95
 				y=184
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=96
+				y=185
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m21.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=195
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m21_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=203
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m21.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=199
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m21.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=195
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m21.HLS"
+			}
+		}
+		composite {
+			object {
+				x=96
+				y=194
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=95
-						y=184
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=96
-						y=185
-						width=38
-						height=10
+						y=195
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m21.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m21"
+						name="motorx_more.adl"
+						args="P=$(P),M=m21"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=130
+						x=96
 						y=195
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m21_able.VAL"
+						vis="if zero"
+						chan="$(P)m21.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=120
-						y=203
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m21.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=199
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m21.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=120
+						x=96
 						y=195
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m21.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=96
 						y=194
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=96
-								y=195
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m21"
-								name="motorx_more.adl"
-								args="P=$(P),M=m21"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=96
-								y=195
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m21.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=96
-								y=195
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=96
-								y=194
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="21"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=207
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m21.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="21"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=96
+				y=207
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m21.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=95
+		y=220
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=95
 				y=220
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=96
+				y=221
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m22.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=231
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m22_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=239
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m22.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=235
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m22.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=231
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m22.HLS"
+			}
+		}
+		composite {
+			object {
+				x=96
+				y=230
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=95
-						y=220
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=96
-						y=221
-						width=38
-						height=10
+						y=231
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m22.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m22"
+						name="motorx_more.adl"
+						args="P=$(P),M=m22"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=130
+						x=96
 						y=231
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m22_able.VAL"
+						vis="if zero"
+						chan="$(P)m22.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=120
-						y=239
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m22.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=235
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m22.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=120
+						x=96
 						y=231
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m22.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=96
 						y=230
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=96
-								y=231
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m22"
-								name="motorx_more.adl"
-								args="P=$(P),M=m22"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=96
-								y=231
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m22.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=96
-								y=231
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=96
-								y=230
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="22"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=243
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m22.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="22"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=96
+				y=243
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m22.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=95
+		y=256
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=95
 				y=256
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=96
+				y=257
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m23.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=130
+				y=267
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m23_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=275
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m23.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=271
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m23.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=120
+				y=267
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m23.HLS"
+			}
+		}
+		composite {
+			object {
+				x=96
+				y=266
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=95
-						y=256
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=96
-						y=257
-						width=38
-						height=10
+						y=267
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m23.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m23"
+						name="motorx_more.adl"
+						args="P=$(P),M=m23"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=130
+						x=96
 						y=267
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m23_able.VAL"
+						vis="if zero"
+						chan="$(P)m23.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=120
-						y=275
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m23.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=271
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m23.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=120
+						x=96
 						y=267
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m23.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=96
 						y=266
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=96
-								y=267
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m23"
-								name="motorx_more.adl"
-								args="P=$(P),M=m23"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=96
-								y=267
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m23.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=96
-								y=267
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=96
-								y=266
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="23"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=279
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m23.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="23"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
 			object {
-				x=95
-				y=292
-				width=40
-				height=33
+				x=96
+				y=279
+				width=38
+				height=10
 			}
-			"composite name"=""
-			children {
-				rectangle {
-					object {
-						x=95
-						y=292
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=293
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m24.DESC"
-						clr=14
-						bclr=0
-					}
-					limits {
-					}
-				}
-				rectangle {
-					object {
-						x=130
-						y=303
-						width=5
-						height=12
-					}
-					"basic attribute" {
-						clr=14
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m24_able.VAL"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=311
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m24.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=307
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m24.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=120
-						y=303
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m24.HLS"
-					}
-				}
-				composite {
-					object {
-						x=96
-						y=302
-						width=24
-						height=14
-					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=96
-								y=303
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m24"
-								name="motorx_more.adl"
-								args="P=$(P),M=m24"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=96
-								y=303
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m24.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=96
-								y=303
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=96
-								y=302
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="24"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=96
-						y=315
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m23.RBV"
-						clr=14
-						bclr=0
-					}
-					limits {
-					}
-				}
+			monitor {
+				chan="$(P)m23.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
 			}
 		}
-		composite {
+	}
+}
+rectangle {
+	object {
+		x=95
+		y=292
+		width=40
+		height=33
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+}
+"text update" {
+	object {
+		x=96
+		y=293
+		width=38
+		height=10
+	}
+	monitor {
+		chan="$(P)m24.DESC"
+		clr=14
+		bclr=0
+	}
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=130
+		y=303
+		width=5
+		height=12
+	}
+	"basic attribute" {
+		clr=14
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)m24_able.VAL"
+	}
+}
+rectangle {
+	object {
+		x=120
+		y=311
+		width=10
+		height=4
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)m24.LLS"
+	}
+}
+rectangle {
+	object {
+		x=120
+		y=307
+		width=10
+		height=4
+	}
+	"basic attribute" {
+		clr=30
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)m24.LVIO"
+	}
+}
+rectangle {
+	object {
+		x=120
+		y=303
+		width=10
+		height=4
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)m24.HLS"
+	}
+}
+composite {
+	object {
+		x=96
+		y=302
+		width=24
+		height=14
+	}
+	"composite name"=""
+	children {
+		"related display" {
+			object {
+				x=96
+				y=303
+				width=24
+				height=12
+			}
+			display[0] {
+				label="m24"
+				name="motorx_more.adl"
+				args="P=$(P),M=m24"
+			}
+			clr=14
+			bclr=51
+			visual="invisible"
+		}
+		rectangle {
+			object {
+				x=96
+				y=303
+				width=24
+				height=12
+			}
+			"basic attribute" {
+				clr=60
+				fill="outline"
+				width=2
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)m24.DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=96
+				y=303
+				width=24
+				height=12
+			}
+			"basic attribute" {
+				clr=5
+			}
+		}
+		text {
+			object {
+				x=96
+				y=302
+				width=24
+				height=14
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="24"
+			align="horiz. centered"
+		}
+	}
+}
+"text update" {
+	object {
+		x=96
+		y=315
+		width=38
+		height=10
+	}
+	monitor {
+		chan="$(P)m24.RBV"
+		clr=14
+		bclr=0
+	}
+	limits {
+	}
+}
+composite {
+	object {
+		x=50
+		y=40
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=50
 				y=40
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=51
+				y=41
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m9.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=85
+				y=51
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m9_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=59
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m9.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=55
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m9.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=51
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m9.HLS"
+			}
+		}
+		composite {
+			object {
+				x=51
+				y=50
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=50
-						y=40
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=51
-						y=41
-						width=38
-						height=10
+						y=51
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m9.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m9"
+						name="motorx_more.adl"
+						args="P=$(P),M=m9"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=85
+						x=51
 						y=51
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m9_able.VAL"
+						vis="if zero"
+						chan="$(P)m9.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=75
-						y=59
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m9.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=55
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m9.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=75
+						x=51
 						y=51
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m9.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=51
 						y=50
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=51
-								y=51
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m9"
-								name="motorx_more.adl"
-								args="P=$(P),M=m9"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=51
-								y=51
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m9.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=51
-								y=51
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=51
-								y=50
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="9"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=63
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m9.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="9"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=51
+				y=63
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m9.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=50
+		y=76
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=50
 				y=76
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=51
+				y=77
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m10.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=85
+				y=87
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m10_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=95
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m10.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=91
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m10.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=87
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m10.HLS"
+			}
+		}
+		composite {
+			object {
+				x=51
+				y=86
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=50
-						y=76
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=51
-						y=77
-						width=38
-						height=10
+						y=87
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m10.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m10"
+						name="motorx_more.adl"
+						args="P=$(P),M=m10"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=85
+						x=51
 						y=87
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m10_able.VAL"
+						vis="if zero"
+						chan="$(P)m10.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=75
-						y=95
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m10.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=91
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m10.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=75
+						x=51
 						y=87
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m10.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=51
 						y=86
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=51
-								y=87
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m10"
-								name="motorx_more.adl"
-								args="P=$(P),M=m10"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=51
-								y=87
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m10.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=51
-								y=87
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=51
-								y=86
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="10"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=99
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m10.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="10"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=51
+				y=99
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m10.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=50
+		y=112
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=50
 				y=112
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=51
+				y=113
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m11.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=85
+				y=123
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m11_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=131
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m11.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=127
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m11.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=123
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m11.HLS"
+			}
+		}
+		composite {
+			object {
+				x=51
+				y=122
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=50
-						y=112
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=51
-						y=113
-						width=38
-						height=10
+						y=123
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m11.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m11"
+						name="motorx_more.adl"
+						args="P=$(P),M=m11"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=85
+						x=51
 						y=123
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m11_able.VAL"
+						vis="if zero"
+						chan="$(P)m11.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=75
-						y=131
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m11.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=127
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m11.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=75
+						x=51
 						y=123
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m11.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=51
 						y=122
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=51
-								y=123
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m11"
-								name="motorx_more.adl"
-								args="P=$(P),M=m11"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=51
-								y=123
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m11.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=51
-								y=123
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=51
-								y=122
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="11"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=135
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m11.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="11"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=51
+				y=135
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m11.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=50
+		y=148
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=50
 				y=148
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=51
+				y=149
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m12.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=85
+				y=159
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m12_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=167
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m12.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=163
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m12.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=159
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m12.HLS"
+			}
+		}
+		composite {
+			object {
+				x=51
+				y=158
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=50
-						y=148
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=51
-						y=149
-						width=38
-						height=10
+						y=159
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m12.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m12"
+						name="motorx_more.adl"
+						args="P=$(P),M=m12"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=85
+						x=51
 						y=159
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m12_able.VAL"
+						vis="if zero"
+						chan="$(P)m12.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=75
-						y=167
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m12.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=163
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m12.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=75
+						x=51
 						y=159
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m12.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=51
 						y=158
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=51
-								y=159
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m12"
-								name="motorx_more.adl"
-								args="P=$(P),M=m12"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=51
-								y=159
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m12.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=51
-								y=159
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=51
-								y=158
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="12"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=171
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m12.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="12"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=51
+				y=171
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m12.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=50
+		y=184
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=50
 				y=184
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=51
+				y=185
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m13.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=85
+				y=195
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m13_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=203
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m13.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=199
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m13.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=195
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m13.HLS"
+			}
+		}
+		composite {
+			object {
+				x=51
+				y=194
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=50
-						y=184
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=51
-						y=185
-						width=38
-						height=10
+						y=195
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m13.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m13"
+						name="motorx_more.adl"
+						args="P=$(P),M=m13"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=85
+						x=51
 						y=195
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m13_able.VAL"
+						vis="if zero"
+						chan="$(P)m13.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=75
-						y=203
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m13.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=199
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m13.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=75
+						x=51
 						y=195
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m13.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=51
 						y=194
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=51
-								y=195
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m13"
-								name="motorx_more.adl"
-								args="P=$(P),M=m13"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=51
-								y=195
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m13.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=51
-								y=195
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=51
-								y=194
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="13"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=207
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m13.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="13"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=51
+				y=207
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m13.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=50
+		y=220
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=50
 				y=220
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=51
+				y=221
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m14.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=85
+				y=231
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m14_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=239
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m14.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=235
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m14.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=231
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m14.HLS"
+			}
+		}
+		composite {
+			object {
+				x=51
+				y=230
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=50
-						y=220
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=51
-						y=221
-						width=38
-						height=10
+						y=231
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m14.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m14"
+						name="motorx_more.adl"
+						args="P=$(P),M=m14"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=85
+						x=51
 						y=231
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m14_able.VAL"
+						vis="if zero"
+						chan="$(P)m14.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=75
-						y=239
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m14.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=235
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m14.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=75
+						x=51
 						y=231
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m14.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=51
 						y=230
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=51
-								y=231
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m14"
-								name="motorx_more.adl"
-								args="P=$(P),M=m14"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=51
-								y=231
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m14.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=51
-								y=231
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=51
-								y=230
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="14"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=243
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m14.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="14"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=51
+				y=243
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m14.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=50
+		y=256
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=50
 				y=256
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=51
+				y=257
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m15.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=85
+				y=267
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m15_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=275
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m15.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=271
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m15.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=75
+				y=267
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m15.HLS"
+			}
+		}
+		composite {
+			object {
+				x=51
+				y=266
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=50
-						y=256
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=51
-						y=257
-						width=38
-						height=10
+						y=267
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m15.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m15"
+						name="motorx_more.adl"
+						args="P=$(P),M=m15"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=85
+						x=51
 						y=267
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m15_able.VAL"
+						vis="if zero"
+						chan="$(P)m15.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=75
-						y=275
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m15.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=271
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m15.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=75
+						x=51
 						y=267
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m15.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=51
 						y=266
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=51
-								y=267
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m15"
-								name="motorx_more.adl"
-								args="P=$(P),M=m15"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=51
-								y=267
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m15.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=51
-								y=267
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=51
-								y=266
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="15"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=279
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m15.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="15"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
 			object {
-				x=50
-				y=292
-				width=40
-				height=33
+				x=51
+				y=279
+				width=38
+				height=10
 			}
-			"composite name"=""
-			children {
-				rectangle {
-					object {
-						x=50
-						y=292
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=293
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m16.DESC"
-						clr=14
-						bclr=0
-					}
-					limits {
-					}
-				}
-				rectangle {
-					object {
-						x=85
-						y=303
-						width=5
-						height=12
-					}
-					"basic attribute" {
-						clr=14
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m16_able.VAL"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=311
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m16.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=307
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m16.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=75
-						y=303
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m16.HLS"
-					}
-				}
-				composite {
-					object {
-						x=51
-						y=302
-						width=24
-						height=14
-					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=51
-								y=303
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m16"
-								name="motorx_more.adl"
-								args="P=$(P),M=m16"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=51
-								y=303
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m16.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=51
-								y=303
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=51
-								y=302
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="16"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=51
-						y=315
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m15.RBV"
-						clr=14
-						bclr=0
-					}
-					limits {
-					}
-				}
+			monitor {
+				chan="$(P)m15.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
 			}
 		}
-		composite {
+	}
+}
+rectangle {
+	object {
+		x=50
+		y=292
+		width=40
+		height=33
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+}
+"text update" {
+	object {
+		x=51
+		y=293
+		width=38
+		height=10
+	}
+	monitor {
+		chan="$(P)m16.DESC"
+		clr=14
+		bclr=0
+	}
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=85
+		y=303
+		width=5
+		height=12
+	}
+	"basic attribute" {
+		clr=14
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)m16_able.VAL"
+	}
+}
+rectangle {
+	object {
+		x=75
+		y=311
+		width=10
+		height=4
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)m16.LLS"
+	}
+}
+rectangle {
+	object {
+		x=75
+		y=307
+		width=10
+		height=4
+	}
+	"basic attribute" {
+		clr=30
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)m16.LVIO"
+	}
+}
+rectangle {
+	object {
+		x=75
+		y=303
+		width=10
+		height=4
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)m16.HLS"
+	}
+}
+composite {
+	object {
+		x=51
+		y=302
+		width=24
+		height=14
+	}
+	"composite name"=""
+	children {
+		"related display" {
+			object {
+				x=51
+				y=303
+				width=24
+				height=12
+			}
+			display[0] {
+				label="m16"
+				name="motorx_more.adl"
+				args="P=$(P),M=m16"
+			}
+			clr=14
+			bclr=51
+			visual="invisible"
+		}
+		rectangle {
+			object {
+				x=51
+				y=303
+				width=24
+				height=12
+			}
+			"basic attribute" {
+				clr=60
+				fill="outline"
+				width=2
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)m16.DMOV"
+			}
+		}
+		rectangle {
+			object {
+				x=51
+				y=303
+				width=24
+				height=12
+			}
+			"basic attribute" {
+				clr=5
+			}
+		}
+		text {
+			object {
+				x=51
+				y=302
+				width=24
+				height=14
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="16"
+			align="horiz. centered"
+		}
+	}
+}
+"text update" {
+	object {
+		x=51
+		y=315
+		width=38
+		height=10
+	}
+	monitor {
+		chan="$(P)m16.RBV"
+		clr=14
+		bclr=0
+	}
+	limits {
+	}
+}
+composite {
+	object {
+		x=5
+		y=40
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=5
 				y=40
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=41
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m1.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=40
+				y=51
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m1_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=59
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m1.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=55
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m1.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=51
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m1.HLS"
+			}
+		}
+		composite {
+			object {
+				x=6
+				y=50
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=5
-						y=40
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=6
-						y=41
-						width=38
-						height=10
+						y=51
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m1.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m1"
+						name="motorx_more.adl"
+						args="P=$(P),M=m1"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=40
+						x=6
 						y=51
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m1_able.VAL"
+						vis="if zero"
+						chan="$(P)m1.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=30
-						y=59
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m1.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=30
-						y=55
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m1.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=30
+						x=6
 						y=51
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m1.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=6
 						y=50
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=6
-								y=51
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m1"
-								name="motorx_more.adl"
-								args="P=$(P),M=m1"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=6
-								y=51
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m1.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=6
-								y=51
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=6
-								y=50
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="1"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=6
-						y=63
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m1.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="1"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=6
+				y=63
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m1.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=5
+		y=76
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=5
 				y=76
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=77
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m2.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=40
+				y=87
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m2_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=95
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m2.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=91
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m2.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=87
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m2.HLS"
+			}
+		}
+		composite {
+			object {
+				x=6
+				y=86
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=5
-						y=76
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=6
-						y=77
-						width=38
-						height=10
+						y=87
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m2.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m2"
+						name="motorx_more.adl"
+						args="P=$(P),M=m2"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=40
+						x=6
 						y=87
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m2_able.VAL"
+						vis="if zero"
+						chan="$(P)m2.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=30
-						y=95
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m2.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=30
-						y=91
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m2.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=30
+						x=6
 						y=87
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m2.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=6
 						y=86
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=6
-								y=87
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m2"
-								name="motorx_more.adl"
-								args="P=$(P),M=m2"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=6
-								y=87
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m2.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=6
-								y=87
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=6
-								y=86
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="2"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=6
-						y=99
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m2.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="2"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=6
+				y=99
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m2.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=5
+		y=112
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=5
 				y=112
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=113
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m3.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=40
+				y=123
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m3_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=131
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m3.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=127
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m3.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=123
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m3.HLS"
+			}
+		}
+		composite {
+			object {
+				x=6
+				y=122
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=5
-						y=112
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=6
-						y=113
-						width=38
-						height=10
+						y=123
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m3.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m3"
+						name="motorx_more.adl"
+						args="P=$(P),M=m3"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=40
+						x=6
 						y=123
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m3_able.VAL"
+						vis="if zero"
+						chan="$(P)m3.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=30
-						y=131
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m3.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=30
-						y=127
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m3.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=30
+						x=6
 						y=123
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m3.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=6
 						y=122
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=6
-								y=123
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m3"
-								name="motorx_more.adl"
-								args="P=$(P),M=m3"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=6
-								y=123
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m3.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=6
-								y=123
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=6
-								y=122
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="3"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=6
-						y=135
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m3.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="3"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=6
+				y=135
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m3.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=5
+		y=148
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=5
 				y=148
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=149
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m4.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=40
+				y=159
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m4_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=167
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m4.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=163
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m4.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=159
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m4.HLS"
+			}
+		}
+		composite {
+			object {
+				x=6
+				y=158
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=5
-						y=148
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=6
-						y=149
-						width=38
-						height=10
+						y=159
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m4.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m4"
+						name="motorx_more.adl"
+						args="P=$(P),M=m4"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=40
+						x=6
 						y=159
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m4_able.VAL"
+						vis="if zero"
+						chan="$(P)m4.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=30
-						y=167
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m4.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=30
-						y=163
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m4.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=30
+						x=6
 						y=159
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m4.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=6
 						y=158
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=6
-								y=159
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m4"
-								name="motorx_more.adl"
-								args="P=$(P),M=m4"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=6
-								y=159
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m4.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=6
-								y=159
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=6
-								y=158
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="4"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=6
-						y=171
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m4.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="4"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=6
+				y=171
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m4.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=5
+		y=184
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=5
 				y=184
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=185
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m5.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=40
+				y=195
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m5_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=203
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m5.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=199
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m5.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=195
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m5.HLS"
+			}
+		}
+		composite {
+			object {
+				x=6
+				y=194
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=5
-						y=184
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=6
-						y=185
-						width=38
-						height=10
+						y=195
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m5.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m5"
+						name="motorx_more.adl"
+						args="P=$(P),M=m5"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=40
+						x=6
 						y=195
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m5_able.VAL"
+						vis="if zero"
+						chan="$(P)m5.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=30
-						y=203
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m5.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=30
-						y=199
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m5.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=30
+						x=6
 						y=195
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m5.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=6
 						y=194
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=6
-								y=195
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m5"
-								name="motorx_more.adl"
-								args="P=$(P),M=m5"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=6
-								y=195
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m5.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=6
-								y=195
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=6
-								y=194
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="5"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=6
-						y=207
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m5.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="5"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=6
+				y=207
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m5.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=5
+		y=220
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=5
 				y=220
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=221
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m6.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=40
+				y=231
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m6_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=239
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m6.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=235
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m6.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=231
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m6.HLS"
+			}
+		}
+		composite {
+			object {
+				x=6
+				y=230
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=5
-						y=220
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=6
-						y=221
-						width=38
-						height=10
+						y=231
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m6.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m6"
+						name="motorx_more.adl"
+						args="P=$(P),M=m6"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=40
+						x=6
 						y=231
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m6_able.VAL"
+						vis="if zero"
+						chan="$(P)m6.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=30
-						y=239
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m6.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=30
-						y=235
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m6.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=30
+						x=6
 						y=231
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m6.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=6
 						y=230
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=6
-								y=231
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m6"
-								name="motorx_more.adl"
-								args="P=$(P),M=m6"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=6
-								y=231
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m6.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=6
-								y=231
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=6
-								y=230
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="6"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=6
-						y=243
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m6.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="6"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=6
+				y=243
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m6.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=5
+		y=256
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=5
 				y=256
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=257
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m7.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=40
+				y=267
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m7_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=275
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m7.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=271
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m7.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=267
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m7.HLS"
+			}
+		}
+		composite {
+			object {
+				x=6
+				y=266
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=5
-						y=256
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=6
-						y=257
-						width=38
-						height=10
+						y=267
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m7.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m7"
+						name="motorx_more.adl"
+						args="P=$(P),M=m7"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=40
+						x=6
 						y=267
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m7_able.VAL"
+						vis="if zero"
+						chan="$(P)m7.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=30
-						y=275
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m7.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=30
-						y=271
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m7.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=30
+						x=6
 						y=267
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m7.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=6
 						y=266
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=6
-								y=267
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m7"
-								name="motorx_more.adl"
-								args="P=$(P),M=m7"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=6
-								y=267
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m7.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=6
-								y=267
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=6
-								y=266
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="7"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=6
-						y=279
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m7.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="7"
+					align="horiz. centered"
 				}
 			}
 		}
-		composite {
+		"text update" {
+			object {
+				x=6
+				y=279
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m7.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=5
+		y=292
+		width=40
+		height=33
+	}
+	"composite name"=""
+	children {
+		rectangle {
 			object {
 				x=5
 				y=292
 				width=40
 				height=33
 			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=293
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m8.DESC"
+				clr=14
+				bclr=0
+			}
+			limits {
+			}
+		}
+		rectangle {
+			object {
+				x=40
+				y=303
+				width=5
+				height=12
+			}
+			"basic attribute" {
+				clr=14
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m8_able.VAL"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=311
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m8.LLS"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=307
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=30
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m8.LVIO"
+			}
+		}
+		rectangle {
+			object {
+				x=30
+				y=303
+				width=10
+				height=4
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)m8.HLS"
+			}
+		}
+		composite {
+			object {
+				x=6
+				y=302
+				width=24
+				height=14
+			}
 			"composite name"=""
 			children {
-				rectangle {
-					object {
-						x=5
-						y=292
-						width=40
-						height=33
-					}
-					"basic attribute" {
-						clr=14
-						fill="outline"
-					}
-				}
-				"text update" {
+				"related display" {
 					object {
 						x=6
-						y=293
-						width=38
-						height=10
+						y=303
+						width=24
+						height=12
 					}
-					monitor {
-						chan="$(P)m8.DESC"
-						clr=14
-						bclr=0
+					display[0] {
+						label="m8"
+						name="motorx_more.adl"
+						args="P=$(P),M=m8"
 					}
-					limits {
-					}
+					clr=14
+					bclr=51
+					visual="invisible"
 				}
 				rectangle {
 					object {
-						x=40
+						x=6
 						y=303
-						width=5
+						width=24
 						height=12
 					}
 					"basic attribute" {
-						clr=14
+						clr=60
+						fill="outline"
+						width=2
 					}
 					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m8_able.VAL"
+						vis="if zero"
+						chan="$(P)m8.DMOV"
 					}
 				}
 				rectangle {
 					object {
-						x=30
-						y=311
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m8.LLS"
-					}
-				}
-				rectangle {
-					object {
-						x=30
-						y=307
-						width=10
-						height=4
-					}
-					"basic attribute" {
-						clr=30
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m8.LVIO"
-					}
-				}
-				rectangle {
-					object {
-						x=30
+						x=6
 						y=303
-						width=10
-						height=4
+						width=24
+						height=12
 					}
 					"basic attribute" {
-						clr=20
-					}
-					"dynamic attribute" {
-						vis="if not zero"
-						chan="$(P)m8.HLS"
+						clr=5
 					}
 				}
-				composite {
+				text {
 					object {
 						x=6
 						y=302
 						width=24
 						height=14
 					}
-					"composite name"=""
-					children {
-						"related display" {
-							object {
-								x=6
-								y=303
-								width=24
-								height=12
-							}
-							display[0] {
-								label="m8"
-								name="motorx_more.adl"
-								args="P=$(P),M=m8"
-							}
-							clr=14
-							bclr=51
-							visual="invisible"
-						}
-						rectangle {
-							object {
-								x=6
-								y=303
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=60
-								fill="outline"
-								width=2
-							}
-							"dynamic attribute" {
-								vis="if zero"
-								chan="$(P)m8.DMOV"
-							}
-						}
-						rectangle {
-							object {
-								x=6
-								y=303
-								width=24
-								height=12
-							}
-							"basic attribute" {
-								clr=5
-							}
-						}
-						text {
-							object {
-								x=6
-								y=302
-								width=24
-								height=14
-							}
-							"basic attribute" {
-								clr=14
-							}
-							textix="8"
-							align="horiz. centered"
-						}
-					}
-				}
-				"text update" {
-					object {
-						x=6
-						y=315
-						width=38
-						height=10
-					}
-					monitor {
-						chan="$(P)m7.RBV"
+					"basic attribute" {
 						clr=14
-						bclr=0
 					}
-					limits {
-					}
+					textix="8"
+					align="horiz. centered"
 				}
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=315
+				width=38
+				height=10
+			}
+			monitor {
+				chan="$(P)m7.RBV"
+				clr=14
+				bclr=0
+			}
+			limits {
 			}
 		}
 	}

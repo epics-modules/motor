@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen/MOONEY/epics/synApps/support/motor/cvs/motorApp/op/adl/motorStatus8.adl"
-	version=030101
+	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/motorStatus8.adl"
+	version=030102
 }
 display {
 	object {
@@ -1453,7 +1453,7 @@ composite {
 		height=10
 	}
 	monitor {
-		chan="$(P)m7.RBV"
+		chan="$(P)m8.RBV"
 		clr=14
 		bclr=0
 	}
