@@ -2,8 +2,12 @@
 # "#!" marks lines that can be uncommented.
 TOP = .
 include $(TOP)/configure/CONFIG
-DIRS := $(DIRS) $(filter-out $(DIRS), configure)
-DIRS := $(DIRS) $(filter-out $(DIRS), motorApp)
-#!DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
-#!DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
+
+DIRS += configure motorApp
+motorApp_DEPEND_DIRS   = configure
+
+#!DIRS += motorExApp iocBoot
+#!motorExApp_DEPEND_DIRS = motorApp
+#!iocBoot_DEPEND_DIRS    = motorExApp
+
 include $(TOP)/configure/RULES_TOP
