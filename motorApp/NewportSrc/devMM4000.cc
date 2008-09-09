@@ -1,10 +1,10 @@
 /*
-FILENAME...	devMM4000.cc
-USAGE...	Motor record device level support for Newport MM4000.
+FILENAME...     devMM4000.cc
+USAGE...        Motor record device level support for Newport MM4000.
 
-Version:	$Revision: 1.5 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-07-07 15:52:58 $
+Version:        $Revision: 1.6 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2008-09-09 18:22:12 $
 */
 
 /*
@@ -21,26 +21,27 @@ Last Modified:	$Date: 2008-07-07 15:52:58 $
  *      and (W-31-109-ENG-38) at Argonne National Laboratory.
  *
  *      Initial development by:
- *	      The Controls and Automation Group (AT-8)
- *	      Ground Test Accelerator
- *	      Accelerator Technology Division
- *	      Los Alamos National Laboratory
+ *            The Controls and Automation Group (AT-8)
+ *            Ground Test Accelerator
+ *            Accelerator Technology Division
+ *            Los Alamos National Laboratory
  *
  *      Co-developed with
- *	      The Controls and Computing Group
- *	      Accelerator Systems Division
- *	      Advanced Photon Source
- *	      Argonne National Laboratory
+ *            The Controls and Computing Group
+ *            Accelerator Systems Division
+ *            Advanced Photon Source
+ *            Argonne National Laboratory
  *
  * Modification Log:
  * -----------------
- * .01  10-20-97	mlr     initialized from drvOms58
- * .02  10-30-97        mlr     Replaced driver calls with gpipIO functions
- * .03  10-30-98        mlr     Minor code cleanup, improved formatting
- * .04  02-01-99        mlr     Added temporary fix to delay reading motor
- *                              positions at the end of a move.
- * .05  04-21-01	rls	Added jog velocity motor command.
- * .06  05-19-03	rls	Converted to R3.14.x.
+ * .01  10-20-97  mlr  initialized from drvOms58
+ * .02  10-30-97  mlr  Replaced driver calls with gpipIO functions
+ * .03  10-30-98  mlr  Minor code cleanup, improved formatting
+ * .04  02-01-99  mlr  Added temporary fix to delay reading motor
+ *                     positions at the end of a move.
+ * .05  04-21-01  rls  Added jog velocity motor command.
+ * .06  05-19-03  rls  Converted to R3.14.x.
+ * .07  07-07-08  rls  Support individual axis power on/off for MM4005/6.
  */
 
 
@@ -302,11 +303,17 @@ STATIC RTN_STATUS MM4000_build_trans(motor_cmnd command, double *parms, struct m
         break;
 
     case ENABLE_TORQUE:
-        sprintf(buff, "MO;");
+        if (cntrl->model == MM4000)
+            sprintf(buff, "MO;");
+        else
+            sprintf(buff, "%dMO;", axis);
         break;
 
     case DISABL_TORQUE:
-        sprintf(buff, "MF;");
+        if (cntrl->model == MM4000)
+            sprintf(buff, "MF;");
+        else
+            sprintf(buff, "%dMF;", axis);
         break;
 
     case SET_HIGH_LIMIT:
