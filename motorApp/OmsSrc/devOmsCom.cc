@@ -2,9 +2,9 @@
 FILENAME...     devOmsCom.cc
 USAGE... Data and functions common to all OMS device level support.
 
-Version:        $Revision: 1.15 $
+Version:        $Revision: 1.16 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-06-11 15:44:43 $
+Last Modified:  $Date: 2008-09-09 18:19:45 $
 */
 
 /*
@@ -62,6 +62,7 @@ Last Modified:  $Date: 2008-06-11 15:44:43 $
  * .17  05-14-08 rls Fixed stop acceleration calculation.
  * .18  05-14-08 rls For MAXv, restore slew acceleration after STOP command.
  * .19  06-11-08 rls For MAXv, fix error on ER command; replace UU1.0 with UF.
+ * .20  07-24-08 rls For MAXv, normalize PID values based on 32,767 maximum.
  *
  */
 
@@ -416,7 +417,10 @@ errorexit:                  errMessage(-1, "Invalid device directive");
                 case SET_PGAIN:
                 case SET_IGAIN:
                 case SET_DGAIN:
-                    sprintf(buffer, "%.1f", (parms[itera] * 1999.9));
+                    if (MAXv == true)
+                        sprintf(buffer, "%.1f", (parms[itera] * 32767.0));
+                    else
+                        sprintf(buffer, "%.1f", (parms[itera] * 1999.9));
                     break;
 
                 case SET_VELOCITY:  /* OMS errors if VB = VL. */
