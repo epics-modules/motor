@@ -1,3 +1,38 @@
+/*
+FILENAME... drvMM4000Asyn.cc
+USAGE...    Motor record asyn driver level support for Newport MM4000.
+
+Version:        $Revision: 1.6 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2008-09-09 20:43:07 $
+*/
+
+/*
+ *      Original Author: Mark Rivers
+ *      Date: 05/03/06
+ *      Current Author: Mark Rivers
+ *
+ -----------------------------------------------------------------------------
+                                COPYRIGHT NOTICE
+ -----------------------------------------------------------------------------
+   Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+      National Laboratory.
+   Copyright (c) 2002 The Regents of the University of California, as
+      Operator of Los Alamos National Laboratory.
+   Synapps Versions 4-5
+   and higher are distributed subject to a Software License Agreement found
+   in file LICENSE that is included with this distribution.
+ -----------------------------------------------------------------------------
+ *
+ * Modification Log:
+ * -----------------
+ *
+ * .01 09-09-08 rls Default to motorAxisHasClosedLoop on from motorAxisInit(),
+ *                  so that CNEN functions.
+ * 
+ */
+ 
+ 
 #include <stddef.h>
 #include "epicsThread.h"
 #include <stdlib.h>
@@ -94,7 +129,7 @@ typedef struct
 
 static int motorMM4000LogMsg(void * param, const motorAxisLogMask_t logMask, const char *pFormat, ...);
 static int sendOnly(MM4000Controller *pController, char *outputString);
-static int sendAndReceive(MM4000Controller *pController, char *outputString, char *inputString, int inputSize);
+static asynStatus sendAndReceive(MM4000Controller *pController, char *outputString, char *inputString, int inputSize);
 
 #define PRINT   (drv.print)
 #define FLOW    motorAxisTraceFlow
@@ -121,8 +156,6 @@ static MM4000Controller *pMM4000Controller=NULL;
 
 #define MAX(a,b) ((a)>(b)? (a): (b))
 #define MIN(a,b) ((a)<(b)? (a): (b))
-
-static char* getMM4000Error(AXIS_HDL pAxis, int status, char *buffer);
 
 static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
@@ -159,7 +192,26 @@ static void motorAxisReport(int level)
 
 static int motorAxisInit(void)
 {
-  return MOTOR_AXIS_OK;
+    int controller, axis;
+
+    for (controller = 0; controller < numMM4000Controllers; controller++)
+    {
+        AXIS_HDL pAxis;
+        for (axis = 0; axis < pMM4000Controller[controller].numAxes; axis++)
+        {
+            pAxis = &pMM4000Controller[controller].pAxis[axis];
+            if (!pAxis->mutexId)
+                break;
+            epicsMutexLock(pAxis->mutexId);
+
+            /*Set GAIN_SUPPORT on so that at least, CNEN functions. */
+            motorParam->setInteger(pAxis->params, motorAxisHasClosedLoop, 1);
+
+            motorParam->callCallback(pAxis->params);
+            epicsMutexUnlock(pAxis->mutexId);
+        }
+    }
+    return(MOTOR_AXIS_OK);
 }
 
 static int motorAxisSetLog( AXIS_HDL pAxis, motorAxisLogFunc logFunc, void * param )
@@ -606,7 +658,6 @@ int MM4000AsynConfig(int card,             /* Controller number */
     int digits;
     int modelNum;
     int retry = 0;
-    asynStatus rtnval;
     char *p, *tokSave;
     char inputBuff[BUFFER_SIZE];
     char outputBuff[BUFFER_SIZE];
@@ -639,10 +690,10 @@ int MM4000AsynConfig(int card,             /* Controller number */
 
     do
     {
-        rtnval = sendAndReceive(pController, "VE;", inputBuff, sizeof(inputBuff));
+        status = sendAndReceive(pController, "VE;", inputBuff, sizeof(inputBuff));
         retry++;
         /* Return value is length of response string */
-    } while (rtnval != asynSuccess && retry < 3);
+    } while (status != asynSuccess && retry < 3);
 
     if (status != asynSuccess)
         return (MOTOR_AXIS_ERROR);
@@ -732,7 +783,7 @@ int MM4000AsynConfig(int card,             /* Controller number */
 static int sendOnly(MM4000Controller *pController, char *outputBuff)
 {
     int nRequested=strlen(outputBuff);
-    int nActual;
+    size_t nActual;
     asynStatus status;
 
     status = pasynOctetSyncIO->write(pController->pasynUser, outputBuff, 
@@ -747,11 +798,10 @@ static int sendOnly(MM4000Controller *pController, char *outputBuff)
 }
 
 
-static int sendAndReceive(MM4000Controller *pController, char *outputBuff, char *inputBuff, int inputSize) 
+static asynStatus sendAndReceive(MM4000Controller *pController, char *outputBuff, char *inputBuff, int inputSize) 
 {
     int nWriteRequested=strlen(outputBuff);
-    int nWrite;
-    int nRead;
+    size_t nWrite, nRead;
     int eomReason;
     asynStatus status;
     
