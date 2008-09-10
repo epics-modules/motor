@@ -1,0 +1,4 @@
+# attocube ANC 150 asyn motor driver support.
+driver(motorANC150)
+registrar(ANC150Register)
+
