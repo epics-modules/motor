@@ -23,6 +23,7 @@
 #include <winsock.h>
 #include <windows.h>
 #else
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
