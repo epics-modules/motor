@@ -5,7 +5,6 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 
 # The following are used for debugging messages.
-#!USR_CFLAGS += -DDEBUG
 #!USR_CXXFLAGS += -DDEBUG
 
 DBD += devSoftMotor.dbd
