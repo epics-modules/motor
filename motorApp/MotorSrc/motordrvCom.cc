@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.14 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2005-12-08 00:13:22 $
+Version:	$Revision: 1.15 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-09-22 19:49:46 $
 */
 
 /*
@@ -44,6 +44,9 @@ Last Modified:	$Date: 2005-12-08 00:13:22 $
  * .03 02/11/04 rls Limit valid "delay" in process_messages() to;
  *			0 <= delay <= (quantum * 2).
  * .04 05/10/05 rls "Stale data delay" bug fix.
+ * .05 09/22/08 rls Skip delay if time lapsed since last update (time_lapse)
+ *                  is > polling rate delay (scan_sec) or if wait time
+ *                  is < 1/2 time quantum.
  */
 
 
@@ -92,18 +95,19 @@ static struct mess_node *motor_malloc(struct circ_queue *, epicsEvent *);
  *	    Clear stale data timer active indicator (stale_data_delay = 0).
  *      ELSE
  *	    Update current_time.
- *	    Set "time_lapse" to time elapsed (in seconds) since last timeout
- *		return from semaphore pend.
+ *	    Set "time_lapse" to time elapsed (in seconds) since last update.
  *	    IF elapsed time (time_lapse) < user delay (scan_sec).
  *		Set "wait_time" to (user delay - elapsed time).
- *		IF "wait_time" < 1 quantum time unit.
- *		    Set "wait_time" to 1 quantum time unit.
+ *		IF "wait_time" < 1/2 quantum time unit.
+ *		    Set "wait_time" to zero.
  *		ENDIF
  *	    ELSE
- *		Set "wait_time" to 1 quantum time unit.
+ *		Set "wait_time" to zero.
  *	    ENDIF
  *	ENDIF
- *	Pend on semaphore with "wait_time" timeout argument.
+ *      IF wait_time nonzero.
+ *	    Pend on semaphore with "wait_time" timeout argument.
+ *      ENDIF
  *	Update "previous_time".
  *	IF the "any_motor_in_motion" indicator is true.
  *	    IF VME58 instance of this task.
@@ -131,6 +135,7 @@ epicsShareFunc int motor_task(struct thread_args *args)
     epicsTime previous_time, current_time;
     double scan_sec, wait_time, time_lapse, stale_data_max_delay, stale_data_delay = 0.0;
     const double quantum = epicsThreadSleepQuantum();
+    double half_quantum;
     int itera;
 
     tabptr = args->table;    
@@ -143,6 +148,8 @@ epicsShareFunc int motor_task(struct thread_args *args)
 	stale_data_max_delay = quantum * 2.0;
     else
 	stale_data_max_delay = args->update_delay;
+
+    half_quantum = quantum / 2;
 
     for(;;)
     {
@@ -160,16 +167,17 @@ epicsShareFunc int motor_task(struct thread_args *args)
 	    if (time_lapse < scan_sec)
 	    {
 		wait_time = scan_sec - time_lapse;
-		if (wait_time < quantum)		
-		    wait_time = quantum;
+		if (wait_time < half_quantum)
+                    wait_time = 0.0;
 	    }
 	    else
-		wait_time = quantum;
+		wait_time = 0.0;
 	}
 
 	Debug(5, "motor_task: wait_time = %f\n", wait_time);
 
-	sem_ret = tabptr->semptr->wait(wait_time);
+        if (wait_time != 0.0)
+	    sem_ret = tabptr->semptr->wait(wait_time);
 	previous_time = epicsTime::getCurrent();
 
 	if (*tabptr->any_inmotion_ptr)
