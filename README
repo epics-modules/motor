@@ -262,6 +262,28 @@ Modification Log from R6-3 to R6-4
         
         Files modified: OmsSrc/drvMAXv.[cc/h]
 
+11) Fixed OMS MAXv error on ER command.  Replaced UU1.0 command with UF.
+
+        File modified: OmsSrc/devOmsCom.cc
+
+12) Fixed OMS MAXv bug with incorrect scaling of PID parameters reported by
+        Jerome Hosselet (CNRS).
+        
+        File modified: OmsSrc/devOmsCom.cc
+
+13) motorUtilAux.cc was not declaring pdbbase correctly.  Consequently, link
+        errors were occuring with Visual C++.
+        
+        File modified: MotorSrc/motorUtilAux.cc
+
+14) With previous releases, motor_task() would not allow the next polling
+        update to take place without some delay, even if the last update had
+        taken longer than the total time required for the polling rate delay.
+        With this release the motor_task() skips the delay if either the time
+        elapsed since last update is > polling rate delay or if the wait time
+        is < 1/2 the epicsThreadSleepQuantum.
+
+        File modified: MotorSrc/motordrvCom.cc
 
 Modification Log from R6-2 to R6-3
 ==================================
