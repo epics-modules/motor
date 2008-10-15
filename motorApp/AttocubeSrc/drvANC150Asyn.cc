@@ -2,9 +2,9 @@
 FILENAME...     drvANC150Asyn.cc
 USAGE...        Motor record driver level support for Kohzu SC800
 
-Version:        $Revision: 1.1 $
+Version:        $Revision: 1.2 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-09-10 18:50:48 $
+Last Modified:  $Date: 2008-10-15 18:36:12 $
 
 */
 
@@ -126,11 +126,12 @@ typedef struct
     epicsTimeStamp now;
 } motorANC150_t;
 
-
+extern "C" {
 static int motorANC150LogMsg(void *, const motorAxisLogMask_t, const char *, ...);
+}
 static int sendOnly(ANC150Controller *, char *);
 static asynStatus sendAndReceive(ANC150Controller *, char *, char *, int);
-static asynStatus getFreq(ANC150Controller *, int, char *, char *, int);
+static asynStatus getFreq(ANC150Controller *, int);
 
 #define PRINT   (drv.print)
 #define FLOW    motorAxisTraceFlow
@@ -506,7 +507,7 @@ static int motorAxisforceCallback(AXIS_HDL pAxis)
 }
 
 
-static void ANC150Poller(ANC150Controller * pController)
+static void ANC150Poller(ANC150Controller *pController)
 {
     /* This is the task that polls the ANC150 */
     double timeout;
@@ -574,6 +575,9 @@ static void ANC150Poller(ANC150Controller * pController)
             motorParam->setDouble(pAxis->params, motorAxisEncoderPosn, pAxis->currentPosition);
             PRINT(pAxis->logParam, IODRIVER, "ANC150Poller: axis %d axisStatus=%x, position=%f\n",
                   pAxis->axis, pAxis->axisStatus, pAxis->currentPosition);
+
+            /* Update frequency. */
+            getFreq(pController, itera);
 
             motorParam->callCallback(pAxis->params);
             epicsMutexUnlock(pAxis->mutexId);
@@ -678,7 +682,7 @@ int ANC150AsynConfig(int card,              /* Controller number */
     do
     {
         pasynOctetSyncIO->flush(pController->pasynUser);
-        status = sendAndReceive(pController, "ver", inputBuff, sizeof(inputBuff));
+        status = sendAndReceive(pController, (char *) "ver", inputBuff, sizeof(inputBuff));
         if (status == asynSuccess && strncmp(inputBuff, "attocube", 8) == 0)
             strncpy(pController->firmwareVersion, &inputBuff[19], sizeof(inputBuff));
         else
@@ -712,7 +716,7 @@ int ANC150AsynConfig(int card,              /* Controller number */
         pAxis->currentPosition = 0.0;
         pAxis->movetimer = new epicsTime();
         pAxis->moving_ind = false;
-        getFreq(pController, axis, outputBuff, inputBuff, sizeof(inputBuff));
+        getFreq(pController, axis);
         sprintf(outputBuff, "setm %d stp", pAxis->axis + 1);
         status = sendOnly(pAxis->pController, outputBuff);
     }
@@ -782,18 +786,21 @@ static asynStatus sendAndReceive(ANC150Controller *pController, char *outputBuff
 }
 
         
-static asynStatus getFreq(ANC150Controller *pController, int axis,
-                          char *outputBuff, char *inputBuff, int inputSize)
+static asynStatus getFreq(ANC150Controller *pController, int axis)
 {
     AXIS_HDL pAxis;
     asynStatus status;
+    char inputBuff[BUFFER_SIZE];
+    char outputBuff[BUFFER_SIZE];
+    int savedfreq;
 
     sprintf(outputBuff, "getf %d", axis + 1);
-    status = sendAndReceive(pController, outputBuff, inputBuff, inputSize);
+    status = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
     
     pAxis = pController->pAxis;
+    savedfreq = pAxis->frequency;
     if (status != asynSuccess || sscanf(inputBuff, "frequency = %d", &pAxis->frequency) != 1)
-        pAxis->frequency = 1;
+        pAxis->frequency = savedfreq;
     
     return(status);
 }
