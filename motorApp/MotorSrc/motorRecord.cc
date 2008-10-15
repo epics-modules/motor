@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.47 $
+Version:	$Revision: 1.48 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-05-08 21:44:41 $
+Last Modified:	$Date: 2008-10-15 18:04:27 $
 */
 
 /*
@@ -107,6 +107,8 @@ Last Modified:	$Date: 2008-05-08 21:44:41 $
  *                  - NTM logic is restored to using feedbacks; NTMF added.
  * .45 03-24-08 rls - Set DRBV based on RRBV only if URIP = NO.
  * .46 05-08-08 rls - Missing "break" in special().
+ * .47 10-15-08 rls - scanOnce declaration changed from (void * precord) to
+ *                    (struct dbCommon *) with EPICS base R3.14.10
  *
  */
 
@@ -395,7 +397,7 @@ static void callbackFunc(struct callback *pcb)
     {
 	pmr->mip &= ~MIP_DELAY_REQ;	/* Turn off REQ. */
 	pmr->mip |= MIP_DELAY_ACK;	/* Turn on ACK. */
-	scanOnce(pmr);
+	scanOnce((struct dbCommon *) pmr);
     }
 }
 
