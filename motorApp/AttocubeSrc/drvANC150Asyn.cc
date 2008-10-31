@@ -2,9 +2,9 @@
 FILENAME...     drvANC150Asyn.cc
 USAGE...        Motor record driver level support for Kohzu SC800
 
-Version:        $Revision: 1.2 $
+Version:        $Revision: 1.3 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-10-15 18:36:12 $
+Last Modified:  $Date: 2008-10-31 18:30:01 $
 
 */
 
@@ -36,6 +36,10 @@ Last Modified:  $Date: 2008-10-15 18:36:12 $
  * Modification Log:
  * -----------------
  * .01 11-09-07 rls copied from drvMM4000Asyn.cc
+ * .02 10-29-08 rls - added frequency and step mode to polling data.
+ *                  - support for CNEN field.
+ *                  - simulate trajectory positon so RDBL link updates.
+ *                  - allow zero moves so motor record does not get stuck.
  */
 
 
@@ -101,6 +105,7 @@ typedef struct motorAxisHandle
 {
     ANC150Controller *pController;
     PARAMS params;
+    double targetPosition;
     double currentPosition;
     double highLimit;
     double lowLimit;
@@ -114,6 +119,7 @@ typedef struct motorAxisHandle
     bool moving_ind;        /* Moving indicator. */
     epicsMutexId mutexId;
     epicsTime *movetimer;   /* Moving timer. */
+    double moveinterval;    /* Moving delta time (sec). */
     int frequency;
 } motorAxis;
 
@@ -132,6 +138,7 @@ static int motorANC150LogMsg(void *, const motorAxisLogMask_t, const char *, ...
 static int sendOnly(ANC150Controller *, char *);
 static asynStatus sendAndReceive(ANC150Controller *, char *, char *, int);
 static asynStatus getFreq(ANC150Controller *, int);
+static bool stpMode(ANC150Controller *, int);
 
 #define PRINT   (drv.print)
 #define FLOW    motorAxisTraceFlow
@@ -290,17 +297,19 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         {
         case motorAxisPosition:
         {
-            pAxis->currentPosition = value;
+            pAxis->currentPosition = pAxis->targetPosition = value;
             break;
         }
         case motorAxisEncoderRatio:
         {
-            PRINT(pAxis->logParam, motorAxisTraceError, "motorAxisSetDouble: ANC150 does not support setting encoder ratio\n");
+            PRINT(pAxis->logParam, motorAxisTraceError,
+                  "motorAxisSetDouble: ANC150 does not support setting encoder ratio\n");
             break;
         }
         case motorAxisResolution:
         {
-            PRINT(pAxis->logParam, motorAxisTraceError, "motorAxisSetDouble: ANC150 does not support setting resolution\n");
+            PRINT(pAxis->logParam, motorAxisTraceError,
+                  "motorAxisSetDouble: ANC150 does not support setting resolution\n");
             break;
         }
         case motorAxisLowLimit:
@@ -308,17 +317,20 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
             break;
         case motorAxisPGain:
         {
-            PRINT(pAxis->logParam, motorAxisTraceError, "ANC150 does not support setting proportional gain\n");
+            PRINT(pAxis->logParam, motorAxisTraceError,
+                  "ANC150 does not support setting proportional gain\n");
             break;
         }
         case motorAxisIGain:
         {
-            PRINT(pAxis->logParam, motorAxisTraceError, "ANC150 does not support setting integral gain\n");
+            PRINT(pAxis->logParam, motorAxisTraceError,
+                  "ANC150 does not support setting integral gain\n");
             break;
         }
         case motorAxisDGain:
         {
-            PRINT(pAxis->logParam, motorAxisTraceError, "ANC150 does not support setting derivative gain\n");
+            PRINT(pAxis->logParam, motorAxisTraceError,
+                  "ANC150 does not support setting derivative gain\n");
             break;
         }
         case motorAxisClosedLoop:
@@ -332,7 +344,8 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
             break;
         }
         default:
-            PRINT(pAxis->logParam, motorAxisTraceError, "motorAxisSetDouble: unknown function %d\n", function);
+            PRINT(pAxis->logParam, motorAxisTraceError,
+                  "motorAxisSetDouble: unknown function %d\n", function);
             break;
         }
     }
@@ -367,7 +380,8 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
         }
         break;
     default:
-        PRINT(pAxis->logParam, motorAxisTraceError, "motorAxisSetInteger: unknown function %d\n", function);
+        PRINT(pAxis->logParam, motorAxisTraceError,
+              "motorAxisSetInteger: unknown function %d\n", function);
         break;
     }
     if (ret_status != MOTOR_AXIS_ERROR)
@@ -384,11 +398,13 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     char buff[100];
     const char *moveCommand;
     bool posdir;
+    double fmove, ffrequency;
 
     if (pAxis == NULL)
         return(MOTOR_AXIS_ERROR);
 
-    PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f\n",
+    PRINT(pAxis->logParam, FLOW,
+          "Set card %d, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f\n",
           pAxis->card, pAxis->axis, position, min_velocity, max_velocity, acceleration);
 
     if (relative)
@@ -397,7 +413,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
             posdir = true;
         else
             posdir = false;
-        pAxis->currentPosition += position;
+        pAxis->targetPosition += position;
         imove = NINT(position);
     }
     else
@@ -407,19 +423,20 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
             posdir = true;
         else
             posdir = false;
-        pAxis->currentPosition = position;
+        pAxis->targetPosition = position;
     }
     if (posdir == true)
         moveCommand = "stepu";
     else
         moveCommand = "stepd";
 
-    if (imove == 0)
-        return(MOTOR_AXIS_OK);
-
     pAxis->moving_ind = true;
     imove = abs(imove);
-    *pAxis->movetimer = epicsTime::getCurrent() + (imove / pAxis->frequency);
+
+    fmove = (double) imove;
+    ffrequency = (double) pAxis->frequency;
+    pAxis->moveinterval = fmove / ffrequency;
+    *pAxis->movetimer = epicsTime::getCurrent() + pAxis->moveinterval;
 
     sprintf(buff, "%s %d %ld", moveCommand, pAxis->axis + 1, imove);
     status = sendOnly(pAxis->pController, buff);
@@ -435,13 +452,15 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     return(MOTOR_AXIS_OK);
 }
 
-static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocity, double acceleration, int forwards)
+static int motorAxisHome(AXIS_HDL pAxis, double min_velocity,
+                         double max_velocity, double acceleration, int forwards)
 {
     return(MOTOR_AXIS_ERROR);
 }
 
 
-static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double velocity, double acceleration)
+static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity,
+                                 double velocity, double acceleration)
 {
     int status;
 
@@ -455,14 +474,17 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
      * will prevent JOG motion beyond its soft limits
      */
     if (velocity > 0.)
-        status = motorAxisMove(pAxis, pAxis->highLimit, 0, min_velocity, velocity, acceleration);
+        status = motorAxisMove(pAxis, pAxis->highLimit, 0, min_velocity,
+                               velocity, acceleration);
     else
-        status = motorAxisMove(pAxis, pAxis->lowLimit, 0, min_velocity, -velocity, acceleration);
+        status = motorAxisMove(pAxis, pAxis->lowLimit, 0, min_velocity,
+                               -velocity, acceleration);
 
     return(status);
 }
 
-static int motorAxisProfileMove(AXIS_HDL pAxis, int npoints, double positions[], double times[], int relative, int trigger)
+static int motorAxisProfileMove(AXIS_HDL pAxis, int npoints, double positions[],
+                                double times[], int relative, int trigger)
 {
     return(MOTOR_AXIS_ERROR);
 }
@@ -495,7 +517,8 @@ static int motorAxisforceCallback(AXIS_HDL pAxis)
     if (pAxis == NULL)
         return(MOTOR_AXIS_ERROR);
 
-    PRINT(pAxis->logParam, FLOW, "motorAxisforceCallback: request card %d, axis %d status update\n",
+    PRINT(pAxis->logParam, FLOW,
+          "motorAxisforceCallback: request card %d, axis %d status update\n",
           pAxis->card, pAxis->axis);
 
     /* Force a status update. */
@@ -512,6 +535,7 @@ static void ANC150Poller(ANC150Controller *pController)
     /* This is the task that polls the ANC150 */
     double timeout;
     AXIS_HDL pAxis;
+    asynStatus astatus;
     int status;
     int itera;
     int axisDone;
@@ -536,12 +560,14 @@ static void ANC150Poller(ANC150Controller *pController)
              * moving, etc.). Force a minimum number of fast polls, because the
              * controller status might not have changed the first few polls
              */
-            forcedFastPolls = 10;
+            forcedFastPolls = 0;
         }
 
         anyMoving = 0;
         for (itera = 0; itera < pController->numAxes; itera++)
         {
+            double slewposition, proportion;
+
             pAxis = &pController->pAxis[itera];
             if (!pAxis->mutexId)
                 break;
@@ -549,13 +575,27 @@ static void ANC150Poller(ANC150Controller *pController)
             
             if (pAxis->moving_ind == true)
             {
+                double time_remain = *pAxis->movetimer - epicsTime::getCurrent();
+                double delta = pAxis->targetPosition - pAxis->currentPosition;
+
                 axisDone = 0;
                 anyMoving = 1;
-                if (*pAxis->movetimer < epicsTime::getCurrent())
+                if (time_remain < 0.0)
+                {
                     pAxis->moving_ind = false;
+                    slewposition = pAxis->currentPosition = pAxis->targetPosition;
+                }
+                else
+                {
+                    proportion = 1.0 - (time_remain / pAxis->moveinterval);
+                    slewposition = pAxis->currentPosition + (delta * proportion);
+                }
             }
             else
+            {
                 axisDone = 1;
+                slewposition = pAxis->currentPosition = pAxis->targetPosition;
+            }
 
             motorParam->setInteger(pAxis->params, motorAxisDone, axisDone);
             if (pAxis->axisStatus & ANC150_HOME)
@@ -571,13 +611,23 @@ static void ANC150Poller(ANC150Controller *pController)
             else
                 motorParam->setInteger(pAxis->params, motorAxisLowHardLimit, 0);
 
-            motorParam->setDouble(pAxis->params, motorAxisPosition, pAxis->currentPosition);
-            motorParam->setDouble(pAxis->params, motorAxisEncoderPosn, pAxis->currentPosition);
+            motorParam->setDouble(pAxis->params, motorAxisPosition, slewposition);
+            motorParam->setDouble(pAxis->params, motorAxisEncoderPosn, slewposition);
             PRINT(pAxis->logParam, IODRIVER, "ANC150Poller: axis %d axisStatus=%x, position=%f\n",
-                  pAxis->axis, pAxis->axisStatus, pAxis->currentPosition);
+                  pAxis->axis, pAxis->axisStatus, slewposition);
 
             /* Update frequency. */
-            getFreq(pController, itera);
+            astatus = getFreq(pController, itera);
+            if (astatus == asynSuccess)
+                motorParam->setInteger(pAxis->params, motorAxisCommError, 0);
+            else
+                motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
+
+            /* Check power on. */
+            if (stpMode(pController, itera))
+                motorParam->setInteger(pAxis->params, motorAxisPowerOn, 1);
+            else
+                motorParam->setInteger(pAxis->params, motorAxisPowerOn, 0);
 
             motorParam->callCallback(pAxis->params);
             epicsMutexUnlock(pAxis->mutexId);
@@ -590,17 +640,14 @@ static void ANC150Poller(ANC150Controller *pController)
             forcedFastPolls--;
         }
         else if (anyMoving)
-        {
             timeout = pController->movingPollPeriod;
-        }
         else
-        {
             timeout = pController->idlePollPeriod;
-        }
-    }               /* End while */
+    }
 }
 
-static int motorANC150LogMsg(void *param, const motorAxisLogMask_t mask, const char *pFormat,...)
+static int motorANC150LogMsg(void *param, const motorAxisLogMask_t mask,
+                             const char *pFormat,...)
 {
 
     va_list pvar;
@@ -623,7 +670,8 @@ int ANC150AsynSetup(int num_controllers)    /* number of ANC150 controllers in s
         return(MOTOR_AXIS_ERROR);
     }
     numANC150Controllers = num_controllers;
-    pANC150Controller = (ANC150Controller *) calloc(numANC150Controllers, sizeof(ANC150Controller));
+    pANC150Controller = (ANC150Controller *) calloc(numANC150Controllers,
+                                                    sizeof(ANC150Controller));
     return(MOTOR_AXIS_OK);
 }
 
@@ -713,6 +761,8 @@ int ANC150AsynConfig(int card,              /* Controller number */
         pAxis->mutexId = epicsMutexMustCreate();
         pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS);
         motorParam->setInteger(pAxis->params, motorAxisClosedLoop, 1);
+        /* Set motorAxisHasClosedLoop on so the CNEN field works. */
+        motorParam->setInteger(pAxis->params, motorAxisHasClosedLoop, 1);
         pAxis->currentPosition = 0.0;
         pAxis->movetimer = new epicsTime();
         pAxis->moving_ind = false;
@@ -760,7 +810,8 @@ static int sendOnly(ANC150Controller * pController, char *outputBuff)
 }
 
 
-static asynStatus sendAndReceive(ANC150Controller *pController, char *outputBuff, char *inputBuff, int inputSize)
+static asynStatus sendAndReceive(ANC150Controller *pController, char *outputBuff,
+                                 char *inputBuff, int inputSize)
 {
     int nWriteRequested = strlen(outputBuff);
     size_t nWrite, nRead;
@@ -780,7 +831,8 @@ static asynStatus sendAndReceive(ANC150Controller *pController, char *outputBuff
                   outputBuff, status, pController->pasynUser->errorMessage);
     }
     else /* Eat the echo. */
-        status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff, inputSize, TIMEOUT, &nRead, &eomReason);
+        status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff,
+                                        inputSize, TIMEOUT, &nRead, &eomReason);
 
     return(status);
 }
@@ -788,21 +840,69 @@ static asynStatus sendAndReceive(ANC150Controller *pController, char *outputBuff
         
 static asynStatus getFreq(ANC150Controller *pController, int axis)
 {
-    AXIS_HDL pAxis;
     asynStatus status;
     char inputBuff[BUFFER_SIZE];
     char outputBuff[BUFFER_SIZE];
+    size_t nRead;
+    int eomReason;
+    AXIS_HDL pAxis;
     int savedfreq;
 
     sprintf(outputBuff, "getf %d", axis + 1);
     status = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
-    
-    pAxis = pController->pAxis;
-    savedfreq = pAxis->frequency;
-    if (status != asynSuccess || sscanf(inputBuff, "frequency = %d", &pAxis->frequency) != 1)
-        pAxis->frequency = savedfreq;
-    
-    return(status);
+
+    if (status != asynSuccess)
+        return(status);
+    else if (strncmp(inputBuff, "Axis not in computer control mode", 34) == 0) /* Eat the ERROR msg. */
+    {
+        status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff, sizeof(inputBuff),
+                                        TIMEOUT, &nRead, &eomReason);
+        return(status);
+    }
+    else
+    {
+        pAxis = pController->pAxis;
+        savedfreq = pAxis->frequency;
+        if (sscanf(inputBuff, "frequency = %d", &pAxis->frequency) != 1)
+        {
+            pAxis->frequency = savedfreq;
+            pasynOctetSyncIO->flush(pController->pasynUser);
+            return(asynError);
+        }
+        return(asynSuccess);
+    }
+}
+
+        
+static bool stpMode(ANC150Controller *pController, int axis)
+{
+    asynStatus status;
+    char inputBuff[BUFFER_SIZE];
+    char outputBuff[BUFFER_SIZE];
+    size_t nRead;
+    int eomReason;
+    bool rtnstatus;
+
+    sprintf(outputBuff, "getm %d", axis + 1);
+    status = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
+
+    if (strncmp(inputBuff, "mode = stp", 11) == 0)
+        rtnstatus = true;
+    else if (strncmp(inputBuff, "mode = gnd", 11) == 0)
+        rtnstatus = false;
+    else if (strncmp(inputBuff, "Axis not in computer control mode", 34) == 0)
+    {
+        /* Eat the ERROR msg. */
+        status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff,
+                                        sizeof(inputBuff), TIMEOUT, &nRead, &eomReason);
+        rtnstatus = false;
+    }
+    else
+    {
+        pasynOctetSyncIO->flush(pController->pasynUser);
+        rtnstatus = true;
+    }
+    return(rtnstatus);
 }
 
 
