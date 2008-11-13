@@ -6,7 +6,7 @@ include $(TOP)/configure/CONFIG
 
 DIRS += MotorSrc
 
-# Select/deselect individual device/driver modules by adding/removing the
+# Select/deselect individual device driver modules by removing/adding a
 # "#" comment.
 
 DIRS += DeltaTauSrc
@@ -74,6 +74,9 @@ KohzuSrc_DEPEND_DIRS = MotorSrc
 
 DIRS += AttocubeSrc
 AttocubeSrc_DEPEND_DIRS = MotorSrc
+
+DIRS += AerotechSrc
+AerotechSrc_DEPEND_DIRS = MotorSrc
 
 endif
 
