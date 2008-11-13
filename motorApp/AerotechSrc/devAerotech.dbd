@@ -1,0 +1,5 @@
+# Aerotech Ensemble Driver support.
+device(motor,VME_IO,devEnsemble,"Ensemble")
+driver(drvEnsemble)
+registrar(AerotechRegister)
+
