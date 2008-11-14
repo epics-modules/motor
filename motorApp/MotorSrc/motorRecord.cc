@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.48 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-10-15 18:04:27 $
+Version:	$Revision: 1.49 $
+Modified By:	$Author: mp49 $
+Last Modified:	$Date: 2008-11-14 13:39:09 $
 */
 
 /*
@@ -109,6 +109,10 @@ Last Modified:	$Date: 2008-10-15 18:04:27 $
  * .46 05-08-08 rls - Missing "break" in special().
  * .47 10-15-08 rls - scanOnce declaration changed from (void * precord) to
  *                    (struct dbCommon *) with EPICS base R3.14.10
+ * .48 10-27-08 mrp - In alarm_sub test for EA_SLIP_STALL and RA_PROBLEM in MSTA
+ *                    and put record into MAJOR STATE alarm.
+ *                    Fix for the bug where the retry count is not incremented 
+ *                    when doing retries.
  *
  */
 
@@ -2089,7 +2093,9 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    {
 		double velocity, position, accel;
 
-		pmr->mip = MIP_MOVE;
+                /* AJF fix for the bug where the retry count is not incremented when doing retries */
+                /* This bug is seen when we use the readback link field                            */
+		pmr->mip |= MIP_MOVE;
 		MARK(M_MIP);
 		/* v1.96 Don't post dmov if special already did. */
 		if (pmr->dmov)
@@ -3047,6 +3053,12 @@ static void alarm_sub(motorRecord * pmr)
 	MARK(M_MSTA);
 	status = recGblSetSevr((dbCommon *) pmr, COMM_ALARM, INVALID_ALARM);
     }
+
+    if ((msta.Bits.EA_SLIP_STALL != 0) || (msta.Bits.RA_PROBLEM != 0))
+    {
+      status = recGblSetSevr((dbCommon *) pmr, STATE_ALARM, MAJOR_ALARM);
+    }
+
     return;
 }
 
