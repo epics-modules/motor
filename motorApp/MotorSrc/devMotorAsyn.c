@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.24 $
- * Modified by: $Author: sluiter $
- * Last Modified: $Date: 2008-06-04 21:56:30 $
+ * Version: $Revision: 1.25 $
+ * Modified by: $Author: mp49 $
+ * Last Modified: $Date: 2008-11-14 15:18:38 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -566,7 +566,7 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
     if (dbScanLockOK) {
         dbScanLock((dbCommon *)pmr);
         memcpy(&pPvt->status, value, sizeof(struct MotorStatus));
-        if (!pPvt->needUpdate && !pPvt->moveRequestPending) {
+        if (!pPvt->moveRequestPending) {
 	    pPvt->needUpdate = 1;
 	    pmr->rset->process((dbCommon*)pmr);
         }
