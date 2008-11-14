@@ -54,16 +54,16 @@ static long Ensemble_init (void *);
 static long Ensemble_init_record (void *);
 static long Ensemble_start_trans (struct motorRecord *);
 static RTN_STATUS Ensemble_build_trans (motor_cmnd, double *,
-										struct motorRecord *);
+                                        struct motorRecord *);
 static RTN_STATUS Ensemble_end_trans (struct motorRecord *);
 
 struct motor_dset devEnsemble =
 {
-	{8, NULL, (DEVSUPFUN) Ensemble_init, (DEVSUPFUN) Ensemble_init_record, NULL},
-	motor_update_values,
-	Ensemble_start_trans,
-	Ensemble_build_trans,
-	Ensemble_end_trans
+    {8, NULL, (DEVSUPFUN) Ensemble_init, (DEVSUPFUN) Ensemble_init_record, NULL},
+    motor_update_values,
+    Ensemble_start_trans,
+    Ensemble_build_trans,
+    Ensemble_end_trans
 };
 
 extern "C" {epicsExportAddress (dset, devEnsemble);}
@@ -75,29 +75,29 @@ extern "C" {epicsExportAddress (dset, devEnsemble);}
  */
 
 static msg_types Ensemble_table[] = {
-	MOTION,						/* MOVE_ABS */
-	MOTION,						/* MOVE_REL */
-	MOTION,						/* HOME_FOR */
-	MOTION,						/* HOME_REV */
-	IMMEDIATE,					/* LOAD_POS */
-	IMMEDIATE,					/* SET_VEL_BASE */
-	IMMEDIATE,					/* SET_VELOCITY */
-	IMMEDIATE,					/* SET_ACCEL */
-	IMMEDIATE,					/* GO */
-	IMMEDIATE,					/* SET_ENC_RATIO */
-	INFO,						/* GET_INFO */
-	MOVE_TERM,					/* STOP_AXIS */
-	VELOCITY,					/* JOG */
-	IMMEDIATE,					/* SET_PGAIN */
-	IMMEDIATE,					/* SET_IGAIN */
-	IMMEDIATE,					/* SET_DGAIN */
-	IMMEDIATE,					/* ENABLE_TORQUE */
-	IMMEDIATE,					/* DISABL_TORQUE */
-	IMMEDIATE,					/* PRIMITIVE */
-	IMMEDIATE,					/* SET_HIGH_LIMIT */
-	IMMEDIATE,					/* SET_LOW_LIMIT */
-	VELOCITY,					/* JOG_VELOCITY */
-	IMMEDIATE					/* SET_RESOLUTION */
+    MOTION,                     /* MOVE_ABS */
+    MOTION,                     /* MOVE_REL */
+    MOTION,                     /* HOME_FOR */
+    MOTION,                     /* HOME_REV */
+    IMMEDIATE,                  /* LOAD_POS */
+    IMMEDIATE,                  /* SET_VEL_BASE */
+    IMMEDIATE,                  /* SET_VELOCITY */
+    IMMEDIATE,                  /* SET_ACCEL */
+    IMMEDIATE,                  /* GO */
+    IMMEDIATE,                  /* SET_ENC_RATIO */
+    INFO,                       /* GET_INFO */
+    MOVE_TERM,                  /* STOP_AXIS */
+    VELOCITY,                   /* JOG */
+    IMMEDIATE,                  /* SET_PGAIN */
+    IMMEDIATE,                  /* SET_IGAIN */
+    IMMEDIATE,                  /* SET_DGAIN */
+    IMMEDIATE,                  /* ENABLE_TORQUE */
+    IMMEDIATE,                  /* DISABL_TORQUE */
+    IMMEDIATE,                  /* PRIMITIVE */
+    IMMEDIATE,                  /* SET_HIGH_LIMIT */
+    IMMEDIATE,                  /* SET_LOW_LIMIT */
+    VELOCITY,                   /* JOG_VELOCITY */
+    IMMEDIATE                   /* SET_RESOLUTION */
 };
 
 
@@ -109,260 +109,260 @@ static struct board_stat **Ensemble_cards;
 // initialize device support for Ensemble
 static long Ensemble_init (void *arg)
 {
-	long rtnval;
-	int after = (int) arg;
+    long rtnval;
+    int after = (int) arg;
 
-	if(after == 0)
-	{
-		drvtabptr = &Ensemble_access;
-		(drvtabptr->init)();
-	}
+    if (after == 0)
+    {
+        drvtabptr = &Ensemble_access;
+        (drvtabptr->init)();
+    }
 
-	rtnval = motor_init_com(after, *drvtabptr->cardcnt_ptr,
-							drvtabptr, &Ensemble_cards);
-	return (rtnval);
+    rtnval = motor_init_com(after, *drvtabptr->cardcnt_ptr,
+                            drvtabptr, &Ensemble_cards);
+    return(rtnval);
 }
 
 
 // initialize a record instance 
 static long Ensemble_init_record (void *arg)
 {
-	struct motorRecord *mr = (struct motorRecord *) arg;
-	return (motor_init_record_com(mr, *drvtabptr->cardcnt_ptr,
-								  drvtabptr, Ensemble_cards));
+    struct motorRecord *mr = (struct motorRecord *) arg;
+    return(motor_init_record_com(mr, *drvtabptr->cardcnt_ptr,
+                                 drvtabptr, Ensemble_cards));
 }
 
 
 // start building a transaction 
 static long Ensemble_start_trans (struct motorRecord *mr)
 {
-	return (OK);
-	//return (motor_start_trans_com(mr, Ensemble_cards));
+    return(OK);
+    //return (motor_start_trans_com(mr, Ensemble_cards));
 }
 
 
 // end building a transaction 
 static RTN_STATUS Ensemble_end_trans (struct motorRecord * mr)
 {
-	return (OK);
-	//return (motor_end_trans_com(mr, drvtabptr));
+    return(OK);
+    //return (motor_end_trans_com(mr, drvtabptr));
 }
 
 
 // add a part to the transaction
 static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
-										struct motorRecord * mr)
+                                        struct motorRecord * mr)
 {
-	struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
-	struct mess_node *motor_call;
-	struct controller *brdptr;
-	struct mess_info *motor_info;
-	struct Ensemblecontroller *cntrl;
-	char buff[BUFF_SIZE], temp[BUFF_SIZE];
-	int axis, card, maxdigits;
-	unsigned int size;
-	double dval, cntrl_units;
-	RTN_STATUS rtnval;
-	bool send = true;
+    struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
+    struct mess_node *motor_call;
+    struct controller *brdptr;
+    struct mess_info *motor_info;
+    struct Ensemblecontroller *cntrl;
+    char buff[BUFF_SIZE], temp[BUFF_SIZE];
+    int axis, card, maxdigits;
+    unsigned int size;
+    double dval, cntrl_units;
+    RTN_STATUS rtnval;
+    bool send = true;
 
-	rtnval = OK;
-	buff[0] = '\0';
+    rtnval = OK;
+    buff[0] = '\0';
 
-	// Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL).
-	dval = (parms == NULL) ? 0.0 : *parms;
+    // Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL).
+    dval = (parms == NULL) ? 0.0 : *parms;
 
-	motor_start_trans_com(mr, Ensemble_cards);
+    motor_start_trans_com(mr, Ensemble_cards);
 
-	motor_call = &(trans->motor_call);
-	card = motor_call->card;
-	axis = motor_call->signal;
-	brdptr = (*trans->tabptr->card_array)[card];
-	if(brdptr == NULL)
-	{
-		return (rtnval = ERROR);
-	}
+    motor_call = &(trans->motor_call);
+    card = motor_call->card;
+    axis = motor_call->signal;
+    brdptr = (*trans->tabptr->card_array)[card];
+    if (brdptr == NULL)
+    {
+        return(rtnval = ERROR);
+    }
 
-	cntrl = (struct Ensemblecontroller *) brdptr->DevicePrivate;
-	cntrl_units = dval * cntrl->drive_resolution[axis];
-	maxdigits = cntrl->res_decpts[axis];
+    cntrl = (struct Ensemblecontroller *) brdptr->DevicePrivate;
+    cntrl_units = dval * cntrl->drive_resolution[axis];
+    maxdigits = cntrl->res_decpts[axis];
 
-	if(Ensemble_table[command] > motor_call->type)
-	{
-		motor_call->type = Ensemble_table[command];
-	}
+    if (Ensemble_table[command] > motor_call->type)
+    {
+        motor_call->type = Ensemble_table[command];
+    }
 
-	if(trans->state != BUILD_STATE)
-	{
-		return (rtnval = ERROR);
-	}
+    if (trans->state != BUILD_STATE)
+    {
+        return(rtnval = ERROR);
+    }
 
-	switch(command)
-	{
-		case MOVE_ABS:
-		case MOVE_REL:
-		case HOME_FOR:
-		case HOME_REV:
-		case JOG:
-			if(strlen(mr->prem) != 0)
-			{
-				sprintf(temp, "%s%c", mr->prem, ASCII_EOS_CHAR);
-				strcat(motor_call->message, temp);
-			}
-			if(strlen(mr->post) != 0)
-			{
-				motor_call->postmsgptr = (char *) &mr->post;
-			}
-			break;
-		
-		default:
-			break;
-	}
+    switch (command)
+    {
+    case MOVE_ABS:
+    case MOVE_REL:
+    case HOME_FOR:
+    case HOME_REV:
+    case JOG:
+        if (strlen(mr->prem) != 0)
+        {
+            sprintf(temp, "%s%c", mr->prem, ASCII_EOS_CHAR);
+            strcat(motor_call->message, temp);
+        }
+        if (strlen(mr->post) != 0)
+        {
+            motor_call->postmsgptr = (char *) &mr->post;
+        }
+        break;
 
-	switch(command)
-	{
-		case MOVE_ABS:
-			sprintf(buff, "MOVEABS @%d %.*f",
-				axis, maxdigits, cntrl_units);
-			break;
-		case MOVE_REL:
-			sprintf(buff, "MOVEINC @%d %.*f",
-				axis, maxdigits, cntrl_units);
-			break;
+    default:
+        break;
+    }
 
-		case HOME_FOR:
-		case HOME_REV:
-			sprintf(buff, "HOME @%d", axis);
-			break;
+    switch (command)
+    {
+    case MOVE_ABS:
+        sprintf(buff, "MOVEABS @%d %.*f",
+                axis, maxdigits, cntrl_units);
+        break;
+    case MOVE_REL:
+        sprintf(buff, "MOVEINC @%d %.*f",
+                axis, maxdigits, cntrl_units);
+        break;
 
-		case LOAD_POS:
-			sprintf(buff, "MOVEABS @%d %*.f%cWAIT MOVEDONE @%d%cSETPOSCMD @%d, 0",
-				axis, maxdigits, cntrl_units, ASCII_EOS_CHAR, axis, ASCII_EOS_CHAR, axis);
-			break;
+    case HOME_FOR:
+    case HOME_REV:
+        sprintf(buff, "HOME @%d", axis);
+        break;
 
-		case SET_VEL_BASE:
-			send = false;
-			break;					// Ensemble does not use base velocity
+    case LOAD_POS:
+        sprintf(buff, "MOVEABS @%d %*.f%cWAIT MOVEDONE @%d%cSETPOSCMD @%d, 0",
+                axis, maxdigits, cntrl_units, ASCII_EOS_CHAR, axis, ASCII_EOS_CHAR, axis);
+        break;
 
-		case SET_VELOCITY:
-			sprintf(buff, "SETPARM @%d, 102, %.*f", //DefaultSpeed
-				axis, maxdigits, cntrl_units);
-			break;
+    case SET_VEL_BASE:
+        send = false;
+        break;                  // Ensemble does not use base velocity
 
-		case SET_ACCEL:
-			sprintf(buff, "SETPARM @%d, 103, %.*f", //DefaultRampRate
-				axis, maxdigits, cntrl_units);
-			break;
+    case SET_VELOCITY:
+        sprintf(buff, "SETPARM @%d, 102, %.*f", //DefaultSpeed
+                axis, maxdigits, cntrl_units);
+        break;
 
-		case GO:
-			/*
-			 * The Ensemble starts moving immediately on move commands, GO command
-			 * does nothing
-			 */
-			send = false;
-			break;
+    case SET_ACCEL:
+        sprintf(buff, "SETPARM @%d, 103, %.*f", //DefaultRampRate
+                axis, maxdigits, cntrl_units);
+        break;
 
-		case SET_ENC_RATIO:
-			//sprintf(buff, "SETPARM @%d, 3, %.*f", //PosScaleFactor
-			//	axis, maxdigits, cntrl_units);
-			send = false;
-			break;
+    case GO:
+        /*
+         * The Ensemble starts moving immediately on move commands, GO command
+         * does nothing
+         */
+        send = false;
+        break;
 
-		case GET_INFO:
-			/*
-			 * These commands are not actually done by sending a message, but
-			 * rather they will indirectly cause the driver to read the status
-			 * of all motors 
-			 */
-			break;
+    case SET_ENC_RATIO:
+        //sprintf(buff, "SETPARM @%d, 3, %.*f", //PosScaleFactor
+        //	axis, maxdigits, cntrl_units);
+        send = false;
+        break;
 
-		case STOP_AXIS:
-			sprintf(buff, "ABORT @%d", axis);
-			break;
+    case GET_INFO:
+        /*
+         * These commands are not actually done by sending a message, but
+         * rather they will indirectly cause the driver to read the status
+         * of all motors 
+         */
+        break;
 
-		case JOG_VELOCITY:
-		case JOG:
-			sprintf(buff, "FREERUN @%d %.*f", axis, maxdigits, dval > 0. ? mr->jvel : mr->jvel * -1);
-			break;
+    case STOP_AXIS:
+        sprintf(buff, "ABORT @%d", axis);
+        break;
 
-		case SET_PGAIN:
-			sprintf(buff, "SETPARM @%d, 8, %.*f", //GainKp
-				axis, maxdigits, dval);
-			break;
+    case JOG_VELOCITY:
+    case JOG:
+        sprintf(buff, "FREERUN @%d %.*f", axis, maxdigits, dval > 0. ? mr->jvel : mr->jvel * -1);
+        break;
 
-		case SET_IGAIN:
-			sprintf(buff, "SETPARM @%d, 7, %.*f", //GainKi
-				axis, maxdigits, dval);
-			break;
+    case SET_PGAIN:
+        sprintf(buff, "SETPARM @%d, 8, %.*f", //GainKp
+                axis, maxdigits, dval);
+        break;
 
-		case SET_DGAIN:
-			sprintf(buff, "SETPARM @%d, 12, %.*f", //GainKpi
-				axis, maxdigits, dval);	// which gain??
-			break;
+    case SET_IGAIN:
+        sprintf(buff, "SETPARM @%d, 7, %.*f", //GainKi
+                axis, maxdigits, dval);
+        break;
 
-		case ENABLE_TORQUE:
-			sprintf(buff, "ENABLE @%d", axis);
-			break;
+    case SET_DGAIN:
+        sprintf(buff, "SETPARM @%d, 12, %.*f", //GainKpi
+                axis, maxdigits, dval); // which gain??
+        break;
 
-		case DISABL_TORQUE:
-			sprintf(buff, "DISABLE @%d", axis);
-			break;
-		
-		case PRIMITIVE:
-			if(mr->init != NULL && strlen(mr->init) != 0)
-			{
-				strcat(motor_call->message, mr->init);
-			}
-			break;
+    case ENABLE_TORQUE:
+        sprintf(buff, "ENABLE @%d", axis);
+        break;
 
-		case SET_HIGH_LIMIT:
-			sprintf(buff, "SETPARM(@%d, 48, %*.f)", axis, maxdigits, cntrl_units); //ThresholdSoftCW
-			//motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
-			//trans->state = IDLE_STATE;	// No command sent to the controller.
+    case DISABL_TORQUE:
+        sprintf(buff, "DISABLE @%d", axis);
+        break;
 
-			//if(cntrl_units > motor_info->high_limit)
-			//{
-			//	mr->dhlm = motor_info->high_limit;
-			//	rtnval = ERROR;
-			//}
-			//send = false;
-			break;
+    case PRIMITIVE:
+        if (mr->init != NULL && strlen(mr->init) != 0)
+        {
+            strcat(motor_call->message, mr->init);
+        }
+        break;
 
-		case SET_LOW_LIMIT:
-			sprintf(buff, "SETPARM(@%d, 47, %*.f)", axis, maxdigits, cntrl_units); //ThresholdSoftCCW
-			//motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
-			//trans->state = IDLE_STATE;	// No command sent to the controller.
+    case SET_HIGH_LIMIT:
+        sprintf(buff, "SETPARM(@%d, 48, %*.f)", axis, maxdigits, cntrl_units); //ThresholdSoftCW
+        //motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
+        //trans->state = IDLE_STATE;	// No command sent to the controller.
 
-			//if(cntrl_units < motor_info->low_limit)
-			//{
-			//	mr->dllm = motor_info->low_limit;
-			//	rtnval = ERROR;
-			//}
-			//send = false;
-			break;
-		
-		case SET_RESOLUTION:
-			sprintf(buff, "SETPARM @%d, 3, %.*f", //PosScaleFactor
-				axis, maxdigits, 1 / cntrl_units);
-			break;
+        //if(cntrl_units > motor_info->high_limit)
+        //{
+        //	mr->dhlm = motor_info->high_limit;
+        //	rtnval = ERROR;
+        //}
+        //send = false;
+        break;
 
-		default:
-			send = false;
-			rtnval = ERROR;
-	}
+    case SET_LOW_LIMIT:
+        sprintf(buff, "SETPARM(@%d, 47, %*.f)", axis, maxdigits, cntrl_units); //ThresholdSoftCCW
+        //motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
+        //trans->state = IDLE_STATE;	// No command sent to the controller.
 
-	if(send)
-	{
-		size = strlen (buff);
-		if(size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
-		{
-			errlogMessage("Ensemble_build_trans(): buffer overflow.\n");
-		}
-		else
-		{
-			strcat(motor_call->message, buff);
-			motor_end_trans_com(mr, drvtabptr);
-		}
-	}
+        //if(cntrl_units < motor_info->low_limit)
+        //{
+        //	mr->dllm = motor_info->low_limit;
+        //	rtnval = ERROR;
+        //}
+        //send = false;
+        break;
 
-	return (rtnval);
+    case SET_RESOLUTION:
+        sprintf(buff, "SETPARM @%d, 3, %.*f", //PosScaleFactor
+                axis, maxdigits, 1 / cntrl_units);
+        break;
+
+    default:
+        send = false;
+        rtnval = ERROR;
+    }
+
+    if (send)
+    {
+        size = strlen (buff);
+        if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
+        {
+            errlogMessage("Ensemble_build_trans(): buffer overflow.\n");
+        }
+        else
+        {
+            strcat(motor_call->message, buff);
+            motor_end_trans_com(mr, drvtabptr);
+        }
+    }
+
+    return(rtnval);
 }
