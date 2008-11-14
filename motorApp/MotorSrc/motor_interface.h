@@ -325,6 +325,7 @@ typedef enum
     motorAxisHasClosedLoop,    /**< Motor supports closed-loop position control. */
     motorAxisCommError,        /**< Controller communication error. */
     motorAxisLowHardLimit,     /**< minus limit switch has been hit */
+    motorAxisHomed,            /**< Motor has been homed.*/
     motorAxisDeferMoves,       /**< Moves are not executed immediately, but are deferred until this parameter is set to zero */
     motorAxisLastParam
 } motorAxisParam_t;
@@ -519,6 +520,7 @@ typedef int (*motorAxisSetIntegerFunc)( AXIS_HDL pAxis,  motorAxisParam_t, int )
 */
 
 #ifdef DEFINE_MOTOR_PROTOTYPES
+    /* XXXX Change the motorAxisParam_t to int */
 static int motorAxisSetInteger( AXIS_HDL pAxis, motorAxisParam_t function, int value );
 #endif
 
@@ -670,7 +672,7 @@ typedef int (*motorAxisProfileMoveFunc)( AXIS_HDL pAxis, int npoints, double pos
 
     The motion along the profile will not start until triggered. If
     the relative parameter is zero (i.e. the positions indicated are
-    absolute), then the controller should immediately move the the
+    absolute), then the controller should immediately move to the
     first position and stop awaiting the trigger.
 
     The trigger parameter defines when to initiate the motion along

@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.20 $
- * Modified by: $Author: peterd $
- * Last Modified: $Date: 2008-05-20 15:39:58 $
+ * Version: $Revision: 1.21 $
+ * Modified by: $Author: mp49 $
+ * Last Modified: $Date: 2008-11-14 14:27:41 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -102,6 +102,7 @@ static motorCommandStruct motorCommands[] = {
     {motorStatusGainSupport, "STATUS_GAINSUPPORT"},
     {motorStatusCommsError, "STATUS_COMMSERROR"},
     {motorStatusLowLimit, "STATUS_LOWLIMIT"},
+    {motorStatusHomed, "STATUS_HOMED"},
 };
 
 typedef enum{typeInt32, typeFloat64, typeFloat64Array} dataType;
@@ -799,7 +800,7 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
        correct */
     for (i = 0; i < nChanged; i++) {
 	if (changed[i] >= motorAxisDirection && 
-	    changed[i] <= motorAxisLowHardLimit) {
+	    changed[i] <= motorAxisHomed) {
 	    bit_num = changed[i] - motorAxisDirection;
 	    changedmask |= (1 << bit_num);
 	    (*pPvt->drvset->getInteger)(pAxis->axis, changed[i], &ivalue);
