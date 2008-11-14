@@ -2407,7 +2407,7 @@ below.
 	    POSITION: closed-loop position control is enabled.
 	  </li>
 	  <li>
-	    Unused
+	    SLIP_STALL: Slip/Stall detected (eg. fatal following error)
 	  </li>
 	  <li>
 	    HOME: if at home position.
@@ -2416,7 +2416,7 @@ below.
 	    PRESENT: encoder is present.
 	  </li>
 	  <li>
-	    PROBLEM: driver stopped polling.
+	    PROBLEM: driver stopped polling, or hardware problem
 	  </li>
 	  <li>
 	    MOVING: non-zero velocity present.
@@ -2428,10 +2428,15 @@ below.
 	    COMM_ERR: Controller communication error.
 	  </li>
 	  <li>
-	    MINUS_LS: minus limit switch has been hit.<br>
+	    MINUS_LS: minus limit switch has been hit.
 	  </li>
-
+	  <li>
+	    HOMED: the motor has been homed.<br>
+	  </li>
 	</ol>
+	The record is put into MAJOR STATE alarm if either SLIP_STALL or PROBLEM bits are detected. 
+	If HLSV is set, then the record is put into HIGH alarm if either a high soft limit or 
+	hard limit (PLUS_LS) has been reached. Similary for the low limits.
       </blockquote>
     </td>
   </tr>
