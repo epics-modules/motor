@@ -1,15 +1,16 @@
 /*
- *	FILENAME... devEnsemble.cc
- *	USAGE... Motor record device level support for Aerotech Ensemble.
+ * FILENAME... devEnsemble.cc
+ * USAGE... Motor record device level support for Aerotech Ensemble.
  *
- *	Version: 1.0
- *	Modified By: weimer
- *	Last Modified: 2008/04/10 05:52:03 PM
+ * Version:        $Revision: 1.3 $
+ * Modified By:    $Author: sluiter $
+ * Last Modified:  $Date: 2008-11-18 15:58:21 $
  */
 
 /*
- *	Original Author: Mark Rivers
- *	Date: 10/20/97
+ *      Original Author: Chad Weimer
+ *      Date: 04/04/08
+ *	Current Author: Chad Weimer
  *
  *	Experimental Physics and Industrial Control System (EPICS)
  *
@@ -235,8 +236,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
         break;
 
     case LOAD_POS:
-        sprintf(buff, "MOVEABS @%d %*.f%cWAIT MOVEDONE @%d%cSETPOSCMD @%d, 0",
-                axis, maxdigits, cntrl_units, ASCII_EOS_CHAR, axis, ASCII_EOS_CHAR, axis);
+        sprintf(buff, "SETPOSCMD @%d, %.*f", axis, maxdigits, cntrl_units);
         break;
 
     case SET_VEL_BASE:
