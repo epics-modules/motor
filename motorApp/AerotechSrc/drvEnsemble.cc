@@ -2,15 +2,15 @@
 FILENAME... drvEnsemble.cc
 USAGE...    Motor record driver level support for Aerotech Ensemble.
 
-Version:    1.00
-Modified By:    weimer
-Last Modified:  2008/04/10 05:51:48 PM
+Version:        $Revision: 1.3 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2008-11-18 15:59:05 $
 */
 
 /*
- *      Original Author: Mark Rivers
- *      Date: 10/20/97
- *		Current Author: Chad Weimer
+ *      Original Author: Chad Weimer
+ *      Date: 04/04/08
+ *	Current Author: Chad Weimer
  *
  *      Experimental Physics and Industrial Control System (EPICS)
  *
@@ -35,7 +35,7 @@ Last Modified:  2008/04/10 05:51:48 PM
  *
  * Modification Log:
  * -----------------
- * .01	04-04-08	caw		initialized from drvMM4000.cc (Newport)
+ * .01	04-04-08 caw initialized from drvMM4000.cc (Newport)
  */
 
 
@@ -633,6 +633,7 @@ static int motor_init()
                         motor_info->no_motion_count = 0;
                         motor_info->encoder_position = 0;
                         motor_info->position = 0;
+                        brdptr->motor_info[motor_index].motor_motion = NULL;
 
                         // Determine if encoder present based on open/closed loop mode.
                         sprintf(buff, "GETPARM(@%d, 58)", motor_index); //CfgFbkPosType
