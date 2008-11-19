@@ -1,7 +1,7 @@
 
 file {
-	name="/home/epics/devel/motor/5-7beta/motorApp/op/adl/motorx_all.adl"
-	version=030000
+	name="/home/oxygen1/HAMMONDS/CVS/synApps/support/motor/motorApp/op/adl/motorx_all.adl"
+	version=030102
 }
 display {
 	object {
@@ -3002,4 +3002,20 @@ text {
 	format="string"
 	limits {
 	}
+}
+"related display" {
+	object {
+		x=346
+		y=558
+		width=93
+		height=18
+	}
+	display[0] {
+		label="MSTA_Detail"
+		name="motorx_msta_detail.adl"
+		args="P=$(P),M=$(M)"
+	}
+	clr=54
+	bclr=3
+	visual="invisible"
 }
