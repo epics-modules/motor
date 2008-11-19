@@ -1,8 +1,8 @@
 # FILENAME...	motorRecord.dbd
 
-# Version:		$Revision: 1.18 $
+# Version:		$Revision: 1.19 $
 # Modified By:		$Author: sluiter $
-# Last Modified:	$Date: 2008-03-11 16:20:40 $
+# Last Modified:	$Date: 2008-11-19 21:07:10 $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -64,6 +64,11 @@ menu(motorSTUP) {
 	choice(motorSTUP_OFF, "OFF")
 	choice(motorSTUP_ON,  "ON")
 	choice(motorSTUP_BUSY,"BUSY")
+}
+menu(motorRMOD) {
+	choice(motorRMOD_D,"Default")
+	choice(motorRMOD_A,"Arthmetic")
+	choice(motorRMOD_G,"Geometric")
 }
 
 include "menuOmsl.dbd"
@@ -753,5 +758,12 @@ recordtype(motor) {
 		special(SPC_MOD)
 		interest(3)
 		initial("OFF")
+	}
+	field(RMOD,DBF_MENU) {
+                initial("Default")
+		promptgroup(GUI_COMMON)
+                prompt("Retry Mode")
+		interest(1)
+                menu(motorRMOD)
 	}
 }
