@@ -40,3 +40,9 @@ driver(drvPIE516)
 registrar(PIE516motorRegister)
 variable(drvPIE516debug)
 
+# Physik Instrumente (PI) GmbH & Co. E-816 driver support.
+device(motor,VME_IO,devPIE816,"PIE816")
+driver(drvPIE816)
+registrar(PIE816motorRegister)
+variable(drvPIE816debug)
+

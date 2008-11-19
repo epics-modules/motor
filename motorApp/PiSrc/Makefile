@@ -18,6 +18,7 @@ SRCS += devPIC662.cc drvPIC662.cc PIC662Register.cc
 SRCS += devPIC862.cc drvPIC862.cc PIC862Register.cc
 SRCS += devPIE710.cc drvPIE710.cc PIE710Register.cc
 SRCS += devPIE516.cc drvPIE516.cc PIE516Register.cc
+SRCS += devPIE816.cc drvPIE816.cc PIE816Register.cc
 
 
 PI_LIBS += motor asyn
