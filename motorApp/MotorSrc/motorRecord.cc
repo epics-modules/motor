@@ -2,9 +2,9 @@
 FILENAME...	motorRecord.cc
 USAGE...	Motor Record Support.
 
-Version:	$Revision: 1.49 $
-Modified By:	$Author: mp49 $
-Last Modified:	$Date: 2008-11-14 13:39:09 $
+Version:	$Revision: 1.50 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-11-19 21:06:43 $
 */
 
 /*
@@ -113,8 +113,11 @@ Last Modified:	$Date: 2008-11-14 13:39:09 $
  *                    and put record into MAJOR STATE alarm.
  *                    Fix for the bug where the retry count is not incremented 
  *                    when doing retries.
- *
- */
+ * .49 11-19-08 rls - RMOD field added for arthmetic and geometric sequence
+ *                    retries; i.e., 10/10, 9/10, 8/10,...
+ *                  - post changes to TWF/TWR.
+ *                  - ramifications of ORing MIP_MOVE with MIP_RETRY.
+ */                                                        
 
 #define VERSION 6.4
 
@@ -1011,9 +1014,9 @@ LOGIC:
 	Call process_motor_info().
 	IF motor-in-motion indicator (MOVN) is true.
 	    Set the Done Moving field (DMOV) FALSE, and mark it as changed, if not already
-	    IF new target position in opposite direction of current motion.
+	    IF [New target monitoring is enabled], AND,
 	       [Sign of RDIF is NOT the same as sign of CDIR], AND,
-	       [Dist. to target {DIFF} > (NTMF x (|BDST| + RDBD)], AND,
+	       [|Dist. to target| > (NTMF x (|BDST| + RDBD)], AND,
 	       [MIP indicates this move is either (a result of a retry),OR,
 	    		(not from a Jog* or Hom*)]
 		Send Stop Motor command.
@@ -1137,6 +1140,12 @@ static long process(dbCommon *arg)
 	{
 	    int sign_rdif = (pmr->rdif < 0) ? 0 : 1;
             double ntm_deadband =  pmr->ntmf * (fabs(pmr->bdst) + pmr->rdbd);
+            bool move_or_retry;
+            
+            if ((pmr->mip & MIP_RETRY) != 0 || (pmr->mip & MIP_MOVE) != 0)
+                move_or_retry = true;
+            else
+                move_or_retry = false;
 
 	    /* Since other sources can now initiate motor moves (e.g. Asyn
 	     * motors, written to by other records), make dmov track the state
@@ -1154,9 +1163,9 @@ static long process(dbCommon *arg)
 	       motion.
 	     */	    
 	    if (pmr->ntm == menuYesNoYES &&
-		(sign_rdif != pmr->cdir) &&
-		(fabs(pmr->diff) > ntm_deadband) &&
-		(pmr->mip == MIP_RETRY || pmr->mip == MIP_MOVE))
+                (sign_rdif != pmr->cdir) &&
+                (fabs(pmr->diff) > ntm_deadband) &&
+                (move_or_retry == true))
 	    {
 
 		/* We're going in the wrong direction. Readback problem? */
@@ -1486,7 +1495,9 @@ LOGIC:
 	    ELSE
 		Set "use relative move" indicator (use_rel) to false.
 	    ENDIF
-
+	    
+            Set VAL and RVAL based on DVAL; mark VAL and RVAL for posting.
+            
 	    IF new raw commanded position = current raw feedback position.
 		IF not done moving, AND, [either no motion-in-progress, OR,
 					    retry-in-progress].
@@ -1497,8 +1508,6 @@ LOGIC:
 		ENDIF
 	    ENDIF
 
-	    Set VAL and RVAL based on DVAL; mark DVAL, VAL and RVAL for
-	    dbposting.
 
 	    IF this is not a retry.
 		Reset retry counter and mark RCNT for dbposting.
@@ -1606,7 +1615,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		if ((pmr->mip == MIP_DONE) || (pmr->mip & MIP_STOP) ||
 		    (pmr->mip & MIP_RETRY))
 		{
-		    if (pmr->mip == MIP_RETRY)
+		    if (pmr->mip & MIP_RETRY)
 		    {
 			pmr->mip = MIP_DONE;
 			MARK(M_MIP);
@@ -1906,9 +1915,15 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 	    pmr->val += pmr->twv * (pmr->twf ? 1 : -1);
 	    /* Later, we'll act on this. */
 	    if (pmr->twf)
+            {
 		pmr->twf = 0;
+                db_post_events(pmr, &pmr->twf, DBE_VAL_LOG);
+            }
 	    if (pmr->twr)
+            {
 		pmr->twr = 0;
+                db_post_events(pmr, &pmr->twr, DBE_VAL_LOG);
+            }
 	}
 	/*
 	 * New relative value.  Someone has poked a value into the "move
@@ -2082,6 +2097,33 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		pmr->rcnt = 0;
 		MARK(M_RCNT);
 	    }
+            else if (pmr->rmod == motorRMOD_A) /* Do arthmetic sequence retries. */
+            {
+                double factor = (pmr->rtry - pmr->rcnt + 1.0) / pmr->rtry;
+                
+                relpos *= factor;
+                if (fabs(relpos) < 1.0)
+                    relpos = (relpos > 0.0) ? 1.0 : -1.0;
+                
+                relbpos *= factor;
+                if (fabs(relbpos) < 1.0)
+                    relbpos = (relbpos > 0.0) ? 1.0 : -1.0;
+            }
+            else if (pmr->rmod == motorRMOD_G) /* Do geometric sequence retries. */
+            {
+                double factor;
+
+                factor = 1 / pow(2.0, (pmr->rcnt - 1));
+
+                relpos *= factor;
+                if (fabs(relpos) < 1.0)
+                    relpos = (relpos > 0.0) ? 1.0 : -1.0;
+                
+                relbpos *= factor;
+                if (fabs(relbpos) < 1.0)
+                    relbpos = (relbpos > 0.0) ? 1.0 : -1.0;
+            }
+            
 
 	    if (((use_rel == false) && ((pmr->dval > pmr->ldvl) == (pmr->bdst > 0))) ||
 		((use_rel == true)  && ((pmr->diff > 0)         == (pmr->bdst > 0))))
@@ -2156,7 +2198,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 			position = relbpos;
 		    else
 			position = bpos;
-		    pmr->pp = TRUE;	/* Do backlash from posprocess(). */
+                    if ((pmr->mip & MIP_RETRY) == 0) /* If this is not a retry, */
+                        pmr->pp = TRUE;	             /* do backlash from posprocess(). */
 		}
 
 		pmr->cdir = (pmr->rdif < 0.0) ? 0 : 1;
@@ -2164,7 +2207,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 		WRITE_MSG(SET_VELOCITY, &velocity);
 		if (accel > 0.0)	/* Don't SET_ACCEL = 0.0 */
 		    WRITE_MSG(SET_ACCEL, &accel);
-		if (use_rel == true)
+                if (use_rel == true)
 		    WRITE_MSG(MOVE_REL, &position);
 		else
 		    WRITE_MSG(MOVE_ABS, &position);
