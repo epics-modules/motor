@@ -2,9 +2,9 @@
 FILENAME...     drvANC150Asyn.cc
 USAGE...        Motor record driver level support for Kohzu SC800
 
-Version:        $Revision: 1.3 $
+Version:        $Revision: 1.4 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-10-31 18:30:01 $
+Last Modified:  $Date: 2008-11-19 21:29:32 $
 
 */
 
@@ -40,6 +40,10 @@ Last Modified:  $Date: 2008-10-31 18:30:01 $
  *                  - support for CNEN field.
  *                  - simulate trajectory positon so RDBL link updates.
  *                  - allow zero moves so motor record does not get stuck.
+ * .03 11-19-08 rls - change input EOS to prompt ">".
+ *                  - support enable/disable "torque".
+ *                  - zero move bug fix.
+ *                  - set firmwareVersion.
  */
 
 
@@ -64,7 +68,7 @@ Last Modified:  $Date: 2008-10-31 18:30:01 $
 
 /* End-of-string defines */
 #define ANC150_OUT_EOS   "\r\n" /* Command */
-#define ANC150_IN_EOS    "\r\n"  /* Reply */
+#define ANC150_IN_EOS    "> "   /* Reply   */
 
 #define NINT(f)	(long)((f)>0 ? (f)+0.5 : (f)-0.5)	/* Nearest integer. */
 
@@ -287,7 +291,6 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 {
     int ret_status = MOTOR_AXIS_ERROR;
     int status;
-    char buff[20];
 
     if (pAxis == NULL)
         return(MOTOR_AXIS_ERROR);
@@ -333,16 +336,6 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
                   "ANC150 does not support setting derivative gain\n");
             break;
         }
-        case motorAxisClosedLoop:
-        {
-            if (value == 0.0)
-                sprintf(buff, "setm %d gnd", pAxis->axis + 1);
-            else
-                sprintf(buff, "setm %d stp", pAxis->axis + 1);
-
-            status = sendOnly(pAxis->pController, buff);
-            break;
-        }
         default:
             PRINT(pAxis->logParam, motorAxisTraceError,
                   "motorAxisSetDouble: unknown function %d\n", function);
@@ -358,6 +351,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
 {
     int ret_status = MOTOR_AXIS_ERROR;
     int status;
+    char buff[20];
 
     if (pAxis == NULL)
         return(MOTOR_AXIS_ERROR);
@@ -365,20 +359,14 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     switch (function)
     {
     case motorAxisClosedLoop:
-        if (value)
-        {
-            /*
-             * The ANC150 only allows turning on and off ALL motors (MO and MF
-             * commands), not individual axes
-             */
-            /* Don't implement */
-            ret_status = MOTOR_AXIS_OK;
-        }
+        if (value == 0.0)
+            sprintf(buff, "setm %d gnd", pAxis->axis + 1);
         else
-        {
-            ret_status = MOTOR_AXIS_OK;
-        }
+            sprintf(buff, "setm %d stp", pAxis->axis + 1);
+
+        ret_status = sendOnly(pAxis->pController, buff);
         break;
+
     default:
         PRINT(pAxis->logParam, motorAxisTraceError,
               "motorAxisSetInteger: unknown function %d\n", function);
@@ -436,6 +424,8 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     fmove = (double) imove;
     ffrequency = (double) pAxis->frequency;
     pAxis->moveinterval = fmove / ffrequency;
+    if (pAxis->moveinterval <= 0.0)
+        pAxis->moveinterval = epicsThreadSleepQuantum();
     *pAxis->movetimer = epicsTime::getCurrent() + pAxis->moveinterval;
 
     sprintf(buff, "%s %d %ld", moveCommand, pAxis->axis + 1, imove);
@@ -509,6 +499,10 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
     status = sendOnly(pAxis->pController, buff);
     if (status)
         return(MOTOR_AXIS_ERROR);
+    
+    /* Reset timer; indicating move is done. */
+    *pAxis->movetimer = epicsTime::getCurrent();
+
     return(MOTOR_AXIS_OK);
 }
 
@@ -691,8 +685,6 @@ int ANC150AsynConfig(int card,              /* Controller number */
     int retry = 0;
     char inputBuff[BUFFER_SIZE];
     char outputBuff[BUFFER_SIZE];
-    size_t nRead;
-    int eomReason;
 
     if (numANC150Controllers < 1)
     {
@@ -724,8 +716,8 @@ int ANC150AsynConfig(int card,              /* Controller number */
     }
 
     /* Set command End-of-string */
-    pasynOctetSyncIO->setInputEos(pController->pasynUser,  ANC150_IN_EOS,strlen(ANC150_IN_EOS));
-    pasynOctetSyncIO->setOutputEos(pController->pasynUser, ANC150_OUT_EOS,strlen(ANC150_OUT_EOS));
+    pasynOctetSyncIO->setInputEos(pController->pasynUser,  ANC150_IN_EOS,  strlen(ANC150_IN_EOS));
+    pasynOctetSyncIO->setOutputEos(pController->pasynUser, ANC150_OUT_EOS, strlen(ANC150_OUT_EOS));
 
     do
     {
@@ -742,11 +734,6 @@ int ANC150AsynConfig(int card,              /* Controller number */
     if (status != asynSuccess)
         return(MOTOR_AXIS_ERROR);
 
-    status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff, sizeof(inputBuff),
-                                    TIMEOUT, &nRead, &eomReason);
-    strcat(pController->firmwareVersion, "  ");
-    strcat(pController->firmwareVersion, inputBuff);
-    pasynOctetSyncIO->flush(pController->pasynUser);
 
     /* Don't initialize pAxis until all the error checks have passed;
      * prevents drvAsynMotorConfigure from crashing. */
@@ -794,17 +781,16 @@ static int sendOnly(ANC150Controller * pController, char *outputBuff)
     status = pasynOctetSyncIO->writeRead(pController->pasynUser, outputBuff, nRequested,
                                          inputBuff, sizeof(inputBuff), TIMEOUT, &nActual,
                                          &nRead, &eomReason);
+    
     if (nActual != (size_t) nRequested)
         status = asynError;
+
     if (status != asynSuccess)
     {
         asynPrint(pController->pasynUser, ASYN_TRACE_ERROR,
                   "drvANC150Asyn:sendOnly: error sending command %d, sent=%d, status=%d\n",
                   outputBuff, nActual, status);
     }
-    else /* Eat the echo. */
-        status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff, sizeof(inputBuff),
-                                        TIMEOUT, &nRead, &eomReason);
 
     return(status);
 }
@@ -817,22 +803,42 @@ static asynStatus sendAndReceive(ANC150Controller *pController, char *outputBuff
     size_t nWrite, nRead;
     int eomReason;
     asynStatus status;
+    char localbuf[BUFFER_SIZE];
 
-    status = pasynOctetSyncIO->writeRead(pController->pasynUser,
-                                         outputBuff, nWriteRequested,
-                                         inputBuff, inputSize,
+    status = pasynOctetSyncIO->writeRead(pController->pasynUser, outputBuff,
+                                         nWriteRequested, localbuf, BUFFER_SIZE,
                                          TIMEOUT, &nWrite, &nRead, &eomReason);
-    if (nWrite != (size_t) nWriteRequested)
-        status = asynError;
+
+    if (status == asynSuccess)
+    {
+        if (nWrite != (size_t) nWriteRequested ||
+            strncmp(outputBuff, localbuf, nWrite) != 0)
+            status = asynError;
+    }
+
+    if (status == asynSuccess)
+    {
+        char *echo, *reply, *ack;
+
+        if ((echo = strstr(localbuf, "\r\n")) == NULL)
+            status = asynError;
+        else if ((reply = strstr(&echo[2], "\r\n")) == NULL)
+            status = asynError;
+        else if ((ack = strstr(&reply[2], "\r\n")) == NULL)
+            status = asynError;
+        else
+        {
+            *reply = 0;        /* Terminate reply at \r. */
+            strcpy(inputBuff, &echo[2]);
+        }
+    }
+
     if (status != asynSuccess)
     {
         asynPrint(pController->pasynUser, ASYN_TRACE_ERROR,
                   "drvANC150Asyn:sendAndReceive error calling writeRead, output=%s status=%d, error=%s\n",
                   outputBuff, status, pController->pasynUser->errorMessage);
     }
-    else /* Eat the echo. */
-        status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff,
-                                        inputSize, TIMEOUT, &nRead, &eomReason);
 
     return(status);
 }
@@ -843,8 +849,6 @@ static asynStatus getFreq(ANC150Controller *pController, int axis)
     asynStatus status;
     char inputBuff[BUFFER_SIZE];
     char outputBuff[BUFFER_SIZE];
-    size_t nRead;
-    int eomReason;
     AXIS_HDL pAxis;
     int savedfreq;
 
@@ -853,12 +857,8 @@ static asynStatus getFreq(ANC150Controller *pController, int axis)
 
     if (status != asynSuccess)
         return(status);
-    else if (strncmp(inputBuff, "Axis not in computer control mode", 34) == 0) /* Eat the ERROR msg. */
-    {
-        status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff, sizeof(inputBuff),
-                                        TIMEOUT, &nRead, &eomReason);
+    else if (strncmp(inputBuff, "Axis not in computer control mode", 34) == 0)
         return(status);
-    }
     else
     {
         pAxis = pController->pAxis;
