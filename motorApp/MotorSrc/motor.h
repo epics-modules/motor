@@ -3,9 +3,9 @@ FILENAME...	motor.h
 USAGE...	Definitions and structures common to all levels of motorRecord
 		support (i.e., record, device and driver).
 
-Version:	$Revision: 1.19 $
-Modified By:	$Author: mp49 $
-Last Modified:	$Date: 2008-11-14 14:27:40 $
+Version:	$Revision: 1.20 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2008-11-19 21:04:30 $
 */
 
 /*
@@ -44,6 +44,7 @@ Last Modified:	$Date: 2008-11-14 14:27:40 $
  * .05 12-21-04 rls - Changed pre-compiler instructions for LSB/MSB_First
  *		      to support MS Visual C.
  * .06 01-27-06 rls - Added LT_EPICSBASE macro for test EPICS base versions.
+ * .07 11-19-08 rls - More extensive bit field tests.
  */
 
 #ifndef	INCmotorh
@@ -121,15 +122,15 @@ typedef enum  {
 #define YES		1
 
 /* Define, from top to bottom, how bit fields are packed. */
-/* This works for VxWorks, SunPro, Linux g++, MS Visual C. */
-#ifdef _WIN32
-#define LSB_First (TRUE)  /* LSB is packed first. */
+/* This works for gnu, SunPro, MS Visual C. */
+#if defined(_WIN32) || #cpu(i386) || defined (_M_IX86) || defined (_X86_)
+    #define LSB_First (TRUE)  /* LSB is packed first. */
+#elif defined (__i386__) || defined(_armv4l_) || defined (_X86_64_)
+    #define LSB_First (TRUE)  /* LSB is packed first. */
+#elif #cpu(sparc) || #cpu(m68k) || #cpu(powerpc)
+    #define MSB_First (TRUE)  /* MSB is packed first. */
 #else
-#if #cpu(i386) && !#cpu(sparc)
-#define LSB_First (TRUE)  /* LSB is packed first. */
-#else
-#define MSB_First (TRUE)  /* MSB is packed first. */
-#endif
+    Error: unknown bit order!
 #endif
 
 /* -------------------------------------------------- */
