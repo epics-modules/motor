@@ -2,9 +2,9 @@
  * FILENAME... devEnsemble.cc
  * USAGE... Motor record device level support for Aerotech Ensemble.
  *
- * Version:        $Revision: 1.3 $
+ * Version:        $Revision: 1.4 $
  * Modified By:    $Author: sluiter $
- * Last Modified:  $Date: 2008-11-18 15:58:21 $
+ * Last Modified:  $Date: 2008-11-20 22:27:13 $
  */
 
 /*
@@ -33,9 +33,12 @@
  *		Advanced Photon Source
  *		Argonne National Laboratory
  *
- *	Modification Log:
- *	-----------------
- *	.01	04-01-08	caw		initialized from devMM4000.cc (Newport)
+ * Modification Log:
+ * -----------------
+ * .01  04-01-08 caw  initialized from devMM4000.cc (Newport)
+ * .02  11-20-08 rls  - support homing in both directions.
+ *                    - disable LOAD_POS until ABORT command fixed.
+ *                    - SET_VELOCITY sets both default speed and home feedrate.
  */
 
 
@@ -76,29 +79,29 @@ extern "C" {epicsExportAddress (dset, devEnsemble);}
  */
 
 static msg_types Ensemble_table[] = {
-    MOTION,                     /* MOVE_ABS */
-    MOTION,                     /* MOVE_REL */
-    MOTION,                     /* HOME_FOR */
-    MOTION,                     /* HOME_REV */
-    IMMEDIATE,                  /* LOAD_POS */
-    IMMEDIATE,                  /* SET_VEL_BASE */
-    IMMEDIATE,                  /* SET_VELOCITY */
-    IMMEDIATE,                  /* SET_ACCEL */
-    IMMEDIATE,                  /* GO */
-    IMMEDIATE,                  /* SET_ENC_RATIO */
-    INFO,                       /* GET_INFO */
-    MOVE_TERM,                  /* STOP_AXIS */
-    VELOCITY,                   /* JOG */
-    IMMEDIATE,                  /* SET_PGAIN */
-    IMMEDIATE,                  /* SET_IGAIN */
-    IMMEDIATE,                  /* SET_DGAIN */
-    IMMEDIATE,                  /* ENABLE_TORQUE */
-    IMMEDIATE,                  /* DISABL_TORQUE */
-    IMMEDIATE,                  /* PRIMITIVE */
-    IMMEDIATE,                  /* SET_HIGH_LIMIT */
-    IMMEDIATE,                  /* SET_LOW_LIMIT */
-    VELOCITY,                   /* JOG_VELOCITY */
-    IMMEDIATE                   /* SET_RESOLUTION */
+    MOTION,     /* MOVE_ABS */
+    MOTION,     /* MOVE_REL */
+    MOTION,     /* HOME_FOR */
+    MOTION,     /* HOME_REV */
+    IMMEDIATE,  /* LOAD_POS */
+    IMMEDIATE,  /* SET_VEL_BASE */
+    IMMEDIATE,  /* SET_VELOCITY */
+    IMMEDIATE,  /* SET_ACCEL */
+    IMMEDIATE,  /* GO */
+    IMMEDIATE,  /* SET_ENC_RATIO */
+    INFO,       /* GET_INFO */
+    MOVE_TERM,  /* STOP_AXIS */
+    VELOCITY,   /* JOG */
+    IMMEDIATE,  /* SET_PGAIN */
+    IMMEDIATE,  /* SET_IGAIN */
+    IMMEDIATE,  /* SET_DGAIN */
+    IMMEDIATE,  /* ENABLE_TORQUE */
+    IMMEDIATE,  /* DISABL_TORQUE */
+    IMMEDIATE,  /* PRIMITIVE */
+    IMMEDIATE,  /* SET_HIGH_LIMIT */
+    IMMEDIATE,  /* SET_LOW_LIMIT */
+    VELOCITY,   /* JOG_VELOCITY */
+    IMMEDIATE   /* SET_RESOLUTION */
 };
 
 
@@ -179,9 +182,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
     axis = motor_call->signal;
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
-    {
         return(rtnval = ERROR);
-    }
 
     cntrl = (struct Ensemblecontroller *) brdptr->DevicePrivate;
     cntrl_units = dval * cntrl->drive_resolution[axis];
@@ -232,11 +233,28 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
 
     case HOME_FOR:
     case HOME_REV:
-        sprintf(buff, "HOME @%d", axis);
+        {
+            epicsUInt32 hparam = cntrl->home_dparam[axis];
+            if (command == HOME_FOR)
+                hparam |= 0x00000001;
+            else
+                hparam &= 0xFFFFFFFE;
+            cntrl->home_dparam[axis] = hparam;
+
+            sprintf(buff, "SETPARM @%d, 106, %d", axis, hparam);
+            strcpy(motor_call->message, buff);
+            rtnval = motor_end_trans_com(mr, drvtabptr);
+
+            rtnval = (RTN_STATUS) motor_start_trans_com(mr, Ensemble_cards);
+            sprintf(buff, "HOME @%d", axis);
+            motor_call->type = Ensemble_table[command];
+        }
         break;
 
     case LOAD_POS:
-        sprintf(buff, "SETPOSCMD @%d, %.*f", axis, maxdigits, cntrl_units);
+        // Disabled until the ABORT command stops resetting the position offset.
+        // sprintf(buff, "SETPOSCMD @%d, %.*f", axis, maxdigits, cntrl_units);
+        send = false;
         break;
 
     case SET_VEL_BASE:
@@ -246,6 +264,13 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
     case SET_VELOCITY:
         sprintf(buff, "SETPARM @%d, 102, %.*f", //DefaultSpeed
                 axis, maxdigits, cntrl_units);
+        strcpy(motor_call->message, buff);
+        rtnval = motor_end_trans_com(mr, drvtabptr);
+
+        rtnval = (RTN_STATUS) motor_start_trans_com(mr, Ensemble_cards);
+        sprintf(buff, "SETPARM @%d, 107, %.*f", //HomeFeedRate
+                axis, maxdigits, cntrl_units);
+        motor_call->type = Ensemble_table[command];
         break;
 
     case SET_ACCEL:
@@ -315,7 +340,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
         break;
 
     case SET_HIGH_LIMIT:
-        sprintf(buff, "SETPARM(@%d, 48, %*.f)", axis, maxdigits, cntrl_units); //ThresholdSoftCW
+        sprintf(buff, "SETPARM(@%d, 48, %.*f)", axis, maxdigits, cntrl_units); //ThresholdSoftCW
         //motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
         //trans->state = IDLE_STATE;	// No command sent to the controller.
 
@@ -328,7 +353,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
         break;
 
     case SET_LOW_LIMIT:
-        sprintf(buff, "SETPARM(@%d, 47, %*.f)", axis, maxdigits, cntrl_units); //ThresholdSoftCCW
+        sprintf(buff, "SETPARM(@%d, 47, %.*f)", axis, maxdigits, cntrl_units); //ThresholdSoftCCW
         //motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
         //trans->state = IDLE_STATE;	// No command sent to the controller.
 
@@ -350,7 +375,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
         rtnval = ERROR;
     }
 
-    if (send)
+    if (send == true)
     {
         size = strlen (buff);
         if (size > sizeof(buff) || (strlen(motor_call->message) + size) > MAX_MSG_SIZE)
