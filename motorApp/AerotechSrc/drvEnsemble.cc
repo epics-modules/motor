@@ -2,9 +2,9 @@
 FILENAME... drvEnsemble.cc
 USAGE...    Motor record driver level support for Aerotech Ensemble.
 
-Version:        $Revision: 1.3 $
+Version:        $Revision: 1.4 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-11-18 15:59:05 $
+Last Modified:  $Date: 2008-11-20 22:28:31 $
 */
 
 /*
@@ -132,13 +132,8 @@ struct driver_table Ensemble_access =
 struct
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvEnsemble = {2, report, init};
 
 extern "C" {epicsExportAddress(drvet, drvEnsemble);}
@@ -671,19 +666,13 @@ static int motor_init()
                         send_mess(card_index, buff, (char) NULL);
                         recv_mess(card_index, buff, 1);
                         if (buff[0] == ASCII_ACK_CHAR)
-                        {
                             cntrl->drive_resolution[motor_index] = 1 / atof(&buff[1]);
-                        }
                         else
-                        {
                             cntrl->drive_resolution[motor_index] = 1;
-                        }
 
                         digits = (int) -log10(cntrl->drive_resolution[motor_index]) + 2;
                         if (digits < 1)
-                        {
                             digits = 1;
-                        }
                         cntrl->res_decpts[motor_index] = digits;
 
                         // Save home preset position
@@ -691,27 +680,28 @@ static int motor_init()
                         send_mess(card_index, buff, (char) NULL);
                         recv_mess(card_index, buff, 1);
                         if (buff[0] == ASCII_ACK_CHAR)
-                        {
                             cntrl->home_preset[motor_index] = atof(&buff[1]);
-                        }
 
                         // Determine low limit
                         sprintf(buff, "GETPARM(@%d, 47)", motor_index); //ThresholdSoftCCW
                         send_mess(card_index, buff, (char) NULL);
                         recv_mess(card_index, buff, 1);
                         if (buff[0] == ASCII_ACK_CHAR)
-                        {
                             motor_info->low_limit = atof(&buff[1]);
-                        }
 
                         // Determine high limit
                         sprintf(buff, "GETPARM(@%d, 48)", motor_index); //ThresholdSoftCW
                         send_mess(card_index, buff, (char) NULL);
                         recv_mess(card_index, buff, 1);
                         if (buff[0] == ASCII_ACK_CHAR)
-                        {
                             motor_info->high_limit = atof(&buff[1]);
-                        }
+
+                        // Save the HomeDirection parameter
+                        sprintf(buff, "GETPARM(@%d, 106)", motor_index); //HomeDirection
+                        send_mess(card_index, buff, (char) NULL);
+                        recv_mess(card_index, buff, 1);
+                        if (buff[0] == ASCII_ACK_CHAR)
+                            cntrl->home_dparam[motor_index] = atoi(&buff[1]);
 
                         // Read status of each motor
                         set_status(card_index, motor_index);
