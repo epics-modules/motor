@@ -2,9 +2,9 @@
 FILENAME...     drvANC150Asyn.cc
 USAGE...        Motor record driver level support for Kohzu SC800
 
-Version:        $Revision: 1.4 $
+Version:        $Revision: 1.5 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-11-19 21:29:32 $
+Last Modified:  $Date: 2008-11-20 22:35:11 $
 
 */
 
@@ -433,10 +433,11 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     if (status)
         return(MOTOR_AXIS_ERROR);
 
-    /*
-     * Send a signal to the poller task which will make it do a poll, and
-     * switch to the moving poll rate
-     */
+    /* Set direction indicator. */
+    motorParam->setInteger(pAxis->params, motorAxisDirection, posdir);
+
+    /* Send a signal to the poller task which will make it do a poll, and
+       switch to the moving poll rate. */
     epicsEventSignal(pAxis->pController->pollEventId);
 
     return(MOTOR_AXIS_OK);
