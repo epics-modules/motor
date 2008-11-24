@@ -20,8 +20,8 @@ ASYN=$(SUPPORT)/asyn/4-9
 # Need the sequencer for the MM4005 and XPS trajectory scanning
 SNCSEQ=$(SUPPORT)/seq/2-0-11
 
-# Recommended EPICS release: R3.14.9
-EPICS_BASE=$(SUPPORT)/../base-3.14.9
+# Recommended EPICS release: R3.14.10
+EPICS_BASE=$(SUPPORT)/../base-3.14.10
 
 # The following must be defined if the "WithMPF" example in motorExApp is to
 # be built.
