@@ -1,10 +1,11 @@
 /*
 FILENAME...     drvANC150Asyn.cc
-USAGE...        Motor record driver level support for Kohzu SC800
+USAGE...        asyn motor driver support for attocube systems AG ANC150
+                Piezo Step Controller.
 
-Version:        $Revision: 1.5 $
+Version:        $Revision: 1.6 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-11-20 22:35:11 $
+Last Modified:  $Date: 2008-11-24 22:25:32 $
 
 */
 
