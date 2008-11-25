@@ -13,3 +13,6 @@ include "drvAsynSerialPort.dbd"
 #include "motorSimSupport.dbd"
 #include "devSmartMotorMotor.dbd"
 #include "devKohzuMotor.dbd"
+#include "devAttocube.dbd"
+#include "devAerotech.dbd"
+

@@ -25,6 +25,8 @@ WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 #!WithAsynVx_LDOBJS_vxWorks += $(IPAC_BIN)/ipacLib
 #!WithAsynVx_OBJS_vxWorks   += $(IPAC_BIN)/tyGSOctal
 
+#!WithAsyn_LIBS   += Aerotech
+#!WithAsyn_LIBS   += Attocube
 #!WithAsyn_LIBS   += oms
 #!WithAsyn_LIBS   += Mclennan
 #!WithAsyn_LIBS   += Micos
@@ -43,6 +45,8 @@ WithAsyn_LIBS   += asyn
 #!WithAsyn_LIBS   += seq pv
 WithAsyn_LIBS   += $(EPICS_BASE_IOC_LIBS)
 
+WithAsynVx_LIBS += Aerotech
+WithAsynVx_LIBS += Attocube
 #!WithAsynVx_LIBS += oms
 #!WithAsynVx_LIBS += Mclennan
 #!WithAsynVx_LIBS += Micos
