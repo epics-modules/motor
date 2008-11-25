@@ -151,6 +151,25 @@ MM4000Config(0, "L0")
 #!asynOctetSetOutputEos("L0",0,"\r")
 
 
+# Aerotech Ensemble digital servo controller Setup
+#     (1) maximum number of controllers in system
+#     (2) motor task polling rate (min=1Hz,max=60Hz)
+#!EnsembleSetup(1, 10)
+
+# Aerotech Ensemble digital servo controller Configure
+#     (1) controller# being configured, 
+#     (2) asyn port name (string)
+#!EnsembleConfig(0, "a-Serial[0]")
+
+
+# Asyn-based Motor Record support
+#   (1) Asyn port
+#   (2) Driver name
+#   (3) Controller index
+#   (4) Max. number of axes
+#!drvAsynMotorConfigure("ANC150","motorANC150",0,1)
+
+
 iocInit
 
 # motorUtil (allstop & alldone)
