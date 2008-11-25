@@ -285,6 +285,57 @@ Modification Log from R6-3 to R6-4
 
         File modified: MotorSrc/motordrvCom.cc
 
+15) The declaration for scanOnce was changed from (void * precord) to
+        (struct dbCommon *) with EPICS base R3.14.10, causing a compile error
+        in motorRecord.cc.
+
+        File modified: MotorSrc/motorRecord.cc
+
+
+16) System generation files (Makefiles and "configure" files) have been updated
+        based on the makeBaseApp utility.  In addition, this release supports
+        the parallel make feature available starting with R3.14.10.
+        
+        Files modified: - all "configure" files.
+                        - the "top" and "motorApp" Makefiles.
+
+17) Ron Sluiter added asyn motor support for the attocube systems AG ANC150
+        Piezo Step Controller.
+
+        Files modified: added the "AttocubeSrc" directory
+
+18) Chad Weimer (Aerotech) added support for Aerotech's Ensemble family of
+        digital servo controllers.
+
+        Files modified: added the "AerotechSrc" directory
+
+19) John Hammonds added support of the Physik Instrumente (PI) GmbH & Co. E-816
+        motor controller.
+  
+        Files modified: added devPIE816.cc, drvPIE816 and drvPIE816.h to the
+                        PiSrc directory
+
+20) Added a field (RMOD) that allows the user to select different ways of
+        calculating the retry distance move.  The default mode (Unity) moves
+        the motor a relative distance based on the dial error (DIFF field).
+        Badly behaved devices (piezo motors) can oscillate around their target
+        position in this mode.  Hence, two other modes were added to allow a
+        decreasing response from the motor record after each retry.
+
+        The Arithmetic mode generates an arithmetic sequence of corrections.
+        For example, if the max. retry count (RTRY) is 10, then the retries
+        will proceed as follows; DIFF * (1.0), DIFF * (9/10), DIFF * (8/10),
+        etc.
+        
+        The Geometric mode generates a geometric sequence with a 1/2 common
+        factor of corrections.  For example, if the max. retry count is 10,
+        then the retries will proceed as follows; DIFF * (1.0), DIFF * (1/2)
+        DIFF * (1/4), DIFF * (1/8), etc.
+
+        Files modified: - added the "RMOD" to MotorSrc/motorRecord.dbd
+                        - RMOD support changes to MotorSrc/motorRecord.cc
+
+
 Modification Log from R6-2 to R6-3
 ==================================
 

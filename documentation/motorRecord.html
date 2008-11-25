@@ -66,7 +66,7 @@ Channel support):
     Mclennan models PM304 and PM600.
   </li>
   <LI>
-    Physik Instrumente (PI) GmbH & Co. model C-630, C-844, C-848, C-862, E-662 and E-710.
+    Physik Instrumente (PI) GmbH & Co. model C-630, C-844, C-848, C-862, E-662, E-710 and E-816.
   </LI>
   <li>
     MicroMo model MVP 2001 B02.
@@ -102,6 +102,12 @@ Channel support):
   </li>
   <li>
     Kohzu SC-800 stepper motor controller.
+  </li>
+  <li>
+    attocube systems AG ANC150 Piezo Step Controller.
+  </li>
+  <li>
+    Aerotech Ensemble digital servo controller.
   </li>
 </ul>
 The record maintains two coordinate systems for motor position ("user" and "dial 
@@ -877,6 +883,14 @@ below.
     <td>Relative Value</td>
     <td>DOUBLE</td>
     <td><br>
+    </td>
+  </tr>
+  <tr>
+    <td><a href="#Fields_motion">RMOD</a></td>
+    <td>R/W</td>
+    <td>Retry Mode</td>
+    <td>RECCHOICE</td>
+    <td>(0:"Unity", 1:"Arthmetic", 2:"Geometric")<br>
     </td>
   </tr>
   <tr>
@@ -1751,7 +1765,34 @@ below.
     the motion finished. If the desired position was not reached, the field MISS 
     will be set to 1.</td>
   </tr>
-
+  <tr valign="top">
+    <td>RMOD</td>
+    <td>R/W</td>
+    <td>Retry Mode</td>
+    <td>RECCHOICE</td>
+    <td>
+      <p>
+      (0:"Unity", 1:"Arthmetic", 2:"Geometric")
+      </p>
+      <p>
+      RMOD allows the user to select different ways of calculating the retry distance 
+      move.  The default mode (Unity) moves the motor a relative distance based on 
+      the dial error (DIFF field). Badly behaved devices (piezo motors) can oscillate 
+      around their target position in this mode.  Hence, two other modes were added to 
+      allow a decreasing response from the motor record after each retry.
+      </p>
+      <p>
+      The Arithmetic mode generates an arithmetic sequence of corrections. For example, 
+      if the max. retry count (RTRY) is 10, then the retries will proceed as follows; 
+      DIFF * (1.0), DIFF * (9/10), DIFF * (8/10), etc.
+      </p>
+      <p>
+      The Geometric mode generates a geometric sequence with a 1/2 common factor of 
+      corrections.  For example, if the max. retry count is 10, then the retries will 
+      proceed as follows; DIFF * (1.0), DIFF * (1/2) DIFF * (1/4), DIFF * (1/8), etc.
+      </p>
+    </td>
+  </tr>
   </tbody>
 </table>
 

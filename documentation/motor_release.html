@@ -104,6 +104,31 @@
   This means that out of the list of fields that were previously set to ASL=0; 
   VBAS, VMAX, SBAS, SMAX, UREV and MRES are now set to ASL=1.
   </p>
+
+  <p>
+  <U><B>OMS MAXv A24/A32 VMEbus addressing bug fix</B></U>
+  </p>
+  <p>
+  Previous releases had a problem with the OMS MAXv device driver when it was 
+  configured for more than one board, and, either A24 or A32 addressing was 
+  specified. The driver was not sizing the address space occupied by each MAXv 
+  correctly.
+  </p>
+
+  <p>
+  <u><b>asyn motor archtecture updates</b></u>
+  </p>
+  <p>
+  <li>
+    Motor record GET_INFO commands were not supported by the asyn motor archtecture 
+    in previous releases.
+  </li>
+  <li>
+    A motor record bug was fixed that caused unscheduled retries to occur with asyn 
+    motor.
+  </li>
+  </p>
+
 </DIV>
 
 <CENTER>
@@ -147,6 +172,27 @@
   4.1.2, but there are bugs.  Since EPICS base (R3.14.9) has not had all the bugs 
   wrung out (Mantis ID's #309, #310), there are no immediate plans to debug 64-bit 
   related problems.
+  </p>
+  
+  <U><B>attocube systems AG ANC150</B></U>
+  </P>
+  <p>
+  Ron Sluiter added support for the attocube systems AG ANC150 Piezo Step 
+  Controller.  
+  </p>
+
+  <u><b>Aerotech's Ensemble</b></u>
+  </p>
+  <p>
+  Chad Weimer (Aerotech) added support for Aerotech's Ensemble family of digital 
+  servo controllers.
+  </p>
+  
+  <u><b>Physik Instrumente GmbH & Co. Model E-816</b></u>
+  </p>
+  <p>
+  John Hammonds added support of the Physik Instrumente (PI) GmbH & Co. E-816 
+  motor controller.
   </p>
 </DIV>
 
