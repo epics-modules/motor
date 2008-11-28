@@ -2,9 +2,9 @@
 FILENAME...	drvMotorSim.c
 USAGE...	Simulated Motor Support.
 
-Version:	$Revision: 1.7 $
-Modified By:	$Author: peterd $
-Last Modified:	$Date: 2007-02-03 12:07:17 $
+Version:	$Revision: 1.8 $
+Modified By:	$Author: mp49 $
+Last Modified:	$Date: 2008-11-28 17:36:59 $
 */
 
 /*
@@ -105,7 +105,7 @@ static motorSim_t drv={ NULL, NULL, motorSimLogMsg, NULL, { 0, 0 } };
 
 static void motorAxisReportAxis( AXIS_HDL pAxis, int level )
 {
-    printf( "Found driver for motorSim card %d, axis %d\n", pAxis->card, pAxis->axis );
+    printf( "Found driver for motorSim card %d, axis %d, mutex %p\n", pAxis->card, pAxis->axis, pAxis->axisMutex );
 
     if (level > 0)
     {
