@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.25 $
+ * Version: $Revision: 1.26 $
  * Modified by: $Author: mp49 $
- * Last Modified: $Date: 2008-11-14 15:18:38 $
+ * Last Modified: $Date: 2008-12-01 12:18:35 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -115,9 +115,10 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
        which is one reason why I have separated it into another routine */
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     double position = pPvt->status.position;
+    double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
 
-    if ((fabs(pmr->dval) > pmr->rdbd && pmr->mres != 0) &&
-        ((position * pmr->mres) < pmr->rdbd))
+    if ((fabs(pmr->dval) > rdbd && pmr->mres != 0) &&
+        (fabs(position * pmr->mres) < rdbd))
     {
         double setPos = pmr->dval / pmr->mres;
         epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );
@@ -142,7 +143,7 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     else
         asynPrint(pasynUser, ASYN_TRACE_FLOW,
                   "devMotorAsyn::init_controller, %s setting of position not required, position=%f, mres=%f, dval=%f, rdbd=%f",
-                  pmr->name, position, pmr->mres, pmr->dval, pmr->rdbd);
+                  pmr->name, position, pmr->mres, pmr->dval, rdbd );
 
 }
 
@@ -154,6 +155,7 @@ static long init_record(struct motorRecord * pmr )
     asynStatus status;
     asynInterface *pasynInterface;
     motorAsynPvt *pPvt;
+    /*    double resolution;*/
 
     /* Allocate motorAsynPvt private structure */
     pPvt = callocMustSucceed(1, sizeof(motorAsynPvt), "devMotorAsyn init_record()");
@@ -532,7 +534,8 @@ static void asynCallback(asynUser *pasynUser)
 	if (commandIsMove) {
 	    pPvt->moveRequestPending--;
 	    if (!pPvt->moveRequestPending) {
-		pmr->rset->process((dbCommon*)pmr);
+                /* pmr->rset->process((dbCommon*)pmr); */
+                dbProcess((dbCommon*)pmr);
 	    }
 	}
 	dbScanUnlock((dbCommon *)pmr);
@@ -568,7 +571,8 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
         memcpy(&pPvt->status, value, sizeof(struct MotorStatus));
         if (!pPvt->moveRequestPending) {
 	    pPvt->needUpdate = 1;
-	    pmr->rset->process((dbCommon*)pmr);
+	    /* pmr->rset->process((dbCommon*)pmr); */
+            dbProcess((dbCommon*)pmr);
         }
         dbScanUnlock((dbCommon*)pmr);
     } else {
