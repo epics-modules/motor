@@ -14,8 +14,8 @@ motorApp_DEPEND_DIRS   = configure
 # 3rd - make clean uninstall
 # 4th - make
 
-DIRS += motorExApp iocBoot
-motorExApp_DEPEND_DIRS = motorApp
-iocBoot_DEPEND_DIRS    = motorExApp
+#!DIRS += motorExApp iocBoot
+#!motorExApp_DEPEND_DIRS = motorApp
+#!iocBoot_DEPEND_DIRS    = motorExApp
 
 include $(TOP)/configure/RULES_TOP
