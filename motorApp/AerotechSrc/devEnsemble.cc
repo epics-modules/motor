@@ -2,9 +2,9 @@
  * FILENAME... devEnsemble.cc
  * USAGE... Motor record device level support for Aerotech Ensemble.
  *
- * Version:        $Revision: 1.4 $
+ * Version:        $Revision: 1.5 $
  * Modified By:    $Author: sluiter $
- * Last Modified:  $Date: 2008-11-20 22:27:13 $
+ * Last Modified:  $Date: 2008-12-10 18:30:46 $
  */
 
 /*
@@ -114,7 +114,7 @@ static struct board_stat **Ensemble_cards;
 static long Ensemble_init (void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {

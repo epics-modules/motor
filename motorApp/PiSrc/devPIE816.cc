@@ -108,7 +108,7 @@ static struct board_stat **PIE816_cards;
 static long PIE816_init(void *arg)
 {
     long rtnval;
-    int after = (int) arg;
+    int after = (arg == 0) ? 0 : 1;
 
     if (after == 0)
     {
