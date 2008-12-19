@@ -14,21 +14,25 @@
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
-# Recommended ASYN release: R4-9
-ASYN=$(SUPPORT)/asyn/4-9
+# Recommended ASYN release: R4-10
+ASYN=$(SUPPORT)/asyn/4-10
 
 # Need the sequencer for the MM4005 and XPS trajectory scanning
-SNCSEQ=$(SUPPORT)/seq/2-0-11
+# Recommended SNCSEQ release: R2-0-12
+SNCSEQ=$(SUPPORT)/seq/2-0-12
 
 # Recommended EPICS release: R3.14.10
 EPICS_BASE=$(SUPPORT)/../base-3.14.10
+
+# The following must be defined for the MXmotor device driver.
+#!MX=$(SUPPORT)/mx/mx
 
 # The following support modules are required ONLY if the examples in
 # <motor>/motorExApp are built.  To build examples, the top Makefile,
 # <motor>/Makefile must also be edited.
 
-# Recommended IPAC release: R2-9
-#!IPAC=$(SUPPORT)/ipacR2-9
+# Recommended IPAC release: R2-10
+#!IPAC=$(SUPPORT)/ipacR2-10
 
 # The following is only needed for the motor examples in iocBoot.
 #!MOTOR=$(TOP)
