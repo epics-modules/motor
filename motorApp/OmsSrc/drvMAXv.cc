@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.20 $
+Version:        $Revision: 1.21 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-06-03 18:58:08 $
+Last Modified:  $Date: 2009-01-05 19:40:25 $
 */
 
 /*
@@ -65,6 +65,8 @@ Last Modified:  $Date: 2008-06-03 18:58:08 $
  * 09  02-26-08 rls - set "update delay" to zero.
  * 10  05-14-08 rls - read the commanded velocity.
  * 11  05-20-08 rls - A24/A32 address mode bug fix.
+ * 12  01-05-09 rls - Dirk Zimoch's (PSI) bug fix for set_status() overwriting
+ *                    the home switch status in the response string.
  *
  */
 
@@ -642,7 +644,7 @@ static int recv_mess(int card, char *com, int amount)
 
         bufptr = readbuf(pmotor, bufptr);
         if (--amount > 0)
-            *(bufptr-1) = ',';  /* Replace '\n' with delimiter ','. */
+            *(bufptr++) = ',';  /* Replace zero byte with delimiter ','. */
 
     } while (amount > 0);
 
