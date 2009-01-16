@@ -923,6 +923,7 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     double preTimeMax, postTimeMax;
     double preVelocity[MAX_AXES], postVelocity[MAX_AXES];
     double time;
+    int dir[MAX_AXES];
     
     if (pVar->debugLevel > 0) {
         printf("XPS_trajectoryScan: buildAndVerify:"
@@ -958,6 +959,9 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
          * is "correct" but subject to roundoff errors when sending ASCII commands
          * to XPS.  Reduce acceleration 10% to account for this. */
         maxAcceleration[j] = 0.9 * maxAcceleration[j];
+        /* Note: the preDistance and postDistance numbers computed here are
+         * in user coordinates, not XPS coordinates, because they are used for 
+         * EPICS moves at the start and end of the scan */
         if (pVar->moveMode == MOVE_MODE_RELATIVE) {
             distance = pVar->motorTrajectory[j][0];
         } else {
@@ -987,12 +991,17 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     /* Create the trajectory file */
     trajFile =  fopen (TRAJECTORY_FILE, "w");
 
+    /* Compute the sign relationship of user coordinates to XPS coordinates for
+     * each axis */
+    for (j=0; j<pVar->numAxes; j++) {
+        if (pVar->epicsMotorDir[j] == 0) dir[j]=1; else dir[j]=-1;
+    }
     /* Create the initial acceleration element */
     fprintf(trajFile,"%f", preTimeMax);
     for (j=0; j<pVar->numAxes; j++) 
-        fprintf(trajFile,", %f, %f", pVar->preDistance[j], preVelocity[j]);
+        fprintf(trajFile,", %f, %f", pVar->preDistance[j]*dir[j], preVelocity[j]*dir[j]);
     fprintf(trajFile,"\n");
-   
+ 
     /* The number of points in the file is nelements for MOVE_MODE_RELATIVE and
      * nelements-1 for other modes */
     if (pVar->moveMode == MOVE_MODE_RELATIVE) 
@@ -1007,23 +1016,23 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
             T1 = T0;
         for (j=0; j<pVar->numAxes; j++) {
             if (pVar->moveMode == MOVE_MODE_RELATIVE) {
-                D0 = pVar->motorTrajectory[j][i];
+                D0 = pVar->motorTrajectory[j][i] * dir[j];
                 if (i < npoints-1) 
-                    D1 = pVar->motorTrajectory[j][i+1];
+                    D1 = pVar->motorTrajectory[j][i+1] * dir[j];
                 else
                     D1 = D0;
             } else {
-                D0 = pVar->motorTrajectory[j][i+1] - 
-                           pVar->motorTrajectory[j][i];
+                D0 = pVar->motorTrajectory[j][i+1] *dir[j] - 
+                           pVar->motorTrajectory[j][i] * dir[j];
                 if (i < npoints-1) 
-                    D1 = pVar->motorTrajectory[j][i+2] - 
-                           pVar->motorTrajectory[j][i+1];
+                    D1 = pVar->motorTrajectory[j][i+2] * dir[j] - 
+                           pVar->motorTrajectory[j][i+1] * dir[j];
                 else
                     D1 = D0;
             }
                 
             /* Average either side of the point? */
-            trajVel = (D0 + D1) / (T0 + T1);
+            trajVel = ((D0 + D1) / (T0 + T1));
             if (!(pVar->moveAxis[j])) {
                 D0 = 0.0;    /* Axis turned off*/
                 trajVel = 0.0;
@@ -1038,7 +1047,7 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     /* Create the final acceleration element. Final velocity must be 0. */
     fprintf(trajFile,"%f", postTimeMax);
     for (j=0; j<pVar->numAxes; j++) 
-        fprintf(trajFile,", %f, %f", pVar->postDistance[j], 0.);
+        fprintf(trajFile,", %f, %f", pVar->postDistance[j]*dir[j], 0.);
     fprintf(trajFile,"\n");
     fclose (trajFile);
     
