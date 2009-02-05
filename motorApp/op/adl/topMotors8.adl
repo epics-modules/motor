@@ -1230,9 +1230,9 @@ composite {
 		args="P=$(P),M=$(M3)"
 	}
 	display[2] {
-		label="$(M4) (Alt-Small)"
+		label="$(M3) (Alt-Small)"
 		name="motorxU.adl"
-		args="P=$(P),M=$(M4)"
+		args="P=$(P),M=$(M3)"
 	}
 	display[3] {
 		label="$(M3) (Medium)"
