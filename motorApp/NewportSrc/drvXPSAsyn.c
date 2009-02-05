@@ -495,6 +495,8 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
     if (pAxis == NULL) return MOTOR_AXIS_ERROR;
     else
     {
+      if (epicsMutexLock( pAxis->mutexId ) == epicsMutexLockOK)
+	{
         switch (function)
         {
         case motorAxisPosition:
@@ -708,8 +710,16 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
             PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble[%d,%d]: unknown function %d\n", pAxis->card, pAxis->axis, function);
             break;
         }
+
+	if (status == MOTOR_AXIS_OK )
+	  {
+	    motorParam->setDouble( pAxis->params, function, value );
+	    motorParam->callCallback( pAxis->params );
+	  }
+	epicsMutexUnlock( pAxis->mutexId );
+	}
     }
-    if (ret_status != MOTOR_AXIS_ERROR) status = motorParam->setDouble(pAxis->params, function, value);
+    
     return ret_status;
 }
 
