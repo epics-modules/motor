@@ -2,9 +2,9 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.26 $
+Version:	$Revision: 1.27 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:38:46 $
+Last Modified:	$Date: 2009-02-05 19:25:04 $
 */
 
 /*
@@ -105,6 +105,7 @@ Last Modified:	$Date: 2008-03-14 20:38:46 $
  * .35  02-27-08 rls - replaced errlogPrintf calls in ISR with
  *                      epicsInterruptContextMessage calls.
  * .36  03-14-08 rls - 64-bit compatiability.
+ * .37  02-05-09 rls - Have start_status() start ALL updates before waiting.
  */
 
 #include	<string.h>
@@ -307,6 +308,7 @@ static void start_status(int card)
     }
     else
     {
+        /* Start all cards updating. */
         for (index = 0; index < total_cards; index++)
         {
             if (motor_state[index] != NULL &&
@@ -316,14 +318,21 @@ static void start_status(int card)
                 cntrlReg.All = pmotor->control.cntrlReg;
                 while (cntrlReg.Bits.update != 0)
                 {
-                    Debug(1, "start_status(): Update Wait: card #%d\n", index);
+                    Debug(1, "start_status(): Waiting to start update: card #%d\n", index);
                     epicsThreadSleep(quantum);
                     cntrlReg.All = pmotor->control.cntrlReg;
                 };
 
                 cntrlReg.Bits.update = 1;
                 pmotor->control.cntrlReg = cntrlReg.All;
-
+            }
+        }
+        /* Wait for all cards to complete update. */
+        for (index = 0; index < total_cards; index++)
+        {
+            if (motor_state[index] != NULL &&
+                (pmotor = (struct vmex_motor *) motor_state[index]->localaddr) != NULL)
+            {
                 /* Wait Forever for controller to update. */
                 cntrlReg.All = pmotor->control.cntrlReg;
                 while (cntrlReg.Bits.update != 0)
