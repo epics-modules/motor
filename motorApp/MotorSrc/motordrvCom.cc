@@ -3,9 +3,9 @@ FILENAME...	motordrvCom.cc
 USAGE... 	This file contains driver functions that are common
 		to all motor record driver modules.
 
-Version:	$Revision: 1.15 $
+Version:	$Revision: 1.16 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-09-22 19:49:46 $
+Last Modified:	$Date: 2009-02-05 19:18:56 $
 */
 
 /*
@@ -47,6 +47,8 @@ Last Modified:	$Date: 2008-09-22 19:49:46 $
  * .05 09/22/08 rls Skip delay if time lapsed since last update (time_lapse)
  *                  is > polling rate delay (scan_sec) or if wait time
  *                  is < 1/2 time quantum.
+ * .06 02/05/09 rls Always call process_messages() to check for incoming
+ *                  messages.
  */
 
 
@@ -119,9 +121,7 @@ static struct mess_node *motor_malloc(struct circ_queue *, epicsEvent *);
  *		ENDIF
  *	    ENDFOR
  *	ENDIF
- *	IF someone posted the semaphore.
  *	    Process commands - call process_messages().
- *	ENDIF
  *  ENDWHILE
  *
  * NOTES... This function MUST BE reentrant.
@@ -192,7 +192,6 @@ epicsShareFunc int motor_task(struct thread_args *args)
 		    stale_data_delay = query_axis(itera, tabptr, previous_time, stale_data_max_delay);
 	    }
 	}
-	if (sem_ret)
 	    process_messages(tabptr, previous_time, stale_data_max_delay);
     }
     return(0);
