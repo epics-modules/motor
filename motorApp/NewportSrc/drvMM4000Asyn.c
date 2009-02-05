@@ -2,9 +2,9 @@
 FILENAME... drvMM4000Asyn.cc
 USAGE...    Motor record asyn driver level support for Newport MM4000.
 
-Version:        $Revision: 1.6 $
+Version:        $Revision: 1.7 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-09-09 20:43:07 $
+Last Modified:  $Date: 2009-02-05 15:59:25 $
 */
 
 /*
@@ -29,7 +29,10 @@ Last Modified:  $Date: 2008-09-09 20:43:07 $
  *
  * .01 09-09-08 rls Default to motorAxisHasClosedLoop on from motorAxisInit(),
  *                  so that CNEN functions.
- * 
+ * .02 01-29-09 rls Copied Matthew Pearson's (Diamond) fix on XPS for;
+ *                  - idle polling interfering with setting position.
+ *                  - auto save/restore not working.
+ *
  */
  
  
@@ -290,13 +293,14 @@ static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, 
 static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
-    int status;
     double deviceValue;
     char buff[100];
 
-    if (pAxis == NULL) return MOTOR_AXIS_ERROR;
+    if (pAxis == NULL)
+        return MOTOR_AXIS_ERROR;
     else
     {
+        epicsMutexLock(pAxis->mutexId);
         switch (function)
         {
         case motorAxisPosition:
@@ -355,8 +359,13 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
             PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: unknown function %d\n", function);
             break;
         }
+        if (ret_status == MOTOR_AXIS_OK )
+        {
+            motorParam->setDouble(pAxis->params, function, value);
+            motorParam->callCallback(pAxis->params);
+        }
+        epicsMutexUnlock(pAxis->mutexId);
     }
-    if (ret_status != MOTOR_AXIS_ERROR) status = motorParam->setDouble(pAxis->params, function, value);
     return ret_status;
 }
 
