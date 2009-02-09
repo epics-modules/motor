@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.26 $
- * Modified by: $Author: mp49 $
- * Last Modified: $Date: 2008-12-01 12:18:35 $
+ * Version: $Revision: 1.27 $
+ * Modified by: $Author: sluiter $
+ * Last Modified: $Date: 2009-02-09 19:49:45 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -369,6 +369,7 @@ static RTN_STATUS build_trans( motor_cmnd command,
     case LOAD_POS:
 	pmsg->command = motorPosition;
 	pmsg->dvalue = *param;
+	pPvt->moveRequestPending++;
 	break;
     case SET_VEL_BASE:
 	pmsg->command = motorVelBase;
@@ -511,6 +512,7 @@ static void asynCallback(asynUser *pasynUser)
     case motorMoveAbs:
     case motorMoveRel:
     case motorHome:
+    case motorPosition:
 	commandIsMove = 1;
 	/* Intentional fall-through */
     default:
