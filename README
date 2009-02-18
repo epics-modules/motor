@@ -1,8 +1,8 @@
-Motor Record R6-4 Release Notice
+Motor Record R6-5 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
-R3-14-9.
+R3-14-10.
 
 
 Contents
@@ -124,6 +124,36 @@ Known Problems
           is processed from a periodic scan.
 
 
+Modification Log from R6-4 to R6-5
+==================================
+
+1) Fixed 64 bit compile problems with PI E816 and Aerotech Ensemble.
+
+        Files modified: devPIE816.cc and devEnsemble.cc
+
+2) Dirk Zimoch (PSI) fixed a bug in the OMS MAXv driver that caused the 
+          set_status() function to overwrite the home switch status in the
+          response string.
+
+        File modified: drvMAXv.cc
+
+3) Matthew Pearson (Diamond) fixed a bug on Newport XPS and MM4000 asyn motor
+          port drives that was causing idle polling to interfere with setting
+          positions and prevented auto save/restore from working.
+
+        Files modified: drvMM4000Asyn.c, drvXPSAsyn.c, drvMotorSim.c and
+                        drvANC150Asyn.cc; added epicsMutex[Lock/Unlock] to
+                        motorAxisSetDouble().
+
+4) A problem was introduced in R6-4 (fixed in R6-4-2) of the old motor record
+          device drive architecture.  If during the move of one or motors the
+          motor task did not issue an OS delay during status updates, it could
+          potentially not respond to any further motor commands.
+          
+        Files modified: - MotorSrc/motordrvCom.cc; always check for incoming
+                                                   messages.
+                        - OmsSrc/drvOms58.cc; reduced start_status() delays.
+
 
 Modification Log from R6-3 to R6-4
 ==================================
@@ -174,7 +204,7 @@ Modification Log from R6-3 to R6-4
 
 4) Changed the "update delay" for OMS MAXv's from 10ms to zero.
 
-        File modified: - MotorSrc/OmsSrc/drvMAXv.cc; set "update_delay" member
+        File modified: - motorApp/OmsSrc/drvMAXv.cc; set "update_delay" member
                          of "targs" to zero.
 
 5) Major changes have been made to the Access Security Level (ASL) attribute
