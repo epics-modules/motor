@@ -1,6 +1,6 @@
 
 file {
-	name="/home/oxygen1/HAMMONDS/CVS/synApps/support/motor/motorApp/op/adl/motorx_all.adl"
+	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-10/support/motor/cvs/motorApp/op/adl/motorx_all.adl"
 	version=030102
 }
 display {
@@ -1332,7 +1332,8 @@ text {
 		fill="outline"
 	}
 	"dynamic attribute" {
-		vis="if not zero"
+		vis="calc"
+		calc="A==9"
 		chan="$(P)$(M).STAT"
 	}
 	textix="Comm. Failure"
@@ -2612,7 +2613,7 @@ text {
 		clr=14
 		fill="outline"
 	}
-	textix="V2.5"
+	textix="V2.6"
 	align="horiz. centered"
 }
 polyline {
@@ -3018,4 +3019,42 @@ text {
 	clr=54
 	bclr=3
 	visual="invisible"
+}
+text {
+	object {
+		x=315
+		y=42
+		width=130
+		height=20
+	}
+	"basic attribute" {
+		clr=30
+		fill="outline"
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A==7"
+		chan="$(P)$(M).STAT"
+	}
+	textix="Controller"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=316
+		y=59
+		width=130
+		height=20
+	}
+	"basic attribute" {
+		clr=30
+		fill="outline"
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A==7"
+		chan="$(P)$(M).STAT"
+	}
+	textix="Error"
+	align="horiz. centered"
 }
