@@ -2,9 +2,9 @@
  * FILENAME... devEnsemble.cc
  * USAGE... Motor record device level support for Aerotech Ensemble.
  *
- * Version:        $Revision: 1.5 $
+ * Version:        $Revision: 1.6 $
  * Modified By:    $Author: sluiter $
- * Last Modified:  $Date: 2008-12-10 18:30:46 $
+ * Last Modified:  $Date: 2009-02-18 22:05:27 $
  */
 
 /*
@@ -39,6 +39,8 @@
  * .02  11-20-08 rls  - support homing in both directions.
  *                    - disable LOAD_POS until ABORT command fixed.
  *                    - SET_VELOCITY sets both default speed and home feedrate.
+ * .03  01-22-09 rls  - enable LOAD_POS; ABORT command fixed with Ensemble
+ *                      firmware 2.5.2.
  */
 
 
@@ -252,9 +254,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
         break;
 
     case LOAD_POS:
-        // Disabled until the ABORT command stops resetting the position offset.
-        // sprintf(buff, "SETPOSCMD @%d, %.*f", axis, maxdigits, cntrl_units);
-        send = false;
+        sprintf(buff, "SETPOSCMD @%d, %.*f", axis, maxdigits, cntrl_units);
         break;
 
     case SET_VEL_BASE:
