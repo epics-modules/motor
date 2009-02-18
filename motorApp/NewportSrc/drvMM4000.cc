@@ -2,9 +2,9 @@
 FILENAME... drvMM4000.cc
 USAGE...    Motor record driver level support for Newport MM4000.
 
-Version:        $Revision: 1.22 $
+Version:        $Revision: 1.23 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-09-09 18:35:32 $
+Last Modified:  $Date: 2009-02-18 20:54:20 $
 */
 
 /*
@@ -58,6 +58,8 @@ Last Modified:  $Date: 2008-09-09 18:35:32 $
  *      - support for MM4006.
  *      - MS Visual C compatibility; make all epicsExportAddress extern "C" linkage.
  *      - make debug variables always available.
+ * .14 02/18/09 rls Check for controller error.
+ *
  */
 
 
@@ -431,7 +433,17 @@ static int set_status(int card, int signal)
         motor_info->no_motion_count = 0;
     }
 
-    status.Bits.RA_PROBLEM = 0;
+    /* Check for controller error. */
+    send_mess(card, "TE;", (char) NULL);
+    recv_mess(card, cntrl->position_string, 1);
+    if (cntrl->position_string[2] == '@')
+        status.Bits.RA_PROBLEM = 0;
+    else
+    {
+        status.Bits.RA_PROBLEM = 1;
+        rtn_state = 1;
+        goto exit;
+    }
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
