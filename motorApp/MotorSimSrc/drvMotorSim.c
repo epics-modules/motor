@@ -2,9 +2,9 @@
 FILENAME...	drvMotorSim.c
 USAGE...	Simulated Motor Support.
 
-Version:	$Revision: 1.8 $
-Modified By:	$Author: mp49 $
-Last Modified:	$Date: 2008-11-28 17:36:59 $
+Version:	$Revision: 1.9 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2009-02-18 21:39:40 $
 */
 
 /*
@@ -12,7 +12,8 @@ Last Modified:	$Date: 2008-11-28 17:36:59 $
  *
  * Modification Log:
  * -----------------
- * 20060506 npr Added prolog
+ * 2006-05-06 npr Added prolog
+ * 2009-02-11 rls lock/unlock motorAxisSetDouble().
  */
 
 #include <stddef.h>
@@ -226,6 +227,7 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
     if (pAxis == NULL) return MOTOR_AXIS_ERROR;
     else
     {
+        epicsMutexLock(pAxis->axisMutex);
         switch (function)
         {
         case motorAxisPosition:
@@ -278,8 +280,12 @@ static int motorAxisSetDouble( AXIS_HDL pAxis, motorAxisParam_t function, double
             status = MOTOR_AXIS_ERROR;
             break;
         }
-
-        if (status != MOTOR_AXIS_ERROR ) status = motorParam->setDouble( pAxis->params, function, value );
+        if (status == MOTOR_AXIS_OK )
+        {
+            motorParam->setDouble(pAxis->params, function, value);
+            motorParam->callCallback(pAxis->params);
+        }
+        epicsMutexUnlock(pAxis->axisMutex);
     }
   return status;
 }
