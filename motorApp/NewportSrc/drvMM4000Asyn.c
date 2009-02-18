@@ -2,9 +2,9 @@
 FILENAME... drvMM4000Asyn.cc
 USAGE...    Motor record asyn driver level support for Newport MM4000.
 
-Version:        $Revision: 1.8 $
+Version:        $Revision: 1.9 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-02-18 20:00:36 $
+Last Modified:  $Date: 2009-02-18 20:50:16 $
 */
 
 /*
@@ -32,6 +32,11 @@ Last Modified:  $Date: 2009-02-18 20:00:36 $
  * .02 01-29-09 rls Copied Matthew Pearson's (Diamond) fix on XPS for;
  *                  - idle polling interfering with setting position.
  *                  - auto save/restore not working.
+ * .03 02-18-09 rls - Intermittent "set position" problem; set position cmnd.
+ *                  sometimes occurred during polling causing motor record
+ *                  to get old position value.  Lock/Unlock all controller's
+ *                  axis during status update.
+ *                  - Check for controller error.
  *
  */
  
@@ -550,6 +555,16 @@ static void MM4000Poller(MM4000Controller *pController)
         }
 
         anyMoving = 0;
+
+        /* Lock all the controller's axis. */
+        for (i = 0; i < pController->numAxes; i++)
+        {
+            pAxis = &pController->pAxis[i];
+            if (!pAxis->mutexId)
+                break;
+            epicsMutexLock(pAxis->mutexId);
+        }
+
         comStatus = sendAndReceive(pController, "MS;", statusAllString, sizeof(statusAllString));
         if (comStatus == 0)
             comStatus = sendAndReceive(pController, "TP;", positionAllString, sizeof(positionAllString));
@@ -559,7 +574,6 @@ static void MM4000Poller(MM4000Controller *pController)
             pAxis = &pController->pAxis[i];
             if (!pAxis->mutexId)
                 break;
-            epicsMutexLock(pAxis->mutexId);
             if (comStatus != 0)
             {
                 PRINT(pAxis->logParam, ERROR, "MM4000Poller: error reading status=%d\n", comStatus);
@@ -619,12 +633,27 @@ static void MM4000Poller(MM4000Controller *pController)
 
                 /* We would like a way to query the actual velocity, but this is not possible.  If we could we could
                  * set the direction, and Moving flags */
+
+                /* Check for controller error. */
+                comStatus = sendAndReceive(pController, "TE;", buff, sizeof(statusAllString));
+                if (buff[2] == '@')
+                    motorParam->setInteger(pAxis->params, motorAxisProblem, 0);
+                else
+                    motorParam->setInteger(pAxis->params, motorAxisProblem, 1);
             }
 
             motorParam->callCallback(pAxis->params);
-            epicsMutexUnlock(pAxis->mutexId);
-
         } /* Next axis */
+
+        /* UnLock all the controller's axis. */
+        for (i = 0; i < pController->numAxes; i++)
+        {
+            pAxis = &pController->pAxis[i];
+            if (!pAxis->mutexId)
+                break;
+            epicsMutexUnlock(pAxis->mutexId);
+        }
+
         if (forcedFastPolls > 0)
         {
             timeout = pController->movingPollPeriod;
