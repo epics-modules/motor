@@ -2,9 +2,9 @@
 FILENAME... drvEnsemble.cc
 USAGE...    Motor record driver level support for Aerotech Ensemble.
 
-Version:        $Revision: 1.4 $
+Version:        $Revision: 1.5 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-11-20 22:28:31 $
+Last Modified:  $Date: 2009-02-18 22:06:38 $
 */
 
 /*
@@ -32,6 +32,11 @@ Last Modified:  $Date: 2008-11-20 22:28:31 $
  *        Accelerator Systems Division
  *        Advanced Photon Source
  *        Argonne National Laboratory
+ *
+ * NOTES
+ * -----
+ * Verified with firmware:
+ *      - ver: 2.5.2
  *
  * Modification Log:
  * -----------------
