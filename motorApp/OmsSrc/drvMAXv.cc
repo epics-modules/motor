@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.21 $
+Version:        $Revision: 1.22 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-01-05 19:40:25 $
+Last Modified:  $Date: 2009-02-19 16:56:54 $
 */
 
 /*
@@ -111,7 +111,8 @@ Last Modified:  $Date: 2009-01-05 19:40:25 $
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef      DEBUG
-        #define Debug(l, f, args...) {if (l <= drvMAXvdebug) printf(f, ## args);}
+        #define Debug(l, f, args...) {if (l <= drvMAXvdebug) \
+                                  errlogPrintf(f, ## args);}
     #else
         #define Debug(l, f, args...)
     #endif
@@ -1002,7 +1003,8 @@ static int motor_init()
             pmotor = (struct MAXv_motor *) localaddr;
                 
             if (pmotor->firmware_status.Bits.running == 0)
-                errMessage(-1, "controller is NOT running.\n");
+                errlogPrintf("MAXv card #%d is NOT running; status = 0x%x\n",
+                           card_index, (unsigned int) pmotor->firmware_status.All);
 
             Debug(9, "motor_init: malloc'ing motor_state\n");
             motor_state[card_index] = (struct controller *) malloc(sizeof(struct controller));
