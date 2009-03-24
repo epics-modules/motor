@@ -123,6 +123,11 @@ Known Problems
           In other words, the status update is skipped when DMOV=0 and record
           is processed from a periodic scan.
 
+6) The MM4000 sets its' "Axis in Motion" status bit (MS command) false before
+          the target position (as read by the TP command) is reached.  This can
+          appear to the motor record as a following error causing a needless
+          retry if retries are enabled.
+
 
 Modification Log from R6-4 to R6-5
 ==================================
@@ -132,27 +137,44 @@ Modification Log from R6-4 to R6-5
         Files modified: devPIE816.cc and devEnsemble.cc
 
 2) Dirk Zimoch (PSI) fixed a bug in the OMS MAXv driver that caused the 
-          set_status() function to overwrite the home switch status in the
-          response string.
+        set_status() function to overwrite the home switch status in the
+        response string.
 
         File modified: drvMAXv.cc
 
 3) Matthew Pearson (Diamond) fixed a bug on Newport XPS and MM4000 asyn motor
-          port drives that was causing idle polling to interfere with setting
-          positions and prevented auto save/restore from working.
+        port drives that was causing idle polling to interfere with setting
+        positions and prevented auto save/restore from working.
 
         Files modified: drvMM4000Asyn.c, drvXPSAsyn.c, drvMotorSim.c and
                         drvANC150Asyn.cc; added epicsMutex[Lock/Unlock] to
                         motorAxisSetDouble().
 
 4) A problem was introduced in R6-4 (fixed in R6-4-2) of the old motor record
-          device drive architecture.  If during the move of one or motors the
-          motor task did not issue an OS delay during status updates, it could
-          potentially not respond to any further motor commands.
+        device drive architecture.  If during the move of one or motors the
+        motor task did not issue an OS delay during status updates, it could
+        potentially not respond to any further motor commands.
           
         Files modified: - MotorSrc/motordrvCom.cc; always check for incoming
                                                    messages.
                         - OmsSrc/drvOms58.cc; reduced start_status() delays.
+
+5) Modifications were made to motorRecord.cc:do_work() with R6-4 to limit the
+        ramifications of ORing MIP_MOVE with MIP_RETRY.  Unfortunately, the
+        effect of one of those changes prevented the motor from doing its'
+        backlash move when a motor move was interrupted by "New Target
+        Monitoring".  The user would see a "tdir" message in the iocsh and
+        the motor would move, not the target position, but to the target minus
+        the backlash distance.
+
+        File modified: do_work() in motorRecord.cc; unconditionally set the
+                       postprocess indicator TRUE so postProcess() can do the
+                       backlash move.
+
+6) Prevent multiple STOP commands.
+
+        File modified: motorRecord.cc:process(); added check for !MIP_STOP to
+                       NTM logic.
 
 
 Modification Log from R6-3 to R6-4
