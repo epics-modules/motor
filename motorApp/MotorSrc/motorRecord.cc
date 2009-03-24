@@ -2,9 +2,9 @@
 FILENAME...     motorRecord.cc
 USAGE...        Motor Record Support.
 
-Version:        $Revision: 1.51 $
+Version:        $Revision: 1.52 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-12-05 17:07:44 $
+Last Modified:  $Date: 2009-03-24 18:41:34 $
 */
 
 /*
@@ -117,6 +117,10 @@ Last Modified:  $Date: 2008-12-05 17:07:44 $
  *                    retries; i.e., 10/10, 9/10, 8/10,...
  *                  - post changes to TWF/TWR.
  *                  - ramifications of ORing MIP_MOVE with MIP_RETRY.
+ * .50 03-18-09 rls - Prevents multiple STOP commands by adding check for
+ *                    !MIP_STOP to NTM logic.
+ *                  - Unconditionally set postprocess indicator TRUE in
+ *                    do_work() so postProcess() can do backlash.
  */                                                        
 
 #define VERSION 6.5
@@ -1017,7 +1021,8 @@ LOGIC:
                [Sign of RDIF is NOT the same as sign of CDIR], AND,
                [|Dist. to target| > (NTMF x (|BDST| + RDBD)], AND,
                [MIP indicates this move is either (a result of a retry),OR,
-                        (not from a Jog* or Hom*)]
+                        (not from a Jog* or Hom*)], AND
+               [Not already waiting for motor to stop]
                 Send Stop Motor command.
                 Set STOP indicator in MIP true.
                 Mark MIP as changed.
@@ -1164,7 +1169,8 @@ static long process(dbCommon *arg)
             if (pmr->ntm == menuYesNoYES &&
                 (sign_rdif != pmr->cdir) &&
                 (fabs(pmr->diff) > ntm_deadband) &&
-                (move_or_retry == true))
+                (move_or_retry == true) &&
+                (pmr->mip & MIP_STOP) == 0)
             {
 
                 /* We're going in the wrong direction. Readback problem? */
@@ -1531,8 +1537,41 @@ LOGIC:
             ....
             ....
             IF motion in progress indicator is false.
-                Set MIP MOVE indicator ON.
-                .....
+                Set MIP MOVE indicator ON and mark for posting.
+                IF DMOV is TRUE.
+                    Set DMOV to FALSE and mark for posting.
+                ENDIF
+                Update last DVAL/VAL/RVAL.
+                Initialize comm. transaction.
+                IF backlash disabled, OR, no need for separate backlash move
+                    since move is in preferred direction (preferred_dir==ON),
+                    AND, backlash acceleration and velocity are the same as
+                    slew values (BVEL == VELO, AND, BACC == ACCL).
+                    Initialize local velocity and acceleration variables to
+                    slew values.
+                    IF use relative positioning indicator is TRUE.
+                        Set local position variable based on relative position.
+                    ELSE
+                        Set local position variable based on absolute position.
+                    ENDIF
+                ELSE IF current position is within backlash or retry range.
+                    Initialize local velocity and acceleration variables to
+                    backlash values.
+                    IF use relative positioning indicator is TRUE.
+                        Set local position variable based on relative position.
+                    ELSE
+                        Set local position variable based on absolute position.
+                    ENDIF
+                ELSE
+                    Initialize local velocity and acceleration variables to
+                    slew values.
+                    IF use relative positioning indicator is TRUE.
+                        Set local position variable based on relative backlash position.
+                    ELSE
+                        Set local position variable based on absolute backlash position.
+                    ENDIF
+                    Set postprocess indicator TRUE so postprocess can do backlash.
+                ENDIF            
                 .....
                 .....
                 Send message to controller.
@@ -2197,8 +2236,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                         position = relbpos;
                     else
                         position = bpos;
-                    if ((pmr->mip & MIP_RETRY) == 0) /* If this is not a retry, */
-                        pmr->pp = TRUE;              /* do backlash from posprocess(). */
+                    pmr->pp = TRUE;              /* do backlash from posprocess(). */
                 }
 
                 pmr->cdir = (pmr->rdif < 0.0) ? 0 : 1;
