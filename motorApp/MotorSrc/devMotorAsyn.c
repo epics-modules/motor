@@ -11,12 +11,21 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.27 $
+ * Version: $Revision: 1.28 $
  * Modified by: $Author: sluiter $
- * Last Modified: $Date: 2009-02-09 19:49:45 $
+ * Last Modified: $Date: 2009-04-15 18:36:18 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
+ *
+ * Modification Log:
+ * -----------------
+ * .01 2009-04-15 rls
+ * Added logic to asynCallback() to prevent moveRequestPending left nonzero
+ * after motor record LOAD_POS command before dbScanLockOK is true (i.e., from
+ * save/restore at boot-up).
+ * Eliminated compiler warnings.
+ *
  */
 
 #include <stddef.h>
@@ -82,7 +91,7 @@ typedef struct
     struct motorRecord * pmr;
     int moveRequestPending;
     struct MotorStatus status;
-    motor_cmnd move_cmd;
+    motorCommand move_cmd;
     double param;
     int needUpdate;
     asynUser *pasynUser;
@@ -314,7 +323,8 @@ static RTN_STATUS build_trans( motor_cmnd command,
 			       double * param,
 			       struct motorRecord * pmr )
 {
-    RTN_STATUS status = OK;
+    RTN_STATUS rtnind = OK;
+    asynStatus status;
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     asynUser *pasynUser = pPvt->pasynUser;
     motorAsynMessage *pmsg;
@@ -432,7 +442,6 @@ static RTN_STATUS build_trans( motor_cmnd command,
 		  "devMotorAsyn::send_msg: %s: PRIMITIVE no longer supported\n",
 		  pmr->name);
 	return(ERROR);
-	break;
     case SET_HIGH_LIMIT:
 	pmsg->command = motorHighLim;
 	pmsg->dvalue = *param;
@@ -463,9 +472,9 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	asynPrint(pasynUser, ASYN_TRACE_ERROR,
 		  "devMotorAsyn::send_msg: %s error calling queueRequest, %s\n",
 		  pmr->name, pasynUser->errorMessage);
-	return(ERROR);
+	rtnind = ERROR;
     }
-    return(OK);
+    return(rtnind);
 }
 
 static RTN_STATUS end_trans(struct motorRecord * pmr )
@@ -541,6 +550,12 @@ static void asynCallback(asynUser *pasynUser)
 	    }
 	}
 	dbScanUnlock((dbCommon *)pmr);
+    }
+    else if (pmsg->command == motorPosition)
+    {
+        pPvt->moveRequestPending--;
+        if (!pPvt->moveRequestPending)
+            dbProcess((dbCommon*)pmr);
     }
 
     pasynManager->memFree(pmsg, sizeof(*pmsg));
