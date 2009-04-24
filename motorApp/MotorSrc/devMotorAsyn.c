@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.28 $
+ * Version: $Revision: 1.29 $
  * Modified by: $Author: sluiter $
- * Last Modified: $Date: 2009-04-15 18:36:18 $
+ * Last Modified: $Date: 2009-04-24 17:20:45 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -552,11 +552,7 @@ static void asynCallback(asynUser *pasynUser)
 	dbScanUnlock((dbCommon *)pmr);
     }
     else if (pmsg->command == motorPosition)
-    {
         pPvt->moveRequestPending--;
-        if (!pPvt->moveRequestPending)
-            dbProcess((dbCommon*)pmr);
-    }
 
     pasynManager->memFree(pmsg, sizeof(*pmsg));
     status = pasynManager->freeAsynUser(pasynUser);
