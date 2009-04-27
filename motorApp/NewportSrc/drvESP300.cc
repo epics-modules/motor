@@ -2,9 +2,9 @@
 FILENAME... drvESP300.cc
 USAGE...    Motor record driver level support for Newport ESP300/100.
 
-Version:    $Revision: 1.23 $
+Version:    $Revision: 1.24 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2006-08-21 18:28:39 $
+Last Modified:  $Date: 2009-04-27 14:03:02 $
 */
 
 /*
@@ -34,7 +34,7 @@ Last Modified:  $Date: 2006-08-21 18:28:39 $
  *        Argonne National Laboratory
  * NOTES
  * -----
- * - This driver works with both the ESP300 and the ESP100.
+ * - This driver works with the following models: ESP100, ESP300 and ESP301.
  *
  * Modification Log:
  * -----------------
