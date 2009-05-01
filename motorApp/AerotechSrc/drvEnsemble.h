@@ -2,9 +2,9 @@
 FILENAME...     drvEnsemble.h
 USAGE... This file contains Aerotech Ensemble driver "include" information.
 
-Version:        $Revision: 1.2 $
+Version:        $Revision: 1.3 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-11-20 22:29:35 $
+Last Modified:  $Date: 2009-05-01 18:13:42 $
 */
 
 /*
@@ -53,6 +53,7 @@ Last Modified:  $Date: 2008-11-20 22:29:35 $
 #define ASCII_ACK_CHAR      '%'   // AsciiCmdAckChar
 #define ASCII_NAK_CHAR      '!'   // AsciiCmdNakChar
 #define ASCII_FAULT_CHAR    '#'   // AsciiCmdFaultChar
+#define ASCII_TIMEOUT_CHAR  '$'   // AsciiCmdTimeoutChar
 
 #define BUFF_SIZE 100       /* Maximum length of string to/from Ensemble */
 
