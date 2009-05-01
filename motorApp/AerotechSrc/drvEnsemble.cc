@@ -2,9 +2,9 @@
 FILENAME... drvEnsemble.cc
 USAGE...    Motor record driver level support for Aerotech Ensemble.
 
-Version:        $Revision: 1.5 $
+Version:        $Revision: 1.6 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-02-18 22:06:38 $
+Last Modified:  $Date: 2009-05-01 18:13:12 $
 */
 
 /*
@@ -41,6 +41,13 @@ Last Modified:  $Date: 2009-02-18 22:06:38 $
  * Modification Log:
  * -----------------
  * .01	04-04-08 caw initialized from drvMM4000.cc (Newport)
+ * .02  05-01-09 rls - Using EOT fault indicators rather than LS's to set
+ *                     RA_PLUS/MINUS_LS indicators.
+ *                   - Fix HOME_LIMIT/MARKER_BIT mask.
+ *                   - More extensive comm. error checks in set_status(); handle
+ *                     ASCII_ACK_CHAR as error.
+ *                   - cntrl->drive_resolution must be initialized with fabs().
+ *
  */
 
 
@@ -56,14 +63,16 @@ Last Modified:  $Date: 2009-02-18 22:06:38 $
 #include "epicsExport.h"
 
 /* Status byte bits */
-#define ENABLED_BIT		0x00000001
-#define IN_POSITION_BIT	0x00000004
-#define IN_MOTION_BIT	0x00000008
-#define DIRECTION_BIT	0x00000200
-#define PLUS_LIMIT_BIT	0x00004000
-#define MINUS_LIMIT_BIT	0x00008000
-#define HOME_LIMIT_BIT	0x00010000
-#define HOME_MARKER_BIT	0x00020000
+#define ENABLED_BIT     0x00000001
+#define IN_POSITION_BIT 0x00000004
+#define IN_MOTION_BIT   0x00000008
+#define DIRECTION_BIT   0x00000200
+#define HOME_LIMIT_BIT  0x01000000
+#define HOME_MARKER_BIT 0x02000000
+
+/* Fault status bits */
+#define  CW_FAULT_BIT   0x004
+#define CCW_FAULT_BIT   0x008
 
 // This can really be any number, because there isn't any theoretical
 // restriction on the number of Ensembles that can be on a network.
@@ -223,17 +232,13 @@ static int set_status(int card, int signal)
     sprintf(buff, "AXISSTATUS(@%d)", signal);
     send_mess(card, buff, (char) NULL);
     comm_status = recv_mess(card, buff, 1);
-    if (buff[0] == ASCII_ACK_CHAR)
-    {
-        // convert to an integer
-        axis_status = atoi(&buff[1]);
-    }
-    else
-    {
-        axis_status = 0;
-    }
 
-    if (comm_status <= 0)
+    if (comm_status > 0 && buff[0] == ASCII_ACK_CHAR)
+    {
+	cntrl->status = NORMAL;
+	status.Bits.CNTRL_COMM_ERR = 0;
+    }
+    else if (comm_status <= 0)
     {
         if (cntrl->status == NORMAL)
         {
@@ -247,93 +252,109 @@ static int set_status(int card, int signal)
             status.Bits.RA_PROBLEM = 1;
             rtn_state = 1;
         }
+        goto exit;
+    }
+    else if (buff[0] != ASCII_ACK_CHAR)
+    {
+        cntrl->status = COMM_ERR;
+        status.Bits.CNTRL_COMM_ERR = 1;
+        status.Bits.RA_PROBLEM = 1;
+        rtn_state = 1;
+        goto exit;
+    }
+
+    cntrl->status = NORMAL;
+    status.Bits.CNTRL_COMM_ERR = 0;
+
+    // convert to an integer
+    axis_status = atoi(&buff[1]);
+
+    nodeptr = motor_info->motor_motion;
+
+    status.Bits.EA_SLIP = 0;
+    status.Bits.EA_SLIP_STALL = 0;
+
+    // fill in the status
+    status.Bits.RA_DIRECTION = axis_status & DIRECTION_BIT   ? 0 : 1;
+    status.Bits.RA_DONE      = axis_status & IN_POSITION_BIT ? 1 : 0;
+    status.Bits.RA_HOME      = axis_status & HOME_LIMIT_BIT  ? 1 : 0;
+    status.Bits.EA_POSITION  = axis_status & ENABLED_BIT     ? 1 : 0;
+    status.Bits.EA_HOME      = axis_status & HOME_MARKER_BIT ? 1 : 0;
+    status.Bits.RA_MOVING    = axis_status & IN_MOTION_BIT   ? 1 : 0;
+
+    /*  get the axis fault status */
+    sprintf(buff, "AXISFAULT(@%d)", signal);
+    send_mess(card, buff, (char) NULL);
+    comm_status = recv_mess(card, buff, 1);
+    axis_status = atoi(&buff[1]);
+    status.Bits.RA_PLUS_LS   = axis_status & CCW_FAULT_BIT ? 1 : 0;
+    status.Bits.RA_MINUS_LS  = axis_status &  CW_FAULT_BIT ? 1 : 0;
+
+    plusdir = status.Bits.RA_DIRECTION ? true : false;
+    if ((status.Bits.RA_PLUS_LS && plusdir) || (status.Bits.RA_MINUS_LS && !plusdir))
+    {
+        ls_active = true;
+    }
+
+    // get the position
+    sprintf(buff, "PFBKPROG(@%d)", signal);
+    send_mess(card, buff, (char) NULL);
+    recv_mess(card, buff, 1);
+    if (buff[0] == ASCII_ACK_CHAR)
+    {
+        // convert to an integer
+        pfbk = atof(&buff[1]);
     }
     else
     {
-        cntrl->status = NORMAL;
-        status.Bits.CNTRL_COMM_ERR = 0;
-
-        nodeptr = motor_info->motor_motion;
-
-        status.Bits.EA_SLIP = 0;
-        status.Bits.EA_SLIP_STALL = 0;
-
-        // fill in the status
-        status.Bits.RA_DIRECTION = axis_status & DIRECTION_BIT ? 1 : 0;
-        status.Bits.RA_DONE = axis_status & IN_POSITION_BIT ? 1 : 0;
-        status.Bits.RA_PLUS_LS = axis_status & PLUS_LIMIT_BIT ? 1 : 0;
-        status.Bits.RA_HOME = axis_status & HOME_LIMIT_BIT ? 1 : 0;
-        status.Bits.EA_POSITION = axis_status & ENABLED_BIT ? 1 : 0;
-        status.Bits.EA_HOME = axis_status & HOME_MARKER_BIT ? 1 : 0;
-        status.Bits.RA_MOVING = axis_status & IN_MOTION_BIT ? 1 : 0;
-        status.Bits.RA_MINUS_LS = axis_status & MINUS_LIMIT_BIT ? 1 : 0;
-
-        plusdir = status.Bits.RA_DIRECTION ? true : false;
-        if ((status.Bits.RA_PLUS_LS && plusdir) || (status.Bits.RA_MINUS_LS && !plusdir))
-        {
-            ls_active = true;
-        }
-
-        // get the position
-        sprintf(buff, "PFBKPROG(@%d)", signal);
-        send_mess(card, buff, (char) NULL);
-        recv_mess(card, buff, 1);
-        if (buff[0] == ASCII_ACK_CHAR)
-        {
-            // convert to an integer
-            pfbk = atof(&buff[1]);
-        }
-        else
-        {
-            pfbk = 0;
-        }
-
-        // fill in the position
-        motorData = pfbk / cntrl->drive_resolution[signal];
-
-        if (motorData == motor_info->position)
-        {
-            // only increment the counter if the motor is moving
-            if (nodeptr != 0)
-            {
-                motor_info->no_motion_count++;
-            }
-        }
-        else
-        {
-            motor_info->position = NINT(motorData);
-            if (motor_info->encoder_present == YES)
-            {
-                motor_info->encoder_position = NINT(motorData);
-            }
-            else
-            {
-                motor_info->encoder_position = 0;
-            }
-
-            motor_info->no_motion_count = 0;
-        }
-
-        // velocity is not used, so don't bother doing a command down
-        // to the controller to get it
-        motor_info->velocity = 0;
-
-        // do this "last", so that we know no errors occurred
-        status.Bits.RA_PROBLEM = 0;
-
-        rtn_state = (!motor_info->no_motion_count || ls_active ||
-                     status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
-
-        // test for post-move string
-        if ((status.Bits.RA_DONE || ls_active) && nodeptr != 0 && nodeptr->postmsgptr != 0)
-        {
-            strcpy(buff, nodeptr->postmsgptr);
-            send_mess(card, buff, (char) NULL);
-            nodeptr->postmsgptr = NULL;
-        }
+        pfbk = 0;
     }
 
+    // fill in the position
+    motorData = pfbk / cntrl->drive_resolution[signal];
 
+    if (motorData == motor_info->position)
+    {
+        // only increment the counter if the motor is moving
+        if (nodeptr != 0)
+        {
+            motor_info->no_motion_count++;
+        }
+    }
+    else
+    {
+        motor_info->position = NINT(motorData);
+        if (motor_info->encoder_present == YES)
+        {
+            motor_info->encoder_position = NINT(motorData);
+        }
+        else
+        {
+            motor_info->encoder_position = 0;
+        }
+
+        motor_info->no_motion_count = 0;
+    }
+
+    // velocity is not used, so don't bother doing a command down
+    // to the controller to get it
+    motor_info->velocity = 0;
+
+    // do this "last", so that we know no errors occurred
+    status.Bits.RA_PROBLEM = 0;
+
+    rtn_state = (!motor_info->no_motion_count || ls_active ||
+                 status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
+
+    // test for post-move string
+    if ((status.Bits.RA_DONE || ls_active) && nodeptr != 0 && nodeptr->postmsgptr != 0)
+    {
+        strcpy(buff, nodeptr->postmsgptr);
+        send_mess(card, buff, (char) NULL);
+        nodeptr->postmsgptr = NULL;
+    }
+
+exit:
     motor_info->status.All = status.All;
     return(rtn_state);
 }
@@ -348,7 +369,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     struct Ensemblecontroller *cntrl;
     int size;
     size_t nwrite;
-    char *eos_tok, com_cpy[BUFF_SIZE], buff[80];
+    char *eos_tok, com_cpy[BUFF_SIZE];
     asynStatus status;
 
     size = strlen(com);
@@ -671,7 +692,7 @@ static int motor_init()
                         send_mess(card_index, buff, (char) NULL);
                         recv_mess(card_index, buff, 1);
                         if (buff[0] == ASCII_ACK_CHAR)
-                            cntrl->drive_resolution[motor_index] = 1 / atof(&buff[1]);
+                            cntrl->drive_resolution[motor_index] = 1 / fabs(atof(&buff[1]));
                         else
                             cntrl->drive_resolution[motor_index] = 1;
 
