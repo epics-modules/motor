@@ -43,14 +43,14 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 
 # OMS MAXv driver setup parameters: 
 #     (1)number of cards in array.
-#     (2)VME Address Type (16,24,32).
-#     (3)Base Address on 4K (0x1000) boundary.
+#     (2)VME Address Space - A(16,24,32).
+#     (3)Base Address (see README file).
 #     (4)interrupt vector (0=disable or  64 - 255).
 #     (5)interrupt level (1 - 6).
 #     (6)motor task polling rate (min=1Hz,max=60Hz).
-#!MAXvSetup(1, 16, 0xF000,     190, 5, 10)
-#!MAXvSetup(1, 24, 0xF00000,   190, 5, 10)
-#!MAXvSetup(1, 32, 0xB0000000, 190, 5, 10)
+#!MAXvSetup(1, 16,     0xF000, 190, 5, 10)
+#!MAXvSetup(1, 24,   0xFF0000, 190, 5, 10)
+#!MAXvSetup(1, 32, 0xFF000000, 190, 5, 10)
 #!drvMAXvdebug=4
 
 # OMS MAXv configuration string:
