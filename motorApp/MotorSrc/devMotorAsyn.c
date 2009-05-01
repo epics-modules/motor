@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.30 $
+ * Version: $Revision: 1.31 $
  * Modified by: $Author: sluiter $
- * Last Modified: $Date: 2009-04-24 17:22:38 $
+ * Last Modified: $Date: 2009-05-01 17:55:28 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -26,6 +26,10 @@
  * save/restore at boot-up).
  * Eliminated compiler warnings.
  *
+ * .02 2009-04-29 MRP
+ * Fix for motor simulator stuck in Moving state after multiple LOAD_POS
+ * commands to the same position; set needUpdate = 1 in asynCallback() before
+ * dbProcess.
  */
 
 #include <stddef.h>
@@ -545,6 +549,7 @@ static void asynCallback(asynUser *pasynUser)
 	if (commandIsMove) {
 	    pPvt->moveRequestPending--;
 	    if (!pPvt->moveRequestPending) {
+	      pPvt->needUpdate = 1;
                 /* pmr->rset->process((dbCommon*)pmr); */
                 dbProcess((dbCommon*)pmr);
 	    }
