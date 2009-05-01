@@ -2,9 +2,9 @@
  * FILENAME... devEnsemble.cc
  * USAGE... Motor record device level support for Aerotech Ensemble.
  *
- * Version:        $Revision: 1.6 $
+ * Version:        $Revision: 1.7 $
  * Modified By:    $Author: sluiter $
- * Last Modified:  $Date: 2009-02-18 22:05:27 $
+ * Last Modified:  $Date: 2009-05-01 18:11:51 $
  */
 
 /*
@@ -41,6 +41,8 @@
  *                    - SET_VELOCITY sets both default speed and home feedrate.
  * .03  01-22-09 rls  - enable LOAD_POS; ABORT command fixed with Ensemble
  *                      firmware 2.5.2.
+ * .04  05-01-09 rls  - Fix for jog velocity not adjusted by
+ *                      cntrl->drive_resolution.
  */
 
 
@@ -162,7 +164,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct mess_info *motor_info;
+//    struct mess_info *motor_info;
     struct Ensemblecontroller *cntrl;
     char buff[BUFF_SIZE], temp[BUFF_SIZE];
     int axis, card, maxdigits;
@@ -306,7 +308,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
 
     case JOG_VELOCITY:
     case JOG:
-        sprintf(buff, "FREERUN @%d %.*f", axis, maxdigits, dval > 0. ? mr->jvel : mr->jvel * -1);
+        sprintf(buff, "FREERUN @%d %.*f", axis, maxdigits, cntrl_units);
         break;
 
     case SET_PGAIN:
