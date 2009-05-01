@@ -35,4 +35,6 @@ $(P)$(M).PCOF
 $(P)$(M).ICOF
 $(P)$(M).DCOF
 $(P)$(M).HVEL
+$(P)$(M).NTM
+$(P)$(M).NTMF
 $(P)$(M)_able.VAL
