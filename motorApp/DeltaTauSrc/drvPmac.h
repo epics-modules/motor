@@ -2,9 +2,9 @@
 FILENAME...	drvPmac.h
 USAGE... This file contains Delta Tau PMAC driver "include" information.
 
-Version:	$Revision: 1.2 $
+Version:	$Revision: 1.3 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-09-15 18:48:35 $
+Last Modified:	$Date: 2009-05-01 18:26:29 $
 */
 
 /*
@@ -209,7 +209,7 @@ struct pmac_dpram
     epicsUInt8 na1;
     epicsUInt16 out_cntrl_char;	/* Control Character at 0x0E9E. */
     epicsUInt8 cmndbuff[160];	/* Command Buffer at 0x0EA0. */
-    REPLY_STATUS reply_status;	/* Response Buffer Control Characters. */
+    epicsUInt16 reply_status;	/* Response Buffer Control Characters. */
     epicsUInt8 reply_count;	/* Response Character count - 1. */
     epicsUInt8 na2;
     epicsUInt8 response[256];	/* Response Buffer at 0x0F44. */

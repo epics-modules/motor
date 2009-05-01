@@ -2,9 +2,9 @@
 FILENAME...	drvPmac.cc
 USAGE...	Driver level support for Delta Tau PMAC model.
 
-Version:	$Revision: 1.9 $
+Version:	$Revision: 1.10 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-01-27 23:52:58 $
+Last Modified:	$Date: 2009-05-01 18:26:30 $
 */
 
 /*
@@ -78,12 +78,18 @@ Last Modified:	$Date: 2006-01-27 23:52:58 $
 
 
 /*----------------debugging-----------------*/
-#ifdef	DEBUG
-    volatile int drvPmacdebug = 0;
-    #define Debug(l, f, args...) { if(l<=drvPmacdebug) printf(f,## args); }
+#ifdef __GNUG__
+    #ifdef      DEBUG
+        #define Debug(l, f, args...) {if (l <= drvPmacdebug) \
+                                  errlogPrintf(f, ## args);}
+    #else
+        #define Debug(l, f, args...)
+    #endif
 #else
-    #define Debug(l, f, args...)
+    #define Debug
 #endif
+volatile int drvPmacdebug = 0;
+extern "C" {epicsExportAddress(int, drvPmacdebug);}
 
 /* Global data. */
 int Pmac_num_cards = 0;
@@ -163,12 +169,12 @@ static long report(int level)
     int card;
 
     if (Pmac_num_cards <= 0)
-	printf("    No VME8/44 controllers configured.\n");
+	printf("    No PMAC controllers configured.\n");
     else
     {
 	for (card = 0; card < Pmac_num_cards; card++)
 	    if (motor_state[card])
-		printf("    Pmac VME8/44 motor card %d @ 0x%X, id: %s \n",
+		printf("    PMAC motor card %d @ 0x%X, id: %s \n",
 		       card, (uint_t) motor_state[card]->localaddr,
 		       motor_state[card]->ident);
     }
@@ -219,7 +225,7 @@ static int set_status(int card, int signal)
     recv_mess(card, buff, 1);
 
     motorData = atof(buff);
-    motorData /= 32.0; /* Shift out fractionial data. */
+    motorData /= cntrl->pos_scaleFac[card]; /* Shift out scale factor. */
 
     if (motorData == motor_info->position)
     {
@@ -406,7 +412,7 @@ static int recv_mess(int card, char *com, int amount)
 
     pmotorState = motor_state[card];
     pmotor = (struct pmac_dpram *) pmotorState->localaddr;
-    stptr = &pmotor->reply_status;
+    stptr = (volatile REPLY_STATUS *) &pmotor->reply_status;
     
     /* Check that card exists */
     if (card >= total_cards)
@@ -424,12 +430,12 @@ static int recv_mess(int card, char *com, int amount)
 	{
 	    const double flush_delay = quantum;
 
-	    if (control == NULL)
+	    if (control == (char) NULL)
 	    {
 		Debug(6, "recv_mess() - flush wait on NULL\n");
 		epicsThreadSleep(flush_delay);
 		control = stptr->Bits.cntrl_char;
-		if (control == NULL)
+		if (control == (char) NULL)
 		    flushed = true;
 		else
 		    Debug(6, "recv_mess() - NULL -> %c\n", control);
@@ -445,7 +451,7 @@ static int recv_mess(int card, char *com, int amount)
 	    {
 		stptr->All = 0;
 		Debug(6, "recv_mess() - flush wait on CR\n");
-		for (trys = 0; trys < 10 && stptr->Bits.cntrl_char == NULL; trys++)
+		for (trys = 0; trys < 10 && stptr->Bits.cntrl_char == (char) NULL; trys++)
 		{
 		    epicsThreadSleep(quantum * trys);
 		    Debug(6, "recv_mess() - flush wait #%d\n", trys);
@@ -531,7 +537,7 @@ static RTN_STATUS PmacPut(int card, char *pmess)
 
     pmotorState = motor_state[card];
     pmotor = (struct pmac_dpram *) pmotorState->localaddr;
-    stptr = &pmotor->reply_status;
+    stptr = (volatile REPLY_STATUS *) &pmotor->reply_status;
     
     for(itera = 0; itera < 10; itera++)
     {
@@ -550,7 +556,7 @@ static RTN_STATUS PmacPut(int card, char *pmess)
     }
     
     /* Wait for response. */
-    for (itera = 0; itera < 10 && stptr->Bits.cntrl_char == NULL; itera++)
+    for (itera = 0; itera < 10 && stptr->Bits.cntrl_char == (char) NULL; itera++)
     {
 	epicsThreadSleep(quantum * itera);
 	Debug(7, "PmacPut() - response wait #%d\n", itera);
@@ -820,7 +826,13 @@ static int motor_init()
 	    pmotor = (struct pmac_dpram *) pmotorState->localaddr;
 	    pmotor->out_cntrl_wd = 0;	/* Clear "Data ready from host" bit indicator. */
 	    pmotor->out_cntrl_char = 0;	/* Clear "Buffer Control Character. */
-	    pmotor->reply_status.All = 0;
+	    pmotor->reply_status = 0;
+            {
+                epicsUInt8 count;
+                count = pmotor->reply_count;
+                pmotor->na2 = count;
+                count = pmotor->response[0];
+            }
 
 	    send_mess(card_index, "TYPE", (char) NULL);
 	    recv_mess(card_index, (char *) pmotorState->ident, 1);
@@ -853,12 +865,10 @@ static int motor_init()
 		    sprintf(outbuf, "I%.2d21=0", (total_axis + 1));
 		    send_mess(card_index, outbuf, (char) NULL);
 
-/* ????? Read and save Position Scale Factor. ??????
 		    sprintf(outbuf, "I%.2d08", (total_axis + 1));
 		    send_mess(card_index, outbuf, (char) NULL);
 		    recv_mess(card_index, axis_pos, 1);
 		    cntrl->pos_scaleFac[total_axis] = atof(axis_pos) * 32.0;
-*/
 		}
 		else
 		{
