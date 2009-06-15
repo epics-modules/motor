@@ -1,14 +1,14 @@
 
 file {
 	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-10/support/motor/cvs/motorApp/op/adl/motorx_all.adl"
-	version=030102
+	version=030103
 }
 display {
 	object {
 		x=188
 		y=29
 		width=450
-		height=895
+		height=875
 	}
 	clr=6
 	bclr=3
@@ -1690,7 +1690,7 @@ polyline {
 		x=258
 		y=528
 		width=3
-		height=369
+		height=346
 	}
 	"basic attribute" {
 		clr=54
@@ -1699,7 +1699,7 @@ polyline {
 	}
 	points {
 		(260,529)
-		(259,896)
+		(259,873)
 	}
 }
 rectangle {
@@ -2602,20 +2602,6 @@ composite {
 		}
 	}
 }
-text {
-	object {
-		x=418
-		y=887
-		width=30
-		height=10
-	}
-	"basic attribute" {
-		clr=14
-		fill="outline"
-	}
-	textix="V2.6"
-	align="horiz. centered"
-}
 polyline {
 	object {
 		x=0
@@ -2797,7 +2783,7 @@ polyline {
 rectangle {
 	object {
 		x=4
-		y=866
+		y=850
 		width=150
 		height=24
 	}
@@ -2805,134 +2791,10 @@ rectangle {
 		clr=14
 	}
 }
-text {
-	object {
-		x=3
-		y=865
-		width=60
-		height=22
-	}
-	"basic attribute" {
-		clr=15
-	}
-	textix="Scan"
-	align="horiz. centered"
-}
-"message button" {
-	object {
-		x=111
-		y=867
-		width=40
-		height=20
-	}
-	control {
-		chan="$(P)allstop.VAL"
-		clr=30
-		bclr=20
-	}
-	label="Abort"
-	press_msg="1"
-}
-"message button" {
-	object {
-		x=86
-		y=867
-		width=21
-		height=20
-	}
-	control {
-		chan="$(P)$(M):scanParms.GO"
-		clr=14
-		bclr=51
-	}
-	label="Go"
-	press_msg="1"
-}
-"message button" {
-	object {
-		x=62
-		y=867
-		width=21
-		height=20
-	}
-	control {
-		chan="$(P)$(M):scanParms.LOAD"
-		clr=14
-		bclr=51
-	}
-	label="Ld"
-	press_msg="1"
-}
-"related display" {
-	object {
-		x=193
-		y=867
-		width=40
-		height=20
-	}
-	display[0] {
-		label="$(M) (Tiny)"
-		name="motorx_tiny.adl"
-		args="P=$(P),M=$(M)"
-		policy="replace display"
-	}
-	display[1] {
-		label="$(M) (Small)"
-		name="motorx.adl"
-		args="P=$(P),M=$(M)"
-		policy="replace display"
-	}
-	display[2] {
-		label="$(M) (Medium)"
-		name="motorx_more.adl"
-		args="P=$(P),M=$(M)"
-		policy="replace display"
-	}
-	display[3] {
-		label="$(M) (Setup)"
-		name="motorx_setup.adl"
-		args="P=$(P),M=$(M)"
-		policy="replace display"
-	}
-	display[4] {
-		label="Scan Parameters"
-		name="scanParms.adl"
-		args="P=$(P),Q=$(M),PV=$(M)"
-	}
-	clr=0
-	bclr=17
-	label="-More"
-}
-text {
-	object {
-		x=3
-		y=836
-		width=130
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-		fill="outline"
-	}
-	textix="Mode"
-}
-menu {
-	object {
-		x=134
-		y=835
-		width=94
-		height=20
-	}
-	control {
-		chan="$(P)$(M).OMSL"
-		clr=14
-		bclr=51
-	}
-}
 polyline {
 	object {
 		x=0
-		y=858
+		y=842
 		width=260
 		height=3
 	}
@@ -2942,8 +2804,8 @@ polyline {
 		width=2
 	}
 	points {
-		(1,860)
-		(259,859)
+		(1,844)
+		(259,843)
 	}
 }
 text {
@@ -3056,5 +2918,117 @@ text {
 		chan="$(P)$(M).STAT"
 	}
 	textix="Error"
+	align="horiz. centered"
+}
+"related display" {
+	object {
+		x=193
+		y=852
+		width=40
+		height=20
+	}
+	display[0] {
+		label="$(M) (Tiny)"
+		name="motorx_tiny.adl"
+		args="P=$(P),M=$(M)"
+		policy="replace display"
+	}
+	display[1] {
+		label="$(M) (Small)"
+		name="motorx.adl"
+		args="P=$(P),M=$(M)"
+		policy="replace display"
+	}
+	display[2] {
+		label="$(M) (Medium)"
+		name="motorx_more.adl"
+		args="P=$(P),M=$(M)"
+		policy="replace display"
+	}
+	display[3] {
+		label="$(M) (Setup)"
+		name="motorx_setup.adl"
+		args="P=$(P),M=$(M)"
+		policy="replace display"
+	}
+	display[4] {
+		label="Scan Parameters"
+		name="scanParms.adl"
+		args="P=$(P),Q=$(M),PV=$(M)"
+	}
+	clr=0
+	bclr=17
+	label="-More"
+}
+"message button" {
+	object {
+		x=111
+		y=852
+		width=40
+		height=20
+	}
+	control {
+		chan="$(P)allstop.VAL"
+		clr=30
+		bclr=20
+	}
+	label="Abort"
+	press_msg="1"
+}
+text {
+	object {
+		x=3
+		y=850
+		width=60
+		height=22
+	}
+	"basic attribute" {
+		clr=15
+	}
+	textix="Scan"
+	align="horiz. centered"
+}
+"message button" {
+	object {
+		x=62
+		y=852
+		width=21
+		height=20
+	}
+	control {
+		chan="$(P)$(M):scanParms.LOAD"
+		clr=14
+		bclr=51
+	}
+	label="Ld"
+	press_msg="1"
+}
+"message button" {
+	object {
+		x=86
+		y=852
+		width=21
+		height=20
+	}
+	control {
+		chan="$(P)$(M):scanParms.GO"
+		clr=14
+		bclr=51
+	}
+	label="Go"
+	press_msg="1"
+}
+text {
+	object {
+		x=416
+		y=862
+		width=30
+		height=10
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+	textix="V2.7"
 	align="horiz. centered"
 }
