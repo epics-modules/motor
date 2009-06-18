@@ -2,9 +2,9 @@
 FILENAME...     motorRecord.cc
 USAGE...        Motor Record Support.
 
-Version:        $Revision: 1.52 $
+Version:        $Revision: 1.53 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-03-24 18:41:34 $
+Last Modified:  $Date: 2009-06-18 19:19:57 $
 */
 
 /*
@@ -121,6 +121,9 @@ Last Modified:  $Date: 2009-03-24 18:41:34 $
  *                    !MIP_STOP to NTM logic.
  *                  - Unconditionally set postprocess indicator TRUE in
  *                    do_work() so postProcess() can do backlash.
+ * .51 06-11-09 rls - Error since R5-3; PACT cleared early when MIP_DELAY_REQ
+ *                    set.
+ *                  - Prevent redundant DMOV postings when using DLY field.
  */                                                        
 
 #define VERSION 6.5
@@ -1239,7 +1242,9 @@ static long process(dbCommon *arg)
                         INIT_MSG();
                         WRITE_MSG(GET_INFO, NULL);
                         SEND_MSG();
+                        /* Restore DMOV to false and UNMARK it so it is not posted. */
                         pmr->dmov = FALSE;
+                        UNMARK(M_DMOV);
                         goto process_exit;
                     }
                     else if (pmr->stup != motorSTUP_ON)
@@ -1256,8 +1261,9 @@ static long process(dbCommon *arg)
 
                     callbackRequestDelayed(&pcallback->dly_callback, pmr->dly);
 
+                    /* Restore DMOV to false and UNMARK it so it is not posted. */
                     pmr->dmov = FALSE;
-                    pmr->pact = 0;
+                    UNMARK(M_DMOV);
                     goto process_exit;
                 }
             }
