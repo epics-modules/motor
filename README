@@ -124,9 +124,9 @@ Known Problems
           is processed from a periodic scan.
 
 6) The MM4000 sets its' "Axis in Motion" status bit (MS command) false before
-          the target position (as read by the TP command) is reached.  This can
-          appear to the motor record as a following error causing a needless
-          retry if retries are enabled.
+        the target position (as read by the TP command) is reached.  This can
+        appear to the motor record as a following error causing a needless
+        retry if retries are enabled.
 
 
 Modification Log from R6-4 to R6-5
@@ -164,8 +164,8 @@ Modification Log from R6-4 to R6-5
         effect of one of those changes prevented the motor from doing its'
         backlash move when a motor move was interrupted by "New Target
         Monitoring".  The user would see a "tdir" message in the iocsh and
-        the motor would move, not the target position, but to the target minus
-        the backlash distance.
+        the motor would move, not to the target position, but to the target
+        minus the backlash distance.
 
         File modified: do_work() in motorRecord.cc; unconditionally set the
                        postprocess indicator TRUE so postProcess() can do the
@@ -175,6 +175,59 @@ Modification Log from R6-4 to R6-5
 
         File modified: motorRecord.cc:process(); added check for !MIP_STOP to
                        NTM logic.
+
+7) The asynMotor device support would erroneously leave a motor-in-motion
+        indicator on if the motor record issued a LOAD_POS command before the
+        2nd pass of device support initialization.  Added logic to
+        devMotorAsyn.c:asynCallback() to prevent moveRequestPending from being
+        left in a nonzero state after the execution of a LOAD_POS command done
+        as a result of save/restore during boot-up.
+
+        File modified:  devMotorAsyn.c:asynCallback()
+
+8) Aerotech Ensemble device driver fixes for incorrect Jog speeds, support for
+        a negative PosScaleFactor parameter and detecting maximum travel limit
+        switch faults.
+        
+        Files modified: devEnsemble.cc, drvEnsemble.h, drvEnsemble.cc
+
+9) Moved preprocessor assertions in motor.h to the end of the conditional logic
+        to avoid MSVC compiler errors.
+   
+        File modified: MotorSrc/motor.h
+
+10) Matthew Pearson's (Diamond) fix for the motor simulator getting stuck in
+        the Moving state after multiple LOAD_POS commands to the same position.
+        
+        File modified: MotorSrc/devMotorAsyn.c; set needUpdate = 1 in
+                       asynCallback() before dbProcess() call.
+
+11) A consequence of the fix for item #10 above caused the motor record to see
+        RA_DONE in the MSTA field True on the 1st status update after a move;
+        whether or not the motor was done moving.  Matthew Pearson's fix is to
+        set motorAxisDone False in motorAxisDrvSET_t functions that start
+        motion (motorAxisHome, motorAxisMove, motorAxisVelocityMove) and force
+        a status update with a motorParam->callCallback(pAxis->params) call.
+        
+        Files modified: - NewportSrc/drvMM4000Asyn.c
+                        - AtttoCube/drvANC150.cc
+                        - MotorSimSrc/drvMotorSim.c
+
+12) Removed the OMSL field from the motorx_all.adl medm display to prevent
+        confusion with motor position closed-loop control.
+        
+        File modified: motorApp/op/adl/motorx_all.adl
+
+13) An error was introduced with R5-3 when the STUP field was added (item #4
+        under R5-3) that resulted in the PACT field being cleared before
+        recGblGetTimeStamp(), alarm_sub() and monitor() were called.
+
+        File modified: process() in motorRecord.cc
+
+14) Made OMS device driver Setup and Configure shell command error messages
+        more prominent.
+        
+        Files modified: <driver>Setup() drvMAXv.cc, drvOms58.cc and drvOms.cc
 
 
 Modification Log from R6-3 to R6-4
