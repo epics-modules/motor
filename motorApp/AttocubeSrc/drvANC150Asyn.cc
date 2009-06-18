@@ -3,9 +3,9 @@ FILENAME...     drvANC150Asyn.cc
 USAGE...        asyn motor driver support for attocube systems AG ANC150
                 Piezo Step Controller.
 
-Version:        $Revision: 1.7 $
+Version:        $Revision: 1.8 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-02-18 21:39:00 $
+Last Modified:  $Date: 2009-06-18 19:30:56 $
 
 */
 
@@ -48,6 +48,11 @@ Last Modified:  $Date: 2009-02-18 21:39:00 $
  * .04 02-18-09 rls Copied Matthew Pearson's (Diamond) fix on XPS for;
  *                  - idle polling interfering with setting position.
  *                  - auto save/restore not working.
+ * .05 06-11-09 rls - Matthew Pearson's fix for record seeing motorAxisDone True
+ *                  on 1st status update after a move; set motorAxisDone False
+ *                  in motorAxisDrvSET_t functions that start motion
+ *                  (motorAxisHome, motorAxisMove, motorAxisVelocityMove) and
+ *                  force a status update with a call to callCallback().
  *
  */
 
@@ -295,7 +300,6 @@ static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, 
 static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
-    int status;
 
     if (pAxis == NULL)
         return(MOTOR_AXIS_ERROR);
@@ -443,8 +447,16 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     if (status)
         return(MOTOR_AXIS_ERROR);
 
-    /* Set direction indicator. */
-    motorParam->setInteger(pAxis->params, motorAxisDirection, posdir);
+    if (epicsMutexLock(pAxis->mutexId) == epicsMutexLockOK)
+    {
+        /* Set direction indicator. */
+        motorParam->setInteger(pAxis->params, motorAxisDirection, posdir);
+
+        /* Insure that the motor record's next status update sees motorAxisDone = False. */
+        motorParam->setInteger(pAxis->params, motorAxisDone, 0);
+        motorParam->callCallback(pAxis->params);
+        epicsMutexUnlock(pAxis->mutexId);
+    }
 
     /* Send a signal to the poller task which will make it do a poll, and
        switch to the moving poll rate. */
