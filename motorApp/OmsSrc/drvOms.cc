@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.27 $
+Version:	$Revision: 1.28 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:36:10 $
+Last Modified:	$Date: 2009-06-18 19:09:58 $
 */
 
 /*
@@ -73,6 +73,7 @@ Last Modified:	$Date: 2008-03-14 20:36:10 $
  * .13  03-14-08 rls - 64-bit compatiability.
  *                   - changed IRS to task comm. mechanism from epicsRingPointer
  *                     to epicsRingByte.
+ * .14  06-18-09 rls - Make omsSetup() error messages more prominent.
  */
 
 /*========================stepper motor driver ========================
@@ -970,15 +971,25 @@ static void motorIsrDisable(int card)
 /* Configuration function for  module_types data     */
 /* areas. omsSetup()                                */
 /*****************************************************/
-int omsSetup(int num_cards,	/* maximum number of cards in rack */
-	     void *addrs,	/* Base Address(0x0-0xb000 on 4K boundary) */
-	     unsigned vector,	/* noninterrupting(0), valid vectors(64-255) */
-	     int int_level,	/* interrupt level (1-6) */
-	     int scan_rate)	/* polling rate - in HZ */
+RTN_STATUS
+omsSetup(int num_cards,  /* maximum number of cards in rack */
+         void *addrs,    /* Base Address(0x0-0xb000 on 4K boundary) */
+         unsigned vector,/* noninterrupting(0), valid vectors(64-255) */
+         int int_level,  /* interrupt level (1-6) */
+         int scan_rate)  /* polling rate - 1-60 Hz */
 {
+    RTN_STATUS rtncode = OK;
+    char errbase[] = "\nomsSetup: *** invalid ";
 
     if (num_cards < 1 || num_cards > OMS_NUM_CARDS)
+    {
+        char format[] = "%snumber of cards specified = %d ***\n";
 	oms44_num_cards = OMS_NUM_CARDS;
+        errlogPrintf(format, errbase, num_cards);
+        errlogPrintf("             *** using maximum number = %d ***\n", OMS_NUM_CARDS);
+        epicsThreadSleep(5.0);
+        rtncode = ERROR;
+    }
     else
 	oms44_num_cards = num_cards;
 
@@ -989,8 +1000,6 @@ int omsSetup(int num_cards,	/* maximum number of cards in rack */
     if ((epicsUInt32) addrs & 0xF)
 #endif
     {
-	Debug(1, "omsSetup: invalid base address %p\n", addrs);
-	oms_addrs = (char *) OMS_NUM_ADDRS;
     }
     else
 	oms_addrs = (char *) addrs;
@@ -1000,15 +1009,21 @@ int omsSetup(int num_cards,	/* maximum number of cards in rack */
     {
 	if (vector != 0)
 	{
-	    Debug(1, "omsSetup: invalid interrupt vector %d\n", vector);
+	    char format[] = "%s interrupt vector %d ***\n";
 	    omsInterruptVector = (unsigned) OMS_INT_VECTOR;
+	    errlogPrintf(format, errbase, vector);
+            epicsThreadSleep(5.0);
+            rtncode = ERROR;
 	}
     }
 
     if (int_level < 1 || int_level > 6)
     {
-	Debug(1, "omsSetup: invalid interrupt level %d\n", int_level);
+	char format[] = "%s interrupt level %d ***\n";
 	omsInterruptLevel = OMS_INT_LEVEL;
+	errlogPrintf(format, errbase, int_level);
+        epicsThreadSleep(5.0);
+        rtncode = ERROR;
     }
     else
 	omsInterruptLevel = int_level;
@@ -1018,11 +1033,13 @@ int omsSetup(int num_cards,	/* maximum number of cards in rack */
 	targs.motor_scan_rate = scan_rate;
     else
     {
+	char format[] = "%s invalid poll rate - %d HZ\n";
 	targs.motor_scan_rate = SCAN_RATE;
-	errlogPrintf("%s(%d): invalid poll rate - %d HZ\n", __FILE__, __LINE__,
-		      scan_rate);
+	errlogPrintf(format, errbase, scan_rate);
+        epicsThreadSleep(5.0);
+        rtncode = ERROR;
     }
-    return(0);
+    return(rtncode);
 }
 
 /*****************************************************/
