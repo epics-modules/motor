@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.22 $
+Version:        $Revision: 1.23 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-02-19 16:56:54 $
+Last Modified:  $Date: 2009-06-18 19:09:15 $
 */
 
 /*
@@ -67,6 +67,7 @@ Last Modified:  $Date: 2009-02-19 16:56:54 $
  * 11  05-20-08 rls - A24/A32 address mode bug fix.
  * 12  01-05-09 rls - Dirk Zimoch's (PSI) bug fix for set_status() overwriting
  *                    the home switch status in the response string.
+ * 13  06-18-09 rls - Make MAXvSetup() error messages more prominent.
  *
  */
 
@@ -708,17 +709,19 @@ static char *readbuf(volatile struct MAXv_motor *pmotor, char *bufptr)
 /* Configuration function for  module_types data     */
 /* areas. MAXvSetup()                                */
 /*****************************************************/
-RTN_VALUES MAXvSetup(int num_cards, /* maximum number of cards in rack */
-              int addrs_type,       /* VME address type; 16 - A16, 24 - A24 or 32 - A32. */
-              unsigned int addrs,   /* Base Address. */
-              unsigned int vector,  /* noninterrupting(0), valid vectors(64-255) */
-              int int_level,        /* interrupt level (1-6) */
-              int scan_rate)        /* polling rate - 1/60 sec units */
+RTN_STATUS
+MAXvSetup(int num_cards,        /* maximum number of cards in rack */
+          int addrs_type,       /* VME address type; 16 - A16, 24 - A24 or 32 - A32. */
+          unsigned int addrs,   /* Base Address. */
+          unsigned int vector,  /* noninterrupting(0), valid vectors(64-255) */
+          int int_level,        /* interrupt level (1-6) */
+          int scan_rate)        /* 1 <= polling rate <= (1/epicsThreadSleepQuantum) */
 {
     int itera;
     char **strptr;
-    RTN_VALUES rtnind = OK;
+    RTN_STATUS rtncode = OK;
     double frequency;
+    char errbase[] = "\nMAXvSetup: *** invalid ";
 
     if (initstring == NULL)
        initstring = (char **) callocMustSucceed(1,
@@ -731,73 +734,93 @@ RTN_VALUES MAXvSetup(int num_cards, /* maximum number of cards in rack */
     }
 
     if (num_cards < 1 || num_cards > MAXv_NUM_CARDS)
+    {
+        char format[] = "%snumber of cards specified = %d ***\n";
         MAXv_num_cards = MAXv_NUM_CARDS;
+        errlogPrintf(format, errbase, num_cards);
+        errlogPrintf("             *** using maximum number = %d ***\n", MAXv_NUM_CARDS);
+        epicsThreadSleep(5.0);
+        rtncode = ERROR;
+    }
     else
         MAXv_num_cards = num_cards;
 
-    switch(addrs_type)
     {
-    case 16:
-        MAXv_ADDRS_TYPE = atVMEA16;
-        if ((epicsUInt32) addrs & 0xFFFF0FFF)
+        char addmsg[] = "%sA%d address *** = 0x%X.\n";
+        switch (addrs_type)
         {
-            errlogPrintf("MAXvSetup(): invalid A16 address = 0x%X.\n", (epicsUInt32) addrs);
-            rtnind = ERROR;
+        case 16:
+            MAXv_ADDRS_TYPE = atVMEA16;
+            if ((epicsUInt32) addrs & 0xFFFF0FFF)
+            {
+                errlogPrintf(addmsg, errbase, 16, (epicsUInt32) addrs);
+                rtncode = ERROR;
+            }
+            else
+            {
+                MAXv_addrs = (char *) addrs;
+                MAXv_brd_size = 0x1000;
+            }
+            break;
+        case 24:
+            MAXv_ADDRS_TYPE = atVMEA24;
+            if ((epicsUInt32) addrs & 0xFF00FFFF)
+            {
+                errlogPrintf(addmsg, errbase, 24, (epicsUInt32) addrs);
+                rtncode = ERROR;
+            }
+            else
+            {
+                MAXv_addrs = (char *) addrs;
+                MAXv_brd_size = 0x10000;
+            }
+            break;
+        case 32:
+            MAXv_ADDRS_TYPE = atVMEA32;
+            if ((epicsUInt32) addrs & 0x00FFFFFF)
+            {
+                errlogPrintf(addmsg, errbase, 32, (epicsUInt32) addrs);
+                rtncode = ERROR;
+            }
+            else
+            {
+                MAXv_addrs = (char *) addrs;
+                MAXv_brd_size = 0x1000000;
+            }
+            break;
+        default:
+            {
+                char format[] = "%sVME address type = %d ***\n";
+                errlogPrintf(format, errbase, addrs_type);
+            }
+            rtncode = ERROR;
+            break;
         }
-        else
-        {
-            MAXv_addrs = (char *) addrs;
-            MAXv_brd_size = 0x1000;
-        }
-        break;
-    case 24:
-        MAXv_ADDRS_TYPE = atVMEA24;
-        if ((epicsUInt32) addrs & 0xFF00FFFF)
-        {
-            errlogPrintf("MAXvSetup(): invalid A24 address = 0x%X.\n", (epicsUInt32) addrs);
-            rtnind = ERROR;
-        }
-        else
-        {
-            MAXv_addrs = (char *) addrs;
-            MAXv_brd_size = 0x10000;
-        }
-        break;
-    case 32:
-        MAXv_ADDRS_TYPE = atVMEA32;
-        if ((epicsUInt32) addrs & 0x00FFFFFF)
-        {
-            errlogPrintf("MAXvSetup(): invalid A32 address = 0x%X.\n", (epicsUInt32) addrs);
-            rtnind = ERROR;
-        }
-        else
-        {
-            MAXv_addrs = (char *) addrs;
-            MAXv_brd_size = 0x1000000;
-        }
-        break;
-    default:
-        errlogPrintf("MAXvSetup(): invalid VME address type = %d.\n", addrs_type);
-        rtnind = ERROR;
-        break;
     }
+
+    if (rtncode == ERROR)
+        epicsThreadSleep(5.0);
 
     MAXvInterruptVector = vector;
     if (vector < 64 || vector > 255)
     {
         if (vector != 0)
         {
-            errlogPrintf("MAXvSetup: invalid interrupt vector %d\n", vector);
+            char format[] = "%sinterrupt vector = %d ***\n";
             MAXvInterruptVector = (unsigned) OMS_INT_VECTOR;
-            rtnind = ERROR;
+            errlogPrintf(format, errbase, vector);
+            epicsThreadSleep(5.0);
+            rtncode = ERROR;
         }
     }
 
     if (int_level < 1 || int_level > 6)
     {
-        errlogPrintf("MAXvSetup: invalid interrupt level %d\n", int_level);
+        char format[] = "%sinterrupt level = %d ***\n";
         omsInterruptLevel = OMS_INT_LEVEL;
-        rtnind = ERROR;
+        errlogPrintf(format, errbase, int_level);
+        epicsThreadSleep(5.0);
+        rtncode = ERROR;
     }
     else
         omsInterruptLevel = int_level;
@@ -809,7 +832,13 @@ RTN_VALUES MAXvSetup(int num_cards, /* maximum number of cards in rack */
     if (scan_rate >= 1 && scan_rate <= frequency)
         targs.motor_scan_rate = scan_rate;
     else
+    {
+        char format[] = "%spolling rate = %d ***\n";
         targs.motor_scan_rate = (int) frequency;
+        errlogPrintf(format, errbase, scan_rate);
+        epicsThreadSleep(5.0);
+        rtncode = ERROR;
+    }
 
     /* Allocate memory for initialization strings. */
     for (itera = 0, strptr = &initstring[0]; itera < MAXv_num_cards; itera++, strptr++)
@@ -818,7 +847,7 @@ RTN_VALUES MAXvSetup(int num_cards, /* maximum number of cards in rack */
         **strptr = (char) NULL;
     }
 
-    return(rtnind);
+    return(rtncode);
 }
 
 RTN_VALUES MAXvConfig(int card,                 /* number of card being configured */
@@ -827,11 +856,13 @@ RTN_VALUES MAXvConfig(int card,                 /* number of card being configur
     if (card < 0 || card >= MAXv_num_cards)
     {
         errlogPrintf("MAXvConfig: invalid card %d\n", card);
+        epicsThreadSleep(5.0);
         return(ERROR);
     }
     if (strlen(initstr) > INITSTR_SIZE)
     {
         errlogPrintf("MAXvConfig: initialization string > %d bytes.\n", INITSTR_SIZE);
+        epicsThreadSleep(5.0);
         return(ERROR);
     }
 
