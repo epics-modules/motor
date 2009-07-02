@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.23 $
+Version:        $Revision: 1.24 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-06-18 19:09:15 $
+Last Modified:  $Date: 2009-07-02 17:54:14 $
 */
 
 /*
@@ -68,6 +68,9 @@ Last Modified:  $Date: 2009-06-18 19:09:15 $
  * 12  01-05-09 rls - Dirk Zimoch's (PSI) bug fix for set_status() overwriting
  *                    the home switch status in the response string.
  * 13  06-18-09 rls - Make MAXvSetup() error messages more prominent.
+ * 14  07-02-09 rls - backwards compatibility with ver:1.29 and earlier
+ *                    firmware. OMS changed from '<LF><NULL>' to '<LF>' for
+ *                    RA, QA, EA and RL command with ver:1.30
  *
  */
 
@@ -646,8 +649,12 @@ static int recv_mess(int card, char *com, int amount)
 
         bufptr = readbuf(pmotor, bufptr);
         if (--amount > 0)
-            *(bufptr++) = ',';  /* Replace zero byte with delimiter ','. */
-
+        {
+            if (*(bufptr-1) == '\n') /* For ver:1.29 and before firmware, */
+                *(bufptr-1) = ',';   /* replace <LF><0> with <,><0>.      */
+            else                     /* For ver:1.30 and after firmware,  */
+                *(bufptr++) = ',';   /* replace <LF> with <,>.            */
+        }
     } while (amount > 0);
 
     Debug(4, "recv_mess(): card#%d - %s\n", card, com);
