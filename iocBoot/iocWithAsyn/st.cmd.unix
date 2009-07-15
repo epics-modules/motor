@@ -235,15 +235,8 @@ MM4000Config(0, "L0")
 #   (2) Driver name
 #   (3) Controller index
 #   (4) Max. number of axes
-#!drvAsynMotorConfigure("ANC150","motorANC150",0,1)
-
-
-# Asyn-based Motor Record support
-#   (1) Asyn port
-#   (2) Driver name
-#   (3) Controller index
-#   (4) Max. number of axes
-#!drvAsynMotorConfigure("ANC150","motorANC150",0,1)
+#!drvAsynMotorConfigure("MM4",   "motorMM4000", 0, 4)
+#!drvAsynMotorConfigure("ANC150","motorANC150", 0, 1)
 
 
 iocInit
