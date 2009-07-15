@@ -2,9 +2,9 @@
  * FILENAME... devEnsemble.cc
  * USAGE... Motor record device level support for Aerotech Ensemble.
  *
- * Version:        $Revision: 1.7 $
+ * Version:        $Revision: 1.8 $
  * Modified By:    $Author: sluiter $
- * Last Modified:  $Date: 2009-05-01 18:11:51 $
+ * Last Modified:  $Date: 2009-07-15 19:05:58 $
  */
 
 /*
@@ -164,7 +164,6 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-//    struct mess_info *motor_info;
     struct Ensemblecontroller *cntrl;
     char buff[BUFF_SIZE], temp[BUFF_SIZE];
     int axis, card, maxdigits;
