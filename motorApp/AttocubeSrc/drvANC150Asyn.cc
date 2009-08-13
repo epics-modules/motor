@@ -3,9 +3,9 @@ FILENAME...     drvANC150Asyn.cc
 USAGE...        asyn motor driver support for attocube systems AG ANC150
                 Piezo Step Controller.
 
-Version:        $Revision: 1.8 $
+Version:        $Revision: 1.9 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-06-18 19:30:56 $
+Last Modified:  $Date: 2009-08-13 20:05:24 $
 
 */
 
@@ -53,6 +53,8 @@ Last Modified:  $Date: 2009-06-18 19:30:56 $
  *                  in motorAxisDrvSET_t functions that start motion
  *                  (motorAxisHome, motorAxisMove, motorAxisVelocityMove) and
  *                  force a status update with a call to callCallback().
+ * .06 08-07-09 rls - bug fix for multi-axis not reading frequency.
+ *                  - bug fix for set position not setting val/dval/rval.
  *
  */
 
@@ -311,6 +313,7 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         case motorAxisPosition:
         {
             pAxis->currentPosition = pAxis->targetPosition = value;
+            ret_status = MOTOR_AXIS_OK;
             break;
         }
         case motorAxisEncoderRatio:
@@ -884,7 +887,7 @@ static asynStatus getFreq(ANC150Controller *pController, int axis)
         return(status);
     else
     {
-        pAxis = pController->pAxis;
+        pAxis = &pController->pAxis[axis];
         savedfreq = pAxis->frequency;
         if (sscanf(inputBuff, "frequency = %d", &pAxis->frequency) != 1)
         {
