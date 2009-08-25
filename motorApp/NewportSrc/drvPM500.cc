@@ -2,9 +2,9 @@
 FILENAME... drvPM500.cc
 USAGE...    Motor record driver level support for Newport PM500.
 
-Version:    $Revision: 1.20 $
+Version:    $Revision: 1.21 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-01-17 15:39:43 $
+Last Modified:  $Date: 2009-08-25 18:25:54 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -44,10 +44,13 @@ Last Modified:  $Date: 2007-01-17 15:39:43 $
  * .07 07/28/04 rls "epicsExport" debug variable.
  * .08 09/21/04 rls support for 32axes/controller.
  * .09 12/21/04 rls - MS Visual C compatibility; make all epicsExportAddress
- *            extern "C" linkage.
- *          - make debug variables always available.
+ *                    extern "C" linkage.
+ *                  - make debug variables always available.
  * .10 01/17/07 rls Bug fix for driver not issuing the correct command when it
  *                  queried for the number of axes at boot up.
+ * .11 08/20/09 rls - Bad motor_init() initialization; EA_PRESENT and
+ *                    GAIN_SUPPORT cleared.
+ *                  - Added MSTA.EA_POSITION support query to set_status().
  */
 
 
@@ -217,10 +220,9 @@ static int set_status(int card, int signal)
 {
     struct MMcontroller *cntrl;
     struct mess_node *nodeptr;
-    register struct mess_info *motor_info;
+    struct mess_info *motor_info;
     /* Message parsing variables */
-    char *axis_name, status_char, dir_char, buff[BUFF_SIZE],
-    response[BUFF_SIZE];
+    char *axis_name, status_char, dir_char, buff[BUFF_SIZE], response[BUFF_SIZE];
     int rtnval, rtn_state = 0;
     double motorData;
     bool ls_active;
@@ -282,10 +284,13 @@ static int set_status(int card, int signal)
         status.Bits.RA_MINUS_LS = 0;
     }
 
-    status.Bits.RA_HOME = 0;
+    /* Set Motor On/Off status */
+    sprintf(buff, "%sM?", axis_name);
+    send_mess(card, buff, (char) NULL);
+    rtnval = recv_mess(card, response, 1);
+    status.Bits.EA_POSITION = (int) atof(&response[2]);
 
-    /* encoder status */
-    status.Bits.EA_POSITION = 0;
+    status.Bits.RA_HOME = 0;
     status.Bits.EA_SLIP     = 0;
     status.Bits.EA_SLIP_STALL   = 0;
     status.Bits.EA_HOME     = 0;
@@ -645,19 +650,16 @@ static int motor_init()
                     digits = 1;
                 cntrl->res_decpts[motor_index] = digits;
 
+                motor_info->status.All = 0;
+                motor_info->no_motion_count = 0;
+                motor_info->encoder_position = 0;
+                motor_info->position = 0;
+                
                 /* PM500 only supports DC motors. */
                 motor_info->encoder_present = YES;
                 motor_info->status.Bits.EA_PRESENT = 1;
                 motor_info->pid_present = YES;
                 motor_info->status.Bits.GAIN_SUPPORT = 1;
-
-                motor_info->status.All = 0;
-                motor_info->no_motion_count = 0;
-                motor_info->encoder_position = 0;
-                motor_info->position = 0;
-
-                motor_info->encoder_present = NO;
-                motor_info->pid_present = NO;
 
                 cntrl->home_preset[motor_index] = 0;
 
