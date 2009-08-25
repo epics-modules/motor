@@ -229,6 +229,19 @@ Modification Log from R6-4 to R6-5
         
         Files modified: <driver>Setup() drvMAXv.cc, drvOms58.cc and drvOms.cc
 
+15) OMS MAXv driver changes from Austen Rose (Diamond) that support backwards
+        compatibility with ver:1.29 and earlier MAXv firmware. OMS changed
+        their line terminator from '<LF><NULL>' to '<LF>' for RA, QA, EA and
+        RL command with ver:1.30 firmware.
+        
+        File modified: recv_mess() in OmsSrc/drvMAXv.cc
+
+16) Bug fixes for Newport PM500 driver not initializing the MSTA field
+        correctly.  Added support for CNEN field.
+        
+        Files modified: devPM500.cc, drvPM500.cc, motorRecord.dbd
+
+
 
 Modification Log from R6-3 to R6-4
 ==================================
