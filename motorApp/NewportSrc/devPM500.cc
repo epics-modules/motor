@@ -3,9 +3,9 @@ FILENAME...	devPM500.cc
 USAGE...	Motor record device level support for the Newport PM500 motor
 		controller.
 
-Version:	$Revision: 1.3 $
+Version:	$Revision: 1.4 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:17:14 $
+Last Modified:	$Date: 2009-08-25 18:24:24 $
 */
 
 /*
@@ -39,6 +39,8 @@ Last Modified:	$Date: 2008-03-14 20:17:14 $
  * .01  06-02-00 rls integrated into standard motor record
  * .02  04-21-01 rls Added jog velocity motor command. 
  * .03  05-23-03 rls Converted to R3.14.x.
+ * .04  08-24-09 rls Queries added to some commands to prevent comm. response
+ *                   timeouts.
  */
 
 #include <string.h>
@@ -271,7 +273,7 @@ STATIC RTN_STATUS PM500_build_trans(motor_cmnd command, double *parms, struct mo
 	    break;
 	
 	case STOP_AXIS:
-	    sprintf(buff, "%cT;", axis_name);
+	    sprintf(buff, "%cT;%cR", axis_name, axis_name);
 	    break;
 	
 	case JOG:
@@ -288,11 +290,11 @@ STATIC RTN_STATUS PM500_build_trans(motor_cmnd command, double *parms, struct mo
 	    break;
 
 	case ENABLE_TORQUE:
-	    sprintf(buff, "%cT;", axis_name);
+	    sprintf(buff, "%cT;%cM?", axis_name, axis_name);
 	    break;
 	
 	case DISABL_TORQUE:
-	    sprintf(buff, "%cM;", axis_name);
+	    sprintf(buff, "%cM;%cM?", axis_name, axis_name);
 	    break;
 	
 	case SET_HIGH_LIMIT:
