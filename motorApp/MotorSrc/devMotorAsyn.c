@@ -11,9 +11,9 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.31 $
- * Modified by: $Author: sluiter $
- * Last Modified: $Date: 2009-05-01 17:55:28 $
+ * Version: $Revision: 1.32 $
+ * Modified by: $Author: rivers $
+ * Last Modified: $Date: 2009-09-01 14:05:38 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -41,6 +41,7 @@
 #include <dbAccess.h>
 #include <recGbl.h>
 #include <recSup.h>
+#include <errlog.h>
 #include <devSup.h>
 #include <alarm.h>
 #include <epicsEvent.h>
