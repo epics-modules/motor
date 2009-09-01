@@ -2,9 +2,9 @@
 FILENAME...     motorRecord.cc
 USAGE...        Motor Record Support.
 
-Version:        $Revision: 1.53 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-06-18 19:19:57 $
+Version:        $Revision: 1.54 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2009-09-01 14:04:08 $
 */
 
 /*
@@ -756,7 +756,7 @@ static long postProcess(motorRecord * pmr)
 
             /* Use if encoder or ReadbackLink is in use. */
             msta.All = pmr->msta;
-            bool use_rel = (pmr->rtry != 0 && (msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip);
+            bool use_rel = (((pmr->rtry != 0) && (msta.Bits.EA_PRESENT && pmr->ueip)) || pmr->urip);
             double relpos = pmr->diff / pmr->mres;
             double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
@@ -832,7 +832,7 @@ static long postProcess(motorRecord * pmr)
 
         /* Use if encoder or ReadbackLink is in use. */
         msta.All = pmr->msta;
-        bool use_rel = (pmr->rtry != 0 && (msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip);
+        bool use_rel = (((pmr->rtry != 0) && (msta.Bits.EA_PRESENT && pmr->ueip)) || pmr->urip);
         double relpos = pmr->diff / pmr->mres;
         double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
@@ -2094,7 +2094,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             msta.All = pmr->msta;
 
             /*** Use if encoder or ReadbackLink is in use. ***/
-            if (pmr->rtry != 0 && (msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip)
+            if (((pmr->rtry != 0) && (msta.Bits.EA_PRESENT && pmr->ueip)) || pmr->urip)
                 use_rel = true;
             else
                 use_rel = false;
