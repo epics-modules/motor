@@ -132,7 +132,6 @@ unsigned long startTime;
 %% static int writeRead(SS_ID ssId, struct UserVar *pVar, char *command);
 %% static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos);
 %% static int getMotorMoving(SS_ID ssId, struct UserVar *pVar);
-%% static int waitMotors(SS_ID ssId, struct UserVar *pVar);
 %% static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar);
 %% static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar);
 
@@ -598,7 +597,7 @@ ss trajectoryAbort {
 static int writeOnly(SS_ID ssId, struct UserVar *pVar, char *command)
 {
     asynStatus status;
-    int nwrite;
+    size_t nwrite;
     char buffer[MAX_MM4000_STRING];
 
     /* Copy command so we can add terminator */
@@ -614,7 +613,7 @@ static int writeOnly(SS_ID ssId, struct UserVar *pVar, char *command)
 static int writeRead(SS_ID ssId, struct UserVar *pVar, char *command)
 {
     asynStatus status;
-    int nwrite, nread;
+    size_t nwrite, nread;
     int eomReason;
     char buffer[MAX_MM4000_STRING];
 
@@ -692,25 +691,6 @@ static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar)
 }
 
 
-/* waitMotors waits for all motors to stop moving.  It reads and posts the
- * motor positions during each loop. */
-static int waitMotors(SS_ID ssId, struct UserVar *pVar)
-{
-    int j;
-
-    /* Logic is that we always want to post position motor positions 
-     * after the end of move is detected. */
-    while(getMotorMoving(ssId, pVar)) {
-        /* Get the current motor positions, post them */
-        getMotorPositions(ssId, pVar, pVar->motorCurrent);
-        for (j=0; j<pVar->numAxes; j++) seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
-        epicsThreadSleep(POLL_INTERVAL);
-    }
-    getMotorPositions(ssId, pVar, pVar->motorCurrent);
-    for (j=0; j<pVar->numAxes; j++) seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
-    return(0);
-}
-
 /* waitEpicsMotors waits for all motors to stop moving using the EPICS motor
  * records..  It reads and posts the motor positions during each loop. */
 static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
