@@ -24,7 +24,9 @@
 static int code(char*);
 static int sendFtpCommandAndReceive (int, char*, char*);
 static int getPort (int, char*);
+#ifdef DEBUG
 static void printRecv (char*, int);
+#endif
 
 
 /******[ ftpConnect ]************************************************/
@@ -370,6 +372,7 @@ static int  getPort (int socketFD, char* ip)
 }
 
 
+#ifdef DEBUG
 /******[ printRecv ]**************************************************/
 static void printRecv (char *str, int i)   
 {
@@ -377,3 +380,4 @@ static void printRecv (char *str, int i)
   for (j = 0; j < i; j++)
     printf("%c", str[j]); 
 }
+#endif

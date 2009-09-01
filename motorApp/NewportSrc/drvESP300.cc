@@ -2,9 +2,9 @@
 FILENAME... drvESP300.cc
 USAGE...    Motor record driver level support for Newport ESP300/100.
 
-Version:    $Revision: 1.24 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-04-27 14:03:02 $
+Version:    $Revision: 1.25 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2009-09-01 16:17:46 $
 */
 
 /*
@@ -128,7 +128,7 @@ struct driver_table ESP300_access =
     NULL
 };
 
-struct
+struct drvESP300_drvet
 {
     long number;
 #ifdef __cplusplus
@@ -572,7 +572,7 @@ static int motor_init()
     int card_index, motor_index;
     char buff[BUFF_SIZE];
     int total_axis = 0;
-    int status;
+    int status=0;
     asynStatus success_rtn;
     static const char output_terminator[] = "\r";
     static const char input_terminator[]  = "\n";

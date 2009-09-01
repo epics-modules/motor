@@ -2,9 +2,9 @@
 FILENAME... drvMM4000.cc
 USAGE...    Motor record driver level support for Newport MM4000.
 
-Version:        $Revision: 1.23 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-02-18 20:54:20 $
+Version:        $Revision: 1.24 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2009-09-01 16:18:28 $
 */
 
 /*
@@ -157,7 +157,7 @@ struct driver_table MM4000_access =
     NULL
 };
 
-struct
+struct drvMM4000_drvet
 {
     long number;
 #ifdef __cplusplus
@@ -635,7 +635,7 @@ static int motor_init()
     char buff[BUFF_SIZE];
     char *tok_save, *pos_ptr;
     int total_axis = 0;
-    int status, model_num, digits;
+    int status=0, model_num, digits;
     asynStatus success_rtn;
 
     initialized = true; /* Indicate that driver is initialized. */

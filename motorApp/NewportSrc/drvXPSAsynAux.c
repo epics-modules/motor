@@ -384,7 +384,7 @@ static asynStatus readUInt32D(void *drvPvt, asynUser *pasynUser,
                           channel);
             return(asynError);
         }
-        status = GPIOAnalogGainGet(pPvt->socketID, 1, analogInputNames[channel], value);
+        status = GPIOAnalogGainGet(pPvt->socketID, 1, analogInputNames[channel], (int*)value);
         if (status) {
             epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
                           "drvXPSAsynAux::writeUInt32D error calling GPIOAnalogGainSet=%d",
@@ -441,7 +441,7 @@ static asynStatus writeUInt32D(void *drvPvt, asynUser *pasynUser,
             return(asynError);
         }
         GPIOName = analogInputNames[channel];
-        status = GPIOAnalogGainSet(pPvt->socketID, 1, GPIOName, &value);
+        status = GPIOAnalogGainSet(pPvt->socketID, 1, GPIOName, (int*)&value);
         if (status) {
             epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
                           "drvXPSAsynAux::writeUInt32D error calling GPIOAnalogGainSet=%d",

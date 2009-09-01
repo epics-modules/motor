@@ -2,9 +2,9 @@
 FILENAME... drvMM3000.cc
 USAGE...    Motor record driver level support for Newport MM3000.
 
-Version:    $Revision: 1.21 $
+Version:    $Revision: 1.22 $
 Modified By:    $Author: rivers $
-Last Modified:  $Date: 2005-12-15 20:19:02 $
+Last Modified:  $Date: 2009-09-01 16:18:09 $
 */
 
 /*
@@ -151,7 +151,7 @@ struct driver_table MM3000_access =
     NULL
 };
 
-struct
+struct drvMM3000_drvet
 {
     long number;
     long (*report) (int);

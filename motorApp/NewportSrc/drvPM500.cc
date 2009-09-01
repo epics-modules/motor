@@ -2,9 +2,9 @@
 FILENAME... drvPM500.cc
 USAGE...    Motor record driver level support for Newport PM500.
 
-Version:    $Revision: 1.21 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-08-25 18:25:54 $
+Version:    $Revision: 1.22 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2009-09-01 16:20:08 $
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -141,7 +141,7 @@ struct driver_table PM500_access =
     PM500_axis_names
 };
 
-struct
+struct drvP500_drvet
 {
     long number;
 #ifdef __cplusplus
@@ -514,7 +514,7 @@ static int motor_init()
     int card_index, motor_index;
     char buff[BUFF_SIZE];
     int total_axis = 0;
-    int status, digits;
+    int status=0, digits;
     asynStatus success_rtn;
 
     initialized = true; /* Indicate that driver is initialized. */
