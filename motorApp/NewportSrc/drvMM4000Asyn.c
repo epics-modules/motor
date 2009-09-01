@@ -2,9 +2,9 @@
 FILENAME... drvMM4000Asyn.cc
 USAGE...    Motor record asyn driver level support for Newport MM4000.
 
-Version:        $Revision: 1.10 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-06-18 19:26:18 $
+Version:        $Revision: 1.11 $
+Modified By:    $Author: rivers $
+Last Modified:  $Date: 2009-09-01 16:19:17 $
 */
 
 /*
@@ -91,7 +91,9 @@ motorAxisDrvSET_t motorMM4000 =
     motorAxisMove,              /**< Pointer to function to execute a position move */
     motorAxisVelocityMove,      /**< Pointer to function to execute a velocity mode move */
     motorAxisStop,              /**< Pointer to function to stop motion */
-    motorAxisforceCallback      /**< Pointer to function to request a poller status update */
+    motorAxisforceCallback,     /**< Pointer to function to request a poller status update */
+    motorAxisProfileMove,       /**< Pointer to function to execute a profile move */
+    motorAxisTriggerProfile     /**< Pointer to function to trigger a profile move */
   };
 
 epicsExportAddress(drvet, motorMM4000);
@@ -148,7 +150,7 @@ static asynStatus sendAndReceive(MM4000Controller *pController, char *outputStri
 
 #define PRINT   (drv.print)
 #define FLOW    motorAxisTraceFlow
-#define ERROR   motorAxisTraceError
+#define MOTOR_ERROR motorAxisTraceError
 #define IODRIVER  motorAxisTraceIODriver
 
 #define MM4000_MAX_AXES 8
@@ -325,12 +327,12 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         }
         case motorAxisEncoderRatio:
         {
-            PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: MM4000 does not support setting encoder ratio\n");
+            PRINT(pAxis->logParam, MOTOR_ERROR, "motorAxisSetDouble: MM4000 does not support setting encoder ratio\n");
             break;
         }
         case motorAxisResolution:
         {
-            PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: MM4000 does not support setting resolution\n");
+            PRINT(pAxis->logParam, MOTOR_ERROR, "motorAxisSetDouble: MM4000 does not support setting resolution\n");
             break;
         }
         case motorAxisLowLimit:
@@ -349,26 +351,26 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
         }
         case motorAxisPGain:
         {
-            PRINT(pAxis->logParam, ERROR, "MM4000 does not support setting proportional gain\n");
+            PRINT(pAxis->logParam, MOTOR_ERROR, "MM4000 does not support setting proportional gain\n");
             break;
         }
         case motorAxisIGain:
         {
-            PRINT(pAxis->logParam, ERROR, "MM4000 does not support setting integral gain\n");
+            PRINT(pAxis->logParam, MOTOR_ERROR, "MM4000 does not support setting integral gain\n");
             break;
         }
         case motorAxisDGain:
         {
-            PRINT(pAxis->logParam, ERROR, "MM4000 does not support setting derivative gain\n");
+            PRINT(pAxis->logParam, MOTOR_ERROR, "MM4000 does not support setting derivative gain\n");
             break;
         }
         case motorAxisClosedLoop:
         {
-            PRINT(pAxis->logParam, ERROR, "MM4000 does not support changing closed loop or torque\n");
+            PRINT(pAxis->logParam, MOTOR_ERROR, "MM4000 does not support changing closed loop or torque\n");
             break;
         }
         default:
-            PRINT(pAxis->logParam, ERROR, "motorAxisSetDouble: unknown function %d\n", function);
+            PRINT(pAxis->logParam, MOTOR_ERROR, "motorAxisSetDouble: unknown function %d\n", function);
             break;
         }
         if (ret_status == MOTOR_AXIS_OK )
@@ -399,7 +401,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
         }
         break;
     default:
-        PRINT(pAxis->logParam, ERROR, "motorAxisSetInteger: unknown function %d\n", function);
+        PRINT(pAxis->logParam, MOTOR_ERROR, "motorAxisSetInteger: unknown function %d\n", function);
         break;
     }
     if (ret_status != MOTOR_AXIS_ERROR) status = motorParam->setInteger(pAxis->params, function, value);
@@ -602,7 +604,7 @@ static void MM4000Poller(MM4000Controller *pController)
                 break;
             if (comStatus != 0)
             {
-                PRINT(pAxis->logParam, ERROR, "MM4000Poller: error reading status=%d\n", comStatus);
+                PRINT(pAxis->logParam, MOTOR_ERROR, "MM4000Poller: error reading status=%d\n", comStatus);
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
             }
             else
@@ -659,7 +661,7 @@ static void MM4000Poller(MM4000Controller *pController)
                 else
                 {
                     intval = 1;
-                    PRINT(pAxis->logParam, ERROR, "MM4000Poller: controller error %s\n", buff);
+                    PRINT(pAxis->logParam, MOTOR_ERROR, "MM4000Poller: controller error %s\n", buff);
                 }
                 motorParam->setInteger(params, motorAxisProblem, intval);
             }
