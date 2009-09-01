@@ -775,6 +775,8 @@ typedef struct
     motorAxisVelocityMoveFunc    velocityMove;      /**< Pointer to function to execute a velocity mode move */
     motorAxisStopFunc            stop;              /**< Pointer to function to stop motion */
     motorAxisforceCallbackFunc   forceCallback;     /**< Pointer to function to request a poller status update */
+    motorAxisProfileMoveFunc     profileMove;       /**< Pointer to function to execute a profile move */
+    motorAxisTriggerProfileFunc  triggerProfile;    /**< Pointer to function to trigger a profile move */
 } motorAxisDrvSET_t;
 
 #ifdef __cplusplus
