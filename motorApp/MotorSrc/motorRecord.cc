@@ -2,9 +2,9 @@
 FILENAME...     motorRecord.cc
 USAGE...        Motor Record Support.
 
-Version:        $Revision: 1.54 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2009-09-01 14:04:08 $
+Version:        $Revision: 1.55 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2009-09-01 18:43:17 $
 */
 
 /*
@@ -643,6 +643,12 @@ LOGIC:
         ...
     ELSE IF done stopping after jog, OR, done with move.
         IF |backlash distance| > |motor resolution|.
+            IF Retry enabled, AND, [(encoder present, AND, use encoder true),
+                    OR, use readback link true]
+                Set relative positioning indicator true.
+            ELSE
+                Set relative positioning indicator false.
+            ENDIF
             Do backlasth correction.
         ELSE
             Set MIP to DONE.
@@ -652,6 +658,15 @@ LOGIC:
         ENDIF
         ...
         ...
+    ELSE IF done with 1st phase take out backlash after jog.
+        Calculate backlash velocity, base velocity, backlash accel. and backlash position.
+        IF Retry enabled, AND, [(encoder present, AND, use encoder true),
+                OR, use readback link true]
+            Set relative positioning indicator true.
+        ELSE
+            Set relative positioning indicator false.
+        ENDIF
+        
     ELSE IF done with jog or move backlash.
         Clear MIP.
         IF (JOGF field true, AND, Hard High limit false), OR,
@@ -756,7 +771,7 @@ static long postProcess(motorRecord * pmr)
 
             /* Use if encoder or ReadbackLink is in use. */
             msta.All = pmr->msta;
-            bool use_rel = (((pmr->rtry != 0) && (msta.Bits.EA_PRESENT && pmr->ueip)) || pmr->urip);
+            bool use_rel = (pmr->rtry != 0 && ((msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip));
             double relpos = pmr->diff / pmr->mres;
             double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
@@ -832,7 +847,7 @@ static long postProcess(motorRecord * pmr)
 
         /* Use if encoder or ReadbackLink is in use. */
         msta.All = pmr->msta;
-        bool use_rel = (((pmr->rtry != 0) && (msta.Bits.EA_PRESENT && pmr->ueip)) || pmr->urip);
+        bool use_rel = (pmr->rtry != 0 && ((msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip));
         double relpos = pmr->diff / pmr->mres;
         double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
@@ -1500,11 +1515,11 @@ LOGIC:
         ELSE
             Calculate....
             
-            IF (UEIP set to YES, AND, MSTA indicates an encoder is present),
-                        OR, ReadbackLink is in use (URIP).
-                Set "use relative move" indicator (use_rel) to true.
+            IF Retry enabled, AND, [(encoder present, AND, use encoder true),
+                    OR, use readback link true]
+                Set relative positioning indicator true.
             ELSE
-                Set "use relative move" indicator (use_rel) to false.
+                Set relative positioning indicator false.
             ENDIF
             
             Set VAL and RVAL based on DVAL; mark VAL and RVAL for posting.
@@ -2094,7 +2109,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             msta.All = pmr->msta;
 
             /*** Use if encoder or ReadbackLink is in use. ***/
-            if (((pmr->rtry != 0) && (msta.Bits.EA_PRESENT && pmr->ueip)) || pmr->urip)
+            if (pmr->rtry != 0 && ((msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip))
                 use_rel = true;
             else
                 use_rel = false;
