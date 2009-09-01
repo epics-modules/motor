@@ -123,7 +123,7 @@ struct driver_table PM304_access =
     NULL
 };
 
-struct
+struct drvPM304_drvet
 {
     long number;
 #ifdef __cplusplus
