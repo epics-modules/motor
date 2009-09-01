@@ -19,9 +19,9 @@
  *     of this distribution.
  *     ************************************************************************
  *
- * Version: $Revision: 1.21 $
- * Modified by: $Author: mp49 $
- * Last Modified: $Date: 2008-11-14 14:27:41 $
+ * Version: $Revision: 1.22 $
+ * Modified by: $Author: rivers $
+ * Last Modified: $Date: 2009-09-01 14:05:07 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison
@@ -42,6 +42,7 @@
 #include <epicsString.h>
 #include <epicsTimer.h>
 #include <epicsMutex.h>
+#include <errlog.h>
 #include <epicsMessageQueue.h>
 #include <errlog.h>
 #include <cantProceed.h> /* !! for callocMustSucceed() */
@@ -458,7 +459,7 @@ static asynStatus readUInt32Digital(void *drvPvt, asynUser *pasynUser,
                       command);
         return(asynError);
     default:
-    	(*pPvt->drvset->getInteger)(pAxis->axis, command, value);
+    	(*pPvt->drvset->getInteger)(pAxis->axis, command, (epicsInt32*)value);
     	break;
     }
     
@@ -536,7 +537,7 @@ static asynStatus writeInt32(void *drvPvt, asynUser *pasynUser,
     drvmotorAxisPvt *pAxis;
     int channel;
     motorCommand command = pasynUser->reason;
-    asynStatus status;
+    asynStatus status=asynSuccess;
 
     pasynManager->getAddr(pasynUser, &channel);
     if (channel >= pPvt->numAxes) {
@@ -615,7 +616,7 @@ static asynStatus writeUInt32Digital(void *drvPvt, asynUser *pasynUser,
                       command);
         return(asynError);
     default:
-        (*pPvt->drvset->getInteger)(pAxis->axis, command, &temp);
+        (*pPvt->drvset->getInteger)(pAxis->axis, command, (epicsInt32*)&temp);
         temp &= ~mask;
         temp |= (value & mask);
         status = (*pPvt->drvset->setInteger)(pAxis->axis, command, temp);
@@ -894,12 +895,12 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
 }
 
 
-static void rebootCallback(void *drvPvt)
-{
-    drvmotorPvt *pPvt = (drvmotorPvt *)drvPvt;
+/*static void rebootCallback(void *drvPvt)*/
+/*{*/
+/*   drvmotorPvt *pPvt = (drvmotorPvt *)drvPvt;*/
     /* Anything special we have to do on reboot */
-    pPvt->rebooting = 1;
-}
+/*    pPvt->rebooting = 1;*/
+/*}*/
 
 /* asynDrvUser routines */
 static asynStatus drvUserCreate(void *drvPvt, asynUser *pasynUser,
