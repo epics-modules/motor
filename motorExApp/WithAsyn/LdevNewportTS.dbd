@@ -1,0 +1,6 @@
+# This is a partial, local copy of devNewport.dbd used to illustrate how *.dbd
+# specification can be moved to the Makefile.
+
+registrar(MM4005_trajectoryScanRegistrar)
+registrar(XPS_trajectoryScanRegistrar)
+

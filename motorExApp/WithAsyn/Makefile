@@ -1,72 +1,87 @@
 # "#!" marks lines that can be uncommented.
-# Choice either IPAC R2.5 and below, or, R2.6 
-# and above. The default is IPAC R2.6 and above.
 
 # Makefile
 TOP = ../..
 include $(TOP)/configure/CONFIG
 
-ifeq ($(OS_CLASS), vxWorks)
-DBD += WithAsynVx.dbd
-endif
-DBD += WithAsyn.dbd
-
 PROD_IOC_DEFAULT = WithAsyn
 PROD_IOC_vxWorks = WithAsynVx
 
-WithAsyn_SRCS   += WithAsyn_registerRecordDeviceDriver.cpp
-WithAsynVx_SRCS += WithAsynVx_registerRecordDeviceDriver.cpp
-WithAsyn_SRCS_DEFAULT += WithAsynMain.cpp
+COMMONDBDS  = base.dbd
+COMMONDBDS += motorSupport.dbd
+COMMONDBDS += devAcsMotor.dbd
+COMMONDBDS += devImsMotor.dbd
+COMMONDBDS += devMclennanMotor.dbd
+COMMONDBDS += devMicos.dbd
+COMMONDBDS += devMicroMo.dbd
+COMMONDBDS += LdevNewport.dbd
+ifdef SNCSEQ
+COMMONDBDS += LdevNewportTS.dbd
+endif
+COMMONDBDS += devPIMotor.dbd
+COMMONDBDS += devOms.dbd
+COMMONDBDS += devSoftMotor.dbd
+COMMONDBDS += motorSimSupport.dbd
+COMMONDBDS += devSmartMotorMotor.dbd
+COMMONDBDS += devKohzuMotor.dbd
+COMMONDBDS += devAttocube.dbd
+COMMONDBDS += devAerotech.dbd
+COMMONDBDS += drvAsynSerialPort.dbd
 
-# Support from EPICS base
+DBD += WithAsyn.dbd
+WithAsyn_DBD += $(COMMONDBDS)
+ifdef SNCSEQ
+WithAsyn_DBD += devSequencer.dbd
+endif
+
+ifeq ($(OS_CLASS), vxWorks)
+DBD += WithAsynVx.dbd
+WithAsynVx_DBD += $(COMMONDBDS)
+#!WithAsynVx_DBD += drvGsIP488.dbd
+ifdef IPAC
+WithAsynVx_DBD += MiscVx.dbd
+endif
+endif
+
+WithAsyn_SRCS   += WithAsyn_registerRecordDeviceDriver.cpp
+WithAsyn_SRCS_DEFAULT += WithAsynMain.cpp
+WithAsynVx_SRCS += WithAsynVx_registerRecordDeviceDriver.cpp
+
 WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
-# Support from IPAC R2.5 and below.
-#!WithAsynVx_LDOBJS_vxWorks += $(IPAC_BIN)/ipacLib
-#!WithAsynVx_OBJS_vxWorks   += $(IPAC_BIN)/tyGSOctal
+COMMONLIBS += Aerotech
+COMMONLIBS += Attocube
+COMMONLIBS += oms
+COMMONLIBS += Mclennan
+COMMONLIBS += Micos
+COMMONLIBS += MicroMo
+COMMONLIBS += PI
+COMMONLIBS += Acs
+COMMONLIBS += Ims
+COMMONLIBS += Newport
+COMMONLIBS += softMotor
+COMMONLIBS += motorSimSupport
+COMMONLIBS += SmartMotor
+COMMONLIBS += KohzuMotor
+COMMONLIBS += motor
 
-#!WithAsyn_LIBS   += Aerotech
-#!WithAsyn_LIBS   += Attocube
-#!WithAsyn_LIBS   += oms
-#!WithAsyn_LIBS   += Mclennan
-#!WithAsyn_LIBS   += Micos
-#!WithAsyn_LIBS   += MicroMo
-#!WithAsyn_LIBS   += PI
-#!WithAsyn_LIBS   += Acs
-#!WithAsyn_LIBS   += Ims
-#!WithAsyn_LIBS   += Newport
-#!WithAsyn_LIBS   += softMotor
-#!WithAsyn_LIBS   += motorSimSupport
-#!WithAsyn_LIBS   += SmartMotor
-#!WithAsyn_LIBS   += KohzuMotor
-WithAsyn_LIBS   += motor
-WithAsyn_LIBS   += asyn
 # Needed for Newport SNL programs
-#!WithAsyn_LIBS   += seq pv
-WithAsyn_LIBS   += $(EPICS_BASE_IOC_LIBS)
+WithAsyn_LIBS += $(COMMONLIBS)
+WithAsyn_LIBS += asyn
+ifdef SNCSEQ
+WithAsyn_LIBS += seqDev seq pv
+endif
+WithAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
 
-WithAsynVx_LIBS += Aerotech
-WithAsynVx_LIBS += Attocube
-#!WithAsynVx_LIBS += oms
-#!WithAsynVx_LIBS += Mclennan
-#!WithAsynVx_LIBS += Micos
-#!WithAsynVx_LIBS += MicroMo
-#!WithAsynVx_LIBS += PI
-#!WithAsynVx_LIBS += Acs
-#!WithAsynVx_LIBS += Ims
-#!WithAsynVx_LIBS += Newport
-#!WithAsynVx_LIBS += softMotor
-#!WithAsynVx_LIBS += motorSimSupport
-#!WithAsynVx_LIBS += SmartMotor
-#!WithAsynVx_LIBS += KohzuMotor
-WithAsynVx_LIBS += motor
-
-# Support from IPAC R2.6 and above.
+WithAsynVx_LIBS += $(COMMONLIBS)
+ifdef IPAC
 WithAsynVx_LIBS += Ipac TyGSOctal
-
+endif
 WithAsynVx_LIBS += asyn
 # Needed for Newport SNL programs
-#!WithAsynVx_LIBS   += seq pv
+ifdef SNCSEQ
+WithAsynVx_LIBS   += seqDev seq pv
+endif
 WithAsynVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
