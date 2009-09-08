@@ -1,3 +1,5 @@
+# "#!" marks lines that can be uncommented.
+
 # Makefile
 TOP = ../..
 include $(TOP)/configure/CONFIG
@@ -5,29 +7,44 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
-DBD += NoAsyn.dbd
-DBD += NoAsynVx.dbd
-
 PROD_IOC_DEFAULT = NoAsyn
 PROD_IOC_vxWorks = NoAsynVx
 
+COMMONDBDS  = base.dbd
+COMMONDBDS += motorRecord.dbd
+COMMONDBDS += devSoftMotor.dbd
+#!COMMONDBDS += devMXmotor.dbd
+ifeq ($(OS_CLASS), vxWorks)
+COMMONDBDS += devDeltaTau.dbd
+COMMONDBDS += MiscVx.dbd
+else
+COMMONDBDS += Misc.dbd
+endif
+
+DBD += NoAsyn.dbd
+NoAsyn_DBD += $(COMMONDBDS)
+
+ifeq ($(OS_CLASS), vxWorks)
+DBD += NoAsynVx.dbd
+NoAsynVx_DBD += $(COMMONDBDS)
+endif
+
 NoAsyn_SRCS += NoAsyn_registerRecordDeviceDriver.cpp
 NoAsyn_SRCS_DEFAULT += NoAsynMain.cpp
-#!NoAsyn_LIBS += MXmotor
-#!NoAsyn_LIBS += softMotor
-#!NoAsyn_LIBS += oms
-NoAsyn_LIBS += motor
-NoAsyn_LIBS += asyn
+NoAsynVx_SRCS += NoAsynVx_registerRecordDeviceDriver.cpp
+
+#!COMMONLIBS += MXmotor
+COMMONLIBS += softMotor
+ifeq ($(OS_CLASS), vxWorks)
+COMMONLIBS += oms
+COMMONLIBS += DeltaTau
+endif
+COMMONLIBS += motor
+
+NoAsyn_LIBS += $(COMMONLIBS)
 NoAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
 
-NoAsynVx_SRCS += NoAsynVx_registerRecordDeviceDriver.cpp
-#!NoAsynVx_LIBS += softMotor
-#!NoAsynVx_LIBS += oms
-#!NoAsynVx_LIBS += DeltaTau
-NoAsynVx_LIBS += motor
-NoAsynVx_LIBS += asyn
-
-
+NoAsynVx_LIBS += $(COMMONLIBS)
 NoAsynVx_OBJS += $(EPICS_BASE_BIN)/vxComLibrary
 NoAsynVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 

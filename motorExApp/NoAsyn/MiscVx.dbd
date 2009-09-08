@@ -1,0 +1,17 @@
+# Oregon Micro Systems VME8/44 driver support.
+device(motor,VME_IO,devOMS,"OMS VME8/44")
+driver(drvOms)
+
+# Oregon Micro Systems VME58 driver support.
+device(motor,VME_IO,devOms58,"OMS VME58")
+driver(drvOms58)
+
+# Oregon Micro Systems MAXv driver support.
+device(motor,VME_IO,devMAXv,"OMS MAXv")
+driver(drvMAXv)
+
+registrar(motorUtilRegister)
+variable(motorRecordDebug)
+#variable(motordrvComdebug)
+#variable(motorUtil_debug)
+
