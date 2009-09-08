@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.24 $
+Version:        $Revision: 1.25 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-07-02 17:54:14 $
+Last Modified:  $Date: 2009-09-08 18:27:59 $
 */
 
 /*
@@ -186,7 +186,7 @@ struct driver_table MAXv_access =
     MAXv_axis
 };
 
-struct
+struct drvMAXv_drvet
 {
     long number;
     long (*report) (int);

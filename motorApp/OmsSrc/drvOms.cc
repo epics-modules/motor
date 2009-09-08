@@ -2,9 +2,9 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.28 $
+Version:	$Revision: 1.29 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-06-18 19:09:58 $
+Last Modified:	$Date: 2009-09-08 18:27:58 $
 */
 
 /*
@@ -189,7 +189,7 @@ struct driver_table oms_access =
     oms_axis
 };
 
-struct
+struct drvOms_drvet
 {
     long number;
     long (*report) (int);

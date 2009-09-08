@@ -98,16 +98,11 @@ struct driver_table MCB4B_access =
     NULL
 };
 
-struct
+struct drvMCB4B_drvet
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvMCB4B = {2, report, init};
 
 extern "C" {epicsExportAddress(drvet, drvMCB4B);}

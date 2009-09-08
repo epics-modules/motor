@@ -124,7 +124,7 @@ struct driver_table PIE816_access =
     PIE816_axis
 };
 
-struct
+struct drvPIE816_drvet
 {
     long number;
     long (*report) (int);

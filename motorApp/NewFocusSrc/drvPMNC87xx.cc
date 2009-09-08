@@ -190,7 +190,7 @@ struct driver_table PMNC87xx_access =
     NULL
 };
 
-struct
+struct drvPMNC87xx_drvet
 {
     long number;
     long (*report) (int);

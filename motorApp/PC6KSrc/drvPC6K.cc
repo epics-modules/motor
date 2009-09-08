@@ -3,9 +3,9 @@ FILENAME...	drvPC6K.cc
 USAGE...	Motor record driver level support for Parker Computmotor
                 6K Series motor controllers
 
-Version:	$Revision: 1.5 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-12-18 19:31:15 $
+Version:	$Revision: 1.6 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2009-09-08 18:28:46 $
 
 */
 
@@ -183,16 +183,11 @@ struct driver_table PC6K_access =
     NULL
 };
 
-struct
+struct drvPC6K_drvet
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvPC6K = {2, report, init};
 
 extern "C" {epicsExportAddress(drvet, drvPC6K);}

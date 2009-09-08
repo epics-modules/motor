@@ -3,9 +3,9 @@ FILENAME...	drvPIJEDS.cc
 USAGE...	Motor record driver level support for piezosystem jena
 	        GmbH & Co. E-516 motor controller.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2007-06-14 15:56:59 $
+Version:	$Revision: 1.2 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2009-09-08 18:29:06 $
 */
 
 /*
@@ -135,7 +135,7 @@ struct driver_table PIJEDS_access =
     PIJEDS_axis
 };
 
-struct
+struct drvPIJEDS_drvet
 {
     long number;
     long (*report) (int);

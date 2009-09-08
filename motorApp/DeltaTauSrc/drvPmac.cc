@@ -2,9 +2,9 @@
 FILENAME...	drvPmac.cc
 USAGE...	Driver level support for Delta Tau PMAC model.
 
-Version:	$Revision: 1.10 $
+Version:	$Revision: 1.11 $
 Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-05-01 18:26:30 $
+Last Modified:	$Date: 2009-09-08 18:25:19 $
 */
 
 /*
@@ -125,7 +125,7 @@ static void Pmac_reset();
 
 static RTN_STATUS PmacPut(int, char *);
 static int motorIsrEnable(int);
-static void motorIsrDisable(int);
+/* static void motorIsrDisable(int); */
 
 struct driver_table Pmac_access =
 {
@@ -600,6 +600,7 @@ static int motorIsrEnable(int card)
     return (OK);
 }
 
+/*
 static void motorIsrDisable(int card)
 {
     long status;
@@ -610,8 +611,8 @@ static void motorIsrDisable(int card)
     if (!RTN_SUCCESS(status))
 	errPrintf(status, __FILE__, __LINE__, "Can't disconnect vector %d\n",
 		  PmacInterruptVector + card);
-
 }
+*/
 
 
 /*****************************************************

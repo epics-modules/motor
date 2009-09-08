@@ -2,9 +2,9 @@
 FILENAME... drvMCDC2805.cc
 USAGE...    Motor record driver level support for Faulhaber MCDC2805
 
-Version:    $Revision: 1.3 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2005-12-08 00:07:47 $
+Version:    $Revision: 1.4 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2009-09-08 18:25:39 $
 */
 
 /*
@@ -113,7 +113,7 @@ struct driver_table MCDC2805_access =
     MCDC2805_axis
 };
 
-struct
+struct drvMCDC2805_drvet
 {
     long number;
     long (*report) (int);

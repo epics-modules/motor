@@ -3,9 +3,9 @@ FILENAME...	drvSPiiPlus.cc
 USAGE...	Motor record driver level support for ACS Tech80 
                 SPiiPlus
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2008-05-21 21:18:53 $
+Version:	$Revision: 1.4 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2009-09-08 18:24:12 $
 
 */
 
@@ -140,16 +140,11 @@ struct driver_table SPiiPlus_access =
     NULL
 };
 
-struct
+struct drvSPiiPlus_drvet
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvSPiiPlus = {2, report, init};
 
 extern "C" {epicsExportAddress(drvet, drvSPiiPlus);}
@@ -624,7 +619,7 @@ SPiiPlusConfig(int card,		/* card being configured */
 
     // Set controller command interface mode - BUFFER is the default 
     // Assure upper case argument - only check first 3 letters 
-    modeCas[0]=NULL;
+    modeCas[0]= (char) NULL;
     if (modeStr != NULL) {
       for (modeIdx=0; modeIdx < 3; modeIdx++)
 	modeCas[modeIdx] = toupper(modeStr[modeIdx]);

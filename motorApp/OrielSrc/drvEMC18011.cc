@@ -3,9 +3,9 @@ FILENAME...	drvEMC18011.cc
 USAGE...	Motor record driver level support for Spectra-Physics
                 Encoder Mike Controller (Model: 18011)
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-11-02 21:05:56 $
+Version:	$Revision: 1.4 $
+Modified By:	$Author: sluiter $
+Last Modified:	$Date: 2009-09-08 18:28:23 $
 
 */
 
@@ -137,16 +137,11 @@ struct driver_table EMC18011_access =
     NULL
 };
 
-struct
+struct drvEMC18011_drvet
 {
     long number;
-#ifdef __cplusplus
     long (*report) (int);
     long (*init) (void);
-#else
-    DRVSUPFUN report;
-    DRVSUPFUN init;
-#endif
 } drvEMC18011 = {2, report, init};
 
 extern "C" {epicsExportAddress(drvet, drvEMC18011);}

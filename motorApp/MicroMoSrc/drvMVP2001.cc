@@ -3,9 +3,9 @@ FILENAME... drvMVP2001.cc
 USAGE...    Motor record driver level support for MicroMo
             MVP 2001 B02 (Linear, RS-485).
 
-Version:        $Revision: 1.12 $
+Version:        $Revision: 1.13 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-06-09 19:49:25 $
+Last Modified:  $Date: 2009-09-08 18:26:32 $
 */
 
 /*
@@ -189,7 +189,7 @@ struct driver_table MVP2001_access =
     NULL
 };
 
-struct
+struct drvMVP2001_drvet
 {
     long number;
     long (*report) (int);

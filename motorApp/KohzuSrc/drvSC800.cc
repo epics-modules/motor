@@ -2,9 +2,9 @@
 FILENAME...     drvSC800.cc
 USAGE...        Motor record driver level support for Kohzu SC800                
 
-Version:        $Revision: 1.1 $
+Version:        $Revision: 1.2 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2007-11-27 18:01:17 $
+Last Modified:  $Date: 2009-09-08 18:26:02 $
 
 */
 
@@ -124,7 +124,7 @@ struct driver_table SC800_access =
     NULL
 };
 
-struct
+struct drvSC800_drvet
 {
     long number;
     long (*report) (int);

@@ -2,9 +2,9 @@
 FILENAME... drvEnsemble.cc
 USAGE...    Motor record driver level support for Aerotech Ensemble.
 
-Version:        $Revision: 1.6 $
+Version:        $Revision: 1.7 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-05-01 18:13:12 $
+Last Modified:  $Date: 2009-09-08 18:24:33 $
 */
 
 /*
@@ -143,7 +143,7 @@ struct driver_table Ensemble_access =
     NULL
 };
 
-struct
+struct drvEnsemble_drvet
 {
     long number;
     long (*report) (int);
