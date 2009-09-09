@@ -2,9 +2,9 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.25 $
+Version:        $Revision: 1.26 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-08 18:27:59 $
+Last Modified:  $Date: 2009-09-09 18:20:50 $
 */
 
 /*
@@ -71,6 +71,7 @@ Last Modified:  $Date: 2009-09-08 18:27:59 $
  * 14  07-02-09 rls - backwards compatibility with ver:1.29 and earlier
  *                    firmware. OMS changed from '<LF><NULL>' to '<LF>' for
  *                    RA, QA, EA and RL command with ver:1.30
+ * 15  09-09-09 rls - board "running" error check added.
  *
  */
 
@@ -383,6 +384,12 @@ static int set_status(int card, int signal)
         motor_info->no_motion_count = 0;
         errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
             card, signal);
+    }
+    else if (pmotor->firmware_status.Bits.running == 0)
+    {
+        status.Bits.RA_PROBLEM = 1;
+        errlogPrintf("MAXv card #%d is NOT running; status = 0x%x\n",
+                   card, (unsigned int) pmotor->firmware_status.All);
     }
     else
         status.Bits.RA_PROBLEM = 0;
