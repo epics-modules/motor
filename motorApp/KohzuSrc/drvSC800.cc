@@ -2,9 +2,9 @@
 FILENAME...     drvSC800.cc
 USAGE...        Motor record driver level support for Kohzu SC800                
 
-Version:        $Revision: 1.2 $
+Version:        $Revision: 1.3 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-08 18:26:02 $
+Last Modified:  $Date: 2009-09-21 18:33:50 $
 
 */
 
@@ -511,6 +511,7 @@ static int motor_init()
     int total_axis = 0;
     asynStatus success_rtn;
     int version;
+    char errbase[] = "\ndrvSC800.cc:motor_init() *** ";
 
     initialized = true; /* Indicate that driver is initialized. */
 
@@ -533,7 +534,13 @@ static int motor_init()
         success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 
                                                 cntrl->asyn_address, &cntrl->pasynUser, NULL);
 
-        if (success_rtn == asynSuccess)
+        if (success_rtn != asynSuccess)
+        {
+            char format[] = "%s asyn connection error on port = %s, address = %d ***\n\n";
+            errlogPrintf(format, errbase, cntrl->asyn_port, cntrl->asyn_address);
+            epicsThreadSleep(5.0);
+        }
+        else
         {
 	    int retry = 0;
 
