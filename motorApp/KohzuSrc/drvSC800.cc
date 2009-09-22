@@ -2,9 +2,9 @@
 FILENAME...     drvSC800.cc
 USAGE...        Motor record driver level support for Kohzu SC800                
 
-Version:        $Revision: 1.3 $
+Version:        $Revision: 1.4 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-21 18:33:50 $
+Last Modified:  $Date: 2009-09-22 16:57:12 $
 
 */
 
@@ -36,6 +36,8 @@ Last Modified:  $Date: 2009-09-21 18:33:50 $
  * Modification Log:
  * -----------------
  * .01 11-09-07 rls copied from drvMDT695.cc
+ * .02 09-22-09 rls Added support for SC200/400
+ *
  */
 
 
@@ -557,8 +559,18 @@ static int motor_init()
 		status = recv_mess(card_index, buff, 1);
                 if (status > 0)
                 {
-                    int convert_cnt = sscanf(buff, "C\tIDN0\t800\t%d", &version);
-                    if (convert_cnt != 1)
+                    int convert_800_cnt, convert_400_cnt, convert_200_cnt;
+
+                    convert_800_cnt = sscanf(buff, "C\tIDN0\t800\t%d", &version);
+                    convert_400_cnt = sscanf(buff, "C\tIDN0\t400\t%d", &version);
+                    convert_200_cnt = sscanf(buff, "C\tIDN0\t200\t%d", &version);
+                    if (convert_800_cnt == 1)
+                        cntrl->model = SC800;
+                    else if (convert_400_cnt == 1)
+                        cntrl->model = SC400;
+                    else if (convert_200_cnt == 1)
+                        cntrl->model = SC200;
+                    else
                         status = 0;
                 }
 		retry++;
@@ -568,11 +580,26 @@ static int motor_init()
 	if (success_rtn == asynSuccess && status > 0)
 	{
             cntrl->status = NORMAL;
-	    sprintf(brdptr->ident, "SC-800 Ver%d", version);
-	    brdptr->localaddr = (char *) NULL;
+            if (cntrl->model == SC800)
+            {
+                sprintf(brdptr->ident, "SC-800 Ver%d", version);
+                total_axis = 8;
+            }
+            else if (cntrl->model == SC400)
+            {
+                sprintf(brdptr->ident, "SC-400 Ver%d", version);
+                total_axis = 4;
+            }
+            else if (cntrl->model == SC200)
+            {
+                sprintf(brdptr->ident, "SC-200 Ver%d", version);
+                total_axis = 2;
+            }
+            brdptr->total_axis = total_axis;
+	    
+            brdptr->localaddr = (char *) NULL;
 	    brdptr->motor_in_motion = 0;
 
-            brdptr->total_axis = total_axis = 8;
 
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
