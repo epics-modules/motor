@@ -241,6 +241,12 @@ Modification Log from R6-4 to R6-5
         
         Files modified: devPM500.cc, drvPM500.cc, motorRecord.dbd
 
+17) Mark Rivers made numerous changes to elminate 64-bit compiler warning
+        messages.
+
+18) Applied item #11 above to the Newport XPS driver.
+        File modified: NewportSrc/drvXPSAsyn.c
+
 
 
 Modification Log from R6-3 to R6-4
