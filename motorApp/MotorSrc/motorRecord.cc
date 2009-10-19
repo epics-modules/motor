@@ -2,9 +2,9 @@
 FILENAME...     motorRecord.cc
 USAGE...        Motor Record Support.
 
-Version:        $Revision: 1.55 $
+Version:        $Revision: 1.56 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-01 18:43:17 $
+Last Modified:  $Date: 2009-10-19 19:56:03 $
 */
 
 /*
@@ -124,6 +124,8 @@ Last Modified:  $Date: 2009-09-01 18:43:17 $
  * .51 06-11-09 rls - Error since R5-3; PACT cleared early when MIP_DELAY_REQ
  *                    set.
  *                  - Prevent redundant DMOV postings when using DLY field.
+ * .52 10-19-09 rls - Bug fix for homing in the wrong direction when MRES<0.
+ *
  */                                                        
 
 #define VERSION 6.5
@@ -724,6 +726,7 @@ static long postProcess(motorRecord * pmr)
             double vbase = pmr->vbas / fabs(pmr->mres);
             double hpos = 0;
             double hvel =  pmr->hvel / fabs(pmr->mres);
+            motor_cmnd command;
 
             pmr->mip &= ~MIP_STOP;
             pmr->dmov = FALSE;
@@ -733,9 +736,17 @@ static long postProcess(motorRecord * pmr)
             INIT_MSG();
             WRITE_MSG(SET_VEL_BASE, &vbase);
             WRITE_MSG(SET_VELOCITY, &hvel);
-            WRITE_MSG((pmr->mip & MIP_HOMF) ? HOME_FOR : HOME_REV, &hpos);
+            
+            if (((pmr->mip & MIP_HOMF) && (pmr->mres > 0.0)) ||
+                ((pmr->mip & MIP_HOMR) && (pmr->mres < 0.0)))
+                command = HOME_FOR;
+            else
+                command = HOME_REV;
+            
+            WRITE_MSG(command, &hpos);
             WRITE_MSG(GO, NULL);
             SEND_MSG();
+
             pmr->pp = TRUE;
             pmr->cdir = (pmr->mip & MIP_HOMF) ? 1 : 0;
             if (pmr->mres < 0.0)
@@ -1860,6 +1871,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             else
             {
                 double vbase, hvel, hpos;
+                motor_cmnd command;
 
                 /* defend against divide by zero */
                 if (pmr->eres == 0.0)
@@ -1875,12 +1887,17 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 INIT_MSG();
                 WRITE_MSG(SET_VEL_BASE, &vbase);
                 WRITE_MSG(SET_VELOCITY, &hvel);
-                WRITE_MSG((pmr->mip & MIP_HOMF) ? HOME_FOR : HOME_REV, &hpos);
-                /*
-                 * WRITE_MSG(SET_VELOCITY, &hvel); WRITE_MSG(MOVE_ABS, &hpos);
-                 */
+
+                if (((pmr->mip & MIP_HOMF) && (pmr->mres > 0.0)) ||
+                    ((pmr->mip & MIP_HOMR) && (pmr->mres < 0.0)))
+                    command = HOME_FOR;
+                else
+                    command = HOME_REV;
+
+                WRITE_MSG(command, &hpos);
                 WRITE_MSG(GO, NULL);
                 SEND_MSG();
+
                 pmr->dmov = FALSE;
                 MARK(M_DMOV);
                 pmr->rcnt = 0;
