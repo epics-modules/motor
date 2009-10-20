@@ -2,9 +2,9 @@
 FILENAME...     motorRecord.cc
 USAGE...        Motor Record Support.
 
-Version:        $Revision: 1.56 $
+Version:        $Revision: 1.57 $
 Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-10-19 19:56:03 $
+Last Modified:  $Date: 2009-10-20 18:26:32 $
 */
 
 /*
@@ -125,6 +125,8 @@ Last Modified:  $Date: 2009-10-19 19:56:03 $
  *                    set.
  *                  - Prevent redundant DMOV postings when using DLY field.
  * .52 10-19-09 rls - Bug fix for homing in the wrong direction when MRES<0.
+ * .53 10-20-09 rls - Pre-R3.14.10 compatibility for scanOnce() deceleration
+ *                    change in dbScan.h
  *
  */                                                        
 
@@ -412,7 +414,11 @@ static void callbackFunc(struct callback *pcb)
     {
         pmr->mip &= ~MIP_DELAY_REQ;     /* Turn off REQ. */
         pmr->mip |= MIP_DELAY_ACK;      /* Turn on ACK. */
-        scanOnce((struct dbCommon *) pmr);
+#if LT_EPICSBASE(3,14,10)
+	scanOnce(pmr);
+#else
+	scanOnce((struct dbCommon *) pmr);
+#endif
     }
 }
 
