@@ -2,9 +2,10 @@
 FILENAME...     motorRecord.cc
 USAGE...        Motor Record Support.
 
-Version:        $Revision: 1.57 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-10-20 18:26:32 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -127,6 +128,8 @@ Last Modified:  $Date: 2009-10-20 18:26:32 $
  * .52 10-19-09 rls - Bug fix for homing in the wrong direction when MRES<0.
  * .53 10-20-09 rls - Pre-R3.14.10 compatibility for scanOnce() deceleration
  *                    change in dbScan.h
+ * .54 10-27-09 rls - reverse which limit switch is used in do_work() home
+ *                    search error check based on DIR field.
  *
  */                                                        
 
@@ -1834,8 +1837,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
         /* Send motor to home switch in forward direction. */
         if (!pmr->lvio &&
-            ((pmr->homf && !(pmr->mip & MIP_HOMF) && !pmr->hls) ||
-             (pmr->homr && !(pmr->mip & MIP_HOMR) && !pmr->lls)))
+            ((pmr->homf && !(pmr->mip & MIP_HOMF) && !((pmr->dir == motorDIR_Pos) ? pmr->hls : pmr->lls)) ||
+             (pmr->homr && !(pmr->mip & MIP_HOMR) && !((pmr->dir == motorDIR_Pos) ? pmr->lls : pmr->hls))))
         {
             if (stop_or_pause == true)
             {
