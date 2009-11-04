@@ -245,7 +245,14 @@ Modification Log from R6-4 to R6-5
         messages.
 
 18) Applied item #11 above to the Newport XPS driver.
+
         File modified: NewportSrc/drvXPSAsyn.c
+
+19) Bug fix (reported by Pawel Jalocha) for homing in the wrong direction when
+        MRES < 0.
+        
+        File modified: Reverse Home direction commands based on MRES < 0 in
+                       do_work() and postProcess().
 
 
 
