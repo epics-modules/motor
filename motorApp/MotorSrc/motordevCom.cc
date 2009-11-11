@@ -3,9 +3,10 @@ FILENAME: motordevCom.cc
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:        $Revision: 1.13 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-02-14 16:30:15 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
