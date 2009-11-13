@@ -1,6 +1,13 @@
+#FILENAME...     Makefile
+#USAGE...        Makefile for motor application example with Asyn
+
+#Version:        $Revision$
+#Modified By:    $Author$
+#Last Modified:  $Date$
+#HeadURL:        $URL$
+
 # "#!" marks lines that can be uncommented.
 
-# Makefile
 TOP = ../..
 include $(TOP)/configure/CONFIG
 
@@ -14,7 +21,7 @@ COMMONDBDS += devImsMotor.dbd
 COMMONDBDS += devMclennanMotor.dbd
 COMMONDBDS += devMicos.dbd
 COMMONDBDS += devMicroMo.dbd
-COMMONDBDS += LdevNewport.dbd
+COMMONDBDS += devNewport.dbd
 ifdef SNCSEQ
 COMMONDBDS += LdevNewportTS.dbd
 endif
