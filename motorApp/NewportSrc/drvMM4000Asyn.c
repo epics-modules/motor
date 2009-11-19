@@ -2,9 +2,10 @@
 FILENAME... drvMM4000Asyn.cc
 USAGE...    Motor record asyn driver level support for Newport MM4000.
 
-Version:        $Revision: 1.11 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2009-09-01 16:19:17 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -44,10 +45,13 @@ Last Modified:  $Date: 2009-09-01 16:19:17 $
  *                  force a status update with a call to callCallback().
  *                  - bug fix; limit commands reversed.
  *                  - set motorAxisDirection.
+ * .05 11-19-09 rls - bug fix for sendOnly() passing null pointer
+ *                  (pController->pasynUser) if any communication error occurs
+ *                  at bootup.
  *
  */
- 
- 
+
+
 #include <stddef.h>
 #include "epicsThread.h"
 #include <stdlib.h>
@@ -68,13 +72,14 @@ Last Modified:  $Date: 2009-09-01 16:19:17 $
 #include "ellLib.h"
 #include "asynDriver.h"
 #include "asynOctetSyncIO.h"
+#include "errlog.h"
 
 #include "drvSup.h"
 #include "epicsExport.h"
 #define DEFINE_MOTOR_PROTOTYPES 1
 #include "motor_interface.h"
 
-motorAxisDrvSET_t motorMM4000 = 
+motorAxisDrvSET_t motorMM4000 =
   {
     14,
     motorAxisReport,            /**< Standard EPICS driver report function (optional) */
@@ -161,7 +166,7 @@ static asynStatus sendAndReceive(MM4000Controller *pController, char *outputStri
 #define MM4000_LOW_LIMIT  0x10  /* Minus Travel Limit. */
 #define MM4000_HIGH_LIMIT 0x08  /* Plus Travel Limit. */
 #define MM4000_DIRECTION  0x04  /* Motor direction: 0 - minus; 1 - plus. */
-#define MM4000_POWER_ON   0x02  /* Motor power 0 - ON; 1 - OFF. */
+#define MM4000_POWER_OFF  0x02  /* Motor power 0 - ON; 1 - OFF. */
 #define MM4000_MOVING     0x01  /* In-motion indicator. */
 
 
@@ -203,7 +208,7 @@ static void motorAxisReport(int level)
         for(j=0; j<pMM4000Controller[i].numAxes; j++) {
            motorAxisReportAxis(&pMM4000Controller[i].pAxis[j], level);
         }
-    }   
+    }
 }
 
 
@@ -233,7 +238,7 @@ static int motorAxisInit(void)
 
 static int motorAxisSetLog( AXIS_HDL pAxis, motorAxisLogFunc logFunc, void * param )
 {
-    if (pAxis == NULL) 
+    if (pAxis == NULL)
     {
         if (logFunc == NULL)
         {
@@ -409,7 +414,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
 }
 
 
-static int motorAxisMove(AXIS_HDL pAxis, double position, int relative, 
+static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
                           double min_velocity, double max_velocity, double acceleration)
 {
     int status;
@@ -493,9 +498,9 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
      * the record will prevent JOG motion beyond its soft limits
      */
     if (velocity > 0.)
-        status = motorAxisMove(pAxis,  pAxis->highLimit/pAxis->stepSize, 0, min_velocity, velocity, acceleration); 
+        status = motorAxisMove(pAxis,  pAxis->highLimit/pAxis->stepSize, 0, min_velocity, velocity, acceleration);
     else
-        status = motorAxisMove(pAxis,  pAxis->lowLimit/pAxis->stepSize, 0, min_velocity, -velocity, acceleration); 
+        status = motorAxisMove(pAxis,  pAxis->lowLimit/pAxis->stepSize, 0, min_velocity, -velocity, acceleration);
 
     return status;
 }
@@ -516,7 +521,7 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
     char buff[100];
 
     if (pAxis == NULL) return MOTOR_AXIS_ERROR;
-    
+
     PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d to stop with accel=%f\n",
           pAxis->card, pAxis->axis, acceleration);
 
@@ -535,7 +540,7 @@ static int motorAxisforceCallback(AXIS_HDL pAxis)
 
     PRINT(pAxis->logParam, FLOW, "motorAxisforceCallback: request card %d, axis %d status update\n",
           pAxis->card, pAxis->axis);
-    
+
     /* Force a status update. */
     motorParam->forceCallback(pAxis->params);
 
@@ -596,7 +601,7 @@ static void MM4000Poller(MM4000Controller *pController)
         comStatus = sendAndReceive(pController, "MS;", statusAllString, sizeof(statusAllString));
         if (comStatus == 0)
             comStatus = sendAndReceive(pController, "TP;", positionAllString, sizeof(positionAllString));
-        
+
         for (i=0; i<pController->numAxes; i++)
         {
             pAxis = &pController->pAxis[i];
@@ -633,6 +638,7 @@ static void MM4000Poller(MM4000Controller *pController)
                 motorParam->setInteger(params, motorAxisHighHardLimit, (axisStatus & MM4000_HIGH_LIMIT));
                 motorParam->setInteger(params, motorAxisLowHardLimit,  (axisStatus & MM4000_LOW_LIMIT));
                 motorParam->setInteger(params, motorAxisDirection,     (axisStatus & MM4000_DIRECTION));
+                motorParam->setInteger(params, motorAxisPowerOn,      !(axisStatus & MM4000_POWER_OFF));
 
                 /*
                  * Parse motor position
@@ -648,7 +654,7 @@ static void MM4000Poller(MM4000Controller *pController)
                 pAxis->currentPosition = atof(p+3);
                 motorParam->setDouble(params, motorAxisPosition,    (pAxis->currentPosition/pAxis->stepSize));
                 motorParam->setDouble(params, motorAxisEncoderPosn, (pAxis->currentPosition/pAxis->stepSize));
-                PRINT(pAxis->logParam, IODRIVER, "MM4000Poller: axis %d axisStatus=%x, position=%f\n", 
+                PRINT(pAxis->logParam, IODRIVER, "MM4000Poller: axis %d axisStatus=%x, position=%f\n",
                       pAxis->axis, pAxis->axisStatus, pAxis->currentPosition);
 
                 /* We would like a way to query the actual velocity, but this is not possible.  If we could we could
@@ -712,7 +718,7 @@ int MM4000AsynSetup(int num_controllers)   /* number of MM4000 controllers in sy
         return MOTOR_AXIS_ERROR;
     }
     numMM4000Controllers = num_controllers;
-    pMM4000Controller = (MM4000Controller *)calloc(numMM4000Controllers, sizeof(MM4000Controller)); 
+    pMM4000Controller = (MM4000Controller *)calloc(numMM4000Controllers, sizeof(MM4000Controller));
     return MOTOR_AXIS_OK;
 }
 
@@ -792,7 +798,7 @@ int MM4000AsynConfig(int card,             /* Controller number */
         printf("MM4000AsynConfig: invalid model = %s\n", pController->firmwareVersion);
         return MOTOR_AXIS_ERROR;
     }
-    
+
     sendAndReceive(pController, "TP;", inputBuff, sizeof(inputBuff));
 
     /* The return string will tell us how many axes this controller has */
@@ -844,7 +850,7 @@ int MM4000AsynConfig(int card,             /* Controller number */
         sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
         pAxis->highLimit = atof(&inputBuff[3]);
     }
-    
+
     pController->pollEventId = epicsEventMustCreate(epicsEventEmpty);
 
     /* Create the poller thread for this controller */
@@ -863,27 +869,38 @@ static int sendOnly(MM4000Controller *pController, char *outputBuff)
     size_t nActual;
     asynStatus status;
 
-    status = pasynOctetSyncIO->write(pController->pasynUser, outputBuff, 
-                                     nRequested, TIMEOUT, &nActual);
-    if (nActual != nRequested) status = asynError;
-    if (status != asynSuccess) {
-        asynPrint(pController->pasynUser, ASYN_TRACE_ERROR, 
-                  "drvMM4000Asyn:sendOnly: error sending command %d, sent=%d, status=%d\n",
-                  outputBuff, nActual, status); 
+    if (pController->pasynUser == NULL)
+    {
+        status = asynError;
+        errPrintf(-1, __FILE__, __LINE__, "*** Configuration error ***: pasynUser=NULL\n");
+        epicsThreadSleep(5.0);
+    }
+    else
+    {
+        status = pasynOctetSyncIO->write(pController->pasynUser, outputBuff,
+                                         nRequested, TIMEOUT, &nActual);
+        if (nActual != nRequested)
+            status = asynError;
+        if (status != asynSuccess)
+        {
+            asynPrint(pController->pasynUser, ASYN_TRACE_ERROR,
+                      "drvMM4000Asyn:sendOnly: error sending command %d, sent=%d, status=%d\n",
+                      outputBuff, nActual, status);
+        }
     }
     return(status);
 }
 
 
-static asynStatus sendAndReceive(MM4000Controller *pController, char *outputBuff, char *inputBuff, int inputSize) 
+static asynStatus sendAndReceive(MM4000Controller *pController, char *outputBuff, char *inputBuff, int inputSize)
 {
     int nWriteRequested=strlen(outputBuff);
     size_t nWrite, nRead;
     int eomReason;
     asynStatus status;
-    
-    status = pasynOctetSyncIO->writeRead(pController->pasynUser, 
-                                         outputBuff, nWriteRequested, 
+
+    status = pasynOctetSyncIO->writeRead(pController->pasynUser,
+                                         outputBuff, nWriteRequested,
                                          inputBuff, inputSize,
                                          TIMEOUT, &nWrite, &nRead, &eomReason);
     if (nWrite != nWriteRequested) status = asynError;
