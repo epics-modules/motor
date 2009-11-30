@@ -2,9 +2,10 @@
 FILENAME...     drvSC800.cc
 USAGE...        Motor record driver level support for Kohzu SC800                
 
-Version:        $Revision: 1.4 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-22 16:57:12 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 
 */
 
