@@ -18,6 +18,7 @@ DBD += motorSimSupport.dbd
 motorSimSupport_SRCS += route.c
 motorSimSupport_SRCS += devMotorSim.c
 motorSimSupport_SRCS += drvMotorSim.c
+motorSimSupport_SRCS += motorSimDriver.cpp
 motorSimSupport_SRCS += motorSimRegister.cc
 
 motorSimSupport_LIBS += motor
