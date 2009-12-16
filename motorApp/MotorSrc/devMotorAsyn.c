@@ -50,14 +50,15 @@
 #include <asynDriver.h>
 #include <asynInt32.h>
 #include <asynFloat64.h>
+#include <asynDrvUser.h>
 #include <asynFloat64Array.h>
+#include <asynGenericPointer.h>
 #include <asynEpicsUtils.h>
-#include "asynMotorStatus.h"
 
 #include "motorRecord.h"
 #include "motor.h"
 #include "epicsExport.h"
-#include "drvMotorAsyn.h"
+#include "asynMotorDriver.h"
 #include "motor_interface.h"
 
 /*Create the dset for devMotor */
@@ -68,7 +69,7 @@ static long start_trans(struct motorRecord *);
 static RTN_STATUS build_trans( motor_cmnd, double *, struct motorRecord *);
 static RTN_STATUS end_trans(struct motorRecord *);
 static void asynCallback(asynUser *);
-static void statusCallback(void *, asynUser *, struct MotorStatus *);
+static void statusCallback(void *, asynUser *, void *);
 
 typedef enum {int32Type, float64Type, float64ArrayType} interfaceType;
 
@@ -83,6 +84,32 @@ struct motor_dset devMotorAsyn={ { 8,
 				end_trans };
 
 epicsExportAddress(dset,devMotorAsyn);
+
+/* Note, we define these commands here.  These are not pasynUser->reason, they are
+ * an index into those reasons returned from driver */
+typedef enum motorCommand {
+    motorMoveAbs,
+    motorMoveRel,
+    motorMoveVel,
+    motorHome,
+    motorStop,
+    motorVelocity,
+    motorVelBase,
+    motorAccel,
+    motorPosition,
+    motorResolution,
+    motorEncRatio,
+    motorPgain,
+    motorIgain,
+    motorDgain,
+    motorHighLim,
+    motorLowLim,
+    motorSetClosedLoop,
+    motorStatus,
+    motorUpdateStatus,
+    lastMotorCommand
+} motorCommand;
+#define NUM_MOTOR_COMMANDS lastMotorCommand
 
 typedef struct {
     motorCommand command;
@@ -106,10 +133,13 @@ typedef struct
     void *asynFloat64Pvt;
     asynFloat64Array *pasynFloat64Array;
     void *asynFloat64ArrayPvt;
-    asynMotorStatus *pasynMotorStatus;
-    void *asynMotorStatusPvt;
+    asynDrvUser *pasynDrvUser;
+    void *asynDrvUserPvt;
+    asynGenericPointer *pasynGenericPointer;
+    void *asynGenericPointerPvt;
     void *registrarPvt;
     epicsEventId initEvent;
+    int driverReasons[NUM_MOTOR_COMMANDS];
 } motorAsynPvt;
 
 
@@ -159,6 +189,21 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
                   "devMotorAsyn::init_controller, %s setting of position not required, position=%f, mres=%f, dval=%f, rdbd=%f",
                   pmr->name, position, pmr->mres, pmr->dval, rdbd );
 
+}
+
+static long findDrvInfo(motorRecord *pmotor, asynUser *pasynUser, char *drvInfoString, int command)
+{
+    motorAsynPvt *pPvt = (motorAsynPvt *)pmotor->dpvt;
+
+    /* Look up the pasynUser->reason */
+    if (pPvt->pasynDrvUser->create(pPvt->asynDrvUserPvt, pasynUser, drvInfoString, NULL, NULL) != asynSuccess) {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "devMotorAsyn::findDrvInfo, %s drvUserCreate failed for %s\n",
+                  pmotor->name, drvInfoString);
+        return(-1);
+    }
+    pPvt->driverReasons[command] = pasynUser->reason;
+    return(0);
 }
 
 static long init_record(struct motorRecord * pmr )
@@ -219,6 +264,37 @@ static long init_record(struct motorRecord * pmr )
     pPvt->pasynFloat64 = (asynFloat64 *)pasynInterface->pinterface;
     pPvt->asynFloat64Pvt = pasynInterface->drvPvt;
 
+    /* Get the asynDrvUser interface */
+    pasynInterface = pasynManager->findInterface(pasynUser, asynDrvUserType, 1);    if (!pasynInterface) {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "devMotorAsyn::init_record, %s find drvUser interface failed\n",
+                  pmr->name);
+        goto bad;
+    }
+    pPvt->pasynDrvUser = (asynDrvUser *)pasynInterface->pinterface;
+    pPvt->asynDrvUserPvt = pasynInterface->drvPvt;
+
+    /* Now that we have the drvUser interface get pasynUser->reason for each command */
+    if (findDrvInfo(pmr, pasynUser, motorMoveRelString,                motorMoveRel)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorMoveAbsString,                motorMoveAbs)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorMoveVelString,                motorMoveVel)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorHomeString,                   motorHome)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorStopString,                   motorStop)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorVelocityString,               motorVelocity)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorVelBaseString,                motorVelBase)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorAccelString,                  motorAccel)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorPositionString,               motorPosition)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorResolutionString,             motorResolution)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorEncRatioString,               motorEncRatio)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorPgainString,                  motorPgain)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorIgainString,                  motorIgain)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorDgainString,                  motorDgain)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorHighLimString,                motorHighLim)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorLowLimString,                 motorLowLim)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorSetClosedLoopString,          motorSetClosedLoop)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorStatusString,                 motorStatus)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorUpdateStatusString,           motorUpdateStatus)) goto bad;
+    
     /* Get the asynFloat64Array interface */
     pasynInterface = pasynManager->findInterface(pasynUser,
                                                  asynFloat64ArrayType, 1);
@@ -231,22 +307,22 @@ static long init_record(struct motorRecord * pmr )
     pPvt->pasynFloat64Array = (asynFloat64Array *)pasynInterface->pinterface;
     pPvt->asynFloat64ArrayPvt = pasynInterface->drvPvt;
 
-    /* Get the asynMotorStatus interface */
+    /* Get the asynGenericPointer interface */
     pasynInterface = pasynManager->findInterface(pasynUser,
-                                                 asynMotorStatusType, 1);
+                                                 asynGenericPointerType, 1);
     if (!pasynInterface) {
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
-                  "devMotorAsyn::init_record, %s find motorStatus interface failed\n",
+                  "devMotorAsyn::init_record, %s find genericPointer interface failed\n",
                   pmr->name);
         goto bad;
     }
-    pPvt->pasynMotorStatus = (asynMotorStatus *)pasynInterface->pinterface;
-    pPvt->asynMotorStatusPvt = pasynInterface->drvPvt;
+    pPvt->pasynGenericPointer = (asynGenericPointer *)pasynInterface->pinterface;
+    pPvt->asynGenericPointerPvt = pasynInterface->drvPvt;
 
-    /* Now connect the callback, to the combined MotorStatus interface */
+    /* Now connect the callback, to the Generic Pointer interface, which passes MotorStatus structure */
     pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
-    pasynUser->reason = motorStatus;
-    status = pPvt->pasynMotorStatus->registerInterruptUser(pPvt->asynMotorStatusPvt,
+    pasynUser->reason = pPvt->driverReasons[motorStatus];
+    status = pPvt->pasynGenericPointer->registerInterruptUser(pPvt->asynGenericPointerPvt,
 							   pasynUser,
 							   statusCallback,
 							   pPvt,
@@ -266,16 +342,16 @@ static long init_record(struct motorRecord * pmr )
      * in the future ? */
 /*  DON'T DO THIS FOR NOW.  THE NUMBER CAN COME TOO LATE TO BE OF USE TO THE DRIVER
     resolution = pmr->mres;
-    pasynUser->reason = motorResolution;
+    pasynUser->reason = pPvt->driverReasons[motorResolution];
     pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser,
 			      resolution);
 */
-    pasynUser->reason = motorStatus;
-    status = pPvt->pasynMotorStatus->read(pPvt->asynMotorStatusPvt, pasynUser,
-					  &pPvt->status);
+    pasynUser->reason = pPvt->driverReasons[motorStatus];
+    status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt, pasynUser,
+					  (void *)&pPvt->status);
     if (status != asynSuccess) {
 	asynPrint(pasynUser, ASYN_TRACE_ERROR,
-		  "%s devMotorAsyn.c::init_record: pasynMotorStatus->read "
+		  "%s devMotorAsyn.c::init_record: pasynGenericPointer->read "
 		  "returned %s", pmr->name, pasynUser->errorMessage);
     }
 
@@ -297,6 +373,8 @@ bad:
     pmr->pact=1;
     return(0);
 }
+
+
 
 CALLBACK_VALUE update_values(struct motorRecord * pmr)
 {
@@ -456,7 +534,7 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	pmsg->dvalue = *param;
 	break;
     case GET_INFO:
-	pmsg->command = motorUpStatus;
+	pmsg->command = motorUpdateStatus;
 	pmsg->interface = int32Type;
 	break;
     case SET_RESOLUTION:
@@ -471,7 +549,7 @@ static RTN_STATUS build_trans( motor_cmnd command,
     }
     
     /* Queue asyn request, so we get a callback when driver is ready */
-    pasynUser->reason = pmsg->command;
+    pasynUser->reason = pPvt->driverReasons[pmsg->command];
     status = pasynManager->queueRequest(pasynUser, 0, 0);
     if (status != asynSuccess) {
 	asynPrint(pasynUser, ASYN_TRACE_ERROR,
@@ -503,22 +581,22 @@ static void asynCallback(asynUser *pasynUser)
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
               "devMotorAsyn::asynCallback: %s command=%d, ivalue=%d, dvalue=%f\n",
               pmr->name, pmsg->command, pmsg->ivalue, pmsg->dvalue);
-    pasynUser->reason = pmsg->command;
+    pasynUser->reason = pPvt->driverReasons[pmsg->command];
 
     switch (pmsg->command) {
     case motorStatus:
 	/* Read the current status of the device */
-	status = pPvt->pasynMotorStatus->read(pPvt->asynMotorStatusPvt,
+	status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt,
 					      pasynUser,
-					      &pPvt->status);
+					      (void *)&pPvt->status);
 	if (status != asynSuccess) {
 	    asynPrint(pasynUser, ASYN_TRACE_ERROR,
-		      "devMotorAsyn::asynCallback: %s pasynMotorStatus->read"
+		      "devMotorAsyn::asynCallback: %s pasynGenericPointer->read"
 		      "returned %s\n", pmr->name, pasynUser->errorMessage);
 	}
 	break;
 
-    case motorUpStatus:
+    case motorUpdateStatus:
         status = pPvt->pasynInt32->write(pPvt->asynInt32Pvt, pasynUser,
                                          pmsg->ivalue);
         break;
@@ -575,10 +653,11 @@ static void asynCallback(asynUser *pasynUser)
  * True callback to notify that controller status has changed.
  */
 static void statusCallback(void *drvPvt, asynUser *pasynUser,
-			   struct MotorStatus *value)
+			   void *pValue)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)drvPvt;
     motorRecord *pmr = pPvt->pmr;
+    MotorStatus *value = (MotorStatus *)pValue;
 
     asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
 	      "%s devMotorAsyn::statusCallback new value=[p:%f,e:%f,s:%x] %c%c\n",
