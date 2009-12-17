@@ -98,9 +98,12 @@ void motorSimController::report(FILE *fp, int level)
     int axis;
     motorSimAxis *pAxis;
 
+    fprintf(fp, "Simulation motor driver %s, numAxes=%d\n", 
+        this->portName, this->numAxes);
+
     for (axis=0; axis<this->numAxes; axis++) {
         pAxis = this->pAxes[axis];
-        fprintf(fp, "Found driver for motorSim axis %d\n", 
+        fprintf(fp, "  axis %d\n", 
             pAxis->axis);
 
         if (level > 0)
@@ -108,21 +111,21 @@ void motorSimController::report(FILE *fp, int level)
             double lowSoftLimit=0.0;
             double hiSoftLimit=0.0;
 
-            fprintf(fp, "Current position = %f, velocity = %f at current time: %f\n", 
+            fprintf(fp, "    Current position = %f, velocity = %f at current time: %f\n", 
                    pAxis->nextpoint.axis[0].p, 
                    pAxis->nextpoint.axis[0].v,
                    pAxis->nextpoint.T);
-            fprintf(fp, "Destination posn = %f, velocity = %f at desination time:  %f\n",
+            fprintf(fp, "    Destination posn = %f, velocity = %f at desination time:  %f\n",
                    pAxis->endpoint.axis[0].p, 
                    pAxis->endpoint.axis[0].v,
                    pAxis->endpoint.T);
 
-            fprintf(fp, "Hard limits: %f, %f\n", pAxis->lowHardLimit, pAxis->hiHardLimit);
+            fprintf(fp, "    Hard limits: %f, %f\n", pAxis->lowHardLimit, pAxis->hiHardLimit);
             getDoubleParam(pAxis->axis, pAxis->pController->motorHighLim, &hiSoftLimit);
             getDoubleParam(pAxis->axis, pAxis->pController->motorLowLim, &lowSoftLimit);
-            fprintf(fp, "Soft limits: %f, %f\n", lowSoftLimit, hiSoftLimit );
+            fprintf(fp, "    Soft limits: %f, %f\n", lowSoftLimit, hiSoftLimit );
 
-            if (pAxis->homing) fprintf(fp, "Currently homing axis\n" );
+            if (pAxis->homing) fprintf(fp, "    Currently homing axis\n" );
         }
     }
 
@@ -444,6 +447,7 @@ void motorSimController::motorSimTask()
                 pAxis = this->pAxes[axis];
                 this->process(pAxis, delta );
                 callParamCallbacks(axis, axis);
+                this->unlock();
             }
         }
         epicsThreadSleep( DELTA );
@@ -482,7 +486,7 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
     motorSimAxis *pAxis;
     motorSimControllerNode *pNode;
     
-    if (motorSimControllerListInitialized) {
+    if (!motorSimControllerListInitialized) {
         motorSimControllerListInitialized = 1;
         ellInit(&motorSimControllerList);
     }
@@ -500,7 +504,7 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
     for (axis=0; axis<numAxes; axis++) {
         pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
         this->pAxes[axis] = pAxis;
-        setIntegerParam(this->motorPosition, DEFAULT_START);
+        setIntegerParam(axis, this->motorPosition, DEFAULT_START);
     }
 
     this->motorThread = epicsThreadCreate( "motorSimThread", 
@@ -521,14 +525,19 @@ extern "C" int motorSimCreateController(const char *portName, int numAxes, int p
 extern "C" int motorSimConfigAxis(const char *portName, int axis, int hiHardLimit, int lowHardLimit, int home, int start)
 {
     motorSimControllerNode *pNode;
+    static const char *functionName = "motorSimConfigAxis";
     
     // Find this controller
     if (!motorSimControllerListInitialized) {
+        printf("%s:%s: ERROR, controller list not initialized\n",
+            driverName, functionName);
         return(-1);
     }
     pNode = (motorSimControllerNode*)ellFirst(&motorSimControllerList);
     while(pNode) {
         if (strcmp(pNode->portName, portName) == 0) {
+            printf("%s:%s: configuring controller %s axis %d\n",
+                driverName, functionName, pNode->portName, axis); 
             pNode->pController->configAxis(axis, hiHardLimit, lowHardLimit, home, start);
             return(0);
         }
