@@ -65,7 +65,12 @@ public:
                     int asynFlags, int autoConnect, int priority, int stackSize);
 
     /* These are the methods that we override from asynPortDriver */
+    virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+    virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
     virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
+    virtual asynStatus setIntegerParam(int list, int index, int value);
+    virtual asynStatus setDoubleParam(int list, int index, double value);
+    virtual asynStatus callParamCallbacks(int list, int addr);
 
     /* These are the methods that are new to this class */
     virtual asynStatus moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration);
@@ -115,6 +120,9 @@ protected:
     int motorStatusHomed;
     #define LAST_MOTOR_PARAM motorStatusHomed
 
+private:
+    MotorStatus *axisStatus;
+    int *axisStatusChanged;
 };
 #define NUM_MOTOR_DRIVER_PARAMS (&LAST_MOTOR_PARAM - &FIRST_MOTOR_PARAM + 1)
 
