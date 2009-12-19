@@ -63,6 +63,7 @@ class motorSimController : asynMotorDriver {
 public:
     motorSimController(const char *portName, int numAxes, int priority, int stackSize);
     asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+    asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
     void report(FILE *fp, int level);
     asynStatus moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration);
     asynStatus moveVelocityAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration);
@@ -121,6 +122,8 @@ void motorSimController::report(FILE *fp, int level)
                    pAxis->endpoint.T);
 
             fprintf(fp, "    Hard limits: %f, %f\n", pAxis->lowHardLimit, pAxis->hiHardLimit);
+            fprintf(fp, "           Home: %f\n", pAxis->home);
+            fprintf(fp, "    Enc. offset: %f\n", pAxis->enc_offset);
             getDoubleParam(pAxis->axis, pAxis->pController->motorHighLim, &hiSoftLimit);
             getDoubleParam(pAxis->axis, pAxis->pController->motorLowLim, &lowSoftLimit);
             fprintf(fp, "    Soft limits: %f, %f\n", lowSoftLimit, hiSoftLimit );
@@ -181,13 +184,7 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
      * status at the end, but that's OK */
     status = setIntegerParam(pAxis->axis, function, value);
     
-    if (function == motorPosition) 
-    {
-        pAxis->enc_offset = (double) value - pAxis->nextpoint.axis[0].p;
-        asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-            "%s:%s: Set axis %d to position %d", 
-            driverName, functionName, pAxis->axis, value);
-    } else if (function == motorDeferMoves)
+    if (function == motorDeferMoves)
     {
         asynPrint(pasynUser, ASYN_TRACE_FLOW,
             "%s:%s: %sing Deferred Move flag on driver %s\n",
@@ -201,6 +198,42 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else {
         /* Call base class call its method (if we have our parameters check this here) */
         status = asynMotorDriver::writeInt32(pasynUser, value);
+    }
+    
+    /* Do callbacks so higher layers see any changes */
+    callParamCallbacks(pAxis->axis, pAxis->axis);
+    if (status) 
+        asynPrint(pasynUser, ASYN_TRACE_ERROR, 
+              "%s:%s: error, status=%d function=%d, value=%d\n", 
+              driverName, functionName, status, function, value);
+    else        
+        asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
+              "%s:%s: function=%d, value=%d\n", 
+              driverName, functionName, function, value);
+    return status;
+}
+
+asynStatus motorSimController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
+{
+    int function = pasynUser->reason;
+    asynStatus status = asynSuccess;
+    motorSimAxis *pAxis = this->getAxis(pasynUser);
+    static const char *functionName = "writeFloat64";
+    
+    
+    /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
+     * status at the end, but that's OK */
+    status = setDoubleParam(pAxis->axis, function, value);
+    
+    if (function == motorPosition) 
+    {
+        pAxis->enc_offset = (double) value - pAxis->nextpoint.axis[0].p;
+        asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+            "%s:%s: Set axis %d to position %d", 
+            driverName, functionName, pAxis->axis, value);
+    } else {
+        /* Call base class call its method (if we have our parameters check this here) */
+        status = asynMotorDriver::writeFloat64(pasynUser, value);
     }
     
     /* Do callbacks so higher layers see any changes */
