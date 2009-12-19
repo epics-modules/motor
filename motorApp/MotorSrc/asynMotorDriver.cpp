@@ -115,7 +115,7 @@ asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     int axis;
     int function = pasynUser->reason;
     asynStatus status=asynSuccess;
-    double baseVelocity, velocity, accel;
+    double accel;
     static const char *functionName = "writeFloat64";
 
     status = this->getAddress(pasynUser, functionName, &axis);
@@ -123,17 +123,11 @@ asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
      * status at the end, but that's OK */
     status = setDoubleParam(axis, function, value);
-    getDoubleParam(axis, motorAccel, &accel);
 
     if (function == motorStop) {
+        getDoubleParam(axis, motorAccel, &accel);
 	    status = this->stopAxis(pasynUser, accel);
     
-    } else if (function == motorHome) {
-        getDoubleParam(axis, motorVelBase, &baseVelocity);
-        getDoubleParam(axis, motorVelocity, &velocity);
-        getDoubleParam(axis, motorAccel, &accel);
-	    status = this->homeAxis(pasynUser, baseVelocity, velocity, accel, (value == 0) ? 0 : 1);
-
     } else if (function == motorUpdateStatus) {
         // We don't implement this yet.  Is it needed?
    	    //status = this->forceCallback)(pasynUser);
@@ -180,6 +174,10 @@ asynStatus asynMotorDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value
 
     } else if (function == motorMoveVel) {
 	    status = this->moveVelocityAxis(pasynUser, baseVelocity, value, accel);
+
+    // Note, the motorHome command happens on the asynFloat64 interface, even though the value (direction) is really integer 
+    } else if (function == motorHome) {
+	    status = this->homeAxis(pasynUser, baseVelocity, velocity, accel, (value == 0) ? 0 : 1);
 
     }
     
