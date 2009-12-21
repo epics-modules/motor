@@ -141,7 +141,7 @@ motorSimAxis * motorSimController::getAxis(asynUser *pasynUser)
     int axis;
     motorSimAxis *pAxis;
     
-    getAddress(pasynUser, "motorSimController::getAxis", &axis);
+    getAddress(pasynUser, &axis);
     pAxis = this->pAxes[axis];
     return(pAxis);
 }
@@ -370,7 +370,7 @@ asynStatus motorSimController::configAxis(int axis, int hiHardLimit, int lowHard
     pAxis->hiHardLimit = hiHardLimit;
     pAxis->lowHardLimit = lowHardLimit;
     pAxis->home = home;
-    setIntegerParam(axis, motorPosition, start);
+    pAxis->enc_offset = start;
     return(asynSuccess);
 }
 
@@ -537,7 +537,7 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
     for (axis=0; axis<numAxes; axis++) {
         pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
         this->pAxes[axis] = pAxis;
-        setIntegerParam(axis, this->motorPosition, DEFAULT_START);
+        setDoubleParam(axis, this->motorPosition, DEFAULT_START);
     }
 
     this->motorThread = epicsThreadCreate( "motorSimThread", 
