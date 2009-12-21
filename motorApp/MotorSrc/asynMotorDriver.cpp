@@ -24,42 +24,42 @@ asynMotorDriver::asynMotorDriver(const char *portName, int maxAxes, int numParam
     static const char *functionName = "asynMotorDriver";
 
     /* Create the base set of motor parameters */
-    addParam(motorMoveRelString,                &motorMoveRel);
-    addParam(motorMoveAbsString,                &motorMoveAbs);
-    addParam(motorMoveVelString,                &motorMoveVel);
-    addParam(motorHomeString,                   &motorHome);
-    addParam(motorStopString,                   &motorStop);
-    addParam(motorVelocityString,               &motorVelocity);
-    addParam(motorVelBaseString,                &motorVelBase);
-    addParam(motorAccelString,                  &motorAccel);
-    addParam(motorPositionString,               &motorPosition);
-    addParam(motorEncoderPositionString,        &motorEncoderPosition);
-    addParam(motorDeferMovesString,             &motorDeferMoves);
-    addParam(motorResolutionString,             &motorResolution);
-    addParam(motorEncRatioString,               &motorEncRatio);
-    addParam(motorPgainString,                  &motorPgain);
-    addParam(motorIgainString,                  &motorIgain);
-    addParam(motorDgainString,                  &motorDgain);
-    addParam(motorHighLimString,                &motorHighLim);
-    addParam(motorLowLimString,                 &motorLowLim);
-    addParam(motorSetClosedLoopString,          &motorSetClosedLoop);
-    addParam(motorStatusString,                 &motorStatus);
-    addParam(motorUpdateStatusString,           &motorUpdateStatus);
-    addParam(motorStatusDirectionString,        &motorStatusDirection);
-    addParam(motorStatusDoneString,             &motorStatusDone);
-    addParam(motorStatusHighLimitString,        &motorStatusHighLimit);
-    addParam(motorStatusAtHomeString,           &motorStatusAtHome);
-    addParam(motorStatusSlipString,             &motorStatusSlip);
-    addParam(motorStatusPowerOnString,          &motorStatusPowerOn);
-    addParam(motorStatusFollowingErrorString,   &motorStatusFollowingError);
-    addParam(motorStatusHomeString,             &motorStatusHome);
-    addParam(motorStatusHasEncoderString,       &motorStatusHasEncoder);
-    addParam(motorStatusProblemString,          &motorStatusProblem);
-    addParam(motorStatusMovingString,           &motorStatusMoving);
-    addParam(motorStatusGainSupportString,      &motorStatusGainSupport);
-    addParam(motorStatusCommsErrorString,       &motorStatusCommsError);
-    addParam(motorStatusLowLimitString,         &motorStatusLowLimit);
-    addParam(motorStatusHomedString,            &motorStatusHomed);
+    createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel);
+    createParam(motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs);
+    createParam(motorMoveVelString,                asynParamFloat64,    &motorMoveVel);
+    createParam(motorHomeString,                   asynParamFloat64,    &motorHome);
+    createParam(motorStopString,                   asynParamInt32,      &motorStop);
+    createParam(motorVelocityString,               asynParamFloat64,    &motorVelocity);
+    createParam(motorVelBaseString,                asynParamFloat64,    &motorVelBase);
+    createParam(motorAccelString,                  asynParamFloat64,    &motorAccel);
+    createParam(motorPositionString,               asynParamFloat64,    &motorPosition);
+    createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition);
+    createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves);
+    createParam(motorResolutionString,             asynParamFloat64,    &motorResolution);
+    createParam(motorEncRatioString,               asynParamFloat64,    &motorEncRatio);
+    createParam(motorPgainString,                  asynParamFloat64,    &motorPgain);
+    createParam(motorIgainString,                  asynParamFloat64,    &motorIgain);
+    createParam(motorDgainString,                  asynParamFloat64,    &motorDgain);
+    createParam(motorHighLimString,                asynParamFloat64,    &motorHighLim);
+    createParam(motorLowLimString,                 asynParamFloat64,    &motorLowLim);
+    createParam(motorSetClosedLoopString,          asynParamInt32,      &motorSetClosedLoop);
+    createParam(motorStatusString,                 asynParamInt32,      &motorStatus);
+    createParam(motorUpdateStatusString,           asynParamInt32,      &motorUpdateStatus);
+    createParam(motorStatusDirectionString,        asynParamInt32,      &motorStatusDirection);
+    createParam(motorStatusDoneString,             asynParamInt32,      &motorStatusDone);
+    createParam(motorStatusHighLimitString,        asynParamInt32,      &motorStatusHighLimit);
+    createParam(motorStatusAtHomeString,           asynParamInt32,      &motorStatusAtHome);
+    createParam(motorStatusSlipString,             asynParamInt32,      &motorStatusSlip);
+    createParam(motorStatusPowerOnString,          asynParamInt32,      &motorStatusPowerOn);
+    createParam(motorStatusFollowingErrorString,   asynParamInt32,      &motorStatusFollowingError);
+    createParam(motorStatusHomeString,             asynParamInt32,      &motorStatusHome);
+    createParam(motorStatusHasEncoderString,       asynParamInt32,      &motorStatusHasEncoder);
+    createParam(motorStatusProblemString,          asynParamInt32,      &motorStatusProblem);
+    createParam(motorStatusMovingString,           asynParamInt32,      &motorStatusMoving);
+    createParam(motorStatusGainSupportString,      asynParamInt32,      &motorStatusGainSupport);
+    createParam(motorStatusCommsErrorString,       asynParamInt32,      &motorStatusCommsError);
+    createParam(motorStatusLowLimitString,         asynParamInt32,      &motorStatusLowLimit);
+    createParam(motorStatusHomedString,            asynParamInt32,      &motorStatusHomed);
     
     this->axisStatus = (MotorStatus *)calloc(maxAxes, sizeof(MotorStatus));
     this->axisStatusChanged = (int *)calloc(maxAxes, sizeof(int));
@@ -118,7 +118,7 @@ asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     double accel;
     static const char *functionName = "writeFloat64";
 
-    status = this->getAddress(pasynUser, functionName, &axis);
+    status = this->getAddress(pasynUser, &axis);
 
     /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
      * status at the end, but that's OK */
@@ -155,7 +155,7 @@ asynStatus asynMotorDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value
     asynStatus status = asynError;
     static const char *functionName = "writeFloat64";
 
-    status = this->getAddress(pasynUser, functionName, &axis);
+    status = this->getAddress(pasynUser, &axis);
 
     /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
      * status at the end, but that's OK */
@@ -201,7 +201,7 @@ asynStatus asynMotorDriver::readGenericPointer(asynUser *pasynUser, void *pointe
     MotorStatus *pStatus = (MotorStatus *)pointer;
     int axis;
     
-    getAddress(pasynUser, functionName, &axis);
+    getAddress(pasynUser, &axis);
     getIntegerParam(axis, motorStatus, (int *)&pStatus->status);
     getDoubleParam(axis, motorPosition, &pStatus->position);
     getDoubleParam(axis, motorEncoderPosition, &pStatus->encoder_posn);
