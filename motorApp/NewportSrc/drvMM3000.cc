@@ -647,16 +647,16 @@ STATIC int motor_init()
         /* The return string will tell us how many axes this controller has */
         for (total_axis = 0; bufptr != NULL; total_axis++)
         {
-        if (strcmp(bufptr, "unused") == 0)
+        if (strncmp(bufptr, "unused", 6) == 0)
         {
             cntrl->type[total_axis] = UNUSED;
             bufptr = NULL;
         }
         else
         {
-            if (strcmp(bufptr, "stepper1.5M") == 0)
+            if (strncmp(bufptr, "stepper1.5M",11) == 0)
             cntrl->type[total_axis] = STEPPER;
-            else if (strcmp(bufptr, "dc") == 0)
+            else if (strncmp(bufptr, "dc", 2) == 0)
             cntrl->type[total_axis] = DC;
             else
             errlogPrintf("drvMM3000:motor_init() - invalid RC response = %s\n",
