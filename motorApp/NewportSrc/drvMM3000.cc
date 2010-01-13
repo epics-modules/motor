@@ -187,7 +187,6 @@ static long report(int level)
             printf("    MM3000 controller %d asyn port= %s, address=%d, id: %s \n",
                card, cntrl->asyn_port, cntrl->asyn_address,
                brdptr->ident);
-            break;
         }
     }
     }
