@@ -614,6 +614,8 @@ ss xpsTrajectoryRun {
                 /* Start the detector */
                 detOn = 1;
                 pvPut(detOn);
+                /* Wait for 0.5 second for detector to actually start */
+                epicsThreadSleep(0.5);
                 /* Get start time of execute */        
                 startTime = time(0);
                 /* Call the C function from here so that the main state set can poll */
@@ -815,12 +817,12 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
                " calling MultipleAxesPVTPulseOutputSet(%d, %s, %d, %d, %f)\n",
                                            pVar->pollSocket, pVar->groupName,
                                            pVar->startPulses+1, 
-                                           pVar->endPulses+2, 
+                                           pVar->endPulses+1, 
                                            pVar->pulsePeriod);
     }
     status = MultipleAxesPVTPulseOutputSet(pVar->pollSocket, pVar->groupName,
                                            pVar->startPulses+1, 
-                                           pVar->endPulses+2, 
+                                           pVar->endPulses+1, 
                                            pVar->pulsePeriod);
 
     /* Define trigger */
