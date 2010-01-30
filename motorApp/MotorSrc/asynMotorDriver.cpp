@@ -122,7 +122,7 @@ asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
     /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
      * status at the end, but that's OK */
-    status = setDoubleParam(axis, function, value);
+    status = setIntegerParam(axis, function, value);
 
     if (function == motorStop) {
         getDoubleParam(axis, motorAccel, &accel);
