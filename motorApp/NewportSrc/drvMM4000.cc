@@ -2,9 +2,10 @@
 FILENAME... drvMM4000.cc
 USAGE...    Motor record driver level support for Newport MM4000.
 
-Version:        $Revision: 1.24 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2009-09-01 16:18:28 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -59,6 +60,7 @@ Last Modified:  $Date: 2009-09-01 16:18:28 $
  *      - MS Visual C compatibility; make all epicsExportAddress extern "C" linkage.
  *      - make debug variables always available.
  * .14 02/18/09 rls Check for controller error.
+ * .15 02/17/10 rls Bug fix controller error check overwriting position buffer.
  *
  */
 
@@ -435,8 +437,8 @@ static int set_status(int card, int signal)
 
     /* Check for controller error. */
     send_mess(card, "TE;", (char) NULL);
-    recv_mess(card, cntrl->position_string, 1);
-    if (cntrl->position_string[2] == '@')
+    recv_mess(card, buff, 1);
+    if (buff[2] == '@')
         status.Bits.RA_PROBLEM = 0;
     else
     {
