@@ -1,4 +1,0 @@
-# Highland V544 driver support.
-device(motor,VME_IO,devV544,"Highland V544")
-driver(drvV544)
-
