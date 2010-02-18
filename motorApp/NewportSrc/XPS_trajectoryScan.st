@@ -1202,9 +1202,14 @@ static void readGathering(SS_ID ssId, struct UserVar *pVar)
         fgets (buffer, MAX_GATHERING_STRING, gatheringFile);
     }
     /* The next line is the motor positions at the start of the trajectory element
-     * where pulses began to be output.  Skip this line because this pulse just
-     * started the MCS counting, there are no data yet. */
-    fgets (buffer, MAX_GATHERING_STRING, gatheringFile);
+     * where pulses began to be output.  
+     * We used to skip this line because this pulse just
+     * started the MCS counting, there are no data yet. 
+     * But that required the XPS to output more than the requested number of 
+     * output pulses, which is undesireable.  The SIS3801 can be configured to
+     * start counting before receiving the first input pulse, which should
+     * now be done. */
+    /* fgets (buffer, MAX_GATHERING_STRING, gatheringFile); */
     
     for (i=0; i<pVar->npulses; i++) {
         for (j=0; j<pVar->numAxes; j++) {
