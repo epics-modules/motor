@@ -38,6 +38,10 @@ commenting out the appropriate line in ./motorApp/Makefile.
                 directory.
         softMotor - Soft Channel device support; SoftMotorSrc directory.
 
+Valuable device information can be found in the README files located in many of
+the above manufacture specific directories (e.g., motorApp/OmsSrc,
+motorApp/NewportSrc).
+
 
 Configuration
 =============
@@ -154,7 +158,7 @@ Modification Log from R6-4 to R6-5
         device drive architecture.  If during the move of one or motors the
         motor task did not issue an OS delay during status updates, it could
         potentially not respond to any further motor commands.
-          
+
         Files modified: - MotorSrc/motordrvCom.cc; always check for incoming
                                                    messages.
                         - OmsSrc/drvOms58.cc; reduced start_status() delays.
@@ -193,7 +197,7 @@ Modification Log from R6-4 to R6-5
 
 9) Moved preprocessor assertions in motor.h to the end of the conditional logic
         to avoid MSVC compiler errors.
-   
+
         File modified: MotorSrc/motor.h
 
 10) Matthew Pearson's (Diamond) fix for the motor simulator getting stuck in
@@ -215,7 +219,7 @@ Modification Log from R6-4 to R6-5
 
 12) Removed the OMSL field from the motorx_all.adl medm display to prevent
         confusion with motor position closed-loop control.
-        
+
         File modified: motorApp/op/adl/motorx_all.adl
 
 13) An error was introduced with R5-3 when the STUP field was added (item #4
@@ -226,19 +230,19 @@ Modification Log from R6-4 to R6-5
 
 14) Made OMS device driver Setup and Configure shell command error messages
         more prominent.
-        
+
         Files modified: <driver>Setup() drvMAXv.cc, drvOms58.cc and drvOms.cc
 
 15) OMS MAXv driver changes from Austen Rose (Diamond) that support backwards
         compatibility with ver:1.29 and earlier MAXv firmware. OMS changed
         their line terminator from '<LF><NULL>' to '<LF>' for RA, QA, EA and
         RL command with ver:1.30 firmware.
-        
+
         File modified: recv_mess() in OmsSrc/drvMAXv.cc
 
 16) Bug fixes for Newport PM500 driver not initializing the MSTA field
         correctly.  Added support for CNEN field.
-        
+
         Files modified: devPM500.cc, drvPM500.cc, motorRecord.dbd
 
 17) Mark Rivers made numerous changes to elminate 64-bit compiler warning
@@ -248,12 +252,35 @@ Modification Log from R6-4 to R6-5
 
         File modified: NewportSrc/drvXPSAsyn.c
 
-19) Bug fix (reported by Pawel Jalocha) for homing in the wrong direction when
+19) attocube ANC150 driver bug fixes for multi-axis applications not reading
+        frequency and 'set position' not setting val/dval/rval.
+
+        File modified: motorApp/AttocubeSrc/drvANC150Asyn.cc
+
+20) Bug fix (reported by Pawel Jalocha) for homing in the wrong direction when
         MRES < 0.
-        
+
         File modified: Reverse Home direction commands based on MRES < 0 in
                        do_work() and postProcess().
 
+21) Bug fix for Newport MM4000 asyn motor support. The IOC would crash if, for
+        any reason, communication was not established at bootup.
+
+        File modified: null pointer error check added to
+                       drvMM4000Asyn.cc:sendOnly().
+
+22) Newport MM4000 controller (old driver architecture) bug fix for controller
+        error check overwriting position buffer.
+
+        File modified: motorApp/NewportSrc/drvMM4000.cc
+
+23) Removed support for Highland Technologies model V540
+
+        Directory removed: motorApp/V544Src
+
+24) Bug fix for backlash not being done when MRES<0 and DIR="Neg".
+
+        File modified: motorApp/MotorSrc/motorRecord.cc
 
 
 Modification Log from R6-3 to R6-4
@@ -270,7 +297,7 @@ Modification Log from R6-3 to R6-4
         previous target and readback positions are read from the controller on
         the next update.  This occurs with the previous release (R6-3) because
         the "stale data delay" was changed to zero for the drvOms58 driver.
-        
+
         With this release the driver searches all VME58 board ID's for either
         2.24-8S or any 2.35 version.  If any board is found, the "stale data
         delay" is set to a non-zero value.
@@ -442,7 +469,7 @@ Modification Log from R6-3 to R6-4
 
 19) John Hammonds added support of the Physik Instrumente (PI) GmbH & Co. E-816
         motor controller.
-  
+
         Files modified: added devPIE816.cc, drvPIE816 and drvPIE816.h to the
                         PiSrc directory
 
