@@ -130,6 +130,7 @@ HeadURL:        $URL$
  *                    change in dbScan.h
  * .54 10-27-09 rls - reverse which limit switch is used in do_work() home
  *                    search error check based on DIR field.
+ * .55 02-18-10 rls - Fix for backlash not done when MRES<0 and DIR="Neg".
  *
  */                                                        
 
@@ -780,7 +781,7 @@ static long postProcess(motorRecord * pmr)
     }
     else if (pmr->mip & MIP_JOG_STOP || pmr->mip & MIP_MOVE)
     {
-        if (fabs(pmr->bdst) >  fabs(pmr->mres))
+        if (fabs(pmr->bdst) >=  fabs(pmr->mres))
         {
             msta_field msta;
 
@@ -829,7 +830,7 @@ static long postProcess(motorRecord * pmr)
                     WRITE_MSG(SET_ACCEL, &bacc);
                 if (use_rel == true)
                 {
-                    relpos = (relpos - relbpos) * pmr->frac;
+                    relpos = relpos * pmr->frac;
                     WRITE_MSG(MOVE_REL, &relpos);
                 }
                 else
@@ -926,7 +927,7 @@ that it will happen when we return.
 ******************************************************************************/
 static void maybeRetry(motorRecord * pmr)
 {
-    if ((fabs(pmr->diff) > pmr->rdbd) && !pmr->hls && !pmr->lls)
+    if ((fabs(pmr->diff) >= pmr->rdbd) && !pmr->hls && !pmr->lls)
     {
         /* No, we're not close enough.  Try again. */
         Debug(1, "maybeRetry: not close enough; diff = %f\n", pmr->diff);
@@ -1585,7 +1586,7 @@ LOGIC:
                 Update last DVAL/VAL/RVAL.
                 Initialize comm. transaction.
                 IF backlash disabled, OR, no need for separate backlash move
-                    since move is in preferred direction (preferred_dir==ON),
+                    since move is in preferred direction (preferred_dir==True),
                     AND, backlash acceleration and velocity are the same as
                     slew values (BVEL == VELO, AND, BACC == ACCL).
                     Initialize local velocity and acceleration variables to
@@ -1595,7 +1596,8 @@ LOGIC:
                     ELSE
                         Set local position variable based on absolute position.
                     ENDIF
-                ELSE IF current position is within backlash or retry range.
+                ELSE IF move is in preferred direction (preferred_dir==True),
+                        AND, |DVAL - LDVL| <= |BDST + MRES|.
                     Initialize local velocity and acceleration variables to
                     backlash values.
                     IF use relative positioning indicator is TRUE.
@@ -2129,6 +2131,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             bool use_rel, preferred_dir;
             double relpos = pmr->diff / pmr->mres;
             double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
+            double rbdst1 = 1.0 + (fabs(pmr->bdst) / fabs(pmr->mres));
             long rdbdpos = NINT(pmr->rdbd / fabs(pmr->mres)); /* retry deadband steps */
             long rpos, npos;
             msta_field msta;
@@ -2233,7 +2236,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 pmr->ldvl = pmr->dval;
                 pmr->lval = pmr->val;
                 pmr->lrvl = pmr->rval;
-    
+
                 INIT_MSG();
 
                 /* Backlash disabled, OR, no need for seperate backlash move
@@ -2251,11 +2254,12 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                     else
                         position = currpos + pmr->frac * (newpos - currpos);
                 }
-                /* Is current position within backlash or retry range? */
-                else if ((fabs(pmr->diff) < pmr->rdbd) ||
-                         (use_rel == true  && ((relbpos < 0) == (relpos > 0))) ||
-                         (use_rel == false && (((currpos + pmr->rdbd) > bpos) ==
-                                               (newpos > currpos))))
+                /* IF move is in preferred direction, AND, current position is within backlash range. */
+                else if ((preferred_dir == true) &&
+                         ((use_rel == true  && relbpos <= 1.0) ||
+                          (use_rel == false && (fabs(newpos - currpos) <= rbdst1))
+                         )
+                        )
                 {
 /******************************************************************************
  * Backlash correction imposes a much larger penalty on overshoot than on
