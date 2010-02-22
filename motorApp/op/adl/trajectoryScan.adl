@@ -1,14 +1,14 @@
 
 file {
-	name="j:\epics\R3.13.1\CARS\CARSApp\op\adl\trajectoryScan.adl"
-	version=020306
+	name="/home/epics/devel/motor/motorApp/op/adl/trajectoryScan.adl"
+	version=030102
 }
 display {
 	object {
-		x=195
-		y=166
+		x=164
+		y=54
 		width=530
-		height=755
+		height=785
 	}
 	clr=14
 	bclr=4
@@ -92,7 +92,7 @@ rectangle {
 		x=5
 		y=51
 		width=524
-		height=205
+		height=235
 	}
 	"basic attribute" {
 		clr=14
@@ -151,989 +151,6 @@ text {
 	textix="$(TITLE)"
 	align="horiz. centered"
 }
-rectangle {
-	object {
-		x=4
-		y=263
-		width=524
-		height=230
-	}
-	"basic attribute" {
-		clr=14
-		fill="outline"
-		width=2
-	}
-}
-text {
-	object {
-		x=168
-		y=266
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Move axis?"
-}
-menu {
-	object {
-		x=168
-		y=315
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M2Move"
-		clr=14
-		bclr=51
-	}
-}
-menu {
-	object {
-		x=168
-		y=340
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M3Move"
-		clr=14
-		bclr=51
-	}
-}
-menu {
-	object {
-		x=168
-		y=290
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M1Move"
-		clr=14
-		bclr=51
-	}
-}
-menu {
-	object {
-		x=168
-		y=365
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M4Move"
-		clr=14
-		bclr=51
-	}
-}
-menu {
-	object {
-		x=168
-		y=390
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M5Move"
-		clr=14
-		bclr=51
-	}
-}
-text {
-	object {
-		x=300
-		y=266
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Current Pos."
-}
-"text update" {
-	object {
-		x=291
-		y=290
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M1Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=315
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M2Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=340
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M3Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=365
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M4Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=390
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M5Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-text {
-	object {
-		x=456
-		y=266
-		width=50
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Plots"
-}
-"related display" {
-	object {
-		x=440
-		y=290
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M1),TITLE=Output_Trajectory, Y=$(P)$(R)M1Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M1),TITLE=Actual_Trajectory, Y=$(P)$(R)M1Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M1),TITLE=Following_Error, Y=$(P)$(R)M1Error"
-	}
-	clr=14
-	bclr=51
-}
-"related display" {
-	object {
-		x=440
-		y=315
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M2),TITLE=Output_Trajectory, Y=$(P)$(R)M2Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M2),TITLE=Actual_Trajectory, Y=$(P)$(R)M2Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M2),TITLE=Following_Error, Y=$(P)$(R)M2Error"
-	}
-	clr=14
-	bclr=51
-}
-"related display" {
-	object {
-		x=440
-		y=340
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Output_Trajectory, Y=$(P)$(R)M3Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Actual_Trajectory, Y=$(P)$(R)M3Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Following_Error, Y=$(P)$(R)M3Error"
-	}
-	clr=14
-	bclr=51
-}
-"related display" {
-	object {
-		x=440
-		y=365
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Output_Trajectory, Y=$(P)$(R)M4Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Actual_Trajectory, Y=$(P)$(R)M4Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Following_Error, Y=$(P)$(R)M4Error"
-	}
-	clr=14
-	bclr=51
-}
-"related display" {
-	object {
-		x=440
-		y=390
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Output_Trajectory, Y=$(P)$(R)M5Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Actual_Trajectory, Y=$(P)$(R)M5Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Following_Error, Y=$(P)$(R)M5Error"
-	}
-	clr=14
-	bclr=51
-}
-rectangle {
-	object {
-		x=4
-		y=500
-		width=524
-		height=250
-	}
-	"basic attribute" {
-		clr=14
-		fill="outline"
-		width=2
-	}
-}
-text {
-	object {
-		x=111
-		y=530
-		width=50
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Build"
-}
-"message button" {
-	object {
-		x=167
-		y=530
-		width=96
-		height=20
-	}
-	control {
-		chan="$(P)$(R)Build"
-		clr=14
-		bclr=51
-	}
-	label="Build"
-	press_msg="1"
-	release_msg="0"
-}
-text {
-	object {
-		x=31
-		y=580
-		width=130
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Simulate/Real"
-}
-menu {
-	object {
-		x=165
-		y=580
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)SimMode"
-		clr=14
-		bclr=51
-	}
-}
-"text update" {
-	object {
-		x=168
-		y=556
-		width=350
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)BuildMessage"
-		clr=14
-		bclr=56
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=31
-		y=555
-		width=130
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Build message"
-}
-"text update" {
-	object {
-		x=272
-		y=530
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)BuildState"
-		clr=50
-		bclr=13
-	}
-	clrmod="alarm"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=272
-		y=605
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)ExecState"
-		clr=50
-		bclr=14
-	}
-	clrmod="alarm"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=386
-		y=530
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)BuildStatus"
-		clr=50
-		bclr=14
-	}
-	clrmod="alarm"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=386
-		y=605
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)ExecStatus"
-		clr=50
-		bclr=14
-	}
-	clrmod="alarm"
-	limits {
-	}
-}
-text {
-	object {
-		x=180
-		y=505
-		width=70
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Command"
-}
-text {
-	object {
-		x=298
-		y=505
-		width=50
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="State"
-}
-text {
-	object {
-		x=407
-		y=505
-		width=60
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Status"
-}
-composite {
-	object {
-		x=91
-		y=605
-		width=172
-		height=20
-	}
-	"composite name"=""
-	children {
-		text {
-			object {
-				x=91
-				y=605
-				width=70
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Execute"
-		}
-		"message button" {
-			object {
-				x=167
-				y=605
-				width=96
-				height=20
-			}
-			control {
-				chan="$(P)$(R)Execute"
-				clr=14
-				bclr=51
-			}
-			label="Execute"
-			press_msg="1"
-			release_msg="0"
-		}
-	}
-}
-text {
-	object {
-		x=111
-		y=660
-		width=60
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Abort"
-}
-"message button" {
-	object {
-		x=167
-		y=655
-		width=150
-		height=30
-	}
-	control {
-		chan="$(P)$(R)Abort"
-		clr=14
-		bclr=20
-	}
-	label="Abort!"
-	press_msg="1"
-	release_msg="0"
-}
-text {
-	object {
-		x=11
-		y=630
-		width=150
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Execute message"
-}
-"text update" {
-	object {
-		x=168
-		y=631
-		width=350
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)ExecMessage"
-		clr=14
-		bclr=56
-	}
-	limits {
-	}
-}
-"message button" {
-	object {
-		x=167
-		y=695
-		width=96
-		height=20
-	}
-	control {
-		chan="$(P)$(R)Readback"
-		clr=14
-		bclr=51
-	}
-	label="Readback"
-	press_msg="1"
-	release_msg="0"
-}
-text {
-	object {
-		x=81
-		y=695
-		width=80
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Readback"
-}
-"text update" {
-	object {
-		x=272
-		y=695
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)ReadState"
-		clr=50
-		bclr=14
-	}
-	clrmod="alarm"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=386
-		y=695
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)ReadStatus"
-		clr=50
-		bclr=14
-	}
-	clrmod="alarm"
-	limits {
-	}
-}
-text {
-	object {
-		x=41
-		y=720
-		width=120
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Read message"
-}
-"text update" {
-	object {
-		x=168
-		y=721
-		width=350
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)ReadMessage"
-		clr=14
-		bclr=56
-	}
-	limits {
-	}
-}
-menu {
-	object {
-		x=168
-		y=415
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M6Move"
-		clr=14
-		bclr=51
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=415
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M6Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"related display" {
-	object {
-		x=440
-		y=415
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Output_Trajectory, Y=$(P)$(R)M6Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Actual_Trajectory, Y=$(P)$(R)M6Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Following_Error, Y=$(P)$(R)M6Error"
-	}
-	clr=14
-	bclr=51
-}
-menu {
-	object {
-		x=168
-		y=440
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M7Move"
-		clr=14
-		bclr=51
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=440
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M7Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"related display" {
-	object {
-		x=440
-		y=440
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Output_Trajectory, Y=$(P)$(R)M7Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Actual_Trajectory, Y=$(P)$(R)M7Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Following_Error, Y=$(P)$(R)M7Error"
-	}
-	clr=14
-	bclr=51
-}
-menu {
-	object {
-		x=168
-		y=465
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M8Move"
-		clr=14
-		bclr=51
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=465
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M8Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"related display" {
-	object {
-		x=440
-		y=465
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Output_Trajectory, Y=$(P)$(R)M8Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Actual_Trajectory, Y=$(P)$(R)M8Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Following_Error, Y=$(P)$(R)M8Error"
-	}
-	clr=14
-	bclr=51
-}
-"text update" {
-	object {
-		x=6
-		y=290
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M1).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=6
-		y=315
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M2).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=6
-		y=340
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M3).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=6
-		y=365
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M4).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=6
-		y=390
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M5).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=6
-		y=415
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M6).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=6
-		y=440
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M7).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=6
-		y=465
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M8).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
 text {
 	object {
 		x=359
@@ -1182,33 +199,6 @@ text {
 	}
 	control {
 		chan="$(P)$(R)Npulses"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=60
-		y=230
-		width=170
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Acceleration time"
-}
-"text entry" {
-	object {
-		x=234
-		y=230
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)Accel"
 		clr=14
 		bclr=51
 	}
@@ -1296,10 +286,10 @@ text {
 }
 "related display" {
 	object {
-		x=423
-		y=223
+		x=425
+		y=255
 		width=99
-		height=24
+		height=20
 	}
 	display[0] {
 		label="Debug/more"
@@ -1307,7 +297,7 @@ text {
 		args="P=$(P),R=$(R),TITLE=$(TITLE),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
 	}
 	clr=14
-	bclr=4
+	bclr=51
 	label=" More"
 }
 "text entry" {
@@ -1415,4 +405,1063 @@ text {
 		clr=14
 	}
 	textix="Plot time"
+}
+composite {
+	object {
+		x=4
+		y=530
+		width=524
+		height=250
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=4
+				y=530
+				width=524
+				height=250
+			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+				width=2
+			}
+		}
+		text {
+			object {
+				x=111
+				y=560
+				width=50
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Build"
+		}
+		"message button" {
+			object {
+				x=167
+				y=560
+				width=96
+				height=20
+			}
+			control {
+				chan="$(P)$(R)Build"
+				clr=14
+				bclr=51
+			}
+			label="Build"
+			press_msg="1"
+			release_msg="0"
+		}
+		text {
+			object {
+				x=31
+				y=610
+				width=130
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Simulate/Real"
+		}
+		menu {
+			object {
+				x=165
+				y=610
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)SimMode"
+				clr=14
+				bclr=51
+			}
+		}
+		"text update" {
+			object {
+				x=168
+				y=586
+				width=350
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)BuildMessage"
+				clr=14
+				bclr=56
+			}
+			limits {
+			}
+		}
+		text {
+			object {
+				x=31
+				y=585
+				width=130
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Build message"
+		}
+		"text update" {
+			object {
+				x=272
+				y=560
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)BuildState"
+				clr=50
+				bclr=13
+			}
+			clrmod="alarm"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=272
+				y=635
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)ExecState"
+				clr=50
+				bclr=14
+			}
+			clrmod="alarm"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=386
+				y=560
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)BuildStatus"
+				clr=50
+				bclr=14
+			}
+			clrmod="alarm"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=386
+				y=635
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)ExecStatus"
+				clr=50
+				bclr=14
+			}
+			clrmod="alarm"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=180
+				y=535
+				width=70
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Command"
+		}
+		text {
+			object {
+				x=298
+				y=535
+				width=50
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="State"
+		}
+		text {
+			object {
+				x=407
+				y=535
+				width=60
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Status"
+		}
+		composite {
+			object {
+				x=91
+				y=635
+				width=172
+				height=20
+			}
+			"composite name"=""
+			children {
+				text {
+					object {
+						x=91
+						y=635
+						width=70
+						height=20
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="Execute"
+				}
+				"message button" {
+					object {
+						x=167
+						y=635
+						width=96
+						height=20
+					}
+					control {
+						chan="$(P)$(R)Execute"
+						clr=14
+						bclr=51
+					}
+					label="Execute"
+					press_msg="1"
+					release_msg="0"
+				}
+			}
+		}
+		text {
+			object {
+				x=111
+				y=690
+				width=60
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Abort"
+		}
+		"message button" {
+			object {
+				x=167
+				y=685
+				width=150
+				height=30
+			}
+			control {
+				chan="$(P)$(R)Abort"
+				clr=14
+				bclr=20
+			}
+			label="Abort!"
+			press_msg="1"
+			release_msg="0"
+		}
+		text {
+			object {
+				x=11
+				y=660
+				width=150
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Execute message"
+		}
+		"text update" {
+			object {
+				x=168
+				y=661
+				width=350
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)ExecMessage"
+				clr=14
+				bclr=56
+			}
+			limits {
+			}
+		}
+		"message button" {
+			object {
+				x=167
+				y=725
+				width=96
+				height=20
+			}
+			control {
+				chan="$(P)$(R)Readback"
+				clr=14
+				bclr=51
+			}
+			label="Readback"
+			press_msg="1"
+			release_msg="0"
+		}
+		text {
+			object {
+				x=81
+				y=725
+				width=80
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Readback"
+		}
+		"text update" {
+			object {
+				x=272
+				y=725
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)ReadState"
+				clr=50
+				bclr=14
+			}
+			clrmod="alarm"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=386
+				y=725
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)ReadStatus"
+				clr=50
+				bclr=14
+			}
+			clrmod="alarm"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=41
+				y=750
+				width=120
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Read message"
+		}
+		"text update" {
+			object {
+				x=168
+				y=751
+				width=350
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)ReadMessage"
+				clr=14
+				bclr=56
+			}
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=4
+		y=293
+		width=524
+		height=230
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=4
+				y=293
+				width=524
+				height=230
+			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+				width=2
+			}
+		}
+		text {
+			object {
+				x=168
+				y=296
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Move axis?"
+		}
+		menu {
+			object {
+				x=168
+				y=345
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M2Move"
+				clr=14
+				bclr=51
+			}
+		}
+		menu {
+			object {
+				x=168
+				y=370
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M3Move"
+				clr=14
+				bclr=51
+			}
+		}
+		menu {
+			object {
+				x=168
+				y=320
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M1Move"
+				clr=14
+				bclr=51
+			}
+		}
+		menu {
+			object {
+				x=168
+				y=395
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M4Move"
+				clr=14
+				bclr=51
+			}
+		}
+		menu {
+			object {
+				x=168
+				y=420
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M5Move"
+				clr=14
+				bclr=51
+			}
+		}
+		text {
+			object {
+				x=300
+				y=296
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Current Pos."
+		}
+		"text update" {
+			object {
+				x=291
+				y=320
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M1Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=291
+				y=345
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M2Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=291
+				y=370
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M3Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=291
+				y=395
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M4Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=291
+				y=420
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M5Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=456
+				y=296
+				width=50
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Plots"
+		}
+		"related display" {
+			object {
+				x=440
+				y=320
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M1),TITLE=Output_Trajectory, Y=$(P)$(R)M1Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M1),TITLE=Actual_Trajectory, Y=$(P)$(R)M1Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M1),TITLE=Following_Error, Y=$(P)$(R)M1Error"
+			}
+			clr=14
+			bclr=51
+		}
+		"related display" {
+			object {
+				x=440
+				y=345
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M2),TITLE=Output_Trajectory, Y=$(P)$(R)M2Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M2),TITLE=Actual_Trajectory, Y=$(P)$(R)M2Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M2),TITLE=Following_Error, Y=$(P)$(R)M2Error"
+			}
+			clr=14
+			bclr=51
+		}
+		"related display" {
+			object {
+				x=440
+				y=370
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M3),TITLE=Output_Trajectory, Y=$(P)$(R)M3Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M3),TITLE=Actual_Trajectory, Y=$(P)$(R)M3Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M3),TITLE=Following_Error, Y=$(P)$(R)M3Error"
+			}
+			clr=14
+			bclr=51
+		}
+		"related display" {
+			object {
+				x=440
+				y=395
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M4),TITLE=Output_Trajectory, Y=$(P)$(R)M4Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M4),TITLE=Actual_Trajectory, Y=$(P)$(R)M4Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M4),TITLE=Following_Error, Y=$(P)$(R)M4Error"
+			}
+			clr=14
+			bclr=51
+		}
+		"related display" {
+			object {
+				x=440
+				y=420
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M5),TITLE=Output_Trajectory, Y=$(P)$(R)M5Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M5),TITLE=Actual_Trajectory, Y=$(P)$(R)M5Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M5),TITLE=Following_Error, Y=$(P)$(R)M5Error"
+			}
+			clr=14
+			bclr=51
+		}
+		menu {
+			object {
+				x=168
+				y=445
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M6Move"
+				clr=14
+				bclr=51
+			}
+		}
+		"text update" {
+			object {
+				x=291
+				y=445
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M6Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"related display" {
+			object {
+				x=440
+				y=445
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M6),TITLE=Output_Trajectory, Y=$(P)$(R)M6Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M6),TITLE=Actual_Trajectory, Y=$(P)$(R)M6Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M6),TITLE=Following_Error, Y=$(P)$(R)M6Error"
+			}
+			clr=14
+			bclr=51
+		}
+		menu {
+			object {
+				x=168
+				y=470
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M7Move"
+				clr=14
+				bclr=51
+			}
+		}
+		"text update" {
+			object {
+				x=291
+				y=470
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M7Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"related display" {
+			object {
+				x=440
+				y=470
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M7),TITLE=Output_Trajectory, Y=$(P)$(R)M7Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M7),TITLE=Actual_Trajectory, Y=$(P)$(R)M7Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M7),TITLE=Following_Error, Y=$(P)$(R)M7Error"
+			}
+			clr=14
+			bclr=51
+		}
+		menu {
+			object {
+				x=168
+				y=495
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M8Move"
+				clr=14
+				bclr=51
+			}
+		}
+		"text update" {
+			object {
+				x=291
+				y=495
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M8Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"related display" {
+			object {
+				x=440
+				y=495
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M8),TITLE=Output_Trajectory, Y=$(P)$(R)M8Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M8),TITLE=Actual_Trajectory, Y=$(P)$(R)M8Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="trajectoryPlot.adl"
+				args="M=$(P)$(M8),TITLE=Following_Error, Y=$(P)$(R)M8Error"
+			}
+			clr=14
+			bclr=51
+		}
+		"text update" {
+			object {
+				x=6
+				y=320
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M1).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=345
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M2).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=370
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M3).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=395
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M4).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=420
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M5).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=445
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M6).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=470
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M7).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=6
+				y=495
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M8).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+	}
+}
+"text entry" {
+	object {
+		x=234
+		y=230
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)Accel"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=60
+		y=230
+		width=170
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Acceleration time"
+}
+"text entry" {
+	object {
+		x=234
+		y=255
+		width=180
+		height=20
+	}
+	control {
+		chan="$(P)$(R)TrajectoryFile"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=40
+		y=255
+		width=190
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="XPS trajectory file"
 }
