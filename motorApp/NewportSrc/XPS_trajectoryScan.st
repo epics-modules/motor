@@ -69,7 +69,6 @@ option +r;
 
 /* Constants used for FTP to the XPS */
 #define TRAJECTORY_DIRECTORY "/Admin/public/Trajectories"
-#define TRAJECTORY_FILE "TrajectoryScan.trj"
 #define GATHERING_DIRECTORY "/Admin/public/"
 #define GATHERING_FILE "Gathering.dat"
 
@@ -487,9 +486,6 @@ ss xpsTrajectoryScan {
                 printMessage("XPS_trajectoryScan: ss xpsTrajectoryScan: state wait_execute:"
                        " execStatus = EXECUTE_STATE_FLYBACK\n");
             }
-            /* Stop the detector */
-            detOff = 1;
-            pvPut(detOff);
             pvPut(execState);
             pvPut(execStatus);
             pvPut(execMessage);
@@ -613,11 +609,6 @@ ss xpsTrajectoryRun {
 
             /* If ready to move */
             if (xpsStatus > 9 && xpsStatus < 20) {
-                /* Start the detector */
-                detOn = 1;
-                pvPut(detOn);
-                /* Wait for 0.5 second for detector to actually start */
-                epicsThreadSleep(0.5);
                 /* Get start time of execute */        
                 startTime = time(0);
                 /* Call the C function from here so that the main state set can poll */
@@ -876,10 +867,10 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
         printMessage("XPS_trajectoryScan: trajectoryExecute:"
                " calling MultipleAxesPVTExecution(%d, %s, %s, %d)\n",
                                       pVar->driveSocket, pVar->groupName,
-                                      TRAJECTORY_FILE, 1);
+                                      pVar->trajectoryFile, 1);
     }
     status = MultipleAxesPVTExecution(pVar->driveSocket, pVar->groupName,
-                                      TRAJECTORY_FILE, 1);
+                                      pVar->trajectoryFile, 1);
     /* status -27 means the trajectory was aborted */
     if ((status != 0) && (status != -27))
         printMessage("Error performing MultipleAxesPVTExecution, status=%d\n", status);
@@ -993,7 +984,7 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     }
 
     /* Create the trajectory file */
-    trajFile =  fopen (TRAJECTORY_FILE, "w");
+    trajFile =  fopen (pVar->trajectoryFile, "w");
 
     /* Compute the sign relationship of user coordinates to XPS coordinates for
      * each axis */
@@ -1066,7 +1057,7 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
         printMessage("Error calling ftpChangeDir, status=%d\n", status);
         return;
     }
-    status = ftpStoreFile(ftpSocket, TRAJECTORY_FILE);
+    status = ftpStoreFile(ftpSocket, pVar->trajectoryFile);
     if (status != 0) {
         printMessage("Error calling ftpStoreFile, status=%d\n", status);
         return;
@@ -1081,10 +1072,10 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     if (pVar->debugLevel > 0) {
         printMessage("XPS_trajectoryScan: buildAndVerify:"
                " calling MultipleAxesPVTVerification(%d, %s, %s)\n", 
-               pVar->pollSocket, pVar->groupName, TRAJECTORY_FILE);
+               pVar->pollSocket, pVar->groupName, pVar->trajectoryFile);
     }
     status = MultipleAxesPVTVerification(pVar->pollSocket, pVar->groupName,
-                                         TRAJECTORY_FILE);
+                                         pVar->trajectoryFile);
      
     pVar->buildStatus = STATUS_FAILURE;
     if (status == 0) {
