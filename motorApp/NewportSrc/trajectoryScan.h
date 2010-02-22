@@ -75,8 +75,6 @@ int     execStatus;  assign execStatus   to "{P}{R}ExecStatus.VAL";
 string  execMessage; assign execMessage  to "{P}{R}ExecMessage.VAL";
 int     abort;       assign abort        to "{P}{R}Abort.VAL";   
 monitor abort;
-int     detOn;       assign detOn        to "{P}{R}DetOn.PROC";
-int     detOff;      assign detOff       to "{P}{R}DetOff.PROC";
 int     readback;    assign readback     to "{P}{R}Readback.VAL";   
 monitor readback;
 int     readState;   assign readState    to "{P}{R}ReadState.VAL";   
@@ -85,6 +83,8 @@ string  readMessage; assign readMessage  to "{P}{R}ReadMessage.VAL";
 double  timeTrajectory[MAX_ELEMENTS];
 assign  timeTrajectory to  "{P}{R}TimeTraj.VAL"; 
 monitor timeTrajectory;
+string  trajectoryFile; assign trajectoryFile to "{P}{R}TrajectoryFile.VAL";
+monitor trajectoryFile;
 
 int     moveAxis[MAX_AXES]; 
 assign  moveAxis     to
