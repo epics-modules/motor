@@ -2,9 +2,10 @@
 FILENAME... drvEnsemble.cc
 USAGE...    Motor record driver level support for Aerotech Ensemble.
 
-Version:        $Revision: 1.7 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-08 18:24:33 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -47,7 +48,10 @@ Last Modified:  $Date: 2009-09-08 18:24:33 $
  *                   - More extensive comm. error checks in set_status(); handle
  *                     ASCII_ACK_CHAR as error.
  *                   - cntrl->drive_resolution must be initialized with fabs().
- *
+ * .03  03-02-10 rls - Use sign(drive_resolution) to determine +/- limit switch
+ *                     status. Removed reading controller's soft limits; see
+ *                     README file. This version is depreciated; use the asyn
+ *                     motor version.
  */
 
 
@@ -275,7 +279,11 @@ static int set_status(int card, int signal)
     status.Bits.EA_SLIP_STALL = 0;
 
     // fill in the status
-    status.Bits.RA_DIRECTION = axis_status & DIRECTION_BIT   ? 0 : 1;
+    if (cntrl->drive_resolution[signal] > 0.0)
+        status.Bits.RA_DIRECTION = axis_status & DIRECTION_BIT ? 1 : 0;
+    else
+        status.Bits.RA_DIRECTION = axis_status & DIRECTION_BIT ? 0 : 1;
+
     status.Bits.RA_DONE      = axis_status & IN_POSITION_BIT ? 1 : 0;
     status.Bits.RA_HOME      = axis_status & HOME_LIMIT_BIT  ? 1 : 0;
     status.Bits.EA_POSITION  = axis_status & ENABLED_BIT     ? 1 : 0;
@@ -287,8 +295,16 @@ static int set_status(int card, int signal)
     send_mess(card, buff, (char) NULL);
     comm_status = recv_mess(card, buff, 1);
     axis_status = atoi(&buff[1]);
-    status.Bits.RA_PLUS_LS   = axis_status & CCW_FAULT_BIT ? 1 : 0;
-    status.Bits.RA_MINUS_LS  = axis_status &  CW_FAULT_BIT ? 1 : 0;
+    if (cntrl->drive_resolution[signal] > 0.0)
+    {
+        status.Bits.RA_PLUS_LS   = axis_status &  CW_FAULT_BIT ? 1 : 0;
+        status.Bits.RA_MINUS_LS  = axis_status & CCW_FAULT_BIT ? 1 : 0;
+    }
+    else
+    {
+        status.Bits.RA_PLUS_LS   = axis_status & CCW_FAULT_BIT ? 1 : 0;
+        status.Bits.RA_MINUS_LS  = axis_status &  CW_FAULT_BIT ? 1 : 0;
+    }
 
     plusdir = status.Bits.RA_DIRECTION ? true : false;
     if ((status.Bits.RA_PLUS_LS && plusdir) || (status.Bits.RA_MINUS_LS && !plusdir))
@@ -311,7 +327,7 @@ static int set_status(int card, int signal)
     }
 
     // fill in the position
-    motorData = pfbk / cntrl->drive_resolution[signal];
+    motorData = pfbk / fabs(cntrl->drive_resolution[signal]);
 
     if (motorData == motor_info->position)
     {
@@ -572,16 +588,14 @@ static int motor_init()
     initialized = true;
 
     if (Ensemble_num_cards <= 0)
-    {
         return(ERROR);
-    }
 
     for (card_index = 0; card_index < Ensemble_num_cards; card_index++)
     {
+        int retry = 0;
+
         if (!motor_state[card_index])
-        {
             continue;
-        }
 
         brdptr = motor_state[card_index];
         brdptr->cmnd_response = true;
@@ -591,154 +605,131 @@ static int motor_init()
         // Initialize communications channel
         success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, cntrl->asyn_address, &cntrl->pasynUser, NULL);
 
-        if (success_rtn == asynSuccess)
+        if (success_rtn != asynSuccess)
+            continue;
+
+        // Send a message to the baord, see if it exists
+        // flush any junk at input port - should not be any data available
+        pasynOctetSyncIO->flush(cntrl->pasynUser);
+
+        do
         {
-            int retry = 0;
+            // we only care if we get a response
+            // so we don't need to send a valid command
+            strcpy(buff, "NONE");
+            send_mess(card_index, buff, (char) NULL);
+            status = recv_mess(card_index, buff, 1);
+            retry++;
+        } while (!status && retry < 3);
 
-            // Send a message to the baord, see if it exists
-            // flush any junk at input port - should not be any data available
-            pasynOctetSyncIO->flush(cntrl->pasynUser);
+        if (status > 0)
+        {
+            brdptr->localaddr = (char *) NULL;
+            brdptr->motor_in_motion = 0;
+            // Read controller ID string
+            strcpy(buff, "GETPARM(CONTROL, 265)"); //UserString1
+            send_mess(card_index, buff, (char) NULL);
+            recv_mess(card_index, buff, 1);
+            if (buff[0] == ASCII_ACK_CHAR)
+                strcpy(brdptr->ident, &buff[1]);
+            else
+                sprintf(brdptr->ident, "Ensemble%d", card_index);
 
-            do
+            // Get the number of axes
+            brdptr->total_axis = 0;
+            for (motor_index = 0; motor_index < 10; motor_index++)
             {
-                // we only care if we get a response
-                // so we don't need to send a valid command
-                strcpy(buff, "NONE");
-                send_mess(card_index, buff, (char) NULL);
-                status = recv_mess(card_index, buff, 1);
-
-                retry++;
-            } while (!status && retry < 3);
-
-            if (status > 0)
-            {
-                brdptr->localaddr = (char *) NULL;
-                brdptr->motor_in_motion = 0;
-                // Read controller ID string
-                strcpy(buff, "GETPARM(CONTROL, 265)"); //UserString1
+                // Does this axis actually exist?
+                sprintf(buff, "GETPARM(@%d, 257)", motor_index); //AxisName
                 send_mess(card_index, buff, (char) NULL);
                 recv_mess(card_index, buff, 1);
+
+                // We know the axis exists if we got an ACK response
                 if (buff[0] == ASCII_ACK_CHAR)
                 {
-                    strcpy(brdptr->ident, &buff[1]);
+                    cntrl->axes[motor_index] = 1;
+                    brdptr->total_axis++;
                 }
-                else
-                {
-                    sprintf(brdptr->ident, "Ensemble%d", card_index);
-                }
+            }
 
-                // Get the number of axes
-                brdptr->total_axis = 0;
-                for (motor_index = 0; motor_index < 10; motor_index++)
+            for (motor_index = 0; motor_index < 10; motor_index++)
+            {
+                if (cntrl->axes[motor_index])
                 {
-                    // Does this axis actually exist?
-                    sprintf(buff, "GETPARM(@%d, 257)", motor_index); //AxisName
+                    struct mess_info *motor_info = &brdptr->motor_info[motor_index];
+
+                    motor_info->status.All = 0;
+                    motor_info->no_motion_count = 0;
+                    motor_info->encoder_position = 0;
+                    motor_info->position = 0;
+                    brdptr->motor_info[motor_index].motor_motion = NULL;
+
+                    // Determine if encoder present based on open/closed loop mode.
+                    sprintf(buff, "GETPARM(@%d, 58)", motor_index); //CfgFbkPosType
+                    send_mess(card_index, buff, (char) NULL);
+                    recv_mess(card_index, buff, 1);
+                    if (buff[0] == ASCII_ACK_CHAR)
+                    {
+                        if (atoi(&buff[1]) > 0)
+                        {
+                            motor_info->encoder_present = YES;
+                            motor_info->status.Bits.EA_PRESENT = 1;
+                        }
+                    }
+
+                    // Determine if gains are supported based on the motor type.
+                    sprintf(buff, "GETPARM(@%d, 33)", motor_index); //CfgMotType
+                    send_mess(card_index, buff, (char) NULL);
+                    recv_mess(card_index, buff, 1);
+                    if (buff[0] == ASCII_ACK_CHAR)
+                    {
+                        if (atoi(&buff[1]) != 3)
+                        {
+                            motor_info->pid_present = YES;
+                            motor_info->status.Bits.GAIN_SUPPORT = 1;
+                        }
+                    }
+
+                    // Stop all motors
+                    sprintf(buff, "ABORT @%d", motor_index);
                     send_mess(card_index, buff, (char) NULL);
                     recv_mess(card_index, buff, 1);
 
-                    // We know the axis exists if we got an ACK response
+                    // Determive drive resolution
+                    sprintf(buff, "GETPARM(@%d, 3)", motor_index); //PosScaleFactor
+                    send_mess(card_index, buff, (char) NULL);
+                    recv_mess(card_index, buff, 1);
                     if (buff[0] == ASCII_ACK_CHAR)
-                    {
-                        cntrl->axes[motor_index] = 1;
-                        brdptr->total_axis++;
-                    }
+                        cntrl->drive_resolution[motor_index] = 1 / atof(&buff[1]);
+                    else
+                        cntrl->drive_resolution[motor_index] = 1;
+
+                    digits = (int) -log10(fabs(cntrl->drive_resolution[motor_index])) + 2;
+                    if (digits < 1)
+                        digits = 1;
+                    cntrl->res_decpts[motor_index] = digits;
+
+                    // Save home preset position
+                    sprintf(buff, "GETPARM(@%d, 108)", motor_index); //HomeOffset
+                    send_mess(card_index, buff, (char) NULL);
+                    recv_mess(card_index, buff, 1);
+                    if (buff[0] == ASCII_ACK_CHAR)
+                        cntrl->home_preset[motor_index] = atof(&buff[1]);
+
+                    // Save the HomeDirection parameter
+                    sprintf(buff, "GETPARM(@%d, 106)", motor_index); //HomeDirection
+                    send_mess(card_index, buff, (char) NULL);
+                    recv_mess(card_index, buff, 1);
+                    if (buff[0] == ASCII_ACK_CHAR)
+                        cntrl->home_dparam[motor_index] = atoi(&buff[1]);
+
+                    // Read status of each motor
+                    set_status(card_index, motor_index);
                 }
-
-                for (motor_index = 0; motor_index < 10; motor_index++)
-                {
-                    if (cntrl->axes[motor_index])
-                    {
-                        struct mess_info *motor_info = &brdptr->motor_info[motor_index];
-
-                        motor_info->status.All = 0;
-                        motor_info->no_motion_count = 0;
-                        motor_info->encoder_position = 0;
-                        motor_info->position = 0;
-                        brdptr->motor_info[motor_index].motor_motion = NULL;
-
-                        // Determine if encoder present based on open/closed loop mode.
-                        sprintf(buff, "GETPARM(@%d, 58)", motor_index); //CfgFbkPosType
-                        send_mess(card_index, buff, (char) NULL);
-                        recv_mess(card_index, buff, 1);
-                        if (buff[0] == ASCII_ACK_CHAR)
-                        {
-                            if (atoi(&buff[1]) > 0)
-                            {
-                                motor_info->encoder_present = YES;
-                                motor_info->status.Bits.EA_PRESENT = 1;
-                            }
-                        }
-
-                        // Determine if gains are supported based on the motor type.
-                        sprintf(buff, "GETPARM(@%d, 33)", motor_index); //CfgMotType
-                        send_mess(card_index, buff, (char) NULL);
-                        recv_mess(card_index, buff, 1);
-                        if (buff[0] == ASCII_ACK_CHAR)
-                        {
-                            if (atoi(&buff[1]) != 3)
-                            {
-                                motor_info->pid_present = YES;
-                                motor_info->status.Bits.GAIN_SUPPORT = 1;
-                            }
-                        }
-
-                        // Stop all motors
-                        sprintf(buff, "ABORT @%d", motor_index);
-                        send_mess(card_index, buff, (char) NULL);
-                        recv_mess(card_index, buff, 1);
-
-                        // Determive drive resolution
-                        sprintf(buff, "GETPARM(@%d, 3)", motor_index); //PosScaleFactor
-                        send_mess(card_index, buff, (char) NULL);
-                        recv_mess(card_index, buff, 1);
-                        if (buff[0] == ASCII_ACK_CHAR)
-                            cntrl->drive_resolution[motor_index] = 1 / fabs(atof(&buff[1]));
-                        else
-                            cntrl->drive_resolution[motor_index] = 1;
-
-                        digits = (int) -log10(cntrl->drive_resolution[motor_index]) + 2;
-                        if (digits < 1)
-                            digits = 1;
-                        cntrl->res_decpts[motor_index] = digits;
-
-                        // Save home preset position
-                        sprintf(buff, "GETPARM(@%d, 108)", motor_index); //HomeOffset
-                        send_mess(card_index, buff, (char) NULL);
-                        recv_mess(card_index, buff, 1);
-                        if (buff[0] == ASCII_ACK_CHAR)
-                            cntrl->home_preset[motor_index] = atof(&buff[1]);
-
-                        // Determine low limit
-                        sprintf(buff, "GETPARM(@%d, 47)", motor_index); //ThresholdSoftCCW
-                        send_mess(card_index, buff, (char) NULL);
-                        recv_mess(card_index, buff, 1);
-                        if (buff[0] == ASCII_ACK_CHAR)
-                            motor_info->low_limit = atof(&buff[1]);
-
-                        // Determine high limit
-                        sprintf(buff, "GETPARM(@%d, 48)", motor_index); //ThresholdSoftCW
-                        send_mess(card_index, buff, (char) NULL);
-                        recv_mess(card_index, buff, 1);
-                        if (buff[0] == ASCII_ACK_CHAR)
-                            motor_info->high_limit = atof(&buff[1]);
-
-                        // Save the HomeDirection parameter
-                        sprintf(buff, "GETPARM(@%d, 106)", motor_index); //HomeDirection
-                        send_mess(card_index, buff, (char) NULL);
-                        recv_mess(card_index, buff, 1);
-                        if (buff[0] == ASCII_ACK_CHAR)
-                            cntrl->home_dparam[motor_index] = atoi(&buff[1]);
-
-                        // Read status of each motor
-                        set_status(card_index, motor_index);
-                    }
-                }
-            }
-            else
-            {
-                motor_state[card_index] = (struct controller *) NULL;
             }
         }
+        else
+            motor_state[card_index] = (struct controller *) NULL;
     }
 
     any_motor_in_motion = 0;

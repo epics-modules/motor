@@ -2,9 +2,10 @@
 FILENAME...	AerotechRegister.h
 USAGE... This file contains function prototypes for ACS IOC shell commands.
 
-Version:	1.0
-Modified By:	weimer
-Last Modified:	2008/04/10 05:52:48 PM
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -34,13 +35,15 @@ Last Modified:	2008/04/10 05:52:48 PM
  *
  * Modification Log:
  * -----------------
+ * .01	2008/04/10 caw Initial support for Ensemble
+ * .02	2009/04/29 hcf Added support for Soloist
+ * .03	2009/07/28 cjb Added support for Ensemble asynMotor
  */
 
 #include "motor.h"
 #include "motordrvCom.h"
+#include "drvEnsembleAsyn.h"
 #include "drvEnsemble.h"
+#include "drvSoloist.h"
 
-/* Function prototypes. */
-//extern RTN_STATUS EnsembleSetup(int, int);
-//extern RTN_STATUS EnsembleConfig(int, const char *, int);
 

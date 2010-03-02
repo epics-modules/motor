@@ -2,9 +2,10 @@
  * FILENAME... devEnsemble.cc
  * USAGE... Motor record device level support for Aerotech Ensemble.
  *
- * Version:        $Revision: 1.8 $
- * Modified By:    $Author: sluiter $
- * Last Modified:  $Date: 2009-07-15 19:05:58 $
+ * Version:        $Revision$
+ * Modified By:    $Author$
+ * Last Modified:  $Date$
+ * HeadURL:        $URL$
  */
 
 /*
@@ -43,6 +44,8 @@
  *                      firmware 2.5.2.
  * .04  05-01-09 rls  - Fix for jog velocity not adjusted by
  *                      cntrl->drive_resolution.
+ * .05  03-02-10 rls  - removed setting controller's soft limits; see README
+ *                    - Depreciated version; use the asyn motor version.
  */
 
 
@@ -341,29 +344,8 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
         break;
 
     case SET_HIGH_LIMIT:
-        sprintf(buff, "SETPARM(@%d, 48, %.*f)", axis, maxdigits, cntrl_units); //ThresholdSoftCW
-        //motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
-        //trans->state = IDLE_STATE;	// No command sent to the controller.
-
-        //if(cntrl_units > motor_info->high_limit)
-        //{
-        //	mr->dhlm = motor_info->high_limit;
-        //	rtnval = ERROR;
-        //}
-        //send = false;
-        break;
-
     case SET_LOW_LIMIT:
-        sprintf(buff, "SETPARM(@%d, 47, %.*f)", axis, maxdigits, cntrl_units); //ThresholdSoftCCW
-        //motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
-        //trans->state = IDLE_STATE;	// No command sent to the controller.
-
-        //if(cntrl_units < motor_info->low_limit)
-        //{
-        //	mr->dllm = motor_info->low_limit;
-        //	rtnval = ERROR;
-        //}
-        //send = false;
+        send = false;
         break;
 
     case SET_RESOLUTION:
