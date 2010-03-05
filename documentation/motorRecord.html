@@ -232,6 +232,20 @@ below.
     <td>acceleration time</td>
   </tr>
   <tr>
+    <td><a href="#Fields_status">ADEL</a></td>
+    <td>R/W</td>
+    <td>Archive Deadband</td>
+    <td>DOUBLE</td>
+    <td>Deadband on RBV archive monitor</td>
+  </tr>
+  <tr>
+    <td><a href="#Fields_status">ALST</a></td>
+    <td>R</td>
+    <td>Last Valve Archived</td>
+    <td>DOUBLE</td>
+    <td>Last RBV value to be archived</td>
+  </tr>
+  <tr>
     <td><a href="#Fields_status">ATHM</a></td>
     <td>R</td>
     <td>At HOME</td>
@@ -656,6 +670,20 @@ below.
     <td>SHORT</td>
     <td><br>
     </td>
+  </tr>
+  <tr>
+    <td><a href="#Fields_status">MDEL</a></td>
+    <td>R/W</td>
+    <td>Monitor Deadband</td>
+    <td>DOUBLE</td>
+    <td>Deadband on RBV valve monitor</td>
+  </tr>
+  <tr>
+    <td><a href="#Fields_status">MLST</a></td>
+    <td>R</td>
+    <td>Last Valve Monitored</td>
+    <td>DOUBLE</td>
+    <td>Last RBV value to be value monitored</td>
   </tr>
   <tr>
     <td><a href="#Fields_private">MIP</a></td>
@@ -2556,6 +2584,38 @@ below.
       </P>
     </td>
   </tr>
+  <tr valign="top">
+    <td>ADEL</td>
+    <td>R/W</td>
+    <td>Archive Deadband</td>
+    <td>DOUBLE</td>
+    <td>An archive value is only posted if RBV moves out of the ADEL deadband when 
+        compared to the previous value archived. ie. if ((RBV-ALST)>ADEL). ADEL defaults to zero, 
+        which would mean that all changes to RBV are archived.</td>
+    </tr>
+    <tr valign="top">
+    <td>MDEL</td>
+    <td>R/W</td>
+    <td>Monitor Deadband</td>
+    <td>DOUBLE</td>
+    <td>An monitor value is only posted if RBV moves out of the MDEL deadband when 
+        compared to the previous value posted. ie. if ((RBV-MLST)>MDEL). MDEL defaults to zero, 
+        which would mean that all value changes to RBV are posted.</td>
+    </tr>
+    <tr valign="top">
+    <td>ALST</td>
+    <td>R</td>
+    <td>Last Value Archived</td>
+    <td>DOUBLE</td>
+    <td>Holds the last RBV to be archived. Used to determine if the current RBV is within an ADEL deadband.</td>
+    </tr>
+    <tr valign="top">
+    <td>MLST</td>
+    <td>R</td>
+    <td>Last Value Monitored</td>
+    <td>DOUBLE</td>
+    <td>Holds the last RBV to be posted. Used to determine if the current RBV is within a MDEL deadband.</td>
+    </tr>
 
   </tbody>
 </table>
