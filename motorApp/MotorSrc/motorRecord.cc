@@ -3200,8 +3200,29 @@ static void alarm_sub(motorRecord * pmr)
 static void monitor(motorRecord * pmr)
 {
     unsigned short monitor_mask;
+    double delta = 0.0;
 
     monitor_mask = recGblResetAlarms(pmr);
+
+    /* check for value change */
+    delta = pmr->mlst - pmr->rbv;
+    if (delta<0.0) delta = -delta;
+    if (delta > pmr->mdel) {
+      /* post events for value change */
+      monitor_mask |= DBE_VALUE;
+      /* update last value monitored */
+      pmr->mlst = pmr->rbv;
+    }
+
+    /* check for archive change */
+    delta = pmr->alst - pmr->rbv;
+    if (delta<0.0) delta = -delta;
+    if (delta > pmr->adel) {
+      /* post events on value field for archive change */
+      monitor_mask |= DBE_LOG;
+      /* update last archive value monitored */
+      pmr->alst = pmr->rbv;
+    }
 
     /* Catch all previous 'calls' to MARK(). */
     post_MARKed_fields(pmr, monitor_mask);
@@ -3224,11 +3245,13 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
     
     msta.All = pmr->msta;
 
-    if ((local_mask = mask | (MARKED(M_RBV) ? DBE_VAL_LOG : 0)))
-    {
-        db_post_events(pmr, &pmr->rbv, local_mask);
+    if (MARKED(M_RBV)) {
+        db_post_events(pmr, &pmr->rbv, mask);
         UNMARK(M_RBV);
     }
+
+    /*Now we have posted change on RBV, reset the monitor mask.*/
+    mask = recGblResetAlarms(pmr);
     
     if ((local_mask = mask | (MARKED(M_RRBV) ? DBE_VAL_LOG : 0)))
     {

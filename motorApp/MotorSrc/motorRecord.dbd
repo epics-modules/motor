@@ -768,4 +768,24 @@ recordtype(motor) {
                 interest(1)
                 menu(motorRMOD)
         }
+	field(ADEL,DBF_DOUBLE) {
+                prompt("Archive Deadband")
+                promptgroup(GUI_COMMON)
+                interest(1)
+        }
+        field(MDEL,DBF_DOUBLE) {
+                prompt("Monitor Deadband")
+                promptgroup(GUI_COMMON)
+                interest(1)
+        }
+	field(ALST,DBF_DOUBLE) {
+                prompt("Last Value Archived")
+                special(SPC_NOMOD)
+                interest(3)
+        }
+        field(MLST,DBF_DOUBLE) {
+                prompt("Last Val Monitored")
+                special(SPC_NOMOD)
+                interest(3)
+        }
 }
