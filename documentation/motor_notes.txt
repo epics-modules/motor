@@ -197,3 +197,54 @@ ENDIF
 
 #3) Backlash correction is disabled if and only if |BDST| < |RES|.
 
+
+Initial or retry move logic at end of do_work().
+------------------------------------------------
+
+IF [backlash is disabled {|BDST| < |MRES|}], OR,
+   [Preferred Dir. == True, AND, BVEL == VELO, AND, BACC == ACCL]
+    Set local vel/acc to slew values.
+    IF use relative moves indicator is true.
+        Set local move position = relpos * FRAC
+                                = (DIFF/MRES) * FRAC
+                                = ((DVAL - DRBV)/MRES) * FRAC
+    ELSE
+        Set local move position = currpos + (FRAC * (newpos - currpos))
+                                    If FRAC = 1
+                                = currpos + newpos - currpos = newpos
+                                = DVAL/MRES
+    ENDIF
+ELSE IF
+    [Preferred Dir. == True], AND,
+    [the current position is within the backlash distance plus
+        1 step. {|DIFF| < |BDST| + |MRES|}
+        {
+         (use_rel == true,  AND, (sign(DIFF - BDST) != sign(DIFF)), OR
+         [use_rel == false, AND, ([(LDVL + RDBD) > (DVAL - BDST)] == (DVAL > LDVL))]
+        }
+    ]
+
+    Set local vel/acc to backlash values.
+    IF use relative moves indicator is true.
+        Set local move position = relpos * FRAC
+        IF use relative moves indicator is true.
+            Set local move position = relpos * FRAC
+                                    = (DIFF/MRES) * FRAC
+                                    = ((DVAL - DRBV)/MRES) * FRAC
+        ELSE
+            Set local move position = currpos + (FRAC * (newpos - currpos))
+                                        If FRAC = 1
+                                    = currpos + newpos - currpos = newpos
+                                    = DVAL/MRES
+        ENDIF
+ELSE
+    Set local vel/acc to slew values.
+    IF use relative moves indicator is true.
+        Set local move position = relbpos
+                                = (DIFF - BDST) / MRES
+    ELSE
+        Set local move position = bpos
+                                = (DVAL - BDST) / MRES
+    ENDIF
+ENDIF
+
