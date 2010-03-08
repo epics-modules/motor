@@ -54,7 +54,8 @@ HeadURL:        $URL$
  * .10  10/17/07 rls Raised the precedence of the INIT string for controllers
  *                   (PI C-848) that require an INIT string primitive before a
  *                   LOAD_POS can be executed.
- * .11  0214/08  rls Post RVEL changes.
+ * .11  02/14/08 rls Post RVEL changes.
+ * .12  03/08/10 rls Always send positive encoder ratio values.
  */
 
 
@@ -277,23 +278,18 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
     initEncoder = (msta.Bits.EA_PRESENT && mr->ueip) ? true : false;
     if (initEncoder == true)
     {
+        int m;
         if (fabs(mr->mres) < 1.e-9)
             mr->mres = 1.;
         if (fabs(mr->eres) < 1.e-9)
             mr->eres = mr->mres;
-        {
-            int m;
-            for (m = 10000000; (m > 1) && (fabs(m / mr->eres) > 1.e6 ||
-                        fabs(m / mr->mres) > 1.e6); m /= 10);
-            ep_mp[0] = m / mr->eres;    /* encoder pulses per ... */
-            ep_mp[1] = m / mr->mres;    /* motor pulses */
-        }
+        for (m = 10000000; (m > 1) &&
+             (fabs(m / mr->eres) > 1.e6 || fabs(m / mr->mres) > 1.e6); m /= 10);
+        ep_mp[0] = fabs(m / mr->eres);    /* encoder pulses per */
+        ep_mp[1] = fabs(m / mr->mres);    /* motor pulses */
     }
     else
-    {
-        ep_mp[0] = 1.;
-        ep_mp[1] = 1.;
-    }
+        ep_mp[0] = ep_mp[1] = 1.0;
 
     initPos = (fabs(mr->dval) > mr->rdbd && mr->mres != 0 &&
                fabs(axis_query.position * mr->mres) < mr->rdbd)
