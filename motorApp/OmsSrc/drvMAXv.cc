@@ -72,6 +72,7 @@ Last Modified:  $Date: 2009-09-09 18:20:50 $
  *                    firmware. OMS changed from '<LF><NULL>' to '<LF>' for
  *                    RA, QA, EA and RL command with ver:1.30
  * 15  09-09-09 rls - board "running" error check added.
+ * 16  03-08-10 rls - sprintf() not callable from RTEMS interrupt context.
  *
  */
 
@@ -898,7 +899,13 @@ static void motorIsr(int card)
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
+#if (defined(__rtems__))
+        strcpy(errmsg, "\ndrvMAXv.cc:motorIsr: Invalid entry-card xx\n");
+        errmsg[strlen(errmsg)-2] = '0' + card%10;
+        errmsg[strlen(errmsg)-3] = '0' + (card/10)%10;
+#else
         sprintf(errmsg, "%s(%d): Invalid entry-card #%d.\n", __FILE__, __LINE__, card);
+#endif
         epicsInterruptContextMessage(errmsg);
         return;
     }
@@ -915,7 +922,13 @@ static void motorIsr(int card)
     }
     if (status1_flag.Bits.cmndError)
     {
-        sprintf(errmsg, "%s(%d): command error on card #%d.\n", __FILE__, __LINE__, card);
+#if (defined(__rtems__))
+        strcpy(errmsg, "\ndrvMAXv.cc:motorIsr: command error on card xx\n");
+        errmsg[strlen(errmsg)-2] = '0' + card%10;
+        errmsg[strlen(errmsg)-3] = '0' + (card/10)%10;
+#else
+        sprintf(errmsg, "\n%s(%d): command error on card #%d.\n", __FILE__, __LINE__, card);
+#endif
         epicsInterruptContextMessage(errmsg);
     }
 
