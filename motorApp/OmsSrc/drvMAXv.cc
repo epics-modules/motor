@@ -2,9 +2,10 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 1.26 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-09 18:20:50 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -73,6 +74,7 @@ Last Modified:  $Date: 2009-09-09 18:20:50 $
  *                    RA, QA, EA and RL command with ver:1.30
  * 15  09-09-09 rls - board "running" error check added.
  * 16  03-08-10 rls - sprintf() not callable from RTEMS interrupt context.
+ * 17  03-09-10 rls - sprintf() not callable from any OS ISR.
  *
  */
 
@@ -684,9 +686,7 @@ static char *readbuf(volatile struct MAXv_motor *pmotor, char *bufptr)
     end    = (char *) &pmotor->inBuffer[putIndex];
 
     if (start < end)    /* Test for message wraparound in buffer. */
-    {
         memcpy(bufptr, start, bufsize);
-    }
     else
     {
         int size;
@@ -888,25 +888,21 @@ RTN_VALUES MAXvConfig(int card,                 /* number of card being configur
 
 /*****************************************************/
 /* Interrupt service routine.                        */
-/* motorIsr()                                */
+/* motorIsr()                                        */
 /*****************************************************/
 static void motorIsr(int card)
 {
     volatile struct controller *pmotorState;
     volatile struct MAXv_motor *pmotor;
     STATUS1 status1_flag;
-    static char errmsg[60];
+    static char errmsg1[] = "\ndrvMAXv.cc:motorIsr: Invalid entry - card xx\n";
+    static char errmsg2[] = "\ndrvMAXv.cc:motorIsr: command error - card xx\n";
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
-#if (defined(__rtems__))
-        strcpy(errmsg, "\ndrvMAXv.cc:motorIsr: Invalid entry-card xx\n");
-        errmsg[strlen(errmsg)-2] = '0' + card%10;
-        errmsg[strlen(errmsg)-3] = '0' + (card/10)%10;
-#else
-        sprintf(errmsg, "%s(%d): Invalid entry-card #%d.\n", __FILE__, __LINE__, card);
-#endif
-        epicsInterruptContextMessage(errmsg);
+        errmsg1[46-2] = '0' + card%10;
+        errmsg1[46-3] = '0' + (card/10)%10;
+        epicsInterruptContextMessage(errmsg1);
         return;
     }
 
@@ -915,21 +911,13 @@ static void motorIsr(int card)
 
     /* Motion done handling */
     if (status1_flag.Bits.done != 0)
-    {
-        /* Wake up polling task 'motor_task()' to issue callbacks */
-        motor_sem.signal();
+        motor_sem.signal();  /* Wake up 'motor_task()' to issue callbacks */
 
-    }
     if (status1_flag.Bits.cmndError)
     {
-#if (defined(__rtems__))
-        strcpy(errmsg, "\ndrvMAXv.cc:motorIsr: command error on card xx\n");
-        errmsg[strlen(errmsg)-2] = '0' + card%10;
-        errmsg[strlen(errmsg)-3] = '0' + (card/10)%10;
-#else
-        sprintf(errmsg, "\n%s(%d): command error on card #%d.\n", __FILE__, __LINE__, card);
-#endif
-        epicsInterruptContextMessage(errmsg);
+        errmsg2[46-2] = '0' + card%10;
+        errmsg2[46-3] = '0' + (card/10)%10;
+        epicsInterruptContextMessage(errmsg2);
     }
 
     if (status1_flag.Bits.text_response != 0)   /* Don't clear this. */
@@ -974,7 +962,7 @@ static int motorIsrSetup(int card)
     }
 
 #endif
-    
+
     /* Setup card for interrupt-on-done */
     status1_irq.All = 0;
     status1_irq.Bits.done = 0xFF;
