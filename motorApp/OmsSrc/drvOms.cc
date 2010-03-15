@@ -2,9 +2,10 @@
 FILENAME...	drvOms.cc
 USAGE...	Driver level support for OMS models VME8, VME44 and VS4.
 
-Version:	$Revision: 1.29 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-09-08 18:27:58 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -74,6 +75,7 @@ Last Modified:	$Date: 2009-09-08 18:27:58 $
  *                   - changed IRS to task comm. mechanism from epicsRingPointer
  *                     to epicsRingByte.
  * .14  06-18-09 rls - Make omsSetup() error messages more prominent.
+ * .15  03-15-10 rls - sprintf() not callable from any OS ISR.
  */
 
 /*========================stepper motor driver ========================
@@ -793,10 +795,15 @@ static void motorIsr(int card)
     epicsUInt8 status;
     epicsUInt8 doneFlags;
     char dataChar;
+    static char errmsg1[] = "\ndrvOms.cc:motorIsr: Invalid entry - card xx\n";
+    static char errmsg2[] = "\ndrvOms.cc:motorIsr: command error - card xx\n";
+    static char errmsg3[] = "\ndrvOms.cc:motorIsr: Rx ring overflow - card xx\n";
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
-	errlogPrintf("Invalid entry-card #%d\n", card);
+        errmsg1[45-2] = '0' + card%10;
+        errmsg1[45-3] = '0' + (card/10)%10;
+        epicsInterruptContextMessage(errmsg1);
 	return;
     }
 
@@ -814,11 +821,6 @@ static void motorIsr(int card)
 
     /* Determine cause of entry */
 
-#ifdef	DEBUG
-    if (drvOMSdebug >= 10)
-	errlogPrintf("entry card #%d,status=0x%X,done=0x%X\n", card, status, doneFlags);
-#endif
-
     /* Motion done handling */
     if (status & STAT_DONE)
 	/* Wake up polling task 'motor_task()' to issue callbacks */
@@ -828,12 +830,9 @@ static void motorIsr(int card)
     if (status & STAT_ERROR)
     {
 	pmotor->data = (epicsUInt8) CMD_CLEAR;
-
-	/* Send null character to indicate error */
-#ifdef	DEBUG
-	if (drvOMSdebug >= 1)
-	    errlogPrintf("command error detected on card %d\n", card);
-#endif
+        errmsg2[45-2] = '0' + card%10;
+        errmsg2[45-3] = '0' + (card/10)%10;
+        epicsInterruptContextMessage(errmsg2);
 	irqdata->irqErrno |= STAT_ERROR;
     }
 
@@ -856,7 +855,9 @@ static void motorIsr(int card)
 
 	if (epicsRingBytesPut(irqdata->recv_rng, &dataChar, 1) == 0)
 	{
-	    errlogPrintf("card %d recv ring full, lost '%c'\n", card, dataChar);
+            errmsg3[48-2] = '0' + card%10;
+            errmsg3[48-3] = '0' + (card/10)%10;
+            epicsInterruptContextMessage(errmsg3);
 	    irqdata->irqErrno |= STAT_INPUT_BUF_FULL;
 	}
 	irqdata->recv_sem->signal();

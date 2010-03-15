@@ -2,9 +2,10 @@
 FILENAME...	drvOms58.cc
 USAGE...	Motor record driver level support for OMS model VME58.
 
-Version:	$Revision: 1.29 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-09-08 18:27:58 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -107,6 +108,7 @@ Last Modified:	$Date: 2009-09-08 18:27:58 $
  * .36  03-14-08 rls - 64-bit compatiability.
  * .37  02-05-09 rls - Have start_status() start ALL updates before waiting.
  * .38  06-18-09 rls - Make oms58Setup() error messages more prominent.
+ * .39  03-15-10 rls - sprintf() not callable from any OS ISR.
  *
  */
 
@@ -944,7 +946,7 @@ oms58Setup(int num_cards,   /* maximum number of cards in rack */
 
 /*****************************************************/
 /* Interrupt service routine.                        */
-/* motorIsr()		                     */
+/* motorIsr()		                             */
 /*****************************************************/
 static void motorIsr(int card)
 {
@@ -952,13 +954,14 @@ static void motorIsr(int card)
     volatile struct vmex_motor *pmotor;
     STATUS_REG statusBuf;
     epicsUInt8 doneFlags, userIO, slipFlags, limitFlags, cntrlReg;
-    static char errmsg[60];
-    static char cmderrmsg[60];
+    static char errmsg1[] = "\ndrvOms58.cc:motorIsr: Invalid entry - card xx\n";
+    static char errmsg2[] = "\ndrvOms58.cc:motorIsr: command error - card xx\n";
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
-        sprintf(errmsg, "%s(%d): Invalid entry-card #%d.\n", __FILE__, __LINE__, card);
-        epicsInterruptContextMessage(errmsg);
+        errmsg1[47-2] = '0' + card%10;
+        errmsg1[47-3] = '0' + (card/10)%10;
+        epicsInterruptContextMessage(errmsg1);
         return;
     }
 
@@ -990,15 +993,6 @@ static void motorIsr(int card)
         pmotor->control.cntrlReg = (epicsUInt8) 0x90;
 /* Questioniable Fix for undefined problem Ends Here. */
 
-#ifdef	DEBUG
-    if (drvOms58debug >= 10)
-    {
-        sprintf(errmsg, "%s(%d): entry card #%d,status=0x%X,done=0x%X\n",
-                __FILE__, __LINE__, card, statusBuf.All, doneFlags);
-        epicsInterruptContextMessage(errmsg);
-    }
-#endif
-
     /* Motion done handling */
     if (statusBuf.Bits.done)
         /* Wake up polling task 'motor_task()' to issue callbacks */
@@ -1006,8 +1000,9 @@ static void motorIsr(int card)
 
     if (statusBuf.Bits.cmndError)
     {
-        sprintf(cmderrmsg, "%s(%d): command error on card #%d.\n", __FILE__, __LINE__, card);
-        epicsInterruptContextMessage(cmderrmsg);
+        errmsg2[47-2] = '0' + card%10;
+        errmsg2[47-3] = '0' + (card/10)%10;
+        epicsInterruptContextMessage(errmsg2);
     }
 }
 
