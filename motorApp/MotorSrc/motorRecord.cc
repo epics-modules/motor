@@ -131,6 +131,7 @@ HeadURL:        $URL$
  * .54 10-27-09 rls - reverse which limit switch is used in do_work() home
  *                    search error check based on DIR field.
  * .55 02-18-10 rls - Fix for backlash not done when MRES<0 and DIR="Neg".
+ * .56 03-18-10 rls - MSTA wrong at boot-up; force posting from init_record().
  *
  */                                                        
 
@@ -618,6 +619,8 @@ static long init_record(dbCommon* arg, int pass)
         pmr->lvio = 1;
         MARK(M_LVIO);
     }
+
+    MARK(M_MSTA);   /* MSTA incorrect at boot-up; force posting. */
 
     monitor(pmr);
     return(OK);
