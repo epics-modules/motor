@@ -132,6 +132,12 @@ HeadURL:        $URL$
  *                    search error check based on DIR field.
  * .55 02-18-10 rls - Fix for backlash not done when MRES<0 and DIR="Neg".
  * .56 03-18-10 rls - MSTA wrong at boot-up; force posting from init_record().
+ * .57 03-24-10 rls - removed monitor()'s subroutine; post_MARKed_fields().
+ *                  - removed unused and under used MMAP and NMAP indicators;
+ *                    added MMAP indicator for STOP field.
+ *                  - removed depreciated RES field.
+ *                  - changed MDEL/ADEL support for RBV so that record behaves
+ *                    the same as before when MDEL and ADEL are zero.
  *
  */                                                        
 
@@ -177,7 +183,6 @@ extern "C" {epicsExportAddress(int, motorRecordDebug);}
 static RTN_STATUS do_work(motorRecord *, CALLBACK_VALUE);
 static void alarm_sub(motorRecord *);
 static void monitor(motorRecord *);
-static void post_MARKed_fields(motorRecord *, unsigned short);
 static void process_motor_info(motorRecord *, bool);
 static void load_pos(motorRecord *);
 static void check_speed_and_resolution(motorRecord *);
@@ -264,8 +269,8 @@ when you mean...
 
         db_post_events(pmr, &pmr->xxxx, monitor_mask);
 
-Before leaving, you have to call post_MARKed_fields() to actually post the
-field to all listeners.  monitor() does this.
+Before leaving, you have to call monitor() to actually post the
+field to all listeners.
 
         --- NOTE WELL ---
         The macros below assume that the variable "pmr" exists and points to a
@@ -289,7 +294,7 @@ typedef union
         unsigned int M_MRES     :1;
         unsigned int M_ERES     :1;
         unsigned int M_UEIP     :1;
-        unsigned int M_URIP     :1;
+        unsigned int M_STOP     :1;
         unsigned int M_LVIO     :1;
         unsigned int M_RVAL     :1;
         unsigned int M_RLV      :1;
@@ -298,7 +303,6 @@ typedef union
         unsigned int M_DHLM     :1;
         unsigned int M_DLLM     :1;
         unsigned int M_DRBV     :1;
-        unsigned int M_RDBD     :1;
         unsigned int M_MOVN     :1;
         unsigned int M_HLS      :1;
         unsigned int M_LLS      :1;
@@ -320,17 +324,12 @@ typedef union
     epicsUInt32 All;
     struct
     {
-        unsigned int M_S        :1;
         unsigned int M_SBAS     :1;
-        unsigned int M_SBAK     :1;
         unsigned int M_SREV     :1;
         unsigned int M_UREV     :1;
         unsigned int M_VELO     :1;
         unsigned int M_VBAS     :1;
-        unsigned int M_BVEL     :1;
         unsigned int M_MISS     :1;
-        unsigned int M_ACCL     :1;
-        unsigned int M_BACC     :1;
         unsigned int M_STUP     :1;
         unsigned int M_JOGF     :1;
         unsigned int M_JOGR     :1;
@@ -567,7 +566,6 @@ static long init_record(dbCommon* arg, int pass)
      */
     (*pdset->update_values) (pmr);
 
-    pmr->res = pmr->mres;       /* After R4.5, RES is always = MRES. */
     if (pmr->eres == 0.0)
     {
         pmr->eres = pmr->mres;
@@ -936,11 +934,8 @@ static void maybeRetry(motorRecord * pmr)
         Debug(1, "maybeRetry: not close enough; diff = %f\n", pmr->diff);
         /* If max retry count is zero, retry is disabled */
         if (pmr->rtry == 0)
-        {
-            pmr->mip &= MIP_JOG_REQ;/* Clear everything, except jog request; for
-                                        jog reactivation in postProcess(). */
-            MARK(M_MIP);
-        }
+            pmr->mip &= MIP_JOG_REQ; /* Clear everything, except jog request;
+                                      * for jog reactivation in postProcess(). */
         else
         {
             if (++(pmr->rcnt) > pmr->rtry)
@@ -948,7 +943,6 @@ static void maybeRetry(motorRecord * pmr)
                 /* Too many retries. */
                 /* pmr->spmg = motorSPMG_Pause; MARK(M_SPMG); */
                 pmr->mip = MIP_DONE;
-                MARK(M_MIP);
                 pmr->lval = pmr->val;
                 pmr->ldvl = pmr->dval;
                 pmr->lrvl = pmr->rval;
@@ -962,7 +956,6 @@ static void maybeRetry(motorRecord * pmr)
                 pmr->dmov = FALSE;
                 MARK(M_DMOV);
                 pmr->mip = MIP_RETRY;
-                MARK(M_MIP);
             }
             MARK(M_RCNT);
         }
@@ -972,8 +965,7 @@ static void maybeRetry(motorRecord * pmr)
         /* Yes, we're close enough to the desired value. */
         Debug(1, "maybeRetry: close enough; diff = %f\n", pmr->diff);
         pmr->mip &= MIP_JOG_REQ;/* Clear everything, except jog request; for
-                                    jog reactivation in postProcess(). */
-        MARK(M_MIP);
+                                 * jog reactivation in postProcess(). */
         if (pmr->miss)
         {
             pmr->miss = 0;
@@ -987,6 +979,7 @@ static void maybeRetry(motorRecord * pmr)
             MARK(M_SPMG);
         }
     }
+    MARK(M_MIP);
 }
 
 
@@ -1333,6 +1326,7 @@ enter_do_work:
         if (pmr->lvio && !pmr->set)
         {
             pmr->stop = 1;
+            MARK(M_STOP);
             clear_buttons(pmr);
         }
     }
@@ -1686,7 +1680,10 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
         if (pmr->spmg != pmr->lspg)
             pmr->lspg = pmr->spmg;
         else
+        {
             pmr->stop = 0;
+            MARK(M_STOP);
+        }
 
         if (stop_or_pause == true || stop == true)
         {
@@ -1769,9 +1766,6 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
         double ep_mp[2];
         long m;
         msta_field msta;
-
-        if (MARKED(M_MRES))
-            pmr->res = pmr->mres;       /* After R4.5, RES is always = MRES. */
 
         /* Set the encoder ratio.  Note this is blatantly device dependent. */
         msta.All = pmr->msta;
@@ -2710,7 +2704,7 @@ velcheckB:
         if (pmr->bvel != (temp_dbl = fabs_urev * pmr->sbak))
         {
             pmr->bvel = temp_dbl;
-            MARK_AUX(M_BVEL);
+            db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
         }
         if (pmr->vmax != (temp_dbl = fabs_urev * pmr->smax))
         {
@@ -2745,10 +2739,6 @@ velcheckB:
         MARK(M_UEIP);
         /* Ideally, we should be recalculating speeds, but at the moment */
         /* we don't know whether hardware even has an encoder. */
-        break;
-
-        /* new urip flag */
-    case motorRecordURIP:
         break;
 
         /* Set to SET mode  */
@@ -3199,101 +3189,146 @@ static void alarm_sub(motorRecord * pmr)
 
 /******************************************************************************
         monitor()
+
+LOGIC:
+    Initalize local variables for MARKED and UNMARKED macros.
+    Set monitor_mask from recGblResetAlarms() return value.
+    IF both Monitor (MDEL) and Archive (ADEL) Deadbands are zero.
+        Set local_mask <- monitor_mask.
+        IF RBV marked for value change
+            bitwiseOR both DBE_VALUE and DBE_LOG into local_mask.
+            dbpost RBV.
+            Clear RBV marked for value change.
+        ENDIF
+    ELSE IF RBV marked for value change.
+        Clear RBV marked for value change.
+        Set local_mask <- monitor_mask.
+        IF Monitor Deadband (MDEL) is zero.
+            bitwiseOR DBE_VALUE into local_mask.
+        ELSE
+            IF |MLST - RBV| > MDEL
+                bitwiseOR DBE_VALUE into local_mask.
+                Update Last Value Monitored (MLST).
+            ENDIF
+        ENDIF
+        IF Archive Deadband (ADEL) is zero.
+            bitwiseOR DBE_LOG into local_mask.
+        ELSE
+            IF |ALST - RBV| > ADEL
+                bitwiseOR DBE_LOG into local_mask.
+                Update Last Value Archived (MLST).
+            ENDIF            
+        ENIDIF
+        IF local_mask is nonzero.
+            dbpost RBV.
+        ENDIF            
+    ENDIF
+
+    dbpost frequently changing PV's.
+    IF no PV's marked for value change.
+        EXIT.
+    ENDIF
+    
+    dbpost remaining PV's.
+    Clear all PF's marked for value change.
+    EXIT
+
 *******************************************************************************/
 static void monitor(motorRecord * pmr)
 {
-    unsigned short monitor_mask;
+    unsigned short monitor_mask, local_mask;
     double delta = 0.0;
+    mmap_field mmap_bits;
+    nmap_field nmap_bits;
+
+    mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
+    nmap_bits.All = pmr->nmap; /* Initialize for MARKED_AUX. */
 
     monitor_mask = recGblResetAlarms(pmr);
 
-    /* check for value change */
-    delta = pmr->mlst - pmr->rbv;
-    if (delta<0.0) delta = -delta;
-    if (delta > pmr->mdel) {
-      /* post events for value change */
-      monitor_mask |= DBE_VALUE;
-      /* update last value monitored */
-      pmr->mlst = pmr->rbv;
+    if (pmr->mdel == 0.0 && pmr->adel == 0.0)
+    {
+        if ((local_mask = monitor_mask | (MARKED(M_RBV) ? DBE_VAL_LOG : 0)))
+        {
+            db_post_events(pmr, &pmr->rbv, local_mask);
+            UNMARK(M_RBV);
+        }
     }
-
-    /* check for archive change */
-    delta = pmr->alst - pmr->rbv;
-    if (delta<0.0) delta = -delta;
-    if (delta > pmr->adel) {
-      /* post events on value field for archive change */
-      monitor_mask |= DBE_LOG;
-      /* update last archive value monitored */
-      pmr->alst = pmr->rbv;
-    }
-
-    /* Catch all previous 'calls' to MARK(). */
-    post_MARKed_fields(pmr, monitor_mask);
-    return;
-}
-
-
-/******************************************************************************
-        post_MARKed_fields()
-*******************************************************************************/
-static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
-{
-    unsigned short local_mask;
-    mmap_field mmap_bits;
-    nmap_field nmap_bits;
-    msta_field msta;
-    
-    mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
-    nmap_bits.All = pmr->nmap; /* Initialize for MARKED_AUX. */
-    
-    msta.All = pmr->msta;
-
-    if (MARKED(M_RBV)) {
-        db_post_events(pmr, &pmr->rbv, mask);
+    else if (MARKED(M_RBV))
+    {
         UNMARK(M_RBV);
-    }
+        local_mask = monitor_mask;
 
-    /*Now we have posted change on RBV, reset the monitor mask.*/
-    mask = recGblResetAlarms(pmr);
+        if (pmr->mdel == 0.0) /* check for value change */
+            local_mask |= DBE_VALUE;
+        else
+        {
+            delta = fabs(pmr->mlst - pmr->rbv);
+            if (delta > pmr->mdel)
+            {
+                local_mask |= DBE_VALUE;
+                pmr->mlst = pmr->rbv; /* update last value monitored */
+            }
+        }
+
+        if (pmr->adel == 0.0) /* check for archive change */
+            local_mask |= DBE_LOG;
+        else
+        {
+            delta = fabs(pmr->alst - pmr->rbv);
+            if (delta > pmr->adel)
+            {
+                local_mask |= DBE_LOG;
+                pmr->alst = pmr->rbv; /* update last archive value monitored */
+            }
+        }
+
+        if (local_mask)
+            db_post_events(pmr, &pmr->rbv, local_mask);
+    }
     
-    if ((local_mask = mask | (MARKED(M_RRBV) ? DBE_VAL_LOG : 0)))
+
+    if ((local_mask = monitor_mask | (MARKED(M_RRBV) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->rrbv, local_mask);
         UNMARK(M_RRBV);
     }
     
-    if ((local_mask = mask | (MARKED(M_DRBV) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_DRBV) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->drbv, local_mask);
         UNMARK(M_DRBV);
     }
     
-    if ((local_mask = mask | (MARKED(M_RMP) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_RMP) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->rmp, local_mask);
         UNMARK(M_RMP);
     }
     
-    if ((local_mask = mask | (MARKED(M_REP) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_REP) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->rep, local_mask);
         UNMARK(M_REP);
     }
     
-    if ((local_mask = mask | (MARKED(M_DIFF) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_DIFF) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->diff, local_mask);
         UNMARK(M_DIFF);
     }
     
-    if ((local_mask = mask | (MARKED(M_RDIF) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_RDIF) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->rdif, local_mask);
         UNMARK(M_RDIF);
     }
     
-    if ((local_mask = mask | (MARKED(M_MSTA) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_MSTA) ? DBE_VAL_LOG : 0)))
     {
+        msta_field msta;
+        
+        msta.All = pmr->msta;
         db_post_events(pmr, &pmr->msta, local_mask);
         UNMARK(M_MSTA);
         if (msta.Bits.GAIN_SUPPORT)
@@ -3314,33 +3349,33 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
     mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
     nmap_bits.All = pmr->nmap; /* Initialize for MARKED_AUX. */
 
-    if ((local_mask = mask | (MARKED(M_VAL) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_VAL) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->val, local_mask);
-    if ((local_mask = mask | (MARKED(M_DVAL) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_DVAL) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->dval, local_mask);
-    if ((local_mask = mask | (MARKED(M_RVAL) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_RVAL) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->rval, local_mask);
-    if ((local_mask = mask | (MARKED(M_TDIR) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_TDIR) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->tdir, local_mask);
-    if ((local_mask = mask | (MARKED(M_MIP) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_MIP) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->mip, local_mask);
-    if ((local_mask = mask | (MARKED(M_HLM) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_HLM) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->hlm, local_mask);
-    if ((local_mask = mask | (MARKED(M_LLM) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_LLM) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->llm, local_mask);
-    if ((local_mask = mask | (MARKED(M_SPMG) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_SPMG) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->spmg, local_mask);
-    if ((local_mask = mask | (MARKED(M_RCNT) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_RCNT) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->rcnt, local_mask);
-    if ((local_mask = mask | (MARKED(M_RLV) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_RLV) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->rlv, local_mask);
-    if ((local_mask = mask | (MARKED(M_OFF) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_OFF) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->off, local_mask);
-    if ((local_mask = mask | (MARKED(M_DHLM) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_DHLM) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->dhlm, local_mask);
-    if ((local_mask = mask | (MARKED(M_DLLM) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_DLLM) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->dllm, local_mask);
-    if ((local_mask = mask | (MARKED(M_HLS) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_HLS) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->hls, local_mask);
         if ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0))
@@ -3348,7 +3383,7 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
         else
             db_post_events(pmr, &pmr->rlls, local_mask);
     }
-    if ((local_mask = mask | (MARKED(M_LLS) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_LLS) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->lls, local_mask);
         if ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0))
@@ -3356,56 +3391,44 @@ static void post_MARKed_fields(motorRecord * pmr, unsigned short mask)
         else
             db_post_events(pmr, &pmr->rhls, local_mask);
     }
-    if ((local_mask = mask | (MARKED(M_ATHM) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_ATHM) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->athm, local_mask);
-    if ((local_mask = mask | (MARKED(M_MRES) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_MRES) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->mres, local_mask);
-    if ((local_mask = mask | (MARKED(M_ERES) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_ERES) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->eres, local_mask);
-    if ((local_mask = mask | (MARKED(M_UEIP) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_UEIP) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->ueip, local_mask);
-    if ((local_mask = mask | (MARKED(M_URIP) ? DBE_VAL_LOG : 0)))
-        db_post_events(pmr, &pmr->urip, local_mask);
-    if ((local_mask = mask | (MARKED(M_LVIO) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_LVIO) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->lvio, local_mask);
-    if ((local_mask = mask | (MARKED(M_RDBD) ? DBE_VAL_LOG : 0)))
-        db_post_events(pmr, &pmr->rdbd, local_mask);
+    if ((local_mask = monitor_mask | (MARKED(M_STOP) ? DBE_VAL_LOG : 0)))
+        db_post_events(pmr, &pmr->stop, local_mask);
 
-    if ((local_mask = mask | (MARKED_AUX(M_S) ? DBE_VAL_LOG : 0)))
-        db_post_events(pmr, &pmr->s, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_SBAS) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_SBAS) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->sbas, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_SBAK) ? DBE_VAL_LOG : 0)))
-        db_post_events(pmr, &pmr->sbak, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_SREV) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_SREV) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->srev, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_UREV) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_UREV) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->urev, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_VELO) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_VELO) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->velo, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_VBAS) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_VBAS) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->vbas, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_BVEL) ? DBE_VAL_LOG : 0)))
-        db_post_events(pmr, &pmr->bvel, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_MISS) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_MISS) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->miss, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_ACCL) ? DBE_VAL_LOG : 0)))
-        db_post_events(pmr, &pmr->accl, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_BACC) ? DBE_VAL_LOG : 0)))
-        db_post_events(pmr, &pmr->bacc, local_mask);
-    if ((local_mask = mask | (MARKED(M_MOVN) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_MOVN) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->movn, local_mask);
-    if ((local_mask = mask | (MARKED(M_DMOV) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED(M_DMOV) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->dmov, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_STUP) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_STUP) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->stup, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_JOGF) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_JOGF) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->jogf, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_JOGR) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_JOGR) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->jogr, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_HOMF) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_HOMF) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->homf, local_mask);
-    if ((local_mask = mask | (MARKED_AUX(M_HOMR) ? DBE_VAL_LOG : 0)))
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_HOMR) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->homr, local_mask);
 
     UNMARK_ALL;
@@ -3731,12 +3754,12 @@ static void check_speed_and_resolution(motorRecord * pmr)
     if (pmr->accl == 0.0)
     {
         pmr->accl = 0.1;
-        MARK_AUX(M_ACCL);
+        db_post_events(pmr, &pmr->accl, DBE_VAL_LOG);
     }
     if (pmr->bacc == 0.0)
     {
         pmr->bacc = 0.1;
-        MARK_AUX(M_BACC);
+        db_post_events(pmr, &pmr->bacc, DBE_VAL_LOG);
     }
     /* Sanity check on jog velocity and acceleration rate. */
     if (pmr->jvel == 0.0)
