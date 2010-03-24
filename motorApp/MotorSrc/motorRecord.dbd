@@ -3,7 +3,7 @@
 # Version:       $Revision$
 # Modified By:   $Author$
 # Last Modified: $Date$
-# HeadURL:       $URL$
+# HeadURL:       $URL $
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -276,11 +276,6 @@ recordtype(motor) {
         field(RRES,DBF_DOUBLE) {
                 prompt("Readback Step Size (EGU")
                 promptgroup(GUI_COMMON)
-                interest(1)
-        }
-        field(RES,DBF_DOUBLE) {
-                prompt("Step Size (EGU)")
-                special(SPC_NOMOD)
                 interest(1)
         }
         field(UEIP,DBF_MENU) {
