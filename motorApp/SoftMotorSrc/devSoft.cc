@@ -62,6 +62,7 @@ NOTES...
 #include	"devSoft.h"
 
 #include	"epicsExport.h"
+#include	"errlog.h"
 
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
@@ -272,7 +273,7 @@ void soft_rdbl_func(struct motorRecord *mr, double newrdbl)
     newrdbl = newrdbl / mr->mres;
     mr->rmp = NINT(newrdbl);
 
-    Debug(5, "soft_rdbl_func(): updated RMP = %d.\n", mr->rmp);
+    Debug(5, "soft_rdbl_func(): updated RMP = %d for %s.\n", mr->rmp, mr->name);
     
     if (ptr->initialized == false)
     {
