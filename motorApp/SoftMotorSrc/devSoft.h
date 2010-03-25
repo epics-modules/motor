@@ -4,9 +4,10 @@ FILENAME..	devSoft.h
 USAGE... 	This file contains information that is common to
 		all Soft channel device support modules.
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: peterd $
-Last Modified:	$Date: 2006-04-11 10:11:24 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
