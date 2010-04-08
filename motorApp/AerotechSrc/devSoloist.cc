@@ -156,7 +156,6 @@ static RTN_STATUS Soloist_build_trans (motor_cmnd command, double *parms, struct
 	struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
 	struct mess_node *motor_call;
 	struct controller *brdptr;
-	struct mess_info *motor_info;
 	struct Soloistcontroller *cntrl;
 	char buff[BUFF_SIZE], temp[BUFF_SIZE];
 	int axis, card, maxdigits;
