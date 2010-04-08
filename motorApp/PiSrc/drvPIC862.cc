@@ -8,6 +8,10 @@ USAGE...	Motor record driver level support for Physik Instrumente (PI)
  *      Current Author: Mohan Ramanathan
  *      Date: 09/04/2006
  *
+ * NOTES
+ * -----
+ * - This driver works with both the C-862 and C-863.
+ *
  * Modification Log:
  * -----------------
  * .00  09/05/2006  mr  copied from drvPIC848.cc
