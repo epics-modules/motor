@@ -8,5 +8,14 @@ user rely on the EPICS motor record soft limits.
 - Since the Ensemble network connection requires period communication
 from the host to prevent the Ensemble from closing the network socket,
 the Ensemble support based on the old device driver architecture will
-be removed after R5-6.  The asyn motor architecture support continuous,
+be removed after R5-6.  The asyn motor architecture supports continuous,
 periodic updates; the old architecture does not.
+
+
+ENSEMBLE CONFIGURATION NOTES
+============================
+
+
+- Set the "Idle Polling" parameter the EnsembleAsynConfig() call <=
+InetSock1ActiveTimeSec Parameter.  This will prevent the Ensemble
+from closing the socket.
