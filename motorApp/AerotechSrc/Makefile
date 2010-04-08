@@ -13,7 +13,7 @@ LIBRARY_IOC = Aerotech
 SRCS += AerotechRegister.cc
 SRCS += devEnsemble.cc drvEnsemble.cc
 SRCS += devSoloist.cc  drvSoloist.cc
-SRCS += drvEnsembleAsyn.c
+SRCS += drvEnsembleAsyn.cc
 
 Aerotech_LIBS += motor asyn
 Aerotech_LIBS += $(EPICS_BASE_IOC_LIBS)

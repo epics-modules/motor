@@ -1,5 +1,5 @@
 /*
-FILENAME... drvEnsembleAsyn.c
+FILENAME... drvEnsembleAsyn.cc
 USAGE...    Motor record asyn driver level support for Aerotech Ensemble.
 
 Version:        $Revision$
@@ -30,6 +30,8 @@ in file LICENSE that is included with this distribution.
 *
 * .01 07-28-09 cjb Initialized from drvMM4000Asyn.c (Newport)
 * .02 03-02-10 rls Original check into version control.
+* .03 03-16-10 rls Switch to C++ file.
+* .04 04-07-10 rls Acknowledged fault before enabling drive.
 *
 */
 
@@ -125,7 +127,9 @@ typedef struct
 } motorEnsemble_t;
 
 
+extern "C" {
 static int motorEnsembleLogMsg(void * param, const motorAxisLogMask_t logMask, const char *pFormat, ...);
+}
 static asynStatus sendAndReceive(EnsembleController *pController, char *outputString, char *inputString, int inputSize);
 
 #define PRINT   (drv.print)
@@ -162,7 +166,7 @@ the Ensemble parameters specified */
 #define ASCII_TIMEOUT_CHAR  '$'   /* AsciiCmdTimeoutChar */
 
 #define TCP_TIMEOUT 2.0
-static motorEnsemble_t drv={ NULL, NULL, motorEnsembleLogMsg, 0, { 0, 0}};
+static motorEnsemble_t drv = {NULL, NULL, motorEnsembleLogMsg, 0, {0, 0}};
 static int numEnsembleControllers;
 /* Pointer to array of controller strutures */
 static EnsembleController *pEnsembleController=NULL;
@@ -299,8 +303,7 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 {
     int ret_status = MOTOR_AXIS_ERROR;
     double deviceValue;
-    char inputBuff[BUFFER_SIZE];
-    char outputBuff[BUFFER_SIZE];
+    char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
 
     if (pAxis == NULL)
         return (MOTOR_AXIS_ERROR);
@@ -371,8 +374,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
 {
     int ret_status = MOTOR_AXIS_ERROR;
     int status;
-    char inputBuff[BUFFER_SIZE];
-    char outputBuff[BUFFER_SIZE];
+    char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
 
     if (pAxis == NULL)
         return (MOTOR_AXIS_ERROR);
@@ -385,7 +387,17 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
         if (value == 0)
             sprintf(outputBuff, "DISABLE @%d", pAxis->axis);
         else
+        {
+            sprintf(outputBuff, "AXISFAULT @%d", pAxis->axis);
+            ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+            if (ret_status != 0)
+            {
+                PRINT(pAxis->logParam, TERROR, "motorAxisSetInteger: FAULTACK = %X\n", ret_status);
+                sprintf(outputBuff, "FAULTACK @%d", pAxis->axis);
+                ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+            }
             sprintf(outputBuff, "ENABLE @%d", pAxis->axis);
+        }
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
         break;
     default:
@@ -406,10 +418,9 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
                          double min_velocity, double max_velocity, double acceleration)
 {
     int ret_status;
-    char inputBuff[BUFFER_SIZE];
-    char outputBuff[BUFFER_SIZE];
-    char *moveCommand;
-    int posdir;
+    char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
+    const char *moveCommand;
+    bool posdir;
     int axis, maxDigits;
 
     if (pAxis == NULL)
@@ -421,22 +432,22 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f\n",
           pAxis->card, axis, position, min_velocity, max_velocity, acceleration);
 
-    posdir = 0;
+    posdir = false;
 
     if (relative)
     {
         if (position >= 0.0)
-            posdir = 1;
+            posdir = true;
         else
-            posdir = 0;
+            posdir = false;
         moveCommand = "MOVEINC";
     }
     else
     {
         if (position >= pAxis->currentPosition)
-            posdir = 1;
+            posdir = true;
         else
-            posdir = 0;
+            posdir = false;
         moveCommand = "MOVEABS";
     }
 
@@ -456,7 +467,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
 
     if (epicsMutexLock(pAxis->mutexId) == epicsMutexLockOK)
     {
-        motorParam->setInteger(pAxis->params, motorAxisDirection, posdir);
+        motorParam->setInteger(pAxis->params, motorAxisDirection, (int) posdir);
         /* Ensure that the motor record's next status update sees motorAxisDone = False. */
         motorParam->setInteger(pAxis->params, motorAxisDone, 0);
         motorParam->callCallback(pAxis->params);
@@ -472,8 +483,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
 static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocity, double acceleration, int forwards)
 {
     int ret_status;
-    char inputBuff[BUFFER_SIZE];
-    char outputBuff[BUFFER_SIZE];
+    char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
     epicsUInt32 hparam;
     int axis;
 
@@ -526,8 +536,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
 
 static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double velocity, double acceleration)
 {
-    char inputBuff[BUFFER_SIZE];
-    char outputBuff[BUFFER_SIZE];
+    char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
     int ret_status;
 
     if (pAxis == NULL)
@@ -566,8 +575,7 @@ static int motorAxisTriggerProfile(AXIS_HDL pAxis)
 static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
 {
     int ret_status;
-    char inputBuff[BUFFER_SIZE];
-    char outputBuff[BUFFER_SIZE];
+    char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
 
     if (pAxis == NULL)
         return (MOTOR_AXIS_ERROR);
@@ -603,9 +611,9 @@ static void EnsemblePoller(EnsembleController *pController)
     /* This is the task that polls the Ensemble */
     double timeout;
     AXIS_HDL pAxis;
-    int status, itera, anyMoving, comStatus, axisStatus;
-    char inputBuff[BUFFER_SIZE];
-    char outputBuff[BUFFER_SIZE];
+    int status, itera, comStatus, axisStatus;
+    bool anyMoving;
+    char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
 
     timeout = pController->idlePollPeriod;
     epicsEventSignal(pController->pollEventId);  /* Force on poll at startup */
@@ -617,7 +625,7 @@ static void EnsemblePoller(EnsembleController *pController)
         else
             status = epicsEventWait(pController->pollEventId);
 
-        anyMoving = 0;
+        anyMoving = false;
 
         for (itera = 0; itera < pController->numAxes; itera++)
         {
@@ -649,7 +657,7 @@ static void EnsemblePoller(EnsembleController *pController)
                     axisStatus = atoi(&inputBuff[1]);
                     motorParam->setInteger(params, motorAxisDone, axisStatus & IN_MOTION_BIT ? 0 : 1);
                     if (axisStatus & IN_MOTION_BIT)
-                        anyMoving = 1;
+                        anyMoving = true;
                     motorParam->setInteger(pAxis->params, motorAxisPowerOn, axisStatus & ENABLED_BIT ? 1 : 0);
                     motorParam->setInteger(pAxis->params, motorAxisHomeSignal, axisStatus & HOME_MARKER_BIT ? 1 : 0);
                     if (pAxis->stepSize > 0.0)
@@ -718,7 +726,7 @@ static void EnsemblePoller(EnsembleController *pController)
             epicsMutexUnlock(pAxis->mutexId);
         } /* Next axis */
 
-        if (anyMoving)
+        if (anyMoving == true)
             timeout = pController->movingPollPeriod;
         else
             timeout = pController->idlePollPeriod;
@@ -760,14 +768,10 @@ int EnsembleAsynConfig(int card,             /* Controller number */
 
 {
     AXIS_HDL pAxis;
-    int axis;
     EnsembleController *pController;
     char threadName[20];
-    int status;
-    int digits;
-    int retry = 0;
-    char inputBuff[BUFFER_SIZE];
-    char outputBuff[BUFFER_SIZE];
+    int axis, status, digits, retry = 0;
+    char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
     int numAxesFound;
 
     if (numEnsembleControllers < 1)
@@ -854,7 +858,7 @@ int EnsembleAsynConfig(int card,             /* Controller number */
                 pAxis->stepSize = 1 / atof(&inputBuff[1]);
             else
                 pAxis->stepSize = 1;  
-            digits = (int) -log(10) * (fabs(pAxis->stepSize)) + 2;
+            digits = (int) -log10(fabs(pAxis->stepSize)) + 2;
             if (digits < 1)
                 digits = 1;
             pAxis->maxDigits = digits;
@@ -885,7 +889,7 @@ int EnsembleAsynConfig(int card,             /* Controller number */
 static asynStatus sendAndReceive(EnsembleController *pController, char *outputBuff, char *inputBuff, int inputSize) 
 {
     char outputCopy[BUFFER_SIZE];
-    int nWriteRequested;
+    size_t nWriteRequested;
     size_t nWrite, nRead;
     int eomReason;
     asynStatus status;
