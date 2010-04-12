@@ -76,6 +76,9 @@ HeadURL:        $URL$
  *                     to epicsRingByte.
  * .14  06-18-09 rls - Make omsSetup() error messages more prominent.
  * .15  03-15-10 rls - sprintf() not callable from any OS ISR.
+ * .16  04-12-10 rls - enable interrupts after encoder check in motor_init() so
+ *                     user does not see "motorIsr: command error" messages at
+ *                     iocInit time.
  */
 
 /*========================stepper motor driver ========================
@@ -124,7 +127,8 @@ HeadURL:        $URL$
 /*----------------debugging-----------------*/
 #ifdef __GNUG__
     #ifdef      DEBUG
-        #define Debug(l, f, args...) {if (l <= drvOMSdebug) printf(f, ## args);}
+        #define Debug(l, f, args...) {if (l <= drvOMSdebug) \
+				    errlogPrintf(f, ## args);}
     #else
         #define Debug(l, f, args...)
     #endif
@@ -1157,16 +1161,6 @@ static int motor_init()
             Debug(3, "Total axis = %d\n", total_axis);
             pmotorState->total_axis = total_axis;
 
-            /*
-             * Enable interrupt-when-done if selected - driver depends on
-             * motor_state->total_axis  being set.
-             */
-            if (omsInterruptVector)
-            {
-                if (motorIsrEnable(card_index) == ERROR)
-                    errPrintf(0, __FILE__, __LINE__, "Interrupts Disabled!\n");
-            }
-
             for (total_encoders = 0, motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 send_mess(card_index, ENCODER_QUERY, oms_axis[motor_index]);
@@ -1181,6 +1175,14 @@ static int motor_init()
                     total_encoders++;
                     pmotorState->motor_info[motor_index].encoder_present = YES;
                 }
+            }
+
+            /* Enable interrupt-when-done if selected. */
+
+            if (omsInterruptVector)
+            {
+                if (motorIsrEnable(card_index) == ERROR)
+                    errPrintf(0, __FILE__, __LINE__, "Interrupts Disabled!\n");
             }
 
             for (motor_index = 0; motor_index < total_axis; motor_index++)
