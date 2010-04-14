@@ -5,11 +5,88 @@
   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
   <meta name="Author" content="Ronald L. Sluiter">
   <meta name="Description" content="Synopsis of modifications, fixes and new features for each motor record release.">
-  <title>EPICS Motor Record Release R6-4 Notice</title>
+  <title>EPICS Motor Record Release R6-5 Notice</title>
   <meta name="author" content="Ronald L. Sluiter">
   <meta name="description" content="Notification of bug fixes, functional changes and new features.">
 </head>
 <body>
+
+
+<CENTER>
+  <H1><B><U>Motor Record Version 6-5 Release Notice</U></B></H1>
+</CENTER>
+
+<center>
+  <h4><u>Modifications to Existing Features</u></h4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>64-bit compatiablity</B></U>
+  </P>
+  <P>
+  64-bit compile problems with the PI E816 and Aerotech Ensemble device drivers 
+  were fixed.  Mark Rivers made numerous changes to eliminate all 64-bit compiler 
+  warning messages.
+  </P>
+  <U><B>OMS MAXv</B></U>
+  <P>
+  Dirk Zimoch (PSI) fixed a bug in the OMS MAXv driver that caused the set_status() 
+  function to overwrite the home switch status in the response string
+  </P>
+  <U><B>asyn motor</B></U>
+  </P>
+  <UL>
+    <LI>
+      Matthew Pearson (Diamond) fixed a bug on Newport XPS and MM4000 asyn motor port 
+      drives that was causing idle polling to interfere with setting positions and 
+      prevented auto save/restore from working.
+    </LI>
+    <LI>
+      The asynMotor device support would leave a motor-in-motion indicator on if the 
+      motor record issued a LOAD_POS command before the 2nd pass of device support 
+      initialization.
+    </LI>
+  </UL>
+  <U><B>Highland Technologies</B></U>
+  </P>
+  <P>
+  Support for the Highland Technologies V540 motor controller has been removed.
+  </P>
+  <U><B>Aerotech Ensemble</B></U>
+  </P>
+  <UL>
+    <LI>
+      Aerotech Ensemble device driver fixes for incorrect Jog speeds, support for a 
+      negative PosScaleFactor parameter and detecting maximum travel limit switch 
+      faults.
+    </LI>
+    <LI>
+      This is the latest release to include the old Ensemble device driver 
+      architecture version. See below.
+    </LI>
+  </UL>
+</DIV>
+
+<CENTER>
+  <H4><U>New Features</U></H4>
+</CENTER>
+
+<DIV align="left">
+  <P>
+  <U><B>Aerotech Soloist and Ensemble asyn motor support</B></U>
+  </P>
+  <P>
+  Added two new drivers from Aerotech; the Soloist controller and an asyn motor 
+  version of the Ensemble.  Since the Ensemble network connection requires period 
+  communication from the host to prevent the Ensemble from closing the network 
+  socket, the Ensemble support based on the old device driver architecture will be 
+  removed after R5-6.  The asyn motor architecture supports continuous, periodic 
+  updates; the old architecture does not.
+  </P>
+</DIV>
+
+<br>
 
 
 <CENTER>
