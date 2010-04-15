@@ -48,6 +48,9 @@ HeadURL:        $URL$
  * .05 11-19-09 rls - bug fix for sendOnly() passing null pointer
  *                  (pController->pasynUser) if any communication error occurs
  *                  at bootup.
+ * .06 04-15-10 rls - Apply Matthew Pearson's fix to motorAxisSetInteger().
+ *                  - Allow MM4005 models to enable/disable torque.
+ *                  - Reformat some 'if' statements.
  *
  */
 
@@ -80,7 +83,7 @@ HeadURL:        $URL$
 #include "motor_interface.h"
 
 motorAxisDrvSET_t motorMM4000 =
-  {
+{
     14,
     motorAxisReport,            /**< Standard EPICS driver report function (optional) */
     motorAxisInit,              /**< Standard EPICS dirver initialisation function (optional) */
@@ -99,7 +102,7 @@ motorAxisDrvSET_t motorMM4000 =
     motorAxisforceCallback,     /**< Pointer to function to request a poller status update */
     motorAxisProfileMove,       /**< Pointer to function to execute a profile move */
     motorAxisTriggerProfile     /**< Pointer to function to trigger a profile move */
-  };
+};
 
 epicsExportAddress(drvet, motorMM4000);
 
@@ -271,8 +274,10 @@ static AXIS_HDL motorAxisOpen(int card, int axis, char * param)
 {
   AXIS_HDL pAxis;
 
-  if (card > numMM4000Controllers) return(NULL);
-  if (axis > pMM4000Controller[card].numAxes) return(NULL);
+  if (card > numMM4000Controllers)
+      return(NULL);
+  if (axis > pMM4000Controller[card].numAxes)
+      return(NULL);
   pAxis = &pMM4000Controller[card].pAxis[axis];
   return pAxis;
 }
@@ -284,29 +289,26 @@ static int motorAxisClose(AXIS_HDL pAxis)
 
 static int motorAxisGetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int * value)
 {
-  if (pAxis == NULL) return MOTOR_AXIS_ERROR;
+  if (pAxis == NULL)
+      return MOTOR_AXIS_ERROR;
   else
-    {
       return motorParam->getInteger(pAxis->params, (paramIndex) function, value);
-    }
 }
 
 static int motorAxisGetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double * value)
 {
-  if (pAxis == NULL) return MOTOR_AXIS_ERROR;
+  if (pAxis == NULL)
+      return MOTOR_AXIS_ERROR;
   else
-    {
       return motorParam->getDouble(pAxis->params, (paramIndex) function, value);
-    }
 }
 
 static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, void * param)
 {
-  if (pAxis == NULL) return MOTOR_AXIS_ERROR;
+  if (pAxis == NULL)
+      return MOTOR_AXIS_ERROR;
   else
-    {
       return motorParam->setCallback(pAxis->params, callback, param);
-    }
 }
 
 static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)
@@ -369,11 +371,6 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
             PRINT(pAxis->logParam, MOTOR_ERROR, "MM4000 does not support setting derivative gain\n");
             break;
         }
-        case motorAxisClosedLoop:
-        {
-            PRINT(pAxis->logParam, MOTOR_ERROR, "MM4000 does not support changing closed loop or torque\n");
-            break;
-        }
         default:
             PRINT(pAxis->logParam, MOTOR_ERROR, "motorAxisSetDouble: unknown function %d\n", function);
             break;
@@ -392,36 +389,52 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
 {
     int ret_status = MOTOR_AXIS_ERROR;
     int status;
+    char buff[100];
 
-    if (pAxis == NULL) return MOTOR_AXIS_ERROR;
+    if (pAxis == NULL)
+        return MOTOR_AXIS_ERROR;
 
-    switch (function) {
+    epicsMutexLock(pAxis->mutexId);
+
+    switch (function)
+    {
     case motorAxisClosedLoop:
-        if (value) {
-            /* The MM4000 only allows turning on and off ALL motors (MO and MF commands), not individual axes */
-            /* Don't implement */
+        /* The MM4000 only allows turning on and off ALL motors (MO and MF commands), */
+        /* not individual axes. Don't implement */        
+        if (pAxis->pController->model == MM4000)
             ret_status = MOTOR_AXIS_OK;
-        } else {
-            ret_status = MOTOR_AXIS_OK;
+        else
+        {
+            if (value == 0)
+                sprintf(buff, "%dMF", pAxis->axis+1);
+            else
+                sprintf(buff, "%dMO", pAxis->axis+1);
+            ret_status = sendOnly(pAxis->pController, buff);
         }
         break;
     default:
         PRINT(pAxis->logParam, MOTOR_ERROR, "motorAxisSetInteger: unknown function %d\n", function);
         break;
     }
-    if (ret_status != MOTOR_AXIS_ERROR) status = motorParam->setInteger(pAxis->params, function, value);
+    if (ret_status != MOTOR_AXIS_ERROR)
+    {
+        status = motorParam->setInteger(pAxis->params, function, value);
+        motorParam->callCallback(pAxis->params);
+    }
+    epicsMutexUnlock(pAxis->mutexId);
     return ret_status;
 }
 
 
 static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
-                          double min_velocity, double max_velocity, double acceleration)
+                         double min_velocity, double max_velocity, double acceleration)
 {
     int status;
     char buff[100];
     char *moveCommand;
 
-    if (pAxis == NULL) return MOTOR_AXIS_ERROR;
+    if (pAxis == NULL)
+        return MOTOR_AXIS_ERROR;
 
     PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f\n",
           pAxis->card, pAxis->axis, position, min_velocity, max_velocity, acceleration);
@@ -490,7 +503,8 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
 {
     int status;
 
-    if (pAxis == NULL) return(MOTOR_AXIS_ERROR);
+    if (pAxis == NULL)
+        return(MOTOR_AXIS_ERROR);
 
     /* MM4000 does not have a jog command.  Simulate with move absolute
      * to the appropriate software limit. We can move to MM4000 soft limits.
@@ -520,7 +534,8 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
     int status;
     char buff[100];
 
-    if (pAxis == NULL) return MOTOR_AXIS_ERROR;
+    if (pAxis == NULL)
+        return MOTOR_AXIS_ERROR;
 
     PRINT(pAxis->logParam, FLOW, "Set card %d, axis %d to stop with accel=%f\n",
           pAxis->card, pAxis->axis, acceleration);
@@ -529,7 +544,8 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
             pAxis->axis+1, pAxis->maxDigits, acceleration * pAxis->stepSize,
             pAxis->axis+1);
     status = sendOnly(pAxis->pController, buff);
-    if (status) return MOTOR_AXIS_ERROR;
+    if (status)
+        return MOTOR_AXIS_ERROR;
     return MOTOR_AXIS_OK;
 }
 
@@ -709,7 +725,7 @@ static int motorMM4000LogMsg(void * param, const motorAxisLogMask_t mask, const 
     return(nchar);
 }
 
-
+
 int MM4000AsynSetup(int num_controllers)   /* number of MM4000 controllers in system.  */
 {
 
@@ -722,7 +738,7 @@ int MM4000AsynSetup(int num_controllers)   /* number of MM4000 controllers in sy
     return MOTOR_AXIS_OK;
 }
 
-
+
 int MM4000AsynConfig(int card,             /* Controller number */
                      const char *portName, /* asyn port name of serial or GPIB port */
                      int asynAddress,      /* asyn subaddress for GPIB */
@@ -794,7 +810,8 @@ int MM4000AsynConfig(int card,             /* Controller number */
         pController->model = MM4000;
     else if (modelNum == 4005 || modelNum == 4006)
         pController->model = MM4005;
-    else {
+    else
+    {
         printf("MM4000AsynConfig: invalid model = %s\n", pController->firmwareVersion);
         return MOTOR_AXIS_ERROR;
     }
@@ -806,7 +823,8 @@ int MM4000AsynConfig(int card,             /* Controller number */
              p != 0; p = epicsStrtok_r(NULL, ",", &tokSave), totalAxes++)
         ;
 
-    if (totalAxes < numAxes) {
+    if (totalAxes < numAxes)
+    {
         printf("MM4000AsynConfig: actual number of axes=%d < numAxes=%d\n", totalAxes, numAxes);
         return MOTOR_AXIS_ERROR;
     }
@@ -823,16 +841,16 @@ int MM4000AsynConfig(int card,             /* Controller number */
         sprintf(outputBuff, "%dTC", axis+1);
         sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
         loopState = atoi(&inputBuff[3]);    /* Skip first 3 characters */
-        if (loopState != 0) {
+        if (loopState != 0)
             pAxis->closedLoop = 1;
-        }
 
         /* Determine drive resolution. */
         sprintf(outputBuff, "%dTU", axis+1);
         sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
         pAxis->stepSize = atof(&inputBuff[3]);
         digits = (int) -log10(pAxis->stepSize) + 2;
-        if (digits < 1) digits = 1;
+        if (digits < 1)
+            digits = 1;
         pAxis->maxDigits = digits;
 
         /* Save home preset position. */
