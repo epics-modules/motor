@@ -97,3 +97,29 @@ Setting and saving an ESP100 for use with a DC servo motor driven stage (e.g.,
 
         1QM 1<CR>
         SM<CR>
+
+
+Newport MM4000
+==============
+
+The MM4000 controller has an approximately 50ms delay before it responds to a
+status query.  Hence, it is impossible to get more that a 20 Hz update rate
+from the MM4000; 7 or 8 Hz is attainable.  This 50ms delay exists with both
+RS232 and GPIB communication interfaces.
+
+
+Newport PM500
+=============
+
+The PM500 has high and low speed loops. Since the EPICS PM500 device driver
+does not set any of the low speed parameters (i.e., LSIZE, LACCEL, LDECEL, LV),
+the low speed loop feature may interfere with EPICS setting the slew velocity.
+I recommend preventing the PM500 from ever using the low speed velocity loop by
+setting the Low Speed Loop Threshold (LSIZE) to the motor record's Retry
+Deadband field (RDBD).
+
+The LSIZE can be set from the EPICS motor record by entering the PM500 command
+in the record's INIT field.  LSIZE is in units of either um or arc-sec.  For
+example, if your RDBD = 0.123 mm, then set the INIT field to "LSIZE 123.0".
+
+
