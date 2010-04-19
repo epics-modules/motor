@@ -32,7 +32,8 @@ in file LICENSE that is included with this distribution.
 * .02 03-02-10 rls Original check into version control.
 * .03 03-16-10 rls Switch to C++ file.
 * .04 04-07-10 rls Acknowledged fault before enabling drive.
-*
+* .05 04-19-10 rls Change back to reading EOT LS's and let record determine
+*                  limit error condition.
 */
 
 
@@ -43,9 +44,6 @@ in file LICENSE that is included with this distribution.
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "drvEnsembleAsyn.h"
-#include "paramLib.h"
 
 #include "epicsFindSymbol.h"
 #include "epicsTime.h"
@@ -62,6 +60,9 @@ in file LICENSE that is included with this distribution.
 #include "epicsExport.h"
 #define DEFINE_MOTOR_PROTOTYPES 1
 #include "motor_interface.h"
+
+#include "paramLib.h"
+#include "drvEnsembleAsyn.h"
 
 motorAxisDrvSET_t motorEnsemble = 
 {
@@ -373,7 +374,7 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
-    int status;
+    int status, FaultStatus;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
 
     if (pAxis == NULL)
@@ -390,9 +391,10 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
         {
             sprintf(outputBuff, "AXISFAULT @%d", pAxis->axis);
             ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
-            if (ret_status != 0)
+
+            if (ret_status == 0 && inputBuff[0] == ASCII_ACK_CHAR && (FaultStatus = atoi(&inputBuff[1])))
             {
-                PRINT(pAxis->logParam, TERROR, "motorAxisSetInteger: FAULTACK = %X\n", ret_status);
+                PRINT(pAxis->logParam, TERROR, "motorAxisSetInteger: FAULTACK = %X\n", FaultStatus);
                 sprintf(outputBuff, "FAULTACK @%d", pAxis->axis);
                 ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
             }
@@ -611,7 +613,8 @@ static void EnsemblePoller(EnsembleController *pController)
     /* This is the task that polls the Ensemble */
     double timeout;
     AXIS_HDL pAxis;
-    int status, itera, comStatus, axisStatus;
+    int status, itera, comStatus;
+    Axis_Status axisStatus;
     bool anyMoving;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
 
@@ -645,7 +648,7 @@ static void EnsemblePoller(EnsembleController *pController)
             else
             {
                 PARAMS params = pAxis->params;
-                axisStatus = 0;
+                axisStatus.All = 0;
                 if (inputBuff[0] != ASCII_ACK_CHAR)
                 {
                     epicsMutexUnlock(pAxis->mutexId);
@@ -654,18 +657,28 @@ static void EnsemblePoller(EnsembleController *pController)
                 else
                 {
                     motorParam->setInteger(params, motorAxisCommError, 0);
-                    axisStatus = atoi(&inputBuff[1]);
-                    motorParam->setInteger(params, motorAxisDone, axisStatus & IN_MOTION_BIT ? 0 : 1);
-                    if (axisStatus & IN_MOTION_BIT)
+                    axisStatus.All = atoi(&inputBuff[1]);
+                    motorParam->setInteger(params, motorAxisDone, !axisStatus.Bits.move_active);
+                    if (axisStatus.Bits.move_active)
                         anyMoving = true;
-                    motorParam->setInteger(pAxis->params, motorAxisPowerOn, axisStatus & ENABLED_BIT ? 1 : 0);
-                    motorParam->setInteger(pAxis->params, motorAxisHomeSignal, axisStatus & HOME_MARKER_BIT ? 1 : 0);
+                    motorParam->setInteger(pAxis->params, motorAxisPowerOn, axisStatus.Bits.axis_enabled);
+                    motorParam->setInteger(pAxis->params, motorAxisHomeSignal, axisStatus.Bits.home_limit);
                     if (pAxis->stepSize > 0.0)
-                        motorParam->setInteger(pAxis->params, motorAxisDirection, axisStatus & DIRECTION_BIT ? 1 : 0);
+                        motorParam->setInteger(pAxis->params, motorAxisDirection, axisStatus.Bits.motion_ccw);
                     else
-                        motorParam->setInteger(pAxis->params, motorAxisDirection, axisStatus & DIRECTION_BIT ? 0 : 1);
+                        motorParam->setInteger(pAxis->params, motorAxisDirection, !axisStatus.Bits.motion_ccw);
+                    if (pAxis->stepSize > 0.0)
+                    {
+                        motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, axisStatus.Bits.CW_limit);
+                        motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  axisStatus.Bits.CCW_limit);   
+                    }
+                    else
+                    {
+                        motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, axisStatus.Bits.CCW_limit);
+                        motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  axisStatus.Bits.CW_limit);   
+                    }
                 }
-                pAxis->axisStatus = axisStatus;
+                pAxis->axisStatus = axisStatus.All;
             }
             sprintf(outputBuff, "PFBKPROG(@%d)", pAxis->axis);
             comStatus = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
@@ -706,20 +719,6 @@ static void EnsemblePoller(EnsembleController *pController)
                     motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
                     epicsMutexUnlock(pAxis->mutexId);
                     continue;
-                }
-                else
-                {
-                    axisStatus = atoi(&inputBuff[1]);
-                    if (pAxis->stepSize > 0.0)
-                    {
-                        motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, axisStatus &  CW_FAULT_BIT ? 1 : 0);
-                        motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  axisStatus & CCW_FAULT_BIT ? 1 : 0);   
-                    }
-                    else
-                    {
-                        motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, axisStatus & CCW_FAULT_BIT ? 1 : 0);
-                        motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  axisStatus &  CW_FAULT_BIT ? 1 : 0);   
-                    }
                 }
             }
             motorParam->callCallback(pAxis->params);
