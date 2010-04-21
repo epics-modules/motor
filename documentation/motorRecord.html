@@ -1049,10 +1049,10 @@ below.
   </tr>
   <tr>
     <td><a href="#Fields_status">STUP</a></td>
-    <td>R</td>
+    <td>R/W*</td>
     <td>Status Update Request</td>
     <td>RECCHOICE</td>
-    <td>ON(1)<br>
+    <td>OFF(0), ON(1), BUSY(2)<br>
     </td>
   </tr>
   <tr>
@@ -1061,6 +1061,14 @@ below.
     <td>Set USE Mode</td>
     <td>SHORT</td>
     <td><br>
+    </td>
+  </tr>
+  <tr>
+    <td><a href="#Fields_drive">SYNC</a></td>
+    <td>R/W*</td>
+    <td>Sync positions</td>
+    <td>RECCHOICE</td>
+    <td>(0:"No", 1:"Yes")<br>
     </td>
   </tr>
   <tr>
@@ -2341,6 +2349,14 @@ below.
     <td>When this field is changed, its value will be added to VAL, the field itself 
     will immediately be reset to 0, and the motor record will behave as though the 
     VAL field had been changed directly.&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>SYNC</td>
+    <td>R/W*</td>
+    <td>Sync positions</td>
+    <td>RECCHOICE</td>
+    <td>When this field is set to Yes(1) the record sets the Drive fields (VAL/DVAL/RVAL) 
+    to their readback values (RBV/DRBV/RRBV) and sets the SYNC field back to No(0).&nbsp;</td>
   </tr>
 
   </tbody>

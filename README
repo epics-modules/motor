@@ -212,7 +212,7 @@ Modification Log from R6-4 to R6-5
         set motorAxisDone False in motorAxisDrvSET_t functions that start
         motion (motorAxisHome, motorAxisMove, motorAxisVelocityMove) and force
         a status update with a motorParam->callCallback(pAxis->params) call.
-        
+
         Files modified: - NewportSrc/drvMM4000Asyn.c
                         - AtttoCube/drvANC150.cc
                         - MotorSimSrc/drvMotorSim.c
@@ -281,6 +281,32 @@ Modification Log from R6-4 to R6-5
 24) Bug fix for backlash not being done when MRES<0 and DIR="Neg".
 
         File modified: motorApp/MotorSrc/motorRecord.cc
+
+25) Removed the depreciated motor resolution field (RES) from the motor record
+        database definition. The RES field has been depreciated by the MRES
+        field since R4-5
+
+        Files modified: motorApp/MotorSrc/motorRecord.cc
+                        motorApp/MotorSrc/motorRecord.dbd
+
+26) Removed unused, and under used, MMAP and NMAP indicators.
+
+        File modified: motorApp/MotorSrc/motorRecord.cc
+
+27) Two new Aerotech device drives were added.  An 'asyn motor' version of the
+        Ensemble and a Soloist under the old driver architecture.
+
+        Files added: devSoloist.cc, drvSoloist.cc, drvSoloist.h
+                     drvEnsembleAsyn.cc, drvEnsembleAsyn.h
+
+28) Matthew Pearson (Diamond) added support for the ADEL and MDEL fields.
+
+        Files modified: motorRecord.cc, motorRecord.dbd
+
+29) Added synchronize field (SYNC) that sets VAL/DVAL/RVAL to RBV/DRBV/RRBV.
+
+        Files modified: motorRecord.cc, motorRecord.dbd
+        
 
 
 Modification Log from R6-3 to R6-4

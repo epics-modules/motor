@@ -60,6 +60,13 @@
       <li>This is the latest release to include the old Ensemble device driver architecture
         version. See below. </li>
     </ul>
+    <p>
+      <b>RES field deleted</b>
+    </p>
+    <p>
+      The RES field was removed from the motor record database definition with this 
+      release (R6-5). The RES field has been depreciated by the MRES field since R4-5.
+    </p>
   </div>
   <div style="text-align: center">
     <h4>
@@ -67,15 +74,30 @@
   </div>
   <div style="text-align: left">
     <p>
-      <b>Aerotech Soloist and Ensemble asyn motor support</b>
+      <b>Aerotech Soloist and Ensemble motor controller support</b>
     </p>
     <p>
-      Added two new drivers from Aerotech; the Soloist controller and an asyn motor version
-      of the Ensemble. Since the Ensemble network connection requires period communication
-      from the host to prevent the Ensemble from closing the network socket, the Ensemble
-      support based on the old device driver architecture will be removed after R5-6.
-      The asyn motor architecture supports continuous, periodic updates; the old architecture
-      does not.
+      Two new drivers from Aerotech were add; an asyn motor version of the Ensemble 
+      and the Soloist under the old driver architecture. Since the Ensemble network 
+      connection requires period communication from the host to prevent the Ensemble 
+      from closing the network socket, the Ensemble support based on the old device 
+      driver architecture will be removed after R5-6. The asyn motor architecture 
+      supports continuous, periodic updates; the old architecture does not.
+    </p>
+    <p>
+      <b>ADEL and MDEL fields added</b>
+    </p>
+    <p>
+      Matthew Pearson (Diamond) added support for the ADEL and MDEL motor record 
+      fields. Unlike most records, the ADEL/MDEL fields in the motor record apply to 
+      the User Readback Value (RBV).  See the motorRecord.html document for details.
+    </p>
+    <p>
+      <b>Synchronize field (SYNC)</b>
+    </p>
+    <p>
+      When the SYNC field is set to Yes(1) the record sets the Drive fields (VAL/DVAL/RVAL) 
+      to their readback values (RBV/DRBV/RRBV) and sets SYNC field back to No(0).
     </p>
   </div>
   <p>
