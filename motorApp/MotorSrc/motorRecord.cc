@@ -138,6 +138,8 @@ HeadURL:        $URL$
  *                  - removed depreciated RES field.
  *                  - changed MDEL/ADEL support for RBV so that record behaves
  *                    the same as before when MDEL and ADEL are zero.
+ * .58 04-15-10 rls - Added SYNC field to synchronize VAL/DVAL/RVAL with
+ *                    RBV/DRBV/RRBV
  *
  */                                                        
 
@@ -2316,6 +2318,18 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
         else
             SEND_MSG();
     }
+    else if (pmr->sync != 0 && pmr->mip == MIP_DONE)
+    {
+        /* Sync target positions with readbacks. */
+        pmr->val  = pmr->lval = pmr->rbv;
+        MARK(M_VAL);
+        pmr->dval = pmr->ldvl = pmr->drbv;
+        MARK(M_DVAL);
+        pmr->rval = pmr->lrvl = NINT(pmr->dval / pmr->mres);
+        MARK(M_RVAL);
+        pmr->sync = 0;
+    }
+
     return(OK);
 }
 

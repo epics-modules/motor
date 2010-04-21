@@ -783,4 +783,9 @@ recordtype(motor) {
                 special(SPC_NOMOD)
                 interest(3)
         }
+	field(SYNC,DBF_SHORT) {
+		prompt("Sync position")
+		pp(TRUE)
+		interest(1)
+	}
 }
