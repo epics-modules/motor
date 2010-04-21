@@ -34,6 +34,8 @@ in file LICENSE that is included with this distribution.
 * .04 04-07-10 rls Acknowledged fault before enabling drive.
 * .05 04-19-10 rls Change back to reading EOT LS's and let record determine
 *                  limit error condition.
+* .06 04-21-10 rls Temporarily backing out previous change on EOT LS's; need
+*                  more cnfg. info from controller on LS active high/low.
 */
 
 
@@ -667,16 +669,6 @@ static void EnsemblePoller(EnsembleController *pController)
                         motorParam->setInteger(pAxis->params, motorAxisDirection, axisStatus.Bits.motion_ccw);
                     else
                         motorParam->setInteger(pAxis->params, motorAxisDirection, !axisStatus.Bits.motion_ccw);
-                    if (pAxis->stepSize > 0.0)
-                    {
-                        motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, axisStatus.Bits.CW_limit);
-                        motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  axisStatus.Bits.CCW_limit);   
-                    }
-                    else
-                    {
-                        motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, axisStatus.Bits.CCW_limit);
-                        motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  axisStatus.Bits.CW_limit);   
-                    }
                 }
                 pAxis->axisStatus = axisStatus.All;
             }
@@ -719,6 +711,22 @@ static void EnsemblePoller(EnsembleController *pController)
                     motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
                     epicsMutexUnlock(pAxis->mutexId);
                     continue;
+                }
+                else
+                {
+                    int axisFault;
+
+                    axisFault = atoi(&inputBuff[1]);
+                    if (pAxis->stepSize > 0.0)
+                    {
+                        motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, axisFault &  CW_FAULT_BIT ? 1 : 0);
+                        motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  axisFault & CCW_FAULT_BIT ? 1 : 0);   
+                    }
+                    else
+                    {
+                        motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, axisFault & CCW_FAULT_BIT ? 1 : 0);
+                        motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  axisFault &  CW_FAULT_BIT ? 1 : 0);   
+                    }
                 }
             }
             motorParam->callCallback(pAxis->params);
