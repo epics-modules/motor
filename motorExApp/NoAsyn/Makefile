@@ -1,3 +1,11 @@
+#FILENAME...     Makefile
+#USAGE...        Makefile for motor application example without Asyn
+
+#Version:        $Revision$
+#Modified By:    $Author$
+#Last Modified:  $Date$
+#HeadURL:        $URL$
+
 # "#!" marks lines that can be uncommented.
 
 # Makefile
@@ -14,20 +22,15 @@ COMMONDBDS  = base.dbd
 COMMONDBDS += motorRecord.dbd
 COMMONDBDS += devSoftMotor.dbd
 #!COMMONDBDS += devMXmotor.dbd
-ifeq ($(OS_CLASS), vxWorks)
-COMMONDBDS += devDeltaTau.dbd
-COMMONDBDS += MiscVx.dbd
-else
-COMMONDBDS += Misc.dbd
-endif
 
 DBD += NoAsyn.dbd
 NoAsyn_DBD += $(COMMONDBDS)
+NoAsyn_DBD += Misc.dbd
 
-ifeq ($(OS_CLASS), vxWorks)
 DBD += NoAsynVx.dbd
 NoAsynVx_DBD += $(COMMONDBDS)
-endif
+NoAsynVx_DBD += devDeltaTau.dbd
+NoAsynVx_DBD += MiscVx.dbd
 
 NoAsyn_SRCS += NoAsyn_registerRecordDeviceDriver.cpp
 NoAsyn_SRCS_DEFAULT += NoAsynMain.cpp

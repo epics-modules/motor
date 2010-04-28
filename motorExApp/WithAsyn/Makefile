@@ -41,13 +41,11 @@ ifdef SNCSEQ
 WithAsyn_DBD += devSequencer.dbd
 endif
 
-ifeq ($(OS_CLASS), vxWorks)
 DBD += WithAsynVx.dbd
 WithAsynVx_DBD += $(COMMONDBDS)
 #!WithAsynVx_DBD += drvGsIP488.dbd
 ifdef IPAC
 WithAsynVx_DBD += MiscVx.dbd
-endif
 endif
 
 WithAsyn_SRCS   += WithAsyn_registerRecordDeviceDriver.cpp
