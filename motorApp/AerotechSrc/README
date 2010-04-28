@@ -1,15 +1,23 @@
 DESIGN NOTES
 ============
 
-- The EPICS driver neither reads nor writes the Ensemble's soft limits.
-It is recommended that the Ensemble soft limits be disabled and the
-user rely on the EPICS motor record soft limits.
+- The EPICS driver neither reads nor writes the Ensemble's soft limits.  It is
+recommended that the Ensemble soft limits be disabled and the user rely on the
+EPICS motor record soft limits.
 
-- Since the Ensemble network connection requires period communication
-from the host to prevent the Ensemble from closing the network socket,
-the Ensemble support based on the old device driver architecture will
-be removed after R5-6.  The asyn motor architecture supports continuous,
-periodic updates; the old architecture does not.
+- Since the Ensemble network connection requires period communication from the
+host to prevent the Ensemble from closing the network socket, the Ensemble
+support based on the old device driver architecture will be removed after R5-6.
+The asyn motor architecture supports continuous, periodic updates; the old
+architecture does not.
+
+- This driver assumes that the EOT limit switches have been configured
+correctly.  If the PosScaleFactor parameter is positive, then a positive move
+is a move in the direction of the CW EOT limit switch and a negative move is a
+move in the direction of the CCW EOT limit switch.  If the PosScaleFactor
+parameter is negative, then a positive move is a move in the direction of the
+CCW EOT limit switch and a negative move is a move in the direction of the CW
+EOT limit switch
 
 
 ENSEMBLE CONFIGURATION NOTES
@@ -19,3 +27,17 @@ ENSEMBLE CONFIGURATION NOTES
 - Set the "Idle Polling" parameter the EnsembleAsynConfig() call <=
 InetSock1ActiveTimeSec Parameter.  This will prevent the Ensemble
 from closing the socket.
+
+
+DRIVER LIMITATIONS
+------------------
+
+The driver reads the controllers configuration information only at boot-up
+(iocInit). If any of the following Ensemble parameters are changed, EPICS
+must be rebooted.
+
+- CfgFbkPosType
+- PosScaleFactor
+- HomeOffset
+- HomeDirection
+- LimitLevelMask
