@@ -133,6 +133,21 @@ Known Problems
         retry if retries are enabled.
 
 
+Modification Log from R6-5 to R6-6
+==================================
+
+1) Aerotech Ensemble asyn motor driver would crash the IOC at boot-up if the
+        Ensemble was not power-ed up and able to communicate.
+        
+        Files modified: drvEnsembleAsyn.cc
+
+2) Aerotech Ensemble EOT limit switch status was not available except via an
+        Ensemble fault condition.  With this release the status of the EOT
+        limit switches are always available.
+
+        Files modified: drvEnsembleAsyn.cc; add Parameters.h
+
+
 Modification Log from R6-4 to R6-5
 ==================================
 
