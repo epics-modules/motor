@@ -287,7 +287,7 @@ static int motorAxisClose(AXIS_HDL pAxis)
 
 static int motorAxisGetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int * value)
 {
-    if (pAxis == NULL)
+    if (pAxis == NULL || pAxis->params == NULL)
         return (MOTOR_AXIS_ERROR);
     else
         return (motorParam->getInteger(pAxis->params, (paramIndex) function, value));
@@ -295,7 +295,7 @@ static int motorAxisGetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int * 
 
 static int motorAxisGetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double * value)
 {
-    if (pAxis == NULL)
+    if (pAxis == NULL || pAxis->params == NULL)
         return (MOTOR_AXIS_ERROR);
     else
         return (motorParam->getDouble(pAxis->params, (paramIndex) function, value));
@@ -303,7 +303,7 @@ static int motorAxisGetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 
 static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, void * param)
 {
-    if (pAxis == NULL)
+    if (pAxis == NULL || pAxis->params == NULL)
         return (MOTOR_AXIS_ERROR);
     else
         return (motorParam->setCallback(pAxis->params, callback, param));
