@@ -297,6 +297,24 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!EnsembleConfig(0, "a-Serial[0]")
 
 
+# Aerotech Ensemble digital servo controller asyn motor Setup
+#     (1) maximum number of controllers in system
+#!EnsembleAsynSetup(1)
+
+# The Ensemble driver does not set end of string (EOS).
+#!asynOctetSetInputEos(EnsemblePort,0,"\n")
+#!asynOctetSetOutputEos(EnsemblePort,0,"\n")
+
+# Aerotech Ensemble digital servo controller  asyn motor Config
+#     (1) Controller number being configured
+#     (2) ASYN port name
+#     (3) ASYN address (GPIB only)
+#     (4) Number of axes this controller supports
+#     (5) Time to poll (msec) when an axis is in motion
+#     (6) Time to poll (msec) when an axis is idle. 0 for no polling
+#!EnsembleAsynConfig(0, EnsemblePort, 0, 1, 100, 1000)
+
+
 # Newport MM4000/5/6 asyn motor driver setup parameter.
 #!MM4000AsynSetup(1)   /* number of MM4000 controllers in system.  */
 
@@ -314,10 +332,12 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #   (2) Driver name
 #   (3) Controller index
 #   (4) Max. number of axes
-#!drvAsynMotorConfigure("MM4",   "motorMM4000", 0, 4)
-#!drvAsynMotorConfigure("ANC150","motorANC150", 0, 2 )
-#!drvAsynMotorConfigure("XPS1",  "motorXPS",    0, 5)
-#!drvAsynMotorConfigure("XPS2",  "motorXPS",    1, 5)
+#!drvAsynMotorConfigure("MM4",   "motorMM4000",   0, 4)
+#!drvAsynMotorConfigure("ANC150","motorANC150",   0, 2 )
+#!drvAsynMotorConfigure("XPS1",  "motorXPS",      0, 5)
+#!drvAsynMotorConfigure("XPS2",  "motorXPS",      1, 5)
+#!drvAsynMotorConfigure("AeroE1","motorEnsemble", 0, 1)
+#!drvAsynMotorConfigure("AeroE2","motorEnsemble", 1, 1)
 
 iocInit
 

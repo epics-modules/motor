@@ -1,3 +1,49 @@
+CONFIGURATION NOTES
+===================
+
+
+- Database definition (*.dbd) requirements.
+<App>DBD += devAerotech.dbd
+
+- Startup command file (st.cmd) requirements.
+("#"  is used to denote st.cmd comment lines.)
+("#!" is used to denote st.cmd command lines.)
+
+Configure an asyn communications port driver for the Ensemble.  This can be
+either RS-232 or ethernet. For example,
+
+#!EnsemblePort = "Serial"
+#!drvAsynSerialPortConfigure(EnsemblePort,"/tyGS0/Mod0/1",0,0,0)
+
+#!EnsemblePort = "tcp1"
+#!drvAsynIPPortConfigure(EnsemblePort,"xx.xx.xx.xx:8000", 0, 0, 0)
+
+See asyn documentation for details.
+
+# Aerotech Ensemble digital servo controller
+#     (1) maximum number of controllers in system
+#!EnsembleAsynSetup(1)
+
+# The Ensemble driver does not set end of string (EOS).
+#!asynOctetSetInputEos(EnsemblePort,0,"\n")
+#!asynOctetSetOutputEos(EnsemblePort,0,"\n")
+
+#     (1) Controller number being configured
+#     (2) ASYN port name
+#     (3) ASYN address (GPIB only)
+#     (4) Number of axes this controller supports
+#     (5) Time to poll (msec) when an axis is in motion
+#     (6) Time to poll (msec) when an axis is idle. 0 for no polling
+#!EnsembleAsynConfig(0, EnsemblePort, 0, 1, 100, 1000)
+
+# Asyn-based Motor Record support
+#   (1) Asyn port
+#   (2) Driver name
+#   (3) Controller index
+#   (4) Max. number of axes
+#!drvAsynMotorConfigure("AeroE1","motorEnsemble",0,1)
+
+
 DESIGN NOTES
 ============
 
