@@ -2,9 +2,10 @@
 FILENAME...     drvEnsemble.h
 USAGE... This file contains Aerotech Ensemble driver "include" information.
 
-Version:        $Revision: 1.3 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-05-01 18:13:42 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*

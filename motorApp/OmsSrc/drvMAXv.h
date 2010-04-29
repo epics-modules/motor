@@ -3,9 +3,10 @@ FILENAME...	drvMAXv.h
 USAGE...	OMS driver level "include" information that is specific to OMS
 		model MAXv.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-06-03 18:58:25 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*

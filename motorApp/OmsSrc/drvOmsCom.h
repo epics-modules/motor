@@ -3,9 +3,9 @@ FILENAME...	drvOmsCom.h
 USAGE... 	This file contains OMS driver "include" information
 		that is common to all OMS models.
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:38:02 $
+Version:	$Revision$
+Modified By:	$Author$
+Last Modified:	$Date$
 */
 
 /*
