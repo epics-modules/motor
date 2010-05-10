@@ -1,0 +1,34 @@
+
+
+Please note:
+
+- The MAXnet IP-stack is very basic. You cannot ping the card and it doesn't know 
+  anything about routing, which means you can only use it from hosts in the same
+  subnet.
+- MAXnet cards with firmware versions older than 1.33.4 shouldn't be used
+  with the ethernet port. They abort communication, if they detect a tcp packet 
+  with checksum 0xffff.
+- MAXnet cards with firmware versions below 1.33 use "\n\r" as input EOS 
+  on Ethernet ports. Version 1.33 and higher use "\n" on ethernet and serial ports.
+  Comment the setInputEos call and set input EOS in st.cmd if using firmware
+  versions below 1.33
+
+add this to st.cmd if using the ethernet port:
+  drvAsynIPPortConfigure("MAXNET","maxnet-ip-address:23",0,0,0)
+
+add this to st.cmd if using the serial port:
+  drvAsynSerialPortConfigure("MAXNET","/your/serial/device",0,0,0)
+  asynSetOption("MAXNET",0,"baud","115200")
+  asynSetOption("MAXNET",0,"bits","8")
+  asynSetOption("MAXNET",0,"parity","none")
+  asynSetOption("MAXNET",0,"crtscts","Y")
+
+add this to Makefile
+	# The following is required for the OMS MAXnet device driver.
+	SRCS += drvMAXnetAsyn
+
+add this to devOms.dbd
+	# Oregon Micro Systems MAXnet Asyn driver support.
+	driver(motorMAXnet)
+	registrar(OmsMAXnetRegister)
+	variable(motorMAXnetdebug)
