@@ -14,6 +14,7 @@ LIBRARY_IOC_DEFAULT += oms
 # The following is required for the OMS PC68/78 (i.e., devOmsPC68) device driver.
 ifdef ASYN
 SRCS += devOmsPC68.cc drvOmsPC68.cc
+SRCS += drvMAXnetAsyn.cc
 endif
 
 # The following is required for the OMS VME8/44 (i.e., devOMS) device driver.
