@@ -874,12 +874,16 @@ static void MAXnetPoller(MAXnetController *pController)
            waiting may be interrupted by pollEvent */
         epicsTimeGetCurrent(&now);
         timeToWait = timeout - epicsTimeDiffInSeconds(&now, &loopStart);
+        pasynManager->lockPort(pController->pasynUserSyncIO);
         pController->pasynOctet->flush(pController->octetPvt, pController->pasynUser);
+        pasynManager->unlockPort(pController->pasynUserSyncIO);
         while ( timeToWait > 0){
             /* reading with bufferlength 0 and timeout 0.0 triggers a callback and
              * poll event if a notification is outstanding */
+            pasynManager->lockPort(pController->pasynUserSyncIO);
             status = pController->pasynOctet->read(pController->octetPvt, pController->pasynUser, inputBuffer,
             		                                0, &nRead, &eomReason);
+            pasynManager->unlockPort(pController->pasynUserSyncIO);
             if (epicsEventWaitWithTimeout(pController->pollEventId, pollWait) == epicsEventWaitOK) {
                 if (motorMAXnetdebug > 3) asynPrint(pController->pasynUser, ASYN_TRACE_FLOW,
 													"MAXnetPoller wakeup call received\n");
