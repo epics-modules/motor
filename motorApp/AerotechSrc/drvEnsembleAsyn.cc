@@ -40,6 +40,7 @@ in file LICENSE that is included with this distribution.
 *                    error check that pController is not Null.
 *                  - changed EOT LS read status from AXISFAULT to AXISSTATUS so
 *                    LS status can be monitored independent of fault status.
+* .08 06-03-10 rls - Set motorAxisHasEncoder based on CfgFbkPosType parameter.
 */
 
 
@@ -905,10 +906,20 @@ int EnsembleAsynConfig(int card,             /* Controller number */
                 pAxis->homeDirection = atoi(&inputBuff[1]);
             numAxesFound++;
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_LimitLevelMask); /*  */
+            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_LimitLevelMask);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->swconfig.All = atoi(&inputBuff[1]);
+
+            /* Determine if encoder present based on open/closed loop mode. */
+            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_CfgFbkPosType);
+            sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
+            if (inputBuff[0] == ASCII_ACK_CHAR)
+            {
+                if (atoi(&inputBuff[1]) > 0)
+                    motorParam->setInteger(pAxis->params, motorAxisHasEncoder, 1);
+            }
+
         }
     }
 
