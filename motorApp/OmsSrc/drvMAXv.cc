@@ -41,6 +41,7 @@ HeadURL:        $URL$
  *      - MAXv ver:1.29 (has ECO #1432; fixes initialization problem).
  *      - MAXv ver:1.31 (fixes DPRAM encoder position data problem when using
  *                       mixed motor types.)
+ *      - MAXv ver:1.33, FPGA:B2:A6 BOOT:1.2 (Watchdog Timeout Counter added)
  *
  * Modification Log:
  * -----------------
@@ -75,6 +76,10 @@ HeadURL:        $URL$
  * 15  09-09-09 rls - board "running" error check added.
  * 16  03-08-10 rls - sprintf() not callable from RTEMS interrupt context.
  * 17  03-09-10 rls - sprintf() not callable from any OS ISR.
+ * 18  06-01-10 rls - Save firmware version in static float array.
+ *                  - For firmware ver:1.33 and above, read Watchdog Timeout
+ *                    Counter. If Counter is nonzero, print error message and
+ *                    clear Counter.
  *
  */
 
@@ -200,6 +205,14 @@ struct drvMAXv_drvet
 extern "C" {epicsExportAddress(drvet, drvMAXv);}
 
 static struct thread_args targs = {SCAN_RATE, &MAXv_access, 0.000};
+
+static struct MAXvbrdinfo           /* MAXv board info. */
+{
+    float fwver[MAXv_NUM_CARDS];    /* firmware version */
+} MAXvdata;
+
+static char wdctrmsg[] = "\n***MAXv card #%d Error*** Watchdog Timeout CTR %s\n\n";
+
 
 /*----------------functions-----------------*/
 
@@ -396,6 +409,17 @@ static int set_status(int card, int signal)
     }
     else
         status.Bits.RA_PROBLEM = 0;
+
+    if (MAXvdata.fwver[card] >= 1.33)
+    {
+        send_mess(card, "#WS", (char) NULL);
+        recv_mess(card, q_buf, 1);
+        if (strcmp(q_buf, "=0") != 0)
+        {
+            errlogPrintf(wdctrmsg, card, q_buf);
+            send_mess(card, "#WC", (char) NULL);
+        }
+    }
 
     /* get command velocity */
     send_mess(card, "RV", MAXv_axis[signal]);
@@ -1077,6 +1101,22 @@ static int motor_init()
             recv_mess(card_index, (char *) pmotorState->ident, 1);
             Debug(3, "Identification = %s\n", pmotorState->ident);
 
+            /* Save firmware version to static float array. */
+            pos_ptr = strchr((char *)pmotorState->ident, ':');
+            sscanf(++pos_ptr, "%f", &MAXvdata.fwver[card_index]);
+
+            if (MAXvdata.fwver[card_index] >= 1.33)
+            {
+                send_mess(card_index, "#WS", (char) NULL);
+                recv_mess(card_index, axis_pos, 1);
+                if (strcmp(axis_pos, "=0") != 0)
+                {
+                    errlogPrintf(wdctrmsg, card_index, axis_pos);
+                    epicsThreadSleep(2.0);
+                    send_mess(card_index, "#WC", (char) NULL);
+                }
+            }
+
             send_mess(card_index, initstring[card_index], (char) NULL);
 
             send_mess(card_index, ALL_POS, (char) NULL);
@@ -1191,6 +1231,8 @@ static int motor_init()
     /* Deallocate memory for initialization strings. */
     for (itera = 0, strptr = &initstring[0]; itera < MAXv_num_cards; itera++, strptr++)
         free(*strptr);
+    free(initstring);
+    initstring = NULL;
 
     return (0);
 }
