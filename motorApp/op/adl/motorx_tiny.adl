@@ -162,8 +162,10 @@ rectangle {
 		width=2
 	}
 	"dynamic attribute" {
-		vis="if not zero"
+                vis="calc"
+                calc="A!=0||B==7"
 		chan="$(P)$(M).SET"
+		chanB="$(P)$(M).STAT"
 	}
 }
 rectangle {
