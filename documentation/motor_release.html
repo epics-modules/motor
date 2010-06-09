@@ -11,6 +11,66 @@
   <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
 </head>
 <body>
+  
+  <div style="text-align: center">
+    <h1>
+      <b>Motor Record Version 6-5-1 Release Notice</b></h1>
+  </div>
+  <div style="text-align: center">
+    <h4>
+      Modifications to Existing Features</h4>
+  </div>
+<div style="text-align: left">
+  <p><b>Aerotech Ensemble</b></p>
+  <p>
+  <ul>
+    <li>
+      With previous releases the Aerotech Ensemble asyn motor driver would crash the 
+      IOC at boot-up if the Ensemble was not powered up and able to communicate.
+    </li>
+    <li>
+      The EOT limit switch status was not available except via an Ensemble fault 
+      condition.  With this release the status of the EOT limit switches are always 
+      available.
+    </li>
+  </ul>
+  </p>
+  
+  <p><b>OMS MAXv WatchDog Timeout Counter</b></p>
+  <p>
+  <p>
+    For OMS MAXv firmware ver:1.33 and above, the EPICS driver reads the MAXv's 
+    Watchdog Timeout Counter at bootup, and with every motor status update. If the 
+    Counter is nonzero, an error message is sent to both the errlog task and the 
+    console.  Since a watchdog timer trip indicates that the MAXv has rebooted and 
+    no longer has valid motor positions, the controller is disabled and is no longer 
+    available to EPICS until after the VME crate has been power cycled.  Other MAXv 
+    boards in the system are unaffected by this scenario.
+  </p>
+  <p>
+    To better communicate this problem to the user, several medm displays have been 
+    changed.  Small displays (motorx_tiny.adl, motorx.adl) will show a yellow border 
+    around their position readback values.  Larger displays (motorx_more.adl, 
+    motorx_all.adl) will display the message "Controller Error" in yellow.  The 
+    following error message at the console and/or in the errlog is definitive;
+  </p>
+  <p>
+    <center>***MAXv card #<i>(card#)</i> Disabled*** Watchdog Timeout CTR =<i>(count)</i></center>
+  </p>
+  </p>
+</div>
+
+<div style="text-align: center">
+  <h4>New Features</h4>
+</div>
+<div style="text-align: left">
+  <p><b>OMS MAXnet motor controller support</b></p>
+  <p>
+  Jens Eden's (PTB) added support for the OMS MAXnet motor controller using an asyn 
+  motor port driver
+  </p>
+</div>
+  
   <div style="text-align: center">
     <h1>
       <b>Motor Record Version 6-5 Release Notice</b></h1>
