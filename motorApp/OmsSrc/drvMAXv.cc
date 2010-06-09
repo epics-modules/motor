@@ -80,6 +80,7 @@ HeadURL:        $URL$
  *                  - For firmware ver:1.33 and above, read Watchdog Timeout
  *                    Counter. If Counter is nonzero, print error message and
  *                    clear Counter.
+ * 19  06-07-10 rls - Disable board if WDT CTR is nonzero; don't clear CTR.
  *
  */
 
@@ -211,7 +212,7 @@ static struct MAXvbrdinfo           /* MAXv board info. */
     float fwver[MAXv_NUM_CARDS];    /* firmware version */
 } MAXvdata;
 
-static char wdctrmsg[] = "\n***MAXv card #%d Error*** Watchdog Timeout CTR %s\n\n";
+static char wdctrmsg[] = "\n***MAXv card #%d Disabled*** Watchdog Timeout CTR %s\n\n";
 
 
 /*----------------functions-----------------*/
@@ -322,6 +323,22 @@ static int set_status(int card, int signal)
     pmotor = (struct MAXv_motor *) motor_state[card]->localaddr;
     status.All = motor_info->status.All;
 
+    if (MAXvdata.fwver[card] >= 1.33)
+    {
+        send_mess(card, "#WS", (char) NULL);
+        recv_mess(card, q_buf, 1);
+        if (strcmp(q_buf, "=0") != 0)
+        {
+            errlogPrintf(wdctrmsg, card, q_buf);
+            status.Bits.RA_PROBLEM = 1;
+            motor_info->status.All = status.All;
+            send_mess(card, STOP_ALL, (char) NULL);
+            /* Disable board. */
+            motor_state[card] = (struct controller *) NULL;
+            return(rtn_state = 1); /* End move. */
+        }
+    }
+
     if (motor_info->encoder_present == YES)
     {
         /* get 4 pieces of info from axis */
@@ -409,17 +426,6 @@ static int set_status(int card, int signal)
     }
     else
         status.Bits.RA_PROBLEM = 0;
-
-    if (MAXvdata.fwver[card] >= 1.33)
-    {
-        send_mess(card, "#WS", (char) NULL);
-        recv_mess(card, q_buf, 1);
-        if (strcmp(q_buf, "=0") != 0)
-        {
-            errlogPrintf(wdctrmsg, card, q_buf);
-            send_mess(card, "#WC", (char) NULL);
-        }
-    }
 
     /* get command velocity */
     send_mess(card, "RV", MAXv_axis[signal]);
@@ -639,7 +645,7 @@ static int recv_mess(int card, char *com, int amount)
     /* Check that card exists */
     if (!motor_state[card])
     {
-        Debug(1, "resv_mess - invalid card #%d\n", card);
+        Debug(1, "recv_mess - invalid card #%d\n", card);
         return(-1);
     }
 
@@ -1056,6 +1062,8 @@ static int motor_init()
 #endif
         if (PROBE_SUCCESS(status))
         {
+            bool wdtrip;
+
 #ifdef USE_DEVLIB
             status = devRegisterAddress(__FILE__, MAXv_ADDRS_TYPE,
                                         (size_t) probeAddr, MAXv_brd_size,
@@ -1105,6 +1113,8 @@ static int motor_init()
             pos_ptr = strchr((char *)pmotorState->ident, ':');
             sscanf(++pos_ptr, "%f", &MAXvdata.fwver[card_index]);
 
+            wdtrip = false;
+
             if (MAXvdata.fwver[card_index] >= 1.33)
             {
                 send_mess(card_index, "#WS", (char) NULL);
@@ -1113,97 +1123,101 @@ static int motor_init()
                 {
                     errlogPrintf(wdctrmsg, card_index, axis_pos);
                     epicsThreadSleep(2.0);
-                    send_mess(card_index, "#WC", (char) NULL);
+                    motor_state[card_index] = (struct controller *) NULL;
+                    wdtrip = true;
                 }
             }
 
-            send_mess(card_index, initstring[card_index], (char) NULL);
-
-            send_mess(card_index, ALL_POS, (char) NULL);
-            recv_mess(card_index, axis_pos, 1);
-
-            for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
-                 pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
+            if (wdtrip == false)
             {
-                pmotorState->motor_info[total_axis].motor_motion = NULL;
-                pmotorState->motor_info[total_axis].status.All = 0;
-            }
-
-            Debug(3, "motor_init: Total axis = %d\n", total_axis);
-            pmotorState->total_axis = total_axis;
-
-            for (total_encoders = total_pidcnt = 0, motor_index = 0; motor_index < total_axis; motor_index++)
-            {
-                STATUS1 flag1;
-
-                /* Test if motor has an encoder. */
-                send_mess(card_index, ENCODER_QUERY, MAXv_axis[motor_index]);
-                while (!pmotor->status1_flag.Bits.done) /* Wait for command to complete. */
-                    epicsThreadSleep(quantum);
-
-                if (pmotor->status1_flag.Bits.cmndError)
-                {
-                    Debug(2, "motor_init: No encoder on axis %d\n", motor_index);
-                    pmotorState->motor_info[motor_index].encoder_present = NO;
-                    flag1.All = pmotor->status1_flag.All;       /* Clear command error. */
-                    pmotor->status1_flag.All = flag1.All;
-                }
-                else
-                {
-                    total_encoders++;
-                    pmotorState->motor_info[motor_index].encoder_present = YES;
-                    recv_mess(card_index, encoder_pos, 1);
-                }
-                
-                /* Test if motor has PID parameters. */
-                send_mess(card_index, PID_QUERY, MAXv_axis[motor_index]);
-                while (!pmotor->status1_flag.Bits.done) /* Wait for command to complete. */
-                    epicsThreadSleep(quantum);
-                if (pmotor->status1_flag.Bits.cmndError)
-                {
-                    Debug(2, "motor_init: No PID parameters on axis %d\n", motor_index);
-                    pmotorState->motor_info[motor_index].pid_present = NO;
-                    flag1.All = pmotor->status1_flag.All;       /* Clear command error. */
-                    pmotor->status1_flag.All = flag1.All;
-                }
-                else
-                {
-                    total_pidcnt++;
-                    pmotorState->motor_info[motor_index].pid_present = YES;
-                    recv_mess(card_index, encoder_pos, FLUSH);  /* Flush response. */
-                }
-            }
-
-            /* Enable interrupt-when-done if selected */
-            if (MAXvInterruptVector)
-            {
-                if (motorIsrSetup(card_index) == ERROR)
-                    errMessage(-1, "Interrupts Disabled!\n");
-            }
-
-            for (motor_index = 0; motor_index < total_axis; motor_index++)
-            {
-                motor_info = (struct mess_info *) &pmotorState->motor_info[motor_index];
-
-                motor_info->status.All = 0;
-                motor_info->no_motion_count = 0;
-                motor_info->encoder_position = 0;
-                motor_info->position = 0;
-
-                if (motor_info->encoder_present == YES)
-                    motor_info->status.Bits.EA_PRESENT = 1;
-                if (motor_info->pid_present == YES)
-                    motor_info->status.Bits.GAIN_SUPPORT = 1;
-
-                set_status(card_index, motor_index);
-
-                send_mess(card_index, DONE_QUERY, MAXv_axis[motor_index]); /* Is this needed??? */
+                send_mess(card_index, initstring[card_index], (char) NULL);
+    
+                send_mess(card_index, ALL_POS, (char) NULL);
                 recv_mess(card_index, axis_pos, 1);
+    
+                for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
+                     pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
+                {
+                    pmotorState->motor_info[total_axis].motor_motion = NULL;
+                    pmotorState->motor_info[total_axis].status.All = 0;
+                }
+    
+                Debug(3, "motor_init: Total axis = %d\n", total_axis);
+                pmotorState->total_axis = total_axis;
+    
+                for (total_encoders = total_pidcnt = 0, motor_index = 0; motor_index < total_axis; motor_index++)
+                {
+                    STATUS1 flag1;
+    
+                    /* Test if motor has an encoder. */
+                    send_mess(card_index, ENCODER_QUERY, MAXv_axis[motor_index]);
+                    while (!pmotor->status1_flag.Bits.done) /* Wait for command to complete. */
+                        epicsThreadSleep(quantum);
+    
+                    if (pmotor->status1_flag.Bits.cmndError)
+                    {
+                        Debug(2, "motor_init: No encoder on axis %d\n", motor_index);
+                        pmotorState->motor_info[motor_index].encoder_present = NO;
+                        flag1.All = pmotor->status1_flag.All;       /* Clear command error. */
+                        pmotor->status1_flag.All = flag1.All;
+                    }
+                    else
+                    {
+                        total_encoders++;
+                        pmotorState->motor_info[motor_index].encoder_present = YES;
+                        recv_mess(card_index, encoder_pos, 1);
+                    }
+                    
+                    /* Test if motor has PID parameters. */
+                    send_mess(card_index, PID_QUERY, MAXv_axis[motor_index]);
+                    while (!pmotor->status1_flag.Bits.done) /* Wait for command to complete. */
+                        epicsThreadSleep(quantum);
+                    if (pmotor->status1_flag.Bits.cmndError)
+                    {
+                        Debug(2, "motor_init: No PID parameters on axis %d\n", motor_index);
+                        pmotorState->motor_info[motor_index].pid_present = NO;
+                        flag1.All = pmotor->status1_flag.All;       /* Clear command error. */
+                        pmotor->status1_flag.All = flag1.All;
+                    }
+                    else
+                    {
+                        total_pidcnt++;
+                        pmotorState->motor_info[motor_index].pid_present = YES;
+                        recv_mess(card_index, encoder_pos, FLUSH);  /* Flush response. */
+                    }
+                }
+    
+                /* Enable interrupt-when-done if selected */
+                if (MAXvInterruptVector)
+                {
+                    if (motorIsrSetup(card_index) == ERROR)
+                        errMessage(-1, "Interrupts Disabled!\n");
+                }
+    
+                for (motor_index = 0; motor_index < total_axis; motor_index++)
+                {
+                    motor_info = (struct mess_info *) &pmotorState->motor_info[motor_index];
+    
+                    motor_info->status.All = 0;
+                    motor_info->no_motion_count = 0;
+                    motor_info->encoder_position = 0;
+                    motor_info->position = 0;
+    
+                    if (motor_info->encoder_present == YES)
+                        motor_info->status.Bits.EA_PRESENT = 1;
+                    if (motor_info->pid_present == YES)
+                        motor_info->status.Bits.GAIN_SUPPORT = 1;
+    
+                    set_status(card_index, motor_index);
+    
+                    send_mess(card_index, DONE_QUERY, MAXv_axis[motor_index]); /* Is this needed??? */
+                    recv_mess(card_index, axis_pos, 1);
+                }
+    
+                Debug(2, "motor_init: Init Address=%p\n", localaddr);
+                Debug(3, "motor_init: Total encoders = %d\n", total_encoders);
+                Debug(3, "motor_init: Total with PID = %d\n", total_pidcnt);
             }
-
-            Debug(2, "motor_init: Init Address=%p\n", localaddr);
-            Debug(3, "motor_init: Total encoders = %d\n", total_encoders);
-            Debug(3, "motor_init: Total with PID = %d\n", total_pidcnt);
         }
         else
         {
