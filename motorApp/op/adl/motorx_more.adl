@@ -246,8 +246,10 @@ rectangle {
 		width=2
 	}
 	"dynamic attribute" {
-		vis="if not zero"
+                vis="calc"
+                calc="A!=0||B==7"
 		chan="$(P)$(M).SET"
+		chanB="$(P)$(M).STAT"
 	}
 }
 rectangle {
@@ -787,6 +789,56 @@ composite {
 		}
 	}
 }
+composite {
+	object {
+		x=305
+		y=22
+		width=60
+		height=26
+	}
+	"composite name"=""
+	vis="static"
+	chan="$(P)$(M).LVIO"
+	children {
+		text {
+			object {
+				x=300
+				y=35
+				width=60
+				height=13
+			}
+			"basic attribute" {
+				clr=30
+				fill="outline"
+			}
+			"dynamic attribute" {
+                		vis="calc"
+                		calc="A==7"
+				chan="$(P)$(M).STAT"
+			}
+			textix="Error"
+		}
+		text {
+			object {
+				x=300
+				y=22
+				width=60
+				height=13
+			}
+			"basic attribute" {
+				clr=30
+				fill="outline"
+			}
+			"dynamic attribute" {
+                		vis="calc"
+                		calc="A==7"
+				chan="$(P)$(M).STAT"
+			}
+			textix="Controller"
+		}
+	}
+}
+
 "text update" {
 	object {
 		x=0
