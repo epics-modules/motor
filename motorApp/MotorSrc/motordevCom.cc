@@ -56,6 +56,8 @@ HeadURL:        $URL$
  *                   LOAD_POS can be executed.
  * .11  02/14/08 rls Post RVEL changes.
  * .12  03/08/10 rls Always send positive encoder ratio values.
+ * .13  06/09/10 rls Set RA_PROBLEM instead of CNTRL_COMM_ERR when a NULL
+ *                   motor_state[] ptr is detected in motor_end_trans_com().
  */
 
 
@@ -479,12 +481,12 @@ epicsShareFunc RTN_STATUS motor_end_trans_com(struct motorRecord *mr, struct dri
         msta_field msta;
 
         /* If the controller does not exits, then set "done moving"
-         * and communication error TRUE.
+         * and the Hardware Problem bit TRUE.
          */
         mr->dmov = TRUE;
         db_post_events(mr, &mr->dmov, DBE_VAL_LOG);
         msta.All = mr->msta;
-        msta.Bits.CNTRL_COMM_ERR = 1;
+        msta.Bits.RA_PROBLEM = 1;
         mr->msta = msta.All;
         return(rc = ERROR);
     }
