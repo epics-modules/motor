@@ -1,10 +1,12 @@
 /*
-*	FILENAME... devSoloist.cc
-*	USAGE... Motor record device level support for Aerotech Soloist.
+* FILENAME... devSoloist.cc
+* USAGE... Motor record device level support for Aerotech Soloist.
 *
-* Version:			1.1
-* Modified By:		cbonnell
-* Last Modified:	2009/07/07 01:46:08 PM
+* Version:        $Revision$
+* Modified By:    $Author$
+* Last Modified:  $Date$
+* HeadURL:        $URL$
+*
 */
 
 /*
