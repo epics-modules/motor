@@ -1,13 +1,14 @@
-Motor Record R6-5 Release Notice
+Motor Record R6-5-1 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
-R3-14-10.
+R3-14-11. See the <motor>/configure/RELEASE file for support module version
+dependencies.
 
 
 Contents
 ========
-        
+
 This <supporttop> contains the following motor record related items:
         - motor record and device driver database definitions.
         - the record level support library.
@@ -133,6 +134,51 @@ Known Problems
         retry if retries are enabled.
 
 
+Modification Log from R6-5 to R6-5-1
+====================================
+
+1) Aerotech Ensemble asyn motor driver would crash the IOC at boot-up if the
+        Ensemble was not powered up and able to communicate.
+
+        Files modified: drvEnsembleAsyn.cc
+
+2) Aerotech Ensemble EOT limit switch status was not available except via an
+        Ensemble fault condition.  With this release the status of the EOT
+        limit switches are always available.
+
+        Files modified: drvEnsembleAsyn.cc; add Parameters.h
+
+3) Jens Eden's (PTB) added support for the OMS MAXnet motor controller with an
+        asyn motor port driver.
+
+        Files added to OmsSrc: drvMAXnetAsyn.h, drvMAXnetAsyn.cc, README_MAXnet
+
+4) For OMS MAXv firmware ver:1.33 and above, the EPICS driver reads the MAXv's
+        Watchdog Timeout Counter at bootup, and with every motor status update.
+        If the Counter is nonzero, an error message is sent to both the errlog
+        task and the console.  Since a watchdog timer trip indicates that the
+        MAXv has rebooted and no longer has valid motor positions, the
+        controller is disabled and is no longer available to EPICS until after
+        the VME crate has been power cycled.  Other MAXv boards in the system
+        are unaffected by this scenario.
+
+        To better communicate this problem to the user, several medm displays
+        have been changed.  Small displays (motorx_tiny.adl, motorx.adl) will
+        show a yellow border around their position readback values.  Larger
+        displays (motorx_more.adl, motorx_all.adl) will display the message
+        "Controller Error" in yellow.  The following error message at the
+        console and/or in the errlog is definitive;
+
+        "***MAXv card #<card> Disabled*** Watchdog Timeout CTR =<ctr>"
+
+        motor_end_trans_com() was modified to set RA_PROBLEM rather than
+        CNTRL_COMM_ERR when a NULL motor_state[] pointer is detected.
+
+        Files modified: motordevCom.cc, drvMAXv.cc, motorx_tiny.adl,
+                        motorx.adl, motorx_more.adl
+
+
+
 Modification Log from R6-4 to R6-5
 ==================================
 
@@ -155,9 +201,9 @@ Modification Log from R6-4 to R6-5
                         motorAxisSetDouble().
 
 4) A problem was introduced in R6-4 (fixed in R6-4-2) of the old motor record
-        device drive architecture.  If during the move of one or motors the
-        motor task did not issue an OS delay during status updates, it could
-        potentially not respond to any further motor commands.
+        device drive architecture.  If during the move of one or more motors
+        the motor task did not issue an OS delay during status updates, it
+        could potentially not respond to any further motor commands.
 
         Files modified: - MotorSrc/motordrvCom.cc; always check for incoming
                                                    messages.
@@ -245,7 +291,7 @@ Modification Log from R6-4 to R6-5
 
         Files modified: devPM500.cc, drvPM500.cc, motorRecord.dbd
 
-17) Mark Rivers made numerous changes to elminate 64-bit compiler warning
+17) Mark Rivers made numerous changes to eliminate 64-bit compiler warning
         messages.
 
 18) Applied item #11 above to the Newport XPS driver.
@@ -306,7 +352,7 @@ Modification Log from R6-4 to R6-5
 29) Added synchronize field (SYNC) that sets VAL/DVAL/RVAL to RBV/DRBV/RRBV.
 
         Files modified: motorRecord.cc, motorRecord.dbd
-        
+
 
 
 Modification Log from R6-3 to R6-4
@@ -452,12 +498,12 @@ Modification Log from R6-3 to R6-4
 
 12) Fixed OMS MAXv bug with incorrect scaling of PID parameters reported by
         Jerome Hosselet (CNRS).
-        
+
         File modified: OmsSrc/devOmsCom.cc
 
 13) motorUtilAux.cc was not declaring pdbbase correctly.  Consequently, link
         errors were occuring with Visual C++.
-        
+
         File modified: MotorSrc/motorUtilAux.cc
 
 14) With previous releases, motor_task() would not allow the next polling
@@ -583,13 +629,13 @@ Modification Log from R6-2 to R6-3
         status" that occurred only with version 2.35 firmware is removed.
         Finally, start_status() is modified to wait for DPRAM update before
         exiting.
-        
+
         File modified: motorApp/OmsSrc/drvOms58.cc
 
 9) Raised the precedence of INIT string in motor_init_record_com() for
         controllers (PI C-848) that require an INIT string primitive before a
         LOAD_POS can be executed.
-        
+
         File modified: motorApp/MotorSrc/motordevCom.cc
 
 10) Numerous fixes for the PI C-848 controller.
@@ -816,7 +862,7 @@ Modification Log from R5-8 to R5-9
         support".  This is a preliminary release of work in progress.  Do not
         use "asynMotor" device support at this time, except for development and
         testing purposes only.
-        
+
         Directory added - MotorSimSrc; motor simulation software.
         Files added     - <motor>/motorApp/MotorSrc/devMotorAsyn.c
                         - <motor>/motorApp/MotorSrc/drvMotorAsyn.c
@@ -1040,7 +1086,7 @@ Modification Log from R5-6 to R5-7
         This value is set in motordrvCom.h to 5 seconds.  This helps prevent
         the "dev_NoInit (init_record_com: callback2 timeout" error message at
         motor record initialization.
-        
+
         Files modified: - Added MAX_TIMEOUT to motordrvCom.h.
                         - Reference MAX_TIMEOUT in motor_init_record_com() in
                           motordevCom.cc.
@@ -1188,7 +1234,7 @@ Modification Log from R5-3 to R5-4
 5) Delta Tau PMAC device support was added.
 
         Files added: added the motorApp/DeltaTauSrc directory.
-        
+
 
 Modification Log from R5-2 to R5-3
 ==================================
@@ -1618,7 +1664,7 @@ Modification Log from R4-4 to R4-5
 3) For two CPU board configurations only (i.e., EPICS and IP satellite boards),
         erroneous timeouts occurred if the EPICS board booted much faster than
         the satellite board.
-        
+
         File modified: CommSrc/serialIOMPF.cc; increased timeout from 2 to 10
                         seconds in call to msgQReceive() from serialIO().
 
@@ -2140,7 +2186,7 @@ Modification Log from V3-5 to R4-0
         - Modified motor_init_record_com() in motordevCom.c so that a "Load
                 Pos" command is issued only if the position from the
                 controller is zero.
-                
+
 6) Consolidated common driver local variables in the motordrvComCode.h file.
         - Created motordrvComCode.h
         - Moved common local variables from drvOms.c, drvOms58.c, drvMM3000.c,
@@ -2162,7 +2208,7 @@ Modification Log from V3-5 to R4-0
                 - initialized pointer to local initialized indicator in driver
                         table.
                 - set initialized indicator ON in init().
-                
+
 8) Both the MM3000 and MM4000 device driver support could generate a bus error
         under the following conditions:
         1) The user selected GPIB communication mode.
@@ -2172,7 +2218,7 @@ Modification Log from V3-5 to R4-0
 
         - Modified MM3000_build_trans() and MM4000_build_trans() in devMM3000.c
                 and devMM4000.c, respectively, to test for NULL board pointer.
-                
+
 
 9) Eliminated MM3000 and MM4000 device driver "internal" offset.
         - Removed "offset" from MM3000_build_trans() and MM4000_build_trans()
@@ -2361,5 +2407,4 @@ Modification Log from V3-5 to R4-0
         nearly running out of stack space.  Increased stack allocation from
         1,000 to 5,000 bytes.
         Files modified: devSoftAux.c
-
 
