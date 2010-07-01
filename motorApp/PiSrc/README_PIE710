@@ -7,6 +7,12 @@ Version: V5.023
 
 RS232:
 	9600,8,1,N (default)
+	connection:
+		db9 pin 2 (Rx)  -> Tx
+		db9 pin 3 (Tx)  -> Rx
+		db9 pin 5 (Com) -> Com
+		db9 pin 7 \		-> n.c.
+		db9 pin 8 /		-> n.c.
 
 Commands:
 	<axis#><command>[<arg>]</n>
