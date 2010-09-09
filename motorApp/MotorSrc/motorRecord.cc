@@ -140,8 +140,12 @@ HeadURL:        $URL$
  *                    the same as before when MDEL and ADEL are zero.
  * .58 04-15-10 rls - Added SYNC field to synchronize VAL/DVAL/RVAL with
  *                    RBV/DRBV/RRBV
+ * .59 09-08-10 rls - clean-up RCNT change value posting in do_work().
+ *                  - bug fix for save/restore not working when URIP=Yes. DRBV
+ *                    not getting initialized. Fixed in initial call to
+ *                    process_motor_info().
  *
- */                                                        
+ */
 
 #define VERSION 6.6
 
@@ -2181,8 +2185,9 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             /* reset retry counter if this is not a retry */
             if ((pmr->mip & MIP_RETRY) == 0)
             {
+                if (pmr->rcnt != 0)
+                    MARK(M_RCNT);
                 pmr->rcnt = 0;
-                MARK(M_RCNT);
             }
             else if (pmr->rmod == motorRMOD_A) /* Do arthmetic sequence retries. */
             {
@@ -3480,7 +3485,7 @@ static void
     else
     {
         pmr->rrbv = pmr->rmp;
-        if (pmr->urip == motorUEIP_No)
+        if (pmr->urip == motorUEIP_No || initcall == true)
             pmr->drbv = pmr->rrbv * pmr->mres;
     }
 
