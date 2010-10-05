@@ -41,6 +41,10 @@ in file LICENSE that is included with this distribution.
 *                  - changed EOT LS read status from AXISFAULT to AXISSTATUS so
 *                    LS status can be monitored independent of fault status.
 * .08 06-03-10 rls - Set motorAxisHasEncoder based on CfgFbkPosType parameter.
+* .09 09-13-10 rls - Bug fix from Wang Xiaoqiang (PSI); remove redundant EOS
+*                    append in sendAndReceive().  Fixes comm. problem with
+*                    Ensemble firmware 2.54.004 and above.
+*
 */
 
 
@@ -945,8 +949,6 @@ static asynStatus sendAndReceive(EnsembleController *pController, char *outputBu
         return(asynError);
 
     strcpy(outputCopy, outputBuff);
-    if (outputCopy[strlen(outputCopy) - 1] != ASCII_EOS_CHAR)
-        strcat(outputCopy, ASCII_EOS_STR);
     nWriteRequested=strlen(outputCopy);
 
     /* sendAndReceive is intended only for "fast" read-write operations (such as getting parameter/status values),
