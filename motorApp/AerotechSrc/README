@@ -69,10 +69,22 @@ EOT limit switch
 ENSEMBLE CONFIGURATION NOTES
 ============================
 
+- In the Controller->Communication->AsciiCmdEnable parameter,
+check the following items (everything else is unchecked);
 
-- Set the "Idle Polling" parameter the EnsembleAsynConfig() call <=
-InetSock1ActiveTimeSec Parameter.  This will prevent the Ensemble
-from closing the socket.
+    * RS232 Port 1
+    * Ethernet Socket 1
+    * Always Send EOS
+
+- Set the "Idle Polling" parameter of the EnsembleAsynConfig() call <=
+Controller->Communication->Ethernet->Sockets->InetSock1ActiveTimeSec Parameter.
+
+This will prevent the Ensemble from closing the socket.  In addition, the time
+between the call to drvAsynIPPortConfigure() and the call to
+EnsembleAsynConfig() in the st.cmd file must be less than the
+InetSock1ActiveTimeSec Parameter.  If this is not done a socket timeout will
+occur during IOC initialization and prevent EPICS from making a communication
+connection.
 
 
 DRIVER LIMITATIONS
