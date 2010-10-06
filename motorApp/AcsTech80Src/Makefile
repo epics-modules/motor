@@ -5,8 +5,6 @@ include $(TOP)/configure/CONFIG
 # The following are used for debugging messages.
 #USR_CXXFLAGS += -DDEBUG
 
-OPT_CXXFLAGS = 
-
 DBD += devSPiiPlus.dbd
 
 LIBRARY_IOC = acsTech80
