@@ -3,9 +3,10 @@ FILENAME...	drvSPiiPlus.cc
 USAGE...	Motor record driver level support for ACS Tech80 
                 SPiiPlus
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-09-08 18:24:12 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 
 */
 
@@ -38,6 +39,8 @@ Last Modified:	$Date: 2009-09-08 18:24:12 $
  * Modification Log:
  * -----------------
  * .01 04-08-05 jps initialized from drvSPiiPlus.cc
+ * .02 09-29-10 rls Added req'd initialization of motor_info->motor_motion to
+ *                  NULL in motor_init().
  */
 
 
@@ -726,6 +729,7 @@ static int motor_init()
 		motor_info->no_motion_count = 0;
 		motor_info->encoder_position = 0;
 		motor_info->position = 0;
+		motor_info->motor_motion = NULL;
 
 		/* Encoder Enable */
                 motor_info->encoder_present = YES;
