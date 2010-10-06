@@ -20,6 +20,7 @@ Last Modified:	$Date: 2009-06-18 19:38:20 $
  *                (motorAxisHome, motorAxisMove, motorAxisVelocityMove) and
  *                force a status update with a call to callCallback().
  *                - Matthew Pearson added deferred move support.
+ * 2010-10-05 rls - MP's fix for deferred moves broken in drvMotorSim.
  *
  */
 
