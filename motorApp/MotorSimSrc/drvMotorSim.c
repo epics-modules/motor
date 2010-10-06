@@ -20,6 +20,7 @@ Last Modified:	$Date: 2009-06-18 19:38:20 $
  *                (motorAxisHome, motorAxisMove, motorAxisVelocityMove) and
  *                force a status update with a call to callCallback().
  *                - Matthew Pearson added deferred move support.
+ * 2010-10-05 rls - MP's fix for deferred moves broken in drvMotorSim.
  *
  */
 
@@ -416,7 +417,11 @@ static int motorAxisSetInteger( AXIS_HDL pAxis, motorAxisParam_t function, int v
             }
 
             if (status != MOTOR_AXIS_ERROR )
+            {
                 status = motorParam->setInteger( pAxis->params, function, value );
+                motorParam->callCallback(pAxis->params);
+            }
+            epicsMutexUnlock(pAxis->axisMutex);
         }
         return (status);
     }
