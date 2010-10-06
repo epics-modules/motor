@@ -239,22 +239,7 @@ static RTN_STATUS Ensemble_build_trans (motor_cmnd command, double *parms,
 
     case HOME_FOR:
     case HOME_REV:
-        {
-            epicsUInt32 hparam = cntrl->home_dparam[axis];
-            if (command == HOME_FOR)
-                hparam |= 0x00000001;
-            else
-                hparam &= 0xFFFFFFFE;
-            cntrl->home_dparam[axis] = hparam;
-
-            sprintf(buff, "SETPARM @%d, 106, %d", axis, hparam);
-            strcpy(motor_call->message, buff);
-            rtnval = motor_end_trans_com(mr, drvtabptr);
-
-            rtnval = (RTN_STATUS) motor_start_trans_com(mr, Ensemble_cards);
-            sprintf(buff, "HOME @%d", axis);
-            motor_call->type = Ensemble_table[command];
-        }
+        send = false; // Commenting out until Home search can be stopped from EPICS
         break;
 
     case LOAD_POS:

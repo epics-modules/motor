@@ -24,6 +24,10 @@ Synapps Versions 4-5
 and higher are distributed subject to a Software License Agreement found
 in file LICENSE that is included with this distribution.
 -----------------------------------------------------------------------------
+* NOTES
+* -----
+* Verified with firmware:
+*      - 2.54.003
 *
 * Modification Log:
 * -----------------
@@ -41,6 +45,11 @@ in file LICENSE that is included with this distribution.
 *                  - changed EOT LS read status from AXISFAULT to AXISSTATUS so
 *                    LS status can be monitored independent of fault status.
 * .08 06-03-10 rls - Set motorAxisHasEncoder based on CfgFbkPosType parameter.
+* .09 09-13-10 rls - Bug fix from Wang Xiaoqiang (PSI); remove redundant EOS
+*                    append in sendAndReceive().  Fixes comm. problem with
+*                    Ensemble firmware 2.54.004 and above.
+* .10 09-29-10 rls - Commented out home search until firmware upgrade that
+*                    allows aborting home search from ASCII protocol.
 */
 
 
@@ -85,7 +94,7 @@ motorAxisDrvSET_t motorEnsemble =
     motorAxisSetInteger,        /**< Pointer to function to set an integer value */
     motorAxisGetDouble,         /**< Pointer to function to get a double value */
     motorAxisGetInteger,        /**< Pointer to function to get an integer value */
-    motorAxisHome,              /**< Pointer to function to execute a more to reference or home */
+    motorAxisHome,              /**< Pointer to function to execute a move to reference or home */
     motorAxisMove,              /**< Pointer to function to execute a position move */
     motorAxisVelocityMove,      /**< Pointer to function to execute a velocity mode move */
     motorAxisStop,              /**< Pointer to function to stop motion */
@@ -499,7 +508,9 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     epicsUInt32 hparam;
     int axis;
 
+    /* Return ERROR until Ensemble firmware upgrade.
     if (pAxis == NULL || pAxis->pController == NULL)
+    */
         return (MOTOR_AXIS_ERROR);
 
     axis = pAxis->axis;
@@ -945,8 +956,6 @@ static asynStatus sendAndReceive(EnsembleController *pController, char *outputBu
         return(asynError);
 
     strcpy(outputCopy, outputBuff);
-    if (outputCopy[strlen(outputCopy) - 1] != ASCII_EOS_CHAR)
-        strcat(outputCopy, ASCII_EOS_STR);
     nWriteRequested=strlen(outputCopy);
 
     /* sendAndReceive is intended only for "fast" read-write operations (such as getting parameter/status values),
