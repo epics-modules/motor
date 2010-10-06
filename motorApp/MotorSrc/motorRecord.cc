@@ -141,9 +141,6 @@ HeadURL:        $URL$
  * .58 04-15-10 rls - Added SYNC field to synchronize VAL/DVAL/RVAL with
  *                    RBV/DRBV/RRBV
  * .59 09-08-10 rls - clean-up RCNT change value posting in do_work().
- *                  - bug fix for save/restore not working when URIP=Yes. DRBV
- *                    not getting initialized. Fixed in initial call to
- *                    process_motor_info().
  *
  */
 
@@ -3485,7 +3482,7 @@ static void
     else
     {
         pmr->rrbv = pmr->rmp;
-        if (pmr->urip == motorUEIP_No || initcall == true)
+        if (pmr->urip == motorUEIP_No)
             pmr->drbv = pmr->rrbv * pmr->mres;
     }
 
