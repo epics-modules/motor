@@ -11,15 +11,56 @@
   <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
 </head>
 <body>
-  
-  <div style="text-align: center">
-    <h1>
-      <b>Motor Record Version 6-5-1 Release Notice</b></h1>
-  </div>
-  <div style="text-align: center">
-    <h4>
-      Modifications to Existing Features</h4>
-  </div>
+
+
+
+<div style="text-align: center">
+  <h1><b>Motor Record Version 6-5-2 Release Notice</b></h1>
+</div>
+<div style="text-align: center">
+  <h4>Modifications to Existing Features</h4>
+</div>
+<div style="text-align: left">
+  <p>
+  <b>Aerotech Ensemble</b>
+  </p>
+  <p>
+  <ul>
+    <li>
+      With the current Aerotech Ensemble firmware a home search can not be aborted 
+      from EPICS. Therefore, the home search command has been commented out of this 
+      release until an Ensemble firmware update resolves this problem.  Aerotech's 
+      Ensemble IDE software can be used to perform a home search that can be aborted.
+    </li>
+    <li>
+      Wang Xiaoqiang (PSI) fixed a bug in the Aerotech Ensemble asyn motor driver that 
+      was causing communication problems with Ensemble firmware 2.54.004 and above.  
+      The problem was a redundant EOS was being append to transmitted commands.
+    </li>
+  </ul>
+  </p>
+
+  <p>
+  <b>VxWorks 6.x compiler error</b>
+  </p>
+  <p>
+  The GNU preprocessor assertions in motor.h are deprecated with the VxWorks 6.x 
+  compiler.  Test for CPU macros that are compatible with VxWorks 6.x have been 
+  added.  This change prevents an "Error: unknown bit order!" compiler error with 
+  VxWorks 6.x.
+  </p>
+  </p>
+</div>
+
+
+<div style="text-align: center">
+  <h1>
+    <b>Motor Record Version 6-5-1 Release Notice</b></h1>
+</div>
+<div style="text-align: center">
+  <h4>
+    Modifications to Existing Features</h4>
+</div>
 <div style="text-align: left">
   <p><b>Aerotech Ensemble</b></p>
   <p>

@@ -1,4 +1,4 @@
-Motor Record R6-5-1 Release Notice
+Motor Record R6-5-2 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
@@ -134,13 +134,49 @@ Known Problems
         retry if retries are enabled.
 
 
+
+Modification Log from R6-5-1 to R6-5-2
+======================================
+
+1) The GNU preprocessor assertions in motor.h are deprecated with the VxWorks
+        6.x compiler.  Test for CPU macros that are compatible with VxWorks 6.x
+        have been added.  This change prevents an "Error: unknown bit order!"
+        compiler error with VxWorks 6.x.
+
+        File modified: motorApp/MotorSrc/motor.h
+
+2) Wang Xiaoqiang (PSI) bug fix for Aerotech Ensemble communication problem
+        with Ensemble firmware 2.54.004 and above.  Redundant EOS append in
+        sendAndReceive() removed.
+
+        File modified: drvEnsembleAsyn.cc
+
+3) Minor bug fix to ACS Motion Control, SPiiPlus controller.  Uninitialized
+        data area would sometimes cause a crash at iocInit time.
+        
+        Files modified: AcsTech80Src/drvSPiiPlus.cc
+                        AcsTech80Src/Makefile
+                        
+4) Matthew Pearson's (Diamond) bug fix for deferred moves broken with Motor
+        Simulation (devMotorSim) device driver.
+
+        File modified: MotorSimSrc/drvMotorSim.c
+
+5) Currently, the Aerotech Ensemble home search can not be aborted from EPICS.
+        Therefore, the home search command has been commented out of this
+        release until an Ensemble firmware update resolves this problem.
+
+        Files modified: devEnsemble.cc and drvEnsembleAsyn.cc
+
+
+
 Modification Log from R6-5 to R6-5-1
 ====================================
 
 1) Aerotech Ensemble asyn motor driver would crash the IOC at boot-up if the
         Ensemble was not powered up and able to communicate.
 
-        Files modified: drvEnsembleAsyn.cc
+        File modified: drvEnsembleAsyn.cc
 
 2) Aerotech Ensemble EOT limit switch status was not available except via an
         Ensemble fault condition.  With this release the status of the EOT
