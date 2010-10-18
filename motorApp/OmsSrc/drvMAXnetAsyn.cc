@@ -27,12 +27,6 @@ Last Modified:
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-
 
 #include "drvMAXnetAsyn.h"
 #include "paramLib.h"
@@ -51,9 +45,9 @@ Last Modified:
 #include "asynOctetSyncIO.h"
 
 #include "drvSup.h"
-#include "epicsExport.h"
 #define DEFINE_MOTOR_PROTOTYPES 1
 #include "motor_interface.h"
+#include "epicsExport.h"
 
 motorAxisDrvSET_t motorMAXnet =
   {
