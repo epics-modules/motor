@@ -60,25 +60,25 @@ typedef struct MotorStatus {
 class asynMotorDriver : public asynPortDriver {
 public:
     /* This is the constructor for the class. */
-    asynMotorDriver(const char *portName, int maxAxes, int numParams,
+    epicsShareFunc asynMotorDriver(const char *portName, int maxAxes, int numParams,
                     int interfaceMask, int interruptMask,
                     int asynFlags, int autoConnect, int priority, int stackSize);
 
     /* These are the methods that we override from asynPortDriver */
-    virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
-    virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
-    virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
-    virtual asynStatus setIntegerParam(int list, int index, int value);
-    virtual asynStatus setDoubleParam(int list, int index, double value);
-    virtual asynStatus callParamCallbacks(int list, int addr);
+    epicsShareFunc virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+    epicsShareFunc virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
+    epicsShareFunc virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
+    epicsShareFunc virtual asynStatus setIntegerParam(int list, int index, int value);
+    epicsShareFunc virtual asynStatus setDoubleParam(int list, int index, double value);
+    epicsShareFunc virtual asynStatus callParamCallbacks(int list, int addr);
 
     /* These are the methods that are new to this class */
-    virtual asynStatus moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration);
-    virtual asynStatus moveVelocityAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration);
-    virtual asynStatus homeAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration, int forwards);
-    virtual asynStatus stopAxis(asynUser *pasynUser, double acceleration);
-    virtual asynStatus profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger);
-    virtual asynStatus triggerProfile(asynUser *pasynUser);
+    epicsShareFunc virtual asynStatus moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration);
+    epicsShareFunc virtual asynStatus moveVelocityAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration);
+    epicsShareFunc virtual asynStatus homeAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration, int forwards);
+    epicsShareFunc virtual asynStatus stopAxis(asynUser *pasynUser, double acceleration);
+    epicsShareFunc virtual asynStatus profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger);
+    epicsShareFunc virtual asynStatus triggerProfile(asynUser *pasynUser);
 
 protected:
     int motorMoveRel;
