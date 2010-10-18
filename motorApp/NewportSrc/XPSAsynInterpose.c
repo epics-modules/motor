@@ -2,11 +2,11 @@
 #include <cantProceed.h>
 #include <epicsString.h>
 #include <errlog.h>
-#include <epicsExport.h>
 #include <iocsh.h>
 #include <asynDriver.h>
 #include <asynDrvUser.h>
 #include <XPSAsynInterpose.h>
+#include <epicsExport.h>
 
 typedef struct {
     XPSCommand command;

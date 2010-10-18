@@ -21,12 +21,12 @@ typedef int BOOL;
 #include <time.h>
 #include <epicsThread.h>
 #include <epicsMutex.h>
-#include <epicsExport.h>
 #include <epicsString.h>
 #include <asynDriver.h>
 #include <asynOctetSyncIO.h>
 #include <asynCommonSyncIO.h>
 #include <drvAsynIPPort.h>
+#include <epicsExport.h>
 
 
 /* The maximum number of sockets to XPS controllers.  The driver uses

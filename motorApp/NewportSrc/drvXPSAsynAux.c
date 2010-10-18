@@ -12,7 +12,6 @@
 
 #include <cantProceed.h> /* !! for callocMustSucceed() */
 
-#include <epicsExport.h>
 #include <epicsMutex.h>
 #include <epicsEvent.h>
 #include <epicsThread.h>
@@ -26,6 +25,7 @@
 #include <asynDrvUser.h>
 
 #include <XPS_C8_drivers.h>
+#include <epicsExport.h>
 
 typedef struct {
     char *portName;
