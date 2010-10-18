@@ -37,7 +37,6 @@
 #endif
 
 #include <iocsh.h>
-#include <epicsExport.h>
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <epicsTimer.h>
@@ -61,6 +60,7 @@
 #include "asynMotorDriver.h"
 #include "motor_interface.h"
 #include <limits.h>
+#include <epicsExport.h>
 
 /* Message queue size */
 #define MAX_MESSAGES 100
