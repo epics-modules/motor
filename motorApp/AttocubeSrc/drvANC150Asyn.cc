@@ -64,7 +64,6 @@ Last Modified:  $Date: 2009-08-13 20:05:24 $
 #include <string.h>
 
 #include "epicsThread.h"
-#include "epicsExport.h"
 #include "epicsEvent.h"
 #include "epicsMutex.h"
 #include "epicsTime.h"
@@ -77,6 +76,7 @@ Last Modified:  $Date: 2009-08-13 20:05:24 $
 #define DEFINE_MOTOR_PROTOTYPES 1
 #include "motor_interface.h"
 #include "paramLib.h"
+#include "epicsExport.h"
 
 /* End-of-string defines */
 #define ANC150_OUT_EOS   "\r\n" /* Command */
