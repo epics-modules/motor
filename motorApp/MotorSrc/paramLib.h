@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <shareLib.h>
+
 #define PARAM_OK (0)
 #define PARAM_ERROR (-1)
 
@@ -26,7 +28,7 @@ typedef struct
   void (*forceCallback)( PARAMS params );
 } paramSupport;
 
-extern paramSupport * motorParam;
+epicsShareExtern paramSupport * motorParam;
 
 #ifdef __cplusplus
 }
