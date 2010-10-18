@@ -21,9 +21,9 @@ December 13, 2009
 #include <epicsMutex.h>
 #include <ellLib.h>
 #include <iocsh.h>
-#include <epicsExport.h>
 
 #include "asynMotorDriver.h"
+#include <epicsExport.h>
 
 #include "route.h"
 
