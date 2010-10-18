@@ -68,13 +68,13 @@ in file LICENSE that is included with this distribution.
 #include "errlog.h"
 
 #include "drvSup.h"
-#include "epicsExport.h"
 #define DEFINE_MOTOR_PROTOTYPES 1
 #include "motor_interface.h"
 
 #include "paramLib.h"
 #include "drvEnsembleAsyn.h"
 #include "Parameters.h"
+#include "epicsExport.h"
 
 motorAxisDrvSET_t motorEnsemble = 
 {
@@ -98,7 +98,9 @@ motorAxisDrvSET_t motorEnsemble =
     motorAxisTriggerProfile     /**< Pointer to function to trigger a profile move */
 };
 
+extern "C" {
 epicsExportAddress(drvet, motorEnsemble);
+}
 
 typedef struct
 {
