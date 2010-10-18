@@ -53,6 +53,7 @@ ifdef SNCSEQ
 Newport_LIBS += seq pv
 endif
 Newport_LIBS += $(EPICS_BASE_IOC_LIBS)
+Newport_SYS_LIBS_WIN32 += ws2_32
 
 PROD_IOC += XPSGatheringMain
 XPSGatheringMain_SRCS += XPSGatheringMain.c
