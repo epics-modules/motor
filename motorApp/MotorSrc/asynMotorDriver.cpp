@@ -1,7 +1,9 @@
 #include <stdlib.h>
 
+#include <asynPortDriver.h>
+#define epicsExportSharedSymbols
+#include <shareLib.h>
 #include "asynMotorDriver.h"
-
 
 /** All of the arguments are simply passed to
   * the constructor for the asynPortDriver base class. After calling the base class
@@ -11,7 +13,7 @@
 
 static const char *driverName = "asynMotorDriver";
 
-asynMotorDriver::asynMotorDriver(const char *portName, int maxAxes, int numParams,
+epicsShareFunc asynMotorDriver::asynMotorDriver(const char *portName, int maxAxes, int numParams,
                                  int interfaceMask, int interruptMask,
                                  int asynFlags, int autoConnect, int priority, int stackSize)
 
@@ -72,7 +74,7 @@ asynMotorDriver::asynMotorDriver(const char *portName, int maxAxes, int numParam
 // We override the setIntegerParam, setDoubleParam, and callParamCallbacks methods so we can construct 
 // the aggregate status structure and do callbacks on it
 
-asynStatus asynMotorDriver::setIntegerParam(int axis, int function, int value)
+epicsShareFunc asynStatus asynMotorDriver::setIntegerParam(int axis, int function, int value)
 {
     int mask;
     
@@ -88,7 +90,7 @@ asynStatus asynMotorDriver::setIntegerParam(int axis, int function, int value)
     return asynPortDriver::setIntegerParam(axis, function, value);
 }
 
-asynStatus asynMotorDriver::setDoubleParam(int axis, int function, double value)
+epicsShareFunc asynStatus asynMotorDriver::setDoubleParam(int axis, int function, double value)
 {
     if (function == motorPosition) {
         axisStatusChanged[axis] = 1;
@@ -101,7 +103,7 @@ asynStatus asynMotorDriver::setDoubleParam(int axis, int function, double value)
     return asynPortDriver::setDoubleParam(axis, function, value);
 }   
 
-asynStatus asynMotorDriver::callParamCallbacks(int axis, int addr)
+epicsShareFunc asynStatus asynMotorDriver::callParamCallbacks(int axis, int addr)
 {
     if (this->axisStatusChanged[axis]) {
         this->axisStatusChanged[axis] = 0;
@@ -110,7 +112,7 @@ asynStatus asynMotorDriver::callParamCallbacks(int axis, int addr)
     return asynPortDriver::callParamCallbacks(axis, addr);
 }
 
-asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
+epicsShareFunc asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     int axis;
     int function = pasynUser->reason;
@@ -147,7 +149,7 @@ asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 }        
     
 
-asynStatus asynMotorDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
+epicsShareFunc asynStatus asynMotorDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
     int axis;
     int function = pasynUser->reason;
@@ -195,7 +197,7 @@ asynStatus asynMotorDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value
         
 }
 
-asynStatus asynMotorDriver::readGenericPointer(asynUser *pasynUser, void *pointer)
+epicsShareFunc asynStatus asynMotorDriver::readGenericPointer(asynUser *pasynUser, void *pointer)
 {
     static const char *functionName = "readGenericPointer";
     MotorStatus *pStatus = (MotorStatus *)pointer;
@@ -212,7 +214,7 @@ asynStatus asynMotorDriver::readGenericPointer(asynUser *pasynUser, void *pointe
     return(asynSuccess);
 }    
 
-asynStatus asynMotorDriver::moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration)
+epicsShareFunc asynStatus asynMotorDriver::moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration)
 {
     static const char *functionName = "moveAxis";
 
@@ -222,7 +224,7 @@ asynStatus asynMotorDriver::moveAxis(asynUser *pasynUser, double position, int r
     return(asynError);
 }
 
-asynStatus asynMotorDriver::moveVelocityAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration)
+epicsShareFunc asynStatus asynMotorDriver::moveVelocityAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration)
 {
     static const char *functionName = "moveVelocityAxis";
 
@@ -232,7 +234,7 @@ asynStatus asynMotorDriver::moveVelocityAxis(asynUser *pasynUser, double min_vel
     return(asynError);
 }
 
-asynStatus asynMotorDriver::homeAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration, int forwards)
+epicsShareFunc asynStatus asynMotorDriver::homeAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration, int forwards)
 {
     static const char *functionName = "homeAxis";
 
@@ -243,7 +245,7 @@ asynStatus asynMotorDriver::homeAxis(asynUser *pasynUser, double min_velocity, d
 }
 
 
-asynStatus asynMotorDriver::stopAxis(asynUser *pasynUser, double acceleration)
+epicsShareFunc asynStatus asynMotorDriver::stopAxis(asynUser *pasynUser, double acceleration)
 {
     static const char *functionName = "stopAxis";
 
@@ -253,7 +255,7 @@ asynStatus asynMotorDriver::stopAxis(asynUser *pasynUser, double acceleration)
     return(asynError);
 }
 
-asynStatus asynMotorDriver::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger)
+epicsShareFunc asynStatus asynMotorDriver::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger)
 {
     static const char *functionName = "profileMove";
 
@@ -263,7 +265,7 @@ asynStatus asynMotorDriver::profileMove(asynUser *pasynUser, int npoints, double
     return(asynError);
 }
 
-asynStatus asynMotorDriver::triggerProfile(asynUser *pasynUser)
+epicsShareFunc asynStatus asynMotorDriver::triggerProfile(asynUser *pasynUser)
 {
     static const char *functionName = "triggerProfile";
 
