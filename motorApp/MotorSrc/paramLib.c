@@ -13,7 +13,7 @@ drvMotorSim.c code.
 #include <string.h>
 #include <math.h>
 #define epicsExportSharedSymbols
-#include <sharelib.h>
+#include <shareLib.h>
 #include "paramLib.h"
 
 typedef enum { paramUndef, paramDouble, paramInt } paramType;
