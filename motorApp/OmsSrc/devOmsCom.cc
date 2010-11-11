@@ -65,6 +65,7 @@ HeadURL:        $URL$
  * .19  06-11-08 rls For MAXv, fix error on ER command; replace UU1.0 with UF.
  * .20  07-24-08 rls For MAXv, normalize PID values based on 32,767 maximum.
  * .21  03-01-10 rls Some MR commands still ignored; change fraction to .9.
+ * .22  11-10-10 rls Error check for valid acceleration rate on STOP command.
  *
  */
 
@@ -80,6 +81,14 @@ HeadURL:        $URL$
 #include "motor.h"
 #include "motordevCom.h"
 #include "devOmsCom.h"
+
+
+/* WARNING... The following is a COPY of a motorRecord.cc definition.
+   If device support uses MIP definitions, then they should be moved
+   from motorRecord.cc to motor.h. In addition, for device support to
+   fully use MIP (e.g. correct accleration on STOP command), device
+   support needs record support to implement previous MIP (PMIP). */
+#define MIP_JOG_STOP    0x2000  /* Stop jogging. */
 
 /*
 Command set used by record support.  WARNING! this must match "motor_cmnd" in
@@ -201,6 +210,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
     bool MAXv = false;
     bool MAXv_PSE = false;
     int card, signal;
+    long valid_acc;
 
     rtnind = OK;
     motor_call = &trans->motor_call;
@@ -291,14 +301,31 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
                 rtnind = ERROR;
             }
             else if (command == STOP_AXIS)
-            {
-                double acc = ((mr->velo - mr->vbas) / fabs(mr->mres)) / mr->accl;
-            
+            {                
+                double acc;
+
+                /* Use MIP to determine which acc. rate to use. */
+                if (mr->mip & MIP_JOG_STOP)
+                    acc = ((mr->jar) / fabs(mr->mres)) / mr->accl;
+                else
+                    acc = ((mr->velo - mr->vbas) / fabs(mr->mres)) / mr->accl;
+
+                valid_acc = NINT(acc);
+
+                /* For VME8/44 & MAXv, valid_acc < 8E6. For VME58, valid_acc < 1E9.
+                 * Use 8E6 in common code. */
+                if (valid_acc < 1 || valid_acc > 8E6)
+                {
+                    errPrintf(-1, __FILE__, __LINE__,
+                              "Overriding invalid acceleration.\n");
+                    valid_acc = (long) 200000; /* Using VME58 default. */
+                }
+                
                 /* Put in acceleration. */
                 if (MAXv == true)
                     strcat(motor_call->message, "FL");
                 strcat(motor_call->message, oms_table[SET_ACCEL].command);
-                sprintf(buffer, "%ld", NINT(acc));
+                sprintf(buffer, "%ld", valid_acc);
                 strcat(motor_call->message, buffer);
                 if (MAXv == true)
                     strcat(motor_call->message, "; WQ");
@@ -458,17 +485,13 @@ errorexit:                  errMessage(-1, "Invalid device directive");
 
                 case SET_ACCEL: /* Prevent invalid acceleration values. */
                     {
-                        long valid_acc = NINT(parms[itera]);
+                        valid_acc = NINT(parms[itera]);
 
-                        if (valid_acc < 1 || valid_acc > 1000000000)
+                        if (valid_acc < 1 || valid_acc > 8E6)
                         {
                             errPrintf(-1, __FILE__, __LINE__,
                                       "Overriding invalid acceleration.\n");
-
-                            if (valid_acc < 1)
-                                valid_acc = 1;
-                            else
-                                valid_acc = 1000000000;
+                            valid_acc = (long) 200000;  /* Using VME58 default. */
                         }
                         sprintf(buffer, "%ld", valid_acc);
                     }
