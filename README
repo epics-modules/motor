@@ -133,6 +133,11 @@ Known Problems
         appear to the motor record as a following error causing a needless
         retry if retries are enabled.
 
+7) Backlash and retries do not work with the Physik Instrumente (PI) GmbH & Co.
+        model C-862 controller. The backlash and retry move commands are (for
+        some unknown reason) ignored and several subsequent status request
+        result in communication timeouts.
+
 
 Modification Log from R6-5 to R6-6
 ==================================
@@ -177,6 +182,35 @@ Modification Log from R6-5 to R6-6
         Files modified: motordevCom.cc, drvMAXv.cc, motorx_tiny.adl,
                         motorx.adl, motorx_more.adl
 
+5) The GNU preprocessor assertions in motor.h are deprecated with the VxWorks
+        6.x compiler.  Test for CPU macros that are compatible with VxWorks 6.x
+        have been added.  This change prevents an "Error: unknown bit order!"
+        compiler error with VxWorks 6.x.
+
+        File modified: motorApp/MotorSrc/motor.h
+
+6) Wang Xiaoqiang (PSI) bug fix for Aerotech Ensemble communication problem
+        with Ensemble firmware 2.54.004 and above.  Redundant EOS append in
+        sendAndReceive() removed.
+
+        File modified: drvEnsembleAsyn.cc
+
+7) Minor bug fix to ACS Motion Control, SPiiPlus controller.  Uninitialized
+        data area would sometimes cause a crash at iocInit time.
+        
+        Files modified: AcsTech80Src/drvSPiiPlus.cc
+                        AcsTech80Src/Makefile
+
+8) Matthew Pearson's (Diamond) bug fix for deferred moves broken in the Motor
+        Simulation (devMotorSim) device driver.
+
+        File modified: MotorSimSrc/drvMotorSim.c
+
+9) Added error check for valid acceleration rate on STOP command to OMS device
+        support. This prevent "command error" messages when VBAS = VELO and a
+        STOP command is issued.
+
+        File modified: OmsSrc/devOmsCom.cc
 
 
 Modification Log from R6-4 to R6-5
