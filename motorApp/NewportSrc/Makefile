@@ -39,7 +39,7 @@ Newport_SRCS += XPS_trajectoryScan.st
 endif
 
 # strtok_r needed on WIN32
-Newport_SRCS_WIN32 += strtok_r.cpp
+Newport_SRCS_WIN32 += strtok_r.c
 
 # XPS Gathering test function
 Newport_SRCS += XPSGathering.c
