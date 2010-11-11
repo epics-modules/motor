@@ -17,7 +17,7 @@
 #endif
 
 #ifdef __rtems__
-#include "strtok_r.h"
+    #include "strtok_r.h"
 #endif
 
 #ifdef __cplusplus
