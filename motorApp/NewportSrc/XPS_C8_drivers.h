@@ -16,6 +16,10 @@
 	#define __stdcall 
 #endif
 
+#ifdef __rtems__
+#include "strtok_r.h"
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
