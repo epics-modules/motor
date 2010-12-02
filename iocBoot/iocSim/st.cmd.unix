@@ -17,8 +17,8 @@ motorSimCreateController("motorSim2", 8)
 #asynSetTraceMask("motorSim2", 0, 255)
 
 # motorSimConfigAxis(port, axis, lowLimit, highLimit, home, start)
-motorSimConfigAxis("motorSim2", 0, 20000, -20000, 500, 0)
-motorSimConfigAxis("motorSim2", 1, 20000, -20000, 1500, 1000)
-motorSimConfigAxis("motorSim2", 2, 20000, -20000, 2500, 2000)
-motorSimConfigAxis("motorSim2", 3, 20000, -20000, 3000, 3000)
+motorSimConfigAxis("motorSim2", 0, 20000, -20000,  500, 0)
+motorSimConfigAxis("motorSim2", 1, 20000, -20000, 1500, 0)
+motorSimConfigAxis("motorSim2", 2, 20000, -20000, 2500, 0)
+motorSimConfigAxis("motorSim2", 3, 20000, -20000, 3000, 0)
 iocInit
