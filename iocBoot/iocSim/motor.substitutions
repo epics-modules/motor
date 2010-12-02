@@ -1,4 +1,4 @@
-file "$(MOTOR)/db/basic_asyn_motor.db"
+file "../../db/basic_asyn_motor.db"
 {
 pattern
 {P,     N,  M,        DTYP,         PORT,       ADDR,  DESC,          EGU,      DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC,  DHLM,  DLLM,  INIT}
