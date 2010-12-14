@@ -502,8 +502,10 @@ motorSimAxis::motorSimAxis(motorSimController *pController, int axis, double low
       this->endpoint.T = 0;
       this->endpoint.axis[0].p = start;
       this->endpoint.axis[0].v = 0;
+      this->nextpoint.T = 0;
       this->nextpoint.axis[0].p = start;
       this->route = routeNew( &(this->endpoint), &pars );
+      this->deferred_move = 0;
 }
 
 
@@ -532,7 +534,7 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
 
     if (numAxes < 1 ) numAxes = 1;
     this->numAxes = numAxes;
-    
+    this->movesDeferred = 0;
     this->pAxes = (motorSimAxis**) calloc(numAxes, sizeof(motorSimAxis*));
     for (axis=0; axis<numAxes; axis++) {
         pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
