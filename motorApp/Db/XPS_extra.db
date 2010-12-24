@@ -20,7 +20,7 @@ grecord(ai,"$(P)$(R)READBACK") {
     field(PINI, "1")
     field(DTYP, "asynFloat64")
     field(SCAN, "I/O Intr")
-    field(INP,"@asyn($(PORT),$(ADDR))POSITION")
+    field(INP,"@asyn($(PORT),$(ADDR))MOTOR_POSITION")
 }
 
 grecord(ai,"$(P)$(R)XPS_STATUS") {
