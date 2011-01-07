@@ -43,7 +43,6 @@ HeadURL:        $URL$
 #include "motor.h"
 #include "motordrvCom.h"
 #include "drvEnsembleAsyn.h"
-#include "drvEnsemble.h"
 #include "drvSoloist.h"
 
 

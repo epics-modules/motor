@@ -11,7 +11,6 @@ LIBRARY_IOC = Aerotech
 
 # Aerotech driver support.
 SRCS += AerotechRegister.cc
-SRCS += devEnsemble.cc drvEnsemble.cc
 SRCS += devSoloist.cc  drvSoloist.cc
 SRCS += drvEnsembleAsyn.cc
 
