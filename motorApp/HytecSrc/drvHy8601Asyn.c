@@ -17,6 +17,12 @@
 /*  Original Developers   :-      Peter Denison                                 */
 /*  Subsequent Developers :-      Jim Chen. Started from 13-Oct-2009            */
 /*                                                                              */
+/*  Version:        $Revision::                                              $  */
+/*  Modified By:    $Author::                                                $  */
+/*  Last Modified:  $Date::                                                  $  */
+/*  HeadURL:        $URL::                                                   $  */
+/*                                                                              */
+/*                                                                              */
 /********************************************************************************/
 /*                                                                              */
 /*  Description :- Asyn motor Driver interface for                              */

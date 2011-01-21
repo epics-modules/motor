@@ -1,3 +1,8 @@
+/*  Version:        $Revision::                                              $  */
+/*  Modified By:    $Author::                                                $  */
+/*  Last Modified:  $Date::                                                  $  */
+/*  HeadURL:        $URL::                                                   $  */
+
 /* This is the EPICS dependent code for the Hytec 8601 Step motor driver.
  * By making this separate file for the EPICS dependent code the driver itself
  * only needs libCom from EPICS for OS-independence (i.e. it is then possible to create

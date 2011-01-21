@@ -1,3 +1,8 @@
+/*  Version:        $Revision::                                              $  */
+/*  Modified By:    $Author::                                                $  */
+/*  Last Modified:  $Date::                                                  $  */
+/*  HeadURL:        $URL::                                                   $  */
+
 #ifndef DRV_HY8601_H
 #define DRV_HY8601_H
 
