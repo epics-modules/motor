@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen/SLUITER/R3-14-8/support/motor/motorApp/op/adl/motorxU.adl"
-	version=030101
+	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-12/support/motor/svn/motorApp/op/adl/motorxU.adl"
+	version=030105
 }
 display {
 	object {
@@ -598,10 +598,10 @@ rectangle {
 }
 rectangle {
 	object {
-		x=16
+		x=17
 		y=58
-		width=145
-		height=21
+		width=142
+		height=22
 	}
 	"basic attribute" {
 		clr=30
@@ -609,8 +609,10 @@ rectangle {
 		width=2
 	}
 	"dynamic attribute" {
-		vis="if not zero"
+		vis="calc"
+		calc="A!=0||B==7"
 		chan="$(P)$(M).SET"
+		chanB="$(P)$(M).STAT"
 	}
 }
 "text update" {
@@ -678,4 +680,42 @@ rectangle {
 	align="horiz. centered"
 	limits {
 	}
+}
+text {
+	object {
+		x=43
+		y=152
+		width=84
+		height=10
+	}
+	"basic attribute" {
+		clr=30
+		fill="outline"
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A==7"
+		chan="$(P)$(M).STAT"
+	}
+	textix="Controller"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=43
+		y=160
+		width=84
+		height=10
+	}
+	"basic attribute" {
+		clr=30
+		fill="outline"
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A==7"
+		chan="$(P)$(M).STAT"
+	}
+	textix="Error"
+	align="horiz. centered"
 }
