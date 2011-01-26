@@ -164,15 +164,15 @@ Modification Log from R6-5 to R6-6
         task and the console.  Since a watchdog timer trip indicates that the
         MAXv has rebooted and no longer has valid motor positions, the
         controller is disabled and is no longer available to EPICS until after
-        the VME crate has been power cycled.  Other MAXv boards in the system
-        are unaffected by this scenario.
+        the VME crate has been rebooted.  Other MAXv boards in the system are
+        unaffected by this scenario.
 
         To better communicate this problem to the user, several medm displays
         have been changed.  Small displays (motorx_tiny.adl, motorx.adl) will
         show a yellow border around their position readback values.  Larger
         displays (motorx_more.adl, motorx_all.adl) will display the message
         "Controller Error" in yellow.  The following error message at the
-        console and/or in the errlog is definitive;
+        console and/or in the IOC errlog is definitive;
 
         "***MAXv card #<card> Disabled*** Watchdog Timeout CTR =<ctr>"
 
@@ -207,10 +207,45 @@ Modification Log from R6-5 to R6-6
         File modified: MotorSimSrc/drvMotorSim.c
 
 9) Added error check for valid acceleration rate on STOP command to OMS device
-        support. This prevent "command error" messages when VBAS = VELO and a
+        support. This prevents "command error" messages when VBAS = VELO and a
         STOP command is issued.
 
         File modified: OmsSrc/devOmsCom.cc
+
+10) There is a problem with initiating a home search with the Aerotech Ensemble
+        motor controller with EPICS.  The problem is that the EPICS Ensemble
+        driver uses Aerotech's ASCII communication protocol and that protocol
+        blocks all communication on ASCII communication ports during a home
+        search.  Consequently, once a home search is started from EPICS, it is
+        unable to stop it.
+
+        With this release, the home search function is commented out of the
+        Ensemble driver.  Users that need to perform a home search should do it
+        from Aerotech's IDE software, which can abort a home search.
+
+        File modified: AerotechSrc/drvEnsembleAsyn.cc
+
+11) Since the Ensemble network connection requires period communication from
+        the host to prevent the Ensemble from closing the network socket, the
+        Ensemble support based on the old device driver architecture (phase 1)
+        was removed with this release.  The asyn motor architecture supports
+        continuous, periodic updates; the old architecture does not.
+
+        Files deleted: AerotechSrc/[devEnsemble.cc, drvEnsemble.cc,
+                                    drvEnsemble.h]
+        Files modified: AerotechSrc/[AerotechRegister.h, Makefile,
+                                     devAerotech.dbd]
+
+12) A reboot error check was added to the OMS VME58 device driver.  When the
+        reboot error check detects that a VME58 board has rebooted since the
+        last power-cycle or VME SysReset, and no longer has valid motor
+        positions, the controller is disabled and is no longer available to
+        EPICS until after the VME crate has been rebooted.  Other VME58
+        boards in the system are unaffected by this scenario.  The following
+        error message is sent to the IOC error log;
+
+        ***VME58 card #0 Disabled*** Reboot Detected.
+
 
 
 Modification Log from R6-4 to R6-5
