@@ -6,6 +6,7 @@ USAGE...        OMS driver level "include" information that is specific to OMS
 Version:        $Revision$
 Modified By:    $Author$
 Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -46,6 +47,7 @@ Last Modified:  $Date$
  * .09  05-09-97 jps increase maximum card count to 15
  * .10  08-22-01 rls "int" type specifications for all bit-fields.
  * .11  03-21-05 rls replace VxWorks specific "uint16_t" with "epicsUInt16".
+ * .12  01-26-11 rls added reboot flag in DPRAM R/W reserved area.
  *  
  */
 
@@ -247,17 +249,19 @@ typedef struct
 
 /* OMS VME dual port memory map */
 struct vmex_motor
-{
-    epicsInt16 inPutIndex;
-    epicsInt16 outGetIndex;
-    epicsInt16 inBuffer[BUFFER_SIZE];
-    epicsInt16 reserved0[254];
-    MOTOR_DATA_REGS data[OMS_NUM_CHANNELS];
-    epicsInt16 outPutIndex;
-    epicsInt16 inGetIndex;
-    epicsInt16 outBuffer[BUFFER_SIZE];
-    epicsInt16 reserved1[750];
-    MOTOR_CNTRL_REGS control;
+{                                               /* Offset */
+    epicsInt16 inPutIndex;                      /* 0x0000 */
+    epicsInt16 outGetIndex;                     /* 0x0002 */
+    epicsInt16 inBuffer[BUFFER_SIZE];           /* 0x0004 */
+    epicsInt16 reserved0[254];                  /* 0x0204 */
+    MOTOR_DATA_REGS data[OMS_NUM_CHANNELS];     /* 0x0400 */
+    epicsInt16 outPutIndex;                     /* 0x0800 */
+    epicsInt16 inGetIndex;                      /* 0x0802 */
+    epicsInt16 outBuffer[BUFFER_SIZE];          /* 0x0804 */
+    epicsInt16 rebootind;                       /* 0x0A04 - used by driver to
+                                                 * test for board reboot. */
+    epicsInt16 reserved1[749];                  /* 0x0A06 */
+    MOTOR_CNTRL_REGS control;                   /* 0x0FE0 */
 };
 
 #endif	/* INCdrvOms58h */

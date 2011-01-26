@@ -109,6 +109,9 @@ HeadURL:        $URL$
  * .37  02-05-09 rls - Have start_status() start ALL updates before waiting.
  * .38  06-18-09 rls - Make oms58Setup() error messages more prominent.
  * .39  03-15-10 rls - sprintf() not callable from any OS ISR.
+ * .40  01-26-11 rls - added reboot flag to DPRAM R/W reserved area. Driver
+ *                     sets flag to 0x4321; set_status() disables board if flag
+ *                     does not read 0x4321.
  *
  */
 
@@ -225,6 +228,8 @@ struct drvOms58_drvet
 } drvOms58 = {2, report, init};
 
 extern "C" {epicsExportAddress(drvet, drvOms58);}
+
+static char rebootmsg[] = "\n***VME58 card #%d Disabled*** Reboot Detected.\n\n";
 
 static struct thread_args targs = {SCAN_RATE, &oms58_access, 0.000};
 
@@ -415,6 +420,17 @@ static int set_status(int card, int signal)
     nodeptr = motor_info->motor_motion;
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
     status.All = motor_info->status.All;
+
+    if (pmotor->rebootind != 0x4321)    /* Test if board has rebooted. */
+    {
+        errlogPrintf(rebootmsg, card);
+        status.Bits.RA_PROBLEM = 1;
+        motor_info->status.All = status.All;
+        send_mess(card, STOP_ALL, (char) NULL);
+        /* Disable board. */
+        motor_state[card] = (struct controller *) NULL;
+        return(rtn_state = 1); /* End move. */
+    }
 
     if (motor_info->encoder_present == YES)
     {
@@ -1216,6 +1232,8 @@ static int motor_init()
                 if (motorIsrSetup(card_index) == ERROR)
                     errPrintf(0, __FILE__, __LINE__, "Interrupts Disabled!\n");
             }
+
+            pmotor->rebootind = 0x4321; /* Set reboot indicator. */
 
             start_status(card_index);
             for (motor_index = 0; motor_index < total_axis; motor_index++)
