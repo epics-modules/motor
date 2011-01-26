@@ -13148,7 +13148,7 @@ composite {
 					display[0] {
 						label="m3"
 						name="motorx_more.adl"
-						args="P=$(P),M=m3"
+						args="P=$(P),M=m75"
 					}
 					clr=14
 					bclr=51
@@ -13303,7 +13303,7 @@ composite {
 					display[0] {
 						label="m4"
 						name="motorx_more.adl"
-						args="P=$(P),M=m4"
+						args="P=$(P),M=m76"
 					}
 					clr=14
 					bclr=51
@@ -13458,7 +13458,7 @@ composite {
 					display[0] {
 						label="m5"
 						name="motorx_more.adl"
-						args="P=$(P),M=m5"
+						args="P=$(P),M=m77"
 					}
 					clr=14
 					bclr=51
@@ -13613,7 +13613,7 @@ composite {
 					display[0] {
 						label="m6"
 						name="motorx_more.adl"
-						args="P=$(P),M=m6"
+						args="P=$(P),M=m78"
 					}
 					clr=14
 					bclr=51
@@ -13768,7 +13768,7 @@ composite {
 					display[0] {
 						label="m7"
 						name="motorx_more.adl"
-						args="P=$(P),M=m7"
+						args="P=$(P),M=m79"
 					}
 					clr=14
 					bclr=51
@@ -13923,7 +13923,7 @@ composite {
 					display[0] {
 						label="m8"
 						name="motorx_more.adl"
-						args="P=$(P),M=m8"
+						args="P=$(P),M=m80"
 					}
 					clr=14
 					bclr=51
@@ -14078,7 +14078,7 @@ composite {
 					display[0] {
 						label="m1"
 						name="motorx_more.adl"
-						args="P=$(P),M=m1"
+						args="P=$(P),M=m73"
 					}
 					clr=14
 					bclr=51
@@ -14233,7 +14233,7 @@ composite {
 					display[0] {
 						label="m2"
 						name="motorx_more.adl"
-						args="P=$(P),M=m2"
+						args="P=$(P),M=m74"
 					}
 					clr=14
 					bclr=51
@@ -14519,7 +14519,7 @@ composite {
 					display[0] {
 						label="m3"
 						name="motorx_more.adl"
-						args="P=$(P),M=m3"
+						args="P=$(P),M=m83"
 					}
 					clr=14
 					bclr=51
@@ -14674,7 +14674,7 @@ composite {
 					display[0] {
 						label="m4"
 						name="motorx_more.adl"
-						args="P=$(P),M=m4"
+						args="P=$(P),M=m84"
 					}
 					clr=14
 					bclr=51
@@ -14829,7 +14829,7 @@ composite {
 					display[0] {
 						label="m5"
 						name="motorx_more.adl"
-						args="P=$(P),M=m5"
+						args="P=$(P),M=m85"
 					}
 					clr=14
 					bclr=51
@@ -14984,7 +14984,7 @@ composite {
 					display[0] {
 						label="m6"
 						name="motorx_more.adl"
-						args="P=$(P),M=m6"
+						args="P=$(P),M=m86"
 					}
 					clr=14
 					bclr=51
@@ -15139,7 +15139,7 @@ composite {
 					display[0] {
 						label="m7"
 						name="motorx_more.adl"
-						args="P=$(P),M=m7"
+						args="P=$(P),M=m87"
 					}
 					clr=14
 					bclr=51
@@ -15294,7 +15294,7 @@ composite {
 					display[0] {
 						label="m8"
 						name="motorx_more.adl"
-						args="P=$(P),M=m8"
+						args="P=$(P),M=m88"
 					}
 					clr=14
 					bclr=51
@@ -15449,7 +15449,7 @@ composite {
 					display[0] {
 						label="m1"
 						name="motorx_more.adl"
-						args="P=$(P),M=m1"
+						args="P=$(P),M=m81"
 					}
 					clr=14
 					bclr=51
@@ -15604,7 +15604,7 @@ composite {
 					display[0] {
 						label="m2"
 						name="motorx_more.adl"
-						args="P=$(P),M=m2"
+						args="P=$(P),M=m82"
 					}
 					clr=14
 					bclr=51
