@@ -81,6 +81,10 @@ HeadURL:        $URL$
  *                    Counter. If Counter is nonzero, print error message and
  *                    clear Counter.
  * 19  06-07-10 rls - Disable board if WDT CTR is nonzero; don't clear CTR.
+ * 20  02-03-11 rls - Increase max. config. string size from 150 to 300 bytes.
+ *                  - Increase all receive buffer sizes to same 300 bytes.
+ *                  - Add error checks for buffer overflow with MAXvConfig()'s
+ *                    configuration string argument and in readbuf(). 
  *
  */
 
@@ -137,7 +141,7 @@ volatile int drvMAXvdebug = 0;
 extern "C" {epicsExportAddress(int, drvMAXvdebug);}
 
 #define pack2x16(p)      ((epicsUInt32)(((p[0])<<16)|(p[1])))
-#define INITSTR_SIZE    150     /* 150 byte intialization string. */
+#define INITSTR_SIZE    300     /* 300 byte configuration string. */
 
 /* Global data. */
 int MAXv_num_cards = 0;
@@ -159,6 +163,10 @@ static epicsUInt32 MAXv_brd_size;  /* card address boundary */
 /*----------------functions-----------------*/
 
 /* Common local function declarations. */
+extern "C" {
+RTN_STATUS MAXvSetup(int, int, unsigned int, unsigned int, int, int);
+RTN_VALUES MAXvConfig(int, const char *);
+}
 static long report(int);
 static long init();
 static void query_done(int, int, struct mess_node *);
@@ -249,7 +257,7 @@ static long init()
 
 static void query_done(int card, int axis, struct mess_node *nodeptr)
 {
-    char buffer[40];
+    char buffer[MAX_IDENT_LEN];
 
     send_mess(card, DONE_QUERY, MAXv_axis[axis]);
     recv_mess(card, buffer, 1);
@@ -310,7 +318,7 @@ static int set_status(int card, int signal)
     char *p, *tok_save;
     struct axis_status *ax_stat;
     struct encoder_status *en_stat;
-    char q_buf[50], outbuf[50];
+    char q_buf[MAX_IDENT_LEN], outbuf[50];
     int index;
     bool ls_active = false;
     bool got_encoder;
@@ -563,7 +571,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     if (pmotor->inGetIndex != pmotor->inPutIndex)
     {
         Debug(1, "send_mess - clearing data in buffer\n");
-        recv_mess(card, NULL, -1);
+        recv_mess(card, outbuf, FLUSH);
     }
 
 
@@ -655,7 +663,7 @@ static int recv_mess(int card, char *com, int amount)
     {
         if (pmotor->inGetIndex != pmotor->inPutIndex)
         {
-            char junk[80];
+            char junk[MAX_IDENT_LEN];
 
             readbuf(pmotor, junk);
 
@@ -717,6 +725,14 @@ static char *readbuf(volatile struct MAXv_motor *pmotor, char *bufptr)
 
     if (start < end)    /* Test for message wraparound in buffer. */
         memcpy(bufptr, start, bufsize);
+    else if (start == end) /* Test for empty input buffer. */
+    {
+        static char emptymsg[] = 
+        "MAXv DPRAM input buffer empty; inGetIndex = %d inPutIndex = %d\n";
+ 
+        errlogPrintf(emptymsg, getIndex, putIndex);
+        return(bufptr);
+    }
     else
     {
         int size;
@@ -725,8 +741,16 @@ static char *readbuf(volatile struct MAXv_motor *pmotor, char *bufptr)
         size = bufend - start;
         bufsize += BUFFER_SIZE;
 
-        memcpy(bufptr, start, size);
-        memcpy((bufptr + size), (const char *) &pmotor->inBuffer[0], (bufsize - size));
+        if (bufsize > MAX_IDENT_LEN)
+        {
+            errlogPrintf("\n*** MAXv readbuf() overrun ***; bufsize = %d\n\n", bufsize);
+            return(bufptr);
+        }
+        else
+        {
+            memcpy(bufptr, start, size);
+            memcpy((bufptr + size), (const char *) &pmotor->inBuffer[0], (bufsize - size));
+        }
     }
     
     getIndex += bufsize;
@@ -896,7 +920,7 @@ MAXvSetup(int num_cards,        /* maximum number of cards in rack */
 }
 
 RTN_VALUES MAXvConfig(int card,                 /* number of card being configured */
-                      const char *initstr)      /* initialization string */
+                      const char *initstr)      /* configuration string */
 {
     if (card < 0 || card >= MAXv_num_cards)
     {
@@ -906,7 +930,8 @@ RTN_VALUES MAXvConfig(int card,                 /* number of card being configur
     }
     if (strlen(initstr) > INITSTR_SIZE)
     {
-        errlogPrintf("MAXvConfig: initialization string > %d bytes.\n", INITSTR_SIZE);
+        errlogPrintf("\n*** MAXvConfig ERROR ***\n");
+        errlogPrintf("Configuration string: %d bytes > %d maximum.\n\n", strlen(initstr), INITSTR_SIZE);
         epicsThreadSleep(5.0);
         return(ERROR);
     }
@@ -1014,7 +1039,7 @@ static int motor_init()
     volatile struct MAXv_motor *pmotor;
     long status;
     int card_index, motor_index, itera;
-    char axis_pos[50], encoder_pos[50], **strptr;
+    char axis_pos[MAX_IDENT_LEN], encoder_pos[MAX_IDENT_LEN], **strptr;
     char *tok_save, *pos_ptr;
     int total_encoders = 0, total_axis = 0, total_pidcnt = 0;
     volatile void *localaddr;
@@ -1242,7 +1267,7 @@ static int motor_init()
 
     Debug(3, "Started motor_task\n");
 
-    /* Deallocate memory for initialization strings. */
+    /* Deallocate memory for configuration strings. */
     for (itera = 0, strptr = &initstring[0]; itera < MAXv_num_cards; itera++, strptr++)
         free(*strptr);
     free(initstring);
@@ -1281,7 +1306,7 @@ extern "C"
     static const iocshArg setupArg5 = {"polling rate - 1/60 sec units", iocshArgInt};
 // Oms Config arguments
     static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
-    static const iocshArg configArg1 = {"initialization string", iocshArgString};
+    static const iocshArg configArg1 = {"configuration string", iocshArgString};
 
     static const iocshArg * const OmsSetupArgs[6] = {&setupArg0, &setupArg1,
         &setupArg2, &setupArg3, &setupArg4, &setupArg5};
