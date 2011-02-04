@@ -17,7 +17,7 @@ For all MAXv motors.
 MAXv array base address
 -----------------------
 - defined the by 3rd argument to the MAXvSetup() call.
-- must be both a valid address and on a valid address boundry for the selected
+- must be both a valid address and on a valid address boundary for the selected
 VME Address Space.  A valid address for an A16 address must be 4 hex digits;
 A24 - 6 hex digits; A32 - 8 hex digits.
 
@@ -31,6 +31,7 @@ valid MAXv| 0x0000 | 0x10 0000 | 0x1000 0000 |
 addresses | 0x1000 | 0x11 0000 | 0x1100 0000 |
           | 0x2000 | 0x12 0000 | 0x1200 0000 |
           |   ...  |    ...    |      ...    |
+          | 0xE000 | 0x1E 0000 | 0x1E00 0000 |
           | 0xF000 | 0x1F 0000 | 0x1F00 0000 |
           |        | 0x20 0000 | 0x2000 0000 |
           |        |    ...    |      ...    |
@@ -50,21 +51,23 @@ MAXvSetup(3, 24, 0xA00000, 190, 5, 10)
 NOTES:
 - Unlike the other OMS models, the MAXv VME Address Modifiers (AM) do not
   respond to both supervisory and non-privileged access.  Hence, the MAXv's
-  AM's must match the CPU board's AM's exactly.
+  AM's must match the CPU board's AM's exactly. At the APS, this means the
+  AM must be set to A16 privileged access; 0x2D .
 
-Configure the MAXv's limit switch sense by placing one of the following MAXv
-controller commands in the 2nd argument of MAXvConfig(); the initialization
-string.  This command determines which TTL signal level defines an active
-limit switch input:
+- Configure the MAXv's limit switch sense by placing one of the following MAXv
+  controller commands in the 2nd argument of MAXvConfig(); the initialization
+  string.  This command determines which TTL signal level defines an active
+  limit switch input:
 
-LL - low (default).
-LH - high.
+  LL - low (default).
+  LH - high.
 
-In addition, one of the following MAXv controller commands must appear in the
-initialization string to configure the type of axis:
-PSO - open loop stepper axis.
-PSE - stepper axis with encoder.
-PSM - servo axis
+- One of the following MAXv controller commands must appear in the
+  initialization string to configure the type of axis:
+
+  PSO - open loop stepper axis.
+  PSE - stepper axis with encoder.
+  PSM - servo axis
 
 Note: Separate multiple commands in the initialization string with ";".
 
