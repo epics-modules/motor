@@ -245,7 +245,16 @@ Modification Log from R6-5 to R6-6
         error message is sent to the IOC error log;
 
         ***VME58 card #0 Disabled*** Reboot Detected.
+        
+        Files modified: OmsSrc/[drvOms58.cc, drvOms58.h]
 
+13) Michael Davidsaver (BNL) discovered buffer overflow vulnerabilities in the
+        OMS MAXv driver.  Added buffer overflow error checks in MAXvConfig()'s
+        configuration string argument and in readbuf(). Added a counter to
+        send_mess()'s "waiting for message acknowledgement" loop to prevent
+        infinite loop when MAXv board is not responding.
+        
+        File modified: OmsSrc/drvMAXv.cc        
 
 
 Modification Log from R6-4 to R6-5
