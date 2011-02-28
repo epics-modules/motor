@@ -42,6 +42,7 @@ Last Modified:	$Date: 2008-03-14 20:10:01 $
  *                   MDrive_build_trans().
  * .05  09/20/04 rls remove '?' command string padding.
  * .06  04/06/05 rls Bug fix for not setting accel = decel.
+ * .07  01/28/11 jps MDrive Release 3.x requires an '=' on velocity commands. 
  */
 
 #include <string.h>
@@ -251,11 +252,11 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
 	    break;
 	
 	case SET_VEL_BASE:
-	    sprintf(buff, "VI %d", intval);
+	    sprintf(buff, "VI=%d", intval);
 	    break;
 	
 	case SET_VELOCITY:
-	    sprintf(buff, "VM %d", intval);
+	    sprintf(buff, "VM=%d", intval);
 	    break;
 	
 	case SET_ACCEL:
