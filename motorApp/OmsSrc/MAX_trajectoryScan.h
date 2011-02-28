@@ -239,7 +239,7 @@ double  epicsMotorPos[MAX_AXES];
 assign  epicsMotorPos to {"","","","","","","",""};
 monitor epicsMotorPos;
 
-double  epicsMotorDir[MAX_AXES]; 
+int  epicsMotorDir[MAX_AXES]; 
 assign  epicsMotorDir to {"","","","","","","",""};
 monitor epicsMotorDir;
 
