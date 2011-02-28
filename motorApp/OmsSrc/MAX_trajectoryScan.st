@@ -104,7 +104,6 @@ int k;
 int n;
 double delay;
 int anyMoving;
-int anyMovingPrev;
 int ncomplete;
 int nextra;
 int npoints;
@@ -146,11 +145,11 @@ unsigned long startTime;
 %% static int writeRead(SS_ID ssId, struct UserVar *pVar, char *command, char *reply);
 %% static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos, epicsInt32 *raw, double *dtime);
 %% static int getMotorPositionsRB(SS_ID ssId, struct UserVar *pVar, double *pos, epicsInt32 *rawP, int *rawV, int *rawA, double *dtime);
-%% static int getMotorMoving(SS_ID ssId, struct UserVar *pVar);
+%% static int getMotorMoving(SS_ID ssId, struct UserVar *pVar, int movingMask);
 %% static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar);
 %% static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar);
 %%static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *timeTrajectory,
-%%	double *motorTrajectory, double epicsMotorDir, int moveMode, int npoints, int npulses, double motorResolution,
+%%	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, int npulses, double motorResolution,
 %%	int *position, int *velocity, int *acceleration);
 %%static int getStarted(SS_ID ssId, struct UserVar *pVar);
 
@@ -201,16 +200,22 @@ ss maxTrajectoryScan {
 				sprintf(macroBuf, "M%d", i+1);
 				sprintf(motorName, "%s%s.VAL", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorPos[i], motorName);
+				pvMonitor(epicsMotorPos[i]);
 				sprintf(motorName, "%s%s.DIR", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorDir[i], motorName);
+				pvMonitor(epicsMotorDir[i]);
 				sprintf(motorName, "%s%s.OFF", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorOff[i], motorName);
+				pvMonitor(epicsMotorOff[i]);
 				sprintf(motorName, "%s%s.DMOV", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorDone[i], motorName);
+				pvMonitor(epicsMotorDone[i]);
 				sprintf(motorName, "%s%s.MRES", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorMres[i], motorName);
+				pvMonitor(epicsMotorMres[i]);
 				sprintf(motorName, "%s%s.CARD", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorCard[i], motorName);
+				pvMonitor(epicsMotorCard[i]);
 				if (cardNumber == -2) {
 					cardNumber = epicsMotorCard[i];
 				} else {
@@ -287,7 +292,7 @@ ss maxTrajectoryScan {
 			if (moveMode == MOVE_MODE_RELATIVE) {
 				npoints = nelements;
 			} else {
-				npoints = nelements-1;
+				npoints = nelements;
 			}
 
 			/* calculate time at which motor should reach each trajectory point */
@@ -360,7 +365,8 @@ ss maxTrajectoryScan {
 
 			for (j=0, firstTask=1; j<MAX_AXES; j++) {
 				if (moveAxis[j]) {
-					
+					if (epicsMotorDir[j] == 0) dir=1; else dir=-1;
+
 					/* we may need current raw positions to mock up relative mode */
 					%%epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
 					%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
@@ -444,8 +450,15 @@ ss maxTrajectoryScan {
 						if (segment_v_end < 0) segment_v_end = 0;
 						if (segment_v_end > 4194303) segment_v_end = 4194303;
 
-						/* BUG in MAXV: doesn't do relative trajectories right. Try to work around. */
-						if (moveMode != MOVE_MODE_ABSOLUTE) position[j][i] += motorCurrentRaw[j];
+						if (moveMode != MOVE_MODE_ABSOLUTE) {
+							position[j][i] += dir*motorCurrentRaw[j];
+							if (debugLevel > 7) printf("moveMode == MOVE_MODE_ABSOLUTE, adding dir*motorCurrentRaw=%d\n", dir*motorCurrentRaw[j]);
+						} else {
+							%%pVar->k = NINT(pVar->epicsMotorOff[pVar->j] / pVar->epicsMotorMres[pVar->j]);
+							position[j][i] -=  dir*k;
+							if (debugLevel > 7) printf("moveMode == %d, subtracting %d\n", moveMode, dir*k);
+						}
+
 
 						if (do_split) {
 							if (firstTask && ((outBitNum >= 0) && (outBitNum <= 15))) {
@@ -579,7 +592,6 @@ ss maxTrajectoryScan {
 			for (j=0, movingMask = 0; j<numAxes; j++) {
 				if (moveAxis[j]) movingMask |= (1<<j);
 			}
-			anyMoving = movingMask;
 		} state wait_execute
 	}
 
@@ -676,10 +688,8 @@ ss maxTrajectoryScan {
 				lastRealTimePoint = i;
 				if (doPoll) {
 					lastPollTime = dtime;
-					anyMovingPrev = anyMoving;
-					%%pVar->anyMoving = getMotorMoving(ssId, pVar);
-					if (debugLevel >= 10) printf("movingMask=0x%x, anyMoving=0x%x\n", movingMask, anyMoving);
-					if (!(anyMoving&movingMask) && !(anyMovingPrev&movingMask)) {
+					%%pVar->anyMoving = getMotorMoving(ssId, pVar, pVar->movingMask);
+					if (anyMoving == 0) {
 						execState = EXECUTE_STATE_FLYBACK;
 						execStatus = STATUS_SUCCESS;
 						strcpy(execMessage, " ");
@@ -970,31 +980,35 @@ static int getMotorPositionsRB(SS_ID ssId, struct UserVar *pVar, double *pos, ep
 }
 
 
-/* getMotorMoving returns the moving status of each motor, packed into a single
- * int.  Bit 0 = motor 1, bit 1 = motor 2, etc. 0=not moving, 1=moving.
- * If the entire int is 0 then no motors are moving */
-static int getMotorMoving(SS_ID ssId, struct UserVar *pVar)
+/* getMotorMoving returns 1 if any of the motors in movingMask are moving */
+static int getMotorMoving(SS_ID ssId, struct UserVar *pVar, int movingMask)
 {
-	int i, mask=1, result=0;
+	int i, j, mask, moving;
 
-	/* Read the current status of all the axes */
-	writeRead(ssId, pVar, "QI", pVar->stringIn);
+	for (j=0; j<2; j++) {
+		mask = 1;
+		moving = 0;
+		/* Read the current status of all the axes */
+		writeRead(ssId, pVar, "QI", pVar->stringIn);
 
-	/* Parse the return string which is of the form 
-	 * MDNN,MDNN,PNLN,PNNN,PNLN,PNNN,PNNN,PNNN,<LF>
-	 * The second character of each status word is 'D' (done) or 'N' (not done)
-	 */
+		/* Parse the return string which is of the form 
+		 * MDNN,MDNN,PNLN,PNNN,PNLN,PNNN,PNNN,PNNN,<LF>
+		 * The second character of each status word is 'D' (done) or 'N' (not done)
+		 */
 
-	for (i=1; i<37; i+=5, mask<<=1) {
-		if (pVar->stringIn[i] == 'N') result |= mask;
+		for (i=1; i<37; i+=5, mask<<=1) {
+			if (pVar->stringIn[i] == 'N') moving |= mask;
+		}
+
+		pVar->stringIn[40] = '\0';
+		if (pVar->debugLevel >= 7) {
+			printf("\ngetMotorMoving: reply = '%s', moving = %2x", pVar->stringIn, moving);
+		}
+		if (moving & movingMask) return(1);
 	}
-
-	pVar->stringIn[40] = '\0';
-	if (pVar->debugLevel >= 7) {
-		printf("getMotorMoving: reply = '%s', movingMask = %2x\n", pVar->stringIn, result);
-	}
-	return(result);
+	return(0);
 }
+
 
 static int getStarted(SS_ID ssId, struct UserVar *pVar) {
 	int i, bits, mask;
@@ -1067,13 +1081,13 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
 
 double	y2[MAX_ELEMENTS], v_out[MAX_ELEMENTS], a_out[MAX_ELEMENTS], calcMotorTrajectory[MAX_ELEMENTS];
 static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTrajectory,
-	double *motorTrajectory, double epicsMotorDir, int moveMode, int npoints, int npulses, double motorResolution,
+	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, int npulses, double motorResolution,
 	int *position, int *velocity, int *acceleration)
 {
 	double dp, dt, v_ideal, v_lin, v_spline, accel_p, accel_v, time;
 	double x0;
 	double delta, yy0, yy1;
-	int i, np;
+	int i, np, dir;
 
 	spline(realTimeTrajectory, motorTrajectory, npoints, y2);
 
@@ -1152,6 +1166,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 	}
 
 	/* Translate into MAX commands */
+	dir = (epicsMotorDir == 0) ? 1 : -1;
 	v_out[0] = 0;
 	if (pVar->debugLevel >= 1) {
 		printf("motor resolution %f\n", motorResolution);
@@ -1161,15 +1176,15 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 		if (i < npoints-1) {
 			time = realTimeTrajectory[i+1];
 			dt = realTimeTrajectory[i+1] - realTimeTrajectory[i];
-			position[i] = NINT(calcMotorTrajectory[i+1]/motorResolution);
-			velocity[i] = NINT(v_out[i+1]/motorResolution);
-			acceleration[i] = NINT(a_out[i]/motorResolution);
+			position[i] = NINT(dir*calcMotorTrajectory[i+1]/motorResolution);
+			velocity[i] = NINT(dir*v_out[i+1]/motorResolution);
+			acceleration[i] = NINT(dir*a_out[i]/motorResolution);
 		} else {
 			time = realTimeTrajectory[i];
 			dt = realTimeTrajectory[i] - realTimeTrajectory[i-1];
-			position[i] = NINT(calcMotorTrajectory[i]/motorResolution);
+			position[i] = NINT(dir*calcMotorTrajectory[i]/motorResolution);
 			velocity[i] = 0;
-			acceleration[i] = NINT(a_out[i]/motorResolution);
+			acceleration[i] = NINT(dir*a_out[i]/motorResolution);
 		}
 		if (i>0) {
 			x0 = position[i-1] + velocity[i-1]*dt + .5 * acceleration[i]*dt*dt;
