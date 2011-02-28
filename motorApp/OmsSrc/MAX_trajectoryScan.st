@@ -356,12 +356,40 @@ ss maxTrajectoryScan {
 			/* Get update rate */
 			sprintf(stringOut, "AX; #UR?;");
 			%%if (pVar->simMode==0) writeRead(ssId, pVar, pVar->stringOut, pVar->stringOut);
-			if (debugLevel > 0) printf("Update rate (X)='%s'\n", stringOut);
+			if (debugLevel > 0) printf("Update rate ='%s'\n", stringOut);
+
+			%%epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
+			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
+			if (debugLevel >= 1) {
+				printf("\nbefore '#UR': motor=\n");
+				for (j=0; j<MAX_AXES; j++) {
+					%%printf("%7d%c", pVar->motorCurrentRaw[pVar->j], (pVar->j<MAX_AXES-1?',':'\n'));
+				}
+			}
 
 			/* Set update rate. */
 			i = 1024 * updateFreq;
 			sprintf(stringOut, "AX; #UR%d;", i);
 			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+
+			/* reload motor positions to what they were before the #UR command */
+			/* Note that LP sets both motor and encoder positions to the same value */
+			n = sprintf(stringOut, "AM; LP");
+			for (j=0; j<MAX_AXES; j++) {
+				n += sprintf(&(stringOut[n]), "%d", motorCurrentRaw[j]);
+				if (j<(MAX_AXES-1)) n += sprintf(&(stringOut[n]), ",");
+			}
+			strcat(stringOut, ";");
+			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+
+			%%epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
+			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
+			if (debugLevel >= 1) {
+				printf("\nafter '#UR;': motor=\n");
+				for (j=0; j<MAX_AXES; j++) {
+					%%printf("%7d%c", pVar->motorCurrentRaw[pVar->j], (pVar->j<MAX_AXES-1?',':'\n'));
+				}
+			}
 
 			for (j=0, firstTask=1; j<MAX_AXES; j++) {
 				if (moveAxis[j]) {
@@ -1120,7 +1148,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 			if (pVar->debugLevel >= 10) printf("v_lin=%f, v_spline=%f\n", v_lin, v_spline);
 
 			/* the acceleration that will get us to the ideal velocity */
-			if (0) {
+			if (pVar->startPulses != 0) {
 				v_ideal = v_spline;
 			} else {
 				v_ideal = v_lin;
