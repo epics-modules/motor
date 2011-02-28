@@ -27,6 +27,7 @@ program MAX_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6=M6
 #define MIN(a,b) ((a) > (b) ? (b) : (a))
 #define NINT(f)  (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
+#define USE_VID 1
 #define DEBUG_VA 10
 /* This program must be compiled with the recursive option */
 option +r;
@@ -87,9 +88,10 @@ int cardNumber;
 #define MAX_STRING_SIZE 40
 
 /* Polling interval in seconds for waiting for motors to reach their targets */
-#define POLL_INTERVAL (1/10.)
+#define POLL_INTERVAL (1/5.)
 #define READ_INTERVAL (1/60.)
 
+%%char axis_name[] = "XYZTUVRS";
 char stringOut[MAX_MESSAGE_STRING];
 char sbuf[MAX_MESSAGE_STRING];
 char stringIn[MAX_MESSAGE_STRING];
@@ -102,6 +104,7 @@ int k;
 int n;
 double delay;
 int anyMoving;
+int anyMovingPrev;
 int ncomplete;
 int nextra;
 int npoints;
@@ -317,7 +320,7 @@ ss maxTrajectoryScan {
 			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
 
 			/* digital I/O commands */
-			if (outBitNum >= 0) {
+			if ((outBitNum >= 0) && (outBitNum <= 15)) {
 				onMask = 1<<outBitNum;
 				offMask = 0;
 				outMask = 1<<outBitNum;
@@ -327,7 +330,7 @@ ss maxTrajectoryScan {
 				sprintf(stringOut, "BL%d;", outBitNum);	/* set output bit low */
 				%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
 			}
-			if (inBitNum >= 0) {
+			if ((inBitNum >= 0) && (inBitNum <= 15)) {
 				sprintf(stringOut, "IO%d,0;", inBitNum);	/* set bit as input */
 				%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
 			}
@@ -359,24 +362,25 @@ ss maxTrajectoryScan {
 				if (moveAxis[j]) {
 					
 					/* we may need current raw positions to mock up relative mode */
-					%%epicsTimeGetCurrent(&eStartTime); /* not actually the start time, we just need a value */
+					%%epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
 					%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
+					if (debugLevel >= 1) printf("\n");
 
 					/* output bit */
-					if (firstTask && (outBitNum >= 0)) {
+					if (firstTask && ((outBitNum >= 0) && (outBitNum <= 15))) {
 						/* Tell controller to output a pulse at the beginning of every trajectory segment. */
 						sprintf(stringOut, "AM; VIO[%d]%04x,%04x,%04x;", j+1, onMask, offMask, outMask);
 						%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
 					} else {
 						/* Tell controller NOT to output a pulse at the beginning of every trajectory segment. */
-						sprintf(stringOut, "AM; VIO[%d];", j+1);
+						sprintf(stringOut, "AM; VIO[%d]0,0,0;", j+1);
 						%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
 					}
-
 					/* done flag and interrupt */
+#if USE_VID
 					sprintf(stringOut, "AM; VID[%d]1;", j+1);
 					%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-
+#endif
 					/* Don't start until I tell you to start */
 					sprintf(stringOut, "AM; VH[%d]0;", j+1);
 					%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
@@ -384,9 +388,10 @@ ss maxTrajectoryScan {
 					/* Arm the trajectories to start on an input trigger bit.
 					 * If no input trigger bit, then start now.
 					 */
-					if (inBitNum >= 0) {
+					if ((inBitNum >= 0) && (inBitNum <= 15)) {
 						/* Wait for input bit to go high before processing any more commands. */
-						sprintf(stringOut, "AM; SW%d;", inBitNum);
+						/*sprintf(stringOut, "AM; SW%d;", inBitNum);*/
+						%%sprintf(pVar->stringOut, "A%c; SW%d;", axis_name[pVar->j], pVar->inBitNum);
 						%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
 					}
 
@@ -443,6 +448,11 @@ ss maxTrajectoryScan {
 						if (moveMode != MOVE_MODE_ABSOLUTE) position[j][i] += motorCurrentRaw[j];
 
 						if (do_split) {
+							if (firstTask && ((outBitNum >= 0) && (outBitNum <= 15))) {
+								/* Disable output pulses */
+								sprintf(stringOut, "AM; VIO[%d]0,0,0;", j+1);
+								%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+							}
 							/* we have to split this segment into two where velocity goes through zero. */
 							n = sprintf(stringOut, "AM; VA[%d]%d;", j+1, segment_accel);
 							n += sprintf(&stringOut[n], "VV[%d]%d,%d;", j+1, segment_v_start, v1);
@@ -453,6 +463,11 @@ ss maxTrajectoryScan {
 							strcat(stringOut, ";");
 							%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
 
+							if (firstTask && ((outBitNum >= 0) && (outBitNum <= 15))) {
+								/* Enable output pulses */
+								sprintf(stringOut, "AM; VIO[%d]%04x,%04x,%04x;", j+1, onMask, offMask, outMask);
+								%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+							}
 							n = sprintf(stringOut, "AM; VA[%d]%d;", j+1, segment_accel);
 							if (i<npoints-1) {
 								n += sprintf(&stringOut[n], "VV[%d]%d;", j+1, segment_v_end);
@@ -560,7 +575,11 @@ ss maxTrajectoryScan {
 			lastRealTimePoint = 0;
 			/* KLUDGE: coopt variable 'accel' as test velocity-override factor */
 			vOverrideFactor = accel;
-			waitingForTrigger = (inBitNum >= 0);
+			waitingForTrigger = ((inBitNum >= 0) && (inBitNum <= 15));
+			for (j=0, movingMask = 0; j<numAxes; j++) {
+				if (moveAxis[j]) movingMask |= (1<<j);
+			}
+			anyMoving = movingMask;
 		} state wait_execute
 	}
 
@@ -604,10 +623,9 @@ ss maxTrajectoryScan {
 	
 				doPoll = (dtime - lastPollTime) > POLL_INTERVAL;
 				if (doPoll) pvPut(elapsedTime);
-				for (j=0, movingMask = 0; j<numAxes; j++) {
+				for (j=0; j<numAxes; j++) {
 					if (moveAxis[j]) {
 						pvPut(motorCurrent[j]);
-						movingMask |= (1<<j);
 						/* MAXV has no readback function, so we read while it's moving. */
 						if (currPulse < MAX_PULSES-1) {
 							motorReadbacks[j][currPulse] = motorCurrent[j];
@@ -658,9 +676,10 @@ ss maxTrajectoryScan {
 				lastRealTimePoint = i;
 				if (doPoll) {
 					lastPollTime = dtime;
+					anyMovingPrev = anyMoving;
 					%%pVar->anyMoving = getMotorMoving(ssId, pVar);
 					if (debugLevel >= 10) printf("movingMask=0x%x, anyMoving=0x%x\n", movingMask, anyMoving);
-					if (!(anyMoving&movingMask)) {
+					if (!(anyMoving&movingMask) && !(anyMovingPrev&movingMask)) {
 						execState = EXECUTE_STATE_FLYBACK;
 						execStatus = STATUS_SUCCESS;
 						strcpy(execMessage, " ");
@@ -862,13 +881,15 @@ static int writeOnly(SS_ID ssId, struct UserVar *pVar, char *command)
 static int writeRead(SS_ID ssId, struct UserVar *pVar, char *command, char *reply)
 {
 	asynStatus status;
+	char buffer[MAX_MESSAGE_STRING];
 #if USE_ASYN
 	size_t nwrite, nread;
 	int eomReason;
-	char buffer[MAX_MESSAGE_STRING];
+#endif
 
-	/* Copy command so we can add terminator */
 	strncpy(buffer, command, MAX_MESSAGE_STRING-3);
+
+#if USE_ASYN
 	strcat(buffer, "\r");
 	/* Use 30 second timeout, some commands take a long time to reply */
 	status = pasynOctetSyncIO->writeRead((asynUser *)pVar->pasynUser, buffer,
@@ -878,8 +899,8 @@ static int writeRead(SS_ID ssId, struct UserVar *pVar, char *command, char *repl
 	status = (asynStatus) MAXV_send_mess(pVar->cardNumber, command, (char *) NULL);
 	status |= (asynStatus) MAXV_recv_mess(pVar->cardNumber, reply, 1);
 #endif
-	if (pVar->debugLevel >= 10) {
-		printf("    writeRead:command='%s', reply='%s'\n", command, reply);
+	if (pVar->debugLevel >= 5) {
+		printf("    writeRead:command='%s', reply='%s'\n", buffer, reply);
 	}
 	return(status);
 }
@@ -955,22 +976,10 @@ static int getMotorPositionsRB(SS_ID ssId, struct UserVar *pVar, double *pos, ep
 static int getMotorMoving(SS_ID ssId, struct UserVar *pVar)
 {
 	int i, mask=1, result=0;
-	char s[MAX_MESSAGE_STRING];
 
-	for (i=0; i==0;) {
-		/* Read the current status of all the axes */
-		writeRead(ssId, pVar, "QI", pVar->stringIn);
-		strcpy(s, pVar->stringIn);
-		writeRead(ssId, pVar, "QI", pVar->stringIn);
-		if (strcmp(s, pVar->stringIn) != 0) {
-			if (pVar->debugLevel >= 10) {
-				printf("getMotorMoving: inconsistent replies:\n");
-				printf("r1:'%s', r2:'%s'\n", s, pVar->stringIn);
-			}
-		} else {
-			i = 1;
-		}
-	}
+	/* Read the current status of all the axes */
+	writeRead(ssId, pVar, "QI", pVar->stringIn);
+
 	/* Parse the return string which is of the form 
 	 * MDNN,MDNN,PNLN,PNNN,PNLN,PNNN,PNNN,PNNN,<LF>
 	 * The second character of each status word is 'D' (done) or 'N' (not done)
@@ -981,7 +990,7 @@ static int getMotorMoving(SS_ID ssId, struct UserVar *pVar)
 	}
 
 	pVar->stringIn[40] = '\0';
-	if (pVar->debugLevel >= 10) {
+	if (pVar->debugLevel >= 7) {
 		printf("getMotorMoving: reply = '%s', movingMask = %2x\n", pVar->stringIn, result);
 	}
 	return(result);
@@ -1095,7 +1104,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 			if (pVar->debugLevel >= 10) printf("v_lin=%f, v_spline=%f\n", v_lin, v_spline);
 
 			/* the acceleration that will get us to the ideal velocity */
-			if (1) {
+			if (0) {
 				v_ideal = v_spline;
 			} else {
 				v_ideal = v_lin;
