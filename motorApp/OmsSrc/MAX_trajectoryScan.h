@@ -53,6 +53,7 @@ int     moveMode;    assign moveMode     to "{P}{R}MoveMode.VAL";
 monitor moveMode;
 double  time;        assign time         to "{P}{R}Time.VAL";      
 monitor time;
+double  elapsedTime; assign elapsedTime  to "{P}{R}ElapsedTime.VAL";      
 double  timeScale;   assign timeScale    to "{P}{R}TimeScale.VAL"; 
 monitor timeScale;
 int     timeMode;    assign timeMode     to "{P}{R}TimeMode.VAL";    
@@ -85,6 +86,13 @@ assign  timeTrajectory to  "{P}{R}TimeTraj.VAL";
 monitor timeTrajectory;
 string  trajectoryFile; assign trajectoryFile to "{P}{R}TrajectoryFile.VAL";
 monitor trajectoryFile;
+
+int     inBitNum;    assign inBitNum     to "{P}{R}InBitNum.VAL"; 
+monitor inBitNum;
+int     outBitNum;   assign outBitNum    to "{P}{R}OutBitNum.VAL"; 
+monitor outBitNum;
+double  realTimeTrajectory[MAX_ELEMENTS];
+assign  realTimeTrajectory to "{P}{R}realTimeTrajectory.VAL"; 
 
 int     moveAxis[MAX_AXES]; 
 assign  moveAxis     to
@@ -144,6 +152,8 @@ assign  motorCurrent to
          "{P}{R}M8Current.VAL"};
 
 int  motorCurrentRaw[MAX_AXES];
+int  motorCurrentVRaw[MAX_AXES];
+int  motorCurrentARaw[MAX_AXES];
 
 double  motorMDVS[MAX_AXES]; 
 assign  motorMDVS   to
