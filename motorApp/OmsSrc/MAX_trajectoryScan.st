@@ -158,7 +158,7 @@ unsigned long startTime;
 int position[MAX_AXES][MAX_ELEMENTS];
 int velocity[MAX_AXES][MAX_ELEMENTS];
 int acceleration[MAX_AXES][MAX_ELEMENTS];
-
+int motorStartRaw[MAX_AXES];
 
 /*** variables for digital I/O ***/
 /* detector trigger (e.g., MCS channel advance) */
@@ -532,6 +532,7 @@ ss maxTrajectoryScan {
 				%%waitEpicsMotors(ssId, pVar);
 			}
 
+			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorStartRaw, &(pVar->dtime));
 			n = sprintf(stringOut, "AM;"); /* Axis multitasking mode */
 			for (j=0; j<MAX_AXES; j++) {
 				if (moveAxis[j]) {
@@ -581,10 +582,18 @@ ss maxTrajectoryScan {
 		when (execState==EXECUTE_STATE_EXECUTING) {
 
 			if (waitingForTrigger) {
-				%%pVar->waitingForTrigger = (getStarted(ssId, pVar) ? 0 : 1);
-				startTime = time(0);
-				%%epicsTimeGetCurrent(&eStartTime);
-			} else {
+				%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
+				for (j=0; j<numAxes; j++) {
+					if (moveAxis[j] && (motorStartRaw[j] != motorCurrentRaw[j])) waitingForTrigger = 0;
+				}
+				if (waitingForTrigger) {
+					%%pVar->waitingForTrigger = (getStarted(ssId, pVar) ? 0 : 1);
+					startTime = time(0);
+					%%epicsTimeGetCurrent(&eStartTime);
+				}
+			}
+			
+			if (!waitingForTrigger) {
 				/* Get the current motor positions, post them */
 				if (debugLevel < DEBUG_VA) {
 					%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
@@ -999,8 +1008,8 @@ static int getStarted(SS_ID ssId, struct UserVar *pVar) {
 		bits |= c;
 	}
 	mask = 1 << (pVar->inBitNum);
-	if (pVar->debugLevel >= 2)
-		printf("getStarted: reply='%s', bits=0x%x, mask=0x%x\n",  pVar->stringIn, bits, mask);
+	if (pVar->debugLevel >= 5)
+		printf("\ngetStarted: reply='%s', bits=0x%x, mask=0x%x",  pVar->stringIn, bits, mask);
 	return (bits & mask);
 }
 
