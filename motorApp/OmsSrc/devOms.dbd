@@ -16,4 +16,5 @@ driver(drvOmsPC68)
 registrar(OmsPC68Register)
 variable(drvOmsPC68debug)
 
+registrar(MAX_trajectoryScanRegistrar)
 
