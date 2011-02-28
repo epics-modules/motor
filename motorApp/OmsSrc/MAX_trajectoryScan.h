@@ -87,10 +87,16 @@ monitor timeTrajectory;
 string  trajectoryFile; assign trajectoryFile to "{P}{R}TrajectoryFile.VAL";
 monitor trajectoryFile;
 
-int     inBitNum;    assign inBitNum     to "{P}{R}InBitNum.VAL"; 
-monitor inBitNum;
 int     outBitNum;   assign outBitNum    to "{P}{R}OutBitNum.VAL"; 
 monitor outBitNum;
+int     inBitNum;    assign inBitNum     to "{P}{R}InBitNum.VAL"; 
+monitor inBitNum;
+
+double overrideFactor; assign overrideFactor to "{P}{R}OverrideFactor";
+monitor overrideFactor;
+int     updateFreq;    assign updateFreq     to "{P}{R}UpdateFreq.RVAL";    
+monitor updateFreq;
+
 double  realTimeTrajectory[MAX_ELEMENTS];
 assign  realTimeTrajectory to "{P}{R}realTimeTrajectory.VAL"; 
 
