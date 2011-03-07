@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-8/support/motor/motorApp/op/adl/topMotors8.adl"
-	version=030101
+	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/topMotors8.adl"
+	version=030105
 }
 display {
 	object {
@@ -152,8 +152,9 @@ text {
 	}
 	display[0] {
 		label="motor-parameter table"
-		name="8motor_form.adl"
+		name="topMotors8_more.adl"
 		args="P=$(P),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
+		policy="replace display"
 	}
 	clr=0
 	bclr=63
