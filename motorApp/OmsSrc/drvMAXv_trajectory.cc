@@ -8,6 +8,14 @@ Last Modified:  $Date: 2010-06-09 13:43:20 -0500 (Wed, 09 Jun 2010) $
 HeadURL:        $URL: https://subversion.xor.aps.anl.gov/synApps/motor/trunk/motorApp/OmsSrc/drvMAXv.cc $
 */
 
+/* This is a customized version of drvMAXv.cc with modifications to support
+ * MAX_trajectoryScan.st.  If MAX_trajectoryScan.st will be used, this file
+ * must be built instead of drvMAXv.cc.  Eventually, all this should be migrated
+ * to asyn, so there seems little point in trying to reconcile drvMAXv.cc and
+ * this file now.
+ * Tim Mooney
+ */
+
 /*
  *      Original Author: Ron Sluiter
  *      Date: 04/05/04
