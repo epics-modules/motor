@@ -53,14 +53,12 @@ int     moveMode;    assign moveMode     to "{P}{R}MoveMode.VAL";
 monitor moveMode;
 double  time;        assign time         to "{P}{R}Time.VAL";      
 monitor time;
-double  elapsedTime; assign elapsedTime  to "{P}{R}ElapsedTime.VAL";      
 double  timeScale;   assign timeScale    to "{P}{R}TimeScale.VAL"; 
 monitor timeScale;
 int     timeMode;    assign timeMode     to "{P}{R}TimeMode.VAL";    
 monitor timeMode;
 double  accel;       assign accel        to "{P}{R}Accel.VAL";     
 monitor accel;
-int     initStatus; /* assign buildStatus  to "{P}{R}InitStatus.VAL"; (pv not in database)*/
 int     build;       assign build        to "{P}{R}Build.VAL";     
 monitor build;
 int     buildState;  assign buildState   to "{P}{R}BuildState.VAL"; 
@@ -87,18 +85,55 @@ monitor timeTrajectory;
 string  trajectoryFile; assign trajectoryFile to "{P}{R}TrajectoryFile.VAL";
 monitor trajectoryFile;
 
+/*** BEGIN: Specific to MAX_trajectoryScan.st ***/
+
+/* time since trajectory start */
+double  elapsedTime; assign elapsedTime  to "{P}{R}ElapsedTime.VAL";      
+
+/* Number (0..15) of general purpose I/O bit to be used for output pulses (e.g., to trigger detector). */
 int     outBitNum;   assign outBitNum    to "{P}{R}OutBitNum.VAL"; 
 monitor outBitNum;
+
+/* Number (0..15) of general purpose I/O bit to be used for input start-trajectory pulse. */
 int     inBitNum;    assign inBitNum     to "{P}{R}InBitNum.VAL"; 
 monitor inBitNum;
 
+/* Used to calculate velocity-override percentages while trajectory is executing */
 double overrideFactor; assign overrideFactor to "{P}{R}OverrideFactor";
 monitor overrideFactor;
+
+/* MAX controller's update frequency (one of 1024, 2048, 4096, or 8192 Hz) */
 int     updateFreq;    assign updateFreq     to "{P}{R}UpdateFreq.RVAL";    
 monitor updateFreq;
 
+/* time in seconds from trajectory start */
 double  realTimeTrajectory[MAX_ELEMENTS];
 assign  realTimeTrajectory to "{P}{R}realTimeTrajectory.VAL"; 
+
+/* raw values read from the controller, generally while a trajectory is executing */
+int  motorCurrentRaw[MAX_AXES];
+int  motorCurrentVRaw[MAX_AXES];
+int  motorCurrentARaw[MAX_AXES];
+
+/* EPICS motor record resolution */
+double  epicsMotorMres[MAX_AXES]; 
+assign  epicsMotorMres to {"","","","","","","",""};
+monitor epicsMotorMres;
+
+/* EPICS motor-controller card number.  (For now, we talk to the controller via drvMAX.cc) */
+int  epicsMotorCard[MAX_AXES]; 
+assign  epicsMotorCard to {"","","","","","","",""};
+monitor epicsMotorCard;
+
+/* EPICS motor record soft limits */
+double  epicsMotorHLM[MAX_AXES]; 
+assign  epicsMotorHLM to {"","","","","","","",""};
+monitor epicsMotorHLM;
+double  epicsMotorLLM[MAX_AXES]; 
+assign  epicsMotorLLM to {"","","","","","","",""};
+monitor epicsMotorLLM;
+
+/*** END: Specific to MAX_trajectoryScan.st ***/
 
 int     moveAxis[MAX_AXES]; 
 assign  moveAxis     to
@@ -156,10 +191,6 @@ assign  motorCurrent to
          "{P}{R}M6Current.VAL",
          "{P}{R}M7Current.VAL",
          "{P}{R}M8Current.VAL"};
-
-int  motorCurrentRaw[MAX_AXES];
-int  motorCurrentVRaw[MAX_AXES];
-int  motorCurrentARaw[MAX_AXES];
 
 double  motorMDVS[MAX_AXES]; 
 assign  motorMDVS   to
@@ -256,14 +287,6 @@ monitor epicsMotorOff;
 double  epicsMotorDone[MAX_AXES]; 
 assign  epicsMotorDone to {"","","","","","","",""};
 monitor epicsMotorDone;
-
-double  epicsMotorMres[MAX_AXES]; 
-assign  epicsMotorMres to {"","","","","","","",""};
-monitor epicsMotorMres;
-
-int  epicsMotorCard[MAX_AXES]; 
-assign  epicsMotorCard to {"","","","","","","",""};
-monitor epicsMotorCard;
 
 
 evflag buildMon;        sync build      buildMon;
