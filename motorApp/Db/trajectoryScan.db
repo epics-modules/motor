@@ -67,6 +67,11 @@ grecord(ao,"$(P)$(R)Time") {
     field(VAL, "10.")
     field(PREC, "3")
 }
+grecord(ao,"$(P)$(R)ElapsedTime") {
+    field(DESC,"Elapsed time")
+    field(VAL, "0.")
+    field(PREC, "3")
+}
 grecord(ao,"$(P)$(R)TimeScale") {
     field(DESC,"Trajectory time scaling")
     field(VAL, "1.")
@@ -82,12 +87,45 @@ grecord(waveform,"$(P)$(R)TimeTraj") {
     field(FTVL,"DOUBLE")
     field(PREC, "3")
 }
+grecord(waveform,"$(P)$(R)realTimeTrajectory") {
+    field(DESC,"Time at element")
+    field(NELM,"$(NELM)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "3")
+}
 grecord(ao,"$(P)$(R)Accel") {
     field(DESC,"Trajectory Acceleration")
     field(VAL, "0.5")
     field(PREC, "3")
 }
 
+grecord(longout,"$(P)$(R)OutBitNum") {
+    field(VAL, "-1")
+    field(DESC,"Output-Bit Number")
+}
+
+grecord(longout,"$(P)$(R)InBitNum") {
+    field(VAL, "-1")
+    field(DESC,"Input-Bit Number")
+}
+grecord(ao,"$(P)$(R)OverrideFactor") {
+    field(DESC,"velocity override factor")
+    field(VAL, "0.1")
+    field(PREC, "3")
+}
+grecord(mbbo,"$(P)$(R)UpdateFreq") {
+    field(DESC,"Move mode")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "1")
+    field(ZRST, "1024")
+    field(ONVL, "2")
+    field(ONST, "2048")
+    field(TWVL, "4")
+    field(TWST, "4096")
+    field(THVL, "8")
+    field(THST, "8192")
+}
 #
 # PVs controlling which motors will move
 #
