@@ -27,35 +27,9 @@ program MAX_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6=M6
 #define MIN(a,b) ((a) > (b) ? (b) : (a))
 #define NINT(f)  (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
-#define USE_VID 1
 #define DEBUG_VA 10
 /* This program must be compiled with the recursive option */
 option +r;
-
-/* Until I get an asyn driver I can use, I'll test by writing/reading
- * directly to/from drvMaxv.cc's send_mess()/recv_mess() functions.
- */
-#define USE_ASYN 0
-
-#if USE_ASYN
-#else
-int cardNumber;
-
-/* send_mess:
- *		If name is an axis name, command is prefixed by single-axis command, such as "AX ".
- *		If name is null, command is sent without modification.
- *	return value: {OK = 0, ERROR = 1}
- */
-%%extern int MAXV_send_mess(int cardNumber, char const *message, char *name);
-
-/* recv_mess:
- * amount: -1 means flush and discard; other values specify number of messages to read
- * 
- */
-%%extern int MAXV_recv_mess(int cardNumber, char *message, int amount);
-
-%%extern int MAXV_getPositions(int card, epicsInt32 *positions, int nPositions);
-#endif
 
 /* Maximum # of trajectory elements.  The MAXV allows something like 2550 for
  * a trajectory preloaded into the controller (unlimited if you're willing to
@@ -87,6 +61,42 @@ int cardNumber;
  * SNL compiler gives a warning. */
 #define MAX_STRING_SIZE 40
 
+/* After the trajectory commands have been loaded into the MAX controller, nobody
+ * can talk to it.  For relative and hybrid trajectories, this is sort of ok, because
+ * we don't need to move the motor to the start point.  But if the user wants to
+ * load a trajectory and then move the motor before executing the trajectory, the
+ * move will fail.  If LOAD_EARLY==0, we postpone loading the trajectory until we get
+ * an "Execute" command.  This avoids all kinds of problems, but imposes a few second
+ * delay before execution actually starts.
+ */
+#define LOAD_EARLY 0
+
+/* Until I get an asyn driver I can use, I'll test by writing/reading
+ * directly to/from drvMaxv.cc's send_mess()/recv_mess() functions.
+ */
+#define USE_ASYN 0
+
+#if USE_ASYN
+#else
+int cardNumber;
+
+/* send_mess:
+ *		If name is an axis name, command is prefixed by single-axis command, such as "AX ".
+ *		If name is null, command is sent without modification.
+ *	return value: {OK = 0, ERROR = 1}
+ */
+%%extern int MAXV_send_mess(int cardNumber, char const *message, char *name);
+
+/* recv_mess:
+ * amount: -1 means flush and discard; other values specify number of messages to read
+ * 
+ */
+%%extern int MAXV_recv_mess(int cardNumber, char *message, int amount);
+
+%%extern int MAXV_getPositions(int card, epicsInt32 *positions, int nPositions);
+#endif
+
+
 /* Polling interval in seconds for waiting for motors to reach their targets */
 #define POLL_INTERVAL (1/5.)
 #define READ_INTERVAL (1/60.)
@@ -107,7 +117,6 @@ int anyMoving;
 int ncomplete;
 int nextra;
 int npoints;
-int dir;
 double dtime;
 double dpos;
 double posActual;
@@ -127,6 +136,8 @@ int vOverride;
 double lastPollTime;
 int lastRealTimePoint;
 int doPoll;
+int initStatus;
+int limitViolation;
 
 /* All PVs which will be accessed in local C functions need to have their index
  * extracted with pvIndex() */
@@ -149,6 +160,7 @@ unsigned long startTime;
 %% static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *timeTrajectory,
 %%	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, int npulses, double motorOffset,
 %%	double motorResolution, int *position, int *velocity, int *acceleration);
+%% static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode);
 %% static int getStarted(SS_ID ssId, struct UserVar *pVar);
 %% static int userToRaw(double user, double off, int dir, double res);
 %% static double rawToUser(int raw, double off, int dir, double res);
@@ -160,32 +172,13 @@ unsigned long startTime;
 int position[MAX_AXES][MAX_ELEMENTS];
 int velocity[MAX_AXES][MAX_ELEMENTS];
 int acceleration[MAX_AXES][MAX_ELEMENTS];
+double motorStart[MAX_AXES];
 int motorStartRaw[MAX_AXES];
+double dbuf[MAX_PULSES];
 
-/*** variables for digital I/O ***/
-/* detector trigger (e.g., MCS channel advance) */
-/*int outBitNum; This is now a PV */
-int onMask;
-int offMask;
-int outMask;
-/* trajectory-start signal */
-/*int inBitNum; This is now a PV */
 /* variables for constructing trajectory commands */
-int segment_accel;
-int segment_decel;
-int segment_v_start;
-int segment_v_end;
-char absRel;
-int firstTask;
 int movingMask;
-/* variables for splitting a segment */
-int p1;
-int v1;
-int do_split;
-double t_v0;
-double p1_double;
 int waitingForTrigger;
-double addForRelMove;
 
 ss maxTrajectoryScan {
 
@@ -194,29 +187,43 @@ ss maxTrajectoryScan {
 		when() {
 			cardNumber = -2;
 			initStatus = STATUS_UNDEFINED;
-			absRel='A';
 			/* Force numAxes to be <= MAX_AXES */
 			if (numAxes > MAX_AXES) numAxes = MAX_AXES;
 			for (i=0; i<numAxes; i++) {
 				sprintf(macroBuf, "M%d", i+1);
+
 				sprintf(motorName, "%s%s.VAL", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorPos[i], motorName);
 				pvMonitor(epicsMotorPos[i]);
+
 				sprintf(motorName, "%s%s.DIR", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorDir[i], motorName);
 				pvMonitor(epicsMotorDir[i]);
+
 				sprintf(motorName, "%s%s.OFF", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorOff[i], motorName);
 				pvMonitor(epicsMotorOff[i]);
+
 				sprintf(motorName, "%s%s.DMOV", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorDone[i], motorName);
 				pvMonitor(epicsMotorDone[i]);
+
 				sprintf(motorName, "%s%s.MRES", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorMres[i], motorName);
 				pvMonitor(epicsMotorMres[i]);
+
 				sprintf(motorName, "%s%s.CARD", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorCard[i], motorName);
 				pvMonitor(epicsMotorCard[i]);
+
+				sprintf(motorName, "%s%s.HLM", macValueGet("P"), macValueGet(macroBuf));
+				pvAssign(epicsMotorHLM[i], motorName);
+				pvMonitor(epicsMotorHLM[i]);
+
+				sprintf(motorName, "%s%s.LLM", macValueGet("P"), macValueGet(macroBuf));
+				pvAssign(epicsMotorLLM[i], motorName);
+				pvMonitor(epicsMotorLLM[i]);
+
 				if (cardNumber == -2) {
 					cardNumber = epicsMotorCard[i];
 				} else {
@@ -282,6 +289,11 @@ ss maxTrajectoryScan {
 			pvPut(buildState);
 			buildStatus=STATUS_UNDEFINED;
 			pvPut(buildStatus);
+			sprintf(buildMessage, "Building...");
+			pvPut(buildMessage);
+
+
+			buildStatus = STATUS_SUCCESS; /* presume we'll be successful */
 			/* Initialize new trajectory */
 			/* If time mode is TIME_MODE_TOTAL then construct timeTrajectory and post it */
 			if (timeMode == TIME_MODE_TOTAL) {
@@ -321,231 +333,31 @@ ss maxTrajectoryScan {
 			/* Compute expected time for trajectory.  This includes timeScale factor. */
 			expectedTime = realTimeTrajectory[npoints-1];
 
-			/*** load trajectory into controller. ***/
-			sprintf(stringOut, "AM;");	/* multitasking mode */
-			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-
-			/* digital I/O commands */
-			if ((outBitNum >= 0) && (outBitNum <= 15)) {
-				onMask = 1<<outBitNum;
-				offMask = 0;
-				outMask = 1<<outBitNum;
-				/*sprintf(stringOut, "IO%d,1;", outBitNum);*/	/* set bit as output */
-				sprintf(stringOut, "BD%04x;", outMask);	/* set bit as output */
-				%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-				sprintf(stringOut, "BL%d;", outBitNum);	/* set output bit low */
-				%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-			}
-			if ((inBitNum >= 0) && (inBitNum <= 15)) {
-				sprintf(stringOut, "IO%d,0;", inBitNum);	/* set bit as input */
-				%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-			}
-
-			/* trajectory commands */
-			absRel = (moveMode == MOVE_MODE_ABSOLUTE) ? 'A' : 'R';
-
-			/* clear motor queue */
-			sprintf(stringOut, "AM; SI");
-			for (j=0; j<MAX_AXES; j++) {
-				if (moveAxis[j]) strcat(stringOut, "1");
-				if (j<(MAX_AXES-1)) strcat(stringOut, ",");
-			}
-			strcat(stringOut, ";");
-			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-
-			/* Get update rate */
-			sprintf(stringOut, "AX; #UR?;");
-			%%if (pVar->simMode==0) writeRead(ssId, pVar, pVar->stringOut, pVar->stringOut);
-			if (debugLevel > 0) printf("Update rate ='%s'\n", stringOut);
-
-			%%epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
-			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
-			if (debugLevel >= 1) {
-				printf("\nbefore '#UR': motor=\n");
-				for (j=0; j<MAX_AXES; j++) {
-					%%printf("%7d%c", pVar->motorCurrentRaw[pVar->j], (pVar->j<MAX_AXES-1?',':'\n'));
-				}
-			}
-
-			/* Set update rate. */
-			i = 1024 * updateFreq;
-			sprintf(stringOut, "AX; #UR%d;", i);
-			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-
-			/* reload motor positions to what they were before the #UR command */
-			/* Note that LP sets both motor and encoder positions to the same value */
-			n = sprintf(stringOut, "AM; LP");
-			for (j=0; j<MAX_AXES; j++) {
-				n += sprintf(&(stringOut[n]), "%d", motorCurrentRaw[j]);
-				if (j<(MAX_AXES-1)) n += sprintf(&(stringOut[n]), ",");
-			}
-			strcat(stringOut, ";");
-			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-
-			%%epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
-			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
-			if (debugLevel >= 1) {
-				printf("\nafter '#UR;': motor=\n");
-				for (j=0; j<MAX_AXES; j++) {
-					%%printf("%7d%c", pVar->motorCurrentRaw[pVar->j], (pVar->j<MAX_AXES-1?',':'\n'));
-				}
-			}
-
-			for (j=0, firstTask=1; j<MAX_AXES; j++) {
+			/* This might be a good time to check trajectories against motor soft limits */
+			limitViolation = 0;
+			for (j=0; j<numAxes && !limitViolation; j++) {
 				if (moveAxis[j]) {
-					if (epicsMotorDir[j] == 0) dir=1; else dir=-1;
-
-					/* we may need current raw positions to mock up relative mode */
-					%%epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
-					%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
-					if (debugLevel >= 1) printf("\nmotorCurrent[%d]=%f\n", j, motorCurrent[j]);
-					addForRelMove = motorCurrent[j]*dir/epicsMotorMres[j];
-					if (debugLevel > 0) printf("addForRelMove=%f\n", addForRelMove);
-
-					/* output bit */
-					if (firstTask && ((outBitNum >= 0) && (outBitNum <= 15))) {
-						/* Tell controller to output a pulse at the beginning of every trajectory segment. */
-						sprintf(stringOut, "AM; VIO[%d]%04x,%04x,%04x;", j+1, onMask, offMask, outMask);
-						%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-					} else {
-						/* Tell controller NOT to output a pulse at the beginning of every trajectory segment. */
-						sprintf(stringOut, "AM; VIO[%d]0,0,0;", j+1);
-						%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-					}
-					/* done flag and interrupt */
-#if USE_VID
-					sprintf(stringOut, "AM; VID[%d]1;", j+1);
-					%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-#endif
-					/* Don't start until I tell you to start */
-					sprintf(stringOut, "AM; VH[%d]0;", j+1);
-					%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-
-					/* Arm the trajectories to start on an input trigger bit.
-					 * If no input trigger bit, then start now.
-					 */
-					if ((inBitNum >= 0) && (inBitNum <= 15)) {
-						/* Wait for input bit to go high before processing any more commands. */
-						/*sprintf(stringOut, "AM; SW%d;", inBitNum);*/
-						%%sprintf(pVar->stringOut, "A%c; SW%d;", axis_name[pVar->j], pVar->inBitNum);
-						%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-					}
-
-					for (i=0; i<npoints; i++) {
-						if (acceleration[j][i] > 0) {
-							segment_accel = acceleration[j][i];
-							segment_decel = acceleration[j][i];
-						} else {
-							segment_accel = -acceleration[j][i];
-							segment_decel = -acceleration[j][i];
-						}
-						if (segment_accel < 1) segment_accel = 1;
-						if (segment_accel > 8000000) segment_accel = 8000000;
-						if (segment_decel < 1) segment_decel = 1;
-						if (segment_decel > 8000000) segment_decel = 8000000;
-
-						segment_v_start = (i==0)? velocity[j][0]:velocity[j][i-1];
-						segment_v_end = velocity[j][i];
-
-						/* If velocity goes through zero during this segment, we'll need to split the segment. */
-						do_split = (segment_v_start>0) != (segment_v_end>0);
-						do_split = do_split && (abs(segment_v_start)>2) && (abs(segment_v_end)>2);
-						do_split = do_split && (i>0);
-						if (do_split) {
-							/* time from the beginning of the trajectory segment at which the velocity reaches zero.
-							 * Coded in two lines because SNL is too stupid to understand a cast:
-							 * t_v0 = (double)(-segment_v_start) / acceleration[j][i];
-							 */
-							t_v0 = -segment_v_start;
-							t_v0 = t_v0/acceleration[j][i];
-
-							if ((t_v0 < .005) || (((realTimeTrajectory[i] - realTimeTrajectory[i-1]) - t_v0) < .005)) {
-								/* Don't split very near either end of segment. */
-								if (debugLevel > 0) printf("declined to split segment at t=%f\n", t_v0);
-								do_split = 0;
-							} else {
-								v1 = 0;
-								p1_double = position[j][i-1] + segment_v_start*t_v0 + 0.5 * acceleration[j][i]*t_v0*t_v0;
-								%% pVar->p1 = NINT(pVar->p1_double);
-								if (debugLevel > 0) printf("split segment at t=%f, x=%d\n", t_v0, p1);
-							}
-						}
-
-						segment_v_start = abs(segment_v_start); 
-						segment_v_end = abs(segment_v_end); 
-
-						if (segment_v_start < 1) segment_v_start = 1;
-						if (segment_v_start > 4194303) segment_v_start = 4194303;
-						if (segment_v_end < 0) segment_v_end = 0;
-						if (segment_v_end > 4194303) segment_v_end = 4194303;
-
-						if (moveMode != MOVE_MODE_ABSOLUTE) {
-							p1_double = position[j][i];
-							%%pVar->position[pVar->j][pVar->i] = NINT(pVar->p1_double + pVar->addForRelMove);
-
-							if (do_split) {
-								%% pVar->p1 = NINT(pVar->p1 + pVar->addForRelMove);
-							}
-						}
-
-
-						if (do_split) {
-							if (firstTask && ((outBitNum >= 0) && (outBitNum <= 15))) {
-								/* Disable output pulses */
-								sprintf(stringOut, "AM; VIO[%d]0,0,0;", j+1);
-								%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-							}
-							/* we have to split this segment into two where velocity goes through zero. */
-							n = sprintf(stringOut, "AM; VA[%d]%d;", j+1, segment_accel);
-							n += sprintf(&stringOut[n], "VV[%d]%d,%d;", j+1, segment_v_start, v1);
-							n += sprintf(&stringOut[n], "VP[%d]", j+1);
-							for (k=0; k<j; k++) {strcat(stringOut, ","); n++;}
-							n += sprintf(&(stringOut[n]), "%d", p1);
-							for (k=j+1; k<MAX_AXES; k++) {strcat(stringOut, ","); n++;}
-							strcat(stringOut, ";");
-							%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-
-							if (firstTask && ((outBitNum >= 0) && (outBitNum <= 15))) {
-								/* Enable output pulses */
-								sprintf(stringOut, "AM; VIO[%d]%04x,%04x,%04x;", j+1, onMask, offMask, outMask);
-								%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-							}
-							n = sprintf(stringOut, "AM; VA[%d]%d;", j+1, segment_accel);
-							if (i<npoints-1) {
-								n += sprintf(&stringOut[n], "VV[%d]%d;", j+1, segment_v_end);
-							} else {
-								n += sprintf(&stringOut[n], "VV[%d]%d,%d;", j+1, 1, segment_v_end);
-							}
-							n += sprintf(&stringOut[n], "VP[%d]", j+1);
-							for (k=0; k<j; k++) {strcat(stringOut, ","); n++;}
-							n += sprintf(&(stringOut[n]), "%d", position[j][i]);
-							for (k=j+1; k<MAX_AXES; k++) {strcat(stringOut, ","); n++;}
-							strcat(stringOut, ";");
-							%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-						} else {
-							n = sprintf(stringOut, "AM; VA[%d]%d;", j+1, segment_accel);
-							if (i<npoints-1) {
-								n += sprintf(&stringOut[n], "VV[%d]%d;", j+1, segment_v_end);
-							} else {
-								n += sprintf(&stringOut[n], "VV[%d]%d,%d;", j+1, segment_v_start, segment_v_end);
-							}
-							n += sprintf(&stringOut[n], "VP[%d]", j+1);
-							for (k=0; k<j; k++) {strcat(stringOut, ","); n++;}
-							n += sprintf(&(stringOut[n]), "%d", position[j][i]);
-							for (k=j+1; k<MAX_AXES; k++) {strcat(stringOut, ","); n++;}
-							strcat(stringOut, ";");
-							%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+					for (k=0; k<npoints && !limitViolation; k++) {
+						posActual = motorTrajectory[j][k];
+						if (moveMode != MOVE_MODE_ABSOLUTE) posActual += epicsMotorPos[j];
+						limitViolation = (posActual > epicsMotorHLM[j]) || (posActual < epicsMotorLLM[j]);
+                		if (limitViolation) {
+							sprintf(buildMessage, "Limit: motor %d at pt. %d (%f)", j+1, k+1, posActual);
 						}
 					}
-					sprintf(stringOut, "AM; VE[%d];", j+1);
-					%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
-					firstTask = 0;
 				}
 			}
 
-
+			if (limitViolation) {
+				buildStatus = STATUS_FAILURE;
+			}
+#if LOAD_EARLY
+			if ((buildStatus == STATUS_SUCCESS) && (moveMode != MOVE_MODE_ABSOLUTE)) {
+				/* We can load trajectory into controller, because we won't have to move to initial position. */
+				%%loadTrajectory(ssId, pVar, pVar->simMode);
+			}
+#endif
 			/* Set status and message string */
-			buildStatus = STATUS_SUCCESS;
 
 			/* Clear busy flag, post status */
 			buildState = BUILD_STATE_DONE;
@@ -556,6 +368,10 @@ ss maxTrajectoryScan {
 			 * to do this until build is complete. */
 			build=0;
 			pvPut(build);
+			if (buildStatus == STATUS_SUCCESS) {
+				sprintf(buildMessage, "Done");
+				pvPut(buildMessage);
+			}
 		} state monitor_inputs
 	}
 
@@ -589,14 +405,23 @@ ss maxTrajectoryScan {
 				%%waitEpicsMotors(ssId, pVar);
 			}
 
-			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorStartRaw, &(pVar->dtime));
+#if LOAD_EARLY
+			if (moveMode == MOVE_MODE_ABSOLUTE) {
+				/* We had to hold off loading until now so we could move to initial position. */
+				%%loadTrajectory(ssId, pVar, pVar->simMode);
+			}
+#else
+			%%loadTrajectory(ssId, pVar, pVar->simMode);
+#endif
+
+			%%getMotorPositions(ssId, pVar, pVar->motorStart, pVar->motorStartRaw, &(pVar->dtime));
 			n = sprintf(stringOut, "AM;"); /* Axis multitasking mode */
 			for (j=0; j<MAX_AXES; j++) {
 				if (moveAxis[j]) {
 					n += sprintf(&(stringOut[n]), "VO[%d]=100;", j+1); /* no velocity override */
 				}
 			}
-			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+			%%writeOnly(ssId, pVar, pVar->stringOut);
 
 			n = sprintf(stringOut, "AM;"); /* Axis multitasking mode */
 			for (j=0; j<MAX_AXES; j++) {
@@ -604,7 +429,7 @@ ss maxTrajectoryScan {
 					n += sprintf(&(stringOut[n]), "VG[%d];", j+1); /* GO! */
 				}
 			}
-			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+			%%writeOnly(ssId, pVar, pVar->stringOut);
 
 			/* Get start time of execute */
 			elapsedTime = 0.;
@@ -688,8 +513,11 @@ ss maxTrajectoryScan {
 								dtime, i, realTimeTrajectory[i]);
 							frac = (dtime - realTimeTrajectory[i]) / (realTimeTrajectory[i+1] - realTimeTrajectory[i]);
 							posTheory = motorTrajectory[j][i] + frac * (motorTrajectory[j][i+1] - motorTrajectory[j][i]);
+							if (moveMode != MOVE_MODE_ABSOLUTE) {
+								posTheory += motorStart[j];
+							}
 							dpos = motorCurrent[j] - posTheory;
-							if (debugLevel >= 10) printf("   wait_execute: actual=%.2f, ideal=%.2f, err=%.2f\n",
+							if (debugLevel >= 3) printf("   wait_execute: actual=%.2f, ideal=%.2f, err=%.2f\n",
 								motorCurrent[j], posTheory, dpos);
 							/* dp/dt */
 							v = (motorReadbacks[j][currPulse] - motorReadbacks[j][currPulse-1]) /
@@ -705,7 +533,7 @@ ss maxTrajectoryScan {
 								v, deltaV, vO, vOverride);
 							/* legal range of vOverride is [0, 200] */
 							sprintf(stringOut, "AM; VO[%d]=%d;", j+1, vOverride);
-							%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+							%%writeOnly(ssId, pVar, pVar->stringOut);
 							if (debugLevel >= 2) printf(", 'VO[%d]=%3d'", j+1, vOverride);
 						}
 					}
@@ -730,7 +558,7 @@ ss maxTrajectoryScan {
 						for (j=0; j<MAX_AXES; j++) {
 							if (moveAxis[j]) {
 								sprintf(stringOut, "AM; VH[%d]1;", j+1);
-								%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+								%%writeOnly(ssId, pVar, pVar->stringOut);
 							}
 						}
 						/* SHOULD PROBABLY WAIT FOR MOTORS TO DECELERATE TO A STOP BEFORE KILLING */
@@ -742,7 +570,7 @@ ss maxTrajectoryScan {
 						}
 						strcat(stringOut, ";");
 						if (debugLevel) printf("timeout: sending command '%s'\n", stringOut);
-						%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+						%%writeOnly(ssId, pVar, pVar->stringOut);
 	
 						%%waitEpicsMotors(ssId, pVar); /* wait until all motors are done */
 					}
@@ -788,24 +616,31 @@ ss maxTrajectoryScan {
 #if 1
 			/* During trajectory execution, time and motor position were accumulated into
 			 * motorError[j] and motorReadbacks[j], respectively.  Interpolate motorReadbacks[j]
-			 * to get readbacks at the times implied by realTimeTrajectory, so they can be plotted
-			 * on the same axis with motorTrajectory[j].  This algorithm converts in place, which
-			 * assumes we have more readbacks than trajectory segments ((i-1)>k).
+			 * to get readbacks at the times in realTimeTrajectory, so they can be plotted
+			 * on the same axis with motorTrajectory[j].
 			 */
             for (j=0; j<numAxes; j++) {
+				if (moveMode != MOVE_MODE_ABSOLUTE) {
+					for (k=0; k<=currPulse; k++) motorReadbacks[j][k] -= motorStart[j];
+				}
 				if (debugLevel >= 10) printf("state readback: motor %d\n", j);
 				for (k=0, i=0; k<npoints; k++) {
 					while ((motorError[j][i] < realTimeTrajectory[k]) && (i < MAX_PULSES-1)) i++;
 					if ((i>0) && (fabs(motorError[j][i] - motorError[j][i-1]) > 1e-6)) {
 						frac = (realTimeTrajectory[k] - motorError[j][i-1])/(motorError[j][i] - motorError[j][i-1]);
-						motorReadbacks[j][k] = motorReadbacks[j][i-1] + frac * (motorReadbacks[j][i] - motorReadbacks[j][i-1]);
+						dbuf[k] = motorReadbacks[j][i-1] + frac * (motorReadbacks[j][i] - motorReadbacks[j][i-1]);
+						/*if (k==npoints-1) printf("interp: motorReadbacks[%d][%d]=%f\n", j, k, dbuf[k]);*/
 					} else {
-						motorReadbacks[j][k] = motorReadbacks[j][i];
+						dbuf[k] = motorReadbacks[j][i];
+						/*if (k==npoints-1) printf("copy: motorReadbacks[%d][%d]=%f\n", j, k, dbuf[k]);*/
 					}
-					if (debugLevel >= 10) printf("state readback: rb=%f, t=%f\n", motorReadbacks[j][k], realTimeTrajectory[k]);
+					if (debugLevel >= 10) printf("state readback: rb=%f, t=%f\n", dbuf[k], realTimeTrajectory[k]);
 
 				}
-				for (; k<MAX_PULSES; k++) motorReadbacks[j][k] = 0.;
+				for (; k<MAX_PULSES; k++) dbuf[k] = 0.;
+
+				/* copy to motorReadbacks */
+				for (k=0; k<MAX_PULSES; k++) motorReadbacks[j][k] = dbuf[k];
 				/* calculate error, ignoring last (deceleration) point */
 				for (k=0; k<npoints-1; k++) {
 					motorError[j][k] =  motorReadbacks[j][k] - motorTrajectory[j][k];
@@ -850,12 +685,12 @@ ss trajectoryAbort {
 		when (efTestAndClear(abortMon) && (abort==1)) {
 #if 0
 			sprintf(stringOut, "SA;"); /* Stop all motors, and flush all queues. */
-			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+			%%writeOnly(ssId, pVar, pVar->stringOut);
 #else
 			for (j=0; j<MAX_AXES; j++) {
 				if (moveAxis[j]) {
 					sprintf(stringOut, "AM; VH[%d]1;", j+1);
-					%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+					%%writeOnly(ssId, pVar, pVar->stringOut);
 				}
 			}
 			/* SHOULD PROBABLY WAIT FOR MOTORS TO DECELERATE TO A STOP BEFORE KILLING */
@@ -867,7 +702,7 @@ ss trajectoryAbort {
 			}
 			strcat(stringOut, ";");
 			if (debugLevel) printf("abort: sending command '%s'\n", stringOut);
-			%%if (pVar->simMode==0) writeOnly(ssId, pVar, pVar->stringOut);
+			%%writeOnly(ssId, pVar, pVar->stringOut);
 #endif
 
 			execStatus = STATUS_ABORT;
@@ -883,13 +718,14 @@ ss trajectoryAbort {
 	}
 }
 
+/***********************************************************************************************************/
 /* C functions */
 %{
 
 /* writeOnly sends a command to the MAX controller */
 static int writeOnly(SS_ID ssId, struct UserVar *pVar, char *command)
 {
-	asynStatus status;
+	asynStatus status=0;
 	int debug_out=0;
 #if USE_ASYN
 	size_t nwrite;
@@ -898,10 +734,14 @@ static int writeOnly(SS_ID ssId, struct UserVar *pVar, char *command)
 	/* Copy command so we can add terminator */
 	strncpy(buffer, command, MAX_MESSAGE_STRING-3);
 	strcat(buffer, "\r");
-	status = pasynOctetSyncIO->write((asynUser *)pVar->pasynUser, buffer,
+	if (pVar->simMode==0) {
+		status = pasynOctetSyncIO->write((asynUser *)pVar->pasynUser, buffer,
 							   strlen(buffer), 1.0, &nwrite);
+	}
 #else
-	status = (asynStatus) MAXV_send_mess(pVar->cardNumber, command, (char *) NULL);
+	if (pVar->simMode==0) {
+		status = (asynStatus) MAXV_send_mess(pVar->cardNumber, command, (char *) NULL);
+	}
 #endif
 	if (pVar->execState==EXECUTE_STATE_EXECUTING)
 		debug_out = (pVar->debugLevel >= 7);
@@ -1090,12 +930,13 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
 
 	/* Logic is that we always want to post position motor positions 
 	 * after the end of move is detected. */
-	while(getEpicsMotorMoving(ssId, pVar)) {
+	while (getEpicsMotorMoving(ssId, pVar)) {
 		/* Get the current motor positions, post them */
 		for (j=0; j<pVar->numAxes; j++) {
 			pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
 			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
 		}
+		if (pVar->debugLevel >= 1) printf("waitEpicsMotors: m1=%f\n", pVar->epicsMotorPos[0]);
 		epicsThreadSleep(POLL_INTERVAL);
 	}
 	for (j=0; j<pVar->numAxes; j++) {
@@ -1128,7 +969,6 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 			"pos", "calcPos", "dp", "t", "v_ideal", "accel_p", "accel_v", "accel_s");
 	}
 	for (i=1; i<npoints; i++) {
-		/*dp = motorTrajectory[i]-motorTrajectory[i-1];*/
 		/* Don't assume we achieved exactly the desired [i-1] position. */
 		dp = motorTrajectory[i]-calcMotorTrajectory[i-1];
 		dt = realTimeTrajectory[i]-realTimeTrajectory[i-1];
@@ -1238,6 +1078,221 @@ static double rawToUser(int raw, double off, int dir, double res) {
 	return (raw*res*dir+off);
 }
 
+
+/**************************************************************************************/
+static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
+	int i, j, k, n;
+	int onMask=0, offMask=0, outMask=0;
+	int segment_accel, segment_decel, segment_v_start, segment_v_end;
+	char absRel;
+	char stringOut[MAX_MESSAGE_STRING];
+	int firstTask;
+	double addForRelMove;
+	int dir;
+	/* variables for splitting a segment */
+	int p1=0, v1=0, do_split;
+	double p1_double, t_v0;
+
+	sprintf(stringOut, "AM;");	/* multitasking mode */
+	writeOnly(ssId, pVar, stringOut);
+
+	/* digital I/O commands */
+	if ((pVar->outBitNum >= 0) && (pVar->outBitNum <= 15)) {
+		onMask = 1 << (pVar->outBitNum);
+		offMask = 0;
+		outMask = 1 << (pVar->outBitNum);
+		/*sprintf(stringOut, "IO%d,1;", pVar->outBitNum);*/	/* set bit as output */
+		sprintf(stringOut, "BD%04x;", outMask);	/* set bit as output */
+		writeOnly(ssId, pVar, stringOut);
+		sprintf(stringOut, "BL%d;", pVar->outBitNum);	/* set output bit low */
+		writeOnly(ssId, pVar, stringOut);
+	}
+	if ((pVar->inBitNum >= 0) && (pVar->inBitNum <= 15)) {
+		sprintf(stringOut, "IO%d,0;", pVar->inBitNum);	/* set bit as input */
+		writeOnly(ssId, pVar, stringOut);
+	}
+
+	/* trajectory commands */
+	absRel = 'A';
+	/*absRel = (moveMode == MOVE_MODE_ABSOLUTE) ? 'A' : 'R';*/
+
+	/* clear motor queue */
+	sprintf(stringOut, "AM; SI");
+	for (j=0; j<MAX_AXES; j++) {
+		if (pVar->moveAxis[j]) strcat(stringOut, "1");
+		if (j<(MAX_AXES-1)) strcat(stringOut, ",");
+	}
+	strcat(stringOut, ";");
+	writeOnly(ssId, pVar, stringOut);
+
+	/* Get update rate */
+	sprintf(stringOut, "AX; #UR?;");
+	writeRead(ssId, pVar, stringOut, stringOut);
+	if (pVar->debugLevel > 0) printf("Update rate ='%s'\n", stringOut);
+
+	epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
+	getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
+
+	/* Set update rate. */
+	i = 1024 * pVar->updateFreq;
+	sprintf(stringOut, "AX; #UR%d;", i);
+	writeOnly(ssId, pVar, stringOut);
+
+	/* reload motor positions to what they were before the #UR command */
+	/* Note that LP sets both motor and encoder positions to the same value */
+	n = sprintf(stringOut, "AM; LP");
+	for (j=0; j<MAX_AXES; j++) {
+		n += sprintf(&(stringOut[n]), "%d", pVar->motorCurrentRaw[j]);
+		if (j<(MAX_AXES-1)) n += sprintf(&(stringOut[n]), ",");
+	}
+	strcat(stringOut, ";");
+	writeOnly(ssId, pVar, stringOut);
+
+	/* we may need current raw positions to mock up relative mode */
+	epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
+	getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
+
+	for (j=0, firstTask=1; j<MAX_AXES; j++) {
+		if (pVar->moveAxis[j]) {
+			if (pVar->epicsMotorDir[j] == 0) dir=1; else dir=-1;
+
+			addForRelMove = pVar->motorCurrent[j]*dir / pVar->epicsMotorMres[j];
+			if (pVar->debugLevel > 2) printf("addForRelMove=%f\n", addForRelMove);
+
+			/* output bit */
+			if (firstTask && ((pVar->outBitNum >= 0) && (pVar->outBitNum <= 15))) {
+				/* Tell controller to output a pulse at the beginning of every trajectory segment. */
+				sprintf(stringOut, "AM; VIO[%d]%04x,%04x,%04x;", j+1, onMask, offMask, outMask);
+				writeOnly(ssId, pVar, stringOut);
+			} else {
+				/* Tell controller NOT to output a pulse at the beginning of every trajectory segment. */
+				sprintf(stringOut, "AM; VIO[%d]0,0,0;", j+1);
+				writeOnly(ssId, pVar, stringOut);
+			}
+			/* done flag and interrupt */
+			sprintf(stringOut, "AM; VID[%d]1;", j+1);
+			writeOnly(ssId, pVar, stringOut);
+
+			/* Don't start until I tell you to start */
+			sprintf(stringOut, "AM; VH[%d]0;", j+1);
+			writeOnly(ssId, pVar, stringOut);
+
+			/* Arm the trajectories to start on an input trigger bit.
+			 * If no input trigger bit, then start now.
+			 */
+			if ((pVar->inBitNum >= 0) && (pVar->inBitNum <= 15)) {
+				/* Wait for input bit to go high before processing any more commands. */
+				sprintf(stringOut, "A%c; SW%d;", axis_name[j], pVar->inBitNum);
+				writeOnly(ssId, pVar, stringOut);
+			}
+
+			for (i=0; i<pVar->npoints; i++) {
+				if (pVar->acceleration[j][i] > 0) {
+					segment_accel = pVar->acceleration[j][i];
+					segment_decel = pVar->acceleration[j][i];
+				} else {
+					segment_accel = -(pVar->acceleration[j][i]);
+					segment_decel = -(pVar->acceleration[j][i]);
+				}
+				if (segment_accel < 1) segment_accel = 1;
+				if (segment_accel > 8000000) segment_accel = 8000000;
+				if (segment_decel < 1) segment_decel = 1;
+				if (segment_decel > 8000000) segment_decel = 8000000;
+
+				segment_v_start = (i==0) ? pVar->velocity[j][0] : pVar->velocity[j][i-1];
+				segment_v_end = pVar->velocity[j][i];
+
+				/* If velocity goes through zero during this segment, we'll need to split the segment. */
+				do_split = (segment_v_start>0) != (segment_v_end>0);
+				do_split = do_split && (abs(segment_v_start)>2) && (abs(segment_v_end)>2);
+				do_split = do_split && (i>0);
+				if (do_split) {
+					/* time from the beginning of the trajectory segment at which the velocity reaches zero.*/
+					t_v0 = (double)(-segment_v_start) / pVar->acceleration[j][i];
+
+					if ((t_v0 < .005) || (((pVar->realTimeTrajectory[i] - pVar->realTimeTrajectory[i-1]) - t_v0) < .005)) {
+						/* Don't split very near either end of segment. */
+						if (pVar->debugLevel > 0) printf("declined to split segment at t=%f\n", t_v0);
+						do_split = 0;
+					} else {
+						v1 = 0;
+						p1_double = pVar->position[j][i-1] + segment_v_start*t_v0 +
+							0.5 * pVar->acceleration[j][i]*t_v0*t_v0;
+						p1 = NINT(p1_double); /* Note that this already has addForRelMove added to it. */
+						if (pVar->debugLevel > 0) printf("split segment at t=%f, x=%d\n", t_v0, p1);
+					}
+				}
+
+				segment_v_start = abs(segment_v_start); 
+				segment_v_end = abs(segment_v_end); 
+
+				if (segment_v_start < 1) segment_v_start = 1;
+				if (segment_v_start > 4194303) segment_v_start = 4194303;
+				if (segment_v_end < 0) segment_v_end = 0;
+				if (segment_v_end > 4194303) segment_v_end = 4194303;
+
+				if (pVar->moveMode != MOVE_MODE_ABSOLUTE) {
+					p1_double = pVar->position[j][i];
+					pVar->position[j][i] = NINT(p1_double + addForRelMove);
+				}
+
+				if (do_split) {
+					if (firstTask && ((pVar->outBitNum >= 0) && (pVar->outBitNum <= 15))) {
+						/* Disable output pulses */
+						sprintf(stringOut, "AM; VIO[%d]0,0,0;", j+1);
+						writeOnly(ssId, pVar, stringOut);
+					}
+					/* we have to split this segment where velocity goes through zero. */
+					n = sprintf(stringOut, "AM; VA[%d]%d;", j+1, segment_accel);
+					n += sprintf(&stringOut[n], "VV[%d]%d,%d;", j+1, segment_v_start, v1);
+					n += sprintf(&stringOut[n], "VP[%d]%c", j+1, absRel);
+					for (k=0; k<j; k++) {strcat(stringOut, ","); n++;}
+					n += sprintf(&(stringOut[n]), "%d", p1);
+					for (k=j+1; k<MAX_AXES; k++) {strcat(stringOut, ","); n++;}
+					strcat(stringOut, ";");
+					writeOnly(ssId, pVar, stringOut);
+
+					if (firstTask && ((pVar->outBitNum >= 0) && (pVar->outBitNum <= 15))) {
+						/* Enable output pulses */
+						sprintf(stringOut, "AM; VIO[%d]%04x,%04x,%04x;", j+1, onMask, offMask, outMask);
+						writeOnly(ssId, pVar, stringOut);
+					}
+					n = sprintf(stringOut, "AM; VA[%d]%d;", j+1, segment_accel);
+					if (i < (pVar->npoints)-1) {
+						n += sprintf(&stringOut[n], "VV[%d]%d;", j+1, segment_v_end);
+					} else {
+						n += sprintf(&stringOut[n], "VV[%d]%d,%d;", j+1, 1, segment_v_end);
+					}
+					n += sprintf(&stringOut[n], "VP[%d]%c", j+1, absRel);
+					for (k=0; k<j; k++) {strcat(stringOut, ","); n++;}
+					n += sprintf(&(stringOut[n]), "%d", pVar->position[j][i]);
+					for (k=j+1; k<MAX_AXES; k++) {strcat(stringOut, ","); n++;}
+					strcat(stringOut, ";");
+					writeOnly(ssId, pVar, stringOut);
+				} else {
+					n = sprintf(stringOut, "AM; VA[%d]%d;", j+1, segment_accel);
+					if (i < (pVar->npoints)-1) {
+						n += sprintf(&stringOut[n], "VV[%d]%d;", j+1, segment_v_end);
+					} else {
+						n += sprintf(&stringOut[n], "VV[%d]%d,%d;", j+1, segment_v_start, segment_v_end);
+					}
+					n += sprintf(&stringOut[n], "VP[%d]%c", j+1, absRel);
+					for (k=0; k<j; k++) {strcat(stringOut, ","); n++;}
+					n += sprintf(&(stringOut[n]), "%d", pVar->position[j][i]);
+					for (k=j+1; k<MAX_AXES; k++) {strcat(stringOut, ","); n++;}
+					strcat(stringOut, ";");
+					writeOnly(ssId, pVar, stringOut);
+				}
+			}
+			sprintf(stringOut, "AM; VE[%d];", j+1);
+			writeOnly(ssId, pVar, stringOut);
+			firstTask = 0;
+		}
+	}
+	return(0);
+}
+
+/**************************************************************************************/
 
 /* Numerical recipes spline routines */
 double u[MAX_ELEMENTS+1];
