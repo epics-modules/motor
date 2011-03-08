@@ -201,7 +201,7 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
     }
     
     /* Do callbacks so higher layers see any changes */
-    callParamCallbacks(pAxis->axis, pAxis->axis);
+    callParamCallbacks(pAxis->axis);
     if (status) 
         asynPrint(pasynUser, ASYN_TRACE_ERROR, 
               "%s:%s: error, status=%d function=%d, value=%d\n", 
@@ -237,7 +237,7 @@ asynStatus motorSimController::writeFloat64(asynUser *pasynUser, epicsFloat64 va
     }
     
     /* Do callbacks so higher layers see any changes */
-    callParamCallbacks(pAxis->axis, pAxis->axis);
+    callParamCallbacks(pAxis->axis);
     if (status) 
         asynPrint(pasynUser, ASYN_TRACE_ERROR, 
               "%s:%s: error, status=%d function=%d, value=%f\n", 
@@ -275,7 +275,7 @@ asynStatus motorSimController::moveAxis(asynUser*pasynUser, double position, int
     routeSetParams( pAxis->route, &pars ); 
 
     setIntegerParam(pAxis->axis, motorStatusDone, 0);
-    callParamCallbacks(pAxis->axis, pAxis->axis);
+    callParamCallbacks(pAxis->axis);
 
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
         "%s:%s: Set driver %s, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f",
@@ -316,7 +316,7 @@ asynStatus motorSimController::homeAxis(asynUser *pasynUser, double min_velocity
     status = pAxis->velocity((forwards? max_velocity: -max_velocity), acceleration );
     pAxis->homing = 1;
     setIntegerParam(pAxis->axis, motorStatusDone, 0 );
-    callParamCallbacks(pAxis->axis, pAxis->axis);
+    callParamCallbacks(pAxis->axis);
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
         "%s:%s: Set dirver %s, axis %d to home %s, min vel=%f, max_vel=%f, accel=%f",
         driverName, functionName, this->portName, pAxis->axis, (forwards?"FORWARDS":"REVERSE"), min_velocity, max_velocity, acceleration );
@@ -332,7 +332,7 @@ asynStatus motorSimController::moveVelocityAxis(asynUser *pasynUser, double min_
 
     status = pAxis->velocity(velocity, acceleration );
     setIntegerParam(pAxis->axis, motorStatusDone, 0);
-    callParamCallbacks(pAxis->axis, pAxis->axis);
+    callParamCallbacks(pAxis->axis);
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
         "%s:%s: Set port %s, axis %d move with velocity of %f, accel=%f",
         driverName, functionName, this->portName, pAxis->axis, velocity, acceleration );
@@ -479,7 +479,7 @@ void motorSimController::motorSimTask()
                 this->lock();
                 pAxis = this->pAxes[axis];
                 this->process(pAxis, delta );
-                callParamCallbacks(axis, axis);
+                callParamCallbacks(axis);
                 this->unlock();
             }
         }
