@@ -70,7 +70,7 @@ public:
     virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
     virtual asynStatus setIntegerParam(int list, int index, int value);
     virtual asynStatus setDoubleParam(int list, int index, double value);
-    virtual asynStatus callParamCallbacks(int list, int addr);
+    virtual asynStatus callParamCallbacks(int addr);
 
     /* These are the methods that are new to this class */
     virtual asynStatus moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration);

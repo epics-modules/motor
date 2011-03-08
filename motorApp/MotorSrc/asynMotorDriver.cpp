@@ -103,13 +103,13 @@ asynStatus asynMotorDriver::setDoubleParam(int axis, int function, double value)
     return asynPortDriver::setDoubleParam(axis, function, value);
 }   
 
-asynStatus asynMotorDriver::callParamCallbacks(int axis, int addr)
+asynStatus asynMotorDriver::callParamCallbacks(int axis)
 {
     if (this->axisStatusChanged[axis]) {
         this->axisStatusChanged[axis] = 0;
         doCallbacksGenericPointer((void *)&this->axisStatus[axis], motorStatus, axis);
     }
-    return asynPortDriver::callParamCallbacks(axis, addr);
+    return asynPortDriver::callParamCallbacks(axis);
 }
 
 asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -136,7 +136,7 @@ asynStatus asynMotorDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     }
 
     /* Do callbacks so higher layers see any changes */
-    callParamCallbacks(axis, axis);
+    callParamCallbacks(axis);
     if (status) 
         asynPrint(pasynUser, ASYN_TRACE_ERROR, 
               "%s:%s error, status=%d axis=%d, function=%d, value=%d\n", 
@@ -184,7 +184,7 @@ asynStatus asynMotorDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value
     }
     
     /* Do callbacks so higher layers see any changes */
-    callParamCallbacks(axis, axis);
+    callParamCallbacks(axis);
     if (status) 
         asynPrint(pasynUser, ASYN_TRACE_ERROR, 
               "%s:%s error, status=%d axis=%d, function=%d, value=%f\n", 
