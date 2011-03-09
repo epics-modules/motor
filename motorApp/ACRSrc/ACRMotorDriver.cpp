@@ -46,7 +46,7 @@ public:
 
 class ACRMotorController : asynMotorDriver {
 public:
-    ACRMotorController(const char *portName, const char *ACRPortName, int numAxes, int movingPollRate, int idlePollRate);
+    ACRMotorController(const char *portName, const char *ACRPortName, int numAxes, int movingPollPeriod, int idlePollPeriod);
     
     /* These are the methods that we override from asynMotorDriver */
     asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
@@ -79,7 +79,7 @@ private:
     char inString[MAX_ACR_STRING_SIZE];
 };
 
-ACRMotorController::ACRMotorController(const char *portName, const char *ACRPortName, int numAxes, int movingPollRate, int idlePollRate)
+ACRMotorController::ACRMotorController(const char *portName, const char *ACRPortName, int numAxes, int movingPollPeriod, int idlePollPeriod)
     :   asynMotorDriver(portName, numAxes, NUM_ACR_CONTROLLER_PARAMS, 
             asynInt32Mask | asynFloat64Mask, 
             asynInt32Mask | asynFloat64Mask,
@@ -94,8 +94,8 @@ ACRMotorController::ACRMotorController(const char *portName, const char *ACRPort
 
     if (numAxes < 1 ) numAxes = 1;
     this->numAxes = numAxes;
-    this->idlePollPeriod = 1. / (idlePollRate/1000.);
-    this->movingPollPeriod = 1. / (movingPollRate/1000.);
+    this->idlePollPeriod = idlePollPeriod/1000.;
+    this->movingPollPeriod = movingPollPeriod/1000.;
     this->pAxes = (ACRMotorAxis**) calloc(numAxes, sizeof(ACRMotorAxis*));
     this->pollEventId = epicsEventMustCreate(epicsEventEmpty);
 
@@ -108,7 +108,9 @@ ACRMotorController::ACRMotorController(const char *portName, const char *ACRPort
     }
     // Turn off command echoing
     sprintf(this->outString, "BIT1792=0");
-    writeACR();
+     // Turn off command prompt
+    sprintf(this->outString, "BIT1794=1");
+   writeACR();
     for (axis=0; axis<numAxes; axis++) {
         pAxis  = new ACRMotorAxis(axis);
         this->pAxes[axis] = pAxis;
@@ -126,10 +128,10 @@ ACRMotorController::ACRMotorController(const char *portName, const char *ACRPort
 
 
 /** Configuration command, called directly or from iocsh */
-extern "C" int ACRMotorCreateController(const char *portName, const char *ACRPortName, int numAxes, int movingPollRate, int idlePollRate)
+extern "C" int ACRMotorCreateController(const char *portName, const char *ACRPortName, int numAxes, int movingPollPeriod, int idlePollPeriod)
 {
     ACRMotorController *pACRMotorController
-        = new ACRMotorController(portName, ACRPortName, numAxes, movingPollRate, idlePollRate);
+        = new ACRMotorController(portName, ACRPortName, numAxes, movingPollPeriod, idlePollPeriod);
     pACRMotorController = NULL;
     return(asynSuccess);
 }
@@ -138,7 +140,7 @@ ACRMotorAxis::ACRMotorAxis(int axisNumber)
     : axisNumber(axisNumber)
 {
     sprintf(this->axisName, "AXIS%d", axisNumber);
-    this->positionRegister = 12288 + 256*axisNumber;
+    this->positionRegister = 12290 + 256*axisNumber;
     this->flagsRegister = 4120 + axisNumber;
 }
 
@@ -147,8 +149,8 @@ void ACRMotorController::report(FILE *fp, int level)
     int axis;
     ACRMotorAxis *pAxis;
 
-    fprintf(fp, "ACR motor driver %s, numAxes=%d\n", 
-        this->portName, this->numAxes);
+    fprintf(fp, "ACR motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
+        this->portName, this->numAxes, this->movingPollPeriod, this->idlePollPeriod);
 
     if (level > 0) {
         for (axis=0; axis<this->numAxes; axis++) {
@@ -224,7 +226,8 @@ asynStatus ACRMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 va
     
     if (function == motorPosition) 
     {
-        sprintf(this->outString, "%s RES %f", pAxis->axisName, value);
+        sprintf(this->outString, "%s RES %f", pAxis->axisName, value/pAxis->pulsesPerUnit);
+        status = writeACR();
         asynPrint(pasynUser, ASYN_TRACE_FLOW, 
             "%s:%s: Set axis %d to position %d\n", 
             driverName, functionName, pAxis->axisNumber, value);
@@ -261,7 +264,9 @@ asynStatus ACRMotorController::moveAxis(asynUser*pasynUser, double position, int
     } else {
         sprintf(this->outString, "%s JOG ABS %f", pAxis->axisName, position/pAxis->pulsesPerUnit);
         writeACR();
-    };
+    }
+    // Wake up the poller task to begin polling quickly
+    epicsEventSignal(this->pollEventId);
 
     setIntegerParam(pAxis->axisNumber, motorStatusDone, 0);
     callParamCallbacks(pAxis->axisNumber);
@@ -284,6 +289,9 @@ asynStatus ACRMotorController::homeAxis(asynUser *pasynUser, double min_velocity
     status = writeACR();
     sprintf(this->outString, "%s JOG HOME %d", pAxis->axisName, forwards ? 1 : -1);
     status = writeACR();
+    // Wake up the poller task to begin polling quickly
+    epicsEventSignal(this->pollEventId);
+
     setIntegerParam(pAxis->axisNumber, motorStatusDone, 0);
     callParamCallbacks(pAxis->axisNumber);
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -293,17 +301,32 @@ asynStatus ACRMotorController::homeAxis(asynUser *pasynUser, double min_velocity
 }
 
 
-asynStatus ACRMotorController::moveVelocityAxis(asynUser *pasynUser, double min_velocity, double velocity, double acceleration)
+asynStatus ACRMotorController::moveVelocityAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration)
 {
     asynStatus status = asynError;
+    double speed=max_velocity;
+    int forwards=1;
     ACRMotorAxis *pAxis = this->getAxis(pasynUser);
     static const char *functionName = "moveVelocityAxis";
+
+    if (speed < 0) {
+        speed = -speed;
+        forwards = 0;
+    }
+    sprintf(this->outString, "%s JOG ACC %f", pAxis->axisName, acceleration/pAxis->pulsesPerUnit);
+    status = writeACR();
+    sprintf(this->outString, "%s JOG VEL %f", pAxis->axisName, speed/pAxis->pulsesPerUnit);
+    status = writeACR();
+    sprintf(this->outString, "%s JOG %s", pAxis->axisName, forwards ? "FWD" : "REV");
+    status = writeACR();
+    // Wake up the poller task to begin polling quickly
+    epicsEventSignal(this->pollEventId);
 
     setIntegerParam(pAxis->axisNumber, motorStatusDone, 0);
     callParamCallbacks(pAxis->axisNumber);
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-        "%s:%s: Set port %s, axis %d move with velocity of %f, accel=%f\n",
-        driverName, functionName, this->portName, pAxis->axisNumber, velocity, acceleration );
+        "%s:%s: Set port %s, axis %d move with velocity of %f, accel=%f, forwards=%d\n",
+        driverName, functionName, this->portName, pAxis->axisNumber, speed, acceleration, forwards);
     return status;
 }
 
@@ -370,8 +393,9 @@ void ACRMotorController::ACRMotorPoller()
             // Read the current encoder position
             sprintf(this->outString, "?P%d", pAxis->positionRegister);
             this->writeReadACR();
-            pAxis->currentPosition = atof(this->inString) * pAxis->pulsesPerUnit;
+            pAxis->currentPosition = atof(this->inString);
             setDoubleParam(i, motorEncoderPosition, pAxis->currentPosition);
+            setDoubleParam(i, motorPosition, pAxis->currentPosition);
             // Read the current flags
             sprintf(this->outString, "?P%d", pAxis->flagsRegister);
             this->writeReadACR();
@@ -443,8 +467,8 @@ asynStatus ACRMotorController::writeReadACR(const char *output, char *input, siz
 static const iocshArg ACRMotorCreateControllerArg0 = {"Port name", iocshArgString};
 static const iocshArg ACRMotorCreateControllerArg1 = {"ACR port name", iocshArgString};
 static const iocshArg ACRMotorCreateControllerArg2 = {"Number of axes", iocshArgInt};
-static const iocshArg ACRMotorCreateControllerArg3 = {"Moving poll rate", iocshArgInt};
-static const iocshArg ACRMotorCreateControllerArg4 = {"Idle poll rate", iocshArgInt};
+static const iocshArg ACRMotorCreateControllerArg3 = {"Moving poll period (ms)", iocshArgInt};
+static const iocshArg ACRMotorCreateControllerArg4 = {"Idle poll period (ms)", iocshArgInt};
 static const iocshArg * const ACRMotorCreateControllerArgs[] =  {&ACRMotorCreateControllerArg0,
                                                           &ACRMotorCreateControllerArg1,
                                                           &ACRMotorCreateControllerArg2,
