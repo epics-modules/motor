@@ -34,6 +34,13 @@ HeadURL:        $URL$
  *        Advanced Photon Source
  *        Argonne National Laboratory
  *
+ * NOTES
+ * -----
+ * Verified with firmware:
+ *
+ *  - 901.086 E
+ *  - 3.010
+ *
  * Modification Log:
  * -----------------
  * .01 03/21/03 rls copied from drvIM483PL.c
@@ -50,6 +57,9 @@ HeadURL:        $URL$
  *                    extern "C" linkage.
  * .07 03/18/05 rls - Flexible MDrive I/O configuration.
  *                  - Change Echo mode to 2; eliminate eat_garbage().
+ * .08 12/17/10 rls - Test to determine if encoder is present changed to
+ *                    accommodate new firmware.
+ *                  - support actual velocity status update.
  */
 
 /*
@@ -364,10 +374,12 @@ static int set_status(int card, int signal)
 
     status.Bits.RA_PROBLEM = 0;
 
-    /* Parse motor velocity? */
-    /* NEEDS WORK */
+    /* Get current motor velocity */
 
-    motor_info->velocity = 0;
+    send_mess(card, "PR V", MDrive_axis[signal]);
+    recv_mess(card, buff, 1);
+    motorData = atof(buff);
+    motor_info->velocity = (epicsInt32) motorData;
 
     if (!status.Bits.RA_DIRECTION)
         motor_info->velocity *= -1;
@@ -612,6 +624,7 @@ static int motor_init()
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 int itera;
+                bool encoder = false;   /* Default to no encoder detected. */
                 struct mess_info *motor_info = &brdptr->motor_info[motor_index];
 
                 motor_info->status.All = 0;
@@ -619,17 +632,39 @@ static int motor_init()
                 motor_info->encoder_position = 0;
                 motor_info->position = 0;
                 brdptr->motor_info[motor_index].motor_motion = NULL;
-                /* Assume no encoder support. */
-                motor_info->encoder_present = NO;
 
                 /* Determine if encoder present based last character of "ident". */
                 if (brdptr->ident[strlen(brdptr->ident) - 1] == 'E')
+                    encoder = true;
+                else
+                {
+                    int size;
+
+                    /* Try to get "Part number" (not in old firmware). */
+                    send_mess(card_index, "PR PN", MDrive_axis[motor_index]);
+                    size = recv_mess(card_index, buff, 1);
+                    if (size > 0)
+                    {
+                        bool found = false;
+
+                        found |= !strcmp(&buff[size-1],"E");
+                        found |= !strcmp(&buff[size-2],"EQ");
+                        found |= !strcmp(&buff[size-2],"EE");
+                        found |= !strcmp(&buff[size-3],"EJM");
+                        found |= !strcmp(&buff[size-5],"EJM-N");
+                        encoder = found;
+                    }
+                }
+
+                if (encoder == true)
                 {
                     motor_info->pid_present = YES;
                     motor_info->status.Bits.GAIN_SUPPORT = 1;
                     motor_info->encoder_present = YES;
                     motor_info->status.Bits.EA_PRESENT = 1;
                 }
+                else
+                    motor_info->encoder_present = NO;
 
                 /* Determine input configuration. */
                 confptr->homeLS = confptr->minusLS = confptr->plusLS = 0;
