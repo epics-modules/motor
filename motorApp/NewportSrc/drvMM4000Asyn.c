@@ -25,6 +25,16 @@ HeadURL:        $URL$
    in file LICENSE that is included with this distribution.
  -----------------------------------------------------------------------------
  *
+ * NOTES
+ * -----
+ * Verified with firmware:
+ *
+ *  - MM4000 2.04
+ *  - MM4005 2.40
+ *  - MM4005 2.42
+ *  - MM4005 3.14b
+ *  - MM4006 7.01c date 04-02-2004
+ *
  * Modification Log:
  * -----------------
  *
