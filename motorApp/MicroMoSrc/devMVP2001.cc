@@ -84,6 +84,8 @@ Last Modified:	$Date: 2008-06-06 17:16:51 $
  *			current limit is out of range) from 500mA to 100mA.
  * .06	02/13/04  rls	port to R3.14.x
  * .07	06/06/08  rls	Bug fix initializing driver twice.
+ * .08  03/18/11  kmp   Corrected the MVP2001_table structure; only the "GO"
+ *                      command causes the motor to move.
  *
  */
 
@@ -126,15 +128,15 @@ extern "C"{epicsExportAddress(dset, devMVP2001);}
 /* WARNING! this must match "motor_cmnd" in motor.h */
 
 static msg_types MVP2001_table[] = {
-    MOTION,         /* MOVE_ABS */
-    MOTION,         /* MOVE_REL */
-    MOTION,         /* HOME_FOR */
-    MOTION,         /* HOME_REV */
+    IMMEDIATE,      /* MOVE_ABS */
+    IMMEDIATE,      /* MOVE_REL */
+    IMMEDIATE,      /* HOME_FOR */
+    IMMEDIATE,      /* HOME_REV */
     IMMEDIATE,      /* LOAD_POS */
     IMMEDIATE,      /* SET_VEL_BASE */
     IMMEDIATE,      /* SET_VELOCITY */
     IMMEDIATE,      /* SET_ACCEL */
-    IMMEDIATE,      /* GO */
+    MOTION,         /* GO */
     IMMEDIATE,      /* SET_ENC_RATIO */
     INFO,           /* GET_INFO */
     MOVE_TERM,      /* STOP_AXIS */

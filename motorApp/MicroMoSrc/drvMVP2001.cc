@@ -86,6 +86,8 @@ Last Modified:  $Date: 2009-09-08 18:26:32 $
  * .09 06/06/08  rls    - Bug fix setting RA_DONE based on inMotion.
  * .10 06/09/08  rls    - Controller workaround for comm. errors; delay after
  *                        each messages received for 0.1 second.
+ * .11 03/18/11  kmp    Set status.Bits.EA_POSITION properly in set_status() so
+ *                      the torque enable/disable button is accurate.
  */
 
 /*
@@ -395,8 +397,8 @@ static int set_status(int card, int signal)
     /* The MVP2001 doesn't have a home feature */
     status.Bits.RA_HOME = 0;
 
-    /* !!! Assume no closed-looped control!!! */
-    status.Bits.EA_POSITION = 0;
+    /* Set the enable-torque PV properly */
+    status.Bits.EA_POSITION = (mstat.Bits.NOT_power == false) ? 1 : 0;
 
     /* encoder status */
     status.Bits.EA_SLIP = 0;
