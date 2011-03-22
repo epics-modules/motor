@@ -21,6 +21,7 @@ program XPS_trajectoryScan("P=13BMC:,R=traj1,IPADDR=164.54.160.34,PORT=5001,"
 %% #include <math.h>
 %% #include <stdarg.h>
 %% #include "XPS_C8_drivers.h"
+%% #include "XPS_C8_errors.h"
 %% #include "Socket.h"
 %% #include "xps_ftp.h"
 
@@ -64,13 +65,12 @@ option +r;
 #define MAX_GATHERING_AXIS_STRING 60
 /* Number of items per axis */
 #define NUM_GATHERING_ITEMS 2
-/* Total length of gathering string */
+/* Total length of gathering configuration string */
 #define MAX_GATHERING_STRING MAX_GATHERING_AXIS_STRING * NUM_GATHERING_ITEMS * MAX_AXES
+#define GATHERING_MAX_READ_LEN 65536
 
 /* Constants used for FTP to the XPS */
 #define TRAJECTORY_DIRECTORY "/Admin/public/Trajectories"
-#define GATHERING_DIRECTORY "/Admin/public/"
-#define GATHERING_FILE "Gathering.dat"
 
 int status;
 int i;
@@ -893,17 +893,17 @@ static void trajectoryExecute(SS_ID ssId, struct UserVar *pVar)
         return;
     }
         
-    /* Save the gathered data to a file */    
+    /* Stop the gathering */    
     if (pVar->debugLevel > 0) {
         printMessage("XPS_trajectoryScan: trajectoryExecute:"
-               " calling GatheringStopAndSave(%d)\n", pVar->pollSocket);
+               " calling GatheringStop(%d)\n", pVar->pollSocket);
     }
-    status = GatheringStopAndSave(pVar->pollSocket);
+    status = GatheringStop(pVar->pollSocket);
     
     /* status -30 means gathering not started i.e. aborted before the end of
        1 trajectory element */
     if ((status != 0) && (status != -30))
-        printMessage("Error performing GatheringStopAndSave, status=%d\n", status);
+        printMessage("Error performing GatheringStop, status=%d\n", status);
     
     return;
 }
@@ -1155,83 +1155,85 @@ static int getGroupStatus(SS_ID ssId, struct UserVar *pVar)
 }
 
 
-/* Function to load the GatheringExternal.dat file which was written
- * by the XPS after the trajectory was performed and read back the
+/* Function to read the gathering data that was collected
+ * by the XPS as the trajectory was performed and read back the
  * actual motor positions and calculate the position errors */ 
 static void readGathering(SS_ID ssId, struct UserVar *pVar)
 {
-    char buffer[MAX_GATHERING_STRING];
-    FILE *gatheringFile;
-    int i,j;
-    int nitems;
+    char *buffer, *bptr, *tptr;
+    int currentSamples, maxSamples;
     double setpointPosition, actualPosition;
-    int ftpSocket;
     int status;
     int dir;
+    int i, j;
+    int nitems;
+    int numRead, numInBuffer, numChars;
+
     
     if (pVar->debugLevel > 0) {
         printMessage("XPS_trajectoryScan: readGathering:"
                " entry\n");
     }
-    /* FTP the gathering file from the XPS to the local directory */
-    status = ftpConnect(pVar->xpsAddress, pVar->userName, pVar->password, &ftpSocket);
+    /* Read the number of lines of gathering */
+    status = GatheringCurrentNumberGet(pVar->pollSocket, &currentSamples, &maxSamples);
     if (status != 0) {
-        printMessage("Error calling ftpConnect, status=%d\n", status);
+        printMessage("Error calling GatherCurrentNumberGet, status=%d\n", status);
         return;
     }
-    status = ftpChangeDir(ftpSocket, GATHERING_DIRECTORY);
-    if (status != 0) {
-        printMessage("Error calling ftpChangeDir, status=%d\n", status);
+    if (currentSamples != pVar->npulses) {
+        printMessage("readGathering: error, npulses=%d, currentSamples=%d\n", 
+            pVar->npulses, currentSamples);
         return;
     }
-    status = ftpRetrieveFile(ftpSocket, GATHERING_FILE);
-    if (status != 0) {
-        printMessage("Error calling ftpRetrieveFile, status=%d\n", status);
-        return;
-    }
-    status = ftpDisconnect(ftpSocket);
-    if (status != 0) {
-        printMessage("Error calling ftpDisconnect, status=%d\n", status);
-        return;
-    }
-
-    gatheringFile = fopen(GATHERING_FILE, "r");
-    
-    /* Read 1st 2 lines which only contain the axis names */
-    for (i=0; i<2; i++) {
-        fgets (buffer, MAX_GATHERING_STRING, gatheringFile);
-    }
-    /* The next line is the motor positions at the start of the trajectory element
-     * where pulses began to be output.  
-     * We used to skip this line because this pulse just
-     * started the MCS counting, there are no data yet. 
-     * But that required the XPS to output more than the requested number of 
-     * output pulses, which is undesireable.  The SIS3801 can be configured to
-     * start counting before receiving the first input pulse, which should
-     * now be done. */
-    /* fgets (buffer, MAX_GATHERING_STRING, gatheringFile); */
-    
-    for (i=0; i<pVar->npulses; i++) {
-        for (j=0; j<pVar->numAxes; j++) {
-            /* Note the trailing white space in this format is required to make
-             * fscanf read the newline */
-            nitems = fscanf(gatheringFile, "%lf %lf ", 
-                            &setpointPosition, &actualPosition);
-            if (nitems != NUM_GATHERING_ITEMS) {
-                printMessage("Error reading Gathering.dat file, nitems=%d, should be %d\n",
-                       nitems, NUM_GATHERING_ITEMS);
-                goto done;
+    buffer = (char *)calloc(GATHERING_MAX_READ_LEN, sizeof(char));
+    numInBuffer = 0;
+    for (numRead=0; numRead<currentSamples;) {
+        /* Read the next buffer */
+        /* Try to read all the remaining points */
+        status = -1;
+        numInBuffer = currentSamples - numRead;
+        while (status && (numInBuffer > 0)) {
+            status = GatheringDataMultipleLinesGet(pVar->pollSocket, numRead, numInBuffer, buffer);
+            if (pVar->debugLevel > 0) {
+                printMessage("readGathering: GatheringDataMultipleLinesGet, status=%d, numInBuffer=%d\n", status, numInBuffer);
             }
-            pVar->motorError[j][i] = actualPosition - setpointPosition;
-            /* Convert from XPS units to EPICS motor user units */
-            if (pVar->epicsMotorDir[j] == 0) dir=1; else dir=-1;
-            pVar->motorReadbacks[j][i] = actualPosition * dir + pVar->epicsMotorOff[j];
+            if (status) numInBuffer /= 2;
+        }
+        if (numInBuffer == 0) {
+            printMessage("Error reading gathering data, numInBuffer = 0\n");
+            goto done;
+        }
+        bptr = buffer;
+        for (i=0; i<numInBuffer; i++) {
+            /* Find the next \n and replace with null */
+            tptr = strstr(bptr, "\n");
+            if (tptr) *tptr = 0;
+            for (j=0; j<pVar->numAxes; j++) {
+                nitems = sscanf(bptr, "%lf;%lf%n", 
+                                &setpointPosition, &actualPosition, &numChars);
+                bptr += numChars+1;
+                if (nitems != NUM_GATHERING_ITEMS) {
+                    printMessage("Error reading Gathering.dat file, nitems=%d, should be %d\n",
+                           nitems, NUM_GATHERING_ITEMS);
+                    goto done;
+                }
+                pVar->motorError[j][numRead] = actualPosition - setpointPosition;
+                /* Convert from XPS units to EPICS motor user units */
+                if (pVar->epicsMotorDir[j] == 0) dir=1; else dir=-1;
+                pVar->motorReadbacks[j][numRead] = actualPosition * dir + pVar->epicsMotorOff[j];
+            }
+            numRead++;
+            pVar->nactual = numRead;
+            bptr = tptr + 1;
         }
     }
     
     done:
-    fclose (gatheringFile);
-    pVar->nactual = i; 
+    free(buffer);
+    if (pVar->debugLevel > 0) {
+        printMessage("XPS_trajectoryScan: readGathering:"
+               " exit\n");
+    }
 
     return;
 }
