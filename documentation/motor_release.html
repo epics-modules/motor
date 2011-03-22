@@ -13,6 +13,79 @@
 <body>
   <div style="text-align: center">
     <h1>
+      <b>Motor Record Version 6-6 Release Notice</b></h1>
+  </div>
+  <div style="text-align: center">
+    <h4>
+      Modifications to Existing Features</h4>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>Many driver and device support files</b>
+    </p>
+    <p>
+      Minor fixes to allow building dynamically on win32-x86, i.e. to build DLLs. This
+      mostly involved changing the location of the #include &lt;epicsExport.h&gt; statement
+      and adding the epicsShareFunc qualifier.
+    </p>
+    <p>
+      <b>XPS trajectory scanning (Mark Rivers)</b>
+    </p>
+    <p>
+      Fixed a bug with soft limit checking when the motors .DIR field was negative.
+    </p>
+    <p>
+      There was previously a problem with reading back the gathering data (actual and
+      theoretical positions) when doing trajectory scans. The problem was that the XPS
+      firmware would sometimes save a corrupted file to the flash drive in the XPS. Newport
+      is not fixing this, so we changed to reading the gathering data GatheringDataMultipleLinesGet(),
+      i.e. directly over the socket connection to the XPS, rather than saving to a file
+      and using FTP to copy the file to the IOC.
+    </p>
+    <p>
+      The above change exposed a bug in the SendAndReceive function in asynOctetSocket.cpp.
+      That function needs to loop reading from the socket until it sets the end-of-message
+      string ",EndOfAPI". It was not previously doing this, which was OK when responses
+      were shorter than the 999 bytes that the XPS sends in one message. But the GatheringDataMultipleLinesGet()
+      function returns very long responses, up to 64KB, so this needed to be fixed.
+    </p>
+    <p>
+      Updated the XPS_C8_driver.cpp and .h files to the latest versions that come with
+      the XPS 2.6.2 firmware. This adds new functions over the versions previously being
+      used. To take advantage of these new functions the XPS firmware needs to be upgraded
+      to 2.6.2.
+    </p>
+    <p>
+      <b>asynMotorDriver</b>&nbsp;</p>
+    <p>
+      Changed the function callParamCallbacks(addr, addr) to callParamCallbacks(addr). This
+      will require changes to any existing drivers that derive from asynMotorDriver.
+    </p>
+    <p>
+      <b>motorSimDriver</b>&nbsp;</p>
+    <p>
+      Fix bug with items not initialized in constructor.  Made changes to work with fixes
+      to asynMotorDriver described above.
+    </p>
+    <p>
+    </p>
+  </div>
+  <div style="text-align: center">
+    <h4>
+      New Features</h4>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>Parker ACR series controller support</b>&nbsp;</p>
+    <p>
+      Mark Rivers added a new driver for the Parker ACR (including Aries) series of controllers.
+      This driver uses the new asyn C++ model, i.e. it derives from asynMotorDriver.cpp.
+      It has currently only been tested on the single-axis Aries controller, but it should
+      work on the multi-axis ACR controllers as well.
+    </p>
+    </div>
+    <div style="text-align: center">
+      <h1>
       <b>Motor Record Version 6-5 Release Notice</b></h1>
   </div>
   <div style="text-align: center">
@@ -64,8 +137,8 @@
       <b>RES field deleted</b>
     </p>
     <p>
-      The RES field was removed from the motor record database definition with this 
-      release (R6-5). The RES field has been depreciated by the MRES field since R4-5.
+      The RES field was removed from the motor record database definition with this release
+      (R6-5). The RES field has been depreciated by the MRES field since R4-5.
     </p>
   </div>
   <div style="text-align: center">
@@ -77,26 +150,26 @@
       <b>Aerotech Soloist and Ensemble motor controller support</b>
     </p>
     <p>
-      Two new drivers from Aerotech were add; an asyn motor version of the Ensemble 
-      and the Soloist under the old driver architecture. Since the Ensemble network 
-      connection requires period communication from the host to prevent the Ensemble 
-      from closing the network socket, the Ensemble support based on the old device 
-      driver architecture will be removed after R5-6. The asyn motor architecture 
-      supports continuous, periodic updates; the old architecture does not.
+      Two new drivers from Aerotech were add; an asyn motor version of the Ensemble and
+      the Soloist under the old driver architecture. Since the Ensemble network connection
+      requires period communication from the host to prevent the Ensemble from closing
+      the network socket, the Ensemble support based on the old device driver architecture
+      will be removed after R5-6. The asyn motor architecture supports continuous, periodic
+      updates; the old architecture does not.
     </p>
     <p>
       <b>ADEL and MDEL fields added</b>
     </p>
     <p>
-      Matthew Pearson (Diamond) added support for the ADEL and MDEL motor record 
-      fields. Unlike most records, the ADEL/MDEL fields in the motor record apply to 
-      the User Readback Value (RBV).  See the motorRecord.html document for details.
+      Matthew Pearson (Diamond) added support for the ADEL and MDEL motor record fields.
+      Unlike most records, the ADEL/MDEL fields in the motor record apply to the User
+      Readback Value (RBV). See the motorRecord.html document for details.
     </p>
     <p>
       <b>Synchronize field (SYNC)</b>
     </p>
     <p>
-      When the SYNC field is set to Yes(1) the record sets the Drive fields (VAL/DVAL/RVAL) 
+      When the SYNC field is set to Yes(1) the record sets the Drive fields (VAL/DVAL/RVAL)
       to their readback values (RBV/DRBV/RRBV) and sets SYNC field back to No(0).
     </p>
   </div>
