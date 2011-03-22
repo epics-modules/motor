@@ -1,0 +1,43 @@
+#errlogInit(5000)
+< envPaths
+# Tell EPICS all about the record types, device-support modules, drivers,
+# etc. in this build from CARS
+dbLoadDatabase("../../dbd/WithAsyn.dbd")
+WithAsyn_registerRecordDeviceDriver(pdbbase)
+
+### Motors
+dbLoadTemplate "motor.substitutions.acr"
+
+drvAsynIPPortConfigure("ARIES1", "gse-aries1:5002", 0, 0, 0)
+#asynSetTraceMask("ARIES1", 0, 3)
+asynSetTraceIOMask("ARIES1", 0, 2)
+asynOctetSetInputEos("ARIES1",0,"\r")
+asynOctetSetOutputEos("ARIES1",0,"\r")
+
+drvAsynIPPortConfigure("ARIES2", "gse-aries2:5002", 0, 0, 0)
+#asynSetTraceMask("ARIES2", 0, 3)
+asynSetTraceIOMask("ARIES2", 0, 2)
+asynOctetSetInputEos("ARIES2",0,"\r")
+asynOctetSetOutputEos("ARIES2",0,"\r")
+
+dbLoadRecords("$(ASYN)/db/asynRecord.db", "P=IOC:, R=asyn1, PORT=ARIES1, ADDR=0, OMAX=256, IMAX=256")
+dbLoadRecords("$(ASYN)/db/asynRecord.db", "P=IOC:, R=asyn2, PORT=ARIES1, ADDR=0, OMAX=256, IMAX=256")
+
+# PORT, ACR_PORT, number of axes, active poll period (ms), idle poll period (ms)
+ACRMotorCreateController("ACR1", "ARIES1", 1, 20, 1000)
+ACRMotorCreateController("ACR2", "ARIES2", 1, 20, 1000)
+
+#asynSetTraceMask("ACR1", 0, 255)
+asynSetTraceIOMask("ACR1", 0, 2)
+#asynSetTraceMask("ACR2", 0, 255)
+asynSetTraceIOMask("ACR2", 0, 2)
+
+iocInit
+
+# This IOC does not use save/restore, so set values of some PVs
+dbpf("IOC:m1.RTRY", "0")
+dbpf("IOC:m1.TWV", "0.1")
+dbpf("IOC:m2.RTRY", "0")
+dbpf("IOC:m2.TWV", "0.1")
+
+
