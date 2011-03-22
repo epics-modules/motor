@@ -34,6 +34,8 @@ COMMONDBDS += devKohzuMotor.dbd
 COMMONDBDS += devAttocube.dbd
 COMMONDBDS += devAerotech.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
+COMMONDBDS += drvAsynIPPort.dbd
+COMMONDBDS += ACRMotorSupport.dbd
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -68,6 +70,7 @@ COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
 COMMONLIBS += SmartMotor
 COMMONLIBS += KohzuMotor
+COMMONLIBS += ACRMotor
 COMMONLIBS += motor
 
 # Needed for Newport SNL programs
