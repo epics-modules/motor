@@ -23,7 +23,9 @@ March 4, 2011
 #include "asynMotorDriver.h"
 #include <epicsExport.h>
 
-#define NUM_ACR_CONTROLLER_PARAMS 0
+#define ACRJerkString "ACR_JERK"
+#define CtlY 25
+
 #define ACR_TIMEOUT 1.0
 #define MAX_ACR_STRING_SIZE 80
 
@@ -38,10 +40,14 @@ public:
     int axisNumber;
     char axisName[10];
     double pulsesPerUnit;
-    int flagsRegister;
-    int positionRegister;
-    double currentPosition;
+    int flagsReg;
+    int limitsReg;
+    int encoderPositionReg;
+    int theoryPositionReg;
+    double encoderPosition;
+    double theoryPosition;
     int currentFlags;
+    int currentLimits;
 };
 
 class ACRMotorController : asynMotorDriver {
@@ -60,12 +66,18 @@ public:
     asynStatus triggerProfile(asynUser *pasynUser);
     
     /* These are the methods that are new to this class */
-    asynStatus configAxis(int axis, int hiHardLimit, int lowHardLimit, int home, int start);
     asynStatus writeACR();
     asynStatus writeACR(const char *output, double timeout);
     asynStatus writeReadACR();
     asynStatus writeReadACR(const char *output, char *response, size_t maxResponseLen, size_t *responseLen, double timeout);
     void ACRMotorPoller();  // Should be private, but called from non-member function
+    
+protected:
+    int ACRJerk;
+#define FIRST_ACR_PARAM ACRJerk
+#define LAST_ACR_PARAM ACRJerk
+
+#define NUM_ACR_PARAMS (&LAST_ACR_PARAM - &FIRST_ACR_PARAM + 1)
 
 private:
     ACRMotorAxis* getAxis(asynUser *pasynUser);
@@ -80,7 +92,7 @@ private:
 };
 
 ACRMotorController::ACRMotorController(const char *portName, const char *ACRPortName, int numAxes, int movingPollPeriod, int idlePollPeriod)
-    :   asynMotorDriver(portName, numAxes, NUM_ACR_CONTROLLER_PARAMS, 
+    :   asynMotorDriver(portName, numAxes, NUM_ACR_PARAMS, 
             asynInt32Mask | asynFloat64Mask, 
             asynInt32Mask | asynFloat64Mask,
             ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
@@ -98,6 +110,9 @@ ACRMotorController::ACRMotorController(const char *portName, const char *ACRPort
     this->movingPollPeriod = movingPollPeriod/1000.;
     this->pAxes = (ACRMotorAxis**) calloc(numAxes, sizeof(ACRMotorAxis*));
     this->pollEventId = epicsEventMustCreate(epicsEventEmpty);
+    
+    // Create controller-specific parameters
+    createParam(ACRJerkString, asynParamFloat64, &this->ACRJerk);
 
     /* Connect to ACR controller */
     status = pasynOctetSyncIO->connect(ACRPortName, 0, &this->pasynUserACR, NULL);
@@ -108,16 +123,28 @@ ACRMotorController::ACRMotorController(const char *portName, const char *ACRPort
     }
     // Turn off command echoing
     sprintf(this->outString, "BIT1792=0");
+    writeACR();
      // Turn off command prompt
     sprintf(this->outString, "BIT1794=1");
-   writeACR();
+    writeACR();
+    // Wait a short while so that any responses to the above commands have time to arrive so we can flush
+    // them in the next writeReadACR()
+    epicsThreadSleep(0.5);
     for (axis=0; axis<numAxes; axis++) {
         pAxis  = new ACRMotorAxis(axis);
         this->pAxes[axis] = pAxis;
         // Get the number of pulses per unit on this axis
         sprintf(this->outString, "%s PPU", pAxis->axisName);
         status = writeReadACR();
-        pAxis->pulsesPerUnit = atof(this->inString);
+        if (status) {
+            setIntegerParam(axis, motorStatusProblem, 1);
+        } else {
+            pAxis->pulsesPerUnit = atof(this->inString);
+            // We assume servo motor with encoder for now
+            setIntegerParam(axis, motorStatusGainSupport, 1);
+            setIntegerParam(axis, motorStatusHasEncoder, 1);
+        }
+        callParamCallbacks(axis);
     }
 
     epicsThreadCreate("ACRMotorThread", 
@@ -140,8 +167,10 @@ ACRMotorAxis::ACRMotorAxis(int axisNumber)
     : axisNumber(axisNumber)
 {
     sprintf(this->axisName, "AXIS%d", axisNumber);
-    this->positionRegister = 12290 + 256*axisNumber;
-    this->flagsRegister = 4120 + axisNumber;
+    this->encoderPositionReg = 12290 + 256*axisNumber;
+    this->theoryPositionReg  = 12294 + 256*axisNumber;
+    this->limitsReg          = 4600  + axisNumber;
+    this->flagsReg           = 4120  + axisNumber;
 }
 
 void ACRMotorController::report(FILE *fp, int level)
@@ -155,8 +184,15 @@ void ACRMotorController::report(FILE *fp, int level)
     if (level > 0) {
         for (axis=0; axis<this->numAxes; axis++) {
             pAxis = this->pAxes[axis];
-            fprintf(fp, "  axis %d, pulsesPerUnit = %f, position=%f, flags=%x\n", 
-                pAxis->axisNumber, pAxis->pulsesPerUnit, pAxis->currentPosition, pAxis->currentFlags);
+            fprintf(fp, "  axis %d\n"
+                        "    pulsesPerUnit = %f\n"
+                        "    encoder position=%f\n"
+                        "    theory position=%f\n"
+                        "    limits=0x%x\n"
+                        "    flags=0x%x\n", 
+                pAxis->axisNumber, pAxis->pulsesPerUnit, 
+                pAxis->encoderPosition, pAxis->theoryPosition,
+                pAxis->currentLimits, pAxis->currentFlags);
 
         }
     }
@@ -194,7 +230,17 @@ asynStatus ACRMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value)
             "%s:%s: %sing Deferred Move flag on driver %s\n",
             value != 0.0?"Sett":"Clear",
             driverName, functionName, this->portName);
-    } else {
+    } 
+    else if (function == motorSetClosedLoop)
+    {
+        sprintf(this->outString, "DRIVE %s %s", value ? "ON":"OFF", pAxis->axisName);
+        writeACR();
+        asynPrint(pasynUser, ASYN_TRACE_FLOW,
+            "%s:%s: %s setting closed loop=%d on %s\n",
+            driverName, functionName, this->portName, value, pAxis->axisName);
+    } 
+    else 
+    {
         /* Call base class call its method (if we have our parameters check this here) */
         status = asynMotorDriver::writeInt32(pasynUser, value);
     }
@@ -228,9 +274,17 @@ asynStatus ACRMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 va
     {
         sprintf(this->outString, "%s RES %f", pAxis->axisName, value/pAxis->pulsesPerUnit);
         status = writeACR();
+        sprintf(this->outString, "%s JOG REN", pAxis->axisName);
+        status = writeACR();
         asynPrint(pasynUser, ASYN_TRACE_FLOW, 
             "%s:%s: Set axis %d to position %d\n", 
             driverName, functionName, pAxis->axisNumber, value);
+    }
+    else if (function == ACRJerk)
+    {
+        sprintf(this->outString, "%s JOG JRK %f", pAxis->axisName, value);
+        status = writeACR();
+        
     } else {
         /* Call base class call its method (if we have our parameters check this here) */
         status = asynMotorDriver::writeFloat64(pasynUser, value);
@@ -258,11 +312,12 @@ asynStatus ACRMotorController::moveAxis(asynUser*pasynUser, double position, int
     writeACR();
     sprintf(this->outString, "%s JOG VEL %f", pAxis->axisName, max_velocity/pAxis->pulsesPerUnit);
     writeACR();
+    // Note, the CtlY being send below clears the kill for all axes, in case they had hit a limit, etc.
     if (relative) {
-        sprintf(this->outString, "%s JOG INC %f", pAxis->axisName, position/pAxis->pulsesPerUnit);
+        sprintf(this->outString, "%c:%s JOG INC %f", CtlY, pAxis->axisName, position/pAxis->pulsesPerUnit);
         writeACR();
     } else {
-        sprintf(this->outString, "%s JOG ABS %f", pAxis->axisName, position/pAxis->pulsesPerUnit);
+        sprintf(this->outString, "%c:%s JOG ABS %f", CtlY, pAxis->axisName, position/pAxis->pulsesPerUnit);
         writeACR();
     }
     // Wake up the poller task to begin polling quickly
@@ -287,7 +342,7 @@ asynStatus ACRMotorController::homeAxis(asynUser *pasynUser, double min_velocity
     status = writeACR();
     sprintf(this->outString, "%s JOG VEL %f", pAxis->axisName, max_velocity/pAxis->pulsesPerUnit);
     status = writeACR();
-    sprintf(this->outString, "%s JOG HOME %d", pAxis->axisName, forwards ? 1 : -1);
+    sprintf(this->outString, "%c:%s JOG HOME %d", CtlY, pAxis->axisName, forwards ? 1 : -1);
     status = writeACR();
     // Wake up the poller task to begin polling quickly
     epicsEventSignal(this->pollEventId);
@@ -317,7 +372,7 @@ asynStatus ACRMotorController::moveVelocityAxis(asynUser *pasynUser, double min_
     status = writeACR();
     sprintf(this->outString, "%s JOG VEL %f", pAxis->axisName, speed/pAxis->pulsesPerUnit);
     status = writeACR();
-    sprintf(this->outString, "%s JOG %s", pAxis->axisName, forwards ? "FWD" : "REV");
+    sprintf(this->outString, "%c:%s JOG %s", CtlY, pAxis->axisName, forwards ? "FWD" : "REV");
     status = writeACR();
     // Wake up the poller task to begin polling quickly
     epicsEventSignal(this->pollEventId);
@@ -369,8 +424,11 @@ void ACRMotorController::ACRMotorPoller()
     int forcedFastPolls=0;
     int anyMoving;
     int done;
+    int driveOn;
+    int limit;
     ACRMotorAxis *pAxis;
     int status;
+    asynStatus comStatus;
 
     timeout = this->idlePollPeriod;
     epicsEventSignal(this->pollEventId);  /* Force on poll at startup */
@@ -390,19 +448,51 @@ void ACRMotorController::ACRMotorPoller()
         this->lock();
         for (i=0; i<this->numAxes; i++) {
             pAxis = this->pAxes[i];
+
             // Read the current encoder position
-            sprintf(this->outString, "?P%d", pAxis->positionRegister);
-            this->writeReadACR();
-            pAxis->currentPosition = atof(this->inString);
-            setDoubleParam(i, motorEncoderPosition, pAxis->currentPosition);
-            setDoubleParam(i, motorPosition, pAxis->currentPosition);
+            sprintf(this->outString, "?P%d", pAxis->encoderPositionReg);
+            comStatus = this->writeReadACR();
+            if (comStatus) goto done;
+            pAxis->encoderPosition = atof(this->inString);
+            setDoubleParam(i, motorEncoderPosition, pAxis->encoderPosition);
+
+            // Read the current theoretical position
+            sprintf(this->outString, "?P%d", pAxis->theoryPositionReg);
+            comStatus = this->writeReadACR();
+            if (comStatus) goto done;
+            pAxis->theoryPosition = atof(this->inString);
+            setDoubleParam(i, motorPosition, pAxis->theoryPosition);
+
             // Read the current flags
-            sprintf(this->outString, "?P%d", pAxis->flagsRegister);
-            this->writeReadACR();
+            sprintf(this->outString, "?P%d", pAxis->flagsReg);
+            comStatus = this->writeReadACR();
+            if (comStatus) goto done;
             pAxis->currentFlags = atoi(this->inString);
-            done = (pAxis->currentFlags & 0x1000000) == 0;
+            done = (pAxis->currentFlags & 0x1000000)?0:1;
             setIntegerParam(i, motorStatusDone, done);
             if (!done) anyMoving = 1;
+            
+            // Read the current limit status
+            sprintf(this->outString, "?P%d", pAxis->limitsReg);
+            comStatus = this->writeReadACR();
+            if (comStatus) goto done;
+            pAxis->currentLimits = atoi(this->inString);
+            limit = (pAxis->currentLimits & 0x1)?1:0;
+            setIntegerParam(i, motorStatusHighLimit, limit);
+            limit = (pAxis->currentLimits & 0x2)?1:0;
+            setIntegerParam(i, motorStatusLowLimit, limit);
+            limit = (pAxis->currentLimits & 0x4)?1:0;
+            setIntegerParam(i, motorStatusAtHome, limit);
+
+            // Read the drive power on status
+            sprintf(this->outString, "DRIVE %s", pAxis->axisName);
+            comStatus = this->writeReadACR();
+            if (comStatus) goto done;
+            driveOn = strstr(this->inString, "ON") ? 1:0;
+            setIntegerParam(i, motorStatusPowerOn, driveOn);
+            setIntegerParam(i, motorStatusProblem, 0);
+            done:
+            setIntegerParam(i, motorStatusProblem, comStatus?1:0);
             callParamCallbacks(i);
         }
         this->unlock();
@@ -449,8 +539,6 @@ asynStatus ACRMotorController::writeReadACR(const char *output, char *input, siz
     asynUser *pasynUser = this->pasynUserACR;
     const char *functionName="writeReadACR";
     
-    /* Flush any stale input */
-    status = pasynOctetSyncIO->flush(pasynUser);
     status = pasynOctetSyncIO->writeRead(pasynUser, output,
                 strlen(output), input, maxChars, timeout,
                 &nwrite, nread, &eomReason);
