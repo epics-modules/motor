@@ -37,6 +37,7 @@ typedef int BOOL;
 #define PORT_NAME_SIZE     100
 #define ERROR_STRING_SIZE  100
 #define DEFAULT_TIMEOUT    0.2
+#define XPS_TERMINATOR     ",EndOfAPI"
 
 #define MAX_RETRIES 2
 
@@ -50,6 +51,7 @@ typedef struct {
     double timeout;
     char errorString[ERROR_STRING_SIZE];
     int connected;
+    epicsMutexId mutexId;
 } socketStruct;
 static socketStruct socketStructs[MAX_SOCKETS];
 
@@ -99,6 +101,11 @@ int ConnectToServer(char *IpAddress, int IpPort, double timeout)
                portName, pasynUserCommon->errorMessage);
         return -1;
     }
+    
+    /* Create a mutex to prevent more than 1 thread using socket at once
+     * Normally the SyncIO-.writeRead function takes care of this, but for long responses
+     * we can't use a single write/read operation */
+    psock->mutexId = epicsMutexMustCreate();
 
     psock->timeout = timeout;
     psock->connected = 1;
@@ -130,6 +137,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
     int status;
     int retries;
     int errStat;
+    int nread;
 
     /* Check to see if the Socket is valid! */
     
@@ -146,6 +154,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
         return;
     }
 
+    epicsMutexMustLock(psock->mutexId);
     /* If timeout > 0. then we do a write read.  If < 0. then write. */
 
     if (psock->timeout > 0.0) {
@@ -165,7 +174,22 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
         }
         asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
                   "SendAndReceive, sent: '%s', received: '%s'\n",
-                  buffer, valueRtrn);    
+                  buffer, valueRtrn);
+        nread = nbytesIn;
+        /* Loop until we the response contains ",EndOfAPI" or we get an error */
+        while ((status==asynSuccess) && 
+               (strcmp(valueRtrn + nread - strlen(XPS_TERMINATOR), XPS_TERMINATOR) != 0)) {
+            status = pasynOctetSyncIO->read(psock->pasynUser,
+                                            &valueRtrn[nread],
+                                            returnSize-nread,
+                                            psock->timeout,
+                                            &nbytesIn,
+                                            &eomReason);
+            asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
+                  "SendAndReceive, received: nread=%d, returnSize-nread=%d, nbytesIn=%d\n",
+                  nread, returnSize-nread, nbytesIn);
+            nread += nbytesIn;
+        }
     } else {
         /* This is typically used for the "Move" commands, and we don't want to wait for the response */
         /* Fake the response by putting "-1" (for error) or "0" (for success) in the return string */
@@ -207,6 +231,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
         }
         strcpy(valueRtrn, "0");
     }
+    epicsMutexUnlock(psock->mutexId);
 }
 
 
