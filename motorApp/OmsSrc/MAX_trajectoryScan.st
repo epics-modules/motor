@@ -517,7 +517,7 @@ ss maxTrajectoryScan {
 								posTheory += motorStart[j];
 							}
 							dpos = motorCurrent[j] - posTheory;
-							if (debugLevel >= 3) printf("   wait_execute: actual=%.2f, ideal=%.2f, err=%.2f\n",
+							if (debugLevel >= 4) printf("\n   wait_execute: actual=%.2f, ideal=%.2f, err=%.2f\n",
 								motorCurrent[j], posTheory, dpos);
 							/* dp/dt */
 							v = (motorReadbacks[j][currPulse] - motorReadbacks[j][currPulse-1]) /
@@ -790,6 +790,7 @@ static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos, epic
     int dir;
 	epicsTimeStamp currtime;
 	char vBuf[MAX_MESSAGE_STRING], aBuf[MAX_MESSAGE_STRING];
+	static char vcmd[10]="VRV[1];", acmd[10]="VRC[1];";
 
 	MAXV_getPositions(pVar->cardNumber, rawP, pVar->numAxes);
 
@@ -802,10 +803,23 @@ static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos, epic
     }
 
 	if ((pVar->execState == EXECUTE_STATE_EXECUTING) && (pVar->debugLevel >= 2)) {
-		writeRead(ssId, pVar, "VRV[1];", vBuf);
-		writeRead(ssId, pVar, "VRC[1];", aBuf);
-		printf("\ndt=%6.3f, p=%7d, v=%7.0f, a=%7.0f",
-			*dt, rawP[0], atof(&(vBuf[1])), atof(&(aBuf[1])));
+		if (pVar->debugLevel >= 3) {
+			printf("\n%6.3fs: ", *dt);
+	    	for (j=0; j<pVar->numAxes; j++) {
+				if (pVar->moveAxis[j]) {
+					vcmd[4] = (char)(j+1 + '0');
+					writeRead(ssId, pVar, vcmd, vBuf);
+					acmd[4] = (char)(j+1 + '0');
+					writeRead(ssId, pVar, acmd, aBuf);
+					printf("(%7d, %7.0f, %7.0f) ", rawP[j], atof(&(vBuf[1])), atof(&(aBuf[1])));
+				}
+			}
+		} else {
+			writeRead(ssId, pVar, "VRV[1];", vBuf);
+			writeRead(ssId, pVar, "VRC[1];", aBuf);
+			printf("\ndt=%6.3f, p=%7d, v=%7.0f, a=%7.0f",
+				*dt, rawP[0], atof(&(vBuf[1])), atof(&(aBuf[1])));
+		}
 		if (pVar->debugLevel >= 10) printf("\n");
 	} else if (pVar->debugLevel >= 1) {
 		printf("\ndt=%6.3f, p=%7d", *dt, rawP[0]);
