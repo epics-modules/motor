@@ -23,7 +23,12 @@ March 4, 2011
 #include "asynMotorDriver.h"
 #include <epicsExport.h>
 
-#define ACRJerkString "ACR_JERK"
+// drvInfo strings for extra parameters that the ACR controller supports
+#define ACRJerkString           "ACR_JERK"
+#define ACRBinaryInString       "ACR_BINARY_IN"
+#define ACRBinaryOutString      "ACR_BINARY_OUT"
+#define ACRBinaryOutRBVString   "ACR_BINARY_OUT_RBV"
+
 #define CtlY 25
 
 #define ACR_TIMEOUT 1.0
@@ -57,6 +62,7 @@ public:
     /* These are the methods that we override from asynMotorDriver */
     asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
     asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
+    asynStatus writeUInt32Digital(asynUser *pasynUser, epicsUInt32 value, epicsUInt32 mask);
     void report(FILE *fp, int level);
     asynStatus moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration);
     asynStatus moveVelocityAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration);
@@ -75,7 +81,10 @@ public:
 protected:
     int ACRJerk;
 #define FIRST_ACR_PARAM ACRJerk
-#define LAST_ACR_PARAM ACRJerk
+    int ACRBinaryIn;
+    int ACRBinaryOut;
+    int ACRBinaryOutRBV;
+#define LAST_ACR_PARAM ACRBinaryOutRBV
 
 #define NUM_ACR_PARAMS (&LAST_ACR_PARAM - &FIRST_ACR_PARAM + 1)
 
@@ -89,12 +98,16 @@ private:
     asynUser *pasynUserACR;
     char outString[MAX_ACR_STRING_SIZE];
     char inString[MAX_ACR_STRING_SIZE];
+    int binaryIn;
+    int binaryOutRBV;
+    int binaryInReg;
+    int binaryOutReg;
 };
 
 ACRMotorController::ACRMotorController(const char *portName, const char *ACRPortName, int numAxes, int movingPollPeriod, int idlePollPeriod)
     :   asynMotorDriver(portName, numAxes, NUM_ACR_PARAMS, 
-            asynInt32Mask | asynFloat64Mask, 
-            asynInt32Mask | asynFloat64Mask,
+            asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask, 
+            asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask,
             ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
             1, // autoconnect
             0, 0)  // Default priority and stack size
@@ -110,9 +123,14 @@ ACRMotorController::ACRMotorController(const char *portName, const char *ACRPort
     this->movingPollPeriod = movingPollPeriod/1000.;
     this->pAxes = (ACRMotorAxis**) calloc(numAxes, sizeof(ACRMotorAxis*));
     this->pollEventId = epicsEventMustCreate(epicsEventEmpty);
+    this->binaryInReg  = 4096;
+    this->binaryOutReg = 4097;
     
     // Create controller-specific parameters
-    createParam(ACRJerkString, asynParamFloat64, &this->ACRJerk);
+    createParam(ACRJerkString,         asynParamFloat64,        &this->ACRJerk);
+    createParam(ACRBinaryInString,     asynParamUInt32Digital,  &this->ACRBinaryIn);
+    createParam(ACRBinaryOutString,    asynParamUInt32Digital,  &this->ACRBinaryOut);
+    createParam(ACRBinaryOutRBVString, asynParamUInt32Digital,  &this->ACRBinaryOutRBV);
 
     /* Connect to ACR controller */
     status = pasynOctetSyncIO->connect(ACRPortName, 0, &this->pasynUserACR, NULL);
@@ -182,6 +200,8 @@ void ACRMotorController::report(FILE *fp, int level)
         this->portName, this->numAxes, this->movingPollPeriod, this->idlePollPeriod);
 
     if (level > 0) {
+        fprintf(fp, "  binary input = 0x%x\n", this->binaryIn);
+        fprintf(fp, "  binary output readback = 0x%x\n", this->binaryOutRBV);
         for (axis=0; axis<this->numAxes; axis++) {
             pAxis = this->pAxes[axis];
             fprintf(fp, "  axis %d\n"
@@ -301,6 +321,24 @@ asynStatus ACRMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 va
               "%s:%s: function=%d, value=%f\n", 
               driverName, functionName, function, value);
     return status;
+}
+
+asynStatus ACRMotorController::writeUInt32Digital(asynUser *pasynUser, epicsUInt32 value, epicsUInt32 mask)
+{
+    // This function is limited to writing a single bit, because we use the BIT command.
+    // It writes to least significant bit that is set in the mask
+    int bit, tmask=0x1;
+    asynStatus status;
+    //static const char *functionName = "writeUInt32Digital";
+    
+    for (bit=0; bit<32; bit++) {
+        if (mask & tmask) break;
+        tmask = tmask << 1;
+    }
+    sprintf(this->outString, "BIT %d=%d", 32+bit, value);
+    status = writeACR();
+
+    return(status);
 }
 
 asynStatus ACRMotorController::moveAxis(asynUser*pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration)
@@ -428,6 +466,7 @@ void ACRMotorController::ACRMotorPoller()
     int limit;
     ACRMotorAxis *pAxis;
     int status;
+    epicsUInt32 newBits, changedBits;
     asynStatus comStatus;
 
     timeout = this->idlePollPeriod;
@@ -491,10 +530,35 @@ void ACRMotorController::ACRMotorPoller()
             driveOn = strstr(this->inString, "ON") ? 1:0;
             setIntegerParam(i, motorStatusPowerOn, driveOn);
             setIntegerParam(i, motorStatusProblem, 0);
+
             done:
             setIntegerParam(i, motorStatusProblem, comStatus?1:0);
             callParamCallbacks(i);
         }
+        // Read the binary inputs
+        sprintf(this->outString, "?P%d", this->binaryInReg);
+        comStatus = this->writeReadACR();
+        if (!comStatus) {
+            newBits = atoi(this->inString);
+            changedBits = newBits ^ this->binaryIn;
+            this->binaryIn = newBits;
+            setUIntDigitalParam(0, ACRBinaryIn, this->binaryIn, 0xFFFFFFFF);
+            setUInt32DigitalInterrupt(0, ACRBinaryIn, changedBits, interruptOnBoth);
+        }
+
+        // Read the binary outputs
+        sprintf(this->outString, "?P%d", this->binaryOutReg);
+        comStatus = this->writeReadACR();
+        if (!comStatus) {
+            newBits = atoi(this->inString);
+            changedBits = newBits ^ this->binaryOutRBV;
+            this->binaryOutRBV = newBits;
+            setUIntDigitalParam(0, ACRBinaryOutRBV, this->binaryOutRBV, 0xFFFFFFFF);
+            setUInt32DigitalInterrupt(0, ACRBinaryOut, changedBits, interruptOnBoth);
+        }
+        
+        callParamCallbacks(0);
+
         this->unlock();
         if (forcedFastPolls > 0) {
             timeout = this->movingPollPeriod;
