@@ -1,0 +1,3017 @@
+
+file {
+	name="/home/epics/devel/motor/motorApp/op/adl/ACRAux.adl"
+	version=030102
+}
+display {
+	object {
+		x=48
+		y=69
+		width=1400
+		height=250
+	}
+	clr=14
+	bclr=4
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+text {
+	object {
+		x=433
+		y=12
+		width=534
+		height=32
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="ACR Motor Controller Aux ($(P)$(R))"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=82
+		y=59
+		width=30
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Bit"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=62
+		y=84
+		width=50
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Input"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=52
+		y=155
+		width=60
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Output"
+	align="horiz. centered"
+}
+composite {
+	object {
+		x=127
+		y=62
+		width=1261
+		height=15
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=167
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="1"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=207
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="2"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=247
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="3"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=287
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="4"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=327
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="5"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=367
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="6"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=407
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="7"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=487
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="9"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=447
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="8"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=527
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="10"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=567
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="11"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=607
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="12"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=647
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="13"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=687
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="14"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=727
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="15"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=127
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="0"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=767
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="16"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=807
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="17"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=847
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="18"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=887
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="19"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=927
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="20"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=967
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="21"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1007
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="22"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1047
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="23"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1088
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="24"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1128
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="25"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1168
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="26"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1208
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="27"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1248
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="28"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1288
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="29"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1328
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="30"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=1368
+				y=62
+				width=20
+				height=15
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="31"
+			align="horiz. centered"
+		}
+	}
+}
+composite {
+	object {
+		x=120
+		y=150
+		width=1277
+		height=30
+	}
+	"composite name"=""
+	children {
+		"choice button" {
+			object {
+				x=160
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo1"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=200
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo2"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=240
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo3"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=280
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo4"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=320
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo5"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=360
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo6"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=400
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo7"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=480
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo9"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=440
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo8"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=520
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo10"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=560
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo11"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=600
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo12"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=640
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo13"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=680
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo14"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=720
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo15"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=120
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo0"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=760
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo16"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=800
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo17"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=840
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo18"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=880
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo19"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=920
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo20"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=960
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo21"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1000
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo22"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1040
+				y=150
+				width=36
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo23"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1081
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo24"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1121
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo25"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1161
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo26"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1201
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo27"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1241
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo28"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1281
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo29"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1321
+				y=150
+				width=35
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo30"
+				clr=14
+				bclr=51
+			}
+		}
+		"choice button" {
+			object {
+				x=1361
+				y=150
+				width=36
+				height=30
+			}
+			control {
+				chan="$(P)$(R)bo31"
+				clr=14
+				bclr=51
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=127
+		y=84
+		width=1261
+		height=20
+	}
+	"composite name"=""
+	children {
+		oval {
+			object {
+				x=1047
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi23.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1047
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi23.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1088
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi24.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1088
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi24.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1128
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi25.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1128
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi25.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1168
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi26.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1168
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi26.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1208
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi27.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1208
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi27.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1248
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi28.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1248
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi28.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1288
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi29.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1288
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi29.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1328
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi30.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1328
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi30.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1368
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi31.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1368
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi31.VAL"
+			}
+		}
+		oval {
+			object {
+				x=167
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi1.VAL"
+			}
+		}
+		oval {
+			object {
+				x=167
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi1.VAL"
+			}
+		}
+		oval {
+			object {
+				x=207
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi2.VAL"
+			}
+		}
+		oval {
+			object {
+				x=207
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi2.VAL"
+			}
+		}
+		oval {
+			object {
+				x=247
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi3.VAL"
+			}
+		}
+		oval {
+			object {
+				x=247
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi3.VAL"
+			}
+		}
+		oval {
+			object {
+				x=287
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi4.VAL"
+			}
+		}
+		oval {
+			object {
+				x=287
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi4.VAL"
+			}
+		}
+		oval {
+			object {
+				x=327
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi5.VAL"
+			}
+		}
+		oval {
+			object {
+				x=327
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi5.VAL"
+			}
+		}
+		oval {
+			object {
+				x=367
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi6.VAL"
+			}
+		}
+		oval {
+			object {
+				x=367
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi6.VAL"
+			}
+		}
+		oval {
+			object {
+				x=407
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi7.VAL"
+			}
+		}
+		oval {
+			object {
+				x=407
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi7.VAL"
+			}
+		}
+		oval {
+			object {
+				x=487
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi9.VAL"
+			}
+		}
+		oval {
+			object {
+				x=487
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi9.VAL"
+			}
+		}
+		oval {
+			object {
+				x=447
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi8.VAL"
+			}
+		}
+		oval {
+			object {
+				x=447
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi8.VAL"
+			}
+		}
+		oval {
+			object {
+				x=527
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi10.VAL"
+			}
+		}
+		oval {
+			object {
+				x=527
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi10.VAL"
+			}
+		}
+		oval {
+			object {
+				x=567
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi11.VAL"
+			}
+		}
+		oval {
+			object {
+				x=567
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi11.VAL"
+			}
+		}
+		oval {
+			object {
+				x=607
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi12.VAL"
+			}
+		}
+		oval {
+			object {
+				x=607
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi12.VAL"
+			}
+		}
+		oval {
+			object {
+				x=647
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi13.VAL"
+			}
+		}
+		oval {
+			object {
+				x=647
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi13.VAL"
+			}
+		}
+		oval {
+			object {
+				x=687
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi14.VAL"
+			}
+		}
+		oval {
+			object {
+				x=687
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi14.VAL"
+			}
+		}
+		oval {
+			object {
+				x=727
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi15.VAL"
+			}
+		}
+		oval {
+			object {
+				x=727
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi15.VAL"
+			}
+		}
+		oval {
+			object {
+				x=127
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi0.VAL"
+			}
+		}
+		oval {
+			object {
+				x=127
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi0.VAL"
+			}
+		}
+		oval {
+			object {
+				x=767
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi16.VAL"
+			}
+		}
+		oval {
+			object {
+				x=767
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi16.VAL"
+			}
+		}
+		oval {
+			object {
+				x=807
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi17.VAL"
+			}
+		}
+		oval {
+			object {
+				x=807
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi17.VAL"
+			}
+		}
+		oval {
+			object {
+				x=847
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi18.VAL"
+			}
+		}
+		oval {
+			object {
+				x=847
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi18.VAL"
+			}
+		}
+		oval {
+			object {
+				x=887
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi19.VAL"
+			}
+		}
+		oval {
+			object {
+				x=887
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi19.VAL"
+			}
+		}
+		oval {
+			object {
+				x=927
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi20.VAL"
+			}
+		}
+		oval {
+			object {
+				x=927
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi20.VAL"
+			}
+		}
+		oval {
+			object {
+				x=967
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi21.VAL"
+			}
+		}
+		oval {
+			object {
+				x=967
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi21.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1007
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				vis="if not zero"
+				chan="$(P)$(R)bi22.VAL"
+			}
+		}
+		oval {
+			object {
+				x=1007
+				y=84
+				width=20
+				height=20
+			}
+			"basic attribute" {
+				clr=15
+			}
+			"dynamic attribute" {
+				vis="if zero"
+				chan="$(P)$(R)bi22.VAL"
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=12
+		y=123
+		width=1376
+		height=20
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=127
+				y=123
+				width=1261
+				height=20
+			}
+			"composite name"=""
+			children {
+				oval {
+					object {
+						x=1047
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV23.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1047
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV23.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1088
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV24.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1088
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV24.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1128
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV25.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1128
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV25.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1168
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV26.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1168
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV26.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1208
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV27.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1208
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV27.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1248
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV28.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1248
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV28.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1288
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV29.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1288
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV29.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1328
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV30.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1328
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV30.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1368
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV31.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1368
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV31.VAL"
+					}
+				}
+				oval {
+					object {
+						x=167
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV1.VAL"
+					}
+				}
+				oval {
+					object {
+						x=167
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV1.VAL"
+					}
+				}
+				oval {
+					object {
+						x=207
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV2.VAL"
+					}
+				}
+				oval {
+					object {
+						x=207
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV2.VAL"
+					}
+				}
+				oval {
+					object {
+						x=247
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV3.VAL"
+					}
+				}
+				oval {
+					object {
+						x=247
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV3.VAL"
+					}
+				}
+				oval {
+					object {
+						x=287
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV4.VAL"
+					}
+				}
+				oval {
+					object {
+						x=287
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV4.VAL"
+					}
+				}
+				oval {
+					object {
+						x=327
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV5.VAL"
+					}
+				}
+				oval {
+					object {
+						x=327
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV5.VAL"
+					}
+				}
+				oval {
+					object {
+						x=367
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV6.VAL"
+					}
+				}
+				oval {
+					object {
+						x=367
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV6.VAL"
+					}
+				}
+				oval {
+					object {
+						x=407
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV7.VAL"
+					}
+				}
+				oval {
+					object {
+						x=407
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV7.VAL"
+					}
+				}
+				oval {
+					object {
+						x=487
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV9.VAL"
+					}
+				}
+				oval {
+					object {
+						x=487
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV9.VAL"
+					}
+				}
+				oval {
+					object {
+						x=447
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV8.VAL"
+					}
+				}
+				oval {
+					object {
+						x=447
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV8.VAL"
+					}
+				}
+				oval {
+					object {
+						x=527
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV10.VAL"
+					}
+				}
+				oval {
+					object {
+						x=527
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV10.VAL"
+					}
+				}
+				oval {
+					object {
+						x=567
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV11.VAL"
+					}
+				}
+				oval {
+					object {
+						x=567
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV11.VAL"
+					}
+				}
+				oval {
+					object {
+						x=607
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV12.VAL"
+					}
+				}
+				oval {
+					object {
+						x=607
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV12.VAL"
+					}
+				}
+				oval {
+					object {
+						x=647
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV13.VAL"
+					}
+				}
+				oval {
+					object {
+						x=647
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV13.VAL"
+					}
+				}
+				oval {
+					object {
+						x=687
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV14.VAL"
+					}
+				}
+				oval {
+					object {
+						x=687
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV14.VAL"
+					}
+				}
+				oval {
+					object {
+						x=727
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV15.VAL"
+					}
+				}
+				oval {
+					object {
+						x=727
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV15.VAL"
+					}
+				}
+				oval {
+					object {
+						x=127
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV0.VAL"
+					}
+				}
+				oval {
+					object {
+						x=127
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV0.VAL"
+					}
+				}
+				oval {
+					object {
+						x=767
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV16.VAL"
+					}
+				}
+				oval {
+					object {
+						x=767
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV16.VAL"
+					}
+				}
+				oval {
+					object {
+						x=807
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV17.VAL"
+					}
+				}
+				oval {
+					object {
+						x=807
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV17.VAL"
+					}
+				}
+				oval {
+					object {
+						x=847
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV18.VAL"
+					}
+				}
+				oval {
+					object {
+						x=847
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV18.VAL"
+					}
+				}
+				oval {
+					object {
+						x=887
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV19.VAL"
+					}
+				}
+				oval {
+					object {
+						x=887
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV19.VAL"
+					}
+				}
+				oval {
+					object {
+						x=927
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV20.VAL"
+					}
+				}
+				oval {
+					object {
+						x=927
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV20.VAL"
+					}
+				}
+				oval {
+					object {
+						x=967
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV21.VAL"
+					}
+				}
+				oval {
+					object {
+						x=967
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV21.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1007
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=20
+					}
+					"dynamic attribute" {
+						vis="if not zero"
+						chan="$(P)$(R)boRBV22.VAL"
+					}
+				}
+				oval {
+					object {
+						x=1007
+						y=123
+						width=20
+						height=20
+					}
+					"basic attribute" {
+						clr=15
+					}
+					"dynamic attribute" {
+						vis="if zero"
+						chan="$(P)$(R)boRBV22.VAL"
+					}
+				}
+			}
+		}
+		text {
+			object {
+				x=12
+				y=123
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Output RBV"
+			align="horiz. centered"
+		}
+	}
+}
+text {
+	object {
+		x=117
+		y=192
+		width=140
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="longin record:"
+}
+"text update" {
+	object {
+		x=260
+		y=192
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)li.VAL"
+		clr=14
+		bclr=51
+	}
+	align="horiz. right"
+	format="hexadecimal"
+	limits {
+	}
+}
+text {
+	object {
+		x=147
+		y=219
+		width=110
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Jerk value:"
+}
+"text entry" {
+	object {
+		x=260
+		y=219
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)Jerk"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
