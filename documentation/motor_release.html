@@ -58,13 +58,13 @@
     <p>
       <b>asynMotorDriver</b>&nbsp;</p>
     <p>
-      Changed the function callParamCallbacks(addr, addr) to callParamCallbacks(addr). This
-      will require changes to any existing drivers that derive from asynMotorDriver.
+      Changed the function callParamCallbacks(addr, addr) to callParamCallbacks(addr).
+      This will require changes to any existing drivers that derive from asynMotorDriver.
     </p>
     <p>
       <b>motorSimDriver</b>&nbsp;</p>
     <p>
-      Fix bug with items not initialized in constructor.  Made changes to work with fixes
+      Fix bug with items not initialized in constructor. Made changes to work with fixes
       to asynMotorDriver described above.
     </p>
     <p>
@@ -81,11 +81,14 @@
       Mark Rivers added a new driver for the Parker ACR (including Aries) series of controllers.
       This driver uses the new asyn C++ model, i.e. it derives from asynMotorDriver.cpp.
       It has currently only been tested on the single-axis Aries controller, but it should
-      work on the multi-axis ACR controllers as well.
+      work on the multi-axis ACR controllers as well. The driver supports parameters beyond
+      the standard motor record parameters, including the jerk parameter (derivative of
+      acceleration with respect to time) and 32 opto-isolated inputs and 32 opto-isolated
+      outputs.
     </p>
-    </div>
-    <div style="text-align: center">
-      <h1>
+  </div>
+  <div style="text-align: center">
+    <h1>
       <b>Motor Record Version 6-5 Release Notice</b></h1>
   </div>
   <div style="text-align: center">
