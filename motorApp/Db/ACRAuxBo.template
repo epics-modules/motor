@@ -1,0 +1,7 @@
+record(bo,"$(P)$(R)") {
+    field(DTYP,"asynUInt32Digital")
+    field(OUT,"@asynMask($(PORT) 0 $(MASK))ACR_BINARY_OUT")
+    field(VAL, "1")
+    field(ZNAM, "Low")
+    field(ONAM, "High")
+}

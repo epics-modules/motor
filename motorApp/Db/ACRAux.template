@@ -1,0 +1,10 @@
+# Database for extra PVs for Parker ACR controllers
+
+record(ao,"$(P)$(R)Jerk") {
+    field(DESC,"Jerk parameter")
+    field(PINI, "1")
+    field(PREC,"3")
+    field(VAL,".01")
+    field(DTYP, "asynFloat64")
+    field(OUT,"@asyn($(PORT),$(ADDR))ACR_JERK")
+}
