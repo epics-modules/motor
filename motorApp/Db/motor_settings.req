@@ -37,4 +37,7 @@ $(P)$(M).DCOF
 $(P)$(M).HVEL
 $(P)$(M).NTM
 $(P)$(M).NTMF
+$(P)$(M).INIT
+$(P)$(M).PREM
+$(P)$(M).POST
 $(P)$(M)_able.VAL
