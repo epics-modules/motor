@@ -23,67 +23,15 @@ December 13, 2009
 #include <iocsh.h>
 
 #include "asynMotorDriver.h"
+#include "motorSimDriver.h"
 #include <epicsExport.h>
-
-#include "route.h"
 
 #define DEFAULT_LOW_LIMIT -10000
 #define DEFAULT_HI_LIMIT   10000
 #define DEFAULT_HOME       0
 #define DEFAULT_START      0
 
-#define NUM_SIM_CONTROLLER_PARAMS 0
-
 static const char *driverName = "motorSimDriver";
-
-class motorSimAxis 
-{
-public:
-    motorSimAxis(class motorSimController *pController, int axis, double lowLimit, double hiLimit, double home, double start);
-    asynStatus velocity(double velocity, double acceleration);
-    class motorSimController *pController;
-    int axis;
-    ROUTE_ID route;
-    route_reroute_t reroute;
-    route_demand_t endpoint;
-    route_demand_t nextpoint;
-    double lowHardLimit;
-    double hiHardLimit;
-    double enc_offset;
-    double home;
-    int homing;
-    epicsTimeStamp tLast;
-    double deferred_position;
-    int deferred_move;
-    int deferred_relative;
-    friend class motorSimController;
-};
-
-class motorSimController : asynMotorDriver {
-public:
-    motorSimController(const char *portName, int numAxes, int priority, int stackSize);
-    asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
-    asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
-    void report(FILE *fp, int level);
-    asynStatus moveAxis(asynUser *pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration);
-    asynStatus moveVelocityAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration);
-    asynStatus homeAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration, int forwards);
-    asynStatus stopAxis(asynUser *pasynUser, double acceleration);
-    asynStatus profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger);
-    asynStatus triggerProfile(asynUser *pasynUser);
-    asynStatus configAxis(int axis, int hiHardLimit, int lowHardLimit, int home, int start);
-    void motorSimTask();  // Should be pivate, but called from non-member function
-
-private:
-    motorSimAxis* getAxis(asynUser *pasynUser);
-    void process(motorSimAxis *pAxis, double delta );
-    epicsThreadId motorThread;
-    epicsTimeStamp now;
-    int movesDeferred;
-    int numAxes;
-    asynStatus processDeferredMoves();
-    motorSimAxis** pAxes;
-};
 
 typedef struct motorSimControllerNode {
     ELLNODE node;
@@ -100,12 +48,12 @@ void motorSimController::report(FILE *fp, int level)
     motorSimAxis *pAxis;
 
     fprintf(fp, "Simulation motor driver %s, numAxes=%d\n", 
-        this->portName, this->numAxes);
+        this->portName, numAxes_);
 
-    for (axis=0; axis<this->numAxes; axis++) {
-        pAxis = this->pAxes[axis];
+    for (axis=0; axis<numAxes_; axis++) {
+        pAxis = pAxes_[axis];
         fprintf(fp, "  axis %d\n", 
-            pAxis->axis);
+            pAxis->axis_);
 
         if (level > 0)
         {
@@ -113,27 +61,27 @@ void motorSimController::report(FILE *fp, int level)
             double hiSoftLimit=0.0;
 
             fprintf(fp, "    Current position = %f, velocity = %f at current time: %f\n", 
-                   pAxis->nextpoint.axis[0].p, 
-                   pAxis->nextpoint.axis[0].v,
-                   pAxis->nextpoint.T);
+                   pAxis->nextpoint_.axis[0].p, 
+                   pAxis->nextpoint_.axis[0].v,
+                   pAxis->nextpoint_.T);
             fprintf(fp, "    Destination posn = %f, velocity = %f at desination time:  %f\n",
-                   pAxis->endpoint.axis[0].p, 
-                   pAxis->endpoint.axis[0].v,
-                   pAxis->endpoint.T);
+                   pAxis->endpoint_.axis[0].p, 
+                   pAxis->endpoint_.axis[0].v,
+                   pAxis->endpoint_.T);
 
-            fprintf(fp, "    Hard limits: %f, %f\n", pAxis->lowHardLimit, pAxis->hiHardLimit);
-            fprintf(fp, "           Home: %f\n", pAxis->home);
-            fprintf(fp, "    Enc. offset: %f\n", pAxis->enc_offset);
-            getDoubleParam(pAxis->axis, pAxis->pController->motorHighLim, &hiSoftLimit);
-            getDoubleParam(pAxis->axis, pAxis->pController->motorLowLim, &lowSoftLimit);
+            fprintf(fp, "    Hard limits: %f, %f\n", pAxis->lowHardLimit_, pAxis->hiHardLimit_);
+            fprintf(fp, "           Home: %f\n", pAxis->home_);
+            fprintf(fp, "    Enc. offset: %f\n", pAxis->enc_offset_);
+            getDoubleParam(pAxis->axis_, motorHighLimit_, &hiSoftLimit);
+            getDoubleParam(pAxis->axis_, motorLowLimit_, &lowSoftLimit);
             fprintf(fp, "    Soft limits: %f, %f\n", lowSoftLimit, hiSoftLimit );
 
-            if (pAxis->homing) fprintf(fp, "    Currently homing axis\n" );
+            if (pAxis->homing_) fprintf(fp, "    Currently homing axis\n" );
         }
     }
 
     // Call the base class method
-    asynMotorDriver::report(fp, level);
+    asynMotorController::report(fp, level);
 }
 
 motorSimAxis * motorSimController::getAxis(asynUser *pasynUser)
@@ -142,7 +90,7 @@ motorSimAxis * motorSimController::getAxis(asynUser *pasynUser)
     motorSimAxis *pAxis;
     
     getAddress(pasynUser, &axis);
-    pAxis = this->pAxes[axis];
+    pAxis = pAxes_[axis];
     return(pAxis);
 }
     
@@ -154,18 +102,18 @@ asynStatus motorSimController::processDeferredMoves()
     int axis;
     motorSimAxis *pAxis;
 
-    for (axis=0; axis<this->numAxes; axis++)
+    for (axis=0; axis<numAxes_; axis++)
     {
-        pAxis = this->pAxes[axis];
-        if (pAxis->deferred_move) {
-            position = pAxis->deferred_position;
+        pAxis = pAxes_[axis];
+        if (pAxis->deferred_move_) {
+            position = pAxis->deferred_position_;
             /* Check to see if in hard limits */
-            if ((pAxis->nextpoint.axis[0].p >= pAxis->hiHardLimit  &&  position > pAxis->nextpoint.axis[0].p) ||
-                (pAxis->nextpoint.axis[0].p <= pAxis->lowHardLimit &&  position < pAxis->nextpoint.axis[0].p)  ) return asynError;
-            pAxis->endpoint.axis[0].p = position - pAxis->enc_offset;
-            pAxis->endpoint.axis[0].v = 0.0;        
-            setIntegerParam(axis, motorStatusDone, 0);
-            pAxis->deferred_move = 0;
+            if ((pAxis->nextpoint_.axis[0].p >= pAxis->hiHardLimit_  &&  position > pAxis->nextpoint_.axis[0].p) ||
+                (pAxis->nextpoint_.axis[0].p <= pAxis->lowHardLimit_ &&  position < pAxis->nextpoint_.axis[0].p)  ) return asynError;
+            pAxis->endpoint_.axis[0].p = position - pAxis->enc_offset_;
+            pAxis->endpoint_.axis[0].v = 0.0;        
+            setIntegerParam(axis, motorStatusDone_, 0);
+            pAxis->deferred_move_ = 0;
         }
     }
     return status;
@@ -182,26 +130,26 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
     
     /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
      * status at the end, but that's OK */
-    status = setIntegerParam(pAxis->axis, function, value);
+    status = setIntegerParam(pAxis->axis_, function, value);
     
-    if (function == motorDeferMoves)
+    if (function == motorDeferMoves_)
     {
         asynPrint(pasynUser, ASYN_TRACE_FLOW,
             "%s:%s: %sing Deferred Move flag on driver %s\n",
             value != 0.0?"Sett":"Clear",
             driverName, functionName, this->portName);
-        if (value == 0.0 && this->movesDeferred != 0)
+        if (value == 0.0 && movesDeferred_ != 0)
         {
             processDeferredMoves();
         }
-        this->movesDeferred = value;
+        movesDeferred_ = value;
     } else {
         /* Call base class call its method (if we have our parameters check this here) */
-        status = asynMotorDriver::writeInt32(pasynUser, value);
+        status = asynMotorController::writeInt32(pasynUser, value);
     }
     
     /* Do callbacks so higher layers see any changes */
-    callParamCallbacks(pAxis->axis);
+    callParamCallbacks(pAxis->axis_);
     if (status) 
         asynPrint(pasynUser, ASYN_TRACE_ERROR, 
               "%s:%s: error, status=%d function=%d, value=%d\n", 
@@ -223,21 +171,21 @@ asynStatus motorSimController::writeFloat64(asynUser *pasynUser, epicsFloat64 va
     
     /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
      * status at the end, but that's OK */
-    status = setDoubleParam(pAxis->axis, function, value);
+    status = setDoubleParam(pAxis->axis_, function, value);
     
-    if (function == motorPosition) 
+    if (function == motorPosition_) 
     {
-        pAxis->enc_offset = (double) value - pAxis->nextpoint.axis[0].p;
+        pAxis->enc_offset_ = (double) value - pAxis->nextpoint_.axis[0].p;
         asynPrint(pasynUser, ASYN_TRACE_FLOW, 
             "%s:%s: Set axis %d to position %d", 
-            driverName, functionName, pAxis->axis, value);
+            driverName, functionName, pAxis->axis_, value);
     } else {
         /* Call base class call its method (if we have our parameters check this here) */
-        status = asynMotorDriver::writeFloat64(pasynUser, value);
+        status = asynMotorController::writeFloat64(pasynUser, value);
     }
     
     /* Do callbacks so higher layers see any changes */
-    callParamCallbacks(pAxis->axis);
+    callParamCallbacks(pAxis->axis_);
     if (status) 
         asynPrint(pasynUser, ASYN_TRACE_ERROR, 
               "%s:%s: error, status=%d function=%d, value=%f\n", 
@@ -249,93 +197,93 @@ asynStatus motorSimController::writeFloat64(asynUser *pasynUser, epicsFloat64 va
     return status;
 }
 
-asynStatus motorSimController::moveAxis(asynUser*pasynUser, double position, int relative, double min_velocity, double max_velocity, double acceleration)
+asynStatus motorSimController::moveAxis(asynUser*pasynUser, double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
     motorSimAxis *pAxis = this->getAxis(pasynUser);
     route_pars_t pars;
     static const char *functionName = "moveAxis";
 
-    if (relative) position += pAxis->endpoint.axis[0].p + pAxis->enc_offset;
+    if (relative) position += pAxis->endpoint_.axis[0].p + pAxis->enc_offset_;
 
     /* Check to see if in hard limits */
-    if ((pAxis->nextpoint.axis[0].p >= pAxis->hiHardLimit  &&  position > pAxis->nextpoint.axis[0].p) ||
-        (pAxis->nextpoint.axis[0].p <= pAxis->lowHardLimit &&  position < pAxis->nextpoint.axis[0].p)  ) return asynError;
+    if ((pAxis->nextpoint_.axis[0].p >= pAxis->hiHardLimit_  &&  position > pAxis->nextpoint_.axis[0].p) ||
+        (pAxis->nextpoint_.axis[0].p <= pAxis->lowHardLimit_ &&  position < pAxis->nextpoint_.axis[0].p)  ) return asynError;
 
-    if (this->movesDeferred == 0) { /*Normal move.*/
-        pAxis->endpoint.axis[0].p = position - pAxis->enc_offset;
-        pAxis->endpoint.axis[0].v = 0.0;
+    if (movesDeferred_ == 0) { /*Normal move.*/
+        pAxis->endpoint_.axis[0].p = position - pAxis->enc_offset_;
+        pAxis->endpoint_.axis[0].v = 0.0;
     } else { /*Deferred moves.*/
-        pAxis->deferred_position = position;
-        pAxis->deferred_move = 1;
-        pAxis->deferred_relative = relative;
+        pAxis->deferred_position_ = position;
+        pAxis->deferred_move_ = 1;
+        pAxis->deferred_relative_ = relative;
     }
-    routeGetParams(pAxis->route, &pars);
-    if (max_velocity != 0) pars.axis[0].Vmax = fabs(max_velocity);
+    routeGetParams(pAxis->route_, &pars);
+    if (maxVelocity != 0) pars.axis[0].Vmax = fabs(maxVelocity);
     if (acceleration != 0) pars.axis[0].Amax = fabs(acceleration);
-    routeSetParams( pAxis->route, &pars ); 
+    routeSetParams( pAxis->route_, &pars ); 
 
-    setIntegerParam(pAxis->axis, motorStatusDone, 0);
-    callParamCallbacks(pAxis->axis);
+    setIntegerParam(pAxis->axis_, motorStatusDone_, 0);
+    callParamCallbacks(pAxis->axis_);
 
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-        "%s:%s: Set driver %s, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f",
-        driverName, functionName, this->portName, pAxis->axis, position, min_velocity, max_velocity, acceleration );
+        "%s:%s: Set driver %s, axis %d move to %f, min vel=%f, maxVel=%f, accel=%f",
+        driverName, functionName, this->portName, pAxis->axis_, position, minVelocity, maxVelocity, acceleration );
     return asynSuccess;
 }
 
 asynStatus motorSimAxis::velocity(double velocity, double acceleration )
 {
     route_pars_t pars;
-    double deltaV = velocity - this->nextpoint.axis[0].v;                
+    double deltaV = velocity - this->nextpoint_.axis[0].v;                
     double time;
 
     /* Check to see if in hard limits */
-    if ((this->nextpoint.axis[0].p > this->hiHardLimit && velocity > 0) ||
-        (this->nextpoint.axis[0].p < this->lowHardLimit && velocity < 0)  ) return asynError;
+    if ((this->nextpoint_.axis[0].p > hiHardLimit_ && velocity > 0) ||
+        (this->nextpoint_.axis[0].p < lowHardLimit_ && velocity < 0)  ) return asynError;
 
-    routeGetParams( this->route, &pars );
+    routeGetParams( this->route_, &pars );
     if (acceleration != 0) pars.axis[0].Amax = fabs(acceleration);
-    routeSetParams( this->route, &pars );
+    routeSetParams( this->route_, &pars );
 
     time = fabs( deltaV / pars.axis[0].Amax );
 
-    this->endpoint.axis[0].v = velocity;
-    this->endpoint.axis[0].p = ( this->nextpoint.axis[0].p +
-                  time * ( this->nextpoint.axis[0].v + 0.5 * deltaV ));
-    this->reroute = ROUTE_NEW_ROUTE;
+    this->endpoint_.axis[0].v = velocity;
+    this->endpoint_.axis[0].p = ( this->nextpoint_.axis[0].p +
+                  time * ( this->nextpoint_.axis[0].v + 0.5 * deltaV ));
+    this->reroute_ = ROUTE_NEW_ROUTE;
     return asynSuccess;
 }
 
 
-asynStatus motorSimController::homeAxis(asynUser *pasynUser, double min_velocity, double max_velocity, double acceleration, int forwards )
+asynStatus motorSimController::homeAxis(asynUser *pasynUser, double minVelocity, double maxVelocity, double acceleration, int forwards )
 {
     asynStatus status = asynError;
     motorSimAxis *pAxis = this->getAxis(pasynUser);
     static const char *functionName = "moveAxis";
 
-    status = pAxis->velocity((forwards? max_velocity: -max_velocity), acceleration );
-    pAxis->homing = 1;
-    setIntegerParam(pAxis->axis, motorStatusDone, 0 );
-    callParamCallbacks(pAxis->axis);
+    status = pAxis->velocity((forwards? maxVelocity: -maxVelocity), acceleration );
+    pAxis->homing_ = 1;
+    setIntegerParam(pAxis->axis_, motorStatusDone_, 0 );
+    callParamCallbacks(pAxis->axis_);
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-        "%s:%s: Set dirver %s, axis %d to home %s, min vel=%f, max_vel=%f, accel=%f",
-        driverName, functionName, this->portName, pAxis->axis, (forwards?"FORWARDS":"REVERSE"), min_velocity, max_velocity, acceleration );
+        "%s:%s: Set driver %s, axis %d to home %s, min vel=%f, maxVel=%f, accel=%f",
+        driverName, functionName, this->portName, pAxis->axis_, (forwards?"FORWARDS":"REVERSE"), minVelocity, maxVelocity, acceleration );
     return status;
 }
 
 
-asynStatus motorSimController::moveVelocityAxis(asynUser *pasynUser, double min_velocity, double velocity, double acceleration )
+asynStatus motorSimController::moveVelocityAxis(asynUser *pasynUser, double minVelocity, double velocity, double acceleration )
 {
     asynStatus status = asynError;
     motorSimAxis *pAxis = this->getAxis(pasynUser);
     static const char *functionName = "moveVelocityAxis";
 
     status = pAxis->velocity(velocity, acceleration );
-    setIntegerParam(pAxis->axis, motorStatusDone, 0);
-    callParamCallbacks(pAxis->axis);
+    setIntegerParam(pAxis->axis_, motorStatusDone_, 0);
+    callParamCallbacks(pAxis->axis_);
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
         "%s:%s: Set port %s, axis %d move with velocity of %f, accel=%f",
-        driverName, functionName, this->portName, pAxis->axis, velocity, acceleration );
+        driverName, functionName, this->portName, pAxis->axis_, velocity, acceleration );
     return status;
 }
 
@@ -355,22 +303,22 @@ asynStatus motorSimController::stopAxis(asynUser *pasynUser, double acceleration
     static const char *functionName = "moveVelocityAxis";
 
     pAxis->velocity(0.0, acceleration );
-    pAxis->deferred_move = 0;
+    pAxis->deferred_move_ = 0;
 
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
         "%s:%s: Set axis %d to stop with accel=%f",
-        driverName, functionName, pAxis->axis, acceleration );
+        driverName, functionName, pAxis->axis_, acceleration );
     return asynSuccess;
 }
 
 asynStatus motorSimController::configAxis(int axis, int hiHardLimit, int lowHardLimit, int home, int start)
 {
-    motorSimAxis *pAxis = this->pAxes[axis];
+    motorSimAxis *pAxis = pAxes_[axis];
     
-    pAxis->hiHardLimit = hiHardLimit;
-    pAxis->lowHardLimit = lowHardLimit;
-    pAxis->home = home;
-    pAxis->enc_offset = start;
+    pAxis->hiHardLimit_ = hiHardLimit;
+    pAxis->lowHardLimit_ = lowHardLimit;
+    pAxis->home_ = home;
+    pAxis->enc_offset_ = start;
     return(asynSuccess);
 }
 
@@ -394,59 +342,59 @@ void motorSimController::process(motorSimAxis *pAxis, double delta )
     double lastpos;
     int done = 0;
 
-    lastpos = pAxis->nextpoint.axis[0].p;
-    pAxis->nextpoint.T += delta;
-    routeFind( pAxis->route, pAxis->reroute, &(pAxis->endpoint), &(pAxis->nextpoint) );
-    /*  if (pAxis->reroute == ROUTE_NEW_ROUTE) routePrint( pAxis->route, pAxis->reroute, &(pAxis->endpoint), &(pAxis->nextpoint), stdout ); */
-    pAxis->reroute = ROUTE_CALC_ROUTE;
+    lastpos = pAxis->nextpoint_.axis[0].p;
+    pAxis->nextpoint_.T += delta;
+    routeFind( pAxis->route_, pAxis->reroute_, &(pAxis->endpoint_), &(pAxis->nextpoint_) );
+    /*  if (pAxis->reroute == ROUTE_NEW_ROUTE) routePrint( pAxis->route, pAxis->reroute, &(pAxis->endpoint), &(pAxis->nextpoint_), stdout ); */
+    pAxis->reroute_ = ROUTE_CALC_ROUTE;
 
     /* No, do a limits check */
-    if (pAxis->homing && 
-        ((lastpos - pAxis->home) * (pAxis->nextpoint.axis[0].p - pAxis->home)) <= 0)
+    if (pAxis->homing_ && 
+        ((lastpos - pAxis->home_) * (pAxis->nextpoint_.axis[0].p - pAxis->home_)) <= 0)
     {
         /* Homing and have crossed the home sensor - return to home */
-        pAxis->homing = 0;
-        pAxis->reroute = ROUTE_NEW_ROUTE;
-        pAxis->endpoint.axis[0].p = pAxis->home;
-        pAxis->endpoint.axis[0].v = 0.0;
+        pAxis->homing_ = 0;
+        pAxis->reroute_ = ROUTE_NEW_ROUTE;
+        pAxis->endpoint_.axis[0].p = pAxis->home_;
+        pAxis->endpoint_.axis[0].v = 0.0;
     }
-    if ( pAxis->nextpoint.axis[0].p > pAxis->hiHardLimit && pAxis->nextpoint.axis[0].v > 0 )
+    if ( pAxis->nextpoint_.axis[0].p > pAxis->hiHardLimit_ && pAxis->nextpoint_.axis[0].v > 0 )
     {
-        if (pAxis->homing) pAxis->velocity(-pAxis->endpoint.axis[0].v, 0.0 );
+        if (pAxis->homing_) pAxis->velocity(-pAxis->endpoint_.axis[0].v, 0.0 );
         else
         {
-            pAxis->reroute = ROUTE_NEW_ROUTE;
-            pAxis->endpoint.axis[0].p = pAxis->hiHardLimit;
-            pAxis->endpoint.axis[0].v = 0.0;
+            pAxis->reroute_ = ROUTE_NEW_ROUTE;
+            pAxis->endpoint_.axis[0].p = pAxis->hiHardLimit_;
+            pAxis->endpoint_.axis[0].v = 0.0;
         }
     }
-    else if (pAxis->nextpoint.axis[0].p < pAxis->lowHardLimit && pAxis->nextpoint.axis[0].v < 0)
+    else if (pAxis->nextpoint_.axis[0].p < pAxis->lowHardLimit_ && pAxis->nextpoint_.axis[0].v < 0)
     {
-        if (pAxis->homing) pAxis->velocity(-pAxis->endpoint.axis[0].v, 0.0 );
+        if (pAxis->homing_) pAxis->velocity(-pAxis->endpoint_.axis[0].v, 0.0 );
         else
         {
-            pAxis->reroute = ROUTE_NEW_ROUTE;
-            pAxis->endpoint.axis[0].p = pAxis->lowHardLimit;
-            pAxis->endpoint.axis[0].v = 0.0;
+            pAxis->reroute_ = ROUTE_NEW_ROUTE;
+            pAxis->endpoint_.axis[0].p = pAxis->lowHardLimit_;
+            pAxis->endpoint_.axis[0].v = 0.0;
         }
     }
 
-    if (pAxis->nextpoint.axis[0].v ==  0) {
-        if (!pAxis->deferred_move) {
+    if (pAxis->nextpoint_.axis[0].v ==  0) {
+        if (!pAxis->deferred_move_) {
             done = 1;
         }
     } else {
         done = 0;
     }
 
-    setDoubleParam(  pAxis->axis, this->motorPosition,          (pAxis->nextpoint.axis[0].p+pAxis->enc_offset) );
-    setDoubleParam(  pAxis->axis, this->motorEncoderPosition,   (pAxis->nextpoint.axis[0].p+pAxis->enc_offset) );
-    setIntegerParam( pAxis->axis, this->motorStatusDirection,   (pAxis->nextpoint.axis[0].v >  0) );
-    setIntegerParam( pAxis->axis, this->motorStatusDone,        done );
-    setIntegerParam( pAxis->axis, this->motorStatusHighLimit,   (pAxis->nextpoint.axis[0].p >= pAxis->hiHardLimit) );
-    setIntegerParam( pAxis->axis, this->motorStatusHome,        (pAxis->nextpoint.axis[0].p == pAxis->home) );
-    setIntegerParam( pAxis->axis, this->motorStatusMoving,      !done );
-    setIntegerParam( pAxis->axis, this->motorStatusLowLimit,    (pAxis->nextpoint.axis[0].p <= pAxis->lowHardLimit) );
+    setDoubleParam(  pAxis->axis_, this->motorPosition_,          (pAxis->nextpoint_.axis[0].p+pAxis->enc_offset_) );
+    setDoubleParam(  pAxis->axis_, this->motorEncoderPosition_,   (pAxis->nextpoint_.axis[0].p+pAxis->enc_offset_) );
+    setIntegerParam( pAxis->axis_, this->motorStatusDirection_,   (pAxis->nextpoint_.axis[0].v >  0) );
+    setIntegerParam( pAxis->axis_, this->motorStatusDone_,        done );
+    setIntegerParam( pAxis->axis_, this->motorStatusHighLimit_,   (pAxis->nextpoint_.axis[0].p >= pAxis->hiHardLimit_) );
+    setIntegerParam( pAxis->axis_, this->motorStatusHome_,        (pAxis->nextpoint_.axis[0].p == pAxis->home_) );
+    setIntegerParam( pAxis->axis_, this->motorStatusMoving_,      !done );
+    setIntegerParam( pAxis->axis_, this->motorStatusLowLimit_,    (pAxis->nextpoint_.axis[0].p <= pAxis->lowHardLimit_) );
 }
 
 static void motorSimTaskC(void *drvPvt)
@@ -468,16 +416,16 @@ void motorSimController::motorSimTask()
     {
         /* Get a new timestamp */
         epicsTimeGetCurrent( &now );
-        delta = epicsTimeDiffInSeconds( &now, &(this->now) );
-        this->now = now;
+        delta = epicsTimeDiffInSeconds( &now, &(now_) );
+        now_ = now;
 
         if ( delta > (DELTA/4.0) && delta <= (4.0*DELTA) )
         {
             /* A reasonable time has elapsed, it's not a time step in the clock */
-            for (axis=0; axis<this->numAxes; axis++) 
+            for (axis=0; axis<numAxes_; axis++) 
             {       
                 this->lock();
-                pAxis = this->pAxes[axis];
+                pAxis = pAxes_[axis];
                 this->process(pAxis, delta );
                 callParamCallbacks(axis);
                 this->unlock();
@@ -488,7 +436,7 @@ void motorSimController::motorSimTask()
 }
 
 motorSimAxis::motorSimAxis(motorSimController *pController, int axis, double lowHardLimit, double hiHardLimit, double home, double start )
-    : pController(pController), axis(axis), lowHardLimit(lowHardLimit), hiHardLimit(hiHardLimit), home(home)
+    : pController_(pController), axis_(axis), lowHardLimit_(lowHardLimit), hiHardLimit_(hiHardLimit), home_(home)
 {
       route_pars_t pars;
 
@@ -499,18 +447,18 @@ motorSimAxis::motorSimAxis(motorSimController *pController, int axis, double low
       pars.axis[0].Amax = 1.0;
       pars.axis[0].Vmax = 1.0;
 
-      this->endpoint.T = 0;
-      this->endpoint.axis[0].p = start;
-      this->endpoint.axis[0].v = 0;
-      this->nextpoint.T = 0;
-      this->nextpoint.axis[0].p = start;
-      this->route = routeNew( &(this->endpoint), &pars );
-      this->deferred_move = 0;
+      this->endpoint_.T = 0;
+      this->endpoint_.axis[0].p = start;
+      this->endpoint_.axis[0].v = 0;
+      this->nextpoint_.T = 0;
+      this->nextpoint_.axis[0].p = start;
+      this->route_ = routeNew( &(this->endpoint_), &pars );
+      this->deferred_move_ = 0;
 }
 
 
 motorSimController::motorSimController(const char *portName, int numAxes, int priority, int stackSize)
-    :   asynMotorDriver(portName, numAxes, NUM_SIM_CONTROLLER_PARAMS, 
+    :   asynMotorController(portName, numAxes, NUM_SIM_CONTROLLER_PARAMS, 
             asynInt32Mask | asynFloat64Mask, 
             asynInt32Mask | asynFloat64Mask,
             ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
@@ -533,16 +481,16 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
     ellAdd(&motorSimControllerList, (ELLNODE *)pNode);
 
     if (numAxes < 1 ) numAxes = 1;
-    this->numAxes = numAxes;
-    this->movesDeferred = 0;
-    this->pAxes = (motorSimAxis**) calloc(numAxes, sizeof(motorSimAxis*));
+    numAxes_ = numAxes;
+    this->movesDeferred_ = 0;
+    pAxes_ = (motorSimAxis**) calloc(numAxes, sizeof(motorSimAxis*));
     for (axis=0; axis<numAxes; axis++) {
         pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
-        this->pAxes[axis] = pAxis;
-        setDoubleParam(axis, this->motorPosition, DEFAULT_START);
+        pAxes_[axis] = pAxis;
+        setDoubleParam(axis, this->motorPosition_, DEFAULT_START);
     }
 
-    this->motorThread = epicsThreadCreate( "motorSimThread", 
+    this->motorThread_ = epicsThreadCreate( "motorSimThread", 
                     epicsThreadPriorityLow,
                     epicsThreadGetStackSize(epicsThreadStackMedium),
                     (EPICSTHREADFUNC) motorSimTaskC, (void *) this);
