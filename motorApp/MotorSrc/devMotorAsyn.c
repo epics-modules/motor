@@ -102,8 +102,8 @@ typedef enum motorCommand {
     motorPgain,
     motorIgain,
     motorDgain,
-    motorHighLim,
-    motorLowLim,
+    motorHighLimit,
+    motorLowLimit,
     motorSetClosedLoop,
     motorStatus,
     motorUpdateStatus,
@@ -289,8 +289,8 @@ static long init_record(struct motorRecord * pmr )
     if (findDrvInfo(pmr, pasynUser, motorPgainString,                  motorPgain)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorIgainString,                  motorIgain)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorDgainString,                  motorDgain)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorHighLimString,                motorHighLim)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorLowLimString,                 motorLowLim)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorHighLimitString,              motorHighLimit)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorLowLimitString,               motorLowLimit)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorSetClosedLoopString,          motorSetClosedLoop)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorStatusString,                 motorStatus)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorUpdateStatusString,           motorUpdateStatus)) goto bad;
@@ -388,7 +388,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         pmr->name, pPvt->needUpdate);
     if ( pPvt->needUpdate ) {
 	pmr->rmp = (epicsInt32)floor(pPvt->status.position + 0.5);
-	pmr->rep = (epicsInt32)floor(pPvt->status.encoder_posn + 0.5);
+	pmr->rep = (epicsInt32)floor(pPvt->status.encoderPosition + 0.5);
 	/* pmr->rvel = (epicsInt32)round(pPvt->status.velocity); */
 	pmr->msta = pPvt->status.status;
 	rc = CALLBACK_DATA;
@@ -526,11 +526,11 @@ static RTN_STATUS build_trans( motor_cmnd command,
 		  pmr->name);
 	return(ERROR);
     case SET_HIGH_LIMIT:
-	pmsg->command = motorHighLim;
+	pmsg->command = motorHighLimit;
 	pmsg->dvalue = *param;
 	break;
     case SET_LOW_LIMIT:
-	pmsg->command = motorLowLim;
+	pmsg->command = motorLowLimit;
 	pmsg->dvalue = *param;
 	break;
     case GET_INFO:
@@ -661,7 +661,7 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
 
     asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
 	      "%s devMotorAsyn::statusCallback new value=[p:%f,e:%f,s:%x] %c%c\n",
-	      pmr->name, value->position, value->encoder_posn, value->status,
+	      pmr->name, value->position, value->encoderPosition, value->status,
 	      pPvt->needUpdate?'N':' ', pPvt->moveRequestPending?'P':' ');
 
     if (dbScanLockOK) {
