@@ -1,0 +1,19 @@
+# The is the ASYN example for communication to 4 simulated motors
+# "#!" marks lines that can be uncommented.
+
+< envPaths
+
+dbLoadDatabase("$(TOP)/dbd/WithAsyn.dbd")
+WithAsyn_registerRecordDeviceDriver(pdbbase)
+dbLoadTemplate("motor.substitutions.sim")
+
+motorSimCreateController("motorSim1", 4)
+#asynSetTraceIOMask("motorSim1", 0, 4)
+#asynSetTraceMask("motorSim1", 0, 255)
+
+# motorSimConfigAxis(port, axis, lowLimit, highLimit, home, start)
+motorSimConfigAxis("motorSim1", 0, 20000, -20000,  500, 0)
+motorSimConfigAxis("motorSim1", 1, 20000, -20000, 1500, 0)
+motorSimConfigAxis("motorSim1", 2, 20000, -20000, 2500, 0)
+motorSimConfigAxis("motorSim1", 3, 20000, -20000, 3000, 0)
+iocInit
