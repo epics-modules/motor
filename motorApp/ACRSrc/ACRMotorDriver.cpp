@@ -202,17 +202,7 @@ asynStatus ACRController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   /* Set the parameter and readback in the parameter library. */
   status = setDoubleParam(pAxis->axisNo_, function, value);
   
-  if (function == motorPosition_) 
-  {
-    sprintf(outString_, "%s RES %f", pAxis->axisName_, value/pAxis->pulsesPerUnit_);
-    status = writeController();
-    sprintf(outString_, "%s JOG REN", pAxis->axisName_);
-    status = writeController();
-    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-      "%s:%s: Set axis %d to position %d\n", 
-      driverName, functionName, pAxis->axisNo_, value);
-  }
-  else if (function == ACRJerk_)
+  if (function == ACRJerk_)
   {
     sprintf(outString_, "%s JOG JRK %f", pAxis->axisName_, value);
     status = writeController();
@@ -293,21 +283,6 @@ asynStatus ACRController::triggerProfile(asynUser *pasynUser)
 asynStatus ACRController::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger)
 {
   return asynError;
-}
-
-asynStatus ACRAxis::stop(double acceleration )
-{
-  ACRController *pC = getController();
-  asynStatus status;
-  static const char *functionName = "stopAxis";
-
-  sprintf(pC->outString_, "%s JOG OFF", axisName_);
-  status = pC->writeReadController();
-
-  asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-    "%s:%s: Set axis %d to stop, status=%d\n",
-    driverName, functionName, axisNo_, status);
-  return status;
 }
 
 asynStatus ACRController::writeController()
@@ -410,6 +385,33 @@ asynStatus ACRAxis::moveVelocity(double minVelocity, double maxVelocity, double 
   sprintf(pC->outString_, "%s JOG VEL %f", axisName_, speed/pulsesPerUnit_);
   status = pC->writeController();
   sprintf(pC->outString_, "%c:%s JOG %s", CtlY, axisName_, forwards ? "FWD" : "REV");
+  status = pC->writeController();
+  return status;
+}
+
+asynStatus ACRAxis::stop(double acceleration )
+{
+  ACRController *pC = getController();
+  asynStatus status;
+  static const char *functionName = "stopAxis";
+
+  sprintf(pC->outString_, "%s JOG OFF", axisName_);
+  status = pC->writeController();
+
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+    "%s:%s: Set axis %d to stop, status=%d\n",
+    driverName, functionName, axisNo_, status);
+  return status;
+}
+
+asynStatus ACRAxis::setPosition(double position)
+{
+  ACRController *pC = getController();
+  asynStatus status;
+
+  sprintf(pC->outString_, "%s RES %f", axisName_, position/pulsesPerUnit_);
+  status = pC->writeController();
+  sprintf(pC->outString_, "%s JOG REN", axisName_);
   status = pC->writeController();
   return status;
 }
