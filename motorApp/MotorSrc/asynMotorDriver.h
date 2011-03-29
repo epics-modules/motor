@@ -75,6 +75,7 @@ public:
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards) = 0;
   virtual asynStatus stop(double acceleration) = 0;
   virtual asynStatus poll(int *moving) = 0;
+  virtual asynStatus setPosition(double position) = 0;
 
 protected:
   class asynMotorController *pController_;
