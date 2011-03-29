@@ -24,8 +24,8 @@ dbLoadRecords("$(ASYN)/db/asynRecord.db", "P=IOC:, R=asyn1, PORT=ARIES1, ADDR=0,
 dbLoadRecords("$(ASYN)/db/asynRecord.db", "P=IOC:, R=asyn2, PORT=ARIES1, ADDR=0, OMAX=256, IMAX=256")
 
 # PORT, ACR_PORT, number of axes, active poll period (ms), idle poll period (ms)
-ACRMotorCreateController("ACR1", "ARIES1", 1, 20, 1000)
-ACRMotorCreateController("ACR2", "ARIES2", 1, 20, 1000)
+ACRCreateController("ACR1", "ARIES1", 1, 20, 1000)
+ACRCreateController("ACR2", "ARIES2", 1, 20, 1000)
 
 #asynSetTraceMask("ACR1", 0, 255)
 asynSetTraceIOMask("ACR1", 0, 2)
