@@ -28,6 +28,7 @@ public:
   asynStatus home(double min_velocity, double max_velocity, double acceleration, int forwards);
   asynStatus stop(double acceleration);
   asynStatus poll(int *moving);
+  asynStatus setPosition(double position);
 
   // These are the methods that are new to this class 
   class ACRController* getController();
