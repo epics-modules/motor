@@ -8,6 +8,7 @@
 #ifndef asynMotorDriver_H
 #define asynMotorDriver_H
 
+#include <epicsEvent.h>
 #include <epicsTypes.h>
 
 #define motorMoveRelString              "MOTOR_MOVE_REL"
@@ -61,23 +62,37 @@ typedef struct MotorStatus {
 class epicsShareFunc asynMotorAxis {
 public:
   /* This is the constructor for the class. */
-  asynMotorAxis(int axisNumber, class asynMotorController *pController);
+  asynMotorAxis(class asynMotorController *pController, int axisNumber);
 
-  virtual asynStatus move(double position, int relative, double minVelocity, double maxVelocity, double acceleration);
-  virtual asynStatus moveVelocity(double minVelocity, double maxVelocity, double acceleration);
-  virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
-  virtual asynStatus stop(double acceleration);
+  virtual asynStatus setIntegerParam(int index, int value);
+  virtual asynStatus setDoubleParam(int index, double value);
+  virtual asynStatus callParamCallbacks();
+  asynMotorController* getController();
+
+  // These are pure virtual functions which derived classes must implement
+  virtual asynStatus move(double position, int relative, double minVelocity, double maxVelocity, double acceleration) = 0;
+  virtual asynStatus moveVelocity(double minVelocity, double maxVelocity, double acceleration) = 0;
+  virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards) = 0;
+  virtual asynStatus stop(double acceleration) = 0;
+  virtual asynStatus poll(int *moving) = 0;
+
+protected:
+  class asynMotorController *pController_;
+  int axisNo_;
+  asynUser *pasynUser_;
 
 private:
-  int axisNumber_;
-  class asynMotorController *pController_;
+  MotorStatus status_;
+  int statusChanged_;
+  
+friend class asynMotorController;
 };
 
 /** Class from which motor drivers are directly derived. */
 class epicsShareFunc asynMotorController : public asynPortDriver {
 public:
   /* This is the constructor for the class. */
-  asynMotorController(const char *portName, int maxAxes, int numParams,
+  asynMotorController(const char *portName, int numAxes, int numParams,
                       int interfaceMask, int interruptMask,
                       int asynFlags, int autoConnect, int priority, int stackSize);
 
@@ -85,17 +100,16 @@ public:
   virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
   virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
   virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
-  virtual asynStatus setIntegerParam(int list, int index, int value);
-  virtual asynStatus setDoubleParam(int list, int index, double value);
-  virtual asynStatus callParamCallbacks(int addr);
 
   /* These are the methods that are new to this class */
-  virtual asynStatus moveAxis(asynUser *pasynUser, double position, int relative, double minVelocity, double maxVelocity, double acceleration);
-  virtual asynStatus moveVelocityAxis(asynUser *pasynUser, double minVelocity, double maxVelocity, double acceleration);
-  virtual asynStatus homeAxis(asynUser *pasynUser, double minVelocity, double maxVelocity, double acceleration, int forwards);
-  virtual asynStatus stopAxis(asynUser *pasynUser, double acceleration);
+  virtual asynMotorAxis* getAxis(asynUser *pasynUser);
+  virtual asynMotorAxis* getAxis(int axisNo);
+  virtual asynStatus startPoller(double movingPollPeriod, double idlePollPeriod);
+  virtual asynStatus wakeupPoller();
   virtual asynStatus profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger);
   virtual asynStatus triggerProfile(asynUser *pasynUser);
+  virtual asynStatus poll();
+  void asynMotorPoller();  // This should be private but is called from C function
 
 protected:
   int motorMoveRel_;
@@ -137,9 +151,13 @@ protected:
   int motorStatusHomed_;
   #define LAST_MOTOR_PARAM motorStatusHomed_
 
-private:
-  MotorStatus *axisStatus_;
-  int *axisStatusChanged_;
+  int numAxes_;
+  asynMotorAxis **pAxes_;
+  epicsEventId pollEventId_;
+  double idlePollPeriod_;
+  double movingPollPeriod_;
+  
+friend class asynMotorAxis;
 };
 #define NUM_MOTOR_DRIVER_PARAMS (&LAST_MOTOR_PARAM - &FIRST_MOTOR_PARAM + 1)
 

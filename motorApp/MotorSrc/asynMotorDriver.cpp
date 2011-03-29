@@ -1,9 +1,15 @@
 #include <stdlib.h>
 
+#include <epicsThread.h>
+
 #include <asynPortDriver.h>
 #define epicsExportSharedSymbols
 #include <shareLib.h>
 #include "asynMotorDriver.h"
+
+/* Number of fast polls when poller first wakes up.  This allows for fact
+ * that the status may not be moving on the first few polls */
+ #define FORCED_FAST_POLLS 10
 
 /** All of the arguments are simply passed to the constructor for the asynPortDriver base class. 
   * After calling the base class constructor this method creates the motor parameters
@@ -11,15 +17,30 @@
   */
 
 static const char *driverName = "asynMotorDriver";
+static void asynMotorPollerC(void *drvPvt);
 
-asynMotorController::asynMotorController(const char *portName, int maxAxes, int numParams,
+  asynMotorAxis::asynMotorAxis(class asynMotorController *pController, int axisNo)
+    : pController_(pController), axisNo_(axisNo), statusChanged_(1)
+{
+  if (!pController) return;
+  if ((axisNo < 0) || (axisNo >= pController->numAxes_)) return;
+  pController->pAxes_[axisNo] = this;
+  status_.status = 0;
+  
+  // Create the asynUser, connect to this axis
+  pasynUser_ = pasynManager->createAsynUser(NULL, NULL);
+  pasynManager->connectDevice(pasynUser_, pController->portName, axisNo);
+}
+
+asynMotorController::asynMotorController(const char *portName, int numAxes, int numParams,
                                          int interfaceMask, int interruptMask,
                                          int asynFlags, int autoConnect, int priority, int stackSize)
 
-  : asynPortDriver(portName, maxAxes, NUM_MOTOR_DRIVER_PARAMS+numParams,
+  : asynPortDriver(portName, numAxes, NUM_MOTOR_DRIVER_PARAMS+numParams,
       interfaceMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask | asynDrvUserMask,
       interruptMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask,
-      asynFlags, autoConnect, priority, stackSize)
+      asynFlags, autoConnect, priority, stackSize),
+    numAxes_(numAxes)
 
 {
   static const char *functionName = "asynMotorDriver";
@@ -62,53 +83,12 @@ asynMotorController::asynMotorController(const char *portName, int maxAxes, int 
   createParam(motorStatusLowLimitString,         asynParamInt32,      &motorStatusLowLimit_);
   createParam(motorStatusHomedString,            asynParamInt32,      &motorStatusHomed_);
 
-  axisStatus_ = (MotorStatus *)calloc(maxAxes, sizeof(MotorStatus));
-  axisStatusChanged_ = (int *)calloc(maxAxes, sizeof(int));
-
+  pAxes_ = (asynMotorAxis**) calloc(numAxes, sizeof(asynMotorAxis*));
+  pollEventId_ = epicsEventMustCreate(epicsEventEmpty);
+  
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
     "%s:%s: constructor complete\n",
     driverName, functionName);
-
-}
-// We override the setIntegerParam, setDoubleParam, and callParamCallbacks methods so we can construct 
-// the aggregate status structure and do callbacks on it
-
-asynStatus asynMotorController::setIntegerParam(int axis, int function, int value)
-{
-  int mask;
-  
-  // This assumes the parameters defined above are in the same order as the bits the motor record expects!
-  if (function >= motorStatusDirection_ && 
-  function <= motorStatusHomed_) {
-  mask = 1 << (function - motorStatusDirection_);
-  if (value) axisStatus_[axis].status |= mask;
-  else       axisStatus_[axis].status &= ~mask;
-  axisStatusChanged_[axis] = 1;
-  }
-  // Call the base class method
-  return asynPortDriver::setIntegerParam(axis, function, value);
-}
-
-asynStatus asynMotorController::setDoubleParam(int axis, int function, double value)
-{
-  if (function == motorPosition_) {
-    axisStatusChanged_[axis] = 1;
-    axisStatus_[axis].position = value;
-  } else if (function == motorEncoderPosition_) {
-    axisStatusChanged_[axis] = 1;
-    axisStatus_[axis].encoderPosition = value;
-  }  
-  // Call the base class method
-  return asynPortDriver::setDoubleParam(axis, function, value);
-}   
-
-asynStatus asynMotorController::callParamCallbacks(int axis)
-{
-  if (axisStatusChanged_[axis]) {
-    axisStatusChanged_[axis] = 0;
-    doCallbacksGenericPointer((void *)&axisStatus_[axis], motorStatus_, axis);
-  }
-  return asynPortDriver::callParamCallbacks(axis);
 }
 
 asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -116,10 +96,12 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   int axis;
   int function = pasynUser->reason;
   asynStatus status=asynSuccess;
+  asynMotorAxis *pAxis;
   double accel;
   static const char *functionName = "writeFloat64";
 
   status = getAddress(pasynUser, &axis);
+  pAxis = pAxes_[axis];
 
   /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
    * status at the end, but that's OK */
@@ -127,7 +109,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
 
   if (function == motorStop_) {
     getDoubleParam(axis, motorAccel_, &accel);
-    status = stopAxis(pasynUser, accel);
+    status = pAxis->stop(accel);
   
   } else if (function == motorUpdateStatus_) {
     // We don't implement this yet.  Is it needed?
@@ -147,16 +129,18 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   return status;
 }    
   
-
 asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
-  int axis;
   int function = pasynUser->reason;
-  double baseVelocity, velocity, accel;
+  double baseVelocity, velocity, acceleration;
+  asynMotorAxis *pAxis;
+  int axis;
+  int forwards;
   asynStatus status = asynError;
   static const char *functionName = "writeFloat64";
 
-  status = getAddress(pasynUser, &axis);
+  pAxis = getAxis(pasynUser);
+  axis = pAxis->axisNo_;
 
   /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
    * status at the end, but that's OK */
@@ -164,25 +148,49 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   getDoubleParam(axis, motorVelBase_, &baseVelocity);
   getDoubleParam(axis, motorVelocity_, &velocity);
-  getDoubleParam(axis, motorAccel_, &accel);
+  getDoubleParam(axis, motorAccel_, &acceleration);
 
   if (function == motorMoveRel_) {
-    status = moveAxis(pasynUser, value, 1, baseVelocity, velocity, accel);
+    status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
+    pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->callParamCallbacks();
+    wakeupPoller();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d move relative by %f, base velocity=%f, velocity=%f, acceleration=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
   
   } else if (function == motorMoveAbs_) {
-    status = moveAxis(pasynUser, value, 0, baseVelocity, velocity, accel);
+    status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
+    pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->callParamCallbacks();
+    wakeupPoller();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d move absolute to %f, base velocity=%f, velocity=%f, acceleration=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
 
   } else if (function == motorMoveVel_) {
-    status = moveVelocityAxis(pasynUser, baseVelocity, value, accel);
+    status = pAxis->moveVelocity(baseVelocity, value, acceleration);
+    pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->callParamCallbacks();
+    wakeupPoller();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set port %s, axis %d move with velocity of %f, acceleration=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value, acceleration);
 
   // Note, the motorHome command happens on the asynFloat64 interface, even though the value (direction) is really integer 
   } else if (function == motorHome_) {
-    status = homeAxis(pasynUser, baseVelocity, velocity, accel, (value == 0) ? 0 : 1);
+    forwards = (value == 0) ? 0 : 1;
+    status = pAxis->home(baseVelocity, velocity, acceleration, forwards);
+    pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->callParamCallbacks();
+    wakeupPoller();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d to home %s, base velocity=%f, velocity=%f, acceleration=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, (forwards?"FORWARDS":"REVERSE"), baseVelocity, velocity, acceleration);
 
   }
   
   /* Do callbacks so higher layers see any changes */
-  callParamCallbacks(axis);
   if (status) 
     asynPrint(pasynUser, ASYN_TRACE_ERROR, 
       "%s:%s error, status=%d axis=%d, function=%d, value=%f\n", 
@@ -212,47 +220,6 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
   return(asynSuccess);
 }  
 
-asynStatus asynMotorController::moveAxis(asynUser *pasynUser, double position, int relative, double minVelocity, double maxVelocity, double acceleration)
-{
-  static const char *functionName = "moveAxis";
-
-  asynPrint(pasynUser, ASYN_TRACE_ERROR,
-    "%s:%s: not implemented in this driver\n", 
-    driverName, functionName);
-  return(asynError);
-}
-
-asynStatus asynMotorController::moveVelocityAxis(asynUser *pasynUser, double minVelocity, double maxVelocity, double acceleration)
-{
-  static const char *functionName = "moveVelocityAxis";
-
-  asynPrint(pasynUser, ASYN_TRACE_ERROR,
-    "%s:%s: not implemented in this driver\n", 
-    driverName, functionName);
-  return(asynError);
-}
-
-asynStatus asynMotorController::homeAxis(asynUser *pasynUser, double minVelocity, double maxVelocity, double acceleration, int forwards)
-{
-  static const char *functionName = "homeAxis";
-
-  asynPrint(pasynUser, ASYN_TRACE_ERROR,
-    "%s:%s: not implemented in this driver\n", 
-    driverName, functionName);
-  return(asynError);
-}
-
-
-asynStatus asynMotorController::stopAxis(asynUser *pasynUser, double acceleration)
-{
-  static const char *functionName = "stopAxis";
-
-  asynPrint(pasynUser, ASYN_TRACE_ERROR,
-    "%s:%s: not implemented in this driver\n", 
-    driverName, functionName);
-  return(asynError);
-}
-
 asynStatus asynMotorController::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger)
 {
   static const char *functionName = "profileMove";
@@ -261,6 +228,20 @@ asynStatus asynMotorController::profileMove(asynUser *pasynUser, int npoints, do
     "%s:%s: not implemented in this driver\n", 
     driverName, functionName);
   return(asynError);
+}
+
+asynMotorAxis* asynMotorController::getAxis(asynUser *pasynUser)
+{
+    int axisNo;
+    
+    getAddress(pasynUser, &axisNo);
+    return getAxis(axisNo);
+}
+
+asynMotorAxis* asynMotorController::getAxis(int axisNo)
+{
+    if ((axisNo < 0) || (axisNo >= numAxes_)) return NULL;
+    return pAxes_[axisNo];
 }
 
 asynStatus asynMotorController::triggerProfile(asynUser *pasynUser)
@@ -273,3 +254,127 @@ asynStatus asynMotorController::triggerProfile(asynUser *pasynUser)
   return(asynError);
 }
 
+asynStatus asynMotorController::startPoller(double movingPollPeriod, double idlePollPeriod)
+{
+  movingPollPeriod_ = movingPollPeriod;
+  idlePollPeriod_   = idlePollPeriod;
+  epicsThreadCreate("motorPoller", 
+                    epicsThreadPriorityLow,
+                    epicsThreadGetStackSize(epicsThreadStackMedium),
+                    (EPICSTHREADFUNC)asynMotorPollerC, (void *)this);
+  return asynSuccess;
+}
+
+asynStatus asynMotorController::wakeupPoller()
+{
+  epicsEventSignal(pollEventId_);
+  return asynSuccess;
+}
+
+asynStatus asynMotorController::poll()
+{
+  return asynSuccess;
+}
+
+static void asynMotorPollerC(void *drvPvt)
+{
+  asynMotorController *pController = (asynMotorController*)drvPvt;
+  pController->asynMotorPoller();
+}
+  
+
+void asynMotorController::asynMotorPoller()
+{
+  double timeout;
+  int i;
+  int forcedFastPolls=0;
+  int anyMoving;
+  int moving;
+  asynMotorAxis *pAxis;
+  int status;
+
+  timeout = idlePollPeriod_;
+  wakeupPoller();  /* Force on poll at startup */
+
+  while(1) {
+    if (timeout != 0.) status = epicsEventWaitWithTimeout(pollEventId_, timeout);
+    else               status = epicsEventWait(pollEventId_);
+    if (status == epicsEventWaitOK) {
+      /* We got an event, rather than a timeout.  This is because other software
+       * knows that an axis should have changed state (started moving, etc.).
+       * Force a minimum number of fast polls, because the controller status
+       * might not have changed the first few polls
+       */
+      forcedFastPolls = FORCED_FAST_POLLS;
+    }
+    anyMoving = 0;
+    lock();
+    this->poll();
+    for (i=0; i<numAxes_; i++) {
+        pAxis=getAxis(i);
+        pAxis->poll(&moving);
+        if (moving) anyMoving=1;
+    }
+    unlock();
+    if (forcedFastPolls > 0) {
+      timeout = movingPollPeriod_;
+      forcedFastPolls--;
+    } else if (anyMoving) {
+      timeout = movingPollPeriod_;
+    } else {
+      timeout = idlePollPeriod_;
+    }
+  }
+}
+
+
+// We implement the setIntegerParam, setDoubleParam, and callParamCallbacks methods so we can construct 
+// the aggregate status structure and do callbacks on it
+
+asynStatus asynMotorAxis::setIntegerParam(int function, int value)
+{
+  int mask;
+  asynMotorController *pC = getController();
+  
+  // This assumes the parameters defined above are in the same order as the bits the motor record expects!
+  if (function >= pC->motorStatusDirection_ && 
+      function <= pC->motorStatusHomed_) {
+    mask = 1 << (function - pC->motorStatusDirection_);
+    if (value) status_.status |= mask;
+    else       status_.status &= ~mask;
+    statusChanged_ = 1;
+  }
+  // Call the base class method
+  return pC->setIntegerParam(axisNo_, function, value);
+}
+
+asynStatus asynMotorAxis::setDoubleParam(int function, double value)
+{
+  asynMotorController *pC = getController();
+
+  if (function == pC->motorPosition_) {
+    statusChanged_ = 1;
+    status_.position = value;
+  } else if (function == pC->motorEncoderPosition_) {
+    statusChanged_ = 1;
+    status_.encoderPosition = value;
+  }  
+  // Call the base class method
+  return pC->setDoubleParam(axisNo_, function, value);
+}   
+
+asynStatus asynMotorAxis::callParamCallbacks()
+{
+  asynMotorController *pC = getController();
+  
+  if (statusChanged_) {
+    statusChanged_ = 0;
+    pC->doCallbacksGenericPointer((void *)&status_, pC->motorStatus_, axisNo_);
+  }
+  return pC->callParamCallbacks(axisNo_);
+}
+
+asynMotorController* asynMotorAxis::getController()
+{
+  return pController_;
+}
