@@ -109,6 +109,16 @@ display {
 		name="ACRAux.adl"
 		args="P=IOC:, R=ACR1:, M1=m1:"
 	}
+	display[3] {
+		label="asyn record #1"
+		name="asynRecord.adl"
+		args="P=IOC:, R=asyn1"
+	}
+	display[4] {
+		label="asyn record #2"
+		name="asynRecord.adl"
+		args="P=IOC:, R=asyn2"
+	}
 	clr=14
 	bclr=51
 	label="More"
