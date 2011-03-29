@@ -179,7 +179,7 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   
   /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
    * status at the end, but that's OK */
-  status = setIntegerParam(pAxis->axisNo_, function, value);
+  pAxis->setIntegerParam(function, value);
   
   if (function == motorDeferMoves_)
   {
@@ -198,7 +198,7 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   }
   
   /* Do callbacks so higher layers see any changes */
-  callParamCallbacks(pAxis->axisNo_);
+  pAxis->callParamCallbacks();
   if (status) 
     asynPrint(pasynUser, ASYN_TRACE_ERROR, 
               "%s:%s: error, status=%d function=%d, value=%d\n", 
@@ -206,42 +206,6 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   else        
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
               "%s:%s: function=%d, value=%d\n", 
-              driverName, functionName, function, value);
-  return status;
-}
-
-asynStatus motorSimController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
-{
-  int function = pasynUser->reason;
-  asynStatus status = asynSuccess;
-  motorSimAxis *pAxis = this->getAxis(pasynUser);
-  static const char *functionName = "writeFloat64";
-  
-  
-  /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
-   * status at the end, but that's OK */
-  status = setDoubleParam(pAxis->axisNo_, function, value);
-  
-  if (function == motorPosition_) 
-  {
-    pAxis->enc_offset_ = (double) value - pAxis->nextpoint_.axis[0].p;
-    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-              "%s:%s: Set axis %d to position %d\n", 
-              driverName, functionName, pAxis->axisNo_, value);
-  } else {
-    /* Call base class call its method (if we have our parameters check this here) */
-    status = asynMotorController::writeFloat64(pasynUser, value);
-  }
-  
-  /* Do callbacks so higher layers see any changes */
-  callParamCallbacks(pAxis->axisNo_);
-  if (status) 
-    asynPrint(pasynUser, ASYN_TRACE_ERROR, 
-              "%s:%s: error, status=%d function=%d, value=%f\n", 
-              driverName, functionName, status, function, value);
-  else    
-    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-              "%s:%s: function=%d, value=%f\n", 
               driverName, functionName, function, value);
   return status;
 }
@@ -387,6 +351,12 @@ asynStatus motorSimAxis::stop(double acceleration )
 
   setVelocity(0.0, acceleration );
   deferred_move_ = 0;
+  return asynSuccess;
+}
+
+asynStatus motorSimAxis::setPosition(double position)
+{
+  enc_offset_ = position - nextpoint_.axis[0].p;
   return asynSuccess;
 }
 
