@@ -22,6 +22,14 @@ pattern
 {IOC:ACR2:, li, ACR2, "I/O Intr"}
 }
 
+file "$(TOP)/db/ACRAuxRead.template"
+{
+pattern
+{P,          R,   PORT, SCAN}
+{IOC:ACR1:, Read, ACR1, "1 second"}
+{IOC:ACR2:, Read, ACR2, "1 second"}
+}
+
 file "$(TOP)/db/ACRAuxBi.template"
 {
 pattern
