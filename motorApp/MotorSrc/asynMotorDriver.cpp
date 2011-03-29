@@ -98,14 +98,14 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   asynStatus status=asynSuccess;
   asynMotorAxis *pAxis;
   double accel;
-  static const char *functionName = "writeFloat64";
+  static const char *functionName = "writeInt32";
 
   status = getAddress(pasynUser, &axis);
   pAxis = pAxes_[axis];
 
   /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
    * status at the end, but that's OK */
-  status = setIntegerParam(axis, function, value);
+  pAxis->setIntegerParam(function, value);
 
   if (function == motorStop_) {
     getDoubleParam(axis, motorAccel_, &accel);
@@ -117,7 +117,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   }
 
   /* Do callbacks so higher layers see any changes */
-  callParamCallbacks(axis);
+  pAxis->callParamCallbacks();
   if (status) 
     asynPrint(pasynUser, ASYN_TRACE_ERROR, 
       "%s:%s error, status=%d axis=%d, function=%d, value=%d\n", 
@@ -144,7 +144,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
    * status at the end, but that's OK */
-  status = setDoubleParam(axis, function, value);
+  status = pAxis->setDoubleParam(function, value);
 
   getDoubleParam(axis, motorVelBase_, &baseVelocity);
   getDoubleParam(axis, motorVelocity_, &velocity);
@@ -188,9 +188,17 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       "%s:%s: Set driver %s, axis %d to home %s, base velocity=%f, velocity=%f, acceleration=%f\n",
       driverName, functionName, portName, pAxis->axisNo_, (forwards?"FORWARDS":"REVERSE"), baseVelocity, velocity, acceleration);
 
+  } else if (function == motorPosition_) {
+    status = pAxis->setPosition(value);
+    pAxis->callParamCallbacks();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d to position=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value);
+
   }
-  
   /* Do callbacks so higher layers see any changes */
+  pAxis->callParamCallbacks();
+  
   if (status) 
     asynPrint(pasynUser, ASYN_TRACE_ERROR, 
       "%s:%s error, status=%d axis=%d, function=%d, value=%f\n", 
@@ -230,6 +238,16 @@ asynStatus asynMotorController::profileMove(asynUser *pasynUser, int npoints, do
   return(asynError);
 }
 
+asynStatus asynMotorController::triggerProfile(asynUser *pasynUser)
+{
+  static const char *functionName = "triggerProfile";
+
+  asynPrint(pasynUser, ASYN_TRACE_ERROR,
+    "%s:%s: not implemented in this driver\n", 
+    driverName, functionName);
+  return(asynError);
+}
+
 asynMotorAxis* asynMotorController::getAxis(asynUser *pasynUser)
 {
     int axisNo;
@@ -242,16 +260,6 @@ asynMotorAxis* asynMotorController::getAxis(int axisNo)
 {
     if ((axisNo < 0) || (axisNo >= numAxes_)) return NULL;
     return pAxes_[axisNo];
-}
-
-asynStatus asynMotorController::triggerProfile(asynUser *pasynUser)
-{
-  static const char *functionName = "triggerProfile";
-
-  asynPrint(pasynUser, ASYN_TRACE_ERROR,
-    "%s:%s: not implemented in this driver\n", 
-    driverName, functionName);
-  return(asynError);
 }
 
 asynStatus asynMotorController::startPoller(double movingPollPeriod, double idlePollPeriod)
