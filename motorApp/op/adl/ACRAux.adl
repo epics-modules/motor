@@ -3015,3 +3015,28 @@ text {
 	limits {
 	}
 }
+menu {
+	object {
+		x=509
+		y=192
+		width=106
+		height=20
+	}
+	control {
+		chan="$(P)$(R)Read.SCAN"
+		clr=14
+		bclr=51
+	}
+}
+text {
+	object {
+		x=384
+		y=192
+		width=120
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Read inputs:"
+}
