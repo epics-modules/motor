@@ -23,13 +23,16 @@ class motorSimAxis : public asynMotorAxis
 public:
 
   /* These are the functions we override from the base class */
-  motorSimAxis(class motorSimController *pController, int axis, double lowLimit, double hiLimit, double home, double start);
+  class motorSimController* getController();
+
+  /* These are the pure virtual functions that must be implemented */
+  motorSimAxis(motorSimController *pController, int axis, double lowLimit, double hiLimit, double home, double start);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
   asynStatus home(double min_velocity, double max_velocity, double acceleration, int forwards);
   asynStatus stop(double acceleration);
   asynStatus poll(int *moving);
-  motorSimController* getController();
+  asynStatus setPosition(double position);
 
   /* These are the methods that are new to this class */
   asynStatus config(int hiHardLimit, int lowHardLimit, int home, int start);
@@ -60,7 +63,6 @@ public:
   /* These are the fucntions we override from the base class */
   motorSimController(const char *portName, int numAxes, int priority, int stackSize);
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
-  asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
   void report(FILE *fp, int level);
   motorSimAxis* getAxis(asynUser *pasynUser);
   motorSimAxis* getAxis(int axisNo);
