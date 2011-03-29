@@ -50,7 +50,7 @@ friend class ACRController;
 
 class ACRController : public asynMotorController {
 public:
-  ACRController(const char *portName, const char *ACRPortName, int numAxes, int movingPollPeriod, int idlePollPeriod);
+  ACRController(const char *portName, const char *ACRPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
   
   /* These are the methods that we override from asynMotorDriver */
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);

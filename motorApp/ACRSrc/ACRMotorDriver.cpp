@@ -27,7 +27,8 @@ March 4, 2011
 
 static const char *driverName = "ACRMotorDriver";
 
-ACRController::ACRController(const char *portName, const char *ACRPortName, int numAxes, int movingPollPeriod, int idlePollPeriod)
+ACRController::ACRController(const char *portName, const char *ACRPortName, int numAxes, 
+                             double movingPollPeriod, double idlePollPeriod)
   :  asynMotorController(portName, numAxes, NUM_ACR_PARAMS, 
                          asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask, 
                          asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask,
@@ -93,10 +94,11 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
 
 
 /** Configuration command, called directly or from iocsh */
-extern "C" int ACRCreateController(const char *portName, const char *ACRPortName, int numAxes, int movingPollPeriod, int idlePollPeriod)
+extern "C" int ACRCreateController(const char *portName, const char *ACRPortName, int numAxes, 
+                                   int movingPollPeriod, int idlePollPeriod)
 {
   ACRController *pACRController
-    = new ACRController(portName, ACRPortName, numAxes, movingPollPeriod, idlePollPeriod);
+    = new ACRController(portName, ACRPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   pACRController = NULL;
   return(asynSuccess);
 }
