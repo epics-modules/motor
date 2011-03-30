@@ -19,17 +19,27 @@
 static const char *driverName = "asynMotorDriver";
 static void asynMotorPollerC(void *drvPvt);
 
-  asynMotorAxis::asynMotorAxis(class asynMotorController *pController, int axisNo)
-    : pC_(pController), axisNo_(axisNo), statusChanged_(1)
+asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
+  : pC_(pC), axisNo_(axisNo), statusChanged_(1)
 {
-  if (!pController) return;
-  if ((axisNo < 0) || (axisNo >= pController->numAxes_)) return;
-  pController->pAxes_[axisNo] = this;
+  static const char *functionName = "asynMotorAxis::asynMotorAxis";
+
+  if (!pC) {
+    printf("%s:%s: Error, controller is NULL\n",
+    driverName, functionName);
+    return;
+  }
+  if ((axisNo < 0) || (axisNo >= pC->numAxes_)) {
+    printf("%s:%s: Error, axis=%d is not in range 0 to %d\n",
+    driverName, functionName, axisNo, pC->numAxes_-1);
+    return;
+  }
+  pC->pAxes_[axisNo] = this;
   status_.status = 0;
   
   // Create the asynUser, connect to this axis
   pasynUser_ = pasynManager->createAsynUser(NULL, NULL);
-  pasynManager->connectDevice(pasynUser_, pController->portName, axisNo);
+  pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
 }
 
 asynMotorController::asynMotorController(const char *portName, int numAxes, int numParams,
@@ -43,7 +53,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
     numAxes_(numAxes)
 
 {
-  static const char *functionName = "asynMotorDriver";
+  static const char *functionName = "asynMotorController::asynMotorController";
 
   /* Create the base set of motor parameters */
   createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
@@ -98,10 +108,11 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   asynStatus status=asynSuccess;
   asynMotorAxis *pAxis;
   double accel;
-  static const char *functionName = "writeInt32";
+  static const char *functionName = "asynMotorController::writeInt32";
 
-  status = getAddress(pasynUser, &axis);
-  pAxis = pAxes_[axis];
+  pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
+  axis = pAxis->axisNo_;
 
   /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
    * status at the end, but that's OK */
@@ -137,9 +148,10 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   int axis;
   int forwards;
   asynStatus status = asynError;
-  static const char *functionName = "writeFloat64";
+  static const char *functionName = "asynMotorController::writeFloat64";
 
   pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
   axis = pAxis->axisNo_;
 
   /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
@@ -213,7 +225,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
 asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *pointer)
 {
-  static const char *functionName = "readGenericPointer";
+  static const char *functionName = "asynMotorController::readGenericPointer";
   MotorStatus *pStatus = (MotorStatus *)pointer;
   int axis;
   
@@ -230,7 +242,7 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
 
 asynStatus asynMotorController::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger)
 {
-  static const char *functionName = "profileMove";
+  static const char *functionName = "asynMotorController::profileMove";
 
   asynPrint(pasynUser, ASYN_TRACE_ERROR,
     "%s:%s: not implemented in this driver\n", 
@@ -240,7 +252,7 @@ asynStatus asynMotorController::profileMove(asynUser *pasynUser, int npoints, do
 
 asynStatus asynMotorController::triggerProfile(asynUser *pasynUser)
 {
-  static const char *functionName = "triggerProfile";
+  static const char *functionName = "asynMotorController::triggerProfile";
 
   asynPrint(pasynUser, ASYN_TRACE_ERROR,
     "%s:%s: not implemented in this driver\n", 
@@ -320,6 +332,7 @@ void asynMotorController::asynMotorPoller()
     this->poll();
     for (i=0; i<numAxes_; i++) {
         pAxis=getAxis(i);
+        if (!pAxis) continue;
         pAxis->poll(&moving);
         if (moving) anyMoving=1;
     }
