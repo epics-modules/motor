@@ -355,13 +355,18 @@ void asynMotorController::asynMotorPoller()
 asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
   int mask;
+  epicsUInt32 status;
   // This assumes the parameters defined above are in the same order as the bits the motor record expects!
   if (function >= pC_->motorStatusDirection_ && 
       function <= pC_->motorStatusHomed_) {
+    status = status_.status;
     mask = 1 << (function - pC_->motorStatusDirection_);
-    if (value) status_.status |= mask;
-    else       status_.status &= ~mask;
-    statusChanged_ = 1;
+    if (value) status |= mask;
+    else       status &= ~mask;
+    if (status != status_.status) {
+      status_.status = status;
+      statusChanged_ = 1;
+    }
   }
   // Call the base class method
   return pC_->setIntegerParam(axisNo_, function, value);
@@ -370,11 +375,15 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 asynStatus asynMotorAxis::setDoubleParam(int function, double value)
 {
   if (function == pC_->motorPosition_) {
-    statusChanged_ = 1;
-    status_.position = value;
+    if (value != status_.position) {
+        statusChanged_ = 1;
+        status_.position = value;
+    }
   } else if (function == pC_->motorEncoderPosition_) {
-    statusChanged_ = 1;
-    status_.encoderPosition = value;
+    if (value != status_.encoderPosition) {
+        statusChanged_ = 1;
+        status_.encoderPosition = value;
+    }
   }  
   // Call the base class method
   return pC_->setDoubleParam(axisNo_, function, value);
