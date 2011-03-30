@@ -33,7 +33,12 @@ Newport_SRCS += devESP300.cc drvESP300.cc
 
 # XPS C8 device driver
 Newport_SRCS += asynOctetSocket.cpp 
-Newport_SRCS += XPS_C8_drivers.cpp drvXPSAsyn.c drvXPSAsynAux.c XPSAsynInterpose.c xps_ftp.c
+Newport_SRCS += XPS_C8_drivers.cpp 
+Newport_SRCS += drvXPSAsynAux.c xps_ftp.c
+# This is the model 2 asyn driver
+Newport_SRCS += drvXPSAsyn.c XPSAsynInterpose.c
+# This is the model 3 asyn driver
+Newport_SRCS += XPSMotorDriver.cpp
 ifdef SNCSEQ
 Newport_SRCS += XPS_trajectoryScan.st
 endif
@@ -67,6 +72,7 @@ XPSGatheringMain_SYS_LIBS_solaris += socket nsl
 PROD_IOC += XPSGathering2
 XPSGathering2_SRCS += XPSGathering2.c
 XPSGathering2_LIBS += Newport motor asyn
+XPSGathering2_LIBS += $(EPICS_BASE_IOC_LIBS)
 XPSGathering2_SYS_LIBS_solaris += socket nsl
 
 include $(TOP)/configure/RULES
