@@ -67,7 +67,6 @@ public:
   virtual asynStatus setIntegerParam(int index, int value);
   virtual asynStatus setDoubleParam(int index, double value);
   virtual asynStatus callParamCallbacks();
-  asynMotorController* getController();
 
   // These are pure virtual functions which derived classes must implement
   virtual asynStatus move(double position, int relative, double minVelocity, double maxVelocity, double acceleration) = 0;
@@ -78,7 +77,7 @@ public:
   virtual asynStatus setPosition(double position) = 0;
 
 protected:
-  class asynMotorController *pController_;
+  class asynMotorController *pC_;
   int axisNo_;
   asynUser *pasynUser_;
 

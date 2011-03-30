@@ -20,7 +20,7 @@ static const char *driverName = "asynMotorDriver";
 static void asynMotorPollerC(void *drvPvt);
 
   asynMotorAxis::asynMotorAxis(class asynMotorController *pController, int axisNo)
-    : pController_(pController), axisNo_(axisNo), statusChanged_(1)
+    : pC_(pController), axisNo_(axisNo), statusChanged_(1)
 {
   if (!pController) return;
   if ((axisNo < 0) || (axisNo >= pController->numAxes_)) return;
@@ -342,47 +342,36 @@ void asynMotorController::asynMotorPoller()
 asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
   int mask;
-  asynMotorController *pC = getController();
-  
   // This assumes the parameters defined above are in the same order as the bits the motor record expects!
-  if (function >= pC->motorStatusDirection_ && 
-      function <= pC->motorStatusHomed_) {
-    mask = 1 << (function - pC->motorStatusDirection_);
+  if (function >= pC_->motorStatusDirection_ && 
+      function <= pC_->motorStatusHomed_) {
+    mask = 1 << (function - pC_->motorStatusDirection_);
     if (value) status_.status |= mask;
     else       status_.status &= ~mask;
     statusChanged_ = 1;
   }
   // Call the base class method
-  return pC->setIntegerParam(axisNo_, function, value);
+  return pC_->setIntegerParam(axisNo_, function, value);
 }
 
 asynStatus asynMotorAxis::setDoubleParam(int function, double value)
 {
-  asynMotorController *pC = getController();
-
-  if (function == pC->motorPosition_) {
+  if (function == pC_->motorPosition_) {
     statusChanged_ = 1;
     status_.position = value;
-  } else if (function == pC->motorEncoderPosition_) {
+  } else if (function == pC_->motorEncoderPosition_) {
     statusChanged_ = 1;
     status_.encoderPosition = value;
   }  
   // Call the base class method
-  return pC->setDoubleParam(axisNo_, function, value);
+  return pC_->setDoubleParam(axisNo_, function, value);
 }   
 
 asynStatus asynMotorAxis::callParamCallbacks()
 {
-  asynMotorController *pC = getController();
-  
   if (statusChanged_) {
     statusChanged_ = 0;
-    pC->doCallbacksGenericPointer((void *)&status_, pC->motorStatus_, axisNo_);
+    pC_->doCallbacksGenericPointer((void *)&status_, pC_->motorStatus_, axisNo_);
   }
-  return pC->callParamCallbacks(axisNo_);
-}
-
-asynMotorController* asynMotorAxis::getController()
-{
-  return pController_;
+  return pC_->callParamCallbacks(axisNo_);
 }
