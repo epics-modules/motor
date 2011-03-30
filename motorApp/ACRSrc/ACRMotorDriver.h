@@ -30,10 +30,8 @@ public:
   asynStatus poll(int *moving);
   asynStatus setPosition(double position);
 
-  // These are the methods that are new to this class 
-  class ACRController* getController();
-
 private:
+  ACRController *pC_;
   char axisName_[10];
   double pulsesPerUnit_;
   int flagsReg_;

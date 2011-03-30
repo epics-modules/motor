@@ -325,7 +325,8 @@ asynStatus ACRController::writeReadController(const char *output, char *input, s
 }
 
 ACRAxis::ACRAxis(ACRController *pController, int axisNo)
-  : asynMotorAxis(pController, axisNo)
+  : asynMotorAxis(pController, axisNo),
+    pC_(pController)
 {
   sprintf(axisName_, "AXIS%d", axisNo);
   encoderPositionReg_ = 12290 + 256*axisNo;
@@ -336,43 +337,40 @@ ACRAxis::ACRAxis(ACRController *pController, int axisNo)
 
 asynStatus ACRAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
-  ACRController *pC = getController();
   asynStatus status;
   // static const char *functionName = "moveAxis";
 
-  sprintf(pC->outString_, "%s JOG ACC %f", axisName_, acceleration/pulsesPerUnit_);
-  status = pC->writeController();
-  sprintf(pC->outString_, "%s JOG VEL %f", axisName_, maxVelocity/pulsesPerUnit_);
-  status = pC->writeController();
+  sprintf(pC_->outString_, "%s JOG ACC %f", axisName_, acceleration/pulsesPerUnit_);
+  status = pC_->writeController();
+  sprintf(pC_->outString_, "%s JOG VEL %f", axisName_, maxVelocity/pulsesPerUnit_);
+  status = pC_->writeController();
   // Note, the CtlY being send below clears the kill for all axes, in case they had hit a limit, etc.
   if (relative) {
-    sprintf(pC->outString_, "%c:%s JOG INC %f", CtlY, axisName_, position/pulsesPerUnit_);
-    status = pC->writeController();
+    sprintf(pC_->outString_, "%c:%s JOG INC %f", CtlY, axisName_, position/pulsesPerUnit_);
+    status = pC_->writeController();
   } else {
-    sprintf(pC->outString_, "%c:%s JOG ABS %f", CtlY, axisName_, position/pulsesPerUnit_);
-    status = pC->writeController();
+    sprintf(pC_->outString_, "%c:%s JOG ABS %f", CtlY, axisName_, position/pulsesPerUnit_);
+    status = pC_->writeController();
   }
   return status;
 }
 
 asynStatus ACRAxis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
-  ACRController *pC = getController();
   asynStatus status;
   // static const char *functionName = "homeAxis";
 
-  sprintf(pC->outString_, "%s JOG ACC %f", axisName_, acceleration/pulsesPerUnit_);
-  status = pC->writeController();
-  sprintf(pC->outString_, "%s JOG VEL %f", axisName_, maxVelocity/pulsesPerUnit_);
-  status = pC->writeController();
-  sprintf(pC->outString_, "%c:%s JOG HOME %d", CtlY, axisName_, forwards ? 1 : -1);
-  status = pC->writeController();
+  sprintf(pC_->outString_, "%s JOG ACC %f", axisName_, acceleration/pulsesPerUnit_);
+  status = pC_->writeController();
+  sprintf(pC_->outString_, "%s JOG VEL %f", axisName_, maxVelocity/pulsesPerUnit_);
+  status = pC_->writeController();
+  sprintf(pC_->outString_, "%c:%s JOG HOME %d", CtlY, axisName_, forwards ? 1 : -1);
+  status = pC_->writeController();
   return status;
 }
 
 asynStatus ACRAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
-  ACRController *pC = getController();
   asynStatus status;
   double speed=maxVelocity;
   int forwards=1;
@@ -382,23 +380,22 @@ asynStatus ACRAxis::moveVelocity(double minVelocity, double maxVelocity, double 
     speed = -speed;
     forwards = 0;
   }
-  sprintf(pC->outString_, "%s JOG ACC %f", axisName_, acceleration/pulsesPerUnit_);
-  status = pC->writeController();
-  sprintf(pC->outString_, "%s JOG VEL %f", axisName_, speed/pulsesPerUnit_);
-  status = pC->writeController();
-  sprintf(pC->outString_, "%c:%s JOG %s", CtlY, axisName_, forwards ? "FWD" : "REV");
-  status = pC->writeController();
+  sprintf(pC_->outString_, "%s JOG ACC %f", axisName_, acceleration/pulsesPerUnit_);
+  status = pC_->writeController();
+  sprintf(pC_->outString_, "%s JOG VEL %f", axisName_, speed/pulsesPerUnit_);
+  status = pC_->writeController();
+  sprintf(pC_->outString_, "%c:%s JOG %s", CtlY, axisName_, forwards ? "FWD" : "REV");
+  status = pC_->writeController();
   return status;
 }
 
 asynStatus ACRAxis::stop(double acceleration )
 {
-  ACRController *pC = getController();
   asynStatus status;
   static const char *functionName = "stopAxis";
 
-  sprintf(pC->outString_, "%s JOG OFF", axisName_);
-  status = pC->writeController();
+  sprintf(pC_->outString_, "%s JOG OFF", axisName_);
+  status = pC_->writeController();
 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
     "%s:%s: Set axis %d to stop, status=%d\n",
@@ -408,74 +405,67 @@ asynStatus ACRAxis::stop(double acceleration )
 
 asynStatus ACRAxis::setPosition(double position)
 {
-  ACRController *pC = getController();
   asynStatus status;
 
-  sprintf(pC->outString_, "%s RES %f", axisName_, position/pulsesPerUnit_);
-  status = pC->writeController();
-  sprintf(pC->outString_, "%s JOG REN", axisName_);
-  status = pC->writeController();
+  sprintf(pC_->outString_, "%s RES %f", axisName_, position/pulsesPerUnit_);
+  status = pC_->writeController();
+  sprintf(pC_->outString_, "%s JOG REN", axisName_);
+  status = pC_->writeController();
   return status;
-}
-
-ACRController* ACRAxis::getController()
-{
-  return static_cast<ACRController*>(asynMotorAxis::getController());
 }
 
 asynStatus ACRAxis::poll(int *moving)
 { 
-  ACRController *pC = getController();
   int done;
   int driveOn;
   int limit;
   asynStatus comStatus;
 
   // Read the current encoder position
-  sprintf(pC->outString_, "?P%d", encoderPositionReg_);
-  comStatus = pC->writeReadController();
+  sprintf(pC_->outString_, "?P%d", encoderPositionReg_);
+  comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
-  encoderPosition_ = atof(pC->inString_);
-  setDoubleParam(pC->motorEncoderPosition_,encoderPosition_);
+  encoderPosition_ = atof(pC_->inString_);
+  setDoubleParam(pC_->motorEncoderPosition_,encoderPosition_);
 
   // Read the current theoretical position
-  sprintf(pC->outString_, "?P%d", theoryPositionReg_);
-  comStatus = pC->writeReadController();
+  sprintf(pC_->outString_, "?P%d", theoryPositionReg_);
+  comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
-  theoryPosition_ = atof(pC->inString_);
-  setDoubleParam(pC->motorPosition_, theoryPosition_);
+  theoryPosition_ = atof(pC_->inString_);
+  setDoubleParam(pC_->motorPosition_, theoryPosition_);
 
   // Read the current flags
-  sprintf(pC->outString_, "?P%d", flagsReg_);
-  comStatus = pC->writeReadController();
+  sprintf(pC_->outString_, "?P%d", flagsReg_);
+  comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
-  currentFlags_ = atoi(pC->inString_);
+  currentFlags_ = atoi(pC_->inString_);
   done = (currentFlags_ & 0x1000000)?0:1;
-  setIntegerParam(pC->motorStatusDone_, done);
+  setIntegerParam(pC_->motorStatusDone_, done);
   *moving = done ? 0:1;
 
   // Read the current limit status
-  sprintf(pC->outString_, "?P%d", limitsReg_);
-  comStatus = pC->writeReadController();
+  sprintf(pC_->outString_, "?P%d", limitsReg_);
+  comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
-  currentLimits_ = atoi(pC->inString_);
+  currentLimits_ = atoi(pC_->inString_);
   limit = (currentLimits_ & 0x1)?1:0;
-  setIntegerParam(pC->motorStatusHighLimit_, limit);
+  setIntegerParam(pC_->motorStatusHighLimit_, limit);
   limit = (currentLimits_ & 0x2)?1:0;
-  setIntegerParam(pC->motorStatusLowLimit_, limit);
+  setIntegerParam(pC_->motorStatusLowLimit_, limit);
   limit = (currentLimits_ & 0x4)?1:0;
-  setIntegerParam(pC->motorStatusAtHome_, limit);
+  setIntegerParam(pC_->motorStatusAtHome_, limit);
 
   // Read the drive power on status
-  sprintf(pC->outString_, "DRIVE %s", axisName_);
-  comStatus = pC->writeReadController();
+  sprintf(pC_->outString_, "DRIVE %s", axisName_);
+  comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
-  driveOn = strstr(pC->inString_, "ON") ? 1:0;
-  setIntegerParam(pC->motorStatusPowerOn_, driveOn);
-  setIntegerParam(pC->motorStatusProblem_, 0);
+  driveOn = strstr(pC_->inString_, "ON") ? 1:0;
+  setIntegerParam(pC_->motorStatusPowerOn_, driveOn);
+  setIntegerParam(pC_->motorStatusProblem_, 0);
 
   skip:
-  setIntegerParam(pC->motorStatusProblem_, comStatus ? 1:0);
+  setIntegerParam(pC_->motorStatusProblem_, comStatus ? 1:0);
   callParamCallbacks();
   return comStatus ? asynError : asynSuccess;
 }
