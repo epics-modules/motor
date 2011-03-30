@@ -46,6 +46,7 @@ static int motorSimControllerListInitialized = 0;
 
 motorSimAxis::motorSimAxis(motorSimController *pController, int axis, double lowHardLimit, double hiHardLimit, double home, double start )
   : asynMotorAxis(pController, axis),
+    pC_(pController),
     lowHardLimit_(lowHardLimit), hiHardLimit_(hiHardLimit), home_(home)
 {
   route_pars_t pars;
@@ -270,7 +271,6 @@ void motorSimController::motorSimTask()
 asynStatus motorSimAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
   route_pars_t pars;
-  motorSimController *pC = static_cast<motorSimController*>(pController_);
   static const char *functionName = "move";
 
   if (relative) position += endpoint_.axis[0].p + enc_offset_;
@@ -279,7 +279,7 @@ asynStatus motorSimAxis::move(double position, int relative, double minVelocity,
   if ((nextpoint_.axis[0].p >= hiHardLimit_  &&  position > nextpoint_.axis[0].p) ||
     (nextpoint_.axis[0].p <= lowHardLimit_ &&  position < nextpoint_.axis[0].p)  ) return asynError;
 
-  if (pC->movesDeferred_ == 0) { /*Normal move.*/
+  if (pC_->movesDeferred_ == 0) { /*Normal move.*/
     endpoint_.axis[0].p = position - enc_offset_;
     endpoint_.axis[0].v = 0.0;
   } else { /*Deferred moves.*/
@@ -292,12 +292,12 @@ asynStatus motorSimAxis::move(double position, int relative, double minVelocity,
   if (acceleration != 0) pars.axis[0].Amax = fabs(acceleration);
   routeSetParams( route_, &pars ); 
 
-  setIntegerParam(pC->motorStatusDone_, 0);
+  setIntegerParam(pC_->motorStatusDone_, 0);
   callParamCallbacks();
 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
             "%s:%s: Set driver %s, axis %d move to %f, min vel=%f, maxVel=%f, accel=%f\n",
-            driverName, functionName, pC->portName, axisNo_, position, minVelocity, maxVelocity, acceleration );
+            driverName, functionName, pC_->portName, axisNo_, position, minVelocity, maxVelocity, acceleration );
   return asynSuccess;
 }
 
@@ -369,11 +369,6 @@ asynStatus motorSimAxis::config(int hiHardLimit, int lowHardLimit, int home, int
   return asynSuccess;
 }
 
-motorSimController* motorSimAxis::getController()
-{
-  return static_cast<motorSimController*>(asynMotorAxis::getController());
-}
-
 asynStatus motorSimAxis::poll(int *moving)
 {
   return asynSuccess;
@@ -397,7 +392,6 @@ asynStatus motorSimAxis::poll(int *moving)
 
 void motorSimAxis::process(double delta )
 {
-  motorSimController *pC = getController();
   double lastpos;
   int done = 0;
 
@@ -446,14 +440,14 @@ void motorSimAxis::process(double delta )
     done = 0;
   }
 
-  setDoubleParam (pC->motorPosition_,         (nextpoint_.axis[0].p+enc_offset_));
-  setDoubleParam (pC->motorEncoderPosition_,  (nextpoint_.axis[0].p+enc_offset_));
-  setIntegerParam(pC->motorStatusDirection_,  (nextpoint_.axis[0].v >  0));
-  setIntegerParam(pC->motorStatusDone_,       done);
-  setIntegerParam(pC->motorStatusHighLimit_,  (nextpoint_.axis[0].p >= hiHardLimit_));
-  setIntegerParam(pC->motorStatusHome_,       (nextpoint_.axis[0].p == home_));
-  setIntegerParam(pC->motorStatusMoving_,     !done);
-  setIntegerParam(pC->motorStatusLowLimit_,   (nextpoint_.axis[0].p <= lowHardLimit_));
+  setDoubleParam (pC_->motorPosition_,         (nextpoint_.axis[0].p+enc_offset_));
+  setDoubleParam (pC_->motorEncoderPosition_,  (nextpoint_.axis[0].p+enc_offset_));
+  setIntegerParam(pC_->motorStatusDirection_,  (nextpoint_.axis[0].v >  0));
+  setIntegerParam(pC_->motorStatusDone_,       done);
+  setIntegerParam(pC_->motorStatusHighLimit_,  (nextpoint_.axis[0].p >= hiHardLimit_));
+  setIntegerParam(pC_->motorStatusHome_,       (nextpoint_.axis[0].p == home_));
+  setIntegerParam(pC_->motorStatusMoving_,     !done);
+  setIntegerParam(pC_->motorStatusLowLimit_,   (nextpoint_.axis[0].p <= lowHardLimit_));
   callParamCallbacks();
 }
 
