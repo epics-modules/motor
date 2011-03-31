@@ -7,18 +7,21 @@
 #include <shareLib.h>
 #include "asynMotorDriver.h"
 
-/* Number of fast polls when poller first wakes up.  This allows for fact
+/** Number of fast polls when poller first wakes up.  This allows for fact
  * that the status may not be moving on the first few polls */
- #define FORCED_FAST_POLLS 10
 
-/** All of the arguments are simply passed to the constructor for the asynPortDriver base class. 
-  * After calling the base class constructor this method creates the motor parameters
-  * defined in asynMotorDriver.h.
-  */
 
 static const char *driverName = "asynMotorDriver";
 static void asynMotorPollerC(void *drvPvt);
 
+/** Creates a new asynMotorAxis object.
+  * \param[in] pC Pointer to the asynMotorController to which this axis belongs. 
+  * \param[in] axisNo Index number of this axis, range 0 to pC->numAxes_-1.
+  * 
+  * Checks that pC is not null, and that axisNo is in the valid range.
+  * Sets a pointer to itself in pC->pAxes[axisNo_].
+  * Connects pasynUser_ to this asyn port and axisNo.
+  */
 asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   : pC_(pC), axisNo_(axisNo), statusChanged_(1)
 {
@@ -42,6 +45,11 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
 }
 
+/** Creates a new asynMotorController object.
+  * All of the arguments are simply passed to the constructor for the asynPortDriver base class. 
+  * After calling the base class constructor this method creates the motor parameters
+  * defined in asynMotorDriver.h.
+  */
 asynMotorController::asynMotorController(const char *portName, int numAxes, int numParams,
                                          int interfaceMask, int interruptMask,
                                          int asynFlags, int autoConnect, int priority, int stackSize)
@@ -101,6 +109,16 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
     driverName, functionName);
 }
 
+/** Called when asyn clients call pasynInt32->write().
+  * Extracts the function and axis number from pasynUser.
+  * Sets the value in the parameter library.
+  * If the function is motorStop_ then it calls pAxis->stop().
+  * Calls any registered callbacks for this pasynUser->reason and address.  
+  * Motor drivers will reimplement this function if they support 
+  * controller-specific parameters on the asynInt32 interface. They should call this
+  * base class method for any parameters that are not controller-specific.
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] value Value to write. */
 asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   int axis;
@@ -114,8 +132,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   if (!pAxis) return asynError;
   axis = pAxis->axisNo_;
 
-  /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
-   * status at the end, but that's OK */
+  /* Set the parameter and readback in the parameter library. */
   pAxis->setIntegerParam(function, value);
 
   if (function == motorStop_) {
@@ -140,6 +157,17 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   return status;
 }    
   
+/** Called when asyn clients call pasynFloat64->write().
+  * Extracts the function and axis number from pasynUser.
+  * Sets the value in the parameter library.
+  * If the function is motorMoveRel_, motorMoveAbs_, motorMoveVel_, motorHome_, or motorPosition_,
+  * then it calls pAxis->move(), pAxis->moveVelocity(), pAxis->home(), or pAxis->setPosition().
+  * Calls any registered callbacks for this pasynUser->reason and address.  
+  * Motor drivers will reimplement this function if they support 
+  * controller-specific parameters on the asynFloat64 interface.  They should call this
+  * base class method for any parameters that are not controller-specific.
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] value Value to write. */
 asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
   int function = pasynUser->reason;
@@ -154,8 +182,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   if (!pAxis) return asynError;
   axis = pAxis->axisNo_;
 
-  /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
-   * status at the end, but that's OK */
+  /* Set the parameter and readback in the parameter library. */
   status = pAxis->setDoubleParam(function, value);
 
   getDoubleParam(axis, motorVelBase_, &baseVelocity);
@@ -223,6 +250,11 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     
 }
 
+/** Called when asyn clients call pasynGenericPointer->read().
+  * Builds an aggregate MotorStatus structure at the memory location of the
+  * input pointer.  
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] pointer Pointer to the MotorStatus object to return. */
 asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *pointer)
 {
   static const char *functionName = "asynMotorController::readGenericPointer";
@@ -240,6 +272,8 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
   return(asynSuccess);
 }  
 
+/** Function to define a coordinated move of multiple axes.
+  * This is not currently implemented, as the API still needs work! */
 asynStatus asynMotorController::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger)
 {
   static const char *functionName = "asynMotorController::profileMove";
@@ -250,6 +284,8 @@ asynStatus asynMotorController::profileMove(asynUser *pasynUser, int npoints, do
   return(asynError);
 }
 
+/** Function to trigger a coordinated move of multiple axes.
+  * This is not currently implemented, as the API still needs work! */
 asynStatus asynMotorController::triggerProfile(asynUser *pasynUser)
 {
   static const char *functionName = "asynMotorController::triggerProfile";
@@ -260,6 +296,11 @@ asynStatus asynMotorController::triggerProfile(asynUser *pasynUser)
   return(asynError);
 }
 
+/** Returns a pointer to an asynMotorAxis object.
+  * Returns NULL if the axis number encoded in pasynUser is invalid.
+  * Derived classes will reimplement this function to return a pointer to the derived
+  * axis type.
+  * \param[in] pasynUser asynUser structure that encodes the axis index number. */
 asynMotorAxis* asynMotorController::getAxis(asynUser *pasynUser)
 {
     int axisNo;
@@ -268,16 +309,31 @@ asynMotorAxis* asynMotorController::getAxis(asynUser *pasynUser)
     return getAxis(axisNo);
 }
 
+/** Returns a pointer to an asynMotorAxis object.
+  * Returns NULL if the axis number is invalid.
+  * Derived classes will reimplement this function to return a pointer to the derived
+  * axis type.
+  * \param[in] axisNo Axis index number. */
 asynMotorAxis* asynMotorController::getAxis(int axisNo)
 {
     if ((axisNo < 0) || (axisNo >= numAxes_)) return NULL;
     return pAxes_[axisNo];
 }
 
-asynStatus asynMotorController::startPoller(double movingPollPeriod, double idlePollPeriod)
+/** Starts the motor poller thread.
+  * Derived classes will typically call this at near the end of their constructor.
+  * Derived classes can typically use the base class implementation of the poller thread,
+  * but are free to reimplement it if necessary.
+  * \param[in] movingPollPeriod The time between polls when any axis is moving.
+  * \param[in] idlePollPeriod The time between polls when no axis is moving.
+  * \param[in] forcedFastPolls The number of times to force the movingPollPeriod after waking up the poller.  
+  * This can need to be non-zero for controllers that do not immediately
+  * report that an axis is moving after it has been told to start. */
+asynStatus asynMotorController::startPoller(double movingPollPeriod, double idlePollPeriod, int forcedFastPolls)
 {
   movingPollPeriod_ = movingPollPeriod;
   idlePollPeriod_   = idlePollPeriod;
+  forcedFastPolls_  = forcedFastPolls;
   epicsThreadCreate("motorPoller", 
                     epicsThreadPriorityLow,
                     epicsThreadGetStackSize(epicsThreadStackMedium),
@@ -285,12 +341,23 @@ asynStatus asynMotorController::startPoller(double movingPollPeriod, double idle
   return asynSuccess;
 }
 
+/** Wakes up the poller thread to make it start polling at the movingPollingPeriod_.
+  * This is typically called after an axis has been told to move, so the poller immediately
+  * starts polling quickly. */
 asynStatus asynMotorController::wakeupPoller()
 {
   epicsEventSignal(pollEventId_);
   return asynSuccess;
 }
 
+/** Polls the asynMotorController (not a specific asynMotorAxis).
+  * The base class asynMotorPoller thread calls this method once just before it calls asynMotorAxis::poll
+  * for each axis.
+  * This base class implementation does nothing.  Derived classes can implement this method if there
+  * are controller-wide parameters that need to be polled.  It can also be used for efficiency in some
+  * cases. For example some controllers can return the status or positions for all axes in a single
+  * command.  In that case asynMotorController::poll() could read that information, and then 
+  * asynMotorAxis::poll() might just extract the axis-specific information from the result. */
 asynStatus asynMotorController::poll()
 {
   return asynSuccess;
@@ -303,6 +370,13 @@ static void asynMotorPollerC(void *drvPvt)
 }
   
 
+/** Default poller function that runs in the thread created by asynMotorController::startPoller().
+  * This base class implementation can be used by most derived classes. 
+  * It polls at the idlePollPeriod_ when no axes are moving, and at the movingPollPeriod_ when
+  * any axis is moving.  It will immediately do a poll when asynMotorController::wakeupPoller() is
+  * called, and will then do forcedFastPolls_ loops at the movingPollPeriod, before reverting back
+  * to the idlePollPeriod_ if no axes are moving. It takes the lock on the port driver when it is polling.
+  */
 void asynMotorController::asynMotorPoller()
 {
   double timeout;
@@ -325,7 +399,7 @@ void asynMotorController::asynMotorPoller()
        * Force a minimum number of fast polls, because the controller status
        * might not have changed the first few polls
        */
-      forcedFastPolls = FORCED_FAST_POLLS;
+      forcedFastPolls = forcedFastPolls_;
     }
     anyMoving = 0;
     lock();
@@ -352,6 +426,13 @@ void asynMotorController::asynMotorPoller()
 // We implement the setIntegerParam, setDoubleParam, and callParamCallbacks methods so we can construct 
 // the aggregate status structure and do callbacks on it
 
+/** Sets the value for an integer for this axis in the parameter library.
+  * This function takes special action if the parameter is one of the motorStatus parameters
+  * (motorStatusDirection_, motorStatusHomed_, etc.).  In that case it sets or clears the appropriate
+  * bit in its private MotorStatus.status structure and if that status has changed sets a flag to
+  * do callbacks to devMotorAsyn when callParamCallbacks() is called.
+  * \param[in] function The function (parameter) number 
+  * \param[in] value Value to set */
 asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
   int mask;
@@ -372,6 +453,12 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
   return pC_->setIntegerParam(axisNo_, function, value);
 }
 
+/** Sets the value for a double for this axis in the parameter library.
+  * This function takes special action if the parameter is motorPosition_ or motorEncoderPosition_.  
+  * In that case it sets the value in the private MotorStatus structure and if the value has changed
+  * then sets a flag to do callbacks to devMotorAsyn when callParamCallbacks() is called.
+  * \param[in] function The function (parameter) number 
+  * \param[in] value Value to set */
 asynStatus asynMotorAxis::setDoubleParam(int function, double value)
 {
   if (function == pC_->motorPosition_) {
@@ -389,6 +476,9 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
   return pC_->setDoubleParam(axisNo_, function, value);
 }   
 
+/** Calls the callbacks for any parameters that have changed for this axis in the parameter library.
+  * This function takes special action if the aggregate MotorStatus structure has changed.
+  * In that case it does callbacks on the asynGenericPointer interface, typically to devMotorAsyn. */  
 asynStatus asynMotorAxis::callParamCallbacks()
 {
   if (statusChanged_) {
