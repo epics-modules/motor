@@ -27,6 +27,13 @@ March 4, 2011
 
 static const char *driverName = "ACRMotorDriver";
 
+/** Creates a new ACRController object.
+  * \param[in] portName          The name of the asyn port that will be created for this driver
+  * \param[in] ACRPortName       The name of the drvAsynIPPPort that was created previously to connect to the ACR controller 
+  * \param[in] numAxes           The number of axes that this controller supports 
+  * \param[in] movingPollPeriod  The time between polls when any axis is moving 
+  * \param[in] idlePollPeriod    The time between polls when no axis is moving 
+  */
 ACRController::ACRController(const char *portName, const char *ACRPortName, int numAxes, 
                              double movingPollPeriod, double idlePollPeriod)
   :  asynMotorController(portName, numAxes, NUM_ACR_PARAMS, 
@@ -89,11 +96,18 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
     callParamCallbacks(axis);
   }
 
-  startPoller(movingPollPeriod/1000., idlePollPeriod/1000.);
+  startPoller(movingPollPeriod/1000., idlePollPeriod/1000., 2);
 }
 
 
-/** Configuration command, called directly or from iocsh */
+/** Creates a new ACRController object.
+  * Configuration command, called directly or from iocsh
+  * \param[in] portName          The name of the asyn port that will be created for this driver
+  * \param[in] ACRPortName       The name of the drvAsynIPPPort that was created previously to connect to the ACR controller 
+  * \param[in] numAxes           The number of axes that this controller supports 
+  * \param[in] movingPollPeriod  The time in ms between polls when any axis is moving
+  * \param[in] idlePollPeriod    The time in ms between polls when no axis is moving 
+  */
 extern "C" int ACRCreateController(const char *portName, const char *ACRPortName, int numAxes, 
                                    int movingPollPeriod, int idlePollPeriod)
 {
@@ -103,6 +117,13 @@ extern "C" int ACRCreateController(const char *portName, const char *ACRPortName
   return(asynSuccess);
 }
 
+/** Reports on status of the driver
+  * \param[in] fp The file pointer on which report information will be written
+  * \param[in] level The level of report detail desired
+  *
+  * If details > 0 then information is printed about each axis.
+  * After printing controller-specific information calls asynMotorController::report()
+  */
 void ACRController::report(FILE *fp, int level)
 {
   int axis;
@@ -132,17 +153,32 @@ void ACRController::report(FILE *fp, int level)
   asynMotorController::report(fp, level);
 }
 
+/** Returns a pointer to an ACRMotorAxis object.
+  * Returns NULL if the axis number encoded in pasynUser is invalid.
+  * \param[in] pasynUser asynUser structure that encodes the axis index number. */
 ACRAxis* ACRController::getAxis(asynUser *pasynUser)
 {
   return static_cast<ACRAxis*>(asynMotorController::getAxis(pasynUser));
 }
 
+/** Returns a pointer to an ACRMotorAxis object.
+  * Returns NULL if the axis number encoded in pasynUser is invalid.
+  * \param[in] axisNo Axis index number. */
 ACRAxis* ACRController::getAxis(int axisNo)
 {
   return static_cast<ACRAxis*>(asynMotorController::getAxis(axisNo));
 }
 
 
+/** Called when asyn clients call pasynInt32->write().
+  * Extracts the function and axis number from pasynUser.
+  * Sets the value in the parameter library.
+  * If the function is motorSetClosedLoop_ then it turns the drive power on or off.
+  * If the function is ACRReadBinaryIO_ then it reads the binary I/O registers on the controller.
+  * For all other functions it calls asynMotorController::writeInt32.
+  * Calls any registered callbacks for this pasynUser->reason and address.  
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] value     Value to write. */
 asynStatus ACRController::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   int function = pasynUser->reason;
@@ -155,14 +191,7 @@ asynStatus ACRController::writeInt32(asynUser *pasynUser, epicsInt32 value)
    * status at the end, but that's OK */
   status = setIntegerParam(pAxis->axisNo_, function, value);
   
-  if (function == motorDeferMoves_)
-  {
-    asynPrint(pasynUser, ASYN_TRACE_FLOW,
-      "%s:%s: %sing Deferred Move flag on driver %s\n",
-      value != 0.0?"Sett":"Clear",
-      driverName, functionName, this->portName);
-  } 
-  else if (function == motorSetClosedLoop_)
+  if (function == motorSetClosedLoop_)
   {
     sprintf(outString_, "DRIVE %s %s", value ? "ON":"OFF", pAxis->axisName_);
     writeController();
@@ -193,6 +222,15 @@ asynStatus ACRController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   return status;
 }
 
+/** Called when asyn clients call pasynFloat64->write().
+  * Extracts the function and axis number from pasynUser.
+  * Sets the value in the parameter library.
+  * If the function is ACRJerk_ it sets the jerk value in the controller.
+  * then it calls pAxis->move(), pAxis->moveVelocity(), pAxis->home(), or pAxis->setPosition().
+  * Calls any registered callbacks for this pasynUser->reason and address.  
+  * For all other functions it calls asynMotorController::writeFloat64.
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] value Value to write. */
 asynStatus ACRController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
   int function = pasynUser->reason;
@@ -227,10 +265,15 @@ asynStatus ACRController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   return status;
 }
 
+/** Called when asyn clients call pasynUInt32Digital->write().
+  * Writes a single bit to one of the ACR binary output registers. 
+  * This function is limited to writing a single bit, because we use the BIT command.
+  * It writes to least significant bit that is set in the mask.
+  * \param[in] pasynUser pasynUser structure that encodes the reason and address.
+  * \param[in] value Value to write.
+  * \param[in] mask Mask value to use when writinging the value. */
 asynStatus ACRController::writeUInt32Digital(asynUser *pasynUser, epicsUInt32 value, epicsUInt32 mask)
 {
-  // This function is limited to writing a single bit, because we use the BIT command.
-  // It writes to least significant bit that is set in the mask
   int bit, tmask=0x1;
   asynStatus status;
   //static const char *functionName = "writeUInt32Digital";
@@ -247,6 +290,10 @@ asynStatus ACRController::writeUInt32Digital(asynUser *pasynUser, epicsUInt32 va
   return(status);
 }
 
+/** Reads the binary input and binary output registers on the ACR.
+  * Sets the values in the parameter library.
+  * Keeps track of which bits have changed.
+  * Calls any registered callbacks for this pasynUser->reason and address. */ 
 asynStatus ACRController::readBinaryIO()
 {
   asynStatus status;
@@ -277,21 +324,16 @@ asynStatus ACRController::readBinaryIO()
   return status;
 }
 
-asynStatus ACRController::triggerProfile(asynUser *pasynUser)
-{
-  return asynError;
-}
-
-asynStatus ACRController::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger)
-{
-  return asynError;
-}
-
+/** Writes a string to the ACR controller.
+  * Calls writeController() with a default location of the string to write and a default timeout. */ 
 asynStatus ACRController::writeController()
 {
   return writeController(outString_, ACR_TIMEOUT);
 }
 
+/** Writes a string to the ACR controller.
+  * \param[in] output The string to be written.
+  * \param[in] timeout Timeout before returning an error.*/
 asynStatus ACRController::writeController(const char *output, double timeout)
 {
   size_t nwrite;
@@ -304,12 +346,21 @@ asynStatus ACRController::writeController(const char *output, double timeout)
   return status ;
 }
 
+/** Writes a string to the ACR controller and reads the response.
+  * Calls writeReadController() with default locations of the input and output strings
+  * and default timeout. */ 
 asynStatus ACRController::writeReadController()
 {
   size_t nread;
   return writeReadController(outString_, inString_, sizeof(inString_), &nread, ACR_TIMEOUT);
 }
 
+/** Writes a string to the ACR controller and reads a response.
+  * \param[in] output Pointer to the output string.
+  * \param[out] input Pointer to the input string location.
+  * \param[in] maxChars Size of the input buffer.
+  * \param[out] nread Number of characters read.
+  * \param[out] timeout Timeout before returning an error.*/
 asynStatus ACRController::writeReadController(const char *output, char *input, size_t maxChars, size_t *nread, double timeout)
 {
   size_t nwrite;
@@ -324,9 +375,18 @@ asynStatus ACRController::writeReadController(const char *output, char *input, s
   return status;
 }
 
-ACRAxis::ACRAxis(ACRController *pController, int axisNo)
-  : asynMotorAxis(pController, axisNo),
-    pC_(pController)
+
+// These are the ACRAxis methods
+
+/** Creates a new ACRAxis object.
+  * \param[in] pC Pointer to the ACRController to which this axis belongs. 
+  * \param[in] axisNo Index number of this axis, range 0 to pC->numAxes_-1.
+  * 
+  * Initializes register numbers, etc.
+  */
+ACRAxis::ACRAxis(ACRController *pC, int axisNo)
+  : asynMotorAxis(pC, axisNo),
+    pC_(pC)
 {
   sprintf(axisName_, "AXIS%d", axisNo);
   encoderPositionReg_ = 12290 + 256*axisNo;
@@ -414,6 +474,13 @@ asynStatus ACRAxis::setPosition(double position)
   return status;
 }
 
+/** Polls the axis.
+  * This function reads the controller position, encoder position, the limit status, the moving status, 
+  * and the drive power-on status.  It does not current detect following error, etc. but this could be
+  * added.
+  * It calls setIntegerParam() and setDoubleParam() for each item that it polls,
+  * and then calls callParamCallbacks() at the end.
+  * \param[out] moving A flag that is set indicating that the axis is moving (1) or done (0). */
 asynStatus ACRAxis::poll(int *moving)
 { 
   int done;
