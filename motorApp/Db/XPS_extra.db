@@ -5,14 +5,14 @@ grecord(ao,"$(P)$(R)MIN_JERK_TIME") {
     field(PREC,"3")
     field(VAL,".01")
     field(DTYP, "asynFloat64")
-    field(OUT,"@asyn($(PORT),$(ADDR))MIN_JERK_TIME")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_MIN_JERK")
 }
 grecord(ao,"$(P)$(R)MAX_JERK_TIME") {
     field(DESC,"Max jerk time")
     field(PREC,"3")
     field(VAL,".03")
     field(DTYP, "asynFloat64")
-    field(OUT,"@asyn($(PORT),$(ADDR))MAX_JERK_TIME")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_MAX_JERK")
 }
 grecord(ai,"$(P)$(R)READBACK") {
     field(DESC,"Readback")
