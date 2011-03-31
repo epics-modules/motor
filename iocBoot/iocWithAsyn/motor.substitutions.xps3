@@ -1,0 +1,23 @@
+file "$(TOP)/db/basic_asyn_motor.db"
+{
+pattern
+{P,    N,  M,        DTYP, PORT, ADDR,     DESC,     EGU,  DIR, VELO, VBAS,   ACCL, BDST, BVEL, BACC,      MRES, PREC,   DHLM,      DLLM,  INIT}
+{IOC:, 1, m1, "asynMotor", XPS1,    0,  "scanX",      mm,  Neg,    5.,   1,   0.5,     0,    1,   .2,   0.000001,   5,    12.4,    -12.4, ""}
+{IOC:, 2, m2, "asynMotor", XPS1,    1,  "scanY",      mm,  Pos,    5.,   1,   0.5,     0,    1,   .2,   0.00002,    5,     2.4,     -2.4, ""}
+{IOC:, 3, m3, "asynMotor", XPS1,    2,  "theta", degrees,  Pos,   20.,   1,   0.5,     0,    1,   .2,   0.0005,     4,   150.0,   -150.0, ""}
+{IOC:, 4, m4, "asynMotor", XPS1,    3, "stageX",      mm,  Neg,    5.,   1,   1.0,     0,    1,   .5,   0.0005,     4,   100.0,   -100.0, ""}
+{IOC:, 5, m5, "asynMotor", XPS1,    4, "stageZ",      mm,  Neg,    5.,   1,   1.0,     0,    1,   .5,   0.0005,     4,   100.0,   -100.0, ""}
+{IOC:, 6, m6, "asynMotor", XPS1,    5, "stageY",      mm,  Pos,    5.,   1,   1.0,     0,    2,   .2,   0.0002,     4,   292.0,     -8.0, ""}
+}
+
+file "$(TOP)/db/XPS_extra.db"
+{
+pattern
+{P,     R,  PORT,  ADDR}
+{IOC:,  m1, XPS1,  0}
+{IOC:,  m2, XPS1   1}
+{IOC:,  m3, XPS1   2}
+{IOC:,  m4, XPS1   3}
+{IOC:,  m5, XPS1   4}
+{IOC:,  m6, XPS1   5}
+}
