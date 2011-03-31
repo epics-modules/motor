@@ -82,6 +82,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   * Extracts the function and axis number from pasynUser.
   * Sets the value in the parameter library.
   * If the function is motorStop_ then it calls pAxis->stop().
+  * If the function is motorUpdateStatus_ then it does a poll and forces a callback.
   * Calls any registered callbacks for this pasynUser->reason and address.  
   * Motor drivers will reimplement this function if they support 
   * controller-specific parameters on the asynInt32 interface. They should call this
@@ -95,6 +96,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   asynStatus status=asynSuccess;
   asynMotorAxis *pAxis;
   double accel;
+  int moving;
   static const char *functionName = "asynMotorController::writeInt32";
 
   pAxis = getAxis(pasynUser);
@@ -109,8 +111,10 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     status = pAxis->stop(accel);
   
   } else if (function == motorUpdateStatus_) {
-    // We don't implement this yet.  Is it needed?
-    //status = this->forceCallback)(pasynUser);
+    /* Do a poll, and then force a callback */
+    poll();
+    pAxis->poll(&moving);
+    pAxis->statusChanged_ = 1;
   }
 
   /* Do callbacks so higher layers see any changes */
