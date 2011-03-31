@@ -236,10 +236,10 @@ asynStatus XPSController::processDeferredMovesInGroup(char *groupName)
       /* Build position buffer.*/
       if (pAxis->deferredMove_) {
         positions[positions_index] = 
-          pAxis->deferredRelative_ ? (pAxis->currentPosition_ + pAxis->deferredPosition_) : pAxis->deferredPosition_;
+          pAxis->deferredRelative_ ? (pAxis->setpointPosition_ + pAxis->deferredPosition_) : pAxis->deferredPosition_;
       } else {
         positions[positions_index] = 
-          pAxis->deferredRelative_ ? 0 : pAxis->currentPosition_;
+          pAxis->deferredRelative_ ? 0 : pAxis->setpointPosition_;
       }
 
       /* Reset deferred flag. */
@@ -916,6 +916,7 @@ asynStatus XPSAxis::poll(int *moving)
   /* Set the axis done parameter */
   /* AND the done flag with the inverse of deferred_move.*/
   axisDone &= !deferredMove_;
+  *moving = axisDone ? 0 : 1;
   setIntegerParam(pC_->motorStatusDone_, axisDone);
   setIntegerParam(pC_->motorStatusHome_, (axisStatus_ == 11) ? 1 : 0);
   if ((axisStatus_ >= 0 && axisStatus_ <= 9) || 
@@ -944,15 +945,26 @@ asynStatus XPSAxis::poll(int *moving)
   status = GroupPositionCurrentGet(pollSocket_,
                                    positionerName_,
                                    1,
-                                   &currentPosition_);
+                                   &encoderPosition_);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
               "%s:%s: [%s,%d]: error calling GroupPositionCurrentGet status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, status);
     goto done;
   }
-  setDoubleParam(pC_->motorPosition_, (currentPosition_/stepSize_));
-  setDoubleParam(pC_->motorEncoderPosition_, (currentPosition_/stepSize_));
+  setDoubleParam(pC_->motorEncoderPosition_, (encoderPosition_/stepSize_));
+
+  status = GroupPositionSetpointGet(pollSocket_,
+                                   positionerName_,
+                                   1,
+                                   &setpointPosition_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupPositionSetpointGet status=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    goto done;
+  }
+  setDoubleParam(pC_->motorPosition_, (setpointPosition_/stepSize_));
 
   status = PositionerErrorGet(pollSocket_,
                               positionerName_,

@@ -61,7 +61,8 @@ private:
 
   int pollSocket_;
   int moveSocket_;
-  double currentPosition_;
+  double setpointPosition_;
+  double encoderPosition_;
   double currentVelocity_;
   double velocity_;
   double accel_;
