@@ -48,8 +48,8 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
   ACRAxis *pAxis;
   static const char *functionName = "ACRController";
 
-  idlePollPeriod_ = idlePollPeriod/1000.;
-  movingPollPeriod_ = movingPollPeriod/1000.;
+  idlePollPeriod_ = idlePollPeriod;
+  movingPollPeriod_ = movingPollPeriod;
   binaryInReg_  = 4096;
   binaryOutReg_ = 4097;
   
@@ -80,20 +80,9 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
   readBinaryIO();
   // Set the output=output readback so bi records reflect current state
   setUIntDigitalParam(0, ACRBinaryOut_, binaryOutRBV_, 0xFFFFFFFF);
+  // Create the axis objects
   for (axis=0; axis<numAxes; axis++) {
-    pAxis  = new ACRAxis(this, axis);
-    // Get the number of pulses per unit on this axis
-    sprintf(outString_, "%s PPU", pAxis->axisName_);
-    status = writeReadController();
-    if (status) {
-      setIntegerParam(axis, motorStatusProblem_, 1);
-    } else {
-      pAxis->pulsesPerUnit_ = atof(inString_);
-      // We assume servo motor with encoder for now
-      setIntegerParam(axis, motorStatusGainSupport_, 1);
-      setIntegerParam(axis, motorStatusHasEncoder_, 1);
-    }
-    callParamCallbacks(axis);
+    pAxis = new ACRAxis(this, axis);
   }
 
   startPoller(movingPollPeriod/1000., idlePollPeriod/1000., 2);
@@ -252,7 +241,7 @@ asynStatus ACRController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   }
   
   /* Do callbacks so higher layers see any changes */
-  callParamCallbacks(pAxis->axisNo_);
+  pAxis->callParamCallbacks();
   if (status) 
     asynPrint(pasynUser, ASYN_TRACE_ERROR, 
         "%s:%s: error, status=%d function=%d, value=%f\n", 
@@ -387,11 +376,25 @@ ACRAxis::ACRAxis(ACRController *pC, int axisNo)
   : asynMotorAxis(pC, axisNo),
     pC_(pC)
 {
+  asynStatus status;
+  
   sprintf(axisName_, "AXIS%d", axisNo);
   encoderPositionReg_ = 12290 + 256*axisNo;
   theoryPositionReg_  = 12294 + 256*axisNo;
   limitsReg_          = 4600  + axisNo;
   flagsReg_           = 4120  + axisNo;
+  // Get the number of pulses per unit on this axis
+  sprintf(pC->outString_, "%s PPU", axisName_);
+  status = pC->writeReadController();
+  if (status) {
+    setIntegerParam(pC->motorStatusProblem_, 1);
+  } else {
+    pulsesPerUnit_ = atof(pC->inString_);
+    // We assume servo motor with encoder for now
+    setIntegerParam(pC->motorStatusGainSupport_, 1);
+    setIntegerParam(pC->motorStatusHasEncoder_, 1);
+  }
+  callParamCallbacks();
 }
 
 asynStatus ACRAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
