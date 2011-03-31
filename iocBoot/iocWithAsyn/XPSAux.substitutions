@@ -1,4 +1,4 @@
-file "$(MOTOR)/motorApp/Db/XPSAuxLi.db"
+file "$(TOP)/db/XPSAuxLi.db"
 {
 pattern
 {P,     R,          PORT,       CHAN,   SCAN}
@@ -8,7 +8,7 @@ pattern
 {IOC:,  XPSAux4Li,  XPS_AUX1,   3,      "I/O Intr"}
 }
 
-file "$(MOTOR)/motorApp/Db/XPSAuxBi.db"
+file "$(TOP)/db/XPSAuxBi.db"
 {
 pattern
 {P,    R,           PORT,     CHAN,  MASK,     SCAN}
@@ -50,7 +50,7 @@ pattern
 {IOC:, XPSAux4Bi15, XPS_AUX1, 3,     0x008000, "I/O Intr"}
 }
 
-file "$(MOTOR)/motorApp/Db/XPSAuxBo.db"
+file "$(TOP)/db/XPSAuxBo.db"
 {
 pattern
 {P,    R,           PORT,     CHAN, MASK}
@@ -86,7 +86,7 @@ pattern
 {IOC:, XPSAux4Bo15, XPS_AUX1, 2,    0x008000}
 }
 
-file "$(MOTOR)/motorApp/Db/XPSAuxLo.db"
+file "$(TOP)/db/XPSAuxLo.db"
 {
 pattern
 {P,     R,         PORT,     CHAN}
@@ -96,7 +96,7 @@ pattern
 }
 
 
-file "$(MOTOR)/motorApp/Db/XPSAuxAi.db"
+file "$(TOP)/db/XPSAuxAi.db"
 {
 pattern
 {P,    R,          PORT,     CHAN, LOPR,   HOPR,  PREC, SCAN}
@@ -106,7 +106,7 @@ pattern
 {IOC:, XPSAuxAi3,  XPS_AUX1, 3,    -10.0,  10.0,  4,    "1 second"}
 }
 
-file "$(MOTOR)/motorApp/Db/XPSAuxAo.db"
+file "$(TOP)/db/XPSAuxAo.db"
 {
 pattern
 {P,    R,          PORT,     CHAN, DRVL,   LOPR,   DRVH,  HOPR,  PREC}
