@@ -575,10 +575,14 @@ WARN_LOGFILE           =
 
 INPUT                  = ../../asyn/asyn/miscellaneous/asynPortDriver.cpp \
                          ../../asyn/asyn/miscellaneous/asynPortDriver.h \
-                         ../motorApp/MotorSrc \
-                         ../motorApp/ACRSrc \
-                         ../motorApp/NewportSrc \
-                         ../motorApp/MotorSimSrc  \
+                         ../motorApp/MotorSrc/asynMotorDriver.h \
+                         ../motorApp/MotorSrc/asynMotorDriver.cpp \
+                         ../motorApp/ACRSrc/ACRMotorDriver.h \
+                         ../motorApp/ACRSrc/ACRMotorDriver.cpp \
+                         ../motorApp/NewportSrc/XPSMotorDriver.h \
+                         ../motorApp/NewportSrc/XPSMotorDriver.cpp \
+                         ../motorApp/MotorSimSrc/motorSimDriver.h  \
+                         ../motorApp/MotorSimSrc/motorSimDriver.cpp \
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
