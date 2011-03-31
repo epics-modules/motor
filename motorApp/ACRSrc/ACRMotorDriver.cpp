@@ -226,7 +226,6 @@ asynStatus ACRController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   * Extracts the function and axis number from pasynUser.
   * Sets the value in the parameter library.
   * If the function is ACRJerk_ it sets the jerk value in the controller.
-  * then it calls pAxis->move(), pAxis->moveVelocity(), pAxis->home(), or pAxis->setPosition().
   * Calls any registered callbacks for this pasynUser->reason and address.  
   * For all other functions it calls asynMotorController::writeFloat64.
   * \param[in] pasynUser asynUser structure that encodes the reason and address.
