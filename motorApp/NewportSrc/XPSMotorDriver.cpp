@@ -163,9 +163,8 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   FirmwareVersionGet(pollSocket_, firmwareVersion_);
   
   /* Create the poller thread for this controller
-   * NOTE: at this point the axis objects don't yet exist, so the poller needs
-   * to tolerate this */
-  startPoller(movingPollPeriod, idlePollPeriod);
+   * NOTE: at this point the axis objects don't yet exist, but the poller tolerates this */
+  startPoller(movingPollPeriod, idlePollPeriod, 10);
 }
 
 void XPSController::report(FILE *fp, int level)
@@ -483,15 +482,8 @@ XPSAxis* XPSController::getAxis(int axisNo)
   return static_cast<XPSAxis*>(asynMotorController::getAxis(axisNo));
 }
 
-asynStatus XPSController::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger)
-{
-  return asynError;
-}
 
-asynStatus XPSController::triggerProfile(asynUser *pasynUser)
-{
-  return asynError;
-}
+// These are the XPSAxis:: methods
 
 XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, double stepSize)
   :   asynMotorAxis(pC, axisNo),

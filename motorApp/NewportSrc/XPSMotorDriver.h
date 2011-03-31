@@ -92,8 +92,6 @@ public:
   void report(FILE *fp, int level);
   XPSAxis* getAxis(asynUser *pasynUser);
   XPSAxis* getAxis(int axisNo);
-  asynStatus profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger);
-  asynStatus triggerProfile(asynUser *pasynUser);
 
   /* These are the methods that are new to this class */
   /* Deferred moves functions.*/
