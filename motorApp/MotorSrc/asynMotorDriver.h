@@ -105,7 +105,7 @@ public:
     * This function should read the controller position, encoder position, and as many of the motorStatus flags
     * as the hardware supports.  It should call setIntegerParam() and setDoubleParam() for each item that it polls,
     * and then call callParamCallbacks() at the end.
-    * \param[in] moving A flag that the function must set indicating that the axis is moving (1) or done (0). */
+    * \param[out] moving A flag that the function must set indicating that the axis is moving (1) or done (0). */
   virtual asynStatus poll(int *moving) = 0;
 
   /** Set the current position of the motor.

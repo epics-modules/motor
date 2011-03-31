@@ -14,37 +14,6 @@
 static const char *driverName = "asynMotorDriver";
 static void asynMotorPollerC(void *drvPvt);
 
-/** Creates a new asynMotorAxis object.
-  * \param[in] pC Pointer to the asynMotorController to which this axis belongs. 
-  * \param[in] axisNo Index number of this axis, range 0 to pC->numAxes_-1.
-  * 
-  * Checks that pC is not null, and that axisNo is in the valid range.
-  * Sets a pointer to itself in pC->pAxes[axisNo_].
-  * Connects pasynUser_ to this asyn port and axisNo.
-  */
-asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
-  : pC_(pC), axisNo_(axisNo), statusChanged_(1)
-{
-  static const char *functionName = "asynMotorAxis::asynMotorAxis";
-
-  if (!pC) {
-    printf("%s:%s: Error, controller is NULL\n",
-    driverName, functionName);
-    return;
-  }
-  if ((axisNo < 0) || (axisNo >= pC->numAxes_)) {
-    printf("%s:%s: Error, axis=%d is not in range 0 to %d\n",
-    driverName, functionName, axisNo, pC->numAxes_-1);
-    return;
-  }
-  pC->pAxes_[axisNo] = this;
-  status_.status = 0;
-  
-  // Create the asynUser, connect to this axis
-  pasynUser_ = pasynManager->createAsynUser(NULL, NULL);
-  pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
-}
-
 /** Creates a new asynMotorController object.
   * All of the arguments are simply passed to the constructor for the asynPortDriver base class. 
   * After calling the base class constructor this method creates the motor parameters
@@ -118,7 +87,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   * controller-specific parameters on the asynInt32 interface. They should call this
   * base class method for any parameters that are not controller-specific.
   * \param[in] pasynUser asynUser structure that encodes the reason and address.
-  * \param[in] value Value to write. */
+  * \param[in] value     Value to write. */
 asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   int axis;
@@ -420,6 +389,40 @@ void asynMotorController::asynMotorPoller()
       timeout = idlePollPeriod_;
     }
   }
+}
+
+
+// asynMotorAxis methods
+
+/** Creates a new asynMotorAxis object.
+  * \param[in] pC Pointer to the asynMotorController to which this axis belongs. 
+  * \param[in] axisNo Index number of this axis, range 0 to pC->numAxes_-1.
+  * 
+  * Checks that pC is not null, and that axisNo is in the valid range.
+  * Sets a pointer to itself in pC->pAxes[axisNo_].
+  * Connects pasynUser_ to this asyn port and axisNo.
+  */
+asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
+  : pC_(pC), axisNo_(axisNo), statusChanged_(1)
+{
+  static const char *functionName = "asynMotorAxis::asynMotorAxis";
+
+  if (!pC) {
+    printf("%s:%s: Error, controller is NULL\n",
+    driverName, functionName);
+    return;
+  }
+  if ((axisNo < 0) || (axisNo >= pC->numAxes_)) {
+    printf("%s:%s: Error, axis=%d is not in range 0 to %d\n",
+    driverName, functionName, axisNo, pC->numAxes_-1);
+    return;
+  }
+  pC->pAxes_[axisNo] = this;
+  status_.status = 0;
+  
+  // Create the asynUser, connect to this axis
+  pasynUser_ = pasynManager->createAsynUser(NULL, NULL);
+  pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
 }
 
 
