@@ -1,0 +1,1111 @@
+/*
+FILENAME...     XPSMotorDriver.cpp
+USAGE...        Newport XPS EPICS asyn motor device driver
+
+Version:        $Revision: 19717 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2009-12-09 10:21:24 -0600 (Wed, 09 Dec 2009) $
+HeadURL:        $URL: https://subversion.xor.aps.anl.gov/synApps/trunk/support/motor/vstub/motorApp/NewportSrc/XPSMotorDriver.cpp $
+*/
+
+/*
+Original Author: Mark Rivers
+*/
+
+/*
+Copyright (c) 2005 University of Chicago and the Regents of the University of 
+California. All rights reserved.
+
+synApps is distributed subject to the following license conditions:
+SOFTWARE LICENSE AGREEMENT
+Software: synApps 
+Versions: Release 4-5 and higher.
+
+   1. The "Software", below, refers to synApps (in either source code, or 
+      binary form and accompanying documentation). Each licensee is addressed 
+          as "you" or "Licensee."
+
+   2. The copyright holders shown above and their third-party licensors hereby 
+      grant Licensee a royalty-free nonexclusive license, subject to the 
+          limitations stated herein and U.S. Government license rights.
+
+   3. You may modify and make a copy or copies of the Software for use within 
+      your organization, if you meet the following conditions:
+         1. Copies in source code must include the copyright notice and this 
+                    Software License Agreement.
+         2. Copies in binary form must include the copyright notice and this 
+                    Software License Agreement in the documentation and/or other 
+                        materials provided with the copy.
+
+   4. You may modify a copy or copies of the Software or any portion of it, thus
+      forming a work based on the Software, and distribute copies of such work
+      outside your organization, if you meet all of the following conditions:
+         1. Copies in source code must include the copyright notice and this 
+                    Software License Agreement;
+         2. Copies in binary form must include the copyright notice and this 
+                    Software License Agreement in the documentation and/or other 
+                        materials provided with the copy;
+         3. Modified copies and works based on the Software must carry 
+                    prominent notices stating that you changed specified portions of 
+                        the Software.
+
+   5. Portions of the Software resulted from work developed under a 
+      U.S. Government contract and are subject to the following license: 
+          the Government is granted for itself and others acting on its behalf a 
+          paid-up, nonexclusive, irrevocable worldwide license in this computer 
+          software to reproduce, prepare derivative works, and perform publicly and 
+          display publicly.
+
+   6. WARRANTY DISCLAIMER. THE SOFTWARE IS SUPPLIED "AS IS" WITHOUT WARRANTY OF 
+      ANY KIND. THE COPYRIGHT HOLDERS, THEIR THIRD PARTY LICENSORS, THE UNITED 
+          STATES, THE UNITED STATES DEPARTMENT OF ENERGY, AND THEIR EMPLOYEES: (1) 
+          DISCLAIM ANY WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+          ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+          PURPOSE, TITLE OR NON-INFRINGEMENT, (2) DO NOT ASSUME ANY LEGAL LIABILITY 
+          OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS, OR USEFULNESS OF THE 
+          SOFTWARE, (3) DO NOT REPRESENT THAT USE OF THE SOFTWARE WOULD NOT 
+          INFRINGE PRIVATELY OWNED RIGHTS, (4) DO NOT WARRANT THAT THE SOFTWARE WILL 
+          FUNCTION UNINTERRUPTED, THAT IT IS ERROR-FREE OR THAT ANY ERRORS WILL BE 
+          CORRECTED.
+
+   7. LIMITATION OF LIABILITY. IN NO EVENT WILL THE COPYRIGHT HOLDERS, THEIR 
+      THIRD PARTY LICENSORS, THE UNITED STATES, THE UNITED STATES DEPARTMENT OF 
+          ENERGY, OR THEIR EMPLOYEES: BE LIABLE FOR ANY INDIRECT, INCIDENTAL, 
+          CONSEQUENTIAL, SPECIAL OR PUNITIVE DAMAGES OF ANY KIND OR NATURE, 
+          INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS OR LOSS OF DATA, FOR ANY 
+          REASON WHATSOEVER, WHETHER SUCH LIABILITY IS ASSERTED ON THE BASIS OF 
+          CONTRACT, TORT (INCLUDING NEGLIGENCE OR STRICT LIABILITY), OR OTHERWISE, 
+          EVEN IF ANY OF SAID PARTIES HAS BEEN WARNED OF THE POSSIBILITY OF SUCH 
+          LOSS OR DAMAGES.
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+
+#include <epicsTime.h>
+#include <epicsThread.h>
+#include <epicsExport.h>
+#include <epicsString.h>
+#include <iocsh.h>
+
+#include "XPSController.h"
+#include "XPS_C8_drivers.h"
+
+static const char *driverName = "XPSMotorDriver";
+
+typedef enum { none, positionMove, velocityMove, homeReverseMove, homeForwardsMove } moveType;
+
+/** Struct for a list of strings describing the different corrector types possible on the XPS.*/
+typedef struct {
+  char *PIPosition;
+  char *PIDFFVelocity;
+  char *PIDFFAcceleration;
+  char *PIDDualFFVoltage;
+  char *NoCorrector;
+} CorrectorTypes_t;
+
+const static CorrectorTypes_t CorrectorTypes = { 
+  "PositionerCorrectorPIPosition",
+  "PositionerCorrectorPIDFFVelocity",
+  "PositionerCorrectorPIDFFAcceleration",
+  "PositionerCorrectorPIDDualFFVoltage",
+  "NoCorrector"
+};
+
+/** This is controlled via the XPSEnableSetPosition function (available via the IOC shell). */ 
+static int doSetPosition = 1;
+
+/**
+ * Parameter to control the sleep time used when setting position. 
+ * A function called XPSSetPosSleepTime(int) (millisec parameter) 
+ * is available in the IOC shell to control this.
+ */
+static double setPosSleepTime = 0.5;
+
+/** Deadband to use for the velocity comparison with zero. */
+#define XPS_VELOCITY_DEADBAND 0.0000001
+
+#define XPS_MAX_AXES 8
+#define XPSC8_END_OF_RUN_MINUS  0x80000100
+#define XPSC8_END_OF_RUN_PLUS   0x80000200
+
+#define TCP_TIMEOUT 2.0
+#define MAX(a,b) ((a)>(b)? (a): (b))
+#define MIN(a,b) ((a)<(b)? (a): (b))
+
+// These are the XPSAxis:: methods
+
+XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, double stepSize)
+  :   asynMotorAxis(pC, axisNo),
+      pC_(pC)
+{
+  static const char *functionName = "XPSAxis::XPSAxis";
+  char *index;
+  int status;
+  double minJerkTime, maxJerkTime;
+
+  moveSocket_ = TCP_ConnectToServer(pC_->IPAddress_, pC->IPPort_, TCP_TIMEOUT);
+  if (moveSocket_ < 0) {
+    printf("%s:%s: error calling TCP_ConnectToServer for move socket\n",
+           driverName, functionName);
+  }
+  /* Set the poll rate on the moveSocket to a negative number, which means that SendAndReceive should do only a write, no read */
+  TCP_SetTimeout(moveSocket_, -0.1);
+  pollSocket_ = pC_->pollSocket_;
+
+  setIntegerParam(pC_->motorStatusGainSupport_, 1);
+  setIntegerParam(pC_->motorStatusHasEncoder_, 1);
+  setDoubleParam(pC_->motorPgain_, xpsCorrectorInfo_.KP);
+  setDoubleParam(pC_->motorIgain_, xpsCorrectorInfo_.KI);
+  setDoubleParam(pC_->motorDgain_, xpsCorrectorInfo_.KD);
+  callParamCallbacks();
+  /* Initialise deferred move flags. */
+  deferredRelative_ = 0;
+  deferredPosition_ = 0;
+  /* Disable deferred move for the axis. Should not cause move of this axis
+     if other axes in same group do deferred move. */
+  deferredMove_ = 0; 
+
+  index = (char *)strchr(positionerName, '.');
+  if (index == NULL) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: positionerName must be of form group.positioner = %s\n",
+                driverName, functionName, positionerName);
+  }
+  positionerName_ = epicsStrDup(positionerName);
+  groupName_ = epicsStrDup(positionerName);
+  index = strchr(groupName_, '.');
+  if (index != NULL) *index = '\0';  /* Terminate group name at place of '.' */
+
+  stepSize_ = stepSize;
+  /* Read some information from the controller for this axis */
+  status = PositionerSGammaParametersGet(pollSocket_,
+                                         positionerName_,
+                                         &velocity_,
+                                         &accel_,
+                                         &minJerkTime,
+                                         &maxJerkTime);
+   setDoubleParam(pC_->XPSMinJerk_, minJerkTime);
+   setDoubleParam(pC_->XPSMaxJerk_, maxJerkTime);
+
+  /* NOTE: this will require PID to be allowed to be set greater than 1 in motor record. */
+  /* And we need to implement this in Asyn layer. */
+  getPID();
+
+  /* Wake up the poller task which will make it do a poll, 
+   * updating values for this axis to use the new resolution (stepSize_) */   
+  pC_->wakeupPoller();
+
+}
+
+asynStatus XPSAxis::move(double position, int relative, double min_velocity, double max_velocity, double acceleration)
+{
+  char errorString[100];
+  double deviceUnits;
+  int status;
+  double minJerk, maxJerk;
+  static const char *functionName = "XPSAxis::move";
+
+  pC_->getDoubleParam(axisNo_, pC_->XPSMinJerk_, &minJerk); 
+  pC_->getDoubleParam(axisNo_, pC_->XPSMaxJerk_, &maxJerk); 
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
+            "%s:%s: Set XPS %s, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f, minJerk=%f, maxJerk=%f\n",
+            driverName, functionName, pC_->portName, axisNo_, position, min_velocity, max_velocity, acceleration, minJerk, maxJerk);
+
+  /* Look at the last poll value of the positioner status.  If it is disabled, then enable it */
+  if (axisStatus_ >= 20 && axisStatus_ <= 36) {
+    status = GroupMotionEnable(pollSocket_, groupName_);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: motorAxisMove[%s,%d]: error performing GroupMotionEnable %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
+      return asynError;
+    }
+  }
+  status = PositionerSGammaParametersSet(pollSocket_,
+                                         positionerName_, 
+                                         max_velocity*stepSize_,
+                                         acceleration*stepSize_,
+                                         minJerk,
+                                         maxJerk);
+  if (status != 0) {
+    ErrorStringGet(pollSocket_, status, errorString);
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s: Error performing PositionerSGammaParametersSet[%s,%d] %d: %s\n",
+              driverName, functionName, pC_->portName, axisNo_, status, errorString);
+    return asynError;
+  }
+
+  deviceUnits = position * stepSize_;
+  if (relative) {
+    if (pC_->movesDeferred_ == 0) {
+      status = GroupMoveRelative(moveSocket_,
+                                 positionerName_,
+                                 1,
+                                 &deviceUnits); 
+      if (status != 0 && status != -27) {
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                  "%s:%s: Error performing GroupMoveRelative[%s,%d] %d\n",
+                  driverName, functionName, pC_->portName, axisNo_, status);
+        /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
+        return asynError;
+      }
+    } else {
+      deferredPosition_ = deviceUnits;
+      deferredMove_ = 1;
+      deferredRelative_ = relative;
+    }
+  } else {
+    if (pC_->movesDeferred_ == 0) {
+      status = GroupMoveAbsolute(moveSocket_,
+                                 positionerName_,
+                                 1,
+                                 &deviceUnits); 
+      if (status != 0 && status != -27) {
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                  "%s:%s: Error performing GroupMoveAbsolute[%s,%d] %d\n",
+                  driverName, functionName, pC_->portName, axisNo_, status);
+        /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
+        return asynError;
+      }
+    } else {
+      deferredPosition_ = deviceUnits;
+      deferredMove_ = 1;
+      deferredRelative_ = relative;
+    }
+  }
+
+  return asynSuccess;
+}
+
+asynStatus XPSAxis::home(double min_velocity, double max_velocity, double acceleration, int forwards)
+{
+  int status;
+  int groupStatus;
+  char errorBuffer[100];
+  static const char *functionName = "XPSAxis::home";
+
+  status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
+  /* The XPS won't allow a home command if the group is in the Ready state
+   * If the group is Ready, then make it not Ready  */
+  if (groupStatus >= 10 && groupStatus <= 18) {
+    status = GroupKill(pollSocket_, groupName_);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: [%s,%d]: error calling GroupKill error=%s\n",
+                driverName, functionName, pC_->portName, axisNo_, getXPSError(status, errorBuffer));
+      return asynError;
+    }
+  }
+  status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
+  /* If axis not initialized, then initialize it */
+  if (groupStatus >= 0 && groupStatus <= 9) {
+    status = GroupInitialize(pollSocket_, groupName_);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: [%s,%d]: error calling GroupInitialize error=%s\n",
+                driverName, functionName, pC_->portName, axisNo_, getXPSError(status, errorBuffer));
+      return asynError;
+    }
+  }
+  status = GroupHomeSearch(moveSocket_, groupName_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupHomeSearch error=%s\n",
+              driverName, functionName, pC_->portName, axisNo_, getXPSError(status, errorBuffer));
+    return asynError;
+  }
+
+  return asynSuccess;
+}
+
+
+asynStatus XPSAxis::moveVelocity(double min_velocity, double max_velocity, double acceleration)
+{
+  int status;
+  double deviceVelocity, deviceAcceleration;
+  static const char *functionName = "XPSAxis::moveVelocity";
+
+  status = GroupJogModeEnable(pollSocket_, groupName_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupJogModeEnable error=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    return asynError;
+  }
+  deviceVelocity = max_velocity * stepSize_;
+  deviceAcceleration = acceleration * stepSize_;
+  status = GroupJogParametersSet(moveSocket_, positionerName_, 1, &deviceVelocity, &deviceAcceleration);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupJogParametersSet error=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    return asynError;
+  }
+  return asynSuccess;
+}
+
+asynStatus XPSAxis::setPosition(double position)
+{
+  XPSAxis *pAxis;
+  int status=0;
+  int axisIndex;
+  int axisIndexInGrp;
+  int axesInGroup;
+  double positions[XPS_MAX_AXES];
+  static const char *functionName = "XPSAxis::setPosition";
+
+
+  /* If the user has disabled setting the controller position, skip this.*/
+  if (!doSetPosition) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: XPS set position is disabled. Enable it using XPSEnableSetPosition(1).\n",
+               driverName, functionName);
+    return asynError;
+  }
+  /* Test if this axis is in a XPS group.*/
+  axesInGroup = isInGroup();
+  if (axesInGroup>1) {
+    /* We are in a group, so we need to read the positions of all the axes in the group,
+       kill the group, and set all the positions in the group using referencing mode.
+       We read the positions seperately, rather than in one command, because we can't assume
+       that the ordering is the same in the XPS as in the driver.*/
+    for (axisIndex=0; axisIndex<pC_->numAxes_; axisIndex++) {
+      pAxis = pC_->getAxis(axisIndex);
+      status = GroupPositionCurrentGet(pollSocket_, 
+                                       pAxis->positionerName_, 
+                                       1, 
+                                       &positions[axisIndex]);
+    }
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: Error performing GroupPositionCurrentGet(%s,%d). Aborting set position. XPS API Error: %d.\n", 
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    } 
+    status = GroupKill(pollSocket_, groupName_);
+    status = GroupInitialize(pollSocket_, groupName_);
+    if (status != 0) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: Error performing GroupKill/GroupInitialize(%s,%d). Aborting set position. XPS API Error: %d.\n", 
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+    /* Wait after axis initialisation (we don't want to set position immediately after
+     * initialisation because the stage can oscillate slightly). */
+    epicsThreadSleep(setPosSleepTime);
+
+    status = GroupReferencingStart(pollSocket_, groupName_);
+    axisIndexInGrp = 0;
+    /* Set positions for all axes in the group using the cached values. */
+    for (axisIndex=0; axisIndex<pC_->numAxes_; axisIndex++) {
+      pAxis = pC_->getAxis(axisIndex);
+      if (!strcmp(groupName_, pAxis->groupName_)) {
+        /* But skip the current axis, because we do this just after the loop.*/
+        if (strcmp(positionerName_, pAxis->positionerName_)) {
+          status = GroupReferencingActionExecute(pollSocket_, 
+                                                 pAxis->positionerName_, 
+                                                 "SetPosition", 
+                                                 "None", 
+                                                 positions[axisIndexInGrp]);
+        }
+        ++axisIndexInGrp;
+      }
+    }
+    /* Now reset the position of the axis we are interested in, using the argument passed into this function.*/
+    status = GroupReferencingActionExecute(pollSocket_, 
+                                           positionerName_, 
+                                           "SetPosition", 
+                                           "None", 
+                                           position*(stepSize_));
+    /* Stop referencing, then we are homed on all axes in group.*/
+    status = GroupReferencingStop(pollSocket_, 
+                                  groupName_);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%:s%s: Error performing referencing set position (%s,%d). XPS API Error: %d.", 
+                driverName, functionName, pC_->portName, axisNo_, status);
+    }
+  } else {
+    /* We are not in a group, so we just need to use the XPS
+       referencing mode to set the position.*/
+    status = GroupKill(pollSocket_, groupName_);
+    status = GroupInitialize(pollSocket_, groupName_);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: Error performing GroupKill/GroupInitialize(%s,%d). XPS API Error: %d. Aborting set position.\n", 
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+    /* Wait after axis initialisation (we don't want to set position immediately after
+       initialisation because the stage can oscillate slightly).*/
+    epicsThreadSleep(setPosSleepTime);
+
+    status = GroupReferencingStart(pollSocket_, 
+                                  groupName_);
+    status = GroupReferencingActionExecute(pollSocket_, 
+                                           positionerName_, 
+                                           "SetPosition", 
+                                           "None", 
+                                           position*(stepSize_));
+    status = GroupReferencingStop(pollSocket_, 
+                                  groupName_);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error performing referencing set position (%s,%d). XPS API Error: %d.", 
+                driverName, functionName, pC_->portName, axisNo_, status);
+    }
+  }
+  return asynSuccess;
+} 
+
+asynStatus XPSAxis::stop(double acceleration)
+{
+  int status;
+  double deviceVelocity=0.;
+  double deviceAcceleration;
+  static const char *functionName = "stopAxis";
+
+  /* We need to read the status, because a jog is stopped differently from a move */ 
+  status = GroupStatusGet(pollSocket_, groupName_, &axisStatus_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupStatusGet status=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    return asynError;
+  }
+  if (axisStatus_ == 47) {
+    deviceAcceleration = acceleration * stepSize_;
+    status = GroupJogParametersSet(moveSocket_, positionerName_, 1, &deviceVelocity, &deviceAcceleration);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: [%s,%d]: error calling GroupJogParametersSet status=%d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+  }
+  
+  if (axisStatus_ == 44) {
+    status = GroupMoveAbort(moveSocket_, groupName_);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: [%s,%d]: error calling GroupMoveAbort status=%d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+  }
+
+  /* Clear defer move flag for this axis. */
+  deferredMove_ = 0;
+
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+            "%s:%s: XPS %s, axis %d stop with accel=%f\n",
+            driverName, functionName, axisNo_, acceleration);
+
+  return asynSuccess;
+}
+
+asynStatus XPSAxis::poll(int *moving)
+{
+  int status;
+  int axisDone;
+  double actualVelocity, theoryVelocity, acceleration;
+  static const char *functionName = "XPSAxis::poll";
+
+  status = GroupStatusGet(pollSocket_, 
+                          groupName_, 
+                          &axisStatus_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupStatusGet status=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    goto done;
+  }
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+            "%s:%s: [%s,%d]: %s axisStatus=%d\n",
+            driverName, functionName, pC_->portName, axisNo_, positionerName_, axisStatus_);
+  /* Set done flag by default */
+  axisDone = 1;
+  if (axisStatus_ >= 10 && axisStatus_ <= 18) {
+    /* These states mean ready from move/home/jog etc */
+  }
+  if (axisStatus_ >= 43 && axisStatus_ <= 48) {
+    /* These states mean it is moving/homeing/jogging etc*/
+    axisDone = 0;
+    if (axisStatus_ == 47) {
+      /* We are jogging.  When the velocity gets back to 0 disable jogging */
+      status = GroupJogParametersGet(pollSocket_, positionerName_, 1, &theoryVelocity, &acceleration);
+      status = GroupJogCurrentGet(pollSocket_, positionerName_, 1, &actualVelocity, &acceleration);
+      if (status) {
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                  "%s:%s: [%s,%d]: error calling GroupJogCurrentGet status=%d\n",
+                  driverName, functionName, pC_->portName, axisNo_, status);
+        goto done;
+      }
+      if (actualVelocity == 0. && theoryVelocity == 0.) {
+        status = GroupJogModeDisable(pollSocket_, groupName_);
+        if (status) {
+          asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                    "%s:%s: [%s,%d]: error calling GroupJogModeDisable status=%d\n",
+                    driverName, functionName, pC_->portName, axisNo_, status);
+          /* In this mode must do a group kill? */
+          status = GroupKill(pollSocket_, groupName_);
+          asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                    "%s:%s: [%s,%d]: called GroupKill!\n",
+                    driverName, functionName, pC_->portName, axisNo_);
+          goto done;
+        }
+      } 
+    }
+  }
+  /* Set the status */
+  setIntegerParam(pC_->XPSStatus_, axisStatus_);
+  /* Set the axis done parameter */
+  /* AND the done flag with the inverse of deferred_move.*/
+  axisDone &= !deferredMove_;
+  *moving = axisDone ? 0 : 1;
+  setIntegerParam(pC_->motorStatusDone_, axisDone);
+  setIntegerParam(pC_->motorStatusHome_, (axisStatus_ == 11) ? 1 : 0);
+  if ((axisStatus_ >= 0 && axisStatus_ <= 9) || 
+    (axisStatus_ >= 20 && axisStatus_ <= 42)) {
+    /* Not initialized, homed or disabled */
+    asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+              "%s:%s: [%s,%d]: in bad state %d\n",
+              driverName, functionName, pC_->portName, axisNo_, axisStatus_);
+    /* setIntegerParam(axis, motorStatusHighHardLimit, 1);
+     * setIntegerParam(axis, motorStatusLowHardLimit,  1);
+     */
+  }
+
+  /* Test for following error, and set appropriate param. */
+  if ((axisStatus_ == 21 || axisStatus_ == 22) ||
+      (axisStatus_ >= 24 && axisStatus_ <= 26) ||
+      (axisStatus_ == 28 || axisStatus_ == 35)) {
+      asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+                "%s:%s: [%s,%d]: in following error. XPS State Code: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, axisStatus_);
+    setIntegerParam(pC_->motorStatusFollowingError_, 1);
+  } else {
+    setIntegerParam(pC_->motorStatusFollowingError_, 0);
+  }
+
+  status = GroupPositionCurrentGet(pollSocket_,
+                                   positionerName_,
+                                   1,
+                                   &encoderPosition_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupPositionCurrentGet status=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    goto done;
+  }
+  setDoubleParam(pC_->motorEncoderPosition_, (encoderPosition_/stepSize_));
+
+  status = GroupPositionSetpointGet(pollSocket_,
+                                   positionerName_,
+                                   1,
+                                   &setpointPosition_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupPositionSetpointGet status=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    goto done;
+  }
+  setDoubleParam(pC_->motorPosition_, (setpointPosition_/stepSize_));
+
+  status = PositionerErrorGet(pollSocket_,
+                              positionerName_,
+                              &positionerError_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling PositionerErrorGet status=%d\n",
+               driverName, functionName, pC_->portName, axisNo_, status);
+    goto done;
+  }
+  /* These are hard limits */
+  if (positionerError_ & XPSC8_END_OF_RUN_PLUS) {
+    setIntegerParam(pC_->motorStatusHighLimit_, 1);
+  } else {
+    setIntegerParam(pC_->motorStatusHighLimit_, 0);
+  }
+  if (positionerError_ & XPSC8_END_OF_RUN_MINUS) {
+    setIntegerParam(pC_->motorStatusLowLimit_, 1);
+  } else {
+    setIntegerParam(pC_->motorStatusLowLimit_, 0);
+  }
+
+  /* Read the current velocity and use it set motor direction and moving flag. */
+  status = GroupVelocityCurrentGet(pollSocket_,
+                                   positionerName_,
+                                   1,
+                                   &currentVelocity_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling GroupPositionVelocityGet status=%d\n",
+              driverName, functionName, pC_->portName, axisNo_,  status);
+    goto done;
+  }
+  setIntegerParam(pC_->motorStatusDirection_, (currentVelocity_ > XPS_VELOCITY_DEADBAND));
+  setIntegerParam(pC_->motorStatusMoving_,    (fabs(currentVelocity_) > XPS_VELOCITY_DEADBAND));
+
+  done:
+  setIntegerParam(pC_->motorStatusCommsError_, status ? 1 : 0);
+  callParamCallbacks();
+  return status ? asynError : asynSuccess;
+}
+
+char *XPSAxis::getXPSError(int status, char *buffer)
+{
+    status = ErrorStringGet(this->pollSocket_, status, buffer);
+    return buffer;
+}
+
+/**
+ * Test if axis is configured as an XPS single axis or a group.
+ * This is done by comparing cached group names.
+ * @param pAxis Axis struct AXIS_HDL
+ * @return 1 if in group single group, or return the number of axes in the group.
+ */
+int XPSAxis::isInGroup()
+{
+  XPSAxis *pAxis;
+  int i;
+  int group=0;
+
+  for(i=0; i<pC_->numAxes_; i++) {
+    pAxis = pC_->getAxis(i);
+    if (!strcmp(groupName_, pAxis->groupName_)) {
+      ++group;
+    }
+  } 
+  return group;
+}
+
+/**
+ * Function to set the XPS controller PID parameters.
+ * @param pAxis Axis struct AXIS_HDL
+ * @param value The desired value of the parameter.
+ * @param pidoption Set to 0 for P, 1 for I and 2 for D.
+ *
+ * @return Zero if success, non-zero if error (and equal to XPS API error if error is from XPS).
+ */
+asynStatus XPSAxis::setPID(const double * value, int pidoption)
+{
+  int status = 0;
+  char correctorType[250] = {'\0'};
+  static const char *functionName = "XPSAxis::setPID";
+
+  /*The XPS function that we use to set the PID parameters is dependant on the 
+    type of corrector in use for that axis.*/
+  status = PositionerCorrectorTypeGet(pollSocket_,
+                                      positionerName_,
+                                      correctorType);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s: Error with PositionerCorrectorTypeGet. XPS: %s, Axis: %d, XPS API Error: %d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    return asynError;
+  }
+
+  if (!strcmp(correctorType, CorrectorTypes.PIPosition)) {
+    /*Read the PID parameters first.*/
+    status = PositionerCorrectorPIPositionGetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error with PositionerCorrectorPIPositionGet. Aborting setting PID XPS: %s, Axis: %d, XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+    /*Set the P, I or D parameter in the xpsCorrectorInfo struct.*/
+    setPIDValue(value, pidoption); 
+
+    /*Now set the parameters in the XPS.*/
+    status = PositionerCorrectorPIPositionSetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error with PositionerCorrectorPIPositionSet: %s, Axis: %d, XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+  } else if (!strcmp(correctorType, CorrectorTypes.PIDFFVelocity)) {
+    status = PositionerCorrectorPIDFFVelocityGetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error with PositionerCorrectorPIDFFVelocityGet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+    setPIDValue(value, pidoption); 
+
+    status = PositionerCorrectorPIDFFVelocitySetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error with PositionerCorrectorPIDFFVelocitySet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+  } else if (!strcmp(correctorType, CorrectorTypes.PIDFFAcceleration)) {
+    status = PositionerCorrectorPIDFFAccelerationGetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error with PositionerCorrectorPIDFFAccelerationGet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+    setPIDValue(value, pidoption); 
+
+    status = PositionerCorrectorPIDFFAccelerationSetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error with PositionerCorrectorPIDFFAccelerationSet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+  } else if (!strcmp(correctorType, CorrectorTypes.PIDDualFFVoltage)) {
+    status = PositionerCorrectorPIDDualFFVoltageGetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error with PositionerCorrectorPIDDualFFVoltageGet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+    setPIDValue(value, pidoption); 
+
+    status = PositionerCorrectorPIDDualFFVoltageSetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: Error with PositionerCorrectorPIDDualFFVoltageSet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+  } else if (!strcmp(correctorType, CorrectorTypes.NoCorrector)) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s:. XPS %s axis %d corrector type is %s. Cannot set PID.\n", 
+              driverName, functionName, pC_->portName, axisNo_, correctorType);
+    return asynError; 
+  } else {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s:. XPS %s axis %d not a valid corrector type: %s. Cannot set PID.\n", 
+              driverName, functionName, pC_->portName, axisNo_, correctorType); 
+    return asynError; 
+  }
+  return asynSuccess;
+}
+
+/**
+ * Function to read the PID values from the XPS (and any other XPS corrector info that is valid for the axis). 
+ * The read values are set in the AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Zero if success, non-zero if error (and equal to XPS API error if error is from XPS).
+ */
+asynStatus XPSAxis::getPID() 
+{
+  int status = 0;
+  char correctorType[250] = {'\0'};
+  static const char *functionName = "XPSAxis::getPID";
+  
+  /*The XPS function that we use to set the PID parameters is dependant on the 
+    type of corrector in use for that axis.*/
+  status = PositionerCorrectorTypeGet(pollSocket_,
+                                      positionerName_,
+                                      correctorType);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s: Error with PositionerCorrectorTypeGet. XPS: %s, Axis: %d, XPS API Error: %d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
+    return asynError;
+  }
+  if (!strcmp(correctorType, CorrectorTypes.PIPosition)) {
+    /*Read the PID parameters and set in pAxis.*/
+    status = PositionerCorrectorPIPositionGetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: XPS %s, Axis: %d, Error with PositionerCorrectorPIPositionGet. XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+  } else if (!strcmp(correctorType, CorrectorTypes.PIDFFVelocity)) {
+    status = PositionerCorrectorPIDFFVelocityGetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: XPS %s, Axis: %d, Error with PositionerCorrectorPIDFFVelocityGet. XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+  } else if (!strcmp(correctorType, CorrectorTypes.PIDFFAcceleration)) {
+    status = PositionerCorrectorPIDFFAccelerationGetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: XPS %s, Axis: %d, Error with PositionerCorrectorPIDFFAccelerationGet. XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+  } else if (!strcmp(correctorType, CorrectorTypes.PIDDualFFVoltage)) {
+    status = PositionerCorrectorPIDDualFFVoltageGetWrapper();
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                "%s:%s: XPS %s, Axis: %d, Error with PositionerCorrectorPIDDualFFVoltageGet. XPS API Error: %d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      return asynError;
+    }
+
+  } else if (!strcmp(correctorType, CorrectorTypes.NoCorrector)) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s:. XPS %s axis %d corrector type is %s. Cannot get PID.\n", 
+              driverName, functionName, pC_->portName, axisNo_, correctorType);
+    return asynError; 
+  } else {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s:. XPS %s axis %d not a valid corrector type: %s. Cannot set PID.\n", 
+              driverName, functionName, pC_->portName, axisNo_, correctorType); 
+    return asynError; 
+  }
+  return asynSuccess;
+}
+
+/**
+ * Set the P, I or D parameter in a xpsCorrectorInfo_t struct.
+ * @param xpsCorrectorInfo Pointer to a xpsCorrectorInfo_t struct.
+ * @param value The value to set.
+ * @param pidoption Set to 0 for P, 1 for I and 2 for D.
+ */
+asynStatus XPSAxis::setPIDValue(const double * value, int pidoption) 
+{
+  static const char *functionName = "XPSAxis::setPIDValue";
+
+  if ((pidoption < 0) || (pidoption > 2)) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s: XPS %s axis %d pidoption out of range=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, pidoption);
+    return asynError;
+  } else {
+    switch (pidoption) {
+    case 0:
+      xpsCorrectorInfo_.KP = *value;
+      break;
+    case 1:
+      xpsCorrectorInfo_.KI = *value;
+      break;
+    case 2:
+      xpsCorrectorInfo_.KD = *value;
+      break;
+    default:
+      /*Do nothing.*/
+      break;
+    }
+  }
+  return asynSuccess;
+}
+
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIPositionGet.
+ * It will set parameters in a AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+asynStatus XPSAxis::PositionerCorrectorPIPositionGetWrapper()
+{
+  int status;
+  status = PositionerCorrectorPIPositionGet(pollSocket_,
+                                            positionerName_,
+                                            &xpsCorrectorInfo_.ClosedLoopStatus,
+                                            &xpsCorrectorInfo_.KP, 
+                                            &xpsCorrectorInfo_.KI, 
+                                            &xpsCorrectorInfo_.IntegrationTime);
+  return status ? asynError : asynSuccess;
+}
+
+/**
+ * Wrapper function for PositionerCorrectorPIDFFVelocityGet.
+ * It will set parameters in a AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+asynStatus XPSAxis::PositionerCorrectorPIDFFVelocityGetWrapper()
+{
+  int status;
+  status = PositionerCorrectorPIDFFVelocityGet(pollSocket_,
+                                               positionerName_,
+                                               &xpsCorrectorInfo_.ClosedLoopStatus,
+                                               &xpsCorrectorInfo_.KP, 
+                                               &xpsCorrectorInfo_.KI,
+                                               &xpsCorrectorInfo_.KD,
+                                               &xpsCorrectorInfo_.KS,
+                                               &xpsCorrectorInfo_.IntegrationTime,
+                                               &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                               &xpsCorrectorInfo_.GKP,
+                                               &xpsCorrectorInfo_.GKI,
+                                               &xpsCorrectorInfo_.GKD,
+                                               &xpsCorrectorInfo_.KForm,
+                                               &xpsCorrectorInfo_.FeedForwardGainVelocity);
+  return status ? asynError : asynSuccess;
+}
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIDFFAccelerationGet.
+ * It will set parameters in a AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+asynStatus XPSAxis::PositionerCorrectorPIDFFAccelerationGetWrapper()
+{
+  int status;
+  status = PositionerCorrectorPIDFFAccelerationGet(pollSocket_,
+                                                   positionerName_,
+                                                   &xpsCorrectorInfo_.ClosedLoopStatus,
+                                                   &xpsCorrectorInfo_.KP, 
+                                                   &xpsCorrectorInfo_.KI,
+                                                   &xpsCorrectorInfo_.KD,
+                                                   &xpsCorrectorInfo_.KS,
+                                                   &xpsCorrectorInfo_.IntegrationTime,
+                                                   &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                   &xpsCorrectorInfo_.GKP,
+                                                   &xpsCorrectorInfo_.GKI,
+                                                   &xpsCorrectorInfo_.GKD,
+                                                   &xpsCorrectorInfo_.KForm,
+                                                   &xpsCorrectorInfo_.FeedForwardGainAcceleration);
+  return status ? asynError : asynSuccess;
+}
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIDDualFFVoltageGet.
+ * It will set parameters in a AXIS_HDL struct.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageGetWrapper()
+{
+  int status;
+  status =  PositionerCorrectorPIDDualFFVoltageGet(pollSocket_,
+                                                  positionerName_,
+                                                  &xpsCorrectorInfo_.ClosedLoopStatus,
+                                                  &xpsCorrectorInfo_.KP, 
+                                                  &xpsCorrectorInfo_.KI,
+                                                  &xpsCorrectorInfo_.KD,
+                                                  &xpsCorrectorInfo_.KS,
+                                                  &xpsCorrectorInfo_.IntegrationTime,
+                                                  &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                  &xpsCorrectorInfo_.GKP,
+                                                  &xpsCorrectorInfo_.GKI,
+                                                  &xpsCorrectorInfo_.GKD,
+                                                  &xpsCorrectorInfo_.KForm,
+                                                  &xpsCorrectorInfo_.FeedForwardGainVelocity,
+                                                  &xpsCorrectorInfo_.FeedForwardGainAcceleration,
+                                                  &xpsCorrectorInfo_.Friction);
+  return status ? asynError : asynSuccess;
+}
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIPositionSet.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+asynStatus XPSAxis::PositionerCorrectorPIPositionSetWrapper()
+{
+  int status;
+  status = PositionerCorrectorPIPositionSet(pollSocket_,
+                                            positionerName_,
+                                            xpsCorrectorInfo_.ClosedLoopStatus,
+                                            xpsCorrectorInfo_.KP, 
+                                            xpsCorrectorInfo_.KI, 
+                                            xpsCorrectorInfo_.IntegrationTime);
+  return status ? asynError : asynSuccess;
+}
+
+
+/**
+ * Wrapper function for PositionerCorrectorPIDFFVelocitySet.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+asynStatus XPSAxis::PositionerCorrectorPIDFFVelocitySetWrapper()
+{
+  int status;
+  status = PositionerCorrectorPIDFFVelocitySet(pollSocket_,
+                                               positionerName_,
+                                               xpsCorrectorInfo_.ClosedLoopStatus,
+                                               xpsCorrectorInfo_.KP, 
+                                               xpsCorrectorInfo_.KI,
+                                               xpsCorrectorInfo_.KD,
+                                               xpsCorrectorInfo_.KS,
+                                               xpsCorrectorInfo_.IntegrationTime,
+                                               xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                               xpsCorrectorInfo_.GKP,
+                                               xpsCorrectorInfo_.GKI,
+                                               xpsCorrectorInfo_.GKD,
+                                               xpsCorrectorInfo_.KForm,
+                                               xpsCorrectorInfo_.FeedForwardGainVelocity);
+  return status ? asynError : asynSuccess;
+}
+
+/**
+ * Wrapper function for PositionerCorrectorPIDFFAccelerationSet.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+asynStatus XPSAxis:: PositionerCorrectorPIDFFAccelerationSetWrapper()
+{
+  int status;
+  status = PositionerCorrectorPIDFFAccelerationSet(pollSocket_,
+                                                   positionerName_,
+                                                   xpsCorrectorInfo_.ClosedLoopStatus,
+                                                   xpsCorrectorInfo_.KP, 
+                                                   xpsCorrectorInfo_.KI,
+                                                   xpsCorrectorInfo_.KD,
+                                                   xpsCorrectorInfo_.KS,
+                                                   xpsCorrectorInfo_.IntegrationTime,
+                                                   xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                   xpsCorrectorInfo_.GKP,
+                                                   xpsCorrectorInfo_.GKI,
+                                                   xpsCorrectorInfo_.GKD,
+                                                   xpsCorrectorInfo_.KForm,
+                                                   xpsCorrectorInfo_.FeedForwardGainAcceleration);
+  return status ? asynError : asynSuccess;
+}
+
+/**
+ * Wrapper function for PositionerCorrectorPIDDualFFVoltageSet.
+ * @param pAxis Axis struct AXIS_HDL.
+ * @return Return value from XPS function.
+ */
+asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageSetWrapper()
+{
+  int status;
+  status = PositionerCorrectorPIDDualFFVoltageSet(pollSocket_,
+                                                  positionerName_,
+                                                  xpsCorrectorInfo_.ClosedLoopStatus,
+                                                  xpsCorrectorInfo_.KP, 
+                                                  xpsCorrectorInfo_.KI,
+                                                  xpsCorrectorInfo_.KD,
+                                                  xpsCorrectorInfo_.KS,
+                                                  xpsCorrectorInfo_.IntegrationTime,
+                                                  xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                  xpsCorrectorInfo_.GKP,
+                                                  xpsCorrectorInfo_.GKI,
+                                                  xpsCorrectorInfo_.GKD,
+                                                  xpsCorrectorInfo_.KForm,
+                                                  xpsCorrectorInfo_.FeedForwardGainVelocity,
+                                                  xpsCorrectorInfo_.FeedForwardGainAcceleration,
+                                                  xpsCorrectorInfo_.Friction);
+  return status ? asynError : asynSuccess;
+}
