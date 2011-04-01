@@ -58,7 +58,7 @@
 #include "motorRecord.h"
 #include "motor.h"
 #include "epicsExport.h"
-#include "asynMotorDriver.h"
+#include "asynMotorController.h"
 #include "motor_interface.h"
 
 /*Create the dset for devMotor */
