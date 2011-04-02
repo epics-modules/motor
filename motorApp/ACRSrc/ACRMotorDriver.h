@@ -7,7 +7,8 @@ March 28, 2011
 
 */
 
-#include "asynMotorDriver.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
 
 /** drvInfo strings for extra parameters that the ACR controller supports */
 #define ACRJerkString           "ACR_JERK"

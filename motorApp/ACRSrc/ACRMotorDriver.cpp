@@ -17,7 +17,6 @@ March 4, 2011
 
 #include <asynOctetSyncIO.h>
 
-#include "asynMotorDriver.h"
 #include "ACRMotorDriver.h"
 #include <epicsExport.h>
 
