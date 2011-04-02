@@ -76,7 +76,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
 
   // These are the per-controller parameters for profile moves
   createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);
-  createParam(profileNumSegmentsString,          asynParamInt32,      &profileNumSegments_);
+  createParam(profileNumPointsString,            asynParamInt32,      &profileNumPoints_);
   createParam(profileNumPulsesString,            asynParamInt32,      &profileNumPulses_);
   createParam(profileStartPulsesString,          asynParamInt32,      &profileStartPulses_);
   createParam(profileEndPulsesString,            asynParamInt32,      &profileEndPulses_);
