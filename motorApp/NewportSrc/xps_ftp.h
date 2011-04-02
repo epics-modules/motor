@@ -49,6 +49,9 @@
 #define RETURN_SIZE  1500  /* size of a return (size of standard IP package) */
 #define PATH_SIZE    256   /* size of path */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /******[ global variables ]******************************************/
 
@@ -61,3 +64,7 @@ int ftpDisconnect (int);
 int ftpChangeDir (int, char*);
 int ftpRetrieveFile (int, char*);
 int ftpStoreFile(int, char*);
+
+#ifdef __cplusplus
+}
+#endif
