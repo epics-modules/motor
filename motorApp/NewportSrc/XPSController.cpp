@@ -92,8 +92,9 @@ Versions: Release 4-5 and higher.
 
 #include "XPSController.h"
 #include "XPS_C8_drivers.h"
+#include "xps_ftp.h"
 
-static const char *driverName = "XPSMotorDriver";
+static const char *driverName = "XPSController";
 
 typedef enum { none, positionMove, velocityMove, homeReverseMove, homeForwardsMove } moveType;
 
@@ -124,10 +125,18 @@ static int doSetPosition = 1;
  */
 static double setPosSleepTime = 0.5;
 
+/* Constants used for FTP to the XPS */
+#define TRAJECTORY_DIRECTORY "/Admin/public/Trajectories"
+#define MAX_FILENAME_LEN 256
+#define MAX_MESSAGE_LEN 256
+#define TRAJECTORY_FILE "TrajectoryScan.trj"
+#define DEFAULT_FTP_USERNAME "Administrator"
+#define DEFAULT_FTP_PASSWORD "Administrator"
+#define DEFAULT_PROFILE_GROUPNAME "Group1"
+
 /** Deadband to use for the velocity comparison with zero. */
 #define XPS_VELOCITY_DEADBAND 0.0000001
 
-#define XPS_MAX_AXES 8
 #define XPSC8_END_OF_RUN_MINUS  0x80000100
 #define XPSC8_END_OF_RUN_PLUS   0x80000200
 
@@ -154,11 +163,25 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   createParam(XPSMaxJerkString, asynParamFloat64, &XPSMaxJerk_);
   createParam(XPSStatusString,  asynParamInt32,   &XPSStatus_);
 
+  // This socket is used for polling by the controller and all axes
   pollSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, TCP_TIMEOUT);
   if (pollSocket_ < 0) {
     printf("%s:%s: error calling TCP_ConnectToServer for pollSocket\n",
            driverName, functionName);
   }
+  
+  // This socket is used for moving motors during profile moves
+  // Each axis also has its own moveSocket
+  moveSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, TCP_TIMEOUT);
+  if (moveSocket_ < 0) {
+    printf("%s:%s: error calling TCP_ConnectToServer for moveSocket\n",
+           driverName, functionName);
+  }
+  
+  // Set a default username and password for ftp
+  ftpUsername_ = epicsStrDup(DEFAULT_FTP_USERNAME);
+  ftpPassword_ = epicsStrDup(DEFAULT_FTP_PASSWORD);
+  profileGroupName_ = epicsStrDup(DEFAULT_PROFILE_GROUPNAME);
 
   FirmwareVersionGet(pollSocket_, firmwareVersion_);
   
@@ -480,6 +503,251 @@ XPSAxis* XPSController::getAxis(asynUser *pasynUser)
 XPSAxis* XPSController::getAxis(int axisNo)
 {
   return static_cast<XPSAxis*>(asynMotorController::getAxis(axisNo));
+}
+
+/* Function to build, install and verify trajectory */ 
+asynStatus XPSController::buildProfile()
+{
+  FILE *trajFile;
+  int i, j, status;
+  int nPoints;
+  int nElements;
+  double trajVel;
+  double D0, D1, T0, T1;
+  int ftpSocket;
+  char fileName[MAX_FILENAME_LEN];
+  char buildMessage[MAX_MESSAGE_LEN];
+  int buildStatus;
+  double distance;
+  double maxVelocity[XPS_MAX_AXES], maxAcceleration[XPS_MAX_AXES];
+  double maxVelocityActual;
+  double maxAccelerationActual;
+  double minPositionActual, maxPositionActual;
+  double minJerkTime[XPS_MAX_AXES], maxJerkTime[XPS_MAX_AXES];
+  double preTimeMax, postTimeMax;
+  double preVelocity[XPS_MAX_AXES], postVelocity[XPS_MAX_AXES];
+  double preDistance[XPS_MAX_AXES], postDistance[XPS_MAX_AXES];
+  double time;
+  int dir[XPS_MAX_AXES];
+  int epicsMotorDir[XPS_MAX_AXES];
+  double epicsMotorOffset[XPS_MAX_AXES]; 
+  int moveAxis[XPS_MAX_AXES];
+  XPSAxis *pAxis;
+  static const char *functionName = "buildProfile";
+  
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: entry\n",
+            driverName, functionName);
+
+  /* We create trajectories with an extra element at the beginning and at the end.
+   * The distance and time of the first element is defined so that the motors will
+   * accelerate from 0 to the velocity of the first "real" element at their 
+   * maximum allowed acceleration.
+   * Similarly, the distance and time of last element is defined so that the 
+   * motors will decelerate from the velocity of the last "real" element to 0 
+   * at the maximum allowed acceleration. */
+
+  /* Compute the velocity of each motor during the first real trajectory element, 
+   * and the time required to reach this velocity. */
+  preTimeMax = 0.;
+  postTimeMax = 0.;
+  getIntegerParam(profileNumPoints_, &nPoints);
+  /* Zero values since axes may not be used */
+  for (j=0; j<numAxes_; j++) {
+    preVelocity[j] = 0.;
+    postVelocity[j] = 0.;
+    getIntegerParam(j, profileUseAxis_,        &moveAxis[j]);
+    getIntegerParam(j, profileMotorDirection_, &epicsMotorDir[j]);
+    getDoubleParam (j, profileMotorOffset_,    &epicsMotorOffset[j]);
+  }
+  for (j=0; j<numAxes_; j++) {
+    pAxis = getAxis(j);
+    if (!moveAxis[j]) continue;
+    status = PositionerSGammaParametersGet(pollSocket_, pAxis->positionerName_, 
+                                           &maxVelocity[j], &maxAcceleration[j],
+                                           &minJerkTime[j], &maxJerkTime[j]);
+    if (status) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s: Error calling positionerSGammaParametersSet, status=%d\n",
+                driverName, functionName, status);
+      return asynError;
+    }
+    
+    /* The calculation using maxAcceleration read from controller below
+     * is "correct" but subject to roundoff errors when sending ASCII commands
+     * to XPS.  Reduce acceleration 10% to account for this. */
+    maxAcceleration[j] *= 0.9;
+
+    /* Note: the preDistance and postDistance numbers computed here are
+     * in user coordinates, not XPS coordinates, because they are used for 
+     * EPICS moves at the start and end of the scan */
+    distance = pAxis->profilePositions_[1] - pAxis->profilePositions_[0];
+    preVelocity[j] = distance/profileTimes_[0];
+    time = fabs(preVelocity[j]) / maxAcceleration[j];
+    preTimeMax = MAX(preTimeMax, time);
+    distance = pAxis->profilePositions_[nPoints-1] - 
+               pAxis->profilePositions_[nPoints-2];
+    postVelocity[j] = distance/profileTimes_[nPoints-1];
+    time = fabs(postVelocity[j]) / maxAcceleration[j];
+    postTimeMax = MAX(postTimeMax, time);
+  }
+
+  /* Compute the distance that each motor moves during its acceleration phase.
+   * Only move it this far. */
+  for (j=0; j<numAxes_; j++) {
+    preDistance[j] =  0.5 * preVelocity[j] *  preTimeMax; 
+    postDistance[j] = 0.5 * postVelocity[j] * postTimeMax;
+  }
+
+  /* Create the profile file */
+  trajFile =  fopen (TRAJECTORY_FILE, "w");
+
+  /* Compute the sign relationship of user coordinates to XPS coordinates for
+   * each axis */
+  for (j=0; j<numAxes_; j++) {
+    if (epicsMotorDir[j] == 0) dir[j]=1; else dir[j]=-1;
+  }
+  /* Create the initial acceleration element */
+  fprintf(trajFile,"%f", preTimeMax);
+  for (j=0; j<numAxes_; j++) {
+    fprintf(trajFile,", %f, %f", preDistance[j]*dir[j], preVelocity[j]*dir[j]);
+  }
+  fprintf(trajFile,"\n");
+ 
+  /* The number of profile elements in the file is nPoints-1 */
+  nElements = nPoints - 1;
+  for (i=0; i<nElements; i++) {
+    T0 = profileTimes_[i];
+    if (i < nElements-1)
+      T1 = profileTimes_[i+1];
+    else
+      T1 = T0;
+    for (j=0; j<numAxes_; j++) {
+      pAxis = getAxis(j);
+      D0 = pAxis->profilePositions_[i+1] * dir[j] - 
+           pAxis->profilePositions_[i]   * dir[j];
+      if (i < nElements-1) 
+        D1 = pAxis->profilePositions_[i+2] * dir[j] - 
+             pAxis->profilePositions_[i+1] * dir[j];
+      else
+        D1 = D0;
+
+      /* Average either side of the point */
+      trajVel = ((D0 + D1) / (T0 + T1));
+      if (!moveAxis[j]) {
+        D0 = 0.0;  /* Axis turned off*/
+        trajVel = 0.0;
+      }
+    
+      if (j == 0) fprintf(trajFile,"%f", profileTimes_[i]);
+      fprintf(trajFile,", %f, %f",D0,trajVel);
+      if (j == (numAxes_-1)) fprintf(trajFile,"\n");
+    }  
+  }
+
+  /* Create the final acceleration element. Final velocity must be 0. */
+  fprintf(trajFile,"%f", postTimeMax);
+  for (j=0; j<numAxes_; j++) {
+    fprintf(trajFile,", %f, %f", postDistance[j]*dir[j], 0.);
+  }
+  fprintf(trajFile,"\n");
+  fclose (trajFile);
+  
+  /* FTP the trajectory file from the local directory to the XPS */
+  status = ftpConnect(IPAddress_, ftpUsername_, ftpPassword_, &ftpSocket);
+  if (status != 0) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: Error calling ftpConnect, status=%d\n",
+              driverName, functionName, status);
+    return asynError;
+  }
+  status = ftpChangeDir(ftpSocket, TRAJECTORY_DIRECTORY);
+  if (status != 0) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: Error calling  ftpChangeDir, status=%d\n",
+              driverName, functionName, status);
+    return asynError;
+  }
+  status = ftpStoreFile(ftpSocket, TRAJECTORY_FILE);
+  if (status != 0) {
+     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: Error calling  ftpStoreFile, status=%d\n",
+              driverName, functionName, status);
+    return asynError;
+  }
+  status = ftpDisconnect(ftpSocket);
+  if (status != 0) {
+     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: Error calling  ftpDisconnect, status=%d\n",
+              driverName, functionName, status);
+    return asynError;
+  }
+     
+  /* Verify trajectory */
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling MultipleAxesPVTVerification(%d, %s, %s)\n",
+            driverName, functionName, pollSocket_, profileGroupName_, TRAJECTORY_FILE);
+  status = MultipleAxesPVTVerification(pollSocket_, profileGroupName_, TRAJECTORY_FILE);
+   
+  switch (-status) {
+    case 0:
+      strcpy(buildMessage, " ");
+      break;
+    case 69:
+      strcpy(buildMessage, "Acceleration Too High");
+      break;
+    case 68:
+      strcpy(buildMessage, "Velocity Too High");
+      break;
+    case 70:
+      strcpy(buildMessage, "Final Velocity Non Zero");
+      break;
+    case 75:    
+      strcpy(buildMessage, "Negative or Null Delta Time");
+      break;
+    default: 
+      sprintf(buildMessage, "Unknown trajectory verify error=%d", status);
+      break;
+  }
+  buildStatus = status ?  PROFILE_STATUS_FAILURE : PROFILE_STATUS_SUCCESS;
+  setIntegerParam(profileBuildStatus_, buildStatus);
+  setStringParam(profileBuildMessage_, buildMessage);
+  if (status) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: MultipleAxesPVTVerification error %s\n",
+              driverName, functionName, buildMessage);
+    return asynError;
+  }
+
+  /* Read dynamic parameters*/
+  for (j=0; j<numAxes_; j++) {
+    pAxis = getAxis(j);
+    maxVelocityActual = 0;
+    maxAccelerationActual = 0;   
+    status = MultipleAxesPVTVerificationResultGet(pollSocket_,
+                 pAxis->positionerName_, fileName, 
+                 &minPositionActual, &maxPositionActual, 
+                 &maxVelocityActual, &maxAccelerationActual);
+    if (status != 0) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s: MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
+                driverName, functionName, pAxis->positionerName_, status);
+      return asynError;
+    }
+  }
+  return asynSuccess; 
+}
+
+/* Function to execute trajectory */ 
+asynStatus XPSController::executeProfile()
+{
+  return asynSuccess;
+}
+
+/* Function to readback trajectory */ 
+asynStatus XPSController::readbackProfile()
+{
+  return asynSuccess;
 }
 
 
