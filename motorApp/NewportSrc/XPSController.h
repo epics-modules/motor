@@ -10,6 +10,8 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #include "asynMotorAxis.h"
 #include "XPSAxis.h"
 
+#define XPS_MAX_AXES 8
+
 // drvInfo strings for extra parameters that the XPS controller supports
 #define XPSMinJerkString    "XPS_MIN_JERK"
 #define XPSMaxJerkString    "XPS_MAX_JERK"
@@ -26,6 +28,11 @@ public:
   void report(FILE *fp, int level);
   XPSAxis* getAxis(asynUser *pasynUser);
   XPSAxis* getAxis(int axisNo);
+
+  /* These are the functions for profile moves */
+  asynStatus buildProfile();
+  asynStatus executeProfile();
+  asynStatus readbackProfile();
 
   /* These are the methods that are new to this class */
   /* Deferred moves functions.*/
@@ -44,7 +51,11 @@ protected:
 private:
   char *IPAddress_;
   int IPPort_;
+  char *ftpUsername_;
+  char *ftpPassword_;
+  char *profileGroupName_;
   int pollSocket_;
+  int moveSocket_;
   char firmwareVersion_[100];
   int movesDeferred_;
     
