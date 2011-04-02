@@ -13,7 +13,8 @@ March 28, 2010
 #include <epicsTime.h>
 #include <epicsThread.h>
 
-#include "asynMotorDriver.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
 #include "route.h"
 
 #define NUM_SIM_CONTROLLER_PARAMS 0

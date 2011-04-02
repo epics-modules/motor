@@ -22,7 +22,6 @@ December 13, 2009
 #include <ellLib.h>
 #include <iocsh.h>
 
-#include "asynMotorDriver.h"
 #include "motorSimDriver.h"
 #include <epicsExport.h>
 
