@@ -54,7 +54,7 @@
 
 // These are the per-controller parameters for profile moves (coordinated motion)
 #define profileNumAxesString            "PROFILE_NUM_AXES"
-#define profileNumSegmentsString        "PROFILE_NUM_SEGMENTS"
+#define profileNumPointsString          "PROFILE_NUM_POINTS"
 #define profileNumPulsesString          "PROFILE_NUM_PULSES"
 #define profileStartPulsesString        "PROFILE_START_PULSES"
 #define profileEndPulsesString          "PROFILE_START_PULSES"
@@ -89,6 +89,34 @@ typedef struct MotorStatus {
   double velocity;           /**< Actual velocity */
   epicsUInt32 status;        /**< Word containing status bits (motion done, limits, etc.) */
 } MotorStatus;
+
+/* State codes for Build, Read and Execute. Careful, these must match the
+ * corresponding MBBI records, but there is no way to check this */
+enum ProfileBuildState{
+  PROFILE_BUILD_DONE,
+  PROILE_BUILD_BUSY,
+};
+
+enum ProfileExecuteState{
+  PROFILE_EXECUTE_DONE,
+  PROFILE_EXECUTE_MOVE_START,
+  PROFILE_EXECUTE_EXECUTING,
+  PROFILE_EXECUTE_FLYBACK
+};
+
+enum ProfileReadbackState{
+  PROFILE_READBACK_DONE,
+  PROFILE_READBACK_BUSY
+};
+
+/* Status codes for Build, Execute and Read */
+enum ProfileStatus {
+  PROFILE_STATUS_UNDEFINED,
+  PROFILE_STATUS_SUCCESS,
+  PROFILE_STATUS_FAILURE,
+  PROFILE_STATUS_ABORT,
+  PROFILE_STATUS_TIMEOUT
+};
 
 #ifdef __cplusplus
 #include <asynPortDriver.h>
@@ -168,7 +196,7 @@ protected:
 
   // These are the per-controller parameters for profile moves
   int profileNumAxes_;
-  int profileNumSegments_;
+  int profileNumPoints_;
   int profileNumPulses_;
   int profileStartPulses_;
   int profileEndPulses_;
