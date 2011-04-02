@@ -34,7 +34,8 @@ Newport_SRCS += devESP300.cc drvESP300.cc
 # XPS C8 device driver
 Newport_SRCS += asynOctetSocket.cpp 
 Newport_SRCS += XPS_C8_drivers.cpp 
-Newport_SRCS += drvXPSAsynAux.c xps_ftp.c
+Newport_SRCS += drvXPSAsynAux.c
+Newport_SRCS += xps_ftp.c
 # This is the model 2 asyn driver
 Newport_SRCS += drvXPSAsyn.c XPSAsynInterpose.c
 # This is the model 3 asyn driver
