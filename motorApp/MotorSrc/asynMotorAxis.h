@@ -66,6 +66,7 @@ public:
   virtual asynStatus setPosition(double position) = 0;
 
   virtual asynStatus initializeProfile(int maxPoints);
+  virtual asynStatus defineProfile(double *positions, int numPoints);
   virtual asynStatus buildProfile();
   virtual asynStatus executeProfile();
   virtual asynStatus readbackProfile();
@@ -75,13 +76,13 @@ protected:
                                       *   Abbreviated because it is used very frequently */
   int axisNo_;                       /**< Index number of this axis (0 - pC_->numAxes_-1) */
   asynUser *pasynUser_;              /**< asynUser connected to this axis for asynTrace debugging */
+  double *profilePositions_;         /**< Array of target positions for profile moves */
+  double *profilePositionsRBV_;      /**< Array of readback positions for profile moves */
+  double *profileFollowingErrors_;   /**< Array of following errors for profile moves */   
 
 private:
   MotorStatus status_;
   int statusChanged_;
-  double *profilePositions_;         /**< Array of target positions for profile moves */
-  double *profilePositionsRBV_;      /**< Array of readback positions for profile moves */
-  double *profileFollowingErrors_;   /**< Array of following errors for profile moves */   
   
 friend class asynMotorController;
 };
