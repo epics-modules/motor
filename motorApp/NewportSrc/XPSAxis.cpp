@@ -93,7 +93,7 @@ Versions: Release 4-5 and higher.
 #include "XPSController.h"
 #include "XPS_C8_drivers.h"
 
-static const char *driverName = "XPSMotorDriver";
+static const char *driverName = "XPSAxis";
 
 typedef enum { none, positionMove, velocityMove, homeReverseMove, homeForwardsMove } moveType;
 
