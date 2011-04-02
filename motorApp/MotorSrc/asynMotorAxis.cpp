@@ -6,6 +6,7 @@
  * from which real motor axes are derived.
  */
 #include <stdlib.h>
+#include <string.h>
 
 #include <epicsThread.h>
 
@@ -128,8 +129,18 @@ asynStatus asynMotorAxis::initializeProfile(int maxProfilePoints)
   return asynSuccess;
 }
   
-/** Function to build a coordinated move of multiple axes.
-  * This is not currently implemented, as the API still needs work! */
+/** Function to build a coordinated move of multiple axes. */
+asynStatus asynMotorAxis::defineProfile(double *positions, int numPoints)
+{
+  // static const char *functionName = "asynMotorController::buildProfile";
+  
+  if (numPoints > pC_->maxProfilePoints_) return asynError;
+  memcpy(profilePositions_, positions, numPoints*sizeof(double));
+
+  return asynSuccess;
+}
+
+/** Function to build a coordinated move of multiple axes. */
 asynStatus asynMotorAxis::buildProfile()
 {
   // static const char *functionName = "asynMotorController::buildProfile";
@@ -137,8 +148,7 @@ asynStatus asynMotorAxis::buildProfile()
   return asynSuccess;
 }
 
-/** Function to execute a coordinated move of multiple axes.
-  * This is not currently implemented, as the API still needs work! */
+/** Function to execute a coordinated move of multiple axes. */
 asynStatus asynMotorAxis::executeProfile()
 {
   // static const char *functionName = "asynMotorController::executeProfile";
@@ -146,8 +156,7 @@ asynStatus asynMotorAxis::executeProfile()
   return asynSuccess;
 }
 
-/** Function to readback the actual motor positions from a coordinated move of multiple axes.
-  * This is not currently implemented, as the API still needs work! */
+/** Function to readback the actual motor positions from a coordinated move of multiple axes. */
 asynStatus asynMotorAxis::readbackProfile()
 {
   // static const char *functionName = "asynMotorController::readbackProfile";
