@@ -12,6 +12,7 @@
 
 #include <cantProceed.h> /* !! for callocMustSucceed() */
 
+#include <epicsExit.h>
 #include <epicsMutex.h>
 #include <epicsEvent.h>
 #include <epicsThread.h>
@@ -40,6 +41,7 @@ typedef struct {
     void *uint32DInterruptPvt;
     asynInterface drvUser;
     asynUser *pasynUser;
+    int shuttingDown;
 } drvXPSAsynAuxPvt;
 
 typedef enum {
@@ -144,6 +146,8 @@ static asynDrvUser drvXPSAsynAuxDrvUser = {
 
 static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt);
 
+static void shutdownCallback(drvXPSAsynAuxPvt *pPvt);
+
 
 int XPSAuxConfig(const char *portName, /* asyn port name */
                  const char *ip,       /* XPS IP address or IP name */
@@ -167,6 +171,9 @@ int XPSAuxConfig(const char *portName, /* asyn port name */
     }
     pPvt->pollerTimeout = pollPeriod/1000.;
 
+    /* Register a shutdown callback */
+    epicsAtExit((void *)shutdownCallback, pPvt);
+    
     /* Link with higher level routines */
     pPvt->common.interfaceType = asynCommonType;
     pPvt->common.pinterface  = (void *)&drvXPSAsynAuxCommon;
@@ -254,6 +261,8 @@ static asynStatus readFloat64(void *drvPvt, asynUser *pasynUser,
     char *GPIOName;
     int status;
 
+    if (pPvt->shuttingDown) return asynError;
+    
     pasynManager->getAddr(pasynUser, &channel);
 
     switch(command) {
@@ -303,6 +312,8 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
     char *GPIOName;
     int status;
 
+    if (pPvt->shuttingDown) return asynError;
+    
     pasynManager->getAddr(pasynUser, &channel);
 
     switch(command) {
@@ -342,6 +353,8 @@ static asynStatus readUInt32D(void *drvPvt, asynUser *pasynUser,
     int status;
     unsigned short rawValue;
 
+    if (pPvt->shuttingDown) return asynError;
+    
     pasynManager->getAddr(pasynUser, &channel);
 
     switch(command) {
@@ -412,6 +425,8 @@ static asynStatus writeUInt32D(void *drvPvt, asynUser *pasynUser,
     char *GPIOName;
     int status;
 
+    if (pPvt->shuttingDown) return asynError;
+    
     pasynManager->getAddr(pasynUser, &channel);
 
     switch(command) {
@@ -460,6 +475,13 @@ static asynStatus writeUInt32D(void *drvPvt, asynUser *pasynUser,
     return(asynSuccess);
 }
 
+static void shutdownCallback(drvXPSAsynAuxPvt *pPvt)
+{
+    epicsMutexMustLock(pPvt->lock);
+    pPvt->shuttingDown = 1;
+    epicsMutexUnlock(pPvt->lock);
+}
+
 static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
 {
     char analogNames[100] = "";
@@ -484,6 +506,8 @@ static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
 
     while(1) {
         status = epicsEventWaitWithTimeout(pPvt->pollerEventId, pPvt->pollerTimeout);
+        epicsMutexMustLock(pPvt->lock);
+        if (pPvt->shuttingDown) break;
         status = GPIOAnalogGet(pPvt->socketID, MAX_ANALOG_INPUTS, analogNames, analogValues);
         if (status) {
             asynPrint(pPvt->pasynUser, ASYN_TRACE_ERROR,
@@ -534,6 +558,7 @@ static void XPSAuxPoller(drvXPSAsynAuxPvt *pPvt)
             pnode = (interruptNode *)ellNext(&pnode->node);
         }
         pasynManager->interruptEnd(pPvt->float64InterruptPvt);
+        epicsMutexUnlock(pPvt->lock);
         firstTime = 0;
     }
 }
