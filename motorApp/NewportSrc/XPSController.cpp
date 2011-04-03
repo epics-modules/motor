@@ -96,8 +96,6 @@ Versions: Release 4-5 and higher.
 
 static const char *driverName = "XPSController";
 
-typedef enum { none, positionMove, velocityMove, homeReverseMove, homeForwardsMove } moveType;
-
 /** Struct for a list of strings describing the different corrector types possible on the XPS.*/
 typedef struct {
   char *PIPosition;
@@ -144,6 +142,7 @@ static double setPosSleepTime = 0.5;
 #define MAX(a,b) ((a)>(b)? (a): (b))
 #define MIN(a,b) ((a)<(b)? (a): (b))
 
+
 XPSController::XPSController(const char *portName, const char *IPAddress, int IPPort, 
                                        int numAxes, double movingPollPeriod, double idlePollPeriod)
   :  asynMotorController(portName, numAxes, NUM_XPS_PARAMS, 
@@ -157,6 +156,7 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   
   IPAddress_ = epicsStrDup(IPAddress);
   IPPort_ = IPPort;
+  pAxes_ = (XPSAxis **)(asynMotorController::pAxes_);
 
   // Create controller-specific parameters
   createParam(XPSMinJerkString, asynParamFloat64, &XPSMinJerk_);
@@ -372,7 +372,7 @@ asynStatus XPSController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     status = PositionerUserTravelLimitsGet(pAxis->pollSocket_,
                                            pAxis->positionerName_,
                                            &pAxis->lowLimit_, &pAxis->highLimit_);
-    if (status != 0) {
+    if (status) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
                 "%s:%s: motorAxisSetDouble[%s,%d]: error performing PositionerUserTravelLimitsGet for lowLim status=%d\n",
                 driverName, functionName, portName, pAxis->axisNo_, status);
@@ -381,7 +381,7 @@ asynStatus XPSController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     status = PositionerUserTravelLimitsSet(pAxis->pollSocket_,
                                            pAxis->positionerName_,
                                            deviceValue, pAxis->highLimit_);
-    if (status != 0) {
+    if (status) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
             "%s:%s: motorAxisSetDouble[%s,%d]: error performing PositionerUserTravelLimitsSet for lowLim=%f status=%d\n",
                 driverName, functionName, portName, pAxis->axisNo_, deviceValue, status);
@@ -399,7 +399,7 @@ asynStatus XPSController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     status = PositionerUserTravelLimitsGet(pAxis->pollSocket_,
                                            pAxis->positionerName_,
                                            &pAxis->lowLimit_, &pAxis->highLimit_);
-    if (status != 0) {
+    if (status) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
                 "%s:%s: motorAxisSetDouble[%s,%d]: error performing PositionerUserTravelLimitsGet for highLim status=%d\n",
                 driverName, functionName, portName, pAxis->axisNo_, status);
@@ -408,7 +408,7 @@ asynStatus XPSController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     status = PositionerUserTravelLimitsSet(pAxis->pollSocket_,
                                            pAxis->positionerName_,
                                            pAxis->lowLimit_, deviceValue);
-    if (status != 0) {
+    if (status) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
                 "%s:%s: motorAxisSetDouble[%s,%d]: error performing PositionerUserTravelLimitsSet for highLim=%f status=%d\n",
                 driverName, functionName, portName, pAxis->axisNo_, deviceValue, status);
@@ -495,14 +495,24 @@ asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   return (asynStatus)status;
 }
 
+/** Returns a pointer to an XPSAxis object.
+  * Returns NULL if the axis number encoded in pasynUser is invalid.
+  * \param[in] pasynUser asynUser structure that encodes the axis index number. */
 XPSAxis* XPSController::getAxis(asynUser *pasynUser)
 {
-  return static_cast<XPSAxis*>(asynMotorController::getAxis(pasynUser));
+    int axisNo;
+    
+    getAddress(pasynUser, &axisNo);
+    return getAxis(axisNo);
 }
 
+/** Returns a pointer to an XPSAxis object.
+  * Returns NULL if the axis number is invalid.
+  * \param[in] axisNo Axis index number. */
 XPSAxis* XPSController::getAxis(int axisNo)
 {
-  return static_cast<XPSAxis*>(asynMotorController::getAxis(axisNo));
+    if ((axisNo < 0) || (axisNo >= numAxes_)) return NULL;
+    return pAxes_[axisNo];
 }
 
 /* Function to build, install and verify trajectory */ 
@@ -532,12 +542,15 @@ asynStatus XPSController::buildProfile()
   int epicsMotorDir[XPS_MAX_AXES];
   double epicsMotorOffset[XPS_MAX_AXES]; 
   int moveAxis[XPS_MAX_AXES];
-  XPSAxis *pAxis;
   static const char *functionName = "buildProfile";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: entry\n",
             driverName, functionName);
+
+  setIntegerParam(profileBuildState_, PROFILE_BUILD_BUSY);
+  setIntegerParam(profileBuildStatus_, PROFILE_STATUS_UNDEFINED);
+  callParamCallbacks();
 
   /* We create trajectories with an extra element at the beginning and at the end.
    * The distance and time of the first element is defined so that the motors will
@@ -561,16 +574,15 @@ asynStatus XPSController::buildProfile()
     getDoubleParam (j, profileMotorOffset_,    &epicsMotorOffset[j]);
   }
   for (j=0; j<numAxes_; j++) {
-    pAxis = getAxis(j);
     if (!moveAxis[j]) continue;
-    status = PositionerSGammaParametersGet(pollSocket_, pAxis->positionerName_, 
+    status = PositionerSGammaParametersGet(pollSocket_, pAxes_[j]->positionerName_, 
                                            &maxVelocity[j], &maxAcceleration[j],
                                            &minJerkTime[j], &maxJerkTime[j]);
     if (status) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
                 "%s:%s: Error calling positionerSGammaParametersSet, status=%d\n",
                 driverName, functionName, status);
-      return asynError;
+      goto done;
     }
     
     /* The calculation using maxAcceleration read from controller below
@@ -581,12 +593,12 @@ asynStatus XPSController::buildProfile()
     /* Note: the preDistance and postDistance numbers computed here are
      * in user coordinates, not XPS coordinates, because they are used for 
      * EPICS moves at the start and end of the scan */
-    distance = pAxis->profilePositions_[1] - pAxis->profilePositions_[0];
+    distance = pAxes_[j]->profilePositions_[1] - pAxes_[j]->profilePositions_[0];
     preVelocity[j] = distance/profileTimes_[0];
     time = fabs(preVelocity[j]) / maxAcceleration[j];
     preTimeMax = MAX(preTimeMax, time);
-    distance = pAxis->profilePositions_[nPoints-1] - 
-               pAxis->profilePositions_[nPoints-2];
+    distance = pAxes_[j]->profilePositions_[nPoints-1] - 
+               pAxes_[j]->profilePositions_[nPoints-2];
     postVelocity[j] = distance/profileTimes_[nPoints-1];
     time = fabs(postVelocity[j]) / maxAcceleration[j];
     postTimeMax = MAX(postTimeMax, time);
@@ -623,12 +635,11 @@ asynStatus XPSController::buildProfile()
     else
       T1 = T0;
     for (j=0; j<numAxes_; j++) {
-      pAxis = getAxis(j);
-      D0 = pAxis->profilePositions_[i+1] * dir[j] - 
-           pAxis->profilePositions_[i]   * dir[j];
+      D0 = pAxes_[j]->profilePositions_[i+1] * dir[j] - 
+           pAxes_[j]->profilePositions_[i]   * dir[j];
       if (i < nElements-1) 
-        D1 = pAxis->profilePositions_[i+2] * dir[j] - 
-             pAxis->profilePositions_[i+1] * dir[j];
+        D1 = pAxes_[j]->profilePositions_[i+2] * dir[j] - 
+             pAxes_[j]->profilePositions_[i+1] * dir[j];
       else
         D1 = D0;
 
@@ -655,32 +666,32 @@ asynStatus XPSController::buildProfile()
   
   /* FTP the trajectory file from the local directory to the XPS */
   status = ftpConnect(IPAddress_, ftpUsername_, ftpPassword_, &ftpSocket);
-  if (status != 0) {
+  if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: Error calling ftpConnect, status=%d\n",
               driverName, functionName, status);
-    return asynError;
+    goto done;
   }
   status = ftpChangeDir(ftpSocket, TRAJECTORY_DIRECTORY);
-  if (status != 0) {
+  if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: Error calling  ftpChangeDir, status=%d\n",
               driverName, functionName, status);
-    return asynError;
+    goto done;
   }
   status = ftpStoreFile(ftpSocket, TRAJECTORY_FILE);
-  if (status != 0) {
+  if (status) {
      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: Error calling  ftpStoreFile, status=%d\n",
               driverName, functionName, status);
-    return asynError;
+    goto done;
   }
   status = ftpDisconnect(ftpSocket);
-  if (status != 0) {
+  if (status) {
      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: Error calling  ftpDisconnect, status=%d\n",
               driverName, functionName, status);
-    return asynError;
+    goto done;
   }
      
   /* Verify trajectory */
@@ -716,26 +727,30 @@ asynStatus XPSController::buildProfile()
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: MultipleAxesPVTVerification error %s\n",
               driverName, functionName, buildMessage);
-    return asynError;
+    goto done;
   }
 
   /* Read dynamic parameters*/
   for (j=0; j<numAxes_; j++) {
-    pAxis = getAxis(j);
     maxVelocityActual = 0;
     maxAccelerationActual = 0;   
     status = MultipleAxesPVTVerificationResultGet(pollSocket_,
-                 pAxis->positionerName_, fileName, 
+                 pAxes_[j]->positionerName_, fileName, 
                  &minPositionActual, &maxPositionActual, 
                  &maxVelocityActual, &maxAccelerationActual);
-    if (status != 0) {
+    if (status) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
                 "%s:%s: MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
-                driverName, functionName, pAxis->positionerName_, status);
-      return asynError;
+                driverName, functionName, pAxes_[j]->positionerName_, status);
+      goto done;
     }
   }
-  return asynSuccess; 
+  done:
+  /* Clear build command.  This is a "busy" record, don't want to do this until build is complete. */
+  setIntegerParam(profileBuild_, 0);
+  setIntegerParam(profileBuildState_, PROFILE_BUILD_DONE);
+  callParamCallbacks();
+  return status ? asynError : asynSuccess; 
 }
 
 /* Function to execute trajectory */ 
