@@ -57,28 +57,29 @@
 #define profileNumPointsString          "PROFILE_NUM_POINTS"
 #define profileNumPulsesString          "PROFILE_NUM_PULSES"
 #define profileStartPulsesString        "PROFILE_START_PULSES"
-#define profileEndPulsesString          "PROFILE_START_PULSES"
+#define profileEndPulsesString          "PROFILE_END_PULSES"
 #define profileActualPulsesString       "PROFILE_ACTUAL_PULSES"
 #define profileTimeArrayString          "PROFILE_TIME_ARRAY"
-#define profileAccelString              "PROFILE_ACCEL"
-#define profileBuildString              "PROFILE_BUILD_START"
+#define profileAccelerationString       "PROFILE_ACCELERATION"
+#define profileBuildString              "PROFILE_BUILD"
 #define profileBuildStateString         "PROFILE_BUILD_STATE"
 #define profileBuildStatusString        "PROFILE_BUILD_STATUS"
 #define profileBuildMessageString       "PROFILE_BUILD_MESSAGE"
-#define profileExecString               "PROFILE_EXEC_START"
-#define profileExecStateString          "PROFILE_EXEC_STATE"
-#define profileExecStatusString         "PROFILE_EXEC_STATUS"
-#define profileExecMessageString        "PROFILE_EXEC_MESSAGE"
-#define profileReadbackString           "PROFILE_EXEC_START"
-#define profileReadbackStateString      "PROFILE_EXEC_STATE"
-#define profileReadbackStatusString     "PROFILE_EXEC_STATUS"
-#define profileReadbackMessageString    "PROFILE_EXEC_MESSAGE"
+#define profileExecuteString            "PROFILE_EXECUTE"
+#define profileExecuteStateString       "PROFILE_EXECUTE_STATE"
+#define profileExecuteStatusString      "PROFILE_EXECUTE_STATUS"
+#define profileExecuteMessageString     "PROFILE_EXECUTE_MESSAGE"
+#define profileReadbackString           "PROFILE_READBACK"
+#define profileReadbackStateString      "PROFILE_READBACK_STATE"
+#define profileReadbackStatusString     "PROFILE_READBACK_STATUS"
+#define profileReadbackMessageString    "PROFILE_READBACK_MESSAGE"
 
 // These are the per-axis parameters for profile moves
 #define profileUseAxisString            "PROFILE_USE_AXIS"
-#define profilePositionString           "PROFILE_POSITION"
-#define profilePositionRBVString        "PROFILE_POSITION_RBV"
-#define profileFollowingErrorString     "PROFILE_FOLLOWING_ERROR"
+#define profilePositionsString          "PROFILE_POSITIONS"
+#define profileReadbacksString          "PROFILE_READBACKS"
+#define profileFollowingErrorsString    "PROFILE_FOLLOWING_ERRORS"
+#define profileMotorResolutionString    "PROFILE_MOTOR_RESOLUTION"
 #define profileMotorDirectionString     "PROFILE_MOTOR_DIRECTION"
 #define profileMotorOffsetString        "PROFILE_MOTOR_OFFSET"
 
@@ -94,7 +95,7 @@ typedef struct MotorStatus {
  * corresponding MBBI records, but there is no way to check this */
 enum ProfileBuildState{
   PROFILE_BUILD_DONE,
-  PROILE_BUILD_BUSY,
+  PROFILE_BUILD_BUSY,
 };
 
 enum ProfileExecuteState{
@@ -149,13 +150,15 @@ public:
   virtual asynStatus buildProfile();
   virtual asynStatus executeProfile();
   virtual asynStatus readbackProfile();
+  
+  int shuttingDown_;   /**< Flag indicating that IOC is shutting down.  Stops poller */
 
 protected:
   /** These are the index numbers for the parameters in the parameter library.
    * They are the values of pasynUser->reason in calls from device support */
    // These are the motor commands
-  int motorMoveRel_;
   #define FIRST_MOTOR_PARAM motorMoveRel_
+  int motorMoveRel_;
   int motorMoveAbs_;
   int motorMoveVel_;
   int motorHome_;
@@ -202,15 +205,15 @@ protected:
   int profileEndPulses_;
   int profileActualPulses_;
   int profileTimeArray_;
-  int profileAccel_;
+  int profileAcceleration_;
   int profileBuild_;
   int profileBuildState_;
   int profileBuildStatus_;
   int profileBuildMessage_;
-  int profileExec_;
-  int profileExecState_;
-  int profileExecStatus_;
-  int profileExecMessage_;
+  int profileExecute_;
+  int profileExecuteState_;
+  int profileExecuteStatus_;
+  int profileExecuteMessage_;
   int profileReadback_;
   int profileReadbackState_;
   int profileReadbackStatus_;
@@ -218,12 +221,12 @@ protected:
 
   // These are the per-axis parameters for profile moves
   int profileUseAxis_;
-  int profilePosition_;
-  int profilePositionRBV_;
-  int profileFollowingError_;
+  int profilePositions_;
+  int profileReadbacks_;
+  int profileFollowingErrors_;
+  int profileMotorResolution_;
   int profileMotorDirection_;
   int profileMotorOffset_;
-
   #define LAST_MOTOR_PARAM profileMotorOffset_
 
   int numAxes_;                 /**< Number of axes this controller supports */
