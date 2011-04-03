@@ -39,7 +39,10 @@ public:
   asynStatus processDeferredMoves();
   asynStatus processDeferredMovesInGroup(char * groupName);
 
+
 protected:
+  XPSAxis **pAxes_;       /**< Array of pointers to axis objects */
+
   int XPSMinJerk_;
 #define FIRST_XPS_PARAM XPSMinJerk_
   int XPSMaxJerk_;
