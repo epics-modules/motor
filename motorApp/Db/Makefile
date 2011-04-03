@@ -34,6 +34,10 @@ DB += ACRAuxBoRBV.template
 DB += TransPos.db
 DB += motorUtil.db
 DB += asyn_motor.db
+DB += profileMoveController.template
+DB += profileMoveAxis.template
+DB += profileMoveControllerXPS.template
+DB += profileMoveAxisXPS.template
 
 #----------------------------------------------------
 # Declare template files which do not show up in DB
