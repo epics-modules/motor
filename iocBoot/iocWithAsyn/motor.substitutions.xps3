@@ -21,3 +21,41 @@ pattern
 {IOC:,  m5, XPS1   4}
 {IOC:,  m6, XPS1   5}
 }
+
+file "$(TOP)/db/profileMoveController.template"
+{
+pattern
+{P,     R,     PORT, NAXES, NPOINTS, NPULSES, TIMEOUT}
+{IOC:,  Prof1, XPS1,     6,    2000,    2000,       1}
+}
+
+file "$(TOP)/db/profileMoveControllerXPS.template"
+{
+pattern
+{P,     R,     PORT, NAXES, NPOINTS, NPULSES, TIMEOUT}
+{IOC:,  Prof1, XPS1,     6,    2000,    2000,       1}
+}
+
+file "$(TOP)/db/profileMoveAxis.template"
+{
+pattern
+{P,     R,     PORT, AXIS,NPOINTS, NREADBACK, PREC, TIMEOUT}
+{IOC:,  Prof1, XPS1,    0,   2000,      2000,    5,       1}
+{IOC:,  Prof1, XPS1,    1,   2000,      2000,    5,       1}
+{IOC:,  Prof1, XPS1,    2,   2000,      2000,    4,       1}
+{IOC:,  Prof1, XPS1,    3,   2000,      2000,    4,       1}
+{IOC:,  Prof1, XPS1,    4,   2000,      2000,    4,       1}
+{IOC:,  Prof1, XPS1,    5,   2000,      2000,    4,       1}
+}
+
+file "$(TOP)/db/profileMoveAxisXPS.template"
+{
+pattern
+{P,     R,     PORT, AXIS,NPOINTS, NREADBACK, PREC, TIMEOUT}
+{IOC:,  Prof1, XPS1,    0,   2000,      2000,    5,       1}
+{IOC:,  Prof1, XPS1,    1,   2000,      2000,    5,       1}
+{IOC:,  Prof1, XPS1,    2,   2000,      2000,    4,       1}
+{IOC:,  Prof1, XPS1,    3,   2000,      2000,    4,       1}
+{IOC:,  Prof1, XPS1,    4,   2000,      2000,    4,       1}
+{IOC:,  Prof1, XPS1,    5,   2000,      2000,    4,       1}
+}

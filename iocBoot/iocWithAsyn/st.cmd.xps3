@@ -33,3 +33,16 @@ iocInit
 
 #seq(XPS_trajectoryScan,"P=13xps8:,R=traj1,M1=m1,IPADDR=164.54.160.83,PORT=5001,GROUP=GROUP1,P1=POSITIONER1")
 
+# This IOC does not use save/restore, so set values of some PVs
+dbpf("IOC:m1.RTRY", "0")
+dbpf("IOC:m1.TWV", "0.1")
+dbpf("IOC:m2.RTRY", "0")
+dbpf("IOC:m2.TWV", "0.1")
+dbpf("IOC:m3.RTRY", "0")
+dbpf("IOC:m3.TWV", "0.1")
+dbpf("IOC:m4.RTRY", "0")
+dbpf("IOC:m4.TWV", "0.1")
+dbpf("IOC:m5.RTRY", "0")
+dbpf("IOC:m5.TWV", "0.1")
+dbpf("IOC:m6.RTRY", "0")
+dbpf("IOC:m6.TWV", "0.1")
