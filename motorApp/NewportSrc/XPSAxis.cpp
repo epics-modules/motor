@@ -87,6 +87,7 @@ Versions: Release 4-5 and higher.
 #include <epicsTime.h>
 #include <epicsThread.h>
 #include <epicsExport.h>
+#include <epicsExit.h>
 #include <epicsString.h>
 #include <iocsh.h>
 
@@ -135,8 +136,16 @@ static double setPosSleepTime = 0.5;
 #define MAX(a,b) ((a)>(b)? (a): (b))
 #define MIN(a,b) ((a)<(b)? (a): (b))
 
-// These are the XPSAxis:: methods
+extern "C" void shutdownCallback(void *pPvt)
+{
+  XPSController *pC = static_cast<XPSController *>(pPvt);
 
+  pC->lock();
+  pC->shuttingDown_ = 1;
+  pC->unlock();
+}
+
+// These are the XPSAxis:: methods
 XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, double stepSize)
   :   asynMotorAxis(pC, axisNo),
       pC_(pC)
@@ -154,6 +163,9 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
   /* Set the poll rate on the moveSocket to a negative number, which means that SendAndReceive should do only a write, no read */
   TCP_SetTimeout(moveSocket_, -0.1);
   pollSocket_ = pC_->pollSocket_;
+  
+  /* Set an EPICS exit handler that will shut down polling before asyn kills the IP sockets */
+  epicsAtExit(shutdownCallback, pC_);
 
   setIntegerParam(pC_->motorStatusGainSupport_, 1);
   setIntegerParam(pC_->motorStatusHasEncoder_, 1);
