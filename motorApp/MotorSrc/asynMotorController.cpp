@@ -28,10 +28,10 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
                                          int asynFlags, int autoConnect, int priority, int stackSize)
 
   : asynPortDriver(portName, numAxes, NUM_MOTOR_DRIVER_PARAMS+numParams,
-      interfaceMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask | asynDrvUserMask,
-      interruptMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask,
+      interfaceMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask | asynDrvUserMask,
+      interruptMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask,
       asynFlags, autoConnect, priority, stackSize),
-    numAxes_(numAxes)
+    shuttingDown_(0), numAxes_(numAxes)
 
 {
   static const char *functionName = "asynMotorController::asynMotorController";
@@ -82,15 +82,15 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(profileEndPulsesString,            asynParamInt32,      &profileEndPulses_);
   createParam(profileActualPulsesString,         asynParamInt32,      &profileActualPulses_);
   createParam(profileTimeArrayString,     asynParamFloat64Array,      &profileTimeArray_);
-  createParam(profileAccelString,              asynParamFloat64,      &profileAccel_);
+  createParam(profileAccelerationString,       asynParamFloat64,      &profileAcceleration_);
   createParam(profileBuildString,                asynParamInt32,      &profileBuild_);
   createParam(profileBuildStateString,           asynParamInt32,      &profileBuildState_);
   createParam(profileBuildStatusString,          asynParamOctet,      &profileBuildStatus_);
   createParam(profileBuildMessageString,         asynParamOctet,      &profileBuildMessage_);
-  createParam(profileExecString,                 asynParamInt32,      &profileExec_);
-  createParam(profileExecStateString,            asynParamInt32,      &profileExecState_);
-  createParam(profileExecStatusString,           asynParamOctet,      &profileExecStatus_);
-  createParam(profileExecMessageString,          asynParamOctet,      &profileExecMessage_);
+  createParam(profileExecuteString,              asynParamInt32,      &profileExecute_);
+  createParam(profileExecuteStateString,         asynParamInt32,      &profileExecuteState_);
+  createParam(profileExecuteStatusString,        asynParamOctet,      &profileExecuteStatus_);
+  createParam(profileExecuteMessageString,       asynParamOctet,      &profileExecuteMessage_);
   createParam(profileReadbackString,             asynParamInt32,      &profileReadback_);
   createParam(profileReadbackStateString,        asynParamInt32,      &profileReadbackState_);
   createParam(profileReadbackStatusString,       asynParamOctet,      &profileReadbackStatus_);
@@ -98,9 +98,10 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
 
   // These are the per-axis parameters for profile moves
   createParam(profileUseAxisString,              asynParamInt32,      &profileUseAxis_);
-  createParam(profilePositionString,      asynParamFloat64Array,      &profilePosition_);
-  createParam(profilePositionRBVString,   asynParamFloat64Array,      &profilePositionRBV_);
-  createParam(profileFollowingErrorString,asynParamFloat64Array,      &profileFollowingError_);
+  createParam(profilePositionsString,     asynParamFloat64Array,      &profilePositions_);
+  createParam(profileReadbacksString,     asynParamFloat64Array,      &profileReadbacks_);
+  createParam(profileFollowingErrorsString, asynParamFloat64Array,    &profileFollowingErrors_);
+  createParam(profileMotorResolutionString,    asynParamFloat64,      &profileMotorResolution_);
   createParam(profileMotorDirectionString,       asynParamInt32,      &profileMotorDirection_);
   createParam(profileMotorOffsetString,        asynParamFloat64,      &profileMotorOffset_);
 
@@ -372,7 +373,6 @@ static void asynMotorPollerC(void *drvPvt)
   pController->asynMotorPoller();
 }
   
-
 /** Default poller function that runs in the thread created by asynMotorController::startPoller().
   * This base class implementation can be used by most derived classes. 
   * It polls at the idlePollPeriod_ when no axes are moving, and at the movingPollPeriod_ when
@@ -406,6 +406,7 @@ void asynMotorController::asynMotorPoller()
     }
     anyMoving = 0;
     lock();
+    if (shuttingDown_) break;
     this->poll();
     for (i=0; i<numAxes_; i++) {
         pAxis=getAxis(i);
