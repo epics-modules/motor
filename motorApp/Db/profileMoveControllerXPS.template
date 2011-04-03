@@ -1,0 +1,21 @@
+# Database for profile moves with asynMotor
+# This database defined records specific to the XPS controller
+#
+#    Mark Rivers
+#    April 3, 2011
+#
+#
+# Macro paramters:
+#   $(P)        - PV name prefix
+#   $(R)        - PV base record name
+#   $(PORT)     - asyn port for this controller
+#   $(TIMEOUT)  - asyn timeout
+
+# Name of the trajectory file that is built and FTP'd to the XPS
+record(stringout, "$(P)$(R)TrajectoryFile") {
+    field(DESC, "XPS trajectory file")
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT),0,$(TIMEOUT))XPS_TRAJECTORY_FILE")
+    field(VAL,  "TrajectoryScan.trj")
+}

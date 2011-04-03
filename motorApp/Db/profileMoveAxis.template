@@ -1,0 +1,67 @@
+# Database for profile moves with asynMotor
+# This is the database for the each axis, profileMoveController is the file
+# for the controller.
+#
+#    Mark Rivers
+#    April 3, 2011
+#
+#
+# Macro paramters:
+#   $(P)         - PV name prefix
+#   $(R)         - PV base record name
+#   $(NPOINTS)   - Maximum profile points
+#   $(NREADBACK) - Maximum number of readback positions
+#   $(PORT)      - asyn port for this controller
+#   $(AXIS)      - asyn addr for this axis
+#   $(TIMEOUT)   - asyn timeout for this axis
+#   $(PREC)      - Precision for this axis
+
+#
+# Is this axis involved in the profile move?
+#
+record(bo,"$(P)$(R)($N)Use axis") {
+    field(DESC, "Use axis $(AXIS)?")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_USE_AXIS")
+    field(VAL,  "0")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+}
+#
+# Target position array for this axis
+#
+record(waveform,"$(P)$(R)$(AXIS)Positions") {
+    field(DESC, "Axis $(AXIS) positions")
+    field(DTYP, "asynFloat64ArrayOut")
+    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_POSITIONS")
+    field(NELM, "$(NPOINTS)")
+    field(FTVL, "DOUBLE")
+    field(PREC, "$(PREC)")
+}
+
+#
+# Readback position array for this axis
+#
+record(waveform,"$(P)$(R)$(AXIS)Readbacks") {
+    field(DESC, "Axis $(AXIS) readbacks")
+    field(DTYP, "asynFloat64ArrayIn")
+    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_READBACKS")
+    field(NELM, "$(NREADBACK)")
+    field(FTVL, "DOUBLE")
+    field(PREC, "$(PREC)")
+    field(SCAN, "I/O Intr")
+}
+
+#
+# Following error array for this axis
+#
+record(waveform,"$(P)$(R)$(AXIS)FollowingErrors") {
+    field(DESC, "Axis $(AXIS) following errors")
+    field(DTYP, "asynFloat64ArrayIn")
+    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_FOLLOWING_ERRORS")
+    field(NELM, "$(NREADBACK)")
+    field(FTVL, "DOUBLE")
+    field(PREC, "$(PREC)")
+    field(SCAN, "I/O Intr")
+}

@@ -1,0 +1,58 @@
+# Database for profile moves with asynMotor
+# This database defined records specific to each XPS axis
+#
+#    Mark Rivers
+#    April 3, 2011
+#
+#
+# Macro paramters:
+#   $(P)         - PV name prefix
+#   $(R)         - PV base record name
+#   $(PORT)      - asyn port for this controller
+#   $(AXIS)      - asyn addr for this axis
+#   $(TIMEOUT)   - asyn timeout for this axis
+#   $(PREC)      - Precision for this axis
+
+#
+# Readback of minimum position
+#
+record(ai,"$(P)$(R)MinPosition") {
+    field(DESC, "Axis $(AXIS) min position")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))XPS_PROFILE_MIN_POSITION")
+    field(PREC, "$(PREC)")
+    field(SCAN, "I/O Intr")
+}
+
+#
+# Readback of maximum position
+#
+record(ai,"$(P)$(R)MaxPosition") {
+    field(DESC, "Axis $(AXIS) max position")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))XPS_PROFILE_MAX_POSITION")
+    field(PREC, "$(PREC)")
+    field(SCAN, "I/O Intr")
+}
+
+#
+# Readback of maximum velocity
+#
+record(ai,"$(P)$(R)MaxVelocity") {
+    field(DESC, "Axis $(AXIS) max velocity")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))XPS_PROFILE_MAX_VELOCITY")
+    field(PREC, "$(PREC)")
+    field(SCAN, "I/O Intr")
+}
+
+#
+# Readback of maximum acceleration
+#
+record(ai,"$(P)$(R)MaxAcceleration") {
+    field(DESC, "Axis $(AXIS) max acceleration")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))XPS_PROFILE_MAX_ACCELERATION")
+    field(PREC, "$(PREC)")
+    field(SCAN, "I/O Intr")
+}
