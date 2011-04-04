@@ -726,7 +726,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
 
   if (!strcmp(correctorType, CorrectorTypes.PIPosition)) {
     /*Read the PID parameters first.*/
-    status = PositionerCorrectorPIPositionGetWrapper();
+    status = PositionerCorrectorPIPositionGet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: Error with PositionerCorrectorPIPositionGet. Aborting setting PID XPS: %s, Axis: %d, XPS API Error: %d\n",
@@ -738,7 +738,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
     setPIDValue(value, pidoption); 
 
     /*Now set the parameters in the XPS.*/
-    status = PositionerCorrectorPIPositionSetWrapper();
+    status = PositionerCorrectorPIPositionSet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: Error with PositionerCorrectorPIPositionSet: %s, Axis: %d, XPS API Error: %d\n",
@@ -746,7 +746,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
       return asynError;
     }
   } else if (!strcmp(correctorType, CorrectorTypes.PIDFFVelocity)) {
-    status = PositionerCorrectorPIDFFVelocityGetWrapper();
+    status = PositionerCorrectorPIDFFVelocityGet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: Error with PositionerCorrectorPIDFFVelocityGet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
@@ -756,7 +756,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
 
     setPIDValue(value, pidoption); 
 
-    status = PositionerCorrectorPIDFFVelocitySetWrapper();
+    status = PositionerCorrectorPIDFFVelocitySet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: Error with PositionerCorrectorPIDFFVelocitySet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
@@ -765,7 +765,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
     }
 
   } else if (!strcmp(correctorType, CorrectorTypes.PIDFFAcceleration)) {
-    status = PositionerCorrectorPIDFFAccelerationGetWrapper();
+    status = PositionerCorrectorPIDFFAccelerationGet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: Error with PositionerCorrectorPIDFFAccelerationGet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
@@ -775,7 +775,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
 
     setPIDValue(value, pidoption); 
 
-    status = PositionerCorrectorPIDFFAccelerationSetWrapper();
+    status = PositionerCorrectorPIDFFAccelerationSet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: Error with PositionerCorrectorPIDFFAccelerationSet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
@@ -784,7 +784,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
     }
 
   } else if (!strcmp(correctorType, CorrectorTypes.PIDDualFFVoltage)) {
-    status = PositionerCorrectorPIDDualFFVoltageGetWrapper();
+    status = PositionerCorrectorPIDDualFFVoltageGet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: Error with PositionerCorrectorPIDDualFFVoltageGet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
@@ -794,7 +794,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
 
     setPIDValue(value, pidoption); 
 
-    status = PositionerCorrectorPIDDualFFVoltageSetWrapper();
+    status = PositionerCorrectorPIDDualFFVoltageSet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: Error with PositionerCorrectorPIDDualFFVoltageSet. Aborting setting PID %s, Axis: %d, XPS API Error: %d\n",
@@ -828,7 +828,7 @@ asynStatus XPSAxis::getPID()
   char correctorType[250] = {'\0'};
   static const char *functionName = "XPSAxis::getPID";
   
-  /*The XPS function that we use to set the PID parameters is dependant on the 
+  /* The XPS function that we use to set the PID parameters is dependant on the 
     type of corrector in use for that axis.*/
   status = PositionerCorrectorTypeGet(pollSocket_,
                                       positionerName_,
@@ -841,7 +841,7 @@ asynStatus XPSAxis::getPID()
   }
   if (!strcmp(correctorType, CorrectorTypes.PIPosition)) {
     /*Read the PID parameters and set in pAxis.*/
-    status = PositionerCorrectorPIPositionGetWrapper();
+    status = PositionerCorrectorPIPositionGet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: XPS %s, Axis: %d, Error with PositionerCorrectorPIPositionGet. XPS API Error: %d\n",
@@ -850,7 +850,7 @@ asynStatus XPSAxis::getPID()
     }
 
   } else if (!strcmp(correctorType, CorrectorTypes.PIDFFVelocity)) {
-    status = PositionerCorrectorPIDFFVelocityGetWrapper();
+    status = PositionerCorrectorPIDFFVelocityGet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: XPS %s, Axis: %d, Error with PositionerCorrectorPIDFFVelocityGet. XPS API Error: %d\n",
@@ -859,7 +859,7 @@ asynStatus XPSAxis::getPID()
     }
 
   } else if (!strcmp(correctorType, CorrectorTypes.PIDFFAcceleration)) {
-    status = PositionerCorrectorPIDFFAccelerationGetWrapper();
+    status = PositionerCorrectorPIDFFAccelerationGet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: XPS %s, Axis: %d, Error with PositionerCorrectorPIDFFAccelerationGet. XPS API Error: %d\n",
@@ -868,7 +868,7 @@ asynStatus XPSAxis::getPID()
     }
 
   } else if (!strcmp(correctorType, CorrectorTypes.PIDDualFFVoltage)) {
-    status = PositionerCorrectorPIDDualFFVoltageGetWrapper();
+    status = PositionerCorrectorPIDDualFFVoltageGet();
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: XPS %s, Axis: %d, Error with PositionerCorrectorPIDDualFFVoltageGet. XPS API Error: %d\n",
@@ -932,15 +932,15 @@ asynStatus XPSAxis::setPIDValue(const double * value, int pidoption)
  * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
-asynStatus XPSAxis::PositionerCorrectorPIPositionGetWrapper()
+asynStatus XPSAxis::PositionerCorrectorPIPositionGet()
 {
   int status;
-  status = PositionerCorrectorPIPositionGet(pollSocket_,
-                                            positionerName_,
-                                            &xpsCorrectorInfo_.ClosedLoopStatus,
-                                            &xpsCorrectorInfo_.KP, 
-                                            &xpsCorrectorInfo_.KI, 
-                                            &xpsCorrectorInfo_.IntegrationTime);
+  status = ::PositionerCorrectorPIPositionGet(pollSocket_,
+                                              positionerName_,
+                                              &xpsCorrectorInfo_.ClosedLoopStatus,
+                                              &xpsCorrectorInfo_.KP, 
+                                              &xpsCorrectorInfo_.KI, 
+                                              &xpsCorrectorInfo_.IntegrationTime);
   return status ? asynError : asynSuccess;
 }
 
@@ -950,23 +950,23 @@ asynStatus XPSAxis::PositionerCorrectorPIPositionGetWrapper()
  * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
-asynStatus XPSAxis::PositionerCorrectorPIDFFVelocityGetWrapper()
+asynStatus XPSAxis::PositionerCorrectorPIDFFVelocityGet()
 {
   int status;
-  status = PositionerCorrectorPIDFFVelocityGet(pollSocket_,
-                                               positionerName_,
-                                               &xpsCorrectorInfo_.ClosedLoopStatus,
-                                               &xpsCorrectorInfo_.KP, 
-                                               &xpsCorrectorInfo_.KI,
-                                               &xpsCorrectorInfo_.KD,
-                                               &xpsCorrectorInfo_.KS,
-                                               &xpsCorrectorInfo_.IntegrationTime,
-                                               &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
-                                               &xpsCorrectorInfo_.GKP,
-                                               &xpsCorrectorInfo_.GKI,
-                                               &xpsCorrectorInfo_.GKD,
-                                               &xpsCorrectorInfo_.KForm,
-                                               &xpsCorrectorInfo_.FeedForwardGainVelocity);
+  status = ::PositionerCorrectorPIDFFVelocityGet(pollSocket_,
+                                                 positionerName_,
+                                                 &xpsCorrectorInfo_.ClosedLoopStatus,
+                                                 &xpsCorrectorInfo_.KP, 
+                                                 &xpsCorrectorInfo_.KI,
+                                                 &xpsCorrectorInfo_.KD,
+                                                 &xpsCorrectorInfo_.KS,
+                                                 &xpsCorrectorInfo_.IntegrationTime,
+                                                 &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                 &xpsCorrectorInfo_.GKP,
+                                                 &xpsCorrectorInfo_.GKI,
+                                                 &xpsCorrectorInfo_.GKD,
+                                                 &xpsCorrectorInfo_.KForm,
+                                                 &xpsCorrectorInfo_.FeedForwardGainVelocity);
   return status ? asynError : asynSuccess;
 }
 
@@ -977,23 +977,23 @@ asynStatus XPSAxis::PositionerCorrectorPIDFFVelocityGetWrapper()
  * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
-asynStatus XPSAxis::PositionerCorrectorPIDFFAccelerationGetWrapper()
+asynStatus XPSAxis::PositionerCorrectorPIDFFAccelerationGet()
 {
   int status;
-  status = PositionerCorrectorPIDFFAccelerationGet(pollSocket_,
-                                                   positionerName_,
-                                                   &xpsCorrectorInfo_.ClosedLoopStatus,
-                                                   &xpsCorrectorInfo_.KP, 
-                                                   &xpsCorrectorInfo_.KI,
-                                                   &xpsCorrectorInfo_.KD,
-                                                   &xpsCorrectorInfo_.KS,
-                                                   &xpsCorrectorInfo_.IntegrationTime,
-                                                   &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
-                                                   &xpsCorrectorInfo_.GKP,
-                                                   &xpsCorrectorInfo_.GKI,
-                                                   &xpsCorrectorInfo_.GKD,
-                                                   &xpsCorrectorInfo_.KForm,
-                                                   &xpsCorrectorInfo_.FeedForwardGainAcceleration);
+  status = ::PositionerCorrectorPIDFFAccelerationGet(pollSocket_,
+                                                     positionerName_,
+                                                     &xpsCorrectorInfo_.ClosedLoopStatus,
+                                                     &xpsCorrectorInfo_.KP, 
+                                                     &xpsCorrectorInfo_.KI,
+                                                     &xpsCorrectorInfo_.KD,
+                                                     &xpsCorrectorInfo_.KS,
+                                                     &xpsCorrectorInfo_.IntegrationTime,
+                                                     &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                     &xpsCorrectorInfo_.GKP,
+                                                     &xpsCorrectorInfo_.GKI,
+                                                     &xpsCorrectorInfo_.GKD,
+                                                     &xpsCorrectorInfo_.KForm,
+                                                     &xpsCorrectorInfo_.FeedForwardGainAcceleration);
   return status ? asynError : asynSuccess;
 }
 
@@ -1004,25 +1004,25 @@ asynStatus XPSAxis::PositionerCorrectorPIDFFAccelerationGetWrapper()
  * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
-asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageGetWrapper()
+asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageGet()
 {
   int status;
-  status =  PositionerCorrectorPIDDualFFVoltageGet(pollSocket_,
-                                                  positionerName_,
-                                                  &xpsCorrectorInfo_.ClosedLoopStatus,
-                                                  &xpsCorrectorInfo_.KP, 
-                                                  &xpsCorrectorInfo_.KI,
-                                                  &xpsCorrectorInfo_.KD,
-                                                  &xpsCorrectorInfo_.KS,
-                                                  &xpsCorrectorInfo_.IntegrationTime,
-                                                  &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
-                                                  &xpsCorrectorInfo_.GKP,
-                                                  &xpsCorrectorInfo_.GKI,
-                                                  &xpsCorrectorInfo_.GKD,
-                                                  &xpsCorrectorInfo_.KForm,
-                                                  &xpsCorrectorInfo_.FeedForwardGainVelocity,
-                                                  &xpsCorrectorInfo_.FeedForwardGainAcceleration,
-                                                  &xpsCorrectorInfo_.Friction);
+  status =  ::PositionerCorrectorPIDDualFFVoltageGet(pollSocket_,
+                                                    positionerName_,
+                                                    &xpsCorrectorInfo_.ClosedLoopStatus,
+                                                    &xpsCorrectorInfo_.KP, 
+                                                    &xpsCorrectorInfo_.KI,
+                                                    &xpsCorrectorInfo_.KD,
+                                                    &xpsCorrectorInfo_.KS,
+                                                    &xpsCorrectorInfo_.IntegrationTime,
+                                                    &xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                    &xpsCorrectorInfo_.GKP,
+                                                    &xpsCorrectorInfo_.GKI,
+                                                    &xpsCorrectorInfo_.GKD,
+                                                    &xpsCorrectorInfo_.KForm,
+                                                    &xpsCorrectorInfo_.FeedForwardGainVelocity,
+                                                    &xpsCorrectorInfo_.FeedForwardGainAcceleration,
+                                                    &xpsCorrectorInfo_.Friction);
   return status ? asynError : asynSuccess;
 }
 
@@ -1032,15 +1032,15 @@ asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageGetWrapper()
  * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
-asynStatus XPSAxis::PositionerCorrectorPIPositionSetWrapper()
+asynStatus XPSAxis::PositionerCorrectorPIPositionSet()
 {
   int status;
-  status = PositionerCorrectorPIPositionSet(pollSocket_,
-                                            positionerName_,
-                                            xpsCorrectorInfo_.ClosedLoopStatus,
-                                            xpsCorrectorInfo_.KP, 
-                                            xpsCorrectorInfo_.KI, 
-                                            xpsCorrectorInfo_.IntegrationTime);
+  status = ::PositionerCorrectorPIPositionSet(pollSocket_,
+                                              positionerName_,
+                                              xpsCorrectorInfo_.ClosedLoopStatus,
+                                              xpsCorrectorInfo_.KP, 
+                                              xpsCorrectorInfo_.KI, 
+                                              xpsCorrectorInfo_.IntegrationTime);
   return status ? asynError : asynSuccess;
 }
 
@@ -1050,23 +1050,23 @@ asynStatus XPSAxis::PositionerCorrectorPIPositionSetWrapper()
  * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
-asynStatus XPSAxis::PositionerCorrectorPIDFFVelocitySetWrapper()
+asynStatus XPSAxis::PositionerCorrectorPIDFFVelocitySet()
 {
   int status;
-  status = PositionerCorrectorPIDFFVelocitySet(pollSocket_,
-                                               positionerName_,
-                                               xpsCorrectorInfo_.ClosedLoopStatus,
-                                               xpsCorrectorInfo_.KP, 
-                                               xpsCorrectorInfo_.KI,
-                                               xpsCorrectorInfo_.KD,
-                                               xpsCorrectorInfo_.KS,
-                                               xpsCorrectorInfo_.IntegrationTime,
-                                               xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
-                                               xpsCorrectorInfo_.GKP,
-                                               xpsCorrectorInfo_.GKI,
-                                               xpsCorrectorInfo_.GKD,
-                                               xpsCorrectorInfo_.KForm,
-                                               xpsCorrectorInfo_.FeedForwardGainVelocity);
+  status = ::PositionerCorrectorPIDFFVelocitySet(pollSocket_,
+                                                 positionerName_,
+                                                 xpsCorrectorInfo_.ClosedLoopStatus,
+                                                 xpsCorrectorInfo_.KP, 
+                                                 xpsCorrectorInfo_.KI,
+                                                 xpsCorrectorInfo_.KD,
+                                                 xpsCorrectorInfo_.KS,
+                                                 xpsCorrectorInfo_.IntegrationTime,
+                                                 xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                 xpsCorrectorInfo_.GKP,
+                                                 xpsCorrectorInfo_.GKI,
+                                                 xpsCorrectorInfo_.GKD,
+                                                 xpsCorrectorInfo_.KForm,
+                                                 xpsCorrectorInfo_.FeedForwardGainVelocity);
   return status ? asynError : asynSuccess;
 }
 
@@ -1075,23 +1075,23 @@ asynStatus XPSAxis::PositionerCorrectorPIDFFVelocitySetWrapper()
  * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
-asynStatus XPSAxis:: PositionerCorrectorPIDFFAccelerationSetWrapper()
+asynStatus XPSAxis:: PositionerCorrectorPIDFFAccelerationSet()
 {
   int status;
-  status = PositionerCorrectorPIDFFAccelerationSet(pollSocket_,
-                                                   positionerName_,
-                                                   xpsCorrectorInfo_.ClosedLoopStatus,
-                                                   xpsCorrectorInfo_.KP, 
-                                                   xpsCorrectorInfo_.KI,
-                                                   xpsCorrectorInfo_.KD,
-                                                   xpsCorrectorInfo_.KS,
-                                                   xpsCorrectorInfo_.IntegrationTime,
-                                                   xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
-                                                   xpsCorrectorInfo_.GKP,
-                                                   xpsCorrectorInfo_.GKI,
-                                                   xpsCorrectorInfo_.GKD,
-                                                   xpsCorrectorInfo_.KForm,
-                                                   xpsCorrectorInfo_.FeedForwardGainAcceleration);
+  status = ::PositionerCorrectorPIDFFAccelerationSet(pollSocket_,
+                                                     positionerName_,
+                                                     xpsCorrectorInfo_.ClosedLoopStatus,
+                                                     xpsCorrectorInfo_.KP, 
+                                                     xpsCorrectorInfo_.KI,
+                                                     xpsCorrectorInfo_.KD,
+                                                     xpsCorrectorInfo_.KS,
+                                                     xpsCorrectorInfo_.IntegrationTime,
+                                                     xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                     xpsCorrectorInfo_.GKP,
+                                                     xpsCorrectorInfo_.GKI,
+                                                     xpsCorrectorInfo_.GKD,
+                                                     xpsCorrectorInfo_.KForm,
+                                                     xpsCorrectorInfo_.FeedForwardGainAcceleration);
   return status ? asynError : asynSuccess;
 }
 
@@ -1100,24 +1100,48 @@ asynStatus XPSAxis:: PositionerCorrectorPIDFFAccelerationSetWrapper()
  * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
-asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageSetWrapper()
+asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageSet()
 {
   int status;
-  status = PositionerCorrectorPIDDualFFVoltageSet(pollSocket_,
-                                                  positionerName_,
-                                                  xpsCorrectorInfo_.ClosedLoopStatus,
-                                                  xpsCorrectorInfo_.KP, 
-                                                  xpsCorrectorInfo_.KI,
-                                                  xpsCorrectorInfo_.KD,
-                                                  xpsCorrectorInfo_.KS,
-                                                  xpsCorrectorInfo_.IntegrationTime,
-                                                  xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
-                                                  xpsCorrectorInfo_.GKP,
-                                                  xpsCorrectorInfo_.GKI,
-                                                  xpsCorrectorInfo_.GKD,
-                                                  xpsCorrectorInfo_.KForm,
-                                                  xpsCorrectorInfo_.FeedForwardGainVelocity,
-                                                  xpsCorrectorInfo_.FeedForwardGainAcceleration,
-                                                  xpsCorrectorInfo_.Friction);
+  status = ::PositionerCorrectorPIDDualFFVoltageSet(pollSocket_,
+                                                    positionerName_,
+                                                    xpsCorrectorInfo_.ClosedLoopStatus,
+                                                    xpsCorrectorInfo_.KP, 
+                                                    xpsCorrectorInfo_.KI,
+                                                    xpsCorrectorInfo_.KD,
+                                                    xpsCorrectorInfo_.KS,
+                                                    xpsCorrectorInfo_.IntegrationTime,
+                                                    xpsCorrectorInfo_.DerivativeFilterCutOffFrequency,
+                                                    xpsCorrectorInfo_.GKP,
+                                                    xpsCorrectorInfo_.GKI,
+                                                    xpsCorrectorInfo_.GKD,
+                                                    xpsCorrectorInfo_.KForm,
+                                                    xpsCorrectorInfo_.FeedForwardGainVelocity,
+                                                    xpsCorrectorInfo_.FeedForwardGainAcceleration,
+                                                    xpsCorrectorInfo_.Friction);
   return status ? asynError : asynSuccess;
 }
+
+/** Function to define the motor positions for a profile move. 
+  * This calls the base class function to convert to steps, but since the
+  * XPS works in user-units we need to do an additional convertion by stepSize_. 
+  * \param[in] positions Array of profile positions for this axis in user units.
+  * \param[in] numPoints The number of positions in the array.
+  */
+asynStatus XPSAxis::defineProfile(double *positions, int numPoints)
+{
+  int i;
+  asynStatus status;
+  // static const char *functionName = "asynMotorController::buildProfile";
+  
+  // Call the base class function
+  status = asynMotorAxis::defineProfile(positions, numPoints);
+  if (status) return status;
+  
+  // Convert to XPS units from steps
+  for (i=0; i<numPoints; i++) {
+    profilePositions_[i] = profilePositions_[i]/stepSize_;
+  }
+  return asynSuccess;
+}
+
