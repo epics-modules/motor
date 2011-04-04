@@ -234,10 +234,36 @@ asynStatus asynMotorAxis::executeProfile()
   return asynSuccess;
 }
 
-/** Function to readback the actual motor positions from a coordinated move of multiple axes. */
+/** Function to readback the actual motor positions from a coordinated move of multiple axes.
+  * This base class function converts the readbacks and following errors from controller units 
+  * to user units and does callbacks on the arrays.
+  * Caution: this function modifies the readbacks in place, so it must only be called
+  * once per readback operation.
+ */
 asynStatus asynMotorAxis::readbackProfile()
 {
+  int i;
+  double resolution;
+  double offset;
+  int direction;
+  int numReadbacks;
+  int status=0;
   // static const char *functionName = "asynMotorController::readbackProfile";
-  // Convert readbacks and following errors from controller units to user units and do callbacks
+ 
+  status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
+  status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorOffset_, &offset);
+  status |= pC_->getIntegerParam(axisNo_, pC_->profileMotorDirection_, &direction);
+  status |= pC_->getIntegerParam(axisNo_, pC_->profileNumReadbacks_, &numReadbacks);
+  if (status) return asynError;
+  if (resolution == 0.0) return asynError;
+  
+  // Convert to user units
+  if (direction != 0) resolution = -resolution;
+  for (i=0; i<numReadbacks; i++) {
+    profileReadbacks_[i] = profileReadbacks_[i] * resolution + offset;
+    profileFollowingErrors_[i] = profileFollowingErrors_[i] * resolution;
+  }
+  pC_->doCallbacksFloat64Array(profileReadbacks_,       numReadbacks, axisNo_, pC_->profileReadbacks_);
+  pC_->doCallbacksFloat64Array(profileFollowingErrors_, numReadbacks, axisNo_, pC_->profileFollowingErrors_);
   return asynSuccess;
 }
