@@ -31,7 +31,7 @@ class XPSController;
 
 class XPSAxis : public asynMotorAxis
 {
-public:
+  public:
   /* These are the methods we override from the base class */
   XPSAxis(XPSController *pController, int axisNo, const char *positionerName, double stepSize);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
@@ -40,8 +40,10 @@ public:
   asynStatus stop(double acceleration);
   asynStatus poll(int *moving);
   asynStatus setPosition(double position);
+
+  virtual asynStatus defineProfile(double *positions, int numPoints);
   
-private:
+  private:
   XPSController *pC_;
   char *getXPSError(int status, char *buffer);
   int isInGroup();
@@ -50,14 +52,14 @@ private:
   asynStatus setPIDValue(const double * value, int pidoption); 
 
   /* Wrapper functions for the verbose PositionerCorrector functions. */
-  asynStatus PositionerCorrectorPIPositionGetWrapper();
-  asynStatus PositionerCorrectorPIDFFVelocityGetWrapper();
-  asynStatus PositionerCorrectorPIDFFAccelerationGetWrapper();
-  asynStatus PositionerCorrectorPIDDualFFVoltageGetWrapper();
-  asynStatus PositionerCorrectorPIPositionSetWrapper();
-  asynStatus PositionerCorrectorPIDFFVelocitySetWrapper();
-  asynStatus PositionerCorrectorPIDFFAccelerationSetWrapper();
-  asynStatus PositionerCorrectorPIDDualFFVoltageSetWrapper();
+  asynStatus PositionerCorrectorPIPositionGet();
+  asynStatus PositionerCorrectorPIDFFVelocityGet();
+  asynStatus PositionerCorrectorPIDFFAccelerationGet();
+  asynStatus PositionerCorrectorPIDDualFFVoltageGet();
+  asynStatus PositionerCorrectorPIPositionSet();
+  asynStatus PositionerCorrectorPIDFFVelocitySet();
+  asynStatus PositionerCorrectorPIDFFAccelerationSet();
+  asynStatus PositionerCorrectorPIDDualFFVoltageSet();
 
   int pollSocket_;
   int moveSocket_;
@@ -78,7 +80,7 @@ private:
   int deferredMove_;
   int deferredRelative_;
 
-friend class XPSController;
+  friend class XPSController;
 };
 
 #endif /* XPSMotorAxis_H */
