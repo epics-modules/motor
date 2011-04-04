@@ -18,7 +18,8 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define XPSStatusString     "XPS_STATUS"
 
 class XPSController : public asynMotorController {
-public:
+
+  public:
   XPSController(const char *portName, const char *IPAddress, int IPPort,
                 int numAxes, double movingPollPeriod, double idlePollPeriod);
 
@@ -39,19 +40,16 @@ public:
   asynStatus processDeferredMoves();
   asynStatus processDeferredMovesInGroup(char * groupName);
 
-
-protected:
+  protected:
   XPSAxis **pAxes_;       /**< Array of pointers to axis objects */
 
   int XPSMinJerk_;
-#define FIRST_XPS_PARAM XPSMinJerk_
+  #define FIRST_XPS_PARAM XPSMinJerk_
   int XPSMaxJerk_;
   int XPSStatus_;
-#define LAST_XPS_PARAM XPSStatus_
+  #define LAST_XPS_PARAM XPSStatus_
 
-#define NUM_XPS_PARAMS (&LAST_XPS_PARAM - &FIRST_XPS_PARAM + 1)
-
-private:
+  private:
   char *IPAddress_;
   int IPPort_;
   char *ftpUsername_;
@@ -62,7 +60,8 @@ private:
   char firmwareVersion_[100];
   int movesDeferred_;
     
-friend class XPSAxis;
+  friend class XPSAxis;
 };
+#define NUM_XPS_PARAMS (&LAST_XPS_PARAM - &FIRST_XPS_PARAM + 1)
 #endif /* XPSController_H */
 
