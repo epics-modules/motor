@@ -19,7 +19,7 @@
 #
 # Is this axis involved in the profile move?
 #
-record(bo,"$(P)$(R)($N)Use axis") {
+record(bo,"$(P)$(R)$(AXIS)Use axis") {
     field(DESC, "Use axis $(AXIS)?")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -64,4 +64,41 @@ record(waveform,"$(P)$(R)$(AXIS)FollowingErrors") {
     field(FTVL, "DOUBLE")
     field(PREC, "$(PREC)")
     field(SCAN, "I/O Intr")
+}
+
+# These records make the motor resolution, offset and direction available to the driver
+# which is needed for profile moves
+
+# Motor direction for this axis
+record(longout,"$(P)$(R)$(AXIS)Direction") {
+    field(DESC, "$(AXIS) direction")
+    field(PINI, "YES")
+    field(DOL,  "$(DIR_LINK) CP MS")
+    field(OMSL, "closed_loop")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_MOTOR_DIRECTION")
+}
+
+
+# Motor offset for this axis
+record(ao,"$(P)$(R)$(AXIS)Offset") {
+    field(DESC, "$(AXIS) offset")
+    field(PINI, "YES")
+    field(DOL,  "$(OFF_LINK) CP MS")
+    field(OMSL, "closed_loop")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_MOTOR_OFFSET")
+    field(PREC, "$(PREC)")
+}
+
+
+# Motor resolution for this axis
+record(ao,"$(P)$(R)$(AXIS)Resolution") {
+    field(DESC, "$(AXIS) resolution")
+    field(PINI, "YES")
+    field(DOL,  "$(RES_LINK) CP MS")
+    field(OMSL, "closed_loop")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_MOTOR_RESOLUTION")
+    field(PREC, "$(PREC)")
 }
