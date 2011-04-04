@@ -544,6 +544,8 @@ asynStatus XPSController::buildProfile()
   double maxVelocityActual;
   double maxAccelerationActual;
   double minPositionActual, maxPositionActual;
+  double minProfile, maxProfile;
+  double lowLimit, highLimit;
   double minJerkTime[XPS_MAX_AXES], maxJerkTime[XPS_MAX_AXES];
   double preTimeMax, postTimeMax;
   double preVelocity[XPS_MAX_AXES], postVelocity[XPS_MAX_AXES];
@@ -590,7 +592,7 @@ asynStatus XPSController::buildProfile()
       sprintf(buildMessage, "Error calling positionerSGammaParametersSet, status=%d\n", status);
       goto done;
     }
-    
+
     /* The calculation using maxAcceleration read from controller below
      * is "correct" but subject to roundoff errors when sending ASCII commands
      * to XPS.  Reduce acceleration 10% to account for this. */
@@ -727,6 +729,25 @@ asynStatus XPSController::buildProfile()
               pAxes_[j]->positionerName_, status);
       goto done;
     }
+    /* Check that the trajectory won't exceed the software limits
+     * The XPS does not check this because the trajectory is defined in relative moves and it does
+     * not know where we will be in absolute coordinates when we execute the trajectory */
+    status = PositionerUserTravelLimitsGet(pollSocket_,
+                                           pAxes_[j]->positionerName_,
+                                           &lowLimit, 
+                                           &highLimit);
+    minProfile = pAxes_[j]->profilePositions_[0] + minPositionActual;
+    if (minProfile < lowLimit) {
+      sprintf(buildMessage, "Low soft limit violation for axis %s, position=%f, limit=%f\n",
+              pAxes_[j]->positionerName_, minProfile, lowLimit);
+      goto done;
+    }
+    maxProfile = pAxes_[j]->profilePositions_[0] + maxPositionActual;
+    if (maxProfile > lowLimit) {
+      sprintf(buildMessage, "High soft limit violation for axis %s, position=%f, limit=%f\n",
+              pAxes_[j]->positionerName_, maxProfile, highLimit);
+      goto done;
+    }
   }
   done:
   buildStatus = status ?  PROFILE_STATUS_FAILURE : PROFILE_STATUS_SUCCESS;
@@ -844,6 +865,7 @@ asynStatus XPSController::readbackProfile()
   setIntegerParam(profileReadbackStatus_, readbackStatus);
   setStringParam(profileReadbackMessage_, readbackMessage);
   setIntegerParam(profileActualPulses_, numRead);
+  setIntegerParam(profileNumReadbacks_, numRead);
   if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: %s\n",
