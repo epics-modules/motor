@@ -43,7 +43,7 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   pC->pAxes_[axisNo] = this;
   status_.status = 0;
   profilePositions_       = NULL;
-  profilePositionsRBV_    = NULL;
+  profileReadbacks_       = NULL;
   profileFollowingErrors_ = NULL;
   
   // Create the asynUser, connect to this axis
@@ -51,6 +51,61 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
 }
 
+/** Move the motor to an absolute location or by a relative amount.
+  * \param[in] position  The absolute position to move to (if relative=0) or the relative distance to move 
+  * by (if relative=1). Units=steps.
+  * \param[in] relative  Flag indicating relative move (1) or absolute move (0).
+  * \param[in] minVelocity The initial velocity, often called the base velocity. Units=steps/sec.
+  * \param[in] maxVelocity The maximum velocity, often called the slew velocity. Units=steps/sec.
+  * \param[in] acceleration The acceleration value. Units=steps/sec/sec. */
+asynStatus asynMotorAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
+{
+  return asynError;
+}
+
+/** Move the motor at a fixed velocity until told to stop.
+  * \param[in] minVelocity The initial velocity, often called the base velocity. Units=steps/sec.
+  * \param[in] maxVelocity The maximum velocity, often called the slew velocity. Units=steps/sec.
+  * \param[in] acceleration The acceleration value. Units=steps/sec/sec. */
+asynStatus asynMotorAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
+{
+  return asynError;
+}
+
+/** Move the motor to the home position.
+  * \param[in] minVelocity The initial velocity, often called the base velocity. Units=steps/sec.
+  * \param[in] maxVelocity The maximum velocity, often called the slew velocity. Units=steps/sec.
+  * \param[in] acceleration The acceleration value. Units=steps/sec/sec.
+  * \param[in] forwards  Flag indicating to move the motor in the forward direction(1) or reverse direction(0).
+  *                      Some controllers need to be told the direction, others know which way to go to home. */
+asynStatus asynMotorAxis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
+{
+  return asynError;
+}
+
+/** Stop the motor.
+  * \param[in] acceleration The acceleration value. Units=steps/sec/sec. */
+asynStatus asynMotorAxis::stop(double acceleration)
+{
+  return asynError;
+}
+
+/** Poll the axis.
+  * This function should read the controller position, encoder position, and as many of the motorStatus flags
+  * as the hardware supports.  It should call setIntegerParam() and setDoubleParam() for each item that it polls,
+  * and then call callParamCallbacks() at the end.
+  * \param[out] moving A flag that the function must set indicating that the axis is moving (1) or done (0). */
+asynStatus asynMotorAxis::poll(int *moving)
+{
+  return asynError;
+}
+
+/** Set the current position of the motor.
+  * \param[in] position The new absolute motor position that should be set in the hardware. Units=steps.*/
+asynStatus asynMotorAxis::setPosition(double position)
+{
+  return asynError;
+}
 
 // We implement the setIntegerParam, setDoubleParam, and callParamCallbacks methods so we can construct 
 // the aggregate status structure and do callbacks on it
@@ -120,23 +175,46 @@ asynStatus asynMotorAxis::callParamCallbacks()
 /* These are the functions for profile moves */
 asynStatus asynMotorAxis::initializeProfile(int maxProfilePoints)
 {
-  if (profilePositions_) free(profilePositions_);
-  profilePositions_ = (double *)calloc(maxProfilePoints, sizeof(double));
-  if (profilePositionsRBV_) free(profilePositionsRBV_);
-  profilePositionsRBV_ = (double *)calloc(maxProfilePoints, sizeof(double));
+  if (profilePositions_)       free(profilePositions_);
+  profilePositions_ =         (double *)calloc(maxProfilePoints, sizeof(double));
+  if (profileReadbacks_)    free(profileReadbacks_);
+  profileReadbacks_ =         (double *)calloc(maxProfilePoints, sizeof(double));
   if (profileFollowingErrors_) free(profileFollowingErrors_);
-  profileFollowingErrors_ = (double *)calloc(maxProfilePoints, sizeof(double));
+  profileFollowingErrors_ =   (double *)calloc(maxProfilePoints, sizeof(double));
   return asynSuccess;
 }
   
-/** Function to build a coordinated move of multiple axes. */
+/** Function to define the motor positions for a profile move. 
+  * This base class function converts the positions from user units
+  * to controller units, using the profileMotorOffset_, profileMotorDirection_,
+  * and profileMotorResolution_ parameters. 
+  * \param[in] positions Array of profile positions for this axis in user units.
+  * \param[in] numPoints The number of positions in the array.
+  */
 asynStatus asynMotorAxis::defineProfile(double *positions, int numPoints)
 {
+  int i;
+  double resolution;
+  double offset;
+  int direction;
+  double scale;
+  int status=0;
   // static const char *functionName = "asynMotorController::buildProfile";
   
   if (numPoints > pC_->maxProfilePoints_) return asynError;
-  memcpy(profilePositions_, positions, numPoints*sizeof(double));
 
+  status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
+  status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorOffset_, &offset);
+  status |= pC_->getIntegerParam(axisNo_, pC_->profileMotorDirection_, &direction);
+  if (status) return asynError;
+  if (resolution == 0.0) return asynError;
+  
+  // Convert to controller units
+  scale = 1.0/resolution;
+  if (direction != 0) scale = -scale;
+  for (i=0; i<numPoints; i++) {
+    profilePositions_[i] = (positions[i] - offset)*scale;
+  }
   return asynSuccess;
 }
 
@@ -160,6 +238,6 @@ asynStatus asynMotorAxis::executeProfile()
 asynStatus asynMotorAxis::readbackProfile()
 {
   // static const char *functionName = "asynMotorController::readbackProfile";
-
+  // Convert readbacks and following errors from controller units to user units and do callbacks
   return asynSuccess;
 }
