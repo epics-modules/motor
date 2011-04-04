@@ -132,6 +132,15 @@ static double setPosSleepTime = 0.5;
 #define DEFAULT_FTP_PASSWORD "Administrator"
 #define DEFAULT_PROFILE_GROUPNAME "Group1"
 
+/* The maximum size of the item names in gathering, e.g. "GROUP2.POSITIONER1.CurrentPosition" */
+#define MAX_GATHERING_AXIS_STRING 60
+/* Number of items per axis */
+#define NUM_GATHERING_ITEMS 2
+/* Total length of gathering configuration string */
+#define MAX_GATHERING_STRING MAX_GATHERING_AXIS_STRING * NUM_GATHERING_ITEMS * MAX_AXES
+// Maximum number of bytes that GatheringDataMultipleLinesGet() can return
+#define GATHERING_MAX_READ_LEN 65536
+
 /** Deadband to use for the velocity comparison with zero. */
 #define XPS_VELOCITY_DEADBAND 0.0000001
 
@@ -519,7 +528,8 @@ XPSAxis* XPSController::getAxis(int axisNo)
 asynStatus XPSController::buildProfile()
 {
   FILE *trajFile;
-  int i, j, status;
+  int i, j; 
+  int status;
   int nPoints;
   int nElements;
   double trajVel;
@@ -529,7 +539,8 @@ asynStatus XPSController::buildProfile()
   char buildMessage[MAX_MESSAGE_LEN];
   int buildStatus;
   double distance;
-  double maxVelocity[XPS_MAX_AXES], maxAcceleration[XPS_MAX_AXES];
+  double maxVelocity[XPS_MAX_AXES];
+  double maxAcceleration[XPS_MAX_AXES];
   double maxVelocityActual;
   double maxAccelerationActual;
   double minPositionActual, maxPositionActual;
@@ -538,9 +549,6 @@ asynStatus XPSController::buildProfile()
   double preVelocity[XPS_MAX_AXES], postVelocity[XPS_MAX_AXES];
   double preDistance[XPS_MAX_AXES], postDistance[XPS_MAX_AXES];
   double time;
-  int dir[XPS_MAX_AXES];
-  int epicsMotorDir[XPS_MAX_AXES];
-  double epicsMotorOffset[XPS_MAX_AXES]; 
   int moveAxis[XPS_MAX_AXES];
   static const char *functionName = "buildProfile";
   
@@ -550,6 +558,7 @@ asynStatus XPSController::buildProfile()
 
   setIntegerParam(profileBuildState_, PROFILE_BUILD_BUSY);
   setIntegerParam(profileBuildStatus_, PROFILE_STATUS_UNDEFINED);
+  strcpy(buildMessage, "");
   callParamCallbacks();
 
   /* We create trajectories with an extra element at the beginning and at the end.
@@ -565,13 +574,12 @@ asynStatus XPSController::buildProfile()
   preTimeMax = 0.;
   postTimeMax = 0.;
   getIntegerParam(profileNumPoints_, &nPoints);
+
   /* Zero values since axes may not be used */
   for (j=0; j<numAxes_; j++) {
     preVelocity[j] = 0.;
     postVelocity[j] = 0.;
-    getIntegerParam(j, profileUseAxis_,        &moveAxis[j]);
-    getIntegerParam(j, profileMotorDirection_, &epicsMotorDir[j]);
-    getDoubleParam (j, profileMotorOffset_,    &epicsMotorOffset[j]);
+    getIntegerParam(j, profileUseAxis_, &moveAxis[j]);
   }
   for (j=0; j<numAxes_; j++) {
     if (!moveAxis[j]) continue;
@@ -579,9 +587,7 @@ asynStatus XPSController::buildProfile()
                                            &maxVelocity[j], &maxAcceleration[j],
                                            &minJerkTime[j], &maxJerkTime[j]);
     if (status) {
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Error calling positionerSGammaParametersSet, status=%d\n",
-                driverName, functionName, status);
+      sprintf(buildMessage, "Error calling positionerSGammaParametersSet, status=%d\n", status);
       goto done;
     }
     
@@ -614,15 +620,10 @@ asynStatus XPSController::buildProfile()
   /* Create the profile file */
   trajFile =  fopen (TRAJECTORY_FILE, "w");
 
-  /* Compute the sign relationship of user coordinates to XPS coordinates for
-   * each axis */
-  for (j=0; j<numAxes_; j++) {
-    if (epicsMotorDir[j] == 0) dir[j]=1; else dir[j]=-1;
-  }
   /* Create the initial acceleration element */
   fprintf(trajFile,"%f", preTimeMax);
   for (j=0; j<numAxes_; j++) {
-    fprintf(trajFile,", %f, %f", preDistance[j]*dir[j], preVelocity[j]*dir[j]);
+    fprintf(trajFile,", %f, %f", preDistance[j], preVelocity[j]);
   }
   fprintf(trajFile,"\n");
  
@@ -635,11 +636,11 @@ asynStatus XPSController::buildProfile()
     else
       T1 = T0;
     for (j=0; j<numAxes_; j++) {
-      D0 = pAxes_[j]->profilePositions_[i+1] * dir[j] - 
-           pAxes_[j]->profilePositions_[i]   * dir[j];
+      D0 = pAxes_[j]->profilePositions_[i+1] - 
+           pAxes_[j]->profilePositions_[i];
       if (i < nElements-1) 
-        D1 = pAxes_[j]->profilePositions_[i+2] * dir[j] - 
-             pAxes_[j]->profilePositions_[i+1] * dir[j];
+        D1 = pAxes_[j]->profilePositions_[i+2] - 
+             pAxes_[j]->profilePositions_[i+1];
       else
         D1 = D0;
 
@@ -659,7 +660,7 @@ asynStatus XPSController::buildProfile()
   /* Create the final acceleration element. Final velocity must be 0. */
   fprintf(trajFile,"%f", postTimeMax);
   for (j=0; j<numAxes_; j++) {
-    fprintf(trajFile,", %f, %f", postDistance[j]*dir[j], 0.);
+    fprintf(trajFile,", %f, %f", postDistance[j], 0.);
   }
   fprintf(trajFile,"\n");
   fclose (trajFile);
@@ -667,30 +668,22 @@ asynStatus XPSController::buildProfile()
   /* FTP the trajectory file from the local directory to the XPS */
   status = ftpConnect(IPAddress_, ftpUsername_, ftpPassword_, &ftpSocket);
   if (status) {
-    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-              "%s:%s: Error calling ftpConnect, status=%d\n",
-              driverName, functionName, status);
+    sprintf(buildMessage, "Error calling ftpConnect, status=%d\n", status);
     goto done;
   }
   status = ftpChangeDir(ftpSocket, TRAJECTORY_DIRECTORY);
   if (status) {
-    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-              "%s:%s: Error calling  ftpChangeDir, status=%d\n",
-              driverName, functionName, status);
+    sprintf(buildMessage, "Error calling  ftpChangeDir, status=%d\n", status);
     goto done;
   }
   status = ftpStoreFile(ftpSocket, TRAJECTORY_FILE);
   if (status) {
-     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-              "%s:%s: Error calling  ftpStoreFile, status=%d\n",
-              driverName, functionName, status);
+    sprintf(buildMessage, "Error calling  ftpStoreFile, status=%d\n", status);
     goto done;
   }
   status = ftpDisconnect(ftpSocket);
   if (status) {
-     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-              "%s:%s: Error calling  ftpDisconnect, status=%d\n",
-              driverName, functionName, status);
+     sprintf(buildMessage, "Error calling  ftpDisconnect, status=%d\n", status);
     goto done;
   }
      
@@ -720,15 +713,6 @@ asynStatus XPSController::buildProfile()
       sprintf(buildMessage, "Unknown trajectory verify error=%d", status);
       break;
   }
-  buildStatus = status ?  PROFILE_STATUS_FAILURE : PROFILE_STATUS_SUCCESS;
-  setIntegerParam(profileBuildStatus_, buildStatus);
-  setStringParam(profileBuildMessage_, buildMessage);
-  if (status) {
-    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-              "%s:%s: MultipleAxesPVTVerification error %s\n",
-              driverName, functionName, buildMessage);
-    goto done;
-  }
 
   /* Read dynamic parameters*/
   for (j=0; j<numAxes_; j++) {
@@ -739,13 +723,20 @@ asynStatus XPSController::buildProfile()
                  &minPositionActual, &maxPositionActual, 
                  &maxVelocityActual, &maxAccelerationActual);
     if (status) {
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
-                driverName, functionName, pAxes_[j]->positionerName_, status);
+      sprintf(buildMessage, "MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
+              pAxes_[j]->positionerName_, status);
       goto done;
     }
   }
   done:
+  buildStatus = status ?  PROFILE_STATUS_FAILURE : PROFILE_STATUS_SUCCESS;
+  setIntegerParam(profileBuildStatus_, buildStatus);
+  setStringParam(profileBuildMessage_, buildMessage);
+  if (status) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: %s\n",
+              driverName, functionName, buildMessage);
+  }
   /* Clear build command.  This is a "busy" record, don't want to do this until build is complete. */
   setIntegerParam(profileBuild_, 0);
   setIntegerParam(profileBuildState_, PROFILE_BUILD_DONE);
@@ -762,7 +753,107 @@ asynStatus XPSController::executeProfile()
 /* Function to readback trajectory */ 
 asynStatus XPSController::readbackProfile()
 {
-  return asynSuccess;
+  char readbackMessage[MAX_MESSAGE_LEN];
+  int numPulses;
+  char* buffer=NULL;
+  char* bptr, *tptr;
+  int currentSamples, maxSamples;
+  double setpointPosition, actualPosition;
+  int readbackStatus;
+  int status;
+  int i, j;
+  int nitems;
+  int numRead=0, numInBuffer, numChars;
+  int moveAxis[XPS_MAX_AXES];
+  static const char *functionName = "buildProfile";
+    
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: entry\n",
+            driverName, functionName);
+
+  setIntegerParam(profileBuildState_, PROFILE_BUILD_BUSY);
+  setIntegerParam(profileBuildStatus_, PROFILE_STATUS_UNDEFINED);
+  strcpy(readbackMessage, "");
+  callParamCallbacks();
+  
+  status = getIntegerParam(profileNumPulses_, &numPulses);
+
+  /* Erase the readback and error arrays */
+  for (j=0; j<numAxes_; j++) {
+    memset(pAxes_[j]->profileReadbacks_,       0, maxProfilePoints_*sizeof(double));
+    memset(pAxes_[j]->profileFollowingErrors_, 0, maxProfilePoints_*sizeof(double));
+    getIntegerParam(j, profileUseAxis_, &moveAxis[j]);
+  }
+  /* Read the number of lines of gathering */
+  status = GatheringCurrentNumberGet(pollSocket_, &currentSamples, &maxSamples);
+  if (status != 0) {
+    sprintf(readbackMessage, "Error calling GatherCurrentNumberGet, status=%d\n", status);
+    goto done;
+  }
+  if (currentSamples != numPulses) {
+    sprintf(readbackMessage, "Error, numPulses=%d, currentSamples=%d\n", numPulses, currentSamples);
+    goto done;
+  }
+  buffer = (char *)calloc(GATHERING_MAX_READ_LEN, sizeof(char));
+  numInBuffer = 0;
+  for (numRead=0; numRead<currentSamples;) {
+    /* Read the next buffer */
+    /* Try to read all the remaining points */
+    status = -1;
+    numInBuffer = currentSamples - numRead;
+    while (status && (numInBuffer > 0)) {
+      status = GatheringDataMultipleLinesGet(pollSocket_, numRead, numInBuffer, buffer);
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+                "%s:%s: GatheringDataMultipleLinesGet, status=%d, numInBuffer=%d\n", 
+                driverName, functionName, status, numInBuffer);
+      if (status) numInBuffer /= 2;
+    }
+    if (numInBuffer == 0) {
+      sprintf(readbackMessage, "Error reading gathering data, numInBuffer = 0\n");
+      goto done;
+    }
+    bptr = buffer;
+    for (i=0; i<numInBuffer; i++) {
+      /* Find the next \n and replace with null */
+      tptr = strstr(bptr, "\n");
+      if (tptr) *tptr = 0;
+      for (j=0; j<numAxes_; j++) {
+        if (!moveAxis[j]) continue;
+        nitems = sscanf(bptr, "%lf;%lf%n", 
+                        &setpointPosition, &actualPosition, &numChars);
+        bptr += numChars+1;
+        if (nitems != NUM_GATHERING_ITEMS) {
+          sprintf(readbackMessage, "Error reading Gathering.dat file, nitems=%d, should be %d\n",
+                  nitems, NUM_GATHERING_ITEMS);
+          goto done;
+        }
+        // Note, these positions are in controller units, need to be converted to user units
+        pAxes_[j]->profileFollowingErrors_[numRead] = actualPosition - setpointPosition;
+        pAxes_[j]->profileReadbacks_[numRead] = actualPosition;
+      }
+      numRead++;
+      bptr = tptr + 1;
+    }
+  }
+  
+  done:
+  if (buffer) free(buffer);
+  /* Call the base class method that converts from controller to user units and posts the arrays */
+  asynMotorController::readbackProfile();
+  readbackStatus = status ?  PROFILE_STATUS_FAILURE : PROFILE_STATUS_SUCCESS;
+  setIntegerParam(profileReadbackStatus_, readbackStatus);
+  setStringParam(profileReadbackMessage_, readbackMessage);
+  setIntegerParam(profileActualPulses_, numRead);
+  if (status) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: %s\n",
+              driverName, functionName, readbackMessage);
+  }
+  /* Clear readback command.  This is a "busy" record, don't want to do this until build is complete. */
+  setIntegerParam(profileReadback_, 0);
+  setIntegerParam(profileReadbackState_, PROFILE_READBACK_DONE);
+  callParamCallbacks();
+  return status ? asynError : asynSuccess; 
 }
 
 
