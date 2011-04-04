@@ -59,6 +59,7 @@
 #define profileStartPulsesString        "PROFILE_START_PULSES"
 #define profileEndPulsesString          "PROFILE_END_PULSES"
 #define profileActualPulsesString       "PROFILE_ACTUAL_PULSES"
+#define profileNumReadbacksString       "PROFILE_NUM_READBACKS"
 #define profileTimeArrayString          "PROFILE_TIME_ARRAY"
 #define profileAccelerationString       "PROFILE_ACCELERATION"
 #define profileBuildString              "PROFILE_BUILD"
@@ -205,6 +206,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   int profileStartPulses_;
   int profileEndPulses_;
   int profileActualPulses_;
+  int profileNumReadbacks_;
   int profileTimeArray_;
   int profileAcceleration_;
   int profileBuild_;
