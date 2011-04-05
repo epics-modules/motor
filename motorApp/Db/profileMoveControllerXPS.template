@@ -19,3 +19,12 @@ record(stringout, "$(P)$(R)TrajectoryFile") {
     field(OUT,  "@asyn($(PORT),0,$(TIMEOUT))XPS_TRAJECTORY_FILE")
     field(VAL,  "TrajectoryScan.trj")
 }
+
+# Group name for XPS trajectory scanning
+record(stringout, "$(P)$(R)GroupName") {
+    field(DESC, "XPS PVT group name")
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT),0,$(TIMEOUT))XPS_PROFILE_GROUP_NAME")
+    field(VAL,  "Group1")
+}
