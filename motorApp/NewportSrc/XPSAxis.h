@@ -41,7 +41,7 @@ class XPSAxis : public asynMotorAxis
   asynStatus poll(int *moving);
   asynStatus setPosition(double position);
 
-  virtual asynStatus defineProfile(double *positions, int numPoints);
+  virtual asynStatus defineProfile(double *positions, size_t numPoints);
   
   private:
   XPSController *pC_;
