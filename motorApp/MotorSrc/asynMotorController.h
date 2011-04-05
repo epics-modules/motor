@@ -60,6 +60,8 @@
 #define profileEndPulsesString          "PROFILE_END_PULSES"
 #define profileActualPulsesString       "PROFILE_ACTUAL_PULSES"
 #define profileNumReadbacksString       "PROFILE_NUM_READBACKS"
+#define profileTimeModeString           "PROFILE_TIME_MODE"
+#define profileFixedTimeString          "PROFILE_FIXED_TIME"
 #define profileTimeArrayString          "PROFILE_TIME_ARRAY"
 #define profileAccelerationString       "PROFILE_ACCELERATION"
 #define profileBuildString              "PROFILE_BUILD"
@@ -91,6 +93,11 @@ typedef struct MotorStatus {
   double velocity;           /**< Actual velocity */
   epicsUInt32 status;        /**< Word containing status bits (motion done, limits, etc.) */
 } MotorStatus;
+
+enum ProfileTimeMode{
+  PROFILE_TIME_MODE_FIXED,
+  PROFILE_TIME_MODE_ARRAY
+};
 
 /* State codes for Build, Read and Execute. Careful, these must match the
  * corresponding MBBI records, but there is no way to check this */
@@ -136,7 +143,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   /* These are the methods that we override from asynPortDriver */
   virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
   virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
-  virtual asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nEelements);
+  virtual asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements);
   virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
 
   /* These are the methods that are new to this class */
@@ -148,7 +155,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   void asynMotorPoller();  // This should be private but is called from C function
   
   /* These are the functions for profile moves */
-  virtual asynStatus initializeProfile(int maxPoints);
+  virtual asynStatus initializeProfile(size_t maxPoints);
   virtual asynStatus buildProfile();
   virtual asynStatus executeProfile();
   virtual asynStatus readbackProfile();
@@ -207,6 +214,8 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   int profileEndPulses_;
   int profileActualPulses_;
   int profileNumReadbacks_;
+  int profileTimeMode_;
+  int profileFixedTime_;
   int profileTimeArray_;
   int profileAcceleration_;
   int profileBuild_;
@@ -239,7 +248,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   double movingPollPeriod_;     /**< The time between polls when any axis is moving */
   int    forcedFastPolls_;      /**< The number of forced fast polls when the poller wakes up */
  
-  int maxProfilePoints_;        /**< Maximum number of profile point */
+  size_t maxProfilePoints_;     /**< Maximum number of profile points */
   double *profileTimes_;        /**< Array of times per profile point */
 
   friend class asynMotorAxis;
