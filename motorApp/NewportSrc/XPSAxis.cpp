@@ -94,6 +94,11 @@ Versions: Release 4-5 and higher.
 #include "XPSController.h"
 #include "XPS_C8_drivers.h"
 
+#define XPSC8_END_OF_RUN_MINUS  0x80000100
+#define XPSC8_END_OF_RUN_PLUS   0x80000200
+/** Deadband to use for the velocity comparison with zero. */
+#define XPS_VELOCITY_DEADBAND 0.0000001
+
 static const char *driverName = "XPSAxis";
 
 typedef enum { none, positionMove, velocityMove, homeReverseMove, homeForwardsMove } moveType;
@@ -114,27 +119,6 @@ const static CorrectorTypes_t CorrectorTypes = {
   "PositionerCorrectorPIDDualFFVoltage",
   "NoCorrector"
 };
-
-/** This is controlled via the XPSEnableSetPosition function (available via the IOC shell). */ 
-static int doSetPosition = 1;
-
-/**
- * Parameter to control the sleep time used when setting position. 
- * A function called XPSSetPosSleepTime(int) (millisec parameter) 
- * is available in the IOC shell to control this.
- */
-static double setPosSleepTime = 0.5;
-
-/** Deadband to use for the velocity comparison with zero. */
-#define XPS_VELOCITY_DEADBAND 0.0000001
-
-#define XPS_MAX_AXES 8
-#define XPSC8_END_OF_RUN_MINUS  0x80000100
-#define XPSC8_END_OF_RUN_PLUS   0x80000200
-
-#define TCP_TIMEOUT 2.0
-#define MAX(a,b) ((a)>(b)? (a): (b))
-#define MIN(a,b) ((a)<(b)? (a): (b))
 
 extern "C" void shutdownCallback(void *pPvt)
 {
@@ -372,7 +356,7 @@ asynStatus XPSAxis::setPosition(double position)
 
 
   /* If the user has disabled setting the controller position, skip this.*/
-  if (!doSetPosition) {
+  if (!pC_->enableSetPosition_) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
               "%s:%s: XPS set position is disabled. Enable it using XPSEnableSetPosition(1).\n",
                driverName, functionName);
@@ -409,7 +393,7 @@ asynStatus XPSAxis::setPosition(double position)
 
     /* Wait after axis initialisation (we don't want to set position immediately after
      * initialisation because the stage can oscillate slightly). */
-    epicsThreadSleep(setPosSleepTime);
+    epicsThreadSleep(pC_->setPositionSettlingTime_);
 
     status = GroupReferencingStart(pollSocket_, groupName_);
     axisIndexInGrp = 0;
@@ -456,7 +440,7 @@ asynStatus XPSAxis::setPosition(double position)
 
     /* Wait after axis initialisation (we don't want to set position immediately after
        initialisation because the stage can oscillate slightly).*/
-    epicsThreadSleep(setPosSleepTime);
+    epicsThreadSleep(pC_->setPositionSettlingTime_);
 
     status = GroupReferencingStart(pollSocket_, 
                                   groupName_);
