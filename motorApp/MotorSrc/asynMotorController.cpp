@@ -6,6 +6,7 @@
  * from which real motor controllers are derived.  It derives from asynPortDriver.
  */
 #include <stdlib.h>
+#include <string.h>
 
 #include <epicsThread.h>
 
@@ -34,7 +35,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
     shuttingDown_(0), numAxes_(numAxes)
 
 {
-  static const char *functionName = "asynMotorController::asynMotorController";
+  static const char *functionName = "asynMotorController";
 
   /* Create the base set of motor parameters */
   createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
@@ -82,19 +83,21 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(profileEndPulsesString,            asynParamInt32,      &profileEndPulses_);
   createParam(profileActualPulsesString,         asynParamInt32,      &profileActualPulses_);
   createParam(profileNumReadbacksString,         asynParamInt32,      &profileNumReadbacks_);
+  createParam(profileTimeModeString,             asynParamInt32,      &profileTimeMode_);
+  createParam(profileFixedTimeString,          asynParamFloat64,      &profileFixedTime_);
   createParam(profileTimeArrayString,     asynParamFloat64Array,      &profileTimeArray_);
   createParam(profileAccelerationString,       asynParamFloat64,      &profileAcceleration_);
   createParam(profileBuildString,                asynParamInt32,      &profileBuild_);
   createParam(profileBuildStateString,           asynParamInt32,      &profileBuildState_);
-  createParam(profileBuildStatusString,          asynParamOctet,      &profileBuildStatus_);
+  createParam(profileBuildStatusString,          asynParamInt32,      &profileBuildStatus_);
   createParam(profileBuildMessageString,         asynParamOctet,      &profileBuildMessage_);
   createParam(profileExecuteString,              asynParamInt32,      &profileExecute_);
   createParam(profileExecuteStateString,         asynParamInt32,      &profileExecuteState_);
-  createParam(profileExecuteStatusString,        asynParamOctet,      &profileExecuteStatus_);
+  createParam(profileExecuteStatusString,        asynParamInt32,      &profileExecuteStatus_);
   createParam(profileExecuteMessageString,       asynParamOctet,      &profileExecuteMessage_);
   createParam(profileReadbackString,             asynParamInt32,      &profileReadback_);
   createParam(profileReadbackStateString,        asynParamInt32,      &profileReadbackState_);
-  createParam(profileReadbackStatusString,       asynParamOctet,      &profileReadbackStatus_);
+  createParam(profileReadbackStatusString,       asynParamInt32,      &profileReadbackStatus_);
   createParam(profileReadbackMessageString,      asynParamOctet,      &profileReadbackMessage_);
 
   // These are the per-axis parameters for profile moves
@@ -136,7 +139,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   asynMotorAxis *pAxis;
   double accel;
   int moving;
-  static const char *functionName = "asynMotorController::writeInt32";
+  static const char *functionName = "writeInt32";
 
   pAxis = getAxis(pasynUser);
   if (!pAxis) return asynError;
@@ -154,6 +157,12 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     poll();
     pAxis->poll(&moving);
     pAxis->statusChanged_ = 1;
+  } else if (function == profileBuild_) {
+    buildProfile();
+  } else if (function == profileExecute_) {
+    executeProfile();
+  } else if (function == profileReadback_) {
+    readbackProfile();
   }
 
   /* Do callbacks so higher layers see any changes */
@@ -188,7 +197,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   int axis;
   int forwards;
   asynStatus status = asynError;
-  static const char *functionName = "asynMotorController::writeFloat64";
+  static const char *functionName = "writeFloat64";
 
   pAxis = getAxis(pasynUser);
   if (!pAxis) return asynError;
@@ -271,12 +280,30 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 asynStatus asynMotorController::writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value,
                                 size_t nElements)
 {
-  static const char *functionName = "asynMotorController::writeFloat64Array";
+  int function = pasynUser->reason;
+  asynMotorAxis *pAxis;
+  static const char *functionName = "writeFloat64Array";
 
-  asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-    "%s:%s: not implemented in this driver\n", 
-    driverName, functionName);
-  return asynError ;
+  pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
+  
+  if (nElements > maxProfilePoints_) {
+    nElements = maxProfilePoints_;
+  }
+  
+  if (function == profileTimeArray_) {
+    memcpy(profileTimes_, value, nElements*sizeof(double));
+  } 
+  else if (function == profilePositions_) {
+    pAxis->defineProfile(value, nElements);
+  } 
+  else {
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+      "%s:%s: unknown parameter number %d\n", 
+      driverName, functionName, function);
+    return asynError ;
+  }
+  return asynSuccess;
 }
 
 /** Called when asyn clients call pasynGenericPointer->read().
@@ -286,7 +313,7 @@ asynStatus asynMotorController::writeFloat64Array(asynUser *pasynUser, epicsFloa
   * \param[in] pointer Pointer to the MotorStatus object to return. */
 asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *pointer)
 {
-  static const char *functionName = "asynMotorController::readGenericPointer";
+  static const char *functionName = "readGenericPointer";
   MotorStatus *pStatus = (MotorStatus *)pointer;
   int axis;
   
@@ -407,7 +434,10 @@ void asynMotorController::asynMotorPoller()
     }
     anyMoving = 0;
     lock();
-    if (shuttingDown_) break;
+    if (shuttingDown_) {
+      unlock();
+      break;
+    }
     this->poll();
     for (i=0; i<numAxes_; i++) {
         pAxis=getAxis(i);
@@ -415,7 +445,6 @@ void asynMotorController::asynMotorPoller()
         pAxis->poll(&moving);
         if (moving) anyMoving=1;
     }
-    unlock();
     if (forcedFastPolls > 0) {
       timeout = movingPollPeriod_;
       forcedFastPolls--;
@@ -424,16 +453,17 @@ void asynMotorController::asynMotorPoller()
     } else {
       timeout = idlePollPeriod_;
     }
+    unlock();
   }
 }
 
 /* These are the functions for profile moves */
 /** Initialize a profile move of multiple axes. */
-asynStatus asynMotorController::initializeProfile(int maxProfilePoints)
+asynStatus asynMotorController::initializeProfile(size_t maxProfilePoints)
 {
   int axis;
   asynMotorAxis *pAxis;
-  // static const char *functionName = "asynMotorController::initializeProfile";
+  // static const char *functionName = "initializeProfile";
   
   maxProfilePoints_ = maxProfilePoints;
   if (profileTimes_) free(profileTimes_);
@@ -448,12 +478,26 @@ asynStatus asynMotorController::initializeProfile(int maxProfilePoints)
 /** Build a profile move of multiple axes. */
 asynStatus asynMotorController::buildProfile()
 {
-  // static const char *functionName = "asynMotorController::buildProfile";
-  int axis;
+  //static const char *functionName = "buildProfile";
   asynMotorAxis *pAxis;
-  
-  for (axis=0; axis<numAxes_; axis++) {
-    pAxis = getAxis(axis);
+  int i;
+  int status=0;
+  double time;
+  int timeMode;
+  int numPoints;
+
+  status |= getIntegerParam(profileTimeMode_, &timeMode);
+  status |= getDoubleParam(profileFixedTime_, &time);
+  status |= getIntegerParam(profileNumPoints_, &numPoints);
+  if (status) return asynError;
+  if (timeMode == PROFILE_TIME_MODE_FIXED) {
+    memset(profileTimes_, 0, maxProfilePoints_*sizeof(double));
+    for (i=0; i<numPoints; i++) {
+      profileTimes_[i] = time;
+    }
+  }
+  for (i=0; i<numAxes_; i++) {
+    pAxis = getAxis(i);
     pAxis->buildProfile();
   }
   return asynSuccess;
@@ -462,7 +506,7 @@ asynStatus asynMotorController::buildProfile()
 /** Execute a profile move of multiple axes. */
 asynStatus asynMotorController::executeProfile()
 {
-  // static const char *functionName = "asynMotorController::executeProfile";
+  // static const char *functionName = "executeProfile";
   int axis;
   asynMotorAxis *pAxis;
   
@@ -476,7 +520,7 @@ asynStatus asynMotorController::executeProfile()
 /** Readback the actual motor positions from a profile move of multiple axes. */
 asynStatus asynMotorController::readbackProfile()
 {
-  // static const char *functionName = "asynMotorController::readbackProfile";
+  // static const char *functionName = "readbackProfile";
   int axis;
   asynMotorAxis *pAxis;
   
