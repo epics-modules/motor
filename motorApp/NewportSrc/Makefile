@@ -37,7 +37,7 @@ Newport_SRCS += XPS_C8_drivers.cpp
 Newport_SRCS += drvXPSAsynAux.c
 Newport_SRCS += xps_ftp.c
 # This is the model 2 asyn driver
-Newport_SRCS += drvXPSAsyn.c XPSAsynInterpose.c
+#Newport_SRCS += drvXPSAsyn.c XPSAsynInterpose.c
 # This is the model 3 asyn driver
 Newport_SRCS += XPSController.cpp
 Newport_SRCS += XPSAxis.cpp
