@@ -1,0 +1,62 @@
+file "$(TOP)/db/basic_asyn_motor.db"
+{
+pattern
+{P,    N,   M,         DTYP,     PORT, ADDR, DESC,      EGU,     DIR,   VELO,  VBAS, ACCL, BDST, BVEL, BACC,    MRES, PREC,   DHLM,   DLLM, INIT}
+{IOC:, 1, "m$(N)", "asynMotor",  XPS1,  0,  "Phi",     degrees,  Pos,   15.9,   0.1,    1,    0,    1,   .2,    .001,    5,    180,   -180, ""}
+{IOC:, 2, "m$(N)", "asynMotor",  XPS1,  1,  "Kappa",   degrees,  Pos,   15.9,   0.1,    1,    0,    1,   .2,    .0002,   5,    180,   -180, ""}
+{IOC:, 3, "m$(N)", "asynMotor",  XPS1,  2,  "Omega",   degrees,  Pos,   15.9,   0.1,    1,    0,    1,   .2,    .0002,   5,    360,   -180, ""}
+{IOC:, 4, "m$(N)", "asynMotor",  XPS1,  3,  "Psi",     degrees,  Pos,    3.9,   0.1,   .5,    0,    1,   .2,    .00025,  5,    230,   -230, ""}
+{IOC:, 5, "m$(N)", "asynMotor",  XPS1,  4,  "2theta",  degrees,  Pos,    7.9,   0.1,    1,    0,    1,   .2,    .0001,   5,    190,    -10, ""}
+{IOC:, 6, "m$(N)", "asynMotor",  XPS1,  5,  "Nu",      degrees,  Pos,    3.9,   0.1,   .5,    0,    1,   .2,    .00025,  5,    230,   -230, ""}
+}
+
+
+file "$(TOP)/db/XPS_extra.db"
+{
+pattern
+{P,     R,  PORT,  ADDR}
+{IOC:,  m1, XPS1,  0}
+{IOC:,  m2, XPS1   1}
+{IOC:,  m3, XPS1   2}
+{IOC:,  m4, XPS1   3}
+{IOC:,  m5, XPS1   4}
+{IOC:,  m6, XPS1   5}
+}
+
+file "$(TOP)/db/profileMoveController.template"
+{
+pattern
+{P,     R,      PORT, NAXES, NPOINTS, NPULSES, TIMEOUT}
+{IOC:,  Prof1:, XPS1,     6,    2000,    2000,       1}
+}
+
+file "$(TOP)/db/profileMoveControllerXPS.template"
+{
+pattern
+{P,     R,      PORT, NAXES, NPOINTS, NPULSES, TIMEOUT}
+{IOC:,  Prof1:, XPS1,     6,    2000,    2000,       1}
+}
+
+file "$(TOP)/db/profileMoveAxis.template"
+{
+pattern
+{P,     R,      M,  PORT, ADDR,NPOINTS, NREADBACK,  MOTOR, PREC, TIMEOUT}
+{IOC:,  Prof1:, 1,  XPS1,    0,   2000,      2000, IOC:m1,   5,       1}
+{IOC:,  Prof1:, 2,  XPS1,    1,   2000,      2000, IOC:m2,   5,       1}
+{IOC:,  Prof1:, 3,  XPS1,    2,   2000,      2000, IOC:m3,   4,       1}
+{IOC:,  Prof1:, 4,  XPS1,    3,   2000,      2000, IOC:m4,   4,       1}
+{IOC:,  Prof1:, 5,  XPS1,    4,   2000,      2000, IOC:m5,   4,       1}
+{IOC:,  Prof1:, 6,  XPS1,    5,   2000,      2000, IOC:m6,   4,       1}
+}
+
+file "$(TOP)/db/profileMoveAxisXPS.template"
+{
+pattern
+{P,     R,      M,  PORT, ADDR,NPOINTS, NREADBACK, PREC, TIMEOUT}
+{IOC:,  Prof1:, 1,  XPS1,    0,   2000,      2000,    5,       1}
+{IOC:,  Prof1:, 2,  XPS1,    1,   2000,      2000,    5,       1}
+{IOC:,  Prof1:, 3,  XPS1,    2,   2000,      2000,    4,       1}
+{IOC:,  Prof1:, 4,  XPS1,    3,   2000,      2000,    4,       1}
+{IOC:,  Prof1:, 5,  XPS1,    4,   2000,      2000,    4,       1}
+{IOC:,  Prof1:, 6,  XPS1,    5,   2000,      2000,    4,       1}
+}
