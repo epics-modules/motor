@@ -18,7 +18,7 @@ XPSAuxConfig("XPS_AUX1", "164.54.160.180", 5001, 50)
 #asynSetTraceMask("XPS_AUX1", 0, 255)
 #asynSetTraceIOMask("XPS_AUX1", 0, 2)
 
-# XPS asyn port,  axis, groupName.positionerName
+# XPS asyn port,  axis, groupName.positionerName, stepSize
 XPSCreateAxis("XPS1",0,"FINE.X",             100000) # VP-25XL
 XPSCreateAxis("XPS1",1,"FINE.Y",              50000) # VP-5ZA
 XPSCreateAxis("XPS1",2,"THETA.POSITIONER",     2000) # URS75CC
@@ -26,12 +26,10 @@ XPSCreateAxis("XPS1",3,"COARSEX.POSITIONER",   2000) # ILS200CC
 XPSCreateAxis("XPS1",4,"COARSEY.POSITIONER",   2000) # ILS200CC
 XPSCreateAxis("XPS1",5,"COARSEZ.POSITIONER",   5000) # IMS300CC
 
-
-#dbLoadRecords("$(MOTOR)/motorApp/Db/trajectoryScan.db", "P=13xps8:,R=traj1,NAXES=1,NELM=2000,NPULSE=2000,DONPV=13LAB:str:EraseStart,DONV=1,DOFFPV=13LAB:str:StopAll,DOFFV=1")
+XPSEnableSetPosition(XPS1, 0)
+XPSSetPositionSettlingTime(XPS1, 200)
 
 iocInit
-
-#seq(XPS_trajectoryScan,"P=13xps8:,R=traj1,M1=m1,IPADDR=164.54.160.83,PORT=5001,GROUP=GROUP1,P1=POSITIONER1")
 
 # This IOC does not use save/restore, so set values of some PVs
 dbpf("IOC:m1.RTRY", "0")
