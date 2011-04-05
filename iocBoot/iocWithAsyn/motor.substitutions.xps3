@@ -40,7 +40,7 @@ file "$(TOP)/db/profileMoveAxis.template"
 {
 pattern
 {P,     R,      N,     M,   PORT, ADDR,NPOINTS, NREADBACK,       DIR_LINK,       OFF_LINK,        RES_LINK, PREC, TIMEOUT}
-{IOC:,  Prof1:, 1. "m$(N)", XPS1,    0,   2000,      2000, "IOC:$(M).DIR", "IOC:$(M).OFF", "IOC:$(M).MRES",   5,       1}
+{IOC:,  Prof1:, 1, "m$(N)", XPS1,    0,   2000,      2000, "IOC:$(M).DIR", "IOC:$(M).OFF", "IOC:$(M).MRES",   5,       1}
 {IOC:,  Prof1:, 2, "m$(N)", XPS1,    1,   2000,      2000, "IOC:$(M).DIR", "IOC:$(M).OFF", "IOC:$(M).MRES",   5,       1}
 {IOC:,  Prof1:, 3, "m$(N)", XPS1,    2,   2000,      2000, "IOC:$(M).DIR", "IOC:$(M).OFF", "IOC:$(M).MRES",   4,       1}
 {IOC:,  Prof1:, 4, "m$(N)", XPS1,    3,   2000,      2000, "IOC:$(M).DIR", "IOC:$(M).OFF", "IOC:$(M).MRES",   4,       1}
