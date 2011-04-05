@@ -11,7 +11,7 @@ dbLoadTemplate "motor.substitutions.xps3"
 dbLoadTemplate "XPSAux.substitutions"
 
 # asyn port, IP address, IP port, number of axes, active poll period (ms), idle poll period (ms)
-XPSCreate("XPS1", "164.54.160.180", 5001, 6, 20, 500)
+XPSConfig("XPS1", "164.54.160.180", 5001, 6, 20, 500)
 
 # asynPort, IP address, IP port, poll period (ms)
 XPSAuxConfig("XPS_AUX1", "164.54.160.180", 5001, 50)
@@ -19,12 +19,12 @@ XPSAuxConfig("XPS_AUX1", "164.54.160.180", 5001, 50)
 #asynSetTraceIOMask("XPS_AUX1", 0, 2)
 
 # XPS asyn port,  axis, groupName.positionerName, stepSize
-XPSCreateAxis("XPS1",0,"FINE.X",             100000) # VP-25XL
-XPSCreateAxis("XPS1",1,"FINE.Y",              50000) # VP-5ZA
-XPSCreateAxis("XPS1",2,"THETA.POSITIONER",     2000) # URS75CC
-XPSCreateAxis("XPS1",3,"COARSEX.POSITIONER",   2000) # ILS200CC
-XPSCreateAxis("XPS1",4,"COARSEY.POSITIONER",   2000) # ILS200CC
-XPSCreateAxis("XPS1",5,"COARSEZ.POSITIONER",   5000) # IMS300CC
+XPSConfigAxis("XPS1",0,"FINE.X",             100000) # VP-25XL
+XPSConfigAxis("XPS1",1,"FINE.Y",              50000) # VP-5ZA
+XPSConfigAxis("XPS1",2,"THETA.POSITIONER",     2000) # URS75CC
+XPSConfigAxis("XPS1",3,"COARSEX.POSITIONER",   2000) # ILS200CC
+XPSConfigAxis("XPS1",4,"COARSEY.POSITIONER",   2000) # ILS200CC
+XPSConfigAxis("XPS1",5,"COARSEZ.POSITIONER",   5000) # IMS300CC
 
 XPSEnableSetPosition(XPS1, 0)
 XPSSetPositionSettlingTime(XPS1, 200)
