@@ -11,11 +11,17 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #include "XPSAxis.h"
 
 #define XPS_MAX_AXES 8
+#define TCP_TIMEOUT 2.0
 
 // drvInfo strings for extra parameters that the XPS controller supports
-#define XPSMinJerkString    "XPS_MIN_JERK"
-#define XPSMaxJerkString    "XPS_MAX_JERK"
-#define XPSStatusString     "XPS_STATUS"
+#define XPSMinJerkString                "XPS_MIN_JERK"
+#define XPSMaxJerkString                "XPS_MAX_JERK"
+#define XPSProfileMaxVelocityString     "XPS_PROFILE_MAX_VELOCITY"
+#define XPSProfileMaxAccelerationString "XPS_PROFILE_MAX_ACCELERATION"
+#define XPSProfileMinPositionString     "XPS_PROFILE_MIN_POSITION"
+#define XPSProfileMaxPositionString     "XPS_PROFILE_MAX_POSITION"
+#define XPSTrajectoryFileString         "XPS_TRAJECTORY_FILE"
+#define XPSStatusString                 "XPS_STATUS"
 
 class XPSController : public asynMotorController {
 
@@ -39,17 +45,30 @@ class XPSController : public asynMotorController {
   /* Deferred moves functions.*/
   asynStatus processDeferredMoves();
   asynStatus processDeferredMovesInGroup(char * groupName);
+  asynStatus enableSetPosition(int enable);
+  asynStatus setPositionSettlingTime(double sleepTime);
 
   protected:
   XPSAxis **pAxes_;       /**< Array of pointers to axis objects */
 
-  int XPSMinJerk_;
   #define FIRST_XPS_PARAM XPSMinJerk_
+  int XPSMinJerk_;
   int XPSMaxJerk_;
+  int XPSProfileMaxVelocity_;
+  int XPSProfileMaxAcceleration_;
+  int XPSProfileMinPosition_;
+  int XPSProfileMaxPosition_;
+  int XPSTrajectoryFile_;
   int XPSStatus_;
   #define LAST_XPS_PARAM XPSStatus_
 
   private:
+  int enableSetPosition_; /**< This is controlled via the XPSEnableSetPosition function (available via the IOC shell). */ 
+
+  /** Parameter to control the sleep time used when setting position. 
+   *  A function called XPSSetPositionSettlingTime(XPS, int) (millisec parameter) 
+   *  is available in the IOC shell to control this. */
+  double setPositionSettlingTime_;
   char *IPAddress_;
   int IPPort_;
   char *ftpUsername_;
