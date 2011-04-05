@@ -28,7 +28,7 @@ static const char *driverName = "asynMotorAxis";
 asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   : pC_(pC), axisNo_(axisNo), statusChanged_(1)
 {
-  static const char *functionName = "asynMotorAxis::asynMotorAxis";
+  static const char *functionName = "asynMotorAxis";
 
   if (!pC) {
     printf("%s:%s: Error, controller is NULL\n",
@@ -173,7 +173,7 @@ asynStatus asynMotorAxis::callParamCallbacks()
 }
 
 /* These are the functions for profile moves */
-asynStatus asynMotorAxis::initializeProfile(int maxProfilePoints)
+asynStatus asynMotorAxis::initializeProfile(size_t maxProfilePoints)
 {
   if (profilePositions_)       free(profilePositions_);
   profilePositions_ =         (double *)calloc(maxProfilePoints, sizeof(double));
@@ -191,16 +191,16 @@ asynStatus asynMotorAxis::initializeProfile(int maxProfilePoints)
   * \param[in] positions Array of profile positions for this axis in user units.
   * \param[in] numPoints The number of positions in the array.
   */
-asynStatus asynMotorAxis::defineProfile(double *positions, int numPoints)
+asynStatus asynMotorAxis::defineProfile(double *positions, size_t numPoints)
 {
-  int i;
+  size_t i;
   double resolution;
   double offset;
   int direction;
   double scale;
   int status=0;
-  // static const char *functionName = "asynMotorController::buildProfile";
-  
+  //static const char *functionName = "defineProfile";
+
   if (numPoints > pC_->maxProfilePoints_) return asynError;
 
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
@@ -221,7 +221,7 @@ asynStatus asynMotorAxis::defineProfile(double *positions, int numPoints)
 /** Function to build a coordinated move of multiple axes. */
 asynStatus asynMotorAxis::buildProfile()
 {
-  // static const char *functionName = "asynMotorController::buildProfile";
+  // static const char *functionName = "buildProfile";
 
   return asynSuccess;
 }
@@ -229,7 +229,7 @@ asynStatus asynMotorAxis::buildProfile()
 /** Function to execute a coordinated move of multiple axes. */
 asynStatus asynMotorAxis::executeProfile()
 {
-  // static const char *functionName = "asynMotorController::executeProfile";
+  // static const char *functionName = "executeProfile";
 
   return asynSuccess;
 }
@@ -248,7 +248,7 @@ asynStatus asynMotorAxis::readbackProfile()
   int direction;
   int numReadbacks;
   int status=0;
-  // static const char *functionName = "asynMotorController::readbackProfile";
+  // static const char *functionName = "readbackProfile";
  
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorOffset_, &offset);
