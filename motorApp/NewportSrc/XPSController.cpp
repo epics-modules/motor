@@ -117,10 +117,7 @@ const static CorrectorTypes_t CorrectorTypes = {
 #define TRAJECTORY_DIRECTORY "/Admin/public/Trajectories"
 #define MAX_FILENAME_LEN 256
 #define MAX_MESSAGE_LEN 256
-#define TRAJECTORY_FILE "TrajectoryScan.trj"
-#define DEFAULT_FTP_USERNAME "Administrator"
-#define DEFAULT_FTP_PASSWORD "Administrator"
-#define DEFAULT_PROFILE_GROUPNAME "Group1"
+#define MAX_GROUPNAME_LEN 64
 
 /* The maximum size of the item names in gathering, e.g. "GROUP2.POSITIONER1.CurrentPosition" */
 #define MAX_GATHERING_AXIS_STRING 60
@@ -131,26 +128,21 @@ const static CorrectorTypes_t CorrectorTypes = {
 // Maximum number of bytes that GatheringDataMultipleLinesGet() can return
 #define GATHERING_MAX_READ_LEN 65536
 
-/** Deadband to use for the velocity comparison with zero. */
-#define XPS_VELOCITY_DEADBAND 0.0000001
-
-#define XPSC8_END_OF_RUN_MINUS  0x80000100
-#define XPSC8_END_OF_RUN_PLUS   0x80000200
-
-#define TCP_TIMEOUT 2.0
 #define MAX(a,b) ((a)>(b)? (a): (b))
 #define MIN(a,b) ((a)<(b)? (a): (b))
 
 
 XPSController::XPSController(const char *portName, const char *IPAddress, int IPPort, 
-                                       int numAxes, double movingPollPeriod, double idlePollPeriod)
+                             int numAxes, double movingPollPeriod, double idlePollPeriod,
+                             int enableSetPosition, double setPositionSettlingTime)
   :  asynMotorController(portName, numAxes, NUM_XPS_PARAMS, 
                          asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask, 
                          asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask,
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
                          0, 0),  // Default priority and stack size
-     enableSetPosition_(0), setPositionSettlingTime_(0.5)
+     enableSetPosition_(enableSetPosition), setPositionSettlingTime_(setPositionSettlingTime), 
+     ftpUsername_(NULL), ftpPassword_(NULL)
 {
   static const char *functionName = "XPSController";
   
@@ -165,6 +157,7 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   createParam(XPSProfileMaxAccelerationString, asynParamFloat64, &XPSProfileMaxAcceleration_);
   createParam(XPSProfileMinPositionString,     asynParamFloat64, &XPSProfileMinPosition_);
   createParam(XPSProfileMaxPositionString,     asynParamFloat64, &XPSProfileMaxPosition_);
+  createParam(XPSProfileGroupNameString,         asynParamOctet, &XPSProfileGroupName_);
   createParam(XPSTrajectoryFileString,           asynParamOctet, &XPSTrajectoryFile_);
   createParam(XPSStatusString,                   asynParamInt32, &XPSStatus_);
 
@@ -183,11 +176,6 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
            driverName, functionName);
   }
   
-  // Set a default username and password for ftp
-  ftpUsername_ = epicsStrDup(DEFAULT_FTP_USERNAME);
-  ftpPassword_ = epicsStrDup(DEFAULT_FTP_PASSWORD);
-  profileGroupName_ = epicsStrDup(DEFAULT_PROFILE_GROUPNAME);
-
   FirmwareVersionGet(pollSocket_, firmwareVersion_);
   
   /* Create the poller thread for this controller
@@ -500,6 +488,8 @@ asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   return (asynStatus)status;
 }
 
+
+
 /** Returns a pointer to an XPSAxis object.
   * Returns NULL if the axis number encoded in pasynUser is invalid.
   * \param[in] pasynUser asynUser structure that encodes the axis index number. */
@@ -511,6 +501,8 @@ XPSAxis* XPSController::getAxis(asynUser *pasynUser)
     return getAxis(axisNo);
 }
 
+
+
 /** Returns a pointer to an XPSAxis object.
   * Returns NULL if the axis number is invalid.
   * \param[in] axisNo Axis index number. */
@@ -520,39 +512,58 @@ XPSAxis* XPSController::getAxis(int axisNo)
     return pAxes_[axisNo];
 }
 
+
+
+/* Function to initialize profile */ 
+asynStatus XPSController::initializeProfile(size_t maxPoints, const char* ftpUsername, const char* ftpPassword)
+{
+  ftpUsername_ = epicsStrDup(ftpUsername);
+  ftpPassword_ = epicsStrDup(ftpPassword);
+  asynMotorController::initializeProfile(maxPoints);
+  return asynSuccess;
+}
+
+
+
 /* Function to build, install and verify trajectory */ 
 asynStatus XPSController::buildProfile()
 {
   FILE *trajFile;
   int i, j; 
   int status;
+  bool buildOK=false;
+  bool verifyOK=true;
   int nPoints;
   int nElements;
   double trajVel;
   double D0, D1, T0, T1;
   int ftpSocket;
   char fileName[MAX_FILENAME_LEN];
+  char groupName[MAX_GROUPNAME_LEN];
   char buildMessage[MAX_MESSAGE_LEN];
   int buildStatus;
   double distance;
-  double maxVelocity[XPS_MAX_AXES];
-  double maxAcceleration[XPS_MAX_AXES];
-  double maxVelocityActual;
-  double maxAccelerationActual;
-  double minPositionActual, maxPositionActual;
+  double maxVelocity;
+  double maxAcceleration;
+  double maxVelocityActual=0.0;
+  double maxAccelerationActual=0.0;
+  double minPositionActual=0.0, maxPositionActual=0.0;
   double minProfile, maxProfile;
   double lowLimit, highLimit;
-  double minJerkTime[XPS_MAX_AXES], maxJerkTime[XPS_MAX_AXES];
+  double minJerkTime, maxJerkTime;
   double preTimeMax, postTimeMax;
   double preVelocity[XPS_MAX_AXES], postVelocity[XPS_MAX_AXES];
   double preDistance[XPS_MAX_AXES], postDistance[XPS_MAX_AXES];
   double time;
-  int moveAxis[XPS_MAX_AXES];
+  int useAxis[XPS_MAX_AXES];
   static const char *functionName = "buildProfile";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: entry\n",
             driverName, functionName);
+            
+  // Call the base class method which will build the time array if needed
+  asynMotorController::buildProfile();
 
   setIntegerParam(profileBuildState_, PROFILE_BUILD_BUSY);
   setIntegerParam(profileBuildStatus_, PROFILE_STATUS_UNDEFINED);
@@ -572,18 +583,21 @@ asynStatus XPSController::buildProfile()
   preTimeMax = 0.;
   postTimeMax = 0.;
   getIntegerParam(profileNumPoints_, &nPoints);
+  getStringParam(XPSTrajectoryFile_, (int)sizeof(fileName), fileName);
+  getStringParam(XPSProfileGroupName_, (int)sizeof(groupName), groupName);
 
   /* Zero values since axes may not be used */
   for (j=0; j<numAxes_; j++) {
     preVelocity[j] = 0.;
     postVelocity[j] = 0.;
-    getIntegerParam(j, profileUseAxis_, &moveAxis[j]);
+    getIntegerParam(j, profileUseAxis_, &useAxis[j]);
   }
+  
   for (j=0; j<numAxes_; j++) {
-    if (!moveAxis[j]) continue;
+    if (!useAxis[j]) continue;
     status = PositionerSGammaParametersGet(pollSocket_, pAxes_[j]->positionerName_, 
-                                           &maxVelocity[j], &maxAcceleration[j],
-                                           &minJerkTime[j], &maxJerkTime[j]);
+                                           &maxVelocity, &maxAcceleration,
+                                           &minJerkTime, &maxJerkTime);
     if (status) {
       sprintf(buildMessage, "Error calling positionerSGammaParametersSet, status=%d\n", status);
       goto done;
@@ -592,19 +606,19 @@ asynStatus XPSController::buildProfile()
     /* The calculation using maxAcceleration read from controller below
      * is "correct" but subject to roundoff errors when sending ASCII commands
      * to XPS.  Reduce acceleration 10% to account for this. */
-    maxAcceleration[j] *= 0.9;
+    maxAcceleration *= 0.9;
 
     /* Note: the preDistance and postDistance numbers computed here are
      * in user coordinates, not XPS coordinates, because they are used for 
      * EPICS moves at the start and end of the scan */
     distance = pAxes_[j]->profilePositions_[1] - pAxes_[j]->profilePositions_[0];
     preVelocity[j] = distance/profileTimes_[0];
-    time = fabs(preVelocity[j]) / maxAcceleration[j];
+    time = fabs(preVelocity[j]) / maxAcceleration;
     preTimeMax = MAX(preTimeMax, time);
     distance = pAxes_[j]->profilePositions_[nPoints-1] - 
                pAxes_[j]->profilePositions_[nPoints-2];
     postVelocity[j] = distance/profileTimes_[nPoints-1];
-    time = fabs(postVelocity[j]) / maxAcceleration[j];
+    time = fabs(postVelocity[j]) / maxAcceleration;
     postTimeMax = MAX(postTimeMax, time);
   }
 
@@ -616,7 +630,7 @@ asynStatus XPSController::buildProfile()
   }
 
   /* Create the profile file */
-  trajFile =  fopen (TRAJECTORY_FILE, "w");
+  trajFile =  fopen(fileName, "w");
 
   /* Create the initial acceleration element */
   fprintf(trajFile,"%f", preTimeMax);
@@ -644,7 +658,7 @@ asynStatus XPSController::buildProfile()
 
       /* Average either side of the point */
       trajVel = ((D0 + D1) / (T0 + T1));
-      if (!moveAxis[j]) {
+      if (!useAxis[j]) {
         D0 = 0.0;  /* Axis turned off*/
         trajVel = 0.0;
       }
@@ -674,7 +688,7 @@ asynStatus XPSController::buildProfile()
     sprintf(buildMessage, "Error calling  ftpChangeDir, status=%d\n", status);
     goto done;
   }
-  status = ftpStoreFile(ftpSocket, TRAJECTORY_FILE);
+  status = ftpStoreFile(ftpSocket, fileName);
   if (status) {
     sprintf(buildMessage, "Error calling  ftpStoreFile, status=%d\n", status);
     goto done;
@@ -684,13 +698,14 @@ asynStatus XPSController::buildProfile()
      sprintf(buildMessage, "Error calling  ftpDisconnect, status=%d\n", status);
     goto done;
   }
-     
+  buildOK = true;
+
   /* Verify trajectory */
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: calling MultipleAxesPVTVerification(%d, %s, %s)\n",
-            driverName, functionName, pollSocket_, profileGroupName_, TRAJECTORY_FILE);
-  status = MultipleAxesPVTVerification(pollSocket_, profileGroupName_, TRAJECTORY_FILE);
-   
+            driverName, functionName, pollSocket_, groupName, fileName);
+  status = MultipleAxesPVTVerification(pollSocket_, groupName, fileName);
+  if (status) verifyOK = false;
   switch (-status) {
     case 0:
       strcpy(buildMessage, " ");
@@ -720,10 +735,14 @@ asynStatus XPSController::buildProfile()
                  pAxes_[j]->positionerName_, fileName, 
                  &minPositionActual, &maxPositionActual, 
                  &maxVelocityActual, &maxAccelerationActual);
+    pAxes_[j]->setDoubleParam(XPSProfileMinPosition_,     minPositionActual);
+    pAxes_[j]->setDoubleParam(XPSProfileMaxPosition_,     maxPositionActual);
+    pAxes_[j]->setDoubleParam(XPSProfileMaxVelocity_,     maxVelocityActual);
+    pAxes_[j]->setDoubleParam(XPSProfileMaxAcceleration_, maxAccelerationActual);
     if (status) {
       sprintf(buildMessage, "MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
               pAxes_[j]->positionerName_, status);
-      goto done;
+      verifyOK = false;
     }
     /* Check that the trajectory won't exceed the software limits
      * The XPS does not check this because the trajectory is defined in relative moves and it does
@@ -734,19 +753,21 @@ asynStatus XPSController::buildProfile()
                                            &highLimit);
     minProfile = pAxes_[j]->profilePositions_[0] + minPositionActual;
     if (minProfile < lowLimit) {
+      status = 1;
       sprintf(buildMessage, "Low soft limit violation for axis %s, position=%f, limit=%f\n",
               pAxes_[j]->positionerName_, minProfile, lowLimit);
-      goto done;
+      verifyOK = false;
     }
     maxProfile = pAxes_[j]->profilePositions_[0] + maxPositionActual;
-    if (maxProfile > lowLimit) {
+    if (maxProfile > highLimit) {
+      status = 1;
       sprintf(buildMessage, "High soft limit violation for axis %s, position=%f, limit=%f\n",
               pAxes_[j]->positionerName_, maxProfile, highLimit);
-      goto done;
+      verifyOK = false;
     }
   }
   done:
-  buildStatus = status ?  PROFILE_STATUS_FAILURE : PROFILE_STATUS_SUCCESS;
+  buildStatus = (buildOK && verifyOK) ?  PROFILE_STATUS_SUCCESS : PROFILE_STATUS_FAILURE;
   setIntegerParam(profileBuildStatus_, buildStatus);
   setStringParam(profileBuildMessage_, buildMessage);
   if (status) {
@@ -781,7 +802,7 @@ asynStatus XPSController::readbackProfile()
   int i, j;
   int nitems;
   int numRead=0, numInBuffer, numChars;
-  int moveAxis[XPS_MAX_AXES];
+  int useAxis[XPS_MAX_AXES];
   static const char *functionName = "buildProfile";
     
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
@@ -799,7 +820,7 @@ asynStatus XPSController::readbackProfile()
   for (j=0; j<numAxes_; j++) {
     memset(pAxes_[j]->profileReadbacks_,       0, maxProfilePoints_*sizeof(double));
     memset(pAxes_[j]->profileFollowingErrors_, 0, maxProfilePoints_*sizeof(double));
-    getIntegerParam(j, profileUseAxis_, &moveAxis[j]);
+    getIntegerParam(j, profileUseAxis_, &useAxis[j]);
   }
   /* Read the number of lines of gathering */
   status = GatheringCurrentNumberGet(pollSocket_, &currentSamples, &maxSamples);
@@ -835,7 +856,7 @@ asynStatus XPSController::readbackProfile()
       tptr = strstr(bptr, "\n");
       if (tptr) *tptr = 0;
       for (j=0; j<numAxes_; j++) {
-        if (!moveAxis[j]) continue;
+        if (!useAxis[j]) continue;
         nitems = sscanf(bptr, "%lf;%lf%n", 
                         &setpointPosition, &actualPosition, &numChars);
         bptr += numChars+1;
@@ -898,74 +919,28 @@ asynStatus  XPSController::setPositionSettlingTime(double settlingTime)
 
 extern "C" {
 
-/**
- * Function to enable/disable the write down of position to the 
- * XPS controller. Call this function at IOC shell.
- * @param setPos 0=disable, 1=enable
- */
-asynStatus XPSEnableSetPosition(const char *XPSName, int enableSetPosition) 
-{
-  XPSController *pC;
-  pC = (XPSController*) findAsynPortDriver(XPSName);
-  static const char *functionName = "XPSEnableSetPosition";
-
-  if (!pC) {
-    printf("%s:%s: Error port %s not found\n",
-           driverName, functionName, XPSName);
-    return asynError;
-  }
-  pC->lock();
-  pC->enableSetPosition(enableSetPosition);
-  pC->unlock();
-  return asynSuccess;
-}
-
-
-
-/**
- * Function to set the settling time used when setting the XPS position.
- * The sleep is performed after the axes are initialised, to take account of any
- * post initialisation wobble.
- * @param settlingTime The time in milliseconds to sleep.
- */
-asynStatus XPSSetPositionSettlingTime(const char *XPSName, int settlingTime) 
-{
-  XPSController *pC;
-  pC = (XPSController*) findAsynPortDriver(XPSName);
-  static const char *functionName = "XPSSetPositionSettlingTime";
-
-  if (!pC) {
-    printf("%s:%s: Error port %s not found\n",
-           driverName, functionName, XPSName);
-    return asynError;
-  }
-  pC->lock();
-  pC->setPositionSettlingTime((double)settlingTime / 1000.0);
-  pC->unlock();
-  return asynSuccess;
-}
-
-
-
-asynStatus XPSCreate(const char *portName, const char *IPAddress, int IPPort,
-                         int numAxes, int movingPollPeriod, int idlePollPeriod)
+asynStatus XPSConfig(const char *portName, const char *IPAddress, int IPPort,
+                         int numAxes, int movingPollPeriod, int idlePollPeriod,
+                         int enableSetPosition, int setPositionSettlingTime)
 {
     XPSController *pXPSController
-        = new XPSController(portName, IPAddress, IPPort, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
+        = new XPSController(portName, IPAddress, IPPort, numAxes, 
+                            movingPollPeriod/1000., idlePollPeriod/1000.,
+                            enableSetPosition, setPositionSettlingTime/1000.);
     pXPSController = NULL;
     return asynSuccess;
 }
 
 
 
-asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controller by port name */
+asynStatus XPSConfigAxis(const char *XPSName,         /* specify which controller by port name */
                          int axis,                    /* axis number 0-7 */
                          const char *positionerName,  /* groupName.positionerName e.g. Diffractometer.Phi */
                          int stepsPerUnit)            /* steps per user unit */
 {
   XPSController *pC;
   XPSAxis *pAxis;
-  static const char *functionName = "XPSCreateAxis";
+  static const char *functionName = "XPSConfigAxis";
 
   pC = (XPSController*) findAsynPortDriver(XPSName);
   if (!pC) {
@@ -981,81 +956,95 @@ asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controlle
 }
 
 
+asynStatus XPSConfigProfile(const char *XPSName,         /* specify which controller by port name */
+                            int maxPoints,               /* maximum number of profile points */
+                            const char *ftpUsername,      /* FTP account name */
+                            const char *ftpPassword)     /* FTP password */
+{
+  XPSController *pC;
+  static const char *functionName = "XPSConfigProfile";
+
+  pC = (XPSController*) findAsynPortDriver(XPSName);
+  if (!pC) {
+    printf("%s:%s: Error port %s not found\n",
+           driverName, functionName, XPSName);
+    return asynError;
+  }
+  pC->lock();
+  pC->initializeProfile(maxPoints, ftpUsername, ftpPassword);
+  pC->unlock();
+  return asynSuccess;
+}
+
+
 
 /* Code for iocsh registration */
 
-/* XPSCreate */
-static const iocshArg XPSCreateArg0 = {"Controller port name", iocshArgString};
-static const iocshArg XPSCreateArg1 = {"IP address", iocshArgString};
-static const iocshArg XPSCreateArg2 = {"IP port", iocshArgInt};
-static const iocshArg XPSCreateArg3 = {"Number of axes", iocshArgInt};
-static const iocshArg XPSCreateArg4 = {"Moving poll rate (ms)", iocshArgInt};
-static const iocshArg XPSCreateArg5 = {"Idle poll rate (ms)", iocshArgInt};
-static const iocshArg * const XPSCreateArgs[] = {&XPSCreateArg0,
-                                                 &XPSCreateArg1,
-                                                 &XPSCreateArg2,
-                                                 &XPSCreateArg2,
-                                                 &XPSCreateArg4,
-                                                 &XPSCreateArg5};
-static const iocshFuncDef createXPS = {"XPSCreate", 6, XPSCreateArgs};
-static void createXPSCallFunc(const iocshArgBuf *args)
+/* XPSConfig */
+static const iocshArg XPSConfigArg0 = {"Controller port name", iocshArgString};
+static const iocshArg XPSConfigArg1 = {"IP address", iocshArgString};
+static const iocshArg XPSConfigArg2 = {"IP port", iocshArgInt};
+static const iocshArg XPSConfigArg3 = {"Number of axes", iocshArgInt};
+static const iocshArg XPSConfigArg4 = {"Moving poll rate (ms)", iocshArgInt};
+static const iocshArg XPSConfigArg5 = {"Idle poll rate (ms)", iocshArgInt};
+static const iocshArg XPSConfigArg6 = {"Enable set position", iocshArgInt};
+static const iocshArg XPSConfigArg7 = {"Set position settling time (ms)", iocshArgInt};
+static const iocshArg * const XPSConfigArgs[] = {&XPSConfigArg0,
+                                                 &XPSConfigArg1,
+                                                 &XPSConfigArg2,
+                                                 &XPSConfigArg2,
+                                                 &XPSConfigArg4,
+                                                 &XPSConfigArg5,
+                                                 &XPSConfigArg6,
+                                                 &XPSConfigArg7};
+static const iocshFuncDef configXPS = {"XPSConfig", 8, XPSConfigArgs};
+static void configXPSCallFunc(const iocshArgBuf *args)
 {
-  XPSCreate(args[0].sval, args[1].sval, args[2].ival, 
-            args[3].ival, args[4].ival, args[5].ival);
+  XPSConfig(args[0].sval, args[1].sval, args[2].ival, 
+            args[3].ival, args[4].ival, args[5].ival,
+            args[6].ival, args[7].ival);
 }
 
 
 
-/* XPSCreateAxis */
-static const iocshArg XPSCreateAxisArg0 = {"Controller port name", iocshArgString};
-static const iocshArg XPSCreateAxisArg1 = {"Axis number", iocshArgInt};
-static const iocshArg XPSCreateAxisArg2 = {"Axis name", iocshArgString};
-static const iocshArg XPSCreateAxisArg3 = {"Steps per unit", iocshArgInt};
-static const iocshArg * const XPSCreateAxisArgs[] = {&XPSCreateAxisArg0,
-                                                     &XPSCreateAxisArg1,
-                                                     &XPSCreateAxisArg2,
-                                                     &XPSCreateAxisArg3};
-static const iocshFuncDef createXPSAxis = {"XPSCreateAxis", 4, XPSCreateAxisArgs};
+/* XPSConfigAxis */
+static const iocshArg XPSConfigAxisArg0 = {"Controller port name", iocshArgString};
+static const iocshArg XPSConfigAxisArg1 = {"Axis number", iocshArgInt};
+static const iocshArg XPSConfigAxisArg2 = {"Axis name", iocshArgString};
+static const iocshArg XPSConfigAxisArg3 = {"Steps per unit", iocshArgInt};
+static const iocshArg * const XPSConfigAxisArgs[] = {&XPSConfigAxisArg0,
+                                                     &XPSConfigAxisArg1,
+                                                     &XPSConfigAxisArg2,
+                                                     &XPSConfigAxisArg3};
+static const iocshFuncDef configXPSAxis = {"XPSConfigAxis", 4, XPSConfigAxisArgs};
 
-static void createXPSAxisCallFunc(const iocshArgBuf *args)
+static void configXPSAxisCallFunc(const iocshArgBuf *args)
 {
-  XPSCreateAxis(args[0].sval, args[1].ival, args[2].sval, args[3].ival);
+  XPSConfigAxis(args[0].sval, args[1].ival, args[2].sval, args[3].ival);
 }
 
 
 
-/* XPSEnableSetPosition */
-static const iocshArg XPSEnableSetPositionArg0 = {"Controller port name", iocshArgString};
-static const iocshArg XPSEnableSetPositionArg1 = {"Set Position Flag", iocshArgInt};
-static const iocshArg * const XPSEnableSetPositionArgs[] = {&XPSEnableSetPositionArg0,
-                                                            &XPSEnableSetPositionArg1};
-static const iocshFuncDef enableSetPosition = {"XPSEnableSetPosition", 2, XPSEnableSetPositionArgs};
-static void enableSetPositionCallFunc(const iocshArgBuf *args)
+/* XPSConfigProfile */
+static const iocshArg XPSConfigProfileArg0 = {"Controller port name", iocshArgString};
+static const iocshArg XPSConfigProfileArg1 = {"Max points", iocshArgInt};
+static const iocshArg XPSConfigProfileArg2 = {"FTP username", iocshArgString};
+static const iocshArg XPSConfigProfileArg3 = {"FTP password", iocshArgString};
+static const iocshArg * const XPSConfigProfileArgs[] = {&XPSConfigProfileArg0,
+                                                        &XPSConfigProfileArg1,
+                                                        &XPSConfigProfileArg2,
+                                                        &XPSConfigProfileArg3};
+static const iocshFuncDef configXPSProfile = {"XPSConfigProfile", 4, XPSConfigProfileArgs};
+
+static void configXPSProfileCallFunc(const iocshArgBuf *args)
 {
-  XPSEnableSetPosition(args[0].sval, args[1].ival);
+  XPSConfigProfile(args[0].sval, args[1].ival, args[2].sval, args[3].sval);
 }
-
-
-
-/* XPSSetPositionSettlingTime */
-static const iocshArg XPSSetPositionSettlingTimeArg0 = {"Controller port name", iocshArgString};
-static const iocshArg XPSSetPositionSettlingTimeArg1 = {"Set Position Settling Time", iocshArgInt};
-static const iocshArg * const XPSSetPositionSettlingTimeArgs[] = {&XPSSetPositionSettlingTimeArg0,
-                                                                  &XPSSetPositionSettlingTimeArg1};
-static const iocshFuncDef setPositionSettlingTime = {"XPSSetPositionSettlingTime", 2, XPSSetPositionSettlingTimeArgs};
-static void setPositionSettlingTimeCallFunc(const iocshArgBuf *args)
-{
-  XPSSetPositionSettlingTime(args[0].sval, args[1].ival);
-}
-
-
-
 static void XPSRegister3(void)
 {
-  iocshRegister(&createXPS,            createXPSCallFunc);
-  iocshRegister(&createXPSAxis,        createXPSAxisCallFunc);
-  iocshRegister(&enableSetPosition,    enableSetPositionCallFunc);
-  iocshRegister(&setPositionSettlingTime, setPositionSettlingTimeCallFunc);
+  iocshRegister(&configXPS,            configXPSCallFunc);
+  iocshRegister(&configXPSAxis,        configXPSAxisCallFunc);
+  iocshRegister(&configXPSProfile,     configXPSProfileCallFunc);
 }
 epicsExportRegistrar(XPSRegister3);
 
