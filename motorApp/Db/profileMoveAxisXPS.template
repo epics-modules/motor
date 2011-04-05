@@ -17,7 +17,7 @@
 #
 # Readback of minimum position
 #
-record(ai,"$(P)$(R)$(M)MinPosition") {
+record(ai,"$(P)$(R)M$(M)MinPosition") {
     field(DESC, "Axis $(ADDR) min position")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))XPS_PROFILE_MIN_POSITION")
@@ -28,7 +28,7 @@ record(ai,"$(P)$(R)$(M)MinPosition") {
 #
 # Readback of maximum position
 #
-record(ai,"$(P)$(R)$(M)MaxPosition") {
+record(ai,"$(P)$(R)M$(M)MaxPosition") {
     field(DESC, "Axis $(ADDR) max position")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))XPS_PROFILE_MAX_POSITION")
@@ -39,7 +39,7 @@ record(ai,"$(P)$(R)$(M)MaxPosition") {
 #
 # Readback of maximum velocity
 #
-record(ai,"$(P)$(R)$(M)MaxVelocity") {
+record(ai,"$(P)$(R)M$(M)MaxVelocity") {
     field(DESC, "Axis $(ADDR) max velocity")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))XPS_PROFILE_MAX_VELOCITY")
@@ -50,7 +50,7 @@ record(ai,"$(P)$(R)$(M)MaxVelocity") {
 #
 # Readback of maximum acceleration
 #
-record(ai,"$(P)$(R)$(M)MaxAcceleration") {
+record(ai,"$(P)$(R)M$(M)MaxAcceleration") {
     field(DESC, "Axis $(ADDR) max acceleration")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))XPS_PROFILE_MAX_ACCELERATION")
