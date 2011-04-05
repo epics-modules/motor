@@ -113,16 +113,6 @@ const static CorrectorTypes_t CorrectorTypes = {
   "NoCorrector"
 };
 
-/** This is controlled via the XPSEnableSetPosition function (available via the IOC shell). */ 
-static int doSetPosition = 1;
-
-/**
- * Parameter to control the sleep time used when setting position. 
- * A function called XPSSetPosSleepTime(int) (millisec parameter) 
- * is available in the IOC shell to control this.
- */
-static double setPosSleepTime = 0.5;
-
 /* Constants used for FTP to the XPS */
 #define TRAJECTORY_DIRECTORY "/Admin/public/Trajectories"
 #define MAX_FILENAME_LEN 256
@@ -159,7 +149,8 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
                          asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask,
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
-                         0, 0)  // Default priority and stack size
+                         0, 0),  // Default priority and stack size
+     enableSetPosition_(0), setPositionSettlingTime_(0.5)
 {
   static const char *functionName = "XPSController";
   
@@ -168,9 +159,14 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   pAxes_ = (XPSAxis **)(asynMotorController::pAxes_);
 
   // Create controller-specific parameters
-  createParam(XPSMinJerkString, asynParamFloat64, &XPSMinJerk_);
-  createParam(XPSMaxJerkString, asynParamFloat64, &XPSMaxJerk_);
-  createParam(XPSStatusString,  asynParamInt32,   &XPSStatus_);
+  createParam(XPSMinJerkString,                asynParamFloat64, &XPSMinJerk_);
+  createParam(XPSMaxJerkString,                asynParamFloat64, &XPSMaxJerk_);
+  createParam(XPSProfileMaxVelocityString,     asynParamFloat64, &XPSProfileMaxVelocity_);
+  createParam(XPSProfileMaxAccelerationString, asynParamFloat64, &XPSProfileMaxAcceleration_);
+  createParam(XPSProfileMinPositionString,     asynParamFloat64, &XPSProfileMinPosition_);
+  createParam(XPSProfileMaxPositionString,     asynParamFloat64, &XPSProfileMaxPosition_);
+  createParam(XPSTrajectoryFileString,           asynParamOctet, &XPSTrajectoryFile_);
+  createParam(XPSStatusString,                   asynParamInt32, &XPSStatus_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, TCP_TIMEOUT);
@@ -878,39 +874,89 @@ asynStatus XPSController::readbackProfile()
   return status ? asynError : asynSuccess; 
 }
 
+asynStatus XPSController::enableSetPosition(int enable) 
+{
+  enableSetPosition_ = enable;
+  return asynSuccess;
+}
+
+/**
+ * Function to set the seetling time used when setting the XPS position.
+ * The sleep is performed after the axes are initialised, to take account of any
+ * post initialisation wobble.
+ * @param settlingTime The time in seconds to sleep.
+ */
+asynStatus  XPSController::setPositionSettlingTime(double settlingTime) 
+{
+  setPositionSettlingTime_ = settlingTime;
+  return asynSuccess;
+}
+
 
 
 /** The following functions have C linkage, and can be called directly or from iocsh */
+
 extern "C" {
+
 /**
  * Function to enable/disable the write down of position to the 
  * XPS controller. Call this function at IOC shell.
  * @param setPos 0=disable, 1=enable
  */
-/* void XPSEnableSetPosition(int setPos) 
+asynStatus XPSEnableSetPosition(const char *XPSName, int enableSetPosition) 
 {
-  doSetPosition = setPos;
+  XPSController *pC;
+  pC = (XPSController*) findAsynPortDriver(XPSName);
+  static const char *functionName = "XPSEnableSetPosition";
+
+  if (!pC) {
+    printf("%s:%s: Error port %s not found\n",
+           driverName, functionName, XPSName);
+    return asynError;
+  }
+  pC->lock();
+  pC->enableSetPosition(enableSetPosition);
+  pC->unlock();
+  return asynSuccess;
 }
- */
+
+
+
 /**
- * Function to set the threadSleep time used when setting the XPS position.
+ * Function to set the settling time used when setting the XPS position.
  * The sleep is performed after the axes are initialised, to take account of any
  * post initialisation wobble.
- * @param posSleep The time in miliseconds to sleep.
+ * @param settlingTime The time in milliseconds to sleep.
  */
-/* void XPSSetPosSleepTime(int posSleep) 
+asynStatus XPSSetPositionSettlingTime(const char *XPSName, int settlingTime) 
 {
-  setPosSleepTime = (double)posSleep / 1000.0;
+  XPSController *pC;
+  pC = (XPSController*) findAsynPortDriver(XPSName);
+  static const char *functionName = "XPSSetPositionSettlingTime";
+
+  if (!pC) {
+    printf("%s:%s: Error port %s not found\n",
+           driverName, functionName, XPSName);
+    return asynError;
+  }
+  pC->lock();
+  pC->setPositionSettlingTime((double)settlingTime / 1000.0);
+  pC->unlock();
+  return asynSuccess;
 }
- */
+
+
+
 asynStatus XPSCreate(const char *portName, const char *IPAddress, int IPPort,
                          int numAxes, int movingPollPeriod, int idlePollPeriod)
 {
     XPSController *pXPSController
         = new XPSController(portName, IPAddress, IPPort, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
     pXPSController = NULL;
-    return(asynSuccess);
+    return asynSuccess;
 }
+
+
 
 asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controller by port name */
                          int axis,                    /* axis number 0-7 */
@@ -927,10 +973,14 @@ asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controlle
            driverName, functionName, XPSName);
     return asynError;
   }
+  pC->lock();
   pAxis = new XPSAxis(pC, axis, positionerName, 1./stepsPerUnit);
   pAxis = NULL;
-  return(asynSuccess);
+  pC->unlock();
+  return asynSuccess;
 }
+
+
 
 /* Code for iocsh registration */
 
@@ -941,12 +991,12 @@ static const iocshArg XPSCreateArg2 = {"IP port", iocshArgInt};
 static const iocshArg XPSCreateArg3 = {"Number of axes", iocshArgInt};
 static const iocshArg XPSCreateArg4 = {"Moving poll rate (ms)", iocshArgInt};
 static const iocshArg XPSCreateArg5 = {"Idle poll rate (ms)", iocshArgInt};
-static const iocshArg * const XPSCreateArgs[6] = {&XPSCreateArg0,
-                                                  &XPSCreateArg1,
-                                                  &XPSCreateArg2,
-                                                  &XPSCreateArg2,
-                                                  &XPSCreateArg4,
-                                                  &XPSCreateArg5};
+static const iocshArg * const XPSCreateArgs[] = {&XPSCreateArg0,
+                                                 &XPSCreateArg1,
+                                                 &XPSCreateArg2,
+                                                 &XPSCreateArg2,
+                                                 &XPSCreateArg4,
+                                                 &XPSCreateArg5};
 static const iocshFuncDef createXPS = {"XPSCreate", 6, XPSCreateArgs};
 static void createXPSCallFunc(const iocshArgBuf *args)
 {
@@ -955,15 +1005,16 @@ static void createXPSCallFunc(const iocshArgBuf *args)
 }
 
 
+
 /* XPSCreateAxis */
 static const iocshArg XPSCreateAxisArg0 = {"Controller port name", iocshArgString};
 static const iocshArg XPSCreateAxisArg1 = {"Axis number", iocshArgInt};
 static const iocshArg XPSCreateAxisArg2 = {"Axis name", iocshArgString};
 static const iocshArg XPSCreateAxisArg3 = {"Steps per unit", iocshArgInt};
-static const iocshArg * const XPSCreateAxisArgs[4] = {&XPSCreateAxisArg0,
-                                                      &XPSCreateAxisArg1,
-                                                      &XPSCreateAxisArg2,
-                                                      &XPSCreateAxisArg3};
+static const iocshArg * const XPSCreateAxisArgs[] = {&XPSCreateAxisArg0,
+                                                     &XPSCreateAxisArg1,
+                                                     &XPSCreateAxisArg2,
+                                                     &XPSCreateAxisArg3};
 static const iocshFuncDef createXPSAxis = {"XPSCreateAxis", 4, XPSCreateAxisArgs};
 
 static void createXPSAxisCallFunc(const iocshArgBuf *args)
@@ -972,32 +1023,41 @@ static void createXPSAxisCallFunc(const iocshArgBuf *args)
 }
 
 
-/* void XPSEnableSetPosition(int setPos) */
-static const iocshArg XPSEnableSetPositionArg0 = {"Set Position Flag", iocshArgInt};
-static const iocshArg * const XPSEnableSetPositionArgs[1] = {&XPSEnableSetPositionArg0};
-static const iocshFuncDef xpsEnableSetPosition = {"XPSEnableSetPosition", 1, XPSEnableSetPositionArgs};
-static void xpsEnableSetPositionCallFunc(const iocshArgBuf *args)
+
+/* XPSEnableSetPosition */
+static const iocshArg XPSEnableSetPositionArg0 = {"Controller port name", iocshArgString};
+static const iocshArg XPSEnableSetPositionArg1 = {"Set Position Flag", iocshArgInt};
+static const iocshArg * const XPSEnableSetPositionArgs[] = {&XPSEnableSetPositionArg0,
+                                                            &XPSEnableSetPositionArg1};
+static const iocshFuncDef enableSetPosition = {"XPSEnableSetPosition", 2, XPSEnableSetPositionArgs};
+static void enableSetPositionCallFunc(const iocshArgBuf *args)
 {
-//  XPSEnableSetPosition(args[0].ival);
+  XPSEnableSetPosition(args[0].sval, args[1].ival);
 }
 
-/* void XPSSetPosSleepTime(int posSleep) */
-static const iocshArg XPSSetPosSleepTimeArg0 = {"Set Position Sleep Time", iocshArgInt};
-static const iocshArg * const XPSSetPosSleepTimeArgs[1] = {&XPSSetPosSleepTimeArg0};
-static const iocshFuncDef xpsSetPosSleepTime = {"XPSSetPosSleepTime", 1, XPSSetPosSleepTimeArgs};
-static void xpsSetPosSleepTimeCallFunc(const iocshArgBuf *args)
+
+
+/* XPSSetPositionSettlingTime */
+static const iocshArg XPSSetPositionSettlingTimeArg0 = {"Controller port name", iocshArgString};
+static const iocshArg XPSSetPositionSettlingTimeArg1 = {"Set Position Settling Time", iocshArgInt};
+static const iocshArg * const XPSSetPositionSettlingTimeArgs[] = {&XPSSetPositionSettlingTimeArg0,
+                                                                  &XPSSetPositionSettlingTimeArg1};
+static const iocshFuncDef setPositionSettlingTime = {"XPSSetPositionSettlingTime", 2, XPSSetPositionSettlingTimeArgs};
+static void setPositionSettlingTimeCallFunc(const iocshArgBuf *args)
 {
-//  XPSSetPosSleepTime(args[0].ival);
+  XPSSetPositionSettlingTime(args[0].sval, args[1].ival);
 }
+
 
 
 static void XPSRegister3(void)
 {
   iocshRegister(&createXPS,            createXPSCallFunc);
   iocshRegister(&createXPSAxis,        createXPSAxisCallFunc);
-//  iocshRegister(&xpsEnableSetPosition, xpsEnableSetPositionCallFunc);
-//  iocshRegister(&xpsSetPosSleepTime,   xpsSetPosSleepTimeCallFunc);
+  iocshRegister(&enableSetPosition,    enableSetPositionCallFunc);
+  iocshRegister(&setPositionSettlingTime, setPositionSettlingTimeCallFunc);
 }
-
 epicsExportRegistrar(XPSRegister3);
+
+
 } // extern "C"
