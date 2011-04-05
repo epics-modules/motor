@@ -20,6 +20,7 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define XPSProfileMaxAccelerationString "XPS_PROFILE_MAX_ACCELERATION"
 #define XPSProfileMinPositionString     "XPS_PROFILE_MIN_POSITION"
 #define XPSProfileMaxPositionString     "XPS_PROFILE_MAX_POSITION"
+#define XPSProfileGroupNameString       "XPS_PROFILE_GROUP_NAME"
 #define XPSTrajectoryFileString         "XPS_TRAJECTORY_FILE"
 #define XPSStatusString                 "XPS_STATUS"
 
@@ -27,7 +28,8 @@ class XPSController : public asynMotorController {
 
   public:
   XPSController(const char *portName, const char *IPAddress, int IPPort,
-                int numAxes, double movingPollPeriod, double idlePollPeriod);
+                int numAxes, double movingPollPeriod, double idlePollPeriod,
+                int enableSetPosition, double setPositionSettlingTime);
 
   /* These are the methods that we override from asynMotorDriver */
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
@@ -37,6 +39,7 @@ class XPSController : public asynMotorController {
   XPSAxis* getAxis(int axisNo);
 
   /* These are the functions for profile moves */
+  asynStatus initializeProfile(size_t maxPoints, const char* ftpUsername, const char* ftpPassword);
   asynStatus buildProfile();
   asynStatus executeProfile();
   asynStatus readbackProfile();
@@ -58,6 +61,7 @@ class XPSController : public asynMotorController {
   int XPSProfileMaxAcceleration_;
   int XPSProfileMinPosition_;
   int XPSProfileMaxPosition_;
+  int XPSProfileGroupName_;
   int XPSTrajectoryFile_;
   int XPSStatus_;
   #define LAST_XPS_PARAM XPSStatus_
@@ -73,7 +77,6 @@ class XPSController : public asynMotorController {
   int IPPort_;
   char *ftpUsername_;
   char *ftpPassword_;
-  char *profileGroupName_;
   int pollSocket_;
   int moveSocket_;
   char firmwareVersion_[100];
