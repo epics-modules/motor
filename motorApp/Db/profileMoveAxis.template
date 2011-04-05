@@ -9,21 +9,22 @@
 # Macro paramters:
 #   $(P)         - PV name prefix
 #   $(R)         - PV base record name
+#   $(M)         - PV motor name
 #   $(NPOINTS)   - Maximum profile points
 #   $(NREADBACK) - Maximum number of readback positions
 #   $(PORT)      - asyn port for this controller
-#   $(AXIS)      - asyn addr for this axis
+#   $(ADDR)      - asyn addr for this axis
 #   $(TIMEOUT)   - asyn timeout for this axis
 #   $(PREC)      - Precision for this axis
 
 #
 # Is this axis involved in the profile move?
 #
-record(bo,"$(P)$(R)$(AXIS)Use axis") {
-    field(DESC, "Use axis $(AXIS)?")
+record(bo,"$(P)$(R)$(M)Use axis") {
+    field(DESC, "Use axis $(ADDR)?")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_USE_AXIS")
+    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_USE_AXIS")
     field(VAL,  "0")
     field(ZNAM, "No")
     field(ONAM, "Yes")
@@ -31,10 +32,10 @@ record(bo,"$(P)$(R)$(AXIS)Use axis") {
 #
 # Target position array for this axis
 #
-record(waveform,"$(P)$(R)$(AXIS)Positions") {
-    field(DESC, "Axis $(AXIS) positions")
+record(waveform,"$(P)$(R)$(M)Positions") {
+    field(DESC, "Axis $(ADDR) positions")
     field(DTYP, "asynFloat64ArrayOut")
-    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_POSITIONS")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_POSITIONS")
     field(NELM, "$(NPOINTS)")
     field(FTVL, "DOUBLE")
     field(PREC, "$(PREC)")
@@ -43,10 +44,10 @@ record(waveform,"$(P)$(R)$(AXIS)Positions") {
 #
 # Readback position array for this axis
 #
-record(waveform,"$(P)$(R)$(AXIS)Readbacks") {
-    field(DESC, "Axis $(AXIS) readbacks")
+record(waveform,"$(P)$(R)$(M)Readbacks") {
+    field(DESC, "Axis $(ADDR) readbacks")
     field(DTYP, "asynFloat64ArrayIn")
-    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_READBACKS")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_READBACKS")
     field(NELM, "$(NREADBACK)")
     field(FTVL, "DOUBLE")
     field(PREC, "$(PREC)")
@@ -56,10 +57,10 @@ record(waveform,"$(P)$(R)$(AXIS)Readbacks") {
 #
 # Following error array for this axis
 #
-record(waveform,"$(P)$(R)$(AXIS)FollowingErrors") {
-    field(DESC, "Axis $(AXIS) following errors")
+record(waveform,"$(P)$(R)$(M)FollowingErrors") {
+    field(DESC, "Axis $(ADDR) following errors")
     field(DTYP, "asynFloat64ArrayIn")
-    field(INP,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_FOLLOWING_ERRORS")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_FOLLOWING_ERRORS")
     field(NELM, "$(NREADBACK)")
     field(FTVL, "DOUBLE")
     field(PREC, "$(PREC)")
@@ -70,35 +71,35 @@ record(waveform,"$(P)$(R)$(AXIS)FollowingErrors") {
 # which is needed for profile moves
 
 # Motor direction for this axis
-record(longout,"$(P)$(R)$(AXIS)Direction") {
-    field(DESC, "$(AXIS) direction")
+record(longout,"$(P)$(R)$(M)Direction") {
+    field(DESC, "$(ADDR) direction")
     field(PINI, "YES")
     field(DOL,  "$(DIR_LINK) CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_MOTOR_DIRECTION")
+    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_MOTOR_DIRECTION")
 }
 
 
 # Motor offset for this axis
-record(ao,"$(P)$(R)$(AXIS)Offset") {
-    field(DESC, "$(AXIS) offset")
+record(ao,"$(P)$(R)$(M)Offset") {
+    field(DESC, "$(ADDR) offset")
     field(PINI, "YES")
     field(DOL,  "$(OFF_LINK) CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynFloat64")
-    field(OUT,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_MOTOR_OFFSET")
+    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_MOTOR_OFFSET")
     field(PREC, "$(PREC)")
 }
 
 
 # Motor resolution for this axis
-record(ao,"$(P)$(R)$(AXIS)Resolution") {
-    field(DESC, "$(AXIS) resolution")
+record(ao,"$(P)$(R)$(M)Resolution") {
+    field(DESC, "$(ADDR) resolution")
     field(PINI, "YES")
     field(DOL,  "$(RES_LINK) CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynFloat64")
-    field(OUT,  "@asyn($(PORT),$(AXIS),$(TIMEOUT))PROFILE_MOTOR_RESOLUTION")
+    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_MOTOR_RESOLUTION")
     field(PREC, "$(PREC)")
 }
