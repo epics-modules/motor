@@ -20,7 +20,7 @@
 #
 # Is this axis involved in the profile move?
 #
-record(bo,"$(P)$(R)$(M)Use axis") {
+record(bo,"$(P)$(R)M$(M)UseAxis") {
     field(DESC, "Use axis $(ADDR)?")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -32,7 +32,7 @@ record(bo,"$(P)$(R)$(M)Use axis") {
 #
 # Target position array for this axis
 #
-record(waveform,"$(P)$(R)$(M)Positions") {
+record(waveform,"$(P)$(R)M$(M)Positions") {
     field(DESC, "Axis $(ADDR) positions")
     field(DTYP, "asynFloat64ArrayOut")
     field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_POSITIONS")
@@ -44,7 +44,7 @@ record(waveform,"$(P)$(R)$(M)Positions") {
 #
 # Readback position array for this axis
 #
-record(waveform,"$(P)$(R)$(M)Readbacks") {
+record(waveform,"$(P)$(R)M$(M)Readbacks") {
     field(DESC, "Axis $(ADDR) readbacks")
     field(DTYP, "asynFloat64ArrayIn")
     field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_READBACKS")
@@ -57,7 +57,7 @@ record(waveform,"$(P)$(R)$(M)Readbacks") {
 #
 # Following error array for this axis
 #
-record(waveform,"$(P)$(R)$(M)FollowingErrors") {
+record(waveform,"$(P)$(R)M$(M)FollowingErrors") {
     field(DESC, "Axis $(ADDR) following errors")
     field(DTYP, "asynFloat64ArrayIn")
     field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_FOLLOWING_ERRORS")
@@ -71,10 +71,10 @@ record(waveform,"$(P)$(R)$(M)FollowingErrors") {
 # which is needed for profile moves
 
 # Motor direction for this axis
-record(longout,"$(P)$(R)$(M)Direction") {
+record(longout,"$(P)$(R)M$(M)Direction") {
     field(DESC, "$(ADDR) direction")
     field(PINI, "YES")
-    field(DOL,  "$(DIR_LINK) CP MS")
+    field(DOL,  "$MOTOR).DIR CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_MOTOR_DIRECTION")
@@ -82,10 +82,10 @@ record(longout,"$(P)$(R)$(M)Direction") {
 
 
 # Motor offset for this axis
-record(ao,"$(P)$(R)$(M)Offset") {
+record(ao,"$(P)$(R)M$(M)Offset") {
     field(DESC, "$(ADDR) offset")
     field(PINI, "YES")
-    field(DOL,  "$(OFF_LINK) CP MS")
+    field(DOL,  "$(MOTOR).OFF CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_MOTOR_OFFSET")
@@ -94,10 +94,10 @@ record(ao,"$(P)$(R)$(M)Offset") {
 
 
 # Motor resolution for this axis
-record(ao,"$(P)$(R)$(M)Resolution") {
+record(ao,"$(P)$(R)M$(M)Resolution") {
     field(DESC, "$(ADDR) resolution")
     field(PINI, "YES")
-    field(DOL,  "$(RES_LINK) CP MS")
+    field(DOL,  "$(MOTOR).MRES CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PROFILE_MOTOR_RESOLUTION")
