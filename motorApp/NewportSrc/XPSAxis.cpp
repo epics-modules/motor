@@ -134,7 +134,7 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
   :   asynMotorAxis(pC, axisNo),
       pC_(pC)
 {
-  static const char *functionName = "XPSAxis::XPSAxis";
+  static const char *functionName = "XPSAxis";
   char *index;
   int status;
   double minJerkTime, maxJerkTime;
@@ -202,7 +202,7 @@ asynStatus XPSAxis::move(double position, int relative, double min_velocity, dou
   double deviceUnits;
   int status;
   double minJerk, maxJerk;
-  static const char *functionName = "XPSAxis::move";
+  static const char *functionName = "move";
 
   pC_->getDoubleParam(axisNo_, pC_->XPSMinJerk_, &minJerk); 
   pC_->getDoubleParam(axisNo_, pC_->XPSMaxJerk_, &maxJerk); 
@@ -282,7 +282,7 @@ asynStatus XPSAxis::home(double min_velocity, double max_velocity, double accele
   int status;
   int groupStatus;
   char errorBuffer[100];
-  static const char *functionName = "XPSAxis::home";
+  static const char *functionName = "home";
 
   status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
   /* The XPS won't allow a home command if the group is in the Ready state
@@ -323,7 +323,7 @@ asynStatus XPSAxis::moveVelocity(double min_velocity, double max_velocity, doubl
 {
   int status;
   double deviceVelocity, deviceAcceleration;
-  static const char *functionName = "XPSAxis::moveVelocity";
+  static const char *functionName = "moveVelocity";
 
   status = GroupJogModeEnable(pollSocket_, groupName_);
   if (status) {
@@ -352,7 +352,7 @@ asynStatus XPSAxis::setPosition(double position)
   int axisIndexInGrp;
   int axesInGroup;
   double positions[XPS_MAX_AXES];
-  static const char *functionName = "XPSAxis::setPosition";
+  static const char *functionName = "setPosition";
 
 
   /* If the user has disabled setting the controller position, skip this.*/
@@ -511,7 +511,7 @@ asynStatus XPSAxis::poll(int *moving)
   int status;
   int axisDone;
   double actualVelocity, theoryVelocity, acceleration;
-  static const char *functionName = "XPSAxis::poll";
+  static const char *functionName = "poll";
 
   status = GroupStatusGet(pollSocket_, 
                           groupName_, 
@@ -694,7 +694,7 @@ asynStatus XPSAxis::setPID(const double * value, int pidoption)
 {
   int status = 0;
   char correctorType[250] = {'\0'};
-  static const char *functionName = "XPSAxis::setPID";
+  static const char *functionName = "setPID";
 
   /*The XPS function that we use to set the PID parameters is dependant on the 
     type of corrector in use for that axis.*/
@@ -810,7 +810,7 @@ asynStatus XPSAxis::getPID()
 {
   int status = 0;
   char correctorType[250] = {'\0'};
-  static const char *functionName = "XPSAxis::getPID";
+  static const char *functionName = "getPID";
   
   /* The XPS function that we use to set the PID parameters is dependant on the 
     type of corrector in use for that axis.*/
@@ -882,7 +882,7 @@ asynStatus XPSAxis::getPID()
  */
 asynStatus XPSAxis::setPIDValue(const double * value, int pidoption) 
 {
-  static const char *functionName = "XPSAxis::setPIDValue";
+  static const char *functionName = "setPIDValue";
 
   if ((pidoption < 0) || (pidoption > 2)) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR,
@@ -1112,11 +1112,11 @@ asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageSet()
   * \param[in] positions Array of profile positions for this axis in user units.
   * \param[in] numPoints The number of positions in the array.
   */
-asynStatus XPSAxis::defineProfile(double *positions, int numPoints)
+asynStatus XPSAxis::defineProfile(double *positions, size_t numPoints)
 {
-  int i;
+  size_t i;
   asynStatus status;
-  // static const char *functionName = "asynMotorController::buildProfile";
+  //static const char *functionName = "defineProfile";
   
   // Call the base class function
   status = asynMotorAxis::defineProfile(positions, numPoints);
@@ -1124,7 +1124,7 @@ asynStatus XPSAxis::defineProfile(double *positions, int numPoints)
   
   // Convert to XPS units from steps
   for (i=0; i<numPoints; i++) {
-    profilePositions_[i] = profilePositions_[i]/stepSize_;
+    profilePositions_[i] = profilePositions_[i]*stepSize_;
   }
   return asynSuccess;
 }
