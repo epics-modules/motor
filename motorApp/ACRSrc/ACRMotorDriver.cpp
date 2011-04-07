@@ -482,7 +482,7 @@ asynStatus ACRAxis::setPosition(double position)
   * It calls setIntegerParam() and setDoubleParam() for each item that it polls,
   * and then calls callParamCallbacks() at the end.
   * \param[out] moving A flag that is set indicating that the axis is moving (1) or done (0). */
-asynStatus ACRAxis::poll(int *moving)
+asynStatus ACRAxis::poll(bool *moving)
 { 
   int done;
   int driveOn;
@@ -510,7 +510,7 @@ asynStatus ACRAxis::poll(int *moving)
   currentFlags_ = atoi(pC_->inString_);
   done = (currentFlags_ & 0x1000000)?0:1;
   setIntegerParam(pC_->motorStatusDone_, done);
-  *moving = done ? 0:1;
+  *moving = done ? false:true;
 
   // Read the current limit status
   sprintf(pC_->outString_, "?P%d", limitsReg_);
