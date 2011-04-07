@@ -33,6 +33,12 @@ record(longout,"$(P)$(R)NumPoints") {
     field(OUT,  "@asyn($(PORT),0,$(TIMEOUT))PROFILE_NUM_POINTS")
     field(VAL,  "$(NPOINTS)")
 }
+record(longin, "$(P)$(R)CurrentPoint") {
+    field(DESC, "Current point in profile")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0,$(TIMEOUT))PROFILE_CURRENT_POINT")
+    field(SCAN, "I/O Intr")
+}
 record(longout,"$(P)$(R)NumPulses") {
     field(DESC, "Number of output pulses")
     field(PINI, "YES")
@@ -200,6 +206,7 @@ record(waveform,"$(P)$(R)ExecuteMessage") {
 }
 record(bo,"$(P)$(R)Abort") {
     field(DESC, "Abort profile motion")
+    field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT),0,$(TIMEOUT))PROFILE_ABORT")
     field(ZNAM, "Done")
     field(ONAM, "Abort")
