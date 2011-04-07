@@ -96,6 +96,8 @@ Versions: Release 4-5 and higher.
 
 static const char *driverName = "XPSController";
 
+static void XPSProfileThreadC(void *pPvt);
+
 /** Struct for a list of strings describing the different corrector types possible on the XPS.*/
 typedef struct {
   char *PIPosition;
@@ -115,16 +117,16 @@ const static CorrectorTypes_t CorrectorTypes = {
 
 /* Constants used for FTP to the XPS */
 #define TRAJECTORY_DIRECTORY "/Admin/public/Trajectories"
-#define MAX_FILENAME_LEN 256
-#define MAX_MESSAGE_LEN 256
-#define MAX_GROUPNAME_LEN 64
+#define MAX_FILENAME_LEN  256
+#define MAX_MESSAGE_LEN   256
+#define MAX_GROUPNAME_LEN  64
 
 /* The maximum size of the item names in gathering, e.g. "GROUP2.POSITIONER1.CurrentPosition" */
 #define MAX_GATHERING_AXIS_STRING 60
 /* Number of items per axis */
 #define NUM_GATHERING_ITEMS 2
 /* Total length of gathering configuration string */
-#define MAX_GATHERING_STRING MAX_GATHERING_AXIS_STRING * NUM_GATHERING_ITEMS * MAX_AXES
+#define MAX_GATHERING_STRING MAX_GATHERING_AXIS_STRING * NUM_GATHERING_ITEMS * XPS_MAX_AXES
 // Maximum number of bytes that GatheringDataMultipleLinesGet() can return
 #define GATHERING_MAX_READ_LEN 65536
 
@@ -136,8 +138,8 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
                              int numAxes, double movingPollPeriod, double idlePollPeriod,
                              int enableSetPosition, double setPositionSettlingTime)
   :  asynMotorController(portName, numAxes, NUM_XPS_PARAMS, 
-                         asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask, 
-                         asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask,
+                         0, // No additional interfaces
+                         0, // No addition interrupt interfaces
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
                          0, 0),  // Default priority and stack size
@@ -162,7 +164,7 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   createParam(XPSStatusString,                   asynParamInt32, &XPSStatus_);
 
   // This socket is used for polling by the controller and all axes
-  pollSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, TCP_TIMEOUT);
+  pollSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, XPS_POLL_TIMEOUT);
   if (pollSocket_ < 0) {
     printf("%s:%s: error calling TCP_ConnectToServer for pollSocket\n",
            driverName, functionName);
@@ -170,7 +172,7 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   
   // This socket is used for moving motors during profile moves
   // Each axis also has its own moveSocket
-  moveSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, TCP_TIMEOUT);
+  moveSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, XPS_MOVE_TIMEOUT);
   if (moveSocket_ < 0) {
     printf("%s:%s: error calling TCP_ConnectToServer for moveSocket\n",
            driverName, functionName);
@@ -181,6 +183,16 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   /* Create the poller thread for this controller
    * NOTE: at this point the axis objects don't yet exist, but the poller tolerates this */
   startPoller(movingPollPeriod, idlePollPeriod, 10);
+  
+  // Create the event that wakes up the thread for profile moves
+  profileExecuteEvent_ = epicsEventMustCreate(epicsEventEmpty);
+  
+  // Create the thread that will execute profile moves
+  epicsThreadCreate("XPSProfile", 
+                    epicsThreadPriorityLow,
+                    epicsThreadGetStackSize(epicsThreadStackMedium),
+                    (EPICSTHREADFUNC)XPSProfileThreadC, (void *)this);
+
 }
 
 void XPSController::report(FILE *fp, int level)
@@ -344,10 +356,13 @@ asynStatus XPSController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
   int function = pasynUser->reason;
   int status = asynSuccess;
-  XPSAxis *pAxis = this->getAxis(pasynUser);
+  XPSAxis *pAxis;
   double deviceValue;
   static const char *functionName = "writeFloat64";
   
+  pAxis = this->getAxis(pasynUser);
+  if (!pAxis) return asynError;
+
   /* Set the parameter and readback in the parameter library. */
   status = pAxis->setDoubleParam(function, value);
   
@@ -434,9 +449,12 @@ asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   int function = pasynUser->reason;
   int status = asynSuccess;
-  XPSAxis *pAxis = this->getAxis(pasynUser);
+  XPSAxis *pAxis;
   static const char *functionName = "writeInt32";
 
+  pAxis = this->getAxis(pasynUser);
+  if (!pAxis) return asynError;
+  
   /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
    * status at the end, but that's OK */
   status = pAxis->setIntegerParam(function, value);
@@ -513,6 +531,22 @@ XPSAxis* XPSController::getAxis(int axisNo)
 }
 
 
+asynStatus XPSController::waitMotors()
+{
+  bool moving, anyMoving=true;
+  int j;
+
+  while (anyMoving) {
+    anyMoving = false;
+    for (j=0; j<numAxes_; j++) {
+      pAxes_[j]->poll(&moving);
+      if (moving) anyMoving = true;
+    }
+    epicsThreadSleep(0.1);
+  }
+  return asynSuccess;
+}
+
 
 /* Function to initialize profile */ 
 asynStatus XPSController::initializeProfile(size_t maxPoints, const char* ftpUsername, const char* ftpPassword)
@@ -531,7 +565,7 @@ asynStatus XPSController::buildProfile()
   FILE *trajFile;
   int i, j; 
   int status;
-  bool buildOK=false;
+  bool buildOK=true;
   bool verifyOK=true;
   int nPoints;
   int nElements;
@@ -540,7 +574,7 @@ asynStatus XPSController::buildProfile()
   int ftpSocket;
   char fileName[MAX_FILENAME_LEN];
   char groupName[MAX_GROUPNAME_LEN];
-  char buildMessage[MAX_MESSAGE_LEN];
+  char message[MAX_MESSAGE_LEN];
   int buildStatus;
   double distance;
   double maxVelocity;
@@ -565,9 +599,10 @@ asynStatus XPSController::buildProfile()
   // Call the base class method which will build the time array if needed
   asynMotorController::buildProfile();
 
+  strcpy(message, "");
+  setStringParam(profileBuildMessage_, message);
   setIntegerParam(profileBuildState_, PROFILE_BUILD_BUSY);
   setIntegerParam(profileBuildStatus_, PROFILE_STATUS_UNDEFINED);
-  strcpy(buildMessage, "");
   callParamCallbacks();
 
   /* We create trajectories with an extra element at the beginning and at the end.
@@ -599,7 +634,8 @@ asynStatus XPSController::buildProfile()
                                            &maxVelocity, &maxAcceleration,
                                            &minJerkTime, &maxJerkTime);
     if (status) {
-      sprintf(buildMessage, "Error calling positionerSGammaParametersSet, status=%d\n", status);
+      buildOK = false;
+      sprintf(message, "Error calling positionerSGammaParametersSet, status=%d\n", status);
       goto done;
     }
 
@@ -627,6 +663,9 @@ asynStatus XPSController::buildProfile()
   for (j=0; j<numAxes_; j++) {
     preDistance[j] =  0.5 * preVelocity[j] *  preTimeMax; 
     postDistance[j] = 0.5 * postVelocity[j] * postTimeMax;
+    // Save these distances, they are needed to start and complete the profile move
+    pAxes_[j]->profilePreDistance_ = preDistance[j];
+    pAxes_[j]->profilePostDistance_ = postDistance[j];
   }
 
   /* Create the profile file */
@@ -680,25 +719,28 @@ asynStatus XPSController::buildProfile()
   /* FTP the trajectory file from the local directory to the XPS */
   status = ftpConnect(IPAddress_, ftpUsername_, ftpPassword_, &ftpSocket);
   if (status) {
-    sprintf(buildMessage, "Error calling ftpConnect, status=%d\n", status);
+    buildOK = false;
+    sprintf(message, "Error calling ftpConnect, status=%d\n", status);
     goto done;
   }
   status = ftpChangeDir(ftpSocket, TRAJECTORY_DIRECTORY);
   if (status) {
-    sprintf(buildMessage, "Error calling  ftpChangeDir, status=%d\n", status);
+    buildOK = false;
+    sprintf(message, "Error calling  ftpChangeDir, status=%d\n", status);
     goto done;
   }
   status = ftpStoreFile(ftpSocket, fileName);
   if (status) {
-    sprintf(buildMessage, "Error calling  ftpStoreFile, status=%d\n", status);
+    buildOK = false;
+    sprintf(message, "Error calling  ftpStoreFile, status=%d\n", status);
     goto done;
   }
   status = ftpDisconnect(ftpSocket);
   if (status) {
-     sprintf(buildMessage, "Error calling  ftpDisconnect, status=%d\n", status);
+    buildOK = false;
+     sprintf(message, "Error calling  ftpDisconnect, status=%d\n", status);
     goto done;
   }
-  buildOK = true;
 
   /* Verify trajectory */
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
@@ -708,22 +750,22 @@ asynStatus XPSController::buildProfile()
   if (status) verifyOK = false;
   switch (-status) {
     case 0:
-      strcpy(buildMessage, " ");
+      strcpy(message, " ");
       break;
     case 69:
-      strcpy(buildMessage, "Acceleration Too High");
+      strcpy(message, "Acceleration Too High");
       break;
     case 68:
-      strcpy(buildMessage, "Velocity Too High");
+      strcpy(message, "Velocity Too High");
       break;
     case 70:
-      strcpy(buildMessage, "Final Velocity Non Zero");
+      strcpy(message, "Final Velocity Non Zero");
       break;
     case 75:    
-      strcpy(buildMessage, "Negative or Null Delta Time");
+      strcpy(message, "Negative or Null Delta Time");
       break;
     default: 
-      sprintf(buildMessage, "Unknown trajectory verify error=%d", status);
+      sprintf(message, "Unknown trajectory verify error=%d", status);
       break;
   }
 
@@ -740,9 +782,9 @@ asynStatus XPSController::buildProfile()
     pAxes_[j]->setDoubleParam(XPSProfileMaxVelocity_,     maxVelocityActual);
     pAxes_[j]->setDoubleParam(XPSProfileMaxAcceleration_, maxAccelerationActual);
     if (status) {
-      sprintf(buildMessage, "MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
-              pAxes_[j]->positionerName_, status);
       verifyOK = false;
+      sprintf(message, "MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
+              pAxes_[j]->positionerName_, status);
     }
     /* Check that the trajectory won't exceed the software limits
      * The XPS does not check this because the trajectory is defined in relative moves and it does
@@ -753,27 +795,25 @@ asynStatus XPSController::buildProfile()
                                            &highLimit);
     minProfile = pAxes_[j]->profilePositions_[0] + minPositionActual;
     if (minProfile < lowLimit) {
-      status = 1;
-      sprintf(buildMessage, "Low soft limit violation for axis %s, position=%f, limit=%f\n",
-              pAxes_[j]->positionerName_, minProfile, lowLimit);
       verifyOK = false;
+      sprintf(message, "Low soft limit violation for axis %s, position=%f, limit=%f\n",
+              pAxes_[j]->positionerName_, minProfile, lowLimit);
     }
     maxProfile = pAxes_[j]->profilePositions_[0] + maxPositionActual;
     if (maxProfile > highLimit) {
-      status = 1;
-      sprintf(buildMessage, "High soft limit violation for axis %s, position=%f, limit=%f\n",
-              pAxes_[j]->positionerName_, maxProfile, highLimit);
       verifyOK = false;
+      sprintf(message, "High soft limit violation for axis %s, position=%f, limit=%f\n",
+              pAxes_[j]->positionerName_, maxProfile, highLimit);
     }
   }
   done:
   buildStatus = (buildOK && verifyOK) ?  PROFILE_STATUS_SUCCESS : PROFILE_STATUS_FAILURE;
   setIntegerParam(profileBuildStatus_, buildStatus);
-  setStringParam(profileBuildMessage_, buildMessage);
-  if (status) {
+  setStringParam(profileBuildMessage_, message);
+  if (buildStatus != PROFILE_STATUS_SUCCESS) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: %s\n",
-              driverName, functionName, buildMessage);
+              driverName, functionName, message);
   }
   /* Clear build command.  This is a "busy" record, don't want to do this until build is complete. */
   setIntegerParam(profileBuild_, 0);
@@ -785,13 +825,306 @@ asynStatus XPSController::buildProfile()
 /* Function to execute trajectory */ 
 asynStatus XPSController::executeProfile()
 {
+  epicsEventSignal(profileExecuteEvent_);
   return asynSuccess;
 }
+
+/* C Function which runs the profile thread */ 
+static void XPSProfileThreadC(void *pPvt)
+{
+  XPSController *pC = (XPSController*)pPvt;
+  pC->profileThread();
+}
+
+
+/* Function which runs in its own thread to execute profiles */ 
+void XPSController::profileThread()
+{
+  while (true) {
+    epicsEventWait(profileExecuteEvent_);
+    runProfile();
+  }
+}
+
+/* Function to run trajectory.  It runs in a dedicated thread, so it's OK to block.
+ * It needs to lock and unlock when it accesses class data. */ 
+asynStatus XPSController::runProfile()
+{
+  int status;
+  bool executeOK=true;
+  bool aborted=false;
+  int j;
+  int startPulses, endPulses;
+  int numPoints, numPulses;
+  int executeStatus;
+  double pulsePeriod;
+  double position;
+  double time;
+  int i;
+  char message[MAX_MESSAGE_LEN];
+  char buffer[MAX_GATHERING_STRING];
+  char fileName[MAX_FILENAME_LEN];
+  char groupName[MAX_GROUPNAME_LEN];
+  int eventId;
+  int useAxis[XPS_MAX_AXES];
+  XPSAxis *pAxis;
+  static const char *functionName = "runProfile";
+  
+  lock();
+  getStringParam(XPSTrajectoryFile_,   (int)sizeof(fileName), fileName);
+  getStringParam(XPSProfileGroupName_, (int)sizeof(groupName), groupName);
+  getIntegerParam(profileStartPulses_, &startPulses);
+  getIntegerParam(profileEndPulses_,   &endPulses);
+  getIntegerParam(profileNumPoints_,   &numPoints);
+  getIntegerParam(profileNumPulses_,   &numPulses);
+  for (j=0; j<numAxes_; j++) {
+    getIntegerParam(j, profileUseAxis_, &useAxis[j]);
+  }
+  strcpy(message, " ");
+  setStringParam(profileExecuteMessage_, message);
+  setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_MOVE_START);
+  setIntegerParam(profileExecuteStatus_, PROFILE_STATUS_UNDEFINED);
+  callParamCallbacks();
+  unlock();
+
+  // Move the motors to the start position
+  for (j=0; j<numAxes_; j++) {
+    if (!useAxis[j]) continue;
+    pAxis = getAxis(j);
+    position = pAxis->profilePositions_[numPoints-1] - pAxis->profilePreDistance_;
+    status = GroupMoveAbsolute(pAxis->moveSocket_,
+                               pAxis->positionerName_,
+                               1,
+                               &position);
+  }
+
+  // Wait for the motors to get there
+  wakeupPoller();
+  waitMotors();
+
+  lock();
+  setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_EXECUTING);
+  callParamCallbacks();
+  unlock();
+  
+  /* Configure Gathering */
+  /* Reset gathering.  
+   * This must be done because GatheringOneData just appends to in-memory list */  
+  status = GatheringReset(pollSocket_);
+  if (status != 0) {
+    executeOK = false;
+    sprintf(message, "Error performing GatheringReset, status=%d",status);
+    goto done;
+  }
+
+  /* Write list of gathering parameters.
+   * Note that there must be NUM_GATHERING_ITEMS per axis in this list. */
+  strcpy(buffer, "");
+  for (j=0; j<numAxes_; j++) {
+    strcat (buffer, pAxes_[j]->positionerName_);
+    strcat (buffer, ".SetpointPosition;");
+    strcat (buffer, pAxes_[j]->positionerName_);
+    strcat (buffer, ".CurrentPosition;");
+  }
+  
+  /* Define what is to be saved in the GatheringExternal.dat.  
+   * 3 pieces of information per axis. */
+  status = GatheringConfigurationSet(pollSocket_, 
+                                     numAxes_*NUM_GATHERING_ITEMS, buffer);
+  if (status != 0) {
+    executeOK = false;
+    sprintf(message, "Error performing GatheringConfigurationSet, status=%d, buffer=%s", 
+            status, buffer);
+    goto done;
+  }
+
+  // Check valid range of start and end pulses;  these start at 1, not 0
+  if ((startPulses < 1)           || (startPulses > numPoints) ||
+      (endPulses   < startPulses) || (endPulses   > numPoints)) {
+    executeOK = false;
+    sprintf(message, "Error: start or end pulses outside valid range");
+    goto done;
+  }
+  // The XPS can only output pulses at a fixed period, not a fixed distance along the trajectory.  
+  // The trajectory elements where pulses start and stop are defined by startPulses and endPulses.
+  // Compute the time between pulses as the total time over which pulses should be output divided 
+  //  by the number of pulses to be output. */
+  time = 0;
+  for (i=startPulses; i<=endPulses; i++) {
+    time += profileTimes_[i-1];
+  }
+  if (numPulses != 0)
+    pulsePeriod = time / numPulses;
+  else
+    pulsePeriod = 0;
+  
+  /* Define trajectory output pulses. 
+   * startPulses and endPulses are defined as 1=first real element, need to add
+   * 1 to each to skip the acceleration element.  
+   * The XPS is told the element to stop outputting pulses, and it seems to stop
+   * outputting at the start of that element.  So we need to have that element be
+   * the decceleration endPulses is the element, which means adding another +1. */
+  status = MultipleAxesPVTPulseOutputSet(pollSocket_, groupName,
+                                         startPulses+1, 
+                                         endPulses+1, 
+                                         pulsePeriod);
+
+  /* Define trigger */
+  sprintf(buffer, "Always;%s.PVT.TrajectoryPulse", groupName);
+  status = EventExtendedConfigurationTriggerSet(pollSocket_, 2, buffer, 
+                                                "", "", "", "");
+  if (status != 0) {
+    executeOK = false;
+    sprintf(message, "Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s", 
+            status, buffer);
+    goto done;
+  }
+
+  /* Define action */
+  status = EventExtendedConfigurationActionSet(pollSocket_, 1, 
+                                               "GatheringOneData", 
+                                               "", "", "", "");
+  if (status != 0) {
+    executeOK = false;
+    sprintf(message, "Error performing EventExtendedConfigurationActionSet, status=%d", 
+            status);
+    goto done;
+  }
+
+  /* Start gathering */
+  status= EventExtendedStart(pollSocket_, &eventId);
+  if (status != 0) {
+    executeOK = false;
+    sprintf(message, "Error performing EventExtendedStart, status=%d", 
+            status);
+    goto done;
+  }
+
+  wakeupPoller();
+  
+  /* We call the command to run the trajectory on the moveSocket which does not
+   * wait for a reply.  Thus this routine returns immediately without a meaningful
+   * status */
+  status = MultipleAxesPVTExecution(moveSocket_, groupName,
+                                    fileName, 1);
+  /* status -27 means the trajectory was aborted */
+  if (status == -27) {
+    executeOK = false;
+    aborted = true;
+    sprintf(message, "MultipleAxesPVTExecution aborted");
+  }
+  else if (status != 0) {
+    executeOK = false;
+    sprintf(message, "Error performing MultipleAxesPVTExecution, status=%d", 
+            status);
+  }
+
+  /* Remove the event */
+  status = EventExtendedRemove(pollSocket_, eventId);
+  if (status != 0) {
+    executeOK = false;
+    sprintf(message, "Error performing ExtendedEventRemove, status=%d", 
+            status);
+  }
+    
+  /* Stop the gathering */  
+  status = GatheringStop(pollSocket_);
+  /* status -30 means gathering not started i.e. aborted before the end of
+     1 trajectory element */
+  if ((status != 0) && (status != -30)) {
+    executeOK = false;
+    sprintf(message, "Error performing GatheringStop, status=%d", 
+            status);
+  }
+  
+  done:
+  lock();
+  setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_FLYBACK);
+  callParamCallbacks();
+  unlock();
+
+  // Move the motors to the end position
+  for (j=0; j<numAxes_; j++) {
+    if (!useAxis[j]) continue;
+    pAxis = getAxis(j);
+    position = pAxis->profilePositions_[numPoints-1] + pAxis->profilePostDistance_;
+    status = GroupMoveAbsolute(pAxis->moveSocket_,
+                               pAxis->positionerName_,
+                               1,
+                               &position); 
+  }
+  
+  // Wait for the motors to get there
+  wakeupPoller();
+  waitMotors();
+
+  lock();
+  if (executeOK)    executeStatus = PROFILE_STATUS_SUCCESS;
+  else if (aborted) executeStatus = PROFILE_STATUS_ABORT;
+  else              executeStatus = PROFILE_STATUS_FAILURE;
+  setIntegerParam(profileExecuteStatus_, executeStatus);
+  setStringParam(profileExecuteMessage_, message);
+  if (!executeOK) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: %s\n",
+              driverName, functionName, message);
+  }
+  /* Clear execute command.  This is a "busy" record, don't want to do this until build is complete. */
+  setIntegerParam(profileExecute_, 0);
+  setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_DONE);
+  callParamCallbacks();
+  unlock();
+  return executeOK ? asynSuccess : asynError; 
+}
+
+/** Polls the controller, rather than individual axis
+  * Used during profile moves */
+asynStatus XPSController::poll()
+{
+  int executeState;
+  int status;
+  int number;
+  char fileName[MAX_FILENAME_LEN];
+  char groupName[MAX_GROUPNAME_LEN];
+  
+  getIntegerParam(profileExecuteState_, &executeState);
+  if (executeState != PROFILE_EXECUTE_EXECUTING) return asynSuccess;
+
+  getStringParam(XPSTrajectoryFile_, (int)sizeof(fileName), fileName);
+  getStringParam(XPSProfileGroupName_, (int)sizeof(groupName), groupName);
+  status = MultipleAxesPVTParametersGet(pollSocket_, groupName, fileName, &number);
+  if (status) return asynError;
+  setIntegerParam(profileCurrentPoint_, number);
+  callParamCallbacks();
+  return asynSuccess;
+}
+
+
+
+asynStatus XPSController::abortProfile()
+{
+  int status;
+  char groupName[MAX_GROUPNAME_LEN];
+  static const char *functionName = "abortProfile";
+  
+  getStringParam(XPSProfileGroupName_, (int)sizeof(groupName), groupName);
+  status = GroupMoveAbort(pollSocket_, groupName);
+  if (status != 0) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+              "%s:%s: Error performing GroupMoveAbort, status=%d\n",
+              driverName, functionName, status);
+    return asynError;
+  }
+  return asynSuccess;
+}
+       
+
 
 /* Function to readback trajectory */ 
 asynStatus XPSController::readbackProfile()
 {
-  char readbackMessage[MAX_MESSAGE_LEN];
+  char message[MAX_MESSAGE_LEN];
+  bool readbackOK=true;
   int numPulses;
   char* buffer=NULL;
   char* bptr, *tptr;
@@ -809,28 +1142,34 @@ asynStatus XPSController::readbackProfile()
             "%s:%s: entry\n",
             driverName, functionName);
 
-  setIntegerParam(profileBuildState_, PROFILE_BUILD_BUSY);
-  setIntegerParam(profileBuildStatus_, PROFILE_STATUS_UNDEFINED);
-  strcpy(readbackMessage, "");
+  for (j=0; j<numAxes_; j++) {
+    getIntegerParam(j, profileUseAxis_, &useAxis[j]);
+  }
+  strcpy(message, "");
+  setStringParam(profileReadbackMessage_, message);
+  setIntegerParam(profileReadbackState_, PROFILE_READBACK_BUSY);
+  setIntegerParam(profileReadbackStatus_, PROFILE_STATUS_UNDEFINED);
   callParamCallbacks();
   
   status = getIntegerParam(profileNumPulses_, &numPulses);
 
   /* Erase the readback and error arrays */
   for (j=0; j<numAxes_; j++) {
+    if (!useAxis[j]) continue;
     memset(pAxes_[j]->profileReadbacks_,       0, maxProfilePoints_*sizeof(double));
     memset(pAxes_[j]->profileFollowingErrors_, 0, maxProfilePoints_*sizeof(double));
-    getIntegerParam(j, profileUseAxis_, &useAxis[j]);
   }
   /* Read the number of lines of gathering */
   status = GatheringCurrentNumberGet(pollSocket_, &currentSamples, &maxSamples);
   if (status != 0) {
-    sprintf(readbackMessage, "Error calling GatherCurrentNumberGet, status=%d\n", status);
+    readbackOK = false;
+    sprintf(message, "Error calling GatherCurrentNumberGet, status=%d", status);
     goto done;
   }
   if (currentSamples != numPulses) {
-    sprintf(readbackMessage, "Error, numPulses=%d, currentSamples=%d\n", numPulses, currentSamples);
-    goto done;
+    readbackOK = false;
+    sprintf(message, "Error, numPulses=%d, currentSamples=%d", numPulses, currentSamples);
+    //goto done;
   }
   buffer = (char *)calloc(GATHERING_MAX_READ_LEN, sizeof(char));
   numInBuffer = 0;
@@ -847,7 +1186,8 @@ asynStatus XPSController::readbackProfile()
       if (status) numInBuffer /= 2;
     }
     if (numInBuffer == 0) {
-      sprintf(readbackMessage, "Error reading gathering data, numInBuffer = 0\n");
+      readbackOK = false;
+      sprintf(message, "Error reading gathering data, numInBuffer = 0");
       goto done;
     }
     bptr = buffer;
@@ -861,7 +1201,8 @@ asynStatus XPSController::readbackProfile()
                         &setpointPosition, &actualPosition, &numChars);
         bptr += numChars+1;
         if (nitems != NUM_GATHERING_ITEMS) {
-          sprintf(readbackMessage, "Error reading Gathering.dat file, nitems=%d, should be %d\n",
+          readbackOK = false;
+          sprintf(message, "Error reading Gathering.dat file, nitems=%d, should be %d",
                   nitems, NUM_GATHERING_ITEMS);
           goto done;
         }
@@ -876,41 +1217,25 @@ asynStatus XPSController::readbackProfile()
   
   done:
   if (buffer) free(buffer);
-  /* Call the base class method that converts from controller to user units and posts the arrays */
-  asynMotorController::readbackProfile();
-  readbackStatus = status ?  PROFILE_STATUS_FAILURE : PROFILE_STATUS_SUCCESS;
-  setIntegerParam(profileReadbackStatus_, readbackStatus);
-  setStringParam(profileReadbackMessage_, readbackMessage);
   setIntegerParam(profileActualPulses_, numRead);
   setIntegerParam(profileNumReadbacks_, numRead);
-  if (status) {
+  /* Convert from controller to user units and post the arrays */
+  for (j=0; j<numAxes_; j++) {
+    pAxes_[j]->readbackProfile();
+  }
+  readbackStatus = readbackOK ?  PROFILE_STATUS_SUCCESS : PROFILE_STATUS_FAILURE;
+  setIntegerParam(profileReadbackStatus_, readbackStatus);
+  setStringParam(profileReadbackMessage_, message);
+  if (!readbackOK) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: %s\n",
-              driverName, functionName, readbackMessage);
+              driverName, functionName, message);
   }
-  /* Clear readback command.  This is a "busy" record, don't want to do this until build is complete. */
+  /* Clear readback command.  This is a "busy" record, don't want to do this until readback is complete. */
   setIntegerParam(profileReadback_, 0);
   setIntegerParam(profileReadbackState_, PROFILE_READBACK_DONE);
   callParamCallbacks();
   return status ? asynError : asynSuccess; 
-}
-
-asynStatus XPSController::enableSetPosition(int enable) 
-{
-  enableSetPosition_ = enable;
-  return asynSuccess;
-}
-
-/**
- * Function to set the seetling time used when setting the XPS position.
- * The sleep is performed after the axes are initialised, to take account of any
- * post initialisation wobble.
- * @param settlingTime The time in seconds to sleep.
- */
-asynStatus  XPSController::setPositionSettlingTime(double settlingTime) 
-{
-  setPositionSettlingTime_ = settlingTime;
-  return asynSuccess;
 }
 
 
