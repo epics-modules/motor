@@ -55,6 +55,7 @@
 // These are the per-controller parameters for profile moves (coordinated motion)
 #define profileNumAxesString            "PROFILE_NUM_AXES"
 #define profileNumPointsString          "PROFILE_NUM_POINTS"
+#define profileCurrentPointString       "PROFILE_CURRENT_POINT"
 #define profileNumPulsesString          "PROFILE_NUM_PULSES"
 #define profileStartPulsesString        "PROFILE_START_PULSES"
 #define profileEndPulsesString          "PROFILE_END_PULSES"
@@ -72,6 +73,7 @@
 #define profileExecuteStateString       "PROFILE_EXECUTE_STATE"
 #define profileExecuteStatusString      "PROFILE_EXECUTE_STATUS"
 #define profileExecuteMessageString     "PROFILE_EXECUTE_MESSAGE"
+#define profileAbortString              "PROFILE_ABORT"
 #define profileReadbackString           "PROFILE_READBACK"
 #define profileReadbackStateString      "PROFILE_READBACK_STATE"
 #define profileReadbackStatusString     "PROFILE_READBACK_STATUS"
@@ -144,6 +146,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
   virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
   virtual asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements);
+  virtual asynStatus readFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements, size_t *nRead);
   virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
 
   /* These are the methods that are new to this class */
@@ -158,6 +161,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus initializeProfile(size_t maxPoints);
   virtual asynStatus buildProfile();
   virtual asynStatus executeProfile();
+  virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
   
   int shuttingDown_;   /**< Flag indicating that IOC is shutting down.  Stops poller */
@@ -209,6 +213,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   // These are the per-controller parameters for profile moves
   int profileNumAxes_;
   int profileNumPoints_;
+  int profileCurrentPoint_;
   int profileNumPulses_;
   int profileStartPulses_;
   int profileEndPulses_;
@@ -226,6 +231,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   int profileExecuteState_;
   int profileExecuteStatus_;
   int profileExecuteMessage_;
+  int profileAbort_;
   int profileReadback_;
   int profileReadbackState_;
   int profileReadbackStatus_;
