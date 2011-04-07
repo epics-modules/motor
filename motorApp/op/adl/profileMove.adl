@@ -100,33 +100,6 @@ rectangle {
 		width=2
 	}
 }
-text {
-	object {
-		x=70
-		y=55
-		width=160
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="# Profile points"
-}
-"text entry" {
-	object {
-		x=234
-		y=55
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)NumPoints"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
 rectangle {
 	object {
 		x=73
@@ -150,209 +123,6 @@ text {
 	}
 	textix="$(TITLE)"
 	align="horiz. centered"
-}
-text {
-	object {
-		x=359
-		y=105
-		width=60
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Actual"
-}
-"text update" {
-	object {
-		x=422
-		y=108
-		width=100
-		height=15
-	}
-	monitor {
-		chan="$(P)$(R)NumActualPulses"
-		clr=14
-		bclr=56
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=80
-		y=105
-		width=150
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="# Output pulses"
-}
-"text entry" {
-	object {
-		x=234
-		y=105
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)NumPulses"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=140
-		y=155
-		width=90
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Time mode"
-}
-menu {
-	object {
-		x=234
-		y=155
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)TimeMode"
-		clr=14
-		bclr=51
-	}
-}
-text {
-	object {
-		x=30
-		y=180
-		width=200
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Fixed time per point"
-}
-"text entry" {
-	object {
-		x=234
-		y=180
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)FixedTime"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-"related display" {
-	object {
-		x=387
-		y=252
-		width=120
-		height=20
-	}
-	display[0] {
-		label="Debug/more"
-		name="profileMoveXPS.adl"
-		args="P=$(P),R=$(R),TITLE=$(TITLE)_XPS,M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
-	}
-	clr=14
-	bclr=51
-	label="XPS settings"
-}
-"text entry" {
-	object {
-		x=234
-		y=130
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)StartPulses"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=387
-		y=130
-		width=30
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="End"
-}
-"text entry" {
-	object {
-		x=422
-		y=130
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)EndPulses"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=10
-		y=130
-		width=220
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Range of pulses: Start"
-}
-"related display" {
-	object {
-		x=447
-		y=180
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Time per element"
-		name="trajectoryPlot.adl"
-		args="TITLE=Time_per_element, Y=$(P)$(R)Times"
-	}
-	clr=14
-	bclr=51
-}
-text {
-	object {
-		x=352
-		y=180
-		width=90
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Plot time"
 }
 rectangle {
 	object {
@@ -976,33 +746,6 @@ menu {
 	limits {
 	}
 }
-"text entry" {
-	object {
-		x=234
-		y=230
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)Acceleration"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=60
-		y=230
-		width=170
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Acceleration time"
-}
 text {
 	object {
 		x=40
@@ -1330,4 +1073,288 @@ text {
 	label="Execute"
 	press_msg="1"
 	release_msg="0"
+}
+text {
+	object {
+		x=55
+		y=56
+		width=160
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="# Profile points"
+}
+"text entry" {
+	object {
+		x=219
+		y=56
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)NumPoints"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=65
+		y=105
+		width=150
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="# Output pulses"
+}
+"text entry" {
+	object {
+		x=219
+		y=105
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)NumPulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=125
+		y=155
+		width=90
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Time mode"
+}
+menu {
+	object {
+		x=219
+		y=155
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)TimeMode"
+		clr=14
+		bclr=51
+	}
+}
+text {
+	object {
+		x=15
+		y=180
+		width=200
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Fixed time per point"
+}
+"text entry" {
+	object {
+		x=219
+		y=180
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)FixedTime"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=219
+		y=130
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)StartPulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=35
+		y=130
+		width=180
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Pulse range: Start"
+}
+"text entry" {
+	object {
+		x=219
+		y=230
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)Acceleration"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=45
+		y=230
+		width=170
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Acceleration time"
+}
+text {
+	object {
+		x=346
+		y=105
+		width=60
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Actual"
+}
+"text update" {
+	object {
+		x=410
+		y=105
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)NumActualPulses"
+		clr=54
+		bclr=4
+	}
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=375
+		y=252
+		width=120
+		height=20
+	}
+	display[0] {
+		label="Debug/more"
+		name="profileMoveXPS.adl"
+		args="P=$(P),R=$(R),TITLE=$(TITLE)_XPS,M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
+	}
+	clr=14
+	bclr=51
+	label="XPS settings"
+}
+text {
+	object {
+		x=376
+		y=130
+		width=30
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="End"
+}
+"text entry" {
+	object {
+		x=410
+		y=130
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)EndPulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=435
+		y=180
+		width=75
+		height=20
+	}
+	display[0] {
+		label="Time per element"
+		name="trajectoryPlot.adl"
+		args="TITLE=Time_per_element, Y=$(P)$(R)Times"
+	}
+	clr=14
+	bclr=51
+}
+text {
+	object {
+		x=340
+		y=180
+		width=90
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Plot time"
+}
+text {
+	object {
+		x=336
+		y=56
+		width=70
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Current"
+}
+"text update" {
+	object {
+		x=410
+		y=56
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)CurrentPoint"
+		clr=54
+		bclr=4
+	}
+	limits {
+	}
 }
