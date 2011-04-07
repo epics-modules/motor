@@ -139,7 +139,7 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
   int status;
   double minJerkTime, maxJerkTime;
 
-  moveSocket_ = TCP_ConnectToServer(pC_->IPAddress_, pC->IPPort_, TCP_TIMEOUT);
+  moveSocket_ = TCP_ConnectToServer(pC_->IPAddress_, pC->IPPort_, XPS_POLL_TIMEOUT);
   if (moveSocket_ < 0) {
     printf("%s:%s: error calling TCP_ConnectToServer for move socket\n",
            driverName, functionName);
@@ -506,7 +506,7 @@ asynStatus XPSAxis::stop(double acceleration)
   return asynSuccess;
 }
 
-asynStatus XPSAxis::poll(int *moving)
+asynStatus XPSAxis::poll(bool *moving)
 {
   int status;
   int axisDone;
@@ -564,7 +564,7 @@ asynStatus XPSAxis::poll(int *moving)
   /* Set the axis done parameter */
   /* AND the done flag with the inverse of deferred_move.*/
   axisDone &= !deferredMove_;
-  *moving = axisDone ? 0 : 1;
+  *moving = axisDone ? false : true;
   setIntegerParam(pC_->motorStatusDone_, axisDone);
   setIntegerParam(pC_->motorStatusHome_, (axisStatus_ == 11) ? 1 : 0);
   if ((axisStatus_ >= 0 && axisStatus_ <= 9) || 
@@ -1129,3 +1129,29 @@ asynStatus XPSAxis::defineProfile(double *positions, size_t numPoints)
   return asynSuccess;
 }
 
+
+/** Function to readback the actual motor positions from a coordinated move of multiple axes.
+  * This scales by the stepSize to get to steps, and then calls the base class method
+  * that converts to user units
+  * Caution: this function modifies the readbacks in place, so it must only be called
+  * once per readback operation.
+ */
+asynStatus XPSAxis::readbackProfile()
+{
+  int i;
+  int numReadbacks;
+  int status=0;
+  // static const char *functionName = "readbackProfile";
+ 
+  status |= pC_->getIntegerParam(axisNo_, pC_->profileNumReadbacks_, &numReadbacks);
+  if (status) return asynError;
+
+  // Convert to steps
+  for (i=0; i<numReadbacks; i++) {
+    profileReadbacks_[i]       /= stepSize_;
+    profileFollowingErrors_[i] /= stepSize_;
+  }
+  // Call the base class method
+  asynMotorAxis::readbackProfile();
+  return asynSuccess;
+}
