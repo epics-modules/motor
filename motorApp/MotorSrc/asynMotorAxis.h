@@ -31,13 +31,14 @@ class epicsShareFunc asynMotorAxis {
   virtual asynStatus moveVelocity(double minVelocity, double maxVelocity, double acceleration);
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
   virtual asynStatus stop(double acceleration);
-  virtual asynStatus poll(int *moving);
+  virtual asynStatus poll(bool *moving);
   virtual asynStatus setPosition(double position);
 
   virtual asynStatus initializeProfile(size_t maxPoints);
   virtual asynStatus defineProfile(double *positions, size_t numPoints);
   virtual asynStatus buildProfile();
   virtual asynStatus executeProfile();
+  virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
 
   protected:
