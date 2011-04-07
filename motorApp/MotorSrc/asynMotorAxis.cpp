@@ -17,6 +17,9 @@
 #include "asynMotorController.h"
 
 static const char *driverName = "asynMotorAxis";
+
+
+
 /** Creates a new asynMotorAxis object.
   * \param[in] pC Pointer to the asynMotorController to which this axis belongs. 
   * \param[in] axisNo Index number of this axis, range 0 to pC->numAxes_-1.
@@ -51,6 +54,8 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
 }
 
+
+
 /** Move the motor to an absolute location or by a relative amount.
   * \param[in] position  The absolute position to move to (if relative=0) or the relative distance to move 
   * by (if relative=1). Units=steps.
@@ -63,6 +68,8 @@ asynStatus asynMotorAxis::move(double position, int relative, double minVelocity
   return asynError;
 }
 
+
+
 /** Move the motor at a fixed velocity until told to stop.
   * \param[in] minVelocity The initial velocity, often called the base velocity. Units=steps/sec.
   * \param[in] maxVelocity The maximum velocity, often called the slew velocity. Units=steps/sec.
@@ -71,6 +78,8 @@ asynStatus asynMotorAxis::moveVelocity(double minVelocity, double maxVelocity, d
 {
   return asynError;
 }
+
+
 
 /** Move the motor to the home position.
   * \param[in] minVelocity The initial velocity, often called the base velocity. Units=steps/sec.
@@ -83,6 +92,8 @@ asynStatus asynMotorAxis::home(double minVelocity, double maxVelocity, double ac
   return asynError;
 }
 
+
+
 /** Stop the motor.
   * \param[in] acceleration The acceleration value. Units=steps/sec/sec. */
 asynStatus asynMotorAxis::stop(double acceleration)
@@ -90,15 +101,19 @@ asynStatus asynMotorAxis::stop(double acceleration)
   return asynError;
 }
 
+
+
 /** Poll the axis.
   * This function should read the controller position, encoder position, and as many of the motorStatus flags
   * as the hardware supports.  It should call setIntegerParam() and setDoubleParam() for each item that it polls,
   * and then call callParamCallbacks() at the end.
   * \param[out] moving A flag that the function must set indicating that the axis is moving (1) or done (0). */
-asynStatus asynMotorAxis::poll(int *moving)
+asynStatus asynMotorAxis::poll(bool *moving)
 {
   return asynError;
 }
+
+
 
 /** Set the current position of the motor.
   * \param[in] position The new absolute motor position that should be set in the hardware. Units=steps.*/
@@ -106,6 +121,8 @@ asynStatus asynMotorAxis::setPosition(double position)
 {
   return asynError;
 }
+
+
 
 // We implement the setIntegerParam, setDoubleParam, and callParamCallbacks methods so we can construct 
 // the aggregate status structure and do callbacks on it
@@ -137,6 +154,8 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
   return pC_->setIntegerParam(axisNo_, function, value);
 }
 
+
+
 /** Sets the value for a double for this axis in the parameter library.
   * This function takes special action if the parameter is motorPosition_ or motorEncoderPosition_.  
   * In that case it sets the value in the private MotorStatus structure and if the value has changed
@@ -160,6 +179,8 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
   return pC_->setDoubleParam(axisNo_, function, value);
 }   
 
+
+
 /** Calls the callbacks for any parameters that have changed for this axis in the parameter library.
   * This function takes special action if the aggregate MotorStatus structure has changed.
   * In that case it does callbacks on the asynGenericPointer interface, typically to devMotorAsyn. */  
@@ -171,6 +192,8 @@ asynStatus asynMotorAxis::callParamCallbacks()
   }
   return pC_->callParamCallbacks(axisNo_);
 }
+
+
 
 /* These are the functions for profile moves */
 asynStatus asynMotorAxis::initializeProfile(size_t maxProfilePoints)
@@ -184,6 +207,8 @@ asynStatus asynMotorAxis::initializeProfile(size_t maxProfilePoints)
   return asynSuccess;
 }
   
+
+
 /** Function to define the motor positions for a profile move. 
   * This base class function converts the positions from user units
   * to controller units, using the profileMotorOffset_, profileMotorDirection_,
@@ -218,6 +243,8 @@ asynStatus asynMotorAxis::defineProfile(double *positions, size_t numPoints)
   return asynSuccess;
 }
 
+
+
 /** Function to build a coordinated move of multiple axes. */
 asynStatus asynMotorAxis::buildProfile()
 {
@@ -226,6 +253,8 @@ asynStatus asynMotorAxis::buildProfile()
   return asynSuccess;
 }
 
+
+
 /** Function to execute a coordinated move of multiple axes. */
 asynStatus asynMotorAxis::executeProfile()
 {
@@ -233,6 +262,18 @@ asynStatus asynMotorAxis::executeProfile()
 
   return asynSuccess;
 }
+
+
+
+/** Function to abort a profile. */
+asynStatus asynMotorAxis::abortProfile()
+{
+  // static const char *functionName = "abortProfile";
+
+  return asynSuccess;
+}
+
+
 
 /** Function to readback the actual motor positions from a coordinated move of multiple axes.
   * This base class function converts the readbacks and following errors from controller units 
@@ -248,14 +289,13 @@ asynStatus asynMotorAxis::readbackProfile()
   int direction;
   int numReadbacks;
   int status=0;
-  // static const char *functionName = "readbackProfile";
- 
+  static const char *functionName = "readbackProfile";
+
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorOffset_, &offset);
   status |= pC_->getIntegerParam(axisNo_, pC_->profileMotorDirection_, &direction);
-  status |= pC_->getIntegerParam(axisNo_, pC_->profileNumReadbacks_, &numReadbacks);
+  status |= pC_->getIntegerParam(0, pC_->profileNumReadbacks_, &numReadbacks);
   if (status) return asynError;
-  if (resolution == 0.0) return asynError;
   
   // Convert to user units
   if (direction != 0) resolution = -resolution;
@@ -263,7 +303,7 @@ asynStatus asynMotorAxis::readbackProfile()
     profileReadbacks_[i] = profileReadbacks_[i] * resolution + offset;
     profileFollowingErrors_[i] = profileFollowingErrors_[i] * resolution;
   }
-  pC_->doCallbacksFloat64Array(profileReadbacks_,       numReadbacks, axisNo_, pC_->profileReadbacks_);
-  pC_->doCallbacksFloat64Array(profileFollowingErrors_, numReadbacks, axisNo_, pC_->profileFollowingErrors_);
+  status  = pC_->doCallbacksFloat64Array(profileReadbacks_,       numReadbacks, axisNo_, pC_->profileReadbacks_);
+  status |= pC_->doCallbacksFloat64Array(profileFollowingErrors_, numReadbacks, axisNo_, pC_->profileFollowingErrors_);
   return asynSuccess;
 }
