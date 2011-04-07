@@ -38,10 +38,11 @@ class XPSAxis : public asynMotorAxis
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
   asynStatus home(double min_velocity, double max_velocity, double acceleration, int forwards);
   asynStatus stop(double acceleration);
-  asynStatus poll(int *moving);
+  asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
 
   virtual asynStatus defineProfile(double *positions, size_t numPoints);
+  virtual asynStatus readbackProfile();
   
   private:
   XPSController *pC_;
@@ -75,6 +76,8 @@ class XPSAxis : public asynMotorAxis
   char *groupName_;
   int positionerError_;
   int axisStatus_;
+  double profilePreDistance_;
+  double profilePostDistance_;
   xpsCorrectorInfo_t xpsCorrectorInfo_;
   double deferredPosition_;
   int deferredMove_;
