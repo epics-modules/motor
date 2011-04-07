@@ -368,15 +368,11 @@ asynStatus motorSimAxis::config(int hiHardLimit, int lowHardLimit, int home, int
   return asynSuccess;
 }
 
-asynStatus motorSimAxis::poll(int *moving)
+asynStatus motorSimAxis::poll(bool *moving)
 {
   return asynSuccess;
 }
 
-
-/**\defgroup motorSimTask Routines to implement the motor axis simulation task
-@{
-*/
 
 /** Process one iteration of an axis
 
