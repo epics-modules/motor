@@ -11,7 +11,8 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #include "XPSAxis.h"
 
 #define XPS_MAX_AXES 8
-#define TCP_TIMEOUT 2.0
+#define XPS_POLL_TIMEOUT 2.0
+#define XPS_MOVE_TIMEOUT 100000.0 // "Forever"
 
 // drvInfo strings for extra parameters that the XPS controller supports
 #define XPSMinJerkString                "XPS_MIN_JERK"
@@ -37,19 +38,22 @@ class XPSController : public asynMotorController {
   void report(FILE *fp, int level);
   XPSAxis* getAxis(asynUser *pasynUser);
   XPSAxis* getAxis(int axisNo);
+  asynStatus poll();
 
   /* These are the functions for profile moves */
   asynStatus initializeProfile(size_t maxPoints, const char* ftpUsername, const char* ftpPassword);
   asynStatus buildProfile();
   asynStatus executeProfile();
+  asynStatus abortProfile();
   asynStatus readbackProfile();
 
   /* These are the methods that are new to this class */
+  void profileThread();
+  asynStatus runProfile();
+  asynStatus waitMotors();
   /* Deferred moves functions.*/
   asynStatus processDeferredMoves();
   asynStatus processDeferredMovesInGroup(char * groupName);
-  asynStatus enableSetPosition(int enable);
-  asynStatus setPositionSettlingTime(double sleepTime);
 
   protected:
   XPSAxis **pAxes_;       /**< Array of pointers to axis objects */
@@ -67,12 +71,8 @@ class XPSController : public asynMotorController {
   #define LAST_XPS_PARAM XPSStatus_
 
   private:
-  int enableSetPosition_; /**< This is controlled via the XPSEnableSetPosition function (available via the IOC shell). */ 
-
-  /** Parameter to control the sleep time used when setting position. 
-   *  A function called XPSSetPositionSettlingTime(XPS, int) (millisec parameter) 
-   *  is available in the IOC shell to control this. */
-  double setPositionSettlingTime_;
+  bool enableSetPosition_;          /**< Enable/disable setting the position from EPICS */ 
+  double setPositionSettlingTime_;  /**< The settling (sleep) time used when setting position. */
   char *IPAddress_;
   int IPPort_;
   char *ftpUsername_;
@@ -81,7 +81,8 @@ class XPSController : public asynMotorController {
   int moveSocket_;
   char firmwareVersion_[100];
   int movesDeferred_;
-    
+  epicsEventId profileExecuteEvent_;
+  
   friend class XPSAxis;
 };
 #define NUM_XPS_PARAMS (&LAST_XPS_PARAM - &FIRST_XPS_PARAM + 1)
