@@ -78,6 +78,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   // These are the per-controller parameters for profile moves
   createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);
   createParam(profileNumPointsString,            asynParamInt32,      &profileNumPoints_);
+  createParam(profileCurrentPointString,         asynParamInt32,      &profileCurrentPoint_);
   createParam(profileNumPulsesString,            asynParamInt32,      &profileNumPulses_);
   createParam(profileStartPulsesString,          asynParamInt32,      &profileStartPulses_);
   createParam(profileEndPulsesString,            asynParamInt32,      &profileEndPulses_);
@@ -95,6 +96,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(profileExecuteStateString,         asynParamInt32,      &profileExecuteState_);
   createParam(profileExecuteStatusString,        asynParamInt32,      &profileExecuteStatus_);
   createParam(profileExecuteMessageString,       asynParamOctet,      &profileExecuteMessage_);
+  createParam(profileAbortString,                asynParamInt32,      &profileAbort_);
   createParam(profileReadbackString,             asynParamInt32,      &profileReadback_);
   createParam(profileReadbackStateString,        asynParamInt32,      &profileReadbackState_);
   createParam(profileReadbackStatusString,       asynParamInt32,      &profileReadbackStatus_);
@@ -133,12 +135,10 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   * \param[in] value     Value to write. */
 asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-  int axis;
   int function = pasynUser->reason;
   asynStatus status=asynSuccess;
   asynMotorAxis *pAxis;
-  double accel;
-  int moving;
+  int axis;
   static const char *functionName = "writeInt32";
 
   pAxis = getAxis(pasynUser);
@@ -149,20 +149,24 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   pAxis->setIntegerParam(function, value);
 
   if (function == motorStop_) {
+    double accel;
     getDoubleParam(axis, motorAccel_, &accel);
     status = pAxis->stop(accel);
   
   } else if (function == motorUpdateStatus_) {
+    bool moving;
     /* Do a poll, and then force a callback */
     poll();
-    pAxis->poll(&moving);
+    status = pAxis->poll(&moving);
     pAxis->statusChanged_ = 1;
   } else if (function == profileBuild_) {
-    buildProfile();
+    status = buildProfile();
   } else if (function == profileExecute_) {
-    executeProfile();
+    status = executeProfile();
+  } else if (function == profileAbort_) {
+    status = abortProfile();
   } else if (function == profileReadback_) {
-    readbackProfile();
+    status = readbackProfile();
   }
 
   /* Do callbacks so higher layers see any changes */
@@ -278,7 +282,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   * \param[in] value Pointer to the array to write.
   * \param[in] nElements Number of elements to write. */
 asynStatus asynMotorController::writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value,
-                                size_t nElements)
+                                                  size_t nElements)
 {
   int function = pasynUser->reason;
   asynMotorAxis *pAxis;
@@ -287,10 +291,8 @@ asynStatus asynMotorController::writeFloat64Array(asynUser *pasynUser, epicsFloa
   pAxis = getAxis(pasynUser);
   if (!pAxis) return asynError;
   
-  if (nElements > maxProfilePoints_) {
-    nElements = maxProfilePoints_;
-  }
-  
+  if (nElements > maxProfilePoints_) nElements = maxProfilePoints_;
+   
   if (function == profileTimeArray_) {
     memcpy(profileTimes_, value, nElements*sizeof(double));
   } 
@@ -306,6 +308,43 @@ asynStatus asynMotorController::writeFloat64Array(asynUser *pasynUser, epicsFloa
   return asynSuccess;
 }
 
+/** Called when asyn clients call pasynFloat64Array->read().
+  * Returns the readbacks or following error arrays from profile moves.
+  * \param[in] pasynUser pasynUser structure that encodes the reason and address.
+  * \param[in] value Pointer to the array to read.
+  * \param[in] nElements Maximum number of elements to read. 
+  * \param[in] Number of values actually returned */
+asynStatus asynMotorController::readFloat64Array(asynUser *pasynUser, epicsFloat64 *value,
+                                                 size_t nElements, size_t *nRead)
+{
+  int function = pasynUser->reason;
+  asynMotorAxis *pAxis;
+  int numReadbacks;
+  static const char *functionName = "readFloat64Array";
+
+  pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
+  
+  getIntegerParam(profileNumReadbacks_, &numReadbacks);
+  *nRead = numReadbacks;
+  if (*nRead > nElements) *nRead = nElements;
+
+  if (function == profileReadbacks_) {
+    memcpy(value, pAxis->profileReadbacks_, *nRead*sizeof(double));
+  } 
+  else if (function == profileFollowingErrors_) {
+    memcpy(value, pAxis->profileFollowingErrors_, *nRead*sizeof(double));
+  } 
+  else {
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+      "%s:%s: unknown parameter number %d\n", 
+      driverName, functionName, function);
+    return asynError ;
+  }
+  return asynSuccess;
+}
+
+
 /** Called when asyn clients call pasynGenericPointer->read().
   * Builds an aggregate MotorStatus structure at the memory location of the
   * input pointer.  
@@ -313,10 +352,15 @@ asynStatus asynMotorController::writeFloat64Array(asynUser *pasynUser, epicsFloa
   * \param[in] pointer Pointer to the MotorStatus object to return. */
 asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *pointer)
 {
-  static const char *functionName = "readGenericPointer";
   MotorStatus *pStatus = (MotorStatus *)pointer;
   int axis;
-  
+  asynMotorAxis *pAxis;
+  static const char *functionName = "readGenericPointer";
+
+  pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
+  axis = pAxis->axisNo_;
+ 
   getAddress(pasynUser, &axis);
   getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
   getDoubleParam(axis, motorPosition_, &pStatus->position);
@@ -413,8 +457,8 @@ void asynMotorController::asynMotorPoller()
   double timeout;
   int i;
   int forcedFastPolls=0;
-  int anyMoving;
-  int moving;
+  bool anyMoving;
+  bool moving;
   asynMotorAxis *pAxis;
   int status;
 
@@ -432,18 +476,18 @@ void asynMotorController::asynMotorPoller()
        */
       forcedFastPolls = forcedFastPolls_;
     }
-    anyMoving = 0;
+    anyMoving = false;
     lock();
     if (shuttingDown_) {
       unlock();
       break;
     }
-    this->poll();
+    poll();
     for (i=0; i<numAxes_; i++) {
         pAxis=getAxis(i);
         if (!pAxis) continue;
         pAxis->poll(&moving);
-        if (moving) anyMoving=1;
+        if (moving) anyMoving = true;;
     }
     if (forcedFastPolls > 0) {
       timeout = movingPollPeriod_;
@@ -513,6 +557,20 @@ asynStatus asynMotorController::executeProfile()
   for (axis=0; axis<numAxes_; axis++) {
     pAxis = getAxis(axis);
     pAxis->executeProfile();
+  }
+  return asynSuccess;
+}
+
+/** Aborts a profile move. */
+asynStatus asynMotorController::abortProfile()
+{
+  // static const char *functionName = "abortProfile";
+  int axis;
+  asynMotorAxis *pAxis;
+  
+  for (axis=0; axis<numAxes_; axis++) {
+    pAxis = getAxis(axis);
+    pAxis->abortProfile();
   }
   return asynSuccess;
 }
