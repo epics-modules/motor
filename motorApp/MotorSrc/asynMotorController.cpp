@@ -116,6 +116,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
 
   maxProfilePoints_ = 0;
   profileTimes_ = NULL;
+  setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_DONE);
 
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
     "%s:%s: constructor complete\n",
