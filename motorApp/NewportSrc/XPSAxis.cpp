@@ -1143,7 +1143,7 @@ asynStatus XPSAxis::readbackProfile()
   int status=0;
   // static const char *functionName = "readbackProfile";
  
-  status |= pC_->getIntegerParam(axisNo_, pC_->profileNumReadbacks_, &numReadbacks);
+  status |= pC_->getIntegerParam(pC_->profileNumReadbacks_, &numReadbacks);
   if (status) return asynError;
 
   // Convert to steps
