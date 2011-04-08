@@ -303,7 +303,7 @@ asynStatus asynMotorAxis::readbackProfile()
     profileReadbacks_[i] = profileReadbacks_[i] * resolution + offset;
     profileFollowingErrors_[i] = profileFollowingErrors_[i] * resolution;
   }
-  status  = pC_->doCallbacksFloat64Array(profileReadbacks_,       numReadbacks, axisNo_, pC_->profileReadbacks_);
-  status |= pC_->doCallbacksFloat64Array(profileFollowingErrors_, numReadbacks, axisNo_, pC_->profileFollowingErrors_);
+  status  = pC_->doCallbacksFloat64Array(profileReadbacks_,       numReadbacks, pC_->profileReadbacks_, axisNo_);
+  status |= pC_->doCallbacksFloat64Array(profileFollowingErrors_, numReadbacks, pC_->profileFollowingErrors_, axisNo_);
   return asynSuccess;
 }
