@@ -909,7 +909,10 @@ asynStatus XPSController::runProfile()
   
   /* Configure Gathering */
   /* Reset gathering.  
-   * This must be done because GatheringOneData just appends to in-memory list */  
+   * This must be done because GatheringOneData just appends to in-memory list */
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling GatheringReset(%d)\n", 
+            driverName, functionName, pollSocket_);
   status = GatheringReset(pollSocket_);
   if (status != 0) {
     executeOK = false;
@@ -929,6 +932,9 @@ asynStatus XPSController::runProfile()
   
   /* Define what is to be saved in the GatheringExternal.dat.  
    * 3 pieces of information per axis. */
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling GatheringConfigurationSet(%d, %d, %s)\n", 
+            driverName, functionName, pollSocket_, numAxes_*NUM_GATHERING_ITEMS, buffer);
   status = GatheringConfigurationSet(pollSocket_, 
                                      numAxes_*NUM_GATHERING_ITEMS, buffer);
   if (status != 0) {
@@ -964,6 +970,10 @@ asynStatus XPSController::runProfile()
    * The XPS is told the element to stop outputting pulses, and it seems to stop
    * outputting at the start of that element.  So we need to have that element be
    * the decceleration endPulses is the element, which means adding another +1. */
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling MultipleAxesPVTPulseOutputSet(%d, %s, %d, %d, %f)\n", 
+            driverName, functionName, pollSocket_, groupName,
+            startPulses+1, endPulses+1, pulsePeriod);
   status = MultipleAxesPVTPulseOutputSet(pollSocket_, groupName,
                                          startPulses+1, 
                                          endPulses+1, 
@@ -971,6 +981,9 @@ asynStatus XPSController::runProfile()
 
   /* Define trigger */
   sprintf(buffer, "Always;%s.PVT.TrajectoryPulse", groupName);
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling EventExtendedConfigurationTriggerSet(%d, %d, %s, %s, %s, %s)\n", 
+            driverName, functionName, pollSocket_, 2, buffer, "", "", "", "");
   status = EventExtendedConfigurationTriggerSet(pollSocket_, 2, buffer, 
                                                 "", "", "", "");
   if (status != 0) {
@@ -981,6 +994,9 @@ asynStatus XPSController::runProfile()
   }
 
   /* Define action */
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling EventExtendedConfigurationActionSet(%d, %d, %s, %s, %s, %s)\n", 
+            driverName, functionName, pollSocket_, 1, "GatheringOneData", "", "", "", "");
   status = EventExtendedConfigurationActionSet(pollSocket_, 1, 
                                                "GatheringOneData", 
                                                "", "", "", "");
@@ -992,6 +1008,9 @@ asynStatus XPSController::runProfile()
   }
 
   /* Start gathering */
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling EventExtendedStart(%d, %p)\n", 
+            driverName, functionName, pollSocket_, &eventId);
   status= EventExtendedStart(pollSocket_, &eventId);
   if (status != 0) {
     executeOK = false;
@@ -1005,6 +1024,9 @@ asynStatus XPSController::runProfile()
   /* We call the command to run the trajectory on the moveSocket which does not
    * wait for a reply.  Thus this routine returns immediately without a meaningful
    * status */
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling MultipleAxesPVTExecution(%d, %s, %s, %d)\n", 
+            driverName, functionName, moveSocket_, groupName, fileName, 1);
   status = MultipleAxesPVTExecution(moveSocket_, groupName,
                                     fileName, 1);
   /* status -27 means the trajectory was aborted */
@@ -1020,6 +1042,9 @@ asynStatus XPSController::runProfile()
   }
 
   /* Remove the event */
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling EventExtendedRemove(%d, %d)\n", 
+            driverName, functionName, pollSocket_, eventId);
   status = EventExtendedRemove(pollSocket_, eventId);
   if (status != 0) {
     executeOK = false;
@@ -1028,6 +1053,9 @@ asynStatus XPSController::runProfile()
   }
     
   /* Stop the gathering */  
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: calling GatheringStop(%d)\n", 
+            driverName, functionName, pollSocket_);
   status = GatheringStop(pollSocket_);
   /* status -30 means gathering not started i.e. aborted before the end of
      1 trajectory element */
@@ -1161,6 +1189,9 @@ asynStatus XPSController::readbackProfile()
   }
   /* Read the number of lines of gathering */
   status = GatheringCurrentNumberGet(pollSocket_, &currentSamples, &maxSamples);
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+            "%s:%s: GatheringCurrentNumberGet, status=%d, currentSamples=%d, maxSamples=%d\n", 
+            driverName, functionName, status, currentSamples, maxSamples);
   if (status != 0) {
     readbackOK = false;
     sprintf(message, "Error calling GatherCurrentNumberGet, status=%d", status);
