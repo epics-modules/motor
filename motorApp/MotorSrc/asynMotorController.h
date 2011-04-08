@@ -52,7 +52,7 @@
 #define motorStatusLowLimitString       "MOTOR_STATUS_LOW_LIMIT"
 #define motorStatusHomedString          "MOTOR_STATUS_HOMED"
 
-// These are the per-controller parameters for profile moves (coordinated motion)
+/* These are the per-controller parameters for profile moves (coordinated motion) */
 #define profileNumAxesString            "PROFILE_NUM_AXES"
 #define profileNumPointsString          "PROFILE_NUM_POINTS"
 #define profileCurrentPointString       "PROFILE_CURRENT_POINT"
@@ -79,7 +79,7 @@
 #define profileReadbackStatusString     "PROFILE_READBACK_STATUS"
 #define profileReadbackMessageString    "PROFILE_READBACK_MESSAGE"
 
-// These are the per-axis parameters for profile moves
+/* These are the per-axis parameters for profile moves */
 #define profileUseAxisString            "PROFILE_USE_AXIS"
 #define profilePositionsString          "PROFILE_POSITIONS"
 #define profileReadbacksString          "PROFILE_READBACKS"
