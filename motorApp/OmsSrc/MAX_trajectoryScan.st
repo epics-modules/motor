@@ -44,7 +44,7 @@ option +r;
 /* Maximum # of output pulses.  For now, we emit a pulse at the beginning of
  * every trajectory element.
  */
-#define MAX_PULSES 10000
+#define MAX_PULSES 1000
 
 /* Note that MAX_ELEMENTS, and MAX_PULSES must be defined before including
  * trajectoryScan.h, which defines MAX_AXES. */
@@ -508,7 +508,7 @@ ss maxTrajectoryScan {
 						for (i=lastRealTimePoint; (i<npoints-1) && (dtime>0.) && (dtime > realTimeTrajectory[i]); i++);
 						i--;
 						if (i<0) i = 0;
-						if (doPoll && (i > 2) && (i < npoints-2) && (overrideFactor >= .01)) {
+						if (doPoll && (i > 2) && (i < npoints-2) && (overrideFactor >= .01) && (currPulse < MAX_PULSES-1)) {
 							if (debugLevel >= 10) printf("wait_execute: time=%f, i=%d, realTimeTrajectory[i]=%f\n",
 								dtime, i, realTimeTrajectory[i]);
 							frac = (dtime - realTimeTrajectory[i]) / (realTimeTrajectory[i+1] - realTimeTrajectory[i]);
@@ -580,7 +580,7 @@ ss maxTrajectoryScan {
 		} state wait_execute
 
 		when (execState==EXECUTE_STATE_FLYBACK) {
-			if (debugLevel) printf("\nflyback...");
+			if (debugLevel) printf("\nflyback. currPulse=%d\n", currPulse);
 			pvPut(elapsedTime);
 			pvPut(execState);
 			pvPut(execStatus);
