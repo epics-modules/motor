@@ -27,9 +27,9 @@ class epicsShareFunc asynMotorAxis {
   virtual asynStatus setDoubleParam(int index, double value);
   virtual asynStatus callParamCallbacks();
 
-  virtual asynStatus move(double position, int relative, double minVelocity, double maxVelocity, double acceleration);
+  virtual asynStatus move(double position, bool relative, double minVelocity, double maxVelocity, double acceleration);
   virtual asynStatus moveVelocity(double minVelocity, double maxVelocity, double acceleration);
-  virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
+  virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, bool forwards);
   virtual asynStatus stop(double acceleration);
   virtual asynStatus poll(bool *moving);
   virtual asynStatus setPosition(double position);
@@ -40,6 +40,11 @@ class epicsShareFunc asynMotorAxis {
   virtual asynStatus executeProfile();
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
+          int        getAxisIndex()         {return axisNo_;}
+  inline  void       setStatusChanged()     {statusChanged_ = true;}
+  inline  void       clearStatusChanged()   {statusChanged_ = false;}
+  inline  double *   getprofileReadbacks()  {return profileReadbacks_;}
+  inline  double *   getprofileFollowingErrors() {return profileFollowingErrors_;}
 
   protected:
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
@@ -52,9 +57,7 @@ class epicsShareFunc asynMotorAxis {
 
   private:
   MotorStatus status_;
-  int statusChanged_;
-  
-  friend class asynMotorController;
+  bool statusChanged_;
 };
 
 #endif /* _cplusplus */

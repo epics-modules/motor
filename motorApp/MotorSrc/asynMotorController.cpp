@@ -144,7 +144,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
 
   pAxis = getAxis(pasynUser);
   if (!pAxis) return asynError;
-  axis = pAxis->axisNo_;
+  axis = pAxis->getAxisIndex();
 
   /* Set the parameter and readback in the parameter library. */
   pAxis->setIntegerParam(function, value);
@@ -159,7 +159,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     /* Do a poll, and then force a callback */
     poll();
     status = pAxis->poll(&moving);
-    pAxis->statusChanged_ = 1;
+    pAxis->setStatusChanged();
   } else if (function == profileBuild_) {
     status = buildProfile();
   } else if (function == profileExecute_) {
@@ -206,7 +206,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   pAxis = getAxis(pasynUser);
   if (!pAxis) return asynError;
-  axis = pAxis->axisNo_;
+  axis = pAxis->getAxisIndex();
 
   /* Set the parameter and readback in the parameter library. */
   status = pAxis->setDoubleParam(function, value);
@@ -222,7 +222,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
       "%s:%s: Set driver %s, axis %d move relative by %f, base velocity=%f, velocity=%f, acceleration=%f\n",
-      driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
+      driverName, functionName, portName, pAxis->getAxisIndex(), value, baseVelocity, velocity, acceleration );
   
   } else if (function == motorMoveAbs_) {
     status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
@@ -231,7 +231,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
       "%s:%s: Set driver %s, axis %d move absolute to %f, base velocity=%f, velocity=%f, acceleration=%f\n",
-      driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
+      driverName, functionName, portName, pAxis->getAxisIndex(), value, baseVelocity, velocity, acceleration );
 
   } else if (function == motorMoveVel_) {
     status = pAxis->moveVelocity(baseVelocity, value, acceleration);
@@ -240,7 +240,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
       "%s:%s: Set port %s, axis %d move with velocity of %f, acceleration=%f\n",
-      driverName, functionName, portName, pAxis->axisNo_, value, acceleration);
+      driverName, functionName, portName, pAxis->getAxisIndex(), value, acceleration);
 
   // Note, the motorHome command happens on the asynFloat64 interface, even though the value (direction) is really integer 
   } else if (function == motorHome_) {
@@ -251,14 +251,14 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
       "%s:%s: Set driver %s, axis %d to home %s, base velocity=%f, velocity=%f, acceleration=%f\n",
-      driverName, functionName, portName, pAxis->axisNo_, (forwards?"FORWARDS":"REVERSE"), baseVelocity, velocity, acceleration);
+      driverName, functionName, portName, pAxis->getAxisIndex(), (forwards?"FORWARDS":"REVERSE"), baseVelocity, velocity, acceleration);
 
   } else if (function == motorPosition_) {
     status = pAxis->setPosition(value);
     pAxis->callParamCallbacks();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
       "%s:%s: Set driver %s, axis %d to position=%f\n",
-      driverName, functionName, portName, pAxis->axisNo_, value);
+      driverName, functionName, portName, pAxis->getAxisIndex(), value);
 
   }
   /* Do callbacks so higher layers see any changes */
@@ -331,10 +331,10 @@ asynStatus asynMotorController::readFloat64Array(asynUser *pasynUser, epicsFloat
   if (*nRead > nElements) *nRead = nElements;
 
   if (function == profileReadbacks_) {
-    memcpy(value, pAxis->profileReadbacks_, *nRead*sizeof(double));
+    memcpy(value, pAxis->getprofileReadbacks(), *nRead*sizeof(double));
   } 
   else if (function == profileFollowingErrors_) {
-    memcpy(value, pAxis->profileFollowingErrors_, *nRead*sizeof(double));
+    memcpy(value, pAxis->getprofileFollowingErrors(), *nRead*sizeof(double));
   } 
   else {
     asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
@@ -360,7 +360,7 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
 
   pAxis = getAxis(pasynUser);
   if (!pAxis) return asynError;
-  axis = pAxis->axisNo_;
+  axis = pAxis->getAxisIndex();
  
   getAddress(pasynUser, &axis);
   getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
@@ -588,4 +588,10 @@ asynStatus asynMotorController::readbackProfile()
     pAxis->readbackProfile();
   }
   return asynSuccess;
+}
+
+/** Initialize pointer array in asynMotorController with asynMotorAxis instance. */
+void asynMotorController::setAxesPtr(int index, asynMotorAxis *ptr)
+{
+  pAxes_[index] = ptr;
 }

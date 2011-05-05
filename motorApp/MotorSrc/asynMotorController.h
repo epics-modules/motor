@@ -105,7 +105,7 @@ enum ProfileTimeMode{
  * corresponding MBBI records, but there is no way to check this */
 enum ProfileBuildState{
   PROFILE_BUILD_DONE,
-  PROFILE_BUILD_BUSY,
+  PROFILE_BUILD_BUSY
 };
 
 enum ProfileExecuteState{
@@ -156,7 +156,8 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus wakeupPoller();
   virtual asynStatus poll();
   void asynMotorPoller();  // This should be private but is called from C function
-  
+  void setAxesPtr(int index, asynMotorAxis *ptr); // Allows a subclass to initialize pAxes_[index] entry to ptr.
+
   /* These are the functions for profile moves */
   virtual asynStatus initializeProfile(size_t maxPoints);
   virtual asynStatus buildProfile();
@@ -164,6 +165,81 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
   
+  inline int getMotorMoveRelIndex()                {return motorMoveRel_;}
+  inline int getMotorMoveAbsIndex()                {return motorMoveAbs_;}
+  inline int getMotorMoveVelIndex()                {return motorMoveVel_;}
+  inline int getMotorHomeIndex()                   {return motorHome_;}
+  inline int getMotorStopIndex()                   {return motorStop_;}
+  inline int getMotorVelocityIndex()               {return motorVelocity_;}
+  inline int getMotorVelBaseIndex()                {return motorVelBase_;}
+  inline int getMotorAccelIndex()                  {return motorAccel_;}
+  inline int getMotorPositionIndex()               {return motorPosition_;}
+  inline int getMotorEncoderPositionIndex()        {return motorEncoderPosition_;}
+  inline int getMotorDeferMovesIndex()             {return motorDeferMoves_;}
+  inline int getMotorResolutionIndex()             {return motorResolution_;}
+  inline int getMotorEncRatioIndex()               {return motorEncRatio_;}
+  inline int getMotorPgainIndex()                  {return motorPgain_;}
+  inline int getMotorIgainIndex()                  {return motorIgain_;}
+  inline int getMotorDgainIndex()                  {return motorDgain_;}
+  inline int getMotorHighLimitIndex()              {return motorHighLimit_;}
+  inline int getMotorLowLimitIndex()               {return motorLowLimit_;}
+  inline int getMotorSetClosedLoopIndex()          {return motorSetClosedLoop_;}
+  inline int getMotorStatusIndex()                 {return motorStatus_;}
+  inline int getMotorUpdateStatusIndex()           {return motorUpdateStatus_;}
+  
+  inline int getMotorStatusDirectionIndex()        {return motorStatusDirection_;}
+  inline int getMotorStatusDoneIndex()             {return motorStatusDone_;}
+  inline int getMotorStatusHighLimitIndex()        {return motorStatusHighLimit_;}
+  inline int getMotorStatusAtHomeIndex()           {return motorStatusAtHome_;}
+  inline int getMotorStatusSlipIndex()             {return motorStatusSlip_;}
+  inline int getMotorStatusPowerOnIndex()          {return motorStatusPowerOn_;}
+  inline int getMotorStatusFollowingErrorIndex()   {return motorStatusFollowingError_;}
+  inline int getMotorStatusHomeIndex()             {return motorStatusHome_;}
+  inline int getMotorStatusHasEncoderIndex()       {return motorStatusHasEncoder_;}
+  inline int getMotorStatusProblemIndex()          {return motorStatusProblem_;}
+  inline int getMotorStatusMovingIndex()           {return motorStatusMoving_;}
+  inline int getMotorStatusGainSupportIndex()      {return motorStatusGainSupport_;}
+  inline int getMotorStatusCommsErrorIndex()       {return motorStatusCommsError_;}
+  inline int getMotorStatusLowLimitIndex()         {return motorStatusLowLimit_;}
+  inline int getMotorStatusHomedIndex()            {return motorStatusHomed_;}
+  
+  inline int getProfileNumAxesIndex()              {return profileNumAxes_;}
+  inline int getProfileNumPointsIndex()            {return profileNumPoints_;}
+  inline int getProfileCurrentPointIndex()         {return profileCurrentPoint_;}
+  inline int getProfileNumPulsesIndex()            {return profileNumPulses_;}
+  inline int getProfileStartPulsesIndex()          {return profileStartPulses_;}
+  inline int getProfileEndPulsesIndex()            {return profileEndPulses_;}
+  inline int getProfileActualPulsesIndex()         {return profileActualPulses_;}
+  inline int getProfileNumReadbacksIndex()         {return profileNumReadbacks_;}
+  inline int getProfileTimeModeIndex()             {return profileTimeMode_;}
+  inline int getProfileFixedTimeIndex()            {return profileFixedTime_;}
+  inline int getProfileTimeArrayIndex()            {return profileTimeArray_;}
+  inline int getProfileAccelerationIndex()         {return profileAcceleration_;}
+  inline int getProfileBuildIndex()                {return profileBuild_;}
+  inline int getProfileBuildStateIndex()           {return profileBuildState_;}
+  inline int getProfileBuildStatusIndex()          {return profileBuildStatus_;}
+  inline int getProfileBuildMessageIndex()         {return profileBuildMessage_;}
+  inline int getProfileExecuteIndex()              {return profileExecute_;}
+  inline int getProfileExecuteStateIndex()         {return profileExecuteState_;}
+  inline int getProfileExecuteStatusIndex()        {return profileExecuteStatus_;}
+  inline int getProfileExecuteMessageIndex()       {return profileExecuteMessage_;}
+  inline int getProfileAbortIndex()                {return profileAbort_;}
+  inline int getProfileReadbackIndex()             {return profileReadback_;}
+  inline int getProfileReadbackStateIndex()        {return profileReadbackState_;}
+  inline int getProfileReadbackStatusIndex()       {return profileReadbackStatus_;}
+  inline int getprofileReadbackMessageIndex()      {return profileReadbackMessage_;}
+
+  inline int getProfileUseAxisIndex()              {return profileUseAxis_;}
+  inline int getProfilePositionsIndex()            {return profilePositions_;}
+  inline int getProfileReadbacksIndex()            {return profileReadbacks_;}
+  inline int getProfileFollowingErrorsIndex()      {return profileFollowingErrors_;}
+  inline int getProfileMotorResolutionIndex()      {return profileMotorResolution_;}
+  inline int getProfileMotorDirectionIndex()       {return profileMotorDirection_;}
+  inline int getProfileMotorOffsetIndex()          {return profileMotorOffset_;}
+  
+  inline int getNumAxes()                          {return numAxes_;}
+  inline size_t getMaxProfilePoints()              {return maxProfilePoints_;}
+
   int shuttingDown_;   /**< Flag indicating that IOC is shutting down.  Stops poller */
 
   protected:
@@ -256,8 +332,6 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
  
   size_t maxProfilePoints_;     /**< Maximum number of profile points */
   double *profileTimes_;        /**< Array of times per profile point */
-
-  friend class asynMotorAxis;
 };
 #define NUM_MOTOR_DRIVER_PARAMS (&LAST_MOTOR_PARAM - &FIRST_MOTOR_PARAM + 1)
 
