@@ -95,7 +95,8 @@ public:
   asynStatus writeReadConvertInt(const char *format, int axisnum, int *output);
   char       writeReadRtnResponse(const char *format, int axisnum, asynStatus *);
   char       writeReadRtnResponse(const char *format, asynStatus *);
-  
+  virtual int  getNumParams();
+
 protected:
   int MM4KJerk_;
 #define FIRST_MM4K_PARAM MM4KJerk_

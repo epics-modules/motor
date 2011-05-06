@@ -36,21 +36,6 @@
 #define motorSetClosedLoopString        "MOTOR_SET_CLOSED_LOOP"
 #define motorStatusString               "MOTOR_STATUS"
 #define motorUpdateStatusString         "MOTOR_UPDATE_STATUS"
-#define motorStatusDirectionString      "MOTOR_STATUS_DIRECTION" 
-#define motorStatusDoneString           "MOTOR_STATUS_DONE"
-#define motorStatusHighLimitString      "MOTOR_STATUS_HIGH_LIMIT"
-#define motorStatusAtHomeString         "MOTOR_STATUS_AT_HOME"
-#define motorStatusSlipString           "MOTOR_STATUS_SLIP"
-#define motorStatusPowerOnString        "MOTOR_STATUS_POWERED"
-#define motorStatusFollowingErrorString "MOTOR_STATUS_FOLLOWING_ERROR"
-#define motorStatusHomeString           "MOTOR_STATUS_HOME"
-#define motorStatusHasEncoderString     "MOTOR_STATUS_HAS_ENCODER"
-#define motorStatusProblemString        "MOTOR_STATUS_PROBLEM"
-#define motorStatusMovingString         "MOTOR_STATUS_MOVING"
-#define motorStatusGainSupportString    "MOTOR_STATUS_GAIN_SUPPORT"
-#define motorStatusCommsErrorString     "MOTOR_STATUS_COMMS_ERROR"
-#define motorStatusLowLimitString       "MOTOR_STATUS_LOW_LIMIT"
-#define motorStatusHomedString          "MOTOR_STATUS_HOMED"
 
 /* These are the per-controller parameters for profile moves (coordinated motion) */
 #define profileNumAxesString            "PROFILE_NUM_AXES"
@@ -138,7 +123,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
 
   public:
   /* This is the constructor for the class. */
-  asynMotorController(const char *portName, int numAxes, int numParams,
+  asynMotorController(const char *portName, int numAxes,
                       int interfaceMask, int interruptMask,
                       int asynFlags, int autoConnect, int priority, int stackSize);
 
@@ -164,7 +149,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus executeProfile();
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
-  
+  virtual int        getNumParams();
   inline int getMotorMoveRelIndex()                {return motorMoveRel_;}
   inline int getMotorMoveAbsIndex()                {return motorMoveAbs_;}
   inline int getMotorMoveVelIndex()                {return motorMoveVel_;}
@@ -186,7 +171,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   inline int getMotorSetClosedLoopIndex()          {return motorSetClosedLoop_;}
   inline int getMotorStatusIndex()                 {return motorStatus_;}
   inline int getMotorUpdateStatusIndex()           {return motorUpdateStatus_;}
-  
+/*  
   inline int getMotorStatusDirectionIndex()        {return motorStatusDirection_;}
   inline int getMotorStatusDoneIndex()             {return motorStatusDone_;}
   inline int getMotorStatusHighLimitIndex()        {return motorStatusHighLimit_;}
@@ -202,7 +187,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   inline int getMotorStatusCommsErrorIndex()       {return motorStatusCommsError_;}
   inline int getMotorStatusLowLimitIndex()         {return motorStatusLowLimit_;}
   inline int getMotorStatusHomedIndex()            {return motorStatusHomed_;}
-  
+*/  
   inline int getProfileNumAxesIndex()              {return profileNumAxes_;}
   inline int getProfileNumPointsIndex()            {return profileNumPoints_;}
   inline int getProfileCurrentPointIndex()         {return profileCurrentPoint_;}
@@ -268,23 +253,6 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   int motorSetClosedLoop_;
   int motorStatus_;
   int motorUpdateStatus_;
-
-  // These are the status bits
-  int motorStatusDirection_;
-  int motorStatusDone_;
-  int motorStatusHighLimit_;
-  int motorStatusAtHome_;
-  int motorStatusSlip_;
-  int motorStatusPowerOn_;
-  int motorStatusFollowingError_;
-  int motorStatusHome_;
-  int motorStatusHasEncoder_;
-  int motorStatusProblem_;
-  int motorStatusMoving_;
-  int motorStatusGainSupport_;
-  int motorStatusCommsError_;
-  int motorStatusLowLimit_;
-  int motorStatusHomed_;
 
   // These are the per-controller parameters for profile moves
   int profileNumAxes_;

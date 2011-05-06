@@ -18,6 +18,8 @@ INC += motor_interface.h
 INC += paramLib.h
 INC += asynMotorController.h
 INC += asynMotorAxis.h
+INC += asynMotorStatus.h
+INC += asynPortDriverExt.h
 endif
 
 LIBRARY_IOC += motor
@@ -30,6 +32,8 @@ ifdef ASYN
 motor_SRCS += drvMotorAsyn.c
 motor_SRCS += devMotorAsyn.c
 motor_SRCS += paramLib.c
+motor_SRCS += asynPortDriverExt.cpp
+motor_SRCS += asynMotorStatus.cpp
 motor_SRCS += asynMotorController.cpp
 motor_SRCS += asynMotorAxis.cpp
 motor_LIBS += asyn

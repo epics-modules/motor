@@ -58,6 +58,7 @@
 #include <registryDriverSupport.h>
 
 #include "asynMotorController.h"
+#include "asynMotorStatus.h"
 #include "motor_interface.h"
 #include <limits.h>
 #include <epicsExport.h>

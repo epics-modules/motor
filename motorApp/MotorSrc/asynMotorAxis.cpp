@@ -48,7 +48,7 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   profilePositions_       = NULL;
   profileReadbacks_       = NULL;
   profileFollowingErrors_ = NULL;
-  
+  aMotorStatus = new asynMotorStatus(pC_, axisNo_);
   // Create the asynUser, connect to this axis
   pasynUser_ = pasynManager->createAsynUser(NULL, NULL);
   pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
@@ -138,18 +138,6 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
   int mask;
   epicsUInt32 status;
-  // This assumes the parameters defined above are in the same order as the bits the motor record expects!
-  if (function >= pC_->getMotorStatusDirectionIndex() && 
-      function <= pC_->getMotorStatusHomedIndex()) {
-    status = status_.status;
-    mask = 1 << (function - pC_->getMotorStatusDirectionIndex());
-    if (value) status |= mask;
-    else       status &= ~mask;
-    if (status != status_.status) {
-      status_.status = status;
-      statusChanged_ = 1;
-    }
-  }
   // Call the base class method
   return pC_->setIntegerParam(axisNo_, function, value);
 }
@@ -275,6 +263,7 @@ asynStatus asynMotorAxis::abortProfile()
 
 
 
+
 /** Function to readback the actual motor positions from a coordinated move of multiple axes.
   * This base class function converts the readbacks and following errors from controller units 
   * to user units and does callbacks on the arrays.
@@ -285,6 +274,7 @@ asynStatus asynMotorAxis::readbackProfile()
 {
   int i;
   double resolution;
+
   double offset;
   int direction;
   int numReadbacks;
@@ -306,4 +296,8 @@ asynStatus asynMotorAxis::readbackProfile()
   status  = pC_->doCallbacksFloat64Array(profileReadbacks_,       numReadbacks, pC_->getProfileReadbacksIndex(), axisNo_);
   status |= pC_->doCallbacksFloat64Array(profileFollowingErrors_, numReadbacks, pC_->getProfileFollowingErrorsIndex(), axisNo_);
   return asynSuccess;
+}
+
+asynMotorStatus* asynMotorAxis::getStatus(){
+  return aMotorStatus;
 }

@@ -1,8 +1,6 @@
 TOP = ../..
 include $(TOP)/configure/CONFIG
-ARCH = linux-x86
-ARCH = win32-x86
-#ARCH = vxWorks-ppc604
+ARCH = vxWorks-ppc604_long-debug
 TARGETS = cdCommands
 TARGETS += envPaths
 TARGETS += dllPath.bat

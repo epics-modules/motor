@@ -15,14 +15,14 @@
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
 # Recommended ASYN release: R4-13
-ASYN=$(SUPPORT)/asyn/4-13
+ASYN=/home/oxygen/SLUITER/R3-14-12/support/asyn/svn
 
 # Need the sequencer for the MM4005 and XPS trajectory scanning
 # Recommended SNCSEQ release: R2-0-12
-SNCSEQ=$(SUPPORT)/seq/2-0-12
+SNCSEQ=/home/oxygen/SLUITER/R3-14-12/support/seq/2-0-12
 
 # Recommended EPICS release: R3.14.11
-EPICS_BASE=$(SUPPORT)/../base-3.14.11
+EPICS_BASE=/APSshare/epics/base-3.14.11
 
 # The following must be defined for the MXmotor device driver.
 #!MX=$(SUPPORT)/mx/mx
@@ -32,8 +32,8 @@ EPICS_BASE=$(SUPPORT)/../base-3.14.11
 # <motor>/Makefile must also be edited.
 
 # Recommended IPAC release: R2-10
-#!IPAC=$(SUPPORT)/ipacR2-10
+IPAC=/home/oxygen/SLUITER/R3-14-12/support/ipac/2-10
 
 # The following is only needed for the motor examples in iocBoot.
-#!MOTOR=$(TOP)
+MOTOR=/home/oxygen/SLUITER/R3-14-12/support/motor/AMD
 

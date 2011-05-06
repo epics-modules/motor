@@ -15,6 +15,7 @@
 #include <asynPortDriver.h>
 
 #include "asynMotorController.h"
+#include "asynMotorStatus.h"
 
 /** Class from which motor axis objects are derived. */
 class epicsShareFunc asynMotorAxis {
@@ -45,6 +46,7 @@ class epicsShareFunc asynMotorAxis {
   inline  void       clearStatusChanged()   {statusChanged_ = false;}
   inline  double *   getprofileReadbacks()  {return profileReadbacks_;}
   inline  double *   getprofileFollowingErrors() {return profileFollowingErrors_;}
+          asynMotorStatus* getStatus();
 
   protected:
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
@@ -54,7 +56,7 @@ class epicsShareFunc asynMotorAxis {
   double *profilePositions_;         /**< Array of target positions for profile moves */
   double *profileReadbacks_;         /**< Array of readback positions for profile moves */
   double *profileFollowingErrors_;   /**< Array of following errors for profile moves */   
-
+  asynMotorStatus *aMotorStatus;
   private:
   MotorStatus status_;
   bool statusChanged_;

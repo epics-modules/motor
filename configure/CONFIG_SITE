@@ -15,7 +15,7 @@ endif
 # Set this when you only want to compile this application
 # for a subset of the cross-compiled target architectures
 # that Base is built for.
-#CROSS_COMPILER_TARGET_ARCHS = vxWorks-68040
+CROSS_COMPILER_TARGET_ARCHS = vxWorks-ppc604_long-debug
 
 # Set this when your IOC and the host use different paths
 # to access the application. This will be needed to boot

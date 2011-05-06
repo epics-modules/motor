@@ -21,7 +21,7 @@ SoftMotorSrc_DEPEND_DIRS = MotorSrc
 # All the following modules require ASYN.
 ifdef ASYN
 
-DIRS += MotorSimSrc
+#!DIRS += MotorSimSrc
 MotorSimSrc_DEPEND_DIRS = MotorSrc
 
 DIRS += NewportSrc
@@ -81,7 +81,7 @@ AerotechSrc_DEPEND_DIRS = MotorSrc
 DIRS += HytecSrc
 HytecSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += ACRSrc
+#!DIRS += ACRSrc
 ACRSrc_DEPEND_DIRS = MotorSrc
 
 endif

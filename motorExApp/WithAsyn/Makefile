@@ -28,14 +28,14 @@ endif
 COMMONDBDS += devPIMotor.dbd
 COMMONDBDS += devOms.dbd
 COMMONDBDS += devSoftMotor.dbd
-COMMONDBDS += motorSimSupport.dbd
+#!COMMONDBDS += motorSimSupport.dbd
 COMMONDBDS += devSmartMotorMotor.dbd
 COMMONDBDS += devKohzuMotor.dbd
 COMMONDBDS += devAttocube.dbd
 COMMONDBDS += devAerotech.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
 COMMONDBDS += drvAsynIPPort.dbd
-COMMONDBDS += ACRMotorSupport.dbd
+#!COMMONDBDS += ACRMotorSupport.dbd
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -67,10 +67,10 @@ COMMONLIBS += Acs
 COMMONLIBS += Ims
 COMMONLIBS += Newport
 COMMONLIBS += softMotor
-COMMONLIBS += motorSimSupport
+#!COMMONLIBS += motorSimSupport
 COMMONLIBS += SmartMotor
 COMMONLIBS += KohzuMotor
-COMMONLIBS += ACRMotor
+#!COMMONLIBS += ACRMotor
 COMMONLIBS += motor
 
 # Needed for Newport SNL programs

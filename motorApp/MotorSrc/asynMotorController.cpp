@@ -24,11 +24,11 @@ static void asynMotorPollerC(void *drvPvt);
   * After calling the base class constructor this method creates the motor parameters
   * defined in asynMotorDriver.h.
   */
-asynMotorController::asynMotorController(const char *portName, int numAxes, int numParams,
+asynMotorController::asynMotorController(const char *portName, int numAxes,
                                          int interfaceMask, int interruptMask,
                                          int asynFlags, int autoConnect, int priority, int stackSize)
 
-  : asynPortDriver(portName, numAxes, NUM_MOTOR_DRIVER_PARAMS+numParams,
+  : asynPortDriver(portName, numAxes,
       interfaceMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask | asynDrvUserMask,
       interruptMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask,
       asynFlags, autoConnect, priority, stackSize),
@@ -59,21 +59,6 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorSetClosedLoopString,          asynParamInt32,      &motorSetClosedLoop_);
   createParam(motorStatusString,                 asynParamInt32,      &motorStatus_);
   createParam(motorUpdateStatusString,           asynParamInt32,      &motorUpdateStatus_);
-  createParam(motorStatusDirectionString,        asynParamInt32,      &motorStatusDirection_);
-  createParam(motorStatusDoneString,             asynParamInt32,      &motorStatusDone_);
-  createParam(motorStatusHighLimitString,        asynParamInt32,      &motorStatusHighLimit_);
-  createParam(motorStatusAtHomeString,           asynParamInt32,      &motorStatusAtHome_);
-  createParam(motorStatusSlipString,             asynParamInt32,      &motorStatusSlip_);
-  createParam(motorStatusPowerOnString,          asynParamInt32,      &motorStatusPowerOn_);
-  createParam(motorStatusFollowingErrorString,   asynParamInt32,      &motorStatusFollowingError_);
-  createParam(motorStatusHomeString,             asynParamInt32,      &motorStatusHome_);
-  createParam(motorStatusHasEncoderString,       asynParamInt32,      &motorStatusHasEncoder_);
-  createParam(motorStatusProblemString,          asynParamInt32,      &motorStatusProblem_);
-  createParam(motorStatusMovingString,           asynParamInt32,      &motorStatusMoving_);
-  createParam(motorStatusGainSupportString,      asynParamInt32,      &motorStatusGainSupport_);
-  createParam(motorStatusCommsErrorString,       asynParamInt32,      &motorStatusCommsError_);
-  createParam(motorStatusLowLimitString,         asynParamInt32,      &motorStatusLowLimit_);
-  createParam(motorStatusHomedString,            asynParamInt32,      &motorStatusHomed_);
 
   // These are the per-controller parameters for profile moves
   createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);
@@ -217,7 +202,8 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   if (function == motorMoveRel_) {
     status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
-    pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->getStatus()->setDoneMoving(false);
+//DELETE ME    pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -226,7 +212,8 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   
   } else if (function == motorMoveAbs_) {
     status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
-    pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->getStatus()->setDoneMoving(false);
+//DELETE ME    pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -235,7 +222,8 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   } else if (function == motorMoveVel_) {
     status = pAxis->moveVelocity(baseVelocity, value, acceleration);
-    pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->getStatus()->setDoneMoving(false);
+//DELETE ME    pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -246,7 +234,8 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   } else if (function == motorHome_) {
     forwards = (value == 0) ? 0 : 1;
     status = pAxis->home(baseVelocity, velocity, acceleration, forwards);
-    pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->getStatus()->setDoneMoving(false);
+//DELETE ME    pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -594,4 +583,10 @@ asynStatus asynMotorController::readbackProfile()
 void asynMotorController::setAxesPtr(int index, asynMotorAxis *ptr)
 {
   pAxes_[index] = ptr;
+}
+
+/** Override the number of parameters defined by asynPortController */
+int asynMotorController::getNumParams()
+{
+  return NUM_MOTOR_DRIVER_PARAMS+asynPortDriver::getNumParams();
 }

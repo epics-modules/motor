@@ -27,7 +27,7 @@ March 4, 2011
 static const char *driverName = "MM4KMotorDriver";
 
 MM4KController::MM4KController(const char *asynMotorPort, const char *asynCommPort, int numAxes, double movingPollPeriod, double idlePollPeriod)
-  :  asynMotorController(asynMotorPort, numAxes, NUM_MM4K_PARAMS, 
+  :  asynMotorController(asynMotorPort, numAxes,  
                          asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask, 
                          asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask,
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
@@ -391,6 +391,11 @@ char MM4KController::writeReadRtnResponse(const char *format, asynStatus *status
   return(inString_[2]);
 }
 
+int MM4KController::getNumParams()
+{
+  return NUM_MM4K_PARAMS + asynMotorController::getNumParams();
+}
+
 MM4KAxis::MM4KAxis(MM4KController *pC, int axisNo)
   : asynMotorAxis(pC, axisNo),
     pC_(pC)
@@ -402,7 +407,7 @@ MM4KAxis::MM4KAxis(MM4KController *pC, int axisNo)
   // Get the number of pulses per unit on this axis
   status = pC->writeReadConvertDouble("%dTU", axisNo, &pulsesPerUnit_);
   if (status)
-    setIntegerParam(pC->getMotorStatusProblemIndex(), 1);
+    getStatus()->setProblem(true);
   else
   {
     int loopState;
@@ -412,10 +417,10 @@ MM4KAxis::MM4KAxis(MM4KController *pC, int axisNo)
         digits = 1;
     maxDigits = digits;
 
-    setIntegerParam(pC->getMotorStatusGainSupportIndex(), 1); /* Assume gain support. */
+    getStatus()->setHasGainSupport(true); /* Assume gain support. */
 
     pC->writeReadConvertInt("%dTC", axisNo, &loopState);
-    setIntegerParam(pC->getMotorStatusHasEncoderIndex(), loopState);
+    getStatus()->setHasEncoder(loopState);
 
     /* Save home preset position. */
     pC->writeReadConvertDouble("%dXH", axisNo, &homePreset);
@@ -530,7 +535,7 @@ asynStatus MM4KAxis::setPosition(double position)
 
 asynStatus MM4KAxis::poll(bool *moving)
 { 
-  int done;
+  bool done;
   asynStatus comStatus;
   bool errInd;
   char rtnchar;
@@ -550,14 +555,14 @@ asynStatus MM4KAxis::poll(bool *moving)
   // Read the current status
   rtnchar = pC_->writeReadRtnResponse("%dMS", axisNo_, &comStatus);
   currentFlags_ = (int) rtnchar;
-  setIntegerParam(pC_->getMotorStatusAtHomeIndex(),     (currentFlags_ & MM4000_HOME));
-  setIntegerParam(pC_->getMotorStatusHighLimitIndex(),  (currentFlags_ & MM4000_HIGH_LIMIT));
-  setIntegerParam(pC_->getMotorStatusLowLimitIndex(),   (currentFlags_ & MM4000_LOW_LIMIT));
-  setIntegerParam(pC_->getMotorStatusDirectionIndex(),  (currentFlags_ & MM4000_DIRECTION));
-  setIntegerParam(pC_->getMotorStatusPowerOnIndex(),   !(currentFlags_ & MM4000_POWER_OFF));
-  done = (currentFlags_ & MM4000_MOVING) ? 0:1;
-  setIntegerParam(pC_->getMotorStatusDoneIndex(), done);
-  *moving = done ? false:true;
+  getStatus()->setAtHome(currentFlags_ & MM4000_HOME);
+  getStatus()->setHighLimitOn(currentFlags_ & MM4000_HIGH_LIMIT);
+  getStatus()->setLowLimitOn(currentFlags_ & MM4000_LOW_LIMIT);
+  getStatus()->setDirection(currentFlags_ & MM4000_DIRECTION ? PLUS : MINUS);
+  getStatus()->setPowerOn(!(currentFlags_ & MM4000_POWER_OFF));
+  done = (currentFlags_ & MM4000_MOVING) ? false : true;
+  getStatus()->setDoneMoving(done);
+  *moving = done ? false : true;
 
   /* Check for controller error. */
   rtnchar = pC_->writeReadRtnResponse("TE;", &comStatus);
@@ -568,7 +573,7 @@ asynStatus MM4KAxis::poll(bool *moving)
       errInd = true;
       asynPrint(pasynUser_, ASYN_TRACE_ERROR, "controller error on card/addr = %d:%d\n", axisNo_);
   }
-  setIntegerParam(pC_->getMotorStatusProblemIndex(), errInd);
+  getStatus()->setProblem(errInd);
 
 skip:
   callParamCallbacks();
