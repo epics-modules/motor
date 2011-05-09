@@ -1,0 +1,72 @@
+record(bo,"$(dev):$(area):$(locn):POWER") {
+    field(DTYP,"asynInt32")
+    field(OUT,"@asyn($(PORT) 0)HYTEC_POWER")
+    field(VAL, "1")
+    field(ZNAM, "On")
+    field(ONAM, "Off")
+}
+
+record(bo,"$(dev):$(area):$(locn):BRAKE") {
+    field(DTYP,"asynInt32")
+    field(OUT,"@asyn($(PORT) 0)HYTEC_BRAKE")
+    field(VAL, "1")
+    field(ZNAM, "Set")
+    field(ONAM, "Rls")
+}
+
+record(ai,"$(dev):$(area):$(locn):POSN") {
+    field(PINI, "YES")
+    field(DTYP,"asynInt32")
+    field(INP,"@asyn($(PORT) 0)MOTOR_POSITION")
+    field(SCAN, "1 second")
+}
+
+record(ai,"$(dev):$(area):$(locn):FIRMWARE_VERSION") {
+    field(PINI, "YES")
+    field(DTYP,"asynInt32")
+    field(INP,"@asyn($(PORT) 0)HYTEC_FWVERSION")
+    field(SCAN, "1 second")
+}
+
+record(ai,"$(dev):$(area):$(locn):EN_POSN") {
+    field(PINI, "YES")
+    field(DTYP,"asynInt32")
+    field(INP,"@asyn($(PORT) 0)MOTOR_ENCODER_POSITION")
+    field(SCAN, "1 second")
+}
+
+record(ai, "$(dev):$(area):$(locn):LOWLMT") {
+  field(SCAN, "I/O Intr")
+  field(DTYP, "asynInt32")
+  field(INP, "@asyn($(PORT) 0) MOTOR_STATUS_LOW_LIMIT")
+}
+
+record(ai, "$(dev):$(area):$(locn):HIGHLMT") {
+  field(SCAN, "I/O Intr")
+  field(DTYP, "asynInt32")
+  field(INP, "@asyn($(PORT) 0) MOTOR_STATUS_HIGH_LIMIT")
+}
+
+record(ai, "$(dev):$(area):$(locn):DONE") {
+  field(SCAN, "I/O Intr")
+  field(DTYP, "asynInt32")
+  field(INP, "@asyn($(PORT) 0) MOTOR_STATUS_DONE")
+}
+
+record(ai, "$(dev):$(area):$(locn):HOMELMT") {
+  field(SCAN, "I/O Intr")
+  field(DTYP, "asynInt32")
+  field(INP, "@asyn($(PORT) 0) MOTOR_STATUS_AT_HOME")
+}
+
+record(ai, "$(dev):$(area):$(locn):FAULT") {
+  field(SCAN, "I/O Intr")
+  field(DTYP, "asynInt32")
+  field(INP, "@asyn($(PORT) 0) MOTOR_STATUS_PROBLEM")
+}
+
+record(ai, "$(dev):$(area):$(locn):HASENCODER") {
+  field(SCAN, "I/O Intr")
+  field(DTYP, "asynInt32")
+  field(INP, "@asyn($(PORT) 0) MOTOR_STATUS_HAS_ENCODER")
+}
