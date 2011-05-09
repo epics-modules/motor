@@ -1,7 +1,0 @@
-# Database Definition
-registrar(Hy8601AsynRegister)
-driver(drvHy8601Asyn)
-#registrar(xy9660Registrar)
-registrar(Hy8002Registrar)
-
-
