@@ -37,6 +37,20 @@ asynMotorController::asynMotorController(const char *portName, int numAxes,
 {
   static const char *functionName = "asynMotorController";
 
+
+  pAxes_ = (asynMotorAxis**) calloc(numAxes, sizeof(asynMotorAxis*));
+  pollEventId_ = epicsEventMustCreate(epicsEventEmpty);
+
+  maxProfilePoints_ = 0;
+  profileTimes_ = NULL;
+
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+    "%s:%s: constructor complete\n",
+    driverName, functionName);
+}
+
+asynStatus asynMotorController::createDriverParams()
+{
   /* Create the base set of motor parameters */
   createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
   createParam(motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs_);
@@ -96,18 +110,9 @@ asynMotorController::asynMotorController(const char *portName, int numAxes,
   createParam(profileMotorDirectionString,       asynParamInt32,      &profileMotorDirection_);
   createParam(profileMotorOffsetString,        asynParamFloat64,      &profileMotorOffset_);
 
-  pAxes_ = (asynMotorAxis**) calloc(numAxes, sizeof(asynMotorAxis*));
-  pollEventId_ = epicsEventMustCreate(epicsEventEmpty);
-
-  maxProfilePoints_ = 0;
-  profileTimes_ = NULL;
   setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_DONE);
 
-  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-    "%s:%s: constructor complete\n",
-    driverName, functionName);
 }
-
 /** Called when asyn clients call pasynInt32->write().
   * Extracts the function and axis number from pasynUser.
   * Sets the value in the parameter library.

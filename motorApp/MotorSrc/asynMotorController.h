@@ -150,6 +150,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
   virtual int        getNumParams();
+  virtual asynStatus createDriverParams();
   inline int getMotorMoveRelIndex()                {return motorMoveRel_;}
   inline int getMotorMoveAbsIndex()                {return motorMoveAbs_;}
   inline int getMotorMoveVelIndex()                {return motorMoveVel_;}
