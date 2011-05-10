@@ -132,6 +132,7 @@ extern "C" int MM4KCreateController(const char *asynMotorPort, const char *asynC
                                    int movingPollPeriod, int idlePollPeriod)
 {
   MM4KController *pMM4KController = new MM4KController(asynMotorPort, asynCommPort, numAxes, movingPollPeriod, idlePollPeriod);
+  pMM4KController->initializePortDriver();
   pMM4KController = NULL;
   return(asynSuccess);
 }
