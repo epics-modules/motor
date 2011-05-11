@@ -16,7 +16,7 @@ class asynPortDriverExt
 {
 public:
   asynPortDriverExt(asynMotorController *pC);
-  virtual int        getNumParams() = 0;
+  static int        getNumParams() {return 0;};
   virtual asynStatus createParams() = 0;
   asynStatus         createParam(const char *name, asynParamType type, int *index);
 
