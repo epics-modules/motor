@@ -95,7 +95,9 @@ public:
   asynStatus writeReadConvertInt(const char *format, int axisnum, int *output);
   char       writeReadRtnResponse(const char *format, int axisnum, asynStatus *);
   char       writeReadRtnResponse(const char *format, asynStatus *);
+  asynStatus createDriverParams();
   virtual int  getNumParams();
+  asynStatus postInitDriver();
 
 protected:
   int MM4KJerk_;

@@ -1,6 +1,6 @@
 /*
 FILENAME... MM4KMotorDriver.cpp
-USAGE...    Motor driver support for the Parker ACR series of controllers, including the Aries.
+USAGE...    Motor driver support for the Newport MM4K series of controllers, including the Aries.
 
 Mark Rivers
 March 4, 2011
@@ -34,9 +34,7 @@ MM4KController::MM4KController(const char *asynMotorPort, const char *asynCommPo
                          1, // autoconnect
                          0, 0)  // Default priority and stack size
 {
-  int axis;
   asynStatus status;
-  MM4KAxis *pAxis;
   static const char *functionName = "MM4KController";
   int modelNum, totalAxes;
   char *pmodel, *ptr, *tokSave;
@@ -44,12 +42,6 @@ MM4KController::MM4KController(const char *asynMotorPort, const char *asynCommPo
   binaryInReg_  = 4096;
   binaryOutReg_ = 4097;
   
-  // Create controller-specific parameters
-  createParam(MM4KJerkString,         asynParamFloat64,       &MM4KJerk_);
-  createParam(MM4KReadBinaryIOString, asynParamInt32,         &MM4KReadBinaryIO_);
-  createParam(MM4KBinaryInString,     asynParamUInt32Digital, &MM4KBinaryIn_);
-  createParam(MM4KBinaryOutString,    asynParamUInt32Digital, &MM4KBinaryOut_);
-  createParam(MM4KBinaryOutRBVString, asynParamUInt32Digital, &MM4KBinaryOutRBV_);
 
   /* Connect to MM4K controller */
   status = pasynOctetSyncIO->connect(asynCommPort, 0, &pasynUser_, NULL);
@@ -114,13 +106,6 @@ MM4KController::MM4KController(const char *asynMotorPort, const char *asynCommPo
   else
     numAxes = totalAxes;
 
-
-  for (axis=0; axis < numAxes; axis++)
-  {
-    pAxis  = new MM4KAxis(this, axis);    
-    callParamCallbacks();
-  }
-
   startPoller(movingPollPeriod/1000., idlePollPeriod/1000., 0);
 
 errexit:;
@@ -135,6 +120,19 @@ extern "C" int MM4KCreateController(const char *asynMotorPort, const char *asynC
   pMM4KController->initializePortDriver();
   pMM4KController = NULL;
   return(asynSuccess);
+}
+
+asynStatus MM4KController::createDriverParams()
+{
+  asynStatus status = asynSuccess;
+  status = asynMotorController::createDriverParams();
+  createParam(MM4KJerkString,         asynParamFloat64,       &MM4KJerk_);
+  createParam(MM4KReadBinaryIOString, asynParamInt32,         &MM4KReadBinaryIO_);
+  createParam(MM4KBinaryInString,     asynParamUInt32Digital, &MM4KBinaryIn_);
+  createParam(MM4KBinaryOutString,    asynParamUInt32Digital, &MM4KBinaryOut_);
+  createParam(MM4KBinaryOutRBVString, asynParamUInt32Digital, &MM4KBinaryOutRBV_);
+
+  return asynSuccess;
 }
 
 void MM4KController::report(FILE *fp, int level)
@@ -394,7 +392,22 @@ char MM4KController::writeReadRtnResponse(const char *format, asynStatus *status
 
 int MM4KController::getNumParams()
 {
-  return NUM_MM4K_PARAMS + asynMotorController::getNumParams();
+  return NUM_MM4K_PARAMS + asynMotorController::getNumParams() + asynMotorStatus::getNumParams();
+}
+
+asynStatus MM4KController::postInitDriver()
+{
+  MM4KAxis *pAxis;
+  int axis;
+  for (axis=0; axis < numAxes_; axis++)
+  {
+    pAxis  = new MM4KAxis(this, axis);
+    pAxis->getStatus()->createParams();
+    callParamCallbacks();
+  }
+  return asynSuccess;
+
+
 }
 
 MM4KAxis::MM4KAxis(MM4KController *pC, int axisNo)
