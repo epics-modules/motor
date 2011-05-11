@@ -1,14 +1,14 @@
-////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////////////////
 // Created header file XPS_C8_errors.h for XPS function errors
-// 
+//*/
 
-// TCL interpretor error
+/* TCL interpretor error */
 #define ERR_TCL_INTERPRETOR_ERROR 1
 
-// No error
+/* No error */
 #define SUCCESS 0
 
-// XPS errors 
+/* XPS errors */
 #define ERR_BUSY_SOCKET -1
 #define ERR_TCP_TIMEOUT -2
 #define ERR_STRING_TOO_LONG -3
