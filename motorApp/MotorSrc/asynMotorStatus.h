@@ -38,7 +38,7 @@ class asynMotorStatus : public asynPortDriverExt
 {
 public:
   asynMotorStatus(asynMotorController *pC, int axisNo);
-  virtual int        getNumParams();
+  static int        getNumParams();
   virtual asynStatus createParams();
           asynStatus setDoneMoving(bool done);
 //          asynStatus getStatusDone(int *done);
@@ -54,8 +54,8 @@ public:
 protected:
   asynStatus setIntegerParam(int function, int value);
   asynMotorController *pC_;
-  epicsUInt32 status_;
   int axisNo_;
+  epicsUInt32 status_;
   bool statusChanged_;
   // These are the status bits
 #define FIRST_STATUS_PARAM motorStatusDirection_
@@ -78,7 +78,7 @@ protected:
   
 };
 
-#define NUM_STATUS_PARAMS (&LAST_STATUS_PARAM - &FIRST_STATUS_PARAM + 1)
+#define NUM_STATUS_PARAMS 15
 #endif /*__cplusplus */
 #endif /*asynMotorStatus_H */
 
