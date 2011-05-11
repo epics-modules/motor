@@ -51,6 +51,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes,
 
 asynStatus asynMotorController::createDriverParams()
 {
+  asynStatus status = asynSuccess;
   /* Create the base set of motor parameters */
   createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
   createParam(motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs_);
@@ -111,6 +112,7 @@ asynStatus asynMotorController::createDriverParams()
   createParam(profileMotorOffsetString,        asynParamFloat64,      &profileMotorOffset_);
 
   setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_DONE);
+  return asynSuccess;
 
 }
 /** Called when asyn clients call pasynInt32->write().
