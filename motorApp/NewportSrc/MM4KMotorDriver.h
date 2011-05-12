@@ -47,6 +47,8 @@ public:
   asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
   void       axisReport(FILE *fp);
+  virtual asynStatus postInitAxis();
+  virtual asynStatus createParams();
 
 private:
   MM4KController *pC_;     /**< Pointer to the asynMotorController to which this axis belongs.

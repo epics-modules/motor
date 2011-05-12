@@ -23,6 +23,10 @@ class epicsShareFunc asynMotorAxis {
   public:
   /* This is the constructor for the class. */
   asynMotorAxis(class asynMotorController *pController, int axisNumber);
+  asynStatus initializeAxis();
+  virtual asynStatus preInitAxis();
+  virtual asynStatus postInitAxis();
+  virtual asynStatus createParams();
 
   virtual asynStatus setIntegerParam(int index, int value);
   virtual asynStatus setDoubleParam(int index, double value);

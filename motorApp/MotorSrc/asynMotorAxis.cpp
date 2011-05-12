@@ -54,7 +54,56 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
 }
 
+/**
+ * Do post constructor initialization
+ */
+asynStatus asynMotorAxis::initializeAxis()
+{
+  const char functionName[] = "initializeAxis";
+  asynStatus status;
+  status =  preInitAxis();
+  if (status)
+  {
+    printf("%s trouble reported by preInitAxis()\n",
+        functionName);
+    return asynError;
+  }
 
+  createParams();
+
+  status =  postInitAxis();
+  if (status)
+  {
+    printf("%s trouble reported by preInitAxis()\n",
+        functionName);
+    return asynError;
+  }
+
+  return status;
+}
+
+/**
+ * Virtual method to extend initializeAxis at
+ * the beginning of the method
+ */
+asynStatus asynMotorAxis::preInitAxis()
+{
+  return asynSuccess;
+}
+
+/**
+ * Virtual method to extend initializeAxis at
+ * the end of the method
+ */
+asynStatus asynMotorAxis::postInitAxis()
+{
+  return asynSuccess;
+}
+
+asynStatus asynMotorAxis::createParams()
+{
+  return asynSuccess;
+}
 
 /** Move the motor to an absolute location or by a relative amount.
   * \param[in] position  The absolute position to move to (if relative=0) or the relative distance to move 

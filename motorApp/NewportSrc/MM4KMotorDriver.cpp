@@ -402,7 +402,7 @@ asynStatus MM4KController::postInitDriver()
   for (axis=0; axis < numAxes_; axis++)
   {
     pAxis  = new MM4KAxis(this, axis);
-    pAxis->getStatus()->createParams();
+    pAxis->initializeAxis();
     callParamCallbacks();
   }
   return asynSuccess;
@@ -414,12 +414,14 @@ MM4KAxis::MM4KAxis(MM4KController *pC, int axisNo)
   : asynMotorAxis(pC, axisNo),
     pC_(pC)
 {
-  asynStatus status;
-
   sprintf(axisName_, "%d", axisNo+1);
-  
+}
+
+asynStatus MM4KAxis::postInitAxis()
+{
+  asynStatus status;
   // Get the number of pulses per unit on this axis
-  status = pC->writeReadConvertDouble("%dTU", axisNo, &pulsesPerUnit_);
+  status = pC_->writeReadConvertDouble("%dTU", axisNo_, &pulsesPerUnit_);
   if (status)
     getStatus()->setProblem(true);
   else
@@ -433,18 +435,26 @@ MM4KAxis::MM4KAxis(MM4KController *pC, int axisNo)
 
     getStatus()->setHasGainSupport(true); /* Assume gain support. */
 
-    pC->writeReadConvertInt("%dTC", axisNo, &loopState);
+    pC_->writeReadConvertInt("%dTC", axisNo_, &loopState);
     getStatus()->setHasEncoder(loopState);
 
     /* Save home preset position. */
-    pC->writeReadConvertDouble("%dXH", axisNo, &homePreset);
+    pC_->writeReadConvertDouble("%dXH", axisNo_, &homePreset);
 
     /* Determine low limit */
-    pC->writeReadConvertDouble("%dTL", axisNo, &lowLimit);
+    pC_->writeReadConvertDouble("%dTL", axisNo_, &lowLimit);
 
     /* Determine high limit */
-    pC->writeReadConvertDouble("%dTR", axisNo, &highLimit);
+    pC_->writeReadConvertDouble("%dTR", axisNo_, &highLimit);
   }
+  return status;
+}
+asynStatus MM4KAxis::createParams()
+{
+  asynStatus status = asynSuccess;
+  status = getStatus()->createParams();
+
+  return status;
 }
 
 void MM4KAxis::axisReport(FILE *fp)
