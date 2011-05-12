@@ -53,7 +53,6 @@ public:
 
 protected:
   asynStatus setIntegerParam(int function, int value);
-  asynMotorController *pC_;
   int axisNo_;
   epicsUInt32 status_;
   bool statusChanged_;

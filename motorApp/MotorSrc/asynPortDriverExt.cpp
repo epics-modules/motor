@@ -9,9 +9,8 @@ Last Modified:	$Date$
 
 #include "asynPortDriverExt.h"
 
-asynPortDriverExt::asynPortDriverExt(asynMotorController *pC)
+asynPortDriverExt::asynPortDriverExt(asynMotorController *pC): pC_(pC)
 {
-  pC_ = pC;
 }
 
 /** This is a convenience method for calling port driver createParam() method.
