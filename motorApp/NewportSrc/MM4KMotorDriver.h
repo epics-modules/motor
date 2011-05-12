@@ -97,7 +97,7 @@ public:
   char       writeReadRtnResponse(const char *format, asynStatus *);
   asynStatus createDriverParams();
   virtual int  getNumParams();
-  asynStatus postInitDriver();
+  virtual asynStatus postInitDriver();
 
 protected:
   int MM4KJerk_;
