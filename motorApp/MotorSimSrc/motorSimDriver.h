@@ -56,7 +56,7 @@ private:
 friend class motorSimController;
 };
 
-class motorSimController : asynMotorController {
+class motorSimController : public asynMotorController {
 public:
 
   /* These are the fucntions we override from the base class */
@@ -67,6 +67,9 @@ public:
   motorSimAxis* getAxis(int axisNo);
   asynStatus profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger);
   asynStatus triggerProfile(asynUser *pasynUser);
+  bool areMovesDeferred();
+  virtual int getNumParams();
+  virtual asynStatus postInitDriver();
 
   /* These are the functions that are new to this class */
   void motorSimTask();  // Should be pivate, but called from non-member function
@@ -77,5 +80,5 @@ private:
   epicsTimeStamp prevTime_;
   int movesDeferred_;
   
-friend class motorSimAxis;
+//friend class motorSimAxis;
 };
