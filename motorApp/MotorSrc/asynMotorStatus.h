@@ -41,7 +41,7 @@ public:
   static int        getNumParams();
   virtual asynStatus createParams();
           asynStatus setDoneMoving(bool done);
-//          asynStatus getStatusDone(int *done);
+          asynStatus setMoving(bool moving);
           asynStatus setProblem(bool on);
           asynStatus setHasGainSupport(bool yes);
           asynStatus setHasEncoder(bool yes);

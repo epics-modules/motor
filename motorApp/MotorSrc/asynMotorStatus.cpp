@@ -51,6 +51,14 @@ asynStatus asynMotorStatus::setDoneMoving(bool done){
   return retStat;
 }
 
+/** Set the axis moving bit
+  */
+asynStatus asynMotorStatus::setMoving(bool moving){
+  asynStatus retStat = asynSuccess;
+  retStat = setIntegerParam(motorStatusMoving_, moving);
+  return retStat;
+}
+
 /** Get the value stored in the done bit indicator
   */
 //asynStatus asynMotorStatus::getDone(int *done){
