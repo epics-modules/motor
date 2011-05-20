@@ -1775,7 +1775,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
         /* Set the encoder ratio.  Note this is blatantly device dependent. */
         msta.All = pmr->msta;
-        if (msta.Bits.EA_PRESENT && pmr->ueip)
+        if (msta.Bits.EA_PRESENT)
         {
             /* defend against divide by zero */
             if (fabs(pmr->mres) < 1.e-9)
