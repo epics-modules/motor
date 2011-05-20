@@ -665,6 +665,9 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 							 "None", 
 							 value*(pAxis->stepSize));
 		  /*Stop referencing, then we are homed on all axes in group.*/
+		  /*Some types of XPS axes (eg. spindle) need a sleep here, otherwise 
+		    the axis can be left in referencing mode.*/
+		  epicsThreadSleep(0.05);
 		  status = GroupReferencingStop(pAxis->pollSocket, 
 						pAxis->groupName);
 		  if (status != 0) {
@@ -696,6 +699,9 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 						       "SetPosition", 
 						       "None", 
 						       value*(pAxis->stepSize));
+		/*Some types of XPS axes (eg. spindle) need a sleep here, otherwise 
+		  the axis can be left in referencing mode.*/
+		epicsThreadSleep(0.05);
 		status = GroupReferencingStop(pAxis->pollSocket, 
 					      pAxis->groupName);
 		if (status != 0) {
