@@ -1178,6 +1178,7 @@ static void XPSPoller(XPSController *pController)
     int anyMoving;
     int forcedFastPolls=0;
     double actualVelocity, theoryVelocity, acceleration;
+    double theoryPosition=0;
 
     timeout = pController->idlePollPeriod;
     epicsEventSignal(pController->pollEventId);  /* Force on poll at startup */
@@ -1296,16 +1297,22 @@ static void XPSPoller(XPSController *pController)
 
             }
 
+	    status = GroupPositionSetpointGet(pAxis->pollSocket,
+					      pAxis->positionerName,
+					      1,
+					      &theoryPosition);
+
             status = GroupPositionCurrentGet(pAxis->pollSocket,
                                              pAxis->positionerName,
                                              1,
                                              &pAxis->currentPosition);
+
             if (status != 0) {
                 PRINT(pAxis->logParam, MOTOR_ERROR, "XPSPoller: error calling GroupPositionCurrentGet[%d,%d], status=%d\n", pAxis->card, pAxis->axis, status);
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
             } else {
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 0);
-                motorParam->setDouble(pAxis->params, motorAxisPosition,    (pAxis->currentPosition/pAxis->stepSize));
+                motorParam->setDouble(pAxis->params, motorAxisPosition,    (theoryPosition/pAxis->stepSize));
                 motorParam->setDouble(pAxis->params, motorAxisEncoderPosn, (pAxis->currentPosition/pAxis->stepSize));
             }
 
