@@ -342,6 +342,9 @@ static int motorAxisInit(void)
       motorParam->setDouble(pAxis->params, motorAxisIGain, (pAxis->xpsCorrectorInfo).KI);
       motorParam->setDouble(pAxis->params, motorAxisDGain, (pAxis->xpsCorrectorInfo).KD);
 
+      /*Set motorAxisHasEncoder so that we can use UEIP field.*/
+      motorParam->setDouble(pAxis->params, motorAxisHasEncoder, 1);
+
       /*Initialise deferred move flags.*/
       pAxis->deferred_relative = 0;
       pAxis->deferred_position = 0;
