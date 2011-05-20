@@ -927,10 +927,11 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
             return MOTOR_AXIS_ERROR;
         }
     }
+
     status = PositionerSGammaParametersSet(pAxis->pollSocket,
                                            pAxis->positionerName, 
                                            max_velocity*pAxis->stepSize,
-                                           acceleration*pAxis->stepSize,
+                                           ((acceleration!=0) ? acceleration*pAxis->stepSize : pAxis->accel),
                                            pAxis->minJerkTime,
                                            pAxis->maxJerkTime);
     if (status != 0) {
