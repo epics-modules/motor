@@ -28,6 +28,12 @@ driver(drvPIC862)
 registrar(PIC862motorRegister)
 variable(drvPIC862debug)
 
+# Physik Instrumente (PI) GmbH & Co. C-663 driver support.
+device(motor,VME_IO,devPIC663,"PIC663")
+driver(drvPIC663)
+registrar(PIC663motorRegister)
+variable(drvPIC663debug)
+
 # Physik Instrumente (PI) GmbH & Co. E-710 driver support.
 device(motor,VME_IO,devPIE710,"PIE710")
 driver(drvPIE710)
