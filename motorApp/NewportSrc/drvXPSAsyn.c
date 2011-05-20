@@ -814,6 +814,8 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 	  if (status) {
 	    PRINT(pAxis->logParam, MOTOR_ERROR, "Deferred moved failed on XPS %d, status=%d\n", pAxis->card, status);
 	    ret_status = MOTOR_AXIS_ERROR;
+	  } else {
+	    ret_status = MOTOR_AXIS_OK;
 	  }
 	  break;
 	}
@@ -876,6 +878,8 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
       if (status) {
 	PRINT(pAxis->logParam, MOTOR_ERROR, "Deferred moved failed on XPS %d, status=%d\n", pAxis->card, status);
 	ret_status = MOTOR_AXIS_ERROR;
+      } else {
+	ret_status = MOTOR_AXIS_OK;
       }
       break;
     }
