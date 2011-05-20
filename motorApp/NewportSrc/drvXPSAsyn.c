@@ -151,6 +151,8 @@ typedef struct {
     double movingPollPeriod;
     double idlePollPeriod;
     epicsEventId pollEventId;
+    epicsEventId homeEventId;
+    int moveToHomeAxis;
     AXIS_HDL pAxis;  /* array of axes */
     int movesDeferred;
 } XPSController;
@@ -203,6 +205,8 @@ typedef struct motorAxisHandle
     double deferred_position;
     int deferred_move;
     int deferred_relative;
+    int referencing_mode;
+    int referencing_mode_move;
 } motorAxis;
 
 typedef struct
@@ -253,6 +257,7 @@ static int motorXPSLogMsg(void * param, const motorAxisLogMask_t logMask, const 
 #define XPS_MAX_AXES 8
 #define XPSC8_END_OF_RUN_MINUS  0x80000100
 #define XPSC8_END_OF_RUN_PLUS   0x80000200
+#define XPSC8_ZM_HIGH_LEVEL     0x00000004
 
 #define TCP_TIMEOUT 2.0
 static motorXPS_t drv={ NULL, NULL, motorXPSLogMsg, 0, { 0, 0 } };
@@ -285,6 +290,9 @@ static int PositionerCorrectorPIDDualFFVoltageSetWrapper(AXIS_HDL pAxis);
 /*Deferred moves functions.*/
 static int processDeferredMoves(const XPSController * pController);
 static int processDeferredMovesInGroup(const XPSController * pController, char * groupName);
+
+/*Move to home functions*/
+static int movePositionerToHome(AXIS_HDL pAxis);
 
 static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
@@ -338,7 +346,10 @@ static int motorAxisInit(void)
       pAxis->deferred_position = 0;
       /*Disable deferred move for the axis. Should not cause move of this axis
        if other axes in same group do deferred move.*/
-      pAxis->deferred_move = 0; 
+      pAxis->deferred_move = 0;
+
+      /*Initialise referencing mode flag. If this is set, ignore the home state reported by the controller.*/
+      pAxis->referencing_mode = 0;
 
       motorParam->callCallback(pAxis->params);
       epicsMutexUnlock(pAxis->mutexId);
@@ -858,11 +869,25 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
       }
       break;
     }
+    case motorAxisMoveToHome:
+      {
+	if (value == 1) {
+	  PRINT(pAxis->logParam, FLOW, "Starting move to home for axis %s %s\n", pAxis->groupName, pAxis->positionerName);
+	  pAxis->pController->moveToHomeAxis = pAxis->axis;
+	  epicsEventSignal(pAxis->pController->homeEventId);
+	  ret_status = MOTOR_AXIS_OK;
+	} else {
+	  ret_status = MOTOR_AXIS_OK;
+	}
+	break;
+      }
     default:
         PRINT(pAxis->logParam, MOTOR_ERROR, "motorAxisSetInteger[%d,%d]: unknown function %d\n", pAxis->card, pAxis->axis, function);
         break;
     }
-    if (ret_status != MOTOR_AXIS_ERROR) status = motorParam->setInteger(pAxis->params, function, value);
+    if (ret_status != MOTOR_AXIS_ERROR) {
+      status = motorParam->setInteger(pAxis->params, function, value);
+    }
     return ret_status;
 }
 
@@ -958,8 +983,21 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     int status;
     int groupStatus;
     char errorBuffer[100];
-
+    int axis = 0;
+    XPSController *pController = NULL;
+    AXIS_HDL pTempAxis = NULL;
+    
     if (pAxis == NULL) return MOTOR_AXIS_ERROR;
+
+    pController = pAxis->pController;
+
+    /* Find out if any axes are in the same group, and clear the referencing mode for them.*/
+    for (axis=0; axis<pController->numAxes; axis++) {
+      pTempAxis = &pController->pAxis[axis];
+      if (strcmp(pAxis->groupName, pTempAxis->groupName) == 0) {
+	pTempAxis->referencing_mode = 0;
+      }  
+    }
 
     status = GroupStatusGet(pAxis->pollSocket, pAxis->groupName, &groupStatus);
     /* The XPS won't allow a home command if the group is in the Ready state
@@ -1082,14 +1120,25 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
         }
     }
     
-    if (pAxis->axisStatus == 44) {
+    if ((pAxis->axisStatus == 44) || (pAxis->axisStatus == 45)) {
         status = GroupMoveAbort(pAxis->moveSocket, pAxis->groupName);
         if (status != 0) {
-            PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupMoveAbort axis=%s status=%d\n",\
+            PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupMoveAbort axis=%s status=%d. Trying again.\n",\
+                  pAxis->positionerName, status);
+	    GroupMoveAbort(pAxis->moveSocket, pAxis->groupName);
+            return MOTOR_AXIS_ERROR;
+        }
+    }
+
+    if (pAxis->axisStatus == 43) {
+        status = GroupKill(pAxis->moveSocket, pAxis->groupName);
+        if (status != 0) {
+            PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupKill axis=%s status=%d\n",\
                   pAxis->positionerName, status);
             return MOTOR_AXIS_ERROR;
         }
     }
+    
 
     /*Clear defer move flag for this axis.*/
     pAxis->deferred_move = 0;
@@ -1193,11 +1242,37 @@ static void XPSPoller(XPSController *pController)
 		/* AND the done flag with the inverse of deferred_move.*/
 		axisDone &= !pAxis->deferred_move;
                 motorParam->setInteger(pAxis->params, motorAxisDone, axisDone);
+                
+		/*Read the controller software limits in case these have been changed by a TCL script.*/
+		status = PositionerUserTravelLimitsGet(pAxis->pollSocket, pAxis->positionerName, &pAxis->lowLimit, &pAxis->highLimit);
+		if (status == 0) {
+		  motorParam->setDouble(pAxis->params, motorAxisLowLimit, (pAxis->lowLimit/pAxis->stepSize));
+		  motorParam->setDouble(pAxis->params, motorAxisHighLimit, (pAxis->highLimit/pAxis->stepSize));
+		}
+
+		/*Set the ATHM signal.*/
                 if (pAxis->axisStatus == 11) {
+		  if (pAxis->referencing_mode == 0) {
                     motorParam->setInteger(pAxis->params, motorAxisHomeSignal, 1);
+		  } else {
+		    motorParam->setInteger(pAxis->params, motorAxisHomeSignal, 0);
+		  }
                 } else {
                     motorParam->setInteger(pAxis->params, motorAxisHomeSignal, 0);
                 }
+
+		/*Set the HOMED signal.*/
+		if ((pAxis->axisStatus >= 10 && pAxis->axisStatus <= 21) || 
+		    (pAxis->axisStatus == 44)) {
+		  if (pAxis->referencing_mode == 0) {
+		    motorParam->setInteger(pAxis->params, motorAxisHomed, 1);
+		  } else {
+		    motorParam->setInteger(pAxis->params, motorAxisHomed, 0);
+		  }
+		} else {
+		  motorParam->setInteger(pAxis->params, motorAxisHomed, 0);
+		}
+
                 if ((pAxis->axisStatus >= 0 && pAxis->axisStatus <= 9) || 
                     (pAxis->axisStatus >= 20 && pAxis->axisStatus <= 42)) {
                     /* Not initialized, homed or disabled */
@@ -1287,6 +1362,32 @@ static void XPSPoller(XPSController *pController)
     } /* End while */
 
 }
+
+/**
+ * This is the task that deals with the special move to home switch function 
+ */
+static void XPSMoveToHome(XPSController *pController)
+{
+  
+  AXIS_HDL pAxis;
+  int status = 0;
+  
+  while(1) {
+    
+    status = epicsEventWait(pController->homeEventId);
+    if (status == epicsEventWaitOK) { 
+      pAxis = &(pController->pAxis[pController->moveToHomeAxis]);
+      status = movePositionerToHome(pAxis);
+      if (status) {
+	PRINT(pAxis->logParam, MOTOR_ERROR, "Move to home failed on XPS %d, status=%d\n", pAxis->card, status);
+	PRINT(pAxis->logParam, MOTOR_ERROR, "Axis %s %s\n\n", pAxis->groupName, pAxis->positionerName);
+      }
+    }
+    
+  }
+  
+}
+
 
 static char *getXPSError(AXIS_HDL pAxis, int status, char *buffer)
 {
@@ -1385,6 +1486,7 @@ int XPSConfig(int card,           /* Controller number */
     FirmwareVersionGet(pollSocket, pController->firmwareVersion);
     
     pController->pollEventId = epicsEventMustCreate(epicsEventEmpty);
+    pController->homeEventId = epicsEventMustCreate(epicsEventEmpty);
 
     /* Create the poller thread for this controller */
     epicsSnprintf(threadName, sizeof(threadName), "XPS:%d", card);
@@ -1392,6 +1494,14 @@ int XPSConfig(int card,           /* Controller number */
                       epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),
                       (EPICSTHREADFUNC) XPSPoller, (void *) pController);
+
+    /* Create the thread for this controller to deal with move to home functions*/
+    epicsSnprintf(threadName, sizeof(threadName), "XPS home:%d", card);
+    epicsThreadCreate(threadName,
+                      epicsThreadPriorityMedium,
+                      epicsThreadGetStackSize(epicsThreadStackMedium),
+                      (EPICSTHREADFUNC) XPSMoveToHome, (void *) pController);
+    
 
     return MOTOR_AXIS_OK;
 
@@ -1445,6 +1555,9 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     /* Send a signal to the poller task which will make it do a poll, 
      * updating values for this axis to use the new resolution (stepSize) */
     epicsEventSignal(pAxis->pController->pollEventId);
+
+    /*Initialise this to zero, to disable the movePositionerToHome function by default.*/
+    pAxis->referencing_mode_move = 0;
     
     return MOTOR_AXIS_OK;
 }
@@ -1870,6 +1983,211 @@ static int PositionerCorrectorPIDDualFFVoltageSetWrapper(AXIS_HDL pAxis)
 }
 
 
+/**
+ * Function to move an axis to roughly the home position.
+ * It first does a kill, followed by a referencing start/stop 
+ * sequence on an group. Then uses the hardware status to
+ * determine which direction to move.
+ * The distance to move is set when enabling this functionality
+ * (it is disabled by default, because it only applies to
+ * stages with home switches in the middle of travel).
+ *
+ */
+static int movePositionerToHome(AXIS_HDL pAxis)
+{
+  int status = 0;
+  int axis = 0;
+  int groupStatus = 0;
+  int initialHardwareStatus = 0;
+  int hardwareStatus = 0;
+  double defaultDistance = 0;
+  double vel=0;
+  double accel=0;
+  double minJerk=0;
+  double maxJerk=0;
+
+  XPSController *pController = NULL;
+  AXIS_HDL pTempAxis = NULL;
+  pController = pAxis->pController;
+
+  if (pAxis->referencing_mode_move == 0) {
+    PRINT(pAxis->logParam, MOTOR_ERROR, "[%d,%d]: This function has not been enabled.\n", 
+	  pAxis->card, pAxis->axis);
+    return MOTOR_AXIS_ERROR;
+  }
+
+  defaultDistance = (double) pAxis->referencing_mode_move;
+  
+  /*NOTE: the XPS has some race conditions in its firmware. That's why I placed some
+    epicsThreadSleep calls between the XPS functions below.*/
+
+  /* The XPS won't allow a home command if the group is in the Ready state
+     * If the group is Ready, then make it not Ready  */
+  status = GroupStatusGet(pAxis->pollSocket, pAxis->groupName, &groupStatus);
+  if (groupStatus >= 10 && groupStatus <= 18) {
+    status = GroupKill(pAxis->moveSocket, pAxis->groupName);
+  }
+  epicsThreadSleep(0.05);
+  status = GroupInitialize(pAxis->pollSocket, pAxis->groupName);
+  if (status) {
+    PRINT(pAxis->logParam, MOTOR_ERROR, "movePositionerToHome[%d,%d]: error calling GroupInitialize\n",
+	  pAxis->card, pAxis->axis);
+    return MOTOR_AXIS_ERROR;
+  }
+  epicsThreadSleep(0.05);
+  status = GroupReferencingStart(pAxis->moveSocket, pAxis->groupName);
+  epicsThreadSleep(0.05);
+  status = GroupReferencingStop(pAxis->moveSocket, pAxis->groupName);
+  epicsThreadSleep(0.05);
+
+  status = GroupStatusGet(pAxis->pollSocket, pAxis->groupName, &groupStatus);
+  if (groupStatus != 11) {
+    PRINT(pAxis->logParam, MOTOR_ERROR, "movePositionerToHome[%d,%d]: error putting axis into referencing mode\n",
+	  pAxis->card, pAxis->axis);
+    return MOTOR_AXIS_ERROR;
+  }
+  
+  /* Find out if any axes are in the same group, and set referencing mode for them all.*/
+  for (axis=0; axis<pController->numAxes; axis++) {
+    pTempAxis = &pController->pAxis[axis];
+    if (strcmp(pAxis->groupName, pTempAxis->groupName) == 0) {
+      pTempAxis->referencing_mode = 1;
+    }  
+  }
+  
+  /*Set status bits correctly*/
+  if (epicsMutexLock(pAxis->mutexId) == epicsMutexLockOK) {
+    motorParam->setInteger(pAxis->params, motorAxisHomed, 0);
+    motorParam->setInteger(pAxis->params, motorAxisHomeSignal, 0);  
+    motorParam->callCallback(pAxis->params);
+    epicsMutexUnlock(pAxis->mutexId);
+  }
+  
+
+  /*Read which side of the home switch we are on.*/
+  status = PositionerHardwareStatusGet(pAxis->pollSocket, pAxis->positionerName, &initialHardwareStatus);
+  if (status) {
+    PRINT(pAxis->logParam, MOTOR_ERROR, "movePositionerToHome[%d,%d]: error calling PositionerHardwareStatusGet\n", 
+	  pAxis->card, pAxis->axis);
+    return MOTOR_AXIS_ERROR;
+  }
+  
+  if (!(XPSC8_ZM_HIGH_LEVEL & initialHardwareStatus)) {
+    defaultDistance = defaultDistance * -1.0;
+  }
+
+  /*I want to set a slow speed here, so as not to move at default (max) speed. The user must have chance to
+    stop things if it looks like it has past the home switch and is not stopping. First I need to read what is currently
+    set for velocity, and then I divide it by 2.*/
+  status = PositionerSGammaParametersGet(pAxis->pollSocket,
+					 pAxis->positionerName, 
+					 &vel, &accel, &minJerk, &maxJerk);
+  if (status != 0) {
+    PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing PositionerSGammaParametersGet[%d,%d].\n",
+	  pAxis->card, pAxis->axis);
+    GroupKill(pAxis->moveSocket, pAxis->groupName);
+    return MOTOR_AXIS_ERROR;
+  }
+  status = PositionerSGammaParametersSet(pAxis->pollSocket,
+					 pAxis->positionerName, 
+					 (vel/2), accel, minJerk, maxJerk);
+  if (status != 0) {
+    PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing PositionerSGammaParametersSet[%d,%d].\n",
+	  pAxis->card, pAxis->axis);
+    GroupKill(pAxis->moveSocket, pAxis->groupName);
+    return MOTOR_AXIS_ERROR;
+  }
+  epicsThreadSleep(0.05);
+  
+  /*Move in direction of home switch.*/
+  status = GroupMoveRelative(pAxis->moveSocket, pAxis->positionerName, 1,
+			     &defaultDistance); 
+  if (status != 0) {
+    PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupMoveRelative axis=%s status=%d\n", \
+	  pAxis->positionerName, status);
+    /*Issue a kill here if we have failed to move.*/
+    status = GroupKill(pAxis->moveSocket, pAxis->groupName);
+    return MOTOR_AXIS_ERROR;
+  }
+  
+  epicsThreadSleep(0.1);
+
+  status = GroupStatusGet(pAxis->pollSocket, pAxis->groupName, &groupStatus);
+  
+  if (groupStatus == 44) {
+    while (1) {
+      epicsThreadSleep(0.2);
+      status = PositionerHardwareStatusGet(pAxis->pollSocket, pAxis->positionerName, &hardwareStatus);
+      if (hardwareStatus != initialHardwareStatus) {
+	break;
+      }
+      status = GroupStatusGet(pAxis->pollSocket, pAxis->groupName, &groupStatus);
+      if (groupStatus != 44) {
+	/* move finished for some other reason.*/
+	PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupMoveRelative axis=%s status=%d\n", \
+	      pAxis->positionerName, status);
+        /*Issue a kill here if we have failed to move.*/
+	status = GroupKill(pAxis->moveSocket, pAxis->groupName);
+	return MOTOR_AXIS_ERROR;
+      }
+    }
+  } else {
+    PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupMoveRelative axis=%s status=%d\n", \
+	  pAxis->positionerName, status);
+    /*Issue a kill here if we have failed to move.*/
+    status = GroupKill(pAxis->moveSocket, pAxis->groupName);
+    return MOTOR_AXIS_ERROR;
+  }
+
+  status = GroupMoveAbort(pAxis->pollSocket, pAxis->groupName);
+  if (status != 0) {
+    PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupMoveAbort axis=%s status=%d\n",	\
+	  pAxis->positionerName, status);
+    /*This should really have worked. Do a kill instead.*/
+    status = GroupKill(pAxis->moveSocket, pAxis->groupName);
+    return MOTOR_AXIS_ERROR;
+  }
+
+  return status;
+}
+
+
+/**
+ * Function to enable the movePositionerToHome function on a per axis.
+ * It also sets the distance to try to move by for an axis.
+ */
+void XPSEnableMoveToHome(int card, const char * positionerName, int distance)
+{
+
+  XPSController *pController = NULL;
+  AXIS_HDL pAxis = NULL;
+  int axisIndex = 0;
+
+  if (distance<=0) {
+    printf("Error in XPSEnableMoveToHome. distance must be positive.\n");
+    
+  } else {
+
+    /*Get the axis referenence.*/
+    pController = &pXPSController[card];
+    
+    for (axisIndex=0; axisIndex<pController->numAxes; ++axisIndex) {
+      pAxis = &(pController->pAxis[axisIndex]);
+      if (!strcmp(positionerName, pAxis->positionerName)) {
+      	pAxis->referencing_mode_move = distance;
+	break;
+      }
+    } 
+    
+  }
+  
+}
+
+
+
+
+
+
 /* Code for iocsh registration */
 
 /* Newport XPS Gathering Test */
@@ -1961,6 +2279,19 @@ static void xpsSetPosSleepTimeCallFunc(const iocshArgBuf *args)
     XPSSetPosSleepTime(args[0].ival);
 }
 
+/* void XPSEnableMoveToHome(int card, const char * positionerName, int distance) */
+static const iocshArg XPSEnableMoveToHomeArg0 = {"Card number", iocshArgInt};
+static const iocshArg XPSEnableMoveToHomeArg1 = {"Axis name", iocshArgString};
+static const iocshArg XPSEnableMoveToHomeArg2 = {"Distance", iocshArgInt};
+static const iocshArg * const XPSEnableMoveToHomeArgs[3] = {&XPSEnableMoveToHomeArg0,
+                                                            &XPSEnableMoveToHomeArg1,
+                                                            &XPSEnableMoveToHomeArg2};
+static const iocshFuncDef xpsEnableMoveToHome = {"XPSEnableMoveToHome", 3, XPSEnableMoveToHomeArgs};
+static void xpsEnableMoveToHomeCallFunc(const iocshArgBuf *args)
+{
+  XPSEnableMoveToHome(args[0].ival, args[1].sval, args[2].ival);
+}
+
 
 static void XPSRegister(void)
 {
@@ -1972,6 +2303,7 @@ static void XPSRegister(void)
     iocshRegister(&xpsSetPosSleepTime, xpsSetPosSleepTimeCallFunc);
     iocshRegister(&TCLRun,        TCLRunCallFunc);
     iocshRegister(&XPSC8GatheringTest, XPSC8GatheringTestCallFunc);
+    iocshRegister(&xpsEnableMoveToHome, xpsEnableMoveToHomeCallFunc);
 }
 
 epicsExportRegistrar(XPSRegister);

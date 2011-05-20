@@ -89,6 +89,7 @@ typedef enum {
     motorSetClosedLoop = motorAxisClosedLoop,
     motorEncoderPosition = motorAxisEncoderPosn,
     motorDeferMoves = motorAxisDeferMoves,
+    motorMoveToHome = motorAxisMoveToHome,
     /* Status bits split out */
     motorStatusDirection=motorAxisDirection,
     motorStatusDone, motorStatusHighLimit, motorStatusAtHome,
@@ -130,6 +131,7 @@ static motorCommandStruct motorCommands[] = {
     {motorLowLimit,             motorLowLimitString},
     {motorSetClosedLoop,        motorSetClosedLoopString},
     {motorDeferMoves,           motorDeferMovesString},
+    {motorMoveToHome,           motorMoveToHomeString},
     {motorStatus,               motorStatusString},
     {motorUpdateStatus,         motorUpdateStatusString},
     {motorStatusDirection,      motorStatusDirectionString}, 

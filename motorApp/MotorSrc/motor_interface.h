@@ -327,6 +327,7 @@ typedef enum
     motorAxisLowHardLimit,     /**< minus limit switch has been hit */
     motorAxisHomed,            /**< Motor has been homed.*/
     motorAxisDeferMoves,       /**< Moves are not executed immediately, but are deferred until this parameter is set to zero */
+    motorAxisMoveToHome,       /**< Move to home switch (not a real home command).*/
     motorAxisLastParam
 } motorAxisParam_t;
 
