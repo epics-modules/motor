@@ -19,6 +19,8 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
                   const char *positionerName, /* groupName.positionerName e.g. Diffractometer.Phi */
                   int stepsPerUnit);          /* steps per user unit */
 
+void XPSDisablePoll(int disablePollVal);
+
 #ifdef __cplusplus
 }
 #endif
