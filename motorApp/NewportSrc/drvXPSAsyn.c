@@ -1027,7 +1027,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     }
     status = GroupStatusGet(pAxis->pollSocket, pAxis->groupName, &groupStatus);
     /* If axis not initialized, then initialize it */
-    if (groupStatus >= 0 && groupStatus <= 9) {
+    if ((groupStatus >= 0 && groupStatus <= 9) || (groupStatus == 50) || (groupStatus == 63)) {
         status = GroupInitialize(pAxis->pollSocket, pAxis->groupName);
         if (status) {
             PRINT(pAxis->logParam, MOTOR_ERROR, "motorAxisHome[%d,%d]: error calling GroupInitialize error=%s\n",
