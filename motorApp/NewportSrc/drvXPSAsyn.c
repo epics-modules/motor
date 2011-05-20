@@ -181,6 +181,7 @@ typedef struct motorAxisHandle
     XPSController *pController;
     int moveSocket;
     int pollSocket;
+    int noDisabledError;
     PARAMS params;
     double currentPosition;
     double currentVelocity;
@@ -633,6 +634,7 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 	      if (status != 0) {
 		PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupPositionCurrentGet(%d,%d). Aborting set position. XPS API Error: %d.\n", 
 		      pAxis->card, pAxis->axis, status);
+		ret_status = MOTOR_AXIS_ERROR;
 	      } else {
 		status = GroupKill(pAxis->pollSocket, 
 				   pAxis->groupName);
@@ -641,6 +643,7 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 		if (status != 0) {
 		  PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupKill/GroupInitialize(%d,%d). Aborting set position. XPS API Error: %d.\n", 
 			pAxis->card, pAxis->axis, status);
+		  ret_status = MOTOR_AXIS_ERROR;
 		} else {
 
 		  /*Wait after axis initialisation (we don't want to set position immediately after
@@ -679,6 +682,9 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 		  if (status != 0) {
 		    PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing referencing set position (%d,%d). XPS API Error: %d.", 
 			  pAxis->card, pAxis->axis, status);
+		    ret_status = MOTOR_AXIS_ERROR;
+		  } else {
+		    ret_status = MOTOR_AXIS_OK;
 		  }
 		}
 	      }
@@ -692,8 +698,8 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 	      if (status != 0) {
 		PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing GroupKill/GroupInitialize(%d,%d). XPS API Error: %d. Aborting set position.\n", 
 		      pAxis->card, pAxis->axis, status);
+		ret_status = MOTOR_AXIS_ERROR;
 	      } else {
-
 		/*Wait after axis initialisation (we don't want to set position immediately after
 		  initialisation because the stage can oscillate slightly).*/
 		epicsThreadSleep(setPosSleepTime);
@@ -713,6 +719,9 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 		if (status != 0) {
 		  PRINT(pAxis->logParam, MOTOR_ERROR, " Error performing referencing set position (%d,%d). XPS API Error: %d.", 
 			pAxis->card, pAxis->axis, status);
+		  ret_status = MOTOR_AXIS_ERROR;
+		} else {
+		  ret_status = MOTOR_AXIS_OK;
 		}
 	      }
 	    }
@@ -993,6 +1002,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
         epicsMutexUnlock(pAxis->mutexId);
     }
     
+    motorParam->callCallback( pAxis->params );
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
 
@@ -1059,6 +1069,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
         epicsMutexUnlock(pAxis->mutexId);
     }
     
+    motorParam->callCallback( pAxis->params );
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
     PRINT(pAxis->logParam, FLOW, "motorAxisHome: set card %d, axis %d to home\n",
@@ -1098,6 +1109,7 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
         epicsMutexUnlock(pAxis->mutexId);
     }
 
+    motorParam->callCallback( pAxis->params );
     /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
     epicsEventSignal(pAxis->pController->pollEventId);
     PRINT(pAxis->logParam, FLOW, "motorAxisVelocityMove card %d, axis %d move velocity=%f, accel=%f\n",
@@ -1299,16 +1311,6 @@ static void XPSPoller(XPSController *pController)
 		  motorParam->setInteger(pAxis->params, motorAxisHomed, 0);
 		}
 
-                if ((pAxis->axisStatus >= 0 && pAxis->axisStatus <= 9) || 
-                    (pAxis->axisStatus >= 20 && pAxis->axisStatus <= 42)) {
-                    /* Not initialized, homed or disabled */
-                     PRINT(pAxis->logParam, FLOW, "axis %d in bad state %d\n",
-                           pAxis->axis, pAxis->axisStatus);
-                    /* motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, 1);
-                     * motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  1);
-                     */
-                }
-
 		/*Test for following error, and set appropriate param.*/
 		if ((pAxis->axisStatus == 21 || pAxis->axisStatus == 22) ||
 		    (pAxis->axisStatus >= 24 && pAxis->axisStatus <= 26) ||
@@ -1318,6 +1320,21 @@ static void XPSPoller(XPSController *pController)
 		  motorParam->setInteger(pAxis->params, motorAxisFollowingError, 1);
 		} else {
 		  motorParam->setInteger(pAxis->params, motorAxisFollowingError, 0);
+		}
+
+		/*Test for states that mean we cannot move an axis (disabled, uninitialised, etc.) 
+		  and set problem bit in MSTA.*/
+		if ((pAxis->axisStatus < 10) || ((pAxis->axisStatus >= 20) && (pAxis->axisStatus <= 42)) ||
+		    (pAxis->axisStatus == 50) || (pAxis->axisStatus == 64)) {
+		  if ( (pAxis->noDisabledError > 0) && (pAxis->axisStatus==20) ) {
+		    motorParam->setInteger(pAxis->params, motorAxisProblem, 0);		    
+		  } else {
+		    PRINT(pAxis->logParam, FLOW, "XPS Axis %d is uninitialised/disabled/not referenced. XPS State Code: %d\n",
+                           pAxis->axis, pAxis->axisStatus);
+		    motorParam->setInteger(pAxis->params, motorAxisProblem, 1);
+		  }
+		} else {
+		  motorParam->setInteger(pAxis->params, motorAxisProblem, 0);
 		}
 
             }
@@ -1545,7 +1562,8 @@ int XPSConfig(int card,           /* Controller number */
 int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
                   int axis,                   /* axis number 0-7 */
                   const char *positionerName, /* groupName.positionerName e.g. Diffractometer.Phi */
-                  int stepsPerUnit)           /* steps per user unit */
+                  int stepsPerUnit,           /* steps per user unit */
+                  int noDisabledError)        /* If 1 then don't report disabled state as error */
 {
     XPSController *pController;
     AXIS_HDL pAxis;
@@ -1573,6 +1591,7 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     }
     pAxis->positionerName = epicsStrDup(positionerName);
     pAxis->groupName = epicsStrDup(positionerName);
+    pAxis->noDisabledError = noDisabledError;
     index = strchr(pAxis->groupName, '.');
     if (index != NULL) *index = '\0';  /* Terminate group name at place of '.' */
 
@@ -2288,15 +2307,18 @@ static const iocshArg XPSConfigAxisArg0 = {"Card number", iocshArgInt};
 static const iocshArg XPSConfigAxisArg1 = {"Axis number", iocshArgInt};
 static const iocshArg XPSConfigAxisArg2 = {"Axis name", iocshArgString};
 static const iocshArg XPSConfigAxisArg3 = {"Steps per unit", iocshArgInt};
-static const iocshArg * const XPSConfigAxisArgs[4] = {&XPSConfigAxisArg0,
+static const iocshArg XPSConfigAxisArg4 = {"No Disabled Error", iocshArgInt};
+static const iocshArg * const XPSConfigAxisArgs[5] = {&XPSConfigAxisArg0,
                                                       &XPSConfigAxisArg1,
                                                       &XPSConfigAxisArg2,
-                                                      &XPSConfigAxisArg3};
-static const iocshFuncDef configXPSAxis = {"XPSConfigAxis", 4, XPSConfigAxisArgs};
+                                                      &XPSConfigAxisArg3,
+                                                      &XPSConfigAxisArg4};
+                                                      
+static const iocshFuncDef configXPSAxis = {"XPSConfigAxis", 5, XPSConfigAxisArgs};
 
 static void configXPSAxisCallFunc(const iocshArgBuf *args)
 {
-    XPSConfigAxis(args[0].ival, args[1].ival, args[2].sval, args[3].ival);
+    XPSConfigAxis(args[0].ival, args[1].ival, args[2].sval, args[3].ival, args[4].ival);
 }
 
 
@@ -2318,6 +2340,15 @@ static void xpsSetPosSleepTimeCallFunc(const iocshArgBuf *args)
     XPSSetPosSleepTime(args[0].ival);
 }
 
+/* void XPSDisablePoll(int posSleep) */
+static const iocshArg XPSDisablePollArg0 = {"Set disablePoll value", iocshArgInt};
+static const iocshArg * const XPSDisablePollArgs[1] = {&XPSDisablePollArg0};
+static const iocshFuncDef xpsDisablePoll = {"XPSDisablePoll", 1, XPSDisablePollArgs};
+static void xpsDisablePollCallFunc(const iocshArgBuf *args)
+{
+    XPSDisablePoll(args[0].ival);
+}
+
 /* void XPSEnableMoveToHome(int card, const char * positionerName, int distance) */
 static const iocshArg XPSEnableMoveToHomeArg0 = {"Card number", iocshArgInt};
 static const iocshArg XPSEnableMoveToHomeArg1 = {"Axis name", iocshArgString};
@@ -2330,16 +2361,6 @@ static void xpsEnableMoveToHomeCallFunc(const iocshArgBuf *args)
 {
   XPSEnableMoveToHome(args[0].ival, args[1].sval, args[2].ival);
 }
-
-/* void XPSDisablePoll(int posSleep) */
-static const iocshArg XPSDisablePollArg0 = {"Set disablePoll value", iocshArgInt};
-static const iocshArg * const XPSDisablePollArgs[1] = {&XPSDisablePollArg0};
-static const iocshFuncDef xpsDisablePoll = {"XPSDisablePoll", 1, XPSDisablePollArgs};
-static void xpsDisablePollCallFunc(const iocshArgBuf *args)
-{
-    XPSDisablePoll(args[0].ival);
-}
-
 
 static void XPSRegister(void)
 {
