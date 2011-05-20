@@ -160,6 +160,7 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     double position = pPvt->status.position;
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
+    double encRatio[2] = {pmr->mres, pmr->eres};
 
     if ((fabs(pmr->dval) > rdbd && pmr->mres != 0) &&
         (fabs(position * pmr->mres) < rdbd))
@@ -168,6 +169,11 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
         epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );
 
         pPvt->initEvent = initEvent;
+
+	/*Before setting position, set the correct encoder ratio.*/
+	start_trans(pmr);
+        build_trans(SET_ENC_RATIO, encRatio, pmr);
+        end_trans(pmr);
 
         start_trans(pmr);
         build_trans(LOAD_POS, &setPos, pmr);
@@ -629,7 +635,6 @@ static void asynCallback(asynUser *pasynUser)
 	    pPvt->moveRequestPending--;
 	    if (!pPvt->moveRequestPending) {
 	      pPvt->needUpdate = 1;
-                /* pmr->rset->process((dbCommon*)pmr); */
                 dbProcess((dbCommon*)pmr);
 	    }
 	}
@@ -646,7 +651,9 @@ static void asynCallback(asynUser *pasynUser)
                   pmr->name, pasynUser->errorMessage);
     }
 
-    if ( pPvt->initEvent ) epicsEventSignal(  pPvt->initEvent );
+    if ( pPvt->initEvent && pmsg->command == motorPosition) {
+      epicsEventSignal(  pPvt->initEvent );
+    }
 }
 
 /**
@@ -678,3 +685,4 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
         pPvt->needUpdate = 1;
     }
 }
+
