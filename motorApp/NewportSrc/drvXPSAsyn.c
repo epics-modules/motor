@@ -245,6 +245,12 @@ static int doSetPosition = 1;
  * is available in the IOC shell to control this.
  */
 static double setPosSleepTime = 0.5;
+/**
+ * Parameter to control the enable and disable of the poller
+ * A function called XPSDisablePoll(int)
+ * is available in the IOC shell to control this.
+ */
+static int disablePoll = 0;
 
 /** Deadband to use for the velocity comparison with zero. */
 #define XPS_VELOCITY_DEADBAND 0.0000001
@@ -1199,6 +1205,10 @@ static void XPSPoller(XPSController *pController)
     epicsEventSignal(pController->pollEventId);  /* Force on poll at startup */
 
     while(1) {
+    	while(disablePoll==1)
+    	{
+    		epicsThreadSleep(0.1);
+    	}
         if (timeout != 0.) status = epicsEventWaitWithTimeout(pController->pollEventId, timeout);
         else               status = epicsEventWait(pController->pollEventId);
         if (status == epicsEventWaitOK) {
@@ -1605,6 +1615,11 @@ void XPSEnableSetPosition(int setPos)
 void XPSSetPosSleepTime(int posSleep) 
 {
   setPosSleepTime = (double)posSleep / 1000.0;
+}
+
+void XPSDisablePoll(int disablePollVal)
+{
+	disablePoll = disablePollVal;
 }
 
 
@@ -2316,6 +2331,15 @@ static void xpsEnableMoveToHomeCallFunc(const iocshArgBuf *args)
   XPSEnableMoveToHome(args[0].ival, args[1].sval, args[2].ival);
 }
 
+/* void XPSDisablePoll(int posSleep) */
+static const iocshArg XPSDisablePollArg0 = {"Set disablePoll value", iocshArgInt};
+static const iocshArg * const XPSDisablePollArgs[1] = {&XPSDisablePollArg0};
+static const iocshFuncDef xpsDisablePoll = {"XPSDisablePoll", 1, XPSDisablePollArgs};
+static void xpsDisablePollCallFunc(const iocshArgBuf *args)
+{
+    XPSDisablePoll(args[0].ival);
+}
+
 
 static void XPSRegister(void)
 {
@@ -2325,6 +2349,7 @@ static void XPSRegister(void)
     iocshRegister(&configXPSAxis, configXPSAxisCallFunc);
     iocshRegister(&xpsEnableSetPosition, xpsEnableSetPositionCallFunc);
     iocshRegister(&xpsSetPosSleepTime, xpsSetPosSleepTimeCallFunc);
+    iocshRegister(&xpsDisablePoll, xpsDisablePollCallFunc);
     iocshRegister(&TCLRun,        TCLRunCallFunc);
     iocshRegister(&XPSC8GatheringTest, XPSC8GatheringTestCallFunc);
     iocshRegister(&xpsEnableMoveToHome, xpsEnableMoveToHomeCallFunc);
