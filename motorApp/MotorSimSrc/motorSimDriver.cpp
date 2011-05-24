@@ -104,10 +104,12 @@ asynStatus motorSimController::postInitDriver()
   motorSimAxis *pAxis;
   for (axis=0; axis<numAxes_; axis++) {
     pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
+    pAxis->initializeAxis();
     setDoubleParam(axis, this->motorPosition_, DEFAULT_START);
   }
   return asynSuccess;
 }
+
 
 void motorSimController::report(FILE *fp, int level)
 {
@@ -474,6 +476,15 @@ void motorSimAxis::process(double delta )
   //setIntegerParam(pC_->motorStatusLowLimit_,   (nextpoint_.axis[0].p <= lowHardLimit_));
   callParamCallbacks();
 }
+
+asynStatus motorSimAxis::createParams()
+{
+  asynStatus status = asynSuccess;
+  status = getStatus()->createParams();
+
+  return status;
+}
+
 
 /** Configuration command, called directly or from iocsh */
 extern "C" int motorSimCreateController(const char *portName, int numAxes, int priority, int stackSize)
