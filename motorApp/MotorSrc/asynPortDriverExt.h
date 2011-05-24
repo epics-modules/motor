@@ -15,13 +15,14 @@ Last Modified:	$Date$
 class asynPortDriverExt
 {
 public:
-  asynPortDriverExt(asynMotorController *pC);
+  asynPortDriverExt(asynMotorController *pC, int addr);
   static int        getNumParams() {return 0;};
   virtual asynStatus createParams() = 0;
   asynStatus         createParam(const char *name, asynParamType type, int *index);
 
 protected:
   asynMotorController *pC_;
+  int addr_;
 };
 
 #endif /*asynPortDriverExt_H */

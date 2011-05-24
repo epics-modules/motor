@@ -10,7 +10,7 @@ Last Modified:	$Date$
 #include "asynMotorStatus.h"
 
 asynMotorStatus::asynMotorStatus(asynMotorController *pC, int axisNo) :
-  asynPortDriverExt(pC) , axisNo_(axisNo), status_(0){
+  asynPortDriverExt(pC, axisNo){
     //empty
   }
 /** return the number of parameters associated with the status object
