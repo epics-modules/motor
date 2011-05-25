@@ -111,6 +111,26 @@ asynStatus motorSimController::postInitDriver()
 }
 
 
+void motorSimAxis::axisReport(FILE *& fp, int & level)
+{
+    fprintf(fp, "  axis %d\n", getAxisIndex());
+    if(level > 0){
+        double lowSoftLimit = 0.0;
+        double hiSoftLimit = 0.0;
+        fprintf(fp, "  Current position = %f, velocity = %f at current time: %f\n", nextpoint_.axis[0].p, nextpoint_.axis[0].v, nextpoint_.T);
+        fprintf(fp, "  Destination posn = %f, velocity = %f at desination time:  %f\n", endpoint_.axis[0].p, endpoint_.axis[0].v, endpoint_.T);
+        fprintf(fp, "    Hard limits: %f, %f\n", lowHardLimit_, hiHardLimit_);
+        fprintf(fp, "           Home: %f\n", home_);
+        fprintf(fp, "    Enc. offset: %f\n", enc_offset_);
+        pC_->getDoubleParam(axisNo_, pC_->getMotorHighLimitIndex(), &hiSoftLimit);
+        pC_->getDoubleParam(axisNo_, pC_->getMotorLowLimitIndex(), &lowSoftLimit);
+        fprintf(fp, "    Soft limits: %f, %f\n", lowSoftLimit, hiSoftLimit);
+        if(homing_)
+            fprintf(fp, "    Currently homing axis\n");
+
+    }
+}
+
 void motorSimController::report(FILE *fp, int level)
 {
   int axis;
@@ -121,59 +141,45 @@ void motorSimController::report(FILE *fp, int level)
 
   for (axis=0; axis<numAxes_; axis++) {
     pAxis = getAxis(axis);
-    fprintf(fp, "  axis %d\n", pAxis->axisNo_);
-
-    if (level > 0)
-    {
-      double lowSoftLimit=0.0;
-      double hiSoftLimit=0.0;
-
-      fprintf(fp, "  Current position = %f, velocity = %f at current time: %f\n", 
-           pAxis->nextpoint_.axis[0].p, 
-           pAxis->nextpoint_.axis[0].v,
-           pAxis->nextpoint_.T);
-      fprintf(fp, "  Destination posn = %f, velocity = %f at desination time:  %f\n",
-           pAxis->endpoint_.axis[0].p, 
-           pAxis->endpoint_.axis[0].v,
-           pAxis->endpoint_.T);
-
-      fprintf(fp, "    Hard limits: %f, %f\n", pAxis->lowHardLimit_, pAxis->hiHardLimit_);
-      fprintf(fp, "           Home: %f\n", pAxis->home_);
-      fprintf(fp, "    Enc. offset: %f\n", pAxis->enc_offset_);
-      getDoubleParam(pAxis->axisNo_, motorHighLimit_, &hiSoftLimit);
-      getDoubleParam(pAxis->axisNo_, motorLowLimit_, &lowSoftLimit);
-      fprintf(fp, "    Soft limits: %f, %f\n", lowSoftLimit, hiSoftLimit );
-
-      if (pAxis->homing_) fprintf(fp, "    Currently homing axis\n" );
-    }
+    pAxis->axisReport(fp, level);
   }
 
   // Call the base class method
   asynMotorController::report(fp, level);
 }
 
+asynStatus motorSimAxis::doDeferredMove()
+{
+	asynStatus status = asynSuccess;
+    if(deferred_move_){
+        double position = 0.0;
+        position = deferred_position_;
+        /* Check to see if in hard limits */
+        if((nextpoint_.axis[0].p >= hiHardLimit_ && position > nextpoint_.axis[0].p) || (nextpoint_.axis[0].p <= lowHardLimit_ && position < nextpoint_.axis[0].p)){
+            status = asynError;
+        }else{
+            endpoint_.axis[0].p = position - enc_offset_;
+            endpoint_.axis[0].v = 0.0;
+            getStatus()->setDoneMoving(false);
+            // TODO remove
+            //setIntegerParam(axis, motorStatusDone_, 0);
+            deferred_move_ = 0;
+        }
+    }
+    return status;
+}
+
 asynStatus motorSimController::processDeferredMoves()
 {
   asynStatus status = asynError;
-  double position = 0.0;
   int axis;
   motorSimAxis *pAxis;
 
   for (axis=0; axis<numAxes_; axis++)
   {
     pAxis = getAxis(axis);
-    if (pAxis->deferred_move_) {
-      position = pAxis->deferred_position_;
-      /* Check to see if in hard limits */
-      if ((pAxis->nextpoint_.axis[0].p >= pAxis->hiHardLimit_  &&  position > pAxis->nextpoint_.axis[0].p) ||
-          (pAxis->nextpoint_.axis[0].p <= pAxis->lowHardLimit_ &&  position < pAxis->nextpoint_.axis[0].p)) return asynError;
-      pAxis->endpoint_.axis[0].p = position - pAxis->enc_offset_;
-      pAxis->endpoint_.axis[0].v = 0.0;    
-      pAxis->getStatus()->setDoneMoving(false);
-      // TODO remove
-      //setIntegerParam(axis, motorStatusDone_, 0);
-      pAxis->deferred_move_ = 0;
-    }
+    status = pAxis->doDeferredMove();
+    if (status != asynSuccess) break;
   }
   return status;
 }

@@ -31,6 +31,8 @@ public:
   asynStatus stop(double acceleration);
   asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
+  asynStatus doDeferredMove();
+  void axisReport(FILE *& fp, int & level);
   virtual asynStatus createParams();
 
   /* These are the methods that are new to this class */
@@ -54,7 +56,7 @@ private:
   int deferred_move_;
   int deferred_relative_;
   
-friend class motorSimController;
+//friend class motorSimController;
 };
 
 class motorSimController : public asynMotorController {
