@@ -76,6 +76,8 @@ option +r;
  */
 #define USE_ASYN 0
 
+#define USE_SPLINE 0
+
 #if USE_ASYN
 #else
 int cardNumber;
@@ -166,8 +168,10 @@ unsigned long startTime;
 %% static double rawToUser(int raw, double off, int dir, double res);
 
 /* Numerical Recipes spline routines */
+#if USE_SPLINE
 %% static int spline(double *x, double *y, int n, double *y2);
 %% static int splint(double *xa, double *ya, int n, double x, double *y);
+#endif
 
 int position[MAX_AXES][MAX_ELEMENTS];
 int velocity[MAX_AXES][MAX_ELEMENTS];
@@ -969,12 +973,17 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, int npulses, double motorOffset,
 	double motorResolution, int *position, int *velocity, int *acceleration)
 {
-	double dp, dt, v_ideal, v_lin, v_spline, accel_p, accel_v, time;
+	double dp, dt, v_ideal, v_lin, accel_p, accel_v, time;
+#if USE_SPLINE
+	double v_spline, delta, yy0, yy1;
+#endif
 	double x0;
-	double delta, yy0, yy1;
-	int i, np, dir;
+	int i, dir;
 
+#if USE_SPLINE
+	/* prepare for spline interpolation of motor trajectory */
 	spline(realTimeTrajectory, motorTrajectory, npoints, y2);
+#endif
 
 	calcMotorTrajectory[0] = motorTrajectory[0];
 	v_out[0] = 0;
@@ -992,40 +1001,23 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 			/* the ideal velocity at motorTrajectory[i] */
 			/* linear interpolation */
 			v_lin = (motorTrajectory[i+1]-motorTrajectory[i-1])/(realTimeTrajectory[i+1]-realTimeTrajectory[i-1]);
+			v_ideal = v_lin;
 
-			/* spline calculation */
+#if USE_SPLINE
+			/* spline interpolation of motor trajectory */
 			delta = (realTimeTrajectory[i+1] - realTimeTrajectory[i-1])/10.;
 			splint(realTimeTrajectory, motorTrajectory, npoints, realTimeTrajectory[i]-delta, &yy0);
 			splint(realTimeTrajectory, motorTrajectory, npoints, realTimeTrajectory[i]+delta, &yy1);
 			v_spline = (yy1-yy0)/(2*delta);
-
 			if (pVar->debugLevel >= 10) printf("v_lin=%f, v_spline=%f\n", v_lin, v_spline);
+			v_ideal = v_spline;
+#endif
 
 			/* the acceleration that will get us to the ideal velocity */
-			if (pVar->startPulses != 0) {
-				v_ideal = v_spline;
-			} else {
-				v_ideal = v_lin;
-			}
 			accel_v = (v_ideal - v_out[i-1])/dt;
 
 			/* compromise between desired position and ideal velocity */
-			if ((pVar->endPulses != 0) && (i > 2)) {
-				np = abs(pVar->endPulses);
-				if (pVar->endPulses > 0) {
-					if (pVar->endPulses == 999) {
-						a_out[i-1] = (y2[i-1]+y2[i])/2;
-					} else if (pVar->endPulses == 888) {
-						a_out[i-1] = (accel_p + accel_v + (y2[i-1]+y2[i])/2)/3;
-					} else {
-						a_out[i-1] = (np*accel_p + accel_v)/(np+1);
-					}
-				} else {
-					a_out[i-1] = (accel_p + np*accel_v)/(np+1);
-				}
-			} else {
-				a_out[i-1] = (accel_p + accel_v)/2;
-			}
+			a_out[i-1] = (accel_p + accel_v)/2;
 		} else {
 			v_ideal = 0.;
 			accel_v = (v_ideal - v_out[i-1])/dt;
@@ -1308,6 +1300,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 
 /**************************************************************************************/
 
+#if USE_SPLINE
 /* Numerical recipes spline routines */
 double u[MAX_ELEMENTS+1];
 
@@ -1359,5 +1352,6 @@ static int splint(double *xa, double *ya, int n, double x, double *y)
 	*y = a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2[klo]+(b*b*b-b)*y2[khi])*(h*h)/6.0;
 	return(0);
 }
+#endif
 
 }%
