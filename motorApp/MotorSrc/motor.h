@@ -47,6 +47,8 @@ Last Modified:	$Date: 2009-04-27 14:28:42 $
  * .07 11-19-08 rls - More extensive bit field tests.
  * .08 00-09-10 rls - GNU preprocessor assertions are deprecated with VxWorks
  *                    6.x.  Added test for CPU macros.
+ * .09 04-07-11 kmp - Added __APPLE__ to define bit order (may be incorrect)
+ *                    tested by jph with simMotorDriver.
  */
 
 #ifndef	INCmotorh
@@ -127,7 +129,7 @@ typedef enum  {
 /* This works for gnu, SunPro, MS Visual C. */
 #if defined(_WIN32) || defined (_M_IX86) || defined (_X86_)
     #define LSB_First (TRUE)  /* LSB is packed first. */
-#elif defined (__i386__) || defined(_armv4l_) || defined (_X86_64_)
+#elif defined (__i386__) || defined(_armv4l_) || defined (_X86_64_)  || defined(__APPLE__)
     #define LSB_First (TRUE)  /* LSB is packed first. */
 #elif #cpu(i386)
     #define LSB_First (TRUE)  /* LSB is packed first. */    
