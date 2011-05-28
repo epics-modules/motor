@@ -185,8 +185,6 @@ asynStatus asynMotorAxis::setPosition(double position)
   * \param[in] value Value to set */
 asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
-  int mask;
-  epicsUInt32 status;
   // Call the base class method
   return pC_->setIntegerParam(axisNo_, function, value);
 }
