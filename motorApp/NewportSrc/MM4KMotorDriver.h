@@ -47,6 +47,8 @@ public:
   asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
   void       axisReport(FILE *fp);
+
+protected:
   virtual asynStatus postInitAxis();
   virtual asynStatus createParams();
 
