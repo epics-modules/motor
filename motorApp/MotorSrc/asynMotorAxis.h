@@ -25,7 +25,6 @@ class epicsShareFunc asynMotorAxis {
   asynMotorAxis(class asynMotorController *pController, int axisNumber);
   asynStatus initializeAxis();
   virtual asynStatus preInitAxis();
-  virtual asynStatus postInitAxis();
   virtual asynStatus createParams();
 
   virtual asynStatus setIntegerParam(int index, int value);
@@ -53,6 +52,7 @@ class epicsShareFunc asynMotorAxis {
           asynMotorStatus* getStatus();
 
   protected:
+  virtual asynStatus postInitAxis();
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
                                       *   Abbreviated because it is used very frequently */
   int axisNo_;                       /**< Index number of this axis (0 - pC_->numAxes_-1) */
