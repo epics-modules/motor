@@ -56,7 +56,6 @@ private:
   int deferred_move_;
   int deferred_relative_;
   
-//friend class motorSimController;
 };
 
 class motorSimController : public asynMotorController {
@@ -72,10 +71,12 @@ public:
   asynStatus triggerProfile(asynUser *pasynUser);
   bool areMovesDeferred();
   virtual int getNumParams();
-  virtual asynStatus postInitDriver();
 
   /* These are the functions that are new to this class */
   void motorSimTask();  // Should be pivate, but called from non-member function
+
+protected:
+  virtual asynStatus postInitDriver();
 
 private:
   asynStatus processDeferredMoves();
@@ -83,5 +84,4 @@ private:
   epicsTimeStamp prevTime_;
   int movesDeferred_;
   
-//friend class motorSimAxis;
 };
