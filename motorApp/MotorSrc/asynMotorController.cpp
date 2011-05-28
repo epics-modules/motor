@@ -49,70 +49,88 @@ asynMotorController::asynMotorController(const char *portName, int numAxes,
     driverName, functionName);
 }
 
+/** This is a template method called by asynPortDriver's initializePortDriver method.
+ * Child classes that add parameters should override this to add parameters but should
+ * also override this but should call this to keep the parameters defined here.
+ */
 asynStatus asynMotorController::createDriverParams()
 {
-  asynStatus status = asynSuccess;
+  int status = asynSuccess;
+  asynStatus retStatus = asynSuccess;
+  static const char *functionName = "createDriverParams";
+
   /* Create the base set of motor parameters */
-  createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
-  createParam(motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs_);
-  createParam(motorMoveVelString,                asynParamFloat64,    &motorMoveVel_);
-  createParam(motorHomeString,                   asynParamFloat64,    &motorHome_);
-  createParam(motorStopString,                   asynParamInt32,      &motorStop_);
-  createParam(motorVelocityString,               asynParamFloat64,    &motorVelocity_);
-  createParam(motorVelBaseString,                asynParamFloat64,    &motorVelBase_);
-  createParam(motorAccelString,                  asynParamFloat64,    &motorAccel_);
-  createParam(motorPositionString,               asynParamFloat64,    &motorPosition_);
-  createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
-  createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves_);
-  createParam(motorResolutionString,             asynParamFloat64,    &motorResolution_);
-  createParam(motorEncRatioString,               asynParamFloat64,    &motorEncRatio_);
-  createParam(motorPgainString,                  asynParamFloat64,    &motorPgain_);
-  createParam(motorIgainString,                  asynParamFloat64,    &motorIgain_);
-  createParam(motorDgainString,                  asynParamFloat64,    &motorDgain_);
-  createParam(motorHighLimitString,              asynParamFloat64,    &motorHighLimit_);
-  createParam(motorLowLimitString,               asynParamFloat64,    &motorLowLimit_);
-  createParam(motorSetClosedLoopString,          asynParamInt32,      &motorSetClosedLoop_);
-  createParam(motorStatusString,                 asynParamInt32,      &motorStatus_);
-  createParam(motorUpdateStatusString,           asynParamInt32,      &motorUpdateStatus_);
+  status |= createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
+  status |= createParam(motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs_);
+  status |= createParam(motorMoveVelString,                asynParamFloat64,    &motorMoveVel_);
+  status |= createParam(motorHomeString,                   asynParamFloat64,    &motorHome_);
+  status |= createParam(motorStopString,                   asynParamInt32,      &motorStop_);
+  status |= createParam(motorVelocityString,               asynParamFloat64,    &motorVelocity_);
+  status |= createParam(motorVelBaseString,                asynParamFloat64,    &motorVelBase_);
+  status |= createParam(motorAccelString,                  asynParamFloat64,    &motorAccel_);
+  status |= createParam(motorPositionString,               asynParamFloat64,    &motorPosition_);
+  status |= createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
+  status |= createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves_);
+  status |= createParam(motorResolutionString,             asynParamFloat64,    &motorResolution_);
+  status |= createParam(motorEncRatioString,               asynParamFloat64,    &motorEncRatio_);
+  status |= createParam(motorPgainString,                  asynParamFloat64,    &motorPgain_);
+  status |= createParam(motorIgainString,                  asynParamFloat64,    &motorIgain_);
+  status |= createParam(motorDgainString,                  asynParamFloat64,    &motorDgain_);
+  status |= createParam(motorHighLimitString,              asynParamFloat64,    &motorHighLimit_);
+  status |= createParam(motorLowLimitString,               asynParamFloat64,    &motorLowLimit_);
+  status |= createParam(motorSetClosedLoopString,          asynParamInt32,      &motorSetClosedLoop_);
+  status |= createParam(motorStatusString,                 asynParamInt32,      &motorStatus_);
+  status |= createParam(motorUpdateStatusString,           asynParamInt32,      &motorUpdateStatus_);
 
   // These are the per-controller parameters for profile moves
-  createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);
-  createParam(profileNumPointsString,            asynParamInt32,      &profileNumPoints_);
-  createParam(profileCurrentPointString,         asynParamInt32,      &profileCurrentPoint_);
-  createParam(profileNumPulsesString,            asynParamInt32,      &profileNumPulses_);
-  createParam(profileStartPulsesString,          asynParamInt32,      &profileStartPulses_);
-  createParam(profileEndPulsesString,            asynParamInt32,      &profileEndPulses_);
-  createParam(profileActualPulsesString,         asynParamInt32,      &profileActualPulses_);
-  createParam(profileNumReadbacksString,         asynParamInt32,      &profileNumReadbacks_);
-  createParam(profileTimeModeString,             asynParamInt32,      &profileTimeMode_);
-  createParam(profileFixedTimeString,          asynParamFloat64,      &profileFixedTime_);
-  createParam(profileTimeArrayString,     asynParamFloat64Array,      &profileTimeArray_);
-  createParam(profileAccelerationString,       asynParamFloat64,      &profileAcceleration_);
-  createParam(profileBuildString,                asynParamInt32,      &profileBuild_);
-  createParam(profileBuildStateString,           asynParamInt32,      &profileBuildState_);
-  createParam(profileBuildStatusString,          asynParamInt32,      &profileBuildStatus_);
-  createParam(profileBuildMessageString,         asynParamOctet,      &profileBuildMessage_);
-  createParam(profileExecuteString,              asynParamInt32,      &profileExecute_);
-  createParam(profileExecuteStateString,         asynParamInt32,      &profileExecuteState_);
-  createParam(profileExecuteStatusString,        asynParamInt32,      &profileExecuteStatus_);
-  createParam(profileExecuteMessageString,       asynParamOctet,      &profileExecuteMessage_);
-  createParam(profileAbortString,                asynParamInt32,      &profileAbort_);
-  createParam(profileReadbackString,             asynParamInt32,      &profileReadback_);
-  createParam(profileReadbackStateString,        asynParamInt32,      &profileReadbackState_);
-  createParam(profileReadbackStatusString,       asynParamInt32,      &profileReadbackStatus_);
-  createParam(profileReadbackMessageString,      asynParamOctet,      &profileReadbackMessage_);
+  status |= createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);
+  status |= createParam(profileNumPointsString,            asynParamInt32,      &profileNumPoints_);
+  status |= createParam(profileCurrentPointString,         asynParamInt32,      &profileCurrentPoint_);
+  status |= createParam(profileNumPulsesString,            asynParamInt32,      &profileNumPulses_);
+  status |= createParam(profileStartPulsesString,          asynParamInt32,      &profileStartPulses_);
+  status |= createParam(profileEndPulsesString,            asynParamInt32,      &profileEndPulses_);
+  status |= createParam(profileActualPulsesString,         asynParamInt32,      &profileActualPulses_);
+  status |= createParam(profileNumReadbacksString,         asynParamInt32,      &profileNumReadbacks_);
+  status |= createParam(profileTimeModeString,             asynParamInt32,      &profileTimeMode_);
+  status |= createParam(profileFixedTimeString,          asynParamFloat64,      &profileFixedTime_);
+  status |= createParam(profileTimeArrayString,     asynParamFloat64Array,      &profileTimeArray_);
+  status |= createParam(profileAccelerationString,       asynParamFloat64,      &profileAcceleration_);
+  status |= createParam(profileBuildString,                asynParamInt32,      &profileBuild_);
+  status |= createParam(profileBuildStateString,           asynParamInt32,      &profileBuildState_);
+  status |= createParam(profileBuildStatusString,          asynParamInt32,      &profileBuildStatus_);
+  status |= createParam(profileBuildMessageString,         asynParamOctet,      &profileBuildMessage_);
+  status |= createParam(profileExecuteString,              asynParamInt32,      &profileExecute_);
+  status |= createParam(profileExecuteStateString,         asynParamInt32,      &profileExecuteState_);
+  status |= createParam(profileExecuteStatusString,        asynParamInt32,      &profileExecuteStatus_);
+  status |= createParam(profileExecuteMessageString,       asynParamOctet,      &profileExecuteMessage_);
+  status |= createParam(profileAbortString,                asynParamInt32,      &profileAbort_);
+  status |= createParam(profileReadbackString,             asynParamInt32,      &profileReadback_);
+  status |= createParam(profileReadbackStateString,        asynParamInt32,      &profileReadbackState_);
+  status |= createParam(profileReadbackStatusString,       asynParamInt32,      &profileReadbackStatus_);
+  status |= createParam(profileReadbackMessageString,      asynParamOctet,      &profileReadbackMessage_);
 
   // These are the per-axis parameters for profile moves
-  createParam(profileUseAxisString,              asynParamInt32,      &profileUseAxis_);
-  createParam(profilePositionsString,     asynParamFloat64Array,      &profilePositions_);
-  createParam(profileReadbacksString,     asynParamFloat64Array,      &profileReadbacks_);
-  createParam(profileFollowingErrorsString, asynParamFloat64Array,    &profileFollowingErrors_);
-  createParam(profileMotorResolutionString,    asynParamFloat64,      &profileMotorResolution_);
-  createParam(profileMotorDirectionString,       asynParamInt32,      &profileMotorDirection_);
-  createParam(profileMotorOffsetString,        asynParamFloat64,      &profileMotorOffset_);
+  status |= createParam(profileUseAxisString,              asynParamInt32,      &profileUseAxis_);
+  status |= createParam(profilePositionsString,     asynParamFloat64Array,      &profilePositions_);
+  status |= createParam(profileReadbacksString,     asynParamFloat64Array,      &profileReadbacks_);
+  status |= createParam(profileFollowingErrorsString, asynParamFloat64Array,    &profileFollowingErrors_);
+  status |= createParam(profileMotorResolutionString,    asynParamFloat64,      &profileMotorResolution_);
+  status |= createParam(profileMotorDirectionString,       asynParamInt32,      &profileMotorDirection_);
+  status |= createParam(profileMotorOffsetString,        asynParamFloat64,      &profileMotorOffset_);
 
-  setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_DONE);
-  return asynSuccess;
+  status |= setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_DONE);
+  if (status != asynSuccess)
+  {
+	  retStatus = asynError;
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+	    "%s:%s: problem creating parameters\n",
+	    driverName, functionName);
+  }
+  else
+  {
+	  retStatus = asynSuccess;
+  }
+  return retStatus;
 
 }
 /** Called when asyn clients call pasynInt32->write().
@@ -210,7 +228,6 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   if (function == motorMoveRel_) {
     status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
     pAxis->getStatus()->setDoneMoving(false);
-//DELETE ME    pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -220,7 +237,6 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   } else if (function == motorMoveAbs_) {
     status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
     pAxis->getStatus()->setDoneMoving(false);
-//DELETE ME    pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -230,7 +246,6 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   } else if (function == motorMoveVel_) {
     status = pAxis->moveVelocity(baseVelocity, value, acceleration);
     pAxis->getStatus()->setDoneMoving(false);
-//DELETE ME    pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -242,7 +257,6 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     forwards = (value == 0) ? 0 : 1;
     status = pAxis->home(baseVelocity, velocity, acceleration, forwards);
     pAxis->getStatus()->setDoneMoving(false);
-//DELETE ME    pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 

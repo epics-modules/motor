@@ -150,7 +150,6 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
   virtual int        getNumParams();
-  virtual asynStatus createDriverParams();
   inline int getMotorMoveRelIndex()                {return motorMoveRel_;}
   inline int getMotorMoveAbsIndex()                {return motorMoveAbs_;}
   inline int getMotorMoveVelIndex()                {return motorMoveVel_;}
@@ -172,23 +171,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   inline int getMotorSetClosedLoopIndex()          {return motorSetClosedLoop_;}
   inline int getMotorStatusIndex()                 {return motorStatus_;}
   inline int getMotorUpdateStatusIndex()           {return motorUpdateStatus_;}
-/*  
-  inline int getMotorStatusDirectionIndex()        {return motorStatusDirection_;}
-  inline int getMotorStatusDoneIndex()             {return motorStatusDone_;}
-  inline int getMotorStatusHighLimitIndex()        {return motorStatusHighLimit_;}
-  inline int getMotorStatusAtHomeIndex()           {return motorStatusAtHome_;}
-  inline int getMotorStatusSlipIndex()             {return motorStatusSlip_;}
-  inline int getMotorStatusPowerOnIndex()          {return motorStatusPowerOn_;}
-  inline int getMotorStatusFollowingErrorIndex()   {return motorStatusFollowingError_;}
-  inline int getMotorStatusHomeIndex()             {return motorStatusHome_;}
-  inline int getMotorStatusHasEncoderIndex()       {return motorStatusHasEncoder_;}
-  inline int getMotorStatusProblemIndex()          {return motorStatusProblem_;}
-  inline int getMotorStatusMovingIndex()           {return motorStatusMoving_;}
-  inline int getMotorStatusGainSupportIndex()      {return motorStatusGainSupport_;}
-  inline int getMotorStatusCommsErrorIndex()       {return motorStatusCommsError_;}
-  inline int getMotorStatusLowLimitIndex()         {return motorStatusLowLimit_;}
-  inline int getMotorStatusHomedIndex()            {return motorStatusHomed_;}
-*/  
+
   inline int getProfileNumAxesIndex()              {return profileNumAxes_;}
   inline int getProfileNumPointsIndex()            {return profileNumPoints_;}
   inline int getProfileCurrentPointIndex()         {return profileCurrentPoint_;}
@@ -232,6 +215,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   /** These are the index numbers for the parameters in the parameter library.
    * They are the values of pasynUser->reason in calls from device support */
    // These are the motor commands
+  virtual asynStatus createDriverParams();
   #define FIRST_MOTOR_PARAM motorMoveRel_
   int motorMoveRel_;
   int motorMoveAbs_;
