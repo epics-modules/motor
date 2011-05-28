@@ -24,23 +24,34 @@ int asynMotorStatus::getNumParams()
   */
 asynStatus asynMotorStatus::createParams()
 {
-  asynStatus status = asynSuccess;
-  createParam(motorStatusDirectionString,        asynParamInt32,      &motorStatusDirection_);
-  createParam(motorStatusDoneString,             asynParamInt32,      &motorStatusDone_);
-  createParam(motorStatusHighLimitString,        asynParamInt32,      &motorStatusHighLimit_);
-  createParam(motorStatusAtHomeString,           asynParamInt32,      &motorStatusAtHome_);
-  createParam(motorStatusSlipString,             asynParamInt32,      &motorStatusSlip_);
-  createParam(motorStatusPowerOnString,          asynParamInt32,      &motorStatusPowerOn_);
-  createParam(motorStatusFollowingErrorString,   asynParamInt32,      &motorStatusFollowingError_);
-  createParam(motorStatusHomeString,             asynParamInt32,      &motorStatusHome_);
-  createParam(motorStatusHasEncoderString,       asynParamInt32,      &motorStatusHasEncoder_);
-  createParam(motorStatusProblemString,          asynParamInt32,      &motorStatusProblem_);
-  createParam(motorStatusMovingString,           asynParamInt32,      &motorStatusMoving_);
-  createParam(motorStatusGainSupportString,      asynParamInt32,      &motorStatusGainSupport_);
-  createParam(motorStatusCommsErrorString,       asynParamInt32,      &motorStatusCommsError_);
-  createParam(motorStatusLowLimitString,         asynParamInt32,      &motorStatusLowLimit_);
-  createParam(motorStatusHomedString,            asynParamInt32,      &motorStatusHomed_);
-  return(status);
+  asynStatus retStatus = asynSuccess;
+  int status = asynSuccess;
+  static const char *functionName = "createParams";
+
+  status |= createParam(motorStatusDirectionString,        asynParamInt32,      &motorStatusDirection_);
+  status |= createParam(motorStatusDoneString,             asynParamInt32,      &motorStatusDone_);
+  status |= createParam(motorStatusHighLimitString,        asynParamInt32,      &motorStatusHighLimit_);
+  status |= createParam(motorStatusAtHomeString,           asynParamInt32,      &motorStatusAtHome_);
+  status |= createParam(motorStatusSlipString,             asynParamInt32,      &motorStatusSlip_);
+  status |= createParam(motorStatusPowerOnString,          asynParamInt32,      &motorStatusPowerOn_);
+  status |= createParam(motorStatusFollowingErrorString,   asynParamInt32,      &motorStatusFollowingError_);
+  status |= createParam(motorStatusHomeString,             asynParamInt32,      &motorStatusHome_);
+  status |= createParam(motorStatusHasEncoderString,       asynParamInt32,      &motorStatusHasEncoder_);
+  status |= createParam(motorStatusProblemString,          asynParamInt32,      &motorStatusProblem_);
+  status |= createParam(motorStatusMovingString,           asynParamInt32,      &motorStatusMoving_);
+  status |= createParam(motorStatusGainSupportString,      asynParamInt32,      &motorStatusGainSupport_);
+  status |= createParam(motorStatusCommsErrorString,       asynParamInt32,      &motorStatusCommsError_);
+  status |= createParam(motorStatusLowLimitString,         asynParamInt32,      &motorStatusLowLimit_);
+  status |= createParam(motorStatusHomedString,            asynParamInt32,      &motorStatusHomed_);
+  if (status != asynSuccess)
+  {
+	  retStatus = asynError;
+  }
+  else
+  {
+	  retStatus = asynSuccess;
+  }
+  return(retStatus);
 }
 
 /** Set the axis is done moving bit
