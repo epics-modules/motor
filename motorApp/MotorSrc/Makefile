@@ -40,3 +40,9 @@ motor_LIBS += $(EPICS_BASE_IOC_LIBS)
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
+
+# Parallel build sometimes fails.
+# Make dependences on motorRecord.h explicit.
+motorRecord$(OBJ):  $(COMMON_DIR)/motorRecord.h
+motordevCom$(OBJ):  $(COMMON_DIR)/motorRecord.h
+devMotorAsyn$(OBJ): $(COMMON_DIR)/motorRecord.h
