@@ -15,19 +15,7 @@
   * These are the values passed to drvUserCreate. 
   * The driver will place in pasynUser->reason an integer to be used when the
   * standard asyn interface methods are called. */
-/* DELETE ME
- * #define motorMoveRelString              "MOTOR_MOVE_REL"
-#define motorMoveAbsString              "MOTOR_MOVE_ABS"
-#define motorMoveVelString              "MOTOR_MOVE_VEL"
-#define motorHomeString                 "MOTOR_HOME"
-*/
 #define motorStopString                 "MOTOR_STOP_AXIS"
-/* DELETE ME
-#define motorVelocityString             "MOTOR_VELOCITY"
-#define motorVelBaseString              "MOTOR_VEL_BASE"
-#define motorAccelString                "MOTOR_ACCEL"
-#define motorPositionString             "MOTOR_POSITION"
-*/
 #define motorEncoderPositionString      "MOTOR_ENCODER_POSITION"
 #define motorDeferMovesString           "MOTOR_DEFER_MOVES"
 #define motorResolutionString           "MOTOR_RESOLUTION"
@@ -154,19 +142,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
   virtual int        getNumParams();
-/* DELETE ME
-  inline int getMotorMoveRelIndex()                {return motorMoveRel_;}
-  inline int getMotorMoveAbsIndex()                {return motorMoveAbs_;}
-  inline int getMotorMoveVelIndex()                {return motorMoveVel_;}
-  inline int getMotorHomeIndex()                   {return motorHome_;}
-*/
   inline int getMotorStopIndex()                   {return motorStop_;}
-/* DELETE ME
-  inline int getMotorVelocityIndex()               {return motorVelocity_;}
-  inline int getMotorVelBaseIndex()                {return motorVelBase_;}
-  inline int getMotorAccelIndex()                  {return motorAccel_;}
-  inline int getMotorPositionIndex()               {return motorPosition_;}
-*/
   inline int getMotorEncoderPositionIndex()        {return motorEncoderPosition_;}
   inline int getMotorDeferMovesIndex()             {return motorDeferMoves_;}
   inline int getMotorResolutionIndex()             {return motorResolution_;}
@@ -225,15 +201,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
    // These are the motor commands
   virtual asynStatus createDriverParams();
   #define FIRST_MOTOR_PARAM motorStop_
-//  int motorMoveRel_;
-//  int motorMoveAbs_;
-//  int motorMoveVel_;
-//  int motorHome_;
   int motorStop_;
-//  int motorVelocity_;
-//  int motorVelBase_;
-//  int motorAccel_;
-//  int motorPosition_;
   int motorEncoderPosition_;
   int motorDeferMoves_;
   int motorResolution_;

@@ -160,8 +160,6 @@ asynStatus motorSimAxis::doDeferredMove()
             endpoint_.axis[0].p = position - enc_offset_;
             endpoint_.axis[0].v = 0.0;
             getStatus()->setDoneMoving(false);
-            // TODO remove
-            //setIntegerParam(axis, motorStatusDone_, 0);
             deferred_move_ = 0;
         }
     }
@@ -319,8 +317,6 @@ asynStatus motorSimAxis::move(double position, int relative, double minVelocity,
   routeSetParams( route_, &pars ); 
 
   getStatus()->setDoneMoving(false);
-  //TODO remove
-  //setIntegerParam(pC_->motorStatusDone_, 0);
   callParamCallbacks();
 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
@@ -472,13 +468,6 @@ void motorSimAxis::process(double delta )
   getStatus()->setAtHome(nextpoint_.axis[0].p == home_);
   getStatus()->setMoving(!done);
   getStatus()->setLowLimitOn(nextpoint_.axis[0].p <= lowHardLimit_);
-  //TODO remove
-  //setIntegerParam(pC_->motorStatusDirection_,  (nextpoint_.axis[0].v >  0));
-  //setIntegerParam(pC_->motorStatusDone_,       done);
-  //setIntegerParam(pC_->motorStatusHighLimit_,  (nextpoint_.axis[0].p >= hiHardLimit_));
-  //setIntegerParam(pC_->motorStatusHome_,       (nextpoint_.axis[0].p == home_));
-  //setIntegerParam(pC_->motorStatusMoving_,     !done);
-  //setIntegerParam(pC_->motorStatusLowLimit_,   (nextpoint_.axis[0].p <= lowHardLimit_));
   callParamCallbacks();
 }
 
