@@ -11,15 +11,7 @@
 #include <epicsEvent.h>
 #include <epicsTypes.h>
 
-#define motorMoveRelString              "MOTOR_MOVE_REL"
-#define motorMoveAbsString              "MOTOR_MOVE_ABS"
-#define motorMoveVelString              "MOTOR_MOVE_VEL"
-#define motorHomeString                 "MOTOR_HOME"
-//#define motorStopString                 "MOTOR_STOP_AXIS"
-#define motorVelocityString             "MOTOR_VELOCITY"
-#define motorVelBaseString              "MOTOR_VEL_BASE"
-#define motorAccelString                "MOTOR_ACCEL"
-#define motorPositionString             "MOTOR_POSITION"
+
 
 #ifdef __cplusplus
 #include <asynPortDriver.h>

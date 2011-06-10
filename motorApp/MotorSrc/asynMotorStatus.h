@@ -13,21 +13,15 @@ Last Modified:	$Date$
 #include "asynMotorController.h"
 #include <epicsTypes.h>
 
-#define motorStatusDirectionString      "MOTOR_STATUS_DIRECTION" 
-#define motorStatusDoneString           "MOTOR_STATUS_DONE"
-#define motorStatusHighLimitString      "MOTOR_STATUS_HIGH_LIMIT"
-#define motorStatusAtHomeString         "MOTOR_STATUS_AT_HOME"
-#define motorStatusSlipString           "MOTOR_STATUS_SLIP"
-#define motorStatusPowerOnString        "MOTOR_STATUS_POWERED"
-#define motorStatusFollowingErrorString "MOTOR_STATUS_FOLLOWING_ERROR"
-#define motorStatusHomeString           "MOTOR_STATUS_HOME"
-#define motorStatusHasEncoderString     "MOTOR_STATUS_HAS_ENCODER"
-#define motorStatusProblemString        "MOTOR_STATUS_PROBLEM"
-#define motorStatusMovingString         "MOTOR_STATUS_MOVING"
-#define motorStatusGainSupportString    "MOTOR_STATUS_GAIN_SUPPORT"
-#define motorStatusCommsErrorString     "MOTOR_STATUS_COMMS_ERROR"
-#define motorStatusLowLimitString       "MOTOR_STATUS_LOW_LIMIT"
-#define motorStatusHomedString          "MOTOR_STATUS_HOMED"
+/** The structure that is passed back to devMotorAsyn when the status changes. */
+typedef struct MotorStatus {
+  double position;           /**< Commanded motor position */
+  double encoderPosition;    /**< Actual encoder position */
+  double velocity;           /**< Actual velocity */
+  epicsUInt32 status;        /**< Word containing status bits (motion done, limits, etc.) */
+} MotorStatus;
+
+
 
 #ifdef __cplusplus
 #include "asynPortDriverExt.h"

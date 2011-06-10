@@ -15,6 +15,7 @@
 #include <shareLib.h>
 #include "asynMotorController.h"
 #include "asynMotorAxis.h"
+#include <motorParamNames.h>
 
 static const char *driverName = "asynMotorController";
 static void asynMotorPollerC(void *drvPvt);

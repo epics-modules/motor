@@ -15,6 +15,7 @@
 #include <shareLib.h>
 #include "asynMotorAxis.h"
 #include "asynMotorController.h"
+#include <motorParamNames.h>
 
 static const char *driverName = "asynMotorAxis";
 

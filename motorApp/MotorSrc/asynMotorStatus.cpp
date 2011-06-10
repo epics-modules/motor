@@ -8,6 +8,7 @@ Last Modified:	$Date$
 */
 
 #include "asynMotorStatus.h"
+#include <motorParamNames.h>
 
 asynMotorStatus::asynMotorStatus(asynMotorController *pC, int axisNo) :
   asynPortDriverExt(pC, axisNo){
