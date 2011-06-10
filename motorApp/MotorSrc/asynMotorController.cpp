@@ -61,7 +61,7 @@ asynStatus asynMotorController::createDriverParams()
   static const char *functionName = "createDriverParams";
 
   /* Create the base set of motor parameters */
-  status |= createParam(motorStopString,                   asynParamInt32,      &motorStop_);
+//  status |= createParam(motorStopString,                   asynParamInt32,      &motorStop_);
   status |= createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
   status |= createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves_);
   status |= createParam(motorResolutionString,             asynParamFloat64,    &motorResolution_);
@@ -152,12 +152,15 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   /* Set the parameter and readback in the parameter library. */
   pAxis->setIntegerParam(function, value);
 
-  if (function == motorStop_) {
+/*
+   if (function == motorStop_) {
     double accel;
     getDoubleParam(axis, pAxis->getMotorAccelIndex(), &accel);
     status = pAxis->stop(accel);
   
   } else if (function == motorUpdateStatus_) {
+*/
+ if (function == motorUpdateStatus_) {
     bool moving;
     /* Do a poll, and then force a callback */
     poll();
@@ -173,6 +176,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     status = readbackProfile();
   }
 
+ pAxis->writeInt32(pasynUser, value);
   /* Do callbacks so higher layers see any changes */
   pAxis->callParamCallbacks();
   if (status) 

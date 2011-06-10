@@ -82,7 +82,6 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
   virtual int        getNumParams();
-  inline int getMotorStopIndex()                   {return motorStop_;}
   inline int getMotorEncoderPositionIndex()        {return motorEncoderPosition_;}
   inline int getMotorDeferMovesIndex()             {return motorDeferMoves_;}
   inline int getMotorResolutionIndex()             {return motorResolution_;}
@@ -140,8 +139,8 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
    * They are the values of pasynUser->reason in calls from device support */
    // These are the motor commands
   virtual asynStatus createDriverParams();
-  #define FIRST_MOTOR_PARAM motorStop_
-  int motorStop_;
+  #define FIRST_MOTOR_PARAM motorEncoderPosition_
+//  int motorStop_;
   int motorEncoderPosition_;
   int motorDeferMoves_;
   int motorResolution_;

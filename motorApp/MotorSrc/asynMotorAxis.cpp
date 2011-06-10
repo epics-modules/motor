@@ -111,7 +111,7 @@ asynStatus asynMotorAxis::createParams()
   status |= pC_->createParam(getAxisIndex(), motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs_);
   status |= pC_->createParam(getAxisIndex(), motorMoveVelString,                asynParamFloat64,    &motorMoveVel_);
   status |= pC_->createParam(getAxisIndex(), motorHomeString,                   asynParamFloat64,    &motorHome_);
-//  status |= createParam(motorStopString,                   asynParamInt32,      &motorStop_);
+  status |= pC_->createParam(getAxisIndex(), motorStopString,                   asynParamInt32,      &motorStop_);
   status |= pC_->createParam(getAxisIndex(), motorVelocityString,               asynParamFloat64,    &motorVelocity_);
   status |= pC_->createParam(getAxisIndex(), motorVelBaseString,                asynParamFloat64,    &motorVelBase_);
   status |= pC_->createParam(getAxisIndex(), motorAccelString,                  asynParamFloat64,    &motorAccel_);
@@ -452,4 +452,20 @@ asynStatus asynMotorAxis::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 int asynMotorAxis::getNumParams()
 {
   return NUM_ASYN_AXIS_PARAMS;
+}
+
+asynStatus asynMotorAxis::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+  int function = pasynUser->reason;
+  asynStatus status=asynSuccess;
+  static const char *functionName = "writeInt32";
+
+  if (function == motorStop_) {
+   double accel;
+   pC_->getDoubleParam(getAxisIndex(), getMotorAccelIndex(), &accel);
+   status = stop(accel);
+
+  }
+
+  return status;
 }

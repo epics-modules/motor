@@ -31,20 +31,13 @@ class epicsShareFunc asynMotorAxis {
   virtual asynStatus createParams();
   static int        getNumParams();
 
-  //TODO Peel back out getXXXIndex after separating parameters
- inline int getMotorMoveRelIndex()                {return motorMoveRel_;}
-  inline int getMotorMoveAbsIndex()                {return motorMoveAbs_;}
-  inline int getMotorMoveVelIndex()                {return motorMoveVel_;}
-  inline int getMotorHomeIndex()                   {return motorHome_;}
-
-//  inline int getMotorStopIndex()                   {return motorStop_;}
+  //TODO Make getXXXIndex protected after separating parameters
   inline int getMotorVelocityIndex()               {return motorVelocity_;}
-  inline int getMotorVelBaseIndex()                {return motorVelBase_;}
-  inline int getMotorAccelIndex()                  {return motorAccel_;}
   inline int getMotorPositionIndex()               {return motorPosition_;}
 
   virtual asynStatus setIntegerParam(int index, int value);
   virtual asynStatus setDoubleParam(int index, double value);
+  virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
   virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
   virtual asynStatus callParamCallbacks();
 
@@ -68,9 +61,19 @@ class epicsShareFunc asynMotorAxis {
   inline  double *   getprofileFollowingErrors() {return profileFollowingErrors_;}
           asynMotorStatus* getStatus();
 
-  protected:
+protected:
   virtual asynStatus preInitAxis();
   virtual asynStatus postInitAxis();
+
+  inline int getMotorMoveRelIndex()                {return motorMoveRel_;}
+   inline int getMotorMoveAbsIndex()                {return motorMoveAbs_;}
+   inline int getMotorMoveVelIndex()                {return motorMoveVel_;}
+   inline int getMotorHomeIndex()                   {return motorHome_;}
+
+   inline int getMotorStopIndex()                   {return motorStop_;}
+   inline int getMotorVelBaseIndex()                {return motorVelBase_;}
+   inline int getMotorAccelIndex()                  {return motorAccel_;}
+
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
                                       *   Abbreviated because it is used very frequently */
   int axisNo_;                       /**< Index number of this axis (0 - pC_->numAxes_-1) */
@@ -79,20 +82,21 @@ class epicsShareFunc asynMotorAxis {
   double *profileReadbacks_;         /**< Array of readback positions for profile moves */
   double *profileFollowingErrors_;   /**< Array of following errors for profile moves */   
   asynMotorStatus *aMotorStatus;
-  private:
+
+private:
   MotorStatus status_;
   bool statusChanged_;
 
-private:
   int motorMoveRel_;
   int motorMoveAbs_;
   int motorMoveVel_;
   int motorHome_;
+  int motorStop_;
   int motorVelocity_;
   int motorVelBase_;
   int motorAccel_;
   int motorPosition_;
-  static const int NUM_ASYN_AXIS_PARAMS = 8;
+  static const int NUM_ASYN_AXIS_PARAMS = 9;
 
 };
 
