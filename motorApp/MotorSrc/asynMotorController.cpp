@@ -60,15 +60,19 @@ asynStatus asynMotorController::createDriverParams()
   static const char *functionName = "createDriverParams";
 
   /* Create the base set of motor parameters */
+/* DELETE ME
   status |= createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
   status |= createParam(motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs_);
   status |= createParam(motorMoveVelString,                asynParamFloat64,    &motorMoveVel_);
   status |= createParam(motorHomeString,                   asynParamFloat64,    &motorHome_);
+ */
   status |= createParam(motorStopString,                   asynParamInt32,      &motorStop_);
+  /* DELETE ME
   status |= createParam(motorVelocityString,               asynParamFloat64,    &motorVelocity_);
   status |= createParam(motorVelBaseString,                asynParamFloat64,    &motorVelBase_);
   status |= createParam(motorAccelString,                  asynParamFloat64,    &motorAccel_);
   status |= createParam(motorPositionString,               asynParamFloat64,    &motorPosition_);
+ */
   status |= createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
   status |= createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves_);
   status |= createParam(motorResolutionString,             asynParamFloat64,    &motorResolution_);
@@ -161,7 +165,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
 
   if (function == motorStop_) {
     double accel;
-    getDoubleParam(axis, motorAccel_, &accel);
+    getDoubleParam(axis, pAxis->getMotorAccelIndex(), &accel);
     status = pAxis->stop(accel);
   
   } else if (function == motorUpdateStatus_) {
@@ -221,10 +225,11 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   /* Set the parameter and readback in the parameter library. */
   status = pAxis->setDoubleParam(function, value);
 
-  getDoubleParam(axis, motorVelBase_, &baseVelocity);
-  getDoubleParam(axis, motorVelocity_, &velocity);
-  getDoubleParam(axis, motorAccel_, &acceleration);
+//  getDoubleParam(axis, getMotorVelocityIndex(), &baseVelocity);
+//  getDoubleParam(axis, motorVelocity_, &velocity);
+//  getDoubleParam(axis, motorAccel_, &acceleration);
 
+/* DELETE ME
   if (function == motorMoveRel_) {
     status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
     pAxis->getStatus()->setDoneMoving(false);
@@ -271,9 +276,10 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       driverName, functionName, portName, pAxis->getAxisIndex(), value);
 
   }
+  */
   /* Do callbacks so higher layers see any changes */
-  pAxis->callParamCallbacks();
-  
+  //pAxis->callParamCallbacks();
+  pAxis->writeFloat64(pasynUser, value);
   if (status) 
     asynPrint(pasynUser, ASYN_TRACE_ERROR, 
       "%s:%s error, status=%d axis=%d, function=%d, value=%f\n", 
@@ -374,9 +380,9 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
  
   getAddress(pasynUser, &axis);
   getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
-  getDoubleParam(axis, motorPosition_, &pStatus->position);
+  getDoubleParam(axis, pAxis->getMotorPositionIndex(), &pStatus->position);
   getDoubleParam(axis, motorEncoderPosition_, &pStatus->encoderPosition);
-  getDoubleParam(axis, motorVelocity_, &pStatus->velocity);
+  getDoubleParam(axis, pAxis->getMotorVelocityIndex(), &pStatus->velocity);
   asynPrint(pasynUser, ASYN_TRACE_FLOW,
     "%s:%s: MotorStatus = status%d, position=%f, encoder position=%f, velocity=%f\n", 
     driverName, functionName, pStatus->status, pStatus->position, pStatus->encoderPosition, pStatus->velocity);

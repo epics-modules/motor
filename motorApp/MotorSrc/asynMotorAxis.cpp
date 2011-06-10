@@ -102,7 +102,33 @@ asynStatus asynMotorAxis::postInitAxis()
 
 asynStatus asynMotorAxis::createParams()
 {
-  return asynSuccess;
+  int status = asynSuccess;
+  asynStatus retStatus = asynSuccess;
+  static const char *functionName = "createDriverParams";
+
+  status |= pC_->createParam(getAxisIndex(), motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
+  status |= pC_->createParam(getAxisIndex(), motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs_);
+  status |= pC_->createParam(getAxisIndex(), motorMoveVelString,                asynParamFloat64,    &motorMoveVel_);
+  status |= pC_->createParam(getAxisIndex(), motorHomeString,                   asynParamFloat64,    &motorHome_);
+//  status |= createParam(motorStopString,                   asynParamInt32,      &motorStop_);
+  status |= pC_->createParam(getAxisIndex(), motorVelocityString,               asynParamFloat64,    &motorVelocity_);
+  status |= pC_->createParam(getAxisIndex(), motorVelBaseString,                asynParamFloat64,    &motorVelBase_);
+  status |= pC_->createParam(getAxisIndex(), motorAccelString,                  asynParamFloat64,    &motorAccel_);
+  status |= pC_->createParam(getAxisIndex(), motorPositionString,               asynParamFloat64,    &motorPosition_);
+
+  if (status != asynSuccess)
+  {
+          retStatus = asynError;
+//          asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+//            "%s:%s: problem creating parameters\n",
+//            driverName, functionName);
+  }
+  else
+  {
+          retStatus = asynSuccess;
+  }
+
+  return retStatus;
 }
 
 /** Move the motor to an absolute location or by a relative amount.
@@ -199,7 +225,7 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
   * \param[in] value Value to set */
 asynStatus asynMotorAxis::setDoubleParam(int function, double value)
 {
-  if (function == pC_->getMotorPositionIndex()) {
+  if (function == motorPosition_) {
     if (value != status_.position) {
         statusChanged_ = 1;
         status_.position = value;
@@ -347,4 +373,82 @@ asynStatus asynMotorAxis::readbackProfile()
 
 asynMotorStatus* asynMotorAxis::getStatus(){
   return aMotorStatus;
+}
+
+asynStatus asynMotorAxis::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
+{
+  int function = pasynUser->reason;
+  double baseVelocity, velocity, acceleration;
+  asynStatus status = asynError;
+  int forwards;
+  static const char *functionName = "writeFloat64";
+
+  pC_->getDoubleParam(getAxisIndex(), motorVelBase_, &baseVelocity);
+  pC_->getDoubleParam(getAxisIndex(), motorVelocity_, &velocity);
+  pC_->getDoubleParam(getAxisIndex(), motorAccel_, &acceleration);
+
+  if (function == motorMoveRel_) {
+    status = move(value, 1, baseVelocity, velocity, acceleration);
+    getStatus()->setDoneMoving(false);
+    callParamCallbacks();
+    pC_->wakeupPoller();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+      "%s:%s: Set driver %s, axis %d move relative by %f, base velocity=%f, velocity=%f, acceleration=%f\n",
+      driverName, functionName, pC_->portName, getAxisIndex(), value, baseVelocity, velocity, acceleration );
+
+  } else if (function == motorMoveAbs_) {
+    status = move(value, 0, baseVelocity, velocity, acceleration);
+    getStatus()->setDoneMoving(false);
+    callParamCallbacks();
+    pC_->wakeupPoller();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+      "%s:%s: Set driver %s, axis %d move absolute to %f, base velocity=%f, velocity=%f, acceleration=%f\n",
+      driverName, functionName, pC_->portName, getAxisIndex(), value, baseVelocity, velocity, acceleration );
+
+  } else if (function == motorMoveVel_) {
+    status = moveVelocity(baseVelocity, value, acceleration);
+    getStatus()->setDoneMoving(false);
+    callParamCallbacks();
+    pC_->wakeupPoller();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+      "%s:%s: Set port %s, axis %d move with velocity of %f, acceleration=%f\n",
+      driverName, functionName, pC_->portName, getAxisIndex(), value, acceleration);
+
+    // Note, the motorHome command happens on the asynFloat64 interface, even though the value (direction) is really integer
+    } else if (function == motorHome_) {
+      forwards = (value == 0) ? 0 : 1;
+      status = home(baseVelocity, velocity, acceleration, forwards);
+      getStatus()->setDoneMoving(false);
+      callParamCallbacks();
+      pC_->wakeupPoller();
+      asynPrint(pasynUser, ASYN_TRACE_FLOW,
+        "%s:%s: Set driver %s, axis %d to home %s, base velocity=%f, velocity=%f, acceleration=%f\n",
+        driverName, functionName, pC_->portName, getAxisIndex(), (forwards?"FORWARDS":"REVERSE"), baseVelocity, velocity, acceleration);
+
+    } else if (function == motorPosition_) {
+      status = setPosition(value);
+      callParamCallbacks();
+      asynPrint(pasynUser, ASYN_TRACE_FLOW,
+        "%s:%s: Set driver %s, axis %d to position=%f\n",
+        driverName, functionName, pC_->portName, getAxisIndex(), value);
+
+    }
+  /* Do callbacks so higher layers see any changes */
+  callParamCallbacks();
+
+  if (status)
+    asynPrint(pasynUser, ASYN_TRACE_ERROR,
+      "%s:%s error, status=%d axis=%d, function=%d, value=%f\n",
+      driverName, functionName, status, getAxisIndex(), function, value);
+  else
+    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
+      "%s:%s:: axis=%d, function=%d, value=%f\n",
+      driverName, functionName, getAxisIndex(), function, value);
+  return status;
+
+}
+
+int asynMotorAxis::getNumParams()
+{
+  return NUM_ASYN_AXIS_PARAMS;
 }
