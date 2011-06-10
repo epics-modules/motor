@@ -34,11 +34,15 @@ public:
   asynStatus doDeferredMove();
   void axisReport(FILE *& fp, int & level);
   virtual asynStatus createParams();
+  static int        getNumParams();
 
   /* These are the methods that are new to this class */
   asynStatus config(int hiHardLimit, int lowHardLimit, int home, int start);
   asynStatus setVelocity(double velocity, double acceleration);
   void process(double delta );
+
+protected:
+  virtual asynStatus postInitAxis();
 
 private:
   motorSimController *pC_;

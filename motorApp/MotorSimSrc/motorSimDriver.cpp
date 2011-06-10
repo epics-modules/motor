@@ -105,7 +105,6 @@ asynStatus motorSimController::postInitDriver()
   for (axis=0; axis<numAxes_; axis++) {
     pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
     pAxis->initializeAxis();
-    setDoubleParam(axis, this->motorPosition_, DEFAULT_START);
   }
   return asynSuccess;
 }
@@ -284,7 +283,7 @@ void motorSimController::motorSimTask()
 
 int motorSimController::getNumParams()
 {
-  return NUM_SIM_CONTROLLER_PARAMS + asynMotorController::getNumParams() + asynMotorStatus::getNumParams();
+  return NUM_SIM_CONTROLLER_PARAMS + asynMotorController::getNumParams() + motorSimAxis::getNumParams();
 }
 
 /**
@@ -465,7 +464,7 @@ void motorSimAxis::process(double delta )
     done = 0;
   }
 
-  setDoubleParam (pC_->getMotorPositionIndex(),         (nextpoint_.axis[0].p+enc_offset_));
+  setDoubleParam (getMotorPositionIndex(),         (nextpoint_.axis[0].p+enc_offset_));
   setDoubleParam (pC_->getMotorEncoderPositionIndex(),  (nextpoint_.axis[0].p+enc_offset_));
   getStatus()->setDirection((nextpoint_.axis[0].v >  0)?PLUS:MINUS);
   getStatus()->setDoneMoving(done);
@@ -485,13 +484,29 @@ void motorSimAxis::process(double delta )
 
 asynStatus motorSimAxis::createParams()
 {
-  asynStatus status = asynSuccess;
-  status = getStatus()->createParams();
+  int status = asynSuccess;
+  asynStatus retStatus = asynSuccess;
 
-  return status;
+  status |= asynMotorAxis::createParams();
+  status |= getStatus()->createParams();
+
+  if (status != 0 )
+  {
+      retStatus = asynError;
+  }
+  return retStatus;
 }
 
+asynStatus motorSimAxis::postInitAxis()
+{
+  pC_->setDoubleParam(getAxisIndex(), getMotorPositionIndex(), DEFAULT_START);
 
+}
+
+int motorSimAxis::getNumParams()
+{
+  return asynMotorAxis::getNumParams() + asynMotorStatus::getNumParams();
+}
 /** Configuration command, called directly or from iocsh */
 extern "C" int motorSimCreateController(const char *portName, int numAxes, int priority, int stackSize)
 {
