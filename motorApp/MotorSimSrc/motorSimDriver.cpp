@@ -205,7 +205,7 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
     }
     movesDeferred_ = value;
   } else {
-    /* Call base class call its method (if we have our parameters check this here) */
+  /* Call base class call its method (if we have our parameters check this here) */
     status = asynMotorController::writeInt32(pasynUser, value);
   }
   
@@ -461,7 +461,7 @@ void motorSimAxis::process(double delta )
   }
 
   setDoubleParam (getMotorPositionIndex(),         (nextpoint_.axis[0].p+enc_offset_));
-  setDoubleParam (pC_->getMotorEncoderPositionIndex(),  (nextpoint_.axis[0].p+enc_offset_));
+  setDoubleParam (getMotorEncoderPositionIndex(),  (nextpoint_.axis[0].p+enc_offset_));
   getStatus()->setDirection((nextpoint_.axis[0].v >  0)?PLUS:MINUS);
   getStatus()->setDoneMoving(done);
   getStatus()->setHighLimitOn(nextpoint_.axis[0].p >= hiHardLimit_);
@@ -488,7 +488,7 @@ asynStatus motorSimAxis::createParams()
 
 asynStatus motorSimAxis::postInitAxis()
 {
-  pC_->setDoubleParam(getAxisIndex(), getMotorPositionIndex(), DEFAULT_START);
+  return pC_->setDoubleParam(getAxisIndex(), getMotorPositionIndex(), DEFAULT_START);
 
 }
 

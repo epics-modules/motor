@@ -62,7 +62,7 @@ asynStatus asynMotorController::createDriverParams()
 
   /* Create the base set of motor parameters */
 //  status |= createParam(motorStopString,                   asynParamInt32,      &motorStop_);
-  status |= createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
+//  status |= createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
   status |= createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves_);
   status |= createParam(motorResolutionString,             asynParamFloat64,    &motorResolution_);
   status |= createParam(motorEncRatioString,               asynParamFloat64,    &motorEncRatio_);
@@ -323,7 +323,7 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
   getAddress(pasynUser, &axis);
   getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
   getDoubleParam(axis, pAxis->getMotorPositionIndex(), &pStatus->position);
-  getDoubleParam(axis, motorEncoderPosition_, &pStatus->encoderPosition);
+  getDoubleParam(axis, pAxis->getMotorEncoderPositionIndex(), &pStatus->encoderPosition);
   getDoubleParam(axis, pAxis->getMotorVelocityIndex(), &pStatus->velocity);
   asynPrint(pasynUser, ASYN_TRACE_FLOW,
     "%s:%s: MotorStatus = status%d, position=%f, encoder position=%f, velocity=%f\n", 

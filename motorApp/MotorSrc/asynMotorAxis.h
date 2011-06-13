@@ -34,6 +34,7 @@ class epicsShareFunc asynMotorAxis {
   //TODO Make getXXXIndex protected after separating parameters
   inline int getMotorVelocityIndex()               {return motorVelocity_;}
   inline int getMotorPositionIndex()               {return motorPosition_;}
+  inline int getMotorEncoderPositionIndex()        {return motorEncoderPosition_;}
 
   virtual asynStatus setIntegerParam(int index, int value);
   virtual asynStatus setDoubleParam(int index, double value);
@@ -96,7 +97,8 @@ private:
   int motorVelBase_;
   int motorAccel_;
   int motorPosition_;
-  static const int NUM_ASYN_AXIS_PARAMS = 9;
+  int motorEncoderPosition_;
+  static const int NUM_ASYN_AXIS_PARAMS = 10;
 
 };
 

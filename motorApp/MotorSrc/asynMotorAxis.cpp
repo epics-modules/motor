@@ -116,6 +116,7 @@ asynStatus asynMotorAxis::createParams()
   status |= pC_->createParam(getAxisIndex(), motorVelBaseString,                asynParamFloat64,    &motorVelBase_);
   status |= pC_->createParam(getAxisIndex(), motorAccelString,                  asynParamFloat64,    &motorAccel_);
   status |= pC_->createParam(getAxisIndex(), motorPositionString,               asynParamFloat64,    &motorPosition_);
+  status |= pC_->createParam(getAxisIndex(), motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
 
   if (status != asynSuccess)
   {
@@ -231,7 +232,7 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
         statusChanged_ = 1;
         status_.position = value;
     }
-  } else if (function == pC_->getMotorEncoderPositionIndex()) {
+  } else if (function == getMotorEncoderPositionIndex()) {
     if (value != status_.encoderPosition) {
         statusChanged_ = 1;
         status_.encoderPosition = value;
