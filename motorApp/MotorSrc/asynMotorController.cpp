@@ -61,18 +61,8 @@ asynStatus asynMotorController::createDriverParams()
   static const char *functionName = "createDriverParams";
 
   /* Create the base set of motor parameters */
-//  status |= createParam(motorStopString,                   asynParamInt32,      &motorStop_);
-//  status |= createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
   status |= createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves_);
-  status |= createParam(motorResolutionString,             asynParamFloat64,    &motorResolution_);
-  status |= createParam(motorEncRatioString,               asynParamFloat64,    &motorEncRatio_);
-  status |= createParam(motorPgainString,                  asynParamFloat64,    &motorPgain_);
-  status |= createParam(motorIgainString,                  asynParamFloat64,    &motorIgain_);
-  status |= createParam(motorDgainString,                  asynParamFloat64,    &motorDgain_);
-  status |= createParam(motorHighLimitString,              asynParamFloat64,    &motorHighLimit_);
-  status |= createParam(motorLowLimitString,               asynParamFloat64,    &motorLowLimit_);
   status |= createParam(motorSetClosedLoopString,          asynParamInt32,      &motorSetClosedLoop_);
-  status |= createParam(motorStatusString,                 asynParamInt32,      &motorStatus_);
   status |= createParam(motorUpdateStatusString,           asynParamInt32,      &motorUpdateStatus_);
 
   // These are the per-controller parameters for profile moves
@@ -152,14 +142,6 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   /* Set the parameter and readback in the parameter library. */
   pAxis->setIntegerParam(function, value);
 
-/*
-   if (function == motorStop_) {
-    double accel;
-    getDoubleParam(axis, pAxis->getMotorAccelIndex(), &accel);
-    status = pAxis->stop(accel);
-  
-  } else if (function == motorUpdateStatus_) {
-*/
  if (function == motorUpdateStatus_) {
     bool moving;
     /* Do a poll, and then force a callback */
@@ -204,10 +186,8 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
 asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
   int function = pasynUser->reason;
-  double baseVelocity, velocity, acceleration;
   asynMotorAxis *pAxis;
   int axis;
-  int forwards;
   asynStatus status = asynError;
   static const char *functionName = "writeFloat64";
 
@@ -311,23 +291,17 @@ asynStatus asynMotorController::readFloat64Array(asynUser *pasynUser, epicsFloat
   * \param[in] pointer Pointer to the MotorStatus object to return. */
 asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *pointer)
 {
-  MotorStatus *pStatus = (MotorStatus *)pointer;
+//  MotorStatus *pStatus = (MotorStatus *)pointer;
   int axis;
   asynMotorAxis *pAxis;
   static const char *functionName = "readGenericPointer";
+  asynStatus status = asynSuccess;
 
   pAxis = getAxis(pasynUser);
   if (!pAxis) return asynError;
   axis = pAxis->getAxisIndex();
- 
-  getAddress(pasynUser, &axis);
-  getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
-  getDoubleParam(axis, pAxis->getMotorPositionIndex(), &pStatus->position);
-  getDoubleParam(axis, pAxis->getMotorEncoderPositionIndex(), &pStatus->encoderPosition);
-  getDoubleParam(axis, pAxis->getMotorVelocityIndex(), &pStatus->velocity);
-  asynPrint(pasynUser, ASYN_TRACE_FLOW,
-    "%s:%s: MotorStatus = status%d, position=%f, encoder position=%f, velocity=%f\n", 
-    driverName, functionName, pStatus->status, pStatus->position, pStatus->encoderPosition, pStatus->velocity);
+
+  status = pAxis->updateStatusPointer(pointer);
   return asynSuccess;
 }  
 

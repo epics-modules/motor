@@ -32,9 +32,6 @@ class epicsShareFunc asynMotorAxis {
   static int        getNumParams();
 
   //TODO Make getXXXIndex protected after separating parameters
-  inline int getMotorVelocityIndex()               {return motorVelocity_;}
-  inline int getMotorPositionIndex()               {return motorPosition_;}
-  inline int getMotorEncoderPositionIndex()        {return motorEncoderPosition_;}
 
   virtual asynStatus setIntegerParam(int index, int value);
   virtual asynStatus setDoubleParam(int index, double value);
@@ -61,6 +58,7 @@ class epicsShareFunc asynMotorAxis {
   inline  double *   getprofileReadbacks()  {return profileReadbacks_;}
   inline  double *   getprofileFollowingErrors() {return profileFollowingErrors_;}
           asynMotorStatus* getStatus();
+  asynStatus updateStatusPointer(void *pointer);
 
 protected:
   virtual asynStatus preInitAxis();
@@ -70,10 +68,21 @@ protected:
    inline int getMotorMoveAbsIndex()                {return motorMoveAbs_;}
    inline int getMotorMoveVelIndex()                {return motorMoveVel_;}
    inline int getMotorHomeIndex()                   {return motorHome_;}
+   inline int getMotorVelocityIndex()               {return motorVelocity_;}
+   inline int getMotorPositionIndex()               {return motorPosition_;}
+   inline int getMotorEncoderPositionIndex()        {return motorEncoderPosition_;}
+   inline int getMotorStatusIndex()                 {return motorStatus_;}
 
    inline int getMotorStopIndex()                   {return motorStop_;}
    inline int getMotorVelBaseIndex()                {return motorVelBase_;}
    inline int getMotorAccelIndex()                  {return motorAccel_;}
+   inline int getMotorResolutionIndex()             {return motorResolution_;}
+   inline int getMotorEncRatioIndex()               {return motorEncRatio_;}
+   inline int getMotorPgainIndex()                  {return motorPgain_;}
+   inline int getMotorIgainIndex()                  {return motorIgain_;}
+   inline int getMotorDgainIndex()                  {return motorDgain_;}
+   inline int getMotorHighLimitIndex()              {return motorHighLimit_;}
+   inline int getMotorLowLimitIndex()               {return motorLowLimit_;}
 
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
                                       *   Abbreviated because it is used very frequently */
@@ -88,6 +97,7 @@ private:
   MotorStatus status_;
   bool statusChanged_;
 
+  /* PortDriver params associated with the axis */
   int motorMoveRel_;
   int motorMoveAbs_;
   int motorMoveVel_;
@@ -98,7 +108,15 @@ private:
   int motorAccel_;
   int motorPosition_;
   int motorEncoderPosition_;
-  static const int NUM_ASYN_AXIS_PARAMS = 10;
+  int motorResolution_;
+  int motorEncRatio_;
+  int motorPgain_;
+  int motorIgain_;
+  int motorDgain_;
+  int motorHighLimit_;
+  int motorLowLimit_;
+  int motorStatus_;
+  static const int NUM_ASYN_AXIS_PARAMS = 18;
 
 };
 

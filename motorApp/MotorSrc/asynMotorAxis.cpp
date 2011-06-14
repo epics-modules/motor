@@ -117,13 +117,21 @@ asynStatus asynMotorAxis::createParams()
   status |= pC_->createParam(getAxisIndex(), motorAccelString,                  asynParamFloat64,    &motorAccel_);
   status |= pC_->createParam(getAxisIndex(), motorPositionString,               asynParamFloat64,    &motorPosition_);
   status |= pC_->createParam(getAxisIndex(), motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
+  status |= pC_->createParam(getAxisIndex(), motorResolutionString,             asynParamFloat64,    &motorResolution_);
+  status |= pC_->createParam(getAxisIndex(), motorEncRatioString,               asynParamFloat64,    &motorEncRatio_);
+  status |= pC_->createParam(getAxisIndex(), motorPgainString,                  asynParamFloat64,    &motorPgain_);
+  status |= pC_->createParam(getAxisIndex(), motorIgainString,                  asynParamFloat64,    &motorIgain_);
+  status |= pC_->createParam(getAxisIndex(), motorDgainString,                  asynParamFloat64,    &motorDgain_);
+  status |= pC_->createParam(getAxisIndex(), motorHighLimitString,              asynParamFloat64,    &motorHighLimit_);
+  status |= pC_->createParam(getAxisIndex(), motorLowLimitString,               asynParamFloat64,    &motorLowLimit_);
+  status |= pC_->createParam(getAxisIndex(), motorStatusString,                 asynParamInt32,      &motorStatus_);
 
   if (status != asynSuccess)
   {
           retStatus = asynError;
-//          asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-//            "%s:%s: problem creating parameters\n",
-//            driverName, functionName);
+          asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+            "%s:%s: problem creating parameters\n",
+            driverName, functionName);
   }
   else
   {
@@ -251,7 +259,7 @@ asynStatus asynMotorAxis::callParamCallbacks()
 {
   if (statusChanged_) {
     statusChanged_ = 0;
-    pC_->doCallbacksGenericPointer((void *)&status_, pC_->getMotorStatusIndex(), axisNo_);
+    pC_->doCallbacksGenericPointer((void *)&status_, getMotorStatusIndex(), axisNo_);
   }
   return pC_->callParamCallbacks(axisNo_);
 }
@@ -469,4 +477,19 @@ asynStatus asynMotorAxis::writeInt32(asynUser *pasynUser, epicsInt32 value)
   }
 
   return status;
+}
+
+asynStatus asynMotorAxis::updateStatusPointer(void *pointer){
+  asynStatus retStatus = asynSuccess;
+  MotorStatus *pStatus = (MotorStatus *)pointer;
+  static const char *functionName = "updateStatusPointer";
+
+  pC_->getIntegerParam(getAxisIndex(), getMotorStatusIndex(), (int *)&pStatus->status);
+  pC_->getDoubleParam(getAxisIndex(), getMotorPositionIndex(), &pStatus->position);
+  pC_->getDoubleParam(getAxisIndex(), getMotorEncoderPositionIndex(), &pStatus->encoderPosition);
+  pC_->getDoubleParam(getAxisIndex(), getMotorVelocityIndex(), &pStatus->velocity);
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
+    "%s:%s: MotorStatus = status%d, position=%f, encoder position=%f, velocity=%f\n",
+    driverName, functionName, pStatus->status, pStatus->position, pStatus->encoderPosition, pStatus->velocity);
+  return retStatus;
 }

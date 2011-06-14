@@ -83,15 +83,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus readbackProfile();
   virtual int        getNumParams();
   inline int getMotorDeferMovesIndex()             {return motorDeferMoves_;}
-  inline int getMotorResolutionIndex()             {return motorResolution_;}
-  inline int getMotorEncRatioIndex()               {return motorEncRatio_;}
-  inline int getMotorPgainIndex()                  {return motorPgain_;}
-  inline int getMotorIgainIndex()                  {return motorIgain_;}
-  inline int getMotorDgainIndex()                  {return motorDgain_;}
-  inline int getMotorHighLimitIndex()              {return motorHighLimit_;}
-  inline int getMotorLowLimitIndex()               {return motorLowLimit_;}
   inline int getMotorSetClosedLoopIndex()          {return motorSetClosedLoop_;}
-  inline int getMotorStatusIndex()                 {return motorStatus_;}
   inline int getMotorUpdateStatusIndex()           {return motorUpdateStatus_;}
 
   inline int getProfileNumAxesIndex()              {return profileNumAxes_;}
@@ -139,18 +131,8 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
    // These are the motor commands
   virtual asynStatus createDriverParams();
   #define FIRST_MOTOR_PARAM motorDeferMoves_
-//  int motorStop_;
-//  int motorEncoderPosition_;
   int motorDeferMoves_;
-  int motorResolution_;
-  int motorEncRatio_;
-  int motorPgain_;
-  int motorIgain_;
-  int motorDgain_;
-  int motorHighLimit_;
-  int motorLowLimit_;
   int motorSetClosedLoop_;
-  int motorStatus_;
   int motorUpdateStatus_;
 
   // These are the per-controller parameters for profile moves
