@@ -121,8 +121,8 @@ void motorSimAxis::axisReport(FILE *& fp, int & level)
         fprintf(fp, "    Hard limits: %f, %f\n", lowHardLimit_, hiHardLimit_);
         fprintf(fp, "           Home: %f\n", home_);
         fprintf(fp, "    Enc. offset: %f\n", enc_offset_);
-        pC_->getDoubleParam(axisNo_, pC_->getMotorHighLimitIndex(), &hiSoftLimit);
-        pC_->getDoubleParam(axisNo_, pC_->getMotorLowLimitIndex(), &lowSoftLimit);
+        pC_->getDoubleParam(axisNo_, getMotorHighLimitIndex(), &hiSoftLimit);
+        pC_->getDoubleParam(axisNo_, getMotorLowLimitIndex(), &lowSoftLimit);
         fprintf(fp, "    Soft limits: %f, %f\n", lowSoftLimit, hiSoftLimit);
         if(homing_)
             fprintf(fp, "    Currently homing axis\n");
