@@ -50,6 +50,9 @@ in file LICENSE that is included with this distribution.
 *                    Ensemble firmware 2.54.004 and above.
 * .10 09-29-10 rls - Commented out home search until firmware upgrade that
 *                    allows aborting home search from ASCII protocol.
+* .11 06-21-11 rls - Bug fix for jog velocity and acceleration not converted
+*                    from raw units to Ensemble user units when the
+*                    PosScaleFactor parameter is not 1.
 */
 
 
@@ -567,9 +570,9 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
     if (pAxis == NULL || pAxis->pController == NULL)
         return(MOTOR_AXIS_ERROR);
 
-    sprintf(outputBuff, "SETPARM @%d, 103, %.*f", pAxis->axis, pAxis->maxDigits, acceleration);
+    sprintf(outputBuff, "SETPARM @%d, 103, %.*f", pAxis->axis, pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
-    sprintf(outputBuff, "FREERUN @%d %.*f", pAxis->axis, pAxis->maxDigits, velocity);
+    sprintf(outputBuff, "FREERUN @%d %.*f", pAxis->axis, pAxis->maxDigits, velocity  * fabs(pAxis->stepSize));
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
 
     if (epicsMutexLock(pAxis->mutexId) == epicsMutexLockOK)
