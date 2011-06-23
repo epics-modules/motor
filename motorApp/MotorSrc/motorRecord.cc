@@ -144,6 +144,7 @@ HeadURL:        $URL$
  *                  - bug fix for save/restore not working when URIP=Yes. DRBV
  *                    not getting initialized. Fixed in initial call to
  *                    process_motor_info().
+ * .60 06-23-11 kmp - Added a check for a non-zero MIP before doing retries.
  *
  */
 
@@ -1285,7 +1286,7 @@ static long process(dbCommon *arg)
                         UNMARK(M_DMOV);
                         goto process_exit;
                     }
-                    else if (pmr->stup != motorSTUP_ON)
+                    else if (pmr->stup != motorSTUP_ON && pmr->mip != MIP_DONE)
                     {
                         pmr->mip &= ~MIP_DELAY;
                         MARK(M_MIP);    /* done delaying */
