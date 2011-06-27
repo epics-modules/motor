@@ -145,6 +145,9 @@ HeadURL:        $URL$
  *                    not getting initialized. Fixed in initial call to
  *                    process_motor_info().
  * .60 06-23-11 kmp - Added a check for a non-zero MIP before doing retries.
+ * .61 06-24-11 rls - No retries after backlash or jogging. Move setting
+ *                    MIP <- DONE and reactivating Jog request from
+ *                    postProcess() to maybeRetry().
  *
  */
 
@@ -855,12 +858,6 @@ static long postProcess(motorRecord * pmr)
             SEND_MSG();
             pmr->pp = TRUE;
         }
-        else
-        {
-            pmr->mip = MIP_DONE;        /* Backup distance = 0; skip backlash. */
-            if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
-                pmr->mip |= MIP_JOG_REQ;
-        }
         pmr->mip &= ~MIP_JOG_STOP;
         pmr->mip &= ~MIP_MOVE;
     }
@@ -910,13 +907,6 @@ static long postProcess(motorRecord * pmr)
         pmr->mip = MIP_JOG_BL2;
         pmr->pp = TRUE;
     }
-    else if (pmr->mip & MIP_JOG_BL2 || pmr->mip & MIP_MOVE_BL)
-    {
-        /* Completed backlash part of jog command. */
-        pmr->mip = MIP_DONE;
-        if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
-            pmr->mip |= MIP_JOG_REQ;
-    }
     /* Save old values for next call. */
     pmr->lval = pmr->val;
     pmr->ldvl = pmr->dval;
@@ -950,6 +940,9 @@ static void maybeRetry(motorRecord * pmr)
                 /* Too many retries. */
                 /* pmr->spmg = motorSPMG_Pause; MARK(M_SPMG); */
                 pmr->mip = MIP_DONE;
+                if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
+                    pmr->mip |= MIP_JOG_REQ;
+
                 pmr->lval = pmr->val;
                 pmr->ldvl = pmr->dval;
                 pmr->lrvl = pmr->rval;
