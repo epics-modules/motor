@@ -12,7 +12,9 @@ DBD += devOms.dbd
 LIBRARY_IOC_DEFAULT += oms
 
 # Trajectory support for MAXV controller
+ifdef SNCSEQ
 SRCS += MAX_trajectoryScan.st
+endif
 
 # The following is required for the OMS PC68/78 (i.e., devOmsPC68) device driver.
 ifdef ASYN
