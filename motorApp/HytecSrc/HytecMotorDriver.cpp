@@ -48,6 +48,8 @@
 /*				Added firmware version parameter								*/
 /*  2.3         Bugs fix 				Jim Chen       	 21/04/2011             */
 /*  	        Fixed detecting encoder logic wrong bug							*/
+/*  2.4         Bugs fix 				Jim Chen       	 24/06/2011             */
+/*  	        Fixed wrong ioc shell command function name						*/
 /*                                                                              */
 /********************************************************************************/
 
@@ -339,7 +341,7 @@ int HytecMotorController::checkprom(char *pr,int expmodel)
 		expmodel);
 	}
 	
-	return (/* SCO strok && */ishytec && ismodel);
+	return (/* SCO strok && */ ismodel);
 }
 
 // report
@@ -388,7 +390,7 @@ asynStatus HytecMotorController::readInt32(asynUser *pasynUser, epicsInt32 *valu
     if ((function == motorPosition_) || (function == motorEncoderPosition_))
     {
 		//update all values and status
-		pAxis->poll(&moving);			
+		pAxis->poll(&moving);		
 	    getDoubleParam(pAxis->axisNo_, function, &dvalue);
 	    *value = (int)dvalue;
 	}else if(function == HytecFWVersion_)
@@ -540,8 +542,6 @@ static void intQueuedTask( void *pDrv )
 			pAxis = pController->getAxis(axis);
            	pController->drvHy8601GetAxisStatus( pAxis, data[axis] );
         }
-
-//printf("\nasynDrover! Pointer=%x\n\n", data[0]);     /* for debug */
 
         /* re-enable interrupt. for Linux IOCs */
         ipmIrqCmd(ipcarrier, ipslot, 0, ipac_irqEnable);
@@ -949,7 +949,7 @@ int acc= GET_REG(this->chanbase, REG_RAMPRATE);
 int lsp= GET_REG(this->chanbase, REG_STARTSTOPSPD);
 int hsp=GET_REG(this->chanbase, REG_HIGHSPD);
 if(this->axisNo_ == 0)
-	printf("moved=%d, error=%d, desired=%d absp=%d csr=%x acc=%d minsp=%d maxsp=%d\n", (int)stepMoved, (int)error , (int)this->desiredMove, (int)this->absPosition, (int)csr, acc, lsp, hsp); 
+printf("%d: moved=%d, error=%d, desired=%d absp=%d csr=%x\n",this->axisNo_, (int)stepMoved, (int)error , (int)this->desiredMove, (int)this->absPosition, (int)csr); 
 */
     setIntegerParam( pC_->motorStatusDirection_,     ((csr & CSR_DIRECTION) != 0 ) );
     setIntegerParam( pC_->motorStatusHasEncoder_,    ((csr & CSR_ENCODDET) != 0) );
@@ -1065,7 +1065,7 @@ static const iocshArg * const Hy8601ConfigArgs[] =  {&Hy8601ConfigArg0,
 													   &Hy8601ConfigArg11,
 													   &Hy8601ConfigArg12};
 
-static const iocshFuncDef configHy8601 = {"Hy8601AsynConfig", 13, Hy8601ConfigArgs};
+static const iocshFuncDef configHy8601 = {"Hytec8601Configure", 13, Hy8601ConfigArgs};
 static void configHy8601CallFunc(const iocshArgBuf *args)
 {
     Hytec8601Configure(args[0].sval, args[1].ival, args[2].ival, args[3].ival, args[4].ival, 
