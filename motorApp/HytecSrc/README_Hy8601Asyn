@@ -144,9 +144,9 @@ The configuration ioc shell command takes the form below.
 
 int Hytec8601Configure(char *portName,
 				  	epicsUInt16 numAxes,
-				  	epicsUInt16 cardnum,
 				  	epicsUInt16 movingPollPeriod,
 					epicsUInt16 idlePollPeriod,
+				  	epicsUInt16 cardnum,
                  	epicsUInt16 ip_carrier,
                  	epicsUInt16 ipslot,
                  	epicsUInt16 vector,
@@ -159,9 +159,9 @@ int Hytec8601Configure(char *portName,
 Where:
     (1) portName   asyn port name
     (2) numAxes    number of axes 
-    (3) cardnum    Arbitrary card number to assign to this controller
-    (4) movingPollPeriod  status polling time period when motor is moving in ms
-    (5) idlePollPeriod    status polling time period when motor is stopped in ms
+    (3) movingPollPeriod  status polling time period when motor is moving in ms
+    (4) idlePollPeriod    status polling time period when motor is stopped in ms
+    (5) cardnum    Arbitrary card number to assign to this controller (currently not used)
     (6) ip_carrier which previously configured IP carrier in the IOC
     (7) ipslot     which IP Slot on carrier card (0=A etc.)
     (8) vector     which Interrupt Vector (0 - Find One ?)
@@ -174,14 +174,14 @@ Where:
 
 Example:
 
-	Hytec8601Configure("Hy8601", 4, 0, 500, 1000, IPAC0, 0, 70, 15, 0.25, 0.25, 0.25, 0.25)
+	Hytec8601Configure("Hy8601", 4, 500, 1000, 0, IPAC0, 0, 70, 15, 0.25, 0.25, 0.25, 0.25)
 
 This configures the 8601 card with 
 	port name: Hy8601
 	4 axes
-	card number = 0 
 	poll status every 500ms when moving
 	poll status every 1000ms when  stopped
+	card number = 0 
 	carrier serial number = 0
 	ipslot = site A
 	interrupt vector = 70
@@ -245,7 +245,10 @@ Where:
     	field(SCAN, "1 second")
 	}
 
-There are other records in the HytecMotorControl.db which can return the positions synchronously etc.  
+There are other records in the HytecMotorControl.db which can return the positions synchronously etc. 
+
+These positions are raw values in terms of the "counts". These records can be read by "ai" records 
+and can be converted to engineering values by EGUF, EGUL etc.
 
 Notes:
 
@@ -369,9 +372,9 @@ The following example is for an IOC that uses RTEMS R4.9.4, MVME5500 processor b
 	# Hytec MDS-8 8601 driver setup parameters:
 	# int Hytec8601Configure(char *portName,
 	#				  epicsUInt16 numAxes,
-	#				  epicsUInt16 cardnum,
 	#				  epicsUInt16 movingPollPeriod,
 	#				  epicsUInt16 idlePollPeriod,
+	#				  epicsUInt16 cardnum,
 	#                 epicsUInt16 ip_carrier,
 	#                 epicsUInt16 ipslot,
 	#                 epicsUInt16 vector,
@@ -382,9 +385,9 @@ The following example is for an IOC that uses RTEMS R4.9.4, MVME5500 processor b
 	#                 epicsDouble encoderRatio3)
 	#     (1) portName   asyn port name
 	#     (2) numAxes    number of axes 
-	#     (3) cardnum    Arbitrary card number to assign to this controller
-    #	  (4) movingPollPeriod  status polling time period when motor is moving in ms
-    #	  (5) idlePollPeriod    status polling time period when motor is stopped in ms
+    #	  (3) movingPollPeriod  status polling time period when motor is moving in ms
+    #	  (4) idlePollPeriod    status polling time period when motor is stopped in ms
+	#     (5) cardnum    Arbitrary card number to assign to this controller, not used
 	#     (6) ip_carrier which previously configured IP carrier in the IOC
 	#     (7) ipslot     which IP Slot on carrier card (0=A etc.)
 	#     (8) vector     which Interrupt Vector (0 - Find One ?)
@@ -395,7 +398,7 @@ The following example is for an IOC that uses RTEMS R4.9.4, MVME5500 processor b
 	#     (12) encoderRatio2  - axis2 hardware encoder ratio
 	#     (13) encoderRatio3  - axis3 hardware encoder ratio
 
-	Hytec8601Configure("Hy8601", 4, 0, IPAC0, 0, 70, 0, 0.25, 0.25, 0.25, 0.25)
+	Hytec8601Configure("Hy8601", 4, IPAC0, 0, 0, 70, 0, 0.25, 0.25, 0.25, 0.25)
 
 
 	# ========================================================
