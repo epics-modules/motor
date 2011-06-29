@@ -30,7 +30,8 @@ static const char *driverName = "asynMotorAxis";
   * Connects pasynUser_ to this asyn port and axisNo.
   */
 asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
-  : pC_(pC), axisNo_(axisNo), statusChanged_(1)
+  : pC_(pC), axisNo_(axisNo)
+//, statusChanged_(1)
 {
   static const char *functionName = "asynMotorAxis";
 
@@ -222,7 +223,7 @@ asynStatus asynMotorAxis::setPosition(double position)
 asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
   // Call the base class method
-  return pC_->setIntegerParam(axisNo_, function, value);
+  return getStatus()->setIntegerParam(function, value);
 }
 
 
@@ -237,12 +238,12 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
 {
   if (function == motorPosition_) {
     if (value != status_.position) {
-        statusChanged_ = 1;
+        getStatus()->setStatusChanged();
         status_.position = value;
     }
   } else if (function == getMotorEncoderPositionIndex()) {
     if (value != status_.encoderPosition) {
-        statusChanged_ = 1;
+        getStatus()->setStatusChanged();
         status_.encoderPosition = value;
     }
   }  
@@ -257,9 +258,10 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
   * In that case it does callbacks on the asynGenericPointer interface, typically to devMotorAsyn. */  
 asynStatus asynMotorAxis::callParamCallbacks()
 {
-  if (statusChanged_) {
-    statusChanged_ = 0;
-    pC_->doCallbacksGenericPointer((void *)&status_, getMotorStatusIndex(), axisNo_);
+  if (getStatus()->hasStatusChanged()) {
+      getStatus()->clearStatusChanged();
+      status_.status = getStatus()->getStatus();
+      pC_->doCallbacksGenericPointer((void *)&status_, getMotorStatusIndex(), axisNo_);
   }
   return pC_->callParamCallbacks(axisNo_);
 }
@@ -393,6 +395,10 @@ asynStatus asynMotorAxis::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   int forwards;
   static const char *functionName = "writeFloat64";
 
+  status = setDoubleParam(function, value);
+
+
+
   pC_->getDoubleParam(getAxisIndex(), motorVelBase_, &baseVelocity);
   pC_->getDoubleParam(getAxisIndex(), motorVelocity_, &velocity);
   pC_->getDoubleParam(getAxisIndex(), motorAccel_, &acceleration);
@@ -446,7 +452,7 @@ asynStatus asynMotorAxis::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   /* Do callbacks so higher layers see any changes */
   callParamCallbacks();
 
-  if (status)
+  if (status && (isAxisFunction(function)))
     asynPrint(pasynUser, ASYN_TRACE_ERROR,
       "%s:%s error, status=%d axis=%d, function=%d, value=%f\n",
       driverName, functionName, status, getAxisIndex(), function, value);
@@ -458,6 +464,10 @@ asynStatus asynMotorAxis::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
 }
 
+bool asynMotorAxis::isAxisFunction(int function)
+{
+  return ((function >=motorMoveRel_) && (function <= motorStatus_) );
+}
 int asynMotorAxis::getNumParams()
 {
   return NUM_ASYN_AXIS_PARAMS;
@@ -468,7 +478,6 @@ asynStatus asynMotorAxis::writeInt32(asynUser *pasynUser, epicsInt32 value)
   int function = pasynUser->reason;
   asynStatus status=asynSuccess;
   static const char *functionName = "writeInt32";
-
   if (function == motorStop_) {
    double accel;
    pC_->getDoubleParam(getAxisIndex(), getMotorAccelIndex(), &accel);
@@ -492,4 +501,8 @@ asynStatus asynMotorAxis::updateStatusPointer(void *pointer){
     "%s:%s: MotorStatus = status%d, position=%f, encoder position=%f, velocity=%f\n",
     driverName, functionName, pStatus->status, pStatus->position, pStatus->encoderPosition, pStatus->velocity);
   return retStatus;
+}
+
+void asynMotorAxis::axisReport(FILE *& fp, int & level){
+
 }

@@ -53,12 +53,13 @@ class epicsShareFunc asynMotorAxis {
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
           int        getAxisIndex()         {return axisNo_;}
-  inline  void       setStatusChanged()     {statusChanged_ = true;}
-  inline  void       clearStatusChanged()   {statusChanged_ = false;}
+//  inline  void       setStatusChanged()     {statusChanged_ = true;}
+//  inline  void       clearStatusChanged()   {statusChanged_ = false;}
   inline  double *   getprofileReadbacks()  {return profileReadbacks_;}
   inline  double *   getprofileFollowingErrors() {return profileFollowingErrors_;}
           asynMotorStatus* getStatus();
   asynStatus updateStatusPointer(void *pointer);
+  virtual void axisReport(FILE *& fp, int & level);
 
 protected:
   virtual asynStatus preInitAxis();
@@ -83,6 +84,7 @@ protected:
    inline int getMotorDgainIndex()                  {return motorDgain_;}
    inline int getMotorHighLimitIndex()              {return motorHighLimit_;}
    inline int getMotorLowLimitIndex()               {return motorLowLimit_;}
+   bool isAxisFunction(int function);
 
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
                                       *   Abbreviated because it is used very frequently */
@@ -95,7 +97,7 @@ protected:
 
 private:
   MotorStatus status_;
-  bool statusChanged_;
+//  bool statusChanged_;
 
   /* PortDriver params associated with the axis */
   int motorMoveRel_;
