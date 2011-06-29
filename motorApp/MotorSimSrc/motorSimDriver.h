@@ -25,7 +25,7 @@ public:
 
   /* These are the pure virtual functions that must be implemented */
   motorSimAxis(class motorSimController *pController, int axis, double lowLimit, double hiLimit, double home, double start);
-  asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
+  asynStatus move(double position, bool relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
   asynStatus home(double min_velocity, double max_velocity, double acceleration, int forwards);
   asynStatus stop(double acceleration);
@@ -45,7 +45,7 @@ protected:
   virtual asynStatus postInitAxis();
 
 private:
-  motorSimController *pC_;
+  asynMotorController *pC_;
   ROUTE_ID route_;
   route_reroute_t reroute_;
   route_demand_t endpoint_;
@@ -69,8 +69,9 @@ public:
   motorSimController(const char *portName, int numAxes, int priority, int stackSize);
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
   void report(FILE *fp, int level);
-  motorSimAxis* getAxis(asynUser *pasynUser);
+/*  motorSimAxis* getAxis(asynUser *pasynUser);
   motorSimAxis* getAxis(int axisNo);
+*/
   asynStatus profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger);
   asynStatus triggerProfile(asynUser *pasynUser);
   bool areMovesDeferred();

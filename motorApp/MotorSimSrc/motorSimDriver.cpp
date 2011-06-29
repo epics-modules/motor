@@ -101,7 +101,7 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
 asynStatus motorSimController::postInitDriver()
 {
   int axis;
-  motorSimAxis *pAxis;
+  asynMotorAxis *pAxis;
   for (axis=0; axis<numAxes_; axis++) {
     pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
     pAxis->initializeAxis();
@@ -133,7 +133,8 @@ void motorSimAxis::axisReport(FILE *& fp, int & level)
 void motorSimController::report(FILE *fp, int level)
 {
   int axis;
-  motorSimAxis *pAxis;
+//  motorSimAxis *pAxis;
+  asynMotorAxis *pAxis;
 
   fprintf(fp, "Simulation motor driver %s, numAxes=%d\n", 
           this->portName, numAxes_);
@@ -174,7 +175,7 @@ asynStatus motorSimController::processDeferredMoves()
 
   for (axis=0; axis<numAxes_; axis++)
   {
-    pAxis = getAxis(axis);
+    pAxis = static_cast<motorSimAxis*>(getAxis(axis));
     status = pAxis->doDeferredMove();
     if (status != asynSuccess) break;
   }
@@ -185,7 +186,7 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   int function = pasynUser->reason;
   asynStatus status = asynSuccess;
-  motorSimAxis *pAxis = this->getAxis(pasynUser);
+  asynMotorAxis *pAxis = this->getAxis(pasynUser);
   static const char *functionName = "writeInt32";
   
   
@@ -222,6 +223,7 @@ asynStatus motorSimController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   return status;
 }
 
+/*
 motorSimAxis* motorSimController::getAxis(asynUser *pasynUser)
 {
   return static_cast<motorSimAxis*>(asynMotorController::getAxis(pasynUser));
@@ -231,7 +233,7 @@ motorSimAxis* motorSimController::getAxis(int axisNo)
 {
   return static_cast<motorSimAxis*>(asynMotorController::getAxis(axisNo));
 }
-
+*/
 asynStatus motorSimController::profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger )
 {
   return asynError;
@@ -270,7 +272,7 @@ void motorSimController::motorSimTask()
       for (axis=0; axis<numAxes_; axis++) 
       {     
         this->lock();
-        pAxis = getAxis(axis);
+        pAxis = static_cast<motorSimAxis*>(getAxis(axis));
         pAxis->process(delta );
         this->unlock();
       }
@@ -292,7 +294,7 @@ bool motorSimController::areMovesDeferred()
   return (movesDeferred_ == 1);
 }
 
-asynStatus motorSimAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
+asynStatus motorSimAxis::move(double position, bool relative, double minVelocity, double maxVelocity, double acceleration)
 {
   route_pars_t pars;
   static const char *functionName = "move";
@@ -303,7 +305,7 @@ asynStatus motorSimAxis::move(double position, int relative, double minVelocity,
   if ((nextpoint_.axis[0].p >= hiHardLimit_  &&  position > nextpoint_.axis[0].p) ||
     (nextpoint_.axis[0].p <= lowHardLimit_ &&  position < nextpoint_.axis[0].p)  ) return asynError;
 
-  if (!(pC_->areMovesDeferred())) { /*Normal move.*/
+  if (!((static_cast<motorSimController*>(pC_))->areMovesDeferred())) { /*Normal move.*/
     endpoint_.axis[0].p = position - enc_offset_;
     endpoint_.axis[0].v = 0.0;
   } else { /*Deferred moves.*/
@@ -522,7 +524,7 @@ extern "C" int motorSimConfigAxis(const char *portName, int axis, int hiHardLimi
     if (strcmp(pNode->portName, portName) == 0) {
       printf("%s:%s: configuring controller %s axis %d\n",
              driverName, functionName, pNode->portName, axis); 
-             pNode->pController->getAxis(axis)->config(hiHardLimit, lowHardLimit, home, start);
+      static_cast<motorSimAxis*>(pNode->pController->getAxis(axis))->config(hiHardLimit, lowHardLimit, home, start);
       return(0);
     }
     pNode = (motorSimControllerNode*)ellNext((ELLNODE*)pNode);
