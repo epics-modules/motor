@@ -568,13 +568,13 @@ asynStatus MM4KAxis::poll(bool *moving)
   comStatus = pC_->writeReadConvertDouble("%dTP;", axisNo_, &encoderPosition_);
   if (comStatus)
     goto skip;
-  setDoubleParam(pC_->getMotorEncoderPositionIndex(), encoderPosition_ / pulsesPerUnit_);
+  setDoubleParam(getMotorEncoderPositionIndex(), encoderPosition_ / pulsesPerUnit_);
 
   // Read the current theoretical position
   comStatus = pC_->writeReadConvertDouble("%dTH;", axisNo_, &theoryPosition_);
   if (comStatus)
     goto skip;
-  setDoubleParam(pC_->getMotorPositionIndex(), theoryPosition_ / pulsesPerUnit_);
+  setDoubleParam(getMotorPositionIndex(), theoryPosition_ / pulsesPerUnit_);
 
   // Read the current status
   rtnchar = pC_->writeReadRtnResponse("%dMS", axisNo_, &comStatus);
