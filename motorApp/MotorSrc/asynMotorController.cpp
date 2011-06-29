@@ -147,7 +147,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     /* Do a poll, and then force a callback */
     poll();
     status = pAxis->poll(&moving);
-    pAxis->setStatusChanged();
+    pAxis->getStatus()->setStatusChanged();
   } else if (function == profileBuild_) {
     status = buildProfile();
   } else if (function == profileExecute_) {
@@ -201,7 +201,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   /* Do callbacks so higher layers see any changes */
   pAxis->callParamCallbacks();
 
-  pAxis->writeFloat64(pasynUser, value);
+  status = pAxis->writeFloat64(pasynUser, value);
   if (status) 
     asynPrint(pasynUser, ASYN_TRACE_ERROR, 
       "%s:%s error, status=%d axis=%d, function=%d, value=%f\n", 
