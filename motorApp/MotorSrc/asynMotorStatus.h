@@ -44,9 +44,13 @@ public:
           asynStatus setLowLimitOn(bool on);
           asynStatus setDirection(Direction way);
           asynStatus setPowerOn(bool on);
+          void setStatusChanged();
+          bool hasStatusChanged();
+          void clearStatusChanged();
+          asynStatus setIntegerParam(int function, int value);
+          epicsUInt32 getStatus();
 
 protected:
-  asynStatus setIntegerParam(int function, int value);
   int axisNo_;
   epicsUInt32 status_;
   bool statusChanged_;

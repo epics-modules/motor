@@ -12,7 +12,8 @@ Last Modified:	$Date$
 
 asynMotorStatus::asynMotorStatus(asynMotorController *pC, int axisNo) :
   asynPortDriverExt(pC, axisNo){
-    //empty
+    status_ = 0;
+    statusChanged_ = false;
   }
 /** return the number of parameters associated with the status object
   */
@@ -166,11 +167,30 @@ asynStatus asynMotorStatus::setIntegerParam(int function, int value)
     else       status &= ~mask;
     if (status != status_) {
       status_ = status;
-      statusChanged_ = 1;
+      setStatusChanged();
     }
   }
   // Call the base class method
   return pC_->setIntegerParam(axisNo_, function, value);
 }
 
+void asynMotorStatus::setStatusChanged()
+{
+  statusChanged_=true;
+}
 
+void asynMotorStatus::clearStatusChanged()
+{
+  statusChanged_=false;
+}
+
+
+bool asynMotorStatus::hasStatusChanged()
+{
+  return statusChanged_;
+}
+
+epicsUInt32 asynMotorStatus::getStatus()
+{
+  return status_;
+}
