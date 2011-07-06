@@ -75,7 +75,7 @@
 
 #include "HytecMotorDriver.h"
 
-static void ISR_8601(int pDrv);
+static void ISR_8601(void* pDrv);
 static void intQueuedTask( void *pDrv );
 
 #define MAX_MESSAGES  100           /* maximum number of messages */
@@ -188,12 +188,11 @@ asynStatus HytecMotorController::SetupCard()
     }
 
     /* Setup Interrupts. THIS SEEMS NOT RIGHT. 8601 HAS 4 AXIS AND EACH ONE HAS A VECTOR SO 4 ISRs ARE NEEDED?????????????? */
-    st=ipmIntConnect(this->ip_carrier,
-			 this->ipslot,
-			 this->vector,
-			 &ISR_8601,
-			 (int)this);
-      
+    st = devConnectInterruptVME(
+          this->vector, 
+          ISR_8601, 
+          this);
+          
     /* If Interrupts NOT Setup OK */
     if (st!=OK) 
     {
@@ -490,7 +489,7 @@ asynStatus HytecMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 
 }
 
 // ISR8601 Routines to handle interrupts
-static void ISR_8601(int pDrv)
+static void ISR_8601(void* pDrv)
 {
     HytecMotorController *pController = (HytecMotorController*) pDrv;
 	HytecMotorAxis * pAxis;
