@@ -8,9 +8,9 @@
 #  CONFIG_SITE.Common.$(T_A)
 #  CONFIG_SITE.$(EPICS_HOST_ARCH).$(T_A)
 
-ifeq ($(EPICS_HOST_ARCH),vl-linux-x86)
-CROSS_COMPILER_TARGET_ARCHS = RTEMS-uC5282
-endif
+#ifeq ($(EPICS_HOST_ARCH),vl-linux-x86)
+#CROSS_COMPILER_TARGET_ARCHS = RTEMS-uC5282
+#endif
 
 # Set this when you only want to compile this application
 # for a subset of the cross-compiled target architectures
