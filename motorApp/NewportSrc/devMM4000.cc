@@ -2,9 +2,10 @@
 FILENAME...     devMM4000.cc
 USAGE...        Motor record device level support for Newport MM4000.
 
-Version:        $Revision: 1.6 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-09-09 18:22:12 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
