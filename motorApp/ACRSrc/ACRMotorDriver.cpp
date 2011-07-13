@@ -47,8 +47,6 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
   ACRAxis *pAxis;
   static const char *functionName = "ACRController";
 
-  idlePollPeriod_ = idlePollPeriod;
-  movingPollPeriod_ = movingPollPeriod;
   binaryInReg_  = 4096;
   binaryOutReg_ = 4097;
   
@@ -84,7 +82,7 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
     pAxis = new ACRAxis(this, axis);
   }
 
-  startPoller(movingPollPeriod/1000., idlePollPeriod/1000., 2);
+  startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
 
 
