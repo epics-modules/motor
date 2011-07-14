@@ -188,6 +188,13 @@ This configures the 8601 card with
 	all 4 axes use encoder
 	all 4 axes have quardrature encoder hence their ratios are 0.25
 
+Please note, since the parameters in the function is more than 10, in VxWorks, the start up 
+script loading will complain about " too many parameters..." In this case, adding
+
+	iocsh()
+
+before this routine in start up script will solve the problem.
+
 
 2). Database definition file
 ----------------------------
