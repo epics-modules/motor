@@ -22,7 +22,9 @@ December 13, 2009
 #include <ellLib.h>
 #include <iocsh.h>
 
-#include "motorSimDriver.h"
+#include "motorSimAxis.h"
+#include "motorSimController.h"
+
 #include <epicsExport.h>
 
 #define DEFAULT_LOW_LIMIT -10000
@@ -464,7 +466,8 @@ void motorSimAxis::process(double delta )
 
   setDoubleParam (getMotorPositionIndex(),         (nextpoint_.axis[0].p+enc_offset_));
   setDoubleParam (getMotorEncoderPositionIndex(),  (nextpoint_.axis[0].p+enc_offset_));
-  getStatus()->setDirection((nextpoint_.axis[0].v >  0)?PLUS:MINUS);
+  if (nextpoint_.axis[0].v != 0)
+    getStatus()->setDirection((nextpoint_.axis[0].v >  0) ? PLUS:MINUS);
   getStatus()->setDoneMoving(done);
   getStatus()->setHighLimitOn(nextpoint_.axis[0].p >= hiHardLimit_);
   getStatus()->setAtHome(nextpoint_.axis[0].p == home_);
