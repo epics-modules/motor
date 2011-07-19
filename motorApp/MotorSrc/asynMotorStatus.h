@@ -51,7 +51,6 @@ public:
           epicsUInt32 getStatus();
 
 protected:
-  int axisNo_;
   epicsUInt32 status_;
   bool statusChanged_;
   // These are the status bits

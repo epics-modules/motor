@@ -171,7 +171,7 @@ asynStatus asynMotorStatus::setIntegerParam(int function, int value)
     }
   }
   // Call the base class method
-  return pC_->setIntegerParam(axisNo_, function, value);
+  return pC_->setIntegerParam(addr_, function, value);
 }
 
 void asynMotorStatus::setStatusChanged()
