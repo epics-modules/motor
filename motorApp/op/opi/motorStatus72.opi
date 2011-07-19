@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display typeId="org.csstudio.opibuilder.Display" version="1.0">
+  <auto_zoom_to_fit_all>false</auto_zoom_to_fit_all>
+  <macros>
+    <include_parent_macros>true</include_parent_macros>
+  </macros>
+  <scripts />
+  <show_ruler>true</show_ruler>
+  <height>328</height>
+  <name>motorStatus16</name>
+  <snap_to_geometry>false</snap_to_geometry>
+  <show_grid>false</show_grid>
+  <background_color>
+    <color name="Gray_2" />
+  </background_color>
+  <foreground_color>
+    <color name="Gray_7" />
+  </foreground_color>
+  <widget_type>Display</widget_type>
+  <show_close_button>true</show_close_button>
+  <width>410</width>
+  <rules />
+  <show_edit_range>true</show_edit_range>
+  <grid_space>5</grid_space>
+  <actions hook="false" />
+  <y>425</y>
+  <x>365</x>
+  <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
+    <visible>true</visible>
+    <vertical_alignment>1</vertical_alignment>
+    <auto_size>false</auto_size>
+    <scripts />
+    <height>20</height>
+    <name>Label</name>
+    <transparent>true</transparent>
+    <show_scrollbar>false</show_scrollbar>
+    <background_color>
+      <color red="255" green="255" blue="255" />
+    </background_color>
+    <foreground_color>
+      <color name="Gray_14" />
+    </foreground_color>
+    <widget_type>Label</widget_type>
+    <enabled>true</enabled>
+    <text>$(P) motor</text>
+    <font>
+      <fontdata fontName="Sans" height="10" style="0" />
+    </font>
+    <width>410</width>
+    <border_style>0</border_style>
+    <rules />
+    <border_width>1</border_width>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <actions hook="false" />
+    <y>0</y>
+    <wrap_words>true</wrap_words>
+    <tooltip />
+    <x>0</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
+    <visible>true</visible>
+    <vertical_alignment>1</vertical_alignment>
+    <auto_size>false</auto_size>
+    <scripts />
+    <height>20</height>
+    <name>Label</name>
+    <transparent>true</transparent>
+    <show_scrollbar>false</show_scrollbar>
+    <background_color>
+      <color red="255" green="255" blue="255" />
+    </background_color>
+    <foreground_color>
+      <color name="Gray_14" />
+    </foreground_color>
+    <widget_type>Label</widget_type>
+    <enabled>true</enabled>
+    <text>status</text>
+    <font>
+      <fontdata fontName="Sans" height="10" style="0" />
+    </font>
+    <width>410</width>
+    <border_style>0</border_style>
+    <rules />
+    <border_width>1</border_width>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <actions hook="false" />
+    <y>20</y>
+    <wrap_words>true</wrap_words>
+    <tooltip />
+    <x>0</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>1</N1>
+      <N2>2</N2>
+      <N3>3</N3>
+      <N4>4</N4>
+      <N5>5</N5>
+      <N6>6</N6>
+      <N7>7</N7>
+      <N8>8</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>5</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>9</N1>
+      <N2>10</N2>
+      <N3>11</N3>
+      <N4>12</N4>
+      <N5>13</N5>
+      <N6>14</N6>
+      <N7>15</N7>
+      <N8>16</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container_1</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>50</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>17</N1>
+      <N2>18</N2>
+      <N3>19</N3>
+      <N4>20</N4>
+      <N5>21</N5>
+      <N6>22</N6>
+      <N7>23</N7>
+      <N8>24</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container_2</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>95</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>25</N1>
+      <N2>26</N2>
+      <N3>27</N3>
+      <N4>28</N4>
+      <N5>29</N5>
+      <N6>30</N6>
+      <N7>31</N7>
+      <N8>32</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container_3</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>140</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>33</N1>
+      <N2>34</N2>
+      <N3>35</N3>
+      <N4>36</N4>
+      <N5>37</N5>
+      <N6>38</N6>
+      <N7>39</N7>
+      <N8>40</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container_4</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>185</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>41</N1>
+      <N2>42</N2>
+      <N3>43</N3>
+      <N4>44</N4>
+      <N5>45</N5>
+      <N6>46</N6>
+      <N7>47</N7>
+      <N8>48</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container_5</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>230</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>49</N1>
+      <N2>50</N2>
+      <N3>51</N3>
+      <N4>52</N4>
+      <N5>53</N5>
+      <N6>54</N6>
+      <N7>55</N7>
+      <N8>56</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container_6</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>275</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>57</N1>
+      <N2>58</N2>
+      <N3>59</N3>
+      <N4>60</N4>
+      <N5>61</N5>
+      <N6>62</N6>
+      <N7>63</N7>
+      <N8>64</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container_7</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>320</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>m</M>
+      <N1>65</N1>
+      <N2>66</N2>
+      <N3>67</N3>
+      <N4>68</N4>
+      <N5>69</N5>
+      <N6>70</N6>
+      <N7>71</N7>
+      <N8>72</N8>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>40</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>false</zoom_to_fit>
+    <height>278</height>
+    <border_width>1</border_width>
+    <name>Linking Container_8</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>40</y>
+    <actions hook="false" />
+    <opi_file>motorStatus8_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="218" green="218" blue="218" />
+    </background_color>
+    <x>365</x>
+    <tooltip />
+  </widget>
+</display>

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display typeId="org.csstudio.opibuilder.Display" version="1.0">
+  <auto_zoom_to_fit_all>false</auto_zoom_to_fit_all>
+  <macros>
+    <include_parent_macros>true</include_parent_macros>
+  </macros>
+  <scripts />
+  <show_ruler>true</show_ruler>
+  <height>200</height>
+  <name>motor2x</name>
+  <snap_to_geometry>false</snap_to_geometry>
+  <show_grid>false</show_grid>
+  <background_color>
+    <color name="Gray_3" />
+  </background_color>
+  <foreground_color>
+    <color name="Gray_14" />
+  </foreground_color>
+  <widget_type>Display</widget_type>
+  <show_close_button>true</show_close_button>
+  <width>596</width>
+  <rules />
+  <show_edit_range>true</show_edit_range>
+  <grid_space>5</grid_space>
+  <actions hook="false" />
+  <y>140</y>
+  <x>55</x>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>$(M1)</M>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>116</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>true</zoom_to_fit>
+    <height>200</height>
+    <border_width>1</border_width>
+    <name>Linking Container</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>0</y>
+    <actions hook="false" />
+    <opi_file>motorx_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200" />
+    </background_color>
+    <x>0</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>$(M2)</M>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>116</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>true</zoom_to_fit>
+    <height>200</height>
+    <border_width>1</border_width>
+    <name>Linking Container_1</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>0</y>
+    <actions hook="false" />
+    <opi_file>motorx_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200" />
+    </background_color>
+    <x>120</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>$(M3)</M>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>116</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>true</zoom_to_fit>
+    <height>200</height>
+    <border_width>1</border_width>
+    <name>Linking Container_2</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>0</y>
+    <actions hook="false" />
+    <opi_file>motorx_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200" />
+    </background_color>
+    <x>240</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>$(M4)</M>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>116</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>true</zoom_to_fit>
+    <height>200</height>
+    <border_width>1</border_width>
+    <name>Linking Container_3</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>0</y>
+    <actions hook="false" />
+    <opi_file>motorx_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200" />
+    </background_color>
+    <x>360</x>
+    <tooltip />
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.linkingContainer" version="1.0">
+    <group_name />
+    <enabled>true</enabled>
+    <widget_type>Linking Container</widget_type>
+    <macros>
+      <include_parent_macros>true</include_parent_macros>
+      <M>$(M5)</M>
+    </macros>
+    <visible>true</visible>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>116</width>
+    <border_style>0</border_style>
+    <auto_size>false</auto_size>
+    <rules />
+    <scripts />
+    <zoom_to_fit>true</zoom_to_fit>
+    <height>200</height>
+    <border_width>1</border_width>
+    <name>Linking Container_4</name>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>0</y>
+    <actions hook="false" />
+    <opi_file>motorx_bare.opi</opi_file>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200" />
+    </background_color>
+    <x>480</x>
+    <tooltip />
+  </widget>
+</display>
