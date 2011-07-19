@@ -628,7 +628,8 @@ static void motorSimProcess( AXIS_HDL pAxis, double delta )
 
   motorParam->setDouble(  pAxis->params, motorAxisPosition,      (pAxis->nextpoint.axis[0].p+pAxis->enc_offset) );
   motorParam->setDouble(  pAxis->params, motorAxisEncoderPosn,   (pAxis->nextpoint.axis[0].p+pAxis->enc_offset) );
-  motorParam->setInteger( pAxis->params, motorAxisDirection,     (pAxis->nextpoint.axis[0].v >  0) );
+  if (pAxis->nextpoint.axis[0].v != 0)
+    motorParam->setInteger( pAxis->params, motorAxisDirection,     (pAxis->nextpoint.axis[0].v <  0) );
   motorParam->setInteger( pAxis->params, motorAxisDone,          done );
   motorParam->setInteger( pAxis->params, motorAxisHighHardLimit, (pAxis->nextpoint.axis[0].p >= pAxis->hiHardLimit) );
   motorParam->setInteger( pAxis->params, motorAxisHomeSignal,    (pAxis->nextpoint.axis[0].p == pAxis->home) );
