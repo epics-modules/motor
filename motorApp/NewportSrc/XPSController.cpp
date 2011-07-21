@@ -225,7 +225,6 @@ void XPSController::report(FILE *fp, int level)
 
 /**
  * Perform a deferred move (a coordinated group move) on all the axes in a group.
- * @param pController Pointer to XPSController structure.
  * @param groupName Pointer to string naming the group on which to perform the group move.
  * @return motor driver status code.
  */
