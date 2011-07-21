@@ -379,7 +379,6 @@ asynStatus motorSimAxis::poll(bool *moving)
   This routine takes a single axis and propogates its motion forward a given amount
   of time.
 
-  \param pAxis  [in]   Pointer to axis information.
   \param delta  [in]   Time in seconds to propogate motion forwards.
 
   \return Integer indicating 0 (asynSuccess) for success or non-zero for failure. 
