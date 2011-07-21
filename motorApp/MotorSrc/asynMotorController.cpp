@@ -314,7 +314,7 @@ asynStatus asynMotorController::writeFloat64Array(asynUser *pasynUser, epicsFloa
   * \param[in] pasynUser pasynUser structure that encodes the reason and address.
   * \param[in] value Pointer to the array to read.
   * \param[in] nElements Maximum number of elements to read. 
-  * \param[in] Number of values actually returned */
+  * \param[in] nRead Number of values actually returned */
 asynStatus asynMotorController::readFloat64Array(asynUser *pasynUser, epicsFloat64 *value,
                                                  size_t nElements, size_t *nRead)
 {
