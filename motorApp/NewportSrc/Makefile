@@ -10,8 +10,9 @@ include $(TOP)/configure/CONFIG
 INC += XPS_C8_drivers.h
 
 DBD += devNewport.dbd
+DBD += devNewportModel3.dbd
 
-LIBRARY_IOC = Newport
+LIBRARY_IOC = Newport NewportModel2 NewportModel3
 
 Newport_SRCS += NewportRegister.cc
 
@@ -37,12 +38,12 @@ Newport_SRCS += XPS_C8_drivers.cpp
 Newport_SRCS += drvXPSAsynAux.c
 Newport_SRCS += xps_ftp.c
 # This is the model 2 asyn driver
-#Newport_SRCS += drvXPSAsyn.c XPSAsynInterpose.c
+NewportModel2_SRCS += drvXPSAsyn.c XPSAsynInterpose.c
 # This is the model 3 asyn driver
-Newport_SRCS += XPSController.cpp
-Newport_SRCS += XPSAxis.cpp
+NewportModel3_SRCS += XPSController.cpp
+NewportModel3_SRCS += XPSAxis.cpp
 ifdef SNCSEQ
-Newport_SRCS += XPS_trajectoryScan.st
+NewportModel2_SRCS += XPS_trajectoryScan.st
 endif
 
 # strtok_r needed on WIN32
