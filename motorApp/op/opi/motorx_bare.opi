@@ -755,7 +755,7 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <text>Calibrate</text>
     <font>
-      <fontdata fontName="Sans" height="6" style="0" />
+      <fontdata fontName="Sans" height="8" style="0" />
     </font>
     <width>60</width>
     <border_style>0</border_style>
@@ -844,9 +844,9 @@ $(pv_value)</tooltip>
     <text>Go</text>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <font>
-      <opifont.name>Default</opifont.name>
+      <fontdata fontName="Sans" height="10" style="0" />
     </font>
-    <width>21</width>
+    <width>23</width>
     <push_action_index>0</push_action_index>
     <border_style>0</border_style>
     <image />
@@ -867,7 +867,7 @@ $(pv_value)</tooltip>
     </actions>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-    <x>52</x>
+    <x>50</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
@@ -890,7 +890,7 @@ $(pv_value)</tooltip>
     <font>
       <fontdata fontName="Sans" height="8" style="0" />
     </font>
-    <width>30</width>
+    <width>28</width>
     <border_style>0</border_style>
     <rules />
     <border_width>1</border_width>
@@ -946,7 +946,7 @@ $(pv_value)</tooltip>
     </actions>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-    <x>30</x>
+    <x>28</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.ActionButton" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -1098,7 +1098,7 @@ $(pv_value)</tooltip>
     <text>&lt;</text>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <font>
-      <opifont.name>Default</opifont.name>
+      <fontdata fontName="Sans" height="18" style="0" />
     </font>
     <width>25</width>
     <push_action_index>0</push_action_index>
@@ -1152,7 +1152,7 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Sans" height="14" style="0" />
+      <fontdata fontName="Sans" height="12" style="0" />
     </font>
     <width>60</width>
     <border_style>3</border_style>
@@ -1189,7 +1189,7 @@ $(pv_value)</tooltip>
     <text>&gt;</text>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <font>
-      <opifont.name>Default</opifont.name>
+      <fontdata fontName="Sans" height="18" style="0" />
     </font>
     <width>25</width>
     <push_action_index>0</push_action_index>
@@ -1243,7 +1243,7 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Sans" height="18" style="0" />
+      <fontdata fontName="Sans" height="16" style="0" />
     </font>
     <width>98</width>
     <border_style>3</border_style>
@@ -1323,7 +1323,7 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <text>($(P)$(M))</text>
     <font>
-      <fontdata fontName="Sans" height="6" style="0" />
+      <fontdata fontName="Sans" height="8" style="0" />
     </font>
     <width>116</width>
     <border_style>0</border_style>
@@ -1401,7 +1401,7 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <text>Soft limit</text>
     <font>
-      <fontdata fontName="Sans" height="6" style="0" />
+      <fontdata fontName="Sans" height="8" style="0" />
     </font>
     <width>60</width>
     <border_style>0</border_style>
