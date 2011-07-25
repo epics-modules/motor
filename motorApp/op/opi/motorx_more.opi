@@ -2576,4 +2576,162 @@ $(pv_value)</tooltip>
 $(pv_value)</tooltip>
     <x>305</x>
   </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.MenuButton" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <actions_from_pv>false</actions_from_pv>
+    <scripts />
+    <height>20</height>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Menu Button_1</name>
+    <transparent>false</transparent>
+    <pv_name />
+    <background_color>
+      <color name="MEDM_COLOR_17" />
+    </background_color>
+    <foreground_color>
+      <color name="Gray_0" />
+    </foreground_color>
+    <widget_type>Menu Button</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>60</width>
+    <border_style>6</border_style>
+    <label>More</label>
+    <rules />
+    <border_width>1</border_width>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>-247</y>
+    <actions hook="false">
+      <action type="OPEN_DISPLAY">
+        <path>motorx_tiny.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>true</replace>
+        <description>$(M) (Tiny)</description>
+      </action>
+      <action type="OPEN_DISPLAY">
+        <path>motorx.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>true</replace>
+        <description>$(M) (Small)</description>
+      </action>
+      <action type="OPEN_DISPLAY">
+        <path>motorx_setup.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>true</replace>
+        <description>$(M) (Setup)</description>
+      </action>
+      <action type="OPEN_DISPLAY">
+        <path>scanParms.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+          <Q>$(M)</Q>
+          <PV>$(M)</PV>
+        </macros>
+        <replace>true</replace>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="OPEN_DISPLAY">
+        <path>motorx_all.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>true</replace>
+        <description>$(M) (Debug)</description>
+      </action>
+    </actions>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>279</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.MenuButton" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <actions_from_pv>false</actions_from_pv>
+    <scripts />
+    <height>20</height>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Menu Button_3</name>
+    <transparent>false</transparent>
+    <pv_name />
+    <background_color>
+      <color name="MEDM_COLOR_17" />
+    </background_color>
+    <foreground_color>
+      <color name="Gray_0" />
+    </foreground_color>
+    <widget_type>Menu Button</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>60</width>
+    <border_style>6</border_style>
+    <label>More</label>
+    <rules />
+    <border_width>1</border_width>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>-315</y>
+    <actions hook="false">
+      <action type="OPEN_DISPLAY">
+        <path>motorx_tiny.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>true</replace>
+        <description>$(M) (Tiny)</description>
+      </action>
+      <action type="OPEN_DISPLAY">
+        <path>motorx.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>true</replace>
+        <description>$(M) (Small)</description>
+      </action>
+      <action type="OPEN_DISPLAY">
+        <path>motorx_setup.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>true</replace>
+        <description>$(M) (Setup)</description>
+      </action>
+      <action type="OPEN_DISPLAY">
+        <path>scanParms.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+          <Q>$(M)</Q>
+          <PV>$(M)</PV>
+        </macros>
+        <replace>true</replace>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="OPEN_DISPLAY">
+        <path>motorx_all.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>true</replace>
+        <description>$(M) (Debug)</description>
+      </action>
+    </actions>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>412</x>
+  </widget>
 </display>
