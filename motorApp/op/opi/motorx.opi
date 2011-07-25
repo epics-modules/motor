@@ -37,7 +37,7 @@
       <opifont.name>Default</opifont.name>
     </font>
     <width>116</width>
-    <border_style>3</border_style>
+    <border_style>0</border_style>
     <auto_size>false</auto_size>
     <rules />
     <scripts />
