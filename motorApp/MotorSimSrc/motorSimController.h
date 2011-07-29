@@ -40,4 +40,5 @@ private:
   epicsThreadId motorThread_;
   epicsTimeStamp prevTime_;
   int movesDeferred_;
+  bool initialized;
 };

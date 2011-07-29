@@ -75,7 +75,8 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
                          asynInt32Mask | asynFloat64Mask,
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
-                         priority, stackSize)
+                         priority, stackSize),
+                         initialized(false)
 {
   motorSimControllerNode *pNode;
   
@@ -108,6 +109,7 @@ asynStatus motorSimController::postInitDriver()
     pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
     pAxis->initializeAxis();
   }
+  initialized = true; // Make poller wait on this indicator.
   return asynSuccess;
 }
 
@@ -260,6 +262,9 @@ void motorSimController::motorSimTask()
   double delta;
   int axis;
   motorSimAxis *pAxis;
+
+  while(initialized == false)
+    epicsThreadSleep(1.0);
 
   while ( 1 )
   {
@@ -504,10 +509,8 @@ int motorSimAxis::getNumParams()
 /** Configuration command, called directly or from iocsh */
 extern "C" int motorSimCreateController(const char *portName, int numAxes, int priority, int stackSize)
 {
-  motorSimController *pSimController
-    = new motorSimController(portName,numAxes, priority, stackSize);
+  motorSimController *pSimController = new motorSimController(portName,numAxes, priority, stackSize);
   pSimController->initializePortDriver();
-  pSimController = NULL;
   return(asynSuccess);
 }
 
