@@ -305,7 +305,7 @@ asynStatus XPSAxis::home(double min_velocity, double max_velocity, double accele
   }
   status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
   /* If axis not initialized, then initialize it */
-  if (groupStatus >= 0 && groupStatus <= 9) {
+  if ((groupStatus >= 0 && groupStatus <= 9) || (groupStatus == 50) || (groupStatus == 63)) {
     status = GroupInitialize(pollSocket_, groupName_);
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
