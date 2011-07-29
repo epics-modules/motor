@@ -425,6 +425,9 @@ asynStatus XPSAxis::setPosition(double position)
                                            "None", 
                                            position*(stepSize_));
     /* Stop referencing, then we are homed on all axes in group.*/
+    /*Some types of XPS axes (eg. spindle) need a sleep here, otherwise 
+      the axis can be left in referencing mode.*/
+    epicsThreadSleep(0.05);
     status = GroupReferencingStop(pollSocket_, 
                                   groupName_);
     if (status) {
