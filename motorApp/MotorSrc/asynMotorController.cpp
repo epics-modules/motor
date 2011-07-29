@@ -8,7 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iostream>
+using std::endl;
+using std::cout;
+
 #include <epicsThread.h>
+#include <epicsExport.h>
+#include <iocsh.h>
 
 #include <asynPortDriver.h>
 #define epicsExportSharedSymbols
@@ -18,6 +24,8 @@
 
 static const char *driverName = "asynMotorController";
 static void asynMotorPollerC(void *drvPvt);
+static void asynMotorMoveToHomeC(void *drvPvt);
+
 
 /** Creates a new asynMotorController object.
   * All of the arguments are simply passed to the constructor for the asynPortDriver base class. 
@@ -49,6 +57,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorPositionString,               asynParamFloat64,    &motorPosition_);
   createParam(motorEncoderPositionString,        asynParamFloat64,    &motorEncoderPosition_);
   createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves_);
+  createParam(motorMoveToHomeString,             asynParamInt32,      &motorMoveToHome_);
   createParam(motorResolutionString,             asynParamFloat64,    &motorResolution_);
   createParam(motorEncRatioString,               asynParamFloat64,    &motorEncRatio_);
   createParam(motorPgainString,                  asynParamFloat64,    &motorPgain_);
@@ -113,10 +122,13 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
 
   pAxes_ = (asynMotorAxis**) calloc(numAxes, sizeof(asynMotorAxis*));
   pollEventId_ = epicsEventMustCreate(epicsEventEmpty);
+  moveToHomeId_ = epicsEventMustCreate(epicsEventEmpty);
 
   maxProfilePoints_ = 0;
   profileTimes_ = NULL;
   setIntegerParam(profileExecuteState_, PROFILE_EXECUTE_DONE);
+
+  moveToHomeAxis_ = 0;
 
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
     "%s:%s: constructor complete\n",
@@ -168,6 +180,13 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     status = abortProfile();
   } else if (function == profileReadback_) {
     status = readbackProfile();
+  } else if (function == motorMoveToHome_) {
+    if (value == 1) {
+      asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+		"%s:%s:: Starting a move to home for axis %d\n",  driverName, functionName, axis);
+      moveToHomeAxis_ = axis;
+      epicsEventSignal(moveToHomeId_);
+    }
   }
 
   /* Do callbacks so higher layers see any changes */
@@ -418,6 +437,7 @@ asynStatus asynMotorController::startPoller(double movingPollPeriod, double idle
   return asynSuccess;
 }
 
+
 /** Wakes up the poller thread to make it start polling at the movingPollingPeriod_.
   * This is typically called after an axis has been told to move, so the poller immediately
   * starts polling quickly. */
@@ -501,6 +521,55 @@ void asynMotorController::asynMotorPoller()
     unlock();
   }
 }
+
+/**
+ * Start the thread which deals with moving axes to their home position.
+ * This is called by the derived concrete controller class at object instatiation, so
+ * that drivers that don't need this functionality don't have the overhead of the thread.
+ */
+asynStatus asynMotorController::startMoveToHomeThread()
+{
+  epicsThreadCreate("motorMoveToHome", 
+                    epicsThreadPriorityMedium,
+                    epicsThreadGetStackSize(epicsThreadStackMedium),
+                    (EPICSTHREADFUNC)asynMotorMoveToHomeC, (void *)this);
+  return asynSuccess;
+}
+
+static void asynMotorMoveToHomeC(void *drvPvt)
+{
+  asynMotorController *pController = (asynMotorController*)drvPvt;
+  pController->asynMotorMoveToHome();
+}
+
+
+
+/**
+ * Default move to home thread. Not normally overridden.
+ */
+void asynMotorController::asynMotorMoveToHome()
+{
+  
+  asynMotorAxis *pAxis;
+  int status = 0;
+  static const char *functionName = "asynMotorMoveToHome";
+
+  while(1) {
+    status = epicsEventWait(moveToHomeId_);
+    if (status == epicsEventWaitOK) { 
+      pAxis = getAxis(this->moveToHomeAxis_);
+      if (!pAxis) continue;
+      status = pAxis->doMoveToHome();
+      if (status) {
+	asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+      "%s:%s: move to home failed in asynMotorController::asynMotorMoveToHome. Axis number=%d\n", 
+      driverName, functionName, this->moveToHomeAxis_);
+      }
+    } 
+  } 
+}
+
+
 
 /* These are the functions for profile moves */
 /** Initialize a profile move of multiple axes. */
@@ -589,3 +658,61 @@ asynStatus asynMotorController::readbackProfile()
   }
   return asynSuccess;
 }
+
+
+
+/** The following functions have C linkage, and can be called directly or from iocsh */
+
+extern "C" {
+
+
+asynStatus asynMotorEnableMoveToHome(const char *portName, int axis, int distance)
+{
+  asynMotorController *pC = NULL;
+  asynMotorAxis *pA = NULL;
+  static const char *functionName = "asynMotorEnableMoveToHome";
+
+  pC = (asynMotorController*) findAsynPortDriver(portName);
+  if (!pC) {
+    cout << driverName << "::" << functionName << " Error port " << portName << " not found." << endl;
+    return asynError;
+  }
+  
+  pA = pC->getAxis(axis);
+  if (!pA) {
+    cout << driverName << "::" << functionName << " Error axis " << axis << " not found." << endl;
+    return asynError;
+  }
+
+  if (distance<=0) {
+    cout << "Error in asynMotorEnableMoveToHome. distance must be positive integer." << endl;
+  } else {
+    pA->setReferencingModeMove(distance);
+  }
+
+  return asynSuccess;
+}
+
+
+/* asynMotorEnableMoveToHome */
+static const iocshArg asynMotorEnableMoveToHomeArg0 = {"Controller port name", iocshArgString};
+static const iocshArg asynMotorEnableMoveToHomeArg1 = {"Axis number", iocshArgInt};
+static const iocshArg asynMotorEnableMoveToHomeArg2 = {"Distance", iocshArgInt};
+static const iocshArg * const asynMotorEnableMoveToHomeArgs[] = {&asynMotorEnableMoveToHomeArg0,
+                                                                 &asynMotorEnableMoveToHomeArg1,
+                                                                 &asynMotorEnableMoveToHomeArg2};
+static const iocshFuncDef enableMoveToHome = {"asynMotorEnableMoveToHome", 3, asynMotorEnableMoveToHomeArgs};
+
+static void enableMoveToHomeCallFunc(const iocshArgBuf *args)
+{
+  asynMotorEnableMoveToHome(args[0].sval, args[1].ival, args[2].ival);
+}
+
+
+static void asynMotorControllerRegister(void)
+{
+  iocshRegister(&enableMoveToHome, enableMoveToHomeCallFunc);
+}
+epicsExportRegistrar(asynMotorControllerRegister);
+
+} //extern C

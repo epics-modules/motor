@@ -32,6 +32,7 @@ class epicsShareFunc asynMotorAxis {
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
   virtual asynStatus stop(double acceleration);
   virtual asynStatus poll(bool *moving);
+  virtual asynStatus doMoveToHome();
   virtual asynStatus setPosition(double position);
 
   virtual asynStatus initializeProfile(size_t maxPoints);
@@ -41,6 +42,9 @@ class epicsShareFunc asynMotorAxis {
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
 
+  void setReferencingModeMove(int distance);
+  int getReferencingModeMove();
+
   protected:
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
                                       *   Abbreviated because it is used very frequently */
@@ -49,10 +53,12 @@ class epicsShareFunc asynMotorAxis {
   double *profilePositions_;         /**< Array of target positions for profile moves */
   double *profileReadbacks_;         /**< Array of readback positions for profile moves */
   double *profileFollowingErrors_;   /**< Array of following errors for profile moves */   
+  int referencingMode_;
 
   private:
   MotorStatus status_;
   int statusChanged_;
+  int referencingModeMove_;
   
   friend class asynMotorController;
 };

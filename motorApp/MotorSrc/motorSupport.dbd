@@ -4,5 +4,6 @@ registrar(motorUtilRegister)
 #variable(motordrvComdebug)
 #variable(motorUtil_debug)
 registrar(motorRegister)
+registrar(asynMotorControllerRegister)
 device(motor,INST_IO,devMotorAsyn,"asynMotor")
 

@@ -158,6 +158,10 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus poll();
   void asynMotorPoller();  // This should be private but is called from C function
   
+  /* Functions to deal with moveToHome.*/
+  virtual asynStatus startMoveToHomeThread();
+  void asynMotorMoveToHome();
+
   /* These are the functions for profile moves */
   virtual asynStatus initializeProfile(size_t maxPoints);
   virtual asynStatus buildProfile();
@@ -183,6 +187,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   int motorPosition_;
   int motorEncoderPosition_;
   int motorDeferMoves_;
+  int motorMoveToHome_;
   int motorResolution_;
   int motorEncRatio_;
   int motorPgain_;
@@ -251,12 +256,15 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   int numAxes_;                 /**< Number of axes this controller supports */
   asynMotorAxis **pAxes_;       /**< Array of pointers to axis objects */
   epicsEventId pollEventId_;    /**< Event ID to wake up poller */
+  epicsEventId moveToHomeId_;    /**< Event ID to wake up move to home thread */
   double idlePollPeriod_;       /**< The time between polls when no axes are moving */
   double movingPollPeriod_;     /**< The time between polls when any axis is moving */
   int    forcedFastPolls_;      /**< The number of forced fast polls when the poller wakes up */
  
   size_t maxProfilePoints_;     /**< Maximum number of profile points */
   double *profileTimes_;        /**< Array of times per profile point */
+
+  int moveToHomeAxis_;
 
   friend class asynMotorAxis;
 };
