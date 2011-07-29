@@ -554,6 +554,14 @@ asynStatus XPSAxis::poll(bool *moving)
   axisDone &= !deferredMove_;
   *moving = axisDone ? false : true;
   setIntegerParam(pC_->motorStatusDone_, axisDone);
+
+  /*Read the controller software limits in case these have been changed by a TCL script.*/
+  status = PositionerUserTravelLimitsGet(pollSocket_, positionerName_, &lowLimit_, &highLimit_);
+  if (status == 0) {
+    setDoubleParam(pC_->motorHighLimit_, (highLimit_/stepSize_));
+    setDoubleParam(pC_->motorLowLimit_, (lowLimit_/stepSize_));
+  }
+
   setIntegerParam(pC_->motorStatusHome_, (axisStatus_ == 11) ? 1 : 0);
   if ((axisStatus_ >= 0 && axisStatus_ <= 9) || 
     (axisStatus_ >= 20 && axisStatus_ <= 42)) {
