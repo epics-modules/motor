@@ -84,6 +84,10 @@ Versions: Release 4-5 and higher.
 #include <string.h>
 #include <math.h>
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 #include <epicsTime.h>
 #include <epicsThread.h>
 #include <epicsExport.h>
@@ -344,10 +348,11 @@ asynStatus XPSAxis::moveVelocity(double min_velocity, double max_velocity, doubl
   status = GroupJogParametersSet(moveSocket_, positionerName_, 1, &deviceVelocity, &deviceAcceleration);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-              "%s:%s: [%s,%d]: error calling GroupJogParametersSet error=%d\n",
-              driverName, functionName, pC_->portName, axisNo_, status);
+	       "%s:%s: [%s,%d]: error calling GroupJogParametersSet error=%d\n",
+	       driverName, functionName, pC_->portName, axisNo_, status);
     return asynError;
   }
+
   return asynSuccess;
 }
 
@@ -473,8 +478,6 @@ asynStatus XPSAxis::setPosition(double position)
 asynStatus XPSAxis::stop(double acceleration)
 {
   int status;
-  double deviceVelocity=0.;
-  double deviceAcceleration;
   static const char *functionName = "stopAxis";
 
   /* We need to read the status, because a jog is stopped differently from a move */ 
@@ -485,22 +488,23 @@ asynStatus XPSAxis::stop(double acceleration)
               driverName, functionName, pC_->portName, axisNo_, status);
     return asynError;
   }
-  if (axisStatus_ == 47) {
-    deviceAcceleration = acceleration * stepSize_;
-    status = GroupJogParametersSet(moveSocket_, positionerName_, 1, &deviceVelocity, &deviceAcceleration);
-    if (status) {
-      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-                "%s:%s: [%s,%d]: error calling GroupJogParametersSet status=%d\n",
-                driverName, functionName, pC_->portName, axisNo_, status);
-      return asynError;
-    }
-  }
   
-  if (axisStatus_ == 44) {
+  if ((axisStatus_ == 44) || (axisStatus_ == 45) || (axisStatus_ == 47)) {
     status = GroupMoveAbort(moveSocket_, groupName_);
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
                 "%s:%s: [%s,%d]: error calling GroupMoveAbort status=%d\n",
+                driverName, functionName, pC_->portName, axisNo_, status);
+      GroupMoveAbort(moveSocket_, groupName_);
+      return asynError;
+    }
+  }
+
+  if (axisStatus_ == 43) {
+    status = GroupKill(moveSocket_, groupName_);
+    if (status) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: [%s,%d]: error calling GroupKill status=%d\n",
                 driverName, functionName, pC_->portName, axisNo_, status);
       return asynError;
     }
@@ -520,7 +524,6 @@ asynStatus XPSAxis::poll(bool *moving)
 {
   int status;
   int axisDone;
-  double actualVelocity, theoryVelocity, acceleration;
   static const char *functionName = "poll";
 
   status = GroupStatusGet(pollSocket_, 
@@ -543,31 +546,6 @@ asynStatus XPSAxis::poll(bool *moving)
   if (axisStatus_ >= 43 && axisStatus_ <= 48) {
     /* These states mean it is moving/homeing/jogging etc*/
     axisDone = 0;
-    if (axisStatus_ == 47) {
-      /* We are jogging.  When the velocity gets back to 0 disable jogging */
-      status = GroupJogParametersGet(pollSocket_, positionerName_, 1, &theoryVelocity, &acceleration);
-      status = GroupJogCurrentGet(pollSocket_, positionerName_, 1, &actualVelocity, &acceleration);
-      if (status) {
-        asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-                  "%s:%s: [%s,%d]: error calling GroupJogCurrentGet status=%d\n",
-                  driverName, functionName, pC_->portName, axisNo_, status);
-        goto done;
-      }
-      if (actualVelocity == 0. && theoryVelocity == 0.) {
-        status = GroupJogModeDisable(pollSocket_, groupName_);
-        if (status) {
-          asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-                    "%s:%s: [%s,%d]: error calling GroupJogModeDisable status=%d\n",
-                    driverName, functionName, pC_->portName, axisNo_, status);
-          /* In this mode must do a group kill? */
-          status = GroupKill(pollSocket_, groupName_);
-          asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-                    "%s:%s: [%s,%d]: called GroupKill!\n",
-                    driverName, functionName, pC_->portName, axisNo_);
-          goto done;
-        }
-      } 
-    }
   }
   /* Set the status */
   setIntegerParam(pC_->XPSStatus_, axisStatus_);
@@ -674,7 +652,6 @@ char *XPSAxis::getXPSError(int status, char *buffer)
 /**
  * Test if axis is configured as an XPS single axis or a group.
  * This is done by comparing cached group names.
- * @param pAxis Axis struct AXIS_HDL
  * @return 1 if in group single group, or return the number of axes in the group.
  */
 int XPSAxis::isInGroup()
@@ -922,8 +899,7 @@ asynStatus XPSAxis::setPIDValue(const double * value, int pidoption)
 
 /**
  * Wrapper function for PositionerCorrectorPIPositionGet.
- * It will set parameters in a AXIS_HDL struct.
- * @param pAxis Axis struct AXIS_HDL.
+ * It will set parameters in this object..
  * @return Return value from XPS function.
  */
 asynStatus XPSAxis::PositionerCorrectorPIPositionGet()
@@ -940,8 +916,7 @@ asynStatus XPSAxis::PositionerCorrectorPIPositionGet()
 
 /**
  * Wrapper function for PositionerCorrectorPIDFFVelocityGet.
- * It will set parameters in a AXIS_HDL struct.
- * @param pAxis Axis struct AXIS_HDL.
+ * It will set parameters in this object..
  * @return Return value from XPS function.
  */
 asynStatus XPSAxis::PositionerCorrectorPIDFFVelocityGet()
@@ -967,8 +942,7 @@ asynStatus XPSAxis::PositionerCorrectorPIDFFVelocityGet()
 
 /**
  * Wrapper function for PositionerCorrectorPIDFFAccelerationGet.
- * It will set parameters in a AXIS_HDL struct.
- * @param pAxis Axis struct AXIS_HDL.
+ * It will set parameters in this object..
  * @return Return value from XPS function.
  */
 asynStatus XPSAxis::PositionerCorrectorPIDFFAccelerationGet()
@@ -994,8 +968,7 @@ asynStatus XPSAxis::PositionerCorrectorPIDFFAccelerationGet()
 
 /**
  * Wrapper function for PositionerCorrectorPIDDualFFVoltageGet.
- * It will set parameters in a AXIS_HDL struct.
- * @param pAxis Axis struct AXIS_HDL.
+ * It will set parameters in this object..
  * @return Return value from XPS function.
  */
 asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageGet()
@@ -1023,7 +996,6 @@ asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageGet()
 
 /**
  * Wrapper function for PositionerCorrectorPIPositionSet.
- * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
 asynStatus XPSAxis::PositionerCorrectorPIPositionSet()
@@ -1041,7 +1013,6 @@ asynStatus XPSAxis::PositionerCorrectorPIPositionSet()
 
 /**
  * Wrapper function for PositionerCorrectorPIDFFVelocitySet.
- * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
 asynStatus XPSAxis::PositionerCorrectorPIDFFVelocitySet()
@@ -1066,7 +1037,6 @@ asynStatus XPSAxis::PositionerCorrectorPIDFFVelocitySet()
 
 /**
  * Wrapper function for PositionerCorrectorPIDFFAccelerationSet.
- * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
 asynStatus XPSAxis:: PositionerCorrectorPIDFFAccelerationSet()
@@ -1091,7 +1061,6 @@ asynStatus XPSAxis:: PositionerCorrectorPIDFFAccelerationSet()
 
 /**
  * Wrapper function for PositionerCorrectorPIDDualFFVoltageSet.
- * @param pAxis Axis struct AXIS_HDL.
  * @return Return value from XPS function.
  */
 asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageSet()
