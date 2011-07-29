@@ -212,8 +212,8 @@ asynStatus XPSAxis::move(double position, int relative, double min_velocity, dou
 
   /* Look at the last poll value of the positioner status.  If it is disabled, then enable it */
   /* This can be disabled by calling XPSDisableAutoEnable() at the IOC shell.*/
-  if (pC_->autoEnable_) {
-    if (axisStatus_ >= 20 && axisStatus_ <= 36) {
+  if (axisStatus_ >= 20 && axisStatus_ <= 36) {
+    if (pC_->autoEnable_) {
       status = GroupMotionEnable(pollSocket_, groupName_);
       if (status) {
 	asynPrint(pasynUser_, ASYN_TRACE_ERROR,
@@ -222,11 +222,12 @@ asynStatus XPSAxis::move(double position, int relative, double min_velocity, dou
 	/* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
 	return asynError;
       }
+    } else {
+      //Return error if a move is attempted and auto enable is turned off.
+      return asynError;
     }
-  } else {
-    //Return error if a move is attempted and auto enable is turned off.
-    return asynError;
   }
+  
   status = PositionerSGammaParametersSet(pollSocket_,
                                          positionerName_, 
                                          max_velocity*stepSize_,
