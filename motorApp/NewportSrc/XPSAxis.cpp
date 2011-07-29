@@ -211,15 +211,21 @@ asynStatus XPSAxis::move(double position, int relative, double min_velocity, dou
             driverName, functionName, pC_->portName, axisNo_, position, min_velocity, max_velocity, acceleration, minJerk, maxJerk);
 
   /* Look at the last poll value of the positioner status.  If it is disabled, then enable it */
-  if (axisStatus_ >= 20 && axisStatus_ <= 36) {
-    status = GroupMotionEnable(pollSocket_, groupName_);
-    if (status) {
-      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-                "%s:%s: motorAxisMove[%s,%d]: error performing GroupMotionEnable %d\n",
-                driverName, functionName, pC_->portName, axisNo_, status);
-      /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
-      return asynError;
+  /* This can be disabled by calling XPSDisableAutoEnable() at the IOC shell.*/
+  if (pC_->autoEnable_) {
+    if (axisStatus_ >= 20 && axisStatus_ <= 36) {
+      status = GroupMotionEnable(pollSocket_, groupName_);
+      if (status) {
+	asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+		  "%s:%s: motorAxisMove[%s,%d]: error performing GroupMotionEnable %d\n",
+		  driverName, functionName, pC_->portName, axisNo_, status);
+	/* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
+	return asynError;
+      }
     }
+  } else {
+    //Return error if a move is attempted and auto enable is turned off.
+    return asynError;
   }
   status = PositionerSGammaParametersSet(pollSocket_,
                                          positionerName_, 

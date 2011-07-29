@@ -55,6 +55,9 @@ class XPSController : public asynMotorController {
   asynStatus processDeferredMoves();
   asynStatus processDeferredMovesInGroup(char * groupName);
 
+  /*Disable automatic enable of axes.*/
+  asynStatus disableAutoEnable();
+
   protected:
   XPSAxis **pAxes_;       /**< Array of pointers to axis objects */
 
@@ -82,6 +85,7 @@ class XPSController : public asynMotorController {
   char firmwareVersion_[100];
   int movesDeferred_;
   epicsEventId profileExecuteEvent_;
+  int autoEnable_;
   
   friend class XPSAxis;
 };
