@@ -188,6 +188,9 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
    * NOTE: at this point the axis objects don't yet exist, but the poller tolerates this */
   startPoller(movingPollPeriod, idlePollPeriod, 10);
   
+  /* Start the thread that will handle move to home commands.*/
+  startMoveToHomeThread();
+
   // Create the event that wakes up the thread for profile moves
   profileExecuteEvent_ = epicsEventMustCreate(epicsEventEmpty);
   

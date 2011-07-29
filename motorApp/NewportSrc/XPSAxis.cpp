@@ -100,6 +100,7 @@ using std::endl;
 
 #define XPSC8_END_OF_RUN_MINUS  0x80000100
 #define XPSC8_END_OF_RUN_PLUS   0x80000200
+#define XPSC8_ZM_HIGH_LEVEL     0x00000004
 /** Deadband to use for the velocity comparison with zero. */
 #define XPS_VELOCITY_DEADBAND 0.0000001
 
@@ -193,9 +194,6 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
   /* NOTE: this will require PID to be allowed to be set greater than 1 in motor record. */
   /* And we need to implement this in Asyn layer. */
   getPID();
-
-  /* Used to keep track of referencing mode in the driver.*/
-  referencingMode_ = 0;
 
   /* Wake up the poller task which will make it do a poll, 
    * updating values for this axis to use the new resolution (stepSize_) */   
@@ -297,6 +295,15 @@ asynStatus XPSAxis::home(double min_velocity, double max_velocity, double accele
   int groupStatus;
   char errorBuffer[100];
   static const char *functionName = "home";
+
+  /* Find out if any axes are in the same group, and set referencing mode for them all.*/
+  XPSAxis *pTempAxis = NULL;
+  for (int axis=0; axis<pC_->numAxes_; axis++) {
+    pTempAxis = pC_->getAxis(axis);
+    if (strcmp(groupName_, pTempAxis->groupName_) == 0) {
+      pTempAxis->referencingMode_ = 0;
+    }  
+  }
 
   status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
   /* The XPS won't allow a home command if the group is in the Ready state
@@ -1174,6 +1181,164 @@ asynStatus XPSAxis::readbackProfile()
 }
 
 
+/**
+ * XPS implementation of the move to home function
+ *
+ * It first does a kill, followed by a referencing start/stop 
+ * sequence on an group. Then uses the hardware status to
+ * determine which direction to move.
+ * The distance to move is set when enabling this functionality
+ * (it is disabled by default, because it only applies to
+ * stages with home switches in the middle of travel).
+ *
+ */
+asynStatus XPSAxis::doMoveToHome(void) 
+{
+  int status = 0;
+  int axis = 0;
+  int groupStatus = 0;
+  int initialHardwareStatus = 0;
+  int hardwareStatus = 0;
+  double defaultDistance = 0;
+  double vel=0;
+  double accel=0;
+  double minJerk=0;
+  double maxJerk=0;
+  static const char * functionName = "XPSAxis::doMoveToHome";
 
+  XPSAxis *pTempAxis = NULL;
+
+  if (getReferencingModeMove() == 0) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s: This function has not been enabled for axis %d\n",
+              driverName, functionName, axisNo_);
+    return asynError;
+  }
+
+  defaultDistance = (double) getReferencingModeMove();
+  
+  /*NOTE: the XPS has some race conditions in its firmware. That's why I placed some
+    epicsThreadSleep calls between the XPS functions below.*/
+
+  /* The XPS won't allow a home command if the group is in the Ready state
+     * If the group is Ready, then make it not Ready  */
+  status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
+  if (groupStatus >= 10 && groupStatus <= 18) {
+    status = GroupKill(moveSocket_, groupName_);
+  }
+  epicsThreadSleep(0.05);
+  status = GroupInitialize(pollSocket_, groupName_);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: error calling GroupInitialize\n", driverName, functionName);
+    return asynError;
+  }
+  epicsThreadSleep(0.05);
+  status = GroupReferencingStart(moveSocket_, groupName_);
+  epicsThreadSleep(0.05);
+  status = GroupReferencingStop(moveSocket_, groupName_);
+  epicsThreadSleep(0.05);
+
+  status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
+  if (groupStatus != 11) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: error putting axis into referencing mode.\n", driverName, functionName);
+    return asynError;
+  }
+  
+  /* Find out if any axes are in the same group, and set referencing mode for them all.*/
+  for (axis=0; axis<pC_->numAxes_; axis++) {
+    pTempAxis = pC_->getAxis(axis);
+    if (strcmp(groupName_, pTempAxis->groupName_) == 0) {
+      pTempAxis->referencingMode_ = 1;
+    }  
+  }
+  
+  /*Set status bits correctly*/
+  pC_->lock();
+  setIntegerParam(pC_->motorStatusHomed_, 0);
+  setIntegerParam(pC_->motorStatusHome_, 0);
+  callParamCallbacks();
+  pC_->unlock();
+  
+  /*Read which side of the home switch we are on.*/
+  status = PositionerHardwareStatusGet(pollSocket_, positionerName_, &initialHardwareStatus);
+  if (status) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: error calling PositionerHardwareStatusGet.\n", driverName, functionName);
+    return asynError;
+  }
+  
+  if (!(XPSC8_ZM_HIGH_LEVEL & initialHardwareStatus)) {
+    defaultDistance = defaultDistance * -1.0;
+  }
+
+  /*I want to set a slow speed here, so as not to move at default (max) speed. The user must have chance to
+    stop things if it looks like it has past the home switch and is not stopping. First I need to read what is currently
+    set for velocity, and then I divide it by 2.*/
+  status = PositionerSGammaParametersGet(pollSocket_,
+                                         positionerName_, 
+                                         &vel, &accel, &minJerk, &maxJerk);
+  if (status != 0) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: Error performing PositionerSGammaParametersGet.\n", driverName, functionName);
+    GroupKill(moveSocket_, groupName_);
+    return asynError;
+
+  }
+  status = PositionerSGammaParametersSet(pollSocket_,
+                                         positionerName_, 
+                                         (vel/2), accel, minJerk, maxJerk);
+  if (status != 0) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: Error performing PositionerSGammaParametersSet.\n", driverName, functionName);
+    GroupKill(moveSocket_, groupName_);
+    return asynError;
+  }
+  epicsThreadSleep(0.05);
+  
+  /*Move in direction of home switch.*/
+  status = GroupMoveRelative(moveSocket_, positionerName_, 1,
+                             &defaultDistance); 
+  if (status != 0) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: Error performing GroupMoveRelative.\n", driverName, functionName);
+    /*Issue a kill here if we have failed to move.*/
+    status = GroupKill(moveSocket_, groupName_);
+    return asynError;
+  }
+  
+  epicsThreadSleep(0.1);
+
+  status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
+  
+  if (groupStatus == 44) {
+    while (1) {
+      epicsThreadSleep(0.2);
+      status = PositionerHardwareStatusGet(pollSocket_, positionerName_, &hardwareStatus);
+      if (hardwareStatus != initialHardwareStatus) {
+        break;
+      }
+      status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
+      if (groupStatus != 44) {
+        /* move finished for some other reason.*/
+	asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: Error performing GroupMoveRelative.\n", driverName, functionName);
+        /*Issue a kill here if we have failed to move.*/
+        status = GroupKill(moveSocket_, groupName_);
+        return asynError;
+      }
+    }
+  } else {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: Error performing GroupMoveRelative.\n", driverName, functionName);
+    /*Issue a kill here if we have failed to move.*/
+    status = GroupKill(moveSocket_, groupName_);
+    return asynError;
+  }
+
+  status = GroupMoveAbort(pollSocket_, groupName_);
+  if (status != 0) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: Error performing GroupMoveAbort.\n", driverName, functionName);
+    /*This should really have worked. Do a kill instead.*/
+    status = GroupKill(moveSocket_, groupName_);
+    return asynError;
+  }
+
+  return asynSuccess;
+
+}
 
 
