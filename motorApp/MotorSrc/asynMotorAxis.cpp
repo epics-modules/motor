@@ -151,6 +151,7 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
     }
   }
   // Call the base class method
+  pC_->setIntegerParam(axisNo_, pC_->motorStatus_, status);
   return pC_->setIntegerParam(axisNo_, function, value);
 }
 
@@ -192,8 +193,6 @@ asynStatus asynMotorAxis::callParamCallbacks()
   }
   return pC_->callParamCallbacks(axisNo_);
 }
-
-
 
 /* These are the functions for profile moves */
 asynStatus asynMotorAxis::initializeProfile(size_t maxProfilePoints)
