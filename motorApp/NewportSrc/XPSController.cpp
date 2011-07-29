@@ -79,6 +79,10 @@ Versions: Release 4-5 and higher.
           LOSS OR DAMAGES.
 */
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -195,6 +199,9 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
 
   //By default, automatically enable axes that have been disabled.
   autoEnable_ = 1;
+
+  /* Flag used to turn off setting MSTA problem bit when the axis is disabled.*/
+  noDisableError_ = 0;
 
 }
 
@@ -1278,6 +1285,13 @@ asynStatus XPSController::disableAutoEnable()
   return asynSuccess; 
 }
 
+/* Function to disable the MSTA problem bit in the event of an XPS Disable state 20 */ 
+asynStatus XPSController::noDisableError()
+{
+  noDisableError_ = 1;
+  return asynSuccess; 
+}
+
 
 
 
@@ -1350,14 +1364,27 @@ asynStatus XPSDisableAutoEnable(const char *XPSName)
 
   pC = (XPSController*) findAsynPortDriver(XPSName);
   if (!pC) {
-    printf("%s:%s: Error port %s not found\n",
-           driverName, functionName, XPSName);
+    cout << driverName << "::" << functionName << " Error port " << XPSName << "not found." << endl;
     return asynError;
   }
 
   return pC->disableAutoEnable();
 }
 
+
+asynStatus XPSNoDisableError(const char *XPSName)
+{
+  XPSController *pC;
+  static const char *functionName = "XPSNoDisableError";
+
+  pC = (XPSController*) findAsynPortDriver(XPSName);
+  if (!pC) {
+    cout << driverName << "::" << functionName << " Error port " << XPSName << "not found." << endl;
+    return asynError;
+  }
+
+  return pC->noDisableError();
+}
 
 
 /* Code for iocsh registration */
@@ -1434,6 +1461,16 @@ static void disableAutoEnableCallFunc(const iocshArgBuf *args)
   XPSDisableAutoEnable(args[0].sval);
 }
 
+/* XPSNoDisableError */
+static const iocshArg XPSNoDisableErrorArg0 = {"Controller port name", iocshArgString};
+static const iocshArg * const XPSNoDisableErrorArgs[] = {&XPSNoDisableErrorArg0};
+static const iocshFuncDef noDisableError = {"XPSNoDisableError", 1, XPSNoDisableErrorArgs};
+
+static void noDisableErrorCallFunc(const iocshArgBuf *args)
+{
+  XPSNoDisableError(args[0].sval);
+}
+
 
 static void XPSRegister3(void)
 {
@@ -1441,6 +1478,7 @@ static void XPSRegister3(void)
   iocshRegister(&configXPSAxis,        configXPSAxisCallFunc);
   iocshRegister(&configXPSProfile,     configXPSProfileCallFunc);
   iocshRegister(&disableAutoEnable,    disableAutoEnableCallFunc);
+  iocshRegister(&noDisableError,       noDisableErrorCallFunc);
 }
 epicsExportRegistrar(XPSRegister3);
 

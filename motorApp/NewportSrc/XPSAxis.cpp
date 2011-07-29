@@ -588,27 +588,32 @@ asynStatus XPSAxis::poll(bool *moving)
     setIntegerParam(pC_->motorStatusHomed_, 0);
   }
 
-  if ((axisStatus_ >= 0 && axisStatus_ <= 9) || 
-    (axisStatus_ >= 20 && axisStatus_ <= 42)) {
-    /* Not initialized, homed or disabled */
-    asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-              "%s:%s: [%s,%d]: in bad state %d\n",
-              driverName, functionName, pC_->portName, axisNo_, axisStatus_);
-    /* setIntegerParam(axis, motorStatusHighHardLimit, 1);
-     * setIntegerParam(axis, motorStatusLowHardLimit,  1);
-     */
-  }
-
   /* Test for following error, and set appropriate param. */
   if ((axisStatus_ == 21 || axisStatus_ == 22) ||
       (axisStatus_ >= 24 && axisStatus_ <= 26) ||
       (axisStatus_ == 28 || axisStatus_ == 35)) {
-      asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-                "%s:%s: [%s,%d]: in following error. XPS State Code: %d\n",
-                driverName, functionName, pC_->portName, axisNo_, axisStatus_);
+    asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+	      "%s:%s: [%s,%d]: in following error. XPS State Code: %d\n",
+	      driverName, functionName, pC_->portName, axisNo_, axisStatus_);
     setIntegerParam(pC_->motorStatusFollowingError_, 1);
   } else {
     setIntegerParam(pC_->motorStatusFollowingError_, 0);
+  }
+
+  /*Test for states that mean we cannot move an axis (disabled, uninitialised, etc.) 
+    and set problem bit in MSTA.*/
+  if ((axisStatus_ < 10) || ((axisStatus_ >= 20) && (axisStatus_ <= 42)) ||
+      (axisStatus_ == 50) || (axisStatus_ == 64)) {
+    if ( (pC_->noDisableError_ > 0) && (axisStatus_==20) ) {
+      setIntegerParam(pC_->motorStatusProblem_, 0);             
+    } else {
+      asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+	      "%s:%s: [%s,%d]: in unintialised/disabled/not referenced. XPS State Code: %d\n",
+	      driverName, functionName, pC_->portName, axisNo_, axisStatus_);
+      setIntegerParam(pC_->motorStatusProblem_, 1);
+    }
+  } else {
+    setIntegerParam(pC_->motorStatusProblem_, 0);
   }
 
   status = GroupPositionCurrentGet(pollSocket_,
@@ -1167,3 +1172,8 @@ asynStatus XPSAxis::readbackProfile()
   asynMotorAxis::readbackProfile();
   return asynSuccess;
 }
+
+
+
+
+
