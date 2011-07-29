@@ -194,6 +194,9 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
   /* And we need to implement this in Asyn layer. */
   getPID();
 
+  /* Used to keep track of referencing mode in the driver.*/
+  referencingMode_ = 0;
+
   /* Wake up the poller task which will make it do a poll, 
    * updating values for this axis to use the new resolution (stepSize_) */   
   pC_->wakeupPoller();
@@ -562,7 +565,29 @@ asynStatus XPSAxis::poll(bool *moving)
     setDoubleParam(pC_->motorLowLimit_, (lowLimit_/stepSize_));
   }
 
-  setIntegerParam(pC_->motorStatusHome_, (axisStatus_ == 11) ? 1 : 0);
+  /*Set the ATHM signal.*/
+  if (axisStatus_ == 11) {
+    if (referencingMode_ == 0) {
+      setIntegerParam(pC_->motorStatusHome_, 1);
+    } else {
+      setIntegerParam(pC_->motorStatusHome_, 0);
+    }
+  } else {
+    setIntegerParam(pC_->motorStatusHome_, 0);
+  }
+
+  /*Set the HOMED signal.*/
+  if ((axisStatus_ >= 10 && axisStatus_ <= 21) || 
+      (axisStatus_ == 44) || (axisStatus_ == 45) || (axisStatus_ == 47)) {
+    if (referencingMode_ == 0) {
+      setIntegerParam(pC_->motorStatusHomed_, 1);
+    } else {
+      setIntegerParam(pC_->motorStatusHomed_, 0);
+    }
+  } else {
+    setIntegerParam(pC_->motorStatusHomed_, 0);
+  }
+
   if ((axisStatus_ >= 0 && axisStatus_ <= 9) || 
     (axisStatus_ >= 20 && axisStatus_ <= 42)) {
     /* Not initialized, homed or disabled */

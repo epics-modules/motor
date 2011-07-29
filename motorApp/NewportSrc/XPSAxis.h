@@ -82,6 +82,7 @@ class XPSAxis : public asynMotorAxis
   double deferredPosition_;
   int deferredMove_;
   int deferredRelative_;
+  int referencingMode_;
 
   friend class XPSController;
 };
