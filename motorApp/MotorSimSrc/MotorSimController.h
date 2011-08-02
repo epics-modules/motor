@@ -1,5 +1,5 @@
 /*
-FILENAME...  motorSimController.h
+FILENAME...  MotorSimController.h
 USAGE...     Simulated Motor Support.
 
 Based on drvMotorSim.c

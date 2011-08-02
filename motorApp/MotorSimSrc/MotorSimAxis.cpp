@@ -19,8 +19,8 @@ December 13, 2009
 #include <iocsh.h>
 #include <epicsExport.h>
 
-#include "motorSimController.h"
-#include "motorSimAxis.h"
+#include "MotorSimController.h"
+#include "MotorSimAxis.h"
 
 extern bool motorSimControllerListInitialized;
 extern ELLLIST motorSimControllerList;

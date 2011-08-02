@@ -1,6 +1,6 @@
 /*
-FILENAME...  motorSimAxis.h
-USAGE...     motorSimAxis object definition.
+FILENAME...  MotorSimAxis.h
+USAGE...     MotorSimAxis object definition.
 
 Version:        $Revision$
 Modified By:    $Author$

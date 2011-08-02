@@ -21,8 +21,8 @@ December 13, 2009
 #include <epicsString.h>
 #include <epicsExport.h>
 
-#include "motorSimController.h"
-#include "motorSimAxis.h"
+#include "MotorSimController.h"
+#include "MotorSimAxis.h"
 
 static const char *driverName = "motorSimDriver";
 
