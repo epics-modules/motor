@@ -2,4 +2,7 @@ include "motorRecord.dbd"
 device(motor,VME_IO,devMotorSim,"Motor Simulation")
 driver(motorSim)
 registrar(motorSimRegister)
-registrar(motorSimDriverRegister)
+
+#asyn motor phase 3 simulator
+registrar(motorSimControlRegister)
+registrar(motorSimAxisRegister)

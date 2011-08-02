@@ -15,6 +15,11 @@ March 28, 2010
 
 #include "asynMotorController.h"
 
+#define DEFAULT_LOW_LIMIT -10000
+#define DEFAULT_HI_LIMIT   10000
+#define DEFAULT_HOME       0
+#define DEFAULT_START      0
+
 #define NUM_SIM_CONTROLLER_PARAMS 0
 
 class motorSimController : public asynMotorController {
@@ -42,3 +47,12 @@ private:
   int movesDeferred_;
   bool initialized;
 };
+
+
+typedef struct motorSimControllerNode {
+  ELLNODE node;
+  const char *portName;
+  motorSimController *pController;
+} motorSimControllerNode;
+
+

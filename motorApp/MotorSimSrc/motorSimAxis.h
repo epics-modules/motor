@@ -13,6 +13,8 @@ Based on drvMotorSim.c
 
 */
 
+#include <epicsTime.h>
+
 #include "asynMotorAxis.h"
 #include "route.h"
 
