@@ -3219,7 +3219,7 @@ $(pv_value)</tooltip>
         <description>$(M) (Medium)</description>
       </action>
       <action type="OPEN_DISPLAY">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M)</Q>

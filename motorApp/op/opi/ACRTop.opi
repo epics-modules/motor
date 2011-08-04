@@ -88,7 +88,7 @@
         <description>Auxillary params</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>asynRecord.opi</path>
+        <path>../asyn/asynRecord.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <P>IOC:</P>
@@ -98,7 +98,7 @@
         <description>asyn record #1</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>asynRecord.opi</path>
+        <path>../asyn/asynRecord.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <P>IOC:</P>

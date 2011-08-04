@@ -2794,7 +2794,7 @@ $(pv_value)</tooltip>
         <description>$(M1) (Setup)</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M1)</Q>
@@ -2895,7 +2895,7 @@ $(pv_value)</tooltip>
         <description>$(M5) (Setup)</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M5)</Q>
@@ -2996,7 +2996,7 @@ $(pv_value)</tooltip>
         <description>$(M6) (Setup)</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M6)</Q>
@@ -3097,7 +3097,7 @@ $(pv_value)</tooltip>
         <description>$(M7) (Setup)</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M7)</Q>
@@ -3198,7 +3198,7 @@ $(pv_value)</tooltip>
         <description>$(M8) (Setup)</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M8)</Q>
@@ -3299,7 +3299,7 @@ $(pv_value)</tooltip>
         <description>$(M4) (Setup)</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M4)</Q>
@@ -3400,7 +3400,7 @@ $(pv_value)</tooltip>
         <description>$(M2) (Setup)</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M2)</Q>
@@ -3501,7 +3501,7 @@ $(pv_value)</tooltip>
         <description>$(M3) (Setup)</description>
       </action>
       <action type="OPEN_OPI_IN_VIEW">
-        <path>scanParms.opi</path>
+        <path>../sscan/scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M3)</Q>
