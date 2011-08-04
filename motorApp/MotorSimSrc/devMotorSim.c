@@ -122,7 +122,7 @@ void motor_callback( void * param, unsigned int nReasons, unsigned int * reasons
   if (nReasons > 0)
   {
       pPrvt->needUpdate = 1;
-      scanOnce( pRec );
+      scanOnce( (struct dbCommon *)pRec );
   }
 }
        
