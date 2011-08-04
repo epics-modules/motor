@@ -1,6 +1,6 @@
 
 file {
-	name="/home/oxygen4/MOONEY/epics/synAppsSVN/support/xxx/xxxApp/src/../op/adl/trajectoryScan.adl"
+	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/MAX_trajectoryScan.adl"
 	version=030105
 }
 display {
@@ -294,6 +294,11 @@ text {
 	display[0] {
 		label="Debug/more"
 		name="MAX_trajectoryScanDebug.adl"
+		args="P=$(P),R=$(R),TITLE=$(TITLE),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
+	}
+	display[1] {
+		label="Speed limits"
+		name="MAX_trajectoryScanSpeed.adl"
 		args="P=$(P),R=$(R),TITLE=$(TITLE),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
 	}
 	clr=14
