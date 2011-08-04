@@ -133,6 +133,28 @@ double  epicsMotorLLM[MAX_AXES];
 assign  epicsMotorLLM to {"","","","","","","",""};
 monitor epicsMotorLLM;
 
+double  motorMinSpeed[MAX_AXES]; 
+assign  motorMinSpeed to
+        {"{P}{R}M1MinSpeed.VAL",
+         "{P}{R}M2MinSpeed.VAL",
+         "{P}{R}M3MinSpeed.VAL",
+         "{P}{R}M4MinSpeed.VAL",
+         "{P}{R}M5MinSpeed.VAL",
+         "{P}{R}M6MinSpeed.VAL",
+         "{P}{R}M7MinSpeed.VAL",
+         "{P}{R}M8MinSpeed.VAL"};
+
+double  motorMaxSpeed[MAX_AXES]; 
+assign  motorMaxSpeed to
+        {"{P}{R}M1MaxSpeed.VAL",
+         "{P}{R}M2MaxSpeed.VAL",
+         "{P}{R}M3MaxSpeed.VAL",
+         "{P}{R}M4MaxSpeed.VAL",
+         "{P}{R}M5MaxSpeed.VAL",
+         "{P}{R}M6MaxSpeed.VAL",
+         "{P}{R}M7MaxSpeed.VAL",
+         "{P}{R}M8MaxSpeed.VAL"};
+
 /*** END: Specific to MAX_trajectoryScan.st ***/
 
 int     moveAxis[MAX_AXES]; 
