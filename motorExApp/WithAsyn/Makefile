@@ -21,7 +21,7 @@ COMMONDBDS += devImsMotor.dbd
 COMMONDBDS += devMclennanMotor.dbd
 COMMONDBDS += devMicos.dbd
 COMMONDBDS += devMicroMo.dbd
-COMMONDBDS += devNewport.dbd
+COMMONDBDS += devNewportModel3.dbd
 ifdef SNCSEQ
 COMMONDBDS += LdevNewportTS.dbd
 endif
@@ -33,9 +33,10 @@ COMMONDBDS += devSmartMotorMotor.dbd
 COMMONDBDS += devKohzuMotor.dbd
 COMMONDBDS += devAttocube.dbd
 COMMONDBDS += devAerotech.dbd
+COMMONDBDS += ACRMotorSupport.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
 COMMONDBDS += drvAsynIPPort.dbd
-COMMONDBDS += ACRMotorSupport.dbd
+COMMONDBDS += busySupport.dbd
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -65,7 +66,7 @@ COMMONLIBS += MicroMo
 COMMONLIBS += PI
 COMMONLIBS += Acs
 COMMONLIBS += Ims
-COMMONLIBS += Newport
+COMMONLIBS += NewportModel3 Newport
 COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
 COMMONLIBS += SmartMotor
@@ -80,6 +81,8 @@ ifdef SNCSEQ
 WithAsyn_LIBS += seqDev seq pv
 endif
 WithAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+WithAsyn_LIBS += busy
 
 WithAsynVx_LIBS += $(COMMONLIBS)
 ifdef IPAC
