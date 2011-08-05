@@ -106,7 +106,7 @@ enum ProfileTimeMode{
  * corresponding MBBI records, but there is no way to check this */
 enum ProfileBuildState{
   PROFILE_BUILD_DONE,
-  PROFILE_BUILD_BUSY,
+  PROFILE_BUILD_BUSY
 };
 
 enum ProfileExecuteState{
