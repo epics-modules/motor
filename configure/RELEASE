@@ -10,29 +10,32 @@
 # Add your declarations here
 
 #!GATEWAY=
-#!SUPPORT=
+SUPPORT=/corvette/home/epics/devel
+-include $(TOP)/../configure/SUPPORT.$(EPICS_HOST_ARCH)
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
-# Recommended ASYN release: R4-13
-ASYN=$(SUPPORT)/asyn/4-13
+# Recommended ASYN release: R4-17
+ASYN=$(SUPPORT)/asyn-4-17
 
-# Need the sequencer for the MM4005 and XPS trajectory scanning
+# Need the sequencer and the bust record for the MM4005 and XPS trajectory scanning
 # Recommended SNCSEQ release: R2-0-12
-SNCSEQ=$(SUPPORT)/seq/2-0-12
+SNCSEQ=$(SUPPORT)/seq-2-0-12
+BUSY=$(SUPPORT)/busy-1-3
 
 # Recommended EPICS release: R3.14.11
-EPICS_BASE=$(SUPPORT)/../base-3.14.11
+EPICS_BASE=/corvette/usr/local/epics/base-3.14.12.1
+-include $(TOP)/../configure/EPICS_BASE.$(EPICS_HOST_ARCH)
 
 # The following must be defined for the MXmotor device driver.
 #!MX=$(SUPPORT)/mx/mx
 
-# The following support modules are required ONLY if the examples in
-# <motor>/motorExApp are built.  To build examples, the top Makefile,
+# The following support modules are required for the Hytec driver and for the examples in
+# <motor>/motorExApp.  To build examples, the top Makefile,
 # <motor>/Makefile must also be edited.
 
 # Recommended IPAC release: R2-10
-#!IPAC=$(SUPPORT)/ipacR2-10
+IPAC=$(SUPPORT)/ipac-2-11
 
 # The following is only needed for the motor examples in iocBoot.
 #!MOTOR=$(TOP)
