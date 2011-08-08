@@ -38,7 +38,7 @@ public:
   /* These are the methods that are new to this class */
   asynStatus config(int hiHardLimit, int lowHardLimit, int home, int start);
   asynStatus setVelocity(double velocity, double acceleration);
-  void process(double delta );
+  void process(double delta, bool *moving);
 
 protected:
   virtual asynStatus postInitAxis();
@@ -54,6 +54,7 @@ private:
   double enc_offset_;
   double home_;
   int homing_;
+  epicsTimeStamp prevTime_;
   epicsTimeStamp tLast_;
   double deferred_position_;
   int deferred_move_;

@@ -195,7 +195,17 @@ asynStatus motorSimAxis::config(int hiHardLimit, int lowHardLimit, int home, int
 
 asynStatus motorSimAxis::poll(bool *moving)
 {
-  return asynSuccess;
+  epicsTimeStamp now;
+  double delta;
+
+  epicsTimeGetCurrent(&now);
+  delta = epicsTimeDiffInSeconds(&now, &prevTime_);
+  prevTime_ = now;
+
+  pC_->lock();
+  process(delta, moving);
+  pC_->unlock();
+  return(asynSuccess);
 }
 
 
@@ -210,10 +220,10 @@ asynStatus motorSimAxis::poll(bool *moving)
   \return Integer indicating 0 (asynSuccess) for success or non-zero for failure. 
 */
 
-void motorSimAxis::process(double delta )
+void motorSimAxis::process(double delta, bool *moving)
 {
   double lastpos;
-  int done = 0;
+  bool done = false;
 
   lastpos = nextpoint_.axis[0].p;
   nextpoint_.T += delta;
@@ -258,17 +268,18 @@ void motorSimAxis::process(double delta )
   {
     if (!deferred_move_)
     {
-      done = 1;
+      done = true;
     }
   }
   else
-    done = 0;
+    done = false;
 
   setDoubleParam (getMotorPositionIndex(),         (nextpoint_.axis[0].p+enc_offset_));
   setDoubleParam (getMotorEncoderPositionIndex(),  (nextpoint_.axis[0].p+enc_offset_));
   if (nextpoint_.axis[0].v != 0)
     getStatus()->setDirection((nextpoint_.axis[0].v >  0) ? PLUS:MINUS);
   getStatus()->setDoneMoving(done);
+  *moving = !done;
   getStatus()->setHighLimitOn(nextpoint_.axis[0].p >= hiHardLimit_);
   getStatus()->setAtHome(nextpoint_.axis[0].p == home_);
   getStatus()->setMoving(!done);

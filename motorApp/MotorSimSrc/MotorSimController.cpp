@@ -26,20 +26,17 @@ December 13, 2009
 
 static const char *driverName = "motorSimDriver";
 
-static void motorSimTaskC(void *drvPvt);
-
 bool motorSimControllerListInitialized = false;
 ELLLIST motorSimControllerList;
 
 
-motorSimController::motorSimController(const char *portName, int numAxes, int priority, int stackSize)
+motorSimController::motorSimController(const char *portName, int numAxes, double movingPollPeriod, double idlePollPeriod)
 :  asynMotorController(portName, numAxes,
                        asynInt32Mask | asynFloat64Mask, 
                        asynInt32Mask | asynFloat64Mask,
                        ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                        1, // autoconnect
-                       priority, stackSize),
-initialized(false)
+                       0, 0)
 {
   motorSimControllerNode *pNode;
 
@@ -59,10 +56,7 @@ initialized(false)
     numAxes = 1;
   numAxes_ = numAxes;
   this->movesDeferred_ = 0;
-
-  this->motorThread_ = epicsThreadCreate("motorSimThread", epicsThreadPriorityLow,
-                                         epicsThreadGetStackSize(epicsThreadStackMedium),
-                                         (EPICSTHREADFUNC) motorSimTaskC, (void *) this);
+  startPoller(movingPollPeriod/1000., idlePollPeriod/1000., 0);
 }
 
 asynStatus motorSimController::postInitDriver()
@@ -154,46 +148,7 @@ asynStatus motorSimController::triggerProfile(asynUser *pasynUser)
 {
   return asynError;
 }
-
-static void motorSimTaskC(void *drvPvt)
-{
-  motorSimController *pController = (motorSimController*)drvPvt;
-  pController->motorSimTask();
-}
   
-
-#define DELTA 0.1
-void motorSimController::motorSimTask()
-{
-  epicsTimeStamp now;
-  double delta;
-  int axis;
-  motorSimAxis *pAxis;
-
-  while(initialized == false)
-    epicsThreadSleep(1.0);
-
-  while ( 1 )
-  {
-    /* Get a new timestamp */
-    epicsTimeGetCurrent( &now );
-    delta = epicsTimeDiffInSeconds( &now, &(prevTime_) );
-    prevTime_ = now;
-
-    if ( delta > (DELTA/4.0) && delta <= (4.0*DELTA) )
-    {
-      /* A reasonable time has elapsed, it's not a time step in the clock */
-      for (axis=0; axis<numAxes_; axis++) 
-      {     
-        this->lock();
-        pAxis = static_cast<motorSimAxis*>(getAxis(axis));
-        pAxis->process(delta );
-        this->unlock();
-      }
-    }
-    epicsThreadSleep( DELTA );
-  }
-}
 
 int motorSimController::getNumParams()
 {
@@ -210,18 +165,18 @@ bool motorSimController::areMovesDeferred()
 
 
 /** Configuration command, called directly or from iocsh */
-extern "C" int motorSimCreateController(const char *portName, int numAxes, int priority, int stackSize)
+extern "C" int motorSimCreateController(const char *portName, int numAxes, double movingPollPeriod, double idlePollPeriod)
 {
-  motorSimController *pSimController = new motorSimController(portName,numAxes, priority, stackSize);
+  motorSimController *pSimController = new motorSimController(portName, numAxes, movingPollPeriod, idlePollPeriod);
   pSimController->initializePortDriver();
   return(asynSuccess);
 }
 
 /** Code for iocsh registration */
-static const iocshArg motorSimCreateControllerArg0 = {"Port name", iocshArgString};
-static const iocshArg motorSimCreateControllerArg1 = {"Number of axes", iocshArgInt};
-static const iocshArg motorSimCreateControllerArg2 = {"priority", iocshArgInt};
-static const iocshArg motorSimCreateControllerArg3 = {"stackSize", iocshArgInt};
+static const iocshArg motorSimCreateControllerArg0 = {"Port name",                iocshArgString};
+static const iocshArg motorSimCreateControllerArg1 = {"Number of axes",           iocshArgInt};
+static const iocshArg motorSimCreateControllerArg2 = {"Moving poll period (ms)",  iocshArgDouble};
+static const iocshArg motorSimCreateControllerArg3 = {"Idle poll period (ms)",    iocshArgDouble};
 static const iocshArg * const motorSimCreateControllerArgs[] =  {&motorSimCreateControllerArg0,
                                                                  &motorSimCreateControllerArg1,
                                                                  &motorSimCreateControllerArg2,
@@ -229,7 +184,7 @@ static const iocshArg * const motorSimCreateControllerArgs[] =  {&motorSimCreate
 static const iocshFuncDef motorSimCreateControllerDef = {"motorSimCreateController", 4, motorSimCreateControllerArgs};
 static void motorSimCreateContollerCallFunc(const iocshArgBuf *args)
 {
-  motorSimCreateController(args[0].sval, args[1].ival, args[2].ival, args[3].ival);
+  motorSimCreateController(args[0].sval, args[1].ival, args[2].dval, args[3].dval);
 }
 
 static void motorSimControlRegister(void)

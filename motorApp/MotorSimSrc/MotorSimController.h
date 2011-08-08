@@ -26,7 +26,7 @@ class motorSimController : public asynMotorController {
 public:
 
   /* These are the fucntions we override from the base class */
-  motorSimController(const char *portName, int numAxes, int priority, int stackSize);
+  motorSimController(const char *portName, int numAxes, double movingPollPeriod, double idlePollPeriod);
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
   void report(FILE *fp, int level);
   asynStatus profileMove(asynUser *pasynUser, int npoints, double positions[], double times[], int relative, int trigger);
@@ -45,7 +45,6 @@ private:
   epicsThreadId motorThread_;
   epicsTimeStamp prevTime_;
   int movesDeferred_;
-  bool initialized;
 };
 
 
