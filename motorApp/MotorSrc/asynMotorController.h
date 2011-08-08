@@ -52,8 +52,7 @@ enum ProfileStatus {
 class asynMotorAxis;
 
 class epicsShareFunc asynMotorController : public asynPortDriver {
-
-  public:
+public:
   /* This is the constructor for the class. */
   asynMotorController(const char *portName, int numAxes,
                       int interfaceMask, int interruptMask,
@@ -125,7 +124,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
 
   int shuttingDown_;   /**< Flag indicating that IOC is shutting down.  Stops poller */
 
-  protected:
+protected:
   /** These are the index numbers for the parameters in the parameter library.
    * They are the values of pasynUser->reason in calls from device support */
    // These are the motor commands
@@ -181,6 +180,8 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
  
   size_t maxProfilePoints_;     /**< Maximum number of profile points */
   double *profileTimes_;        /**< Array of times per profile point */
+  bool initialized;             /* Set from postInitDriver methods in each driver after all
+                                 * axis have been initialized and before polling is started. */
 };
 #define NUM_MOTOR_DRIVER_PARAMS (&LAST_MOTOR_PARAM - &FIRST_MOTOR_PARAM + 1)
 

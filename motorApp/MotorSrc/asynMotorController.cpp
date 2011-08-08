@@ -33,7 +33,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes,
       interfaceMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask | asynDrvUserMask,
       interruptMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask,
       asynFlags, autoConnect, priority, stackSize),
-    shuttingDown_(0), numAxes_(numAxes)
+    shuttingDown_(0), numAxes_(numAxes), initialized(false)
 
 {
   static const char *functionName = "asynMotorController";
@@ -394,6 +394,9 @@ void asynMotorController::asynMotorPoller()
   bool moving;
   asynMotorAxis *pAxis;
   int status;
+
+  while (initialized == false)
+    epicsThreadSleep(1.0);
 
   timeout = idlePollPeriod_;
   wakeupPoller();  /* Force on poll at startup */
