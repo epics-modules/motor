@@ -2,24 +2,14 @@ To build any examples;
 
 - in <motor>/configure/RELEASE: EPICS_BASE and MOTOR must be defined.
 
-- in <motor>/Makefile: the following two lines must be uncommented;
-  #DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
-  #DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
+- in <motor>/Makefile: the following three lines must be uncommented;
+  #!DIRS += motorExApp iocBoot
+  #!motorExApp_DEPEND_DIRS = motorApp
+  #!iocBoot_DEPEND_DIRS    = motorExApp
 
 To build this simulation example;
 
 - in <motor>/configure/RELEASE: ASYN must be defined.
-
-- in <motor>/motorExApp/Makefile: #DIRS += WithAsyn must be uncommented.
-
-- in <motor>/motorExApp/WithAsyn/Makefile: uncomment both,
-  #!WithAsyn_LIBS   += motorSimSupport
-    and,
-  #!WithAsynVx_LIBS += motorSimSupport
-
-- in both <motor>/motorExApp/WithAsyn/WithAsynInclude.dbd, and in
-  <motor>/motorExApp/WithAsyn/WithAsynVxInclude.dbd
-  uncomment,  #include "motorSimSupport.dbd"
 
 - in <motor>/iocBoot/iocSim/Makefile set the target architecture
           
