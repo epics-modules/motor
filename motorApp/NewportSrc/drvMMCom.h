@@ -73,7 +73,8 @@ struct MMcontroller
     int asyn_address;		/* Use for GPIB or other address with asyn */
     char asyn_port[80];     	/* asyn port name */
     char status_string[80];     /* String containing status of motors */
-    char position_string[80];   /* String containing position of motors */
+    char position_string[160];   /* String containing commanded/theorectical position of motors */
+    char feedback_string[160];   /* String containing encoder position of motors */
     MM_model model;		/* Motion Master Model. */
     MM_motor_type type[4];	/* For MM3000 only; Motor type array. */
     /* For MM4000/5 only; controller resolution array (from TU command).

@@ -77,7 +77,8 @@ HeadURL:        $URL$
  *                  readback delay now gets and sets the status properly. Also, the delay
  *                  was changed from a double (seconds) to an int (milliseconds) because 
  *                  of problems passing floating-point values from the VxWorks shell.
- *
+ * .17 08/25/11 rls - Added feedback position.
+ *                  - Increased max. # of cards to 10 and buffer size to 160 bytes.
  */
 
 
@@ -95,7 +96,8 @@ HeadURL:        $URL$
 
 #define READ_RESOLUTION "TU;"
 #define READ_STATUS     "MS;"
-#define READ_POSITION   "TP;"
+#define READ_POSITION   "TH;"
+#define READ_FEEDBACK   "TP;"
 #define STOP_ALL        "ST;"
 #define MOTOR_ON        "MO;"
 #define GET_IDENT       "VE;"
@@ -108,8 +110,8 @@ HeadURL:        $URL$
 #define M_MINUS_LIMIT     0x10
 #define M_HOME_SIGNAL     0x20
 
-#define MM4000_NUM_CARDS    4
-#define BUFF_SIZE 100       /* Maximum length of string to/from MM4000 */
+#define MM4000_NUM_CARDS 10
+#define BUFF_SIZE 160       /* Maximum length of string to/from MM4000 */
 
 #define TIMEOUT 2.0 /* Command timeout in sec. */
 
@@ -265,6 +267,8 @@ static void start_status(int card)
             cntrl->status = NORMAL;
             send_mess(card, READ_POSITION, (char) NULL);
             recv_mess(card, cntrl->position_string, 1);
+            send_mess(card, READ_FEEDBACK, (char) NULL);
+            recv_mess(card, cntrl->feedback_string, 1);
         }
         else
         {
@@ -287,7 +291,11 @@ static void start_status(int card)
             cntrl = (struct MMcontroller *) motor_state[itera]->DevicePrivate;
             status = recv_mess(itera, cntrl->status_string, 1);
             if (status > 0)
+            {
                 cntrl->status = NORMAL;
+                send_mess(itera, READ_FEEDBACK, (char) NULL);
+                recv_mess(itera, cntrl->feedback_string, 1);
+            }
             else
             {
                 if (cntrl->status == NORMAL)
@@ -358,7 +366,7 @@ static int set_status(int card, int signal)
      */
     pos = signal*5 + 3;  /* Offset in status string */
     mstat.All = cntrl->status_string[pos];
-    Debug(5, "set_status(): status byte = %x\n", mstat.All);
+    Debug(5, "set_status(): status byte = %x on card #%d\n", mstat.All, card);
 
     status.Bits.RA_DIRECTION = (mstat.Bits.direction == false) ? 0 : 1;
 
@@ -432,7 +440,7 @@ static int set_status(int card, int signal)
     p = epicsStrtok_r(buff, ",", &tok_save);
     for (itera = 0; itera < signal; itera++)
         p = epicsStrtok_r(NULL, ",", &tok_save);
-    Debug(6, "set_status(): position substring = %s\n", p);
+    Debug(6, "set_status(): position substring = %s on card #%d\n", p, card);
     motorData = atof(p+3) / cntrl->drive_resolution[signal];
 
     if (motorData == motor_info->position)
@@ -443,13 +451,23 @@ static int set_status(int card, int signal)
     else
     {
         motor_info->position = NINT(motorData);
-        if (motor_state[card]->motor_info[signal].encoder_present == YES)
-            motor_info->encoder_position = (epicsInt32) motorData;
-        else
-            motor_info->encoder_position = 0;
-
         motor_info->no_motion_count = 0;
     }
+
+    if (motor_state[card]->motor_info[signal].encoder_present == YES)
+    {
+        strcpy(buff, cntrl->feedback_string);
+        tok_save = NULL;
+        p = epicsStrtok_r(buff, ",", &tok_save);
+        for (itera = 0; itera < signal; itera++)
+            p = epicsStrtok_r(NULL, ",", &tok_save);
+        Debug(6, "set_status(): feedback substring = %s on card #%d\n", p, card);
+        motorData = atof(p+3) / cntrl->drive_resolution[signal];
+        motor_info->encoder_position = (epicsInt32) motorData;
+    }
+    else
+        motor_info->encoder_position = 0;
+
 
     /* Check for controller error. */
     send_mess(card, "TE;", (char) NULL);
@@ -521,7 +539,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
         return(ERROR);
     }
 
-    Debug(2, "send_mess(): message = %s\n", com);
+    Debug(2, "send_mess(): message = %s on card #%d\n", com, card);
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
 
@@ -571,7 +589,7 @@ static int recv_mess(int card, char *com, int flag)
         nread = 0;
     }
 
-    Debug(2, "recv_mess(): message = \"%s\"\n", com);
+    Debug(2, "recv_mess(): message = \"%s\" on card #%d\n", com, card);
     return(nread);
 }
 
@@ -587,7 +605,12 @@ MM4000Setup(int num_cards,  /* maximum number of controllers in system.  */
     int itera;
 
     if (num_cards < 1 || num_cards > MM4000_NUM_CARDS)
+    {
+        epicsThreadSleep(5.0);
+        errlogPrintf("\n*** ERROR *** Number specified (%d) exceeds maximum allowed (%d).\n\n", num_cards, MM4000_NUM_CARDS);
+        epicsThreadSleep(5.0);
         MM4000_num_cards = MM4000_NUM_CARDS;
+    }
     else
         MM4000_num_cards = num_cards;
 
