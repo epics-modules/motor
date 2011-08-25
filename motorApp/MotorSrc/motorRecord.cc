@@ -175,7 +175,7 @@ HeadURL:        $URL$
 
 /*----------------debugging-----------------*/
 
-#ifdef __GNUG__
+#if (TOOL_FAMILY == gnu)
     #ifdef  DEBUG
         #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
     #else
