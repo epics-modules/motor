@@ -73,6 +73,10 @@ HeadURL:        $URL$
  *      - make debug variables always available.
  * .14 02/18/09 rls Check for controller error.
  * .15 02/17/10 rls Bug fix controller error check overwriting position buffer.
+ * .16 08/25/11 kmp Bug fix for drvMM4000Readback delay. The first call after the
+ *                  readback delay now gets and sets the status properly. Also, the delay
+ *                  was changed from a double (seconds) to an int (milliseconds) because 
+ *                  of problems passing floating-point values from the VxWorks shell.
  *
  */
 
@@ -130,9 +134,9 @@ int MM4000_num_cards = 0;
 
 
 /* This is a temporary fix to introduce a delayed reading of the motor
- * position after a move completes
+ * position after a move completes. drvMM4000ReadbackDelay is in milliseconds
  */
-volatile double drvMM4000ReadbackDelay = 0.;
+volatile int drvMM4000ReadbackDelay = 0;
 
 
 /*----------------functions-----------------*/
@@ -374,11 +378,11 @@ static int set_status(int card, int signal)
  * on the first poll, when it is really moving.  We work around this by reading
  * the status again after the delay, in case it is really still moving.
  */
-        if (motor_info->pid_present == YES && drvMM4000ReadbackDelay != 0.)
+        if (motor_info->pid_present == YES && drvMM4000ReadbackDelay != 0)
         {
-            epicsThreadSleep(drvMM4000ReadbackDelay);
-            send_mess(card, READ_POSITION, (char) NULL);
-            recv_mess(card, cntrl->position_string, 1);
+            epicsThreadSleep((double) drvMM4000ReadbackDelay/1000.0);
+            send_mess(card, READ_STATUS, (char) NULL);
+            recv_mess(card, cntrl->status_string, 1);
             pos = signal*5 + 3;  /* Offset in status string */
             mstat.All = cntrl->status_string[pos];
             if (mstat.Bits.inmotion == true)
