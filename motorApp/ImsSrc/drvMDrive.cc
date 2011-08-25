@@ -38,7 +38,7 @@ HeadURL:        $URL$
  * -----
  * Verified with firmware:
  *
- *  - 901.086 E
+ *  - 1.071 E
  *  - 3.010
  *
  * Modification Log:
