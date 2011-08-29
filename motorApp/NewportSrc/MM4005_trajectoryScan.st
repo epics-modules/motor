@@ -9,6 +9,7 @@ program MM4005_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6
  *  August 12, 2000
 */
 
+%% #include <stdlib.h>	/* for atof() */
 %% #include <string.h>
 %% #include <stdio.h>
 %% #include <epicsString.h>
