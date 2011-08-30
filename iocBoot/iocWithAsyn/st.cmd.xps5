@@ -13,7 +13,7 @@ dbLoadTemplate "XPSAux.substitutions"
 # asyn port, IP address, IP port, number of axes, 
 # active poll period (ms), idle poll period (ms), 
 # enable set position, set position settling time (ms)
-XPSConfig("XPS1", "164.54.160.55", 5001, 6, 10, 500, 0, 500)
+XPSCreateController("XPS1", "164.54.160.55", 5001, 6, 10, 500, 0, 500)
 asynSetTraceIOMask("XPS1", 0, 2)
 #asynSetTraceMask("XPS1", 0, 255)
 
@@ -23,16 +23,16 @@ XPSAuxConfig("XPS_AUX1", "164.54.160.55", 5001, 50)
 #asynSetTraceMask("XPS_AUX1", 0, 255)
 
 # XPS asyn port,  axis, groupName.positionerName, stepSize
-XPSConfigAxis("XPS1",0,"GROUP.PHI",      1000)
-XPSConfigAxis("XPS1",1,"GROUP.KAPPA",   10000)
-XPSConfigAxis("XPS1",2,"GROUP.OMEGA",   10000)
-XPSConfigAxis("XPS1",3,"GROUP.PSI",      4000)
-XPSConfigAxis("XPS1",4,"GROUP.THETA",   10000)
-XPSConfigAxis("XPS1",5,"GROUP.NU",       4000)
+XPSCreateAxis("XPS1",0,"GROUP.PHI",      "1000")
+XPSCreateAxis("XPS1",1,"GROUP.KAPPA",   "10000")
+XPSCreateAxis("XPS1",2,"GROUP.OMEGA",   "10000")
+XPSCreateAxis("XPS1",3,"GROUP.PSI",      "4000")
+XPSCreateAxis("XPS1",4,"GROUP.THETA",   "10000")
+XPSCreateAxis("XPS1",5,"GROUP.NU",       "4000")
 
 # XPS asyn port,  max points, FTP username, FTP password
 # Note: this must be done after configuring axes
-XPSConfigProfile("XPS1", 2000, "Administrator", "Administrator")
+XPSCreateProfile("XPS1", 2000, "Administrator", "Administrator")
 
 iocInit
 

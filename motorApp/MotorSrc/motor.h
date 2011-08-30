@@ -137,10 +137,10 @@ typedef enum  {
     #define LSB_First (TRUE)  /* LSB is packed first. */    
 #elif defined(sparc) || defined(m68k) || defined(powerpc)
     #define MSB_First (TRUE)  /* MSB is packed first. */
-#elif (CPU == PPC604) || (CPU == PPC603) || (CPU==PPC85XX)
+#elif (CPU == PPC604) || (CPU == PPC603) || (CPU==PPC85XX) || (CPU == MC68040)
     #define MSB_First (TRUE)  /* MSB is packed first. */
 #else
-    Error: unknown bit order!
+    #error: unknown bit order!
 #endif
 
 /* -------------------------------------------------- */

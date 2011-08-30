@@ -173,7 +173,7 @@ asynStatus asynMotorAxis::setPosition(double position)
 asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
   int mask;
-  epicsUInt32 status;
+  epicsUInt32 status=0;
   // This assumes the parameters defined above are in the same order as the bits the motor record expects!
   if (function >= pC_->motorStatusDirection_ && 
       function <= pC_->motorStatusHomed_) {
@@ -324,7 +324,7 @@ asynStatus asynMotorAxis::readbackProfile()
   int direction;
   int numReadbacks;
   int status=0;
-  static const char *functionName = "readbackProfile";
+  //static const char *functionName = "readbackProfile";
 
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorOffset_, &offset);

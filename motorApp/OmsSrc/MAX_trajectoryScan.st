@@ -16,6 +16,7 @@ program MAX_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6=M6
  *  Tim Mooney -- based on MM4000_trajectoryScan.st by Mark Rivers.
  */
 
+%% #include <stdlib.h>
 %% #include <string.h>
 %% #include <ctype.h>
 %% #include <stdio.h>
