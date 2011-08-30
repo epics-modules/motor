@@ -8,10 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iostream>
+using std::endl;
+using std::cout;
+
 #include <epicsThread.h>
 #include <epicsExport.h>
 #include <iocsh.h>
-#include <errlog.h>
 
 #include <asynPortDriver.h>
 #define epicsExportSharedSymbols
@@ -671,18 +674,18 @@ asynStatus asynMotorEnableMoveToHome(const char *portName, int axis, int distanc
 
   pC = (asynMotorController*) findAsynPortDriver(portName);
   if (!pC) {
-    errlogPrintf("%s:%s:: Error port %s not found\n",  driverName, functionName, portName);
+    cout << driverName << "::" << functionName << " Error port " << portName << " not found." << endl;
     return asynError;
   }
   
   pA = pC->getAxis(axis);
   if (!pA) {
-    errlogPrintf("%s:%s:: Error axis %d not found\n",  driverName, functionName, axis);
+    cout << driverName << "::" << functionName << " Error axis " << axis << " not found." << endl;
     return asynError;
   }
 
   if (distance<=0) {
-    errlogPrintf("Error in asynMotorEnableMoveToHome. distance must be positive integer.\n");
+    cout << "Error in asynMotorEnableMoveToHome. distance must be positive integer." << endl;
   } else {
     pA->setReferencingModeMove(distance);
   }
