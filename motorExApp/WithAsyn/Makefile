@@ -21,7 +21,7 @@ COMMONDBDS += devImsMotor.dbd
 COMMONDBDS += devMclennanMotor.dbd
 COMMONDBDS += devMicos.dbd
 COMMONDBDS += devMicroMo.dbd
-COMMONDBDS += devNewportModel3.dbd
+COMMONDBDS += devNewport.dbd
 ifdef SNCSEQ
 COMMONDBDS += LdevNewportTS.dbd
 endif
@@ -66,7 +66,7 @@ COMMONLIBS += MicroMo
 COMMONLIBS += PI
 COMMONLIBS += Acs
 COMMONLIBS += Ims
-COMMONLIBS += NewportModel3 Newport
+COMMONLIBS += Newport
 COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
 COMMONLIBS += SmartMotor
