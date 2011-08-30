@@ -7,7 +7,7 @@ Modified By:    $Author: sluiter $
 Last Modified:  $Date: 2009-12-09 10:21:24 -0600 (Wed, 09 Dec 2009) $
 HeadURL:        $URL: https://subversion.xor.aps.anl.gov/synApps/trunk/support/motor/vstub/motorApp/NewportSrc/XPSMotorDriver.cpp $
 */
-
+ 
 /*
 Original Author: Mark Rivers
 */
