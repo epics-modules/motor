@@ -1302,9 +1302,9 @@ asynStatus XPSController::noDisableError()
 
 extern "C" {
 
-asynStatus XPSConfig(const char *portName, const char *IPAddress, int IPPort,
-                         int numAxes, int movingPollPeriod, int idlePollPeriod,
-                         int enableSetPosition, int setPositionSettlingTime)
+asynStatus XPSCreateController(const char *portName, const char *IPAddress, int IPPort,
+                               int numAxes, int movingPollPeriod, int idlePollPeriod,
+                               int enableSetPosition, int setPositionSettlingTime)
 {
     XPSController *pXPSController
         = new XPSController(portName, IPAddress, IPPort, numAxes, 
@@ -1316,14 +1316,14 @@ asynStatus XPSConfig(const char *portName, const char *IPAddress, int IPPort,
 
 
 
-asynStatus XPSConfigAxis(const char *XPSName,         /* specify which controller by port name */
+asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controller by port name */
                          int axis,                    /* axis number 0-7 */
                          const char *positionerName,  /* groupName.positionerName e.g. Diffractometer.Phi */
-                         int stepsPerUnit)            /* steps per user unit */
+                         double stepsPerUnit)         /* steps per user unit */
 {
   XPSController *pC;
   XPSAxis *pAxis;
-  static const char *functionName = "XPSConfigAxis";
+  static const char *functionName = "XPSCreateAxis";
 
   pC = (XPSController*) findAsynPortDriver(XPSName);
   if (!pC) {
@@ -1339,13 +1339,13 @@ asynStatus XPSConfigAxis(const char *XPSName,         /* specify which controlle
 }
 
 
-asynStatus XPSConfigProfile(const char *XPSName,         /* specify which controller by port name */
+asynStatus XPSCreateProfile(const char *XPSName,         /* specify which controller by port name */
                             int maxPoints,               /* maximum number of profile points */
                             const char *ftpUsername,      /* FTP account name */
                             const char *ftpPassword)     /* FTP password */
 {
   XPSController *pC;
-  static const char *functionName = "XPSConfigProfile";
+  static const char *functionName = "XPSCreateProfile";
 
   pC = (XPSController*) findAsynPortDriver(XPSName);
   if (!pC) {
@@ -1392,65 +1392,65 @@ asynStatus XPSNoDisableError(const char *XPSName)
 
 /* Code for iocsh registration */
 
-/* XPSConfig */
-static const iocshArg XPSConfigArg0 = {"Controller port name", iocshArgString};
-static const iocshArg XPSConfigArg1 = {"IP address", iocshArgString};
-static const iocshArg XPSConfigArg2 = {"IP port", iocshArgInt};
-static const iocshArg XPSConfigArg3 = {"Number of axes", iocshArgInt};
-static const iocshArg XPSConfigArg4 = {"Moving poll rate (ms)", iocshArgInt};
-static const iocshArg XPSConfigArg5 = {"Idle poll rate (ms)", iocshArgInt};
-static const iocshArg XPSConfigArg6 = {"Enable set position", iocshArgInt};
-static const iocshArg XPSConfigArg7 = {"Set position settling time (ms)", iocshArgInt};
-static const iocshArg * const XPSConfigArgs[] = {&XPSConfigArg0,
-                                                 &XPSConfigArg1,
-                                                 &XPSConfigArg2,
-                                                 &XPSConfigArg2,
-                                                 &XPSConfigArg4,
-                                                 &XPSConfigArg5,
-                                                 &XPSConfigArg6,
-                                                 &XPSConfigArg7};
-static const iocshFuncDef configXPS = {"XPSConfig", 8, XPSConfigArgs};
+/* XPSCreateController */
+static const iocshArg XPSCreateControllerArg0 = {"Controller port name", iocshArgString};
+static const iocshArg XPSCreateControllerArg1 = {"IP address", iocshArgString};
+static const iocshArg XPSCreateControllerArg2 = {"IP port", iocshArgInt};
+static const iocshArg XPSCreateControllerArg3 = {"Number of axes", iocshArgInt};
+static const iocshArg XPSCreateControllerArg4 = {"Moving poll rate (ms)", iocshArgInt};
+static const iocshArg XPSCreateControllerArg5 = {"Idle poll rate (ms)", iocshArgInt};
+static const iocshArg XPSCreateControllerArg6 = {"Enable set position", iocshArgInt};
+static const iocshArg XPSCreateControllerArg7 = {"Set position settling time (ms)", iocshArgInt};
+static const iocshArg * const XPSCreateControllerArgs[] = {&XPSCreateControllerArg0,
+                                                           &XPSCreateControllerArg1,
+                                                           &XPSCreateControllerArg2,
+                                                           &XPSCreateControllerArg2,
+                                                           &XPSCreateControllerArg4,
+                                                           &XPSCreateControllerArg5,
+                                                           &XPSCreateControllerArg6,
+                                                           &XPSCreateControllerArg7};
+static const iocshFuncDef configXPS = {"XPSCreateController", 8, XPSCreateControllerArgs};
 static void configXPSCallFunc(const iocshArgBuf *args)
 {
-  XPSConfig(args[0].sval, args[1].sval, args[2].ival, 
-            args[3].ival, args[4].ival, args[5].ival,
-            args[6].ival, args[7].ival);
+  XPSCreateController(args[0].sval, args[1].sval, args[2].ival, 
+                      args[3].ival, args[4].ival, args[5].ival,
+                      args[6].ival, args[7].ival);
 }
 
 
 
-/* XPSConfigAxis */
-static const iocshArg XPSConfigAxisArg0 = {"Controller port name", iocshArgString};
-static const iocshArg XPSConfigAxisArg1 = {"Axis number", iocshArgInt};
-static const iocshArg XPSConfigAxisArg2 = {"Axis name", iocshArgString};
-static const iocshArg XPSConfigAxisArg3 = {"Steps per unit", iocshArgInt};
-static const iocshArg * const XPSConfigAxisArgs[] = {&XPSConfigAxisArg0,
-                                                     &XPSConfigAxisArg1,
-                                                     &XPSConfigAxisArg2,
-                                                     &XPSConfigAxisArg3};
-static const iocshFuncDef configXPSAxis = {"XPSConfigAxis", 4, XPSConfigAxisArgs};
+/* XPSCreateAxis */
+static const iocshArg XPSCreateAxisArg0 = {"Controller port name", iocshArgString};
+static const iocshArg XPSCreateAxisArg1 = {"Axis number", iocshArgInt};
+static const iocshArg XPSCreateAxisArg2 = {"Axis name", iocshArgString};
+static const iocshArg XPSCreateAxisArg3 = {"Steps per unit", iocshArgString};
+static const iocshArg * const XPSCreateAxisArgs[] = {&XPSCreateAxisArg0,
+                                                     &XPSCreateAxisArg1,
+                                                     &XPSCreateAxisArg2,
+                                                     &XPSCreateAxisArg3};
+static const iocshFuncDef configXPSAxis = {"XPSCreateAxis", 4, XPSCreateAxisArgs};
 
 static void configXPSAxisCallFunc(const iocshArgBuf *args)
 {
-  XPSConfigAxis(args[0].sval, args[1].ival, args[2].sval, args[3].ival);
+  XPSCreateAxis(args[0].sval, args[1].ival, args[2].sval, atof(args[3].sval));
 }
 
 
 
-/* XPSConfigProfile */
-static const iocshArg XPSConfigProfileArg0 = {"Controller port name", iocshArgString};
-static const iocshArg XPSConfigProfileArg1 = {"Max points", iocshArgInt};
-static const iocshArg XPSConfigProfileArg2 = {"FTP username", iocshArgString};
-static const iocshArg XPSConfigProfileArg3 = {"FTP password", iocshArgString};
-static const iocshArg * const XPSConfigProfileArgs[] = {&XPSConfigProfileArg0,
-                                                        &XPSConfigProfileArg1,
-                                                        &XPSConfigProfileArg2,
-                                                        &XPSConfigProfileArg3};
-static const iocshFuncDef configXPSProfile = {"XPSConfigProfile", 4, XPSConfigProfileArgs};
+/* XPSCreateProfile */
+static const iocshArg XPSCreateProfileArg0 = {"Controller port name", iocshArgString};
+static const iocshArg XPSCreateProfileArg1 = {"Max points", iocshArgInt};
+static const iocshArg XPSCreateProfileArg2 = {"FTP username", iocshArgString};
+static const iocshArg XPSCreateProfileArg3 = {"FTP password", iocshArgString};
+static const iocshArg * const XPSCreateProfileArgs[] = {&XPSCreateProfileArg0,
+                                                        &XPSCreateProfileArg1,
+                                                        &XPSCreateProfileArg2,
+                                                        &XPSCreateProfileArg3};
+static const iocshFuncDef configXPSProfile = {"XPSCreateProfile", 4, XPSCreateProfileArgs};
 
 static void configXPSProfileCallFunc(const iocshArgBuf *args)
 {
-  XPSConfigProfile(args[0].sval, args[1].ival, args[2].sval, args[3].sval);
+  XPSCreateProfile(args[0].sval, args[1].ival, args[2].sval, args[3].sval);
 }
 
 
