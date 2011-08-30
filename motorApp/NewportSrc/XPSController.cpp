@@ -87,6 +87,7 @@ using std::endl;
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
 
 #include <epicsTime.h>
 #include <epicsThread.h>
@@ -1319,10 +1320,11 @@ asynStatus XPSCreateController(const char *portName, const char *IPAddress, int 
 asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controller by port name */
                          int axis,                    /* axis number 0-7 */
                          const char *positionerName,  /* groupName.positionerName e.g. Diffractometer.Phi */
-                         double stepsPerUnit)         /* steps per user unit */
+                         const char *stepsPerUnit)    /* steps per user unit */
 {
   XPSController *pC;
   XPSAxis *pAxis;
+  double stepSize;
   static const char *functionName = "XPSCreateAxis";
 
   pC = (XPSController*) findAsynPortDriver(XPSName);
@@ -1331,8 +1333,16 @@ asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controlle
            driverName, functionName, XPSName);
     return asynError;
   }
+  errno = 0;
+  stepSize = strtod(stepsPerUnit, NULL);
+  if (errno != 0) {
+    printf("%s:%s: Error invalid steps per unit=%s\n",
+           driverName, functionName, stepsPerUnit);
+    return asynError;
+  }
+  
   pC->lock();
-  pAxis = new XPSAxis(pC, axis, positionerName, 1./stepsPerUnit);
+  pAxis = new XPSAxis(pC, axis, positionerName, 1./stepSize);
   pAxis = NULL;
   pC->unlock();
   return asynSuccess;
@@ -1432,7 +1442,7 @@ static const iocshFuncDef configXPSAxis = {"XPSCreateAxis", 4, XPSCreateAxisArgs
 
 static void configXPSAxisCallFunc(const iocshArgBuf *args)
 {
-  XPSCreateAxis(args[0].sval, args[1].ival, args[2].sval, atof(args[3].sval));
+  XPSCreateAxis(args[0].sval, args[1].ival, args[2].sval, args[3].sval);
 }
 
 
