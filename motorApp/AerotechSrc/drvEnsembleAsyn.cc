@@ -27,7 +27,7 @@ in file LICENSE that is included with this distribution.
 * NOTES
 * -----
 * Verified with firmware:
-*      - 2.54.003
+*      - 4.00.002
 *
 * Modification Log:
 * -----------------
@@ -53,7 +53,8 @@ in file LICENSE that is included with this distribution.
 * .11 06-21-11 rls - Bug fix for jog velocity and acceleration not converted
 *                    from raw units to Ensemble user units when the
 *                    PosScaleFactor parameter is not 1.
-* .12 07-11-11 rls - Ensemble 3.x compatibility.
+* .12 09-01-11 rls - Ensemble 4.x compatibility.
+*                  - Replace PARAMETERID_DefaultRampRate with RAMP RATE.
 */
 
 
@@ -481,8 +482,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
 
     if (acceleration > 0)
     { /* only use the acceleration if > 0 */
-        sprintf(outputBuff, "SETPARM @%d, %d, %.*f", axis, PARAMETERID_DefaultRampRate, maxDigits,
-                acceleration * fabs(pAxis->stepSize));
+        sprintf(outputBuff, "RAMP RATE @%d %.*f", axis, maxDigits, acceleration * fabs(pAxis->stepSize));
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     }
 
@@ -935,6 +935,10 @@ int EnsembleAsynConfig(int card,             /* Controller number */
 
             /* Prevent ASCII interpreter from blocking during MOVEABS/INC commands. */
             sendAndReceive(pController, "WAIT MODE NOWAIT", inputBuff, sizeof(inputBuff));
+
+            /* Set RAMP MODE to RATE. */
+            sprintf(outputBuff, "RAMP MODE @%d RATE", axis);
+            sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
         }
     }
 
