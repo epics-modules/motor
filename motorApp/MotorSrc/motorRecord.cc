@@ -151,7 +151,7 @@ HeadURL:        $URL$
  *
  */
 
-#define VERSION 6.6
+#define VERSION 6.7
 
 #include    <stdlib.h>
 #include    <string.h>
@@ -175,7 +175,7 @@ HeadURL:        $URL$
 
 /*----------------debugging-----------------*/
 
-#if (TOOL_FAMILY == gnu)
+#if defined(TOOL_FAMILY) && (TOOL_FAMILY == gnu)
     #ifdef  DEBUG
         #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
     #else
