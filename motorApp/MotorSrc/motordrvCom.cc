@@ -71,13 +71,14 @@ volatile int motordrvComdebug = 0;
 extern "C" {epicsExportAddress(int, motordrvComdebug);}
 static inline void Debug(int level, const char *format, ...) {
   #ifdef DEBUG
-    va_list pVar;
-    va_start(pVar, format);
-    if (level < motordrvComdebug) vprintf(format, pVar);
-    va_end(pVar);
+    if (level < motordrvComdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
   #endif
 }
-
 
 /* Function declarations. */
 static double query_axis(int, struct driver_table *, epicsTime, double);

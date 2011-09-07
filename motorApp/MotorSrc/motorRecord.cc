@@ -181,10 +181,12 @@ extern "C" {epicsExportAddress(int, motorRecordDebug);}
 
 static inline void Debug(int level, const char *format, ...) {
   #ifdef DEBUG
-    va_list pVar;
-    va_start(pVar, format);
-    if (level < motorRecordDebug) vprintf(format, pVar);
-    va_end(pVar);
+    if (level < motorRecordDebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
   #endif
 }
 
