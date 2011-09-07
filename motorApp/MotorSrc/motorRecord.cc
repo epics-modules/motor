@@ -155,6 +155,7 @@ HeadURL:        $URL$
 
 #include    <stdlib.h>
 #include    <string.h>
+#include    <stdarg.h>
 #include    <alarm.h>
 #include    <dbDefs.h>
 #include    <callback.h>
@@ -173,20 +174,19 @@ HeadURL:        $URL$
 #include    "motor.h"
 #include    "epicsExport.h"
 
-/*----------------debugging-----------------*/
-
-#if defined(TOOL_FAMILY) && (TOOL_FAMILY == gnu)
-    #ifdef  DEBUG
-        #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int motorRecordDebug = 0;
 extern "C" {epicsExportAddress(int, motorRecordDebug);}
 
+/*----------------debugging-----------------*/
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    va_list pVar;
+    va_start(pVar, format);
+    if (level < motorRecordDebug) vprintf(format, pVar);
+    va_end(pVar);
+  #endif
+}
 
 /*** Forward references ***/
 
