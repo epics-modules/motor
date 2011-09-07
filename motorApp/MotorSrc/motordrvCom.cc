@@ -67,17 +67,16 @@ HeadURL:        $URL$
 
 /*----------------debugging-----------------*/
 
-#ifdef __GNUG__
-    #ifdef      DEBUG
-        #define Debug(l, f, args...) {if (l <= motordrvComdebug) printf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int motordrvComdebug = 0;
 extern "C" {epicsExportAddress(int, motordrvComdebug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    va_list pVar;
+    va_start(pVar, format);
+    if (level < motordrvComdebug) vprintf(format, pVar);
+    va_end(pVar);
+  #endif
+}
 
 
 /* Function declarations. */
