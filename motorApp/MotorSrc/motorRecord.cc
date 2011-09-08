@@ -151,10 +151,11 @@ HeadURL:        $URL$
  *
  */
 
-#define VERSION 6.61
+#define VERSION 6.62
 
 #include    <stdlib.h>
 #include    <string.h>
+#include    <stdarg.h>
 #include    <alarm.h>
 #include    <dbDefs.h>
 #include    <callback.h>
@@ -173,20 +174,21 @@ HeadURL:        $URL$
 #include    "motor.h"
 #include    "epicsExport.h"
 
-/*----------------debugging-----------------*/
-
-#if defined(TOOL_FAMILY) && (TOOL_FAMILY == gnu)
-    #ifdef  DEBUG
-        #define Debug(l, f, args...) {if (l <= motorRecordDebug) printf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int motorRecordDebug = 0;
 extern "C" {epicsExportAddress(int, motorRecordDebug);}
 
+/*----------------debugging-----------------*/
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < motorRecordDebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /*** Forward references ***/
 
