@@ -904,7 +904,7 @@ asynStatus XPSController::runProfile()
   for (j=0; j<numAxes_; j++) {
     if (!useAxis[j]) continue;
     pAxis = getAxis(j);
-    position = pAxis->profilePositions_[numPoints-1] - pAxis->profilePreDistance_;
+    position = pAxis->profilePositions_[0] - pAxis->profilePreDistance_;
     status = GroupMoveAbsolute(pAxis->moveSocket_,
                                pAxis->positionerName_,
                                1,
@@ -969,20 +969,26 @@ asynStatus XPSController::runProfile()
   // Compute the time between pulses as the total time over which pulses should be output divided 
   //  by the number of pulses to be output. */
   time = 0;
-  for (i=startPulses; i<=endPulses; i++) {
+  for (i=startPulses; i<endPulses; i++) {
     time += profileTimes_[i-1];
   }
+  // We put out pulses starting at the beginning of element startPulses and ending at the beginning of element
+  // endPulses.  To get exactly numPulses pulses we need to subtract 1 from numPulses when determining the
+  // pulsePeriod
   if (numPulses != 0)
-    pulsePeriod = time / numPulses;
+    pulsePeriod = time / (numPulses-1);
   else
     pulsePeriod = 0;
+printf("XPSController::buildProfile, startPulses=%d, endPulses=%d, time=%f, pulsePeriod=%f\n",
+startPulses, endPulses, time, pulsePeriod);
   
   /* Define trajectory output pulses. 
    * startPulses and endPulses are defined as 1=first real element, need to add
    * 1 to each to skip the acceleration element.  
    * The XPS is told the element to stop outputting pulses, and it seems to stop
-   * outputting at the start of that element.  So we need to have that element be
-   * the decceleration endPulses is the element, which means adding another +1. */
+   * outputting at the end of that element.  So we need to have that element be
+   * the decceleration element, which means adding another +1, or we come up 1 pulse short.
+   * But this means we will almost always get too many pulses */
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: calling MultipleAxesPVTPulseOutputSet(%d, %s, %d, %d, %f)\n", 
             driverName, functionName, pollSocket_, groupName,
@@ -1001,8 +1007,8 @@ asynStatus XPSController::runProfile()
                                                 "", "", "", "");
   if (status != 0) {
     executeOK = false;
-    sprintf(message, "Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s", 
-            status, buffer);
+    sprintf(message, "Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s, strlen(buffer)=%d", 
+            status, buffer, strlen(buffer));
     goto done;
   }
 
@@ -1177,7 +1183,7 @@ asynStatus XPSController::readbackProfile()
   int nitems;
   int numRead=0, numInBuffer, numChars;
   int useAxis[XPS_MAX_AXES];
-  static const char *functionName = "buildProfile";
+  static const char *functionName = "readbackProfile";
     
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: entry\n",
@@ -1210,10 +1216,12 @@ asynStatus XPSController::readbackProfile()
     sprintf(message, "Error calling GatherCurrentNumberGet, status=%d", status);
     goto done;
   }
-  if (currentSamples != numPulses) {
+  if (currentSamples < numPulses) {
     readbackOK = false;
     sprintf(message, "Error, numPulses=%d, currentSamples=%d", numPulses, currentSamples);
     //goto done;
+  } else {
+    currentSamples = numPulses; // Only read as many as were asked for
   }
   buffer = (char *)calloc(GATHERING_MAX_READ_LEN, sizeof(char));
   numInBuffer = 0;
