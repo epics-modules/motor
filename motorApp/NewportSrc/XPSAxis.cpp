@@ -1132,7 +1132,7 @@ asynStatus XPSAxis::PositionerCorrectorPIDDualFFVoltageSet()
 
 /** Function to define the motor positions for a profile move. 
   * This calls the base class function to convert to steps, but since the
-  * XPS works in user-units we need to do an additional convertion by stepSize_. 
+  * XPS works in user-units we need to do an additional conversion by stepSize_. 
   * \param[in] positions Array of profile positions for this axis in user units.
   * \param[in] numPoints The number of positions in the array.
   */
