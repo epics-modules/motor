@@ -1,6 +1,6 @@
 
 file {
-	name="/home/epics/devel/motor/motorApp/op/adl/profileMove.adl"
+	name="/home/epics/support/motor/motorApp/op/adl/profileMove.adl"
 	version=030102
 }
 display {
@@ -772,7 +772,6 @@ text {
 	}
 	label="Build"
 	press_msg="1"
-	release_msg="0"
 }
 "text update" {
 	object {
@@ -972,7 +971,6 @@ text {
 	}
 	label="Readback"
 	press_msg="1"
-	release_msg="0"
 }
 text {
 	object {
@@ -1072,7 +1070,6 @@ text {
 	}
 	label="Execute"
 	press_msg="1"
-	release_msg="0"
 }
 text {
 	object {
