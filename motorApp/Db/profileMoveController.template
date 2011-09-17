@@ -143,7 +143,7 @@ record(waveform,"$(P)$(R)BuildMessage") {
     field(DESC, "Profile build message")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT),0,$(TIMEOUT))PROFILE_BUILD_MESSAGE")
-    field(FTVL, "UCHAR")
+    field(FTVL, "CHAR")
     field(NELM, "256")
     field(SCAN, "I/O Intr")
 }
@@ -200,7 +200,7 @@ record(waveform,"$(P)$(R)ExecuteMessage") {
     field(DESC, "Profile execute message")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT),0,$(TIMEOUT))PROFILE_EXECUTE_MESSAGE")
-    field(FTVL, "UCHAR")
+    field(FTVL, "CHAR")
     field(NELM, "256")
     field(SCAN, "I/O Intr")
 }
@@ -253,7 +253,7 @@ record(waveform,"$(P)$(R)ReadbackMessage") {
     field(DESC, "Profile readback message")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT),0,$(TIMEOUT))PROFILE_READBACK_MESSAGE")
-    field(FTVL, "UCHAR")
+    field(FTVL, "CHAR")
     field(NELM, "256")
     field(SCAN, "I/O Intr")
 }
