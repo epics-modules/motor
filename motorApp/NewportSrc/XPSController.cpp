@@ -600,7 +600,6 @@ asynStatus XPSController::buildProfile()
   double minJerkTime, maxJerkTime;
   double preTimeMax, postTimeMax;
   double preVelocity[XPS_MAX_AXES], postVelocity[XPS_MAX_AXES];
-  double preDistance[XPS_MAX_AXES], postDistance[XPS_MAX_AXES];
   double time;
   int useAxis[XPS_MAX_AXES];
   static const char *functionName = "buildProfile";
@@ -626,8 +625,6 @@ asynStatus XPSController::buildProfile()
    * motors will decelerate from the velocity of the last "real" element to 0 
    * at the maximum allowed acceleration. */
 
-  /* Compute the velocity of each motor during the first real trajectory element, 
-   * and the time required to reach this velocity. */
   preTimeMax = 0.;
   postTimeMax = 0.;
   getIntegerParam(profileNumPoints_, &nPoints);
@@ -656,10 +653,6 @@ asynStatus XPSController::buildProfile()
      * is "correct" but subject to roundoff errors when sending ASCII commands
      * to XPS.  Reduce acceleration 10% to account for this. */
     maxAcceleration *= 0.9;
-
-    /* Note: the preDistance and postDistance numbers computed here are
-     * in user coordinates, not XPS coordinates, because they are used for 
-     * EPICS moves at the start and end of the scan */
     distance = pAxes_[j]->profilePositions_[1] - pAxes_[j]->profilePositions_[0];
     preVelocity[j] = distance/profileTimes_[0];
     time = fabs(preVelocity[j]) / maxAcceleration;
@@ -669,16 +662,21 @@ asynStatus XPSController::buildProfile()
     postVelocity[j] = distance/profileTimes_[nPoints-1];
     time = fabs(postVelocity[j]) / maxAcceleration;
     postTimeMax = MAX(postTimeMax, time);
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+              "%s:%s: axis %d profilePositions[0]=%f, profilePositions[%d]=%f, maxAcceleration=%f, preTimeMax=%f, postTimeMax=%f\n",
+              driverName, functionName, j, pAxes_[j]->profilePositions_[0], nPoints-1, pAxes_[j]->profilePositions_[nPoints-1],
+              maxAcceleration, preTimeMax, postTimeMax);
   }
-
-  /* Compute the distance that each motor moves during its acceleration phase.
-   * Only move it this far. */
+    
+  // preTimeMax and postTimeMax can be very small if the scan velocity is small, because it can accelerate to this velocity
+  // almost instantly.  This leads to errors with the XPS reporting acceleration too high, due to roundoff.
+  // Fix this by using a minimum time for acceleration.
+  preTimeMax = MAX(preTimeMax, XPS_MIN_PROFILE_ACCEL_TIME);
+  postTimeMax = MAX(postTimeMax, XPS_MIN_PROFILE_ACCEL_TIME); 
+  
   for (j=0; j<numAxes_; j++) {
-    preDistance[j] =  0.5 * preVelocity[j] *  preTimeMax; 
-    postDistance[j] = 0.5 * postVelocity[j] * postTimeMax;
-    // Save these distances, they are needed to start and complete the profile move
-    pAxes_[j]->profilePreDistance_ = preDistance[j];
-    pAxes_[j]->profilePostDistance_ = postDistance[j];
+    pAxes_[j]->profilePreDistance_  =  0.5 * preVelocity[j]  * preTimeMax; 
+    pAxes_[j]->profilePostDistance_ =  0.5 * postVelocity[j] * postTimeMax; 
   }
 
   /* Create the profile file */
@@ -687,7 +685,7 @@ asynStatus XPSController::buildProfile()
   /* Create the initial acceleration element */
   fprintf(trajFile,"%f", preTimeMax);
   for (j=0; j<numAxes_; j++) {
-    fprintf(trajFile,", %f, %f", preDistance[j], preVelocity[j]);
+    fprintf(trajFile,", %f, %f", pAxes_[j]->profilePreDistance_, preVelocity[j]);
   }
   fprintf(trajFile,"\n");
  
@@ -724,7 +722,7 @@ asynStatus XPSController::buildProfile()
   /* Create the final acceleration element. Final velocity must be 0. */
   fprintf(trajFile,"%f", postTimeMax);
   for (j=0; j<numAxes_; j++) {
-    fprintf(trajFile,", %f, %f", postDistance[j], 0.);
+    fprintf(trajFile,", %f, %f", pAxes_[j]->profilePostDistance_, 0.);
   }
   fprintf(trajFile,"\n");
   fclose (trajFile);
@@ -979,8 +977,6 @@ asynStatus XPSController::runProfile()
     pulsePeriod = time / (numPulses-1);
   else
     pulsePeriod = 0;
-printf("XPSController::buildProfile, startPulses=%d, endPulses=%d, time=%f, pulsePeriod=%f\n",
-startPulses, endPulses, time, pulsePeriod);
   
   /* Define trajectory output pulses. 
    * startPulses and endPulses are defined as 1=first real element, need to add
