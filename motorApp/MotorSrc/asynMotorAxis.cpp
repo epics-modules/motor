@@ -259,7 +259,11 @@ asynStatus asynMotorAxis::defineProfile(double *positions, size_t numPoints)
   int direction;
   double scale;
   int status=0;
-  //static const char *functionName = "defineProfile";
+  static const char *functionName = "defineProfile";
+  
+  asynPrint(pC_->pasynUserSelf, ASYN_TRACE_FLOW,
+            "%s:%s: axisNo=%d, numPoints=%d, positions[0]=%f\n",
+            driverName, functionName, axisNo_, numPoints, positions[0]);
 
   if (numPoints > pC_->maxProfilePoints_) return asynError;
 
