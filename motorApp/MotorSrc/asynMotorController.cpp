@@ -296,8 +296,6 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 }
 
 /** Called when asyn clients call pasynFloat64Array->write().
-  * The base class implementation simply prints an error message.  
-  * Derived classes may reimplement this function if required.
   * \param[in] pasynUser pasynUser structure that encodes the reason and address.
   * \param[in] value Pointer to the array to write.
   * \param[in] nElements Number of elements to write. */
