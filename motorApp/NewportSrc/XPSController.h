@@ -13,6 +13,7 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define XPS_MAX_AXES 8
 #define XPS_POLL_TIMEOUT 2.0
 #define XPS_MOVE_TIMEOUT 100000.0 // "Forever"
+#define XPS_MIN_PROFILE_ACCEL_TIME 0.25
 
 // drvInfo strings for extra parameters that the XPS controller supports
 #define XPSMinJerkString                "XPS_MIN_JERK"
