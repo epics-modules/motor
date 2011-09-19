@@ -797,6 +797,8 @@ asynStatus XPSController::buildProfile()
       sprintf(message, "MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
               pAxes_[j]->positionerName_, status);
     }
+    // Don't do the rest if the axis is not being used
+    if (!useAxis[j]) continue;
     /* Check that the trajectory won't exceed the software limits
      * The XPS does not check this because the trajectory is defined in relative moves and it does
      * not know where we will be in absolute coordinates when we execute the trajectory */
