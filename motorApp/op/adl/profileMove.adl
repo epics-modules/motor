@@ -391,17 +391,17 @@ text {
 	display[0] {
 		label="Output"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Output_Trajectory, Y=$(P)$(R)M3Positions"
+		args="M=$(P)$(M3),TITLE=Output_Trajectory, Y=$(P)$(R)M3Traj"
 	}
 	display[1] {
 		label="Readback"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Actual_Trajectory, Y=$(P)$(R)M3Readbacks"
+		args="M=$(P)$(M3),TITLE=Actual_Trajectory, Y=$(P)$(R)M3Actual"
 	}
 	display[2] {
 		label="Following error"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Following_Error, Y=$(P)$(R)M3FollowingErrors"
+		args="M=$(P)$(M3),TITLE=Following_Error, Y=$(P)$(R)M3Error"
 	}
 	clr=14
 	bclr=51
@@ -416,17 +416,17 @@ text {
 	display[0] {
 		label="Output"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Output_Trajectory, Y=$(P)$(R)M4Positions"
+		args="M=$(P)$(M4),TITLE=Output_Trajectory, Y=$(P)$(R)M4Traj"
 	}
 	display[1] {
 		label="Readback"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Actual_Trajectory, Y=$(P)$(R)M4Readbacks"
+		args="M=$(P)$(M4),TITLE=Actual_Trajectory, Y=$(P)$(R)M4Actual"
 	}
 	display[2] {
 		label="Following error"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Following_Error, Y=$(P)$(R)M4FollowingErrors"
+		args="M=$(P)$(M4),TITLE=Following_Error, Y=$(P)$(R)M4Error"
 	}
 	clr=14
 	bclr=51
@@ -441,17 +441,17 @@ text {
 	display[0] {
 		label="Output"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Output_Trajectory, Y=$(P)$(R)M5Positions"
+		args="M=$(P)$(M5),TITLE=Output_Trajectory, Y=$(P)$(R)M5Traj"
 	}
 	display[1] {
 		label="Readback"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Actual_Trajectory, Y=$(P)$(R)M5Readbacks"
+		args="M=$(P)$(M5),TITLE=Actual_Trajectory, Y=$(P)$(R)M5Actual"
 	}
 	display[2] {
 		label="Following error"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Following_Error, Y=$(P)$(R)M5FollowingErrors"
+		args="M=$(P)$(M5),TITLE=Following_Error, Y=$(P)$(R)M5Error"
 	}
 	clr=14
 	bclr=51
@@ -495,17 +495,17 @@ menu {
 	display[0] {
 		label="Output"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Output_Trajectory, Y=$(P)$(R)M6Positions"
+		args="M=$(P)$(M6),TITLE=Output_Trajectory, Y=$(P)$(R)M6Traj"
 	}
 	display[1] {
 		label="Readback"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Actual_Trajectory, Y=$(P)$(R)M6Readbacks"
+		args="M=$(P)$(M6),TITLE=Actual_Trajectory, Y=$(P)$(R)M6Actual"
 	}
 	display[2] {
 		label="Following error"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Following_Error, Y=$(P)$(R)M6FollowingErrors"
+		args="M=$(P)$(M6),TITLE=Following_Error, Y=$(P)$(R)M6Error"
 	}
 	clr=14
 	bclr=51
@@ -549,17 +549,17 @@ menu {
 	display[0] {
 		label="Output"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Output_Trajectory, Y=$(P)$(R)M7Positions"
+		args="M=$(P)$(M7),TITLE=Output_Trajectory, Y=$(P)$(R)M7Traj"
 	}
 	display[1] {
 		label="Readback"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Actual_Trajectory, Y=$(P)$(R)M7Readbacks"
+		args="M=$(P)$(M7),TITLE=Actual_Trajectory, Y=$(P)$(R)M7Actual"
 	}
 	display[2] {
 		label="Following error"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Following_Error, Y=$(P)$(R)M7FollowingErrors"
+		args="M=$(P)$(M7),TITLE=Following_Error, Y=$(P)$(R)M7Error"
 	}
 	clr=14
 	bclr=51
@@ -603,17 +603,17 @@ menu {
 	display[0] {
 		label="Output"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Output_Trajectory, Y=$(P)$(R)M8Positions"
+		args="M=$(P)$(M8),TITLE=Output_Trajectory, Y=$(P)$(R)M8Traj"
 	}
 	display[1] {
 		label="Readback"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Actual_Trajectory, Y=$(P)$(R)M8Readbacks"
+		args="M=$(P)$(M8),TITLE=Actual_Trajectory, Y=$(P)$(R)M8Actual"
 	}
 	display[2] {
 		label="Following error"
 		name="trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Following_Error, Y=$(P)$(R)M8FollowingErrors"
+		args="M=$(P)$(M8),TITLE=Following_Error, Y=$(P)$(R)M8Error"
 	}
 	clr=14
 	bclr=51
