@@ -1180,16 +1180,12 @@ asynStatus XPSController::readbackProfile()
   int i, j;
   int nitems;
   int numRead=0, numInBuffer, numChars;
-  int useAxis[XPS_MAX_AXES];
   static const char *functionName = "readbackProfile";
     
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: entry\n",
             driverName, functionName);
 
-  for (j=0; j<numAxes_; j++) {
-    getIntegerParam(j, profileUseAxis_, &useAxis[j]);
-  }
   strcpy(message, "");
   setStringParam(profileReadbackMessage_, message);
   setIntegerParam(profileReadbackState_, PROFILE_READBACK_BUSY);
@@ -1200,7 +1196,6 @@ asynStatus XPSController::readbackProfile()
 
   /* Erase the readback and error arrays */
   for (j=0; j<numAxes_; j++) {
-    if (!useAxis[j]) continue;
     memset(pAxes_[j]->profileReadbacks_,       0, maxProfilePoints_*sizeof(double));
     memset(pAxes_[j]->profileFollowingErrors_, 0, maxProfilePoints_*sizeof(double));
   }
@@ -1246,7 +1241,6 @@ asynStatus XPSController::readbackProfile()
       tptr = strstr(bptr, "\n");
       if (tptr) *tptr = 0;
       for (j=0; j<numAxes_; j++) {
-        if (!useAxis[j]) continue;
         nitems = sscanf(bptr, "%lf;%lf%n", 
                         &setpointPosition, &actualPosition, &numChars);
         bptr += numChars+1;
