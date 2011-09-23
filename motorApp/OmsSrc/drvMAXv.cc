@@ -87,6 +87,7 @@ HeadURL:        $URL$
  *                    configuration string argument and in readbuf().
  * 21  02-04-11 rls - Added counter to send_mess()'s "waiting for message
  *                    acknowledgement" loop to prevent infinite loop.
+ * 22  09-23-11 ajr - Added configuration word MAXvConfig.
  *
  */
 
@@ -161,6 +162,10 @@ static char *MAXv_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 static double quantum;
 static char **initstring = 0;
 static epicsUInt32 MAXv_brd_size;  /* card address boundary */
+
+/* First 8-bits [0..7] used to indicate absolute or */
+/* incremental position registers to be read */
+static int configurationFlags[MAXv_NUM_CARDS] = {0};
 
 /*----------------functions-----------------*/
 
@@ -327,6 +332,8 @@ static int set_status(int card, int signal)
     bool got_encoder;
     msta_field status;
 
+		int absoluteAxis = (configurationFlags[card] & (1 << signal));
+
     int rtn_state;
 
     motor_info = &(motor_state[card]->motor_info[signal]);
@@ -443,7 +450,10 @@ static int set_status(int card, int signal)
     motor_info->velocity = atoi(q_buf);
 
     /* Get encoder position */
-    motorData = pmotor->encPos[signal];
+    if (absoluteAxis)
+    	motorData = pmotor->absPos[signal];
+    else
+    	motorData = pmotor->encPos[signal];
 
     motor_info->encoder_position = motorData;
 
@@ -930,7 +940,8 @@ MAXvSetup(int num_cards,        /* maximum number of cards in rack */
 }
 
 RTN_VALUES MAXvConfig(int card,                 /* number of card being configured */
-                      const char *initstr)      /* configuration string */
+                      const char *initstr,      /* configuration string */
+                      int config)		/* initialization configuration */
 {
     if (card < 0 || card >= MAXv_num_cards)
     {
@@ -938,6 +949,7 @@ RTN_VALUES MAXvConfig(int card,                 /* number of card being configur
         epicsThreadSleep(5.0);
         return(ERROR);
     }
+    
     if (strlen(initstr) > INITSTR_SIZE)
     {
         errlogPrintf("\n*** MAXvConfig ERROR ***\n");
@@ -945,8 +957,11 @@ RTN_VALUES MAXvConfig(int card,                 /* number of card being configur
         epicsThreadSleep(5.0);
         return(ERROR);
     }
-
     strcpy(initstring[card], initstr);
+    
+    /* get the configuation flags */
+    configurationFlags[card] = config;
+    
     return(OK);
 }
 
@@ -1336,7 +1351,7 @@ extern "C"
 
     static void configMAXvCallFunc(const iocshArgBuf *args)
     {
-        MAXvConfig(args[0].ival, args[1].sval);
+        MAXvConfig(args[0].ival, args[1].sval, args[2].ival);
     }
 
     static void OmsMAXvRegister(void)

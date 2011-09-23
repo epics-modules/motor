@@ -156,7 +156,9 @@ struct MAXv_motor
     epicsUInt32 msg_semaphore;
     epicsUInt32 queue_flush_mbox;
     epicsUInt32 gpio;
-    epicsUInt32 naA0[19];		/* N/A byte offset 0xA0 - 0xEB. */
+    epicsUInt32 naA0[2];		/* N/A byte offset 0xA0 - 0xA7. */
+    epicsUInt32 absPos[8];
+    epicsUInt32 naC8[9];		/* N/A byte offset 0xC8 - 0xEB. */
     epicsUInt32 flash_pgm_ptr;
     epicsUInt32 outPutIndex;
     epicsUInt32 outGetIndex;
