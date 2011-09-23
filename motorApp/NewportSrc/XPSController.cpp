@@ -600,6 +600,7 @@ asynStatus XPSController::buildProfile()
   double minJerkTime, maxJerkTime;
   double preTimeMax, postTimeMax;
   double preVelocity[XPS_MAX_AXES], postVelocity[XPS_MAX_AXES];
+  bool inGroup[XPS_MAX_AXES];
   double time;
   int useAxis[XPS_MAX_AXES];
   static const char *functionName = "buildProfile";
@@ -636,10 +637,11 @@ asynStatus XPSController::buildProfile()
     preVelocity[j] = 0.;
     postVelocity[j] = 0.;
     getIntegerParam(j, profileUseAxis_, &useAxis[j]);
+    inGroup[j] = (strcmp(pAxes_[j]->groupName_, groupName) == 0);
   }
   
   for (j=0; j<numAxes_; j++) {
-    if (!useAxis[j]) continue;
+    if (!useAxis[j] || !inGroup[j]) continue;
     status = PositionerSGammaParametersGet(pollSocket_, pAxes_[j]->positionerName_, 
                                            &maxVelocity, &maxAcceleration,
                                            &minJerkTime, &maxJerkTime);
@@ -685,6 +687,7 @@ asynStatus XPSController::buildProfile()
   /* Create the initial acceleration element */
   fprintf(trajFile,"%f", preTimeMax);
   for (j=0; j<numAxes_; j++) {
+    if (!inGroup[j]) continue;
     fprintf(trajFile,", %f, %f", pAxes_[j]->profilePreDistance_, preVelocity[j]);
   }
   fprintf(trajFile,"\n");
@@ -697,7 +700,9 @@ asynStatus XPSController::buildProfile()
       T1 = profileTimes_[i+1];
     else
       T1 = T0;
+    fprintf(trajFile,"%f", profileTimes_[i]);
     for (j=0; j<numAxes_; j++) {
+      if (!inGroup[j]) continue;
       D0 = pAxes_[j]->profilePositions_[i+1] - 
            pAxes_[j]->profilePositions_[i];
       if (i < nElements-1) 
@@ -705,23 +710,21 @@ asynStatus XPSController::buildProfile()
              pAxes_[j]->profilePositions_[i+1];
       else
         D1 = D0;
-
       /* Average either side of the point */
       trajVel = ((D0 + D1) / (T0 + T1));
       if (!useAxis[j]) {
         D0 = 0.0;  /* Axis turned off*/
         trajVel = 0.0;
       }
-    
-      if (j == 0) fprintf(trajFile,"%f", profileTimes_[i]);
       fprintf(trajFile,", %f, %f",D0,trajVel);
-      if (j == (numAxes_-1)) fprintf(trajFile,"\n");
     }  
+    fprintf(trajFile,"\n");
   }
 
   /* Create the final acceleration element. Final velocity must be 0. */
   fprintf(trajFile,"%f", postTimeMax);
   for (j=0; j<numAxes_; j++) {
+    if (!inGroup[j]) continue;
     fprintf(trajFile,", %f, %f", pAxes_[j]->profilePostDistance_, 0.);
   }
   fprintf(trajFile,"\n");
@@ -782,6 +785,7 @@ asynStatus XPSController::buildProfile()
 
   /* Read dynamic parameters*/
   for (j=0; j<numAxes_; j++) {
+    if (!inGroup[j]) continue;
     maxVelocityActual = 0;
     maxAccelerationActual = 0;   
     status = MultipleAxesPVTVerificationResultGet(pollSocket_,
@@ -880,6 +884,7 @@ asynStatus XPSController::runProfile()
   char groupName[MAX_GROUPNAME_LEN];
   int eventId;
   int useAxis[XPS_MAX_AXES];
+  bool inGroup[XPS_MAX_AXES];
   XPSAxis *pAxis;
   static const char *functionName = "runProfile";
   
@@ -892,6 +897,7 @@ asynStatus XPSController::runProfile()
   getIntegerParam(profileNumPulses_,   &numPulses);
   for (j=0; j<numAxes_; j++) {
     getIntegerParam(j, profileUseAxis_, &useAxis[j]);
+    inGroup[j] = (strcmp(pAxes_[j]->groupName_, groupName) == 0);
   }
   strcpy(message, " ");
   setStringParam(profileExecuteMessage_, message);
@@ -902,7 +908,7 @@ asynStatus XPSController::runProfile()
 
   // Move the motors to the start position
   for (j=0; j<numAxes_; j++) {
-    if (!useAxis[j]) continue;
+    if (!useAxis[j] || !inGroup[j]) continue;
     pAxis = getAxis(j);
     position = pAxis->profilePositions_[0] - pAxis->profilePreDistance_;
     status = GroupMoveAbsolute(pAxis->moveSocket_,
@@ -1090,7 +1096,7 @@ asynStatus XPSController::runProfile()
 
   // Move the motors to the end position
   for (j=0; j<numAxes_; j++) {
-    if (!useAxis[j]) continue;
+    if (!useAxis[j] ||!inGroup[j]) continue;
     pAxis = getAxis(j);
     position = pAxis->profilePositions_[numPoints-1] + pAxis->profilePostDistance_;
     status = GroupMoveAbsolute(pAxis->moveSocket_,
