@@ -478,46 +478,43 @@ static int processDeferredMovesInGroup(const XPSController * pController, char *
 
   /*Loop over all axes in this controller.*/
   for (axis=0; axis<pController->numAxes; axis++) {
-      pAxis = &pController->pAxis[axis];
-      
-      PRINT(pAxis->logParam, FLOW, "Executing deferred move on XPS: %d, Group: %s\n", pAxis->card, groupName);
-
-      /*Ignore axes in other groups.*/
-      if (!strcmp(pAxis->groupName, groupName)) {
-	if (first_loop) {
-	  /*Get the number of axes in this group, and allocate buffer for positions.*/
-	  NbPositioners = isAxisInGroup(pAxis);
-	  if ((positions = (double *)calloc(NbPositioners, sizeof(double))) == NULL) {
-	    PRINT(pAxis->logParam, MOTOR_ERROR, "Cannot allocate memory for positions array in processDeferredMovesInGroup.\n" );
-	    return MOTOR_AXIS_ERROR;
-	  }
-	  first_loop = 0;
+    pAxis = &pController->pAxis[axis];
+    
+    PRINT(pAxis->logParam, FLOW, "Executing deferred move on XPS: %d, Group: %s\n", pAxis->card, groupName);
+    
+    /*Ignore axes in other groups.*/
+    if (!strcmp(pAxis->groupName, groupName)) {
+      if (first_loop) {
+	/*Get the number of axes in this group, and allocate buffer for positions.*/
+	NbPositioners = isAxisInGroup(pAxis);
+	if ((positions = (double *)calloc(NbPositioners, sizeof(double))) == NULL) {
+	  PRINT(pAxis->logParam, MOTOR_ERROR, "Cannot allocate memory for positions array in processDeferredMovesInGroup.\n" );
+	  return MOTOR_AXIS_ERROR;
 	}
-
-	/*Set relative flag for the actual move at the end of the funtion.*/
-	if (pAxis->deferred_relative) {
-	  relativeMove = 1;
-	}
-
-	/*Build position buffer.*/
-	if (pAxis->deferred_move) {
-	  positions[positions_index] = 
-	    pAxis->deferred_relative ? (pAxis->currentPosition + pAxis->deferred_position) : pAxis->deferred_position;
-	} else {
-	  positions[positions_index] = 
-	    pAxis->deferred_relative ? 0 : pAxis->theoryPosition;
-	}
-
-	/*Reset deferred flag.*/
-	/*We need to do this for the XPS, because we cannot do partial group moves. Every axis
-	  in the group will be included the next time we do a group move.*/
-	pAxis->deferred_move = 0;
-
-	/*Next axis in this group.*/
-	positions_index++;
+	first_loop = 0;
       }
+      
+      /*Set relative flag for the actual move at the end of the funtion.*/
+      if (pAxis->deferred_relative) {
+	relativeMove = 1;
+      }
+      
+      /*Build position buffer.*/
+      if (pAxis->deferred_move) {
+	positions[positions_index] = 
+	  pAxis->deferred_relative ? (pAxis->currentPosition + pAxis->deferred_position) : pAxis->deferred_position;
+      } else {
+	positions[positions_index] = 
+	  pAxis->deferred_relative ? 0 : pAxis->theoryPosition;
+      }
+      
+      /*Next axis in this group.*/
+      positions_index++;
+    }
   }
   
+  PRINT(pAxis->logParam, FLOW, "Executing deferred move on XPS: %d, Group: %s\n", pAxis->card, groupName);
+
   /*Send the group move command.*/
   if (relativeMove) {
     status = GroupMoveRelative(pAxis->moveSocket,
@@ -531,17 +528,31 @@ static int processDeferredMovesInGroup(const XPSController * pController, char *
 			       positions);
   }
   
+  /*Clear the defer flag for all the axes in this group.*/
+  /*We need to do this for the XPS, because we cannot do partial group moves. Every axis
+    in the group will be included the next time we do a group move.*/
+  for (axis=0; axis<pController->numAxes; axis++) {
+    pAxis = &pController->pAxis[axis];
+    /*Ignore axes in other groups.*/
+    if (!strcmp(pAxis->groupName, groupName)) {
+      pAxis->deferred_move = 0;
+    }
+  }
+  
   if (status!=0) {
     PRINT(pAxis->logParam, MOTOR_ERROR, "Error peforming GroupMoveAbsolute/Relative in processDeferredMovesInGroup. XPS Return code: %d\n", status);
     if (positions != NULL) {
       free(positions);
     }
     return MOTOR_AXIS_ERROR;
-  }    
-
+  }
+    
   if (positions != NULL) {
     free(positions);
   }
+
+  /* Send a signal to the poller task which will make it do a poll, and switch to the moving poll rate */
+  epicsEventSignal(pAxis->pController->pollEventId);
   
   return MOTOR_AXIS_OK;
   
@@ -992,8 +1003,6 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     }
     /* Tell paramLib that the motor is moving.  
      * This will force a callback on the next poll, even if the poll says the motor is already done. */
-
-
     if (epicsMutexLock(pAxis->mutexId) == epicsMutexLockOK)
     {
         /* Insure that the motor record's next status update sees motorAxisDone = False. */
@@ -1236,7 +1245,7 @@ static void XPSPoller(XPSController *pController)
         for (i=0; i<pController->numAxes; i++) {
             pAxis = &pController->pAxis[i];
             if (!pAxis->mutexId) break;
-            epicsMutexLock(pAxis->mutexId);
+	    if (epicsMutexLock(pAxis->mutexId) == epicsMutexLockOK) {
             status = GroupStatusGet(pAxis->pollSocket, 
                                     pAxis->groupName, 
                                     &pAxis->axisStatus);
@@ -1398,6 +1407,7 @@ static void XPSPoller(XPSController *pController)
             motorParam->callCallback(pAxis->params);
 
             epicsMutexUnlock(pAxis->mutexId);
+	}
 
         } /* Next axis */
 

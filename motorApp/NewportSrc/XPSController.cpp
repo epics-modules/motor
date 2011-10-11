@@ -283,11 +283,6 @@ asynStatus XPSController::processDeferredMovesInGroup(char *groupName)
           pAxis->deferredRelative_ ? 0 : pAxis->setpointPosition_;
       }
 
-      /* Reset deferred flag. */
-      /* We need to do this for the XPS, because we cannot do partial group moves. Every axis
-         in the group will be included the next time we do a group move. */
-      pAxis->deferredMove_ = 0;
-
       /* Next axis in this group. */
       positions_index++;
     }
@@ -304,6 +299,18 @@ asynStatus XPSController::processDeferredMovesInGroup(char *groupName)
                                groupName,
                                NbPositioners,
                                positions);
+  }
+
+  /*Clear the defer flag for all the axes in this group.*/
+  /*We need to do this for the XPS, because we cannot do partial group moves. Every axis
+    in the group will be included the next time we do a group move.*/
+  /* Loop over all axes in this controller. */
+  for (axis=0; axis<numAxes_; axis++) {
+    pAxis = getAxis(axis);
+    /* Ignore axes in other groups. */
+    if (!strcmp(pAxis->groupName_, groupName)) {
+      pAxis->deferredMove_ = 0;
+    }
   }
   
   if (status!=0) {
