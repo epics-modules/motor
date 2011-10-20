@@ -148,6 +148,9 @@ HeadURL:        $URL$
  * .61 06-24-11 rls - No retries after backlash or jogging. Move setting
  *                    MIP <- DONE and reactivating Jog request from
  *                    postProcess() to maybeRetry().
+ * .62 10-20-11 rls - Disable soft travel limit error check during home search.
+ *                  - Use home velocity (HVEL), base velocity (BVEL) and accel.
+ *                    time (ACCL) fields to calculate home acceleration rate.
  *
  */
 
@@ -749,6 +752,8 @@ static long postProcess(motorRecord * pmr)
             double vbase = pmr->vbas / fabs(pmr->mres);
             double hpos = 0;
             double hvel =  pmr->hvel / fabs(pmr->mres);
+            double acc = (hvel - vbase) / pmr->accl;
+
             motor_cmnd command;
 
             pmr->mip &= ~MIP_STOP;
@@ -759,6 +764,8 @@ static long postProcess(motorRecord * pmr)
             INIT_MSG();
             WRITE_MSG(SET_VEL_BASE, &vbase);
             WRITE_MSG(SET_VELOCITY, &hvel);
+            if (acc > 0.0)  /* Don't SET_ACCEL to zero. */
+                WRITE_MSG(SET_ACCEL, &acc);
             
             if (((pmr->mip & MIP_HOMF) && (pmr->mres > 0.0)) ||
                 ((pmr->mip & MIP_HOMR) && (pmr->mres < 0.0)))
@@ -1314,9 +1321,8 @@ enter_do_work:
         if (pmr->mip & MIP_JOG)
             pmr->lvio = (pmr->jogf && (pmr->drbv > pmr->dhlm - pmr->velo)) ||
                         (pmr->jogr && (pmr->drbv < pmr->dllm + pmr->velo));
-        else if(pmr->mip & MIP_HOME)
-            pmr->lvio = (pmr->homf && (pmr->drbv > pmr->dhlm - pmr->velo)) ||
-                        (pmr->homr && (pmr->drbv < pmr->dllm + pmr->velo));
+        else if (pmr->mip & MIP_HOME)
+            pmr->lvio = false;  /* Disable soft-limit error check during home search. */
         else
             pmr->lvio = (pmr->drbv > pmr->dhlm + fabs(pmr->mres)) ||
                         (pmr->drbv < pmr->dllm - fabs(pmr->mres));
@@ -1880,7 +1886,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             }
             else
             {
-                double vbase, hvel, hpos;
+                double vbase, hvel, hpos, acc;
                 motor_cmnd command;
 
                 /* defend against divide by zero */
@@ -1892,11 +1898,14 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
                 vbase = pmr->vbas / fabs(pmr->mres);
                 hvel  = pmr->hvel / fabs(pmr->mres);
+                acc   = (hvel - vbase) / pmr->accl;
                 hpos = 0;
 
                 INIT_MSG();
                 WRITE_MSG(SET_VEL_BASE, &vbase);
                 WRITE_MSG(SET_VELOCITY, &hvel);
+                if (acc > 0.0)  /* Don't SET_ACCEL to zero. */
+                    WRITE_MSG(SET_ACCEL, &acc);
 
                 if (((pmr->mip & MIP_HOMF) && (pmr->mres > 0.0)) ||
                     ((pmr->mip & MIP_HOMR) && (pmr->mres < 0.0)))
