@@ -138,6 +138,29 @@ Known Problems
         some unknown reason) ignored and several subsequent status request
         result in communication timeouts.
 
+8) The OMS VME58 controller ignores its' Velocity Base command (VB) on the up
+        ramp of a home search operation; but not on the down ramp.
+
+
+Modification Log for R6-7
+=========================
+
+1) Since the purpose of a Home search is to establish an absolute reference
+        position, the soft travel limits are not valid during a home search
+        operation.  Accordingly, the motor record's soft travel limit error
+        check is now disabled during a home search operation.
+        In addition, the motor record was not setting an acceleration rate for
+        a home search. It now uses the home velocity (HVEL), base velocity
+        (BVEL) and accel. time (ACCL) fields to set a home acceleration rate.
+        
+        File modified: motorApp/MotorSrc/motorRecord.cc
+
+2) If an OMS VME58 board rebooted (as described under item #12 R6-6), it could
+        end up in an endless loop in the driver's send_mess() function. Add
+        a counter to prevent the endless loop.
+        
+        File modified: motorApp/OmsSrc/drvOms58.cc
+
 
 Modification Log from R6-5 to R6-6
 ==================================
