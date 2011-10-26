@@ -5,16 +5,11 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 
 # The following are used for debugging messages.
-USR_CXXFLAGS += -DDEBUG
+#!USR_CXXFLAGS += -DDEBUG
 
 DBD += devOms.dbd
 
 LIBRARY_IOC_DEFAULT += oms
-
-# Trajectory support for MAXV controller
-ifdef SNCSEQ
-SRCS += MAX_trajectoryScan.st
-endif
 
 # The following is required for the OMS PC68/78 (i.e., devOmsPC68) device driver.
 ifdef ASYN
@@ -28,8 +23,17 @@ SRCS += devOms.cc drvOms.cc
 # The following is required for the OMS VME58 (i.e., devOms58) device driver.
 SRCS += devOms58.cc drvOms58.cc
 
-# The following is required for the OMS MAXv device driver.
-SRCS += devMAXv.cc drvMAXv_trajectory.cc
+# OMS MAXv device driver support.
+# Choose one; either "standard" or "trajectory".
+
+# Standard MAXv
+SRCS += devMAXv.cc drvMAXv.cc
+
+# Trajectory support for MAXV controller
+ifdef SNCSEQ
+#!SRCS += MAX_trajectoryScan.st
+endif
+#!SRCS_vxWorks += devMAXv.cc drvMAXv_trajectory.cc
 
 # The following is required for all OMS device drivers.
 SRCS += devOmsCom.cc
