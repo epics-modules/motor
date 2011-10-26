@@ -9,6 +9,7 @@ driver(drvOms58)
 # Oregon Micro Systems MAXv driver support.
 device(motor,VME_IO,devMAXv,"OMS MAXv")
 driver(drvMAXv)
+registrar(OmsMAXvRegister)
 
 # Oregon Micro Systems PC68/78 RS-232 serial driver support.
 device(motor,VME_IO,devOmsPC68,"OMS PC68/78")
@@ -16,5 +17,5 @@ driver(drvOmsPC68)
 registrar(OmsPC68Register)
 variable(drvOmsPC68debug)
 
-registrar(MAX_trajectoryScanRegistrar)
+#!registrar(MAX_trajectoryScanRegistrar)
 
