@@ -282,28 +282,21 @@ asynStatus ACRController::writeUInt32Digital(asynUser *pasynUser, epicsUInt32 va
 asynStatus ACRController::readBinaryIO()
 {
   asynStatus status;
-  epicsUInt32 newBits, changedBits;
 
   // Read the binary inputs
   sprintf(outString_, "?P%d", binaryInReg_);
   status = writeReadController();
   if (!status) {
-    newBits = atoi(inString_);
-    changedBits = newBits ^ binaryIn_;
-    binaryIn_ = newBits;
+    binaryIn_ = atoi(inString_);
     setUIntDigitalParam(0, ACRBinaryIn_, binaryIn_, 0xFFFFFFFF);
-    setUInt32DigitalInterrupt(0, ACRBinaryIn_, changedBits, interruptOnBoth);
   }
 
   // Read the binary outputs
   sprintf(outString_, "?P%d", binaryOutReg_);
   status = writeReadController();
   if (!status) {
-    newBits = atoi(inString_);
-    changedBits = newBits ^ binaryOutRBV_;
-    binaryOutRBV_ = newBits;
+    binaryOutRBV_  = atoi(inString_);
     setUIntDigitalParam(0, ACRBinaryOutRBV_, binaryOutRBV_, 0xFFFFFFFF);
-    setUInt32DigitalInterrupt(0, ACRBinaryOutRBV_, changedBits, interruptOnBoth);
   }
   callParamCallbacks(0);
   return status;
