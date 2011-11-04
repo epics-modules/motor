@@ -38,6 +38,8 @@ HeadURL:        $URL$
  * Modification Log:
  * -----------------
  * 01  04-05-04 rls Copied for drvOms58.h
+ * 02  10-26-11 rls motor_init() sets motor typeID as boot-up. Used by device
+ *                  support to allow MRES and ERES to be opposite sign.
  *  
  */
 
@@ -53,6 +55,17 @@ HeadURL:        $URL$
 #define MAXv_NUM_CARDS           15
 
 #define BUFFER_SIZE	1024
+
+
+enum MotorTypes {PSO,  // Stepper; w/o  encoder
+                 PSE,  // Stepper; with encoder
+                 PSM}; // Servo
+
+struct MAXvController
+{
+    MotorTypes typeID[8];
+};
+
 
 /* MAXv DUAL-PORT MEMORY MAP */
 

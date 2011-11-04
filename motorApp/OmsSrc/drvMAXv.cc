@@ -42,6 +42,7 @@ HeadURL:        $URL$
  *      - MAXv ver:1.31 (fixes DPRAM encoder position data problem when using
  *                       mixed motor types.)
  *      - MAXv ver:1.33, FPGA:B2:A6 BOOT:1.2 (Watchdog Timeout Counter added)
+ *      - MAXv ver:1.34, FPGA:03:A6 BOOT:1.3 
  *
  * Modification Log:
  * -----------------
@@ -88,6 +89,11 @@ HeadURL:        $URL$
  * 21  02-04-11 rls - Added counter to send_mess()'s "waiting for message
  *                    acknowledgement" loop to prevent infinite loop.
  * 22  09-23-11 ajr - Added configuration word MAXvConfig.
+ * 23  10-26-11 rls - Changed Debug() to Mark River's variable arguments macro.
+ *                  - Added MAXvController data structure using private data in
+ *                    motor record to store motor type. Motor type used in
+ *                    device support (devOmsCom.cc) to allow MRES and ERES with
+ *                    different polarity (signs).
  *
  */
 
@@ -128,20 +134,20 @@ HeadURL:        $URL$
 #define DONE_QUERY      "RA"            /* ?? Is this needed?? */
 #define PID_QUERY       "?KA ID"
 
-
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef      DEBUG
-        #define Debug(l, f, args...) {if (l <= drvMAXvdebug) \
-                                  errlogPrintf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug
-#endif
 volatile int drvMAXvdebug = 0;
 extern "C" {epicsExportAddress(int, drvMAXvdebug);}
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvMAXvdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 #define pack2x16(p)      ((epicsUInt32)(((p[0])<<16)|(p[1])))
 #define INITSTR_SIZE    300     /* 300 byte configuration string. */
@@ -332,7 +338,7 @@ static int set_status(int card, int signal)
     bool got_encoder;
     msta_field status;
 
-		int absoluteAxis = (configurationFlags[card] & (1 << signal));
+    int absoluteAxis = (configurationFlags[card] & (1 << signal));
 
     int rtn_state;
 
@@ -451,9 +457,9 @@ static int set_status(int card, int signal)
 
     /* Get encoder position */
     if (absoluteAxis)
-    	motorData = pmotor->absPos[signal];
+        motorData = pmotor->absPos[signal];
     else
-    	motorData = pmotor->encPos[signal];
+        motorData = pmotor->encPos[signal];
 
     motor_info->encoder_position = motorData;
 
@@ -1062,6 +1068,7 @@ static int motor_init()
     struct mess_info *motor_info;
     volatile struct controller *pmotorState;
     volatile struct MAXv_motor *pmotor;
+    struct MAXvController *pvtdata;
     long status;
     int card_index, motor_index, itera;
     char axis_pos[MAX_IDENT_LEN], encoder_pos[MAX_IDENT_LEN], **strptr;
@@ -1149,6 +1156,9 @@ static int motor_init()
         pmotorState->motor_in_motion = 0;
         pmotorState->cmnd_response = false;
 
+        pvtdata = (struct MAXvController *) malloc(sizeof(struct MAXvController));
+        pmotorState->DevicePrivate = pvtdata;
+
         if (MAXvInterruptVector == 0)
             pmotor->IACK_vector = 0;
         else
@@ -1205,6 +1215,7 @@ static int motor_init()
 
             for (total_encoders = total_pidcnt = 0, motor_index = 0; motor_index < total_axis; motor_index++)
             {
+                motor_info = (struct mess_info *) &pmotorState->motor_info[motor_index];
                 STATUS1 flag1;
 
                 /* Test if motor has an encoder. */
@@ -1215,14 +1226,14 @@ static int motor_init()
                 if (pmotor->status1_flag.Bits.cmndError)
                 {
                     Debug(2, "motor_init: No encoder on axis %d\n", motor_index);
-                    pmotorState->motor_info[motor_index].encoder_present = NO;
+                    motor_info->encoder_present = NO;
                     flag1.All = pmotor->status1_flag.All;       /* Clear command error. */
                     pmotor->status1_flag.All = flag1.All;
                 }
                 else
                 {
                     total_encoders++;
-                    pmotorState->motor_info[motor_index].encoder_present = YES;
+                    motor_info->encoder_present = YES;
                     recv_mess(card_index, encoder_pos, 1);
                 }
                 
@@ -1233,16 +1244,24 @@ static int motor_init()
                 if (pmotor->status1_flag.Bits.cmndError)
                 {
                     Debug(2, "motor_init: No PID parameters on axis %d\n", motor_index);
-                    pmotorState->motor_info[motor_index].pid_present = NO;
+                    motor_info->pid_present = NO;
                     flag1.All = pmotor->status1_flag.All;       /* Clear command error. */
                     pmotor->status1_flag.All = flag1.All;
                 }
                 else
                 {
                     total_pidcnt++;
-                    pmotorState->motor_info[motor_index].pid_present = YES;
+                    motor_info->pid_present = YES;
                     recv_mess(card_index, encoder_pos, FLUSH);  /* Flush response. */
                 }
+
+                // Set motor type.
+                if (motor_info->pid_present == YES)
+                    pvtdata->typeID[motor_index] = PSM;
+                else if (motor_info->encoder_present == YES)
+                    pvtdata->typeID[motor_index] = PSE;
+                else
+                    pvtdata->typeID[motor_index] = PSO;
             }
 
             /* Enable interrupt-when-done if selected */
@@ -1335,14 +1354,15 @@ extern "C"
 // Oms Config arguments
     static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
     static const iocshArg configArg1 = {"configuration string", iocshArgString};
+    static const iocshArg configArg2 = {"configuration flags", };
 
     static const iocshArg * const OmsSetupArgs[6] = {&setupArg0, &setupArg1,
         &setupArg2, &setupArg3, &setupArg4, &setupArg5};
-    static const iocshArg * const OmsConfigArgs[2] = {&configArg0, &configArg1};
+    static const iocshArg * const OmsConfigArgs[3] = {&configArg0, &configArg1, &configArg2};
 
     static const iocshFuncDef setupMAXv = {"MAXvSetup", 6, OmsSetupArgs};
 
-    static const iocshFuncDef configMAXv = {"MAXvConfig", 2, OmsConfigArgs};
+    static const iocshFuncDef configMAXv = {"MAXvConfig", 3, OmsConfigArgs};
 
     static void setupMAXvCallFunc(const iocshArgBuf *args)
     {
