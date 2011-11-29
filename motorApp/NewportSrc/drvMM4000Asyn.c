@@ -61,6 +61,9 @@ HeadURL:        $URL$
  * .06 04-15-10 rls - Apply Matthew Pearson's fix to motorAxisSetInteger().
  *                  - Allow MM4005 models to enable/disable torque.
  *                  - Reformat some 'if' statements.
+ * .07 11-29-11 rls - 8 axis with max. precision can overflow comm. buffers.
+ *                    increased from 100 to 160 bytes.
+ *                  - Wait for power on status response.
  *
  */
 
@@ -172,7 +175,7 @@ static asynStatus sendAndReceive(MM4000Controller *pController, char *outputStri
 #define IODRIVER  motorAxisTraceIODriver
 
 #define MM4000_MAX_AXES 8
-#define BUFFER_SIZE 100 /* Size of input and output buffers */
+#define BUFFER_SIZE 160 /* Size of input and output buffers */
 #define TIMEOUT 2.0     /* Timeout for I/O in seconds */
 
 #define MM4000_HOME       0x20  /* Home LS. */
@@ -402,7 +405,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     char buff[100];
 
     if (pAxis == NULL)
-        return MOTOR_AXIS_ERROR;
+        return(MOTOR_AXIS_ERROR);
 
     epicsMutexLock(pAxis->mutexId);
 
@@ -416,10 +419,29 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
         else
         {
             if (value == 0)
-                sprintf(buff, "%dMF", pAxis->axis+1);
+            {
+                int axisStatus, powerOn = 0;
+                int offset = (pAxis->axis * 5) + 3;  /* Offset in status string */
+
+                sprintf(buff, "%dMF", pAxis->axis + 1);
+                ret_status = sendOnly(pAxis->pController, buff);
+                
+                /* Wait for Power to come on. */
+                while (powerOn == 0)
+                {
+                    ret_status = sendAndReceive(pAxis->pController, "MS;", buff, sizeof(buff));
+                    axisStatus = buff[offset];
+                    if (!(axisStatus & MM4000_POWER_OFF))
+                        powerOn = 1;
+                    else
+                        epicsThreadSleep(0.1);
+                }                
+            }
             else
+            {
                 sprintf(buff, "%dMO", pAxis->axis+1);
-            ret_status = sendOnly(pAxis->pController, buff);
+                ret_status = sendOnly(pAxis->pController, buff);
+            }
         }
         break;
     default:
@@ -432,7 +454,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
         motorParam->callCallback(pAxis->params);
     }
     epicsMutexUnlock(pAxis->mutexId);
-    return ret_status;
+    return(ret_status);
 }
 
 
@@ -582,16 +604,16 @@ static void MM4000Poller(MM4000Controller *pController)
     double timeout;
     AXIS_HDL pAxis;
     int status;
-    int i, j;
+    int itera, j;
     int axisDone;
     int offset;
     int anyMoving;
     int comStatus;
     int forcedFastPolls=0;
     char *p, *tokSave;
-    char statusAllString[100];
-    char positionAllString[100];
-    char buff[100];
+    char statusAllString[BUFFER_SIZE];
+    char positionAllString[BUFFER_SIZE];
+    char buff[BUFFER_SIZE];
 
     timeout = pController->idlePollPeriod;
     epicsEventSignal(pController->pollEventId);  /* Force on poll at startup */
@@ -616,9 +638,9 @@ static void MM4000Poller(MM4000Controller *pController)
         anyMoving = 0;
 
         /* Lock all the controller's axis. */
-        for (i = 0; i < pController->numAxes; i++)
+        for (itera = 0; itera < pController->numAxes; itera++)
         {
-            pAxis = &pController->pAxis[i];
+            pAxis = &pController->pAxis[itera];
             if (!pAxis->mutexId)
                 break;
             epicsMutexLock(pAxis->mutexId);
@@ -628,9 +650,9 @@ static void MM4000Poller(MM4000Controller *pController)
         if (comStatus == 0)
             comStatus = sendAndReceive(pController, "TP;", positionAllString, sizeof(positionAllString));
 
-        for (i=0; i<pController->numAxes; i++)
+        for (itera=0; itera < pController->numAxes; itera++)
         {
-            pAxis = &pController->pAxis[i];
+            pAxis = &pController->pAxis[itera];
             if (!pAxis->mutexId)
                 break;
             if (comStatus != 0)
@@ -702,9 +724,9 @@ static void MM4000Poller(MM4000Controller *pController)
         } /* Next axis */
 
         /* UnLock all the controller's axis. */
-        for (i = 0; i < pController->numAxes; i++)
+        for (itera = 0; itera < pController->numAxes; itera++)
         {
-            pAxis = &pController->pAxis[i];
+            pAxis = &pController->pAxis[itera];
             if (!pAxis->mutexId)
                 break;
             epicsMutexUnlock(pAxis->mutexId);
