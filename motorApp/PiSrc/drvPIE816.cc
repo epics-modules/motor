@@ -6,6 +6,11 @@ USAGE...	Motor record driver level support for Physik Instrumente (PI)
 Version:	1.1
 Modified By:	sullivan
 Last Modified:	2008/10/23 20:01:05
+
+Version:	1.2
+Modified By:	K. Gofron & K. Lauer
+Last Modified:	2011/09/19
+Changes required for PIE621 controller.
 */
 
 /*
@@ -53,7 +58,7 @@ DESIGN LIMITATIONS...
 #include "drvPIE816.h"
 #include "epicsExport.h"
 
-#define GET_IDENT     "IDN?"       
+#define GET_IDENT     "*IDN?"       
 #define SET_ONLINE    "ONL 1"      /* Set Online Mode ON */
 /*#define SET_VELCTRL   "VCO A1 B1 C1" */    /* Set Velocity Control Mode - Required for DONE */
 #define READ_ONLINE   "ONL?"       /* Read Online Mode */
@@ -68,17 +73,18 @@ DESIGN LIMITATIONS...
 #define BUFF_SIZE 100		/* Maximum length of string to/from PIE816 */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) { if(l<=drvPIE816debug) printf(f,## args); }
-    #else
-	#define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvPIE816debug = 0;
 extern "C" {epicsExportAddress(int, drvPIE816debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPIE816debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int PIE816_num_cards = 0;
@@ -244,7 +250,7 @@ static int set_status(int card, int signal)
     recv_mess(card, buff, FLUSH);
 
     readOK = false;   
-    send_mess(card, READ_ONLINE, (char) NULL);
+    //send_mess(card, READ_ONLINE, (char) NULL);
 /*    if (recv_mess(card, buff, 1) && sscanf(buff, "%d", &online_status))
       {
 	if (!online_status)
