@@ -2,10 +2,10 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision: 11147 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2010-06-09 13:43:20 -0500 (Wed, 09 Jun 2010) $
-HeadURL:        $URL: https://subversion.xor.aps.anl.gov/synApps/motor/trunk/motorApp/OmsSrc/drvMAXv.cc $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /* This is a customized version of drvMAXv.cc with modifications to support
@@ -137,18 +137,18 @@ struct MAXv_DevicePrivate {
 
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef      DEBUG
-        #define Debug(l, f, args...) {if (l <= drvMAXvdebug) \
-                                  errlogPrintf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug
-#endif
 volatile int drvMAXvdebug = 0;
 extern "C" {epicsExportAddress(int, drvMAXvdebug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvMAXvdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 #define pack2x16(p)      ((epicsUInt32)(((p[0])<<16)|(p[1])))
 #define INITSTR_SIZE    300     /* 300 byte configuration string. */

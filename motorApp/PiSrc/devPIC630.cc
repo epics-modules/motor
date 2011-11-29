@@ -28,18 +28,18 @@
 #define NINT(f) (long)((f)>0 ? (f)+0.5 : (f)-0.5)
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef DEBUG
-        volatile int devPIC630debug = 0;
-        #define Debug(L, FMT, V...) { if(L <= devPIC630debug) \
-                { errlogPrintf("%s(%d):",__FILE__,__LINE__); \
-                  errlogPrintf(FMT,##V); } }
-    #else
-        #define Debug(L, FMT, V...)
-    #endif
-#else
-    #define Debug()
-#endif
+volatile int devPIC630debug = 0;
+extern "C" {epicsExportAddress(int, devPIC630debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < devPIC630debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* Debugging levels: 
  *      devPIC630debug >= 3  Print new part of command and command string so far

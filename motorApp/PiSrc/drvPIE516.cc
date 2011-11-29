@@ -68,17 +68,18 @@ DESIGN LIMITATIONS...
 #define BUFF_SIZE 100		/* Maximum length of string to/from PIE516 */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) { if(l<=drvPIE516debug) printf(f,## args); }
-    #else
-	#define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvPIE516debug = 0;
 extern "C" {epicsExportAddress(int, drvPIE516debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPIE516debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int PIE516_num_cards = 0;

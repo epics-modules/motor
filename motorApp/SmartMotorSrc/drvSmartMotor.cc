@@ -59,19 +59,17 @@ Last Modified:  $Date: 2007-09-13 16:36:38 $
 #define BUFF_SIZE 20  /* Maximum length of string to/from SmartMotor */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef  DEBUG
-        #define Debug(l, f, args...) {if (l <= drvSmartMotordebug) printf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvSmartMotordebug = 0;
-extern "C"
-{
-    epicsExportAddress(int, drvSmartMotordebug);
+extern "C" {epicsExportAddress(int, drvSmartMotordebug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvSmartMotordebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
 }
 
 /* --- Local data. --- */

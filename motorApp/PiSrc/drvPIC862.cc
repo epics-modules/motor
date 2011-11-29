@@ -43,17 +43,18 @@ DESIGN LIMITATIONS...
 #define BUFF_SIZE 100		/* Maximum length of string to/from PIC862 */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) { if(l<=drvPIC862debug) printf(f,## args); }
-    #else
-	#define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvPIC862debug = 0;
 extern "C" {epicsExportAddress(int, drvPIC862debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPIC862debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int PIC862_num_cards = 0;

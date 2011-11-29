@@ -116,17 +116,18 @@ HeadURL:        $URL$
 #define TIMEOUT 2.0 /* Command timeout in sec. */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef  DEBUG
-        #define Debug(l, f, args...) { if(l<=drvMM4000debug) printf(f,## args); }
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvMM4000debug = 0;
 extern "C" {epicsExportAddress(int, drvMM4000debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvMM4000debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int MM4000_num_cards = 0;

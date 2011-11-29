@@ -66,18 +66,18 @@ NOTES...
 #include	"errlog.h"
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-  #ifdef	DEBUG
-    #define Debug(l, f, args...) {if (l <= devSoftdebug) \
-				    errlogPrintf(f, ## args);}
-  #else
-    #define Debug(l, f, args...)
-  #endif
-#else
-  #define Debug
-#endif
 volatile int devSoftdebug = 0;
 extern "C" {epicsExportAddress(int, devSoftdebug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < devSoftdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 static CALLBACK_VALUE update(struct motorRecord *);
 static long start(struct motorRecord *);

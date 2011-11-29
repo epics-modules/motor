@@ -29,19 +29,20 @@ extern struct driver_table MCB4B_access;
 
 #define NINT(f) (long)((f)>0 ? (f)+0.5 : (f)-0.5)
 
-#ifdef __GNUG__
-    #ifdef DEBUG
-	volatile int devMCB4BDebug = 0;
-	#define Debug(L, FMT, V...) { if(L <= devMCB4BDebug) \
-                        { errlogPrintf("%s(%d):",__FILE__,__LINE__); \
-                          errlogPrintf(FMT,##V); } }
-    #else
-	#define Debug(L, FMT, V...)
-    #endif
-#else
-    #define Debug()
-#endif
+volatile int devMCB4BDebug = 0;
+extern "C" {epicsExportAddress(int, devMCB4BDebug);}
 
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < devMCB4BDebug)
+    {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* Debugging levels: 
  *      devMCB4BDebug >= 3  Print new part of command and command string so far

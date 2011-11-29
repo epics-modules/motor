@@ -84,17 +84,19 @@ DESIGN LIMITATIONS...
 #define BUFF_SIZE 13		/* Maximum length of string to/from MDrive */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef  DEBUG
-        #define Debug(l, f, args...) {if (l <= drvMDrivedebug) printf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvMDrivedebug = 0;
 extern "C" {epicsExportAddress(int, drvMDrivedebug);}
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvMDrivedebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int MDrive_num_cards = 0;

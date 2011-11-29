@@ -2,9 +2,10 @@
 FILENAME... drvPM500.cc
 USAGE...    Motor record driver level support for Newport PM500.
 
-Version:    $Revision: 1.22 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2009-09-01 16:20:08 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -85,17 +86,18 @@ Last Modified:  $Date: 2009-09-01 16:20:08 $
 #define SERIAL_TIMEOUT  2.0 /* Command timeout in sec. */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef  DEBUG
-        #define Debug(l, f, args...) { if(l<=drvPM500debug) printf(f,## args); }
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvPM500debug = 0;
 extern "C" {epicsExportAddress(int, drvPM500debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPM500debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int PM500_num_cards = 0;

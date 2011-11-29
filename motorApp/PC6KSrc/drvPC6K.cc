@@ -3,10 +3,10 @@ FILENAME...	drvPC6K.cc
 USAGE...	Motor record driver level support for Parker Computmotor
                 6K Series motor controllers
 
-Version:	$Revision: 1.6 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-09-08 18:28:46 $
-
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 */
 
 /*
@@ -92,17 +92,18 @@ Last Modified:	$Date: 2009-09-08 18:28:46 $
 #define MOTION_DELAY 0.05   
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) { if(l<=drvPC6Kdebug) printf(f,## args); }
-    #else
-	#define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvPC6Kdebug = 0;
 extern "C" {epicsExportAddress(int, drvPC6Kdebug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPC6Kdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int PC6K_num_cards = 0;

@@ -151,18 +151,18 @@ HeadURL:        $URL$
 
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-        #define Debug(l, f, args...) {if (l <= drvOms58debug) \
-				    errlogPrintf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug
-#endif
 volatile int drvOms58debug = 0;
 extern "C" {epicsExportAddress(int, drvOms58debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvOms58debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 #define pack2x16(p)      ((epicsUInt32)(((p[0])<<16)|(p[1])))
 

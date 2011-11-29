@@ -110,17 +110,19 @@ Last Modified:	2005/03/30 19:10:48
 #define MESS_ERR     -1
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) { if(l<=drvPMNC87xxdebug) printf(f,## args); }
-    #else
-	#define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvPMNC87xxdebug = 0;
 extern "C" {epicsExportAddress(int, drvPMNC87xxdebug);}
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPMNC87xxdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int PMNC87xx_num_cards = 0;

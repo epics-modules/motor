@@ -3,9 +3,9 @@ FILENAME... drvMVP2001.cc
 USAGE...    Motor record driver level support for MicroMo
             MVP 2001 B02 (Linear, RS-485).
 
-Version:        $Revision: 1.13 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-08 18:26:32 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
 */
 
 /*
@@ -136,18 +136,18 @@ MORE DESIGN LIMITATIONS
 #define BUFF_SIZE 20		/* Maximum length of string to/from MVP2001 */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef  DEBUG
-        #define Debug(l, f, args...) { if(l<=drvMVP2001debug) printf(f,## args); }
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
-
 volatile int drvMVP2001debug = 0;
 extern "C" {epicsExportAddress(int, drvMVP2001debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvMVP2001debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int MVP2001_num_cards = 0;

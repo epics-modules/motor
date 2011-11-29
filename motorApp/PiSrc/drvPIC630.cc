@@ -31,17 +31,18 @@
 #define BUFF_SIZE 100       /* Maximum length of string to/from PIC630 */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) { if(l<=drvPIC630debug) printf(f,## args); }
-    #else
-	#define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvPIC630debug = 0;
 extern "C" {epicsExportAddress(int, drvPIC630debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPIC630debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* Debugging notes:
  *   drvPIC630debug == 0  No debugging information is printed

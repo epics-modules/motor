@@ -77,17 +77,18 @@
 #define TIMEOUT 20.0 /* Command timeout in sec. */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-#ifdef  DEBUG
-#define Debug(l, f, args...) { if (l<=drvSoloistdebug) printf(f,## args); }
-#else
-#define Debug(l, f, args...)
-#endif
-#else
-#define Debug()
-#endif
 volatile int drvSoloistdebug = 0;
 extern "C" {epicsExportAddress(int, drvSoloistdebug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvSoloistdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int Soloist_num_cards = 0;

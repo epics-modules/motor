@@ -76,20 +76,21 @@ Last Modified:	$Date: 2009-09-08 18:25:19 $
 #define ACK	0x06
 #define CR	0x0D
 
-
-/*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef      DEBUG
-        #define Debug(l, f, args...) {if (l <= drvPmacdebug) \
-                                  errlogPrintf(f, ## args);}
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug
-#endif
 volatile int drvPmacdebug = 0;
 extern "C" {epicsExportAddress(int, drvPmacdebug);}
+
+/*----------------debugging-----------------*/
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPmacdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* Global data. */
 int Pmac_num_cards = 0;

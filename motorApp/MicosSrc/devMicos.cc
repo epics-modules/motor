@@ -23,16 +23,19 @@
 #include "epicsExport.h"
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-	volatile int devMicosDebug = 0;
-	#define Debug(l, f, args...) {if (l <= devMicosDebug) printf(f, ## args);}
-    #else
-	#define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
+volatile int devMicosDebug = 0;
+extern "C" {epicsExportAddress(int, devMicosDebug);}
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < devMicosDebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* Debugging levels: 
  *      devMicosDebug >= 3  Print new part of command and command string so far

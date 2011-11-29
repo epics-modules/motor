@@ -58,19 +58,20 @@ struct mess_queue
     struct mess_node *tail;
 };
 
-
-#ifdef __GNUG__
-    #ifdef DEBUG
-    volatile int drvPM304Debug = 0;
-    #define Debug(L, FMT, V...) { if(L <= drvPM304Debug) \
-                        { errlogPrintf("%s(%d):",__FILE__,__LINE__); \
-                          errlogPrintf(FMT,##V); } }
-    #else
-    #define Debug(L, FMT, V...)
-    #endif
-#else
-    #define Debug()
-#endif
+/*----------------debugging-----------------*/
+volatile int drvPM304Debug = 0;
+extern "C" {epicsExportAddress(int, drvPM304Debug);}
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPM304Debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* Debugging notes:
  *   drvPM304Debug == 0  No debugging information is printed

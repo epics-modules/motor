@@ -103,17 +103,18 @@ HeadURL:        $URL$
 #define SERIAL_TIMEOUT  5.0 /* Command timeout in sec. */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef  DEBUG
-        #define Debug(l, f, args...) { if(l<=drvMM3000debug) printf(f,## args); }
-    #else
-        #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvMM3000debug = 0;
 extern "C" {epicsExportAddress(int, drvMM3000debug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvMM3000debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int MM3000_num_cards = 0;

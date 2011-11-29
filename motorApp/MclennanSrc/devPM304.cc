@@ -37,19 +37,20 @@ extern struct driver_table PM304_access;
 
 #define NINT(f) (long)((f)>0 ? (f)+0.5 : (f)-0.5)
 
+/*----------------debugging-----------------*/
+volatile int devPM304Debug = 0;
+extern "C" {epicsExportAddress(int, devPM304Debug);}
 
-#ifdef __GNUG__
-    #ifdef DEBUG
-	volatile int devPM304Debug = 0;
-	#define Debug(L, FMT, V...) { if(L <= devPM304Debug) \
-                        { errlogPrintf("%s(%d):",__FILE__,__LINE__); \
-                          errlogPrintf(FMT,##V); } }
-    #else
-	#define Debug(L, FMT, V...)
-    #endif
-#else
-    #define Debug()
-#endif
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < devPM304Debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 
 /* Debugging levels: 

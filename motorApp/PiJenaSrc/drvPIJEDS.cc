@@ -3,10 +3,10 @@ FILENAME...	drvPIJEDS.cc
 USAGE...	Motor record driver level support for piezosystem jena
 	        GmbH & Co. E-516 motor controller.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-09-08 18:29:06 $
-*/
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$*/
 
 /*
  *      Original Author: Joe Sullivan
@@ -58,17 +58,18 @@ DESIGN LIMITATIONS...
 #define BUFF_SIZE 100		/* Maximum length of string to/from PIJEDS */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef	DEBUG
-	#define Debug(l, f, args...) { if(l<=drvPIJEDSdebug) printf(f,## args); }
-    #else
-	#define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvPIJEDSdebug = 0;
 extern "C" {epicsExportAddress(int, drvPIJEDSdebug);}
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvPIJEDSdebug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int PIJEDS_num_cards = 0;

@@ -2,9 +2,11 @@
 FILENAME... drvMCDC2805.cc
 USAGE...    Motor record driver level support for Faulhaber MCDC2805
 
-Version:    $Revision: 1.4 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-09-08 18:25:39 $
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+Last Modified:  $Date$
 */
 
 /*
@@ -59,17 +61,19 @@ DESIGN LIMITATIONS...
 #define BUFF_SIZE 100        /* Maximum length of string to/from MCDC2805 */
 
 /*----------------debugging-----------------*/
-#ifdef __GNUG__
-    #ifdef  DEBUG
-    #define Debug(l, f, args...) {if (l <= drvMCDC2805debug) printf(f, ## args);}
-    #else
-    #define Debug(l, f, args...)
-    #endif
-#else
-    #define Debug()
-#endif
 volatile int drvMCDC2805debug = 0;
 extern "C" {epicsExportAddress(int, drvMCDC2805debug);}
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvMCDC2805debug) {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* --- Local data. --- */
 int MCDC2805_num_cards = 0;

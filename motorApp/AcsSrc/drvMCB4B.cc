@@ -35,18 +35,20 @@
 
 #define BUFF_SIZE 100       /* Maximum length of string to/from MCB4B */
 
-#ifdef __GNUG__
-    #ifdef DEBUG
-        volatile int drvMCB4BDebug = 0;
-        #define Debug(L, FMT, V...) { if(L <= drvMCB4BDebug) \
-                            { printf("%s(%d):",__FILE__,__LINE__); \
-                              printf(FMT,##V); } }
-    #else
-        #define Debug(L, FMT, V...)
-    #endif
-#else
-    #define Debug()
-#endif
+volatile int drvMCB4BDebug = 0;
+extern "C" {epicsExportAddress(int, drvMCB4BDebug);}
+
+static inline void Debug(int level, const char *format, ...) {
+  #ifdef DEBUG
+    if (level < drvMCB4BDebug)
+    {
+      va_list pVar;
+      va_start(pVar, format);
+      vprintf(format, pVar);
+      va_end(pVar);
+    }
+  #endif
+}
 
 /* Debugging notes:
  *   drvMCB4BDebug == 0  No debugging information is printed
