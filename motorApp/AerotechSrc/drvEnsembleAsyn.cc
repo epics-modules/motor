@@ -27,7 +27,7 @@ in file LICENSE that is included with this distribution.
 * NOTES
 * -----
 * Verified with firmware:
-*      - 2.54.003
+*      - 4.01.000
 *
 * Modification Log:
 * -----------------
@@ -53,6 +53,7 @@ in file LICENSE that is included with this distribution.
 * .11 06-21-11 rls - Bug fix for jog velocity and acceleration not converted
 *                    from raw units to Ensemble user units when the
 *                    PosScaleFactor parameter is not 1.
+* .12 11-30-11 rls - Ensemble 4.x compatibility.
 */
 
 
@@ -81,14 +82,14 @@ in file LICENSE that is included with this distribution.
 
 #include "paramLib.h"
 #include "drvEnsembleAsyn.h"
-#include "Parameters.h"
+#include "ParameterId.h"
 #include "epicsExport.h"
 
 motorAxisDrvSET_t motorEnsemble = 
 {
     14,
     motorAxisReport,            /**< Standard EPICS driver report function (optional) */
-    motorAxisInit,              /**< Standard EPICS dirver initialisation function (optional) */
+    motorAxisInit,              /**< Standard EPICS driver initialization function (optional) */
     motorAxisSetLog,            /**< Defines an external logging function (optional) */
     motorAxisOpen,              /**< Driver open function */
     motorAxisClose,             /**< Driver close function */
@@ -193,7 +194,7 @@ the Ensemble parameters specified */
 #define TCP_TIMEOUT 2.0
 static motorEnsemble_t drv = {NULL, NULL, motorEnsembleLogMsg, 0, {0, 0}};
 static int numEnsembleControllers;
-/* Pointer to array of controller strutures */
+/* Pointer to array of controller structures */
 static EnsembleController *pEnsembleController=NULL;
 
 #define MAX(a,b) ((a)>(b)? (a): (b))
@@ -326,73 +327,74 @@ static int motorAxisSetCallback(AXIS_HDL pAxis, motorAxisCallbackFunc callback, 
 
 static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double value)
 {
-    int ret_status = MOTOR_AXIS_ERROR;
-    double deviceValue;
+    asynStatus status = asynSuccess;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
 
     if (pAxis == NULL || pAxis->pController == NULL)
-        return (MOTOR_AXIS_ERROR);
-    else
+      return(asynError);
+
+    epicsMutexLock(pAxis->mutexId);
+
+    switch (function)
     {
-        epicsMutexLock(pAxis->mutexId);
-        switch (function)
-        {
-        case motorAxisPosition:
-        {
-            deviceValue = value * fabs(pAxis->stepSize);
-            sprintf(outputBuff, "SETPOSCMD @%d, %.*f", pAxis->axis, pAxis->maxDigits, deviceValue);
-            ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
-            break;
-        }
-        case motorAxisEncoderRatio:
-        {
-            PRINT(pAxis->logParam, TERROR, "motorAxisSetDouble: Ensemble does not support setting encoder ratio\n");
-            break;
-        }
-        case motorAxisResolution:
-        {
-            /* we need to scale over a dozen other parameters if this changed in some cases, so the user should just use
-             * the Configuration Manager to change this setting to ensure that this is done correctly */
-            PRINT(pAxis->logParam, TERROR, "motorAxisSetDouble: Ensemble does not support setting motor resolution\n");
-            break;
-        }
-        case motorAxisLowLimit:
-        {
-            PRINT(pAxis->logParam, TERROR, "Driver does not set Ensemble's Low Limit\n");
-            break;
-        }
-        case motorAxisHighLimit:
-        {
-            PRINT(pAxis->logParam, TERROR, "Driver does not set Ensemble's High Limit\n");
-            break;
-        }
-        case motorAxisPGain:
-        {
-            PRINT(pAxis->logParam, TERROR, "Ensemble does not support setting proportional gain\n");
-            break;
-        }
-        case motorAxisIGain:
-        {
-            PRINT(pAxis->logParam, TERROR, "Ensemble does not support setting integral gain\n");
-            break;
-        }
-        case motorAxisDGain:
-        {
-            PRINT(pAxis->logParam, TERROR, "Ensemble does not support setting derivative gain\n");
-            break;
-        }
-        default:
-            PRINT(pAxis->logParam, TERROR, "motorAxisSetDouble: unknown function %d\n", function);
-            break;
-        }
-        if (ret_status == MOTOR_AXIS_OK )
-        {
-            motorParam->setDouble(pAxis->params, function, value);
-            motorParam->callCallback(pAxis->params);
-        }
-        epicsMutexUnlock(pAxis->mutexId);
+    case motorAxisPosition:
+    {
+        double offset = value * fabs(pAxis->stepSize);
+        sprintf(outputBuff, "POSOFFSET SET @%d, %.*f", pAxis->axis, pAxis->maxDigits, offset);
+        status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+        if (inputBuff[0] != ASCII_ACK_CHAR)
+          status = asynError;
+        break;
     }
-    return (ret_status);
+    case motorAxisEncoderRatio:
+    {
+        PRINT(pAxis->logParam, TERROR, "motorAxisSetDouble: Ensemble does not support setting encoder ratio\n");
+        break;
+    }
+    case motorAxisResolution:
+    {
+        /* we need to scale over a dozen other parameters if this changed in some cases, so the user should just use
+         * the Configuration Manager to change this setting to ensure that this is done correctly */
+        PRINT(pAxis->logParam, TERROR, "motorAxisSetDouble: Ensemble does not support setting motor resolution\n");
+        break;
+    }
+    case motorAxisLowLimit:
+    {
+        PRINT(pAxis->logParam, TERROR, "Driver does not set Ensemble's Low Limit\n");
+        break;
+    }
+    case motorAxisHighLimit:
+    {
+        PRINT(pAxis->logParam, TERROR, "Driver does not set Ensemble's High Limit\n");
+        break;
+    }
+    case motorAxisPGain:
+    {
+        PRINT(pAxis->logParam, TERROR, "Ensemble does not support setting proportional gain\n");
+        break;
+    }
+    case motorAxisIGain:
+    {
+        PRINT(pAxis->logParam, TERROR, "Ensemble does not support setting integral gain\n");
+        break;
+    }
+    case motorAxisDGain:
+    {
+        PRINT(pAxis->logParam, TERROR, "Ensemble does not support setting derivative gain\n");
+        break;
+    }
+    default:
+        PRINT(pAxis->logParam, TERROR, "motorAxisSetDouble: unknown function %d\n", function);
+        break;
+    }
+    if (status == asynSuccess )
+    {
+        motorParam->setDouble(pAxis->params, function, value);
+        motorParam->callCallback(pAxis->params);
+    }
+    epicsMutexUnlock(pAxis->mutexId);
+
+    return(status);
 }
 
 static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
@@ -479,7 +481,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
 
     if (acceleration > 0)
     { /* only use the acceleration if > 0 */
-        sprintf(outputBuff, "SETPARM @%d, 103, %.*f", axis, maxDigits, acceleration * fabs(pAxis->stepSize)); /* DefaultRampRate */
+        sprintf(outputBuff, "RAMP RATE @%d %.*f", axis, maxDigits, acceleration * fabs(pAxis->stepSize));
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     }
 
@@ -525,12 +527,14 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
 
     if (max_velocity > 0)
     {
-        sprintf(outputBuff, "SETPARM @%d, 107, %.*f", axis, pAxis->maxDigits, max_velocity * fabs(pAxis->stepSize)); /* HomeFeedRate */
+        sprintf(outputBuff, "SETPARM @%d, %d, %.*f", axis, PARAMETERID_HomeSpeed, pAxis->maxDigits,
+                max_velocity * fabs(pAxis->stepSize)); /* HomeFeedRate */
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     }
 
     if (acceleration > 0)
-        sprintf(outputBuff, "SETPARM @%d, 109, %.*f", axis, pAxis->maxDigits, acceleration * fabs(pAxis->stepSize)); /* HomeAccelDecelRate */
+        sprintf(outputBuff, "SETPARM @%d, %d, %.*f", axis, PARAMETERID_HomeRampRate, pAxis->maxDigits,
+                acceleration * fabs(pAxis->stepSize)); /* HomeAccelDecelRate */
 
     hparam = pAxis->homeDirection;
     if (forwards == 1)
@@ -539,7 +543,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
         hparam &= 0xFFFFFFFE;
     pAxis->homeDirection = hparam;
 
-    sprintf(outputBuff, "SETPARM @%d, 106, %d", axis, hparam); /* HomeDirection */
+    sprintf(outputBuff, "SETPARM @%d, %d, %d", axis, PARAMETERID_HomeSetup, hparam); /* HomeDirection */
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
 
     sprintf(outputBuff, "HOME @%d", axis);
@@ -570,7 +574,8 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
     if (pAxis == NULL || pAxis->pController == NULL)
         return(MOTOR_AXIS_ERROR);
 
-    sprintf(outputBuff, "SETPARM @%d, 103, %.*f", pAxis->axis, pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
+    sprintf(outputBuff, "SETPARM @%d, %d, %.*f", pAxis->axis, PARAMETERID_DefaultRampRate,
+            pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     sprintf(outputBuff, "FREERUN @%d %.*f", pAxis->axis, pAxis->maxDigits, velocity  * fabs(pAxis->stepSize));
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
@@ -879,7 +884,7 @@ int EnsembleAsynConfig(int card,             /* Controller number */
     for (axis = 0; axis < ENSEMBLE_MAX_AXES && numAxesFound < numAxes; axis++)
     {
         /* Does this axis actually exist? */
-        sprintf(outputBuff, "GETPARM(@%d, 257)", axis); /* AxisName */
+        sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_AxisName);
         sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
 
         /* We know the axis exists if we got an ACK response */
@@ -892,15 +897,15 @@ int EnsembleAsynConfig(int card,             /* Controller number */
             pAxis->mutexId = epicsMutexMustCreate();
             pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS);
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_CfgFbkPosType);
+            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_PositionFeedbackType);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
-            if (inputBuff[0] == ASCII_ACK_CHAR)
+            if (inputBuff[0] == ASCII_ACK_CHAR && atoi(&inputBuff[1]) > 0)
             {
-                if (atoi(&inputBuff[1]) > 0)
-                    pAxis->closedLoop = 1;
+              pAxis->closedLoop = 1;
+              motorParam->setInteger(pAxis->params, motorAxisHasEncoder, 1);
             }
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_PosScaleFactor);
+            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_CountsPerUnit);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->stepSize = 1 / atof(&inputBuff[1]);
@@ -911,31 +916,28 @@ int EnsembleAsynConfig(int card,             /* Controller number */
                 digits = 1;
             pAxis->maxDigits = digits;
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_HomeOffset);
+            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_HomeOffset);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->homePreset = atof(&inputBuff[1]);
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_HomeDirection);
+            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_HomeSetup);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->homeDirection = atoi(&inputBuff[1]);
             numAxesFound++;
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_LimitLevelMask);
+            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_EndOfTravelLimitSetup);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->swconfig.All = atoi(&inputBuff[1]);
 
-            /* Determine if encoder present based on open/closed loop mode. */
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, ParameterNumber_CfgFbkPosType);
-            sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
-            if (inputBuff[0] == ASCII_ACK_CHAR)
-            {
-                if (atoi(&inputBuff[1]) > 0)
-                    motorParam->setInteger(pAxis->params, motorAxisHasEncoder, 1);
-            }
+            /* Prevent ASCII interpreter from blocking during MOVEABS/INC commands. */
+            sendAndReceive(pController, "WAIT MODE NOWAIT", inputBuff, sizeof(inputBuff));
 
+            /* Set RAMP MODE to RATE. */
+            sprintf(outputBuff, "RAMP MODE @%d RATE", axis);
+            sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
         }
     }
 
