@@ -5,7 +5,7 @@
   <meta content="Ronald L. Sluiter" name="Author" />
   <meta content="Synopsis of modifications, fixes and new features for each motor record release."
     name="Description" />
-  <title>EPICS Motor Record Release R6-6 Notice</title>
+  <title>EPICS Motor Record Release R6-7 Notice</title>
   <meta content="Ronald L. Sluiter" name="author" />
   <meta content="Notification of bug fixes, functional changes and new features." name="description" />
   <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
@@ -15,7 +15,7 @@
 
   <div style="text-align: center">
     <h1>
-      <b>Motor Record Version 6-6 Release Notice</b></h1>
+      <b>Motor Record Version 6-6 and 6-7 Release Notice</b></h1>
   </div>
   <div style="text-align: center">
     <h4>
@@ -23,11 +23,81 @@
   </div>
   <div style="text-align: left">
     <p>
-      <b>Aerotech Ensemble Home Search</b>
+    <b>Aerotech Ensemble</b>
     </p>
     <p>
-       The Home Search ability will be restored in a future bug fix release.
+    <ul>
+      <li>
+        Since the Ensemble network connection requires period communication from the 
+        host to prevent the Ensemble from closing the network socket, the Ensemble 
+        support based on the old device driver architecture (phase 1) was removed with 
+        this release.  The asyn motor architecture supports continuous, periodic updates; 
+        the old architecture does not.
+      </li>
+      <li>
+        With this release, the Aerotech Ensemble driver only supports 4.01.00 Ensemble 
+        version firmware and above.
+      </li>
+      <li>
+        In order to support SCURVE trajectories, the move commands have been changed 
+        from MOVE[ABS/INC] to LINEAR.  Currently, the SCURVE command can only be set 
+        from an asyn record (e.g., SCURVE 75).
+      </li>
+      <li>
+        There is a problem with initiating a home search with the Aerotech Ensemble 
+        motor controller with EPICS.  The problem is that the EPICS Ensemble driver uses 
+        Aerotech's ASCII communication protocol and that protocol blocks all 
+        communication on ASCII communication ports during a home search.  Consequently, 
+        once a home search is started from EPICS, it is unable to stop it.  With release 
+        R6-6, the home search function was commented out of the Ensemble driver.  Users 
+        that need to perform a home search should do it from Aerotech's IDE software, 
+        which can abort a home search.  The Home Search ability will be restored in a 
+        future release.
+      </li>
+    </ul>
+    <p>
+    <b>OMS</b>
     </p>
+    <ul>
+    <li>
+    <p>
+    Watchdog and reboot error checks have been added to both the VME58 and MAXv (with 
+    firmware ver:1.33 and above) device drivers.  The EPICS drivers check for a 
+    reboot error or Watchdog timeout (MAXv) with every motor status update.
+    </p>
+    <p>
+    If an error occurs, an error message is sent to both the errlog task and the 
+    console.  Since a reboot or watchdog timer trip indicates that the controller 
+    has rebooted and no longer has valid motor positions, the controller is disabled 
+    and is no longer available to EPICS until after the VME crate has been rebooted.  
+    Other OMS boards in the system are unaffected by this scenario.
+    </p>
+    <p>
+    To better communicate this problem to the user, several medm displays have been 
+    changed.  Small displays (motorx_tiny.adl, motorx.adl) will show a yellow border 
+    around their position readback values.  Larger displays (motorx_more.adl, 
+    motorx_all.adl) will display the message "Controller Error" in yellow.  The 
+    following error message at the console and/or in the IOC errlog is definitive;
+    </p>
+    <div style="text-align: center">
+    <p>
+    "***MAXv card #<card>Disabled*** Watchdog Timeout CTR =<ctr>"
+    </p>
+    <p>
+    "***VME58 card #<card>Disabled*** Reboot Detected."
+    </p>
+    </li>
+    <li>
+      A third argument was added to the MAXvConfig() call; the SSI based absolute 
+      encoder bit flag.
+      <p>
+      MAXvConfig(0, config0, 0x00)
+      </p>
+      Bit #0 for Axis X, bit #1 for Axis Y, etc.. Set a bit flag to '1' for absolute 
+      encoder values; '0' for the standard incremental encoder values.
+    </li>
+    </ul>
+    </div>
   </div>
   <div style="text-align: center">
     <h4>

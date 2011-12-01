@@ -1,8 +1,8 @@
-Motor Record R6-6 Release Notice
+Motor Record R6-7 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
-R3-14-11. See the <motor>/configure/RELEASE file for support module version
+R3-14-12-1. See the <motor>/configure/RELEASE file for support module version
 dependencies.
 
 
@@ -107,15 +107,17 @@ Known Problems
         reverse encoder wires when the motor and encoder direction are
         reversed.
 
-        There is a peculiarity with the OMS controller boards when they are
-        configured with MRES and ERES of opposite polarity.  Since both the
-        commanded and feedback positions are set with the same command (LP),
-        the user must enter the opposite polarity when setting the OMS motor
-        controllers position.
+        There is a peculiarity with the OMS (sans MAXv) controller boards when
+        they are configured with MRES and ERES of opposite polarity.  Since
+        both the commanded and feedback positions are set with the same command
+        (LP), the user must enter the opposite polarity when setting the OMS
+        motor controllers position.
 
         For example, if MRES is positive and ERES is negative and the user
         wants to set the current position to 10.00 inches, then -10.00 must be
         entered in the VAL or DVAL field.
+        
+        This limitation does not apply to the MAXv model after release R6-7.
 
 5) There are several known problems with the status update field (STUP);
         - the motor record gets stuck in the moving state (i.e., DMOV=0) if
@@ -161,6 +163,19 @@ Modification Log for R6-7
         
         File modified: motorApp/OmsSrc/drvOms58.cc
 
+3) Added OMS MAXv device drive support for MRES and ERES having different
+        polarities. See "Known Problems" item #4).
+
+        Files modified: motorApp/OmsSrc/devOmsCom.cc
+                        motorApp/OmsSrc/drvMAXv.cc
+
+4) With this release, the Aerotech Ensemble driver only supports 4.01.00
+        version firmware and above.
+   In order to support SCURVE trajectories, the move commands have been changed
+        from MOVE[ABS/INC] to LINEAR.  Currently, the SCURVE command can only
+        be set from an asyn record (e.g., SCURVE 75).
+
+        
 
 Modification Log from R6-5 to R6-6
 ==================================

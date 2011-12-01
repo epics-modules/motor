@@ -9,22 +9,21 @@
 #
 # Add your declarations here
 
-#!GATEWAY=
-SUPPORT=/corvette/home/epics/devel
+SUPPORT=
 -include $(TOP)/../configure/SUPPORT.$(EPICS_HOST_ARCH)
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
-# Recommended ASYN release: R4-17
-ASYN=$(SUPPORT)/asyn-4-17
+# Recommended ASYN release: R4-18
+ASYN=$(SUPPORT)/asyn/R4-18
 
 # Need the sequencer and the bust record for the MM4005 and XPS trajectory scanning
-# Recommended SNCSEQ release: R2-0-12
-SNCSEQ=$(SUPPORT)/seq-2-0-12
-BUSY=$(SUPPORT)/busy-1-3
+# Recommended SNCSEQ release: R2-1-13
+SNCSEQ=$(SUPPORT)/seq/2-1-3
+BUSY=$(SUPPORT)/busy/R1-4
 
-# Recommended EPICS release: R3.14.11
-EPICS_BASE=/corvette/usr/local/epics/base-3.14.12.1
+# Recommended EPICS release: R3.14.12.1
+EPICS_BASE=
 -include $(TOP)/../configure/EPICS_BASE.$(EPICS_HOST_ARCH)
 
 # The following must be defined for the MXmotor device driver.
@@ -34,8 +33,8 @@ EPICS_BASE=/corvette/usr/local/epics/base-3.14.12.1
 # <motor>/motorExApp.  To build examples, the top Makefile,
 # <motor>/Makefile must also be edited.
 
-# Recommended IPAC release: R2-10
-IPAC=$(SUPPORT)/ipac-2-11
+# Recommended IPAC release: R2-11
+IPAC=$(SUPPORT)/ipac/R2-11
 
 # The following is only needed for the motor examples in iocBoot.
 #!MOTOR=$(TOP)
