@@ -54,6 +54,8 @@ in file LICENSE that is included with this distribution.
 *                    from raw units to Ensemble user units when the
 *                    PosScaleFactor parameter is not 1.
 * .12 11-30-11 rls - Ensemble 4.x compatibility.
+*                  - In order to support SCURVE trajectories; changed from
+*                    MOVE[ABS/INC] to LINEAR move command.
 */
 
 
@@ -468,7 +470,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
             posdir = true;
         else
             posdir = false;
-        moveCommand = "MOVEINC";
+        moveCommand = "INC";
     }
     else
     {
@@ -476,18 +478,22 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
             posdir = true;
         else
             posdir = false;
-        moveCommand = "MOVEABS";
+        moveCommand = "ABS";
     }
+
+    sprintf(outputBuff, "%s", moveCommand);
+    ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+    if (ret_status)
+        return (MOTOR_AXIS_ERROR);
 
     if (acceleration > 0)
     { /* only use the acceleration if > 0 */
-        sprintf(outputBuff, "RAMP RATE @%d %.*f", axis, maxDigits, acceleration * fabs(pAxis->stepSize));
+        sprintf(outputBuff, "RAMP RATE %.*f", maxDigits, acceleration * fabs(pAxis->stepSize));
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     }
 
-    sprintf(outputBuff, "%s @%d %.*f @%dF%.*f", moveCommand, axis, maxDigits,
-            position * fabs(pAxis->stepSize), axis, maxDigits,
-            max_velocity * fabs(pAxis->stepSize));
+    sprintf(outputBuff, "LINEAR @%d %.*f F%.*f", axis, maxDigits, position * fabs(pAxis->stepSize),
+            maxDigits, max_velocity * fabs(pAxis->stepSize));
 
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     if (ret_status)
@@ -687,13 +693,17 @@ static void EnsemblePoller(EnsembleController *pController)
                 }
                 else
                 {
-                    int CW_sw_active, CCW_sw_active;
+                    int CW_sw_active, CCW_sw_active, move_active;
 
                     motorParam->setInteger(params, motorAxisCommError, 0);
                     axisStatus.All = atoi(&inputBuff[1]);
-                    motorParam->setInteger(params, motorAxisDone, !axisStatus.Bits.move_active);
-                    if (axisStatus.Bits.move_active)
+                    
+                    comStatus = sendAndReceive(pController, (char *) "PLANESTATUS(0)", inputBuff, sizeof(inputBuff));
+                    move_active = 0x01 & atoi(&inputBuff[1]);
+                    motorParam->setInteger(params, motorAxisDone, !move_active);
+                    if (move_active)
                         anyMoving = true;
+
                     motorParam->setInteger(pAxis->params, motorAxisPowerOn, axisStatus.Bits.axis_enabled);
                     motorParam->setInteger(pAxis->params, motorAxisHomeSignal, axisStatus.Bits.home_limit);
                     if (pAxis->stepSize > 0.0)
@@ -933,7 +943,7 @@ int EnsembleAsynConfig(int card,             /* Controller number */
                 pAxis->swconfig.All = atoi(&inputBuff[1]);
 
             /* Prevent ASCII interpreter from blocking during MOVEABS/INC commands. */
-            sendAndReceive(pController, "WAIT MODE NOWAIT", inputBuff, sizeof(inputBuff));
+            sendAndReceive(pController, (char *) "WAIT MODE NOWAIT", inputBuff, sizeof(inputBuff));
 
             /* Set RAMP MODE to RATE. */
             sprintf(outputBuff, "RAMP MODE @%d RATE", axis);
