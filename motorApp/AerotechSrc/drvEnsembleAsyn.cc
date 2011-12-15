@@ -55,7 +55,9 @@ in file LICENSE that is included with this distribution.
 *                    PosScaleFactor parameter is not 1.
 * .12 11-30-11 rls - Ensemble 4.x compatibility.
 *                  - In order to support SCURVE trajectories; changed from
-*                    MOVE[ABS/INC] to LINEAR move command.
+*                    MOVE[ABS/INC] to LINEAR move command. 
+* .13 12-15-11 rls - Bug fix for jog not terminating; must check both 
+*                    PLANESTATUS and AXISSTATUS for move_active.
 */
 
 
@@ -693,13 +695,15 @@ static void EnsemblePoller(EnsembleController *pController)
                 }
                 else
                 {
-                    int CW_sw_active, CCW_sw_active, move_active;
+                    int CW_sw_active, CCW_sw_active;
+                    bool move_active;
 
                     motorParam->setInteger(params, motorAxisCommError, 0);
                     axisStatus.All = atoi(&inputBuff[1]);
                     
                     comStatus = sendAndReceive(pController, (char *) "PLANESTATUS(0)", inputBuff, sizeof(inputBuff));
-                    move_active = 0x01 & atoi(&inputBuff[1]);
+                    move_active = (0x01 & atoi(&inputBuff[1])) ? true : false;
+                    move_active |= axisStatus.Bits.move_active;
                     motorParam->setInteger(params, motorAxisDone, !move_active);
                     if (move_active)
                         anyMoving = true;
