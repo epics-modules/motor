@@ -57,7 +57,8 @@ in file LICENSE that is included with this distribution.
 *                  - In order to support SCURVE trajectories; changed from
 *                    MOVE[ABS/INC] to LINEAR move command. 
 * .13 12-15-11 rls - Bug fix for jog not terminating; must check both 
-*                    PLANESTATUS and AXISSTATUS for move_active.
+*                    PLANESTATUS and AXISSTATUS for move_active. 
+* .14 12-22-11 rls - Restore home search; using HomeAsync.abx vendor program.
 */
 
 
@@ -523,9 +524,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     epicsUInt32 hparam;
     int axis;
 
-    /* Return ERROR until Ensemble firmware upgrade.
     if (pAxis == NULL || pAxis->pController == NULL)
-    */
         return (MOTOR_AXIS_ERROR);
 
     axis = pAxis->axis;
@@ -554,7 +553,13 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     sprintf(outputBuff, "SETPARM @%d, %d, %d", axis, PARAMETERID_HomeSetup, hparam); /* HomeDirection */
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
 
-    sprintf(outputBuff, "HOME @%d", axis);
+    /* Set IGLOBAL(32) for one axis and IGLOBAL(33) for axis #; according to HomeAsync.ab protocol*/
+    sprintf(outputBuff, "IGLOBAL(32) = 1");
+    ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+    sprintf(outputBuff, "IGLOBAL(33) = %d", axis);
+    ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+
+    sprintf(outputBuff,"PROGRAM RUN 5, \"HomeAsync.bcx\"");
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     if (ret_status)
         return(MOTOR_AXIS_ERROR);
