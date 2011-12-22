@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-10/support/motor/cvs/motorApp/op/adl/motorx_all.adl"
-	version=030103
+	name="/home/oxygen/SLUITER/local/epics/synAppsSVN/support/motor/svn/motorApp/op/adl/motorx_all.adl"
+	version=030102
 }
 display {
 	object {
@@ -3031,4 +3031,19 @@ text {
 	}
 	textix="V2.7"
 	align="horiz. centered"
+}
+"message button" {
+	object {
+		x=331
+		y=228
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(M).SYNC"
+		clr=0
+		bclr=54
+	}
+	label="SYNC"
+	press_msg="1"
 }
