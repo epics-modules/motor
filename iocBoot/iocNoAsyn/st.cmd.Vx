@@ -44,9 +44,9 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #     (4)interrupt vector (0=disable or  64 - 255).
 #     (5)interrupt level (1 - 6).
 #     (6)motor task polling rate (min=1Hz,max=60Hz).
-#!MAXvSetup(1, 16,     0xF000, 190, 5, 10)
-#!MAXvSetup(1, 24,   0xFF0000, 190, 5, 10)
-#!MAXvSetup(1, 32, 0xFF000000, 190, 5, 10)
+#!MAXvSetup(1, 16,     0xF000, 200, 5, 10)
+#!MAXvSetup(1, 24,   0xFF0000, 200, 5, 10)
+#!MAXvSetup(1, 32, 0xFF000000, 200, 5, 10)
 #!drvMAXvdebug=4
 
 # OMS MAXv configuration string:
