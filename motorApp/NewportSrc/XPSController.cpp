@@ -121,7 +121,7 @@ const static CorrectorTypes_t CorrectorTypes = {
 };
 
 /* Constants used for FTP to the XPS */
-#define TRAJECTORY_DIRECTORY "/Admin/public/Trajectories"
+#define TRAJECTORY_DIRECTORY "/Admin/Public/Trajectories"
 #define MAX_FILENAME_LEN  256
 #define MAX_MESSAGE_LEN   256
 #define MAX_GROUPNAME_LEN  64
@@ -156,6 +156,7 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   IPAddress_ = epicsStrDup(IPAddress);
   IPPort_ = IPPort;
   pAxes_ = (XPSAxis **)(asynMotorController::pAxes_);
+  movesDeferred_ = 0;
 
   // Create controller-specific parameters
   createParam(XPSMinJerkString,                asynParamFloat64, &XPSMinJerk_);
@@ -214,10 +215,21 @@ void XPSController::report(FILE *fp, int level)
   int axis;
   XPSAxis *pAxis;
 
-  fprintf(fp, "XPS motor driver %s, numAxes=%d, firmware version=%s, moving poll period=%f, idle poll period=%f\n", 
-          this->portName, numAxes_, firmwareVersion_, movingPollPeriod_, idlePollPeriod_);
-
+  fprintf(fp, "XPS motor driver: %s\n", this->portName);
+  fprintf(fp, "                 numAxes: %d\n", numAxes_);
+  fprintf(fp, "        firmware version: %s\n", firmwareVersion_);
+  fprintf(fp, "      moving poll period: %f\n", movingPollPeriod_);
+  fprintf(fp, "        idle poll period: %f\n", idlePollPeriod_);
+  
   if (level > 0) {
+    fprintf(fp, " setPositionSettlingTime: %f\n", setPositionSettlingTime_);
+    fprintf(fp, "               IPAddress: %s\n", IPAddress_);
+    fprintf(fp, "                  IPPort: %d\n", IPPort_);
+    fprintf(fp, "             ftpUserName: %s\n", ftpUsername_);
+    fprintf(fp, "         ftpUserPassword: %s\n", ftpPassword_);
+    fprintf(fp, "           movesDeferred: %d\n", movesDeferred_);
+    fprintf(fp, "              autoEnable: %d\n", autoEnable_);
+    fprintf(fp, "          noDisableError: %d\n", noDisableError_);
     for (axis=0; axis<numAxes_; axis++) {
       pAxis = getAxis(axis);
       fprintf(fp, "  axis %d\n"
