@@ -99,3 +99,25 @@ must be rebooted.
 - HomeOffset
 - HomeDirection
 - LimitLevelMask
+
+
+********************************************************************************
+What all the files in this directory are.
+
+EPICS stuff
+-----------
+AerotechRegister.cc
+AerotechRegister.h
+devAerotech.dbd
+
+non-asyn device/driver
+----------------------
+devSoloist.cc
+drvSoloist.cc
+drvSoloist.h
+
+asyn model 2 driver
+-------------------
+drvEnsembleAsyn.cc
+drvEnsembleAsyn.h
+ParameterId.h
