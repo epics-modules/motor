@@ -123,3 +123,75 @@ in the record's INIT field.  LSIZE is in units of either um or arc-sec.  For
 example, if your RDBD = 0.123 mm, then set the INIT field to "LSIZE 123.0".
 
 
+********************************************************************************
+What's what in this directory
+-----------------------------
+
+misc EPICS stuff
+----------------
+NewportRegister.cc
+NewportRegister.h
+
+asyn model 2 driver
+-------------------
+XPSAsynInterpose.c
+XPSAsynInterpose.h
+drvXPSAsyn.c
+drvXPSAsyn.h
+tclCall.cc
+tclCall.h
+
+asyn-model-independent
+----------------------
+drvXPSAsynAux.c (non-motor aspects of XPS controller)
+
+asyn model 3 driver
+-------------------
+XPSAxis.cpp
+XPSAxis.h
+XPSController.cpp
+XPSController.h
+
+support code common to models 2 and 3
+-------------------------------------
+XPS_C8_drivers.cpp
+XPS_C8_drivers.h
+XPS_C8_errors.h
+strtok_r.c
+strtok_r.h
+Socket.cpp
+Socket.h
+asynOctetSocket.cpp
+
+non-asyn device support
+----------------------
+devESP300.cc
+devMM3000.cc
+devMM4000.cc
+devPM500.cc
+
+
+asyn model ?
+---------------
+drvESP300.cc
+drvMM4000Asyn.c
+drvMM4000Asyn.h
+drvMM3000.cc
+drvMM4000.cc
+drvMMCom.h
+drvPM500.cc
+
+other
+-----
+trajectoryScan.h
+xps_ftp.c
+xps_ftp.h
+XPS_trajectoryScan.st
+MM4005_trajectoryScan.st
+
+test code
+---------
+XPSGathering.c
+XPSGathering2.c
+XPSGatheringMain.c
+XPSGatheringRegister.c
