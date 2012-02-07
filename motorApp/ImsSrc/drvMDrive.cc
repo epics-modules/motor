@@ -39,6 +39,7 @@ HeadURL:        $URL$
  * Verified with firmware:
  *
  *  - 1.071 E
+ *  - 3.003 (MDI1FRD17B4-EQ
  *  - 3.010
  *
  * Modification Log:
@@ -60,6 +61,11 @@ HeadURL:        $URL$
  * .08 12/17/10 rls - Test to determine if encoder is present changed to
  *                    accommodate new firmware.
  *                  - support actual velocity status update.
+ * .09 02/06/11 rls - "PR PN" response overflows input buffer; increased
+ *                    BUFF_SIZE from 13 to 80 bytes.
+ *                  - Slow "PR PN" response; increased timeout from 1 to 2 sec.
+ *                  - Extra "\r\n" from "PR PN" response; buffer flush added.
+ *                  - Eliminate compiler warnings on MDrive_axis[].
  */
 
 /*
@@ -81,7 +87,7 @@ DESIGN LIMITATIONS...
 
 #define MDrive_NUM_CARDS    8
 #define MAX_AXES        8
-#define BUFF_SIZE 13		/* Maximum length of string to/from MDrive */
+#define BUFF_SIZE 80		/* Maximum length of string to/from MDrive */
 
 /*----------------debugging-----------------*/
 volatile int drvMDrivedebug = 0;
@@ -100,14 +106,14 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int MDrive_num_cards = 0;
-static char *MDrive_axis[] = {"1", "2", "3", "4", "5", "6", "7", "8"};
+static const char* const MDrive_axis[] = {"1", "2", "3", "4", "5", "6", "7", "8"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include    "motordrvComCode.h"
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, char const *, const char *const);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -131,13 +137,13 @@ struct driver_table MDrive_access =
     &motor_state,
     &total_cards,
     &any_motor_in_motion,
-    send_mess,
+    (RTN_STATUS (*)(int, const char*, char*)) send_mess,
     recv_mess,
     set_status,
     query_done,
     NULL,
     &initialized,
-    MDrive_axis
+    (char **) MDrive_axis
 };
 
 struct drvMDrive_drvet
@@ -250,6 +256,9 @@ static int set_status(int card, int signal)
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
+
+    /* Protect against extra "\r\n" terminator. */
+    rtn_state = recv_mess(card, buff, FLUSH);
 
     send_mess(card, "PR MV", MDrive_axis[signal]);
     rtn_state = recv_mess(card, buff, 1);
@@ -408,7 +417,7 @@ exit:
 /* send a message to the MDrive board                */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, char const *com, const char *const name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
@@ -458,7 +467,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 static int recv_mess(int card, char *com, int flag)
 {
     struct IM483controller *cntrl;
-    const double timeout = 1.0;
+    const double timeout = 2.0;
     size_t nread = 0;
     asynStatus status = asynError;
     int eomReason;
@@ -667,6 +676,9 @@ static int motor_init()
                 }
                 else
                     motor_info->encoder_present = NO;
+
+                /* Protect against extra "\r\n" terminator. */
+		status = recv_mess(card_index, buff, 1);
 
                 /* Determine input configuration. */
                 confptr->homeLS = confptr->minusLS = confptr->plusLS = 0;
