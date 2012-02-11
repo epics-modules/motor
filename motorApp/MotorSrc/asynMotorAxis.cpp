@@ -8,10 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <iostream>
-using std::endl;
-using std::cout;
-
 #include <epicsThread.h>
 
 #include <asynPortDriver.h>
@@ -129,7 +125,11 @@ asynStatus asynMotorAxis::poll(bool *moving)
  */
 asynStatus asynMotorAxis::doMoveToHome()
 {
-  cout << "Dummy implementation of asynMotorAxis::doMoveToHome. Axis: " << pC_->moveToHomeAxis_ << endl;
+  static const char *functionName="doMoveToHome";
+  
+  asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR, 
+    "%s:%s: Axis=%d no implementation\n",
+    driverName, functionName, pC_->moveToHomeAxis_);
   return asynError;
 }
 
