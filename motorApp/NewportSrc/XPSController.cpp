@@ -79,10 +79,6 @@ Versions: Release 4-5 and higher.
           LOSS OR DAMAGES.
 */
 
-#include <iostream>
-using std::cout;
-using std::endl;
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -1402,7 +1398,7 @@ asynStatus XPSDisableAutoEnable(const char *XPSName)
 
   pC = (XPSController*) findAsynPortDriver(XPSName);
   if (!pC) {
-    cout << driverName << "::" << functionName << " Error port " << XPSName << "not found." << endl;
+    printf("%s:%s: Error port %s not found\n", driverName, functionName, XPSName);
     return asynError;
   }
 
@@ -1417,7 +1413,7 @@ asynStatus XPSNoDisableError(const char *XPSName)
 
   pC = (XPSController*) findAsynPortDriver(XPSName);
   if (!pC) {
-    cout << driverName << "::" << functionName << " Error port " << XPSName << "not found." << endl;
+    printf("%s:%s: Error port %s not found\n", driverName, functionName, XPSName);
     return asynError;
   }
 
