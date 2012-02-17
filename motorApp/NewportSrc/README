@@ -132,7 +132,7 @@ misc EPICS stuff
 NewportRegister.cc
 NewportRegister.h
 
-asyn model 2 driver
+Model 2 asyn driver
 -------------------
 XPSAsynInterpose.c
 XPSAsynInterpose.h
@@ -145,7 +145,7 @@ asyn-model-independent
 ----------------------
 drvXPSAsynAux.c (non-motor aspects of XPS controller)
 
-asyn model 3 driver
+Model 3 asyn driver
 -------------------
 XPSAxis.cpp
 XPSAxis.h
@@ -163,7 +163,7 @@ Socket.cpp
 Socket.h
 asynOctetSocket.cpp
 
-non-asyn device support
+Model 1 device support
 ----------------------
 devESP300.cc
 devMM3000.cc
@@ -171,7 +171,7 @@ devMM4000.cc
 devPM500.cc
 
 
-asyn model ?
+Model 1 drivers
 ---------------
 drvESP300.cc
 drvMM4000Asyn.c
@@ -181,7 +181,8 @@ drvMM4000.cc
 drvMMCom.h
 drvPM500.cc
 
-other
+other - Note the XPS Model 3 driver has built-in trajectory scanning.  XPS_trajectoryScan.st is
+      - for use with the Model 2 XPS driver.
 -----
 trajectoryScan.h
 xps_ftp.c
