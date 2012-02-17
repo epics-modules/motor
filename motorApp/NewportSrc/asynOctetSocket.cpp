@@ -73,8 +73,8 @@ int ConnectToServer(char *IpAddress, int IpPort, double timeout)
     /* Create a new asyn port */
     epicsSnprintf(ipString, PORT_NAME_SIZE, "%s:%d TCP", IpAddress, IpPort);
     epicsSnprintf(portName, PORT_NAME_SIZE, "%s:%d:%d", IpAddress, IpPort, nextSocket);
-    /* Create port with noAutoConnect and noProcessEos options */
-    drvAsynIPPortConfigure(portName, ipString, 0, 1, 1);
+    /* Create port with autoConnect and noProcessEos options */
+    drvAsynIPPortConfigure(portName, ipString, 0, 0, 1);
 
     /* Connect to driver with asynOctet interface */
     status = pasynOctetSyncIO->connect(portName, 0, &pasynUser, NULL);
@@ -93,14 +93,6 @@ int ConnectToServer(char *IpAddress, int IpPort, double timeout)
         return -1;
     }
     psock->pasynUserCommon = pasynUserCommon;
-
-    /* Connect to controller */
-    status = pasynCommonSyncIO->connectDevice(pasynUserCommon);
-    if (status != asynSuccess) {
-        printf("ConnectToServer, error calling pasynCommonSyncIO->connectDevice port=%s error=%s\n", 
-               portName, pasynUserCommon->errorMessage);
-        return -1;
-    }
     
     /* Create a mutex to prevent more than 1 thread using socket at once
      * Normally the SyncIO-.writeRead function takes care of this, but for long responses
