@@ -5,7 +5,11 @@ Author: Jim Chen, Hytec Electronics Ltd
 		jim.chen@hytec-electronics.co.uk
 
 First Initial: 12/NOV/2010
-Last updated: 05/MAY/2011
+Last updated: 29/FEB/2012
+
+Modification note:
+22/FEB/2012 - corrected memory offset calculation errors reported by Ernest Williams SLAC.
+29/FEB/2012 - added coverage for all cases when setting up the MEMOFFS for 8002 carrier.
 
 This driver is based on "model 3" motor asyn driver defined by Mark Rivers. 
 ***********************************************************************************
@@ -43,7 +47,7 @@ the base address can be set by configuring a series of jumpers on the board or b
 passing parameter to the memory offset register in the ipacAddCarrier call.
 
 The IPAC Carrier Driver for this board is found in the file drvHy8002.c which 
-implements two   commands ipacAddHy8002 and Hy8002CarrierInfo. The ipacAddHy8002 
+implements two commands ipacAddHy8002 and Hy8002CarrierInfo. The ipacAddHy8002 
 command is used to add a Hytec 8002/8003 board to the system. The Hy8002CarrierInfo 
 reports hardware information for a specified board or all boards in the system if 
 the parameter passed down is 0xFFFF. These commands are registered by the registrar 
@@ -60,42 +64,123 @@ IOC executable, for which it must be listed in the IOC's .dbd file thus:
 
 The parameter string should comprise two (2) to six (6) parameters which are comma 
 separated. The first two are mandate and have to be separated only by one comma. 
-The others are key/value pairs and are optional. The format is defined as
+The others are key/value pairs and are optional as per the conditions of the operating
+system used. The format is defined as
 
 s,i,IPMEM=d,IPCLCK=d,ROAK=d,MEMOFFS=d
 
 where d is a decimal integer number.
-s		defines the VME slot number of the carrier card. Valid number is 2 ~ 21 if 
-		1MB memory space is specified or 2~15 if 2MB memory space is specified
+s		defines the VME slot number of the carrier card. Valid number is 2 ~ 21.
+		this number MUST be the same as the VME slot number where the carrier 
+		card is plugged in. 
 i		defines the interrupt level. Valid number is 0 ~ 7.
-IPMEM=d 	defines the maximum memory size of the IP module. The value d has to be 1, 2, 
-		4 or 8 that represent 1MB, 2MB, 4MB or 8MB respectively. Default is 1.
+IPMEM=d defines the maximum memory size of the IP module. The valid values are 1, 2, 
+		4 or 8 that represent 1MB, 2MB, 4MB or 8MB respectively. Default is 1. For
+		majority Hytec ADCs, DACs such as 8401, 8414, 8417, 8402 and 8415 etc, they 
+		all have 2MB on board. The user can choose to use either 1MB or 2MB. None of
+		the Hytec IPs has more than 2MB on board memory. Other vendors might have.
 IPCLCK=d 	defines the clock that its value has to be either 8 for 8MHz or 32 for 
 		32Mhz. Default is 8.
-ROAK=d 		if d =1, it defines carrier card to release the interrupt upon the 
+ROAK=d 	if d =1, it defines carrier card to release the interrupt upon the 
 		acknowledgment. If d=0, the interrupt is released by user interrupt 
 		service routine. Default is 0.
-MEMOFFS=d	this is used to define the A32 memory space base address when geographic 
-		addressing is not preferred. The value of MEMOFFS defines A16 ~ A31 of 
-		the base address as shown below. It is derived from the VME slot number 
-		of the carrier card plus the VME_A32_MSTR_LOCAL defined in the config.h 
-		file of the BSP.
+MEMOFFS=d	this parameter defines the A32 memory access base address. "d" is a decimal
+		number that represents the offset (the upper WORD) of the A32 base address. 
+		It is needed when any of the two statements below is true:
 
-D15 D14 D13 D12 D11 D10 D09 D08 D07 D06 D05 D04 D03 D02 D01 D00
-A31 A30 A29 A28 A27 A26 A25 A24 A23 A22  x   x   x   x   x   x
+		A. The operating system either VxWorks or RTEMS has defined a non-zero
+		VME_A32_MSTR_LOCAL macro in the system config.h file.
 
-X= don't care, normally 0. So the actual meaningful bit starts from A22.
+		B. The VME crate is not geographical addressing	facilitated. In such a system,
+		user must use this to set up base address for A32. 
+		
+		For a VME crate that is geographical addressing facilitated, and the system
+		defines a non-zero VME_A32_MSTR_LOCAL macro, then it is needed. But if
+		VME_A32_MSTR_LOCAL macro is defined as 0, then this is optional. Setting this 
+		the driver will turn off the carrier card geographical addressing by setting 
+		a bit in the CSR. 
+				
+Note:   MEMOFFS has nothing to do with A16 base address formation. A16 base address
+		is determined either by geographical addressing or by carrier board on board 
+		jumpers settings. For VME crate that is not geographical addressing facilitated, 
+		both 8002 and 8004 carriers need to use on board jumpers (J6~J10) to set up 
+		(On 8004 carrier, moving the jumpers to "manual" positions). When the VME 
+		crate is geographical addressing facilitated, for 8002 carrier, A16 base 
+		address is determined by the crate geographical addressing facility, i.e. 
+		determined automatically by the slot number where the carrier is plugged in 
+		(the actually A16 base address is determined as vmeslotnumber << 11). But for 
+		8004 carrier, user can have a choice to either use the on board jumpers to
+		manually set up (moving jumpers J6~J10 away from "auto" to "manual" positions)
+		or let the the geographical addressing to determine it (keep all J6 ~ J10 to 
+		"auto" position).  
+				
+Calcualtion of MEMOFFS:
 
-The reason it starts from A22 is that the minimum VME carrier memory assignment is 
-4MB, i.e. each IP card has 1MB as defined by the IPMEM=1. As such, a carrier in 
-slot 1 would have base address 0x00400000 plus the VME_A32_MSTR_LOCAL define. 
-Of course slot 1 is occupied by processor. So for slot 2, the base address is 0x00800000 
-and for slot 3, the base address is 0x00C00000 and so forth. 
+As mentioned above, MEMOFFS setting represents the upper WORD of A32 VME address. Two 
+things need to be considered when doing the calculation: IPMEM setting and the the  
+VME_A32_MSTR_LOCAL macro definition in the config.h file of the BSP.
 
-If the VME_A32_MSTR_LOCAL is defined as 0x20000000, then for slot 3, the derived base 
-address is 0x00C00000 + 0x20000000 = 0x200C00000. Hence the MEMOFFS = 8204 (decimal, i.e. 0x200C). 
-For slot 5, the derived base address will be 0x01400000 + 0x20000000 = 0x21400000. 
-Hence the MEMOFFS = 8512 (decimal, i.e. 0x2140). And so forth.
+IPMEM defines the memory size per IP card. Either 8002 or 8004 has up to 4 IPs so
+the carrier memory size is 4 times of the IP memory. The minimum size of an IP, which 
+is also the default setting (if IPMEM is not defined), is 1MB. Hence the MEMOFFS 
+should start from address line A22 as shown below
+
+MEMOFFS BIT 15  14  13  12  11  10  09  08  07  06  05  04  03  02  01  00
+           A31 A30 A29 A28 A27 A26 A25 A24 A23 A22   0   0   0   0   0   0
+
+The MEMOFFS must be defined such that any two carriers in the same crate shuoldn't 
+have overlapped memory area. So when IPMEM changes, the starting address line for 
+calculating MEMOFFS changes as well as illustrated below: 
+
+	IPMEM	memory per IP	carrier memory size		starting address line
+	  1			 1MB				4MB						A22
+	  2			 2MB				8MB						A23
+	  4			 4MB				16MB					A24
+	  8			 8MB				32MB					A25
+
+all address lines below this starting address must be 0.
+
+VME_A32_MSTR_LOCAL macro is the system base and it just needs to be added on to the 
+calculation.
+
+In principle, calculating MEMOFFS doesn't have to correspond it to VME slot number 
+that the carrier is plugged in. The only thing matters is as said that any two MEMOFFS 
+settings for any two carriers in the same crate should not overlap. Yet associating 
+the VME slot number in the calculation just makes better logical sense and fits the 
+natual of human being's thinking. Some examples are shown below.
+
+Let's assume IPMEM=1 (the default setting), this gives 4MB memory space for a 8002 
+carrier so starting address line is A22. The remaining must be 0.      
+
+MEMOFFS BIT 15  14  13  12  11  10  09  08  07  06  05  04  03  02  01  00
+           A31 A30 A29 A28 A27 A26 A25 A24 A23 A22   0   0   0   0   0   0
+
+For a carrier in VME slot 2, we can define its A32 base address as 0x00400000,  
+plus VME_A32_MSTR_LOCAL. For VME slot 3, it could be 0x00800000 plus VME_A32_MSTR_LOCAL 
+and for VME slot 4, it could be 0x00C00000 plus VME_A32_MSTR_LOCAL and so forth. 
+
+Assuming VME_A32_MSTR_LOCAL is 0x20000000, then for VME slot 4, the calculated base 
+address should be 0x00C00000 + 0x20000000 = 0x20C000000. Hence the MEMOFFS = 8384 
+(decimal, i.e. 0x20C0). For slot 5, the derived base address could be 0x01000000 + 
+0x20000000 = 0x21000000. Hence the MEMOFFS = 8448 (decimal, i.e. 0x2100) and so forth.
+
+Now if IPMEM=2, this gives 8MB memory space for each 8002 carrier so the starting address 
+line is A23. The remaining must be 0.
+
+MEMOFFS BIT 15  14  13  12  11  10  09  08  07  06  05  04  03  02  01  00
+           A31 A30 A29 A28 A27 A26 A25 A24 A23   0   0   0   0   0   0   0
+
+For a carrier in VME slot 2, we could define its A32 base address as 0x00800000 
+plus VME_A32_MSTR_LOCAL. For VME slot 3, the base address could be 0x01000000 plus 
+VME_A32_MSTR_LOCAL and for VME slot 4, the base address could be 0x01800000 plus 
+VME_A32_MSTR_LOCALand so forth. 
+
+Assuming VME_A32_MSTR_LOCAL is still 0x20000000, then for VME slot 4, the calculated 
+base address should be 0x01800000 + 0x20000000 = 0x218000000. Hence the MEMOFFS = 8576 
+(decimal, i.e. 0x2180). For slot 5, the derived base address could be 0x02000000 + 
+0x20000000 = 0x22000000. Hence the MEMOFFS = 8704 (decimal, i.e. 0x2200) and so forth.
+
+
 
 - int Hy8002CarrierInfo(int carrier);
 
@@ -113,11 +198,11 @@ This indicates that the carrier is in slot 3 and the interrupt level is set to 2
 IP memory uses default 1MB. Clock uses default 8MHz. RORA as default. use geographical 
 addressing etc.
 
-ipacAddHy8002("5,4,IPMEM=1,IPCLCK=8,ROAK=1,MEMOFFS=192 ") 
+ipacAddHy8002("5,4,IPMEM=1,IPCLCK=8,ROAK=1,MEMOFFS=256 ") 
 
 Here the slot is 5, interrupt level is 4. IP memory size is 1MB, clock uses 8MHz. 
-Use ROAK but not using geographic addressing. The memory offset is 192 which means its 
-base address is 0x00C00000 assuming the VME_A32_MSTR_LOCAL is set to 0x00000000.
+Use ROAK but not using geographic addressing. The memory offset is 256 which means its 
+base address is 0x01000000 assuming the VME_A32_MSTR_LOCAL is set to 0x00000000.
 
 3). Interrupt Commands Supported
 -------------------------------
