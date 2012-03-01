@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
     }
     status = GatheringDataMultipleLinesGet(drive_socket, 0, currentSamples, buffer);
     printf("GatheringDataMultipleLinesGet, status=%d, currentSamples=%d\n", status, currentSamples);
-    printf("Buffer length=%d, buffer=\n%s\n", strlen(buffer), buffer);    
+    printf("Buffer length=%ld, buffer=\n%s\n", (long)strlen(buffer), buffer);    
     return 0;
 }
 
