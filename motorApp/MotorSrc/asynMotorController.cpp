@@ -55,13 +55,13 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorDeferMovesString,             asynParamInt32,      &motorDeferMoves_);
   createParam(motorMoveToHomeString,             asynParamInt32,      &motorMoveToHome_);
   createParam(motorResolutionString,             asynParamFloat64,    &motorResolution_);
-  createParam(motorEncRatioString,               asynParamFloat64,    &motorEncRatio_);
-  createParam(motorPgainString,                  asynParamFloat64,    &motorPgain_);
-  createParam(motorIgainString,                  asynParamFloat64,    &motorIgain_);
-  createParam(motorDgainString,                  asynParamFloat64,    &motorDgain_);
+  createParam(motorEncoderRatioString,           asynParamFloat64,    &motorEncoderRatio_);
+  createParam(motorPGainString,                  asynParamFloat64,    &motorPGain_);
+  createParam(motorIGainString,                  asynParamFloat64,    &motorIGain_);
+  createParam(motorDGainString,                  asynParamFloat64,    &motorDGain_);
   createParam(motorHighLimitString,              asynParamFloat64,    &motorHighLimit_);
   createParam(motorLowLimitString,               asynParamFloat64,    &motorLowLimit_);
-  createParam(motorSetClosedLoopString,          asynParamInt32,      &motorSetClosedLoop_);
+  createParam(motorClosedLoopString,             asynParamInt32,      &motorClosedLoop_);
   createParam(motorStatusString,                 asynParamInt32,      &motorStatus_);
   createParam(motorUpdateStatusString,           asynParamInt32,      &motorUpdateStatus_);
   createParam(motorStatusDirectionString,        asynParamInt32,      &motorStatusDirection_);
@@ -131,6 +131,26 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
     driverName, functionName);
 }
 
+/** Called when asyn clients call pasynManager->report().
+  * This calls the report method for each axis, and then the base class
+  * asynPortDriver report method.
+  * \param[in] fp FILE pointer.
+  * \param[in] details Level of detail to print. */
+void asynMotorController::report(FILE *fp, int level)
+{
+  int axis;
+  asynMotorAxis *pAxis;
+
+  for (axis=0; axis<numAxes_; axis++) {
+    pAxis = getAxis(axis);
+    pAxis->report(fp, level);
+  }
+
+  // Call the base class method
+  asynPortDriver::report(fp, level);
+}
+
+
 /** Called when asyn clients call pasynInt32->write().
   * Extracts the function and axis number from pasynUser.
   * Sets the value in the parameter library.
@@ -162,20 +182,31 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     getDoubleParam(axis, motorAccel_, &accel);
     status = pAxis->stop(accel);
   
+  } else if (function == motorDeferMoves_) {
+    status = setDeferredMoves(value);
+  
+  } else if (function == motorClosedLoop_) {
+    status = pAxis->setClosedLoop(value);
+
   } else if (function == motorUpdateStatus_) {
     bool moving;
     /* Do a poll, and then force a callback */
     poll();
     status = pAxis->poll(&moving);
     pAxis->statusChanged_ = 1;
+
   } else if (function == profileBuild_) {
     status = buildProfile();
+
   } else if (function == profileExecute_) {
     status = executeProfile();
+
   } else if (function == profileAbort_) {
     status = abortProfile();
+
   } else if (function == profileReadback_) {
     status = readbackProfile();
+
   } else if (function == motorMoveToHome_) {
     if (value == 1) {
       asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -273,6 +304,55 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     pAxis->callParamCallbacks();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
       "%s:%s: Set driver %s, axis %d to position=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value);
+
+  } else if (function == motorEncoderPosition_) {
+    status = pAxis->setEncoderPosition(value);
+    pAxis->callParamCallbacks();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d to encoder position=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value);
+
+  } else if (function == motorHighLimit_) {
+    status = pAxis->setHighLimit(value);
+    pAxis->callParamCallbacks();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d high limit=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value);
+
+  } else if (function == motorLowLimit_) {
+    status = pAxis->setLowLimit(value);
+    pAxis->callParamCallbacks();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d low limit=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value);
+
+  } else if (function == motorPGain_) {
+    status = pAxis->setPGain(value);
+    pAxis->callParamCallbacks();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d proportional gain=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value);
+
+  } else if (function == motorIGain_) {
+    status = pAxis->setIGain(value);
+    pAxis->callParamCallbacks();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d integral gain=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value);
+
+  } else if (function == motorDGain_) {
+    status = pAxis->setDGain(value);
+    pAxis->callParamCallbacks();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d derivative gain=%f\n",
+      driverName, functionName, portName, pAxis->axisNo_, value);
+
+  } else if (function == motorEncoderRatio_) {
+    status = pAxis->setEncoderRatio(value);
+    pAxis->callParamCallbacks();
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
+      "%s:%s: Set driver %s, axis %d encoder ratio=%f\n",
       driverName, functionName, portName, pAxis->axisNo_, value);
 
   }
@@ -397,6 +477,13 @@ asynMotorAxis* asynMotorController::getAxis(asynUser *pasynUser)
     
     getAddress(pasynUser, &axisNo);
     return getAxis(axisNo);
+}
+
+/** Processes deferred moves.
+  * \param[in] deferMoves defer moves till later (true) or process moves now (false) */
+asynStatus asynMotorController::setDeferredMoves(bool deferMoves)
+{
+  return asynSuccess;
 }
 
 /** Returns a pointer to an asynMotorAxis object.
@@ -679,7 +766,7 @@ asynStatus asynMotorEnableMoveToHome(const char *portName, int axis, int distanc
   }
 
   if (distance<=0) {
-    printf("%s:%s: Error distance must be positive integer\n", driverName, functionName, axis);
+    printf("%s:%s: Error distance must be positive integer axis=%d\n", driverName, functionName, axis);
   } else {
     pA->setReferencingModeMove(distance);
   }
