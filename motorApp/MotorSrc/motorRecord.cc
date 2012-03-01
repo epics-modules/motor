@@ -553,8 +553,10 @@ static long init_record(dbCommon* arg, int pass)
             case (PV_LINK):
             case (DB_LINK):
             case (CA_LINK):
-            case (INST_IO):
                 pmr->card = -1;
+                break;
+            case (INST_IO):
+                pmr->card = 0;
                 break;
             default:
                 recGblRecordError(S_db_badField, (void *) pmr, (char *) errmsg);
