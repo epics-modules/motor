@@ -28,13 +28,13 @@
 #define motorDeferMovesString           "MOTOR_DEFER_MOVES"
 #define motorMoveToHomeString           "MOTOR_MOVE_HOME"
 #define motorResolutionString           "MOTOR_RESOLUTION"
-#define motorEncRatioString             "MOTOR_ENC_RATIO"
-#define motorPgainString                "MOTOR_PGAIN"
-#define motorIgainString                "MOTOR_IGAIN"
-#define motorDgainString                "MOTOR_DGAIN"
+#define motorEncoderRatioString         "MOTOR_ENCODER_RATIO"
+#define motorPGainString                "MOTOR_PGAIN"
+#define motorIGainString                "MOTOR_IGAIN"
+#define motorDGainString                "MOTOR_DGAIN"
 #define motorHighLimitString            "MOTOR_HIGH_LIMIT"
 #define motorLowLimitString             "MOTOR_LOW_LIMIT"
-#define motorSetClosedLoopString        "MOTOR_SET_CLOSED_LOOP"
+#define motorClosedLoopString           "MOTOR_CLOSED_LOOP"
 #define motorStatusString               "MOTOR_STATUS"
 #define motorUpdateStatusString         "MOTOR_UPDATE_STATUS"
 #define motorStatusDirectionString      "MOTOR_STATUS_DIRECTION" 
@@ -149,6 +149,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements);
   virtual asynStatus readFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements, size_t *nRead);
   virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
+  virtual void report(FILE *fp, int details);
 
   /* These are the methods that are new to this class */
   virtual asynMotorAxis* getAxis(asynUser *pasynUser);
@@ -156,6 +157,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus startPoller(double movingPollPeriod, double idlePollPeriod, int forcedFastPolls);
   virtual asynStatus wakeupPoller();
   virtual asynStatus poll();
+  virtual asynStatus setDeferredMoves(bool defer);
   void asynMotorPoller();  // This should be private but is called from C function
   
   /* Functions to deal with moveToHome.*/
@@ -189,13 +191,13 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   int motorDeferMoves_;
   int motorMoveToHome_;
   int motorResolution_;
-  int motorEncRatio_;
-  int motorPgain_;
-  int motorIgain_;
-  int motorDgain_;
+  int motorEncoderRatio_;
+  int motorPGain_;
+  int motorIGain_;
+  int motorDGain_;
   int motorHighLimit_;
   int motorLowLimit_;
-  int motorSetClosedLoop_;
+  int motorClosedLoop_;
   int motorStatus_;
   int motorUpdateStatus_;
 
