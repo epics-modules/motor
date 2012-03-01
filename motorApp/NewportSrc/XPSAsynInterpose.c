@@ -116,7 +116,7 @@ static asynStatus drvUserGetType(void *drvPvt, asynUser *pasynUser,
         *pptypeName = NULL;
         *psize = 0;
         if (pptypeName)
-            *pptypeName = epicsStrDup(XPSCommands[command].commandString);
+            *pptypeName = epicsStrDup(XPSCommands[command-MOTOR_AXIS_NUM_PARAMS].commandString);
         if (psize) *psize = sizeof(command);
         return(asynSuccess);
     } else {
