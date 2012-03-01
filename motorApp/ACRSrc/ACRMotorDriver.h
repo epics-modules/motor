@@ -24,12 +24,14 @@ class ACRAxis : public asynMotorAxis
 public:
   /* These are the methods we override from the base class */
   ACRAxis(class ACRController *pC, int axis);
+  void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
   asynStatus home(double min_velocity, double max_velocity, double acceleration, int forwards);
   asynStatus stop(double acceleration);
   asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
+  asynStatus setClosedLoop(bool closedLoop);
 
 private:
   ACRController *pC_;      /**< Pointer to the asynMotorController to which this axis belongs.
