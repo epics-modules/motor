@@ -99,9 +99,9 @@ typedef enum motorCommand {
     motorPosition,
     motorResolution,
     motorEncRatio,
-    motorPgain,
-    motorIgain,
-    motorDgain,
+    motorPGain,
+    motorIGain,
+    motorDGain,
     motorHighLimit,
     motorLowLimit,
     motorSetClosedLoop,
@@ -291,13 +291,13 @@ static long init_record(struct motorRecord * pmr )
     if (findDrvInfo(pmr, pasynUser, motorAccelString,                  motorAccel)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorPositionString,               motorPosition)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorResolutionString,             motorResolution)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorEncRatioString,               motorEncRatio)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorPgainString,                  motorPgain)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorIgainString,                  motorIgain)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorDgainString,                  motorDgain)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorEncoderRatioString,           motorEncRatio)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorPGainString,                  motorPGain)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorIGainString,                  motorIGain)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorDGainString,                  motorDGain)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorHighLimitString,              motorHighLimit)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorLowLimitString,               motorLowLimit)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorSetClosedLoopString,          motorSetClosedLoop)) goto bad;
+    if (findDrvInfo(pmr, pasynUser, motorClosedLoopString,             motorSetClosedLoop)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorStatusString,                 motorStatus)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorUpdateStatusString,           motorUpdateStatus)) goto bad;
     
@@ -373,7 +373,7 @@ static long init_record(struct motorRecord * pmr )
     /* Finally, indicate to the motor record that these values can be used. */
     pasynManager->freeAsynUser(pasynUser);
     pPvt->needUpdate = 1;
-
+    
     return(0);
 bad:
     pmr->pact=1;
@@ -505,15 +505,15 @@ static RTN_STATUS build_trans( motor_cmnd command,
 	pmsg->dvalue = *param;
 	break;
     case SET_PGAIN:
-	pmsg->command = motorPgain;
+	pmsg->command = motorPGain;
 	pmsg->dvalue = *param;
 	break;
     case SET_IGAIN:
-	pmsg->command = motorIgain;
+	pmsg->command = motorIGain;
 	pmsg->dvalue = *param;
 	break;
     case SET_DGAIN:
-	pmsg->command = motorDgain;
+	pmsg->command = motorDGain;
 	pmsg->dvalue = *param;
 	break;
     case ENABLE_TORQUE:
