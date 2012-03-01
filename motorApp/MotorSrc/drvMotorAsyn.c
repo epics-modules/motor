@@ -81,9 +81,9 @@ typedef enum {
     motorPosition = motorAxisPosition,
     motorEncRatio = motorAxisEncoderRatio,
     motorResolution = motorAxisResolution,
-    motorPgain = motorAxisPGain,
-    motorIgain = motorAxisIGain,
-    motorDgain = motorAxisDGain,
+    motorPGain = motorAxisPGain,
+    motorIGain = motorAxisIGain,
+    motorDGain = motorAxisDGain,
     motorHighLimit = motorAxisHighLimit,
     motorLowLimit = motorAxisLowLimit,
     motorSetClosedLoop = motorAxisClosedLoop,
@@ -123,13 +123,13 @@ static motorCommandStruct motorCommands[] = {
     {motorEncoderPosition,      motorEncoderPositionString},
     {motorDeferMoves,           motorDeferMovesString},
     {motorResolution,           motorResolutionString},
-    {motorEncRatio,             motorEncRatioString},
-    {motorPgain,                motorPgainString},
-    {motorIgain,                motorIgainString},
-    {motorDgain,                motorDgainString},
+    {motorEncRatio,             motorEncoderRatioString},
+    {motorPGain,                motorPGainString},
+    {motorIGain,                motorIGainString},
+    {motorDGain,                motorDGainString},
     {motorHighLimit,            motorHighLimitString},
     {motorLowLimit,             motorLowLimitString},
-    {motorSetClosedLoop,        motorSetClosedLoopString},
+    {motorSetClosedLoop,        motorClosedLoopString},
     {motorDeferMoves,           motorDeferMovesString},
     {motorMoveToHome,           motorMoveToHomeString},
     {motorStatus,               motorStatusString},
@@ -738,9 +738,9 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
     case motorPosition:
     case motorResolution:
     case motorEncRatio:
-    case motorPgain:
-    case motorIgain:
-    case motorDgain:
+    case motorPGain:
+    case motorIGain:
+    case motorDGain:
     case motorHighLimit:
     case motorLowLimit:
     default:
