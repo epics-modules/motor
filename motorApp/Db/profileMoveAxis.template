@@ -73,7 +73,6 @@ record(waveform,"$(P)$(R)M$(M)FollowingErrors") {
 # Motor direction for this axis
 record(longout,"$(P)$(R)M$(M)Direction") {
     field(DESC, "$(ADDR) direction")
-    field(PINI, "YES")
     field(DOL,  "$(MOTOR).DIR CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynInt32")
@@ -84,7 +83,6 @@ record(longout,"$(P)$(R)M$(M)Direction") {
 # Motor offset for this axis
 record(ao,"$(P)$(R)M$(M)Offset") {
     field(DESC, "$(ADDR) offset")
-    field(PINI, "YES")
     field(DOL,  "$(MOTOR).OFF CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynFloat64")
@@ -96,7 +94,6 @@ record(ao,"$(P)$(R)M$(M)Offset") {
 # Motor resolution for this axis
 record(ao,"$(P)$(R)M$(M)Resolution") {
     field(DESC, "$(ADDR) resolution")
-    field(PINI, "YES")
     field(DOL,  "$(MOTOR).MRES CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynFloat64")
