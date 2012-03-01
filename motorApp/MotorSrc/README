@@ -1,15 +1,18 @@
 Here's my best guess at what all this stuff is. TMM
 
-asyn model 3 driver base classes
+Model 3 (asyn, C++) driver base classes
 --------------------------------
 asynMotorAxis.cpp
 asynMotorAxis.h
 asynMotorController.cpp
 asynMotorController.h
 
-asyn model ?
---------------
+Model 2 and Model 3 device support
+--------------------------------
 devMotorAsyn.c
+
+Model 2 (asyn, C)
+--------------
 drvMotorAsyn.c
 motor_interface.h
 paramLib.c
@@ -21,7 +24,7 @@ motor.h
 motorRecord.cc
 motorRecord.dbd
 
-non-asyn device/driver support
+Model 1 (non-asyn) device/driver support
 ------------------------------
 motordevCom.cc
 motordevCom.h
