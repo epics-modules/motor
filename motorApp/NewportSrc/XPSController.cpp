@@ -862,7 +862,7 @@ asynStatus XPSController::runProfile()
   if (status != 0) {
     executeOK = false;
     sprintf(message, "Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s, strlen(buffer)=%ld", 
-            status, buffer, strlen(buffer));
+            status, buffer, (long)strlen(buffer));
     goto done;
   }
 
