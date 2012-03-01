@@ -34,12 +34,11 @@ class XPSController : public asynMotorController {
                 int enableSetPosition, double setPositionSettlingTime);
 
   /* These are the methods that we override from asynMotorDriver */
-  asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
-  asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
   void report(FILE *fp, int level);
   XPSAxis* getAxis(asynUser *pasynUser);
   XPSAxis* getAxis(int axisNo);
   asynStatus poll();
+  asynStatus setDeferredMoves(bool deferMoves);
 
   /* These are the functions for profile moves */
   asynStatus initializeProfile(size_t maxPoints, const char* ftpUsername, const char* ftpPassword);
@@ -52,8 +51,8 @@ class XPSController : public asynMotorController {
   void profileThread();
   asynStatus runProfile();
   asynStatus waitMotors();
+
   /* Deferred moves functions.*/
-  asynStatus processDeferredMoves();
   asynStatus processDeferredMovesInGroup(char * groupName);
 
   /*Disable automatic enable of axes.*/
@@ -86,7 +85,7 @@ class XPSController : public asynMotorController {
   int pollSocket_;
   int moveSocket_;
   char firmwareVersion_[100];
-  int movesDeferred_;
+  bool movesDeferred_;
   epicsEventId profileExecuteEvent_;
   int autoEnable_;
   int noDisableError_;
