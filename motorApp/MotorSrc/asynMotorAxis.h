@@ -25,6 +25,7 @@ class epicsShareFunc asynMotorAxis {
 
   virtual asynStatus setIntegerParam(int index, int value);
   virtual asynStatus setDoubleParam(int index, double value);
+  virtual void report(FILE *fp, int details);
   virtual asynStatus callParamCallbacks();
 
   virtual asynStatus move(double position, int relative, double minVelocity, double maxVelocity, double acceleration);
@@ -32,8 +33,16 @@ class epicsShareFunc asynMotorAxis {
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
   virtual asynStatus stop(double acceleration);
   virtual asynStatus poll(bool *moving);
-  virtual asynStatus doMoveToHome();
   virtual asynStatus setPosition(double position);
+  virtual asynStatus setEncoderPosition(double position);
+  virtual asynStatus setHighLimit(double highLimit);
+  virtual asynStatus setLowLimit(double lowLimit);
+  virtual asynStatus setPGain(double pGain);
+  virtual asynStatus setIGain(double iGain);
+  virtual asynStatus setDGain(double dGain);
+  virtual asynStatus setClosedLoop(bool closedLoop);
+  virtual asynStatus setEncoderRatio(double ratio);
+  virtual asynStatus doMoveToHome();
 
   virtual asynStatus initializeProfile(size_t maxPoints);
   virtual asynStatus defineProfile(double *positions, size_t numPoints);
