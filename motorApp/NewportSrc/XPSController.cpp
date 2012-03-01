@@ -208,9 +208,6 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
 
 void XPSController::report(FILE *fp, int level)
 {
-  int axis;
-  XPSAxis *pAxis;
-
   fprintf(fp, "XPS motor driver: %s\n", this->portName);
   fprintf(fp, "                 numAxes: %d\n", numAxes_);
   fprintf(fp, "        firmware version: %s\n", firmwareVersion_);
@@ -226,19 +223,6 @@ void XPSController::report(FILE *fp, int level)
     fprintf(fp, "           movesDeferred: %d\n", movesDeferred_);
     fprintf(fp, "              autoEnable: %d\n", autoEnable_);
     fprintf(fp, "          noDisableError: %d\n", noDisableError_);
-    for (axis=0; axis<numAxes_; axis++) {
-      pAxis = getAxis(axis);
-      fprintf(fp, "  axis %d\n"
-                  "    name = %s\n"
-                  "    step size = %g\n"
-                  "    poll socket = %d, moveSocket = %d\n"
-                  "    status = %d\n", 
-              pAxis->axisNo_,
-              pAxis->positionerName_, 
-              pAxis->stepSize_, 
-              pAxis->pollSocket_, pAxis->moveSocket_, 
-              pAxis->axisStatus_);
-    }
   }
 
   // Call the base class method
@@ -309,9 +293,9 @@ asynStatus XPSController::processDeferredMovesInGroup(char *groupName)
                                positions);
   }
 
-  /*Clear the defer flag for all the axes in this group.*/
-  /*We need to do this for the XPS, because we cannot do partial group moves. Every axis
-    in the group will be included the next time we do a group move.*/
+  /* Clear the defer flag for all the axes in this group. */
+  /* We need to do this for the XPS, because we cannot do partial group moves. Every axis
+     in the group will be included the next time we do a group move. */
   /* Loop over all axes in this controller. */
   for (axis=0; axis<numAxes_; axis++) {
     pAxis = getAxis(axis);
@@ -338,7 +322,7 @@ asynStatus XPSController::processDeferredMovesInGroup(char *groupName)
  * and passes the controller pointer and group name to processDeferredMovesInGroup.
  * @return motor driver status code.
  */
-asynStatus XPSController::processDeferredMoves()
+asynStatus XPSController::setDeferredMoves(bool deferMoves)
 {
   asynStatus status = asynError;
   int axis = 0;
@@ -348,7 +332,13 @@ asynStatus XPSController::processDeferredMoves()
   char *groupNames[XPS_MAX_AXES];
   char *blankGroupName = " ";
   XPSAxis *pAxis;
-
+  
+  // If we are not ending deferred moves then return
+  if (deferMoves || !movesDeferred_) {
+    movesDeferred_ = true;
+    return asynSuccess;
+  }
+  
   /* Clear group name cache. */
   for (i=0; i<XPS_MAX_AXES; i++) {
     groupNames[i] = blankGroupName;
@@ -379,161 +369,6 @@ asynStatus XPSController::processDeferredMoves()
   
   return status;
 }
-
-asynStatus XPSController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
-{
-  int function = pasynUser->reason;
-  int status = asynSuccess;
-  XPSAxis *pAxis;
-  double deviceValue;
-  static const char *functionName = "writeFloat64";
-  
-  pAxis = this->getAxis(pasynUser);
-  if (!pAxis) return asynError;
-
-  /* Set the parameter and readback in the parameter library. */
-  status = pAxis->setDoubleParam(function, value);
-  
-  if (function == motorResolution_)
-  {
-    pAxis->stepSize_ = value;
-    asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-              "%s:%s: Set XPS %s, axis %d stepSize to %f\n", 
-               driverName, functionName, portName, pAxis->axisNo_, value);
-  }
-  else if (function == motorLowLimit_)
-  {
-    deviceValue = value*pAxis->stepSize_;
-    /* We need to read the current highLimit because otherwise we could be setting it to an invalid value */
-    status = PositionerUserTravelLimitsGet(pAxis->pollSocket_,
-                                           pAxis->positionerName_,
-                                           &pAxis->lowLimit_, &pAxis->highLimit_);
-    if (status) {
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-                "%s:%s: motorAxisSetDouble[%s,%d]: error performing PositionerUserTravelLimitsGet for lowLim status=%d\n",
-                driverName, functionName, portName, pAxis->axisNo_, status);
-      goto done;
-    }
-    status = PositionerUserTravelLimitsSet(pAxis->pollSocket_,
-                                           pAxis->positionerName_,
-                                           deviceValue, pAxis->highLimit_);
-    if (status) {
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-            "%s:%s: motorAxisSetDouble[%s,%d]: error performing PositionerUserTravelLimitsSet for lowLim=%f status=%d\n",
-                driverName, functionName, portName, pAxis->axisNo_, deviceValue, status);
-      goto done;
-    } 
-    pAxis->lowLimit_ = deviceValue;
-    asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-              "%s:%s: Set XPS %s, axis %d low limit to %f\n", 
-              driverName, functionName, portName, pAxis->axisNo_, deviceValue);
-    status = asynSuccess;
-  } else if (function == motorHighLimit_)
-  {
-    deviceValue = value*pAxis->stepSize_;
-    /* We need to read the current highLimit because otherwise we could be setting it to an invalid value */
-    status = PositionerUserTravelLimitsGet(pAxis->pollSocket_,
-                                           pAxis->positionerName_,
-                                           &pAxis->lowLimit_, &pAxis->highLimit_);
-    if (status) {
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-                "%s:%s: motorAxisSetDouble[%s,%d]: error performing PositionerUserTravelLimitsGet for highLim status=%d\n",
-                driverName, functionName, portName, pAxis->axisNo_, status);
-      goto done;
-    }
-    status = PositionerUserTravelLimitsSet(pAxis->pollSocket_,
-                                           pAxis->positionerName_,
-                                           pAxis->lowLimit_, deviceValue);
-    if (status) {
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-                "%s:%s: motorAxisSetDouble[%s,%d]: error performing PositionerUserTravelLimitsSet for highLim=%f status=%d\n",
-                driverName, functionName, portName, pAxis->axisNo_, deviceValue, status);
-      goto done;
-    } 
-    pAxis->highLimit_ = deviceValue;
-    asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-              "%s:%s: Set XPS %s, axis %d high limit to %f\n", 
-              driverName, functionName, portName, pAxis->axisNo_, deviceValue);
-    status = asynSuccess;
-  } else if (function == motorPgain_)
-  {
-    status = pAxis->setPID(&value, 0);
-  } else if (function == motorIgain_)
-  {
-    status = pAxis->setPID(&value, 1);
-  } else if (function == motorDgain_)
-  {
-    status = pAxis->setPID(&value, 2);
-  } else {
-    /* Call base class method */
-    status = asynMotorController::writeFloat64(pasynUser, value);
-  }
-  done:
-  return (asynStatus)status;
-}
-
-
-asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
-{
-  int function = pasynUser->reason;
-  int status = asynSuccess;
-  XPSAxis *pAxis;
-  static const char *functionName = "writeInt32";
-
-  pAxis = this->getAxis(pasynUser);
-  if (!pAxis) return asynError;
-  
-  /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
-   * status at the end, but that's OK */
-  status = pAxis->setIntegerParam(function, value);
-
-  if (function == motorSetClosedLoop_)
-  {
-    if (value) {
-      status = GroupMotionEnable(pAxis->pollSocket_, pAxis->groupName_);
-      if (status) {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s: [%s,%d]: error calling GroupMotionEnable status=%d\n",
-                   driverName, functionName, portName, pAxis->axisNo_, status);
-      } else {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-                  "%s:%s: motorAxisSetInteger set XPS %s, axis %d closed loop enable\n",
-                   driverName, functionName, portName, pAxis->axisNo_);
-      }
-    } else {
-      status = GroupMotionDisable(pAxis->pollSocket_, pAxis->groupName_);
-      if (status) {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s: [%s,%d]: error calling GroupMotionDisable status=%d\n",
-                  driverName, functionName, portName, pAxis->axisNo_, status);
-      } else {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-                  "%s:%s: motorAxisSetInteger set XPS %s, axis %d closed loop disable\n",
-                  driverName, functionName, portName, pAxis->axisNo_);
-      }
-    }
-  } else if (function == motorDeferMoves_)
-  {
-    asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-              "%s%s: Setting deferred move mode on XPS %s to %d\n", 
-               driverName, functionName, portName, value);
-    if (value == 0.0 && this->movesDeferred_ != 0) {
-      status = this->processDeferredMoves();
-    }
-    this->movesDeferred_ = value;
-    if (status) {
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-                "%s%s: Deferred moved failed on XPS %s, status=%d\n", 
-                driverName, functionName, portName, status);
-      status = asynError;
-    }
-  } else {
-    /* Call base class method */
-    status = asynMotorController::writeInt32(pasynUser, value);
-  }
-  return (asynStatus)status;
-}
-
 
 
 /** Returns a pointer to an XPSAxis object.
@@ -1026,7 +861,7 @@ asynStatus XPSController::runProfile()
                                                 "", "", "", "");
   if (status != 0) {
     executeOK = false;
-    sprintf(message, "Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s, strlen(buffer)=%d", 
+    sprintf(message, "Error performing EventExtendedConfigurationTriggerSet, status=%d, buffer=%s, strlen(buffer)=%ld", 
             status, buffer, strlen(buffer));
     goto done;
   }
