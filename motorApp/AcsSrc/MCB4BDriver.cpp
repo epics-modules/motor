@@ -123,12 +123,11 @@ MCB4BAxis::MCB4BAxis(MCB4BController *pC, int axisNo)
 {  
 }
 
-/** Reports on status of the driver
+/** Reports on status of the axis
   * \param[in] fp The file pointer on which report information will be written
   * \param[in] level The level of report detail desired
   *
-  * If details > 0 then information is printed about each axis.
-  * After printing controller-specific information calls asynMotorController::report()
+  * After printing device-specific information calls asynMotorAxis::report()
   */
 void MCB4BAxis::report(FILE *fp, int level)
 {
@@ -152,7 +151,7 @@ asynStatus MCB4BAxis::sendAccelAndVelocity(double acceleration, double velocity)
   if (ival < 2) ival=2;
   if (ival > 255) ival = 255;
   sprintf(pC_->outString_, "#%02dV=%d", axisNo_, ival);
-  status = pC_->writeController();
+  status = pC_->writeReadController();
 
   // Send the acceleration
   // acceleration is in steps/sec/sec
@@ -163,7 +162,7 @@ asynStatus MCB4BAxis::sendAccelAndVelocity(double acceleration, double velocity)
   if (ival < 1) ival=1;
   if (ival > 255) ival=255;
   sprintf(pC_->outString_, "#%02dR=%d", axisNo_, ival);
-  status = pC_->writeController();
+  status = pC_->writeReadController();
   return status;
 }
 
@@ -180,7 +179,7 @@ asynStatus MCB4BAxis::move(double position, int relative, double minVelocity, do
   } else {
     sprintf(pC_->outString_, "#%02dG%+d", axisNo_, NINT(position));
   }
-  status = pC_->writeController();
+  status = pC_->writeReadController();
   return status;
 }
 
@@ -196,26 +195,30 @@ asynStatus MCB4BAxis::home(double minVelocity, double maxVelocity, double accele
   } else {
     sprintf(pC_->outString_, "#%02dH-", axisNo_);
   }
-  status = pC_->writeController();
+  status = pC_->writeReadController();
   return status;
 }
 
 asynStatus MCB4BAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  // static const char *functionName = "MCB4BAxis::moveVelocity";
+  static const char *functionName = "MCB4BAxis::moveVelocity";
 
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
+    "%s: minVelocity=%f, maxVelocity=%f, acceleration=%f\n",
+    functionName, minVelocity, maxVelocity, acceleration);
+    
   status = sendAccelAndVelocity(acceleration, maxVelocity);
 
   /* MCB-4B does not have jog command. Move 1 million steps */
   if (maxVelocity > 0.) {
     /* This is a positive move in MCB4B coordinates */
-    sprintf(pC_->outString_, "#%02dM+1000000", axisNo_);
+    sprintf(pC_->outString_, "#%02dI+1000000", axisNo_);
   } else {
       /* This is a negative move in MCB4B coordinates */
-      sprintf(pC_->outString_, "#%02dM-1000000", axisNo_);
+      sprintf(pC_->outString_, "#%02dI-1000000", axisNo_);
   }
-  status = pC_->writeController();
+  status = pC_->writeReadController();
   return status;
 }
 
@@ -225,7 +228,7 @@ asynStatus MCB4BAxis::stop(double acceleration )
   //static const char *functionName = "MCB4BAxis::stop";
 
   sprintf(pC_->outString_, "#%02dQ", axisNo_);
-  status = pC_->writeController();
+  status = pC_->writeReadController();
   return status;
 }
 
@@ -235,7 +238,7 @@ asynStatus MCB4BAxis::setPosition(double position)
   //static const char *functionName = "MCB4BAxis::setPosition";
 
   sprintf(pC_->outString_, "#%02dP=%+d", axisNo_, NINT(position));
-  status = pC_->writeController();
+  status = pC_->writeReadController();
   return status;
 }
 
@@ -245,17 +248,16 @@ asynStatus MCB4BAxis::setClosedLoop(bool closedLoop)
   //static const char *functionName = "MCB4BAxis::setClosedLoop";
 
   sprintf(pC_->outString_, "#%02dW=%d", axisNo_, closedLoop ? 1:0);
-  status = pC_->writeController();
+  status = pC_->writeReadController();
   return status;
 }
 
 /** Polls the axis.
-  * This function reads the controller position, encoder position, the limit status, the moving status, 
-  * and the drive power-on status.  It does not current detect following error, etc. but this could be
-  * added.
+  * This function reads the motor position, the limit status, the home status, the moving status, 
+  * and the drive power-on status. 
   * It calls setIntegerParam() and setDoubleParam() for each item that it polls,
   * and then calls callParamCallbacks() at the end.
-  * \param[out] moving A flag that is set indicating that the axis is moving (1) or done (0). */
+  * \param[out] moving A flag that is set indicating that the axis is moving (true) or done (false). */
 asynStatus MCB4BAxis::poll(bool *moving)
 { 
   int done;
