@@ -13,6 +13,7 @@
 #include <iocsh.h>
 
 #include <asynPortDriver.h>
+#include <asynOctetSyncIO.h>
 #define epicsExportSharedSymbols
 #include <shareLib.h>
 #include "asynMotorController.h"
@@ -648,6 +649,59 @@ void asynMotorController::asynMotorMoveToHome()
       }
     } 
   } 
+}
+
+
+/** Writes a string to the controller.
+  * Calls writeController() with a default location of the string to write and a default timeout. */ 
+asynStatus asynMotorController::writeController()
+{
+  return writeController(outString_, DEFAULT_CONTROLLER_TIMEOUT);
+}
+
+/** Writes a string to the controller.
+  * \param[in] output The string to be written.
+  * \param[in] timeout Timeout before returning an error.*/
+asynStatus asynMotorController::writeController(const char *output, double timeout)
+{
+  size_t nwrite;
+  asynStatus status;
+  // const char *functionName="writeController";
+  
+  status = pasynOctetSyncIO->write(pasynUserController_, output,
+                                   strlen(output), timeout, &nwrite);
+                                  
+  return status ;
+}
+
+/** Writes a string to the controller and reads the response.
+  * Calls writeReadController() with default locations of the input and output strings
+  * and default timeout. */ 
+asynStatus asynMotorController::writeReadController()
+{
+  size_t nread;
+  return writeReadController(outString_, inString_, sizeof(inString_), &nread, DEFAULT_CONTROLLER_TIMEOUT);
+}
+
+/** Writes a string to the controller and reads a response.
+  * \param[in] output Pointer to the output string.
+  * \param[out] input Pointer to the input string location.
+  * \param[in] maxChars Size of the input buffer.
+  * \param[out] nread Number of characters read.
+  * \param[out] timeout Timeout before returning an error.*/
+asynStatus asynMotorController::writeReadController(const char *output, char *input, 
+                                                    size_t maxChars, size_t *nread, double timeout)
+{
+  size_t nwrite;
+  asynStatus status;
+  int eomReason;
+  // const char *functionName="writeReadController";
+  
+  status = pasynOctetSyncIO->writeRead(pasynUserController_, output,
+                                       strlen(output), input, maxChars, timeout,
+                                       &nwrite, nread, &eomReason);
+                        
+  return status;
 }
 
 
