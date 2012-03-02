@@ -22,8 +22,6 @@ March 4, 2011
 
 #define CtlY 25
 
-#define ACR_TIMEOUT 1.0
-
 static const char *driverName = "ACRMotorDriver";
 
 /** Creates a new ACRController object.
@@ -36,8 +34,8 @@ static const char *driverName = "ACRMotorDriver";
 ACRController::ACRController(const char *portName, const char *ACRPortName, int numAxes, 
                              double movingPollPeriod, double idlePollPeriod)
   :  asynMotorController(portName, numAxes, NUM_ACR_PARAMS, 
-                         asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask, 
-                         asynInt32Mask | asynFloat64Mask | asynUInt32DigitalMask,
+                         asynUInt32DigitalMask, 
+                         asynUInt32DigitalMask,
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
                          0, 0)  // Default priority and stack size
@@ -58,7 +56,7 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
   createParam(ACRBinaryOutRBVString, asynParamUInt32Digital, &ACRBinaryOutRBV_);
 
   /* Connect to ACR controller */
-  status = pasynOctetSyncIO->connect(ACRPortName, 0, &pasynUserACR_, NULL);
+  status = pasynOctetSyncIO->connect(ACRPortName, 0, &pasynUserController_, NULL);
   if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
       "%s:%s: cannot connect to ACR controller\n",
@@ -278,58 +276,6 @@ asynStatus ACRController::readBinaryIO()
   callParamCallbacks(0);
   return status;
 }
-
-/** Writes a string to the ACR controller.
-  * Calls writeController() with a default location of the string to write and a default timeout. */ 
-asynStatus ACRController::writeController()
-{
-  return writeController(outString_, ACR_TIMEOUT);
-}
-
-/** Writes a string to the ACR controller.
-  * \param[in] output The string to be written.
-  * \param[in] timeout Timeout before returning an error.*/
-asynStatus ACRController::writeController(const char *output, double timeout)
-{
-  size_t nwrite;
-  asynStatus status;
-  // const char *functionName="writeController";
-  
-  status = pasynOctetSyncIO->write(pasynUserACR_, output,
-                                   strlen(output), timeout, &nwrite);
-                                  
-  return status ;
-}
-
-/** Writes a string to the ACR controller and reads the response.
-  * Calls writeReadController() with default locations of the input and output strings
-  * and default timeout. */ 
-asynStatus ACRController::writeReadController()
-{
-  size_t nread;
-  return writeReadController(outString_, inString_, sizeof(inString_), &nread, ACR_TIMEOUT);
-}
-
-/** Writes a string to the ACR controller and reads a response.
-  * \param[in] output Pointer to the output string.
-  * \param[out] input Pointer to the input string location.
-  * \param[in] maxChars Size of the input buffer.
-  * \param[out] nread Number of characters read.
-  * \param[out] timeout Timeout before returning an error.*/
-asynStatus ACRController::writeReadController(const char *output, char *input, size_t maxChars, size_t *nread, double timeout)
-{
-  size_t nwrite;
-  asynStatus status;
-  int eomReason;
-  // const char *functionName="writeReadController";
-  
-  status = pasynOctetSyncIO->writeRead(pasynUserACR_, output,
-                                       strlen(output), input, maxChars, timeout,
-                                       &nwrite, nread, &eomReason);
-                        
-  return status;
-}
-
 
 // These are the ACRAxis methods
 
