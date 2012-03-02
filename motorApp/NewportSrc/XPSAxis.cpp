@@ -716,7 +716,7 @@ asynStatus XPSAxis::setLowLimit(double value)
                                          positionerName_,
                                          &lowLimit_, &highLimit_);
   if (status) {
-    asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR, 
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
               "%s:%s: error performing PositionerUserTravelLimitsGet status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, status);
     goto done;
@@ -725,13 +725,13 @@ asynStatus XPSAxis::setLowLimit(double value)
                                          positionerName_,
                                          deviceValue, highLimit_);
   if (status) {
-    asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR, 
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
           "%s:%s: error performing PositionerUserTravelLimitsSet for lowLim=%f status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, deviceValue, status);
     goto done;
   } 
   lowLimit_ = deviceValue;
-  asynPrint(pC_->pasynUserSelf, ASYN_TRACE_FLOW, 
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
             "%s:%s: Set XPS %s, axis %d low limit to %f\n", 
             driverName, functionName, pC_->portName, axisNo_, deviceValue);
   
@@ -752,7 +752,7 @@ asynStatus XPSAxis::setHighLimit(double value)
                                          positionerName_,
                                          &lowLimit_, &highLimit_);
   if (status) {
-    asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR, 
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
               "%s:%s: error performing PositionerUserTravelLimitsGet status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, status);
     goto done;
@@ -761,13 +761,13 @@ asynStatus XPSAxis::setHighLimit(double value)
                                          positionerName_,
                                          lowLimit_, deviceValue);
   if (status) {
-    asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR, 
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
           "%s:%s: error performing PositionerUserTravelLimitsSet for highLim=%f status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, deviceValue, status);
     goto done;
   } 
   highLimit_ = deviceValue;
-  asynPrint(pC_->pasynUserSelf, ASYN_TRACE_FLOW, 
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
             "%s:%s: Set XPS %s, axis %d high limit to %f\n", 
             driverName, functionName, pC_->portName, axisNo_, deviceValue);
   
@@ -802,22 +802,22 @@ asynStatus XPSAxis::setClosedLoop(bool closedLoop)
   if (closedLoop) {
     status = GroupMotionEnable(pollSocket_, groupName_);
     if (status) {
-      asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR,
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: [%s,%d]: error calling GroupMotionEnable status=%d\n",
                  driverName, functionName, pC_->portName, axisNo_, status);
     } else {
-      asynPrint(pC_->pasynUserSelf, ASYN_TRACE_FLOW,
+      asynPrint(pasynUser_, ASYN_TRACE_FLOW,
                 "%s:%s: set XPS %s, axis %d closed loop enable\n",
                  driverName, functionName, pC_->portName, axisNo_);
     }
   } else {
     status = GroupMotionDisable(pollSocket_, groupName_);
     if (status) {
-      asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR,
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                 "%s:%s: [%s,%d]: error calling GroupMotionDisable status=%d\n",
                 driverName, functionName, pC_->portName, axisNo_, status);
     } else {
-      asynPrint(pC_->pasynUserSelf, ASYN_TRACE_FLOW,
+      asynPrint(pasynUser_, ASYN_TRACE_FLOW,
                 "%s:%s: motorAxisSetInteger set XPS %s, axis %d closed loop disable\n",
                 driverName, functionName, pC_->portName, axisNo_);
     }
