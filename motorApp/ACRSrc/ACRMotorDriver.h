@@ -17,8 +17,6 @@ March 28, 2011
 #define ACRBinaryOutString      "ACR_BINARY_OUT"
 #define ACRBinaryOutRBVString   "ACR_BINARY_OUT_RBV"
 
-#define MAX_ACR_STRING_SIZE 80
-
 class ACRAxis : public asynMotorAxis
 {
 public:
@@ -67,10 +65,6 @@ public:
   
   /* These are the methods that are new to this class */
   asynStatus readBinaryIO();
-  asynStatus writeController();
-  asynStatus writeController(const char *output, double timeout);
-  asynStatus writeReadController();
-  asynStatus writeReadController(const char *output, char *response, size_t maxResponseLen, size_t *responseLen, double timeout);
   
 protected:
   int ACRJerk_;          /**< Jerk time parameter index */        
@@ -84,9 +78,6 @@ protected:
 #define NUM_ACR_PARAMS (&LAST_ACR_PARAM - &FIRST_ACR_PARAM + 1)
 
 private:
-  asynUser *pasynUserACR_;
-  char outString_[MAX_ACR_STRING_SIZE];
-  char inString_[MAX_ACR_STRING_SIZE];
   int binaryIn_;
   int binaryOutRBV_;
   int binaryInReg_;
