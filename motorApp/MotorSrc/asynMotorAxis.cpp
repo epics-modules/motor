@@ -199,7 +199,7 @@ asynStatus asynMotorAxis::doMoveToHome()
 {
   static const char *functionName="doMoveToHome";
   
-  asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR, 
+  asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
     "%s:%s: Axis=%d no implementation\n",
     driverName, functionName, pC_->moveToHomeAxis_);
   return asynSuccess;
@@ -327,7 +327,7 @@ asynStatus asynMotorAxis::defineProfile(double *positions, size_t numPoints)
   int status=0;
   static const char *functionName = "defineProfile";
   
-  asynPrint(pC_->pasynUserSelf, ASYN_TRACE_FLOW,
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
             "%s:%s: axis=%d, numPoints=%d, positions[0]=%f\n",
             driverName, functionName, axisNo_, numPoints, positions[0]);
 
@@ -336,7 +336,7 @@ asynStatus asynMotorAxis::defineProfile(double *positions, size_t numPoints)
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
   status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorOffset_, &offset);
   status |= pC_->getIntegerParam(axisNo_, pC_->profileMotorDirection_, &direction);
-  asynPrint(pC_->pasynUserSelf, ASYN_TRACE_FLOW,
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
             "%s:%s: axis=%d, status=%d, offset=%f direction=%d, resolution=%f\n",
             driverName, functionName, axisNo_, status, offset, direction, resolution);
   if (status) return asynError;
@@ -348,7 +348,7 @@ asynStatus asynMotorAxis::defineProfile(double *positions, size_t numPoints)
   for (i=0; i<numPoints; i++) {
     profilePositions_[i] = (positions[i] - offset)*scale;
   }
-  asynPrint(pC_->pasynUserSelf, ASYN_TRACE_FLOW,
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
             "%s:%s: axis=%d, scale=%f, offset=%f positions[0]=%f, profilePositions_[0]=%f\n",
             driverName, functionName, axisNo_, scale, offset, positions[0], profilePositions_[0]);
   return asynSuccess;
