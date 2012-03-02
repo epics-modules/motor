@@ -11,6 +11,9 @@
 #include <epicsEvent.h>
 #include <epicsTypes.h>
 
+#define MAX_CONTROLLER_STRING_SIZE 256
+#define DEFAULT_CONTROLLER_TIMEOUT 2.0
+
 /** Strings defining parameters for the driver. 
   * These are the values passed to drvUserCreate. 
   * The driver will place in pasynUser->reason an integer to be used when the
@@ -163,7 +166,7 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   /* Functions to deal with moveToHome.*/
   virtual asynStatus startMoveToHomeThread();
   void asynMotorMoveToHome();
-
+  
   /* These are the functions for profile moves */
   virtual asynStatus initializeProfile(size_t maxPoints);
   virtual asynStatus buildProfile();
@@ -267,6 +270,15 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   double *profileTimes_;        /**< Array of times per profile point */
 
   int moveToHomeAxis_;
+
+  /* These are convenience functions for controllers that use asynOctet interfaces to the hardware */
+  asynStatus writeController();
+  asynStatus writeController(const char *output, double timeout);
+  asynStatus writeReadController();
+  asynStatus writeReadController(const char *output, char *response, size_t maxResponseLen, size_t *responseLen, double timeout);
+  asynUser *pasynUserController_;
+  char outString_[MAX_CONTROLLER_STRING_SIZE];
+  char inString_[MAX_CONTROLLER_STRING_SIZE];
 
   friend class asynMotorAxis;
 };
