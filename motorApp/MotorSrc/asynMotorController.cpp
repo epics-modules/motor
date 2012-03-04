@@ -136,7 +136,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   * This calls the report method for each axis, and then the base class
   * asynPortDriver report method.
   * \param[in] fp FILE pointer.
-  * \param[in] details Level of detail to print. */
+  * \param[in] level Level of detail to print. */
 void asynMotorController::report(FILE *fp, int level)
 {
   int axis;
