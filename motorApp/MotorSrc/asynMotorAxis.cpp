@@ -162,7 +162,7 @@ asynStatus asynMotorAxis::setIGain(double iGain)
 
 
 /** Set the derivative gain of the motor.
-  * \param[in] pGain The new derivative gain. */
+  * \param[in] dGain The new derivative gain. */
 asynStatus asynMotorAxis::setDGain(double dGain)
 {
   return asynSuccess;
