@@ -58,6 +58,8 @@ in file LICENSE that is included with this distribution.
 *                    MOVE[ABS/INC] to LINEAR move command. 
 * .13 12-15-11 rls - Bug fix for jog not terminating; must check both 
 *                    PLANESTATUS and AXISSTATUS for move_active.
+* .14 12-22-11 rls - Restore home search; using HomeAsync.abx vendor program.
+* .15 02-02-12 rls - Replace "stepSize > 0.0" test with ReverseDirec parameter.
 */
 
 
@@ -145,6 +147,7 @@ typedef struct motorAxisHandle
     epicsMutexId mutexId;
     Switch_Level swconfig;
     int lastFault;
+    bool ReverseDirec;
 } motorAxis;
 
 typedef struct
@@ -523,9 +526,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     epicsUInt32 hparam;
     int axis;
 
-    /* Return ERROR until Ensemble firmware upgrade.
     if (pAxis == NULL || pAxis->pController == NULL)
-    */
         return (MOTOR_AXIS_ERROR);
 
     axis = pAxis->axis;
@@ -554,7 +555,13 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     sprintf(outputBuff, "SETPARM @%d, %d, %d", axis, PARAMETERID_HomeSetup, hparam); /* HomeDirection */
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
 
-    sprintf(outputBuff, "HOME @%d", axis);
+    /* Set IGLOBAL(32) for one axis and IGLOBAL(33) for axis #; according to HomeAsync.ab protocol*/
+    sprintf(outputBuff, "IGLOBAL(32) = 1");
+    ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+    sprintf(outputBuff, "IGLOBAL(33) = %d", axis);
+    ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+
+    sprintf(outputBuff,"PROGRAM RUN 5, \"HomeAsync.bcx\"");
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     if (ret_status)
         return(MOTOR_AXIS_ERROR);
@@ -710,7 +717,8 @@ static void EnsemblePoller(EnsembleController *pController)
 
                     motorParam->setInteger(pAxis->params, motorAxisPowerOn, axisStatus.Bits.axis_enabled);
                     motorParam->setInteger(pAxis->params, motorAxisHomeSignal, axisStatus.Bits.home_limit);
-                    if (pAxis->stepSize > 0.0)
+
+                    if (pAxis->ReverseDirec == true)
                         motorParam->setInteger(pAxis->params, motorAxisDirection, axisStatus.Bits.motion_ccw);
                     else
                         motorParam->setInteger(pAxis->params, motorAxisDirection, !axisStatus.Bits.motion_ccw);
@@ -718,7 +726,7 @@ static void EnsemblePoller(EnsembleController *pController)
                     CW_sw_active  = !(axisStatus.Bits.CW_limit  ^ pAxis->swconfig.Bits.CWEOTSWstate);
                     CCW_sw_active = !(axisStatus.Bits.CCW_limit ^ pAxis->swconfig.Bits.CCWEOTSWstate);
                 
-                    if (!((pAxis->stepSize > 0.0) ^ (pAxis->swconfig.Bits.EOTswitch)))
+                    if (pAxis->ReverseDirec == false)
                     {
                         motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, CW_sw_active);
                         motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  CCW_sw_active);   
@@ -840,6 +848,7 @@ int EnsembleAsynConfig(int card,             /* Controller number */
     int axis, status, digits, retry = 0;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
     int numAxesFound;
+    static char getparamstr[] = "GETPARM(@%d, %d)";
 
     if (numEnsembleControllers < 1)
     {
@@ -898,7 +907,7 @@ int EnsembleAsynConfig(int card,             /* Controller number */
     for (axis = 0; axis < ENSEMBLE_MAX_AXES && numAxesFound < numAxes; axis++)
     {
         /* Does this axis actually exist? */
-        sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_AxisName);
+        sprintf(outputBuff, getparamstr, axis, PARAMETERID_AxisName);
         sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
 
         /* We know the axis exists if we got an ACK response */
@@ -911,7 +920,7 @@ int EnsembleAsynConfig(int card,             /* Controller number */
             pAxis->mutexId = epicsMutexMustCreate();
             pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS);
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_PositionFeedbackType);
+            sprintf(outputBuff, getparamstr, axis, PARAMETERID_PositionFeedbackType);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR && atoi(&inputBuff[1]) > 0)
             {
@@ -919,7 +928,7 @@ int EnsembleAsynConfig(int card,             /* Controller number */
               motorParam->setInteger(pAxis->params, motorAxisHasEncoder, 1);
             }
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_CountsPerUnit);
+            sprintf(outputBuff, getparamstr, axis, PARAMETERID_CountsPerUnit);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->stepSize = 1 / atof(&inputBuff[1]);
@@ -930,18 +939,18 @@ int EnsembleAsynConfig(int card,             /* Controller number */
                 digits = 1;
             pAxis->maxDigits = digits;
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_HomeOffset);
+            sprintf(outputBuff, getparamstr, axis, PARAMETERID_HomeOffset);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->homePreset = atof(&inputBuff[1]);
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_HomeSetup);
+            sprintf(outputBuff, getparamstr, axis, PARAMETERID_HomeSetup);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->homeDirection = atoi(&inputBuff[1]);
             numAxesFound++;
 
-            sprintf(outputBuff, "GETPARM(@%d, %d)", axis, PARAMETERID_EndOfTravelLimitSetup);
+            sprintf(outputBuff, getparamstr, axis, PARAMETERID_EndOfTravelLimitSetup);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->swconfig.All = atoi(&inputBuff[1]);
@@ -952,6 +961,12 @@ int EnsembleAsynConfig(int card,             /* Controller number */
             /* Set RAMP MODE to RATE. */
             sprintf(outputBuff, "RAMP MODE @%d RATE", axis);
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
+
+            /* Get Reverse Direction indicator. */
+            sprintf(outputBuff, getparamstr, axis, PARAMETERID_ReverseMotionDirection);
+            sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
+            if (inputBuff[0] == ASCII_ACK_CHAR)
+                pAxis->ReverseDirec = (bool) atoi(&inputBuff[1]);
         }
     }
 
