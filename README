@@ -1,4 +1,4 @@
-Motor Record R6-7 Release Notice
+Motor Record R6-7-1 Release Notice
 ===============================================================================
 
 The motor record software in this release is compatible with EPICS base
@@ -142,6 +142,34 @@ Known Problems
 
 8) The OMS VME58 controller ignores its' Velocity Base command (VB) on the up
         ramp of a home search operation; but not on the down ramp.
+
+
+
+Modification Log for R6-7-1
+===========================
+
+1) Bug fix for Aerotech Ensemble jog not terminating when jog request is
+        relinquished.  The FREERUN command does not activate PLANSTATUS's
+        move_active indicator.  The driver must check both PLANESTATUS and
+        AXISSTATUS for active move.
+
+        Restored home search from EPICS function.  The Aerotech Ensemble
+        example program, HomeAsync.abx, must be downloaded and the
+        Parameters>System>TaskExecutionSetup parameter must be set to enable
+        Auxiliary Task execution.
+        
+        Replaced "stepSize > 0.0" test with ReverseMotionDirection parameter
+        to determine if the programming direction of an axis has been reversed.
+
+        File modified: motorApp/AerotechSrc/drvEnsembleAsyn.cc
+
+2) Bug fix for Schneider Electric MDrive "PR PN" response overflows input
+        buffer. BUFF_SIZE increased from 13 to 80 bytes.  Increased timeout
+        from 1 to 2 seconds to accomodate slow "PR PN" response.  Buffer flush
+        added to accomodate extra "\r\n" from "PR PN" response.  Eliminated
+        compiler warnings on MDrive_axis[].
+
+        File modified: motorApp/ImsSrc/drvMDrive.cc
 
 
 Modification Log for R6-7
