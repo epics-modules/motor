@@ -15,6 +15,56 @@
 
   <div style="text-align: center">
     <h1>
+      <b>Motor Record Version R6-7-1 Release Notice</b></h1>
+  </div>
+  <div style="text-align: center">
+    <h4>
+      Modifications to Existing Features</h4>
+  </div>
+  <div style="text-align: left">
+    <p>
+    <b>Aerotech Ensemble</b>
+    </p>
+    
+    <p>
+    <ul>
+      <li>
+        With this release, the Aerotech Ensemble driver only supports 4.01.002 Ensemble 
+        version firmware and above.
+      </li>
+      <li>
+        In order to support SCURVE trajectories, the move commands have been changed 
+        from MOVE[ABS/INC] to LINEAR.  Currently, the SCURVE command can only be set 
+        from an asyn record (e.g., SCURVE 75).
+      </li>
+      <li>
+        The home search from EPICS function has been restored.  The Aerotech Ensemble 
+        example program, HomeAsync.abx, must be compiled and stored in the Ensemble.  In 
+        addition, the Parameters>System>TaskExecutionSetup parameter must be set to 
+        enable Auxiliary Task execution.
+      </li>
+    </ul>
+    </p>
+    
+    <p>
+    <b> Schneider Electric (formally IMS) MDrive</b>
+    </p>
+    
+    <p>
+    <ul>
+      Joe Sullivan fixed several bugs in the Schneider Electric MDrive driver 
+      associated with input buffer overflows that arose with newer MDrive firmware (e.g., 
+      3.003).
+    </ul>
+    </p>
+  </div>
+  <p>
+  </p>
+
+<body>
+
+  <div style="text-align: center">
+    <h1>
       <b>Motor Record Version 6-6 and 6-7 Release Notice</b></h1>
   </div>
   <div style="text-align: center">
