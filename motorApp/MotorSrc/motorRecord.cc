@@ -2340,6 +2340,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
         pmr->rval = pmr->lrvl = NINT(pmr->dval / pmr->mres);
         MARK(M_RVAL);
         pmr->sync = 0;
+        db_post_events(pmr, &pmr->sync, DBE_VAL_LOG);
     }
 
     return(OK);
