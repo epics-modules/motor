@@ -143,6 +143,18 @@ Known Problems
 8) The OMS VME58 controller ignores its' Velocity Base command (VB) on the up
         ramp of a home search operation; but not on the down ramp.
 
+9) When the LOCK field is set to YES for a motor with soft-channel device support,
+	the DMOV field only indicates motion for soft-motor-initiated moves.
+
+
+Modification Log for R6-8
+=========================
+
+1) Kevin Peterson's bug fix for the SYNC field failing to update the target 
+	position of motors with soft-channel device support. 
+        
+        File modified: motorApp/MotorSrc/motorRecord.cc
+
 
 Modification Log for R6-7
 =========================
