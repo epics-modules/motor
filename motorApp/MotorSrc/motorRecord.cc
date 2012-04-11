@@ -151,6 +151,7 @@ HeadURL:        $URL$
  * .62 10-20-11 rls - Disable soft travel limit error check during home search.
  *                  - Use home velocity (HVEL), base velocity (BVEL) and accel.
  *                    time (ACCL) fields to calculate home acceleration rate.
+ * .63 04-10-12 kmp - Inverted the priority of sync and status update in do_work().
  *
  */
 
@@ -553,8 +554,10 @@ static long init_record(dbCommon* arg, int pass)
             case (PV_LINK):
             case (DB_LINK):
             case (CA_LINK):
-            case (INST_IO):
                 pmr->card = -1;
+                break;
+            case (INST_IO):
+                pmr->card = 0;
                 break;
             default:
                 recGblRecordError(S_db_badField, (void *) pmr, (char *) errmsg);
@@ -2313,6 +2316,18 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             }
         }
     }
+    else if (pmr->sync != 0 && pmr->mip == MIP_DONE)
+    {
+        /* Sync target positions with readbacks. */
+        pmr->val  = pmr->lval = pmr->rbv;
+        MARK(M_VAL);
+        pmr->dval = pmr->ldvl = pmr->drbv;
+        MARK(M_DVAL);
+        pmr->rval = pmr->lrvl = NINT(pmr->dval / pmr->mres);
+        MARK(M_RVAL);
+        pmr->sync = 0;
+        db_post_events(pmr, &pmr->sync, DBE_VAL_LOG);
+    }
     else if (proc_ind == NOTHING_DONE && pmr->stup == motorSTUP_OFF)
     {
         RTN_STATUS status;
@@ -2327,17 +2342,6 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             pmr->stup = motorSTUP_OFF;
         else
             SEND_MSG();
-    }
-    else if (pmr->sync != 0 && pmr->mip == MIP_DONE)
-    {
-        /* Sync target positions with readbacks. */
-        pmr->val  = pmr->lval = pmr->rbv;
-        MARK(M_VAL);
-        pmr->dval = pmr->ldvl = pmr->drbv;
-        MARK(M_DVAL);
-        pmr->rval = pmr->lrvl = NINT(pmr->dval / pmr->mres);
-        MARK(M_RVAL);
-        pmr->sync = 0;
     }
 
     return(OK);
