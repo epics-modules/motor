@@ -1,0 +1,6 @@
+file "$(TOP)/db/basic_asyn_motor.db"
+{
+pattern
+{P,      N,     M,         DTYP,      PORT,  ADDR,    DESC,        EGU,     DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC,  DHLM,  DLLM,  INIT, RTRY}
+{IOC:,  1,  "m$(N)",  "asynMotor",  "SMC100_1",  0,  "GTS30V",  mm,  Pos,  1,     0,    .2,    0,     .5,     .2,    0.00001,  6,     25,   -5,  ""}
+}
