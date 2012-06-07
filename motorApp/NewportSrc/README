@@ -123,6 +123,18 @@ in the record's INIT field.  LSIZE is in units of either um or arc-sec.  For
 example, if your RDBD = 0.123 mm, then set the INIT field to "LSIZE 123.0".
 
 
+Newport SMC100
+==============
+The SMC100 controller has a fixed baud rate of 57,600.  This means that it
+cannot be used with the IP-Octal232.  If you want to use it from a vxWorks ioc,
+you will need to connect it via a Moxa or similar.  I have tested this code on
+both Linux and Cygwin soft ioc's.  The stage I tested it with is a GTS30V.
+Initially, the controller needs to be connected to the stage it will be running,
+and then configured with Newport's software.  I used Newport's PC program called 
+"SMC100 User Tool", which allows for the controller to set and keep all of the 
+settings for the stage.
+
+
 ********************************************************************************
 What's what in this directory
 -----------------------------
@@ -151,6 +163,10 @@ XPSAxis.cpp
 XPSAxis.h
 XPSController.cpp
 XPSController.h
+SMC100Driver.cpp
+SMC100Driver.h
+SMC100Register.cc
+SMC100Register.h
 
 support code common to models 2 and 3
 -------------------------------------

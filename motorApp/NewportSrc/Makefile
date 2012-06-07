@@ -31,6 +31,9 @@ Newport_SRCS += devPM500.cc  drvPM500.cc
 # ESP300 device driver.
 Newport_SRCS += devESP300.cc drvESP300.cc
 
+# SMC100 device driver
+Newport_SRCS += SMC100Driver.cpp
+
 # XPS C8 device driver
 Newport_SRCS += asynOctetSocket.cpp 
 Newport_SRCS += XPS_C8_drivers.cpp 
