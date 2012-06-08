@@ -1,6 +1,0 @@
-include "asyn.dbd"
-include "motorRecord.dbd"
-##device(motor,VME_IO,devPIasyn,"PI Motor GCS2")
-##driver(PIasyn)
-registrar(PIasynDriverRegister)
-##registrar(PIasynRegister)
