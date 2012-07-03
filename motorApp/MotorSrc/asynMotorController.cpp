@@ -144,6 +144,7 @@ void asynMotorController::report(FILE *fp, int level)
 
   for (axis=0; axis<numAxes_; axis++) {
     pAxis = getAxis(axis);
+    if (!pAxis) continue; 
     pAxis->report(fp, level);
   }
 
@@ -719,6 +720,7 @@ asynStatus asynMotorController::initializeProfile(size_t maxProfilePoints)
   profileTimes_ = (double *)calloc(maxProfilePoints, sizeof(double));
   for (axis=0; axis<numAxes_; axis++) {
     pAxis = getAxis(axis);
+    if (!pAxis) continue;
     pAxis->initializeProfile(maxProfilePoints);
   }
   return asynSuccess;
@@ -747,6 +749,7 @@ asynStatus asynMotorController::buildProfile()
   }
   for (i=0; i<numAxes_; i++) {
     pAxis = getAxis(i);
+    if (!pAxis) continue;
     pAxis->buildProfile();
   }
   return asynSuccess;
@@ -761,6 +764,7 @@ asynStatus asynMotorController::executeProfile()
   
   for (axis=0; axis<numAxes_; axis++) {
     pAxis = getAxis(axis);
+    if (!pAxis) continue;
     pAxis->executeProfile();
   }
   return asynSuccess;
@@ -775,6 +779,7 @@ asynStatus asynMotorController::abortProfile()
   
   for (axis=0; axis<numAxes_; axis++) {
     pAxis = getAxis(axis);
+    if (!pAxis) continue;
     pAxis->abortProfile();
   }
   return asynSuccess;
@@ -789,6 +794,7 @@ asynStatus asynMotorController::readbackProfile()
   
   for (axis=0; axis<numAxes_; axis++) {
     pAxis = getAxis(axis);
+    if (!pAxis) continue;
     pAxis->readbackProfile();
   }
   return asynSuccess;
