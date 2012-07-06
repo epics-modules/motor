@@ -228,6 +228,46 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
 
 
 /***************************************************************************************/
+int ReadXPSSocket (int SocketIndex, char valueRtrn[], int returnSize, double timeout)
+{
+    size_t nbytesIn;
+    int eomReason;
+    socketStruct *psock;
+    int status;
+    int nread=0;
+
+    /* Check to see if the Socket is valid! */
+    if ((SocketIndex < 0) || (SocketIndex >= nextSocket)) {
+        printf("ReadXPSSocket: invalid SocketIndex %d\n", SocketIndex);
+        strcpy(valueRtrn,"-22");
+        return -1;
+    }
+    psock = &socketStructs[SocketIndex];
+    if (!psock->connected) {
+        printf("ReadXPSSocket: socket not connected %d\n", SocketIndex);
+        strcpy(valueRtrn,"-22");
+        return -1;
+    }
+
+    /* Loop until we the response contains ",EndOfAPI" or we get an error */
+    while ((status==asynSuccess) && 
+           (strcmp(valueRtrn + nread - strlen(XPS_TERMINATOR), XPS_TERMINATOR) != 0)) {
+        status = pasynOctetSyncIO->read(psock->pasynUser,
+                                        &valueRtrn[nread],
+                                        returnSize-nread,
+                                        timeout,
+                                        &nbytesIn,
+                                        &eomReason);
+        asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
+              "SendAndReceive, received: nread=%d, returnSize-nread=%d, nbytesIn=%d\n",
+              nread, returnSize-nread, nbytesIn);
+        nread += nbytesIn;
+    }
+    return nread;
+}
+
+
+/***************************************************************************************/
 void CloseSocket(int SocketIndex)
 {
     socketStruct *psock;
