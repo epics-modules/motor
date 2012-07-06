@@ -97,6 +97,7 @@ using std::endl;
 
 #include "XPSController.h"
 #include "XPS_C8_drivers.h"
+#include "asynOctetSocket.h"
 
 #define XPSC8_END_OF_RUN_MINUS  0x80000100
 #define XPSC8_END_OF_RUN_PLUS   0x80000200
@@ -167,13 +168,16 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
   deferredPosition_ = 0;
   /* Disable deferred move for the axis. Should not cause move of this axis
      if other axes in same group do deferred move. */
-  deferredMove_ = 0; 
+  deferredMove_ = 0;
+  
+  // Assume axis is not moving
+  moving_ = false;
 
   index = (char *)strchr(positionerName, '.');
   if (index == NULL) {
-      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-                "%s:%s: positionerName must be of form group.positioner = %s\n",
-                driverName, functionName, positionerName);
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+              "%s:%s: positionerName must be of form group.positioner = %s\n",
+              driverName, functionName, positionerName);
   }
   positionerName_ = epicsStrDup(positionerName);
   groupName_ = epicsStrDup(positionerName);
@@ -237,11 +241,10 @@ asynStatus XPSAxis::move(double position, int relative, double min_velocity, dou
     if (pC_->autoEnable_) {
       status = GroupMotionEnable(pollSocket_, groupName_);
       if (status) {
-	asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-		  "%s:%s: motorAxisMove[%s,%d]: error performing GroupMotionEnable %d\n",
-		  driverName, functionName, pC_->portName, axisNo_, status);
-	/* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
-	return asynError;
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                  "%s:%s: motorAxisMove[%s,%d]: error performing GroupMotionEnable %d\n",
+                  driverName, functionName, pC_->portName, axisNo_, status);
+        return asynError;
       }
     } else {
       //Return error if a move is attempted and auto enable is turned off.
@@ -274,7 +277,7 @@ asynStatus XPSAxis::move(double position, int relative, double min_velocity, dou
         asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                   "%s:%s: Error performing GroupMoveRelative[%s,%d] %d\n",
                   driverName, functionName, pC_->portName, axisNo_, status);
-        /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
+        /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move! */
         return asynError;
       }
     } else {
@@ -374,8 +377,8 @@ asynStatus XPSAxis::moveVelocity(double min_velocity, double max_velocity, doubl
   status = GroupJogParametersSet(moveSocket_, positionerName_, 1, &deviceVelocity, &deviceAcceleration);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-	       "%s:%s: [%s,%d]: error calling GroupJogParametersSet error=%d\n",
-	       driverName, functionName, pC_->portName, axisNo_, status);
+              "%s:%s: [%s,%d]: error calling GroupJogParametersSet error=%d\n",
+              driverName, functionName, pC_->portName, axisNo_, status);
     return asynError;
   }
 
@@ -550,6 +553,7 @@ asynStatus XPSAxis::poll(bool *moving)
 {
   int status;
   int axisDone;
+  char readResponse[25];
   static const char *functionName = "poll";
 
   status = GroupStatusGet(pollSocket_, 
@@ -599,7 +603,7 @@ asynStatus XPSAxis::poll(bool *moving)
     setIntegerParam(pC_->motorStatusHome_, 0);
   }
 
-  /*Set the HOMED signal.*/
+  /* Set the HOMED signal.*/
   if ((axisStatus_ >= 10 && axisStatus_ <= 21) || 
       (axisStatus_ == 44) || (axisStatus_ == 45) || (axisStatus_ == 47)) {
     if (referencingMode_ == 0) {
@@ -616,8 +620,8 @@ asynStatus XPSAxis::poll(bool *moving)
       (axisStatus_ >= 24 && axisStatus_ <= 26) ||
       (axisStatus_ == 28 || axisStatus_ == 35)) {
     asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-	      "%s:%s: [%s,%d]: in following error. XPS State Code: %d\n",
-	      driverName, functionName, pC_->portName, axisNo_, axisStatus_);
+              "%s:%s: [%s,%d]: in following error. XPS State Code: %d\n",
+              driverName, functionName, pC_->portName, axisNo_, axisStatus_);
     setIntegerParam(pC_->motorStatusFollowingError_, 1);
   } else {
     setIntegerParam(pC_->motorStatusFollowingError_, 0);
@@ -631,8 +635,8 @@ asynStatus XPSAxis::poll(bool *moving)
       setIntegerParam(pC_->motorStatusProblem_, 0);             
     } else {
       asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-	      "%s:%s: [%s,%d]: in unintialised/disabled/not referenced. XPS State Code: %d\n",
-	      driverName, functionName, pC_->portName, axisNo_, axisStatus_);
+          "%s:%s: [%s,%d]: in unintialised/disabled/not referenced. XPS State Code: %d\n",
+          driverName, functionName, pC_->portName, axisNo_, axisStatus_);
       setIntegerParam(pC_->motorStatusProblem_, 1);
     }
   } else {
@@ -697,7 +701,21 @@ asynStatus XPSAxis::poll(bool *moving)
   }
   setIntegerParam(pC_->motorStatusDirection_, (currentVelocity_ > XPS_VELOCITY_DEADBAND));
   setIntegerParam(pC_->motorStatusMoving_,    (fabs(currentVelocity_) > XPS_VELOCITY_DEADBAND));
-
+  
+  status = ReadXPSSocket(moveSocket_, readResponse, sizeof(readResponse), 0);
+  if (status < 0) {
+    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s,%d]: error calling ReadXPSSocket status=%d\n",
+              driverName, functionName, pC_->portName, axisNo_,  status);
+    goto done;
+  }
+  if (status > 0) {
+    asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+              "%s:%s: [%s,%d]: readXPSSocket returned nRead=%d, [%s]\n",
+              driverName, functionName, pC_->portName, axisNo_,  status, readResponse);
+    status = 0;
+  }
+    
   done:
   setIntegerParam(pC_->motorStatusCommsError_, status ? 1 : 0);
   callParamCallbacks();
@@ -1453,7 +1471,7 @@ asynStatus XPSAxis::doMoveToHome(void)
       status = GroupStatusGet(pollSocket_, groupName_, &groupStatus);
       if (groupStatus != 44) {
         /* move finished for some other reason.*/
-	asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: Error performing GroupMoveRelative.\n", driverName, functionName);
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR, "%s:%s: Error performing GroupMoveRelative.\n", driverName, functionName);
         /*Issue a kill here if we have failed to move.*/
         status = GroupKill(moveSocket_, groupName_);
         return asynError;
