@@ -152,6 +152,11 @@ HeadURL:        $URL$
  *                  - Use home velocity (HVEL), base velocity (BVEL) and accel.
  *                    time (ACCL) fields to calculate home acceleration rate.
  * .63 04-10-12 kmp - Inverted the priority of sync and status update in do_work().
+ * .64 07-13-12 mrp - Fixed problem with using DLY field. If a process due to device support
+ *                    happened before the DLY timer expired, then the put callback 
+ *                    returned prematurely. Also, if there was no process due to
+ *                    device support, then the record could get stuck at the end of the move
+ *                    because it wasn't setting DMOV back to True or processing forward links.
  *
  */
 
@@ -1243,6 +1248,12 @@ static long process(dbCommon *arg)
                 MARK(M_DMOV);
             }
 
+	    /* Set dmov to false if we have a delayed callback in process.*/
+	    if (pmr->mip & MIP_DELAY_REQ) 
+	    {
+	      pmr->dmov = FALSE;
+	    }
+
             /* Do another update after LS error. */
             if (pmr->mip != MIP_DONE && (pmr->rhls || pmr->rlls))
             {
@@ -1282,13 +1293,15 @@ static long process(dbCommon *arg)
                 {
                     if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
                     {
-                        pmr->mip |= MIP_DELAY;
+		        pmr->mip = MIP_DONE;
+		        MARK(M_MIP);
                         INIT_MSG();
                         WRITE_MSG(GET_INFO, NULL);
                         SEND_MSG();
-                        /* Restore DMOV to false and UNMARK it so it is not posted. */
-                        pmr->dmov = FALSE;
-                        UNMARK(M_DMOV);
+                        /* Mark DMOV and process forward links after a MIP_DELAY_ACK.*/
+                        pmr->dmov = TRUE;
+                        MARK(M_DMOV);
+			recGblFwdLink(pmr);
                         goto process_exit;
                     }
                     else if (pmr->stup != motorSTUP_ON && pmr->mip != MIP_DONE)
