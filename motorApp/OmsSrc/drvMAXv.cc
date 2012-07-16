@@ -178,7 +178,7 @@ static int configurationFlags[MAXv_NUM_CARDS] = {0};
 /* Common local function declarations. */
 extern "C" {
 RTN_STATUS MAXvSetup(int, int, unsigned int, unsigned int, int, int);
-RTN_VALUES MAXvConfig(int, const char *);
+RTN_VALUES MAXvConfig(int, const char *, int);
 }
 static long report(int);
 static long init();
