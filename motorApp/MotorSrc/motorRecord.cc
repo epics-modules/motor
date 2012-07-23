@@ -1304,7 +1304,6 @@ static long process(dbCommon *arg)
                         /* Mark DMOV and process forward links after a MIP_DELAY_ACK.*/
                         pmr->dmov = TRUE;
                         MARK(M_DMOV);
-                        recGblFwdLink(pmr);
                         goto process_exit;
                     }
                     else if (pmr->stup != motorSTUP_ON && pmr->mip != MIP_DONE)
