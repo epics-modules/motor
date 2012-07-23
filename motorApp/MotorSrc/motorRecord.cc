@@ -157,6 +157,9 @@ HeadURL:        $URL$
  *                    returned prematurely. Also, if there was no process due to
  *                    device support, then the record could get stuck at the end of the move
  *                    because it wasn't setting DMOV back to True or processing forward links.
+ * .65 07-23-12 rls - The motor record's process() function was not processing
+ *                    alarms, events and the forward scan link in the same order
+ *                    as specified in the "EPICS Application Developer's Guide".
  *
  */
 
@@ -1135,13 +1138,13 @@ LOGIC:
         Call do_work().
     ENDIF
     Update Readback output link (RLNK), call dbPutLink().
-    IF Done Moving field (DMOV) is TRUE.
-        Process the forward-scan-link record, call recGblFwdLink().
-    ENDIF
 Exit:
     Update record timestamp, call recGblGetTimeStamp().
     Process alarms, call alarm_sub().
     Monitor changes to record fields, call monitor().
+    IF Done Moving field (DMOV) is TRUE.
+        Process the forward-scan-link record, call recGblFwdLink().
+    ENDIF
     Set Processing Active indicator field (PACT) false.
     Exit.
 
@@ -1248,11 +1251,11 @@ static long process(dbCommon *arg)
                 MARK(M_DMOV);
             }
 
-	    /* Set dmov to false if we have a delayed callback in process.*/
-	    if (pmr->mip & MIP_DELAY_REQ) 
-	    {
-	      pmr->dmov = FALSE;
-	    }
+            /* Set dmov to false if we have a delayed callback in process.*/
+            if (pmr->mip & MIP_DELAY_REQ) 
+            {
+              pmr->dmov = FALSE;
+            }
 
             /* Do another update after LS error. */
             if (pmr->mip != MIP_DONE && (pmr->rhls || pmr->rlls))
@@ -1293,15 +1296,15 @@ static long process(dbCommon *arg)
                 {
                     if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
                     {
-		        pmr->mip = MIP_DONE;
-		        MARK(M_MIP);
+                        pmr->mip = MIP_DONE;
+                        MARK(M_MIP);
                         INIT_MSG();
                         WRITE_MSG(GET_INFO, NULL);
                         SEND_MSG();
                         /* Mark DMOV and process forward links after a MIP_DELAY_ACK.*/
                         pmr->dmov = TRUE;
                         MARK(M_DMOV);
-			recGblFwdLink(pmr);
+                        recGblFwdLink(pmr);
                         goto process_exit;
                     }
                     else if (pmr->stup != motorSTUP_ON && pmr->mip != MIP_DONE)
@@ -1364,9 +1367,6 @@ enter_do_work:
 
     /* Fire off readback link */
     status = dbPutLink(&(pmr->rlnk), DBR_DOUBLE, &(pmr->rbv), 1);
-
-    if (pmr->dmov)
-        recGblFwdLink(pmr);     /* Process the forward-scan-link record. */
     
 process_exit:
     if (process_reason == CALLBACK_DATA && pmr->stup == motorSTUP_BUSY)
@@ -1379,6 +1379,10 @@ process_exit:
     recGblGetTimeStamp(pmr);
     alarm_sub(pmr);                     /* If we've violated alarm limits, yell. */
     monitor(pmr);               /* If values have changed, broadcast them. */
+
+    if (pmr->dmov)
+        recGblFwdLink(pmr);     /* Process the forward-scan-link record. */
+    
     pmr->pact = 0;
     Debug(4, "process:---------------------- end; motor \"%s\"\n", pmr->name);
     return (status);
