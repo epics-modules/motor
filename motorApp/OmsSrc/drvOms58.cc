@@ -114,6 +114,7 @@ HeadURL:        $URL$
  *                     does not read 0x4321.
  * .41  10-20-11 rls - Added counter in send_mess() to prevent endless loop
  *                     after VME58 reboot.
+ * .42  07-26-12 rls - Added reboot test to send_mess().
  *
  */
 
@@ -231,7 +232,7 @@ struct drvOms58_drvet
 
 extern "C" {epicsExportAddress(drvet, drvOms58);}
 
-static char rebootmsg[] = "\n***VME58 card #%d Disabled*** Reboot Detected.\n\n";
+static char rebootmsg[] = "\n\n*** VME58 card #%d Disabled *** Reboot Detected.\n\n";
 
 static struct thread_args targs = {SCAN_RATE, &oms58_access, 0.000};
 
@@ -428,7 +429,6 @@ static int set_status(int card, int signal)
         errlogPrintf(rebootmsg, card);
         status.Bits.RA_PROBLEM = 1;
         motor_info->status.All = status.All;
-        send_mess(card, STOP_ALL, (char) NULL);
         /* Disable board. */
         motor_state[card] = (struct controller *) NULL;
         return(rtn_state = 1); /* End move. */
@@ -675,7 +675,14 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     }
 
     pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
-    Debug(9, "send_mess: pmotor = %p\n", pmotor);
+
+    if (pmotor->rebootind != 0x4321)    /* Test if board has rebooted. */
+    {
+        errlogPrintf(rebootmsg, card);
+        /* Disable board. */
+        motor_state[card] = (struct controller *) NULL;
+        return(ERROR);
+    }
 
     return_code = OK;
 
@@ -731,7 +738,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     
     if (count >= 1000)
     {
-        errlogPrintf("\n*** VME58 card #%d communication timeout ***\n", card);
+        errlogPrintf("\n\n*** VME58 card #%d communication timeout ***\n\n", card);
         return_code = ERROR;
     }
 
@@ -1166,8 +1173,8 @@ static int motor_init()
             pmotorState->motor_in_motion = 0;
             pmotorState->cmnd_response = false;
 
-            /* Disable all interrupts */
-            pmotor->control.cntrlReg = 0;
+            pmotor->control.cntrlReg = 0;   /* Disable all interrupts */
+            pmotor->rebootind = 0x4321;     /* Set reboot indicator (before send_mess call). */
 
             send_mess(card_index, "EF", (char) NULL);
             send_mess(card_index, ERROR_CLEAR, (char) NULL);
@@ -1241,8 +1248,6 @@ static int motor_init()
                 if (motorIsrSetup(card_index) == ERROR)
                     errPrintf(0, __FILE__, __LINE__, "Interrupts Disabled!\n");
             }
-
-            pmotor->rebootind = 0x4321; /* Set reboot indicator. */
 
             start_status(card_index);
             for (motor_index = 0; motor_index < total_axis; motor_index++)
