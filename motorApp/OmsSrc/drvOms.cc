@@ -1,6 +1,6 @@
 /*
 FILENAME...     drvOms.cc
-USAGE...        Driver level support for OMS models VME8, VME44 and VS4.
+USAGE...        Driver level support for OMS models VME8, VME44, VS4 and VX2.
 
 Version:        $Revision$
 Modified By:    $Author$
@@ -79,6 +79,9 @@ HeadURL:        $URL$
  * .16  04-12-10 rls - enable interrupts after encoder check in motor_init() so
  *                     user does not see "motorIsr: command error" messages at
  *                     iocInit time.
+ * .17  07-26-12 rls - Added reboot flag to IRQ control register. Driver
+ *                     sets IRQ_RESET_ID bit on; set_status() and send_mess()
+ *                     read IRQ register and disable board if flag is off.
  */
 
 /*========================stepper motor driver ========================
@@ -206,6 +209,7 @@ struct drvOms_drvet
 extern "C" {epicsExportAddress(drvet, drvOms);}
 
 static struct thread_args targs = {SCAN_RATE, &oms_access, 0.010};
+static char rebootmsg[] = "\n\n*** OMS card #%d Disabled *** Reboot Detected.\n\n";
 
 /*----------------functions-----------------*/
 
@@ -257,10 +261,26 @@ static int set_status(int card, int signal)
     int rtn_state;
     bool ls_active = false;
     msta_field status;
+    struct controller *pmotorState;
+    struct vmex_motor *pmotor;
 
-    motor_info = &(motor_state[card]->motor_info[signal]);
+    if ((pmotorState = motor_state[card]) == NULL ||
+        (pmotor = (struct vmex_motor *) pmotorState->localaddr) == NULL)
+        return(rtn_state = 1); /* End move. */
+
+    motor_info = &(pmotorState->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
+
+    if ((pmotor->control & IRQ_RESET_ID) != 0x01)   /* Test if board has rebooted. */
+    {
+        errlogPrintf(rebootmsg, card);
+        status.Bits.RA_PROBLEM = 1;
+        motor_info->status.All = status.All;
+        /* Disable board. */
+        motor_state[card] = (struct controller *) NULL;
+        return(rtn_state = 1); /* End move. */
+    }
 
     if (motor_state[card]->motor_info[signal].encoder_present == YES)
     {
@@ -440,6 +460,8 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     char outbuf[MAX_MSG_SIZE];
     RTN_STATUS return_code;
+    volatile struct controller *pmotorState;
+    volatile struct vmex_motor *pmotor;
 
     if (strlen(com) > MAX_MSG_SIZE)
     {
@@ -448,9 +470,19 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     }
 
     /* Check that card exists */
-    if (!motor_state[card])
+    if ((pmotorState = motor_state[card]) == NULL)
     {
         errlogPrintf("drvOms.cc:send_mess() - invalid card #%d\n", card);
+        return(ERROR);
+    }
+
+    pmotor = (struct vmex_motor *) pmotorState->localaddr;
+
+    if ((pmotor->control & IRQ_RESET_ID) != 0x01)    /* Test if board has rebooted. */
+    {
+        errlogPrintf(rebootmsg, card);
+        /* Disable board. */
+        motor_state[card] = (struct controller *) NULL;
         return(ERROR);
     }
 
@@ -689,7 +721,8 @@ static RTN_STATUS omsPut(int card, char *pmess)
     struct irqdatastr *irqdata;
     int key, msgsize;
 
-    pmotorState = motor_state[card];
+    if ((pmotorState = motor_state[card]) == NULL)
+        return(ERROR);
     irqdata = (struct irqdatastr *) pmotorState->DevicePrivate;
     pmotor = (struct vmex_motor *) pmotorState->localaddr;
     msgsize = strlen(pmess);
@@ -902,7 +935,7 @@ static int motorIsrEnable(int card)
                       "Can't connect to vector %d\n",
                       omsInterruptVector + card);
             irqdata->irqEnable = FALSE; /* Interrupts disable on card */
-            pmotor->control = 0;
+            pmotor->control = IRQ_RESET_ID;
             return(ERROR);
         }
 
@@ -914,7 +947,7 @@ static int motorIsrEnable(int card)
                       "Can't enable enterrupt level %d\n",
                       omsInterruptLevel);
             irqdata->irqEnable = FALSE; /* Interrupts disable on card */
-            pmotor->control = 0;
+            pmotor->control = IRQ_RESET_ID;
             return(ERROR);
         }
     }
@@ -935,7 +968,7 @@ static int motorIsrEnable(int card)
     cardStatus = pmotor->status;
 
     /* enable interrupt-when-done and input-buffer-full interrupts */
-    pmotor->control = IRQ_ENABLE_ALL;
+    pmotor->control = (IRQ_ENABLE_ALL | IRQ_RESET_ID);
     return(OK);
 }
 
@@ -953,11 +986,10 @@ static void motorIsrDisable(int card)
     pmotor = (struct vmex_motor *) (pmotorState->localaddr);
 
     /* Disable interrupts */
-    pmotor->control = 0;
+    pmotor->control = IRQ_RESET_ID;
 
 #ifdef vxWorks
-    status = pdevLibVirtualOS->pDevDisconnectInterruptVME(
-                                                         omsInterruptVector + card, (void (*)(void *)) motorIsr);
+    status = pdevLibVirtualOS->pDevDisconnectInterruptVME(omsInterruptVector + card, (void (*)(void *)) motorIsr);
 #endif
 
     if (!RTN_SUCCESS(status))
@@ -1136,7 +1168,7 @@ static int motor_init()
             irqdata = (struct irqdatastr *) malloc(sizeof(struct irqdatastr));
             pmotorState->DevicePrivate = irqdata;
             irqdata->irqEnable = FALSE;
-            pmotor->control = 0;
+            pmotor->control = IRQ_RESET_ID;
 
             send_mess(card_index, "EF", (char) NULL);
             send_mess(card_index, ERROR_CLEAR, (char) NULL);
@@ -1237,7 +1269,7 @@ static void oms_reset(void *arg)
         if (motor_state[card] != NULL)
         {
             pmotor = (struct vmex_motor *) motor_state[card]->localaddr;
-            pmotor->control = 0;    /* Disable all interrupts. */
+            pmotor->control = IRQ_RESET_ID;    /* Disable all interrupts. */
         }
     }
 }
