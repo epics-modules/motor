@@ -4,6 +4,13 @@
  *  Created on: 15.12.2010
  *      Author: sra
  */
+ 
+/*
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+*/
 
 #ifndef PIGCSCONTROLLER_H_
 #define PIGCSCONTROLLER_H_

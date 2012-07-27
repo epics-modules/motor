@@ -3,6 +3,13 @@
  *
  *      Author: sra
  */
+ 
+/*
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+*/
 
 #include "PIE755Controller.h"
 #include "PIasynAxis.h"

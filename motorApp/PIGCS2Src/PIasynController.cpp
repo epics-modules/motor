@@ -1,6 +1,11 @@
 /*
 FILENAME...    PIasynController.cpp
 USAGE...    PI GCS2 Motor Support.
+ 
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 
 Based on drvMotorSim.c
 from Mark Rivers, December 13, 2009

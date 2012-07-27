@@ -4,6 +4,13 @@
  *  Created on: 15.12.2010
  *      Author: sra
  */
+ 
+/*
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+*/
 
 #ifndef PIGCSPIEZOCONTROLLER_H_
 #define PIGCSPIEZOCONTROLLER_H_

@@ -6,6 +6,13 @@
  * DO NOT ADD ERROR CODES IN THIS FILE! Use the error list and the generation tool instead!
  *
  */
+ 
+/*
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+*/
 
 #include <stdio.h>
 #include <string.h>

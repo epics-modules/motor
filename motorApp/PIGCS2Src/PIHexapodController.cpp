@@ -3,6 +3,13 @@
  *
  *      Author: sra
  */
+ 
+/*
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+*/
 
 #include "PIHexapodController.h"
 #include "PIasynAxis.h"

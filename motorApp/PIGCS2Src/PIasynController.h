@@ -1,6 +1,11 @@
 /*
 FILENAME...    PIasynController.cpp
 USAGE...    Simulated Motor Support.
+ 
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
 
 Based on drvMotorSim.c
 

@@ -3,6 +3,13 @@
  *
  *      Author: sra
  */
+ 
+/*
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+*/
 
 #ifndef PIE755CONTROLLER_H_
 #define PIE755CONTROLLER_H_

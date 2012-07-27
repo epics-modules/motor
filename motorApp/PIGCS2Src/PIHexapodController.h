@@ -3,6 +3,13 @@
  *
  *      Author: sra
  */
+ 
+/*
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+*/
 
 #ifndef PIHEXAPODCONTROLLER_H_
 #define PIHEXAPODCONTROLLER_H_

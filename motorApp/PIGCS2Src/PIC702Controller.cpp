@@ -4,6 +4,13 @@
  *      Author: sra
  */
 
+/*
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+*/
+
 #include "PIC702Controller.h"
 #include "PIasynAxis.h"
 #include <stdlib.h>
