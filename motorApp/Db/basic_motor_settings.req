@@ -1,4 +1,9 @@
 # FILE... basic_motor_settings.req
+# Version:        $Revision$
+# Modified By:    $Author$
+# Last Modified:  $Date$
+# HeadURL:        $URL$
+
 $(P)$(M).DIR
 $(P)$(M).DHLM
 $(P)$(M).DLLM
@@ -37,4 +42,8 @@ $(P)$(M).DCOF
 $(P)$(M).HVEL
 $(P)$(M).NTM
 $(P)$(M).NTMF
+$(P)$(M).INIT
+$(P)$(M).PREM
+$(P)$(M).POST
+$(P)$(M).FLNK
 
