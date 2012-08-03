@@ -174,6 +174,9 @@ class epicsShareFunc asynMotorController : public asynPortDriver {
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
   
+  virtual asynStatus setMovingPollPeriod(double movingPollPeriod);
+  virtual asynStatus setIdlePollPeriod(double idlePollPeriod);
+
   int shuttingDown_;   /**< Flag indicating that IOC is shutting down.  Stops poller */
 
   protected:

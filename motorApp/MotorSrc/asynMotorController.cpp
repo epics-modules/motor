@@ -24,6 +24,7 @@ static void asynMotorPollerC(void *drvPvt);
 static void asynMotorMoveToHomeC(void *drvPvt);
 
 
+
 /** Creates a new asynMotorController object.
   * All of the arguments are simply passed to the constructor for the asynPortDriver base class. 
   * After calling the base class constructor this method creates the motor parameters
@@ -800,11 +801,70 @@ asynStatus asynMotorController::readbackProfile()
   return asynSuccess;
 }
 
+/** Set the moving poll period (in secs) at runtime.*/
+asynStatus asynMotorController::setMovingPollPeriod(double movingPollPeriod)
+{
+  static const char *functionName = "setMovingPollPeriod";
 
+  asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
+    "%s:%s: Setting moving poll period to %f\n", 
+    driverName, functionName, movingPollPeriod);
+
+  lock();
+  movingPollPeriod_ = movingPollPeriod;
+  wakeupPoller();
+  unlock();
+  return asynSuccess;
+}
+
+/** Set the idle poll period (in secs) at runtime.*/
+asynStatus asynMotorController::setIdlePollPeriod(double idlePollPeriod)
+{
+  static const char *functionName = "setIdlePollPeriod";
+
+  asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
+    "%s:%s: Setting idle poll period to %f\n", 
+    driverName, functionName, idlePollPeriod);
+
+  lock();
+  idlePollPeriod_ = idlePollPeriod;
+  wakeupPoller();
+  unlock();
+  return asynSuccess;
+}
 
 /** The following functions have C linkage, and can be called directly or from iocsh */
 
 extern "C" {
+
+asynStatus setMovingPollPeriod(const char *portName, double movingPollPeriod)
+{
+  asynMotorController *pC;
+  static const char *functionName = "setMovingPollPeriod";
+
+  pC = (asynMotorController*) findAsynPortDriver(portName);
+  if (!pC) {
+    printf("%s:%s: Error port %s not found\n", driverName, functionName, portName);
+    return asynError;
+  }
+    
+  return pC->setMovingPollPeriod(movingPollPeriod);
+}
+
+asynStatus setIdlePollPeriod(const char *portName, double idlePollPeriod)
+{
+  asynMotorController *pC;
+  static const char *functionName = "setIdlePollPeriod";
+
+  pC = (asynMotorController*) findAsynPortDriver(portName);
+  if (!pC) {
+    printf("%s:%s: Error port %s not found\n", driverName, functionName, portName);
+    return asynError;
+  }
+    
+  return pC->setIdlePollPeriod(idlePollPeriod);
+}
+
 
 
 asynStatus asynMotorEnableMoveToHome(const char *portName, int axis, int distance)
@@ -835,6 +895,31 @@ asynStatus asynMotorEnableMoveToHome(const char *portName, int axis, int distanc
 }
 
 
+/* setMovingPollPeriod */
+static const iocshArg setMovingPollPeriodArg0 = {"Controller port name", iocshArgString};
+static const iocshArg setMovingPollPeriodArg1 = {"Axis number", iocshArgDouble};
+static const iocshArg * const setMovingPollPeriodArgs[] = {&setMovingPollPeriodArg0,
+							   &setMovingPollPeriodArg1};
+static const iocshFuncDef setMovingPollPeriodDef = {"setMovingPollPeriod", 2, setMovingPollPeriodArgs};
+
+static void setMovingPollPeriodCallFunc(const iocshArgBuf *args)
+{
+  setMovingPollPeriod(args[0].sval, args[1].dval);
+}
+
+/* setIdlePollPeriod */
+static const iocshArg setIdlePollPeriodArg0 = {"Controller port name", iocshArgString};
+static const iocshArg setIdlePollPeriodArg1 = {"Axis number", iocshArgDouble};
+static const iocshArg * const setIdlePollPeriodArgs[] = {&setIdlePollPeriodArg0,
+							 &setIdlePollPeriodArg1};
+static const iocshFuncDef setIdlePollPeriodDef = {"setIdlePollPeriod", 2, setIdlePollPeriodArgs};
+
+static void setIdlePollPeriodCallFunc(const iocshArgBuf *args)
+{
+  setIdlePollPeriod(args[0].sval, args[1].dval);
+}
+
+
 /* asynMotorEnableMoveToHome */
 static const iocshArg asynMotorEnableMoveToHomeArg0 = {"Controller port name", iocshArgString};
 static const iocshArg asynMotorEnableMoveToHomeArg1 = {"Axis number", iocshArgInt};
@@ -852,6 +937,8 @@ static void enableMoveToHomeCallFunc(const iocshArgBuf *args)
 
 static void asynMotorControllerRegister(void)
 {
+  iocshRegister(&setMovingPollPeriodDef, setMovingPollPeriodCallFunc);
+  iocshRegister(&setIdlePollPeriodDef, setIdlePollPeriodCallFunc);
   iocshRegister(&enableMoveToHome, enableMoveToHomeCallFunc);
 }
 epicsExportRegistrar(asynMotorControllerRegister);
