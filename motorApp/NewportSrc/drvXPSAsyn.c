@@ -1332,20 +1332,29 @@ static void XPSPoller(XPSController *pController)
 		}
 
 		/*Test for states that mean we cannot move an axis (disabled, uninitialised, etc.) 
-		  and set problem bit in MSTA.*/
+		  and set motorAxisPowerOn (CNEN).*/
 		if ((pAxis->axisStatus < 10) || ((pAxis->axisStatus >= 20) && (pAxis->axisStatus <= 42)) ||
-		    (pAxis->axisStatus == 50) || (pAxis->axisStatus == 64)) {
+		    (pAxis->axisStatus == 50) || (pAxis->axisStatus == 63) || (pAxis->axisStatus == 64)) {
 		  if ( (pAxis->noDisabledError > 0) && (pAxis->axisStatus==20) ) {
-		    motorParam->setInteger(pAxis->params, motorAxisProblem, 0);		    
+		    motorParam->setInteger(pAxis->params, motorAxisPowerOn, 1);		    
 		  } else {
 		    PRINT(pAxis->logParam, FLOW, "XPS Axis %d is uninitialised/disabled/not referenced. XPS State Code: %d\n",
                            pAxis->axis, pAxis->axisStatus);
-		    motorParam->setInteger(pAxis->params, motorAxisProblem, 1);
+		    motorParam->setInteger(pAxis->params, motorAxisPowerOn, 0);
 		  }
+		} else {
+		  motorParam->setInteger(pAxis->params, motorAxisPowerOn, 1);
+		}
+		
+		/*Test for uninitialized states.*/
+		if ((pAxis->axisStatus < 10) || (pAxis->axisStatus == 42) || (pAxis->axisStatus == 50) || (pAxis->axisStatus == 63)) {
+		  PRINT(pAxis->logParam, FLOW, "XPS Axis %d is uninitialised. XPS State Code: %d\n",
+                         pAxis->axis, pAxis->axisStatus);
+		  motorParam->setInteger(pAxis->params, motorAxisProblem, 1);
 		} else {
 		  motorParam->setInteger(pAxis->params, motorAxisProblem, 0);
 		}
-
+		
             }
 
 	    status = GroupPositionSetpointGet(pAxis->pollSocket,
