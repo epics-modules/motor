@@ -1,0 +1,2 @@
+registrar(smarActMCSMotorRegister)
+#driver(motorMCS)
