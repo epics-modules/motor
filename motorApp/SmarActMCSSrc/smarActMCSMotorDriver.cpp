@@ -21,6 +21,8 @@
 
 #include <math.h>
 
+#include <epicsString.h>
+
 /* Static configuration parameters (compile-time constants) */
 #undef  DEBUG
 
@@ -61,7 +63,7 @@ SmarActMCSException::SmarActMCSException(SmarActMCSExceptionType t, const char *
 va_list ap;
 	if ( fmt ) {
 		va_start(ap, fmt);
-		vsnprintf(str_, sizeof(str_), fmt, ap);
+		epicsVsnprintf(str_, sizeof(str_), fmt, ap);
 		va_end(ap);
 	} else {
 		str_[0] = 0;
@@ -71,7 +73,7 @@ va_list ap;
 SmarActMCSException::SmarActMCSException(SmarActMCSExceptionType t, const char *fmt, va_list ap)
 		: t_(t)
 {
-	vsnprintf(str_, sizeof(str_), fmt, ap);
+	epicsVsnprintf(str_, sizeof(str_), fmt, ap);
 }
 
 /* Parse reply from MCS and return the value converted to a number.
@@ -159,7 +161,7 @@ size_t     nwrite;
 int        eomReason;
 asynStatus status;
 
-	vsnprintf(buf, sizeof(buf), fmt, ap);
+	epicsVsnprintf(buf, sizeof(buf), fmt, ap);
 
 	status = pasynOctetSyncIO->writeRead( asynUserMot_p_, buf, strlen(buf), rep, len, timeout, &nwrite, got_p, &eomReason);
 
@@ -201,14 +203,14 @@ size_t     got;
 	return status;
 }
 
-/* Obtain value of the 'motorSetClosedLoop_' parameter (which
+/* Obtain value of the 'motorClosedLoop_' parameter (which
  * maps to the record's CNEN field)
  */
 int
 SmarActMCSAxis::getClosedLoop()
 {
 int val;
-	c_p_->getIntegerParam(axisNo_, c_p_->motorSetClosedLoop_, &val);
+	c_p_->getIntegerParam(axisNo_, c_p_->motorClosedLoop_, &val);
 	return val;
 }
 
