@@ -1,0 +1,27 @@
+< envPaths
+
+# Tell EPICS all about the record types, device-support modules, drivers,
+# etc. in this build from CARS
+dbLoadDatabase("../../dbd/WithAsyn.dbd")
+WithAsyn_registerRecordDeviceDriver(pdbbase)
+
+### Motors
+# Motors substitutions, customize this for your motor
+dbLoadTemplate "motor.substitutions.smaractmcs"
+
+# Configure each controller
+drvAsynIPPortConfigure("TSP2","ts-b34-nw08:2102",0,0,0)
+
+# Controller port, asyn port, number of axis, moving poll period, idle poll period
+# smarActMCSCreateController(const char *motorPortName, const char *ioPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
+smarActMCSCreateController("P0", "TSP2", 1, 0.020, 1.0)
+
+# Controller port, axis number, controller channel
+# smarActMCSCreateAxis(const char *motorPortName, int axisNumber, int channel)
+smarActMCSCreateAxis("P0", 0, 1);
+smarActMCSCreateAxis("P0", 0, 0);
+
+asynSetTraceIOMask("XPS1", 0, 2)
+
+iocInit()
+
