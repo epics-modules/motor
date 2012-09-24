@@ -155,7 +155,7 @@ HeadURL:        $URL$
  *
  */
 
-#define VERSION 6.7
+#define VERSION 6.71
 
 #include    <stdlib.h>
 #include    <string.h>
