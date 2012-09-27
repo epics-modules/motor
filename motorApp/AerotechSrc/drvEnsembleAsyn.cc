@@ -62,7 +62,8 @@ in file LICENSE that is included with this distribution.
 * .15 02-02-12 rls - Replace "stepSize > 0.0" test with ReverseDirec parameter.
 * .16 04-19-12 rls - Added communication retries.
 *                  - Reading both feedback and commanded positions.
-*                  - Deleted duplicate error messages.
+*                  - Deleted duplicate error messages. 
+* .17 09-27-12 rls - Bug fix for incorrect jog acceleration rate.
 */
 
 
@@ -587,8 +588,10 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
     if (pAxis == NULL || pAxis->pController == NULL)
         return(MOTOR_AXIS_ERROR);
 
-    sprintf(outputBuff, "SETPARM @%d, %d, %.*f", pAxis->axis, PARAMETERID_DefaultRampRate,
+    sprintf(outputBuff, "SETPARM @%d, %d, %.*f", pAxis->axis, PARAMETERID_AbortDecelRate,
             pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
+    ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+    sprintf(outputBuff, "RAMP RATE @%d %.*f", pAxis->axis, pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     sprintf(outputBuff, "FREERUN @%d %.*f", pAxis->axis, pAxis->maxDigits, velocity  * fabs(pAxis->stepSize));
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
