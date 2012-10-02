@@ -17,8 +17,8 @@ HeadURL:        $URL$
 #include <math.h>
 #include <stdlib.h>
 
-#undef asynPrint
-#define asynPrint(user,reason,format...) 0
+//#undef asynPrint
+//#define asynPrint(user,reason,format...) 0
 
 
 asynStatus PIGCSPiezoController::getStatus(PIasynAxis* pAxis, int& homing, int& moving, int& negLimit, int& posLimit, int& servoControl)

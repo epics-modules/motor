@@ -15,8 +15,8 @@ HeadURL:        $URL$
 #include "PIasynAxis.h"
 #include <stdlib.h>
 
-#undef asynPrint
-#define asynPrint(user,reason,format...) 0
+//#undef asynPrint
+//#define asynPrint(user,reason,format...) 0
 
 
 asynStatus PIE755Controller::getStatus(PIasynAxis* pAxis, int& homing, int& moving, int& negLimit, int& posLimit, int& servoControl)
