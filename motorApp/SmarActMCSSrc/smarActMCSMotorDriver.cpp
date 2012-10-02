@@ -34,6 +34,22 @@
 #define HOLD_NEVER       0
 #define FAR_AWAY     1000000000 /*nm*/
 
+// Windows does not have rint()
+#ifdef _WIN32
+double rint(double x)
+{
+  //middle value point test
+  if (ceil(x+0.5) == floor(x+0.5))
+  {
+    int a = (int)ceil(x);
+    if (a%2 == 0) return ceil(x);
+    else return floor(x);
+  }
+  else return floor(x+0.5);
+}
+#endif
+  
+
 /* The asyn motor driver apparently can't cope with exceptions */
 #undef  ASYN_CANDO_EXCEPTIONS
 /* Define this if exceptions should be thrown and it is OK to abort the application */
