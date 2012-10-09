@@ -213,7 +213,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   } else if (function == motorMoveToHome_) {
     if (value == 1) {
       asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-		"%s:%s:: Starting a move to home for axis %d\n",  driverName, functionName, axis);
+        "%s:%s:: Starting a move to home for axis %d\n",  driverName, functionName, axis);
       moveToHomeAxis_ = axis;
       epicsEventSignal(moveToHomeId_);
     }
@@ -645,9 +645,9 @@ void asynMotorController::asynMotorMoveToHome()
       if (!pAxis) continue;
       status = pAxis->doMoveToHome();
       if (status) {
-	asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-      "%s:%s: move to home failed in asynMotorController::asynMotorMoveToHome. Axis number=%d\n", 
-      driverName, functionName, this->moveToHomeAxis_);
+      asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+        "%s:%s: move to home failed in asynMotorController::asynMotorMoveToHome. Axis number=%d\n", 
+        driverName, functionName, this->moveToHomeAxis_);
       }
     } 
   } 
@@ -899,7 +899,7 @@ asynStatus asynMotorEnableMoveToHome(const char *portName, int axis, int distanc
 static const iocshArg setMovingPollPeriodArg0 = {"Controller port name", iocshArgString};
 static const iocshArg setMovingPollPeriodArg1 = {"Axis number", iocshArgDouble};
 static const iocshArg * const setMovingPollPeriodArgs[] = {&setMovingPollPeriodArg0,
-							   &setMovingPollPeriodArg1};
+                                                           &setMovingPollPeriodArg1};
 static const iocshFuncDef setMovingPollPeriodDef = {"setMovingPollPeriod", 2, setMovingPollPeriodArgs};
 
 static void setMovingPollPeriodCallFunc(const iocshArgBuf *args)
@@ -911,7 +911,7 @@ static void setMovingPollPeriodCallFunc(const iocshArgBuf *args)
 static const iocshArg setIdlePollPeriodArg0 = {"Controller port name", iocshArgString};
 static const iocshArg setIdlePollPeriodArg1 = {"Axis number", iocshArgDouble};
 static const iocshArg * const setIdlePollPeriodArgs[] = {&setIdlePollPeriodArg0,
-							 &setIdlePollPeriodArg1};
+                                                         &setIdlePollPeriodArg1};
 static const iocshFuncDef setIdlePollPeriodDef = {"setIdlePollPeriod", 2, setIdlePollPeriodArgs};
 
 static void setIdlePollPeriodCallFunc(const iocshArgBuf *args)
