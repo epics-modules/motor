@@ -160,7 +160,8 @@ HeadURL:        $URL$
  * .65 07-23-12 rls - The motor record's process() function was not processing
  *                    alarms, events and the forward scan link in the same order
  *                    as specified in the "EPICS Application Developer's Guide".
- *
+ * .66 09-06-12 rls - Refix of DLY problem (see 64 above). Hold DMOV false until DLY times out.
+ * 
  */
 
 #define VERSION 6.8
@@ -1251,12 +1252,6 @@ static long process(dbCommon *arg)
                 MARK(M_DMOV);
             }
 
-            /* Set dmov to false if we have a delayed callback in process.*/
-            if (pmr->mip & MIP_DELAY_REQ) 
-            {
-              pmr->dmov = FALSE;
-            }
-
             /* Do another update after LS error. */
             if (pmr->mip != MIP_DONE && (pmr->rhls || pmr->rlls))
             {
@@ -1288,7 +1283,7 @@ static long process(dbCommon *arg)
             }
 
             /* Are we "close enough" to desired position? */
-            if (pmr->dmov && !(pmr->rhls || pmr->rlls))
+            if (pmr->dmov == TRUE && !(pmr->rhls || pmr->rlls))
             {
                 mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
 
@@ -1296,14 +1291,13 @@ static long process(dbCommon *arg)
                 {
                     if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
                     {
-                        pmr->mip = MIP_DONE;
-                        MARK(M_MIP);
+                        pmr->mip |= MIP_DELAY;
                         INIT_MSG();
                         WRITE_MSG(GET_INFO, NULL);
                         SEND_MSG();
-                        /* Mark DMOV and process forward links after a MIP_DELAY_ACK.*/
-                        pmr->dmov = TRUE;
-                        MARK(M_DMOV);
+                        /* Restore DMOV to false and UNMARK it so it is not posted. */
+                        pmr->dmov = FALSE;
+                        UNMARK(M_DMOV);
                         goto process_exit;
                     }
                     else if (pmr->stup != motorSTUP_ON && pmr->mip != MIP_DONE)
@@ -1313,18 +1307,21 @@ static long process(dbCommon *arg)
                         maybeRetry(pmr);
                     }
                 }
-                else if (MARKED(M_DMOV) && !(pmr->mip & MIP_DELAY_REQ))
-                {
-                    pmr->mip |= MIP_DELAY_REQ;
-                    MARK(M_MIP);
+               else if (MARKED(M_DMOV))
+               {
+                  if (!(pmr->mip & MIP_DELAY_REQ))
+                  {
+                     pmr->mip |= MIP_DELAY_REQ;
+                     MARK(M_MIP);
 
-                    callbackRequestDelayed(&pcallback->dly_callback, pmr->dly);
+                     callbackRequestDelayed(&pcallback->dly_callback, pmr->dly);
+                  }
 
-                    /* Restore DMOV to false and UNMARK it so it is not posted. */
-                    pmr->dmov = FALSE;
-                    UNMARK(M_DMOV);
-                    goto process_exit;
-                }
+                  /* Restore DMOV to false and UNMARK it so it is not posted. */
+                  pmr->dmov = FALSE;
+                  UNMARK(M_DMOV);
+                  goto process_exit;
+               }
             }
         }
     }   /* END of (process_reason == CALLBACK_DATA). */
