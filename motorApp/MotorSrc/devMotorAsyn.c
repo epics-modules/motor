@@ -584,10 +584,10 @@ static void asynCallback(asynUser *pasynUser)
     int status;
     int commandIsMove = 0;
 
-    asynPrint(pasynUser, ASYN_TRACE_FLOW,
-              "devMotorAsyn::asynCallback: %s command=%d, ivalue=%d, dvalue=%f\n",
-              pmr->name, pmsg->command, pmsg->ivalue, pmsg->dvalue);
     pasynUser->reason = pPvt->driverReasons[pmsg->command];
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+              "devMotorAsyn::asynCallback: %s command=%d, ivalue=%d, dvalue=%f, pasynUser->reason=%d\n",
+              pmr->name, pmsg->command, pmsg->ivalue, pmsg->dvalue, pasynUser->reason);
 
     switch (pmsg->command) {
     case motorStatus:
