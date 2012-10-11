@@ -1,0 +1,9 @@
+registrar(OmsMAXnetAsynRegister)
+registrar(OmsMAXvAsynRegister)
+#registrar(omsMAXvEncFuncAsynRegister)
+#variable(motorMAXvdebug)
+#variable(motorOMSBASEdebug)
+#variable(motorMAXvEncFuncdebug)
+#variable(motorMAXnetdebug)
+
+

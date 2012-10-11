@@ -21,6 +21,8 @@ Last Modified:	$Date: 2009-06-18 19:38:20 $
  *                force a status update with a call to callCallback().
  *                - Matthew Pearson added deferred move support.
  * 2010-10-05 rls - MP's fix for deferred moves broken in drvMotorSim.
+ * 2012-10-09 rls - Added motorAxisforceCallback to support motor record
+ *                GET_INFO commands.
  *
  */
 
@@ -63,7 +65,10 @@ motorAxisDrvSET_t motorSim =
     motorAxisHome,              /**< Pointer to function to execute a more to reference or home */
     motorAxisMove,              /**< Pointer to function to execute a position move */
     motorAxisVelocityMove,      /**< Pointer to function to execute a velocity mode move */
-    motorAxisStop               /**< Pointer to function to stop motion */
+    motorAxisStop,              /**< Pointer to function to stop motion */
+    motorAxisforceCallback,     /**< Pointer to function to request a poller status update */
+    motorAxisProfileMove,       /**< Pointer to function to execute a profile move */
+    motorAxisTriggerProfile     /**< Pointer to function to trigger a profile move */
   };
 
 epicsExportAddress(drvet, motorSim);
@@ -120,9 +125,12 @@ static motorSim_t drv={ NULL, NULL, motorSimLogMsg, NULL, { 0, 0 } };
 
 #define MAX(a,b) ((a)>(b)? (a): (b))
 #define MIN(a,b) ((a)<(b)? (a): (b))
+#define DELTA 0.1
 
 /*Deferred moves functions.*/
 static int processDeferredMoves(const motorSim_t * pDrv);
+
+static void motorProcTask(motorSim_t *);
 
 static void motorAxisReportAxis( AXIS_HDL pAxis, int level )
 {
@@ -562,6 +570,18 @@ static int motorAxisStop( AXIS_HDL pAxis, double acceleration )
   return MOTOR_AXIS_OK;
 }
 
+static int motorAxisforceCallback(AXIS_HDL pAxis)
+{
+  if (pAxis == NULL)
+    return(MOTOR_AXIS_ERROR);
+
+  /* Force a status update. */
+  motorParam->forceCallback(pAxis->params);
+  motorProcTask(&drv);
+  return(MOTOR_AXIS_OK);
+}
+
+
 /**\defgroup motorSimTask Routines to implement the motor axis simulation task
 @{
 */
@@ -636,34 +656,39 @@ static void motorSimProcess( AXIS_HDL pAxis, double delta )
   motorParam->setInteger( pAxis->params, motorAxisLowHardLimit,  (pAxis->nextpoint.axis[0].p <= pAxis->lowHardLimit) );
 }
 
-#define DELTA 0.1
-static void motorSimTask( motorSim_t * pDrv )
+
+static void motorProcTask( motorSim_t *pDrv)
 {
   epicsTimeStamp now;
   double delta;
   AXIS_HDL pAxis;
 
+  /* Get a new timestamp */
+  epicsTimeGetCurrent( &now );
+  delta = epicsTimeDiffInSeconds( &now, &(pDrv->now) );
+  pDrv->now = now;
+
+  if ( delta > (DELTA/4.0) && delta <= (4.0*DELTA) )
+  {
+    /* A reasonable time has elapsed, it's not a time step in the clock */
+
+    for (pAxis = pDrv->pFirst; pAxis != NULL; pAxis = pAxis->pNext )
+    {
+      if (epicsMutexLock( pAxis->axisMutex ) == epicsMutexLockOK)
+      {
+        motorSimProcess( pAxis, delta );
+        motorParam->callCallback( pAxis->params );
+        epicsMutexUnlock( pAxis->axisMutex );
+      }
+    }
+  }
+}
+
+static void motorSimTask( motorSim_t * pDrv )
+{
   while ( 1 )
     {
-      /* Get a new timestamp */
-      epicsTimeGetCurrent( &now );
-      delta = epicsTimeDiffInSeconds( &now, &(pDrv->now) );
-      pDrv->now = now;
-
-      if ( delta > (DELTA/4.0) && delta <= (4.0*DELTA) )
-	{
-	  /* A reasonable time has elapsed, it's not a time step in the clock */
-
-	  for (pAxis = pDrv->pFirst; pAxis != NULL; pAxis = pAxis->pNext )
-	    {
-	      if (epicsMutexLock( pAxis->axisMutex ) == epicsMutexLockOK)
-		{
-		  motorSimProcess( pAxis, delta );
-                  motorParam->callCallback( pAxis->params );
-		  epicsMutexUnlock( pAxis->axisMutex );
-		}
-	    }
-	}
+      motorProcTask(pDrv);
       epicsThreadSleep( DELTA );
     }
 }
