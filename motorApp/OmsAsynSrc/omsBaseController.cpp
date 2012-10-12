@@ -340,6 +340,8 @@ asynStatus omsBaseController::writeFloat64(asynUser *pasynUser, epicsFloat64 val
             status = sendReplace(pAxis, inputBuffer);
         }
      }
+/*
+ *   Encoder Mode is currently not supported in motor record
      else if (function == motorEncoderRatio_) {
          int haveEncoder;
          getIntegerParam(pAxis->axisNo_, motorStatusHasEncoder_, &haveEncoder);
@@ -351,6 +353,7 @@ asynStatus omsBaseController::writeFloat64(asynUser *pasynUser, epicsFloat64 val
             status = sendReplace(pAxis, inputBuffer);
         }
      }
+*/
      else if ((function == motorResolution_) || (function == motorLowLimit_) || (function == motorHighLimit_)) {
             // we do nothing
             status = asynSuccess;
@@ -448,6 +451,7 @@ asynStatus omsBaseController::Init(const char* initString, int multiple){
     int totalAxes;
     char axisChrArr[OMS_MAX_AXES] = {'X','Y','Z','T','U','V','R','S'};
     char outputBuffer[10];
+    epicsInt32  axisPosArr[OMS_MAX_AXES];
 
     /* Interrupt clear */
     sendOnlyLock("IC;");
@@ -543,6 +547,10 @@ asynStatus omsBaseController::Init(const char* initString, int multiple){
         else
             errlogPrintf("omsBaseController:Init: error: unknown limit true state!\n");
 
+    }
+    if (getAxesPositions(axisPosArr) == asynSuccess){
+    	for (int axis=0; axis < numAxes; axis++)
+    		(pAxes[axis])->setDoubleParam(motorPosition_, (double) axisPosArr[axis]);
     }
     unlock();
     return asynSuccess;
