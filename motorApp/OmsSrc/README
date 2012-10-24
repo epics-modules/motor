@@ -51,9 +51,24 @@ MAXvSetup(3, 24, 0xA00000, 190, 5, 10)
 NOTES:
 - Unlike the other OMS models, the MAXv VME Address Modifiers (AM) do not
   respond to both supervisory and non-privileged access.  Hence, the MAXv's
-  AM's must match the CPU board's AM's exactly. At the APS, this means the
-  AM must be set to A16 privileged access; 0x2D .
+  AM's must match the CPU board's AM's exactly.
 
+------------------------------ For APS only -----------------------------------
+  At the Advanced Photon Source (APS), the VxWorks Board Support Packages
+  (BSP's) are configured such that the AM must be set to "supervisory
+  (privileged) data access".
+  A16 - 0x2D
+  A24 - 0x3D
+  A32 - 0x0D
+  In addition, for APS only, the VxWorks BSP's are configured such that only
+  the following VME address spaces are available for the MAXv base address.
+  A16:     0x0000 -     0xFFFF
+  A24:   0x000000 -   0xFFFFFF
+  A32: 0xA0000000 - 0xBFFFFFFF
+  Note that CPU local memory mapping makes A32 0x80000000 - 0x9FFFFFFF
+  unavailable to all VMEbus devices.
+------------------------------ For APS only -----------------------------------
+  
 - Configure the MAXv's limit switch sense by placing one of the following MAXv
   controller commands in the 2nd argument of MAXvConfig(); the initialization
   string.  This command determines which TTL signal level defines an active
