@@ -51,7 +51,7 @@ extern int numMotors;
 char ** getMotorList()
 {
     DBENTRY dbentry, *pdbentry = &dbentry;
-    long    status;
+    long    status, a_status;
     char    **paprecords = 0, temp[PVNAME_STRINGSZ];
     int     num_entries = 0, length = 0, index = 0;
 
@@ -68,12 +68,16 @@ char ** getMotorList()
         status = dbFirstRecord(pdbentry);
         while (!status)
         {
-            length = sprintf(temp, "%s", dbGetRecordName(pdbentry));
-            paprecords[index] = (char *) callocMustSucceed(length+1,
+            a_status = dbIsAlias(pdbentry);
+	    if (a_status == 0)
+	    {
+                length = sprintf(temp, "%s", dbGetRecordName(pdbentry));
+                paprecords[index] = (char *) callocMustSucceed(length+1,
                                            sizeof(char), "getMotorList(2nd)");
-            strcpy(paprecords[index], temp); 
+                strcpy(paprecords[index], temp);
+                index++;
+	    }
             status = dbNextRecord(pdbentry);
-            index++;
         }
         numMotors = index;
     }
