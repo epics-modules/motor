@@ -68,7 +68,7 @@ menu(motorSTUP) {
 }
 menu(motorRMOD) {
         choice(motorRMOD_D,"Default")
-        choice(motorRMOD_A,"Arthmetic")
+        choice(motorRMOD_A,"Arithmetic")
         choice(motorRMOD_G,"Geometric")
 }
 
