@@ -50,6 +50,8 @@ HeadURL:        $URL$
  *                  is < 1/2 time quantum.
  * .06 02/05/09 rls Always call process_messages() to check for incoming
  *                  messages.
+ * .07 11/30/12 rls In process_messages(), pass commanded velocity from
+ *                  motor_info->velocity to node->velocity with INFO request.
  */
 
 
@@ -386,6 +388,7 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick,
                 node->position = motor_info->position;
                 node->encoder_position = motor_info->encoder_position;
                 node->status = motor_info->status;
+                node->velocity = motor_info->velocity;
 
 /*=============================================================================
 * node->status & RA_DONE is not a reliable indicator of anything, in this case,
