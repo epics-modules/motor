@@ -917,7 +917,7 @@ static void buildAndVerify(SS_ID ssId, struct UserVar *pVar)
     int npoints;
     double trajVel;
     double D0, D1, T0, T1;
-    int ftpSocket;
+    SOCKET ftpSocket;
     char fileName[NAME_LEN];
     double distance;
     double maxVelocity[MAX_AXES], maxAcceleration[MAX_AXES];
