@@ -142,7 +142,6 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
 {
   static const char *functionName = "XPSAxis";
   char *index;
-  int status;
   double minJerkTime, maxJerkTime;
 
   moveSocket_ = TCP_ConnectToServer(pC_->IPAddress_, pC->IPPort_, XPS_POLL_TIMEOUT);
@@ -186,12 +185,12 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
 
   stepSize_ = stepSize;
   /* Read some information from the controller for this axis */
-  status = PositionerSGammaParametersGet(pollSocket_,
-                                         positionerName_,
-                                         &velocity_,
-                                         &accel_,
-                                         &minJerkTime,
-                                         &maxJerkTime);
+  PositionerSGammaParametersGet(pollSocket_,
+                                positionerName_,
+                                &velocity_,
+                                &accel_,
+                                &minJerkTime,
+                                &maxJerkTime);
    setDoubleParam(pC_->XPSMinJerk_, minJerkTime);
    setDoubleParam(pC_->XPSMaxJerk_, maxJerkTime);
 
