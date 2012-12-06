@@ -401,7 +401,6 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
-    int status;
     char buff[100];
 
     if (pAxis == NULL)
@@ -450,7 +449,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     }
     if (ret_status != MOTOR_AXIS_ERROR)
     {
-        status = motorParam->setInteger(pAxis->params, function, value);
+        motorParam->setInteger(pAxis->params, function, value);
         motorParam->callCallback(pAxis->params);
     }
     epicsMutexUnlock(pAxis->mutexId);
@@ -915,7 +914,7 @@ int MM4000AsynConfig(int card,             /* Controller number */
 
 static int sendOnly(MM4000Controller *pController, char *outputBuff)
 {
-    int nRequested=strlen(outputBuff);
+    size_t nRequested=strlen(outputBuff);
     size_t nActual;
     asynStatus status;
 
@@ -944,7 +943,7 @@ static int sendOnly(MM4000Controller *pController, char *outputBuff)
 
 static asynStatus sendAndReceive(MM4000Controller *pController, char *outputBuff, char *inputBuff, int inputSize)
 {
-    int nWriteRequested=strlen(outputBuff);
+    size_t nWriteRequested=strlen(outputBuff);
     size_t nWrite, nRead;
     int eomReason;
     asynStatus status;

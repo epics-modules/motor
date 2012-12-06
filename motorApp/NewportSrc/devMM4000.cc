@@ -162,7 +162,7 @@ STATIC RTN_STATUS MM4000_build_trans(motor_cmnd command, double *parms, struct m
     struct MMcontroller *cntrl;
     char buff[110];
     int axis, card, maxdigits;
-    unsigned int size;
+    size_t size;
     double dval, cntrl_units;
     RTN_STATUS rtnval;
 

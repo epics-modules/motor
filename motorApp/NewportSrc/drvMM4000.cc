@@ -515,7 +515,7 @@ exit:
 static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
-    int size;
+    size_t size;
     size_t nwrite;
 
     size = strlen(com);
@@ -591,7 +591,7 @@ static int recv_mess(int card, char *com, int flag)
     }
 
     Debug(2, "recv_mess(): message = \"%s\" on card #%d\n", com, card);
-    return(nread);
+    return((int)nread);
 }
 
 
