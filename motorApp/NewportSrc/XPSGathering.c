@@ -24,7 +24,7 @@
 epicsShareFunc void xps_gathering()
 {
     int status,poll_socket,drive_socket,end=0;
-    int ftpSocket;
+    SOCKET ftpSocket;
     char *gatheringData = "GROUP2.POSITIONER1.SetpointPosition;"
                           "GROUP2.POSITIONER1.CurrentPosition;"
                           "GROUP2.POSITIONER1.CurrentVelocity;"

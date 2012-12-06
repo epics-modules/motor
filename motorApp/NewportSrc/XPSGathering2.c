@@ -25,7 +25,7 @@
 int main(int argc, char *argv[])
 {
     int status,poll_socket,drive_socket,end=0;
-    int ftpSocket;
+    SOCKET ftpSocket;
     char *gatheringData = "GROUP1.PHI.SetpointPosition;"
                           "GROUP1.PHI.CurrentPosition;"
                           "GROUP1.KAPPA.SetpointPosition;"
