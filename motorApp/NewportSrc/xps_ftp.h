@@ -19,25 +19,11 @@
 /* #define VXWORKS */
 
 /******[ includes ]**************************************************/
-#ifdef _WIN32
-#include <winsock.h>
-#include <windows.h>
-#else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#ifdef vxWorks
-#include <sockLib.h>
-#include "inetLib.h"
-#include <unistd.h>
-#endif
-#endif 
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <osiSock.h>
 
 
 /******[ defines ]***************************************************/
@@ -53,17 +39,13 @@
 extern "C" {
 #endif
 
-/******[ global variables ]******************************************/
-
-int ftpChangeDir (int, char*);
-
 /******[ prototypes ]************************************************/
 /* FTP commands */
-int ftpConnect (char*, char*, char*, int*);
-int ftpDisconnect (int);
-int ftpChangeDir (int, char*);
-int ftpRetrieveFile (int, char*);
-int ftpStoreFile(int, char*);
+int ftpConnect (char*, char*, char*, SOCKET*);
+int ftpDisconnect (SOCKET);
+int ftpChangeDir (SOCKET, char*);
+int ftpRetrieveFile (SOCKET, char*);
+int ftpStoreFile(SOCKET, char*);
 
 #ifdef __cplusplus
 }

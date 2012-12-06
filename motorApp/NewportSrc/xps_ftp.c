@@ -22,20 +22,20 @@
 
 /* local functions */
 static int code(char*);
-static int sendFtpCommandAndReceive (int, char*, char*);
-static int getPort (int, char*);
+static int sendFtpCommandAndReceive (SOCKET, char*, char*);
+static int getPort (SOCKET, char*);
 #ifdef DEBUG
 static void printRecv (char*, int);
 #endif
 
 
 /******[ ftpConnect ]************************************************/
-int ftpConnect (char* ip, char* login, char* password, int* socketFD)
+int ftpConnect (char* ip, char* login, char* password, SOCKET* socketFD)
 {
   char command[COMMAND_SIZE];
   char returnString[RETURN_SIZE];
   struct sockaddr_in sockAddr;
-  int sockFD, receivedBytes;
+  SOCKET sockFD;
 
   memset(&sockAddr, 0, sizeof(sockAddr));
 
@@ -49,7 +49,7 @@ int ftpConnect (char* ip, char* login, char* password, int* socketFD)
     return -1;
 
   do {
-    receivedBytes = recv(sockFD, returnString, RETURN_SIZE, 0);
+    recv(sockFD, returnString, RETURN_SIZE, 0);
   }
   while (strchr(returnString,'\n')==NULL);
 
@@ -74,7 +74,7 @@ int ftpConnect (char* ip, char* login, char* password, int* socketFD)
 
 
 /******[ ftpDisconnect ]*********************************************/
-int ftpDisconnect (int socketFD)
+int ftpDisconnect (SOCKET socketFD)
 {
 #ifdef _WIN32
   return closesocket(socketFD);
@@ -85,7 +85,7 @@ int ftpDisconnect (int socketFD)
 
 
 /******[ ftpChangeDir ]**********************************************/
-int ftpChangeDir (int socketFD, char* destination)
+int ftpChangeDir (SOCKET socketFD, char* destination)
 {
   char command[COMMAND_SIZE];
   char returnString[RETURN_SIZE];
@@ -99,9 +99,10 @@ int ftpChangeDir (int socketFD, char* destination)
 
 
 /******[ ftpRetrieveFile ]*******************************************/
-int ftpRetrieveFile(int socketFD, char *filename)
+int ftpRetrieveFile(SOCKET socketFD, char *filename)
 {
-  int port_rcv, socketFDReceive, i;
+  int port_rcv, i;
+  SOCKET socketFDReceive;
   struct sockaddr_in adr_rcv;
   char ip[IP_SIZE];
   char command[COMMAND_SIZE];
@@ -172,9 +173,10 @@ int ftpRetrieveFile(int socketFD, char *filename)
 
 
 /******[ ftpStoreFile ]**********************************************/
-int ftpStoreFile(int socketFD, char *filename)
+int ftpStoreFile(SOCKET socketFD, char *filename)
 {
-  int port_snd, socketFDSend, i;
+  int port_snd, i;
+  SOCKET socketFDSend;
   struct sockaddr_in adr_snd;
   char ip[IP_SIZE];
   char command[COMMAND_SIZE];
@@ -216,7 +218,7 @@ int ftpStoreFile(int socketFD, char *filename)
 
   do
     {
-	  i = fread(returnString, sizeof(char), RETURN_SIZE, file);
+	  i = (int)fread(returnString, sizeof(char), RETURN_SIZE, file);
       send(socketFDSend,returnString, i, 0);
     }
   while(i != 0);
@@ -250,7 +252,7 @@ static int code (char *str)
 
 
 /******[ sendFtpCommandAndReceive ]**********************************/
-static int sendFtpCommandAndReceive (int socketFD, char* command, char* returnString)
+static int sendFtpCommandAndReceive (SOCKET socketFD, char* command, char* returnString)
 {
 	int receivedBytes;
 	char str_rec[RETURN_SIZE];
@@ -261,7 +263,7 @@ static int sendFtpCommandAndReceive (int socketFD, char* command, char* returnSt
 
 	sprintf(command, "%s\n", command);
 
-	send (socketFD, command, strlen(command), 0);
+	send (socketFD, command, (int)strlen(command), 0);
 	receivedBytes = recv(socketFD, str_rec, RETURN_SIZE, 0);
    
 #ifdef DEBUG
@@ -285,7 +287,8 @@ static int sendFtpCommandAndReceive (int socketFD, char* command, char* returnSt
     {                           /* the server wants to informations with one packet */  
                                 /* for each line. */ 
 		char tmp_code[3];  
-		int i, j, found_end = 0;      
+		int i, found_end = 0;  
+    size_t j;    
       
 		strncpy(tmp_code, str_rec, 3);
 		while (!found_end)        /* It is the end if we receive the code followed by a space */ 
@@ -322,7 +325,7 @@ static int sendFtpCommandAndReceive (int socketFD, char* command, char* returnSt
 
 
 /******[ getPort ]***************************************************/
-static int  getPort (int socketFD, char* ip)
+static int  getPort (SOCKET socketFD, char* ip)
 {
   char command[COMMAND_SIZE], returnString[RETURN_SIZE], tmp[RETURN_SIZE];
   int count, i, j, port;
