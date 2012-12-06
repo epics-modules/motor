@@ -6,6 +6,10 @@ include $(TOP)/configure/CONFIG
 # must be uncommented to use diagnostic debugging messages.
 #!USR_CXXFLAGS += -DDEBUG
 
+# The Newport XPS_C8_driver.cpp file uses "char *" when they should use "const char *".
+# Turn off warnings when we call this functions with string constants
+USR_CPPFLAGS_Linux += -Wno-write-strings
+
 # Install the XPS header file in case applications in another module need to use it
 INC += XPS_C8_drivers.h
 
