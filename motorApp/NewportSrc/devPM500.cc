@@ -161,7 +161,7 @@ STATIC RTN_STATUS PM500_build_trans(motor_cmnd command, double *parms, struct mo
     char axis_name;
     char buff[110];
     int axis, card, maxdigits;
-    unsigned int size;
+    size_t size;
     double dval, cntrl_units;
     RTN_STATUS rtnval;
 
