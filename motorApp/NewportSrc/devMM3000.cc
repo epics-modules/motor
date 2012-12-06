@@ -147,14 +147,14 @@ STATIC RTN_STATUS MM3000_end_trans(struct motorRecord *mr)
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     char *msgptr;
-    int last;
+    size_t last;
 
     /* Remove trailing ';'s from message. */
     motor_call = &(trans->motor_call);
     msgptr = motor_call->message;
     last = strlen(msgptr) - 1;
     if (msgptr[last] == ';')
-	msgptr[last] = (char) NULL;
+        msgptr[last] = (char) NULL;
 
     return(motor_end_trans_com(mr, drvtabptr));
 }
@@ -169,7 +169,7 @@ STATIC RTN_STATUS MM3000_build_trans(motor_cmnd command, double *parms, struct m
     struct MMcontroller *cntrl;
     char buff[30];
     int axis, card;
-    unsigned int size;
+    size_t size;
     int intval;
     RTN_STATUS rtnval;
 

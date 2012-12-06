@@ -364,7 +364,7 @@ exit:
 static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     struct MMcontroller *cntrl;
-    int size;
+    size_t size;
     size_t nwrite;
 
     size = strlen(com);
@@ -496,7 +496,7 @@ static int recv_mess(int card, char *com, int flag)
     }
     
     Debug(2, "recv_mess(): message = \"%s\"\n", com);
-    return(nread);
+    return((int)nread);
 }
 
 
@@ -607,11 +607,11 @@ static int motor_init()
         }
 
         success_rtn = pasynOctetSyncIO->setOutputEos(cntrl->pasynUser,
-                       output_terminator, strlen(output_terminator));
+                       output_terminator, (int)strlen(output_terminator));
         /* Ignore output EOS error in case this is a GPIB port. */
 
         success_rtn = pasynOctetSyncIO->setInputEos(cntrl->pasynUser,
-                       input_terminator, strlen(input_terminator));
+                       input_terminator, (int)strlen(input_terminator));
         if (success_rtn != asynSuccess)
         {
             errlogPrintf("%s setInputEos error = %d\n", errmsg, (int) success_rtn);
