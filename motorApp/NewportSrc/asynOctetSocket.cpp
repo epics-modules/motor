@@ -129,11 +129,11 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
     int status;
     int retries;
     int errStat;
-    int nread;
+    size_t nread;
 
     /* Check to see if the Socket is valid! */
     
-    bufferLength = strlen(buffer);
+    bufferLength = (int)strlen(buffer);
     if ((SocketIndex < 0) || (SocketIndex >= nextSocket)) {
         printf("SendAndReceive: invalid SocketIndex %d\n", SocketIndex);
         strcpy(valueRtrn,"-22");
@@ -179,7 +179,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
                                             &eomReason);
             asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
                   "SendAndReceive, received: nread=%d, returnSize-nread=%d, nbytesIn=%d\n",
-                  nread, returnSize-nread, nbytesIn);
+                  (int)nread, returnSize-nread, (int)nbytesIn);
             nread += nbytesIn;
         }
     } else {
@@ -234,7 +234,7 @@ int ReadXPSSocket (int SocketIndex, char valueRtrn[], int returnSize, double tim
     int eomReason;
     socketStruct *psock;
     int status;
-    int nread=0;
+    size_t nread=0;
 
     /* Check to see if the Socket is valid! */
     if ((SocketIndex < 0) || (SocketIndex >= nextSocket)) {
@@ -250,8 +250,7 @@ int ReadXPSSocket (int SocketIndex, char valueRtrn[], int returnSize, double tim
     }
 
     /* Loop until we the response contains ",EndOfAPI" or we get an error */
-    while ((status==asynSuccess) && 
-           (strcmp(valueRtrn + nread - strlen(XPS_TERMINATOR), XPS_TERMINATOR) != 0)) {
+    do {
         status = pasynOctetSyncIO->read(psock->pasynUser,
                                         &valueRtrn[nread],
                                         returnSize-nread,
@@ -259,11 +258,12 @@ int ReadXPSSocket (int SocketIndex, char valueRtrn[], int returnSize, double tim
                                         &nbytesIn,
                                         &eomReason);
         asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
-              "SendAndReceive, received: nread=%d, returnSize-nread=%d, nbytesIn=%d\n",
-              nread, returnSize-nread, nbytesIn);
+              "ReadXPSSocket, received: nread=%d, returnSize-nread=%d, nbytesIn=%d\n",
+              (int)nread, returnSize-nread, (int)nbytesIn);
         nread += nbytesIn;
-    }
-    return nread;
+    } while ((status==asynSuccess) && 
+             (strcmp(valueRtrn + nread - strlen(XPS_TERMINATOR), XPS_TERMINATOR) != 0));
+    return (int)nread;
 }
 
 
@@ -305,7 +305,7 @@ char * GetError(int SocketIndex)
 {
     if ((SocketIndex < 0) || (SocketIndex >= nextSocket)) {
         printf("GetError: invalid SocketIndex %d\n", SocketIndex);
-        return "Invalid socket";
+        return (char *)"Invalid socket";
     }
     return socketStructs[SocketIndex].errorString;
 }
