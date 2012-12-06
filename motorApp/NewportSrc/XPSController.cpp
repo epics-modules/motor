@@ -131,8 +131,12 @@ const static CorrectorTypes_t CorrectorTypes = {
 // Maximum number of bytes that GatheringDataMultipleLinesGet() can return
 #define GATHERING_MAX_READ_LEN 65536
 
+#ifndef MAX
 #define MAX(a,b) ((a)>(b)? (a): (b))
+#endif
+#ifndef MIN
 #define MIN(a,b) ((a)<(b)? (a): (b))
+#endif
 
 
 XPSController::XPSController(const char *portName, const char *IPAddress, int IPPort, 
@@ -144,7 +148,8 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
                          0, 0),  // Default priority and stack size
-     enableSetPosition_(enableSetPosition), setPositionSettlingTime_(setPositionSettlingTime), 
+     enableSetPosition_((enableSetPosition!=0)?true:false), 
+     setPositionSettlingTime_(setPositionSettlingTime), 
      ftpUsername_(NULL), ftpPassword_(NULL)
 {
   static const char *functionName = "XPSController";
@@ -434,7 +439,7 @@ asynStatus XPSController::buildProfile()
   int nElements;
   double trajVel;
   double D0, D1, T0, T1;
-  int ftpSocket;
+  SOCKET ftpSocket;
   char fileName[MAX_FILENAME_LEN];
   char groupName[MAX_GROUPNAME_LEN];
   char message[MAX_MESSAGE_LEN];
@@ -1163,11 +1168,9 @@ asynStatus XPSCreateController(const char *portName, const char *IPAddress, int 
                                int numAxes, int movingPollPeriod, int idlePollPeriod,
                                int enableSetPosition, int setPositionSettlingTime)
 {
-    XPSController *pXPSController
-        = new XPSController(portName, IPAddress, IPPort, numAxes, 
-                            movingPollPeriod/1000., idlePollPeriod/1000.,
-                            enableSetPosition, setPositionSettlingTime/1000.);
-    pXPSController = NULL;
+    new XPSController(portName, IPAddress, IPPort, numAxes, 
+                      movingPollPeriod/1000., idlePollPeriod/1000.,
+                      enableSetPosition, setPositionSettlingTime/1000.);
     return asynSuccess;
 }
 
@@ -1179,7 +1182,6 @@ asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controlle
                          const char *stepsPerUnit)    /* steps per user unit */
 {
   XPSController *pC;
-  XPSAxis *pAxis;
   double stepSize;
   static const char *functionName = "XPSCreateAxis";
 
@@ -1198,8 +1200,7 @@ asynStatus XPSCreateAxis(const char *XPSName,         /* specify which controlle
   }
   
   pC->lock();
-  pAxis = new XPSAxis(pC, axis, positionerName, 1./stepSize);
-  pAxis = NULL;
+  new XPSAxis(pC, axis, positionerName, 1./stepSize);
   pC->unlock();
   return asynSuccess;
 }

@@ -92,6 +92,6 @@ class XPSController : public asynMotorController {
   
   friend class XPSAxis;
 };
-#define NUM_XPS_PARAMS (&LAST_XPS_PARAM - &FIRST_XPS_PARAM + 1)
+#define NUM_XPS_PARAMS ((int)(&LAST_XPS_PARAM - &FIRST_XPS_PARAM + 1))
 #endif /* XPSController_H */
 
