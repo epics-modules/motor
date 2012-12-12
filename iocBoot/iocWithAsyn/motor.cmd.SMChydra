@@ -12,6 +12,10 @@ asynSetTraceMask("serial5", 0, 1)
 # Leave ascii selected so traces can be turned on with a single click
 asynSetTraceIOMask("serial5", 0, 1)
 
+# Set end-of-string terminators
+asynOctetSetInputEos("serial5",0,"\r\n")
+asynOctetSetOutputEos("serial5",0,"\r\n")
+
 dbLoadTemplate("motor.substitutions.SMChydra")
 
 # SMChydraCreateController(

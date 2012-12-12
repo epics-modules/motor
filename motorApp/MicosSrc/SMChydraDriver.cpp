@@ -267,6 +267,10 @@ asynStatus SMChydraAxis::stop(double acceleration )
   asynStatus status;
   //static const char *functionName = "SMChydraAxis::stop";
 
+  // Set stop deceleration (will be overridden by accel if accel is higher)
+  sprintf(pC_->outString_, "%f %i ssd", (acceleration * axisRes_), (axisNo_ + 1));
+  status = pC_->writeController();
+
   sprintf(pC_->outString_, "%i nabort", (axisNo_ + 1));
   status = pC_->writeController();
   return status;
