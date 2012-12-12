@@ -196,6 +196,9 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!MicosConfig(0, "a-Serial[0]")
 #!drvMicosDebug = 4
 
+# Micos SMC hydra
+#!< motor.cmd.SMChydra
+
 # IMS MDrive driver setup parameters: 
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz,max=60Hz)

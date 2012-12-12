@@ -14,6 +14,9 @@ LIBRARY_IOC = Micos
 SRCS += MicosRegister.cc
 SRCS += devMicos.cc drvMicos.cc
 
+# SMC hydra support
+SRCS += SMChydraDriver.cpp
+
 Micos_LIBS += motor asyn
 Micos_LIBS += $(EPICS_BASE_IOC_LIBS)
 
