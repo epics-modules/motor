@@ -4,17 +4,25 @@
 #   * after the communication port has been configured
 #   * before iocInit
 #
+# Example ethernet port configuration:
+#   drvAsynIPPortConfigure("hydraEth","192.168.1.17:400", 0, 0, 0)
+#
 
-# Show serial communication
-#asynSetTraceMask("serial5", 0, 3)
+# Ethernet
+HydraPort = "hydraEth"
+# Serial
+#!HydraPort = "serial5"
+
+# Show communication
+#asynSetTraceMask(HydraPort, 0, 3)
 # Only show errors
-asynSetTraceMask("serial5", 0, 1)
+asynSetTraceMask(HydraPort, 0, 1)
 # Leave ascii selected so traces can be turned on with a single click
-asynSetTraceIOMask("serial5", 0, 1)
+asynSetTraceIOMask(HydraPort, 0, 1)
 
 # Set end-of-string terminators
-asynOctetSetInputEos("serial5",0,"\r\n")
-asynOctetSetOutputEos("serial5",0,"\r\n")
+asynOctetSetInputEos(HydraPort,0,"\r\n")
+asynOctetSetOutputEos(HydraPort,0,"\r\n")
 
 dbLoadTemplate("motor.substitutions.SMChydra")
 
@@ -24,9 +32,9 @@ dbLoadTemplate("motor.substitutions.SMChydra")
 #  num axes,
 #  moving poll period (ms),
 #  idle poll period (ms) )
-SMChydraCreateController("Hydra1", "serial5", 2, 100, 500)
+SMChydraCreateController("Hydra1", HydraPort, 2, 100, 500)
 # Use the following line to disable idle polling
-#!SMChydraCreateController("Hydra1", "serial5", 2, 100, 0)
+#!SMChydraCreateController("Hydra1", HydraPort, 2, 100, 0)
 
 # This sleep is useful when asyn traces are enabled
 #!epicsThreadSleep(3.0)
