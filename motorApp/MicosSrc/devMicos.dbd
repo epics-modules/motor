@@ -3,4 +3,4 @@ device(motor,VME_IO,devMicos,"Micos MoCo")
 driver(drvMicos)
 #variable(drvMicosDebug)
 
-
+registrar(SMChydraRegister)
