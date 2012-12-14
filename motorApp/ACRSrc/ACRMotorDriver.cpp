@@ -42,7 +42,6 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
 {
   int axis;
   asynStatus status;
-  ACRAxis *pAxis;
   static const char *functionName = "ACRController";
 
   binaryInReg_  = 4096;
@@ -63,10 +62,7 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
       driverName, functionName);
   }
   // Turn off command echoing
-  sprintf(outString_, "BIT1792=0");
-  writeController();
-   // Turn off command prompt
-  sprintf(outString_, "BIT1794=1");
+  sprintf(outString_, "ECHO 4");
   writeController();
   // Wait a short while so that any responses to the above commands have time to arrive so we can flush
   // them in the next writeReadController()
@@ -77,7 +73,7 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
   setUIntDigitalParam(0, ACRBinaryOut_, binaryOutRBV_, 0xFFFFFFFF);
   // Create the axis objects
   for (axis=0; axis<numAxes; axis++) {
-    pAxis = new ACRAxis(this, axis);
+    new ACRAxis(this, axis);
   }
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
@@ -95,9 +91,7 @@ ACRController::ACRController(const char *portName, const char *ACRPortName, int 
 extern "C" int ACRCreateController(const char *portName, const char *ACRPortName, int numAxes, 
                                    int movingPollPeriod, int idlePollPeriod)
 {
-  ACRController *pACRController
-    = new ACRController(portName, ACRPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
-  pACRController = NULL;
+  new ACRController(portName, ACRPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   return(asynSuccess);
 }
 
