@@ -343,14 +343,12 @@ asynStatus SMChydraAxis::poll(bool *moving)
 { 
   int done;
   int driveOn;
-  int direction;
   int lowLimit;
   int highLimit;
   int ignoreLowLimit;
   int ignoreHighLimit;
   int axisStatus=-1;
   double position=0.0;
-  double newposition;
   asynStatus comStatus;
 
   static const char *functionName = "SMChydraAxis::poll";
@@ -361,14 +359,9 @@ asynStatus SMChydraAxis::poll(bool *moving)
   if (comStatus) goto skip;
   // The response string is a double
   position = atof( (char *) &pC_->inString_);
-  newposition = position / axisRes_;
-  // Simulate the direction bit
-  direction = (newposition >= pC_->motorPosition_) ? 1 : 0;
-  setIntegerParam(pC_->motorStatusDirection_, direction);
-  // Update position, now that is is no longer needed for direction calc
   setDoubleParam(pC_->motorPosition_, (position / axisRes_) );
   setDoubleParam(pC_->motorEncoderPosition_, (position / axisRes_) );
-
+  
   // Read the status of this motor
   sprintf(pC_->outString_, "%i nst", (axisNo_ + 1));
   comStatus = pC_->writeReadController();
@@ -463,10 +456,10 @@ asynStatus SMChydraAxis::poll(bool *moving)
   // Check the drive power bit (0x100)
   driveOn = (axisStatus & 0x100) ? 0 : 1;
   setIntegerParam(pC_->motorStatusPowerOn_, driveOn);
-  setIntegerParam(pC_->motorStatusCommsError_, 0);
+  setIntegerParam(pC_->motorStatusProblem_, 0);
 
   skip:
-  setIntegerParam(pC_->motorStatusCommsError_, comStatus ? 1:0);
+  setIntegerParam(pC_->motorStatusProblem_, comStatus ? 1:0);
   callParamCallbacks();
   return comStatus ? asynError : asynSuccess;
 }
