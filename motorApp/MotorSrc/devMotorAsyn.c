@@ -503,6 +503,7 @@ static RTN_STATUS build_trans( motor_cmnd command,
     case JOG_VELOCITY:
 	pmsg->command = motorMoveVel;
 	pmsg->dvalue = *param;
+	pPvt->moveRequestPending++;
 	break;
     case SET_PGAIN:
 	pmsg->command = motorPGain;
@@ -611,6 +612,7 @@ static void asynCallback(asynUser *pasynUser)
     case motorMoveRel:
     case motorHome:
     case motorPosition:
+    case motorMoveVel:
 	commandIsMove = 1;
 	/* Intentional fall-through */
     default:
