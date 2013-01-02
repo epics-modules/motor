@@ -30,6 +30,10 @@
  * Fix for motor simulator stuck in Moving state after multiple LOAD_POS
  * commands to the same position; set needUpdate = 1 in asynCallback() before
  * dbProcess.
+ * 
+ * .03 2013-01-02 rls
+ * Support for motor record raw actual velocity (RVEL).
+ * 
  */
 
 #include <stddef.h>
@@ -46,6 +50,7 @@
 #include <alarm.h>
 #include <epicsEvent.h>
 #include <cantProceed.h> /* !! for callocMustSucceed() */
+#include <dbEvent.h>
 
 #include <asynDriver.h>
 #include <asynInt32.h>
@@ -393,10 +398,18 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         "%s devMotorAsyn::update_values, needUpdate=%d\n",
         pmr->name, pPvt->needUpdate);
     if ( pPvt->needUpdate ) {
+	epicsInt32 rawvel;
 	pmr->rmp = (epicsInt32)floor(pPvt->status.position + 0.5);
 	pmr->rep = (epicsInt32)floor(pPvt->status.encoderPosition + 0.5);
 	/* pmr->rvel = (epicsInt32)round(pPvt->status.velocity); */
 	pmr->msta = pPvt->status.status;
+	rawvel = (epicsInt32)floor(pPvt->status.velocity);
+	if (pmr->rvel != rawvel)
+	{
+	    pmr->rvel = rawvel;
+	    db_post_events(pmr, &pmr->rvel, DBE_VAL_LOG);
+	}
+
 	rc = CALLBACK_DATA;
 	pPvt->needUpdate = 0;
     }
