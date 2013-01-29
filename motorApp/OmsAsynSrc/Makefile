@@ -17,9 +17,9 @@ SRCS += omsMAXnet.cpp
 SRCS += omsMAXv.cpp
 #SRCS += omsMAXvEncFunc.cpp
 
-oms_LIBS += motor
-oms_LIBS += asyn
-oms_LIBS += $(EPICS_BASE_IOC_LIBS)
+omsAsyn_LIBS += motor
+omsAsyn_LIBS += asyn
+omsAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
 #----------------------------------------
