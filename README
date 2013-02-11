@@ -179,6 +179,11 @@ Modification Log for R6-8
         
         File modified: motorApp/MotorSrc/motorRecord.cc
 
+4) The stepsPerUnit argument of XPSConfigAxis in the model 2 asyn XPS driver
+	has been changed from an int to a string.
+	
+	Files modified: motorApp/NewportSrc/drvXPSAsyn.c
+	                motorApp/NewportSrc/drvXPSAsyn.h
 
 Modification Log for R6-7
 =========================

@@ -17,7 +17,7 @@ int XPSConfig(int card,           /* Controller number */
 int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
                   int axis,                   /* axis number 0-7 */
                   const char *positionerName, /* groupName.positionerName e.g. Diffractometer.Phi */
-                  int stepsPerUnit,           /* steps per user unit */
+                  const char *stepsPerUnit,           /* steps per user unit */
                   int noDisabledError);       /* If 1 then don't report disabled state as error */
 
 void XPSDisablePoll(int disablePollVal);

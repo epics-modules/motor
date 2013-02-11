@@ -1581,12 +1581,14 @@ int XPSConfig(int card,           /* Controller number */
 int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
                   int axis,                   /* axis number 0-7 */
                   const char *positionerName, /* groupName.positionerName e.g. Diffractometer.Phi */
-                  int stepsPerUnit,           /* steps per user unit */
+                  const char *stepsPerUnit,   /* steps per user unit */
                   int noDisabledError)        /* If 1 then don't report disabled state as error */
 {
     XPSController *pController;
     AXIS_HDL pAxis;
     char *index;
+    int status;
+    double stepSize;
 
     if (numXPSControllers < 1) {
         printf("XPSConfigAxis: no XPS controllers allocated, call XPSSetup first\n");
@@ -1613,14 +1615,15 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     index = strchr(pAxis->groupName, '.');
     if (index != NULL) *index = '\0';  /* Terminate group name at place of '.' */
 
-    pAxis->stepSize = 1./stepsPerUnit;
+    stepSize = strtod(stepsPerUnit, NULL);
+    pAxis->stepSize = 1./stepSize;
     /* Read some information from the controller for this axis */
-    PositionerSGammaParametersGet(pAxis->pollSocket,
-                                  pAxis->positionerName,
-                                  &pAxis->velocity,
-                                  &pAxis->accel,
-                                  &pAxis->minJerkTime,
-                                  &pAxis->maxJerkTime);
+    status = PositionerSGammaParametersGet(pAxis->pollSocket,
+                                           pAxis->positionerName,
+                                           &pAxis->velocity,
+                                           &pAxis->accel,
+                                           &pAxis->minJerkTime,
+                                           &pAxis->maxJerkTime);
     pAxis->mutexId = epicsMutexMustCreate();
 
     /* Send a signal to the poller task which will make it do a poll, 
@@ -2324,7 +2327,7 @@ static void configXPSCallFunc(const iocshArgBuf *args)
 static const iocshArg XPSConfigAxisArg0 = {"Card number", iocshArgInt};
 static const iocshArg XPSConfigAxisArg1 = {"Axis number", iocshArgInt};
 static const iocshArg XPSConfigAxisArg2 = {"Axis name", iocshArgString};
-static const iocshArg XPSConfigAxisArg3 = {"Steps per unit", iocshArgInt};
+static const iocshArg XPSConfigAxisArg3 = {"Steps per unit", iocshArgString};
 static const iocshArg XPSConfigAxisArg4 = {"No Disabled Error", iocshArgInt};
 static const iocshArg * const XPSConfigAxisArgs[5] = {&XPSConfigAxisArg0,
                                                       &XPSConfigAxisArg1,
