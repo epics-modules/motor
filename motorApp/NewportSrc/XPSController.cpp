@@ -87,13 +87,13 @@ Versions: Release 4-5 and higher.
 
 #include <epicsTime.h>
 #include <epicsThread.h>
-#include <epicsExport.h>
 #include <epicsString.h>
 #include <iocsh.h>
 
 #include "XPSController.h"
 #include "XPS_C8_drivers.h"
 #include "xps_ftp.h"
+#include <epicsExport.h>
 
 static const char *driverName = "XPSController";
 
@@ -860,7 +860,7 @@ asynStatus XPSController::runProfile()
   /* Define trigger */
   sprintf(buffer, "Always;%s.PVT.TrajectoryPulse", groupName);
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-            "%s:%s: calling EventExtendedConfigurationTriggerSet(%d, %d, %s, %s, %s, %s)\n", 
+            "%s:%s: calling EventExtendedConfigurationTriggerSet(%d, %d, %s, %s, %s, %s. %s)\n", 
             driverName, functionName, pollSocket_, 2, buffer, "", "", "", "");
   status = EventExtendedConfigurationTriggerSet(pollSocket_, 2, buffer, 
                                                 "", "", "", "");
@@ -873,7 +873,7 @@ asynStatus XPSController::runProfile()
 
   /* Define action */
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-            "%s:%s: calling EventExtendedConfigurationActionSet(%d, %d, %s, %s, %s, %s)\n", 
+            "%s:%s: calling EventExtendedConfigurationActionSet(%d, %d, %s, %s, %s, %s, %s)\n", 
             driverName, functionName, pollSocket_, 1, "GatheringOneData", "", "", "", "");
   status = EventExtendedConfigurationActionSet(pollSocket_, 1, 
                                                "GatheringOneData", 
