@@ -15,8 +15,8 @@ HeadURL:        $URL$
 
 #include <string.h>
 
-#include "omsMAXnet.h"
 #include "asynOctetSyncIO.h"
+#include "omsMAXnet.h"
 
 #ifdef __GNUG__
     #ifdef      DEBUG
