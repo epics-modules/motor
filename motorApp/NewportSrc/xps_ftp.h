@@ -24,6 +24,7 @@
 #include <stdlib.h>
 
 #include <osiSock.h>
+#include <epicsExport.h>
 
 
 /******[ defines ]***************************************************/
@@ -41,11 +42,11 @@ extern "C" {
 
 /******[ prototypes ]************************************************/
 /* FTP commands */
-int ftpConnect (char*, char*, char*, SOCKET*);
-int ftpDisconnect (SOCKET);
-int ftpChangeDir (SOCKET, char*);
-int ftpRetrieveFile (SOCKET, char*);
-int ftpStoreFile(SOCKET, char*);
+epicsShareFunc int ftpConnect (char*, char*, char*, SOCKET*);
+epicsShareFunc int ftpDisconnect (SOCKET);
+epicsShareFunc int ftpChangeDir (SOCKET, char*);
+epicsShareFunc int ftpRetrieveFile (SOCKET, char*);
+epicsShareFunc int ftpStoreFile(SOCKET, char*);
 
 #ifdef __cplusplus
 }
