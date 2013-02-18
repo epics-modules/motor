@@ -30,7 +30,7 @@ static void printRecv (char*, int);
 
 
 /******[ ftpConnect ]************************************************/
-int ftpConnect (char* ip, char* login, char* password, SOCKET* socketFD)
+epicsShareFunc int ftpConnect (char* ip, char* login, char* password, SOCKET* socketFD)
 {
   char command[COMMAND_SIZE];
   char returnString[RETURN_SIZE];
@@ -74,7 +74,7 @@ int ftpConnect (char* ip, char* login, char* password, SOCKET* socketFD)
 
 
 /******[ ftpDisconnect ]*********************************************/
-int ftpDisconnect (SOCKET socketFD)
+epicsShareFunc int ftpDisconnect (SOCKET socketFD)
 {
 #ifdef _WIN32
   return closesocket(socketFD);
@@ -85,7 +85,7 @@ int ftpDisconnect (SOCKET socketFD)
 
 
 /******[ ftpChangeDir ]**********************************************/
-int ftpChangeDir (SOCKET socketFD, char* destination)
+epicsShareFunc int ftpChangeDir (SOCKET socketFD, char* destination)
 {
   char command[COMMAND_SIZE];
   char returnString[RETURN_SIZE];
@@ -99,7 +99,7 @@ int ftpChangeDir (SOCKET socketFD, char* destination)
 
 
 /******[ ftpRetrieveFile ]*******************************************/
-int ftpRetrieveFile(SOCKET socketFD, char *filename)
+epicsShareFunc int ftpRetrieveFile(SOCKET socketFD, char *filename)
 {
   int port_rcv, i;
   SOCKET socketFDReceive;
@@ -173,7 +173,7 @@ int ftpRetrieveFile(SOCKET socketFD, char *filename)
 
 
 /******[ ftpStoreFile ]**********************************************/
-int ftpStoreFile(SOCKET socketFD, char *filename)
+epicsShareFunc int ftpStoreFile(SOCKET socketFD, char *filename)
 {
   int port_snd, i;
   SOCKET socketFDSend;
