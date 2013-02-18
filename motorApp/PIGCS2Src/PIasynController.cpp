@@ -27,7 +27,6 @@ Steffen Rau, Physik Instrumente (PI) GmbH & Co KG
 #include <epicsMutex.h>
 #include <ellLib.h>
 #include <iocsh.h>
-#include <epicsExport.h>
 #include <asynOctetSyncIO.h>
 #include <motor_interface.h>
 #include <ctype.h>
@@ -35,6 +34,7 @@ Steffen Rau, Physik Instrumente (PI) GmbH & Co KG
 #include "PIasynController.h"
 #include "PIGCSController.h"
 #include "PIasynAxis.h"
+#include <epicsExport.h>
 
 
 //#undef asynPrint
