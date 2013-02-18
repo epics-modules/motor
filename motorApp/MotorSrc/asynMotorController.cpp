@@ -9,11 +9,11 @@
 #include <string.h>
 
 #include <epicsThread.h>
-#include <epicsExport.h>
 #include <iocsh.h>
 
 #include <asynPortDriver.h>
 #include <asynOctetSyncIO.h>
+#include <epicsExport.h>
 #define epicsExportSharedSymbols
 #include <shareLib.h>
 #include "asynMotorController.h"
