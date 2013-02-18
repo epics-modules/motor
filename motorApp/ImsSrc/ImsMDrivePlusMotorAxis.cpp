@@ -17,11 +17,11 @@
 #include <string.h>
 #include <exception>
 #include <epicsThread.h>
-#include <epicsExport.h>
 #include <iocsh.h>
 #include <asynOctetSyncIO.h>
 
 #include "ImsMDrivePlusMotorController.h"
+#include <epicsExport.h>
 
 ////////////////////////////////////////////////////////
 //! ImsMDrivePlusMotorAxis()
@@ -577,7 +577,7 @@ void ImsMDrivePlusMotorAxis::handleAxisError(char *errMsg)
 	case 82: strcpy(errCodeString, "Went to both limits and did not find home"); break;
 	case 83: strcpy(errCodeString, "Reached plus limit switch"); break;
 	case 84: strcpy(errCodeString, "Reached minus limit switch"); break;
-	case 85: strcpy(errCodeString, "MA or MR isn't allowed during home and home isn't allowed while device is in motion"); break;
+	case 85: strcpy(errCodeString, "MA or MR isn't allowed during home and home isn't allowed while moving"); break;
 	case 86: strcpy(errCodeString, "Stall detected"); break;
 	case 87: strcpy(errCodeString, "In clock mode"); break;
 	case 88: strcpy(errCodeString, "Following error"); break;
