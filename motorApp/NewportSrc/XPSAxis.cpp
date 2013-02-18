@@ -90,7 +90,6 @@ using std::endl;
 
 #include <epicsTime.h>
 #include <epicsThread.h>
-#include <epicsExport.h>
 #include <epicsExit.h>
 #include <epicsString.h>
 #include <iocsh.h>
@@ -98,6 +97,7 @@ using std::endl;
 #include "XPSController.h"
 #include "XPS_C8_drivers.h"
 #include "asynOctetSocket.h"
+#include <epicsExport.h>
 
 #define XPSC8_END_OF_RUN_MINUS  0x80000100
 #define XPSC8_END_OF_RUN_PLUS   0x80000200
@@ -466,7 +466,7 @@ asynStatus XPSAxis::setPosition(double position)
                                   groupName_);
     if (status) {
       asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-                "%:s%s: Error performing referencing set position (%s,%d). XPS API Error: %d.", 
+                "%s:%s: Error performing referencing set position (%s,%d). XPS API Error: %d.\n", 
                 driverName, functionName, pC_->portName, axisNo_, status);
     }
   } else {
@@ -543,7 +543,7 @@ asynStatus XPSAxis::stop(double acceleration)
 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
             "%s:%s: XPS %s, axis %d stop with accel=%f\n",
-            driverName, functionName, axisNo_, acceleration);
+            driverName, functionName, pC_->portName, axisNo_, acceleration);
 
   return asynSuccess;
 }
@@ -734,7 +734,7 @@ asynStatus XPSAxis::setLowLimit(double value)
                                          &lowLimit_, &highLimit_);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-              "%s:%s: error performing PositionerUserTravelLimitsGet status=%d\n",
+              "%s:%s: [%s,%d]: error performing PositionerUserTravelLimitsGet status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, status);
     goto done;
   }
@@ -743,7 +743,7 @@ asynStatus XPSAxis::setLowLimit(double value)
                                          deviceValue, highLimit_);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-          "%s:%s: error performing PositionerUserTravelLimitsSet for lowLim=%f status=%d\n",
+          "%s:%s: [%s,%d]: error performing PositionerUserTravelLimitsSet for lowLim=%f status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, deviceValue, status);
     goto done;
   } 
@@ -770,7 +770,7 @@ asynStatus XPSAxis::setHighLimit(double value)
                                          &lowLimit_, &highLimit_);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-              "%s:%s: error performing PositionerUserTravelLimitsGet status=%d\n",
+              "%s:%s: [%s,%d]: error performing PositionerUserTravelLimitsGet status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, status);
     goto done;
   }
@@ -779,7 +779,7 @@ asynStatus XPSAxis::setHighLimit(double value)
                                          lowLimit_, deviceValue);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-          "%s:%s: error performing PositionerUserTravelLimitsSet for highLim=%f status=%d\n",
+          "%s:%s: [%s,%d]: error performing PositionerUserTravelLimitsSet for highLim=%f status=%d\n",
               driverName, functionName, pC_->portName, axisNo_, deviceValue, status);
     goto done;
   } 
