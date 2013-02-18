@@ -2339,7 +2339,7 @@ static const iocshFuncDef configXPSAxis = {"XPSConfigAxis", 5, XPSConfigAxisArgs
 
 static void configXPSAxisCallFunc(const iocshArgBuf *args)
 {
-    XPSConfigAxis(args[0].ival, args[1].ival, args[2].sval, args[3].ival, args[4].ival);
+    XPSConfigAxis(args[0].ival, args[1].ival, args[2].sval, args[3].sval, args[4].ival);
 }
 
 
