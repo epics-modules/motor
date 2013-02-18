@@ -73,12 +73,12 @@
 #include <epicsMessageQueue.h>
 
 #include <drvSup.h>
-#include <epicsExport.h>
 #include <devLib.h>
 #include <drvIpac.h>
 #include <iocsh.h>
 
 #include "HytecMotorDriver.h"
+#include <epicsExport.h>
 
 static void ISR_8601(int pDrv);
 static void intQueuedTask( void *pDrv );
