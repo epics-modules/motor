@@ -24,11 +24,11 @@
 #include <string.h>
 #include <exception>
 #include <epicsThread.h>
-#include <epicsExport.h>
 #include <iocsh.h>
 #include <asynOctetSyncIO.h>
 
 #include "ImsMDrivePlusMotorController.h"
+#include <epicsExport.h>
 
 ////////////////////////////////////////////////////////
 //! @ImsMDrivePlusMotorController()
