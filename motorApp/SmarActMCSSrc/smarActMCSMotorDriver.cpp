@@ -6,7 +6,6 @@
 /* Author: Till Straumann <strauman@slac.stanford.edu>, 9/11 */
 
 #include <iocsh.h>
-#include <epicsExport.h>
 
 #include <asynOctetSyncIO.h>
 #include <asynMotorController.h>
@@ -22,6 +21,7 @@
 #include <math.h>
 
 #include <epicsString.h>
+#include <epicsExport.h>
 
 /* Static configuration parameters (compile-time constants) */
 #undef  DEBUG
