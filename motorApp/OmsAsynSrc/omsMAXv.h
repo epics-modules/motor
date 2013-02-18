@@ -16,8 +16,8 @@ HeadURL:        $URL$
 #ifndef OMSMAXV_H_
 #define OMSMAXV_H_
 
-#include "omsBaseController.h"
 #include <devLib.h>
+#include "omsBaseController.h"
 
 #define BUFFER_SIZE	1024
 
