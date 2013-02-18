@@ -22,11 +22,10 @@ HeadURL:        $URL$
 #include <epicsMutex.h>
 #include <ellLib.h>
 #include <iocsh.h>
-#include <epicsExport.h>
 #include <errlog.h>
-
 #include "asynMotorController.h"
 #include "omsBaseAxis.h"
+#include <epicsExport.h>
 
 #define OMS_MAX_AXES 8
 #define OMSBASE_MAXNUMBERLEN 12
