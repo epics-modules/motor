@@ -18,10 +18,10 @@ HeadURL:        $URL$
 #include <string.h>
 #include <stdio.h>
 
-#include "omsMAXv.h"
 #include "asynOctetSyncIO.h"
 #include <epicsInterrupt.h>
 #include <epicsExit.h>
+#include "omsMAXv.h"
 
 static const char *driverName = "omsMAXvDriver";
 
@@ -300,10 +300,10 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
         // flush cards response Buffer
 #ifdef DEBUG
         int deltaIndex = ((epicsUInt16)pmotor->inPutIndex) - ((epicsUInt16)pmotor->inGetIndex);
-#endif
         Debug(32, "%s:%s:%s: flushing %d characters\n",
                 driverName, functionName, portName, (((deltaIndex < 0) ? BUFFER_SIZE +
                         deltaIndex : deltaIndex)));
+#endif
         putIndex = (epicsUInt16) pmotor->inPutIndex;
         pmotor->inGetIndex = putIndex;
         pmotor->status1_flag.Bits.text_response = 0;
@@ -359,9 +359,7 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
  */
 asynStatus omsMAXv::sendReceive(const char *outputBuff, char *inputBuff, unsigned int inputSize)
 {
-#ifdef DEBUG
-    const char* functionName = "sendReceive";
-#endif
+    static const char* functionName = "sendReceive";
 
     STATUS1 flag1;
     epicsUInt16 getIndex, putIndex;
