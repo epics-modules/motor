@@ -281,7 +281,9 @@ asynStatus SMChydraAxis::setPosition(double position)
   asynStatus status;
   //static const char *functionName = "SMChydraAxis::setPosition";
 
-  sprintf(pC_->outString_, "%f %i setnpos", (position * axisRes_), (axisNo_ + 1));
+  // The argument to the setnpos command is the distance from the current position of the
+  // desired origin, which is why the position needs to be multiplied by -1.0
+  sprintf(pC_->outString_, "%f %i setnpos", (position * axisRes_ * -1.0), (axisNo_ + 1));
   status = pC_->writeController();
   return status;
 }
