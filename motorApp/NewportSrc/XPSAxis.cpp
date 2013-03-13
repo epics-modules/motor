@@ -163,11 +163,11 @@ XPSAxis::XPSAxis(XPSController *pC, int axisNo, const char *positionerName, doub
   setDoubleParam(pC_->motorDGain_, xpsCorrectorInfo_.KD);
   callParamCallbacks();
   /* Initialise deferred move flags. */
-  deferredRelative_ = 0;
-  deferredPosition_ = 0;
+  deferredRelative_ = false;
+  deferredPosition_ = 0.0;
   /* Disable deferred move for the axis. Should not cause move of this axis
      if other axes in same group do deferred move. */
-  deferredMove_ = 0;
+  deferredMove_ = false;
   
   // Assume axis is not moving
   moving_ = false;
@@ -279,10 +279,11 @@ asynStatus XPSAxis::move(double position, int relative, double min_velocity, dou
         /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move! */
         return asynError;
       }
+      moving_ = true;
     } else {
       deferredPosition_ = deviceUnits;
-      deferredMove_ = 1;
-      deferredRelative_ = relative;
+      deferredMove_ = true;
+      deferredRelative_ = (relative != 0);
     }
   } else {
     if (pC_->movesDeferred_ == 0) {
@@ -297,10 +298,11 @@ asynStatus XPSAxis::move(double position, int relative, double min_velocity, dou
         /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move!*/
         return asynError;
       }
+      moving_ = true;
     } else {
       deferredPosition_ = deviceUnits;
-      deferredMove_ = 1;
-      deferredRelative_ = relative;
+      deferredMove_ = true;
+      deferredRelative_ = (relative != 0);
     }
   }
 
@@ -353,6 +355,7 @@ asynStatus XPSAxis::home(double min_velocity, double max_velocity, double accele
               driverName, functionName, pC_->portName, axisNo_, getXPSError(status, errorBuffer));
     return asynError;
   }
+  moving_ = true;
 
   return asynSuccess;
 }
@@ -380,6 +383,7 @@ asynStatus XPSAxis::moveVelocity(double min_velocity, double max_velocity, doubl
               driverName, functionName, pC_->portName, axisNo_, status);
     return asynError;
   }
+  moving_ = true;
 
   return asynSuccess;
 }
@@ -539,7 +543,7 @@ asynStatus XPSAxis::stop(double acceleration)
   }
 
   /* Clear defer move flag for this axis. */
-  deferredMove_ = 0;
+  deferredMove_ = false;
 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
             "%s:%s: XPS %s, axis %d stop with accel=%f\n",
@@ -551,7 +555,6 @@ asynStatus XPSAxis::stop(double acceleration)
 asynStatus XPSAxis::poll(bool *moving)
 {
   int status;
-  int axisDone;
   char readResponse[25];
   static const char *functionName = "poll";
 
@@ -567,22 +570,42 @@ asynStatus XPSAxis::poll(bool *moving)
   asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
             "%s:%s: [%s,%d]: %s axisStatus=%d\n",
             driverName, functionName, pC_->portName, axisNo_, positionerName_, axisStatus_);
-  /* Set done flag by default */
-  axisDone = 1;
-  if (axisStatus_ >= 10 && axisStatus_ <= 18) {
-    /* These states mean ready from move/home/jog etc */
-  }
-  if (axisStatus_ >= 43 && axisStatus_ <= 48) {
-    /* These states mean it is moving/homeing/jogging etc*/
-    axisDone = 0;
-  }
   /* Set the status */
   setIntegerParam(pC_->XPSStatus_, axisStatus_);
+
+  /* Previously we set the motion done flag by seeing if axisStatus_ was >=43 && <= 48, which means moving,
+   * homing, jogging, etc.  However, this information is about the group, not the axis, so if one
+   * motor in the group was moving, then they all appeared to be moving.  This is not what we want, because
+   * the EPICS motor record required the first motor to stop before the second motor could be moved. 
+   * Instead we look for a response on the moveSocket_ to see when the motor motion was complete */
+   
+  /* If the group is not moving then the axis is not moving */
+  if ((axisStatus_ < 43) || (axisStatus_ > 48)) moving_ = false;
+  
+  /* If the axis is moving then read from the moveSocket to see if it is done 
+   * We currently assume the move is complete if we get any response, we don't
+   * check the actual response. */
+  if (moving_) {
+    status = ReadXPSSocket(moveSocket_, readResponse, sizeof(readResponse), 0);
+    if (status < 0) {
+      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+                "%s:%s: [%s,%d]: error calling ReadXPSSocket status=%d\n",
+                driverName, functionName, pC_->portName, axisNo_,  status);
+      goto done;
+    }
+    if (status > 0) {
+      asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+        "%s:%s: [%s,%d]: readXPSSocket returned nRead=%d, [%s]\n",
+        driverName, functionName, pC_->portName, axisNo_,  status, readResponse);
+      status = 0;
+      moving_ = false;
+    }
+  }
+
   /* Set the axis done parameter */
-  /* AND the done flag with the inverse of deferred_move.*/
-  axisDone &= !deferredMove_;
-  *moving = axisDone ? false : true;
-  setIntegerParam(pC_->motorStatusDone_, axisDone);
+  *moving = moving_;
+  if (deferredMove_) *moving = true;
+  setIntegerParam(pC_->motorStatusDone_, *moving?0:1);
 
   /*Read the controller software limits in case these have been changed by a TCL script.*/
   status = PositionerUserTravelLimitsGet(pollSocket_, positionerName_, &lowLimit_, &highLimit_);
@@ -591,7 +614,7 @@ asynStatus XPSAxis::poll(bool *moving)
     setDoubleParam(pC_->motorLowLimit_, (lowLimit_/stepSize_));
   }
 
-  /*Set the ATHM signal.*/
+  /* Set the ATHM signal.*/
   if (axisStatus_ == 11) {
     if (referencingMode_ == 0) {
       setIntegerParam(pC_->motorStatusHome_, 1);
@@ -701,20 +724,6 @@ asynStatus XPSAxis::poll(bool *moving)
   setIntegerParam(pC_->motorStatusDirection_, (currentVelocity_ > XPS_VELOCITY_DEADBAND));
   setIntegerParam(pC_->motorStatusMoving_,    (fabs(currentVelocity_) > XPS_VELOCITY_DEADBAND));
   
-  status = ReadXPSSocket(moveSocket_, readResponse, sizeof(readResponse), 0);
-  if (status < 0) {
-    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-              "%s:%s: [%s,%d]: error calling ReadXPSSocket status=%d\n",
-              driverName, functionName, pC_->portName, axisNo_,  status);
-    goto done;
-  }
-  if (status > 0) {
-    asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-              "%s:%s: [%s,%d]: readXPSSocket returned nRead=%d, [%s]\n",
-              driverName, functionName, pC_->portName, axisNo_,  status, readResponse);
-    status = 0;
-  }
-    
   done:
   setIntegerParam(pC_->motorStatusCommsError_, status ? 1 : 0);
   callParamCallbacks();
