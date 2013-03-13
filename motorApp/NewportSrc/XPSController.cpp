@@ -157,7 +157,7 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   IPAddress_ = epicsStrDup(IPAddress);
   IPPort_ = IPPort;
   pAxes_ = (XPSAxis **)(asynMotorController::pAxes_);
-  movesDeferred_ = 0;
+  movesDeferred_ = false;
 
   // Create controller-specific parameters
   createParam(XPSMinJerkString,                asynParamFloat64, &XPSMinJerk_);
@@ -306,7 +306,7 @@ asynStatus XPSController::processDeferredMovesInGroup(char *groupName)
     pAxis = getAxis(axis);
     /* Ignore axes in other groups. */
     if (!strcmp(pAxis->groupName_, groupName)) {
-      pAxis->deferredMove_ = 0;
+      pAxis->deferredMove_ = false;
     }
   }
   
