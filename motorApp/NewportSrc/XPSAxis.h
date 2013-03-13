@@ -89,8 +89,8 @@ class XPSAxis : public asynMotorAxis
   double profilePostDistance_;
   xpsCorrectorInfo_t xpsCorrectorInfo_;
   double deferredPosition_;
-  int deferredMove_;
-  int deferredRelative_;
+  bool deferredMove_;
+  bool deferredRelative_;
 
   friend class XPSController;
 };
