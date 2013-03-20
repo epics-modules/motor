@@ -51,6 +51,9 @@ Newport_SRCS += XPSAxis.cpp
 ifdef SNCSEQ
 Newport_SRCS += XPS_trajectoryScan.st
 endif
+#
+Newport_SRCS += hxp_drivers.cpp
+Newport_SRCS += HXPDriver.cpp
  
 # strtok_r needed on WIN32
 Newport_SRCS_WIN32 += strtok_r.c
