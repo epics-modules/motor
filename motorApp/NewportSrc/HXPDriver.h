@@ -11,8 +11,8 @@ USAGE...      Motor driver support for the Newport Hexapod controller.
 #define HXP_POLL_TIMEOUT 2.0
 #define HXP_MOVE_TIMEOUT 100000.0 // "Forever"
 
-// No controller-specific parameters yet
-#define NUM_HXP_PARAMS 0  
+// drvInfo strings for extra parameters that the HXP controller supports
+#define HXPMoveCoordSysString                "HXP_MOVE_COORD_SYS"
 
 class HXPAxis : public asynMotorAxis
 {
@@ -48,6 +48,13 @@ public:
   void report(FILE *fp, int level);
   HXPAxis* getAxis(asynUser *pasynUser);
   HXPAxis* getAxis(int axisNo);
+
+protected:
+  #define FIRST_HXP_PARAM HXPMoveCoordSys_
+  int HXPMoveCoordSys_;
+  #define LAST_HXP_PARAM HXPMoveCoordSys_
+
+  #define NUM_HXP_PARAMS ((int) (&LAST_HXP_PARAM - &FIRST_HXP_PARAM + 1))
 
 private:
   char *IPAddress_;

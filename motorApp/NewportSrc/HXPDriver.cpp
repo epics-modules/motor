@@ -55,6 +55,8 @@ HXPController::HXPController(const char *portName, const char *IPAddress, int IP
   IPAddress_ = epicsStrDup(IPAddress);
   IPPort_ = IPPort;
 
+  createParam(HXPMoveCoordSysString,          asynParamInt32, &HXPMoveCoordSys_);
+
   // This socket is used for polling by the controller and all axes
   pollSocket_ = HXPTCP_ConnectToServer((char *)IPAddress, IPPort, HXP_POLL_TIMEOUT);
   if (pollSocket_ < 0) {
@@ -99,8 +101,12 @@ extern "C" int HXPCreateController(const char *portName, const char *IPAddress, 
   */
 void HXPController::report(FILE *fp, int level)
 {
-  fprintf(fp, "Newport hexapod motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
-    this->portName, NUM_AXES, movingPollPeriod_, idlePollPeriod_);
+  int coordSys;
+  
+  getIntegerParam(HXPMoveCoordSys_, &coordSys);
+  
+  fprintf(fp, "Newport hexapod motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f, coordSys=%d\n", 
+    this->portName, NUM_AXES, movingPollPeriod_, idlePollPeriod_, coordSys);
 
   // Call the base class method
   asynMotorController::report(fp, level);
@@ -149,6 +155,8 @@ HXPAxis::HXPAxis(HXPController *pC, int axisNo)
      the init command to clear a motor fault for stepper motors, even
      though they lack closed-loop support. */
   setIntegerParam(pC_->motorStatusGainSupport_, 1);
+  // does the hexapod read encoders from the stages? leave in for now to test relative moves
+  setIntegerParam(pC_->motorStatusHasEncoder_, 1);
 
 }
 
@@ -172,16 +180,30 @@ void HXPAxis::report(FILE *fp, int level)
 asynStatus HXPAxis::move(double position, int relative, double baseVelocity, double slewVelocity, double acceleration)
 {
   int status;
+  double start_pos;
+  double end_pos;
+  double diff_pos;
   double cur_pos[NUM_AXES];
   double rel_pos[NUM_AXES] = {};
   double *pos;
+  int coordSys; // 0 = work, 1 = tool
   static const char *functionName = "HXPAxis::move";
 
+  pC_->getIntegerParam(pC_->HXPMoveCoordSys_, &coordSys); 
   
   if (relative) {
     rel_pos[axisNo_] = position * MRES;
     pos = rel_pos;
-    status = HXPHexapodMoveIncremental(moveSocket_, GROUP, CS, pos[0], pos[1], pos[2], pos[3], pos[4], pos[5]);
+    
+    if (coordSys == 0)
+    {
+      status = HXPHexapodMoveIncremental(moveSocket_, GROUP, "Work", pos[0], pos[1], pos[2], pos[3], pos[4], pos[5]);
+    }
+    else
+    {
+      status = HXPHexapodMoveIncremental(moveSocket_, GROUP, "Tool", pos[0], pos[1], pos[2], pos[3], pos[4], pos[5]);
+    }
+    
     if (status != 0 && status != -27) {
         asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                   "%s:%s: Error performing HexapodMoveIncremental[%s,%d] %d\n",
@@ -193,9 +215,32 @@ asynStatus HXPAxis::move(double position, int relative, double baseVelocity, dou
     // get current positions before moving (could an error overflow the array?)
     status = HXPGroupPositionCurrentGet(pollSocket_, GROUP, 6, (double *) &cur_pos);
 
-    cur_pos[axisNo_] = position * MRES;
-    pos = cur_pos;
-    status = HXPHexapodMoveAbsolute(moveSocket_, GROUP, CS, pos[0], pos[1], pos[2], pos[3], pos[4], pos[5]);
+    // Capture current position for relative move calc
+    start_pos = cur_pos[axisNo_];
+    
+    end_pos = position * MRES;
+    
+    if (coordSys == 0)
+    {
+      // Update position of axis to be moved
+      cur_pos[axisNo_] = end_pos;
+      pos = cur_pos;
+
+      status = HXPHexapodMoveAbsolute(moveSocket_, GROUP, "Work", pos[0], pos[1], pos[2], pos[3], pos[4], pos[5]);
+    }
+    else
+    {
+      // Calculate relative move amount (needed for Tool coord-sys moves)
+      diff_pos = end_pos - start_pos;
+      
+      // Update position of axis to be moved
+      rel_pos[axisNo_] = diff_pos;
+      pos = rel_pos;
+    
+      status = HXPHexapodMoveIncremental(moveSocket_, GROUP, "Tool", pos[0], pos[1], pos[2], pos[3], pos[4], pos[5]);
+
+    }
+
     if (status != 0 && status != -27) {
         asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                   "%s:%s: Error performing HexapodMoveAbsolute[%s,%d] %d\n",
@@ -306,6 +351,7 @@ asynStatus HXPAxis::poll(bool *moving)
 
   /*Read the controller software limits in case these have been changed by a TCL script.*/
 
+  // set CNEN if group is disabled?
   /*Test for states that mean we cannot move an axis (disabled, uninitialised, etc.) 
     and set problem bit in MSTA.*/
   if ((axisStatus_ < 10) || ((axisStatus_ >= 20) && (axisStatus_ <= 42)) ||
