@@ -26,6 +26,7 @@ DB += XPSAuxBo.db
 DB += XPSAuxLi.db
 DB += XPSAuxLo.db
 DB += XPS_extra.db
+DB += HXP_extra.db
 DB += ACRAux.template
 DB += ACRAuxRead.template
 DB += ACRAuxLi.template

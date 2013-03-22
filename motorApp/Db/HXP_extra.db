@@ -1,0 +1,11 @@
+grecord(mbbo,"$(P)$(R)CS") {
+    field(DESC,"Coordinate System")
+    field(DTYP, "asynInt32")
+    field(OUT,"@asynMask($(PORT) $(CHAN) 0xFFFF)HXP_MOVE_COORD_SYS")
+    field(ZRVL,"0")
+    field(ZRST,"Work")
+    field(ONVL,"1")
+    field(ONST,"Tool")
+    field(VAL, "0")
+    field(PINI, "YES")
+}
