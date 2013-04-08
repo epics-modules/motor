@@ -35,6 +35,8 @@
  * then many assign statements in this file must be changed */
 #define MAX_AXES 8
 
+#define MSGSIZE 40
+
 /* Define PVs */
 int     debugLevel;  assign debugLevel   to "{P}{R}DebugLevel.VAL"; 
 monitor debugLevel;
@@ -309,6 +311,22 @@ monitor epicsMotorOff;
 double  epicsMotorDone[MAX_AXES]; 
 assign  epicsMotorDone to {"","","","","","","",""};
 monitor epicsMotorDone;
+
+double  epicsMotorVELO[MAX_AXES]; 
+assign  epicsMotorVELO to {"","","","","","","",""};
+monitor epicsMotorVELO;
+
+double  epicsMotorVMAX[MAX_AXES]; 
+assign  epicsMotorVMAX to {"","","","","","","",""};
+monitor epicsMotorVMAX;
+
+double  epicsMotorVMIN[MAX_AXES]; 
+assign  epicsMotorVMIN to {"","","","","","","",""};
+monitor epicsMotorVMIN;
+
+double  epicsMotorACCL[MAX_AXES]; 
+assign  epicsMotorACCL to {"","","","","","","",""};
+monitor epicsMotorACCL;
 
 
 evflag buildMon;        sync build      buildMon;
