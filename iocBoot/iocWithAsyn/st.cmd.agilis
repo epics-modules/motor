@@ -8,7 +8,10 @@ WithAsyn_registerRecordDeviceDriver(pdbbase)
 ### Motors
 dbLoadTemplate "motor.substitutions.agilis"
 
-drvAsynSerialPortConfigure("serial1", "COM3", 0, 0, 0)
+# For Windows
+#drvAsynSerialPortConfigure("serial1", "COM3", 0, 0, 0)
+# For Linux
+drvAsynSerialPortConfigure("serial1", "/dev/ttyUSB0", 0, 0, 0)
 asynOctetSetInputEos("serial1",0,"\r\n")
 asynOctetSetOutputEos("serial1",0,"\r\n")
 asynSetOption("serial1",0,"baud","921600")
@@ -26,7 +29,7 @@ dbLoadRecords("$(ASYN)/db/asynRecord.db", "P=IOC:,R=serial1,PORT=serial1, ADDR=0
 
 # AgilisCreateController(asyn port, serial port, number of axes, 
 #                        active poll period (ms), idle poll period (ms)) 
-AgilisCreateController("Agilis1", "serial1", 2, 500, 500)
+AgilisCreateController("Agilis1", "serial1", 2, 50, 500)
 asynSetTraceIOMask("Agilis1", 0, 2)
 #asynSetTraceMask("Agilis1", 0, 255)
 
