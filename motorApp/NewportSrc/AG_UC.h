@@ -1,6 +1,6 @@
 /*
-FILENAME...   Agilis.h
-USAGE...      Motor driver support for the Newport Agilis controller.
+FILENAME...  AG_UC.h
+USAGE...      Motor driver support for the Newport Agilis AG-UC series of controllers.
 
 Mark Rivers
 April 11, 2013
@@ -10,16 +10,14 @@ April 11, 2013
 #include "asynMotorController.h"
 #include "asynMotorAxis.h"
 
-#define MAX_AGILIS_AXES 8
-
 // No controller-specific parameters yet
-#define NUM_AGILIS_PARAMS 0  
+#define NUM_AG_UC_PARAMS 0  
 
-class AgilisAxis : public asynMotorAxis
+class AG_UCAxis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
-  AgilisAxis(class AgilisController *pC, int axis, bool hasLimits, int forwardAmplitude, int reverseAmplitude);
+  AG_UCAxis(class AG_UCController *pC, int axis, bool hasLimits, int forwardAmplitude, int reverseAmplitude);
   void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
@@ -30,7 +28,7 @@ public:
 
 private:
   int velocityToSpeedCode(double velocity);
-  AgilisController *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
+  AG_UCController *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   bool hasLimits_;
   int forwardAmplitude_;
@@ -39,18 +37,18 @@ private:
   int positionOffset_;
   int axisID_;
   
-friend class AgilisController;
+friend class AG_UCController;
 };
 
-class AgilisController : public asynMotorController {
+class AG_UCController : public asynMotorController {
 public:
-  AgilisController(const char *portName, const char *AgilisPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
+  AG_UCController(const char *portName, const char *serialPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
 
   void report(FILE *fp, int level);
-  AgilisAxis* getAxis(asynUser *pasynUser);
-  AgilisAxis* getAxis(int axisNo);
+  AG_UCAxis* getAxis(asynUser *pasynUser);
+  AG_UCAxis* getAxis(int axisNo);
   asynStatus writeAgilis();
   asynStatus writeAgilis(const char *output, double timeout);
 
-  friend class AgilisAxis;
+  friend class AG_UCAxis;
 };
