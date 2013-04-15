@@ -326,7 +326,7 @@ asynStatus AG_UCAxis::poll(bool *moving)
 
 /** Code for iocsh registration */
 static const iocshArg AG_UCCreateControllerArg0 = {"Port name", iocshArgString};
-static const iocshArg AG_UCCreateControllerArg1 = {"MCB-4B port name", iocshArgString};
+static const iocshArg AG_UCCreateControllerArg1 = {"Serial port name", iocshArgString};
 static const iocshArg AG_UCCreateControllerArg2 = {"Number of axes", iocshArgInt};
 static const iocshArg AG_UCCreateControllerArg3 = {"Moving poll period (ms)", iocshArgInt};
 static const iocshArg AG_UCCreateControllerArg4 = {"Idle poll period (ms)", iocshArgInt};
