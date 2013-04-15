@@ -1,6 +1,6 @@
 /*
-FILENAME... AgilisDriver.cpp
-USAGE...    Motor driver support for the Newport MCB-4B controller.
+FILENAME... AG_UC.cpp
+USAGE...    Motor driver support for the Newport Agilis UC series controllers.
 
 Mark Rivers
 April 11, 2013
@@ -18,7 +18,7 @@ April 11, 2013
 
 #include <asynOctetSyncIO.h>
 
-#include "Agilis.h"
+#include "AG_UC.h"
 #include <epicsExport.h>
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
@@ -26,16 +26,16 @@ April 11, 2013
 #define AGILIS_TIMEOUT 2.0
 #define LINUX_WRITE_DELAY 0.1
 
-/** Creates a new AgilisController object.
+/** Creates a new AG_UCController object.
   * \param[in] portName          The name of the asyn port that will be created for this driver
-  * \param[in] AgilisPortName     The name of the drvAsynSerialPort that was created previously to connect to the Agilis controller 
+  * \param[in] serialPortName    The name of the drvAsynSerialPort that was created previously to connect to the Agilis controller 
   * \param[in] numAxes           The number of axes that this controller supports 
   * \param[in] movingPollPeriod  The time between polls when any axis is moving 
   * \param[in] idlePollPeriod    The time between polls when no axis is moving 
   */
-AgilisController::AgilisController(const char *portName, const char *AgilisPortName, int numAxes, 
+AG_UCController::AG_UCController(const char *portName, const char *serialPortName, int numAxes, 
                                  double movingPollPeriod, double idlePollPeriod)
-  :  asynMotorController(portName, numAxes, NUM_AGILIS_PARAMS, 
+  :  asynMotorController(portName, numAxes, NUM_AG_UC_PARAMS, 
                          0, // No additional interfaces beyond those in base class
                          0, // No additional callback interfaces beyond those in base class
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
@@ -43,10 +43,10 @@ AgilisController::AgilisController(const char *portName, const char *AgilisPortN
                          0, 0)  // Default priority and stack size
 {
   asynStatus status;
-  static const char *functionName = "AgilisController::AgilisController";
+  static const char *functionName = "AG_UCController::AG_UCController";
 
   /* Connect to Agilis controller */
-  status = pasynOctetSyncIO->connect(AgilisPortName, 0, &pasynUserController_, NULL);
+  status = pasynOctetSyncIO->connect(serialPortName, 0, &pasynUserController_, NULL);
   if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
       "%s: cannot connect to Agilis controller\n",
@@ -70,40 +70,40 @@ AgilisController::AgilisController(const char *portName, const char *AgilisPortN
 }
 
 
-/** Creates a new AgilisController object.
+/** Creates a new AG_UCController object.
   * Configuration command, called directly or from iocsh
   * \param[in] portName          The name of the asyn port that will be created for this driver
-  * \param[in] AgilisPortName       The name of the drvAsynIPPPort that was created previously to connect to the Agilis controller 
+  * \param[in] serialPortName       The name of the drvAsynIPPPort that was created previously to connect to the Agilis controller 
   * \param[in] numAxes           The number of axes that this controller supports 
   * \param[in] movingPollPeriod  The time in ms between polls when any axis is moving
   * \param[in] idlePollPeriod    The time in ms between polls when no axis is moving 
   */
 extern "C" {
 
-int AgilisCreateController(const char *portName, const char *AgilisPortName, int numAxes, 
+int AG_UCCreateController(const char *portName, const char *serialPortName, int numAxes, 
                                       int movingPollPeriod, int idlePollPeriod)
 {
-  new AgilisController(portName, AgilisPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
+  new AG_UCController(portName, serialPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   return(asynSuccess);
 }
 
-asynStatus AgilisCreateAxis(const char *AgilisName,  /* specify which controller by port name */
-                            int axis,                /* axis number 0-7 */
-                            int hasLimits,           /* Actuator has limits 0 or 1 */
-                            int forwardAmplitude,    /* Step amplitude in forward direction */
-                            int reverseAmplitude)    /* Step amplitude in reverse direction */
+asynStatus AG_UCCreateAxis(const char *AG_UCName,  /* specify which controller by port name */
+                           int axis,                /* axis number 0-7 */
+                           int hasLimits,           /* Actuator has limits 0 or 1 */
+                           int forwardAmplitude,    /* Step amplitude in forward direction */
+                           int reverseAmplitude)    /* Step amplitude in reverse direction */
 {
-  AgilisController *pC;
-  static const char *functionName = "Agilis::AgilisCreateAxis";
+  AG_UCController *pC;
+  static const char *functionName = "AG_UCCreateAxis";
 
-  pC = (AgilisController*) findAsynPortDriver(AgilisName);
+  pC = (AG_UCController*) findAsynPortDriver(AG_UCName);
   if (!pC) {
     printf("%s: Error port %s not found\n",
-           functionName, AgilisName);
+           functionName, AG_UCName);
     return asynError;
   }  
   pC->lock();
-  new AgilisAxis(pC, axis, hasLimits ? true:false, forwardAmplitude, reverseAmplitude);
+  new AG_UCAxis(pC, axis, hasLimits ? true:false, forwardAmplitude, reverseAmplitude);
   pC->unlock();
   return asynSuccess;
 }
@@ -112,7 +112,7 @@ asynStatus AgilisCreateAxis(const char *AgilisName,  /* specify which controller
 
 /** Writes a string to the controller.
   * Calls writeAgilis() with a default location of the string to write and a default timeout. */ 
-asynStatus AgilisController::writeAgilis()
+asynStatus AG_UCController::writeAgilis()
 {
   return writeAgilis(outString_, AGILIS_TIMEOUT);
 }
@@ -120,7 +120,7 @@ asynStatus AgilisController::writeAgilis()
 /** Writes a string to the controller.
   * \param[in] output The string to be written.
   * \param[in] timeout Timeout before returning an error.*/
-asynStatus AgilisController::writeAgilis(const char *output, double timeout)
+asynStatus AG_UCController::writeAgilis(const char *output, double timeout)
 {
   size_t nwrite;
   asynStatus status;
@@ -144,41 +144,41 @@ asynStatus AgilisController::writeAgilis(const char *output, double timeout)
   * If details > 0 then information is printed about each axis.
   * After printing controller-specific information it calls asynMotorController::report()
   */
-void AgilisController::report(FILE *fp, int level)
+void AG_UCController::report(FILE *fp, int level)
 {
-  fprintf(fp, "Agilis motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
+  fprintf(fp, "Agilis UC motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
     this->portName, numAxes_, movingPollPeriod_, idlePollPeriod_);
 
   // Call the base class method
   asynMotorController::report(fp, level);
 }
 
-/** Returns a pointer to an AgilisAxis object.
+/** Returns a pointer to an AG_UCAxis object.
   * Returns NULL if the axis number encoded in pasynUser is invalid.
   * \param[in] pasynUser asynUser structure that encodes the axis index number. */
-AgilisAxis* AgilisController::getAxis(asynUser *pasynUser)
+AG_UCAxis* AG_UCController::getAxis(asynUser *pasynUser)
 {
-  return static_cast<AgilisAxis*>(asynMotorController::getAxis(pasynUser));
+  return static_cast<AG_UCAxis*>(asynMotorController::getAxis(pasynUser));
 }
 
-/** Returns a pointer to an AgilisAxis object.
+/** Returns a pointer to an AG_UCAxis object.
   * Returns NULL if the axis number encoded in pasynUser is invalid.
   * \param[in] axisNo Axis index number. */
-AgilisAxis* AgilisController::getAxis(int axisNo)
+AG_UCAxis* AG_UCController::getAxis(int axisNo)
 {
-  return static_cast<AgilisAxis*>(asynMotorController::getAxis(axisNo));
+  return static_cast<AG_UCAxis*>(asynMotorController::getAxis(axisNo));
 }
 
 
-// These are the AgilisAxis methods
+// These are the AG_UCAxis methods
 
-/** Creates a new AgilisAxis object.
-  * \param[in] pC Pointer to the AgilisController to which this axis belongs. 
+/** Creates a new AG_UCAxis object.
+  * \param[in] pC Pointer to the AG_UCController to which this axis belongs. 
   * \param[in] axisNo Index number of this axis, range 0 to pC->numAxes_-1.
   * 
   * Initializes register numbers, etc.
   */
-AgilisAxis::AgilisAxis(AgilisController *pC, int axisNo, bool hasLimits, 
+AG_UCAxis::AG_UCAxis(AG_UCController *pC, int axisNo, bool hasLimits, 
                        int forwardAmplitude, int reverseAmplitude)
   : asynMotorAxis(pC, axisNo),
     pC_(pC), hasLimits_(hasLimits), 
@@ -199,7 +199,7 @@ AgilisAxis::AgilisAxis(AgilisController *pC, int axisNo, bool hasLimits,
   *
   * After printing device-specific information calls asynMotorAxis::report()
   */
-void AgilisAxis::report(FILE *fp, int level)
+void AG_UCAxis::report(FILE *fp, int level)
 {
   if (level > 0) {
     fprintf(fp, "  axis %d, hasLimits=%d, forwardAmplitude=%d, reverseAmplitude=%d\n",
@@ -210,11 +210,11 @@ void AgilisAxis::report(FILE *fp, int level)
   asynMotorAxis::report(fp, level);
 }
 
-asynStatus AgilisAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
+asynStatus AG_UCAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
   int steps = NINT(position);
-  // static const char *functionName = "AgilisAxis::move";
+  // static const char *functionName = "AG_UCAxis::move";
 
   if (relative) {
     sprintf(pC_->outString_, "%dPR%d", axisID_, steps);
@@ -226,7 +226,7 @@ asynStatus AgilisAxis::move(double position, int relative, double minVelocity, d
   return status;
 }
 
-int AgilisAxis::velocityToSpeedCode(double velocity)
+int AG_UCAxis::velocityToSpeedCode(double velocity)
 {
   int speed;
   if      (abs(velocity) <= 5)   speed = 1;
@@ -237,10 +237,10 @@ int AgilisAxis::velocityToSpeedCode(double velocity)
   return speed;
 }
 
-asynStatus AgilisAxis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
+asynStatus AG_UCAxis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
   asynStatus status;
-  //static const char *functionName = "AgilisAxis::home";
+  //static const char *functionName = "AG_UCAxis::home";
 
   if (!hasLimits_) return asynError;
   sprintf(pC_->outString_, "%dMV%d", axisID_, velocityToSpeedCode(maxVelocity));
@@ -248,29 +248,29 @@ asynStatus AgilisAxis::home(double minVelocity, double maxVelocity, double accel
   return status;
 }
 
-asynStatus AgilisAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
+asynStatus AG_UCAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  //static const char *functionName = "AgilisAxis::moveVelocity";
+  //static const char *functionName = "AG_UCAxis::moveVelocity";
 
   sprintf(pC_->outString_, "%dJA%d", axisID_, velocityToSpeedCode(maxVelocity));
   status = pC_->writeAgilis();
   return status;
 }
 
-asynStatus AgilisAxis::stop(double acceleration )
+asynStatus AG_UCAxis::stop(double acceleration )
 {
   asynStatus status;
-  //static const char *functionName = "AgilisAxis::stop";
+  //static const char *functionName = "AG_UCAxis::stop";
 
   sprintf(pC_->outString_, "%dST", axisID_);
   status = pC_->writeAgilis();
   return status;
 }
 
-asynStatus AgilisAxis::setPosition(double position)
+asynStatus AG_UCAxis::setPosition(double position)
 {
-  //static const char *functionName = "AgilisAxis::setPosition";
+  //static const char *functionName = "AG_UCAxis::setPosition";
 
   positionOffset_ = NINT(position) - currentPosition_;
   return asynSuccess;
@@ -282,7 +282,7 @@ asynStatus AgilisAxis::setPosition(double position)
   * It calls setIntegerParam() and setDoubleParam() for each item that it polls,
   * and then calls callParamCallbacks() at the end.
   * \param[out] moving A flag that is set indicating that the axis is moving (true) or done (false). */
-asynStatus AgilisAxis::poll(bool *moving)
+asynStatus AG_UCAxis::poll(bool *moving)
 { 
   int done;
   int lim, limit=0;
@@ -325,46 +325,46 @@ asynStatus AgilisAxis::poll(bool *moving)
 }
 
 /** Code for iocsh registration */
-static const iocshArg AgilisCreateControllerArg0 = {"Port name", iocshArgString};
-static const iocshArg AgilisCreateControllerArg1 = {"MCB-4B port name", iocshArgString};
-static const iocshArg AgilisCreateControllerArg2 = {"Number of axes", iocshArgInt};
-static const iocshArg AgilisCreateControllerArg3 = {"Moving poll period (ms)", iocshArgInt};
-static const iocshArg AgilisCreateControllerArg4 = {"Idle poll period (ms)", iocshArgInt};
-static const iocshArg * const AgilisCreateControllerArgs[] = {&AgilisCreateControllerArg0,
-                                                             &AgilisCreateControllerArg1,
-                                                             &AgilisCreateControllerArg2,
-                                                             &AgilisCreateControllerArg3,
-                                                             &AgilisCreateControllerArg4};
-static const iocshFuncDef AgilisCreateControllerDef = {"AgilisCreateController", 5, AgilisCreateControllerArgs};
-static void AgilisCreateContollerCallFunc(const iocshArgBuf *args)
+static const iocshArg AG_UCCreateControllerArg0 = {"Port name", iocshArgString};
+static const iocshArg AG_UCCreateControllerArg1 = {"MCB-4B port name", iocshArgString};
+static const iocshArg AG_UCCreateControllerArg2 = {"Number of axes", iocshArgInt};
+static const iocshArg AG_UCCreateControllerArg3 = {"Moving poll period (ms)", iocshArgInt};
+static const iocshArg AG_UCCreateControllerArg4 = {"Idle poll period (ms)", iocshArgInt};
+static const iocshArg * const AG_UCCreateControllerArgs[] = {&AG_UCCreateControllerArg0,
+                                                             &AG_UCCreateControllerArg1,
+                                                             &AG_UCCreateControllerArg2,
+                                                             &AG_UCCreateControllerArg3,
+                                                             &AG_UCCreateControllerArg4};
+static const iocshFuncDef AG_UCCreateControllerDef = {"AG_UCCreateController", 5, AG_UCCreateControllerArgs};
+static void AG_UCCreateContollerCallFunc(const iocshArgBuf *args)
 {
-  AgilisCreateController(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival);
+  AG_UCCreateController(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival);
 }
 
-/* AgilisCreateAxis */
-static const iocshArg AgilisCreateAxisArg0 = {"Controller port name", iocshArgString};
-static const iocshArg AgilisCreateAxisArg1 = {"Axis number", iocshArgInt};
-static const iocshArg AgilisCreateAxisArg2 = {"Has Limits", iocshArgInt};
-static const iocshArg AgilisCreateAxisArg3 = {"Forward amplitude", iocshArgInt};
-static const iocshArg AgilisCreateAxisArg4 = {"Reverse amplitude", iocshArgInt};
-static const iocshArg * const AgilisCreateAxisArgs[] = {&AgilisCreateAxisArg0,
-                                                        &AgilisCreateAxisArg1,
-                                                        &AgilisCreateAxisArg2,
-                                                        &AgilisCreateAxisArg3,
-                                                        &AgilisCreateAxisArg4};
-static const iocshFuncDef AgilisCreateAxisDef = {"AgilisCreateAxis", 5, AgilisCreateAxisArgs};
+/* AG_UCCreateAxis */
+static const iocshArg AG_UCCreateAxisArg0 = {"Controller port name", iocshArgString};
+static const iocshArg AG_UCCreateAxisArg1 = {"Axis number", iocshArgInt};
+static const iocshArg AG_UCCreateAxisArg2 = {"Has Limits", iocshArgInt};
+static const iocshArg AG_UCCreateAxisArg3 = {"Forward amplitude", iocshArgInt};
+static const iocshArg AG_UCCreateAxisArg4 = {"Reverse amplitude", iocshArgInt};
+static const iocshArg * const AG_UCCreateAxisArgs[] = {&AG_UCCreateAxisArg0,
+                                                        &AG_UCCreateAxisArg1,
+                                                        &AG_UCCreateAxisArg2,
+                                                        &AG_UCCreateAxisArg3,
+                                                        &AG_UCCreateAxisArg4};
+static const iocshFuncDef AG_UCCreateAxisDef = {"AG_UCCreateAxis", 5, AG_UCCreateAxisArgs};
 
-static void AgilisCreateAxisCallFunc(const iocshArgBuf *args)
+static void AG_UCCreateAxisCallFunc(const iocshArgBuf *args)
 {
-  AgilisCreateAxis(args[0].sval, args[1].ival, args[2].ival, args[3].ival, args[4].ival);
+  AG_UCCreateAxis(args[0].sval, args[1].ival, args[2].ival, args[3].ival, args[4].ival);
 }
 
-static void AgilisRegister(void)
+static void AG_UCRegister(void)
 {
-  iocshRegister(&AgilisCreateControllerDef, AgilisCreateContollerCallFunc);
-  iocshRegister(&AgilisCreateAxisDef, AgilisCreateAxisCallFunc);
+  iocshRegister(&AG_UCCreateControllerDef, AG_UCCreateContollerCallFunc);
+  iocshRegister(&AG_UCCreateAxisDef, AG_UCCreateAxisCallFunc);
 }
 
 extern "C" {
-epicsExportRegistrar(AgilisRegister);
+epicsExportRegistrar(AG_UCRegister);
 }
