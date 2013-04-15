@@ -121,7 +121,7 @@ asynStatus AG_CONEXController::writeAgilis(const char *output, double timeout)
 void AG_CONEXController::report(FILE *fp, int level)
 {
   fprintf(fp, "Agilis CONEX motor driver %s, controllerID=%d, moving poll period=%f, idle poll period=%f\n", 
-    this->portName, cointrollerID_, movingPollPeriod_, idlePollPeriod_);
+    this->portName, controllerID_, movingPollPeriod_, idlePollPeriod_);
 
   // Call the base class method
   asynMotorController::report(fp, level);
@@ -158,7 +158,7 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
     currentPosition_(0), positionOffset_(0)
 {
   sprintf(pC_->outString_, "%dSU?", pC->controllerID_);
-  pC_->writeReadAgilis();
+  pC_->writeReadController();
 }
 
 /** Reports on status of the axis
@@ -170,8 +170,8 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
 void AG_CONEXAxis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    fprintf(fp, "  axis %d, hasLimits=%d, forwardAmplitude=%d, reverseAmplitude=%d\n",
-            axisID_, hasLimits_, forwardAmplitude_, reverseAmplitude_);
+    fprintf(fp, "  encoderIncrement=%f\n",
+            encoderIncrement_);
   }
 
   // Call the base class method
@@ -185,10 +185,10 @@ asynStatus AG_CONEXAxis::move(double position, int relative, double minVelocity,
   // static const char *functionName = "AG_CONEXAxis::move";
 
   if (relative) {
-    sprintf(pC_->outString_, "%dPR%d", axisID_, steps);
+    sprintf(pC_->outString_, "%dPR%d", pC_->controllerID_, steps);
   } else {
     steps = NINT(position - currentPosition_);
-    sprintf(pC_->outString_, "%dPR%d", axisID_, steps);
+    sprintf(pC_->outString_, "%dPR%d", pC_->controllerID_, steps);
   }
   status = pC_->writeAgilis();
   return status;
@@ -199,7 +199,7 @@ asynStatus AG_CONEXAxis::home(double minVelocity, double maxVelocity, double acc
   asynStatus status;
   //static const char *functionName = "AG_CONEXAxis::home";
 
-  sprintf(pC_->outString_, "%dOR, pC_->controllerID_);
+  sprintf(pC_->outString_, "%dOR", pC_->controllerID_);
   status = pC_->writeAgilis();
   return status;
 }
@@ -209,7 +209,7 @@ asynStatus AG_CONEXAxis::moveVelocity(double minVelocity, double maxVelocity, do
   asynStatus status;
   //static const char *functionName = "AG_CONEXAxis::moveVelocity";
 
-  sprintf(pC_->outString_, "%dJA%d", axisID_, velocityToSpeedCode(maxVelocity));
+  sprintf(pC_->outString_, "%dJA", pC_->controllerID_);
   status = pC_->writeAgilis();
   return status;
 }
@@ -219,7 +219,7 @@ asynStatus AG_CONEXAxis::stop(double acceleration )
   asynStatus status;
   //static const char *functionName = "AG_CONEXAxis::stop";
 
-  sprintf(pC_->outString_, "%dST", axisID_);
+  sprintf(pC_->outString_, "%dST", pC_->controllerID_);
   status = pC_->writeAgilis();
   return status;
 }
@@ -241,12 +241,11 @@ asynStatus AG_CONEXAxis::setPosition(double position)
 asynStatus AG_CONEXAxis::poll(bool *moving)
 { 
   int done;
-  int lim, limit=0;
   int position;
   asynStatus comStatus;
 
   // Read the current motor position
-  sprintf(pC_->outString_, "%dTP", axisID_);
+  sprintf(pC_->outString_, "%dTP", pC_->controllerID_);
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
   // The response string is of the form "1TPxxx"
@@ -255,7 +254,7 @@ asynStatus AG_CONEXAxis::poll(bool *moving)
   setDoubleParam(pC_->motorPosition_, double(currentPosition_));
 
   // Read the moving status of this motor
-  sprintf(pC_->outString_, "%dTS", axisID_);
+  sprintf(pC_->outString_, "%dTS", pC_->controllerID_);
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
   // The response string is of the form "1TSn"
@@ -263,16 +262,8 @@ asynStatus AG_CONEXAxis::poll(bool *moving)
   setIntegerParam(pC_->motorStatusDone_, done);
   *moving = done ? false:true;
 
-  // Read the limit status
-  sprintf(pC_->outString_, "PH");
-  comStatus = pC_->writeReadController();
-  if (comStatus) goto skip;
-  // The response string is of the form "PHn"
-  lim = atoi(&pC_->inString_[2]);
-  if ((axisID_ == 1) && (lim == 1 || lim == 3)) limit = 1;
-  if ((axisID_ == 2) && (lim == 3 || lim == 3)) limit = 1;
-  setIntegerParam(pC_->motorStatusLowLimit_, limit);
-  setIntegerParam(pC_->motorStatusHighLimit_, limit);
+  setIntegerParam(pC_->motorStatusLowLimit_, 0);
+  setIntegerParam(pC_->motorStatusHighLimit_, 0);
 
   skip:
   setIntegerParam(pC_->motorStatusProblem_, comStatus ? 1:0);
