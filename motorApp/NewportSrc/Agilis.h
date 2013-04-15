@@ -29,6 +29,7 @@ public:
   asynStatus setPosition(double position);
 
 private:
+  int velocityToSpeedCode(double velocity);
   AgilisController *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   bool hasLimits_;
@@ -48,6 +49,8 @@ public:
   void report(FILE *fp, int level);
   AgilisAxis* getAxis(asynUser *pasynUser);
   AgilisAxis* getAxis(int axisNo);
+  asynStatus writeAgilis();
+  asynStatus writeAgilis(const char *output, double timeout);
 
-friend class AgilisAxis;
+  friend class AgilisAxis;
 };
