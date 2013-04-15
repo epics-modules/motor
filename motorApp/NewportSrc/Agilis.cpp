@@ -78,7 +78,8 @@ int AgilisCreateController(const char *portName, const char *AgilisPortName, int
 asynStatus AgilisCreateAxis(const char *AgilisName,  /* specify which controller by port name */
                             int axis,                /* axis number 0-7 */
                             int hasLimits,           /* Actuator has limits 0 or 1 */
-                            int stepSize)            /* Pulses per step */
+                            int forwardAmplitude,    /* Step amplitude in forward direction */
+                            int reverseAmplitude)    /* Step amplitude in reverse direction */
 {
   AgilisController *pC;
   static const char *functionName = "Agilis::AgilisCreateAxis";
@@ -90,7 +91,7 @@ asynStatus AgilisCreateAxis(const char *AgilisName,  /* specify which controller
     return asynError;
   }  
   pC->lock();
-  new AgilisAxis(pC, axis, hasLimits ? true:false, stepSize);
+  new AgilisAxis(pC, axis, hasLimits ? true:false, forwardAmplitude, reverseAmplitude);
   pC->unlock();
   return asynSuccess;
 }
@@ -138,11 +139,19 @@ AgilisAxis* AgilisController::getAxis(int axisNo)
   * 
   * Initializes register numbers, etc.
   */
-AgilisAxis::AgilisAxis(AgilisController *pC, int axisNo, bool hasLimits, int stepSize)
+AgilisAxis::AgilisAxis(AgilisController *pC, int axisNo, bool hasLimits, 
+                       int forwardAmplitude, int reverseAmplitude)
   : asynMotorAxis(pC, axisNo),
-    pC_(pC), hasLimits_(hasLimits), stepSize_(stepSize), 
+    pC_(pC), hasLimits_(hasLimits), 
+    forwardAmplitude_(forwardAmplitude), reverseAmplitude_(reverseAmplitude),
     currentPosition_(0), positionOffset_(0), axisID_(axisNo+1)
-{  
+{
+  if (forwardAmplitude_ <= 0) forwardAmplitude_ = 50;
+  if (reverseAmplitude_ >= 0) forwardAmplitude_ = -50;
+  sprintf(pC_->outString_, "%dSU%d", axisID_, forwardAmplitude_);
+  pC_->writeController();
+  sprintf(pC_->outString_, "%dSU%d", axisID_, reverseAmplitude_);
+  pC_->writeController();
 }
 
 /** Reports on status of the axis
@@ -154,8 +163,8 @@ AgilisAxis::AgilisAxis(AgilisController *pC, int axisNo, bool hasLimits, int ste
 void AgilisAxis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    fprintf(fp, "  axis %d, hasLimits=%d, stepSize=%d\n",
-            axisID_, hasLimits_, stepSize_);
+    fprintf(fp, "  axis %d, hasLimits=%d, forwardAmplitude=%d, reverseAmplitude=%d\n",
+            axisID_, hasLimits_, forwardAmplitude_, reverseAmplitude_);
   }
 
   // Call the base class method
@@ -295,16 +304,18 @@ static void AgilisCreateContollerCallFunc(const iocshArgBuf *args)
 static const iocshArg AgilisCreateAxisArg0 = {"Controller port name", iocshArgString};
 static const iocshArg AgilisCreateAxisArg1 = {"Axis number", iocshArgInt};
 static const iocshArg AgilisCreateAxisArg2 = {"Has Limits", iocshArgInt};
-static const iocshArg AgilisCreateAxisArg3 = {"Step Size", iocshArgString};
+static const iocshArg AgilisCreateAxisArg3 = {"Forward amplitude", iocshArgInt};
+static const iocshArg AgilisCreateAxisArg4 = {"Reverse amplitude", iocshArgInt};
 static const iocshArg * const AgilisCreateAxisArgs[] = {&AgilisCreateAxisArg0,
                                                         &AgilisCreateAxisArg1,
                                                         &AgilisCreateAxisArg2,
-                                                        &AgilisCreateAxisArg3};
-static const iocshFuncDef AgilisCreateAxisDef = {"AgilisCreateAxis", 4, AgilisCreateAxisArgs};
+                                                        &AgilisCreateAxisArg3,
+                                                        &AgilisCreateAxisArg4};
+static const iocshFuncDef AgilisCreateAxisDef = {"AgilisCreateAxis", 5, AgilisCreateAxisArgs};
 
 static void AgilisCreateAxisCallFunc(const iocshArgBuf *args)
 {
-  AgilisCreateAxis(args[0].sval, args[1].ival, args[2].ival, args[3].ival);
+  AgilisCreateAxis(args[0].sval, args[1].ival, args[2].ival, args[3].ival, args[4].ival);
 }
 
 static void AgilisRegister(void)
