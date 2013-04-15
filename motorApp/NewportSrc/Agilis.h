@@ -19,7 +19,7 @@ class AgilisAxis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
-  AgilisAxis(class AgilisController *pC, int axis, bool hasLimits, int stepSize);
+  AgilisAxis(class AgilisController *pC, int axis, bool hasLimits, int forwardAmplitude, int reverseAmplitude);
   void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
@@ -32,7 +32,8 @@ private:
   AgilisController *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   bool hasLimits_;
-  int stepSize_;
+  int forwardAmplitude_;
+  int reverseAmplitude_;
   int currentPosition_;
   int positionOffset_;
   int axisID_;
