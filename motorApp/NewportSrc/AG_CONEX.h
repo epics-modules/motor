@@ -32,7 +32,7 @@ private:
                                    *   Abbreviated because it is used very frequently */
   int currentPosition_;
   int positionOffset_;
-  int controllerID_;
+  double encoderIncrement_;
   
 friend class AG_CONEXController;
 };
@@ -46,6 +46,9 @@ public:
   AG_CONEXAxis* getAxis(int axisNo);
   asynStatus writeAgilis();
   asynStatus writeAgilis(const char *output, double timeout);
+
+private:
+  int controllerID_;
 
   friend class AG_CONEXAxis;
 };
