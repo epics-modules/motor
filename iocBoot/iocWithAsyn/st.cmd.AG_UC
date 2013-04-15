@@ -6,7 +6,7 @@ dbLoadDatabase("../../dbd/WithAsyn.dbd")
 WithAsyn_registerRecordDeviceDriver(pdbbase)
 
 ### Motors
-dbLoadTemplate "motor.substitutions.agilis"
+dbLoadTemplate "motor.substitutions.AG_UC"
 
 # For Windows
 #drvAsynSerialPortConfigure("serial1", "COM3", 0, 0, 0)
@@ -29,12 +29,12 @@ dbLoadRecords("$(ASYN)/db/asynRecord.db", "P=IOC:,R=serial1,PORT=serial1, ADDR=0
 
 # AgilisCreateController(asyn port, serial port, number of axes, 
 #                        active poll period (ms), idle poll period (ms)) 
-AgilisCreateController("Agilis1", "serial1", 2, 50, 500)
+AG_UCCreateController("Agilis1", "serial1", 2, 50, 500)
 asynSetTraceIOMask("Agilis1", 0, 2)
 #asynSetTraceMask("Agilis1", 0, 255)
 
 # AgilisCreateAxis((Agilis asyn port,  axis, hasLimits, forwardAmplitude, reverseAmplitude)
-AgilisCreateAxis("Agilis1", 0, 0, 50, -30)
-AgilisCreateAxis("Agilis1", 1, 0, 40, -50)
+AG_UCCreateAxis("Agilis1", 0, 0, 50, -30)
+AG_UCCreateAxis("Agilis1", 1, 0, 40, -50)
 
 iocInit
