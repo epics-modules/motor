@@ -24,15 +24,14 @@ asynSetTraceIOMask("serial1", 0, 2)
 # Load asynRecord records
 dbLoadRecords("$(ASYN)/db/asynRecord.db", "P=IOC:,R=serial1,PORT=serial1, ADDR=0,OMAX=256,IMAX=256")
 
-# asyn port, IP address, IP port, number of axes, 
-# active poll period (ms), idle poll period (ms), 
-# enable set position, set position settling time (ms)
+# AgilisCreateController(asyn port, serial port, number of axes, 
+#                        active poll period (ms), idle poll period (ms)) 
 AgilisCreateController("Agilis1", "serial1", 2, 500, 500)
 asynSetTraceIOMask("Agilis1", 0, 2)
 #asynSetTraceMask("Agilis1", 0, 255)
 
-# Agilis asyn port,  axis, hasLimits, stepSize
-AgilisCreateAxis("Agilis1", 0, 0, 20)
-AgilisCreateAxis("Agilis1", 1, 0, 20)
+# AgilisCreateAxis((Agilis asyn port,  axis, hasLimits, forwardAmplitude, reverseAmplitude)
+AgilisCreateAxis("Agilis1", 0, 0, 50, -30)
+AgilisCreateAxis("Agilis1", 1, 0, 40, -50)
 
 iocInit
