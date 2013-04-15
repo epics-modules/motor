@@ -23,6 +23,9 @@ April 11, 2013
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
+#define AGILIS_TIMEOUT 2.0
+#define LINUX_WRITE_DELAY 0.1
+
 /** Creates a new AgilisController object.
   * \param[in] portName          The name of the asyn port that will be created for this driver
   * \param[in] AgilisPortName     The name of the drvAsynSerialPort that was created previously to connect to the Agilis controller 
@@ -50,9 +53,18 @@ AgilisController::AgilisController(const char *portName, const char *AgilisPortN
       functionName);
   }
   
+  // Reset the controller
+  sprintf(outString_, "RS");
+  status = writeAgilis();
+
   // Put the controller in remote mode
   sprintf(outString_, "MR");
-  status = writeController();
+  status = writeAgilis();
+  
+  // Flush any characters that controller has, read firmware version
+  sprintf(outString_, "VE");
+  status = writeReadController();
+  printf("Agilis controller firmware version = %s\n", inString_);
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
@@ -97,6 +109,33 @@ asynStatus AgilisCreateAxis(const char *AgilisName,  /* specify which controller
 }
 } // extern "C" 
 
+
+/** Writes a string to the controller.
+  * Calls writeAgilis() with a default location of the string to write and a default timeout. */ 
+asynStatus AgilisController::writeAgilis()
+{
+  return writeAgilis(outString_, AGILIS_TIMEOUT);
+}
+
+/** Writes a string to the controller.
+  * \param[in] output The string to be written.
+  * \param[in] timeout Timeout before returning an error.*/
+asynStatus AgilisController::writeAgilis(const char *output, double timeout)
+{
+  size_t nwrite;
+  asynStatus status;
+  // const char *functionName="writeAgilis";
+  
+  status = pasynOctetSyncIO->write(pasynUserController_, output,
+                                   strlen(output), timeout, &nwrite);
+                                   
+  // On Linux it seems to be necessary to delay a short time between writes
+  #ifdef linux
+  epicsThreadSleep(LINUX_WRITE_DELAY);
+  #endif
+                                  
+  return status ;
+}
 
 /** Reports on status of the driver
   * \param[in] fp The file pointer on which report information will be written
@@ -149,9 +188,9 @@ AgilisAxis::AgilisAxis(AgilisController *pC, int axisNo, bool hasLimits,
   if (forwardAmplitude_ <= 0) forwardAmplitude_ = 50;
   if (reverseAmplitude_ >= 0) forwardAmplitude_ = -50;
   sprintf(pC_->outString_, "%dSU%d", axisID_, forwardAmplitude_);
-  pC_->writeController();
+  pC_->writeAgilis();
   sprintf(pC_->outString_, "%dSU%d", axisID_, reverseAmplitude_);
-  pC_->writeController();
+  pC_->writeAgilis();
 }
 
 /** Reports on status of the axis
@@ -180,40 +219,42 @@ asynStatus AgilisAxis::move(double position, int relative, double minVelocity, d
   if (relative) {
     sprintf(pC_->outString_, "%dPR%d", axisID_, steps);
   } else {
-    if (!hasLimits_) {
-      steps = NINT(position - currentPosition_);
-      sprintf(pC_->outString_, "%dPR%d", axisID_, steps);
-    } else {
-      sprintf(pC_->outString_, "%dPA%d", axisID_, steps);
-    }
+    steps = NINT(position - currentPosition_);
+    sprintf(pC_->outString_, "%dPR%d", axisID_, steps);
   }
-  status = pC_->writeController();
+  status = pC_->writeAgilis();
   return status;
+}
+
+int AgilisAxis::velocityToSpeedCode(double velocity)
+{
+  int speed;
+  if      (abs(velocity) <= 5)   speed = 1;
+  else if (abs(velocity) <= 100) speed = 2;
+  else if (abs(velocity) <= 666) speed = 4;
+  else                           speed = 3;
+  if (velocity < 0) speed = -speed;
+  return speed;
 }
 
 asynStatus AgilisAxis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
   asynStatus status;
-  // static const char *functionName = "AgilisAxis::home";
+  //static const char *functionName = "AgilisAxis::home";
 
-  sprintf(pC_->outString_, "%dML4", axisID_);
-  status = pC_->writeController();
+  if (!hasLimits_) return asynError;
+  sprintf(pC_->outString_, "%dMV%d", axisID_, velocityToSpeedCode(maxVelocity));
+  status = pC_->writeAgilis();
   return status;
 }
 
 asynStatus AgilisAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  int speed;
   //static const char *functionName = "AgilisAxis::moveVelocity";
 
-  if      (abs(maxVelocity) <= 5)   speed = 1;
-  else if (abs(maxVelocity) <= 100) speed = 2;
-  else if (abs(maxVelocity) <= 666) speed = 4;
-  else                              speed = 3;
-  if (maxVelocity < 0) speed = -speed;
-  sprintf(pC_->outString_, "%dJA%d", axisID_, speed);
-  status = pC_->writeController();
+  sprintf(pC_->outString_, "%dJA%d", axisID_, velocityToSpeedCode(maxVelocity));
+  status = pC_->writeAgilis();
   return status;
 }
 
@@ -223,7 +264,7 @@ asynStatus AgilisAxis::stop(double acceleration )
   //static const char *functionName = "AgilisAxis::stop";
 
   sprintf(pC_->outString_, "%dST", axisID_);
-  status = pC_->writeController();
+  status = pC_->writeAgilis();
   return status;
 }
 
