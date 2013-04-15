@@ -1,0 +1,38 @@
+#errlogInit(5000)
+< envPaths
+# Tell EPICS all about the record types, device-support modules, drivers,
+# etc.
+dbLoadDatabase("../../dbd/WithAsyn.dbd")
+WithAsyn_registerRecordDeviceDriver(pdbbase)
+
+### Motors
+dbLoadTemplate "motor.substitutions.agilis"
+
+drvAsynSerialPortConfigure("serial1", "COM3", 0, 0, 0)
+asynOctetSetInputEos("serial1",0,"\r\n")
+asynOctetSetOutputEos("serial1",0,"\r\n")
+asynSetOption("serial1",0,"baud","921600")
+asynSetOption("serial1",0,"bits","8")
+asynSetOption("serial1",0,"stop","1")
+asynSetOption("serial1",0,"parity","none")
+asynSetOption("serial1",0,"clocal","Y")
+asynSetOption("serial1",0,"crtscts","N")
+
+asynSetTraceIOMask("serial1", 0, 2)
+#asynSetTraceMask("serial1", 0, 9)
+
+# Load asynRecord records
+dbLoadRecords("$(ASYN)/db/asynRecord.db", "P=IOC:,R=serial1,PORT=serial1, ADDR=0,OMAX=256,IMAX=256")
+
+# asyn port, IP address, IP port, number of axes, 
+# active poll period (ms), idle poll period (ms), 
+# enable set position, set position settling time (ms)
+AgilisCreateController("Agilis1", "serial1", 2, 500, 500)
+asynSetTraceIOMask("Agilis1", 0, 2)
+#asynSetTraceMask("Agilis1", 0, 255)
+
+# Agilis asyn port,  axis, hasLimits, stepSize
+AgilisCreateAxis("Agilis1", 0, 0, 20)
+AgilisCreateAxis("Agilis1", 1, 0, 20)
+
+iocInit
