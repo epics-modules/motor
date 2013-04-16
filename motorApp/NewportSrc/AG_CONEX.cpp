@@ -25,6 +25,9 @@ April 11, 2013
 
 #define AGILIS_TIMEOUT 2.0
 #define LINUX_WRITE_DELAY 0.1
+#define MAX_CONEX_KP 3000.  // Proportional gain
+#define MAX_CONEX_KI 3000.  // Integral gain
+#define MAX_CONEX_LF 1000.  // Low-pass filter frequency
 
 /** Creates a new AG_CONEXController object.
   * \param[in] portName          The name of the asyn port that will be created for this driver
@@ -268,7 +271,39 @@ asynStatus AG_CONEXAxis::setClosedLoop(bool closedLoop)
   return status;
 }
 
+asynStatus AG_CONEXAxis::setPGain(double pGain)
+{
+  asynStatus status;
+  //static const char *functionName = "AG_CONEXAxis::setPGain";
 
+  // The pGain value from the motor record is between 0 and 1.
+  sprintf(pC_->outString_, "%dKP%f", pC_->controllerID_, pGain*MAX_CONEX_KP);
+  status = pC_->writeAgilis();
+  return status;
+}
+
+asynStatus AG_CONEXAxis::setIGain(double iGain)
+{
+  asynStatus status;
+  //static const char *functionName = "AG_CONEXAxis::setIGain";
+
+  // The iGain value from the motor record is between 0 and 1.
+  sprintf(pC_->outString_, "%dKI%f", pC_->controllerID_, iGain*MAX_CONEX_KI);
+  status = pC_->writeAgilis();
+  return status;
+}
+
+asynStatus AG_CONEXAxis::setDGain(double dGain)
+{
+  asynStatus status;
+  //static const char *functionName = "AG_CONEXAxis::setPGain";
+
+  // We are using the DGain for the Low pass filter frequency.
+  // DGain value is between 0 and 1
+  sprintf(pC_->outString_, "%dLF%f", pC_->controllerID_, dGain*MAX_CONEX_LF);
+  status = pC_->writeAgilis();
+  return status;
+}
 
 /** Polls the axis.
   * This function reads the motor position, the limit status, the home status, the moving status, 
