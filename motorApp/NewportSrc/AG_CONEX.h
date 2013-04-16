@@ -30,9 +30,11 @@ public:
 private:
   AG_CONEXController *pC_;        /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
-  int currentPosition_;
-  int positionOffset_;
+  double currentPosition_;
+  double positionOffset_;
   double encoderIncrement_;
+  double highLimit_;
+  double lowLimit_;
   
 friend class AG_CONEXController;
 };

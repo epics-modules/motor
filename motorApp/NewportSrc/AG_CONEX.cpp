@@ -157,8 +157,18 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
     pC_(pC), 
     currentPosition_(0), positionOffset_(0)
 {
+  // Read the encoder increment
   sprintf(pC_->outString_, "%dSU?", pC->controllerID_);
   pC_->writeReadController();
+  encoderIncrement_ = atof(&pC_->inString_[3]);
+  
+  // Read the low and high software limits
+  sprintf(pC_->outString_, "%dSL?", pC->controllerID_);
+  pC_->writeReadController();
+  lowLimit_ = atof(&pC_->inString_[3]);
+  sprintf(pC_->outString_, "%dSR?", pC->controllerID_);
+  pC_->writeReadController();
+  highLimit_ = atof(&pC_->inString_[3]);
 }
 
 /** Reports on status of the axis
@@ -181,14 +191,12 @@ void AG_CONEXAxis::report(FILE *fp, int level)
 asynStatus AG_CONEXAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  int steps = NINT(position);
   // static const char *functionName = "AG_CONEXAxis::move";
 
   if (relative) {
-    sprintf(pC_->outString_, "%dPR%d", pC_->controllerID_, steps);
+    sprintf(pC_->outString_, "%dPR%f", pC_->controllerID_, position*encoderIncrement_);
   } else {
-    steps = NINT(position - currentPosition_);
-    sprintf(pC_->outString_, "%dPR%d", pC_->controllerID_, steps);
+    sprintf(pC_->outString_, "%dPA%f", pC_->controllerID_, (position-positionOffset_)*encoderIncrement_);
   }
   status = pC_->writeAgilis();
   return status;
@@ -207,9 +215,14 @@ asynStatus AG_CONEXAxis::home(double minVelocity, double maxVelocity, double acc
 asynStatus AG_CONEXAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
+  double position;
   //static const char *functionName = "AG_CONEXAxis::moveVelocity";
 
-  sprintf(pC_->outString_, "%dJA", pC_->controllerID_);
+  // The CONEX does not have a jog command.  Move almost to soft limit.
+  if (maxVelocity > 0) position = lowLimit_  + 0.999*(highLimit_ - lowLimit_);
+  else                 position = highLimit_ - 0.999*(highLimit_ - lowLimit_);
+  
+  sprintf(pC_->outString_, "%dPA%f", pC_->controllerID_, position);
   status = pC_->writeAgilis();
   return status;
 }
@@ -228,9 +241,21 @@ asynStatus AG_CONEXAxis::setPosition(double position)
 {
   //static const char *functionName = "AG_CONEXAxis::setPosition";
 
-  positionOffset_ = NINT(position) - currentPosition_;
+  positionOffset_ = position - currentPosition_;
   return asynSuccess;
 }
+
+asynStatus AG_CONEXAxis::setClosedLoop(bool closedLoop)
+{
+  asynStatus status;
+  //static const char *functionName = "AG_CONEXAxis::setClosedLoop";
+
+  sprintf(pC_->outString_, "%dMM%d", pC_->controllerID_, closedLoop ? 1 : 0);
+  status = pC_->writeAgilis();
+  return status;
+}
+
+
 
 /** Polls the axis.
   * This function reads the motor position, the limit status, the home status, the moving status, 
@@ -240,8 +265,10 @@ asynStatus AG_CONEXAxis::setPosition(double position)
   * \param[out] moving A flag that is set indicating that the axis is moving (true) or done (false). */
 asynStatus AG_CONEXAxis::poll(bool *moving)
 { 
-  int done;
-  int position;
+  int done=1;
+  double position;
+  unsigned int status;
+  int count;
   asynStatus comStatus;
 
   // Read the current motor position
@@ -249,16 +276,18 @@ asynStatus AG_CONEXAxis::poll(bool *moving)
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
   // The response string is of the form "1TPxxx"
-  position = atoi(&pC_->inString_[3]);
-  currentPosition_ = position + positionOffset_;
-  setDoubleParam(pC_->motorPosition_, double(currentPosition_));
+  position = atof(&pC_->inString_[3]);
+  currentPosition_ = (position + positionOffset_)/encoderIncrement_;
+  setDoubleParam(pC_->motorPosition_, currentPosition_);
 
   // Read the moving status of this motor
   sprintf(pC_->outString_, "%dTS", pC_->controllerID_);
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
-  // The response string is of the form "1TSn"
-  done = (pC_->inString_[3] == '0') ? 1:0;
+  // The response string is of the form "1TSabcdef"
+  count = sscanf(pC_->inString_, "%*dTS%*4c%x", &status);
+  if (count != 1) goto skip;
+  if ((status == 0x1e) || (status == 0x28)) done = 0;
   setIntegerParam(pC_->motorStatusDone_, done);
   *moving = done ? false:true;
 
