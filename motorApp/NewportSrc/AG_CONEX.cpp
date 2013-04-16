@@ -164,6 +164,14 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
   sprintf(pC_->outString_, "%dSU?", pC->controllerID_);
   pC_->writeReadController();
   encoderIncrement_ = atof(&pC_->inString_[3]);
+
+  // Read the interpolation factor
+  sprintf(pC_->outString_, "%dIF?", pC->controllerID_);
+  pC_->writeReadController();
+  interpolationFactor_ = atof(&pC_->inString_[3]);
+  
+  // Compute the minimum step size
+  stepSize_ = encoderIncrement_ / interpolationFactor_;
   
   // Read the low and high software limits
   sprintf(pC_->outString_, "%dSL?", pC->controllerID_);
@@ -183,8 +191,10 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
 void AG_CONEXAxis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    fprintf(fp, "  currentPosition=%f, positionOffset=%f, encoderIncrement=%f, lowLimit=%f, highLimit=%f\n",
-            currentPosition_, positionOffset_, encoderIncrement_, lowLimit_, highLimit_);
+    fprintf(fp, "  currentPosition=%f, positionOffset=%f, encoderIncrement=%f\n"
+                "  interpolationFactor=%f, stepSize=%f, lowLimit=%f, highLimit=%f\n",
+            currentPosition_, positionOffset_, encoderIncrement_, 
+            interpolationFactor_, stepSize_, lowLimit_, highLimit_);
   }
 
   // Call the base class method
@@ -197,9 +207,9 @@ asynStatus AG_CONEXAxis::move(double position, int relative, double minVelocity,
   // static const char *functionName = "AG_CONEXAxis::move";
 
   if (relative) {
-    sprintf(pC_->outString_, "%dPR%f", pC_->controllerID_, position*encoderIncrement_);
+    sprintf(pC_->outString_, "%dPR%f", pC_->controllerID_, position*stepSize_);
   } else {
-    sprintf(pC_->outString_, "%dPA%f", pC_->controllerID_, (position-positionOffset_)*encoderIncrement_);
+    sprintf(pC_->outString_, "%dPA%f", pC_->controllerID_, (position-positionOffset_)*stepSize_);
   }
   status = pC_->writeAgilis();
   return status;
@@ -222,8 +232,8 @@ asynStatus AG_CONEXAxis::moveVelocity(double minVelocity, double maxVelocity, do
   //static const char *functionName = "AG_CONEXAxis::moveVelocity";
 
   // The CONEX does not have a jog command.  Move almost to soft limit.
-  if (maxVelocity > 0) position = lowLimit_  + 0.999*(highLimit_ - lowLimit_);
-  else                 position = highLimit_ - 0.999*(highLimit_ - lowLimit_);
+  if (maxVelocity > 0) position = highLimit_ - stepSize_;
+  else                 position = lowLimit_ + stepSize_;
   
   sprintf(pC_->outString_, "%dPA%f", pC_->controllerID_, position);
   status = pC_->writeAgilis();
@@ -280,7 +290,7 @@ asynStatus AG_CONEXAxis::poll(bool *moving)
   if (comStatus) goto skip;
   // The response string is of the form "1TPxxx"
   position = atof(&pC_->inString_[3]);
-  currentPosition_ = (position + positionOffset_)/encoderIncrement_;
+  currentPosition_ = (position + positionOffset_)/stepSize_;
   setDoubleParam(pC_->motorPosition_, currentPosition_);
 
   // Read the moving status of this motor
