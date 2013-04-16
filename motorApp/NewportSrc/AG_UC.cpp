@@ -229,9 +229,9 @@ asynStatus AG_UCAxis::move(double position, int relative, double minVelocity, do
 int AG_UCAxis::velocityToSpeedCode(double velocity)
 {
   int speed;
-  if      (abs(velocity) <= 5)   speed = 1;
-  else if (abs(velocity) <= 100) speed = 2;
-  else if (abs(velocity) <= 666) speed = 4;
+  if      (fabs(velocity) <= 5)   speed = 1;
+  else if (fabs(velocity) <= 100) speed = 2;
+  else if (fabs(velocity) <= 666) speed = 4;
   else                           speed = 3;
   if (velocity < 0) speed = -speed;
   return speed;
