@@ -3,7 +3,7 @@
   <macros>
     <include_parent_macros>true</include_parent_macros>
   </macros>
-  <wuid>-35547c25:13a0384ab1a:-39c7</wuid>
+  <wuid>39872d87:13e14015f61:-3310</wuid>
   <boy_version>3.1.2.20120830</boy_version>
   <scripts />
   <show_ruler>true</show_ruler>
@@ -38,7 +38,7 @@
     <line_color>
       <color name="Gray_14" red="0" green="0" blue="0" />
     </line_color>
-    <wuid>-35547c25:13a0384ab1a:-39c5</wuid>
+    <wuid>39872d87:13e14015f61:-330e</wuid>
     <bg_gradient_color>
       <color red="255" green="255" blue="255" />
     </bg_gradient_color>
@@ -93,7 +93,7 @@ $(pv_value)</tooltip>
       <include_parent_macros>true</include_parent_macros>
     </macros>
     <visible>true</visible>
-    <wuid>-35547c25:13a0384ab1a:-39bc</wuid>
+    <wuid>39872d87:13e14015f61:-3305</wuid>
     <scripts />
     <height>249</height>
     <name>Grouping Container</name>
@@ -130,7 +130,7 @@ $(pv_value)</tooltip>
     <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
       <visible>true</visible>
       <vertical_alignment>1</vertical_alignment>
-      <wuid>-35547c25:13a0384ab1a:-39bb</wuid>
+      <wuid>39872d87:13e14015f61:-3304</wuid>
       <auto_size>false</auto_size>
       <scripts />
       <height>20</height>
@@ -171,7 +171,7 @@ $(pv_value)</tooltip>
     <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
       <visible>true</visible>
       <vertical_alignment>1</vertical_alignment>
-      <wuid>-35547c25:13a0384ab1a:-39ba</wuid>
+      <wuid>39872d87:13e14015f61:-3303</wuid>
       <auto_size>false</auto_size>
       <scripts />
       <height>20</height>
@@ -235,7 +235,7 @@ $(pv_value)</tooltip>
       <maximum>Infinity</maximum>
       <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-35547c25:13a0384ab1a:-39b9</wuid>
+      <wuid>39872d87:13e14015f61:-3302</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -291,7 +291,7 @@ $(pv_value)</tooltip>
       <maximum>Infinity</maximum>
       <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-35547c25:13a0384ab1a:-39b8</wuid>
+      <wuid>39872d87:13e14015f61:-3301</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -347,7 +347,7 @@ $(pv_value)</tooltip>
       <maximum>Infinity</maximum>
       <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-35547c25:13a0384ab1a:-39b7</wuid>
+      <wuid>39872d87:13e14015f61:-3300</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -403,7 +403,7 @@ $(pv_value)</tooltip>
       <maximum>Infinity</maximum>
       <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-35547c25:13a0384ab1a:-39b6</wuid>
+      <wuid>39872d87:13e14015f61:-32ff</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -459,7 +459,7 @@ $(pv_value)</tooltip>
       <maximum>Infinity</maximum>
       <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-35547c25:13a0384ab1a:-39b5</wuid>
+      <wuid>39872d87:13e14015f61:-32fe</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -515,7 +515,7 @@ $(pv_value)</tooltip>
       <maximum>Infinity</maximum>
       <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-35547c25:13a0384ab1a:-39b4</wuid>
+      <wuid>39872d87:13e14015f61:-32fd</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -571,7 +571,7 @@ $(pv_value)</tooltip>
       <maximum>Infinity</maximum>
       <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-35547c25:13a0384ab1a:-39b3</wuid>
+      <wuid>39872d87:13e14015f61:-32fc</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -627,7 +627,7 @@ $(pv_value)</tooltip>
       <maximum>Infinity</maximum>
       <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-35547c25:13a0384ab1a:-39b2</wuid>
+      <wuid>39872d87:13e14015f61:-32fb</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -661,7 +661,7 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-35547c25:13a0384ab1a:-39c6</wuid>
+    <wuid>39872d87:13e14015f61:-330f</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>25</height>
@@ -704,7 +704,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39c4</wuid>
+    <wuid>39872d87:13e14015f61:-330d</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -755,7 +755,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39c3</wuid>
+    <wuid>39872d87:13e14015f61:-330c</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -806,7 +806,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39c2</wuid>
+    <wuid>39872d87:13e14015f61:-330b</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -857,7 +857,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39c1</wuid>
+    <wuid>39872d87:13e14015f61:-330a</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -908,7 +908,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39c0</wuid>
+    <wuid>39872d87:13e14015f61:-3309</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -959,7 +959,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39bf</wuid>
+    <wuid>39872d87:13e14015f61:-3308</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -1010,7 +1010,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39be</wuid>
+    <wuid>39872d87:13e14015f61:-3307</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -1061,7 +1061,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39bd</wuid>
+    <wuid>39872d87:13e14015f61:-3306</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -1110,7 +1110,7 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-35547c25:13a0384ab1a:-39b1</wuid>
+    <wuid>39872d87:13e14015f61:-32fa</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>20</height>
@@ -1151,7 +1151,7 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-35547c25:13a0384ab1a:-39b0</wuid>
+    <wuid>39872d87:13e14015f61:-32f9</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>20</height>
@@ -1215,7 +1215,7 @@ $(pv_value)</tooltip>
     <maximum>Infinity</maximum>
     <minimum>-Infinity</minimum>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39af</wuid>
+    <wuid>39872d87:13e14015f61:-32f8</wuid>
     <rotation_angle>0.0</rotation_angle>
     <name>Text Input</name>
     <scale_options>
@@ -1271,7 +1271,7 @@ $(pv_value)</tooltip>
     <maximum>Infinity</maximum>
     <minimum>-Infinity</minimum>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39ae</wuid>
+    <wuid>39872d87:13e14015f61:-32f7</wuid>
     <rotation_angle>0.0</rotation_angle>
     <name>Text Input</name>
     <scale_options>
@@ -1327,7 +1327,7 @@ $(pv_value)</tooltip>
     <maximum>Infinity</maximum>
     <minimum>-Infinity</minimum>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39ad</wuid>
+    <wuid>39872d87:13e14015f61:-32f6</wuid>
     <rotation_angle>0.0</rotation_angle>
     <name>Text Input</name>
     <scale_options>
@@ -1383,7 +1383,7 @@ $(pv_value)</tooltip>
     <maximum>Infinity</maximum>
     <minimum>-Infinity</minimum>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39ac</wuid>
+    <wuid>39872d87:13e14015f61:-32f5</wuid>
     <rotation_angle>0.0</rotation_angle>
     <name>Text Input</name>
     <scale_options>
@@ -1439,7 +1439,7 @@ $(pv_value)</tooltip>
     <maximum>Infinity</maximum>
     <minimum>-Infinity</minimum>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39ab</wuid>
+    <wuid>39872d87:13e14015f61:-32f4</wuid>
     <rotation_angle>0.0</rotation_angle>
     <name>Text Input</name>
     <scale_options>
@@ -1495,7 +1495,7 @@ $(pv_value)</tooltip>
     <maximum>Infinity</maximum>
     <minimum>-Infinity</minimum>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39aa</wuid>
+    <wuid>39872d87:13e14015f61:-32f3</wuid>
     <rotation_angle>0.0</rotation_angle>
     <name>Text Input</name>
     <scale_options>
@@ -1551,7 +1551,7 @@ $(pv_value)</tooltip>
     <maximum>Infinity</maximum>
     <minimum>-Infinity</minimum>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39a9</wuid>
+    <wuid>39872d87:13e14015f61:-32f2</wuid>
     <rotation_angle>0.0</rotation_angle>
     <name>Text Input</name>
     <scale_options>
@@ -1607,7 +1607,7 @@ $(pv_value)</tooltip>
     <maximum>Infinity</maximum>
     <minimum>-Infinity</minimum>
     <show_units>false</show_units>
-    <wuid>-35547c25:13a0384ab1a:-39a8</wuid>
+    <wuid>39872d87:13e14015f61:-32f1</wuid>
     <rotation_angle>0.0</rotation_angle>
     <name>Text Input</name>
     <scale_options>

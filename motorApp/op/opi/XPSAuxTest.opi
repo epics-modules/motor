@@ -1,70 +1,83 @@
-<?xml version='1.0' encoding='UTF-8'?>
 <display typeId="org.csstudio.opibuilder.Display" version="1.0">
   <auto_zoom_to_fit_all>false</auto_zoom_to_fit_all>
   <macros>
     <include_parent_macros>true</include_parent_macros>
   </macros>
-  <scripts/>
+  <wuid>39872d87:13e14015f61:-30e1</wuid>
+  <boy_version>3.1.2.20120830</boy_version>
+  <scripts />
   <show_ruler>true</show_ruler>
   <height>100</height>
   <name>XPSAuxTest</name>
   <snap_to_geometry>false</snap_to_geometry>
   <show_grid>false</show_grid>
   <background_color>
-    <color name="Gray_4"/>
+    <color name="Gray_4" red="187" green="187" blue="187" />
   </background_color>
   <foreground_color>
-    <color name="Gray_14"/>
+    <color name="Gray_14" red="0" green="0" blue="0" />
   </foreground_color>
   <widget_type>Display</widget_type>
   <show_close_button>true</show_close_button>
   <width>150</width>
-  <rules/>
+  <rules />
   <show_edit_range>true</show_edit_range>
   <grid_space>5</grid_space>
-  <actions hook="false"/>
+  <auto_scale_widgets>
+    <auto_scale_widgets>false</auto_scale_widgets>
+    <min_width>-1</min_width>
+    <min_height>-1</min_height>
+  </auto_scale_widgets>
+  <actions hook="false" hook_all="false" />
   <y>49</y>
   <x>839</x>
   <widget typeId="org.csstudio.opibuilder.widgets.MenuButton" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <scripts/>
+    <wuid>39872d87:13e14015f61:-30e0</wuid>
+    <scripts />
     <height>25</height>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Menu Button</name>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <scale_options>
+      <width_scalable>true</width_scalable>
+      <height_scalable>true</height_scalable>
+      <keep_wh_ratio>false</keep_wh_ratio>
+    </scale_options>
     <transparent>false</transparent>
-    <pv_name/>
+    <pv_name></pv_name>
     <background_color>
-      <color name="Gray_4"/>
+      <color name="Gray_4" red="187" green="187" blue="187" />
     </background_color>
     <foreground_color>
-      <color name="Gray_14"/>
+      <color name="Gray_14" red="0" green="0" blue="0" />
     </foreground_color>
     <widget_type>Menu Button</widget_type>
     <enabled>true</enabled>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <font>
-      <opifont.name>Default</opifont.name>
+      <opifont.name fontName="Sans" height="10" style="0">Default</opifont.name>
     </font>
     <width>110</width>
     <border_style>6</border_style>
     <label>XPSAux</label>
-    <rules/>
+    <rules />
+    <pv_value />
     <border_width>1</border_width>
     <border_color>
-      <color red="0" green="128" blue="255"/>
+      <color red="0" green="128" blue="255" />
     </border_color>
     <y>39</y>
-    <actions hook="false">
-      <action type="OPEN_OPI_IN_VIEW">
+    <actions hook="false" hook_all="false">
+      <action type="OPEN_DISPLAY">
         <path>XPSAux.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <P>IOC:</P>
           <R>XPSAux</R>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>XPS Auxilliary</description>
       </action>
     </actions>

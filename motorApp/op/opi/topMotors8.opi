@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <display typeId="org.csstudio.opibuilder.Display" version="1.0">
   <auto_zoom_to_fit_all>false</auto_zoom_to_fit_all>
   <macros>
     <include_parent_macros>true</include_parent_macros>
   </macros>
-  <wuid>-513d5d45:139918b66dd:-7e13</wuid>
-  <boy_version>3.1.2.20120828</boy_version>
+  <wuid>39872d87:13e14015f61:12d5</wuid>
+  <boy_version>3.1.2.20120830</boy_version>
   <scripts />
   <show_ruler>true</show_ruler>
   <height>205</height>
@@ -37,7 +36,7 @@
       <include_parent_macros>true</include_parent_macros>
     </macros>
     <visible>true</visible>
-    <wuid>-513d5d45:139918b66dd:-7e12</wuid>
+    <wuid>39872d87:13e14015f61:12db</wuid>
     <scripts />
     <height>160</height>
     <name>Grouping Container</name>
@@ -46,7 +45,7 @@
       <height_scalable>true</height_scalable>
       <keep_wh_ratio>false</keep_wh_ratio>
     </scale_options>
-    <transparent>false</transparent>
+    <transparent>true</transparent>
     <show_scrollbar>false</show_scrollbar>
     <background_color>
       <color red="200" green="200" blue="200" />
@@ -78,7 +77,7 @@
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e11</wuid>
+      <wuid>39872d87:13e14015f61:12dc</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -96,7 +95,7 @@
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="Gray_14" red="0" green="0" blue="0" />
@@ -145,7 +144,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e10</wuid>
+      <wuid>39872d87:13e14015f61:12dd</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -163,7 +162,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="Gray_14" red="0" green="0" blue="0" />
@@ -212,7 +211,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e0f</wuid>
+      <wuid>39872d87:13e14015f61:12de</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -230,7 +229,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="Gray_14" red="0" green="0" blue="0" />
@@ -279,7 +278,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e0e</wuid>
+      <wuid>39872d87:13e14015f61:12df</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -297,7 +296,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="Gray_14" red="0" green="0" blue="0" />
@@ -346,7 +345,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e0d</wuid>
+      <wuid>39872d87:13e14015f61:12e0</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -364,7 +363,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="Gray_14" red="0" green="0" blue="0" />
@@ -413,7 +412,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e0c</wuid>
+      <wuid>39872d87:13e14015f61:12e1</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -431,7 +430,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="Gray_14" red="0" green="0" blue="0" />
@@ -480,7 +479,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e0b</wuid>
+      <wuid>39872d87:13e14015f61:12e2</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -498,7 +497,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="Gray_14" red="0" green="0" blue="0" />
@@ -547,7 +546,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e0a</wuid>
+      <wuid>39872d87:13e14015f61:12e3</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -565,7 +564,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="Gray_14" red="0" green="0" blue="0" />
@@ -614,7 +613,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e09</wuid>
+      <wuid>39872d87:13e14015f61:12e4</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -632,7 +631,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="MEDM_COLOR_60" red="115" green="255" blue="107" />
@@ -681,7 +680,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e08</wuid>
+      <wuid>39872d87:13e14015f61:12e5</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -699,7 +698,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -748,7 +747,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e07</wuid>
+      <wuid>39872d87:13e14015f61:12e6</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -766,7 +765,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="warning" red="251" green="243" blue="74" />
@@ -815,7 +814,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e06</wuid>
+      <wuid>39872d87:13e14015f61:12e7</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -833,7 +832,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="MEDM_COLOR_60" red="115" green="255" blue="107" />
@@ -882,7 +881,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e05</wuid>
+      <wuid>39872d87:13e14015f61:12e8</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -900,7 +899,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -949,7 +948,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e04</wuid>
+      <wuid>39872d87:13e14015f61:12e9</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -967,7 +966,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1016,7 +1015,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e03</wuid>
+      <wuid>39872d87:13e14015f61:12ea</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1034,7 +1033,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="warning" red="251" green="243" blue="74" />
@@ -1083,7 +1082,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e02</wuid>
+      <wuid>39872d87:13e14015f61:12eb</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1101,7 +1100,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="MEDM_COLOR_60" red="115" green="255" blue="107" />
@@ -1150,7 +1149,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e01</wuid>
+      <wuid>39872d87:13e14015f61:12ec</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1168,7 +1167,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1217,7 +1216,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7e00</wuid>
+      <wuid>39872d87:13e14015f61:12ed</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1235,7 +1234,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1284,7 +1283,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dff</wuid>
+      <wuid>39872d87:13e14015f61:12ee</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1302,7 +1301,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="warning" red="251" green="243" blue="74" />
@@ -1351,7 +1350,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dfe</wuid>
+      <wuid>39872d87:13e14015f61:12ef</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1369,7 +1368,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="MEDM_COLOR_60" red="115" green="255" blue="107" />
@@ -1418,7 +1417,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dfd</wuid>
+      <wuid>39872d87:13e14015f61:12f0</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1436,7 +1435,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1485,7 +1484,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dfc</wuid>
+      <wuid>39872d87:13e14015f61:12f1</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1503,7 +1502,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1552,7 +1551,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dfb</wuid>
+      <wuid>39872d87:13e14015f61:12f2</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1570,7 +1569,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1619,7 +1618,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dfa</wuid>
+      <wuid>39872d87:13e14015f61:12f3</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1637,7 +1636,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1686,7 +1685,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df9</wuid>
+      <wuid>39872d87:13e14015f61:12f4</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1704,7 +1703,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1753,7 +1752,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df8</wuid>
+      <wuid>39872d87:13e14015f61:12f5</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1771,7 +1770,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -1820,7 +1819,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df7</wuid>
+      <wuid>39872d87:13e14015f61:12f6</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1838,7 +1837,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="warning" red="251" green="243" blue="74" />
@@ -1887,7 +1886,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df6</wuid>
+      <wuid>39872d87:13e14015f61:12f7</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1905,7 +1904,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="MEDM_COLOR_60" red="115" green="255" blue="107" />
@@ -1954,7 +1953,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df5</wuid>
+      <wuid>39872d87:13e14015f61:12f8</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -1972,7 +1971,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -2021,7 +2020,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df4</wuid>
+      <wuid>39872d87:13e14015f61:12f9</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2039,7 +2038,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="warning" red="251" green="243" blue="74" />
@@ -2088,7 +2087,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df3</wuid>
+      <wuid>39872d87:13e14015f61:12fa</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2106,7 +2105,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="MEDM_COLOR_60" red="115" green="255" blue="107" />
@@ -2155,7 +2154,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df2</wuid>
+      <wuid>39872d87:13e14015f61:12fb</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2173,7 +2172,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -2222,7 +2221,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df1</wuid>
+      <wuid>39872d87:13e14015f61:12fc</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2240,7 +2239,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="warning" red="251" green="243" blue="74" />
@@ -2289,7 +2288,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7df0</wuid>
+      <wuid>39872d87:13e14015f61:12fd</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2307,7 +2306,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -2356,7 +2355,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7def</wuid>
+      <wuid>39872d87:13e14015f61:12fe</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2374,7 +2373,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="warning" red="251" green="243" blue="74" />
@@ -2423,7 +2422,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dee</wuid>
+      <wuid>39872d87:13e14015f61:12ff</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2441,7 +2440,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="MEDM_COLOR_60" red="115" green="255" blue="107" />
@@ -2490,7 +2489,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7ded</wuid>
+      <wuid>39872d87:13e14015f61:1300</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2508,7 +2507,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -2557,7 +2556,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dec</wuid>
+      <wuid>39872d87:13e14015f61:1301</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2575,7 +2574,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="warning" red="251" green="243" blue="74" />
@@ -2624,7 +2623,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7deb</wuid>
+      <wuid>39872d87:13e14015f61:1302</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2642,7 +2641,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="MEDM_COLOR_60" red="115" green="255" blue="107" />
@@ -2691,7 +2690,7 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-513d5d45:139918b66dd:-7dea</wuid>
+      <wuid>39872d87:13e14015f61:1303</wuid>
       <bg_gradient_color>
         <color red="255" green="255" blue="255" />
       </bg_gradient_color>
@@ -2709,7 +2708,7 @@ $(pv_value)</tooltip>
       <transparent>false</transparent>
       <pv_name></pv_name>
       <background_color>
-        <color red="0" green="0" blue="255" />
+        <color red="30" green="144" blue="255" />
       </background_color>
       <foreground_color>
         <color name="alarm" red="253" green="0" blue="0" />
@@ -2768,16 +2767,16 @@ $(pv_value)</tooltip>
       <enabled>true</enabled>
       <text></text>
       <font>
-        <fontdata fontName="Sans" height="14" style="0" />
+        <fontdata fontName="Sans" height="11" style="0" />
       </font>
       <width>100</width>
       <border_style>3</border_style>
       <pv_value />
       <border_width>1</border_width>
-      <maximum>1.7976931348623157E308</maximum>
-      <minimum>-1.7976931348623157E308</minimum>
+      <maximum>Infinity</maximum>
+      <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-513d5d45:139918b66dd:-7de9</wuid>
+      <wuid>39872d87:13e14015f61:1304</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -2824,16 +2823,16 @@ $(pv_value)</tooltip>
       <enabled>true</enabled>
       <text></text>
       <font>
-        <fontdata fontName="Sans" height="14" style="0" />
+        <fontdata fontName="Sans" height="11" style="0" />
       </font>
       <width>100</width>
       <border_style>3</border_style>
       <pv_value />
       <border_width>1</border_width>
-      <maximum>1.7976931348623157E308</maximum>
-      <minimum>-1.7976931348623157E308</minimum>
+      <maximum>Infinity</maximum>
+      <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-513d5d45:139918b66dd:-7de8</wuid>
+      <wuid>39872d87:13e14015f61:1305</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -2880,16 +2879,16 @@ $(pv_value)</tooltip>
       <enabled>true</enabled>
       <text></text>
       <font>
-        <fontdata fontName="Sans" height="14" style="0" />
+        <fontdata fontName="Sans" height="11" style="0" />
       </font>
       <width>100</width>
       <border_style>3</border_style>
       <pv_value />
       <border_width>1</border_width>
-      <maximum>1.7976931348623157E308</maximum>
-      <minimum>-1.7976931348623157E308</minimum>
+      <maximum>Infinity</maximum>
+      <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-513d5d45:139918b66dd:-7de7</wuid>
+      <wuid>39872d87:13e14015f61:1306</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -2936,16 +2935,16 @@ $(pv_value)</tooltip>
       <enabled>true</enabled>
       <text></text>
       <font>
-        <fontdata fontName="Sans" height="14" style="0" />
+        <fontdata fontName="Sans" height="11" style="0" />
       </font>
       <width>100</width>
       <border_style>3</border_style>
       <pv_value />
       <border_width>1</border_width>
-      <maximum>1.7976931348623157E308</maximum>
-      <minimum>-1.7976931348623157E308</minimum>
+      <maximum>Infinity</maximum>
+      <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-513d5d45:139918b66dd:-7de6</wuid>
+      <wuid>39872d87:13e14015f61:1307</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -2992,16 +2991,16 @@ $(pv_value)</tooltip>
       <enabled>true</enabled>
       <text></text>
       <font>
-        <fontdata fontName="Sans" height="14" style="0" />
+        <fontdata fontName="Sans" height="11" style="0" />
       </font>
       <width>100</width>
       <border_style>3</border_style>
       <pv_value />
       <border_width>1</border_width>
-      <maximum>1.7976931348623157E308</maximum>
-      <minimum>-1.7976931348623157E308</minimum>
+      <maximum>Infinity</maximum>
+      <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-513d5d45:139918b66dd:-7de5</wuid>
+      <wuid>39872d87:13e14015f61:1308</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -3048,16 +3047,16 @@ $(pv_value)</tooltip>
       <enabled>true</enabled>
       <text></text>
       <font>
-        <fontdata fontName="Sans" height="14" style="0" />
+        <fontdata fontName="Sans" height="11" style="0" />
       </font>
       <width>100</width>
       <border_style>3</border_style>
       <pv_value />
       <border_width>1</border_width>
-      <maximum>1.7976931348623157E308</maximum>
-      <minimum>-1.7976931348623157E308</minimum>
+      <maximum>Infinity</maximum>
+      <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-513d5d45:139918b66dd:-7de4</wuid>
+      <wuid>39872d87:13e14015f61:1309</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -3104,16 +3103,16 @@ $(pv_value)</tooltip>
       <enabled>true</enabled>
       <text></text>
       <font>
-        <fontdata fontName="Sans" height="14" style="0" />
+        <fontdata fontName="Sans" height="11" style="0" />
       </font>
       <width>100</width>
       <border_style>3</border_style>
       <pv_value />
       <border_width>1</border_width>
-      <maximum>1.7976931348623157E308</maximum>
-      <minimum>-1.7976931348623157E308</minimum>
+      <maximum>Infinity</maximum>
+      <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-513d5d45:139918b66dd:-7de3</wuid>
+      <wuid>39872d87:13e14015f61:130a</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -3160,16 +3159,16 @@ $(pv_value)</tooltip>
       <enabled>true</enabled>
       <text></text>
       <font>
-        <fontdata fontName="Sans" height="14" style="0" />
+        <fontdata fontName="Sans" height="11" style="0" />
       </font>
       <width>100</width>
       <border_style>3</border_style>
       <pv_value />
       <border_width>1</border_width>
-      <maximum>1.7976931348623157E308</maximum>
-      <minimum>-1.7976931348623157E308</minimum>
+      <maximum>Infinity</maximum>
+      <minimum>-Infinity</minimum>
       <show_units>false</show_units>
-      <wuid>-513d5d45:139918b66dd:-7de2</wuid>
+      <wuid>39872d87:13e14015f61:130b</wuid>
       <rotation_angle>0.0</rotation_angle>
       <name>Text Input</name>
       <scale_options>
@@ -3203,7 +3202,7 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-513d5d45:139918b66dd:-7de1</wuid>
+    <wuid>39872d87:13e14015f61:12d6</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>14</height>
@@ -3246,7 +3245,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-513d5d45:139918b66dd:-7de0</wuid>
+    <wuid>39872d87:13e14015f61:12d7</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -3295,7 +3294,7 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-513d5d45:139918b66dd:-7ddf</wuid>
+    <wuid>39872d87:13e14015f61:12d8</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>14</height>
@@ -3334,11 +3333,11 @@ $(pv_value)</tooltip>
     <x>60</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-513d5d45:139918b66dd:-7dde</wuid>
+    <wuid>39872d87:13e14015f61:12d9</wuid>
     <auto_size>false</auto_size>
     <rotation_angle>0.0</rotation_angle>
     <scripts />
@@ -3350,7 +3349,7 @@ $(pv_value)</tooltip>
       <height_scalable>true</height_scalable>
       <keep_wh_ratio>false</keep_wh_ratio>
     </scale_options>
-    <format_type>4</format_type>
+    <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
     <pv_name>$(P)$(M1).DTYP</pv_name>
@@ -3388,7 +3387,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7ddd</wuid>
+    <wuid>39872d87:13e14015f61:12da</wuid>
     <scripts />
     <height>20</height>
     <name>Menu Button</name>
@@ -3423,12 +3422,12 @@ $(pv_value)</tooltip>
     </border_color>
     <y>185</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>topMotors8_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
         </macros>
-        <Position>1</Position>
+        <replace>1</replace>
         <description>motor-parameter table</description>
       </action>
     </actions>
@@ -3440,7 +3439,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7ddc</wuid>
+    <wuid>39872d87:13e14015f61:130c</wuid>
     <scripts />
     <height>20</height>
     <name>Menu Button</name>
@@ -3475,68 +3474,68 @@ $(pv_value)</tooltip>
     </border_color>
     <y>25</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_tiny.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M1)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M1) (Tiny)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M1)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M1) (Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorxU.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M1)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M1) (Alt-Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M1)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M1) (Medium)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_setup.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M1)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M1) (Setup)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M1)</Q>
           <PV>$(M1)</PV>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>Scan Parameters</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_all.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M1)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M1) (Debug)</description>
       </action>
     </actions>
@@ -3548,7 +3547,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7ddb</wuid>
+    <wuid>39872d87:13e14015f61:130d</wuid>
     <scripts />
     <height>20</height>
     <name>Menu Button</name>
@@ -3583,68 +3582,68 @@ $(pv_value)</tooltip>
     </border_color>
     <y>105</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_tiny.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M5)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M5) (Tiny)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M5)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M5) (Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorxU.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M5)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M5) (Alt-Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M5)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M5) (Medium)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_setup.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M5)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M5) (Setup)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M5)</Q>
           <PV>$(M5)</PV>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>Scan Parameters</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_all.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M5)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M5) (Debug)</description>
       </action>
     </actions>
@@ -3656,7 +3655,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7dda</wuid>
+    <wuid>39872d87:13e14015f61:130e</wuid>
     <scripts />
     <height>20</height>
     <name>Menu Button</name>
@@ -3691,68 +3690,68 @@ $(pv_value)</tooltip>
     </border_color>
     <y>125</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_tiny.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M6)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M6) (Tiny)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M6)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M6) (Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorxU.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M6)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M6) (Alt-Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M6)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M6) (Medium)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_setup.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M6)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M6) (Setup)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M6)</Q>
           <PV>$(M6)</PV>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>Scan Parameters</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_all.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M6)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M6) (Debug)</description>
       </action>
     </actions>
@@ -3764,7 +3763,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7dd9</wuid>
+    <wuid>39872d87:13e14015f61:130f</wuid>
     <scripts />
     <height>19</height>
     <name>Menu Button</name>
@@ -3799,68 +3798,68 @@ $(pv_value)</tooltip>
     </border_color>
     <y>145</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_tiny.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M7)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M7) (Tiny)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M7)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M7) (Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorxU.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M7)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M7) (Alt-Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M7)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M7) (Medium)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_setup.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M7)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M7) (Setup)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M7)</Q>
           <PV>$(M7)</PV>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>Scan Parameters</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_all.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M7)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M7) (Debug)</description>
       </action>
     </actions>
@@ -3872,7 +3871,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7dd8</wuid>
+    <wuid>39872d87:13e14015f61:1310</wuid>
     <scripts />
     <height>19</height>
     <name>Menu Button</name>
@@ -3907,68 +3906,68 @@ $(pv_value)</tooltip>
     </border_color>
     <y>165</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_tiny.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M8)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M8) (Tiny)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M8)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M8) (Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorxU.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M8)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M8) (Alt-Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M8)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M8) (Medium)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_setup.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M8)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M8) (Setup)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M8)</Q>
           <PV>$(M8)</PV>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>Scan Parameters</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_all.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M8)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M8) (Debug)</description>
       </action>
     </actions>
@@ -3980,7 +3979,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7dd7</wuid>
+    <wuid>39872d87:13e14015f61:1311</wuid>
     <scripts />
     <height>20</height>
     <name>Menu Button</name>
@@ -4015,68 +4014,68 @@ $(pv_value)</tooltip>
     </border_color>
     <y>85</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_tiny.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M4)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M4) (Tiny)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M4)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M4) (Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorxU.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M4)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M4) (Alt-Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M4)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M4) (Medium)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_setup.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M4)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M4) (Setup)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M4)</Q>
           <PV>$(M4)</PV>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>Scan Parameters</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_all.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M4)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M4) (Debug)</description>
       </action>
     </actions>
@@ -4088,7 +4087,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7dd6</wuid>
+    <wuid>39872d87:13e14015f61:1312</wuid>
     <scripts />
     <height>20</height>
     <name>Menu Button</name>
@@ -4123,68 +4122,68 @@ $(pv_value)</tooltip>
     </border_color>
     <y>45</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_tiny.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M2)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M2) (Tiny)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M2)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M2) (Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorxU.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M2)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M2) (Alt-Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M2)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M2) (Medium)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_setup.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M2)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M2) (Setup)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M2)</Q>
           <PV>$(M2)</PV>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>Scan Parameters</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_all.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M2)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M2) (Debug)</description>
       </action>
     </actions>
@@ -4196,7 +4195,7 @@ $(pv_value)</tooltip>
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
     <actions_from_pv>false</actions_from_pv>
-    <wuid>-513d5d45:139918b66dd:-7dd5</wuid>
+    <wuid>39872d87:13e14015f61:1313</wuid>
     <scripts />
     <height>20</height>
     <name>Menu Button</name>
@@ -4231,68 +4230,68 @@ $(pv_value)</tooltip>
     </border_color>
     <y>65</y>
     <actions hook="false" hook_all="false">
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_tiny.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M3)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M3) (Tiny)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M3)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M3) (Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorxU.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M3)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M3) (Alt-Small)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_more.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M3)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M3) (Medium)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_setup.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M3)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M3) (Setup)</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>scanParms.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <Q>$(M3)</Q>
           <PV>$(M3)</PV>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>Scan Parameters</description>
       </action>
-      <action type="OPEN_OPI_IN_VIEW">
+      <action type="OPEN_DISPLAY">
         <path>motorx_all.opi</path>
         <macros>
           <include_parent_macros>true</include_parent_macros>
           <M>$(M3)</M>
         </macros>
-        <Position>1</Position>
+        <replace>0</replace>
         <description>$(M3) (Debug)</description>
       </action>
     </actions>
