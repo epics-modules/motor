@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+<class>MainWindow</class>
+<widget class="QMainWindow" name="MainWindow">
+    <property name="geometry">
+        <rect>
+            <x>537</x>
+            <y>30</y>
+            <width>200</width>
+            <height>175</height>
+        </rect>
+    </property>
+    <property name="styleSheet">
+        <string>
+
+QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
+
+</string>
+    </property>
+    <widget class="QWidget" name="centralWidget">
+        <widget class="caRelatedDisplay" name="caRelatedDisplay_0">
+            <property name="geometry">
+                <rect>
+                    <x>25</x>
+                    <y>104</y>
+                    <width>150</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="background">
+                <color alpha="255">
+                    <red>187</red>
+                    <green>187</green>
+                    <blue>187</blue>
+                </color>
+            </property>
+            <property name="label">
+                <string>Extra motor PVs</string>
+            </property>
+            <property name="stackingMode">
+                <enum>Menu</enum>
+            </property>
+            <property name="labels">
+                <string>Motor 1;Motor 2</string>
+            </property>
+            <property name="files">
+                <string>XPSExtra.adl;XPSExtra.adl</string>
+            </property>
+            <property name="args">
+                <string>P=IOC:, M1=m1;P=IOC:, M1=m2</string>
+            </property>
+            <property name="removeParent">
+                <string>false;false</string>
+            </property>
+        </widget>
+        <widget class="caRelatedDisplay" name="caRelatedDisplay_1">
+            <property name="geometry">
+                <rect>
+                    <x>25</x>
+                    <y>134</y>
+                    <width>150</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="background">
+                <color alpha="255">
+                    <red>187</red>
+                    <green>187</green>
+                    <blue>187</blue>
+                </color>
+            </property>
+            <property name="label">
+                <string>Trajectory scan</string>
+            </property>
+            <property name="stackingMode">
+                <enum>Menu</enum>
+            </property>
+            <property name="labels">
+                <string>XPS Trajectory Scan</string>
+            </property>
+            <property name="files">
+                <string>trajectoryScan.adl</string>
+            </property>
+            <property name="args">
+                <string>P=IOC:, R=traj1, TITLE=XPS_trajectory,M1=m1,M2=m2</string>
+            </property>
+            <property name="removeParent">
+                <string>false</string>
+            </property>
+        </widget>
+        <widget class="caRelatedDisplay" name="caRelatedDisplay_2">
+            <property name="geometry">
+                <rect>
+                    <x>25</x>
+                    <y>74</y>
+                    <width>150</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="background">
+                <color alpha="255">
+                    <red>187</red>
+                    <green>187</green>
+                    <blue>187</blue>
+                </color>
+            </property>
+            <property name="label">
+                <string>Auxilliary I/O</string>
+            </property>
+            <property name="stackingMode">
+                <enum>Menu</enum>
+            </property>
+            <property name="labels">
+                <string>XPS Auxilliary</string>
+            </property>
+            <property name="files">
+                <string>XPSAux.adl</string>
+            </property>
+            <property name="args">
+                <string>P=IOC:, R=XPSAux</string>
+            </property>
+            <property name="removeParent">
+                <string>false</string>
+            </property>
+        </widget>
+        <widget class="caLabel" name="caLabel_0">
+            <property name="frameShape">
+                <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>6</x>
+                    <y>11</y>
+                    <width>150</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="background">
+                <color alpha="0">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="text">
+                <string>Newport XPS Test</string>
+            </property>
+            <property name="fontScaleMode">
+                <enum>ESimpleLabel::Height</enum>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+        </widget>
+        <widget class="caRelatedDisplay" name="caRelatedDisplay_3">
+            <property name="geometry">
+                <rect>
+                    <x>25</x>
+                    <y>44</y>
+                    <width>150</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="background">
+                <color alpha="255">
+                    <red>187</red>
+                    <green>187</green>
+                    <blue>187</blue>
+                </color>
+            </property>
+            <property name="label">
+                <string>Motors</string>
+            </property>
+            <property name="stackingMode">
+                <enum>Menu</enum>
+            </property>
+            <property name="labels">
+                <string>Motors</string>
+            </property>
+            <property name="files">
+                <string>motor3x.adl</string>
+            </property>
+            <property name="args">
+                <string>P=IOC:, M1=m1, M2=m2, M3=m3</string>
+            </property>
+            <property name="removeParent">
+                <string>false</string>
+            </property>
+        </widget>
+        <zorder>caLabel_0</zorder>
+        <zorder>caRelatedDisplay_0</zorder>
+        <zorder>caRelatedDisplay_1</zorder>
+        <zorder>caRelatedDisplay_2</zorder>
+        <zorder>caRelatedDisplay_3</zorder>
+    </widget>
+</widget>
+</ui>
