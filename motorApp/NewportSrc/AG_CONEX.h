@@ -26,6 +26,9 @@ public:
   asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
   asynStatus setClosedLoop(bool closedLoop);
+  asynStatus setPGain(double pGain);
+  asynStatus setIGain(double iGain);
+  asynStatus setDGain(double dGain);
 
 private:
   AG_CONEXController *pC_;        /**< Pointer to the asynMotorController to which this axis belongs.
