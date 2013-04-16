@@ -59,6 +59,9 @@ AG_CONEXController::AG_CONEXController(const char *portName, const char *serialP
   sprintf(outString_, "%dVE", controllerID_);
   status = writeReadController();
   printf("Agilis controller firmware version = %s\n", inString_);
+  
+  // Create the axis object
+  new AG_CONEXAxis(this);
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
@@ -155,7 +158,7 @@ AG_CONEXAxis* AG_CONEXController::getAxis(int axisNo)
 AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
   : asynMotorAxis(pC, 0),
     pC_(pC), 
-    currentPosition_(0), positionOffset_(0)
+    currentPosition_(0.), positionOffset_(0.)
 {
   // Read the encoder increment
   sprintf(pC_->outString_, "%dSU?", pC->controllerID_);
@@ -180,8 +183,8 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
 void AG_CONEXAxis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    fprintf(fp, "  encoderIncrement=%f\n",
-            encoderIncrement_);
+    fprintf(fp, "  currentPosition=%f, positionOffset=%f, encoderIncrement=%f, lowLimit=%f, highLimit=%f\n",
+            currentPosition_, positionOffset_, encoderIncrement_, lowLimit_, highLimit_);
   }
 
   // Call the base class method
