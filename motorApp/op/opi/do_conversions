@@ -1,8 +1,0 @@
-#!/bin/sh
-doManySed "s/MEDM_COLOR_17/callup_bg/" *.opi
-doManySed "s/MEDM_COLOR_53/ioc_read_fg/" *.opi
-doManySed "s/MEDM_COLOR_2/Gray_2/" *.opi
-doManySed "s/MEDM_COLOR_47/callup_bg/" *.opi
-doManySed "s/MEDM_COLOR_1/Gray_1/" *.opi
-doManySed "s/====/==/" *.opi
-doManySed "s/!==/!=/" *.opi
