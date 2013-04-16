@@ -33,6 +33,8 @@ private:
   double currentPosition_;
   double positionOffset_;
   double encoderIncrement_;
+  double interpolationFactor_;
+  double stepSize_;
   double highLimit_;
   double lowLimit_;
   
