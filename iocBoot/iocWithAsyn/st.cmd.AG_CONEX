@@ -34,3 +34,6 @@ asynSetTraceIOMask("Agilis1", 0, 2)
 #asynSetTraceMask("Agilis1", 0, 255)
 
 iocInit
+
+dbpf IOC:m1.RTRY 0
+dbpf IOC:m1.NTM 0
