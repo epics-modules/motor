@@ -56,13 +56,18 @@ AG_CONEXController::AG_CONEXController(const char *portName, const char *serialP
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
       "%s: cannot connect to Agilis controller\n",
       functionName);
+    return;
   }
   
   // Flush any characters that controller has, read firmware version
   sprintf(outString_, "%dVE", controllerID_);
   status = writeReadController();
-  printf("Agilis controller firmware version = %s\n", inString_);
-  
+  if (status) {
+    printf("ERROR: cannot read version information from AG_CONEX controller\n");
+    return;
+  }
+  strcpy(controllerVersion_, &inString_[4]);
+
   // Create the axis object
   new AG_CONEXAxis(this);
 
@@ -126,8 +131,9 @@ asynStatus AG_CONEXController::writeAgilis(const char *output, double timeout)
   */
 void AG_CONEXController::report(FILE *fp, int level)
 {
-  fprintf(fp, "Agilis CONEX motor driver %s, controllerID=%d, moving poll period=%f, idle poll period=%f\n", 
-    this->portName, controllerID_, movingPollPeriod_, idlePollPeriod_);
+  fprintf(fp, "Agilis CONEX motor driver %s, controllerID=%d, version=\"%s\n"
+              "  moving poll period=%f, idle poll period=%f\n", 
+    this->portName, controllerID_, controllerVersion_, movingPollPeriod_, idlePollPeriod_);
 
   // Call the base class method
   asynMotorController::report(fp, level);
@@ -163,6 +169,11 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
     pC_(pC), 
     currentPosition_(0.), positionOffset_(0.)
 {
+  // Read the stage ID
+  sprintf(pC_->outString_, "%dID?", pC->controllerID_);
+  pC_->writeReadController();
+  strcpy(stageID_, &pC_->inString_[4]);
+
   // Read the encoder increment
   sprintf(pC_->outString_, "%dSU?", pC->controllerID_);
   pC_->writeReadController();
@@ -182,7 +193,10 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
   lowLimit_ = atof(&pC_->inString_[3]);
   sprintf(pC_->outString_, "%dSR?", pC->controllerID_);
   pC_->writeReadController();
-  highLimit_ = atof(&pC_->inString_[3]);
+  highLimit_ = atof(&pC_->inString_[3]);  
+  
+  // Tell the motor record that we have an gain supprt
+  setIntegerParam(pC_->motorStatusGainSupport_, 1);
 }
 
 /** Reports on status of the axis
@@ -194,10 +208,25 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
 void AG_CONEXAxis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    fprintf(fp, "  currentPosition=%f, positionOffset=%f, encoderIncrement=%f\n"
-                "  interpolationFactor=%f, stepSize=%f, lowLimit=%f, highLimit=%f\n",
+    // Read KOP, KI, LF
+    sprintf(pC_->outString_, "%dKP?", pC_->controllerID_);
+    pC_->writeReadController();
+    KP_ = atof(&pC_->inString_[3]);
+    sprintf(pC_->outString_, "%dKI?", pC_->controllerID_);
+    pC_->writeReadController();
+    KI_ = atof(&pC_->inString_[3]);
+    sprintf(pC_->outString_, "%dLF?", pC_->controllerID_);
+    pC_->writeReadController();
+    LF_ = atof(&pC_->inString_[3]);
+
+    fprintf(fp, "  stageID=%s\n"
+                "  currentPosition=%f, positionOffset=%f, encoderIncrement=%f\n"
+                "  interpolationFactor=%f, stepSize=%f, lowLimit=%f, highLimit=%f\n"
+                "  KP=%f, KI=%f, LF=%f\n",
+            stageID_,
             currentPosition_, positionOffset_, encoderIncrement_, 
-            interpolationFactor_, stepSize_, lowLimit_, highLimit_);
+            interpolationFactor_, stepSize_, lowLimit_, highLimit_,
+            KP_, KI_, LF_);
   }
 
   // Call the base class method
@@ -271,37 +300,63 @@ asynStatus AG_CONEXAxis::setClosedLoop(bool closedLoop)
   return status;
 }
 
+asynStatus AG_CONEXAxis::getClosedLoop(bool *closedLoop)
+{
+  int status;
+  asynStatus comStatus;
+  
+    // Read the status of the motor
+  sprintf(pC_->outString_, "%dMM?", pC_->controllerID_);
+  comStatus = pC_->writeReadController();
+  // The response string is of the form "1MMn"
+  sscanf(pC_->inString_, "%*dMM%x", &status);
+  *closedLoop = (status >= 0x1e) && (status <= 0x34);
+  return comStatus;
+}
+
 asynStatus AG_CONEXAxis::setPGain(double pGain)
 {
   asynStatus status;
+  bool closedLoop;
   //static const char *functionName = "AG_CONEXAxis::setPGain";
 
+  getClosedLoop(&closedLoop);
+  setClosedLoop(false);
   // The pGain value from the motor record is between 0 and 1.
   sprintf(pC_->outString_, "%dKP%f", pC_->controllerID_, pGain*MAX_CONEX_KP);
   status = pC_->writeAgilis();
+  if (closedLoop) setClosedLoop(true);
   return status;
 }
 
 asynStatus AG_CONEXAxis::setIGain(double iGain)
 {
   asynStatus status;
+  bool closedLoop;
   //static const char *functionName = "AG_CONEXAxis::setIGain";
 
+  getClosedLoop(&closedLoop);
+  setClosedLoop(false);
   // The iGain value from the motor record is between 0 and 1.
   sprintf(pC_->outString_, "%dKI%f", pC_->controllerID_, iGain*MAX_CONEX_KI);
   status = pC_->writeAgilis();
+  if (closedLoop) setClosedLoop(true);
   return status;
 }
 
 asynStatus AG_CONEXAxis::setDGain(double dGain)
 {
   asynStatus status;
+  bool closedLoop;
   //static const char *functionName = "AG_CONEXAxis::setPGain";
 
+  getClosedLoop(&closedLoop);
+  setClosedLoop(false);
   // We are using the DGain for the Low pass filter frequency.
   // DGain value is between 0 and 1
   sprintf(pC_->outString_, "%dLF%f", pC_->controllerID_, dGain*MAX_CONEX_LF);
   status = pC_->writeAgilis();
+  if (closedLoop) setClosedLoop(true);
   return status;
 }
 
@@ -317,6 +372,7 @@ asynStatus AG_CONEXAxis::poll(bool *moving)
   double position;
   unsigned int status;
   int count;
+  bool closedLoop;
   asynStatus comStatus;
 
   // Read the current motor position
@@ -338,6 +394,11 @@ asynStatus AG_CONEXAxis::poll(bool *moving)
   if ((status == 0x1e) || (status == 0x28)) done = 0;
   setIntegerParam(pC_->motorStatusDone_, done);
   *moving = done ? false:true;
+  
+  // Set the power-on (closed loop) status of the motor
+  comStatus = getClosedLoop(&closedLoop);
+  if (comStatus) goto skip;
+  setIntegerParam(pC_->motorStatusPowerOn_, closedLoop ? 1:0);
 
   setIntegerParam(pC_->motorStatusLowLimit_, 0);
   setIntegerParam(pC_->motorStatusHighLimit_, 0);
