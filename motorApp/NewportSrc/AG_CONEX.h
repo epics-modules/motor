@@ -33,6 +33,7 @@ public:
 private:
   AG_CONEXController *pC_;        /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
+  asynStatus getClosedLoop(bool *closedLoop);
   double currentPosition_;
   double positionOffset_;
   double encoderIncrement_;
@@ -40,6 +41,10 @@ private:
   double stepSize_;
   double highLimit_;
   double lowLimit_;
+  double KP_;
+  double KI_;
+  double LF_;
+  char   stageID_[40];
   
 friend class AG_CONEXController;
 };
@@ -56,6 +61,7 @@ public:
 
 private:
   int controllerID_;
+  char controllerVersion_[40];
 
   friend class AG_CONEXAxis;
 };
