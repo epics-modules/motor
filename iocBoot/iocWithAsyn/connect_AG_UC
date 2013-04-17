@@ -1,0 +1,2 @@
+sudo modprobe ftdi_sio vendor=0x104d product=0x3000
+sudo chmod o+rw /dev/ttyUSB*
