@@ -14,6 +14,9 @@ SRCS += AerotechRegister.cc
 SRCS += devSoloist.cc  drvSoloist.cc
 SRCS += drvEnsembleAsyn.cc
 
+# EnsemblePSOFly.db support
+SRCS += concatString.c
+
 Aerotech_LIBS += motor asyn
 Aerotech_LIBS += $(EPICS_BASE_IOC_LIBS)
 
