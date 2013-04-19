@@ -6,4 +6,4 @@ driver(drvSoloist)
 driver(motorEnsemble)
 
 registrar(AerotechRegister)
-
+registrar(concatStringRegister)
