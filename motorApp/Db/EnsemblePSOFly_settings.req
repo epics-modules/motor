@@ -1,0 +1,6 @@
+$(P)$(Q)startPos
+$(P)$(Q)endPos
+$(P)$(Q)slewSpeed
+$(P)$(Q)scanDelta
+$(P)$(Q)detSetupTime
+$(P)$(Q)pulseType
