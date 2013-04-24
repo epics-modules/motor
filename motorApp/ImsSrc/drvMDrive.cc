@@ -39,7 +39,7 @@ HeadURL:        $URL$
  * Verified with firmware:
  *
  *  - 1.071 E
- *  - 3.003 (MDI1FRD17B4-EQ
+ *  - 3.003 (MDI1FRD17B4-EQ)
  *  - 3.010
  *
  * Modification Log:
