@@ -1,17 +1,18 @@
 /*
- * TranslateErrors.c
- *
- *
- * This file is automagically generated from the central error code list.
- * DO NOT ADD ERROR CODES IN THIS FILE! Use the error list and the generation tool instead!
- *
- */
- 
-/*
+FILENAME...     translateerror.c
+
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
+
 Version:        $Revision$
 Modified By:    $Author$
 Last Modified:  $Date$
 HeadURL:        $URL$
+
+Original Author: Steffen Rau 
 */
 
 #include <stdio.h>
@@ -2120,6 +2121,141 @@ BOOL TranslatePIError(const int error, char* szBuffer, const int maxlen)
             }
             break;
         }
+        case(PI_CNTR_NODE_DOES_NOT_EXIST): /* 530 */
+        {
+            if (strlen("A command refers to a node that does not exist")<maxlen)
+            {
+                sprintf(szBuffer, "A command refers to a node that does not exist");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_PARENT_NODE_DOES_NOT_EXIST): /* 531 */
+        {
+            if (strlen("A command refers to a node that has no parent node")<maxlen)
+            {
+                sprintf(szBuffer, "A command refers to a node that has no parent node");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODE_IN_USE): /* 532 */
+        {
+            if (strlen("Attempt to delete a node that is in use")<maxlen)
+            {
+                sprintf(szBuffer, "Attempt to delete a node that is in use");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODE_DEFINITION_IS_CYCLIC): /* 533 */
+        {
+            if (strlen("Definition of a node is cyclic")<maxlen)
+            {
+                sprintf(szBuffer, "Definition of a node is cyclic");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODE_CHAIN_INVALID): /* 534 */
+        {
+            if (strlen("The node chain does not end in the \"0\" node")<maxlen)
+            {
+                sprintf(szBuffer, "The node chain does not end in the \"0\" node");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODE_DEFINITION_NOT_CONSISTENT): /* 535 */
+        {
+            if (strlen("The definition of a coordinate transformation is erroneous")<maxlen)
+            {
+                sprintf(szBuffer, "The definition of a coordinate transformation is erroneous");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_HEXAPOD_IN_MOTION): /* 536 */
+        {
+            if (strlen("Transformation cannot be defined as long as Hexapod is in motion")<maxlen)
+            {
+                sprintf(szBuffer, "Transformation cannot be defined as long as Hexapod is in motion");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_TRANSFORMATION_TYPE_NOT_SUPPORTED): /* 537 */
+        {
+            if (strlen("Transformation node cannot be activated")<maxlen)
+            {
+                sprintf(szBuffer, "Transformation node cannot be activated");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODE_TYPE_DIFFERS): /* 538 */
+        {
+            if (strlen("A node can only be replaced by a node of the same type")<maxlen)
+            {
+                sprintf(szBuffer, "A node can only be replaced by a node of the same type");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODE_PARENT_IDENTICAL_TO_CHILD): /* 539 */
+        {
+            if (strlen("A node cannot be linked to itself")<maxlen)
+            {
+                sprintf(szBuffer, "A node cannot be linked to itself");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODE_DEFINITION_INCONSISTENT): /* 540 */
+        {
+            if (strlen("Node definition is erroneous or not complete (replace or delete it)")<maxlen)
+            {
+                sprintf(szBuffer, "Node definition is erroneous or not complete (replace or delete it)");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_ZERO_NODE_CANNOT_BE_CHANGED_OR_REPLACED): /* 541 */
+        {
+            if (strlen("0 is the root node and cannot be modified")<maxlen)
+            {
+                sprintf(szBuffer, "0 is the root node and cannot be modified");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODES_NOT_IN_SAME_CHAIN): /* 542 */
+        {
+            if (strlen("The nodes are not part of the same chain")<maxlen)
+            {
+                sprintf(szBuffer, "The nodes are not part of the same chain");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NODE_MEMORY_FULL): /* 543 */
+        {
+            if (strlen("Unused nodes must be deleted before new nodes can be stored")<maxlen)
+            {
+                sprintf(szBuffer, "Unused nodes must be deleted before new nodes can be stored");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_PIVOT_POINT_FEATURE_NOT_SUPPORTED): /* 544 */
+        {
+            if (strlen("With some transformations pivot point usage is not supported")<maxlen)
+            {
+                sprintf(szBuffer, "With some transformations pivot point usage is not supported");
+                return TRUE;
+            }
+            break;
+        }
         case(PI_CNTR_UNKNOWN_ERROR): /* 555 */
         {
             if (strlen("BasMac: unknown controller error")<maxlen)
@@ -2170,6 +2306,15 @@ BOOL TranslatePIError(const int error, char* szBuffer, const int maxlen)
             if (strlen("Maximum value of input signal has been exceeded")<maxlen)
             {
                 sprintf(szBuffer, "Maximum value of input signal has been exceeded");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_NO_INTEGER): /* 607 */
+        {
+            if (strlen("Value is not integer")<maxlen)
+            {
+                sprintf(szBuffer, "Value is not integer");
                 return TRUE;
             }
             break;
@@ -2350,6 +2495,15 @@ BOOL TranslatePIError(const int error, char* szBuffer, const int maxlen)
             if (strlen("Unknown cluster identifier")<maxlen)
             {
                 sprintf(szBuffer, "Unknown cluster identifier");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_TOO_MANY_TCP_CONNECTIONS_OPEN): /* 1090 */
+        {
+            if (strlen("There are too many open tcpip connections")<maxlen)
+            {
+                sprintf(szBuffer, "There are too many open tcpip connections");
                 return TRUE;
             }
             break;
@@ -2566,6 +2720,60 @@ BOOL TranslatePIError(const int error, char* szBuffer, const int maxlen)
             if (strlen("Axis must be configured for this action")<maxlen)
             {
                 sprintf(szBuffer, "Axis must be configured for this action");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_SENSOR_ABS_INVALID_VALUE): /* 6000 */
+        {
+            if (strlen("Invalid preset value of absolute sensor")<maxlen)
+            {
+                sprintf(szBuffer, "Invalid preset value of absolute sensor");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_SENSOR_ABS_WRITE_ERROR): /* 6001 */
+        {
+            if (strlen("Error while writing to sensor")<maxlen)
+            {
+                sprintf(szBuffer, "Error while writing to sensor");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_SENSOR_ABS_READ_ERROR): /* 6002 */
+        {
+            if (strlen("Error while reading from sensor")<maxlen)
+            {
+                sprintf(szBuffer, "Error while reading from sensor");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_SENSOR_ABS_CRC_ERROR): /* 6003 */
+        {
+            if (strlen("Checksum error of absolute sensor")<maxlen)
+            {
+                sprintf(szBuffer, "Checksum error of absolute sensor");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_SENSOR_ABS_ERROR): /* 6004 */
+        {
+            if (strlen("General error of absolute sensor")<maxlen)
+            {
+                sprintf(szBuffer, "General error of absolute sensor");
+                return TRUE;
+            }
+            break;
+        }
+        case(PI_CNTR_SENSOR_ABS_OVERFLOW): /* 6005 */
+        {
+            if (strlen("Overflow of absolute sensor position")<maxlen)
+            {
+                sprintf(szBuffer, "Overflow of absolute sensor position");
                 return TRUE;
             }
             break;

@@ -1,17 +1,21 @@
 /*
-FILENAME...    PIasynController.cpp
-USAGE...    Simulated Motor Support.
+FILENAME...     PIasynController.cpp
+USAGE...
+
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
 
 Version:        $Revision$
 Modified By:    $Author$
 Last Modified:  $Date$
 HeadURL:        $URL$
 
-Based on drvMotorSim.c
+Original Author: Steffen Rau 
 
-Mark Rivers
-December 13, 2009
-
+Based on drvMotorSim.c, Mark Rivers, December 13, 2009
 */
 
 
@@ -26,12 +30,12 @@ December 13, 2009
 #include <epicsMutex.h>
 #include <ellLib.h>
 #include <iocsh.h>
+#include <epicsExport.h>
 #include <motor_interface.h>
 
 #include "PIasynAxis.h"
 #include "PIasynController.h"
 #include "PIGCSController.h"
-#include <epicsExport.h>
 
 //#undef asynPrint
 //#define asynPrint(user,reason,format...) 0

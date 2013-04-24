@@ -1,6 +1,11 @@
 /*
-FILENAME...    PIasynController.cpp
-USAGE...    Simulated Motor Support.
+FILENAME...     PIasynController.cpp
+ 
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
  
 Version:        $Revision$
 Modified By:    $Author$

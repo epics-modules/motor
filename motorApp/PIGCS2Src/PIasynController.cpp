@@ -1,16 +1,22 @@
 /*
-FILENAME...    PIasynController.cpp
-USAGE...    PI GCS2 Motor Support.
+FILENAME...     PIasynController.cpp
+USAGE...        PI GCS2 Motor Support.
+ 
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
  
 Version:        $Revision$
 Modified By:    $Author$
 Last Modified:  $Date$
 HeadURL:        $URL$
+ 
+Original Author: Steffen Rau
+Created: January 2011
 
-Based on drvMotorSim.c
-from Mark Rivers, December 13, 2009
-
-Steffen Rau, Physik Instrumente (PI) GmbH & Co KG
+Based on drvMotorSim.c, Mark Rivers, December 13, 2009
 
 */
 
@@ -27,6 +33,7 @@ Steffen Rau, Physik Instrumente (PI) GmbH & Co KG
 #include <epicsMutex.h>
 #include <ellLib.h>
 #include <iocsh.h>
+#include <epicsExport.h>
 #include <asynOctetSyncIO.h>
 #include <motor_interface.h>
 #include <ctype.h>
@@ -34,7 +41,6 @@ Steffen Rau, Physik Instrumente (PI) GmbH & Co KG
 #include "PIasynController.h"
 #include "PIGCSController.h"
 #include "PIasynAxis.h"
-#include <epicsExport.h>
 
 
 //#undef asynPrint
@@ -55,6 +61,7 @@ PIasynController::PIasynController(const char *portName, const char* asynPort, i
             1, // autoconnect
             priority, stackSize)
 	, m_pGCSController( NULL )
+	, movesDeferred( 0 )
 {
     createParam(PI_SUP_POSITION_String,		asynParamFloat64,	&PI_SUP_POSITION);
     createParam(PI_SUP_TARGET_String,		asynParamFloat64,	&PI_SUP_TARGET);

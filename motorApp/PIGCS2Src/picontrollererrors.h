@@ -1,14 +1,20 @@
-// PIControllerErrors.h
-//
-// This file defines symbols for each error code used in C/C++ programs.
-//
-// This file is automagically generated from the central error code list.
-// DO NOT ADD ERROR CODES IN THIS FILE! Use the error list and the generation tool instead!
-//
-// after generation open file in VS and create the constants with numbers.
-// This can be done by performing 2 search/replace actions with regulyr expression activetad:
-// search for "\#define:b{:i}:b*{:z}L" replace with "#define \1__\2 \2L\n#define \1 \2L"
-// search for "\#define:b{:i}:b*-{:z}L" replace with "#define \1__MINUS\2 -\2L\n#define \1 -\2L"
+/*
+FILENAME...     picontrollererrors.h
+ 
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
+  
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+ 
+Original Author: Steffen Rau, January 2011
+*/
+
 
 #ifndef __PI_CONTROLLER_ERROS_H__
 #define __PI_CONTROLLER_ERROS_H__
@@ -715,6 +721,51 @@
 #define PI_CNTR_SERVO_LOOP_UNSTABLE__506 506L
 #define PI_CNTR_SERVO_LOOP_UNSTABLE 506L  /**< \ingroup err
 		Servo loop was unstable due to wrong parameter setting and switched off to avoid damage. */
+#define PI_CNTR_NODE_DOES_NOT_EXIST__530 530L
+#define PI_CNTR_NODE_DOES_NOT_EXIST 530L  /**< \ingroup err
+		A command refers to a node that does not exist */
+#define PI_CNTR_PARENT_NODE_DOES_NOT_EXIST__531 531L
+#define PI_CNTR_PARENT_NODE_DOES_NOT_EXIST 531L  /**< \ingroup err
+		A command refers to a node that has no parent node */
+#define PI_CNTR_NODE_IN_USE__532 532L
+#define PI_CNTR_NODE_IN_USE 532L  /**< \ingroup err
+		Attempt to delete a node that is in use */
+#define PI_CNTR_NODE_DEFINITION_IS_CYCLIC__533 533L
+#define PI_CNTR_NODE_DEFINITION_IS_CYCLIC 533L  /**< \ingroup err
+		Definition of a node is cyclic */
+#define PI_CNTR_NODE_CHAIN_INVALID__534 534L
+#define PI_CNTR_NODE_CHAIN_INVALID 534L  /**< \ingroup err
+		The node chain does not end in the \"0\" node */
+#define PI_CNTR_NODE_DEFINITION_NOT_CONSISTENT__535 535L
+#define PI_CNTR_NODE_DEFINITION_NOT_CONSISTENT 535L  /**< \ingroup err
+		The definition of a coordinate transformation is erroneous */
+#define PI_CNTR_HEXAPOD_IN_MOTION__536 536L
+#define PI_CNTR_HEXAPOD_IN_MOTION 536L  /**< \ingroup err
+		Transformation cannot be defined as long as Hexapod is in motion */
+#define PI_CNTR_TRANSFORMATION_TYPE_NOT_SUPPORTED__537 537L
+#define PI_CNTR_TRANSFORMATION_TYPE_NOT_SUPPORTED 537L  /**< \ingroup err
+		Transformation node cannot be activated */
+#define PI_CNTR_NODE_TYPE_DIFFERS__538 538L
+#define PI_CNTR_NODE_TYPE_DIFFERS 538L  /**< \ingroup err
+		A node can only be replaced by a node of the same type */
+#define PI_CNTR_NODE_PARENT_IDENTICAL_TO_CHILD__539 539L
+#define PI_CNTR_NODE_PARENT_IDENTICAL_TO_CHILD 539L  /**< \ingroup err
+		A node cannot be linked to itself */
+#define PI_CNTR_NODE_DEFINITION_INCONSISTENT__540 540L
+#define PI_CNTR_NODE_DEFINITION_INCONSISTENT 540L  /**< \ingroup err
+		Node definition is erroneous or not complete (replace or delete it) */
+#define PI_CNTR_ZERO_NODE_CANNOT_BE_CHANGED_OR_REPLACED__541 541L
+#define PI_CNTR_ZERO_NODE_CANNOT_BE_CHANGED_OR_REPLACED 541L  /**< \ingroup err
+		0 is the root node and cannot be modified */
+#define PI_CNTR_NODES_NOT_IN_SAME_CHAIN__542 542L
+#define PI_CNTR_NODES_NOT_IN_SAME_CHAIN 542L  /**< \ingroup err
+		The nodes are not part of the same chain */
+#define PI_CNTR_NODE_MEMORY_FULL__543 543L
+#define PI_CNTR_NODE_MEMORY_FULL 543L  /**< \ingroup err
+		Unused nodes must be deleted before new nodes can be stored */
+#define PI_CNTR_PIVOT_POINT_FEATURE_NOT_SUPPORTED__544 544L
+#define PI_CNTR_PIVOT_POINT_FEATURE_NOT_SUPPORTED 544L  /**< \ingroup err
+		With some transformations pivot point usage is not supported */
 #define PI_CNTR_UNKNOWN_ERROR__555 555L
 #define PI_CNTR_UNKNOWN_ERROR 555L  /**< \ingroup err
 		BasMac: unknown controller error */
@@ -733,6 +784,9 @@
 #define PI_CNTR_INPUT_OUT_OF_RANGE__606 606L
 #define PI_CNTR_INPUT_OUT_OF_RANGE 606L  /**< \ingroup err
 		Maximum value of input signal has been exceeded */
+#define PI_CNTR_NO_INTEGER__607 607L
+#define PI_CNTR_NO_INTEGER 607L  /**< \ingroup err
+		Value is not integer */
 #define PI_CNTR_TOO_MANY_NESTED_MACROS__1000 1000L
 #define PI_CNTR_TOO_MANY_NESTED_MACROS 1000L  /**< \ingroup err
 		Too many nested macros */
@@ -793,6 +847,9 @@
 #define PI_CNTR_PROFILE_UNKNOWN_CLUSTER_IDENTIFIER__1073 1073L
 #define PI_CNTR_PROFILE_UNKNOWN_CLUSTER_IDENTIFIER 1073L  /**< \ingroup err
 		Unknown cluster identifier */
+#define PI_CNTR_TOO_MANY_TCP_CONNECTIONS_OPEN__1090 1090L
+#define PI_CNTR_TOO_MANY_TCP_CONNECTIONS_OPEN 1090L  /**< \ingroup err
+		There are too many open tcpip connections */
 #define PI_CNTR_ALREADY_HAS_SERIAL_NUMBER__2000 2000L
 #define PI_CNTR_ALREADY_HAS_SERIAL_NUMBER 2000L  /**< \ingroup err
 		Controller already has a serial number */
@@ -865,6 +922,24 @@
 #define PI_CNTR_AXIS_NOT_CONFIGURED__5200 5200L
 #define PI_CNTR_AXIS_NOT_CONFIGURED 5200L  /**< \ingroup err
 		Axis must be configured for this action */
+#define PI_CNTR_SENSOR_ABS_INVALID_VALUE__6000 6000L
+#define PI_CNTR_SENSOR_ABS_INVALID_VALUE 6000L  /**< \ingroup err
+		Invalid preset value of absolute sensor */
+#define PI_CNTR_SENSOR_ABS_WRITE_ERROR__6001 6001L
+#define PI_CNTR_SENSOR_ABS_WRITE_ERROR 6001L  /**< \ingroup err
+		Error while writing to sensor */
+#define PI_CNTR_SENSOR_ABS_READ_ERROR__6002 6002L
+#define PI_CNTR_SENSOR_ABS_READ_ERROR 6002L  /**< \ingroup err
+		Error while reading from sensor */
+#define PI_CNTR_SENSOR_ABS_CRC_ERROR__6003 6003L
+#define PI_CNTR_SENSOR_ABS_CRC_ERROR 6003L  /**< \ingroup err
+		Checksum error of absolute sensor */
+#define PI_CNTR_SENSOR_ABS_ERROR__6004 6004L
+#define PI_CNTR_SENSOR_ABS_ERROR 6004L  /**< \ingroup err
+		General error of absolute sensor */
+#define PI_CNTR_SENSOR_ABS_OVERFLOW__6005 6005L
+#define PI_CNTR_SENSOR_ABS_OVERFLOW 6005L  /**< \ingroup err
+		Overflow of absolute sensor position */
 //
 //  End of Controller Errors
 //////////////////////////////////////////////////

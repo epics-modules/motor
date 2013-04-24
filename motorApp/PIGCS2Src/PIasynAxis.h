@@ -1,19 +1,22 @@
 /*
-FILENAME...    PIasynController.cpp
-USAGE...    PI GCS Motor Support.
-
+FILENAME...     PIasynAxis.h
+USAGE...        PI GCS Motor Support.
+ 
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
+ 
 Version:        $Revision$
 Modified By:    $Author$
 Last Modified:  $Date$
 HeadURL:        $URL$
 
-Based on drvMotorSim.c
+Original Author: Steffen Rau 
+Created: January 2011
 
-Mark Rivers
-December 13, 2009
-
-Steffen Rau,
-January 2011
+Based on drvMotorSim.c, Mark Rivers, December 13, 2009
 */
 
 

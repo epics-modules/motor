@@ -1,8 +1,19 @@
 /*
- * PIC702Controller.h
- *
- *      Author: sra
- */
+FILENAME...     PIC702Controller.h
+
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
+
+Version:        $Revision$
+Modified By:    $Author$
+Last Modified:  $Date$
+HeadURL:        $URL$
+
+Original Author: Steffen Rau
+*/
 
 #ifndef PIC702CONTROLLER_H_
 #define PIC702CONTROLLER_H_

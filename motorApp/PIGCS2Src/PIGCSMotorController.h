@@ -1,15 +1,19 @@
 /*
- * PIGCScontroller.h
- *
- *  Created on: 15.12.2010
- *      Author: sra
- */
- 
-/*
+FILENAME...     PIGCSMotorController.h
+
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
+
 Version:        $Revision$
 Modified By:    $Author$
 Last Modified:  $Date$
 HeadURL:        $URL$
+
+Original Author: Steffen Rau 
+Created: 15.12.2010
 */
 
 #ifndef PIGCSMOTORCONTROLLER_H_

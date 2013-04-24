@@ -1,14 +1,18 @@
 /*
- * PIE755Controller.h
- *
- *      Author: sra
- */
- 
-/*
+FILENAME...     PIE755Controller.h
+
+*************************************************************************
+* Copyright (c) 2011-2013 Physik Instrumente (PI) GmbH & Co. KG
+* This file is distributed subject to the EPICS Open License Agreement
+* found in the file LICENSE that is included with this distribution.
+*************************************************************************
+
 Version:        $Revision$
 Modified By:    $Author$
 Last Modified:  $Date$
 HeadURL:        $URL$
+
+Original Author: Steffen Rau 
 */
 
 #ifndef PIE755CONTROLLER_H_
