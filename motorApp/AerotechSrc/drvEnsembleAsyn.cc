@@ -64,6 +64,7 @@ in file LICENSE that is included with this distribution.
 *                  - Reading both feedback and commanded positions.
 *                  - Deleted duplicate error messages. 
 * .17 09-27-12 rls - Bug fix for incorrect jog acceleration rate.
+* .18 09-27-12 rls - Support for actual velocity in status update. 
 */
 
 
@@ -800,6 +801,20 @@ static void EnsemblePoller(EnsembleController *pController)
                         PRINT(pAxis->logParam, TERROR, "EnsemblePoller: controller fault on axis=%d fault=0x%X\n", itera, axisFault);
                     }
                 }
+            }
+
+            sprintf(outputBuff, "VFBK(@%d)", pAxis->axis);
+            comStatus = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
+            if (comStatus != asynSuccess)
+            {
+                motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
+                epicsMutexUnlock(pAxis->mutexId);
+                continue;
+            }
+            else
+            {
+                double actvelocity = atof(&inputBuff[1]) * 1000.;
+                motorParam->setDouble(pAxis->params, motorAxisActualVel, actvelocity);
             }
             motorParam->callCallback(pAxis->params);
             epicsMutexUnlock(pAxis->mutexId);
