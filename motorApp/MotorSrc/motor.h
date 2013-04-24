@@ -1,11 +1,11 @@
 /*
-FILENAME...	motor.h
-USAGE...	Definitions and structures common to all levels of motorRecord
-		support (i.e., record, device and driver).
+FILENAME...     motor.h
+USAGE...        Definitions and structures common to all levels of motorRecord
+                support (i.e., record, device and driver).
 
-Version:	$Revision: 1.21 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-04-27 14:28:42 $
+Version:        $Revision: 1.21 $
+Modified By:    $Author: sluiter $
+Last Modified:  $Date: 2009-04-27 14:28:42 $
 */
 
 /*
@@ -22,27 +22,27 @@ Last Modified:	$Date: 2009-04-27 14:28:42 $
  *      and (W-31-109-ENG-38) at Argonne National Laboratory.
  *
  *      Initial development by:
- *	      The Controls and Automation Group (AT-8)
- *	      Ground Test Accelerator
- *	      Accelerator Technology Division
- *	      Los Alamos National Laboratory
+ *            The Controls and Automation Group (AT-8)
+ *            Ground Test Accelerator
+ *            Accelerator Technology Division
+ *            Los Alamos National Laboratory
  *
  *      Co-developed with
- *	      The Controls and Computing Group
- *	      Accelerator Systems Division
- *	      Advanced Photon Source
- *	      Argonne National Laboratory
+ *            The Controls and Computing Group
+ *            Accelerator Systems Division
+ *            Advanced Photon Source
+ *            Argonne National Laboratory
  *
  * Modification Log:
  * -----------------
  *
  * .01 10-21-02 rls - Convert to R3.14.x and C++.
  * .02 12-12-03 rls - Added MAX_SCAN_RATE.
- *		    - Converted MSTA #define's to bit field.
+ *                  - Converted MSTA #define's to bit field.
  * .03 08-30-04 rls - Added osiUnistd.h for RTEMS.
  * .04 09-20-04 rls - Increase max. axis / board to 32 for Delta Tau PMAC.
  * .05 12-21-04 rls - Changed pre-compiler instructions for LSB/MSB_First
- *		      to support MS Visual C.
+ *                    to support MS Visual C.
  * .06 01-27-06 rls - Added LT_EPICSBASE macro for test EPICS base versions.
  * .07 11-19-08 rls - More extensive bit field tests.
  * .08 00-09-10 rls - GNU preprocessor assertions are deprecated with VxWorks
@@ -53,8 +53,8 @@ Last Modified:	$Date: 2009-04-27 14:28:42 $
  *                    the defined() operator.
  */
 
-#ifndef	INCmotorh
-#define	INCmotorh 1
+#ifndef INCmotorh
+#define INCmotorh 1
 
 #include <stdio.h>
 #include <dbScan.h>
@@ -67,7 +67,7 @@ Last Modified:	$Date: 2009-04-27 14:28:42 $
 
 /* Maximum message size of all supported devices; see drv[device].h for maximum
 message size for each device. */
-#define MAX_MSG_SIZE	300
+#define MAX_MSG_SIZE    300
 
 #if defined(OK)
 #undef OK
@@ -81,7 +81,7 @@ typedef enum RTN_VALUES {OK = 0, ERROR = 1} RTN_STATUS;
 
 typedef enum CALLBACK_VALUES {NOTHING_DONE = 0, CALLBACK_DATA = 1} CALLBACK_VALUE;
 
-#define NINT(f)	(long)((f)>0 ? (f)+0.5 : (f)-0.5)	/* Nearest integer. */
+#define NINT(f) (long)((f)>0 ? (f)+0.5 : (f)-0.5)       /* Nearest integer. */
 
 /* Motor Record Command Set. !WARNING! this enumeration must match ALL of the
    following (up to and including JOG_VELOCITY);
@@ -90,42 +90,42 @@ typedef enum CALLBACK_VALUES {NOTHING_DONE = 0, CALLBACK_DATA = 1} CALLBACK_VALU
 */
 
 typedef enum  {
-	MOVE_ABS,	/* Absolute Move. */
-	MOVE_REL,	/* Relative Move. */
-	HOME_FOR,	/* Home Forward. */
-	HOME_REV,	/* Home Reverse. */
-	LOAD_POS,	/* Load Position. */
-	SET_VEL_BASE,	/* Set Minimum Velocity. */
-	SET_VELOCITY,	/* Set Jog and Trajectory Velocity. */
-	SET_ACCEL,	/* Set Acceleration. */
-	GO,		/* Start previously programmed move. */
-	SET_ENC_RATIO,	/* Set Encoder Ratio. */
-	GET_INFO,	/* Update Motor Status. */
-	STOP_AXIS,	/* Stop Axis Motion. */
-	JOG,		/* Momentary Jog. */
-	SET_PGAIN,	/* Set Proportional Gain. */
-	SET_IGAIN,	/* Set Integral Gain. */
-	SET_DGAIN,	/* Set Derivative Gain. */
-	ENABLE_TORQUE,	/* Enable Servo Closed-Loop Control. */
-	DISABL_TORQUE,	/* Disable Servo Closed-Loop Control. */
-	PRIMITIVE,	/* Primitive Controller command. */
-	SET_HIGH_LIMIT,	/* Set High Travel Limit. */
-	SET_LOW_LIMIT,	/* Set Low Travel Limit. */
-	JOG_VELOCITY,	/* Change Jog velocity. */
-	SET_RESOLUTION	/* Set resolution */
+        MOVE_ABS,       /* Absolute Move. */
+        MOVE_REL,       /* Relative Move. */
+        HOME_FOR,       /* Home Forward. */
+        HOME_REV,       /* Home Reverse. */
+        LOAD_POS,       /* Load Position. */
+        SET_VEL_BASE,   /* Set Minimum Velocity. */
+        SET_VELOCITY,   /* Set Jog and Trajectory Velocity. */
+        SET_ACCEL,      /* Set Acceleration. */
+        GO,             /* Start previously programmed move. */
+        SET_ENC_RATIO,  /* Set Encoder Ratio. */
+        GET_INFO,       /* Update Motor Status. */
+        STOP_AXIS,      /* Stop Axis Motion. */
+        JOG,            /* Momentary Jog. */
+        SET_PGAIN,      /* Set Proportional Gain. */
+        SET_IGAIN,      /* Set Integral Gain. */
+        SET_DGAIN,      /* Set Derivative Gain. */
+        ENABLE_TORQUE,  /* Enable Servo Closed-Loop Control. */
+        DISABL_TORQUE,  /* Disable Servo Closed-Loop Control. */
+        PRIMITIVE,      /* Primitive Controller command. */
+        SET_HIGH_LIMIT, /* Set High Travel Limit. */
+        SET_LOW_LIMIT,  /* Set Low Travel Limit. */
+        JOG_VELOCITY,   /* Change Jog velocity. */
+        SET_RESOLUTION  /* Set resolution */
 } motor_cmnd;
 
 
 /* -------------------------------------------------- */
 
 /* driver and device support parameters */
-#define MAX_SCAN_RATE	60	/* Maximum polling rate in HZ. */
-#define SCAN_RATE	6	/* Default polling rate in HZ. */
-#define MAX_COUNT	50000	/*19000*/	/* timeout value */
-#define MAX_AXIS	32	/* max number of axis per board */
+#define MAX_SCAN_RATE   60      /* Maximum polling rate in HZ. */
+#define SCAN_RATE       6       /* Default polling rate in HZ. */
+#define MAX_COUNT       50000   /*19000*/       /* timeout value */
+#define MAX_AXIS        32      /* max number of axis per board */
 
-#define NO		0
-#define YES		1
+#define NO              0
+#define YES             1
 
 /* Define, from top to bottom, how bit fields are packed. */
 /* This works for gnu, SunPro, MS Visual C. */
@@ -137,7 +137,7 @@ typedef enum  {
     #define LSB_First (TRUE)  /* LSB is packed first. */    
 #elif defined(sparc) || defined(m68k) || defined(powerpc)
     #define MSB_First (TRUE)  /* MSB is packed first. */
-#elif (CPU == PPC604) || (CPU == PPC603) || (CPU==PPC85XX) || (CPU == MC68040) || (CPU == PPC32)
+#elif (CPU == PPC604) || (CPU == PPC603) || (CPU == PPC85XX) || (CPU == MC68040) || (CPU == PPC32)
     #define MSB_First (TRUE)  /* MSB is packed first. */
 #else
     #error: unknown bit order!
@@ -152,39 +152,39 @@ typedef union
     struct
     {
 #ifdef MSB_First
-	unsigned int na		    :17;/* N/A bits  */
+        unsigned int na             :17;/* N/A bits  */
         unsigned int RA_HOMED       :1; /* Axis has been homed.*/
-	unsigned int RA_MINUS_LS    :1;	/* minus limit switch has been hit */
-	unsigned int CNTRL_COMM_ERR :1;	/* Controller communication error. */
-	unsigned int GAIN_SUPPORT   :1;	/* Motor supports closed-loop position control. */
-	unsigned int RA_MOVING      :1;	/* non-zero velocity present */
-	unsigned int RA_PROBLEM     :1; /* driver stopped polling */
-	unsigned int EA_PRESENT     :1; /* encoder is present */
-	unsigned int EA_HOME        :1; /* encoder home signal on */
-	unsigned int EA_SLIP_STALL  :1; /* slip/stall detected */
-	unsigned int EA_POSITION    :1; /* position maintenence enabled */
-	unsigned int EA_SLIP        :1; /* encoder slip enabled */
-	unsigned int RA_HOME        :1; /* The home signal is on */
-	unsigned int RA_PLUS_LS     :1; /* plus limit switch has been hit */
-	unsigned int RA_DONE        :1;	/* a motion is complete */
-	unsigned int RA_DIRECTION   :1;	/* (last) 0=Negative, 1=Positive */
+        unsigned int RA_MINUS_LS    :1; /* minus limit switch has been hit */
+        unsigned int CNTRL_COMM_ERR :1; /* Controller communication error. */
+        unsigned int GAIN_SUPPORT   :1; /* Motor supports closed-loop position control. */
+        unsigned int RA_MOVING      :1; /* non-zero velocity present */
+        unsigned int RA_PROBLEM     :1; /* driver stopped polling */
+        unsigned int EA_PRESENT     :1; /* encoder is present */
+        unsigned int EA_HOME        :1; /* encoder home signal on */
+        unsigned int EA_SLIP_STALL  :1; /* slip/stall detected */
+        unsigned int EA_POSITION    :1; /* position maintenence enabled */
+        unsigned int EA_SLIP        :1; /* encoder slip enabled */
+        unsigned int RA_HOME        :1; /* The home signal is on */
+        unsigned int RA_PLUS_LS     :1; /* plus limit switch has been hit */
+        unsigned int RA_DONE        :1; /* a motion is complete */
+        unsigned int RA_DIRECTION   :1; /* (last) 0=Negative, 1=Positive */
 #else
-	unsigned int RA_DIRECTION   :1;	/* (last) 0=Negative, 1=Positive */
-	unsigned int RA_DONE        :1;	/* a motion is complete */
-	unsigned int RA_PLUS_LS     :1; /* plus limit switch has been hit */
-	unsigned int RA_HOME        :1; /* The home signal is on */
-	unsigned int EA_SLIP        :1; /* encoder slip enabled */
-	unsigned int EA_POSITION    :1; /* position maintenence enabled */
-	unsigned int EA_SLIP_STALL  :1; /* slip/stall detected */
-	unsigned int EA_HOME        :1; /* encoder home signal on */
-	unsigned int EA_PRESENT     :1; /* encoder is present */
-	unsigned int RA_PROBLEM     :1; /* driver stopped polling */
-	unsigned int RA_MOVING      :1;	/* non-zero velocity present */
-	unsigned int GAIN_SUPPORT   :1;	/* Motor supports closed-loop position control. */
-	unsigned int CNTRL_COMM_ERR :1;	/* Controller communication error. */
-	unsigned int RA_MINUS_LS    :1;	/* minus limit switch has been hit */
+        unsigned int RA_DIRECTION   :1; /* (last) 0=Negative, 1=Positive */
+        unsigned int RA_DONE        :1; /* a motion is complete */
+        unsigned int RA_PLUS_LS     :1; /* plus limit switch has been hit */
+        unsigned int RA_HOME        :1; /* The home signal is on */
+        unsigned int EA_SLIP        :1; /* encoder slip enabled */
+        unsigned int EA_POSITION    :1; /* position maintenence enabled */
+        unsigned int EA_SLIP_STALL  :1; /* slip/stall detected */
+        unsigned int EA_HOME        :1; /* encoder home signal on */
+        unsigned int EA_PRESENT     :1; /* encoder is present */
+        unsigned int RA_PROBLEM     :1; /* driver stopped polling */
+        unsigned int RA_MOVING      :1; /* non-zero velocity present */
+        unsigned int GAIN_SUPPORT   :1; /* Motor supports closed-loop position control. */
+        unsigned int CNTRL_COMM_ERR :1; /* Controller communication error. */
+        unsigned int RA_MINUS_LS    :1; /* minus limit switch has been hit */
         unsigned int RA_HOMED       :1; /* Axis has been homed.*/
-	unsigned int na		    :17;/* N/A bits  */
+        unsigned int na             :17;/* N/A bits  */
 #endif
     } Bits;                                
 } msta_field;
@@ -212,5 +212,5 @@ struct motor_dset
 /* All db_post_events() calls set both VALUE and LOG bits. */
 #define DBE_VAL_LOG (unsigned int) (DBE_VALUE | DBE_LOG)
 
-#endif	/* INCmotorh */
+#endif  /* INCmotorh */
 
