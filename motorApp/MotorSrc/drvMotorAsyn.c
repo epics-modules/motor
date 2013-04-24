@@ -88,6 +88,7 @@ typedef enum {
     motorLowLimit = motorAxisLowLimit,
     motorSetClosedLoop = motorAxisClosedLoop,
     motorEncoderPosition = motorAxisEncoderPosn,
+    motorActualVel = motorAxisActualVel,
     motorDeferMoves = motorAxisDeferMoves,
     motorMoveToHome = motorAxisMoveToHome,
     /* Status bits split out */
@@ -861,10 +862,10 @@ static void intCallback(void *axisPvt, unsigned int nChanged,
             (*pPvt->drvset->getDouble)(pAxis->axis, changed[i], 
                            &(pAxis->status.encoderPosition));
         }
-        /*    if (changed[i] == motorVelocity) {
+        if (changed[i] == motorAxisActualVel) {
             (*pPvt->drvset->getDouble)(pAxis->axis, changed[i], 
                            &(pAxis->status.velocity));
-                           }*/
+        }
     }
 
     /* Pass float64 interrupts */

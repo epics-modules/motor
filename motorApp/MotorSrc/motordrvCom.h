@@ -158,7 +158,7 @@ struct mess_info
     int encoder_present;		/* one YES/NO for each axis */
     epicsInt32 position;		/* one pos for each axis */
     epicsInt32 encoder_position;	/* one pos for each axis */
-    epicsInt32 velocity;		/* Raw velocity readback(not implemented) */
+    epicsInt32 velocity;		/* Raw velocity readback */
     int no_motion_count;
     epicsTime status_delay;     /* Insure 10ms delay between motion/velocity
 				 * commands and status query. */

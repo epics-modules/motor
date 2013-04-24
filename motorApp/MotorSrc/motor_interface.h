@@ -311,6 +311,7 @@ typedef enum
     motorAxisDGain,            /**< (double) The differential gain term for PID control in controller dependent units */
     motorAxisClosedLoop,       /**< (int)    Enables closed loop in the controller if non-zero */
     motorAxisEncoderPosn,      /**< (double, r/o) Current encoder position */
+    motorAxisActualVel,        /**< (double, r/o) Current actual velocity */
     motorAxisDirection,        /**< (int, r/o) last motion direction 0=Negative, 1=Positive */
     motorAxisDone,             /**< (int, r/o) a motion is complete */
     motorAxisHighHardLimit,    /**< (int, r/o) plus limit switch has been hit */
