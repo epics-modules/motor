@@ -53,12 +53,14 @@ HeadURL:        $URL$
  *            extern "C" linkage.
  * .09 08/07/06 rls - GPIB under ASYN only allows 1 input EOS character.
  *                    No output EOS. Adjustments accordingly.
+ * .10 02/22/13 rls - Scrap driver resolution, use MRES.
  */
 
 
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include "motorRecord.h"
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"
@@ -216,13 +218,22 @@ static int set_status(int card, int signal)
     char inbuff[BUFF_SIZE], outbuff[BUFF_SIZE];
     int rtn_state, charcnt;
     long mstatus;
-    double motorData;
+    double motorData, MRES;
     bool power, plusdir, ls_active = false;
     msta_field status;
+    struct motorRecord *mr;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
+    if (nodeptr != NULL)
+    {
+	mr = (struct motorRecord *) nodeptr->mrecord;
+        MRES = mr->mres;
+    }
+    else
+	MRES = 1.0;
+
     status.All = motor_info->status.All;
 
     sprintf(outbuff, "%.2dMD", signal + 1);
@@ -259,7 +270,7 @@ static int set_status(int card, int signal)
     send_mess(card, outbuff, (char) NULL);
     charcnt = recv_mess(card, inbuff, 1);
 
-    motorData = atof(inbuff) / cntrl->drive_resolution[signal];
+    motorData = atof(inbuff) / MRES;
 
     if (motorData == motor_info->position)
     {
@@ -663,12 +674,6 @@ errexit:
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 struct mess_info *motor_info = &brdptr->motor_info[motor_index];
-
-                /* Set axis resolution. */
-                sprintf(buff, "%.2dSU?", motor_index + 1);
-                send_mess(card_index, buff, 0);
-                recv_mess(card_index, buff, 1);
-                cntrl->drive_resolution[motor_index] = atof(&buff[0]);
 
                 motor_info->status.All = 0;
                 motor_info->no_motion_count = 0;

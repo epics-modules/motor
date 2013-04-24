@@ -37,6 +37,7 @@ Last Modified:	$Date: 2008-03-14 20:17:14 $
  * -----------------
  * .01  05-23-03 rls Converted to R3.14.x.
  * .02  10-28-03 rls User must set MRES to drive resolution.
+ * .03  13-22-02 rls Use MRES rather than drive resolution.
  */
 
 #include <string.h>
@@ -187,7 +188,7 @@ static RTN_STATUS ESP300_build_trans(motor_cmnd command, double *parms, struct m
 	return(rtnval = ERROR);
 
     cntrl = (struct MMcontroller *) brdptr->DevicePrivate;
-    cntrl_units = dval * cntrl->drive_resolution[axis - 1];
+    cntrl_units = dval * mr->mres;
 
     if (ESP300_table[command] > motor_call->type)
 	motor_call->type = ESP300_table[command];

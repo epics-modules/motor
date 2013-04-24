@@ -21,56 +21,11 @@ The correct jumpering for the ESP300 is; 1-5, 2-6, 9-13, 10-11, 15-16.
 Setting the motor resolution (MRES) field.
 ------------------------------------------
 
-For DC motors, set MRES to the ESP300's response to the SU? command.
-
-If there is no other mechanism (e.g., generic serial record, dumb terminal,
-etc.) to communicate to the ESP300, the response to the SU? command can be
-determined by following this procedure;
-
-1 - uncomment the "USR_CFLAGS += -DDEBUG" line in the NewportSrc/Makefile.Vx
-    file (This selects the diagnostic messages to be compiled).
-2 - "cd <motor>/motorApp/NewportSrc; gnumake clean; gnumake"; this re-compiles
-    the device drivers with the diagnostic messages selected.
-3 - Rebuild your IOC; "cd <IOC>; gnumake".
-4 - Add "drvESP300debug = 4" to the IOC's st.cmd file before "iocInit".
-5 - Connect to the VxWorks shell and reboot the IOC.
-
-The VxWorks shell output should contain lines like the following;
-
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Starting iocInit
-recv_mess(): message = ""
-send_mess(): message = VE?
-recv_mess(): message = "ESP300 Version 3.03 04/13/00"
-send_mess(): message = ZU
-recv_mess(): message = "0H"
-send_mess(): message = 01ST
-send_mess(): message = 02ST
-send_mess(): message = 03ST
-send_mess(): message = 01SU?
-recv_mess(): message = "0.00005101"
-send_mess(): message = 01MD
-recv_mess(): message = "1"
-send_mess(): message = 01TP
-recv_mess(): message = "0.00000"
-send_mess(): message = 01PH
-recv_mess(): message = "18000000H, 7H"
-send_mess(): message = 01MO?
-recv_mess(): message = "0"
-send_mess(): message = 02SU?
-recv_mess(): message = "0.00005101"
-send_mess(): message = 02MD
-recv_mess(): message = "1"
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Note the response to the SU? commands and set MRES to that value.
-
-6 - Turn off diagnostic messages. Either set drvESP300debug = 0 in the st.cmd
-    file (there is a very small amount of CPU overhead associated with leaving
-    the diagnostic messages loaded), or go to step #1, and reverse the steps;
-    comment out the "USR_CFLAGS += -DDEBUG" line in the NewportSrc/Makefile.Vx,
-    etc., etc.,
-    
+Set the MRES like any other motor; i.e., to the precision of the stage.
+(Prior to motor module R6.8, the driver used the controllers resolution
+to scale the EGUtoRAWbacktoEGU conversion done between motor record and
+device driver support. With R6.8 the driver uses the motor record's MRES
+to scale the conversion).
 
 Newport ESP100
 ==============
