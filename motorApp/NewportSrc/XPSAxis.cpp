@@ -402,7 +402,7 @@ asynStatus XPSAxis::setPosition(double position)
   /* If the user has disabled setting the controller position, skip this.*/
   if (!pC_->enableSetPosition_) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-              "%s:%s: XPS set position is disabled. Enable it using XPSEnableSetPosition(1).\n",
+              "%s:%s: XPS set position is disabled. Enable it by setting enableSetPosition parameter in XPSCreateController).\n",
                driverName, functionName);
     return asynError;
   }
