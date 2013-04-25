@@ -220,6 +220,7 @@ void XPSController::report(FILE *fp, int level)
   fprintf(fp, "        idle poll period: %f\n", idlePollPeriod_);
   
   if (level > 0) {
+    fprintf(fp, "       enableSetPosition: %d\n", enableSetPosition_);
     fprintf(fp, " setPositionSettlingTime: %f\n", setPositionSettlingTime_);
     fprintf(fp, "               IPAddress: %s\n", IPAddress_);
     fprintf(fp, "                  IPPort: %d\n", IPPort_);
