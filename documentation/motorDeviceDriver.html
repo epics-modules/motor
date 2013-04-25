@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Motor Device and Driver Support</title>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
+</head>
+<body>
+  <div style="text-align: center">
+    <h1>
+      EPICS Motor Record Device and Driver Support</h1>
+    <h2>
+      March 11, 2012</h2>
+    <h2>
+      Mark Rivers</h2>
+    <h2>
+      University of Chicago</h2>
+  </div>
+  <h2>
+    Table of Contents</h2>
+  <ul>
+    <li><a href="#Introduction">Introduction</a></li>
+    <li><a href="#Model1">Model 1 device and driver support</a></li>
+    <li><a href="#Model2">Model 2 (asyn, C) device and driver support</a></li>
+    <li><a href="#Model3">Model 3 (asyn, C++) device and driver support</a>
+      <ul>
+        <li><a href="#Model3Overview">Overview</a></li>
+        <li><a href="#asynMotorController">asynMotorController</a></li>
+        <li><a href="#asynMotorAxis">asynMotorAxis</a></li>
+        <li><a href="#Examples">Example drivers</a>
+          <ul>
+            <li><a href="#ACS_MCB4B">ACS MCB-4B</a></li>
+            <li><a href="#Parker_ACR">Parker ACR</a></li>
+            <li><a href="#Newport_XPS">Newport XPS</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#CoordinatedMotion">Coordinated motion</a></li>
+  </ul>
+  <h2 id="Introduction" style="text-align: left">
+    Introduction</h2>
+  <p>
+    This document describes the device and driver support for the EPICS motors. It briefly
+    describes the older APIs for such support (referred to as Model 1 and Model 2),
+    but focuses mainly on the newer Model 3 API, which is the API which should be used
+    for new motor drivers.</p>
+  <p>
+    The APIs described here are mainly intended to be used with the EPICS motor record.
+    However the Model 2 and Model 3 drivers are actually independent of the motor record.
+    They implement standard EPICS asyn interfaces, and can in principle be used with
+    any EPICS records, and do not require the motor record. However, the motor record
+    currently provides the only "state machine" logic that keeps track of backlash,
+    enforcing soft limits, etc. Model 2 and 3 drivers to permit access to controller-specific
+    features that the motor record does not support, and this is typicaly implemented
+    using standard EPICS records (ao, ai, bo, bi, etc.)</p>
+  <h2 id="Model1" style="text-align: left">
+    Model 1 device and driver support</h2>
+  <p>
+    Model 1 is the API that was used for all motor drivers prior to 2006, when Model
+    2 was introduced. Model 1 drivers have the following characteristics:</p>
+  <ul>
+    <li>Each controller type requires both device-dependent device support and device-dependent
+      driver support.</li>
+    <li>The communication channel between device support and driver is custom for the
+      motor record, and is very limited.</li>
+    <li>The communication between device support and the driver is assumed to be via device-dependent
+      strings. Thus, it not suited to register-based controllers, or controllers where
+      the driver calls a vendor-library, rather than just sending strings to the controller.</li>
+    <li>Cannot use other records to with the driver, only the motor record. Cannot take
+      advantage of controller-specific features not supported by the motor record.</li>
+    <li>There is no provision for multi-axis coordination.</li>
+    <li>There is only a single thread per controller <i>type</i>. This means that if a
+      system has, for example, many controllers of a given type then there is only one
+      polling thread for all of these controllers. This is because the poller must wait
+      for each response before sending the next query. This can lead to significantly
+      poorer performance compared to the Model 2 and Model 3 drivers, which have a separate
+      thread per controller.</li>
+  </ul>
+  <p>
+    Because this API was the only one supported prior to 2006, the majority of existing
+    motor drivers are written using this Model 1 API.</p>
+  <h2 id="Model2" style="text-align: left">
+    Model 2 device and driver support</h2>
+  <p>
+    Because of the recognized deficiencies in the Model 1 API, in 2006 Diamond Light
+    Source and APS collaborated in developing a new API, now called Model 2. The Model
+    2 API has the following characteristics:</p>
+  <ul>
+    <li>Uses standard asyn interfaces to communicate between device support and driver.</li>
+    <li>There is only a single device-independent device support file (devMotorAsyn.c).</li>
+    <li>There is a single device-independent driver support file for asyn interfaces (drvMotorAsyn.).</li>
+    <li>There is a device-dependent driver file below the asyn one. This driver must implement
+      a set of functions that the device-independent driver file calls.</li>
+    <li>Can use other records to talk to driver via asyn interfaces. This allows support
+      for controller-specific features.
+      <ul>
+        <li>However, this is not as easy as it should be, because the drivers do not directly
+          expose asyn interfaces.</li>
+        <li>One must write an asyn interposeInterface driver to support controller-specific
+          parameters.</li>
+      </ul>
+    </li>
+    <li>There is no provision for multi-axis coordination.</li>
+    <li>There is one polling thread per controller, which is more efficient than Model
+      1.</li>
+  </ul>
+  <p>
+    There are Model 2 drivers in the motor module for the simulation motor, Newport
+    MM4000, Newport XPS, Pro-Dex MAXnet, Attocube ANC150, and Aerotech Ensemble.</p>
+  <h2 id="Model3" style="text-align: left">
+    Model 3 device and driver support</h2>
+  <p>
+    In 2011 the Model 3 API was introduced. This API is based in part on the ideas and
+    infrastructure that were developed for the areaDetector module. The Model 3 API
+    has the following characteristics:</p>
+  <ul>
+    <li>Uses the asynPortDriver C++ class from asyn.</li>
+    <li>Uses the same single device-independent device support file (devMotorAsyn.c) as
+      Model 2 API.</li>
+    <li>Model 3 drivers are written in C++ by implementing the methods from the new asynMotorController
+      and asynMotorAxis base classes. </li>
+    <li>The base classes take care of much of the work that one needed to write in the
+      device-dependent driver in Model 2.</li>
+    <li>Can use other records with the driver via asyn interfaces. This allows support
+      for controller-specific features. This is now very easy to do, compared to the Model
+      2 driver.</li>
+    <li>The API includes support for multi-axis coordination.</li>
+    <li>There is one polling thread per controller, which is more efficient than Model
+      1.</li>
+  </ul>
+  <p>
+    The Model 3 C++ API is based on the concept of two types of objects: a motor controller
+    and one or motor motor axes. The controller object supports the functions that apply
+    to the entire controller. The controller supports one or more axes. The axis objects
+    support the functions for a specific axis. These objects are implemented in the
+    device-dependent driver. There is a base class for each of these objects, asynMotorControlller
+    and asynMotorAxis.
+  </p>
+  <p>
+    The asynMotorController base class has methods that handle much of the work in writing
+    a driver, including implementing the asyn interfaces and calling the appropriate
+    methods in the axis classes. A basic motor driver derived class will often only
+    need to implement only the constructor for the controller class, and can just use
+    the base class implementation of all other methods in the asynMotorController class.</p>
+  <p>
+    The asynMotorAxis base class on the other hand mainly provides dummy methods (asynMotorAxis::move(),
+    asynMotorAxis::stop(), etc.). The main work in writing a Model 3 driver consists
+    of implementing these methods in the derived class.</p>
+  <p>
+    There are Model 3 drivers in the motor module for the simulation motor, Hytec XXXX,
+    Newport XPS, Parker ACR series controllers (e.g. Aires), and the ACS MCB-4B.</p>
+  <p>
+    The ACS MCB-4B is the simplest Model 3 driver, consisting of only 336 lines of well-commented
+    C++ code (ACSSrc/MCB4BDriver.h and MCB4BDriver.cpp). It does not implement any controller-specific
+    features, it only implements support for standard motor record features. It is a
+    very good starting point for writing a new driver with basic motor record support.</p>
+  <h3 id="asynMotorController" style="text-align: left">
+    asynMotorController base class</h3>
+  <p>
+    The asynMotorController base class defines the following methods:</p>
+  <ul>
+    <li><code>asynMotorController(const char *portName, int numAxes, int numParams, int
+      interfaceMask, int interruptMask, int asynFlags, int autoConnect, int priority,
+      int stackSize)</code><br />
+      This is the constructor for the class. The parameters correspond to the parameters
+      in the constructor for the asynPortDriver base class. The parameters are:<ul>
+        <li><code>portName</code><br />
+          The name of the asynPort for this controller. This port name is used to identify
+          the controller in EPICS record links.</li>
+        <li><code>numAxes</code><br />
+          The number of axes on this controller.</li>
+        <li><code>numParams</code><br />
+          The number of controller-specific parameters for this controller.&nbsp; If the driver
+          only implements the standard motor record parameters then this is set to 0.</li>
+        <li><code>interfaceMask</code><br />
+          A bit mask for extra asyn interfaces supported by this controller. It is not necessary
+          to specify the interfaces that the base class implements, which includes asynOctet,
+          asynInt32, asynFloat64, asynFloat64Array, asynDrvUser, and asynGenericPointer. Normally
+          set to 0.</li>
+        <li><code>interruptMask</code><br />
+          A bit mask for extra asyn interfaces supported by this controller that will do callbacks
+          to device support. It is not necessary to specify the interfaces that the base class
+          implements, which includes asynOctet, asynInt32, asynFloat64, asynFloat64Array,
+          and asynGenericPointer. Normally set to 0.</li>
+        <li><code>asynFlags</code><br />
+          asyn flags to use when creating the asyn port. This is normally (ASYN_CANBLOCK |
+          ASYN_MULTIDEVICE). ASYN_CANBLOCK means that the driver is "slow" and asynchonous
+          device support must be used. ASYN_MULTIDEVICE means that the device supports more
+          than one asyn address, i.e. more than one motor axis.</li>
+        <li><code>autoConnect</code><br />
+          This is normally set to 1, which means that asynManager will automatically call
+          the connect() method in the driver if the controller is not connected.</li>
+        <li><code>priority</code><br />
+          This is normally set to 0, which means that asynManager will use a default priority
+          for the port thread.</li>
+        <li><code>stackSize</code><br />
+          This is normally set to 0, which means that asynManager will use a default stack
+          size for the port thread.</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="asynMotorAxis" style="text-align: left">
+    asynMotorAxis base class</h3>
+  <p>
+    The asynMotorAxis base class defines the following methods:</p>
+  <ul>
+  </ul>
+  <p>
+    This driver inherits from <a href="areaDetectorDoc.html#ADDriver">ADDriver</a>.
+    It implements many of the parameters in <a href="areaDetectorDoxygenHTML/asyn_n_d_array_driver_8h.html">
+      asynNDArrayDriver.h</a> and in <a href="areaDetectorDoxygenHTML/_a_d_driver_8h.html">
+        ADArrayDriver.h</a>. It also implements a number of parameters that are specific
+    to the mar345 detector. The <a href="areaDetectorDoxygenHTML/classmar345.html">mar345
+      class documentation</a> describes this class in detail.</p>
+  <h2 id="StandardNotes" style="text-align: left">
+    Implementation of standard driver parameters</h2>
+  <p>
+    The following table describes how the mar345 driver implements some of the standard
+    driver parameters.
+  </p>
+  <table border="1" cellpadding="2" cellspacing="2" style="text-align: left">
+    <tbody>
+      <tr>
+        <td align="center" colspan="3">
+          <b>Implementation of Parameters in asynNDArrayDriver.h and ADDriver.h, and EPICS Record
+            Definitions in ADBase.template and NDFile.template</b> </td>
+      </tr>
+      <tr>
+        <th>
+          Parameter index variable </th>
+        <th>
+          EPICS record name </th>
+        <th>
+          Description </th>
+      </tr>
+      <tr>
+        <td>
+          ADAcquire </td>
+        <td>
+          $(P)$(R)Acquire </td>
+        <td>
+          Setting this to 1 starts an acquisition sequence. If ADNumImages is greater than
+          1 then it acquires multiple frames. For each frame it does the following:
+          <ol>
+            <li>Erases the detector if mar345EraseMode is "Before expose".</li>
+            <li>Opens the shutter if either the mar345 shutter or EPICS shutter controls are enabled.</li>
+            <li>Waits for the desired exposure time.</li>
+            <li>Closes the shutter if either the mar345 shutter or EPICS shutter controls are
+              enabled.</li>
+            <li>Scans the detector and saves the file.</li>
+            <li>Erases the detector if mar345EraseMode is "After scan".</li>
+          </ol>
+          If ADAcquire is set to 0 during exposure (step 3 above) then it proceeds immediately
+          to step 4, finishes collecting the current frame and stops the acquisition sequence
+          if ADNumImages is greater than 1. If mar345Abort is set to 0 then the acquisition
+          is terminated as soon as possible without saving the data. Note however that commands
+          to the mar345 server to erase, change mode, or scan cannot be aborted, so the driver
+          must wait for these commands to complete. </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    It is useful to use NDPluginROI to define an ROI containing the entire mar345 detector.
+    The MaxValue_RBV PV in this ROI can be monitored to make sure that the 16-bit limit
+    of 65,535 is not being approached in any pixel.
+  </p>
+  <h2 id="Driver_parameters" style="text-align: left">
+    mar345 specific parameters</h2>
+  <p>
+    The mar345 driver implements the following parameters in addition to those in asynNDArrayDriver.h
+    and ADDriver.h. Note that to reduce the width of this table the parameter index
+    variable names have been split into 2 lines, but these are just a single name, for
+    example <code>mar345ScanSize</code>.
+  </p>
+  <table border="1" cellpadding="2" cellspacing="2" style="text-align: left">
+    <tbody>
+      <tr>
+        <td align="center" colspan="7">
+          <b>Parameter Definitions in mar345.cpp and EPICS Record Definitions in mar345.template</b>
+        </td>
+      </tr>
+      <tr>
+        <th>
+          Parameter index variable </th>
+        <th>
+          asyn interface </th>
+        <th>
+          Access </th>
+        <th>
+          Description </th>
+        <th>
+          drvInfo string </th>
+        <th>
+          EPICS record name </th>
+        <th>
+          EPICS record type </th>
+      </tr>
+      <tr>
+        <td align="center" colspan="7">
+          <b>Readout parameters</b> </td>
+      </tr>
+      <tr>
+        <td>
+          mar345<br />
+          ScanSize </td>
+        <td>
+          asynInt32 </td>
+        <td>
+          r/w </td>
+        <td>
+          The detector diameter to read out. Choices are 180mm, 240mm, 300mm, and 345mm.
+        </td>
+        <td>
+          MAR_SIZE </td>
+        <td>
+          $(P)$(R)ScanSize<br />
+          $(P)$(R)ScanSize_RBV </td>
+        <td>
+          mbbo
+          <br />
+          mbbi </td>
+      </tr>
+      <tr>
+        <td>
+          mar345<br />
+          ScanResolution </td>
+        <td>
+          asynInt32 </td>
+        <td>
+          r/w </td>
+        <td>
+          The pixel size to use when reading the detector out. Choices are 0.10 and 0.15mm.
+        </td>
+        <td>
+          MAR_RESOLUTION </td>
+        <td>
+          $(P)$(R)ScanResolution<br />
+          $(P)$(R)ScanResolution_RBV </td>
+        <td>
+          mbbo
+          <br />
+          mbbi </td>
+      </tr>
+    </tbody>
+  </table>
+  <h2 id="Configuration">
+    Configuration</h2>
+  <p>
+    The mar345 driver is created with the mar345Config command, either from C/C++ or
+    from the EPICS IOC shell.</p>
+  <pre>int mar345Config(const char *portName, const char *serverPort,
+                 int maxBuffers, size_t maxMemory,
+                 int priority, int stackSize)
+  </pre>
+  <p>
+    For details on the meaning of the parameters to this function refer to the detailed
+    documentation on the mar345Config function in the <a href="areaDetectorDoxygenHTML/mar345_8cpp.html">
+      mar345.cpp documentation</a> and in the documentation for the constructor for
+    the <a href="areaDetectorDoxygenHTML/classmar345.html">mar345 class</a>.
+  </p>
+  <p>
+    There an example IOC boot directory and startup script (<a href="mar345_st_cmd.html">iocBoot/iocMAR345/st.cmd)</a>
+    provided with areaDetector.
+  </p>
+  <h2 id="MEDM_screens" style="text-align: left">
+    MEDM screens</h2>
+  <p>
+    The following show the MEDM screens that are used to control the mar345 detector.
+    Note that the general purpose screen ADBase.adl can be used, but it exposes many
+    controls that are not applicable to the mar345, and lacks some fields that are important
+    for the mar345.</p>
+  <p>
+    <code>mar345.adl</code> is the main screen used to control the mar345 driver.
+  </p>
+  <div style="text-align: center">
+    <h3 style="text-align: center">
+      mar345.adl</h3>
+    <img alt="mar345.png" src="mar345.png" /></div>
+</body>
+</html>
