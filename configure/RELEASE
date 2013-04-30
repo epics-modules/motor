@@ -14,13 +14,14 @@ SUPPORT=
 
 # If any motor controller communication mechanism besides the VME backplane is
 # required, then ASYN must be defined.
-# Recommended ASYN release: R4-18
-ASYN=$(SUPPORT)/asyn/R4-18
+# Recommended ASYN release: R4-21
+ASYN=$(SUPPORT)/asyn/R4-21
 
 # Need the sequencer and the bust record for the MM4005 and XPS trajectory scanning
-# Recommended SNCSEQ release: R2-1-13
-SNCSEQ=$(SUPPORT)/seq/2-1-3
-BUSY=$(SUPPORT)/busy/R1-4
+# Recommended SNCSEQ release: R2-1-12
+SNCSEQ=$(SUPPORT)/seq/2-1-12
+# Recommended BUSY release: R1-5
+BUSY=$(SUPPORT)/busy/R1-5
 
 # Recommended EPICS release: R3.14.12.1
 EPICS_BASE=
