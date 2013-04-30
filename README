@@ -185,6 +185,10 @@ Modification Log for R6-8
 	Files modified: motorApp/NewportSrc/drvXPSAsyn.c
 	                motorApp/NewportSrc/drvXPSAsyn.h
 
+5) Added xpsSlave.st to motorApp/NewportSrc to allow master/slave mode to be
+	used with any version of the XPS support.
+ 
+
 Modification Log for R6-7
 =========================
 

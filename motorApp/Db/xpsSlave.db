@@ -1,0 +1,41 @@
+record(longout, "$(P)$(R):debug")
+{
+    field(DESC, "Debug level")
+    field(VAL,  "5")
+    field(PINI, "YES")
+}
+record(bo, "$(P)$(R):ok")
+{
+  field(DESC, "Slave mode ok?")
+  field(ZNAM, "No")
+  field(ONAM, "Yes")
+  field(VAL,  "0")
+}
+
+record(bo, "$(P)$(R):init")
+{
+  field(DESC, "Initialize")
+  field(ZNAM, "Done")
+  field(ONAM, "Initializing")
+  field(VAL,  "0")
+}
+
+record(bo, "$(P)$(R):on")
+{
+  field(DESC, "Slave mode")
+  field(ZNAM, "Off")
+  field(ONAM, "On")
+  field(VAL,  "0")
+}
+
+record(ao, "$(P)$(R):ratio")
+{
+  field(DESC, "Gear ratio")
+  field(VAL,  "1")
+}
+
+record(ao, "$(P)$(R):ratioRdbk")
+{
+  field(DESC, "Gear ratio")
+  field(VAL,  "1")
+}

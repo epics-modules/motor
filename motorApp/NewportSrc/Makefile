@@ -54,6 +54,7 @@ Newport_SRCS += XPSController.cpp
 Newport_SRCS += XPSAxis.cpp
 ifdef SNCSEQ
 Newport_SRCS += XPS_trajectoryScan.st
+Newport_SRCS += xpsSlave.st
 endif
 #
 Newport_SRCS += hxp_drivers.cpp
