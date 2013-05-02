@@ -158,7 +158,6 @@ unsigned long startTime;
 %% static int writeOnly(SS_ID ssId, struct UserVar *pVar, char *command);
 %% static int writeRead(SS_ID ssId, struct UserVar *pVar, char *command, char *reply);
 %% static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos, epicsInt32 *raw, double *dtime);
-%% static int getMotorPositionsRB(SS_ID ssId, struct UserVar *pVar, double *pos, epicsInt32 *rawP, int *rawV, int *rawA, double *dtime);
 %% static int getMotorMoving(SS_ID ssId, struct UserVar *pVar, int movingMask);
 %% static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar);
 %% static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar);
@@ -519,11 +518,7 @@ ss maxTrajectoryScan {
 			
 			if (!waitingForTrigger) {
 				/* Get the current motor positions, post them */
-				if (debugLevel < DEBUG_VA) {
-					%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
-				} else {
-					%%getMotorPositionsRB(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, pVar->motorCurrentVRaw, pVar->motorCurrentARaw, &(pVar->dtime));
-				}
+				%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
 				elapsedTime = dtime;
 	
 				doPoll = (dtime - lastPollTime) > POLL_INTERVAL;
@@ -537,12 +532,6 @@ ss maxTrajectoryScan {
 							motorError[j][currPulse] = dtime;
 							if (debugLevel >= 10) printf("wait_execute: motor %d: rb=%f, t=%f\n",
 								j, motorReadbacks[j][currPulse], motorError[j][currPulse]);
-							if (j==0 && (debugLevel >= DEBUG_VA)) {
-								motorReadbacks[j+1][currPulse] = motorCurrentRaw[j];
-								motorReadbacks[j+2][currPulse] = motorCurrentVRaw[j];
-								motorReadbacks[j+3][currPulse] = motorCurrentARaw[j];
-								motorReadbacks[j+4][currPulse] = dtime;
-							}
 						}
 						/*** compare current time, position with desired trajectory ***/
 						/* bracket dtime in the interval [realTimeTrajectory[i], realTimeTrajectory[i+1]] */
@@ -869,41 +858,6 @@ static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos, epic
 		printf("\ndt=%6.3f, p=%7d", *dt, rawP[0]);
 	}
 	epicsThreadSleep(READ_INTERVAL);
-	return(0);
-}
-
-/* getMotorPositions returns the positions of each motor, and maybe velocity and acceleration */
-static int getMotorPositionsRB(SS_ID ssId, struct UserVar *pVar, double *pos, epicsInt32 *rawP, int *rawV, int *rawA, double *dt)
-{
-    int j;
-    int dir;
-	epicsTimeStamp currtime;
-	char vBuf[MAX_MESSAGE_STRING], aBuf[MAX_MESSAGE_STRING];
-
-	MAXV_getPositions(pVar->cardNumber, rawP, pVar->numAxes);
-
-	epicsTimeGetCurrent(&currtime);
-	*dt = epicsTimeDiffInSeconds(&currtime, &eStartTime);
-
-    for (j=0; j<pVar->numAxes; j++) {
-        if (pVar->epicsMotorDir[j] == 0) dir=1; else dir=-1;
-        /*pos[j] = rawP[j]*dir*pVar->epicsMotorMres[j] + pVar->epicsMotorOff[j];*/
-		pos[j] = rawToUser(rawP[j], pVar->epicsMotorOff[j], dir, pVar->epicsMotorMres[j]);
-    }
-
-    /* Read the velocity and acceleration for task 1 */
-	if ((pVar->execState == EXECUTE_STATE_EXECUTING) && (pVar->debugLevel >= DEBUG_VA)) {
-		writeRead(ssId, pVar, "VRV[1];", vBuf);
-		writeRead(ssId, pVar, "VRC[1];", aBuf);
-		rawV[0] = atol(&(vBuf[1]));
-		rawA[0] = atol(&(aBuf[1]));
-		printf("getMotorPositionsRB: dt=%6.3f, p=%7d, v=%7d, a=%7d\n", *dt, rawP[0], rawV[0], rawA[0]);
-		if (pVar->debugLevel >= 10) printf("\n");
-	} else if (pVar->debugLevel >= 1) {
-		printf("getMotorPositionsRB: dt=%6.3f, p=%7d\n", *dt, rawP[0]);
-	}
-	epicsThreadSleep(READ_INTERVAL);
-
 	return(0);
 }
 
