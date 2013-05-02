@@ -29,7 +29,6 @@ program MAX_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6=M6
 #define MIN(a,b) ((a) > (b) ? (b) : (a))
 #define NINT(f)  (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
-#define DEBUG_VA 10
 /* This program must be compiled with the recursive option */
 option +r;
 
@@ -77,8 +76,6 @@ option +r;
  * directly to/from drvMaxv.cc's send_mess()/recv_mess() functions.
  */
 #define USE_ASYN 0
-
-#define USE_SPLINE 0
 
 #if USE_ASYN
 #else
@@ -168,12 +165,6 @@ unsigned long startTime;
 %% static int getStarted(SS_ID ssId, struct UserVar *pVar);
 %% static int userToRaw(double user, double off, int dir, double res);
 %% static double rawToUser(int raw, double off, int dir, double res);
-
-/* Numerical Recipes spline routines */
-#if USE_SPLINE
-%% static int spline(double *x, double *y, int n, double *y2);
-%% static int splint(double *xa, double *ya, int n, double x, double *y);
-#endif
 
 int position[MAX_AXES][MAX_ELEMENTS];
 int velocity[MAX_AXES][MAX_ELEMENTS];
@@ -835,26 +826,7 @@ static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos, epic
 		pos[j] = rawToUser(rawP[j], pVar->epicsMotorOff[j], dir, pVar->epicsMotorMres[j]);
     }
 
-	if ((pVar->execState == EXECUTE_STATE_EXECUTING) && (pVar->debugLevel >= 3)) {
-		if (pVar->debugLevel >= 3) {
-			printf("\n%6.3fs: ", *dt);
-	    	for (j=0; j<pVar->numAxes; j++) {
-				if (pVar->moveAxis[j]) {
-					vcmd[4] = (char)(j+1 + '0');
-					writeRead(ssId, pVar, vcmd, vBuf);
-					acmd[4] = (char)(j+1 + '0');
-					writeRead(ssId, pVar, acmd, aBuf);
-					printf("(%7d, %7.0f, %7.0f) ", rawP[j], atof(&(vBuf[1])), atof(&(aBuf[1])));
-				}
-			}
-		} else {
-			writeRead(ssId, pVar, "VRV[1];", vBuf);
-			writeRead(ssId, pVar, "VRC[1];", aBuf);
-			printf("\ndt=%6.3f, p=%7d, v=%7.0f, a=%7.0f",
-				*dt, rawP[0], atof(&(vBuf[1])), atof(&(aBuf[1])));
-		}
-		if (pVar->debugLevel >= 10) printf("\n");
-	} else if (pVar->debugLevel >= 1) {
+	if (pVar->debugLevel >= 1) {
 		printf("\ndt=%6.3f, p=%7d", *dt, rawP[0]);
 	}
 	epicsThreadSleep(READ_INTERVAL);
@@ -970,16 +942,8 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 	double motorResolution, double motorVmin, int *position, int *velocity, int *acceleration)
 {
 	double dp, dt, v_ideal, v_lin, accel_p, accel_v, time;
-#if USE_SPLINE
-	double v_spline, delta, yy0, yy1;
-#endif
 	double x0;
 	int i, dir;
-
-#if USE_SPLINE
-	/* prepare for spline interpolation of motor trajectory */
-	spline(realTimeTrajectory, motorTrajectory, npoints, y2);
-#endif
 
 	calcMotorTrajectory[0] = motorTrajectory[0];
 	v_out[0] = 0;
@@ -998,16 +962,6 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 			/* linear interpolation */
 			v_lin = (motorTrajectory[i+1]-motorTrajectory[i-1])/(realTimeTrajectory[i+1]-realTimeTrajectory[i-1]);
 			v_ideal = v_lin;
-
-#if USE_SPLINE
-			/* spline interpolation of motor trajectory */
-			delta = (realTimeTrajectory[i+1] - realTimeTrajectory[i-1])/10.;
-			splint(realTimeTrajectory, motorTrajectory, npoints, realTimeTrajectory[i]-delta, &yy0);
-			splint(realTimeTrajectory, motorTrajectory, npoints, realTimeTrajectory[i]+delta, &yy1);
-			v_spline = (yy1-yy0)/(2*delta);
-			if (pVar->debugLevel >= 10) printf("v_lin=%f, v_spline=%f\n", v_lin, v_spline);
-			v_ideal = v_spline;
-#endif
 
 			/* the acceleration that will get us to the ideal velocity */
 			accel_v = (v_ideal - v_out[i-1])/dt;
@@ -1340,61 +1294,5 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 	}
 	return(0);
 }
-
-/**************************************************************************************/
-
-#if USE_SPLINE
-/* Numerical recipes spline routines */
-double u[MAX_ELEMENTS+1];
-
-static int spline(double *x, double *y, int n, double *y2)
-{
-	int i, k;
-	double p, qn, sig, un;
-
-	/* convert from c array to fortran array */
-	x--; y--; y2--;
-
-	y2[1] = u[1] = 0.0;
-	for (i=2; i<=n-1; i++) {
-		sig = (x[i]-x[i-1])/(x[i+1]-x[i-1]);
-		p = sig*y2[i-1]+2.0;
-		y2[i] = (sig-1.0)/p;
-		u[i] = (y[i+1]-y[i])/(x[i+1]-x[i]) - (y[i]-y[i-1])/(x[i]-x[i-1]);
-		u[i] = (6.0*u[i]/(x[i+1]-x[i-1])-sig*u[i-1])/p;
-	}
-	qn = un = 0.0;
-	y2[n] = (un-qn*u[n-1])/(qn*y2[n-1]+1.0);
-	for (k=n-1; k>=1; k--)
-		y2[k] = y2[k]*y2[k+1]+u[k];
-	return(0);
-}
-
-static int splint(double *xa, double *ya, int n, double x, double *y)
-{
-	int klo,khi,k;
-	double h,b,a;
-
-	/* convert from c array to fortran array */
-	xa--; ya--;
-
-	klo = 1;
-	khi = n;
-	while (khi-klo > 1) {
-		k = (khi+klo) >> 1;
-		if (xa[k] > x) khi = k;
-		else klo = k;
-	}
-	h = xa[khi]-xa[klo];
-	if (h == 0.0) {
-		printf("Bad XA input to routine SPLINT");
-		return(-1);
-	}
-	a = (xa[khi]-x)/h;
-	b = (x-xa[klo])/h;
-	*y = a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2[klo]+(b*b*b-b)*y2[khi])*(h*h)/6.0;
-	return(0);
-}
-#endif
 
 }%
