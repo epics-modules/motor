@@ -33,10 +33,6 @@ program MAX_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6=M6
 /* This program must be compiled with the recursive option */
 option +r;
 
-%% volatile int MAXv_traj_quantized = 1;
-%% volatile int MAXv_traj_vmin = 0;
-%% volatile int MAXv_traj_accel_latency = 0;
-
 /* Maximum # of trajectory elements.  The MAXV allows something like 2550 for
  * a trajectory preloaded into the controller (unlimited if you're willing to
  * write elements while the trajectory is running).  For now, we limit the number
@@ -1011,6 +1007,8 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
 /* Calculate velocities and accelerations suitable for MAX variable velocity contouring commands.
  * We're given x(t) in the form x[i], t[i].  We need to calculate v(x) and a(x) that will produce x(t).
  */
+volatile int MAXv_traj_quantized = 1;
+volatile int MAXv_traj_vmin = 0;
 
 double	y2[MAX_ELEMENTS], v_out[MAX_ELEMENTS], a_out[MAX_ELEMENTS], calcMotorTrajectory[MAX_ELEMENTS];
 static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTrajectory,
@@ -1023,13 +1021,6 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 #endif
 	double x0;
 	int i, dir;
-	double half_cycle_time;
-	char stringOut[MAX_MESSAGE_STRING];
-
-	/* Get update rate */
-	sprintf(stringOut, "AX; #UR?;");
-	writeRead(ssId, pVar, stringOut, stringOut);
-	half_cycle_time = MAXv_traj_accel_latency*0.5/atol(stringOut);
 
 #if USE_SPLINE
 	/* prepare for spline interpolation of motor trajectory */
@@ -1082,15 +1073,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 			/* Motor acceleration is quantized.  Take effect into account by assuming nearest achievable acceleration. */
 			a_out[i-1] = motorResolution * NINT(a_out[i-1]/motorResolution);
 		}
-		if ((MAXv_traj_accel_latency==0) || (i<2)) {
-			v_out[i] = v_out[i-1] + a_out[i-1]*dt;
-		} else {
-			/* On average, the hardware will notice that the motor has reached the end of a segment half a
-			 * cycle time later than it was actually reached, so the previous acceleration will have been
-			 * in force during that time.
-			 */
-			v_out[i] = v_out[i-1] + a_out[i-1]*(dt-half_cycle_time) + a_out[i-2]*half_cycle_time;
-		}
+		v_out[i] = v_out[i-1] + a_out[i-1]*dt;
 		if (MAXv_traj_quantized) {
 			/* Motor speed is quantized.  Take effect into account by calculating nearest achievable speed. */
 			v_out[i] = motorResolution * NINT(v_out[i]/motorResolution);
