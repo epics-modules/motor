@@ -635,48 +635,8 @@ ss maxTrajectoryScan {
 			pvPut(readState);
 			readStatus=STATUS_UNDEFINED;
 			pvPut(readStatus);
-#if 1
-			/* During trajectory execution, time and motor position were accumulated into
-			 * motorError[j] and motorReadbacks[j], respectively.  Interpolate motorReadbacks[j]
-			 * to get readbacks at the times in realTimeTrajectory, so they can be plotted
-			 * on the same axis with motorTrajectory[j].
-			 */
-            for (j=0; j<numAxes; j++) {
-				if (moveMode != MOVE_MODE_ABSOLUTE) {
-					for (k=0; k<=currPulse; k++) motorReadbacks[j][k] -= motorStart[j];
-				}
-				if (debugLevel >= 10) printf("state readback: motor %d\n", j);
-				for (k=0, i=0; k<npoints; k++) {
-					while ((motorError[j][i] < realTimeTrajectory[k]) && (i < MAX_PULSES-1)) i++;
-					if ((i>0) && (fabs(motorError[j][i] - motorError[j][i-1]) > 1e-6)) {
-						frac = (realTimeTrajectory[k] - motorError[j][i-1])/(motorError[j][i] - motorError[j][i-1]);
-						dbuf[k] = motorReadbacks[j][i-1] + frac * (motorReadbacks[j][i] - motorReadbacks[j][i-1]);
-						/*if (k==npoints-1) printf("interp: motorReadbacks[%d][%d]=%f\n", j, k, dbuf[k]);*/
-					} else {
-						dbuf[k] = motorReadbacks[j][i];
-						/*if (k==npoints-1) printf("copy: motorReadbacks[%d][%d]=%f\n", j, k, dbuf[k]);*/
-					}
-					if (debugLevel >= 10) printf("state readback: rb=%f, t=%f\n", dbuf[k], realTimeTrajectory[k]);
 
-				}
-				for (; k<MAX_PULSES; k++) dbuf[k] = 0.;
-
-				/* copy to motorReadbacks */
-				for (k=0; k<MAX_PULSES; k++) motorReadbacks[j][k] = dbuf[k];
-				/* calculate error, ignoring last (deceleration) point */
-				for (k=0; k<npoints-1; k++) {
-					motorError[j][k] =  motorReadbacks[j][k] - motorTrajectory[j][k];
-				}
-				for (; k<MAX_PULSES; k++) motorError[j][k] = motorError[j][k-1];
-			}
-			for (k=currPulse; k<MAX_PULSES; k++){
-				motorReadbacks[1][k] = motorReadbacks[1][k-1];
-				motorReadbacks[2][k] = motorReadbacks[2][k-1];
-				motorReadbacks[3][k] = motorReadbacks[3][k-1];
-				motorReadbacks[4][k] = motorReadbacks[4][k-1];
-			}
-#endif
-            /* Post the readback and error arrays */
+            /* Post the readback arrays */
             /*for (j=0; j<numAxes; j++) {*/ 
             for (j=0; j<MAX_AXES; j++) {
                 pvPut(motorReadbacks[j]);
@@ -705,10 +665,6 @@ ss maxTrajectoryScan {
 ss trajectoryAbort {
 	state monitorAbort {
 		when (efTestAndClear(abortMon) && (abort==1)) {
-#if 0
-			sprintf(stringOut, "SA;"); /* Stop all motors, and flush all queues. */
-			%%writeOnly(ssId, pVar, pVar->stringOut);
-#else
 			for (j=0; j<MAX_AXES; j++) {
 				if (moveAxis[j]) {
 					sprintf(stringOut, "AM; VH[%d]1;", j+1);
@@ -725,7 +681,6 @@ ss trajectoryAbort {
 			strcat(stringOut, ";");
 			if (debugLevel) printf("abort: sending command '%s'\n", stringOut);
 			%%writeOnly(ssId, pVar, pVar->stringOut);
-#endif
 
 			execStatus = STATUS_ABORT;
 			pvPut(execStatus);
