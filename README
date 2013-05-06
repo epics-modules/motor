@@ -188,6 +188,14 @@ Modification Log for R6-8
 5) Added xpsSlave.st to motorApp/NewportSrc to allow master/slave mode to be
 	used with any version of the XPS support.
  
+8) Added support for the nPoint C300:
+
+	Files added: motorApp/NPointSrc
+		     motorApp/NPointSrc/C300MotorDriver.cpp
+		     motorApp/NPointSrc/C300MotorDriver.h
+		     motorApp/NPointSrc/Makefile
+		     motorApp/NPointSrc/NPointMotorSupport.dbd
+
 
 Modification Log for R6-7
 =========================
