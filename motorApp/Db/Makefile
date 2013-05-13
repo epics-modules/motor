@@ -40,6 +40,7 @@ DB += profileMoveController.template
 DB += profileMoveAxis.template
 DB += profileMoveControllerXPS.template
 DB += profileMoveAxisXPS.template
+DB += PI_Support.db PI_SupportCtrl.db
 
 #----------------------------------------------------
 # Declare template files which do not show up in DB
