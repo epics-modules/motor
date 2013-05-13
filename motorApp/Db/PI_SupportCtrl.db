@@ -1,0 +1,66 @@
+record(ai, "$(P)LAST_ERR")
+{
+	field(DTYP, "asynInt32")
+	field(INP, "@asyn($(PORT),0,0)PI_SUP_LAST_ERR")
+	field(SCAN, "I/O Intr")
+}
+
+record(bo, "$(P)DEFER") {
+  field(DTYP, "asynInt32")
+  field(OUT, "@asynMask($(PORT),0,0)MOTOR_DEFER_MOVES")
+  field(SCAN, "Passive")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(VAL, "0")
+}
+
+record(ao, "$(P)PIVOT_X")
+{
+   field(DTYP, "asynFloat64")
+   field(OUT,  "@asyn($(PORT),0,0)PI_SUP_PIVOT_X")
+   field(PREC, "5")
+}
+
+record(ao, "$(P)PIVOT_Y")
+{
+   field(DTYP, "asynFloat64")
+   field(OUT,  "@asyn($(PORT),0,0)PI_SUP_PIVOT_Y")
+   field(PREC, "5")
+}
+
+record(ao, "$(P)PIVOT_Z")
+{
+   field(DTYP, "asynFloat64")
+   field(OUT,  "@asyn($(PORT),0,0)PI_SUP_PIVOT_Z")
+   field(PREC, "5")
+}
+
+record(ai, "$(P)RBPIVOT_X")
+{
+	field(PINI, "1")
+	field(DTYP, "asynFloat64")
+	field(INP, "@asyn($(PORT),0,0)PI_SUP_RBPIVOT_X")
+	field(PREC, "5")
+	field(SCAN, "I/O Intr")
+}
+
+
+record(ai, "$(P)RBPIVOT_Y")
+{
+	field(PINI, "1")
+	field(DTYP, "asynFloat64")
+	field(INP, "@asyn($(PORT),0,0)PI_SUP_RBPIVOT_Y")
+	field(PREC, "5")
+	field(SCAN, "I/O Intr")
+}
+
+record(ai, "$(P)RBPIVOT_Z")
+{
+	field(PINI, "1")
+	field(DTYP, "asynFloat64")
+	field(INP, "@asyn($(PORT),0,0)PI_SUP_RBPIVOT_Z")
+	field(PREC, "5")
+	field(SCAN, "I/O Intr")
+}
+
+

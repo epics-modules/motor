@@ -1,0 +1,25 @@
+record(ai, "$(P)$(R)POSITION")
+{
+	field(PINI, "1")
+	field(DTYP, "asynFloat64")
+	field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))PI_SUP_POSITION")
+	field(PREC, "5")
+	field(SCAN, "I/O Intr")
+}
+
+record(ao, "$(P)$(R)TARGET")
+{
+   field(PINI, "1")
+   field(DTYP, "asynFloat64")
+   field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PI_SUP_TARGET")
+   field(PREC, "5")
+}
+
+record(bi, "$(P)$(R)SERVO")
+{
+   field(PINI, "1")
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))PI_SUP_SERVO")
+   field(SCAN, "I/O Intr")
+}
+
