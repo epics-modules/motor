@@ -22,9 +22,14 @@
   </div>
   <div style="text-align: left">
     <p>
-      <b></b>
+      <b>Newport ESP300</b>
     </p>
     <p>
+      Prior to this release, the ESP300 driver used the controller's resolution to 
+      scale the EGUtoRAWbacktoEGU conversion that is done between motor record and 
+      device driver support. With R6.8 the driver uses the motor record's MRES to 
+      scale this conversion. Users should now set the MRES like any other motor; i.e., 
+      to the precision of the stage.
     </p>
   </div>
   <div style="text-align: center">
@@ -33,9 +38,30 @@
   </div>
   <div style="text-align: left">
     <p>
-      <b></b>
+      <b>Physik Instrumente (PI) Asyn Motor Support</b>
     </p>
     <p>
+      Steffen Rau (Physik Instrumente GmbH & Co.) has added asyn motor support for PI 
+      motion controllers that use the GCS2 (General Command Set) command language. 
+      This support resides in the &ltmotor&gt/motorApp/PIGCS2Src/ directory of the 
+      motor module.
+    </p>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>PI micos SMC hydra Asyn Motor Support</b>
+    </p>
+    <p>
+      Kevin Peterson (APS) added support for asyn motor support for the PI micos SMC 
+      hydra controller.
+    </p>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>Schneider Electric (IMS) MDrive/MForce Asyn Motor Support</b>
+    </p>
+    <p>
+      Nia Fong (SLAC) added asyn motor support for the Schneider Electric (IMS) MDrive/MForce controller that uses the MCode command language.
     </p>
   </div>
   <p>

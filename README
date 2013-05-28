@@ -144,7 +144,7 @@ Known Problems
         ramp of a home search operation; but not on the down ramp.
 
 9) When the LOCK field is set to YES for a motor with soft-channel device support,
-	the DMOV field only indicates motion for soft-motor-initiated moves.
+        the DMOV field only indicates motion for soft-motor-initiated moves.
 
 
 Modification Log for R6-8
@@ -175,26 +175,38 @@ Modification Log for R6-8
 
 
 3) Kevin Peterson's bug fix for the SYNC field failing to update the target 
-	position of motors with soft-channel device support. 
+        position of motors with soft-channel device support. 
         
         File modified: motorApp/MotorSrc/motorRecord.cc
 
 4) The stepsPerUnit argument of XPSConfigAxis in the model 2 asyn XPS driver
-	has been changed from an int to a string.
-	
-	Files modified: motorApp/NewportSrc/drvXPSAsyn.c
-	                motorApp/NewportSrc/drvXPSAsyn.h
+        has been changed from an int to a string.
+        
+        Files modified: motorApp/NewportSrc/drvXPSAsyn.c
+                        motorApp/NewportSrc/drvXPSAsyn.h
 
 5) Added xpsSlave.st to motorApp/NewportSrc to allow master/slave mode to be
-	used with any version of the XPS support.
- 
+        used with any version of the XPS support.
+  
+6) Changed the way the Newport ESP300 driver handles communicating with the
+        controller in EGU units.  Instead of using the controllers resolution
+        as the scaler for EGUtoRAWbacktoEGU conversion, the driver uses the
+        motor record's MRES.
+
+        Files modified: motorApp/NewportSrc/{dev/drv}ESP300.cc
+
+7) Added asyn motor driver support to read actual raw velocity (RVEL field).
+
+        File modified: motorApp/MotorSrc - motor_interface.h, motordrvCom.h,
+                                           drvMotorAsyn.c
+
 8) Added support for the nPoint C300:
 
-	Files added: motorApp/NPointSrc
-		     motorApp/NPointSrc/C300MotorDriver.cpp
-		     motorApp/NPointSrc/C300MotorDriver.h
-		     motorApp/NPointSrc/Makefile
-		     motorApp/NPointSrc/NPointMotorSupport.dbd
+        Files added: motorApp/NPointSrc
+                     motorApp/NPointSrc/C300MotorDriver.cpp
+                     motorApp/NPointSrc/C300MotorDriver.h
+                     motorApp/NPointSrc/Makefile
+                     motorApp/NPointSrc/NPointMotorSupport.dbd
 
 
 Modification Log for R6-7
