@@ -769,8 +769,6 @@ static int getMotorPositions(SS_ID ssId, struct UserVar *pVar, double *pos, epic
     int j;
     int dir;
 	epicsTimeStamp currtime;
-	char vBuf[MAX_MESSAGE_STRING], aBuf[MAX_MESSAGE_STRING];
-	static char vcmd[10]="VRV[1];", acmd[10]="VRC[1];";
 
 	MAXV_getPositions(pVar->cardNumber, rawP, pVar->numAxes);
 
