@@ -47,6 +47,7 @@ HeadURL:        $URL$
 #define INCdrvMAXvh 1
 
 #include "drvOmsCom.h"
+#include <epicsMutex.h>
 
 /*
  * MAXv default profile
@@ -64,6 +65,7 @@ enum MotorTypes {PSO,  // Stepper; w/o  encoder
 struct MAXvController
 {
     MotorTypes typeID[8];
+    epicsMutexId message_mutex;
 };
 
 
