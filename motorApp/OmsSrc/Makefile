@@ -23,16 +23,12 @@ SRCS += devOms.cc drvOms.cc
 SRCS += devOms58.cc drvOms58.cc
 
 # OMS MAXv device driver support.
-# Choose one; either "standard" or "trajectory".
-
-# Standard MAXv
 SRCS += devMAXv.cc drvMAXv.cc
 
 # Trajectory support for MAXV controller
 ifdef SNCSEQ
-#!SRCS += MAX_trajectoryScan.st
+SRCS += MAX_trajectoryScan.st
 endif
-#!SRCS_vxWorks += devMAXv.cc drvMAXv_trajectory.cc
 
 # The following is required for all OMS device drivers.
 SRCS += devOmsCom.cc
