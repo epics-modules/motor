@@ -56,6 +56,7 @@ HXPController::HXPController(const char *portName, const char *IPAddress, int IP
   IPPort_ = IPPort;
 
   createParam(HXPMoveCoordSysString,          asynParamInt32, &HXPMoveCoordSys_);
+  createParam(HXPStatusString,                asynParamInt32, &HXPStatus_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = HXPTCP_ConnectToServer((char *)IPAddress, IPPort, HXP_POLL_TIMEOUT);
@@ -336,7 +337,7 @@ asynStatus HXPAxis::poll(bool *moving)
             "%s:%s: [%s,%d]: %s axisStatus=%d\n",
             driverName, functionName, pC_->portName, axisNo_, positionerName_, axisStatus_);
   /* Set the status */
-  //setIntegerParam(pC_->HXPStatus_, axisStatus_);
+  setIntegerParam(pC_->HXPStatus_, axisStatus_);
 
   /* If the group is not moving then the axis is not moving */
   if ((axisStatus_ < 43) || (axisStatus_ > 48))

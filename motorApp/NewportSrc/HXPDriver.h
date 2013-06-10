@@ -13,6 +13,7 @@ USAGE...      Motor driver support for the Newport Hexapod controller.
 
 // drvInfo strings for extra parameters that the HXP controller supports
 #define HXPMoveCoordSysString                "HXP_MOVE_COORD_SYS"
+#define HXPStatusString                      "HXP_STATUS"
 
 class HXPAxis : public asynMotorAxis
 {
@@ -52,7 +53,8 @@ public:
 protected:
   #define FIRST_HXP_PARAM HXPMoveCoordSys_
   int HXPMoveCoordSys_;
-  #define LAST_HXP_PARAM HXPMoveCoordSys_
+  int HXPStatus_;
+  #define LAST_HXP_PARAM HXPStatus_
 
   #define NUM_HXP_PARAMS ((int) (&LAST_HXP_PARAM - &FIRST_HXP_PARAM + 1))
 
@@ -64,7 +66,6 @@ private:
   //int moveSocket_;
   char firmwareVersion_[100];
   char *axisNames_;
-  int HXPStatus_;
   int noDisableError_;
 
 friend class HXPAxis;

@@ -9,3 +9,12 @@ grecord(mbbo,"$(P)$(R)CS") {
     field(VAL, "0")
     field(PINI, "YES")
 }
+
+grecord(ai,"$(P)$(R)STATUS") {
+    field(DESC,"HXP Group Status")
+    field(DTYP, "asynInt32")
+    field(PINI, "1")
+    field(PREC,"0")
+    field(SCAN, "I/O Intr")
+    field(INP,"@asyn($(PORT),$(CHAN))HXP_STATUS")
+}
