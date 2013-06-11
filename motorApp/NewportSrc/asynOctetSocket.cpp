@@ -208,6 +208,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
             if (status == asynTimeout) {
                 asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
                           "SendAndReceive, timeout on read\n");
+                strcpy(valueRtrn, "0");
                 break;
             } else {
                 asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
@@ -221,7 +222,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
                 break;
             }
         }
-        strcpy(valueRtrn, "0");
+        if (retries == MAX_RETRIES) strcpy(valueRtrn, "0");
     }
     epicsMutexUnlock(psock->mutexId);
 }
