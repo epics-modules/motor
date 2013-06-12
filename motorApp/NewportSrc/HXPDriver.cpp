@@ -25,7 +25,6 @@ Note: This driver was tested with the v1.3.x of the firmware
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 #define NUM_AXES 6
 #define GROUP "HEXAPOD"
-#define CS "Work"
 #define MRES 0.00001
 
 static const char *driverName = "HXPDriver";
@@ -57,6 +56,7 @@ HXPController::HXPController(const char *portName, const char *IPAddress, int IP
 
   createParam(HXPMoveCoordSysString,          asynParamInt32, &HXPMoveCoordSys_);
   createParam(HXPStatusString,                asynParamInt32, &HXPStatus_);
+  createParam(HXPErrorString,                 asynParamInt32, &HXPError_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = HXPTCP_ConnectToServer((char *)IPAddress, IPPort, HXP_POLL_TIMEOUT);
@@ -189,6 +189,7 @@ asynStatus HXPAxis::move(double position, int relative, double baseVelocity, dou
   double *pos;
   int coordSys; // 0 = work, 1 = tool
   static const char *functionName = "HXPAxis::move";
+  asynStatus retval = asynSuccess;
 
   pC_->getIntegerParam(pC_->HXPMoveCoordSys_, &coordSys); 
   
@@ -210,7 +211,7 @@ asynStatus HXPAxis::move(double position, int relative, double baseVelocity, dou
                   "%s:%s: Error performing HexapodMoveIncremental[%s,%d] %d\n",
                   driverName, functionName, pC_->portName, axisNo_, status);
         /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move! */
-        return asynError;
+        retval = asynError;
     }
   } else {
     // get current positions before moving (could an error overflow the array?)
@@ -247,11 +248,24 @@ asynStatus HXPAxis::move(double position, int relative, double baseVelocity, dou
                   "%s:%s: Error performing HexapodMoveAbsolute[%s,%d] %d\n",
                   driverName, functionName, pC_->portName, axisNo_, status);
         /* Error -27 is caused when the motor record changes dir i.e. when it aborts a move! */
-        return asynError;
+        retval = asynError;
     }
   }
   
-  return asynSuccess;
+  if (status < 0)
+  {
+    /* Set the error */
+    pC_->setIntegerParam(pC_->HXPError_, status);
+  }
+  else
+  {
+    /* Clear the error */
+    pC_->setIntegerParam(pC_->HXPError_, 0);
+  }
+  callParamCallbacks();
+
+  return retval;
+
 }
 
 asynStatus HXPAxis::home(double baseVelocity, double slewVelocity, double acceleration, int forwards)

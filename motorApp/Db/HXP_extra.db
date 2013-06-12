@@ -1,7 +1,7 @@
 grecord(mbbo,"$(P)$(R)CS") {
     field(DESC,"Coordinate System")
     field(DTYP, "asynInt32")
-    field(OUT,"@asynMask($(PORT) $(CHAN) 0xFFFF)HXP_MOVE_COORD_SYS")
+    field(OUT,"@asynMask($(PORT) 0 0xFFFF)HXP_MOVE_COORD_SYS")
     field(ZRVL,"0")
     field(ZRST,"Work")
     field(ONVL,"1")
@@ -16,5 +16,14 @@ grecord(ai,"$(P)$(R)STATUS") {
     field(PINI, "1")
     field(PREC,"0")
     field(SCAN, "I/O Intr")
-    field(INP,"@asyn($(PORT),$(CHAN))HXP_STATUS")
+    field(INP,"@asyn($(PORT),0)HXP_STATUS")
+}
+
+grecord(ai,"$(P)$(R)ERROR") {
+    field(DESC,"HXP Group Error")
+    field(DTYP, "asynInt32")
+    field(PINI, "1")
+    field(PREC,"0")
+    field(SCAN, "I/O Intr")
+    field(INP,"@asyn($(PORT),0)HXP_ERROR")
 }
