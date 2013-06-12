@@ -1,4 +1,4 @@
-grecord(mbbo,"$(P)$(R)CS") {
+record(mbbo,"$(P)$(R)CS") {
     field(DESC,"Coordinate System")
     field(DTYP, "asynInt32")
     field(OUT,"@asynMask($(PORT) 0 0xFFFF)HXP_MOVE_COORD_SYS")
@@ -10,7 +10,7 @@ grecord(mbbo,"$(P)$(R)CS") {
     field(PINI, "YES")
 }
 
-grecord(ai,"$(P)$(R)STATUS") {
+record(ai,"$(P)$(R)STATUS") {
     field(DESC,"HXP Group Status")
     field(DTYP, "asynInt32")
     field(PINI, "1")
@@ -19,11 +19,17 @@ grecord(ai,"$(P)$(R)STATUS") {
     field(INP,"@asyn($(PORT),0)HXP_STATUS")
 }
 
-grecord(ai,"$(P)$(R)ERROR") {
+record(ai,"$(P)$(R)ERROR") {
     field(DESC,"HXP Group Error")
     field(DTYP, "asynInt32")
-    field(PINI, "1")
     field(PREC,"0")
     field(SCAN, "I/O Intr")
     field(INP,"@asyn($(PORT),0)HXP_ERROR")
+}
+
+record(stringin, "$(P)$(R)ERR_DESC") {
+    field(DESC, "Error Description")
+    field(DTYP, "asynOctetRead")
+    field(SCAN, "I/O Intr")
+    field(INP,  "@asyn($(PORT),0)HXP_ERROR_DESC")
 }

@@ -57,6 +57,7 @@ HXPController::HXPController(const char *portName, const char *IPAddress, int IP
   createParam(HXPMoveCoordSysString,          asynParamInt32, &HXPMoveCoordSys_);
   createParam(HXPStatusString,                asynParamInt32, &HXPStatus_);
   createParam(HXPErrorString,                 asynParamInt32, &HXPError_);
+  createParam(HXPErrorDescString,             asynParamOctet, &HXPErrorDesc_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = HXPTCP_ConnectToServer((char *)IPAddress, IPPort, HXP_POLL_TIMEOUT);
@@ -256,11 +257,23 @@ asynStatus HXPAxis::move(double position, int relative, double baseVelocity, dou
   {
     /* Set the error */
     pC_->setIntegerParam(pC_->HXPError_, status);
+    
+    /* Get the error string */
+    HXPErrorStringGet(moveSocket_, status, errorDescFull_);
+    
+    /* Trim the error string */
+    strncpy(errorDesc_, errorDescFull_, 39);
+    errorDesc_[39] = 0;
+    
+    /* */
+    pC_->setStringParam(pC_->HXPErrorDesc_, errorDesc_);
+    
   }
   else
   {
     /* Clear the error */
     pC_->setIntegerParam(pC_->HXPError_, 0);
+    pC_->setStringParam(pC_->HXPErrorDesc_, "");
   }
   callParamCallbacks();
 
@@ -351,6 +364,8 @@ asynStatus HXPAxis::poll(bool *moving)
             "%s:%s: [%s,%d]: %s axisStatus=%d\n",
             driverName, functionName, pC_->portName, axisNo_, positionerName_, axisStatus_);
   /* Set the status */
+  /* Note: there is only one status PV for the controller. Currently it reflects the status of axis 0.
+           It might be better to call pC_->setIntegerParam(pC_->HXPStatus_, axisStatus_); */
   setIntegerParam(pC_->HXPStatus_, axisStatus_);
 
   /* If the group is not moving then the axis is not moving */

@@ -15,6 +15,7 @@ USAGE...      Motor driver support for the Newport Hexapod controller.
 #define HXPMoveCoordSysString                "HXP_MOVE_COORD_SYS"
 #define HXPStatusString                      "HXP_STATUS"
 #define HXPErrorString                       "HXP_ERROR"
+#define HXPErrorDescString                   "HXP_ERROR_DESC"
 
 class HXPAxis : public asynMotorAxis
 {
@@ -35,6 +36,8 @@ private:
   int pollSocket_;
   char axisName_;
   char positionerName_[12];
+  char errorDesc_[40];
+  char errorDescFull_[1024];
   double encoderPosition_;
   double setpointPosition_;
   int axisStatus_;
@@ -56,7 +59,8 @@ protected:
   int HXPMoveCoordSys_;
   int HXPStatus_;
   int HXPError_;
-  #define LAST_HXP_PARAM HXPError_
+  int HXPErrorDesc_;
+  #define LAST_HXP_PARAM HXPErrorDesc_
 
   #define NUM_HXP_PARAMS ((int) (&LAST_HXP_PARAM - &FIRST_HXP_PARAM + 1))
 

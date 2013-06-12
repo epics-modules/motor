@@ -1,14 +1,14 @@
 
 file {
-	name="/home/oxygen/KPETERSN/epics/ioc/synApps_5_6/kmp/kmpApp/op/adl/HXP_extra.adl"
+	name="/home/oxygen21/KPETERSN/epics/ioc/synApps_5_6/kmp/kmpApp/op/adl/HXP_extra.adl"
 	version=030107
 }
 display {
 	object {
 		x=208
 		y=115
-		width=250
-		height=130
+		width=350
+		height=250
 	}
 	clr=14
 	bclr=4
@@ -91,7 +91,7 @@ rectangle {
 	object {
 		x=0
 		y=0
-		width=250
+		width=350
 		height=30
 	}
 	"basic attribute" {
@@ -102,7 +102,7 @@ text {
 	object {
 		x=0
 		y=0
-		width=250
+		width=350
 		height=30
 	}
 	"basic attribute" {
@@ -111,67 +111,114 @@ text {
 	textix="$(P)$(R)"
 	align="horiz. centered"
 }
-composite {
+text {
 	object {
-		x=12
-		y=50
-		width=225
-		height=67
+		x=62
+		y=44
+		width=110
+		height=30
 	}
-	"composite name"=""
-	children {
-		text {
-			object {
-				x=12
-				y=50
-				width=110
-				height=30
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Coord Sys"
-		}
-		menu {
-			object {
-				x=127
-				y=50
-				width=110
-				height=36
-			}
-			control {
-				chan="$(P)$(R)CS"
-				clr=14
-				bclr=4
-			}
-		}
-		text {
-			object {
-				x=12
-				y=87
-				width=110
-				height=30
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Status"
-		}
-		"text update" {
-			object {
-				x=127
-				y=87
-				width=110
-				height=30
-			}
-			monitor {
-				chan="$(P)$(R)STATUS"
-				clr=14
-				bclr=4
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Coord Sys"
+}
+menu {
+	object {
+		x=177
+		y=44
+		width=110
+		height=36
+	}
+	control {
+		chan="$(P)$(R)CS"
+		clr=14
+		bclr=4
+	}
+}
+text {
+	object {
+		x=62
+		y=81
+		width=110
+		height=30
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Status"
+}
+"text update" {
+	object {
+		x=177
+		y=81
+		width=110
+		height=30
+	}
+	monitor {
+		chan="$(P)$(R)STATUS"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=179
+		y=129
+		width=110
+		height=30
+	}
+	monitor {
+		chan="$(P)$(R)ERROR"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=64
+		y=129
+		width=110
+		height=30
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Error"
+}
+text {
+	object {
+		x=62
+		y=165
+		width=225
+		height=30
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Error Description"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=6
+		y=204
+		width=335
+		height=22
+	}
+	monitor {
+		chan="$(P)$(R)ERR_DESC"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
 	}
 }
