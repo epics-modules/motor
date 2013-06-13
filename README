@@ -208,6 +208,19 @@ Modification Log for R6-8
                      motorApp/NPointSrc/Makefile
                      motorApp/NPointSrc/NPointMotorSupport.dbd
 
+9) Added RTRY field to asyn_motor.db with default value of 10 to allow new
+	support the option of overriding the number of retries without breaking
+	existing support.
+
+10) Added support for the Newport Hexapod (HXP):
+
+	Files added: iocBoot/iocWithAsyn/motor.substitutions.hxp
+	             iocBoot/iocWithAsyn/motor.cmd.hxp
+		     motorApp/Db/HXP_extra.db
+		     motorApp/NewportSrc/HXPDriver.{cpp,h}
+		     motorApp/NewportSrc/hxp_drivers.{cpp,h}
+		     motorApp/NewportSrc/hxp_error.h
+
 
 Modification Log for R6-7
 =========================

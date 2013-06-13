@@ -1,0 +1,6 @@
+dbLoadTemplate("motor.substitutions.hxp")
+
+HXPCreateController("HXP1", "192.168.1.42", 5001, 200, 1000)
+
+#asynSetTraceIOMask("HXP1", 0, 2)
+#asynSetTraceMask("HXP1", 0, 255)
