@@ -6,7 +6,8 @@ Based on the ACS MCB-4B Model 3 device driver written by:
 Mark Rivers
 March 1, 2012
 
-K. Goetze 2012-03-23
+K. Goetze 2012-03-23  Initial version
+          2013-06-07  Allow motor resolution to be set using "SMC100CreateController" at boot time
 
 */
 
@@ -15,6 +16,7 @@ K. Goetze 2012-03-23
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <errno.h>
 
 #include <iocsh.h>
 #include <epicsThread.h>
@@ -34,7 +36,7 @@ K. Goetze 2012-03-23
   * \param[in] idlePollPeriod    The time between polls when no axis is moving 
   */
 SMC100Controller::SMC100Controller(const char *portName, const char *SMC100PortName, int numAxes, 
-                                 double movingPollPeriod, double idlePollPeriod)
+                                 double movingPollPeriod, double idlePollPeriod, double stepSize)
   :  asynMotorController(portName, numAxes, NUM_SMC100_PARAMS, 
                          0, // No additional interfaces beyond those in base class
                          0, // No additional callback interfaces beyond those in base class
@@ -44,8 +46,9 @@ SMC100Controller::SMC100Controller(const char *portName, const char *SMC100PortN
 {
   int axis;
   asynStatus status;
+  SMC100Axis *pAxis;
   static const char *functionName = "SMC100Controller::SMC100Controller";
-
+  
   /* Connect to SMC100 controller */
   status = pasynOctetSyncIO->connect(SMC100PortName, 0, &pasynUserController_, NULL);
   if (status) {
@@ -54,7 +57,8 @@ SMC100Controller::SMC100Controller(const char *portName, const char *SMC100PortN
       functionName);
   }
   for (axis=0; axis<numAxes; axis++) {
-    new SMC100Axis(this, axis);
+  //for (axis=1; axis < (numAxes + 1); axis++) {
+    pAxis = new SMC100Axis(this, axis, stepSize);
   }
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
@@ -68,11 +72,21 @@ SMC100Controller::SMC100Controller(const char *portName, const char *SMC100PortN
   * \param[in] numAxes           The number of axes that this controller supports 
   * \param[in] movingPollPeriod  The time in ms between polls when any axis is moving
   * \param[in] idlePollPeriod    The time in ms between polls when no axis is moving 
+  * \param[in] eguPerStep        The stage resolution
   */
 extern "C" int SMC100CreateController(const char *portName, const char *SMC100PortName, int numAxes, 
-                                   int movingPollPeriod, int idlePollPeriod)
+                                   int movingPollPeriod, int idlePollPeriod, const char *eguPerStep)
 {
-  new SMC100Controller(portName, SMC100PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
+  double stepSize;
+   
+  stepSize = strtod(eguPerStep, NULL);
+  new SMC100Controller(portName, SMC100PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000., stepSize);
+  //printf("\n *** SMC100: stepSize=%f\n", stepSize);
+  if (errno != 0) {
+    printf("SMC100: Error invalid steps per unit=%s\n", eguPerStep);
+    return asynError;
+  }
+  
   return(asynSuccess);
 }
 
@@ -117,10 +131,11 @@ SMC100Axis* SMC100Controller::getAxis(int axisNo)
   * 
   * Initializes register numbers, etc.
   */
-SMC100Axis::SMC100Axis(SMC100Controller *pC, int axisNo)
+SMC100Axis::SMC100Axis(SMC100Controller *pC, int axisNo, double stepSize)
   : asynMotorAxis(pC, axisNo),
-    pC_(pC)
-{  
+    pC_(pC), stepSize_(stepSize)
+{ 
+
 }
 
 /** Reports on status of the axis
@@ -146,13 +161,13 @@ asynStatus SMC100Axis::sendAccelAndVelocity(double acceleration, double velocity
   // static const char *functionName = "SMC100::sendAccelAndVelocity";
 
   // Send the velocity in egus
-  sprintf(pC_->outString_, "%1dVA%f", axisNo_ + 1, (velocity/1e5));
+  sprintf(pC_->outString_, "%1dVA%f", axisNo_ + 1, (velocity*stepSize_));
   status = pC_->writeController();
 
   // Send the acceleration in egus/sec/sec
   //printf("velocity: %f\n", velocity);
   //printf("acceleration: %f", acceleration);
-  sprintf(pC_->outString_, "%1dAC%f", axisNo_ + 1, (acceleration/1e5));
+  sprintf(pC_->outString_, "%1dAC%f", axisNo_ + 1, (acceleration*stepSize_));
   status = pC_->writeController();
   return status;
 }
@@ -166,9 +181,9 @@ asynStatus SMC100Axis::move(double position, int relative, double minVelocity, d
   status = sendAccelAndVelocity(acceleration, maxVelocity);
   
   if (relative) {
-    sprintf(pC_->outString_, "%1dPR%f", axisNo_ + 1, (position/1e5));
+    sprintf(pC_->outString_, "%1dPR%f", axisNo_ + 1, (position*stepSize_));
   } else {
-    sprintf(pC_->outString_, "%1dPA%f", axisNo_ + 1, (position/1e5));
+    sprintf(pC_->outString_, "%1dPA%f", axisNo_ + 1, (position*stepSize_));
   }
   status = pC_->writeController();
   return status;
@@ -289,7 +304,8 @@ asynStatus SMC100Axis::poll(bool *moving)
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
   // The response string is of the form "1TP-0.123"
-  position = (atof(&pC_->inString_[3]) * 1e5);
+  position = (atof(&pC_->inString_[3]) / stepSize_);
+  //printf("\n * * * * SMC100 stepSize_ : %f \n", stepSize_);
   setDoubleParam(pC_->motorPosition_, position);
 
   // Read the moving status of this motor
@@ -340,15 +356,17 @@ static const iocshArg SMC100CreateControllerArg1 = {"SMC100 port name", iocshArg
 static const iocshArg SMC100CreateControllerArg2 = {"Number of axes", iocshArgInt};
 static const iocshArg SMC100CreateControllerArg3 = {"Moving poll period (ms)", iocshArgInt};
 static const iocshArg SMC100CreateControllerArg4 = {"Idle poll period (ms)", iocshArgInt};
+static const iocshArg SMC100CreateControllerArg5 = {"EGUs per step", iocshArgString};
 static const iocshArg * const SMC100CreateControllerArgs[] = {&SMC100CreateControllerArg0,
                                                              &SMC100CreateControllerArg1,
                                                              &SMC100CreateControllerArg2,
                                                              &SMC100CreateControllerArg3,
-                                                             &SMC100CreateControllerArg4};
-static const iocshFuncDef SMC100CreateControllerDef = {"SMC100CreateController", 5, SMC100CreateControllerArgs};
+                                                             &SMC100CreateControllerArg4,
+															 &SMC100CreateControllerArg5};
+static const iocshFuncDef SMC100CreateControllerDef = {"SMC100CreateController", 6, SMC100CreateControllerArgs};
 static void SMC100CreateContollerCallFunc(const iocshArgBuf *args)
 {
-  SMC100CreateController(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival);
+  SMC100CreateController(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival, args[5].sval);
 }
 
 static void SMC100Register(void)
