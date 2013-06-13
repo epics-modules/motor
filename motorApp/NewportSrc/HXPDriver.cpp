@@ -153,9 +153,7 @@ HXPAxis::HXPAxis(HXPController *pC, int axisNo)
   HXPTCP_SetTimeout(moveSocket_, -0.1);
   pollSocket_ = pC_->pollSocket_;
 
-  /* Enable gain support so that the CNEN field can be used to send
-     the init command to clear a motor fault for stepper motors, even
-     though they lack closed-loop support. */
+  /* Enable gain support so that the CNEN field to enable/disable the hexapod */
   setIntegerParam(pC_->motorStatusGainSupport_, 1);
   // does the hexapod read encoders from the stages? leave in for now to test relative moves
   setIntegerParam(pC_->motorStatusHasEncoder_, 1);
@@ -379,23 +377,31 @@ asynStatus HXPAxis::poll(bool *moving)
   //if (deferredMove_) *moving = true;
   setIntegerParam(pC_->motorStatusDone_, *moving?0:1);
 
-  /*Read the controller software limits in case these have been changed by a TCL script.*/
-
-  // set CNEN if group is disabled?
   /*Test for states that mean we cannot move an axis (disabled, uninitialised, etc.) 
     and set problem bit in MSTA.*/
   if ((axisStatus_ < 10) || ((axisStatus_ >= 20) && (axisStatus_ <= 42)) ||
-      (axisStatus_ == 50) || (axisStatus_ == 64)) {
-    if ( (pC_->noDisableError_ > 0) && (axisStatus_==20) ) {
+      (axisStatus_ == 50) || (axisStatus_ == 64)) 
+  {
+    /* Don't consider a normal disabled status to be a problem */
+    if ( axisStatus_==20 ) 
+    {
       setIntegerParam(pC_->motorStatusProblem_, 0);             
-    } else {
+    }
+    else 
+    {
       asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
           "%s:%s: [%s,%d]: in unintialised/disabled/not referenced. XPS State Code: %d\n",
           driverName, functionName, pC_->portName, axisNo_, axisStatus_);
       setIntegerParam(pC_->motorStatusProblem_, 1);
     }
-  } else {
+    
+    /* Group status indicates power is off */
+    setIntegerParam(pC_->motorStatusPowerOn_, 0);
+  }
+  else 
+  {
     setIntegerParam(pC_->motorStatusProblem_, 0);
+    setIntegerParam(pC_->motorStatusPowerOn_, 1);
   }
 
   status = HXPGroupPositionCurrentGet(pollSocket_,

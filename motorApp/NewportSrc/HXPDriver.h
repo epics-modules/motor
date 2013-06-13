@@ -72,7 +72,6 @@ private:
   //int moveSocket_;
   char firmwareVersion_[100];
   char *axisNames_;
-  int noDisableError_;
 
 friend class HXPAxis;
 };
