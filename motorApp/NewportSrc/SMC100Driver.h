@@ -22,7 +22,7 @@ class SMC100Axis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
-  SMC100Axis(class SMC100Controller *pC, int axis);
+  SMC100Axis(class SMC100Controller *pC, int axis, double stepSize);
   void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
@@ -36,13 +36,15 @@ private:
   SMC100Controller *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   asynStatus sendAccelAndVelocity(double accel, double velocity);
+  double stepSize_;      /**< Encoder increment value obtained with SU? command _or_ resolution, set at boot time */
+                         /*   with SMC100CreateController command */
   
 friend class SMC100Controller;
 };
 
 class SMC100Controller : public asynMotorController {
 public:
-  SMC100Controller(const char *portName, const char *SMC100PortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
+  SMC100Controller(const char *portName, const char *SMC100PortName, int numAxes, double movingPollPeriod, double idlePollPeriod, double stepSize);
 
   void report(FILE *fp, int level);
   SMC100Axis* getAxis(asynUser *pasynUser);
