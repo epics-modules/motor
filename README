@@ -220,6 +220,7 @@ Modification Log for R6-8
 		     motorApp/NewportSrc/HXPDriver.{cpp,h}
 		     motorApp/NewportSrc/hxp_drivers.{cpp,h}
 		     motorApp/NewportSrc/hxp_error.h
+		     motorApp/op/adl/HXP_{extra,motors,moveAll}.adl
 
 
 Modification Log for R6-7

@@ -54,10 +54,17 @@ HXPController::HXPController(const char *portName, const char *IPAddress, int IP
   IPAddress_ = epicsStrDup(IPAddress);
   IPPort_ = IPPort;
 
-  createParam(HXPMoveCoordSysString,          asynParamInt32, &HXPMoveCoordSys_);
-  createParam(HXPStatusString,                asynParamInt32, &HXPStatus_);
-  createParam(HXPErrorString,                 asynParamInt32, &HXPError_);
-  createParam(HXPErrorDescString,             asynParamOctet, &HXPErrorDesc_);
+  createParam(HXPMoveCoordSysString,          asynParamInt32,   &HXPMoveCoordSys_);
+  createParam(HXPStatusString,                asynParamInt32,   &HXPStatus_);
+  createParam(HXPErrorString,                 asynParamInt32,   &HXPError_);
+  createParam(HXPErrorDescString,             asynParamOctet,   &HXPErrorDesc_);
+  createParam(HXPMoveAllString,               asynParamInt32,   &HXPMoveAll_);
+  createParam(HXPMoveAllTargetXString,        asynParamFloat64, &HXPMoveAllTargetX_);
+  createParam(HXPMoveAllTargetYString,        asynParamFloat64, &HXPMoveAllTargetY_);
+  createParam(HXPMoveAllTargetZString,        asynParamFloat64, &HXPMoveAllTargetZ_);
+  createParam(HXPMoveAllTargetUString,        asynParamFloat64, &HXPMoveAllTargetU_);
+  createParam(HXPMoveAllTargetVString,        asynParamFloat64, &HXPMoveAllTargetV_);
+  createParam(HXPMoveAllTargetWString,        asynParamFloat64, &HXPMoveAllTargetW_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = HXPTCP_ConnectToServer((char *)IPAddress, IPPort, HXP_POLL_TIMEOUT);
@@ -128,6 +135,103 @@ HXPAxis* HXPController::getAxis(asynUser *pasynUser)
 HXPAxis* HXPController::getAxis(int axisNo)
 {
   return static_cast<HXPAxis*>(asynMotorController::getAxis(axisNo));
+}
+
+
+/** Called when asyn clients call pasynInt32->write().
+  * Extracts the function and axis number from pasynUser.
+  * Sets the value in the parameter library.
+  * If the function is HXPMoveAll_ then it calls moves all motors with a single command
+  * For all other functions it calls asynMotorController::writeInt32.
+  * Calls any registered callbacks for this pasynUser->reason and address.  
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] value     Value to write. */
+asynStatus HXPController::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+  int function = pasynUser->reason;
+  asynStatus status = asynSuccess;
+  HXPAxis *pAxis = getAxis(pasynUser);
+  static const char *functionName = "writeInt32";
+  
+  /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
+   * status at the end, but that's OK */
+  status = setIntegerParam(pAxis->axisNo_, function, value);
+  
+  if (function == HXPMoveAll_)
+  {
+    /* if value == 1: motors are moved
+       if value == 0: nothing is done and parameter is simply reset */
+    if (value == 1)
+    {
+      moveAll(pAxis);
+    }
+  }
+  else 
+  {
+    /* Call base class method */
+    status = asynMotorController::writeInt32(pasynUser, value);
+  }
+  
+  /* Do callbacks so higher layers see any changes */
+  callParamCallbacks(pAxis->axisNo_);
+  if (status) 
+    asynPrint(pasynUser, ASYN_TRACE_ERROR, 
+        "%s:%s: error, status=%d function=%d, value=%d\n", 
+        driverName, functionName, status, function, value);
+  else    
+    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
+        "%s:%s: function=%d, value=%d\n", 
+        driverName, functionName, function, value);
+  return status;
+}
+
+
+/** 
+  * Moves all hexpod axes to new target positions
+  */
+int HXPController::moveAll(HXPAxis *pAxis)
+{
+  int status;
+  double x, y, z, u, v, w;
+  
+  getDoubleParam(0, HXPMoveAllTargetX_, &x);
+  getDoubleParam(0, HXPMoveAllTargetY_, &y);
+  getDoubleParam(0, HXPMoveAllTargetZ_, &z);
+  getDoubleParam(0, HXPMoveAllTargetU_, &u);
+  getDoubleParam(0, HXPMoveAllTargetV_, &v);
+  getDoubleParam(0, HXPMoveAllTargetW_, &w);
+
+  status = HXPHexapodMoveAbsolute(pAxis->moveSocket_, GROUP, "Work", x, y, z, u, v, w);
+
+  /* This is similar to what is done in HXPAxis::move() */
+  if (status < 0)
+  {
+    /* Set the error */
+    setIntegerParam(HXPError_, status);
+    
+    /* Get the error string */
+    HXPErrorStringGet(pAxis->moveSocket_, status, pAxis->errorDescFull_);
+    
+    /* Trim the error string */
+    strncpy(pAxis->errorDesc_, pAxis->errorDescFull_, 39);
+    pAxis->errorDesc_[39] = 0;
+    
+    /* Set the error description */
+    setStringParam(HXPErrorDesc_, pAxis->errorDesc_);
+  }
+  else
+  {
+    /* Clear the error */
+    setIntegerParam(HXPError_, 0);
+    setStringParam(HXPErrorDesc_, "");
+
+    /* If there was a way to force the motor record to switch to the move poll rate,
+       this would be the place to do it. */
+  }
+  callParamCallbacks();
+
+  
+  return status;
 }
 
 
@@ -263,7 +367,7 @@ asynStatus HXPAxis::move(double position, int relative, double baseVelocity, dou
     strncpy(errorDesc_, errorDescFull_, 39);
     errorDesc_[39] = 0;
     
-    /* */
+    /* Set the error description */
     pC_->setStringParam(pC_->HXPErrorDesc_, errorDesc_);
     
   }
@@ -374,7 +478,6 @@ asynStatus HXPAxis::poll(bool *moving)
 
   /* Set the axis done parameter */
   *moving = moving_;
-  //if (deferredMove_) *moving = true;
   setIntegerParam(pC_->motorStatusDone_, *moving?0:1);
 
   /*Test for states that mean we cannot move an axis (disabled, uninitialised, etc.) 

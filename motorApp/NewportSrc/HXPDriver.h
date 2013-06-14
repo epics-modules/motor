@@ -16,6 +16,13 @@ USAGE...      Motor driver support for the Newport Hexapod controller.
 #define HXPStatusString                      "HXP_STATUS"
 #define HXPErrorString                       "HXP_ERROR"
 #define HXPErrorDescString                   "HXP_ERROR_DESC"
+#define HXPMoveAllString                     "HXP_MOVE_ALL"
+#define HXPMoveAllTargetXString              "HXP_MOVE_ALL_TARGET_X"
+#define HXPMoveAllTargetYString              "HXP_MOVE_ALL_TARGET_Y"
+#define HXPMoveAllTargetZString              "HXP_MOVE_ALL_TARGET_Z"
+#define HXPMoveAllTargetUString              "HXP_MOVE_ALL_TARGET_U"
+#define HXPMoveAllTargetVString              "HXP_MOVE_ALL_TARGET_V"
+#define HXPMoveAllTargetWString              "HXP_MOVE_ALL_TARGET_W"
 
 class HXPAxis : public asynMotorAxis
 {
@@ -50,9 +57,15 @@ friend class HXPController;
 class HXPController : public asynMotorController {
 public:
   HXPController(const char *portName, const char *HXPPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
+
+  /* These are the methods that we override from asynMotorDriver */
+  asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value); /* needed for implementation of moveAll */
   void report(FILE *fp, int level);
   HXPAxis* getAxis(asynUser *pasynUser);
   HXPAxis* getAxis(int axisNo);
+
+  /* These are the methods that are new to this class */
+  int moveAll(HXPAxis* pAxis);
 
 protected:
   #define FIRST_HXP_PARAM HXPMoveCoordSys_
@@ -60,7 +73,14 @@ protected:
   int HXPStatus_;
   int HXPError_;
   int HXPErrorDesc_;
-  #define LAST_HXP_PARAM HXPErrorDesc_
+  int HXPMoveAll_;
+  int HXPMoveAllTargetX_;
+  int HXPMoveAllTargetY_;
+  int HXPMoveAllTargetZ_;
+  int HXPMoveAllTargetU_;
+  int HXPMoveAllTargetV_;
+  int HXPMoveAllTargetW_;
+  #define LAST_HXP_PARAM HXPMoveAllTargetW_
 
   #define NUM_HXP_PARAMS ((int) (&LAST_HXP_PARAM - &FIRST_HXP_PARAM + 1))
 

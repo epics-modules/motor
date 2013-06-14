@@ -1,6 +1,11 @@
 dbLoadTemplate("motor.substitutions.hxp")
 
 HXPCreateController("HXP1", "192.168.1.42", 5001, 200, 1000)
+# A shorter, idle-poll period is desirable if the motors
+# are moved using HXP_moveAll.adl, since this period determines
+# how long it takes for the motor records to see that an
+# external move has been initiated.
+#!HXPCreateController("HXP1", "192.168.1.42", 5001, 200, 200)
 
 #asynSetTraceIOMask("HXP1", 0, 2)
 #asynSetTraceMask("HXP1", 0, 255)
