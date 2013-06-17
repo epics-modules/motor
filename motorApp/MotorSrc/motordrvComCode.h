@@ -4,9 +4,10 @@ USAGE... This file contains local variables that are allocated
 	in each motor record driver.  The variables are allocated
 	in each driver by including this file.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2002-10-31 20:46:17 $
+Version:	$Revision$
+Modified By:	$Author$
+Last Modified:	$Date$
+HeadURL:        $URL$
 */
 
 /*
