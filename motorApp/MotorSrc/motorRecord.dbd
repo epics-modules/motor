@@ -3,7 +3,7 @@
 # Version:       $Revision$
 # Modified By:   $Author$
 # Last Modified: $Date$
-# HeadURL:       $URL $
+# HeadURL:       $URL$
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -70,6 +70,7 @@ menu(motorRMOD) {
         choice(motorRMOD_D,"Default")
         choice(motorRMOD_A,"Arithmetic")
         choice(motorRMOD_G,"Geometric")
+        choice(motorRMOD_I,"In-Position")
 }
 
 include "menuOmsl.dbd"
@@ -483,12 +484,14 @@ recordtype(motor) {
         field(TWF,DBF_SHORT) {
                 asl(ASL0)
                 prompt("Tweak motor Forward")
+                special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
         }
         field(TWR,DBF_SHORT) {
                 asl(ASL0)
                 prompt("Tweak motor Reverse")
+                special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
         }
