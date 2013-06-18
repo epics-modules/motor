@@ -1,0 +1,157 @@
+record(bo,"$(P)$(R)READ_CS") {
+    field(DESC,"Read Coord Systems")
+    field(DTYP,"asynInt32")
+    field(ZNAM,"Done")
+    field(ONAM,"Read")
+    field(OUT, "@asyn($(PORT),0)HXP_COORD_SYS_READ_ALL")
+    field(VAL, "1")
+    field(PINI,"YES")
+}
+
+# TOOL CS readbacks
+record(ai,"$(P)$(R)TOOL:X") {
+    field(DESC,"TOOL coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_TOOL_X")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)TOOL:Y") {
+    field(DESC,"TOOL coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_TOOL_Y")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)TOOL:Z") {
+    field(DESC,"TOOL coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_TOOL_Z")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)TOOL:U") {
+    field(DESC,"TOOL coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_TOOL_U")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)TOOL:V") {
+    field(DESC,"TOOL coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_TOOL_V")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)TOOL:W") {
+    field(DESC,"TOOL coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_TOOL_W")
+    field(PREC,"5")
+}
+
+# WORK CS readbacks
+record(ai,"$(P)$(R)WORK:X") {
+    field(DESC,"WORK coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_WORK_X")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)WORK:Y") {
+    field(DESC,"WORK coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_WORK_Y")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)WORK:Z") {
+    field(DESC,"WORK coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_WORK_Z")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)WORK:U") {
+    field(DESC,"WORK coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_WORK_U")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)WORK:V") {
+    field(DESC,"WORK coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_WORK_V")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)WORK:W") {
+    field(DESC,"WORK coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_WORK_W")
+    field(PREC,"5")
+}
+
+# BASE CS readbacks
+record(ai,"$(P)$(R)BASE:X") {
+    field(DESC,"BASE coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_BASE_X")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)BASE:Y") {
+    field(DESC,"BASE coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_BASE_Y")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)BASE:Z") {
+    field(DESC,"BASE coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_BASE_Z")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)BASE:U") {
+    field(DESC,"BASE coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_BASE_U")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)BASE:V") {
+    field(DESC,"BASE coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_BASE_V")
+    field(PREC,"5")
+}
+
+record(ai,"$(P)$(R)BASE:W") {
+    field(DESC,"BASE coordSys def")
+    field(DTYP,"asynFloat64")
+    field(SCAN,"I/O Intr")
+    field(INP, "@asyn($(PORT),0)HXP_COORD_SYS_BASE_W")
+    field(PREC,"5")
+}
+

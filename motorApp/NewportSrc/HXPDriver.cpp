@@ -65,6 +65,25 @@ HXPController::HXPController(const char *portName, const char *IPAddress, int IP
   createParam(HXPMoveAllTargetUString,        asynParamFloat64, &HXPMoveAllTargetU_);
   createParam(HXPMoveAllTargetVString,        asynParamFloat64, &HXPMoveAllTargetV_);
   createParam(HXPMoveAllTargetWString,        asynParamFloat64, &HXPMoveAllTargetW_);
+  createParam(HXPCoordSysReadAllString,       asynParamInt32,   &HXPCoordSysReadAll_);
+  createParam(HXPCoordSysToolXString,         asynParamFloat64, &HXPCoordSysToolX_);
+  createParam(HXPCoordSysToolYString,         asynParamFloat64, &HXPCoordSysToolY_); 
+  createParam(HXPCoordSysToolZString,         asynParamFloat64, &HXPCoordSysToolZ_); 
+  createParam(HXPCoordSysToolUString,         asynParamFloat64, &HXPCoordSysToolU_); 
+  createParam(HXPCoordSysToolVString,         asynParamFloat64, &HXPCoordSysToolV_); 
+  createParam(HXPCoordSysToolWString,         asynParamFloat64, &HXPCoordSysToolW_); 
+  createParam(HXPCoordSysWorkXString,         asynParamFloat64, &HXPCoordSysWorkX_); 
+  createParam(HXPCoordSysWorkYString,         asynParamFloat64, &HXPCoordSysWorkY_);
+  createParam(HXPCoordSysWorkZString,         asynParamFloat64, &HXPCoordSysWorkZ_);
+  createParam(HXPCoordSysWorkUString,         asynParamFloat64, &HXPCoordSysWorkU_);
+  createParam(HXPCoordSysWorkVString,         asynParamFloat64, &HXPCoordSysWorkV_);
+  createParam(HXPCoordSysWorkWString,         asynParamFloat64, &HXPCoordSysWorkW_);
+  createParam(HXPCoordSysBaseXString,         asynParamFloat64, &HXPCoordSysBaseX_);
+  createParam(HXPCoordSysBaseYString,         asynParamFloat64, &HXPCoordSysBaseY_);
+  createParam(HXPCoordSysBaseZString,         asynParamFloat64, &HXPCoordSysBaseZ_);
+  createParam(HXPCoordSysBaseUString,         asynParamFloat64, &HXPCoordSysBaseU_);
+  createParam(HXPCoordSysBaseVString,         asynParamFloat64, &HXPCoordSysBaseV_);
+  createParam(HXPCoordSysBaseWString,         asynParamFloat64, &HXPCoordSysBaseW_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = HXPTCP_ConnectToServer((char *)IPAddress, IPPort, HXP_POLL_TIMEOUT);
@@ -166,6 +185,13 @@ asynStatus HXPController::writeInt32(asynUser *pasynUser, epicsInt32 value)
       moveAll(pAxis);
     }
   }
+  else if (function == HXPCoordSysReadAll_)
+  {
+    if (value == 1)
+    {
+      readAllCS(pAxis);
+    }
+  }
   else 
   {
     /* Call base class method */
@@ -203,6 +229,61 @@ int HXPController::moveAll(HXPAxis *pAxis)
 
   status = HXPHexapodMoveAbsolute(pAxis->moveSocket_, GROUP, "Work", x, y, z, u, v, w);
 
+  postError(pAxis, status);
+
+  /* callParamCallback() is called from postError, so it isn't needed here */
+
+  return status;
+}
+
+/**
+  * Reads the Tool, Work, and Base coordinate-system definitions
+  */
+int HXPController::readAllCS(HXPAxis *pAxis)
+{
+  int status;
+  double x, y, z, u, v, w;
+
+  status = HXPHexapodCoordinateSystemGet(pAxis->moveSocket_, GROUP, "Tool", &x, &y , &z, &u, &v, &w);
+
+  setDoubleParam(0, HXPCoordSysToolX_, x);
+  setDoubleParam(0, HXPCoordSysToolY_, y);
+  setDoubleParam(0, HXPCoordSysToolZ_, z);
+  setDoubleParam(0, HXPCoordSysToolU_, u);
+  setDoubleParam(0, HXPCoordSysToolV_, v);
+  setDoubleParam(0, HXPCoordSysToolW_, w);
+
+  postError(pAxis, status);
+
+  status = HXPHexapodCoordinateSystemGet(pAxis->moveSocket_, GROUP, "Work", &x, &y , &z, &u, &v, &w);
+
+  setDoubleParam(0, HXPCoordSysWorkX_, x);
+  setDoubleParam(0, HXPCoordSysWorkY_, y);
+  setDoubleParam(0, HXPCoordSysWorkZ_, z);
+  setDoubleParam(0, HXPCoordSysWorkU_, u);
+  setDoubleParam(0, HXPCoordSysWorkV_, v);
+  setDoubleParam(0, HXPCoordSysWorkW_, w);
+
+  postError(pAxis, status);
+  
+  status = HXPHexapodCoordinateSystemGet(pAxis->moveSocket_, GROUP, "Base", &x, &y , &z, &u, &v, &w);
+
+  setDoubleParam(0, HXPCoordSysBaseX_, x);
+  setDoubleParam(0, HXPCoordSysBaseY_, y);
+  setDoubleParam(0, HXPCoordSysBaseZ_, z);
+  setDoubleParam(0, HXPCoordSysBaseU_, u);
+  setDoubleParam(0, HXPCoordSysBaseV_, v);
+  setDoubleParam(0, HXPCoordSysBaseW_, w);
+
+  postError(pAxis, status);
+
+  /* callParamCallback() is called from postError, so it isn't needed here */
+  
+  return status;
+}
+
+void HXPController::postError(HXPAxis *pAxis, int status)
+{
   /* This is similar to what is done in HXPAxis::move() */
   if (status < 0)
   {
@@ -224,16 +305,11 @@ int HXPController::moveAll(HXPAxis *pAxis)
     /* Clear the error */
     setIntegerParam(HXPError_, 0);
     setStringParam(HXPErrorDesc_, "");
-
-    /* If there was a way to force the motor record to switch to the move poll rate,
-       this would be the place to do it. */
   }
   callParamCallbacks();
 
-  
-  return status;
+  return;
 }
-
 
 // These are the HXPAxis methods
 

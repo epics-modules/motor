@@ -23,6 +23,25 @@ USAGE...      Motor driver support for the Newport Hexapod controller.
 #define HXPMoveAllTargetUString              "HXP_MOVE_ALL_TARGET_U"
 #define HXPMoveAllTargetVString              "HXP_MOVE_ALL_TARGET_V"
 #define HXPMoveAllTargetWString              "HXP_MOVE_ALL_TARGET_W"
+#define HXPCoordSysReadAllString            "HXP_COORD_SYS_READ_ALL"
+#define HXPCoordSysToolXString  	    "HXP_COORD_SYS_TOOL_X"
+#define HXPCoordSysToolYString  	    "HXP_COORD_SYS_TOOL_Y"
+#define HXPCoordSysToolZString  	    "HXP_COORD_SYS_TOOL_Z"
+#define HXPCoordSysToolUString  	    "HXP_COORD_SYS_TOOL_U"
+#define HXPCoordSysToolVString  	    "HXP_COORD_SYS_TOOL_V"
+#define HXPCoordSysToolWString  	    "HXP_COORD_SYS_TOOL_W"
+#define HXPCoordSysWorkXString  	    "HXP_COORD_SYS_WORK_X"
+#define HXPCoordSysWorkYString  	    "HXP_COORD_SYS_WORK_Y"
+#define HXPCoordSysWorkZString  	    "HXP_COORD_SYS_WORK_Z"
+#define HXPCoordSysWorkUString  	    "HXP_COORD_SYS_WORK_U"
+#define HXPCoordSysWorkVString  	    "HXP_COORD_SYS_WORK_V"
+#define HXPCoordSysWorkWString  	    "HXP_COORD_SYS_WORK_W"
+#define HXPCoordSysBaseXString  	    "HXP_COORD_SYS_BASE_X"
+#define HXPCoordSysBaseYString  	    "HXP_COORD_SYS_BASE_Y"
+#define HXPCoordSysBaseZString  	    "HXP_COORD_SYS_BASE_Z"
+#define HXPCoordSysBaseUString  	    "HXP_COORD_SYS_BASE_U"
+#define HXPCoordSysBaseVString  	    "HXP_COORD_SYS_BASE_V"
+#define HXPCoordSysBaseWString  	    "HXP_COORD_SYS_BASE_W"
 
 class HXPAxis : public asynMotorAxis
 {
@@ -66,6 +85,8 @@ public:
 
   /* These are the methods that are new to this class */
   int moveAll(HXPAxis* pAxis);
+  int readAllCS(HXPAxis* pAxis);
+  void postError(HXPAxis* pAxis, int status);
 
 protected:
   #define FIRST_HXP_PARAM HXPMoveCoordSys_
@@ -80,7 +101,26 @@ protected:
   int HXPMoveAllTargetU_;
   int HXPMoveAllTargetV_;
   int HXPMoveAllTargetW_;
-  #define LAST_HXP_PARAM HXPMoveAllTargetW_
+  int HXPCoordSysReadAll_;
+  int HXPCoordSysToolX_;
+  int HXPCoordSysToolY_;
+  int HXPCoordSysToolZ_;
+  int HXPCoordSysToolU_;
+  int HXPCoordSysToolV_;
+  int HXPCoordSysToolW_;
+  int HXPCoordSysWorkX_;
+  int HXPCoordSysWorkY_;
+  int HXPCoordSysWorkZ_;
+  int HXPCoordSysWorkU_;
+  int HXPCoordSysWorkV_;
+  int HXPCoordSysWorkW_;
+  int HXPCoordSysBaseX_;
+  int HXPCoordSysBaseY_;
+  int HXPCoordSysBaseZ_;
+  int HXPCoordSysBaseU_;
+  int HXPCoordSysBaseV_;
+  int HXPCoordSysBaseW_;
+  #define LAST_HXP_PARAM HXPCoordSysBaseW_
 
   #define NUM_HXP_PARAMS ((int) (&LAST_HXP_PARAM - &FIRST_HXP_PARAM + 1))
 
