@@ -42,6 +42,15 @@ USAGE...      Motor driver support for the Newport Hexapod controller.
 #define HXPCoordSysBaseUString  	    "HXP_COORD_SYS_BASE_U"
 #define HXPCoordSysBaseVString  	    "HXP_COORD_SYS_BASE_V"
 #define HXPCoordSysBaseWString  	    "HXP_COORD_SYS_BASE_W"
+#define HXPCoordSysSetString                "HXP_COORD_SYS_SET"
+#define HXPCoordSysToSetString              "HXP_COORD_SYS_TO_SET"
+#define HXPCoordSysSetXString		    "HXP_COORD_SYS_SET_X"
+#define HXPCoordSysSetYString		    "HXP_COORD_SYS_SET_Y"
+#define HXPCoordSysSetZString		    "HXP_COORD_SYS_SET_Z"
+#define HXPCoordSysSetUString		    "HXP_COORD_SYS_SET_U"
+#define HXPCoordSysSetVString		    "HXP_COORD_SYS_SET_V"
+#define HXPCoordSysSetWString		    "HXP_COORD_SYS_SET_W"
+
 
 class HXPAxis : public asynMotorAxis
 {
@@ -86,6 +95,7 @@ public:
   /* These are the methods that are new to this class */
   int moveAll(HXPAxis* pAxis);
   int readAllCS(HXPAxis* pAxis);
+  int setCS(HXPAxis* pAxis);
   void postError(HXPAxis* pAxis, int status);
 
 protected:
@@ -120,7 +130,15 @@ protected:
   int HXPCoordSysBaseU_;
   int HXPCoordSysBaseV_;
   int HXPCoordSysBaseW_;
-  #define LAST_HXP_PARAM HXPCoordSysBaseW_
+  int HXPCoordSysSet_;  
+  int HXPCoordSysToSet_;
+  int HXPCoordSysSetX_; 
+  int HXPCoordSysSetY_; 
+  int HXPCoordSysSetZ_; 
+  int HXPCoordSysSetU_; 
+  int HXPCoordSysSetV_; 
+  int HXPCoordSysSetW_;
+  #define LAST_HXP_PARAM HXPCoordSysSetW_
 
   #define NUM_HXP_PARAMS ((int) (&LAST_HXP_PARAM - &FIRST_HXP_PARAM + 1))
 

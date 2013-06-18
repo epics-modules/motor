@@ -84,6 +84,14 @@ HXPController::HXPController(const char *portName, const char *IPAddress, int IP
   createParam(HXPCoordSysBaseUString,         asynParamFloat64, &HXPCoordSysBaseU_);
   createParam(HXPCoordSysBaseVString,         asynParamFloat64, &HXPCoordSysBaseV_);
   createParam(HXPCoordSysBaseWString,         asynParamFloat64, &HXPCoordSysBaseW_);
+  createParam(HXPCoordSysSetString,           asynParamInt32,   &HXPCoordSysSet_);
+  createParam(HXPCoordSysToSetString,         asynParamInt32,   &HXPCoordSysToSet_);
+  createParam(HXPCoordSysSetXString,          asynParamFloat64, &HXPCoordSysSetX_);
+  createParam(HXPCoordSysSetYString,          asynParamFloat64, &HXPCoordSysSetY_);
+  createParam(HXPCoordSysSetZString,          asynParamFloat64, &HXPCoordSysSetZ_);
+  createParam(HXPCoordSysSetUString,          asynParamFloat64, &HXPCoordSysSetU_);
+  createParam(HXPCoordSysSetVString,          asynParamFloat64, &HXPCoordSysSetV_);
+  createParam(HXPCoordSysSetWString,          asynParamFloat64, &HXPCoordSysSetW_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = HXPTCP_ConnectToServer((char *)IPAddress, IPPort, HXP_POLL_TIMEOUT);
@@ -192,6 +200,13 @@ asynStatus HXPController::writeInt32(asynUser *pasynUser, epicsInt32 value)
       readAllCS(pAxis);
     }
   }
+  else if (function == HXPCoordSysSet_)
+  {
+    if (value == 1)
+    {
+      setCS(pAxis);
+    }
+  }
   else 
   {
     /* Call base class method */
@@ -279,6 +294,41 @@ int HXPController::readAllCS(HXPAxis *pAxis)
 
   /* callParamCallback() is called from postError, so it isn't needed here */
   
+  return status;
+}
+
+/** 
+  * Redefine the origins of the hexapod coordinate-systems
+  */
+int HXPController::setCS(HXPAxis *pAxis)
+{
+  int status = 0;
+  int cs;     // 0=None,1=Work,2=Tool,3=Base
+  double x, y, z, u, v, w;
+  
+  getIntegerParam(0, HXPCoordSysToSet_, &cs);
+  getDoubleParam(0, HXPCoordSysSetX_, &x);
+  getDoubleParam(0, HXPCoordSysSetY_, &y);
+  getDoubleParam(0, HXPCoordSysSetZ_, &z);
+  getDoubleParam(0, HXPCoordSysSetU_, &u);
+  getDoubleParam(0, HXPCoordSysSetV_, &v);
+  getDoubleParam(0, HXPCoordSysSetW_, &w);
+  
+  if (cs == 1)
+  {
+    status = HXPHexapodCoordinateSystemSet(pAxis->moveSocket_, GROUP, "Work", x, y, z, u, v, w);
+  }
+  else if (cs == 2)
+  {
+    status = HXPHexapodCoordinateSystemSet(pAxis->moveSocket_, GROUP, "Tool", x, y, z, u, v, w);
+  }
+  else if (cs == 3)
+  {
+    status = HXPHexapodCoordinateSystemSet(pAxis->moveSocket_, GROUP, "Base", x, y, z, u, v, w);
+  }
+  
+  postError(pAxis, status);
+
   return status;
 }
 

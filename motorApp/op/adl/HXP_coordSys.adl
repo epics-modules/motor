@@ -1,0 +1,723 @@
+
+file {
+	name="/home/oxygen21/KPETERSN/epics/synApps_5_6/support/motor-svn/motorApp/op/adl/HXP_coordSys.adl"
+	version=030107
+}
+display {
+	object {
+		x=411
+		y=293
+		width=800
+		height=285
+	}
+	clr=14
+	bclr=3
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+composite {
+	object {
+		x=442
+		y=235
+		width=345
+		height=30
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=442
+				y=235
+				width=345
+				height=30
+			}
+			"basic attribute" {
+				clr=20
+				fill="outline"
+				width=2
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A<0"
+				chan="$(P)$(R)ERROR"
+			}
+		}
+		"text update" {
+			object {
+				x=447
+				y=241
+				width=335
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)ERR_DESC"
+				clr=20
+				bclr=3
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+	}
+}
+"message button" {
+	object {
+		x=10
+		y=230
+		width=125
+		height=40
+	}
+	control {
+		chan="$(P)$(R)SET_CS"
+		clr=14
+		bclr=31
+	}
+	label="Set CS"
+	press_msg="1"
+	release_msg="0"
+}
+"message button" {
+	object {
+		x=308
+		y=230
+		width=125
+		height=40
+	}
+	control {
+		chan="$(P)$(R)READ_CS"
+		clr=14
+		bclr=0
+	}
+	label="Read CS"
+	press_msg="1"
+	release_msg="0"
+}
+"text entry" {
+	object {
+		x=90
+		y=186
+		width=98
+		height=25
+	}
+	control {
+		chan="$(P)$(R)CS_SET_X"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=210
+		y=186
+		width=98
+		height=25
+	}
+	control {
+		chan="$(P)$(R)CS_SET_Y"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=330
+		y=186
+		width=98
+		height=25
+	}
+	control {
+		chan="$(P)$(R)CS_SET_Z"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=450
+		y=186
+		width=98
+		height=25
+	}
+	control {
+		chan="$(P)$(R)CS_SET_U"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=570
+		y=186
+		width=98
+		height=25
+	}
+	control {
+		chan="$(P)$(R)CS_SET_V"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=690
+		y=186
+		width=98
+		height=25
+	}
+	control {
+		chan="$(P)$(R)CS_SET_W"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=93
+		y=75
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)TOOL:X"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=213
+		y=75
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)TOOL:Y"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=333
+		y=75
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)TOOL:Z"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=453
+		y=75
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)TOOL:U"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=573
+		y=75
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)TOOL:V"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=693
+		y=75
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)TOOL:W"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=93
+		y=112
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)BASE:X"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=213
+		y=112
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)BASE:Y"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=333
+		y=112
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)BASE:Z"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=453
+		y=112
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)BASE:U"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=573
+		y=112
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)BASE:V"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=693
+		y=112
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)BASE:W"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=94
+		y=149
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)WORK:X"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=214
+		y=149
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)WORK:Y"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=334
+		y=149
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)WORK:Z"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=454
+		y=149
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)WORK:U"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=574
+		y=149
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)WORK:V"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=694
+		y=149
+		width=94
+		height=17
+	}
+	monitor {
+		chan="$(P)$(R)WORK:W"
+		clr=54
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=10
+		y=75
+		width=70
+		height=17
+	}
+	"basic attribute" {
+		clr=54
+	}
+	textix="Tool"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=10
+		y=112
+		width=70
+		height=17
+	}
+	"basic attribute" {
+		clr=54
+	}
+	textix="Base"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=10
+		y=149
+		width=70
+		height=17
+	}
+	"basic attribute" {
+		clr=54
+	}
+	textix="Work"
+	align="horiz. centered"
+}
+composite {
+	object {
+		x=10
+		y=38
+		width=777
+		height=17
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=93
+				y=38
+				width=94
+				height=17
+			}
+			"basic attribute" {
+				clr=54
+			}
+			textix="X"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=213
+				y=38
+				width=94
+				height=17
+			}
+			"basic attribute" {
+				clr=54
+			}
+			textix="Y"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=333
+				y=38
+				width=94
+				height=17
+			}
+			"basic attribute" {
+				clr=54
+			}
+			textix="Z"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=453
+				y=38
+				width=94
+				height=17
+			}
+			"basic attribute" {
+				clr=54
+			}
+			textix="U"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=573
+				y=38
+				width=94
+				height=17
+			}
+			"basic attribute" {
+				clr=54
+			}
+			textix="V"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=693
+				y=38
+				width=94
+				height=17
+			}
+			"basic attribute" {
+				clr=54
+			}
+			textix="W"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=10
+				y=38
+				width=70
+				height=17
+			}
+			"basic attribute" {
+				clr=54
+			}
+			textix="CS"
+			align="horiz. centered"
+		}
+	}
+}
+menu {
+	object {
+		x=8
+		y=183
+		width=75
+		height=30
+	}
+	control {
+		chan="$(P)$(R)CS_TO_SET"
+		clr=14
+		bclr=4
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=0
+		width=800
+		height=20
+	}
+	"basic attribute" {
+		clr=0
+	}
+}
+text {
+	object {
+		x=0
+		y=0
+		width=820
+		height=20
+	}
+	"basic attribute" {
+		clr=54
+	}
+	textix="$(P)$(R) Coordinate System Definitions"
+	align="horiz. centered"
+}
