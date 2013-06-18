@@ -216,11 +216,11 @@ Modification Log for R6-8
 
 	Files added: iocBoot/iocWithAsyn/motor.substitutions.hxp
 	             iocBoot/iocWithAsyn/motor.cmd.hxp
-		     motorApp/Db/HXP_extra.db
+		     motorApp/Db/HXP_{extra,coords}.db
 		     motorApp/NewportSrc/HXPDriver.{cpp,h}
 		     motorApp/NewportSrc/hxp_drivers.{cpp,h}
 		     motorApp/NewportSrc/hxp_error.h
-		     motorApp/op/adl/HXP_{extra,motors,moveAll}.adl
+		     motorApp/op/adl/HXP_{extra,motors,moveAll,coordSys}.adl
 
 
 Modification Log for R6-7

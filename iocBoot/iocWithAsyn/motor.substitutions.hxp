@@ -10,8 +10,16 @@ file "$(MOTOR)/motorApp/Db/asyn_motor.db"
   {xxx:hxp:c0:,      m6, "asynMotor", HXP1,  5,    "W",    degrees,  Pos,  15.,   3.,    .05,    .5,    0,       1.0,    2,	0.00001,      5,   0,       0,  "",  0}
 }
 
-# Extra HXP controller support (coordinate-system, status and error PVs)
+# Extra HXP controller support (moveAll, status and error PVs)
 file "$(MOTOR)/motorApp/Db/HXP_extra.db"
+{
+  pattern
+  {P,    R,       PORT, CHAN}
+  {xxx:, hxp:c0:, HXP1, 0}
+}
+
+# HXP coordinate-system support (reading and redefining)
+file "$(MOTOR)/motorApp/Db/HXP_coords.db"
 {
   pattern
   {P,    R,       PORT, CHAN}
