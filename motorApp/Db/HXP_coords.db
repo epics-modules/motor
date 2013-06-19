@@ -24,6 +24,44 @@ record(bo,"$(P)$(R)SET_CS") {
     field(VAL, "0")
 }
 
+# Monitor set-CS PV and initiate sync on release of button
+record(calcout,"$(P)$(R)syncCalc") {
+    field(DESC,"HXP sync calc")
+    field(DTYP,"Soft Channel")
+    field(SCAN,"Passive")
+    field(INPA,"$(P)$(R)SET_CS.VAL CP NMS")
+    field(B,   "1.0")
+    field(CALC,"A")
+    field(OCAL,"B")
+    field(ODLY,"0.5")
+    field(OOPT,"Transition To Zero")
+    field(DOPT,"Use OCAL")
+    field(OUT, "$(P)$(R)syncSeq.PROC PP NMS")
+}
+
+# Sync target positions and update CS readbacks after setting a CS
+record(sseq, "$(P)$(R)syncSeq") {
+    field(DESC,"HXP sync seq")
+    field(SCAN,"Passive")
+    field(STR1,"1")
+    field(LNK1,"$(P)$(R)$(M1).SYNC PP NMS")
+    field(STR2,"1")
+    field(LNK2,"$(P)$(R)$(M2).SYNC PP NMS")
+    field(STR3,"1")
+    field(LNK3,"$(P)$(R)$(M3).SYNC PP NMS")
+    field(STR4,"1")
+    field(LNK4,"$(P)$(R)$(M4).SYNC PP NMS")
+    field(STR5,"1")
+    field(LNK5,"$(P)$(R)$(M5).SYNC PP NMS")
+    field(STR6,"1")
+    field(LNK6,"$(P)$(R)$(M6).SYNC PP NMS")
+    field(STR7,"1")
+    field(LNK7,"$(P)$(R)READ_CS.VAL PP NMS")
+    field(DLY8,"0.25")
+    field(STR8,"0")
+    field(LNK8,"$(P)$(R)READ_CS.VAL PP NMS")
+}
+
 # CS input fields
 record(ao,"$(P)$(R)CS_SET_X") {
     field(DESC,"CS X target")

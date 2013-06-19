@@ -22,6 +22,6 @@ file "$(MOTOR)/motorApp/Db/HXP_extra.db"
 file "$(MOTOR)/motorApp/Db/HXP_coords.db"
 {
   pattern
-  {P,    R,       PORT, CHAN}
-  {xxx:, hxp:c0:, HXP1, 0}
+  {P,    R,       PORT, CHAN, M1, M2, M3, M4, M5, M6}
+  {xxx:, hxp:c0:, HXP1, 0,    m1, m2, m3, m4, m5, m6}
 }
