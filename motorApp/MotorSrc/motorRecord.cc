@@ -168,7 +168,11 @@ HeadURL:        $URL$
  *                  - Allow moving (new target position, jog or home search) out of invalid
  *                    soft limit travel range toward valid soft limit travel range.
  *                  - Added In-position retry mode for servos.
- * 
+ * .68 06-20-13 rls - bug fix for backlash using relative moves when RMOD = "In-Position".
+ *                  - bug fix for "can't tweak in either direction near soft-travel limit".
+ *                    No need in process() to test MIP_MOVE type moves for soft-travel limits.
+ *                  - Need "preferred_dir" for LVIO test. Moved LVIO test in do_work() to
+ *                    after "preferred_dir" is set.
  */
 
 #define VERSION 6.8
@@ -833,7 +837,7 @@ static long postProcess(motorRecord * pmr)
 
             /* Use if encoder or ReadbackLink is in use. */
             msta.All = pmr->msta;
-            bool use_rel = (pmr->rtry != 0 && ((msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip));
+            bool use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && ((msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip));
             double relpos = pmr->diff / pmr->mres;
             double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
@@ -903,7 +907,7 @@ static long postProcess(motorRecord * pmr)
 
         /* Use if encoder or ReadbackLink is in use. */
         msta.All = pmr->msta;
-        bool use_rel = (pmr->rtry != 0 && ((msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip));
+        bool use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && ((msta.Bits.EA_PRESENT && pmr->ueip) || pmr->urip));
         double relpos = pmr->diff / pmr->mres;
         double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;
 
@@ -1363,26 +1367,12 @@ enter_do_work:
                         (pmr->jogr && (pmr->drbv < pmr->dllm + pmr->jvel));
         else if (pmr->mip & MIP_HOME)
             pmr->lvio = false;  /* Disable soft-limit error check during home search. */
-        else if (pmr->mip & MIP_MOVE)
-            pmr->lvio = (pmr->dval > pmr->dhlm + fabs(pmr->rdbd)) ||
-                        (pmr->dval < pmr->dllm - fabs(pmr->rdbd));
     }
 
     if (pmr->lvio != old_lvio)
     {
-        bool stopmove = true;
-
-        Debug(4, "process: lvio changed to %d\n", pmr->lvio);
         MARK(M_LVIO);
-        if (pmr->mip & MIP_MOVE)
-        {
-            if (pmr->lvio && ((pmr->dval > pmr->dhlm) && (pmr->cdir == 0)))
-                stopmove = false;
-            else if (pmr->lvio && ((pmr->dval < pmr->dhlm) && (pmr->cdir == 1)))
-                stopmove = false;
-        }
-
-        if (stopmove == true && pmr->lvio && !pmr->set)
+        if (pmr->lvio && !pmr->set)
         {
             pmr->stop = 1;
             MARK(M_STOP);
@@ -1580,6 +1570,9 @@ LOGIC:
 
     IF Limit violation occurred.
         Restore VAL, DVAL and RVAL to previous, valid values.
+        IF MIP state is RETRY
+            Set MIP to DONE and mark as changes.
+        ENDIF
         IF MIP state is DONE
             Set DMOV TRUE.
         ENDIF
@@ -2114,37 +2107,6 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             pmr->dval = (pmr->val - pmr->off) / dir;    /* Later we'll act on this. */      
     }
 
-    /* Record limit violation */
-    if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
-        pmr->lvio = false;
-    /* LVIO = TRUE, AND, Move request towards valid travel limit range. */
-    else if (pmr->lvio && (((pmr->dval > pmr->dhlm) && (pmr->dval < pmr->ldvl)) ||
-                           ((pmr->dval < pmr->dllm) && (pmr->dval > pmr->ldvl))))
-        pmr->lvio = false;
-    else
-        pmr->lvio = (pmr->dval > pmr->dhlm) ||
-                    (pmr->dval > pmr->dhlm + pmr->bdst) ||
-                    (pmr->dval < pmr->dllm) ||
-                    (pmr->dval < pmr->dllm + pmr->bdst);
-
-    if (pmr->lvio != old_lvio)
-        MARK(M_LVIO);
-    if (pmr->lvio)
-    {
-        pmr->val = pmr->lval;
-        MARK(M_VAL);
-        pmr->dval = pmr->ldvl;
-        MARK(M_DVAL);
-        pmr->rval = pmr->lrvl;
-        MARK(M_RVAL);
-        if (pmr->mip == MIP_DONE && pmr->dmov == FALSE)
-        {
-            pmr->dmov = TRUE;
-            MARK(M_DMOV);
-        }
-        return(OK);
-    }
-
     if (stop_or_pause == true)
         return(OK);
     
@@ -2292,6 +2254,47 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 preferred_dir = true;
             else
                 preferred_dir = false;
+
+            /* Check for soft-travel limit violation */
+            if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
+                pmr->lvio = false;
+            /* LVIO = TRUE, AND, Move request towards valid travel limit range. */
+            else if (((pmr->dval > pmr->dhlm) && (pmr->dval < pmr->ldvl)) ||
+                     ((pmr->dval < pmr->dllm) && (pmr->dval > pmr->ldvl)))
+                pmr->lvio = false;
+            else
+            {
+                if (preferred_dir == true)
+                    pmr->lvio = ((pmr->dval > pmr->dhlm) || (pmr->dval < pmr->dllm));
+                else
+                {
+                    double bdstpos = pmr->dval - pmr->bdst;
+                    pmr->lvio = ((bdstpos > pmr->dhlm) || (bdstpos < pmr->dllm));
+                }
+            }
+
+            if (pmr->lvio != old_lvio)
+                MARK(M_LVIO);
+            if (pmr->lvio)
+            {
+                pmr->val = pmr->lval;
+                MARK(M_VAL);
+                pmr->dval = pmr->ldvl;
+                MARK(M_DVAL);
+                pmr->rval = pmr->lrvl;
+                MARK(M_RVAL);
+                if ((pmr->mip & MIP_RETRY) != 0)
+                {
+                    pmr->mip = MIP_DONE;
+                    MARK(M_MIP);
+                }
+                if (pmr->mip == MIP_DONE && pmr->dmov == FALSE)
+                {
+                    pmr->dmov = TRUE;
+                    MARK(M_DMOV);
+                }
+                return(OK);
+            }
 
             if (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY)
             {
