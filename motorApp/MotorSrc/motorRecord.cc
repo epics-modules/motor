@@ -1134,20 +1134,11 @@ LOGIC:
             Update Limit violation (LVIO) based on Jog direction (JOGF/JOGR) and velocity (JVEL).
         ELSE IF Homing indicator is true in MIP field.
             Set Limit violation (LVIO) FALSE.
-        ELSE IF Move indicator is true in MIP field.
-            Set Limit violation (LVIO) based on whether the dial target position (DVAL) is within
-            the dial high/low limit range (+/- retry deadband).
         ENDIF
     ENDIF
     IF Limit violation (LVIO) has changed.
-        Mark LVIO as changed. Set stopmove indicator FALSE.
-        IF Move indicator is true in MIP field.
-            IF Limit violation (LVIO) is TRUE, AND, DVAL > DHLM, AND, command direction is Negative (cdir == 0).
-                Set stopmove indicator TRUE.
-            ElSE IF Limit violation (LVIO) is TRUE, AND, DVAL < DLLM, AND, command direction is Positive (cdir == 1).
-                Set stopmove indicator TRUE.
-        ENDIF
-        IF stopmove indicator is TRUE, AND, Limit violation (LVIO) is TRUE, AND, SET is false (i.e., Use/Set is Set).
+        Mark LVIO as changed.
+        IF Limit violation (LVIO) is TRUE, AND, SET is false (i.e., Use/Set is Set).
             Set STOP field true.
             Clear jog and home requests.
         ENDIF
