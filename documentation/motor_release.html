@@ -21,6 +21,11 @@
       Modifications to Existing Features</h4>
   </div>
   <div style="text-align: left">
+    <b>!WARNING!</b><br />
+    motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and all 
+    user trees (i.e., &lt;ioctop&gt;) that load the motor record.
+    </p>
+
     <p>
       <b>Newport ESP300</b>
     </p>
@@ -32,6 +37,41 @@
       to the precision of the stage.
     </p>
   </div>
+  
+  <div style="text-align: left">
+    <b>Soft-travel limits</b>
+  </p>
+  <p>
+  Several changes have been made with regard to the motor record's soft-travel 
+  limits (LVIO field).
+  <ul>
+    <li>
+      Since the soft-travel limits (HLM/LLM, DHLM/DLLM) are not defined until after a 
+      successful home search is performed, error checks have been removed from the 
+      home search request (HOMF/HOMR).
+    </li>
+    <li>
+      All moves out of the invalid soft-limit travel range, toward the valid range, 
+      are allowed.
+    </li>
+  </ul>
+  </p>
+  </div>
+  
+  <div style="text-align: left">
+    <p>
+  <b>Retry Deadband </b>
+  </p>
+  <p>
+  The retry deadband (RDBD) field no longer limits the smallest allowed move. The 
+  size of a move is now only limited by the motor resolution (MRES).
+  </p>
+  </div>
+  
+  <div style="text-align: left">
+  
+  </div>
+
   <div style="text-align: center">
     <h4>
       New Features</h4>
