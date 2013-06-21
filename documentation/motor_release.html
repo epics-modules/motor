@@ -25,7 +25,15 @@
     motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and all 
     user trees (i.e., &lt;ioctop&gt;) that load the motor record.
     </p>
-
+    <p>
+      <b>Newport XPS Asyn Motor (Phase-2) Support</b>
+    </p>
+    <p>
+      The stepsPerUnit argument of XPSConfigAxis has changed from an integer to a string
+      to make phase-2 consistent with phase-3 support.  Failing to change the stepsPerUnit
+      argument to a string results in parameter-out-of-range errors when attempting to 
+      move XPS motors.
+    </p>
     <p>
       <b>Newport ESP300</b>
     </p>
