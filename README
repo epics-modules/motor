@@ -146,6 +146,18 @@ Known Problems
 9) When the LOCK field is set to YES for a motor with soft-channel device support,
         the DMOV field only indicates motion for soft-motor-initiated moves.
 
+10) There are a number of improvements with R6-8 in how the motor record support
+        soft-travel limits (LVIO field).  But there are also two known problems
+        that may remain known limitations until signifiant changes are again
+        made to the motor record. These limitation are as follows:
+        - Tweaking very small increments with UEIP = Yes while in the invalid
+          range of the soft-travel limits may put the motor record in a state
+          where the user cannot tweak in either direction. The solution is to
+          either jog the motor towards the valid range or increase the tweak
+          increment value (TWV field).
+        - Tapping the Jog button can cause the motor to move past the
+          soft-travel limit when backlash is nonzero.
+
 
 Modification Log for R6-8
 =========================
@@ -209,18 +221,34 @@ Modification Log for R6-8
                      motorApp/NPointSrc/NPointMotorSupport.dbd
 
 9) Added RTRY field to asyn_motor.db with default value of 10 to allow new
-	support the option of overriding the number of retries without breaking
-	existing support.
+        support the option of overriding the number of retries without breaking
+        existing support.
 
 10) Added support for the Newport Hexapod (HXP):
 
-	Files added: iocBoot/iocWithAsyn/motor.substitutions.hxp
-	             iocBoot/iocWithAsyn/motor.cmd.hxp
-		     motorApp/Db/HXP_{extra,coords}.db
-		     motorApp/NewportSrc/HXPDriver.{cpp,h}
-		     motorApp/NewportSrc/hxp_drivers.{cpp,h}
-		     motorApp/NewportSrc/hxp_error.h
-		     motorApp/op/adl/HXP_{extra,motors,moveAll,coordSys}.adl
+        Files added: iocBoot/iocWithAsyn/motor.substitutions.hxp
+                     iocBoot/iocWithAsyn/motor.cmd.hxp
+                     motorApp/Db/HXP_{extra,coords}.db
+                     motorApp/NewportSrc/HXPDriver.{cpp,h}
+                     motorApp/NewportSrc/hxp_drivers.{cpp,h}
+                     motorApp/NewportSrc/hxp_error.h
+                     motorApp/op/adl/HXP_{extra,motors,moveAll,coordSys}.adl
+
+11) Significant changes were made to the motor record:
+        - Ignore retry deadband (RDBD) on 1st move.
+        - Toggle DMOV on tweaks (TWF/TWR).
+        - Remove soft travel-limit error checks from home search request.
+        - Moved synch'ing target position with readback to a subroutine.
+        - Allow moving [new target position (DVAL/VAL/RVAL), relative move
+          (RLV), jog or home search] out of the invalid soft-limit travel range
+          toward the valid range.
+        - Added an "In-position" retry mode (RMOD). The In-position RMOD does
+          send any position commands during retries; it simply waits for the
+          position error (DIFF) to be less than the retry deadband (RDBD). It
+          is to be used with a non-zero Readback settle time (DLY) value. 
+    Also see "Known Problems" above, item #10.
+        
+        File modified: motorApp/MotorSrc - motorRecord.cc, motorRecord.dbd
 
 
 Modification Log for R6-7
