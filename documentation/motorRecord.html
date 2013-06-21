@@ -918,7 +918,7 @@ below.
     <td>R/W</td>
     <td>Retry Mode</td>
     <td>RECCHOICE</td>
-    <td>(0:"Unity", 1:"Arthmetic", 2:"Geometric")<br>
+    <td>(0:"Unity", 1:"Arthmetic", 2:"Geometric", 3:"In-Position")<br>
     </td>
   </tr>
   <tr>
@@ -1810,7 +1810,7 @@ below.
     <td>RECCHOICE</td>
     <td>
       <p>
-      (0:"Unity", 1:"Arthmetic", 2:"Geometric")
+      (0:"Unity", 1:"Arthmetic", 2:"Geometric", 3:"In-Position")
       </p>
       <p>
       RMOD allows the user to select different ways of calculating the retry distance 
@@ -1828,6 +1828,12 @@ below.
       The Geometric mode generates a geometric sequence with a 1/2 common factor of 
       corrections.  For example, if the max. retry count is 10, then the retries will 
       proceed as follows; DIFF * (1.0), DIFF * (1/2) DIFF * (1/4), DIFF * (1/8), etc.
+      </p>
+      <p>
+      The In-Position mode is used only with servos. This mode does not send any motion 
+      commands to the controller during a retry. It simply waits for the DIFF field to 
+      less than the RDBD field. This mode is intended to be used with nonzero DLY and 
+      RTRY fields.
       </p>
     </td>
   </tr>
