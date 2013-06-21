@@ -23,7 +23,7 @@ SNCSEQ=$(SUPPORT)/seq/2-1-12
 # Recommended BUSY release: R1-5
 BUSY=$(SUPPORT)/busy/R1-5
 
-# Recommended EPICS release: R3.14.12.1
+# Recommended EPICS release: R3.14.12.3
 EPICS_BASE=
 -include $(TOP)/../configure/EPICS_BASE.$(EPICS_HOST_ARCH)
 
@@ -34,8 +34,8 @@ EPICS_BASE=
 # <motor>/motorExApp.  To build examples, the top Makefile,
 # <motor>/Makefile must also be edited.
 
-# Recommended IPAC release: R2-11
-IPAC=$(SUPPORT)/ipac/R2-11
+# Recommended IPAC release: R2-12
+IPAC=$(SUPPORT)/ipac/R2-12
 
 # The following is only needed for the motor examples in iocBoot.
 #!MOTOR=$(TOP)
