@@ -6,22 +6,10 @@ To build any examples;
   #DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
   #DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
 
-To build this Newport MM4000/5/6 example;
+To build the iocWithAsyn example;
 
-- in <motor>/configure/RELEASE: IPAC and ASYN must all be defined.
-
-- in <motor>/motorApp/Makefile: #DIRS += NewportSrc must be uncommented.
-
-- in <motor>/motorExApp/Makefile: #DIRS += WithAsyn must be uncommented.
-
-- in <motor>/motorExApp/WithAsyn/Makefile: uncomment both,
-  #!WithAsyn_LIBS   += Newport
-    and,
-  #!WithAsynVx_LIBS += Newport
-
-- in both <motor>/motorExApp/WithAsyn/WithAsynInclude.dbd, and in
-  <motor>/motorExApp/WithAsyn/WithAsynVxInclude.dbd
-  uncomment,  #include "devNewport.dbd"
+- in <motor>/configure/RELEASE: IPAC and ASYN must be defined.
+          
           
 Finally, cd <motor>; gnumake clean uninstall; gnumake
 

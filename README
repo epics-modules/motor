@@ -1,8 +1,8 @@
-Motor Record R6-8 Release Notice 
+Motor Module R6-9 Release Notes
 ===============================================================================
 
-The motor record software in this release is compatible with EPICS base
-R3-14-12-1. See the <motor>/configure/RELEASE file for support module version
+The motor module software in this release is compatible with EPICS base
+R3-14-12-3. See the <motor>/configure/RELEASE file for support module version
 dependencies.
 
 
@@ -10,67 +10,53 @@ Contents
 ========
 
 This <supporttop> contains the following motor record related items:
-        - motor record and device driver database definitions.
-        - the record level support library.
-        - device/driver libraries for various controllers.
-        - motor record/device/driver level documentation.
-        - motor record release documentation.
-        - two example applications; one without ASYN (i.e. motorExApp/NoMPF)
-          and one with ASYN (i.e., motorExApp/WithMPF). See the README files
-          under <motor>/iocBoot/* for configuration instructions.
 
-As distributed, this support directory builds the following:
-        - Record support and common code for all device/drivers; libmotor.a.
-        - All non-asyn dependent device drivers; liboms.a, libsoftMotor.a,
-          libDeltaTau.a.
-        - If ASYN is defined, all other device drivers are built.
+- motor database and record support (<motor>/motorApp/MotorSrc).
+- Model (or phase) #1, #2 and #3 device/driver support
+        (<motor>/motorApp/MotorSrc).
+- device/driver support for various manufactures motor controllers (in
+        manufacture specific directories; e.g., <motor>/motorApp/OmsSrc,
+        <motor>/motorApp/NewportSrc).
+- motor record and device/driver level documentation (<motor>/documentation).
+- two example applications; one without ASYN (i.e. motorExApp/NoMPF) and one
+        with ASYN (i.e., motorExApp/WithMPF). See the README files under
+        <motor>/iocBoot/* for configuration instructions.
+- Back Up and Restore Tool (BURT) files (in <motor>/motorApp/op/burt).
+- medm displays (<motor>/motorApp/op/adl).
+- CSS/BOY displays (<motor>/motorApp/op/opi).
+- caQtDM displays (<motor>/motorApp/op/adl/ui).
 
-Any of the following device/driver libraries can be omitted from the build by
-commenting out the appropriate line in ./motorApp/Makefile.
-        Acs - Advanced Control Systems controllers; AcsSrc directory.
-        DeltaTau - Delta Tau controllers; DeltaTauSrc directory.
-        Ims - Intelligent Motion Systems (IMS) controllers; ImsSrc directory.
-        Mclennan - Mclennan controllers; MclennanSrc directory.
-        Micos - Micos controller; MicosSrc directory.
-        MicroMo - MicroMo controllers; MicroMoSrc directory.
-        Newport - Newport controllers; NewportSrc directory.
-        oms - Oregon Micro System (OMS) controllers; OmsSrc directory.
-        PI - Physik Instrumente (PI) GmbH & Co. controllers; PiSrc
-                directory.
-        softMotor - Soft Channel device support; SoftMotorSrc directory.
-
-Valuable device information can be found in the README files located in many of
-the above manufacture specific directories (e.g., motorApp/OmsSrc,
-motorApp/NewportSrc).
+Any of the manufacture specific device/driver libraries can be omitted from the
+build by commenting out the appropriate line in <motor>/motorApp/Makefile; see
+"Configuration" below.  In addition, valuable device information can be found
+in the README files located in many of the manufacture specific directories.
 
 
 Configuration
 =============
-The following files can be edited to tailor this distribution to site specific
+The following files can be edited to tailor the distribution to site specific
 needs.  See individual files for instructions.
         - <motor>/configure/RELEASE: Define location of external products.
 
-                If only VMEbus based motor controllers (e.g., OMS, Highland
-                V544) and/or Soft Channel device support is used, then only
-                EPICS_BASE is required.
+                If only EPICS_BASE is defined, then only the following
+                libraries are built; libmotor, libsoftMotor and liboms.
+                (Although it is built, liboms is for VxWorks targets only
+                if ASYN is undefined).
 
-                For serial and/or GPIB motor controller communication, ALL of
-                the following support modules are required;
-                        - EPICS base R3-14-7
-                        - ASYN R4-2
+                For any motor controllers requiring serial or GPIB
+                communication, ASYN is required.
 
-                If any example applications (motorExApp) are to be built, then
-                        TEMPLATE_TOP and MSITOP must be defined.
+        - <motor>/motorApp/Makefile: Defines which manufacture specific
+                directories to build.  For example, commenting out these lines
+                        #!DIRS += NewportSrc
+                        #!NewportSrc_DEPEND_DIRS = MotorSrc
+                will result in skipping all the Newport controllers from the
+                build.
 
-        - <motor>/motorApp/Makefile: Defines which device/driver modules to
-          build.
         - ./Makefile: uncomment the following to build example applications.
-                #DIRS := $(DIRS) $(filter-out $(DIRS), motorExApp)
-                #DIRS := $(DIRS) $(filter-out $(DIRS), iocBoot)
-        - ./motorExApp/Makefile: Define which, if any, example applications are
-                to be built.
-
-
+                #!DIRS += motorExApp iocBoot
+                #!motorExApp_DEPEND_DIRS = motorApp
+                #!iocBoot_DEPEND_DIRS    = motorExApp
 
 Known Problems
 ==============
