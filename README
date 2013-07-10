@@ -144,6 +144,16 @@ Known Problems
         - Tapping the Jog button can cause the motor to move past the
           soft-travel limit when backlash is nonzero.
 
+Modification Log for R6-9
+=========================
+
+1) Kevin Peterson added Support for the Micronix MMC-200 Controller.
+
+	Files added: 	motorApp/MicronixSrc
+			motorApp/MicronixSrc/MMC200Driver.h
+			motorApp/MicronixSrc/MMC200Driver.cpp
+			motorApp/MicronixSrc/Makefile
+			motorApp/MicronixSrc/MicronixSupport.dbd
 
 Modification Log for R6-8
 =========================
