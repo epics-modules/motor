@@ -1,0 +1,44 @@
+####################################################
+#
+# Template for executing TCL script on an XPS.
+# Uses parameters in model 3 XPS driver (XPSController).
+#
+# Matthew Pearson
+# July 2013
+#
+# Macros:
+# $(P) - PV name prefix
+# $(R) - PV base record name
+# $(PORT) - asyn port for the controller
+# $(ADDR) - asyn address (normally 0)
+# $(TIMEOUT) - asyn timeout
+#
+####################################################
+
+# ///
+# /// Name of the TCL script to execute
+# ///
+record(waveform, "$(P)$(R)TCLScript")
+{
+    field(DESC, "Name of the TCL script")
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))XPS_TCL_SCRIPT")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Execute the TCL script (non blocking)
+# ///
+record(bo, "$(P)$(R)TCLScriptExecute")
+{
+   field(DESC, "Execute TCL Script")
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))XPS_TCL_SCRIPT_EXECUTE")
+   field(ZNAM, "TCL Execute")
+   field(ONAM, "TCL Execute")     
+}
+
+

@@ -577,28 +577,37 @@ asynStatus XPSAxis::poll(bool *moving)
    * homing, jogging, etc.  However, this information is about the group, not the axis, so if one
    * motor in the group was moving, then they all appeared to be moving.  This is not what we want, because
    * the EPICS motor record required the first motor to stop before the second motor could be moved. 
-   * Instead we look for a response on the moveSocket_ to see when the motor motion was complete */
+   * Instead we look for a response on the moveSocket_ to see when the motor motion was complete.
+     NOTE: by default this mode is disabled. To enable it use the XPSController::enableMovingMode() function.*/
    
   /* If the group is not moving then the axis is not moving */
-  if ((axisStatus_ < 43) || (axisStatus_ > 48)) moving_ = false;
+  if ((axisStatus_ < 43) || (axisStatus_ > 48)) {
+    moving_ = false;
+  } else {
+    if (!pC_->enableMovingMode_) {
+      moving_ = true;
+    }
+  }
   
   /* If the axis is moving then read from the moveSocket to see if it is done 
    * We currently assume the move is complete if we get any response, we don't
    * check the actual response. */
-  if (moving_) {
-    status = ReadXPSSocket(moveSocket_, readResponse, sizeof(readResponse), 0);
-    if (status < 0) {
-      asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-                "%s:%s: [%s,%d]: error calling ReadXPSSocket status=%d\n",
-                driverName, functionName, pC_->portName, axisNo_,  status);
-      goto done;
-    }
-    if (status > 0) {
-      asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-        "%s:%s: [%s,%d]: readXPSSocket returned nRead=%d, [%s]\n",
-        driverName, functionName, pC_->portName, axisNo_,  status, readResponse);
-      status = 0;
-      moving_ = false;
+  if (pC_->enableMovingMode_) {
+    if (moving_) {
+      status = ReadXPSSocket(moveSocket_, readResponse, sizeof(readResponse), 0);
+      if (status < 0) {
+	asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
+		  "%s:%s: [%s,%d]: error calling ReadXPSSocket status=%d\n",
+		  driverName, functionName, pC_->portName, axisNo_,  status);
+	goto done;
+      }
+      if (status > 0) {
+	asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
+		  "%s:%s: [%s,%d]: readXPSSocket returned nRead=%d, [%s]\n",
+		  driverName, functionName, pC_->portName, axisNo_,  status, readResponse);
+	status = 0;
+	moving_ = false;
+      }
     }
   }
 

@@ -26,6 +26,7 @@ DB += XPSAuxBo.db
 DB += XPSAuxLi.db
 DB += XPSAuxLo.db
 DB += XPS_extra.db
+DB += XPSTclScript.template
 DB += HXP_extra.db
 DB += HXP_coords.db
 DB += ACRAux.template

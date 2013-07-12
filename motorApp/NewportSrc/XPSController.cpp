@@ -169,6 +169,8 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   createParam(XPSProfileGroupNameString,         asynParamOctet, &XPSProfileGroupName_);
   createParam(XPSTrajectoryFileString,           asynParamOctet, &XPSTrajectoryFile_);
   createParam(XPSStatusString,                   asynParamInt32, &XPSStatus_);
+  createParam(XPSTclScriptString,                asynParamOctet, &XPSTclScript_);
+  createParam(XPSTclScriptExecuteString,         asynParamInt32, &XPSTclScriptExecute_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, XPS_POLL_TIMEOUT);
@@ -209,6 +211,10 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   /* Flag used to turn off setting MSTA problem bit when the axis is disabled.*/
   noDisableError_ = 0;
 
+  /* Flag to disable a mode to change the moving state determination for an axis.*/
+  /* See function XPSController::enableMovingMode().*/
+  enableMovingMode_ = false;
+
 }
 
 void XPSController::report(FILE *fp, int level)
@@ -233,6 +239,51 @@ void XPSController::report(FILE *fp, int level)
 
   // Call the base class method
   asynMotorController::report(fp, level);
+}
+
+asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+  int function = pasynUser->reason;
+  int status = asynSuccess;
+  XPSAxis *pAxis;
+  static const char *functionName = "writeInt32";
+
+  pAxis = this->getAxis(pasynUser);
+  if (!pAxis) return asynError;
+  
+  /* Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
+   * status at the end, but that's OK */
+  status = pAxis->setIntegerParam(function, value);
+
+  if (function == XPSTclScriptExecute_) {
+    /* Execute the TCL script */
+    char fileName[MAX_FILENAME_LEN];
+    getStringParam(XPSTclScript_, (int)sizeof(fileName), fileName);
+    if (fileName != NULL) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		"Executing TCL script %s on XPS: %s\n", 
+		fileName, this->portName);
+      status = TCLScriptExecute(pAxis->moveSocket_,
+				fileName,"0","0");
+      if (status != 0) {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		  "TCLScriptExecute returned error %d, on XPS: %s\n", 
+		  status, this->portName);
+	status = asynError;
+      }
+    } else {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+              "TCL script name has not been set on XPS: %s\n", 
+              this->portName);
+      status = asynError;
+    }
+  } else {
+    /* Call base class method */
+    status = asynMotorController::writeInt32(pasynUser, value);
+  }
+
+  return (asynStatus)status;
+
 }
 
 /**
@@ -1158,6 +1209,18 @@ asynStatus XPSController::noDisableError()
   return asynSuccess; 
 }
 
+/* Function to enable a mode where the XPSAxis poller will check the moveSocket response 
+   to determine motion done. It does not rely on the axis state in this case. This prevents
+   axes in multipleAxis groups being in 'moving state' when another axis in the same
+   group is moving. This allows the motor record to move the axis when another axis in the
+   same group is moving. However, this has the consequence that a moving state is not 
+   detected if the move is externally generated. So by default this mode is turned off. It
+   can be enabled by calling this function. */ 
+asynStatus XPSController::enableMovingMode()
+{
+  enableMovingMode_ = true;
+  return asynSuccess; 
+}
 
 
 
@@ -1257,6 +1320,22 @@ asynStatus XPSNoDisableError(const char *XPSName)
   return pC->noDisableError();
 }
 
+asynStatus XPSEnableMovingMode(const char *XPSName)
+{
+  XPSController *pC;
+  static const char *functionName = "XPSEnableMovingMode";
+
+  pC = (XPSController*) findAsynPortDriver(XPSName);
+  if (!pC) {
+    printf("%s:%s: Error port %s not found\n", driverName, functionName, XPSName);
+    return asynError;
+  }
+
+  return pC->enableMovingMode();
+}
+
+
+
 
 /* Code for iocsh registration */
 
@@ -1342,6 +1421,16 @@ static void noDisableErrorCallFunc(const iocshArgBuf *args)
   XPSNoDisableError(args[0].sval);
 }
 
+/* XPSEnableMovingMode */
+static const iocshArg XPSEnableMovingModeArg0 = {"Controller port name", iocshArgString};
+static const iocshArg * const XPSEnableMovingModeArgs[] = {&XPSEnableMovingModeArg0};
+static const iocshFuncDef enableMovingMode = {"XPSEnableMovingMode", 1, XPSEnableMovingModeArgs};
+
+static void enableMovingModeCallFunc(const iocshArgBuf *args)
+{
+  XPSEnableMovingMode(args[0].sval);
+}
+
 
 static void XPSRegister3(void)
 {
@@ -1350,6 +1439,7 @@ static void XPSRegister3(void)
   iocshRegister(&configXPSProfile,     configXPSProfileCallFunc);
   iocshRegister(&disableAutoEnable,    disableAutoEnableCallFunc);
   iocshRegister(&noDisableError,       noDisableErrorCallFunc);
+  iocshRegister(&enableMovingMode,     enableMovingModeCallFunc);
 }
 epicsExportRegistrar(XPSRegister3);
 

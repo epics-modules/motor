@@ -25,6 +25,8 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define XPSProfileGroupNameString       "XPS_PROFILE_GROUP_NAME"
 #define XPSTrajectoryFileString         "XPS_TRAJECTORY_FILE"
 #define XPSStatusString                 "XPS_STATUS"
+#define XPSTclScriptString              "XPS_TCL_SCRIPT"
+#define XPSTclScriptExecuteString       "XPS_TCL_SCRIPT_EXECUTE"
 
 class XPSController : public asynMotorController {
 
@@ -34,6 +36,7 @@ class XPSController : public asynMotorController {
                 int enableSetPosition, double setPositionSettlingTime);
 
   /* These are the methods that we override from asynMotorDriver */
+  asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
   void report(FILE *fp, int level);
   XPSAxis* getAxis(asynUser *pasynUser);
   XPSAxis* getAxis(int axisNo);
@@ -60,6 +63,11 @@ class XPSController : public asynMotorController {
   /* Function to disable the MSTA problem bit in the event of an XPS Disable state 20 */
   asynStatus noDisableError();
 
+  /* Function to enable a mode where the XPSAxis poller will check the moveSocket response 
+   to determine motion done. */ 
+  asynStatus enableMovingMode();
+
+
   protected:
   XPSAxis **pAxes_;       /**< Array of pointers to axis objects */
 
@@ -73,7 +81,9 @@ class XPSController : public asynMotorController {
   int XPSProfileGroupName_;
   int XPSTrajectoryFile_;
   int XPSStatus_;
-  #define LAST_XPS_PARAM XPSStatus_
+  int XPSTclScript_;
+  int XPSTclScriptExecute_;
+  #define LAST_XPS_PARAM XPSTclScriptExecute_
 
   private:
   bool enableSetPosition_;          /**< Enable/disable setting the position from EPICS */ 
@@ -89,6 +99,7 @@ class XPSController : public asynMotorController {
   epicsEventId profileExecuteEvent_;
   int autoEnable_;
   int noDisableError_;
+  bool enableMovingMode_;
   
   friend class XPSAxis;
 };
