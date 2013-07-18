@@ -25,6 +25,7 @@ class epicsShareFunc asynMotorAxis {
 
   virtual asynStatus setIntegerParam(int index, int value);
   virtual asynStatus setDoubleParam(int index, double value);
+  virtual asynStatus setStringParam(int index, const char *value);
   virtual void report(FILE *fp, int details);
   virtual asynStatus callParamCallbacks();
 

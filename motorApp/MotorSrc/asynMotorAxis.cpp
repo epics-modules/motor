@@ -282,6 +282,16 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
   return pC_->setDoubleParam(axisNo_, function, value);
 }   
 
+/**
+  * Sets the value for a string for this axis in the parameter library.
+  * \param[in] function The function (parameter) number 
+  * \param[in] value Value to set */
+asynStatus asynMotorAxis::setStringParam(int function, const char *value)
+{
+  // Call the base class method
+  return pC_->setStringParam(axisNo_, function, value);
+}
+
 
 
 /** Calls the callbacks for any parameters that have changed for this axis in the parameter library.
