@@ -116,12 +116,6 @@ const static CorrectorTypes_t CorrectorTypes = {
   "NoCorrector"
 };
 
-/* Constants used for FTP to the XPS */
-#define TRAJECTORY_DIRECTORY "/Admin/Public/Trajectories"
-#define MAX_FILENAME_LEN  256
-#define MAX_MESSAGE_LEN   256
-#define MAX_GROUPNAME_LEN  64
-
 /* The maximum size of the item names in gathering, e.g. "GROUP2.POSITIONER1.CurrentPosition" */
 #define MAX_GATHERING_AXIS_STRING 60
 /* Number of items per axis */
@@ -169,6 +163,7 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   createParam(XPSProfileGroupNameString,         asynParamOctet, &XPSProfileGroupName_);
   createParam(XPSTrajectoryFileString,           asynParamOctet, &XPSTrajectoryFile_);
   createParam(XPSStatusString,                   asynParamInt32, &XPSStatus_);
+  createParam(XPSStatusStringString,             asynParamOctet, &XPSStatusString_);
   createParam(XPSTclScriptString,                asynParamOctet, &XPSTclScript_);
   createParam(XPSTclScriptExecuteString,         asynParamInt32, &XPSTclScriptExecute_);
 

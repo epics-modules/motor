@@ -556,11 +556,17 @@ asynStatus XPSAxis::poll(bool *moving)
 {
   int status;
   char readResponse[25];
+  char statusString[MAX_MESSAGE_LEN] = {0};
   static const char *functionName = "poll";
 
   status = GroupStatusGet(pollSocket_, 
                           groupName_, 
                           &axisStatus_);
+  if (!status) {
+    status = GroupStatusStringGet(pollSocket_,
+				  axisStatus_,
+				  statusString); 
+  }
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
               "%s:%s: [%s,%d]: error calling GroupStatusGet status=%d\n",
@@ -568,11 +574,12 @@ asynStatus XPSAxis::poll(bool *moving)
     goto done;
   }
   asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-            "%s:%s: [%s,%d]: %s axisStatus=%d\n",
-            driverName, functionName, pC_->portName, axisNo_, positionerName_, axisStatus_);
+            "%s:%s: [%s,%d]: %s axisStatus=%d, statusString=%s\n",
+            driverName, functionName, pC_->portName, axisNo_, positionerName_, axisStatus_, statusString);
   /* Set the status */
   setIntegerParam(pC_->XPSStatus_, axisStatus_);
-
+  setStringParam(pC_->XPSStatusString_, statusString);
+  
   /* Previously we set the motion done flag by seeing if axisStatus_ was >=43 && <= 48, which means moving,
    * homing, jogging, etc.  However, this information is about the group, not the axis, so if one
    * motor in the group was moving, then they all appeared to be moving.  This is not what we want, because

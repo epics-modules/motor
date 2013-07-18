@@ -15,6 +15,12 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define XPS_MOVE_TIMEOUT 100000.0 // "Forever"
 #define XPS_MIN_PROFILE_ACCEL_TIME 0.25
 
+/* Constants used for FTP to the XPS */
+#define TRAJECTORY_DIRECTORY "/Admin/Public/Trajectories"
+#define MAX_FILENAME_LEN  256
+#define MAX_MESSAGE_LEN   256
+#define MAX_GROUPNAME_LEN  64
+
 // drvInfo strings for extra parameters that the XPS controller supports
 #define XPSMinJerkString                "XPS_MIN_JERK"
 #define XPSMaxJerkString                "XPS_MAX_JERK"
@@ -25,6 +31,7 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define XPSProfileGroupNameString       "XPS_PROFILE_GROUP_NAME"
 #define XPSTrajectoryFileString         "XPS_TRAJECTORY_FILE"
 #define XPSStatusString                 "XPS_STATUS"
+#define XPSStatusStringString           "XPS_STATUS_STRING"
 #define XPSTclScriptString              "XPS_TCL_SCRIPT"
 #define XPSTclScriptExecuteString       "XPS_TCL_SCRIPT_EXECUTE"
 
@@ -81,6 +88,7 @@ class XPSController : public asynMotorController {
   int XPSProfileGroupName_;
   int XPSTrajectoryFile_;
   int XPSStatus_;
+  int XPSStatusString_;
   int XPSTclScript_;
   int XPSTclScriptExecute_;
   #define LAST_XPS_PARAM XPSTclScriptExecute_
