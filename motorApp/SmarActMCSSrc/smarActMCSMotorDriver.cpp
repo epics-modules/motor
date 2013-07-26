@@ -33,6 +33,7 @@
 #define HOLD_FOREVER 60000
 #define HOLD_NEVER       0
 #define FAR_AWAY     1000000000 /*nm*/
+#define UDEG_PER_REV 360000000
 
 // Windows does not have rint()
 #ifdef _WIN32
@@ -118,6 +119,36 @@ SmarActMCSController::parseReply(const char *reply, int *ax_p, int *val_p)
 char cmd[10];
 	if ( 3 != sscanf(reply, ":%10[A-Z]%i,%i", cmd, ax_p, val_p) )
 		return -1;
+	return 'E' == cmd[0] ? *val_p : 0;
+}
+
+/* Parse angle from MCS and return the value converted to a number.
+ *
+ * If the string cannot be parsed, i.e., is not in the format
+ *  ':' , <string_of_upper_case_letters> , <number1> , ',' , <number2> , ',' , <number3>
+ * 
+ * then the routine returns '-1'.
+ *
+ * Otherwise, if <string_of_upper_case_letters> starts with 'E'
+ * (which means an 'Error' code) then the (always non-negative)
+ * error code is returned (may be zero in case of an 'acknowledgement'
+ * message in synchronous mode).
+ *
+ * If the string is parsed successfully then <number2> is passed up
+ * in *val_p.
+ *
+ * Hence - return code nonzero -> error (error code if > 0, parse error
+ *                                otherwise)
+ *       - return code zero    -> successful ACK or command reply; value
+ *                                in *val_p.
+ */
+int
+SmarActMCSController::parseAngle(const char *reply, int *ax_p, int *val_p, int *rot_p)
+{
+char cmd[10];
+	if ( 4 != sscanf(reply, ":%10[A-Z]%i,%i,%i", cmd, ax_p, val_p, rot_p) )
+		return -1;
+	// Will this ever get called? An error response fewer values than an angle response
 	return 'E' == cmd[0] ? *val_p : 0;
 }
 
@@ -234,6 +265,8 @@ SmarActMCSAxis::SmarActMCSAxis(class SmarActMCSController *cnt_p, int axis, int 
 	: asynMotorAxis(cnt_p, axis), c_p_(cnt_p)
 {
 	int val;
+	int angle;
+	int rev;
 	channel_ = channel;
 
 	asynPrint(c_p_->pasynUserSelf, ASYN_TRACEIO_DRIVER, "SmarActMCSAxis::SmarActMCSAxis -- creating axis %u\n", axis);
@@ -258,10 +291,28 @@ SmarActMCSAxis::SmarActMCSAxis(class SmarActMCSController *cnt_p, int axis, int 
 		holdTime_ = getClosedLoop() ? HOLD_FOREVER : 0;
 	}
 
-	if ( asynSuccess == getVal("GP",&val) ) {
-		setIntegerParam(c_p_->motorStatusHasEncoder_, 1);
-		setIntegerParam(c_p_->motorStatusGainSupport_, 1);
+        // Query the sensor type
+	if ( (comStatus_ = getVal("GST", &sensorType_)) )
+		goto bail;
+
+        // Determine if stage is a rotation stage
+	if (sensorType_ == 2 || sensorType_ == 8 || sensorType_ == 14 || sensorType_ == 20 || sensorType_ == 22 || sensorType_ == 23 || (sensorType_ >= 25 && sensorType_ <= 29)) {
+		isRot_ = 1;
+		
+		if ( asynSuccess == getAngle(&angle, &rev) ) {
+			setIntegerParam(c_p_->motorStatusHasEncoder_, 1);
+			setIntegerParam(c_p_->motorStatusGainSupport_, 1);
+		}
 	}
+	else {
+		isRot_ = 0;
+		
+		if ( asynSuccess == getVal("GP",&val) ) {
+			setIntegerParam(c_p_->motorStatusHasEncoder_, 1);
+			setIntegerParam(c_p_->motorStatusGainSupport_, 1);
+		}
+	}
+
 
 bail:
 	setIntegerParam(c_p_->motorStatusProblem_, comStatus_ ? 1 : 0 );
@@ -299,14 +350,46 @@ int        ax;
 	return c_p_->parseReply(rep, &ax, val_p) ? asynError: asynSuccess;
 }
 
+/* Read the position of rotation stage
+ *
+ * parm_cmd: MCS command (w/o ':' char) to read parameter
+ * val_p:    where to store the value returned by the MCS
+ * 
+ * RETURNS:  asynError if an error occurred, asynSuccess otherwise.
+ */
+asynStatus
+SmarActMCSAxis::getAngle(int *val_p, int *rev_p)
+{
+char       rep[REP_LEN];
+asynStatus st;
+int        ax;
+
+	//asynPrint(c_p_->pasynUserSelf, ASYN_TRACEIO_DRIVER, "getAngle() cmd=:%s%u", parm_cmd, this->channel_);
+
+	st = c_p_->sendCmd(rep, sizeof(rep), ":GA%u", this->channel_);
+	if ( st )
+		return st;
+	return c_p_->parseAngle(rep, &ax, val_p, rev_p) ? asynError: asynSuccess;
+}
+
 asynStatus
 SmarActMCSAxis::poll(bool *moving_p)
 {
 int                    val;
+int                    angle;
+int                    rev;
 enum SmarActMCSStatus status;
 
-	if ( (comStatus_ = getVal("GP", &val)) )
-		goto bail;
+	if ( isRot_ ) {
+		if ( (comStatus_ = getAngle(&angle, &rev)) )
+			goto bail;
+		// Convert angle and revs to total angle
+		val = rev * UDEG_PER_REV + angle;
+	}
+	else {
+		if ( (comStatus_ = getVal("GP", &val)) )
+			goto bail;
+        }
 
 	setDoubleParam(c_p_->motorEncoderPosition_, (double)val);
 	setDoubleParam(c_p_->motorPosition_, (double)val);
@@ -418,7 +501,18 @@ asynStatus status;
 asynStatus  
 SmarActMCSAxis::move(double position, int relative, double min_vel, double max_vel, double accel)
 {
-const char *fmt = relative ? ":MPR%u,%ld,%d" : ":MPA%u,%ld,%d";
+const char *fmt_rot = relative ? ":MAR%u,%ld,%d,%d" : ":MAA%u,%ld,%d,%d";
+const char *fmt_lin = relative ? ":MPR%u,%ld,%d" : ":MPA%u,%ld,%d";
+const char *fmt;
+double rpos;
+long angle;
+int rev;
+
+	if ( isRot_ ) {
+		fmt = fmt_rot;
+	} else {
+		fmt = fmt_lin;
+	}
 
 #ifdef DEBUG
 	printf("Move to %f (speed %f - %f)\n", position, min_vel, max_vel);
@@ -427,11 +521,22 @@ const char *fmt = relative ? ":MPR%u,%ld,%d" : ":MPA%u,%ld,%d";
 	if ( (comStatus_ = setSpeed(max_vel)) )
 		goto bail;
 
-	
 	/* cache 'closed-loop' setting until next move */
 	holdTime_  = getClosedLoop() ? HOLD_FOREVER : 0;
 
-	comStatus_ = moveCmd(fmt, channel_, (long)rint(position), holdTime_);
+	rpos = rint(position);
+
+	if ( isRot_ ) {
+		angle = (long)rpos % UDEG_PER_REV;
+		rev = (int)(rpos / UDEG_PER_REV);
+		if (angle < 0) {
+			angle += UDEG_PER_REV;
+			rev -= 1;
+		}
+		comStatus_ = moveCmd(fmt, channel_, angle, rev, holdTime_);
+	} else {
+		comStatus_ = moveCmd(fmt, channel_, (long)rpos, holdTime_);
+	}
 
 bail:
 	if ( comStatus_ ) {
@@ -456,7 +561,7 @@ SmarActMCSAxis::home(double min_vel, double max_vel, double accel, int forwards)
 	/* cache 'closed-loop' setting until next move */
 	holdTime_  = getClosedLoop() ? HOLD_FOREVER : 0;
 
-	comStatus_ = moveCmd(":FRM%u,%u,%d,0", channel_, forwards ? 0 : 1, holdTime_);
+	comStatus_ = moveCmd(":FRM%u,%u,%d,%d", channel_, forwards ? 0 : 1, holdTime_, isRot_ ? 1 : 0);
 
 bail:
 	if ( comStatus_ ) {
@@ -486,7 +591,22 @@ SmarActMCSAxis::stop(double acceleration)
 asynStatus
 SmarActMCSAxis::setPosition(double position)
 {
-	comStatus_ = moveCmd(":SP%u,%d", channel_, (long)rint(position));
+double rpos;
+
+	rpos = rint(position);
+
+	if ( isRot_ ) {
+		// For rotation stages the revolution will always be set to zero
+		// Only set position if it is between zero an 360 degrees
+		if (rpos >= 0.0 && rpos < (double)UDEG_PER_REV) {
+			comStatus_ = moveCmd(":SP%u,%d", channel_, (long)rpos);
+		} else {
+			comStatus_ = asynError;
+		}
+	} else {
+		comStatus_ = moveCmd(":SP%u,%d", channel_, (long)rpos);
+	}
+
 	if ( comStatus_ ) {
 		setIntegerParam(c_p_->motorStatusProblem_,    1);
 		setIntegerParam(c_p_->motorStatusCommsError_, 1);

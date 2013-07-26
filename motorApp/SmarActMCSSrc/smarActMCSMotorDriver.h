@@ -52,6 +52,7 @@ public:
 	asynStatus  moveVelocity(double min_vel, double max_vel, double accel);
 
 	virtual asynStatus getVal(const char *parm, int *val_p);
+	virtual asynStatus getAngle(int *val_p, int *rev_p);
 	virtual asynStatus moveCmd(const char *cmd, ...);
 	virtual int        getClosedLoop();
 
@@ -66,6 +67,8 @@ private:
 	int                    vel_;
 	unsigned               holdTime_;
 	int                    channel_;
+	int                    sensorType_;
+	int                    isRot_;
 
 friend class SmarActMCSController;
 };
@@ -80,6 +83,7 @@ public:
 	virtual asynStatus sendCmd(char *rep, int len, const char *fmt, ...);
 
 	static int parseReply(const char *reply, int *ax_p, int *val_p);
+	static int parseAngle(const char *reply, int *ax_p, int *val_p, int *rot_p);
 
 protected:
 	SmarActMCSAxis **pAxes_;
