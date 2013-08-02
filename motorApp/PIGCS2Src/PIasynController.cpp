@@ -35,6 +35,7 @@ Based on drvMotorSim.c, Mark Rivers, December 13, 2009
 #include <iocsh.h>
 #include <epicsExport.h>
 #include <asynOctetSyncIO.h>
+#include <motorVersion.h>
 #include <motor_interface.h>
 #include <ctype.h>
 
@@ -261,7 +262,7 @@ asynStatus PIasynController::writeInt32(asynUser *pasynUser, epicsInt32 value)
      * status at the end, but that's OK */
     status = pAxis->setIntegerParam(function, value);
     
-    if (function == motorClosedLoop_)
+    if (function == motorSetClosedLoop_)
     {
         asynPrint(pasynUser, ASYN_TRACE_FLOW,
         		"%s:%s: %sing Closed-Loop Control flag on driver %s\n",
@@ -346,7 +347,7 @@ asynStatus PIasynController::writeFloat64(asynUser *pasynUser, epicsFloat64 valu
         /* Call base class call its method (if we have our parameters check this here) */
         status = asynMotorController::writeFloat64(pasynUser, value);
     }
-    else if (function == motorEncoderRatio_)
+    else if (function == motorEncRatio_)
     {
         /* Call base class call its method (if we have our parameters check this here) */
         status = asynMotorController::writeFloat64(pasynUser, value);
@@ -486,15 +487,16 @@ asynStatus PIasynController::configAxis(PIasynAxis *pAxis)
 
 asynStatus PIasynController::poll()
 {
-	return m_pGCSController->getGlobalState(pAxes_, numAxes_);
+    m_pGCSController->getGlobalState(pAxes_, numAxes_);
 
-	setDoubleParam( 0, PI_SUP_RBPIVOT_X, m_pGCSController->GetPivotX());
+    setDoubleParam( 0, PI_SUP_RBPIVOT_X, m_pGCSController->GetPivotX());
     setDoubleParam( 0, PI_SUP_RBPIVOT_Y, m_pGCSController->GetPivotY());
     setDoubleParam( 0, PI_SUP_RBPIVOT_Z, m_pGCSController->GetPivotZ());
 
     setIntegerParam( 0, PI_SUP_LAST_ERR, m_pGCSController->GetLastError() );
 
     callParamCallbacks();
+    return asynSuccess;
 }
 
 

@@ -40,7 +40,11 @@ public:
 	~PIE517Controller() {}
 
 	virtual asynStatus init(void);
-	virtual asynStatus initAxis(PIasynAxis* pAxis);
+	virtual asynStatus haltAxis(PIasynAxis* pAxis)
+	{
+		// E-517 does support HLT with single axis
+		return PIGCSController::haltAxis(pAxis);
+	}
 
 private:
     asynStatus setOnline(int outputChannel, int onlineState);

@@ -55,6 +55,12 @@ PIGCSController* PIGCSController::CreateGCSController(asynUser* pInterface, cons
 	{
 		return new PIE517Controller(pInterface, szIDN);
 	}
+	else if ( 		strstr(szIDN, "E-753") != NULL
+				||	strstr(szIDN, "E-709") != NULL
+			)
+	{
+		return new PIGCSPiezoController(pInterface, szIDN);
+	}
 	else if ( strstr(szIDN, "E-755") != NULL)
 	{
 		return new PIE755Controller(pInterface, szIDN);
@@ -314,8 +320,6 @@ asynStatus PIGCSController::moveCts( PIasynAxis** pAxesArray, int* pTargetCtsArr
 
 asynStatus PIGCSController::moveCts( PIasynAxis* pAxis, int targetCts )
 {
-	asynStatus status;
-	char cmd[100];
 	double target = double(targetCts) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
     asynPrint(m_pInterface, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
     		"PIGCSController::moveCts(, %d) \n", targetCts);

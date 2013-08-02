@@ -21,8 +21,8 @@ Created: 15.12.2010
 #include <stdlib.h>
 #include <math.h>
 
-//#undef asynPrint
-//#define asynPrint(user,reason,format...) 0
+#undef asynPrint
+#define asynPrint(user,reason,format...) 0
 
 
 asynStatus PIE517Controller::init()
@@ -72,13 +72,6 @@ asynStatus PIE517Controller::getNrOutputChannels()
 	m_nrOutputChannels = atoi(buf);
     return status;
 
-}
-
-asynStatus PIE517Controller::initAxis(PIasynAxis* pAxis)
-{
-    pAxis->m_movingStateMask = pow(2.0, pAxis->getAxisNo());
-
-	return setServo(pAxis, 1);
 }
 
 

@@ -37,6 +37,8 @@ public:
 	~PIGCSPiezoController() {}
 
 	virtual asynStatus init(void) { return PIGCSController::init(); }
+	virtual asynStatus initAxis(PIasynAxis* pAxis);
+	virtual asynStatus haltAxis(PIasynAxis* pAxis);
 
     virtual asynStatus getStatus(PIasynAxis* pAxis, int& homing, int& moving, int& negLimit, int& posLimit, int& servoControl);
     virtual asynStatus getReferencedState(PIasynAxis* pAxis);

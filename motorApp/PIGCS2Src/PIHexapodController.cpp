@@ -43,6 +43,7 @@ asynStatus PIHexapodController::init(void)
 		m_bCanReadStatusWithChar4 = false;
 		getGCSError(); // clear error UNKNOWN COMMAND
 	}
+/* m_bCanReadPosWithChar3=true causes DMOV problems */
 //	status = sendAndReceive(char(3), buf, 199);
 //	if (status == asynSuccess)
 //	{
@@ -229,6 +230,7 @@ asynStatus PIHexapodController::moveCts( PIasynAxis** pAxesArray, int* pTargetCt
 
 asynStatus PIHexapodController::getAxisPosition(PIasynAxis* pAxis, double& position)
 {
+	m_pCurrentLogSink = m_pInterface;
 	if (!m_bAnyAxisMoving)
 	{
 		return PIGCSController::getAxisPosition(pAxis, position);
