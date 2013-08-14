@@ -147,13 +147,19 @@ Known Problems
 Modification Log for R6-9
 =========================
 
-1) Kevin Peterson added Support for the Micronix MMC-200 Controller.
+1) Kevin Peterson added support for the Micronix MMC-200 Controller.
 
 	Files added: 	motorApp/MicronixSrc
 			motorApp/MicronixSrc/MMC200Driver.h
 			motorApp/MicronixSrc/MMC200Driver.cpp
 			motorApp/MicronixSrc/Makefile
 			motorApp/MicronixSrc/MicronixSupport.dbd
+
+2) Kevin Peterson added an asyn (model 3) driver for the Micro MVP2001.
+
+	Files added:	motorApp/MicroMoSrc/MVP2001Driver.cpp
+			motorApp/MicroMoSrc/MVP2001Driver.h
+
 
 Modification Log for R6-8
 =========================
