@@ -33,15 +33,15 @@ Based on drvMotorSim.c, Mark Rivers, December 13, 2009
 #include <epicsMutex.h>
 #include <ellLib.h>
 #include <iocsh.h>
-#include <epicsExport.h>
 #include <asynOctetSyncIO.h>
-#include <motorVersion.h>
+//#include <motorVersion.h>
 #include <motor_interface.h>
 #include <ctype.h>
 
 #include "PIasynController.h"
 #include "PIGCSController.h"
 #include "PIasynAxis.h"
+#include <epicsExport.h>
 
 
 //#undef asynPrint
@@ -262,7 +262,7 @@ asynStatus PIasynController::writeInt32(asynUser *pasynUser, epicsInt32 value)
      * status at the end, but that's OK */
     status = pAxis->setIntegerParam(function, value);
     
-    if (function == motorSetClosedLoop_)
+    if (function == motorClosedLoop_)
     {
         asynPrint(pasynUser, ASYN_TRACE_FLOW,
         		"%s:%s: %sing Closed-Loop Control flag on driver %s\n",
@@ -347,7 +347,7 @@ asynStatus PIasynController::writeFloat64(asynUser *pasynUser, epicsFloat64 valu
         /* Call base class call its method (if we have our parameters check this here) */
         status = asynMotorController::writeFloat64(pasynUser, value);
     }
-    else if (function == motorEncRatio_)
+    else if (function == motorEncoderRatio_)
     {
         /* Call base class call its method (if we have our parameters check this here) */
         status = asynMotorController::writeFloat64(pasynUser, value);
