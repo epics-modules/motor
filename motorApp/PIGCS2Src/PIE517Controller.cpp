@@ -21,8 +21,8 @@ Created: 15.12.2010
 #include <stdlib.h>
 #include <math.h>
 
-#undef asynPrint
-#define asynPrint(user,reason,format...) 0
+//#undef asynPrint
+//#define asynPrint(user,reason,format...) 0
 
 
 asynStatus PIE517Controller::init()
