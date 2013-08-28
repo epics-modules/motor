@@ -17,7 +17,7 @@ class C300Axis : public asynMotorAxis
 public:
   /* These are the methods we override from the base class */
   C300Axis(class C300Controller *pC, int axis);
-  void report(FILE *fp, int level);
+  //void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus poll(bool *moving);
 
