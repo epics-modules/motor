@@ -17,6 +17,9 @@ SRCS += drvEnsembleAsyn.cc
 # EnsemblePSOFly.db support
 SRCS += concatString.c
 
+# Ensemble trajectory support
+SRCS += EnsembleTrajectoryScan.st
+
 Aerotech_LIBS += motor asyn
 Aerotech_LIBS += $(EPICS_BASE_IOC_LIBS)
 

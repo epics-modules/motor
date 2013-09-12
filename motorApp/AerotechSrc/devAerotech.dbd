@@ -7,3 +7,4 @@ driver(motorEnsemble)
 
 registrar(AerotechRegister)
 registrar(concatStringRegister)
+registrar(EnsembleTrajectoryScanRegistrar)
