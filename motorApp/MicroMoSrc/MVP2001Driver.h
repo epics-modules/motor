@@ -20,7 +20,7 @@ class MVP2001Axis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
-  MVP2001Axis(class MVP2001Controller *pC, int axisNo, int encLPR, int maxCurr);
+  MVP2001Axis(class MVP2001Controller *pC, int axisNo, int encLPR, int maxCurr, int limPol);
   void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
@@ -41,6 +41,7 @@ private:
   int encoderLinesPerRev_;
   int maxCurrent_;
   int samplePeriod_;
+  int limitPolarity_;
   asynStatus sendAccelAndVelocity(double accel, double velocity);
   
 friend class MVP2001Controller;

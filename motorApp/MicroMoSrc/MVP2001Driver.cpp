@@ -155,7 +155,7 @@ void MVP2001Controller::parseReply(char *inString, int *val, int nchars)
   * 
   * Initializes register numbers, etc.
   */
-MVP2001Axis::MVP2001Axis(MVP2001Controller *pC, int axisNo, int encLPR, int maxCurr)
+MVP2001Axis::MVP2001Axis(MVP2001Controller *pC, int axisNo, int encLPR, int maxCurr, int limPol)
   : asynMotorAxis(pC, axisNo),
     pC_(pC)
 {
@@ -163,12 +163,22 @@ MVP2001Axis::MVP2001Axis(MVP2001Controller *pC, int axisNo, int encLPR, int maxC
   
   axisIndex_ = axisNo + 1;
   encoderLinesPerRev_ = encLPR;
- 
+
   // The MVP2001 manual implies that the range is 0.1-2.3A is ok
   if ( (maxCurr < 100) || maxCurr > 2300 )
     maxCurrent_ = 100;
   else 
     maxCurrent_ = maxCurr;
+
+  // Default to NO if a bad value is given (1=NO, 0=NC)
+  if ( limPol != 0 )
+    limitPolarity_ = 1;
+  else
+    limitPolarity_ = 0;
+  
+  // Set the limit & estop polarity
+  sprintf(pC_->outString_, "%d LP %d", axisIndex_, limitPolarity_);
+  status = pC_->writeController();
 
   // Home the motor (this zeroes the position, which will be restored by autosave at iocInit)
   sprintf(pC_->outString_, "%d HO", axisIndex_);
@@ -195,7 +205,7 @@ MVP2001Axis::MVP2001Axis(MVP2001Controller *pC, int axisNo, int encLPR, int maxC
 }
 
 
-extern "C" int MVP2001CreateAxis(const char *MVP2001Name, int axisNo, int encLPR, int maxCurr)
+extern "C" int MVP2001CreateAxis(const char *MVP2001Name, int axisNo, int encLPR, int maxCurr, int limPol)
 {
   MVP2001Controller *pC;
   
@@ -207,7 +217,7 @@ extern "C" int MVP2001CreateAxis(const char *MVP2001Name, int axisNo, int encLPR
   }
 
   pC->lock();
-  new MVP2001Axis(pC, axisNo, encLPR, maxCurr);
+  new MVP2001Axis(pC, axisNo, encLPR, maxCurr, limPol);
   pC->unlock();
   return asynSuccess;
 }
@@ -227,6 +237,7 @@ void MVP2001Axis::report(FILE *fp, int level)
     fprintf(fp, "  encoderLinesPerRev %d\n", encoderLinesPerRev_);
     fprintf(fp, "  maxCurrent %d (mA)\n", maxCurrent_);
     fprintf(fp, "  samplePeriod %d (us)\n", samplePeriod_);
+    fprintf(fp, "  limitPolarity %d\n", limitPolarity_);
  }
 
   // Call the base class method
@@ -494,14 +505,16 @@ static const iocshArg MVP2001CreateAxisArg0 = {"Controller port name", iocshArgS
 static const iocshArg MVP2001CreateAxisArg1 = {"Axis number", iocshArgInt};
 static const iocshArg MVP2001CreateAxisArg2 = {"Encoder lines per rev", iocshArgInt};
 static const iocshArg MVP2001CreateAxisArg3 = {"Max current (ma)", iocshArgInt};
+static const iocshArg MVP2001CreateAxisArg4 = {"Limit polarity", iocshArgInt};
 static const iocshArg * const MVP2001CreateAxisArgs[] = {&MVP2001CreateAxisArg0,
                                                      &MVP2001CreateAxisArg1,
                                                      &MVP2001CreateAxisArg2,
-                                                     &MVP2001CreateAxisArg3};
-static const iocshFuncDef MVP2001CreateAxisDef = {"MVP2001CreateAxis", 4, MVP2001CreateAxisArgs};
+                                                     &MVP2001CreateAxisArg3,
+                                                     &MVP2001CreateAxisArg4};
+static const iocshFuncDef MVP2001CreateAxisDef = {"MVP2001CreateAxis", 5, MVP2001CreateAxisArgs};
 static void MVP2001CreateAxisCallFunc(const iocshArgBuf *args)
 {
-  MVP2001CreateAxis(args[0].sval, args[1].ival, args[2].ival, args[3].ival);
+  MVP2001CreateAxis(args[0].sval, args[1].ival, args[2].ival, args[3].ival, args[4].ival);
 }
 
 static void MVP2001Register(void)
