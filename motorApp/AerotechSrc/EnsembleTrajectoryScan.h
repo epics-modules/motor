@@ -1,6 +1,6 @@
-/* MAX_trajectoryScan.h
+/* EnsembleTrajectoryScan.h
  * 
- * This file is included in MAX_trajectoryScan.st.
+ * This file is included in EnsembleTrajectoryScan.st.
  */
 
 
@@ -21,6 +21,7 @@
 #define STATUS_FAILURE   2
 #define STATUS_ABORT     3
 #define STATUS_TIMEOUT   4
+#define STATUS_WARNING   5
 
 /* Time modes */
 #define TIME_MODE_TOTAL         0
