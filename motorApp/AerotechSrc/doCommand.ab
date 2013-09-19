@@ -1,0 +1,103 @@
+HEADER
+	DEFINE cmdDONE				0
+	DEFINE cmdVELOCITY_ON		1
+	DEFINE cmdVELOCITY_OFF		2
+	DEFINE cmdHALT				3
+	DEFINE cmdSTART				4
+	DEFINE cmdPVT_INIT_TIME_ABS	5
+	DEFINE cmdPVT_INIT_TIME_INC	6
+	DEFINE cmdPVT1				7
+	DEFINE cmdPVT2				8
+	DEFINE cmdPVT3				9
+	DEFINE cmdPVT				10
+	DEFINE cmdABORT				11
+	DEFINE cmdSTARTABORT		12
+
+	DEFINE cmdVar	45
+	DEFINE iarg1Var	46
+	DEFINE iarg2Var	47
+	DEFINE iarg3Var	48
+	DEFINE iarg4Var	49
+	DEFINE darg1Var	1
+	DEFINE darg2Var	2
+	DEFINE darg3Var	3
+	DEFINE darg4Var	4
+	DEFINE darg5Var	5
+	DEFINE darg6Var	6
+	DEFINE darg7Var	7
+	DEFINE darg8Var	8
+	DEFINE darg9Var	9
+	DEFINE numIArg	44
+	DEFINE numDArg	43
+
+END HEADER
+
+PROGRAM
+
+	DIM axis1Number AS Integer
+	DIM axis2Number AS Integer
+	DIM axis3Number AS Integer
+	DIM axis4Number AS Integer
+	DIM keepon as Integer
+	
+	wait mode nowait
+	
+	keepon = 1
+	WHILE keepon
+	    IF IGLOBAL(cmdVar) = cmdVELOCITY_ON THEN
+	        VELOCITY ON
+	    ELSEIF IGLOBAL(cmdVar) = cmdVELOCITY_OFF THEN
+	        VELOCITY OFF
+	    ELSEIF IGLOBAL(cmdVar) = cmdHALT THEN
+	        HALT
+		ELSEIF IGLOBAL(cmdVar) = cmdSTARTABORT THEN
+			START
+			ABORT @0 @1 @2 @3 @4
+			acknowledgeall
+			enable @0 @1 @2 @3 @4
+			keepon = 0
+	    ELSEIF IGLOBAL(cmdVar) = cmdSTART THEN
+	        START
+			keepon = 0
+	    ELSEIF IGLOBAL(cmdVar) = cmdPVT1 THEN
+			axis1Number = IGLOBAL(iarg1Var)
+	        PVT @axis1Number DGLOBAL(darg1Var), DGLOBAL(darg2Var) TIME DGLOBAL(darg3Var)
+	    ELSEIF IGLOBAL(cmdVar) = cmdPVT  THEN
+			axis1Number = IGLOBAL(iarg1Var)
+			axis2Number = IGLOBAL(iarg2Var)
+			axis3Number = IGLOBAL(iarg3Var)
+			axis4Number = IGLOBAL(iarg4Var)
+			if IGLOBAL(numIArg) = 1 then
+				PVT @axis1Number DGLOBAL(darg1Var), DGLOBAL(darg2Var) TIME DGLOBAL(darg3Var)
+			elseif IGLOBAL(numIArg) = 2 then
+				PVT @axis1Number DGLOBAL(darg1Var), DGLOBAL(darg2Var) @axis2Number DGLOBAL(darg3Var), DGLOBAL(darg4Var) TIME DGLOBAL(darg5Var)
+			elseif IGLOBAL(numIArg) = 3 then
+				PVT @axis1Number DGLOBAL(darg1Var), DGLOBAL(darg2Var) @axis2Number DGLOBAL(darg3Var), DGLOBAL(darg4Var) @axis3Number DGLOBAL(darg5Var), DGLOBAL(darg6Var) TIME DGLOBAL(darg7Var)
+			elseif IGLOBAL(numIArg) = 4 then
+				PVT @axis1Number DGLOBAL(darg1Var), DGLOBAL(darg2Var) @axis2Number DGLOBAL(darg3Var), DGLOBAL(darg4Var) @axis3Number DGLOBAL(darg5Var), DGLOBAL(darg6Var) @axis4Number DGLOBAL(darg7Var), DGLOBAL(darg8Var) TIME DGLOBAL(darg9Var)
+			end if
+		ELSEIF IGLOBAL(cmdVar) = cmdPVT_INIT_TIME_ABS THEN
+			PVT INIT TIME ABS
+	    ELSEIF IGLOBAL(cmdVar) = cmdPVT_INIT_TIME_INC THEN
+			PVT INIT TIME INC
+	    ELSEIF IGLOBAL(cmdVar) = cmdABORT THEN
+			axis1Number = IGLOBAL(iarg1Var)
+			axis2Number = IGLOBAL(iarg2Var)
+			axis3Number = IGLOBAL(iarg3Var)
+			axis4Number = IGLOBAL(iarg4Var)
+			if IGLOBAL(numIArg) = 1 then
+	        	ABORT @axis1Number
+			elseif IGLOBAL(numIArg) = 2 then
+	        	ABORT @axis1Number @axis2Number
+			elseif IGLOBAL(numIArg) = 3 then
+				ABORT @axis1Number @axis2Number @axis3Number
+			elseif IGLOBAL(numIArg) = 4 then
+				ABORT @axis1Number @axis2Number @axis3Number @axis4Number
+			end if
+			keepon = 0
+		END IF
+	    IGLOBAL(cmdVar) = cmdDONE
+	    DWELL 0.01
+	WEND
+
+END PROGRAM
