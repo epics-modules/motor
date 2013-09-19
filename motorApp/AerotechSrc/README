@@ -121,3 +121,21 @@ asyn model 2 driver
 drvEnsembleAsyn.cc
 drvEnsembleAsyn.h
 ParameterId.h
+
+trajectory support
+------------------
+EnsembleTrajectoryScan.h
+EnsembleTrajectoryScan.st
+
+	This software talks to the asyn port specified as an argument to the
+	EnsembleAsynConfig() command, and it needs an Ensemble controller that has
+	been prepared with the AeroBasic program "doCommand.ab", which is included
+	in this directory.  You must copy doCommand.ab to into Motion Composer's
+	user file directory, load it into Motion Composer, and compile it to produce
+	the file doCommand.bcx.  This file must be copied to the controller, so it
+	can be executed immediately when EnsembleTrajectoryScan.st sends the
+	command 'PROGRAM 5 "doCommand.bcx"'.
+	
+	doCommand is needed because the Ensemble commands that execute a trajectory
+	are not available via the ASCII interface through which drvEnsembleAsyn
+	and EnsembleTrajectoryScan talk to the controller.
