@@ -21,6 +21,7 @@ SRCS += concatString.c
 SRCS += EnsembleTrajectoryScan.st
 
 Aerotech_LIBS += motor asyn
+Aerotech_LIBS += seq pv
 Aerotech_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
