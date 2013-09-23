@@ -13,6 +13,12 @@ HEADER
 	DEFINE cmdABORT				11
 	DEFINE cmdSTARTABORT		12
 
+	DEFINE cmdSCOPEBUFFER		13
+	DEFINE cmdSCOPEDATA			14
+	DEFINE cmdSCOPESTATUS		15
+	DEFINE cmdSCOPETRIG			16
+	DEFINE cmdSCOPETRIGPERIOD	17
+
 	DEFINE cmdVar	45
 	DEFINE iarg1Var	46
 	DEFINE iarg2Var	47
@@ -30,6 +36,26 @@ HEADER
 	DEFINE numIArg	44
 	DEFINE numDArg	43
 
+	' Numerical values for first arg to scopedata()
+	DEFINE sd_PositionCommand	0
+	DEFINE sd_PositionFeedback	1
+	DEFINE sd_ExternalPosition	2
+	DEFINE sd_AxisFault			3
+	DEFINE sd_AxisStatus		4
+	DEFINE sd_AnalogInput0		5
+	DEFINE sd_AnalogInput1		6
+	DEFINE sd_AnalogOutput0		7
+	DEFINE sd_AnalogOutput1		8
+	DEFINE sd_DigitalInput0		9
+	DEFINE sd_DigitalInput1		10
+	DEFINE sd_DigitalOutput0	11
+	DEFINE sd_DigitalOutput1	12
+	DEFINE sd_CurrentCommand	13
+	DEFINE sd_CurrentFeedback	14
+	DEFINE sd_OptionalData1		15
+	DEFINE sd_OptionalData2		16
+	DEFINE sd_ProgramCounter	17
+ 
 END HEADER
 
 PROGRAM
@@ -39,7 +65,8 @@ PROGRAM
 	DIM axis3Number AS Integer
 	DIM axis4Number AS Integer
 	DIM keepon as Integer
-	
+	DIM iarg as integer
+
 	wait mode nowait
 	
 	keepon = 1
@@ -95,6 +122,23 @@ PROGRAM
 				ABORT @axis1Number @axis2Number @axis3Number @axis4Number
 			end if
 			keepon = 0
+		ELSEIF IGLOBAL(cmdVar) = cmdSCOPEBUFFER THEN
+			SCOPEBUFFER IGLOBAL(iarg1Var)
+		ELSEIF IGLOBAL(cmdVar) = cmdSCOPEDATA THEN
+			iarg = IGLOBAL(iarg1Var)
+			if iarg = sd_PositionCommand then
+				DGLOBAL(darg1Var) = SCOPEDATA(PositionCommand, IGLOBAL(iarg2Var))
+			elseif iarg = sd_PositionFeedback then
+				DGLOBAL(darg1Var) = SCOPEDATA(PositionFeedback, IGLOBAL(iarg2Var))
+			elseif iarg = sd_CurrentFeedback then
+				DGLOBAL(darg1Var) = SCOPEDATA(CurrentFeedback, IGLOBAL(iarg2Var))
+			end if
+		ELSEIF IGLOBAL(cmdVar) = cmdSCOPESTATUS THEN
+			IGLOBAL(iarg1Var) = SCOPESTATUS(IGLOBAL(iarg1Var))
+		ELSEIF IGLOBAL(cmdVar) = cmdSCOPETRIG THEN
+			SCOPETRIG
+		ELSEIF IGLOBAL(cmdVar) = cmdSCOPETRIGPERIOD THEN
+			SCOPETRIGPERIOD IGLOBAL(iarg1Var)
 		END IF
 	    IGLOBAL(cmdVar) = cmdDONE
 	    DWELL 0.01
