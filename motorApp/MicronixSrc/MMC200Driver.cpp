@@ -29,7 +29,7 @@ July 10, 2013
   * \param[in] idlePollPeriod    The time between polls when no axis is moving 
   */
 MMC200Controller::MMC200Controller(const char *portName, const char *MMC200PortName, int numAxes, 
-                                 double movingPollPeriod, double idlePollPeriod)
+                                 double movingPollPeriod, double idlePollPeriod, int ignoreLimits)
   :  asynMotorController(portName, numAxes, NUM_MMC200_PARAMS, 
                          0, // No additional interfaces beyond those in base class
                          0, // No additional callback interfaces beyond those in base class
@@ -41,6 +41,12 @@ MMC200Controller::MMC200Controller(const char *portName, const char *MMC200PortN
   asynStatus status;
   MMC200Axis *pAxis;
   static const char *functionName = "MMC200Controller::MMC200Controller";
+
+  /* Set flag to ignore limits */
+  if (ignoreLimits == 0)
+    ignoreLimits_ = 0;
+  else
+    ignoreLimits_ = 1;
 
   /* Connect to MMC200 controller */
   status = pasynOctetSyncIO->connect(MMC200PortName, 0, &pasynUserController_, NULL);
@@ -66,10 +72,10 @@ MMC200Controller::MMC200Controller(const char *portName, const char *MMC200PortN
   * \param[in] idlePollPeriod    The time in ms between polls when no axis is moving 
   */
 extern "C" int MMC200CreateController(const char *portName, const char *MMC200PortName, int numAxes, 
-                                   int movingPollPeriod, int idlePollPeriod)
+                                   int movingPollPeriod, int idlePollPeriod, int ignoreLimits)
 {
   MMC200Controller *pMMC200Controller
-    = new MMC200Controller(portName, MMC200PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
+    = new MMC200Controller(portName, MMC200PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000., ignoreLimits);
   pMMC200Controller = NULL;
   return(asynSuccess);
 }
@@ -83,8 +89,12 @@ extern "C" int MMC200CreateController(const char *portName, const char *MMC200Po
   */
 void MMC200Controller::report(FILE *fp, int level)
 {
-  fprintf(fp, "MMC-200 motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
-    this->portName, numAxes_, movingPollPeriod_, idlePollPeriod_);
+  fprintf(fp, "MMC-200 motor driver\n");
+  fprintf(fp, "  port name=%s\n", this->portName);
+  fprintf(fp, "  num axes=%d\n", numAxes_);
+  fprintf(fp, "  moving poll period=%f\n", movingPollPeriod_);
+  fprintf(fp, "  idle poll period=%f\n", idlePollPeriod_);
+  fprintf(fp, "  ignore limits=%d\n", ignoreLimits_);
 
   // Call the base class method
   asynMotorController::report(fp, level);
@@ -327,7 +337,8 @@ asynStatus MMC200Axis::poll(bool *moving)
 { 
   int done;
   int driveOn;
-  int limit;
+  int lowLimit;
+  int highLimit;
   int status;
   double pos;
   double enc;
@@ -366,10 +377,19 @@ asynStatus MMC200Axis::poll(bool *moving)
   setIntegerParam(pC_->motorStatusDone_, done);
   *moving = done ? false:true;
 
-  limit = status & 0x2;
-  setIntegerParam(pC_->motorStatusHighLimit_, limit);
-  limit = status & 0x1;
-  setIntegerParam(pC_->motorStatusLowLimit_, limit);
+  /* Only check limit bits if ignore flag is zero */
+  if (pC_->ignoreLimits_ == 0)
+  {
+    highLimit = status & 0x2;
+    lowLimit = status & 0x1;
+  }
+  else
+  {
+    highLimit = 0;
+    lowLimit = 0;
+  }
+  setIntegerParam(pC_->motorStatusHighLimit_, highLimit);
+  setIntegerParam(pC_->motorStatusLowLimit_, lowLimit);
   
   //setIntegerParam(pC_->motorStatusAtHome_, limit);
 
@@ -396,15 +416,17 @@ static const iocshArg MMC200CreateControllerArg1 = {"MMC-200 port name", iocshAr
 static const iocshArg MMC200CreateControllerArg2 = {"Number of axes", iocshArgInt};
 static const iocshArg MMC200CreateControllerArg3 = {"Moving poll period (ms)", iocshArgInt};
 static const iocshArg MMC200CreateControllerArg4 = {"Idle poll period (ms)", iocshArgInt};
+static const iocshArg MMC200CreateControllerArg5 = {"Ignore limit flag", iocshArgInt};
 static const iocshArg * const MMC200CreateControllerArgs[] = {&MMC200CreateControllerArg0,
                                                              &MMC200CreateControllerArg1,
                                                              &MMC200CreateControllerArg2,
                                                              &MMC200CreateControllerArg3,
-                                                             &MMC200CreateControllerArg4};
-static const iocshFuncDef MMC200CreateControllerDef = {"MMC200CreateController", 5, MMC200CreateControllerArgs};
+                                                             &MMC200CreateControllerArg4,
+                                                             &MMC200CreateControllerArg5};
+static const iocshFuncDef MMC200CreateControllerDef = {"MMC200CreateController", 6, MMC200CreateControllerArgs};
 static void MMC200CreateContollerCallFunc(const iocshArgBuf *args)
 {
-  MMC200CreateController(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival);
+  MMC200CreateController(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival, args[5].ival);
 }
 
 static void MMC200Register(void)

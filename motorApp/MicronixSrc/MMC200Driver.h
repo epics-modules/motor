@@ -44,11 +44,14 @@ friend class MMC200Controller;
 
 class MMC200Controller : public asynMotorController {
 public:
-  MMC200Controller(const char *portName, const char *MMC200PortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
+  MMC200Controller(const char *portName, const char *MMC200PortName, int numAxes, double movingPollPeriod, double idlePollPeriod, int ignoreLimits);
 
   void report(FILE *fp, int level);
   MMC200Axis* getAxis(asynUser *pasynUser);
   MMC200Axis* getAxis(int axisNo);
+  
+private:
+  int ignoreLimits_;  /* 1 = ignore limits */
 
 friend class MMC200Axis;
 };
