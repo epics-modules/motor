@@ -55,14 +55,14 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #         For example, set which TTL signal level defines
 #         an active limit switch.  Set X,Y,Z,T to active low and set U,V,R,S
 #         to active high.  Set all axes to open-loop stepper (PSO). See MAXv
-#         User's Manual for LL/LH and PSO/PSE/PSM commands.
+#         User's Manual for LTL/LTH and PSO/PSE/PSM commands.
 #     (3) SSI based absolute encoder bit flag. Bit #0 for Axis X, bit #1 for
 #         Axis Y, etc.. Set a bit flag to '1' for absolute encoder values; '0'
 #         for the standard incremental encoder values.
 
-#config0="AX LL PSO; AY LL PSO; AZ LL PSO; AT LL PSO; AU LH PSO; AV LH PSO; AR LH PSO; AS LH PSO;"
+#config0="AX LTL PSO; AY LTL PSO; AZ LTL PSO; AT LTL PSO; AU LTH PSO; AV LTH PSO; AR LTH PSO; AS LTH PSO;"
 
-#!config0="AX LH PSM; AY LL PSO; AZ LL PSO; AT LL PSO; AU LH PSO; AV LH PSO; AR LH PSO; AS LH PSO;"
+#!config0="AX LTH PSM; AY LTL PSO; AZ LTL PSO; AT LTL PSO; AU LTH PSO; AV LTH PSO; AR LTH PSO; AS LTH PSO;"
 #!MAXvConfig(0, config0, 0x00)
 
 
