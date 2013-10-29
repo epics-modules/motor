@@ -393,6 +393,13 @@ asynStatus MMC200Axis::poll(bool *moving)
   
   //setIntegerParam(pC_->motorStatusAtHome_, limit);
 
+  // Clear error buffer 
+  if (status & 0x80)
+  {
+    sprintf(pC_->outString_, "%dCER", axisIndex_);
+    status = pC_->writeController();
+  }
+
   // Read the drive power on status
   sprintf(pC_->outString_, "%dMOT?", axisIndex_);
   comStatus = pC_->writeReadController();
