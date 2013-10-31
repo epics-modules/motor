@@ -33,6 +33,8 @@ private:
   MMC200Controller *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   int axisIndex_;    /* Numbered from 1 */
+  char versionStr_[256];  /* Version string */
+  int model_;         /* Model number (200 or 100) */
   int rez_;          /* Units = picometers per full step */
   int microSteps_;   /* Units = microsteps per full step */
   double resolution_;   /* Units = mm per microstep */

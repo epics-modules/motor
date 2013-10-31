@@ -131,10 +131,48 @@ MMC200Axis::MMC200Axis(MMC200Controller *pC, int axisNo)
 {
   int errorFlag = 0;
   asynStatus status;
-  
+  static const char *functionName = "MMC200Axis::MMC200Axis";
+
   // controller axes are numbered from 1
   axisIndex_ = axisNo + 1;
+
+  // Read the version string to determine controller model (200/100)
+  sprintf(pC_->outString_, "%dVER?", axisIndex_);
+  status = pC_->writeReadController();
+  if (status != asynSuccess)
+    errorFlag = 1;
   
+  // Store version string
+  strcpy(versionStr_, pC_->inString_);
+  
+  // Parse version string
+  if (strlen(pC_->inString_) > 8)
+  {
+    if (strncmp(pC_->inString_, "#MMC-200", 8) == 0)
+    {
+      model_ = 200;
+    }
+    else if (strncmp(pC_->inString_, "#MMC-100", 8) == 0)
+    {
+      model_ = 100;
+    } 
+    else
+    {
+      asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR, 
+        "%s: version string is invalid.\n",
+        functionName);
+      model_ = -1;
+
+    }
+  }
+  else
+  {
+    asynPrint(pC_->pasynUserSelf, ASYN_TRACE_ERROR, 
+      "%s: version string is unexpectedly short.\n",
+      functionName);
+    model_ = -1;
+  }
+
   // Read the axis resolution (units = tens of picometers per full step)
   sprintf(pC_->outString_, "%dREZ?", axisIndex_);
   status = pC_->writeReadController();
@@ -143,11 +181,20 @@ MMC200Axis::MMC200Axis(MMC200Controller *pC, int axisNo)
   rez_ = atoi(&pC_->inString_[1]);
 
   // Read the number of microsteps
-  sprintf(pC_->outString_, "%dUST?", axisIndex_);
-  status = pC_->writeReadController();
-  if (status != asynSuccess)
-    errorFlag = 1;
-  microSteps_ = atoi(&pC_->inString_[1]);
+  if ( model_ == 200 )
+  {
+    // The MMC-200 has a variable number of microsteps
+    sprintf(pC_->outString_, "%dUST?", axisIndex_);
+    status = pC_->writeReadController();
+    if (status != asynSuccess)
+      errorFlag = 1;
+    microSteps_ = atoi(&pC_->inString_[1]);
+  }
+  else
+  {
+    // The MMC-100 has a fixed number of microsteps
+    microSteps_ = 100;
+  }
   
   // Calculate motor resolution (mm / microstep)
   resolution_ = rez_ * 1e-8 / microSteps_;
@@ -186,6 +233,8 @@ void MMC200Axis::report(FILE *fp, int level)
   if (level > 0) {
     fprintf(fp, "  axis %d\n", axisNo_);
     fprintf(fp, "  axis index %d\n", axisIndex_);
+    fprintf(fp, "  version %s\n", versionStr_);
+    fprintf(fp, "  model %d\n", model_);
     fprintf(fp, "  rez %d\n", rez_);
     fprintf(fp, "  micro steps %d\n", microSteps_);
     fprintf(fp, "  resolution %f\n", resolution_);
