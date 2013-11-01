@@ -5,6 +5,7 @@ $(P)$(M).TWV
 $(P)$(M).DISA
 $(P)$(M).DISP
 $(P)$(M).OFF
+$(P)$(M).VELO
 $(P)$(M)C1
 $(P)$(M)C2
 $(P)$(M)C3
