@@ -37,6 +37,7 @@ COMMONDBDS += ACRMotorSupport.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
 COMMONDBDS += drvAsynIPPort.dbd
 COMMONDBDS += busySupport.dbd
+COMMONDBDS += PI_GCS2Support.dbd
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -72,7 +73,10 @@ COMMONLIBS += motorSimSupport
 COMMONLIBS += SmartMotor
 COMMONLIBS += KohzuMotor
 COMMONLIBS += ACRMotor
+COMMONLIBS += PI_GCS2Support
 COMMONLIBS += motor
+
+WithAsyn_LIBS += busy
 
 # Needed for Newport SNL programs
 WithAsyn_LIBS += $(COMMONLIBS)
@@ -81,8 +85,6 @@ ifdef SNCSEQ
 WithAsyn_LIBS += seqDev seq pv
 endif
 WithAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
-
-WithAsyn_LIBS += busy
 
 WithAsynVx_LIBS += $(COMMONLIBS)
 ifdef IPAC
