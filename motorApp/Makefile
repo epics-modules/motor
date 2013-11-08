@@ -96,6 +96,9 @@ SmarActMCSSrc_DEPEND_DIRS = MotorSrc
 DIRS += NPointSrc
 NPointSrc_DEPEND_DIRS = MotorSrc
 
+DIRS += MicronixSrc
+MicronixSrc_DEPEND_DIRS = MotorSrc
+
 endif
 
 # Install the edl files
