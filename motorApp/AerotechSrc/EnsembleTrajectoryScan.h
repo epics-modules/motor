@@ -330,3 +330,68 @@ evflag readbackMon;     sync readback   readbackMon;
 evflag nelementsMon;    sync nelements  nelementsMon;
 evflag motorMDVSMon;    sync motorMDVS  motorMDVSMon;
 
+/* This is going to get messy.  We need to use Ensemble commands like "VELOCITY" and "PVT",
+ * But they aren't available via the ASCII interface we're using to send commands.  So we
+ * use ASCII-legal commands to tell an Aerobasic program the commands we want to execute,
+ * and have the AeroBasic program execute those commands.
+ */
+
+/* defines for IGLOBAL values to tell AeroBasic program which command to invoke */
+#define cmdDONE					0
+#define cmdVELOCITY_ON			1
+#define cmdVELOCITY_OFF			2
+#define cmdHALT					3
+#define cmdSTART				4
+#define cmdPVT_INIT_TIME_ABS	5
+#define cmdPVT_INIT_TIME_INC	6
+#define cmdPVT1					7	/* PVT command for one motor (PVT i1 d1, d2, TIME d3) */
+#define cmdPVT2					8	/* PVT command for two motors (PVT i1 d1, d2 i2 d3, d4 TIME d5)*/
+#define cmdPVT3					9
+#define cmdPVT4					10
+#define cmdABORT				11
+#define cmdSTARTABORT			12
+#define cmdSCOPEBUFFER			13
+#define cmdSCOPEDATA			14
+#define cmdSCOPESTATUS			15
+#define cmdSCOPETRIG			16	/* if IGLOBAL(iarg1Var)==1, stop scope */
+#define cmdSCOPETRIGPERIOD		17
+#define cmdDRIVEINFO			18	/* per Aerotech email, but not found in 4.02.004 doc */
+#define cmdLINEAR				19	/* LINEAR @IGLOBAL(iarg1Var) DGLOBAL(darg1Var) FDGLOBAL(darg1Var) */
+#define cmdDATAACQ_TRIG			20	/* DATAACQ @IGLOBAL(iarg1Var) TRIGGER IGLOBAL(1arg2Var) */
+#define cmdDATAACQ_INP			21	/* DATAACQ @IGLOBAL(iarg1Var) INPUT IGLOBAL(1arg2Var) */
+#define cmdDATAACQ_ON			22	/* DATAACQ @IGLOBAL(iarg1Var) ON IGLOBAL(1arg2Var) */
+#define cmdDATAACQ_OFF			23	/* DATAACQ @IGLOBAL(iarg1Var) OFF */
+#define cmdDATAACQ_READ			24	/* DATAACQ @IGLOBAL(iarg1Var) READ IGLOBAL(1arg2Var), IGLOBAL(1arg3Var) */
+#define cmdDOTRAJECTORY			25	/* for motor IGLOBAL(iarg1Var); 3*IGLOBAL(iarg2Var) DGLOBALs (PVT) have been loaded */
+
+#define cmdVar		45
+#define iarg1Var	46
+#define iarg2Var	47
+#define iarg3Var	48
+#define iarg4Var	49
+#define darg1Var	1
+#define darg2Var	2
+#define darg3Var	3
+#define numIArg		44
+#define numDArg		43
+#define pvtWaitMSVar	42
+
+/* Numerical values for first arg for cmdSCOPEDATA */
+#define sd_PositionCommand	0
+#define sd_PositionFeedback	1
+#define sd_ExternalPosition	2
+#define sd_AxisFault		3
+#define sd_AxisStatus		4
+#define sd_AnalogInput0		5
+#define sd_AnalogInput1		6
+#define sd_AnalogOutput0	7
+#define sd_AnalogOutput1	8
+#define sd_DigitalInput0	9
+#define sd_DigitalInput1	10
+#define sd_DigitalOutput0	11
+#define sd_DigitalOutput1	12
+#define sd_CurrentCommand	13
+#define sd_CurrentFeedback	14
+#define sd_OptionalData1	15
+#define sd_OptionalData2	16
+#define sd_ProgramCounter	17
