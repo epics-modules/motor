@@ -34,6 +34,13 @@ record(calc, "$(P)alldoneBlink") {
   field(INPB, "$(P)alldoneBlink")
 }
 
+# Allow smart clients to maintain a list of moving motors
+record(waveform, "$(P)movingDiff") {
+  field(DESC, "Motor w/ last dmov change")
+  field(NELM, "62")
+  field(FTVL, "CHAR")
+}
+
 #! Further lines contain data used by VisualDCT
 #! View(50,124,1.3)
 #! Record("$(P)allstop",100,343,0,0,"$(P)allstop")
