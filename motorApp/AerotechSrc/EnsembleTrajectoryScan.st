@@ -13,8 +13,8 @@ program EnsembleTrajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M
  *
  *  Tim Mooney -- based on MM4000_trajectoryScan.st by Mark Rivers.
  *
- * NOTE that this software is not ready for multiple-motor trajectories, even though
- * some of the code is.
+ *  NOTE that this software is not ready for multiple-motor trajectories, even though
+ *  some of the code is.
  */
 
 %% #include <stdlib.h>
@@ -134,6 +134,7 @@ double dbuf[MAX_PULSES];
 
 /* variables for constructing trajectory commands */
 int movingMask;
+int numGlobalDoubles;
 
 /* temporary variables to hold mav speed and acceleration for a motor */
 double vmax;
@@ -235,6 +236,21 @@ ss EnsembleTrajectoryScan {
 			efClear(motorMDVSMon); /* we don't use this */
 			if (initStatus == STATUS_UNDEFINED) initStatus = STATUS_SUCCESS;
 			loadingTrajectory = 0;
+
+			/* PARAMETERID_GlobalDoubles is 125 */
+			%%pVar->status = writeRead(ssId, pVar, "getparm(125)", pVar->stringIn);
+			if (stringIn[0] == '%') {
+				numGlobalDoubles = atol(&stringIn[1]);
+			} else {
+				/* try again */
+				%%pVar->status = writeRead(ssId, pVar, "getparm(@0,125)", pVar->stringIn);
+				if (stringIn[0] == '%') {
+					numGlobalDoubles = atol(&stringIn[1]);
+				} else {
+					printf("Can't read number of global doubles.  Motor controller problem?\n");
+					numGlobalDoubles = 0;
+				}
+			}
 		} state monitor_inputs
 	}
 
@@ -254,6 +270,13 @@ ss EnsembleTrajectoryScan {
 			/* If nelements changes, then change endPulses to this value,
 			 * since this is what the user normally wants.  endPulses can be
 			 * changed again after changing nelements if this is desired. */
+			if (nelements > (numGlobalDoubles/3 - 3)) {
+				/* The Ensemble has an array of doubles we use to send the trajectory.  The number of
+				 * elements in that array must be configured using the "Configuration Manager".
+				 */ 
+				nelements = numGlobalDoubles/3 - 3;
+				pvPut(nelements);
+			}
 			endPulses = nelements;
 			pvPut(endPulses);
 		} state monitor_inputs
