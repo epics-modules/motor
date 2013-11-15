@@ -1,0 +1,1091 @@
+
+file {
+	name="/home/oxygen4/MOONEY/epics/synAppsSVN/support/motor/motorApp/op/adl/MAX_trajectoryScan1.adl"
+	version=030107
+}
+display {
+	object {
+		x=164
+		y=54
+		width=530
+		height=595
+	}
+	clr=14
+	bclr=4
+	cmap=""
+	gridSpacing=10
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=5
+		y=51
+		width=524
+		height=215
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+		width=2
+	}
+}
+text {
+	object {
+		x=20
+		y=55
+		width=210
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="# trajectory elements"
+}
+"text entry" {
+	object {
+		x=234
+		y=55
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)Nelements"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=73
+		y=10
+		width=384
+		height=35
+	}
+	"basic attribute" {
+		clr=56
+	}
+}
+text {
+	object {
+		x=103
+		y=16
+		width=324
+		height=25
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="$(TITLE)"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=359
+		y=105
+		width=60
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Actual"
+}
+"text update" {
+	object {
+		x=422
+		y=108
+		width=100
+		height=15
+	}
+	monitor {
+		chan="$(P)$(R)Nactual"
+		clr=14
+		bclr=56
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=80
+		y=105
+		width=150
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="# output pulses"
+}
+"text entry" {
+	object {
+		x=234
+		y=105
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)Npulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=140
+		y=155
+		width=90
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Time mode"
+}
+menu {
+	object {
+		x=234
+		y=155
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)TimeMode"
+		clr=14
+		bclr=51
+	}
+}
+text {
+	object {
+		x=130
+		y=180
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Total time"
+}
+"text entry" {
+	object {
+		x=234
+		y=180
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)Time"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=234
+		y=205
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)TimeScale"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=29
+		y=205
+		width=200
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Execution time scale"
+}
+"text entry" {
+	object {
+		x=234
+		y=130
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)StartPulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=387
+		y=130
+		width=30
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="End"
+}
+"text entry" {
+	object {
+		x=422
+		y=130
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)EndPulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=10
+		y=130
+		width=210
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Range of pulses: Start"
+}
+text {
+	object {
+		x=20
+		y=80
+		width=210
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Trajectory definition"
+}
+menu {
+	object {
+		x=234
+		y=80
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)MoveMode"
+		clr=14
+		bclr=51
+	}
+}
+"text entry" {
+	object {
+		x=234
+		y=230
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)Accel"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=60
+		y=230
+		width=170
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Acceleration time"
+}
+"text update" {
+	object {
+		x=340
+		y=195
+		width=50
+		height=15
+	}
+	monitor {
+		chan="$(P)$(R)ElapsedTime"
+		clr=54
+		bclr=4
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=340
+		y=184
+		width=50
+		height=10
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="ELAPSED"
+	align="horiz. centered"
+}
+"text entry" {
+	object {
+		x=490
+		y=56
+		width=25
+		height=20
+	}
+	control {
+		chan="$(P)$(R)OutBitNum"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=375
+		y=55
+		width=110
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Output Bit#"
+}
+"text entry" {
+	object {
+		x=490
+		y=81
+		width=25
+		height=20
+	}
+	control {
+		chan="$(P)$(R)InBitNum"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=375
+		y=80
+		width=110
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Input Bit#"
+}
+"related display" {
+	object {
+		x=425
+		y=235
+		width=99
+		height=20
+	}
+	display[0] {
+		label="Debug/more"
+		name="MAX_trajectoryScanDebug.adl"
+		args="P=$(P),R=$(R),TITLE=$(TITLE),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
+	}
+	display[1] {
+		label="Speed limits"
+		name="MAX_trajectoryScanSpeed.adl"
+		args="P=$(P),R=$(R),TITLE=$(TITLE),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
+	}
+	display[2] {
+		label="all 8 motors"
+		name="MAX_trajectoryScan.adl"
+		args="P=$(P),R=$(R),TITLE=$(TITLE),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
+	}
+	clr=14
+	bclr=51
+	label=" More"
+}
+"related display" {
+	object {
+		x=447
+		y=160
+		width=75
+		height=20
+	}
+	display[0] {
+		label="Time per element"
+		name="MAX_trajectoryPlot.adl"
+		args="TITLE=Time_per_element,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)TimeTraj"
+	}
+	clr=14
+	bclr=51
+}
+text {
+	object {
+		x=400
+		y=160
+		width=40
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Plot"
+}
+"text entry" {
+	object {
+		x=422
+		y=205
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)DebugLevel"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=422
+		y=193
+		width=100
+		height=10
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Debug Level"
+	align="horiz. centered"
+}
+composite {
+	object {
+		x=4
+		y=273
+		width=524
+		height=317
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=4
+				y=273
+				width=524
+				height=60
+			}
+			"basic attribute" {
+				clr=14
+				fill="outline"
+				width=2
+			}
+		}
+		text {
+			object {
+				x=168
+				y=276
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Move axis?"
+		}
+		menu {
+			object {
+				x=168
+				y=300
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)M1Move"
+				clr=14
+				bclr=51
+			}
+		}
+		text {
+			object {
+				x=300
+				y=276
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Current Pos."
+		}
+		"text update" {
+			object {
+				x=291
+				y=300
+				width=103
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)M1Current"
+				clr=54
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=456
+				y=276
+				width=50
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Plots"
+		}
+		"related display" {
+			object {
+				x=440
+				y=300
+				width=75
+				height=20
+			}
+			display[0] {
+				label="Output"
+				name="MAX_trajectoryPlot.adl"
+				args="M=$(P)$(M1),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Traj"
+			}
+			display[1] {
+				label="Readback"
+				name="MAX_trajectoryPlot.adl"
+				args="M=$(P)$(M1),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Actual"
+			}
+			display[2] {
+				label="Following error"
+				name="MAX_trajectoryPlot.adl"
+				args="M=$(P)$(M1),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Error"
+			}
+			display[3] {
+				label="Desired&Readback&Error"
+				name="MAX_trajectoryPlot2.adl"
+				args="M=$(P)$(M1),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M1Error,Y2=$(P)$(R)M1Traj,Y3=$(P)$(R)M1Actual"
+			}
+			display[4] {
+				label="raw"
+				name="MAX_trajectoryPlot3.adl"
+				args="M=$(P)$(M1),TITLE=Output_Readback,X=$(P)$(R)M5Actual,Y1=$(P)$(R)M2Actual,Y2=$(P)$(R)M3Actual,Y3=$(P)$(R)M4Actual"
+			}
+			clr=14
+			bclr=51
+		}
+		"text update" {
+			object {
+				x=6
+				y=300
+				width=150
+				height=20
+			}
+			monitor {
+				chan="$(P)$(M1).DESC"
+				clr=14
+				bclr=4
+			}
+			align="horiz. right"
+			limits {
+			}
+		}
+		composite {
+			object {
+				x=4
+				y=340
+				width=524
+				height=250
+			}
+			"composite name"=""
+			children {
+				composite {
+					object {
+						x=4
+						y=340
+						width=524
+						height=250
+					}
+					"composite name"=""
+					children {
+						rectangle {
+							object {
+								x=4
+								y=340
+								width=524
+								height=250
+							}
+							"basic attribute" {
+								clr=14
+								fill="outline"
+								width=2
+							}
+						}
+						text {
+							object {
+								x=111
+								y=370
+								width=50
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Build"
+						}
+						"message button" {
+							object {
+								x=167
+								y=370
+								width=96
+								height=20
+							}
+							control {
+								chan="$(P)$(R)Build"
+								clr=14
+								bclr=51
+							}
+							label="Build"
+							press_msg="1"
+							release_msg="0"
+						}
+						text {
+							object {
+								x=31
+								y=420
+								width=130
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Simulate/Real"
+						}
+						menu {
+							object {
+								x=165
+								y=420
+								width=100
+								height=20
+							}
+							control {
+								chan="$(P)$(R)SimMode"
+								clr=14
+								bclr=51
+							}
+						}
+						"text update" {
+							object {
+								x=168
+								y=396
+								width=350
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)BuildMessage"
+								clr=14
+								bclr=56
+							}
+							limits {
+							}
+						}
+						text {
+							object {
+								x=31
+								y=395
+								width=130
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Build message"
+						}
+						"text update" {
+							object {
+								x=272
+								y=370
+								width=103
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)BuildState"
+								clr=50
+								bclr=13
+							}
+							clrmod="alarm"
+							limits {
+							}
+						}
+						"text update" {
+							object {
+								x=272
+								y=445
+								width=103
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)ExecState"
+								clr=50
+								bclr=14
+							}
+							clrmod="alarm"
+							limits {
+							}
+						}
+						"text update" {
+							object {
+								x=386
+								y=370
+								width=103
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)BuildStatus"
+								clr=50
+								bclr=14
+							}
+							clrmod="alarm"
+							limits {
+							}
+						}
+						"text update" {
+							object {
+								x=386
+								y=445
+								width=103
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)ExecStatus"
+								clr=50
+								bclr=14
+							}
+							clrmod="alarm"
+							limits {
+							}
+						}
+						text {
+							object {
+								x=180
+								y=345
+								width=70
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Command"
+						}
+						text {
+							object {
+								x=298
+								y=345
+								width=50
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="State"
+						}
+						text {
+							object {
+								x=407
+								y=345
+								width=60
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Status"
+						}
+						composite {
+							object {
+								x=91
+								y=445
+								width=172
+								height=20
+							}
+							"composite name"=""
+							children {
+								text {
+									object {
+										x=91
+										y=445
+										width=70
+										height=20
+									}
+									"basic attribute" {
+										clr=14
+									}
+									textix="Execute"
+								}
+								"message button" {
+									object {
+										x=167
+										y=445
+										width=96
+										height=20
+									}
+									control {
+										chan="$(P)$(R)Execute"
+										clr=14
+										bclr=51
+									}
+									label="Execute"
+									press_msg="1"
+									release_msg="0"
+								}
+							}
+						}
+						text {
+							object {
+								x=111
+								y=500
+								width=60
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Abort"
+						}
+						"message button" {
+							object {
+								x=167
+								y=495
+								width=150
+								height=30
+							}
+							control {
+								chan="$(P)$(R)Abort"
+								clr=14
+								bclr=20
+							}
+							label="Abort!"
+							press_msg="1"
+							release_msg="0"
+						}
+						text {
+							object {
+								x=11
+								y=470
+								width=150
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Execute message"
+						}
+						"text update" {
+							object {
+								x=168
+								y=471
+								width=350
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)ExecMessage"
+								clr=14
+								bclr=56
+							}
+							limits {
+							}
+						}
+						"message button" {
+							object {
+								x=167
+								y=535
+								width=96
+								height=20
+							}
+							control {
+								chan="$(P)$(R)Readback"
+								clr=14
+								bclr=51
+							}
+							label="Readback"
+							press_msg="1"
+							release_msg="0"
+						}
+						text {
+							object {
+								x=81
+								y=535
+								width=80
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Readback"
+						}
+						"text update" {
+							object {
+								x=272
+								y=535
+								width=103
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)ReadState"
+								clr=50
+								bclr=14
+							}
+							clrmod="alarm"
+							limits {
+							}
+						}
+						"text update" {
+							object {
+								x=386
+								y=535
+								width=103
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)ReadStatus"
+								clr=50
+								bclr=14
+							}
+							clrmod="alarm"
+							limits {
+							}
+						}
+						text {
+							object {
+								x=41
+								y=560
+								width=120
+								height=20
+							}
+							"basic attribute" {
+								clr=14
+							}
+							textix="Read message"
+						}
+						"text update" {
+							object {
+								x=168
+								y=561
+								width=350
+								height=20
+							}
+							monitor {
+								chan="$(P)$(R)ReadMessage"
+								clr=14
+								bclr=56
+							}
+							limits {
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
