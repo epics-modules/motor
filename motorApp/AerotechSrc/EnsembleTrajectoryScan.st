@@ -6,6 +6,10 @@ program EnsembleTrajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M
  * iocInit()
  * ...
  * seq &EnsembleTrajectoryScan, "P=xxx:,R=traj1:,M1=m1,M2=m2,M3=m3,M4=m4,M5=m5,M6=m6,M7=m7,M8=m8,PORT=none"
+ *
+ * NAXES must be less than or equal to the value of MAX_AXES specified in EnsembleTrajectoryScan.h
+ * NELM must be less than or equal to the value of MAX_ELEMENTS specified below
+ * NPULSE must be less than or equal to the value of MAX_AXES specified below
  */
 
 /*  This sequencer program works with trajectoryScan.db.  It implements
@@ -65,7 +69,6 @@ option +r;
 #define READ_INTERVAL (1/10.)
 
 char stringOut[MAX_MESSAGE_STRING];
-char sbuf[MAX_MESSAGE_STRING];
 char stringIn[MAX_MESSAGE_STRING];
 char stringLast[MAX_MESSAGE_STRING];
 char abortCommand[MAX_MESSAGE_STRING];
@@ -130,7 +133,6 @@ double position[MAX_AXES][MAX_ELEMENTS];
 double velocity[MAX_AXES][MAX_ELEMENTS];
 double motorStart[MAX_AXES];
 double motorCurr[MAX_AXES];
-double dbuf[MAX_PULSES];
 
 /* variables for constructing trajectory commands */
 int movingMask;
@@ -280,10 +282,6 @@ ss EnsembleTrajectoryScan {
 			endPulses = nelements;
 			pvPut(endPulses);
 		} state monitor_inputs
-
-		when(efTestAndClear(motorMDVSMon)) {
-			/* We don't use this. */
-		} state monitor_inputs
 	}
 
 	/* Build trajectory */
@@ -296,7 +294,6 @@ ss EnsembleTrajectoryScan {
 			pvPut(buildStatus);
 			epicsSnprintf(buildMessage, MSGSIZE, "Building...");
 			pvPut(buildMessage);
-
 
 			buildStatus = STATUS_SUCCESS; /* presume we'll be successful */
 			/* Initialize new trajectory */
@@ -314,7 +311,7 @@ ss EnsembleTrajectoryScan {
 
 			npoints = nelements;
 
-			/* calculate time at which motor should reach each trajectory point */			
+			/* calculate time from beginning of motion at which motor should reach each trajectory point */			
 			realTimeTrajectory[0] = 0.;
 			for (i=1; i<npoints; i++) {
 				realTimeTrajectory[i] = realTimeTrajectory[i-1] + timeTrajectory[i];
@@ -374,7 +371,6 @@ ss EnsembleTrajectoryScan {
 					}
 				}
 			}
-
 			if (limitViolation) {
 				buildStatus = STATUS_FAILURE;
 			}
@@ -400,11 +396,9 @@ ss EnsembleTrajectoryScan {
 
 	state execute {
 		when () {
-			/* Set busy flag */
 			execState = EXECUTE_STATE_MOVE_START;
 			pvPut(execState);
 			abortState = ABORT_STATE_NONE;
-			/* Set status to INVALID */
 			execStatus = STATUS_UNDEFINED;
 			pvPut(execStatus);
 			/* Erase the readback and error arrays */
@@ -542,19 +536,6 @@ ss EnsembleTrajectoryScan {
 				strcpy(stringOut, "PSOCONTROL @0 OFF");
 				%%pVar->status = writeRead(ssId, pVar, pVar->stringOut, pVar->stringIn);
 			}
-#if 0
-			/* Get the current motor positions, post them */
-			%%getMotorPositions(ssId, pVar, pVar->motorCurrent);
-			for (j=0; j<numAxes; j++) pvPut(motorCurrent[j]);
-			for (j=0; j<numAxes; j++) {
-				if (moveAxis[j]) {
-					epicsMotorPos[j] = motorCurrent[j];
-					pvPut(epicsMotorPos[j]);
-				}
-			}
-			%%waitEpicsMotors(ssId, pVar);
-			if (debugLevel) printf("\n...flyback done\n");
-#endif
 			execState = EXECUTE_STATE_DONE;
 			pvPut(execState);
 			/* Clear execute command, post.  This is a "busy" record, don't
@@ -619,7 +600,7 @@ ss EnsembleTrajectoryScan {
 				motorError[0][i] = 0;
 			}
 			%%pVar->d = trajEval(ssId, pVar, pVar->motorReadbacks[0], pVar->scopeDataIntervalMS, pVar->nScopeDataPoints,
-			%% 	pVar->motorTrajectory[0], pVar->realTimeTrajectory, pVar->npoints, pVar->motorError[0]);
+			%%pVar->motorTrajectory[0], pVar->realTimeTrajectory, pVar->npoints, pVar->motorError[0]);
 #endif
 
 #if USE_DATAACQ
@@ -948,7 +929,7 @@ static double rawToUser(int raw, double off, int dir, double res) {
  */
 int sendReceiveCommand(SS_ID ssId, struct UserVar *pVar, char *cmd, char *callerReply, int checkProgram) {
 	int i, i1, i2, i3, i4, cmdNum;
-	double d, d1, d2, d3, d4, d5, d6, d7, d8, d9;
+	double d1, d2, d3;
 	char stringOut[MAX_MESSAGE_STRING], reply[MAX_MESSAGE_STRING];
 	int status, saveDebug;
 
@@ -1001,6 +982,7 @@ int sendReceiveCommand(SS_ID ssId, struct UserVar *pVar, char *cmd, char *caller
 	saveDebug = pVar->debugLevel;
 	pVar->debugLevel = MAX(0, pVar->debugLevel - 1);
 
+	cmdNum = cmdDONE;
 	if (strncmp(cmd, "VELOCITY ON", strlen("VELOCITY ON")) == 0) {
 		cmdNum = cmdVELOCITY_ON;
 		sprintf(stringOut, "IGLOBAL(%d) = %d", cmdVar, cmdVELOCITY_ON);
@@ -1223,14 +1205,22 @@ int writeIntAndCheck(SS_ID ssId, struct UserVar *pVar, int n, int ival) {
 }
 
 
+/* Not all Ensemble controllers support PSOARRAY commands.  There doesn't seem to be a command
+ * that allows software to determine whether or not PSOARRAY commands are supported.
+ */
 #define PSO_DISTANCE_ARRAY 1
+
+/* For trajectories of unlimited length, PVT commands can be executed via sendReceiveCommand(),
+ * but this has not been reliable enough, so if PVT_BY_CONTROLLER, we send the whole trajectory
+ * to the controller via DGLOBAL variables.
+ */
 #define PVT_BY_CONTROLLER 1
+
 /**************************************************************************************/
 static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
-	int i, j, k, n, status;
+	int i, j, n, status;
 	char stringOut[MAX_MESSAGE_STRING], reply[MAX_MESSAGE_STRING];
-	double position, p, v, t, dp, dt, dtime;
-	int dir;
+	double position, p, v, t, dp, dtime;
 	int iGlobalIndex;
 	int nPulses = 1 + pVar->endPulses - pVar->startPulses;
 	int intPosition;
@@ -1343,14 +1333,6 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 	/* Program SCOPE commands */
 	pVar->nScopeDataPoints = pVar->npoints * 2.2;
 	if (pVar->nScopeDataPoints > MAX_PULSES) pVar->nScopeDataPoints = MAX_PULSES;
-	for (j=0, dt=-1.; j<MAX_AXES; j++) {
-		if (pVar->moveAxis[j]) {
-			if (pVar->epicsMotorACCL[j] > dt) {
-				dt = pVar->epicsMotorACCL[j];
-				break;
-			}
-		}
-	}
 	pVar->scopeDataIntervalMS = NINT(1000 * (pVar->time*1.1)/pVar->nScopeDataPoints);
 	if (pVar->scopeDataIntervalMS < 1) pVar->scopeDataIntervalMS = 1;
 	sprintf(stringOut, "SCOPEBUFFER %d", pVar->nScopeDataPoints);
