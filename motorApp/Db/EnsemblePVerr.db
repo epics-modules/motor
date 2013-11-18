@@ -1,0 +1,38 @@
+record(sseq, "$(P)$(Q)EnsemblePVErrDo") {
+	field(PREC, "5")
+	field(STR1, "perr(0)")
+	field(LNK1, "$(P)$(Q)EnsemblePVErrAsyn.AOUT CA NMS")
+	field(WAIT1, "Wait")
+	field(DOL2,  "$(P)$(Q)EnsemblePVErrAsyn.TINP NPP NMS")
+	field(LNK2, "$(P)$(Q)EnsemblePVErrCalc.AA CA NMS")
+	field(WAIT2, "Wait")
+	field(DOL3, "$(P)$(Q)EnsemblePVErrCalc.VAL NPP NMS")
+	field(LNK3, "$(P)$(Q)EnsemblePerr PP")
+	field(STR4, "verr(@0)")
+	field(LNK4, "$(P)$(Q)EnsemblePVErrAsyn.AOUT CA NMS")
+	field(WAIT4, "Wait")
+	field(DOL5, "$(P)$(Q)EnsemblePVErrAsyn.TINP NPP NMS")
+	field(LNK5 , "$(P)$(Q)EnsemblePVErrCalc.AA CA NMS")
+	field(WAIT5, "Wait")
+	field(DOL6 , "$(P)$(Q)EnsemblePVErrCalc.VAL NPP NMS")
+	field(LNK6, "$(P)$(Q)EnsembleVerr PP")
+}
+record(asyn, "$(P)$(Q)EnsemblePVErrAsyn") {
+	field(PORT, "$(PORT)")
+	field(TMOD, "Write/Read")
+	field(IFACE, "asynOctet")
+	field(OFMT, "Ascii")
+	field(IFMT, "ASCII")
+	field(AUCT, "autoConnect")
+	field(ENBL, "Enable")
+}
+record(scalcout, "$(P)$(Q)EnsemblePVErrCalc") {
+	field(CALC, "dbl(aa[1,-1])")
+	field(PREC, "5")
+}
+record(ao, "$(P)$(Q)EnsemblePerr") {
+	field(PREC, "5")
+}
+record(ao, "$(P)$(Q)EnsembleVerr") {
+	field(PREC, "5")
+}
