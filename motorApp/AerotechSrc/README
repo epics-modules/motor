@@ -137,7 +137,8 @@ EnsembleTrajectoryScan.st
 	'PROGRAM 5 "doCommand.bcx"'.  The controller also must be configured to
 	increase the number of global integers and doubles.  For N trajectory
 	points, the number of global doubles must be at least (N+3)*3 (for one
-	motor), and the number of global integers must be at least N+50.
+	motor), and the number of global integers must be at least N+50.  Also, the
+	controller must use the same units as the motor record that talks to it.
 	
 	This software is not ready for multiple-motor trajectories.
 
