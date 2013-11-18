@@ -1,0 +1,236 @@
+
+file {
+	name="EnsemblePVErr.adl"
+	version=030107
+}
+display {
+	object {
+		x=1105
+		y=308
+		width=400
+		height=110
+	}
+	clr=14
+	bclr=1
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+"related display" {
+	object {
+		x=10
+		y=80
+		width=70
+		height=20
+	}
+	display[0] {
+		label="asyn record"
+		name="asynOctet.adl"
+		args="P=$(P),R=XEnsemblePVErrAsyn"
+	}
+	display[1] {
+		label="sseq record"
+		name="yySseq.adl"
+		args="P=$(P),S=XEnsemblePVErrDo"
+	}
+	display[2] {
+		label="scalcout record"
+		name="yySCalcoutRecord.adl"
+		args="P=$(P),C=XEnsemblePVErrCalc"
+	}
+	clr=0
+	bclr=17
+	label="-More"
+}
+"text update" {
+	object {
+		x=130
+		y=50
+		width=90
+		height=20
+	}
+	monitor {
+		chan="$(P)XEnsembleVerr"
+		clr=54
+		bclr=1
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=10
+		y=50
+		width=110
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="VelocityErr"
+}
+"text update" {
+	object {
+		x=230
+		y=50
+		width=50
+		height=20
+	}
+	monitor {
+		chan="$(P)$(M).EGU"
+		clr=54
+		bclr=1
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=280
+		y=50
+		width=110
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="/second"
+}
+menu {
+	object {
+		x=128
+		y=5
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(Q)EnsemblePVErrDo.SCAN"
+		clr=14
+		bclr=51
+	}
+}
+"text update" {
+	object {
+		x=130
+		y=30
+		width=90
+		height=20
+	}
+	monitor {
+		chan="$(P)XEnsemblePerr"
+		clr=54
+		bclr=1
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=10
+		y=30
+		width=110
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="PositionErr"
+}
+"text update" {
+	object {
+		x=230
+		y=30
+		width=50
+		height=20
+	}
+	monitor {
+		chan="$(P)$(M).EGU"
+		clr=54
+		bclr=1
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=10
+		y=5
+		width=110
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Read Period"
+}
