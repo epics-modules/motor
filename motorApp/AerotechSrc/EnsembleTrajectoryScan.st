@@ -561,6 +561,7 @@ ss EnsembleTrajectoryScan {
 			%%pVar->status = sendReceiveCommand(ssId, pVar, "SCOPETRIG STOP", pVar->stringIn, 1);
 			strcpy(stringLast, "");
 			for (i=0; i<nScopeDataPoints; i++) {
+				if (execStatus == STATUS_ABORT) break;
 				sprintf(stringOut, "SCOPEDATA %d %d", sd_PositionFeedback, i);
 				%%pVar->status = sendReceiveCommand(ssId, pVar, pVar->stringOut, pVar->stringIn, 0);
 				sprintf(stringOut, "DGLOBAL(%d)", darg1Var);
@@ -1208,7 +1209,7 @@ int writeIntAndCheck(SS_ID ssId, struct UserVar *pVar, int n, int ival) {
 /* Not all Ensemble controllers support PSOARRAY commands.  There doesn't seem to be a command
  * that allows software to determine whether or not PSOARRAY commands are supported.
  */
-#define PSO_DISTANCE_ARRAY 1
+#define PSO_DISTANCE_ARRAY 0
 
 /* For trajectories of unlimited length, PVT commands can be executed via sendReceiveCommand(),
  * but this has not been reliable enough, so if PVT_BY_CONTROLLER, we send the whole trajectory
@@ -1301,7 +1302,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		status = writeRead(ssId, pVar, stringOut, reply);
 #else
 		/* Just send fixed-distance pulses.  For now, don't even worry about StartPulses, EndPulses */
-		dp = (pVar->motorTrajectory[0][pVar->npoints-1] - pVar->motorTrajectory[0][0]) / pVar->npoints;
+		dp = (pVar->motorTrajectory[0][pVar->npoints-1] - pVar->motorTrajectory[0][0]) / pVar->npulses;
 		sprintf(stringOut, "PSODISTANCE @0 FIXED %f UNITS", dp);
 		status = writeRead(ssId, pVar, stringOut, reply);
 #endif
