@@ -562,6 +562,7 @@ ss EnsembleTrajectoryScan {
 #if USE_SCOPE
 			%%pVar->status = sendReceiveCommand(ssId, pVar, "SCOPETRIG STOP", pVar->stringIn, 1);
 			strcpy(stringLast, "");
+			if (debugLevel) printf("state readback: motorPosOffset[0]=%f\n", motorPosOffset[0]);
 			for (i=0; i<nScopeDataPoints; i++) {
 				if (execStatus == STATUS_ABORT) break;
 				sprintf(stringOut, "SCOPEDATA %d %d", sd_PositionFeedback, i);
@@ -1240,11 +1241,8 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 
 	status = writeIntAndCheck(ssId, pVar, pvtWaitMSVar, 50);
 
-#if PSO_DISTANCE_ARRAY
-
-	/* Program PSO array output */
-	for (j=0; j<1; j++) {
-		/* There may be a position offset in place.  If so, scope data will need to be corrected. */
+	/* There may be a position offset in place.  If so, scope data will need to be corrected. */
+	for (j=0; j<MAX_AXES; j++) {
 		sprintf(stringOut, "pfbkprog(@%d)", j);
 		status = writeRead(ssId, pVar, stringOut, reply);
 		posfbkprog = atof(&reply[1]);
@@ -1252,6 +1250,12 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		status = writeRead(ssId, pVar, stringOut, reply);
 		posfbkcal = atof(&reply[1]);
 		motorPosOffset[j] = posfbkprog - posfbkcal;
+	}
+
+#if PSO_DISTANCE_ARRAY
+
+	/* Program PSO array output */
+	for (j=0; j<1; j++) {
 
 		/* Calc accel portion of trajectory.  Note epicsMotorACCL is accel time. */
 		accelTime = pVar->epicsMotorACCL[j];
