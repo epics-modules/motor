@@ -133,6 +133,7 @@ double position[MAX_AXES][MAX_ELEMENTS];
 double velocity[MAX_AXES][MAX_ELEMENTS];
 double motorStart[MAX_AXES];
 double motorCurr[MAX_AXES];
+double motorPosOffset[MAX_AXES];
 
 /* variables for constructing trajectory commands */
 int movingMask;
@@ -225,6 +226,7 @@ ss EnsembleTrajectoryScan {
 			for (j=0; j<numAxes; j++) {
 				motorCurrentIndex[j]   =  pvIndex(motorCurrent[j]);
 				epicsMotorDoneIndex[j] =  pvIndex(epicsMotorDone[j]);
+				motorPosOffset[j] = 0.;
 			}
 			elapsedTimeIndex = pvIndex(elapsedTime);
 			abortState = ABORT_STATE_NONE;
@@ -484,7 +486,7 @@ ss EnsembleTrajectoryScan {
 			pvPut(execute);
 		} state monitor_inputs
 
-		when (execState==EXECUTE_STATE_EXECUTING) {
+		when ((execState==EXECUTE_STATE_EXECUTING) && delay(0.1)) {
 
 			/* Get the current motor positions, post them */
 			%%epicsTimeGetCurrent(&currTime);
@@ -592,7 +594,7 @@ ss EnsembleTrajectoryScan {
 						if (j==10) printf("abandoned read of point %d\n", i);
 					}
 
-					motorReadbacks[0][i] = atof(&stringIn[1]) * epicsMotorMres[0];
+					motorReadbacks[0][i] = atof(&stringIn[1]) * epicsMotorMres[0] + motorPosOffset[0];
 					motorError[0][i] = motorReadbacks[0][i] - motorTrajectory[0][i];
 				}
 			}
@@ -1227,6 +1229,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 	int intPosition;
 	double accelDist, accelTime, decelDist, decelTime, positionLast;
 	double home_position_set=0.;
+	double posfbkprog, posfbkcal;
 
 	pVar->loadingTrajectory = 1;
 	iGlobalIndex = GLOBALINDEXSTART;
@@ -1241,6 +1244,15 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 
 	/* Program PSO array output */
 	for (j=0; j<1; j++) {
+		/* There may be a position offset in place.  If so, scope data will need to be corrected. */
+		sprintf(stringOut, "pfbkprog(@%d)", j);
+		status = writeRead(ssId, pVar, stringOut, reply);
+		posfbkprog = atof(&reply[1]);
+		sprintf(stringOut, "pfbkcal(@%d)", j);
+		status = writeRead(ssId, pVar, stringOut, reply);
+		posfbkcal = atof(&reply[1]);
+		motorPosOffset[j] = posfbkprog - posfbkcal;
+
 		/* Calc accel portion of trajectory.  Note epicsMotorACCL is accel time. */
 		accelTime = pVar->epicsMotorACCL[j];
 		accelDist = (pVar->velocity[j][0] * pVar->epicsMotorACCL[j]) / 2;
@@ -1337,7 +1349,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 	pVar->scopeDataIntervalMS = NINT(1000 * (pVar->time*1.1)/pVar->nScopeDataPoints);
 	if (pVar->scopeDataIntervalMS < 1) pVar->scopeDataIntervalMS = 1;
 	sprintf(stringOut, "SCOPEBUFFER %d", pVar->nScopeDataPoints);
-	status = sendReceiveCommand(ssId, pVar, stringOut, reply, 0);
+	status = sendReceiveCommand(ssId, pVar, stringOut, reply, 1);
 	sprintf(stringOut, "SCOPETRIGPERIOD %d", pVar->scopeDataIntervalMS);
 	status = sendReceiveCommand(ssId, pVar, stringOut, reply, 0);
 #endif
@@ -1406,13 +1418,19 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 	if (status) goto bad;
 
 	status = writeIntAndCheck(ssId, pVar, iarg2Var, n/3);
+#if USE_SCOPE
 	status = sendReceiveCommand(ssId, pVar, "SCOPETRIG", reply, 0);
+#endif
+
+	epicsTimeGetCurrent(&startTime);
 	sprintf(stringOut, "DOTRAJECTORY");
 	status = sendReceiveCommand(ssId, pVar, stringOut, reply, 0);
 
 #else
 
+#if USE_SCOPE
 	status = sendReceiveCommand(ssId, pVar, "SCOPETRIG", reply, 0);
+#endif
 	/* Program motion */
 	status = writeIntAndCheck(ssId, pVar, pvtWaitMSVar, 30);
 
