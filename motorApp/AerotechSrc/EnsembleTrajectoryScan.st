@@ -1249,7 +1249,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		sprintf(stringOut, "pfbkcal(@%d)", j);
 		status = writeRead(ssId, pVar, stringOut, reply);
 		posfbkcal = atof(&reply[1]);
-		motorPosOffset[j] = posfbkprog - posfbkcal;
+		pVar->motorPosOffset[j] = posfbkprog - posfbkcal;
 	}
 
 #if PSO_DISTANCE_ARRAY
