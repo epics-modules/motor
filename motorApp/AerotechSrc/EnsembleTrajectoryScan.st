@@ -157,6 +157,13 @@ int scopeDataIntervalMS;
 int nAcqDataPoints;
 #endif
 
+/* Ensemble parameter numbers */
+#define VelocityCommandThreshold_PARM_NUM 35
+#define ReverseMotionDirection_PARM_NUM 1
+#define HomePositionSet_PARM_NUM 166
+
+%%int encoder_runs_backwards=0;
+
 ss EnsembleTrajectoryScan {
 
 	/* Initialize things when first starting */
@@ -594,8 +601,9 @@ ss EnsembleTrajectoryScan {
 						strcpy(stringLast, stringIn);
 						if (j==10) printf("abandoned read of point %d\n", i);
 					}
-
-					motorReadbacks[0][i] = atof(&stringIn[1]) * epicsMotorMres[0] + motorPosOffset[0];
+					k = atoi(&stringIn[1]);
+					if (encoder_runs_backwards) k *= -1;
+					motorReadbacks[0][i] = k * epicsMotorMres[0] + motorPosOffset[0];
 					motorError[0][i] = motorReadbacks[0][i] - motorTrajectory[0][i];
 				}
 			}
@@ -845,7 +853,6 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
  * Assume someone else will take care of accelerating onto, and decelerating off of trajectory.
  */
 #define VELOCITY_LINEAR 1
-#define VELOCITY_COMMAND_THRESHOLD_PARM_NUM 35
 static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTrajectory,
 	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, int npulses, double motorOffset,
 	double motorResolution, double *velocity)
@@ -854,7 +861,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 	int i, status;
 	char stringOut[MAX_MESSAGE_STRING], reply[MAX_MESSAGE_STRING];
 
-	sprintf(stringOut, "GETPARM(%d)", VELOCITY_COMMAND_THRESHOLD_PARM_NUM);
+	sprintf(stringOut, "GETPARM(%d)", VelocityCommandThreshold_PARM_NUM);
 	status = writeRead(ssId, pVar, stringOut, reply);
 
 	if (reply[0] == '%') {
@@ -1235,13 +1242,20 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 	pVar->loadingTrajectory = 1;
 	iGlobalIndex = GLOBALINDEXSTART;
 
-	status = writeRead(ssId, pVar, "getparm(@0,166)", reply);
+	sprintf(stringOut, "getparm(@0,%d)", ReverseMotionDirection_PARM_NUM);
+	status = writeRead(ssId, pVar, stringOut, reply);
+	encoder_runs_backwards = atoi(&reply[1]);
+	if (pVar->debugLevel > 2) printf("loadTrajectory: encoder_runs_backwards=%d\n", encoder_runs_backwards);
+
+	sprintf(stringOut, "getparm(@0,%d)", HomePositionSet_PARM_NUM);
+	status = writeRead(ssId, pVar, stringOut, reply);
 	home_position_set = atof(&reply[1]);
 	if (pVar->debugLevel > 2) printf("loadTrajectory: home_position_set=%f\n", home_position_set);
 
 	status = writeIntAndCheck(ssId, pVar, pvtWaitMSVar, 50);
 
 	/* There may be a position offset in place.  If so, scope data will need to be corrected. */
+	/* This code doesn't seem to get at the difference between scope positions and commanded positions. */
 	for (j=0; j<MAX_AXES; j++) {
 		sprintf(stringOut, "pfbkprog(@%d)", j);
 		status = writeRead(ssId, pVar, stringOut, reply);
