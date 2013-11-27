@@ -1332,7 +1332,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		status = writeRead(ssId, pVar, stringOut, reply);
 #else
 		/* Just send fixed-distance pulses.  For now, don't even worry about StartPulses, EndPulses */
-		dp = (pVar->motorTrajectory[0][pVar->npoints-1] - pVar->motorTrajectory[0][0]) / pVar->npulses;
+		dp = fabs(pVar->motorTrajectory[0][pVar->npoints-1] - pVar->motorTrajectory[0][0]) / pVar->npulses;
 		sprintf(stringOut, "PSODISTANCE @0 FIXED %f UNITS", dp);
 		status = writeRead(ssId, pVar, stringOut, reply);
 #endif
@@ -1382,10 +1382,12 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 
 #if PVT_BY_CONTROLLER
 
+	/* Get motor number into Ensemble's IGLOBAL(iarg1Var) for use by DOTRAJECTORY command. */
 	for (j=0; j<MAX_AXES; j++) {
 		if (pVar->moveAxis[j]) break;
 	}
 	status = writeIntAndCheck(ssId, pVar, iarg1Var, j);
+
 	/* Calc accel portion of trajectory.  Note epicsMotorACCL is accel time. */
 	accelTime = pVar->epicsMotorACCL[j];
 	accelDist = (pVar->velocity[j][0] * pVar->epicsMotorACCL[j]) / 2;
@@ -1435,7 +1437,9 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 	status += writeDoubleAndCheck(ssId, pVar, n++, t);
 	if (status) goto bad;
 
+	/* Set Ensemble's IGLOBAL(iarg2Var) to actual number of trajectory points, including accel/decel */
 	status = writeIntAndCheck(ssId, pVar, iarg2Var, n/3);
+
 #if USE_SCOPE
 	status = sendReceiveCommand(ssId, pVar, "SCOPETRIG", reply, 0);
 #endif
