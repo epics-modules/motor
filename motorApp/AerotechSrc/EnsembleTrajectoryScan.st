@@ -1653,7 +1653,7 @@ abort:
 
 double eval_fStart(double fStart, double *motorReadbacks, double scopeDataInterval, int nScopeDataPoints,
 	double *motorTrajectory, double *realTimeTrajectory, int npoints);
-int  parabola(double *x, double *y, int npts, double *xfit);
+int  parabola(double *x, double *y, int npts, double *xFit);
 
 static double trajEval(SS_ID ssId, struct UserVar *pVar, double *motorReadbacks, int scopeDataIntervalMS, int nScopeDataPoints,
 	double *motorTrajectory, double *realTimeTrajectory, int npoints, double *motorError) {
@@ -1677,11 +1677,10 @@ static double trajEval(SS_ID ssId, struct UserVar *pVar, double *motorReadbacks,
 	} else {
 		frac = 0.;
 	}
+	fStart = 0.;
+	frac = 0.;
 	if (rStart>0) {
 		fStart = (rStart-1) + frac;
-	} else {
-		fStart = 0.;
-		frac = 0.;
 	}
 	if (pVar->debugLevel>5) printf("trajEval: rStart=%d, frac=%f, fStart=%f\n",  rStart, frac, fStart);
 
@@ -1690,7 +1689,7 @@ static double trajEval(SS_ID ssId, struct UserVar *pVar, double *motorReadbacks,
 	nTry = 5;
 	for (i=0; i<nTry; i++, fTry += 1) {
 		x[i] = fTry;
-		y[i] = eval(fTry, motorReadbacks, scopeDataInterval, nScopeDataPoints, motorTrajectory, realTimeTrajectory, npoints);
+		y[i] = eval_fStart(fTry, motorReadbacks, scopeDataInterval, nScopeDataPoints, motorTrajectory, realTimeTrajectory, npoints);
 	}
 	i = parabola(x, y, nTry, &fTry);
 	if (i==0) fStart = fTry;
@@ -1742,7 +1741,7 @@ double eval_fStart(double fStart, double *motorReadbacks, double scopeDataInterv
 		fThis = fStart + (realTimeTrajectory[i] - realTimeTrajectory[0])/scopeDataInterval;
 		iThis = floor(fThis);
 		if (iThis+1 < nScopeDataPoints) {
-			if (pVar->debugLevel>5) printf("eval_fStart: iThis=%d, motorReadbacks[iThis]=%f\n", iThis, motorReadbacks[iThis]);
+			/* printf("eval_fStart: iThis=%d, motorReadbacks[iThis]=%f\n", iThis, motorReadbacks[iThis]);*/
 			p = fThis-iThis;
 			if ((iThis > 0) && (iThis+2 < nScopeDataPoints)) {
 				/* Lagrange 4-point interpolation */
@@ -1757,7 +1756,7 @@ double eval_fStart(double fStart, double *motorReadbacks, double scopeDataInterv
 				/* linear interpolation */
 				interp = motorReadbacks[iThis] + (motorReadbacks[iThis+1] - motorReadbacks[iThis])*p;
 			}
-			if (pVar->debugLevel>5) printf("eval_fStart: fThis=%f, interp=%f, motorTrajectory[%d]=%f, \n", fThis, interp, i, motorTrajectory[i]);
+			/* printf("eval_fStart: fThis=%f, interp=%f, motorTrajectory[%d]=%f, \n", fThis, interp, i, motorTrajectory[i]);*/
 			chisq += (interp - motorTrajectory[i]) * (interp - motorTrajectory[i]);
 			numChi++;
 		}
@@ -1766,7 +1765,8 @@ double eval_fStart(double fStart, double *motorReadbacks, double scopeDataInterv
 }
 
 #define SMALL 1e-8
-int  parabola(double *x, double *y, int npts, double *xfit) {
+#define LARGE 1e10
+int  parabola(double *x, double *y, int npts, double *xFit) {
 
 	double xf, yf;
 	double xx, yy, xi, xi2, xi3, xi4, yi, yixi, yixi2;
