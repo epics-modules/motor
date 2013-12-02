@@ -1651,6 +1651,10 @@ abort:
 	return(-1);
 }
 
+double eval_fStart(double fStart, double *motorReadbacks, double scopeDataInterval, int nScopeDataPoints,
+	double *motorTrajectory, double *realTimeTrajectory, int npoints);
+int  parabola(double *x, double *y, int npts, double *xfit);
+
 static double trajEval(SS_ID ssId, struct UserVar *pVar, double *motorReadbacks, int scopeDataIntervalMS, int nScopeDataPoints,
 	double *motorTrajectory, double *realTimeTrajectory, int npoints, double *motorError) {
 
@@ -1658,6 +1662,11 @@ static double trajEval(SS_ID ssId, struct UserVar *pVar, double *motorReadbacks,
 	double fStart, fThis, frac, interp, scopeDataInterval = scopeDataIntervalMS*.001;
 	double p;
 
+	/* for optimizing fStart */
+	double fTry, x[10], y[10];
+	int nTry;
+
+	/* fStart is the fractional index for which motorReadbacks[fStart] == motorTrajectory[0].  Find it.
 	lower = motorReadbacks[0] < motorTrajectory[0];
 	for (rStart=0; rStart < nScopeDataPoints/2; rStart++) {
 		if (pVar->debugLevel>5) printf("trajEval: motorReadbacks[rStart]=%f, motorTrajectory[0]=%f\n", motorReadbacks[rStart], motorTrajectory[0]);
@@ -1668,27 +1677,44 @@ static double trajEval(SS_ID ssId, struct UserVar *pVar, double *motorReadbacks,
 	} else {
 		frac = 0.;
 	}
-	fStart = (rStart-1) + frac;
+	if (rStart>0) {
+		fStart = (rStart-1) + frac;
+	} else {
+		fStart = 0.;
+		frac = 0.;
+	}
 	if (pVar->debugLevel>5) printf("trajEval: rStart=%d, frac=%f, fStart=%f\n",  rStart, frac, fStart);
+
+	/* Try to improve fStart */
+	fTry = MAX(0,fStart-2);
+	nTry = 5;
+	for (i=0; i<nTry; i++, fTry += 1) {
+		x[i] = fTry;
+		y[i] = eval(fTry, motorReadbacks, scopeDataInterval, nScopeDataPoints, motorTrajectory, realTimeTrajectory, npoints);
+	}
+	i = parabola(x, y, nTry, &fTry);
+	if (i==0) fStart = fTry;
+	if (pVar->debugLevel>5) printf("trajEval: fStart=%f\n", fStart);
+
+	/* Calculate SUM(motorReadbacks[t+fStart] - motorTrajectory[t]) */
 	for (i=0; i<npoints; i++) {
 		fThis = fStart + (realTimeTrajectory[i] - realTimeTrajectory[0])/scopeDataInterval;
 		iThis = floor(fThis);
 		if (iThis+1 < nScopeDataPoints) {
 			if (pVar->debugLevel>5) printf("trajEval: iThis=%d, motorReadbacks[iThis]=%f\n", iThis, motorReadbacks[iThis]);
+			p = fThis-iThis;
 			if ((iThis > 0) && (iThis+2 < nScopeDataPoints)) {
 				/* Lagrange 4-point interpolation */
-				p = fThis-iThis;
 				interp = (-p*(p-1)*(p-2)/6)*motorReadbacks[iThis-1] +
 						((p*p-1)*(p-2)/2)*motorReadbacks[iThis] +
 						(-p*(p+1)*(p-2)/2)*motorReadbacks[iThis+1] +
 						(p*(p*p-1)/6)*motorReadbacks[iThis+2];
 			} else if ((iThis > 0) && (iThis+1 < nScopeDataPoints)) {
 				/* Lagrange 3-point interpolation */
-				p = fThis-iThis;
 				interp = (p*(p-1)/2)*motorReadbacks[iThis-1] + (1-p*p)*motorReadbacks[iThis] + (p*(p+1)/2)*motorReadbacks[iThis+1];
 			} else {
 				/* linear interpolation */
-				interp = motorReadbacks[iThis] + (motorReadbacks[iThis+1] - motorReadbacks[iThis])*(fThis-iThis);
+				interp = motorReadbacks[iThis] + (motorReadbacks[iThis+1] - motorReadbacks[iThis])*p;
 			}
 			if (pVar->debugLevel>5) printf("trajEval: fThis=%f, interp=%f, motorTrajectory[%d]=%f, \n", fThis, interp, i, motorTrajectory[i]);
 			motorReadbacks[i] = interp;
@@ -1703,6 +1729,89 @@ static double trajEval(SS_ID ssId, struct UserVar *pVar, double *motorReadbacks,
 		motorError[i] = 0;
 	}
 	return(0.);
+}
+
+double eval_fStart(double fStart, double *motorReadbacks, double scopeDataInterval, int nScopeDataPoints,
+	double *motorTrajectory, double *realTimeTrajectory, int npoints) {
+
+	double fThis, p, interp, chisq = 0;
+	int i, iThis, numChi = 0;
+
+	/* Calculate SUM(motorReadbacks[t+fStart] - motorTrajectory[t]) */
+	for (i=0; i<npoints; i++) {
+		fThis = fStart + (realTimeTrajectory[i] - realTimeTrajectory[0])/scopeDataInterval;
+		iThis = floor(fThis);
+		if (iThis+1 < nScopeDataPoints) {
+			if (pVar->debugLevel>5) printf("eval_fStart: iThis=%d, motorReadbacks[iThis]=%f\n", iThis, motorReadbacks[iThis]);
+			p = fThis-iThis;
+			if ((iThis > 0) && (iThis+2 < nScopeDataPoints)) {
+				/* Lagrange 4-point interpolation */
+				interp = (-p*(p-1)*(p-2)/6)*motorReadbacks[iThis-1] +
+						((p*p-1)*(p-2)/2)*motorReadbacks[iThis] +
+						(-p*(p+1)*(p-2)/2)*motorReadbacks[iThis+1] +
+						(p*(p*p-1)/6)*motorReadbacks[iThis+2];
+			} else if ((iThis > 0) && (iThis+1 < nScopeDataPoints)) {
+				/* Lagrange 3-point interpolation */
+				interp = (p*(p-1)/2)*motorReadbacks[iThis-1] + (1-p*p)*motorReadbacks[iThis] + (p*(p+1)/2)*motorReadbacks[iThis+1];
+			} else {
+				/* linear interpolation */
+				interp = motorReadbacks[iThis] + (motorReadbacks[iThis+1] - motorReadbacks[iThis])*p;
+			}
+			if (pVar->debugLevel>5) printf("eval_fStart: fThis=%f, interp=%f, motorTrajectory[%d]=%f, \n", fThis, interp, i, motorTrajectory[i]);
+			chisq += (interp - motorTrajectory[i]) * (interp - motorTrajectory[i]);
+			numChi++;
+		}
+	}
+	return(chisq/numChi);
+}
+
+#define SMALL 1e-8
+int  parabola(double *x, double *y, int npts, double *xfit) {
+
+	double xf, yf;
+	double xx, yy, xi, xi2, xi3, xi4, yi, yixi, yixi2;
+	int i;
+	double numer, denom;
+	double xmin=LARGE, xmax=-LARGE;
+
+	/* make sums */
+	xi = yi = yixi = xi2 = yixi2 = xi3 = xi4 = 0.0;
+	for (i=0; i<npts; i++) {
+		xmin = MIN(xmin, x[i]);
+		xmax = MAX(xmax, x[i]);
+		xi	  += (xx = x[i]);
+		yi	  += (yy = y[i]);
+		yixi  += yy * xx;
+		xi2   += (xx *=x[i]);
+		yixi2 += yy * xx;
+		xi3   += (xx *= x[i]);
+		xi4   += xx * x[i];
+	}
+
+	/* make averages */
+	xi    /= npts;
+	xi2   /= npts;
+	xi3   /= npts;
+	xi4   /= npts;
+	yi    /= npts;
+	yixi  /= npts;
+	yixi2 /= npts;
+
+	/* x coordinate of minimum of parabola */
+	numer =    yi*(xi2*xi3 - xi*xi4) + yixi*(xi4 - xi2*xi2) + yixi2*(xi*xi2 - xi3);
+	denom = 2*(yi*(xi2*xi2 - xi*xi3) + yixi*(xi3 -  xi*xi2) + yixi2*(xi*xi  - xi2));
+	/* printf("	calculating xf: npts=%d; numer=%.3g; denom=%.3g\n", npts, numer, denom); */
+	if (fabs(denom) < SMALL) return(-1);
+	xf = numer / denom;
+	if ((xf < xmin) || (xf > xmax)) return(-1);	/* Don't extrapolate */
+
+	numer = (xf*xf - 2*xf*xi + xi2) * (yixi2 - yi*xi2);
+	denom = 2*xf*(xi*xi2 - xi3) - xi2*xi2 + xi4;
+	yf = yi - numer/denom;
+	if (fabs(denom) < SMALL) return(-1);
+
+	*xFit = xf;
+	return(0);
 }
 
 }%
