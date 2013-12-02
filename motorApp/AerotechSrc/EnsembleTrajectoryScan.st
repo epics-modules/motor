@@ -1666,7 +1666,7 @@ static double trajEval(SS_ID ssId, struct UserVar *pVar, double *motorReadbacks,
 	double fTry, x[10], y[10];
 	int nTry;
 
-	/* fStart is the fractional index for which motorReadbacks[fStart] == motorTrajectory[0].  Find it.
+	/* fStart is the fractional index for which motorReadbacks[fStart] == motorTrajectory[0].  Find it. */
 	lower = motorReadbacks[0] < motorTrajectory[0];
 	for (rStart=0; rStart < nScopeDataPoints/2; rStart++) {
 		if (pVar->debugLevel>5) printf("trajEval: motorReadbacks[rStart]=%f, motorTrajectory[0]=%f\n", motorReadbacks[rStart], motorTrajectory[0]);
