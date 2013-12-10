@@ -448,15 +448,16 @@ XPSAxis* XPSController::getAxis(int axisNo)
 
 asynStatus XPSController::waitMotors()
 {
-  bool moving, anyMoving=true;
-  int j;
+  int groupStatus;
+  int status;
+  char groupName[MAX_GROUPNAME_LEN];
+  
+  getStringParam(XPSProfileGroupName_, (int)sizeof(groupName), groupName);
 
-  while (anyMoving) {
-    anyMoving = false;
-    for (j=0; j<numAxes_; j++) {
-      pAxes_[j]->poll(&moving);
-      if (moving) anyMoving = true;
-    }
+  while (1) {
+    status = GroupStatusGet(pollSocket_, groupName, &groupStatus);
+    if (status) return asynError;
+    if (groupStatus >= 10 && groupStatus <= 18) break;
     epicsThreadSleep(0.1);
   }
   return asynSuccess;
@@ -585,6 +586,12 @@ asynStatus XPSController::buildProfile()
 
   /* Create the profile file */
   trajFile =  fopen(fileName, "w");
+  if (trajFile == 0) {
+    buildOK = false;
+    status = -1;
+    sprintf(message, "Error creating trajectory file %s, error=%s\n", fileName, strerror(errno));
+    goto done;
+  }
 
   /* Create the initial acceleration element */
   fprintf(trajFile,"%f", preTimeMax);
@@ -654,7 +661,7 @@ asynStatus XPSController::buildProfile()
   status = ftpDisconnect(ftpSocket);
   if (status) {
     buildOK = false;
-     sprintf(message, "Error calling  ftpDisconnect, status=%d\n", status);
+    sprintf(message, "Error calling  ftpDisconnect, status=%d\n", status);
     goto done;
   }
 
