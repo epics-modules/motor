@@ -126,7 +126,7 @@ const static CorrectorTypes_t CorrectorTypes = {
   "NoCorrector"
 };
 
-extern "C" void shutdownCallback(void *pPvt)
+static void shutdownCallback(void *pPvt)
 {
   XPSController *pC = static_cast<XPSController *>(pPvt);
 
