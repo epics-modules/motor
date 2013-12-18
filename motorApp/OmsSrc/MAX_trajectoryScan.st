@@ -176,7 +176,6 @@ double dbuf[MAX_PULSES];
 /* variables for constructing trajectory commands */
 int movingMask;
 int waitingForTrigger;
-int softTrigger;
 
 /* temporary variables to hold mav speed and acceleration for a motor */
 double vmax;
@@ -472,16 +471,7 @@ ss maxTrajectoryScan {
 			pvPut(execState);
 			lastPollTime = -POLL_INTERVAL;
 			lastRealTimePoint = 0;
-
-			/* waitingForTrigger = ((inBitNum >= 0) && (inBitNum <= 15)); */
-/* temporary kludge */
-/* There are only 16 bits, but allow an imaginary 17th to implement a soft trigger when I/O is not connected
- * to anything.  To use, set inBitNum==16, "Execute" the trajectory, and trigger it by setting intBitNum to
- * anything in [0..15].  MAXv inputs default to high, so all bits will trigger.
- */
-waitingForTrigger = ((inBitNum >= 0) && (inBitNum <= 16));
-softTrigger = inBitNum == 16;
-
+			waitingForTrigger = ((inBitNum >= 0) && (inBitNum <= 15));
 			for (j=0, movingMask = 0; j<numAxes; j++) {
 				if (moveAxis[j]) movingMask |= (1<<j);
 			}
@@ -826,7 +816,7 @@ static int getMotorMoving(SS_ID ssId, struct UserVar *pVar, int movingMask)
 	return(0);
 }
 
-/* Read input bits to see vif it's time to start the trajectory. */
+
 static int getStarted(SS_ID ssId, struct UserVar *pVar) {
 	int i, bits, mask;
 	char c;
@@ -850,10 +840,6 @@ static int getStarted(SS_ID ssId, struct UserVar *pVar) {
 	mask = 1 << (pVar->inBitNum);
 	if (pVar->debugLevel >= 5)
 		printf("\ngetStarted: reply='%s', bits=0x%x, mask=0x%x",  pVar->stringIn, bits, mask);
-
-/* If we got called because intBitNum was set to 16, and got triggered by user's change to 0..15, reset intBitNum. */
-if (pVar->softTrigger) pVar->inBitNum = 16;
-
 	return (bits & mask);
 }
 
@@ -1263,3 +1249,5 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 }
 
 }%
+
+
