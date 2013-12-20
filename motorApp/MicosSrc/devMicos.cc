@@ -157,7 +157,8 @@ static RTN_STATUS Micos_build_trans(motor_cmnd command, double *parms, struct mo
 
     rtnval = OK;
     buff[0] = '\0';
-    dval = parms[0];
+    /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
+    dval = (parms == NULL) ? 0.0 : *parms;
     ival = NINT(parms[0]);
 
     rtnval = (RTN_STATUS) motor_start_trans_com(mr, Micos_cards);
