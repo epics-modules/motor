@@ -77,6 +77,9 @@ omsBaseController::omsBaseController(const char *portName, int maxAxes, int prio
     ++omsTotalControllerNumber;
 
     sanityCounter = 0;
+    fwMajor = 0;
+    fwMinor = 0;
+    fwRevision = 0;
     useWatchdog = false;
     enabled = true;
     numAxes = maxAxes;
@@ -134,8 +137,8 @@ void omsBaseController::report(FILE *fp, int level)
     double velocity, position, encoderPosition;
     int haveEncoder=0;
 
-    fprintf(fp, "Oms %s motor driver %s, numAxes=%d\n",
-        controllerType, portName, numAxes);
+    fprintf(fp, "Oms %s motor driver %s, numAxes=%d; Firmware: %d.%d.%d\n",
+        controllerType, portName, numAxes, fwMajor, fwMinor, fwRevision);
 
     for (axis=0; axis < numAxes; axis++) {
         omsBaseAxis *pAxis = pAxes[axis];
@@ -473,9 +476,10 @@ asynStatus omsBaseController::Init(const char* initString, int multiple){
             sendOnlyLock(initString);
         }
     }
+    /* Some init commands (like "LT") need some time to process */
+    epicsThreadSleep(0.5);
 
     /* get Positions of all axes */
-    inputBuffer[0] = '\0';
     sendReceiveLock((char*) "AA RP;", inputBuffer, sizeof(inputBuffer));
 
     if (numAxes > OMS_MAX_AXES) {
@@ -508,7 +512,7 @@ asynStatus omsBaseController::Init(const char* initString, int multiple){
         pAxis->setIntegerParam(motorStatusCommsError_, 0);
 
         /* Determine if encoder is present and if mode is stepper or servo. */
-        if (firmwareMin(1,1,30))
+        if (firmwareMin(1,30,0))
             strcpy(outputBuffer,"A? PS?");
         else
             strcpy(outputBuffer,"A? ?PS");
@@ -532,7 +536,7 @@ asynStatus omsBaseController::Init(const char* initString, int multiple){
 
         /* Determine limit true state high or low */
         /* CAUTION you need firmware version 1.30 or higher to do this */
-        if (firmwareMin(1,1,30))
+        if (firmwareMin(1,30,0))
             strcpy(outputBuffer,"A? LT?");
         else
             strcpy(outputBuffer,"A? ?LS");
@@ -618,7 +622,7 @@ void omsBaseController::omsPoller()
 
         retry_count = 0;
         while ((getAxesPositions(axisPosArr) != asynSuccess) && (retry_count < 5)){
-            epicsThreadSleepQuantum();
+            epicsThreadSleep(0.1);
             ++retry_count;
         }
         if (retry_count > 4){
@@ -959,6 +963,7 @@ asynStatus omsBaseController::sendOnlyLock(const char *outputBuff)
 asynStatus omsBaseController::sendReceiveLock(const char *outputBuff, char *inputBuff, unsigned int inputSize)
 {
     asynStatus status;
+    if (inputSize > 0) inputBuff[0] = '\0';
     baseMutex->lock();
     status = sendReceive(outputBuff, inputBuff, inputSize);
     baseMutex->unlock();
