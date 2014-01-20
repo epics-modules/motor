@@ -37,7 +37,7 @@ static const char *driverName = "omsBaseDriver";
 
 #ifdef __GNUG__
     #ifdef      DEBUG
-        #define Debug(l, f, args...) {if (l <= motorOMSBASEdebug) \
+        #define Debug(l, f, args...) {if (l & motorOMSBASEdebug) \
                                   errlogPrintf(f, ## args);}
     #else
         #define Debug(l, f, args...)
@@ -231,7 +231,7 @@ asynStatus omsBaseController::readInt32(asynUser *pasynUser, epicsInt32 *value)
     int function = pasynUser->reason;
     asynStatus status = asynSuccess;
     omsBaseAxis *pAxis = getAxis(pasynUser);
-    static const char *functionName = "readInt32";
+//    static const char *functionName = "readInt32";
     static char outputBuffer[8];
 
     if (!pAxis) return asynError;
@@ -271,7 +271,7 @@ asynStatus omsBaseController::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (function == motorDeferMoves_)
     {
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
-            "%s:%s:%s Deferred Move: not yet implemented %s\n",
+            "%s:%s:%s Deferred Move: not yet implemented\n",
             driverName, functionName, portName);
     }
     else if (function == motorClosedLoop_)
@@ -452,7 +452,7 @@ asynStatus omsBaseController::Init(const char* initString, int multiple){
 
     char *p, *tokSave;
     int totalAxes;
-    char axisChrArr[OMS_MAX_AXES] = {'X','Y','Z','T','U','V','R','S'};
+    char axisChrArr[OMS_MAX_AXES] = {'X','Y','Z','T','U','V','R','S','W','K'};
     char outputBuffer[10];
     epicsInt32  axisPosArr[OMS_MAX_AXES];
 
@@ -615,7 +615,7 @@ void omsBaseController::omsPoller()
         if (loopBreakCount > 10){
             errlogPrintf("%s:%s:%s: Error: %d consecutive unsuccessful attempts to read from motor card\n"
                     , driverName, functionName, this->portName, loopBreakCount);
-            loopBreakCount = 0;
+            break;
         }
 
         epicsTimeGetCurrent(&loopStart);
@@ -639,9 +639,9 @@ void omsBaseController::omsPoller()
         }
 
         /* read all axis status values and reset done-field
-         * MDNN,MDNN,PNLN,PNNN,PNLN,PNNN,PNNN,PNNN*/
+         * MDNN,MDNN,PNLN,PNNN,PNLN,PNNN,PNNN,PNNN */
         if (getAxesStatus(statusBuffer, sizeof(statusBuffer), &moveDone) != asynSuccess){
-             Debug(1, "%s:%s:%s: error reading axes status\n", driverName, functionName, this->portName);
+            Debug(1, "%s:%s:%s: error reading axes status\n", driverName, functionName, this->portName);
             ++loopBreakCount;
             continue;
         }
@@ -672,24 +672,18 @@ void omsBaseController::omsPoller()
             Debug(1,"%s:%s:%s: Error reading encoder status buffer >%s<\n", driverName, functionName, this->portName, encStatusBuffer);
         }
 
-        /* read all limits */
-        if (moveDone || (anyMoving == 0))
-            haveLimits = true;
-        else
-              haveLimits = false;
+        haveLimits = true;
         limitFlags =0;
-        if (haveLimits){
-            if ((sendReceiveLock((char*) "AM;QL;", pollInputBuffer, sizeof(pollInputBuffer)) == asynSuccess)){
-                if (1 != sscanf(pollInputBuffer, "%x", &limitFlags)){
-                    Debug(1,"%s:%s:%s: error converting limits: %s\n", driverName, functionName, this->portName, pollInputBuffer);
-                    haveLimits = false;
-                }
-            }
-            else {
-                haveLimits = false;
-                Debug(1,"%s:%s:%s: error reading limits %s\n", driverName, functionName, this->portName, pollInputBuffer);
-            }
-        }
+		if ((sendReceiveLock((char*) "AM;QL;", pollInputBuffer, sizeof(pollInputBuffer)) == asynSuccess)){
+			if (1 != sscanf(pollInputBuffer, "%x", &limitFlags)){
+				Debug(1,"%s:%s:%s: error converting limits: %s\n", driverName, functionName, this->portName, pollInputBuffer);
+				haveLimits = false;
+			}
+		}
+		else {
+			haveLimits = false;
+			Debug(1,"%s:%s:%s: error reading limits %s\n", driverName, functionName, this->portName, pollInputBuffer);
+		}
         if (enabled) watchdogOK();
 
         anyMoving = 0;
@@ -719,33 +713,42 @@ void omsBaseController::omsPoller()
 
             /* check the done flag or current velocity */
             if (statusBuffer[i*STATUSSTRINGLEN + 1] == 'D'){
-                Debug(3, "%s:%s:%s: found Done Flag axis %d\n", driverName, functionName, portName, i);
+                Debug(8, "%s:%s:%s: found Done Flag axis %d\n", driverName, functionName, portName, i);
                 pAxis->setIntegerParam(motorStatusProblem_, 0);
                 pAxis->moveDelay=0;
                 pAxis->setIntegerParam(motorStatusDone_, 1);
                 pAxis->setIntegerParam(motorStatusMoving_, 0);
                 if (pAxis->homing) pAxis->homing = 0;
-                Debug(1, "%s:%s:%s: done axis %d \n", driverName, functionName,
-                        this->portName, i );
             }
             else if (haveVeloArray && (veloArr[i] == 0)){
-                /* keep a small delay here, to make sure that a motorAxisDone cycle is performed
-                   even if the motor is on hard limits */
                 getIntegerParam(pAxis->axisNo_, motorStatusMoving_, &axisMoving);
                 if (axisMoving){
-                    pAxis->moveDelay++ ;
-                    if (pAxis->moveDelay >= 5) {
-                        Debug(4, "%s:%s:%s: setting Problem Flag axis %d\n", driverName, functionName, portName, i);
+                    if (statusBuffer[i*STATUSSTRINGLEN + 2] == 'L'){
+                        pAxis->setIntegerParam(motorStatusProblem_, 0);
+                        pAxis->moveDelay=0;
                         pAxis->setIntegerParam(motorStatusDone_, 1);
                         pAxis->setIntegerParam(motorStatusMoving_, 0);
-                        pAxis->setIntegerParam(motorStatusProblem_, 1);
-                        pAxis->moveDelay = 0;
                         if (pAxis->homing) pAxis->homing = 0;
-                        Debug(1, "%s:%s:%s: stop axis %d, moveDelay count %d\n", driverName, functionName,
-                                this->portName, i, pAxis->moveDelay );
+                        if (statusBuffer[i*STATUSSTRINGLEN + 2] == 'P')
+                        	pAxis->setIntegerParam(motorStatusHighLimit_, 1);
+                        else
+                        	pAxis->setIntegerParam(motorStatusLowLimit_, 1);
                     }
-                    Debug(2, "%s:%s:%s: moveDelay axis %d, count %d\n", driverName, functionName,
-                            this->portName, i, pAxis->moveDelay );
+                    else {
+						pAxis->moveDelay++ ;
+						if (pAxis->moveDelay >= 5) {
+							Debug(4, "%s:%s:%s: setting Problem Flag axis %d\n", driverName, functionName, portName, i);
+							pAxis->setIntegerParam(motorStatusDone_, 1);
+							pAxis->setIntegerParam(motorStatusMoving_, 0);
+							pAxis->setIntegerParam(motorStatusProblem_, 1);
+							pAxis->moveDelay = 0;
+							if (pAxis->homing) pAxis->homing = 0;
+							Debug(1, "%s:%s:%s: stop axis %d, moveDelay count %d\n", driverName, functionName,
+									this->portName, i, pAxis->moveDelay );
+						}
+						Debug(2, "%s:%s:%s: moveDelay axis %d, count %d\n", driverName, functionName,
+								this->portName, i, pAxis->moveDelay );
+                    }
                }
             }
             else {
@@ -760,11 +763,13 @@ void omsBaseController::omsPoller()
 
             /* check limits */
             if (haveLimits){
-                if (((limitFlags & (1 << i)) > 0) ^ (pAxis->getLimitInvert()))
-                    pAxis->setIntegerParam(motorStatusLowLimit_, 1);
+            	int limitOffset = 0;
+            	if (i > 7) limitOffset = 8;			// same as limitOffset = 16 ; i -= 8
+                if (((limitFlags & (1 << (i+limitOffset))) > 0) ^ (pAxis->getLimitInvert()))
+                	pAxis->setIntegerParam(motorStatusLowLimit_, 1);
                 else
                     pAxis->setIntegerParam(motorStatusLowLimit_, 0);
-                if (((limitFlags & (1 << (i+8))) > 0) ^ (pAxis->getLimitInvert()))
+                if (((limitFlags & (1 << (i+limitOffset+8))) > 0) ^ (pAxis->getLimitInvert()))
                     pAxis->setIntegerParam(motorStatusHighLimit_, 1);
                 else
                     pAxis->setIntegerParam(motorStatusHighLimit_, 0);
@@ -814,7 +819,7 @@ void omsBaseController::omsPoller()
            waiting may be interrupted by pollEvent or interrupt messages*/
         epicsTimeGetCurrent(&now);
         timeToWait = timeout - epicsTimeDiffInSeconds(&now, &loopStart);
-        Debug(5, "%s:%s:%s: poller loop: waiting %f s\n", driverName, functionName, this->portName, timeToWait);
+        Debug(16, "%s:%s:%s: poller loop: waiting %f s\n", driverName, functionName, this->portName, timeToWait);
         if (waitInterruptible(timeToWait) == epicsEventWaitOK) {
             fastPolls = forcedFastPolls;
         }

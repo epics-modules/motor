@@ -23,7 +23,7 @@ HeadURL:        $URL$
 #include <epicsExit.h>
 #include "omsMAXv.h"
 
-static const char *driverName = "omsMAXvDriver";
+static const char *driverName = "omsMAXvAsyn";
 
 #define MIN(a,b) ((a)<(b)? (a): (b))
 
@@ -66,10 +66,11 @@ void omsMAXv::InterruptHandler( void * param )
         epicsInterruptContextMessage(errmsg);
     }
 
-    // not clearing this may corrupt the next read/write operation
+    /* unset this bit to not clear the text_response bit */
     if (status1_flag.Bits.text_response != 0)  status1_flag.Bits.text_response = 0;
 
-    pmotor->status1_flag.All = status1_flag.All; /* Release IRQ's. */
+    /* Release IRQ's. Clear bits by writing a 1 */
+    pmotor->status1_flag.All = status1_flag.All;
 
     /* do a dummy read to ensure that all previous writes, which may
      * have been queued in the VME bridge chip get processed
@@ -359,7 +360,9 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
  */
 asynStatus omsMAXv::sendReceive(const char *outputBuff, char *inputBuff, unsigned int inputSize)
 {
+#ifdef DEBUG
     static const char* functionName = "sendReceive";
+#endif
 
     STATUS1 flag1;
     epicsUInt16 getIndex, putIndex;
@@ -378,7 +381,6 @@ asynStatus omsMAXv::sendReceive(const char *outputBuff, char *inputBuff, unsigne
 
     *inputBuff = '\0';
 
-    Debug(64, "omsMAXv::sendReceive: receiving\n");
     itera = 0;
     double time = 0.0;
     double timeout = epicsThreadSleepQuantum() + 0.001;
@@ -395,7 +397,8 @@ asynStatus omsMAXv::sendReceive(const char *outputBuff, char *inputBuff, unsigne
 
     if (pmotor->status1_flag.Bits.text_response == 0)
     {
-        Debug(1, "Timeout occurred in recv_mess, %s\n", outputBuff);
+        Debug(1, "%s:%s:%s: Timeout occurred , %s\n",
+        		driverName, functionName, portName, outputBuff);
         return asynTimeout;
     }
 

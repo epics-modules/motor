@@ -167,7 +167,7 @@ asynStatus omsBaseAxis::stop(double acceleration )
 
     asynPrint(pasynUser_, ASYN_TRACE_FLOW,
         "%s:%s: port %s, set axis %d to stop with accel=%f\n",
-        driverName, functionName, pC_->portName, axisNo_, axisNo_, acceleration );
+        driverName, functionName, pC_->portName, axisNo_, acceleration );
 
     return status;
 }

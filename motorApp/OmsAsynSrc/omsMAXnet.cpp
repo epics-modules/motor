@@ -20,7 +20,7 @@ HeadURL:        $URL$
 
 #ifdef __GNUG__
     #ifdef      DEBUG
-        #define Debug(l, f, args...) {if (l <= motorMAXnetdebug) \
+        #define Debug(l, f, args...) {if (l & motorMAXnetdebug) \
                                   errlogPrintf(f, ## args);}
     #else
         #define Debug(l, f, args...)
@@ -28,11 +28,12 @@ HeadURL:        $URL$
 #else
     #define Debug
 #endif
+
 static const char *driverName = "omsMAXnetDriver";
 volatile int motorMAXnetdebug = 0;
 extern "C" {epicsExportAddress(int, motorMAXnetdebug);}
 
-#define MAXnet_MAX_BUFFERLENGTH 80
+#define MAXnet_MAX_BUFFERLENGTH 250
 
 static void connectCallback(asynUser *pasynUser, asynException exception)
 {
@@ -43,12 +44,12 @@ static void connectCallback(asynUser *pasynUser, asynException exception)
     if (exception == asynExceptionConnect) {
         status = pasynManager->isConnected(pasynUser, &connected);
         if (connected){
-            if (motorMAXnetdebug > 4) asynPrint(pasynUser, ASYN_TRACE_FLOW,
+            if (motorMAXnetdebug & 8) asynPrint(pasynUser, ASYN_TRACE_FLOW,
                 "MAXnet connectCallback:  TCP-Port connected\n");
             pController->portConnected = 1;
         }
         else {
-            if (motorMAXnetdebug > 3) asynPrint(pasynUser, ASYN_TRACE_FLOW,
+            if (motorMAXnetdebug & 4) asynPrint(pasynUser, ASYN_TRACE_FLOW,
                 "MAXnet connectCallback:  TCP-Port disconnected\n");
             pController->portConnected = 0;
         }
@@ -93,14 +94,12 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
     pasynUserSerial = pasynManager->createAsynUser(0,0);
     pasynUserSerial->userPvt = this;
 
-    Debug(9, "omsMAXnet connect to %s \n", serialPortName);
     status = pasynManager->connectDevice(pasynUserSerial,serialPortName,0);
     if(status != asynSuccess){
         printf("MAXnetConfig: can't connect to port %s: %s\n",serialPortName,pasynUserSerial->errorMessage);
         return;
     }
 
-    Debug(9, "omsMAXnet add Callback \n");
     status =  pasynManager->exceptionCallbackAdd(pasynUserSerial, connectCallback);
     if(status != asynSuccess){
         printf("MAXnetConfig: can't set exceptionCallback for %s: %s\n",serialPortName,pasynUserSerial->errorMessage);
@@ -109,7 +108,6 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
     /* set the connect flag */
     pasynManager->isConnected(pasynUserSerial, &portConnected);
 
-    Debug(9, "omsMAXnet findInterface \n");
     pasynInterface = pasynManager->findInterface(pasynUserSerial,asynOctetType,1);
     if( pasynInterface == NULL) {
         printf("MAXnetConfig: %s driver not supported\n", asynOctetType);
@@ -118,7 +116,6 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
     pasynOctetSerial = (asynOctet*)pasynInterface->pinterface;
     octetPvtSerial = pasynInterface->drvPvt;
 
-    Debug(9, "omsMAXnet SyncIO->connect \n");
     status = pasynOctetSyncIO->connect(serialPortName, 0, &pasynUserSyncIOSerial, NULL);
     if(status != asynSuccess){
         printf("MAXnetConfig: can't connect pasynOctetSyncIO %s: %s\n",serialPortName,pasynUserSyncIOSerial->errorMessage);
@@ -126,13 +123,11 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
     }
 
     /* flush any junk at input port - should be no data available */
-    Debug(9, "omsMAXnet flush \n");
     pasynOctetSyncIO->flush(pasynUserSyncIOSerial);
 
     timeout = 2.0;
     pasynUserSerial->timeout = 0.0;
 
-    Debug(9, "omsMAXnet setInputEos \n");
     // CAUTION firmware versions before 1.33.4 use '\n' for serial port and '\n\r' for IP port as InputEOS
     // Set inputEOS in st.cmd for old firmware versions
     status = pasynOctetSyncIO->setInputEos(pasynUserSyncIOSerial, "\n\r", 2);
@@ -141,14 +136,12 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
         return ;
     }
 
-    Debug(9, "omsMAXnet setOutputEos \n");
     status = pasynOctetSyncIO->setOutputEos(pasynUserSyncIOSerial, "\n", 1);
     if(status != asynSuccess){
         printf("MAXnetConfig: unable to set OutputEOS %s: %s\n",serialPortName,pasynUserSyncIOSerial->errorMessage);
         return ;
     }
 
-    Debug(9, "omsMAXnet registerInterruptUser \n");
     void* registrarPvt= NULL;
     status = pasynOctetSerial->registerInterruptUser(octetPvtSerial, pasynUserSerial, omsMAXnet::asynCallback, this, &registrarPvt);
     if(status != asynSuccess) {
@@ -156,7 +149,6 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
         return;
     }
 
-    Debug(9, "omsMAXnet get FirmwareVersion \n");
     /* get FirmwareVersion */
     if(getFirmwareVersion() != asynSuccess) {
         printf("MAXnetConfig: unable to talk to controller at %s: %s\n",serialPortName,pasynUserSyncIOSerial->errorMessage);
@@ -184,7 +176,6 @@ epicsEventWaitStatus omsMAXnet::waitInterruptible(double timeout)
     epicsEventWaitStatus waitStatus = epicsEventWaitTimeout;
     epicsTimeGetCurrent(&starttime);
 
-    // TODO use local poll Periods or lock()
     if (timeout == idlePollPeriod_)
         pollWait = idlePollPeriod_ / 5.0;
     else
@@ -195,7 +186,7 @@ epicsEventWaitStatus omsMAXnet::waitInterruptible(double timeout)
     pasynManager->unlockPort(pasynUserSerial);
     while ( timeToWait > 0){
         /* reading with bufferlength 0 and timeout 0.0 triggers a callback and
-         * poll event, if a notification is outstanding */
+         * poll event, if a notification is outstanding. One character will be read. */
         if (enabled) {
             pasynManager->lockPort(pasynUserSerial);
             status = pasynOctetSerial->read(octetPvtSerial, pasynUserSerial, inputBuff,
@@ -218,14 +209,13 @@ asynStatus omsMAXnet::sendOnly(const char *outputBuff)
     asynStatus status;
 
     if (!enabled) return asynError;
-    Debug(9, "omsMAXnet::sendOnly: write: %s \n", outputBuff);
 
     status = pasynOctetSyncIO->write(pasynUserSyncIOSerial, outputBuff,
                              strlen(outputBuff), timeout, &nActual);
 
     if (status != asynSuccess) {
         asynPrint(pasynUserSyncIOSerial, ASYN_TRACE_ERROR,
-                  "drvMAXnetAsyn:sendOnly: error sending command %d, sent=%d, status=%d\n",
+                  "drvMAXnetAsyn:sendOnly: error sending command %s, sent=%d, status=%d\n",
                   outputBuff, nActual, status);
     }
     Debug(4, "omsMAXnet::sendOnly: wrote: %s \n", outputBuff);
@@ -235,28 +225,30 @@ asynStatus omsMAXnet::sendOnly(const char *outputBuff)
 asynStatus omsMAXnet::sendReceive(const char *outputBuff, char *inputBuff, unsigned int inputSize)
 {
     char localBuffer[MAXnet_MAX_BUFFERLENGTH + 1] = "";
-    size_t nRead, nWrite, bufferSize = inputSize;
+    size_t nRead=0, nReadnext=0, nWrite=0;
+    size_t bufferSize = MAXnet_MAX_BUFFERLENGTH;
     int eomReason = 0;
     asynStatus status = asynSuccess;
-    char *outString;
+    char *outString = localBuffer;
     int errorCount = 10;
 
     if (!enabled) return asynError;
 
-    Debug(4, "omsMAXnet::sendReceive: write: %s \n", outputBuff);
-
-    if (bufferSize > MAXnet_MAX_BUFFERLENGTH) bufferSize = MAXnet_MAX_BUFFERLENGTH;
-
-    Debug(9, "omsMAXnet::sendReceive: read the notification \n");
     /*
      * read the notification from input buffer
      */
     while ((notificationCounter > 0) && errorCount){
-        status = pasynOctetSyncIO->read(pasynUserSyncIOSerial, localBuffer, sizeof(localBuffer), 0.1, &nRead, &eomReason);
+        status = pasynOctetSyncIO->read(pasynUserSyncIOSerial, localBuffer, bufferSize, 0.001, &nRead, &eomReason);
+        while ((status == asynSuccess) && !(eomReason & ASYN_EOM_EOS)) {
+            status = pasynOctetSyncIO->read(pasynUserSyncIOSerial, localBuffer+nRead,
+                                                 bufferSize-nRead, timeout, &nReadnext, &eomReason);
+            nRead += nReadnext;
+        }
+        localBuffer[nRead] = '\0';
+        outString = localBuffer;
+    	while (*outString == 6) ++outString;
         if (status == asynSuccess) {
-            localBuffer[nRead] = '\0';
-            if (isNotification(localBuffer) && (notificationCounter > 0)) {
-                Debug(2, "omsMAXnet::sendReceive: decrement notificationCounter: %s, len: %d, reason: %d\n", localBuffer, nRead, eomReason);
+            if (isNotification(outString) && (notificationCounter > 0)) {
                 --notificationCounter;
             }
         }
@@ -268,33 +260,43 @@ asynStatus omsMAXnet::sendReceive(const char *outputBuff, char *inputBuff, unsig
         }
     }
 
-    Debug(9, "omsMAXnet::sendReceive: write \n");
+    Debug(4, "omsMAXnet::sendReceive: write: %s \n", outputBuff);
+    nRead=0;
+    nReadnext=0;
     status = pasynOctetSyncIO->writeRead(pasynUserSyncIOSerial, outputBuff, strlen(outputBuff), localBuffer,
                                         bufferSize, timeout, &nWrite, &nRead, &eomReason);
-    if (status == asynSuccess) localBuffer[nRead] = '\0';
 
-    // if input data is a notification read until expected data arrived
-    while ((status == asynSuccess) && isNotification(localBuffer)) {
-        Debug(2, "omsMAXnet::sendReceive: notification while reading: %s\n", localBuffer);
+    while ((status == asynSuccess) && !(eomReason & ASYN_EOM_EOS)) {
+        status = pasynOctetSyncIO->read(pasynUserSyncIOSerial, localBuffer+nRead,
+                                             bufferSize-nRead, timeout, &nReadnext, &eomReason);
+        nRead += nReadnext;
+    }
+    localBuffer[nRead] = '\0';
+	// cut off a leading /006
+    outString = localBuffer;
+	while (*outString == 6) ++outString;
+
+	// if input data is a notification read until expected data arrived
+    while ((status == asynSuccess) && isNotification(outString)) {
+        nRead=0;
+        nReadnext=0;
         status = pasynOctetSyncIO->read(pasynUserSyncIOSerial, localBuffer,
                                              bufferSize, timeout, &nRead, &eomReason);
-        if (status == asynSuccess) localBuffer[nRead] = '\0';
+        while ((status == asynSuccess) && !(eomReason & ASYN_EOM_EOS)) {
+            status = pasynOctetSyncIO->read(pasynUserSyncIOSerial, localBuffer+nRead,
+                                                 bufferSize-nRead, timeout, &nReadnext, &eomReason);
+            nRead += nReadnext;
+        }
+        localBuffer[nRead] = '\0';
+    	// cut off a leading /006
+        outString = localBuffer;
+    	while (*outString == 6) ++outString;
+    	if (notificationCounter > 0) --notificationCounter;
     }
 
-    if ((status == asynSuccess) && (eomReason == ASYN_EOM_EOS)) {
-        // cut off a leading /006
-        outString = strrchr(localBuffer, 6);
-        if (outString == NULL) {
-            outString = localBuffer;
-        }
-        else {
-            ++outString;
-        }
-
-        // copy into inputBuffer
-        strncpy(inputBuff, outString, inputSize);
-        inputBuff[inputSize-1] = '\0';
-    }
+	// copy into inputBuffer
+	strncpy(inputBuff, outString, inputSize);
+	inputBuff[inputSize-1] = '\0';
 
     Debug(4, "omsMAXnet::sendReceive: read: %s \n", inputBuff);
 
@@ -303,6 +305,7 @@ asynStatus omsMAXnet::sendReceive(const char *outputBuff, char *inputBuff, unsig
 
 /*
  * check if buffer is a notification messages with 13 chars ("%000 SSSSSSSS")
+ * (first character may miss
  */
 int omsMAXnet::isNotification (char *buffer) {
 
@@ -313,8 +316,8 @@ int omsMAXnet::isNotification (char *buffer) {
             printf("%s:%s:%s: CMD_ERR_FLAG received\n", driverName, functionName, portName);
         }
         else {
-            if (motorMAXnetdebug > 1) printf("%s:%s:%s: Interrupt notification: %s\n",
-                    driverName, functionName, portName, buffer);
+            Debug(2,"%s:%s:%s: Interrupt notification: %s\n",
+            		driverName, functionName, portName, buffer);
             epicsEventSignal(pollEventId_);
         }
         return 1;
