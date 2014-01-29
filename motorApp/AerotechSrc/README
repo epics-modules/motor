@@ -69,22 +69,24 @@ EOT limit switch
 ENSEMBLE CONFIGURATION NOTES
 ============================
 
-- In the Controller->Communication->AsciiCmdEnable parameter,
+The following is for Ensemble firmware version 4.02.004 and above.
+
+- In the System->Communication->ASCII->CommandSetup Parameter,
 check the following items (everything else is unchecked);
-
-    * RS232 Port 1
-    * Ethernet Socket 1
+    * RS232 Port 0, OR, Ethernet Socket 2
     * Always Send EOS
-
-- Set the "Idle Polling" parameter of the EnsembleAsynConfig() call <=
-Controller->Communication->Ethernet->Sockets->InetSock1ActiveTimeSec Parameter.
-
-This will prevent the Ensemble from closing the socket.  In addition, the time
+- For ethernet, in the System->Communication->Ethernet Sockets section;
+	- in the ->Socket2Setup Parameter, check the "TCP server" setting.
+	- Enter the IP address in the ->Socket2RemoteIPAddress Parameter
+	- Leave the ->Socket2Port Parameter at the default "8000" or set it to
+	  match the drvAsynIPPortConfigure() st.cmd call.
+	- Set the ->Socket2Timeout Parameter greater than idle polling paramter of
+	  the EnsembleAsynConfig() call.
+(This will prevent the Ensemble from closing the socket.  In addition, the time
 between the call to drvAsynIPPortConfigure() and the call to
-EnsembleAsynConfig() in the st.cmd file must be less than the
-InetSock1ActiveTimeSec Parameter.  If this is not done a socket timeout will
-occur during IOC initialization and prevent EPICS from making a communication
-connection.
+EnsembleAsynConfig() in the st.cmd file must be less than the ->Socket2Timeout
+Parameter.  If this is not done a socket timeout will occur during IOC
+initialization and prevent EPICS from making a communication connection.)
 
 
 DRIVER LIMITATIONS
@@ -94,12 +96,12 @@ The driver reads the controllers configuration information only at boot-up
 (iocInit). If any of the following Ensemble parameters are changed, EPICS
 must be rebooted.
 
-- CfgFbkPosType
-- PosScaleFactor
+- PositionFeedbackType
+- CountsPerUnit
 - HomeOffset
-- HomeDirection
-- LimitLevelMask
-
+- HomeSetup
+- EndOfTravelLimitSetup
+- ReverseMotionDirection
 
 ********************************************************************************
 What all the files in this directory are.
