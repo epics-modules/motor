@@ -50,3 +50,4 @@ $(P)$(R)M5MaxSpeed
 $(P)$(R)M6MaxSpeed
 $(P)$(R)M7MaxSpeed
 $(P)$(R)M8MaxSpeed
+$(P)$(R)AddAccelDecel
