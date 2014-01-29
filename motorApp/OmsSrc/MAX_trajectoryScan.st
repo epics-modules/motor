@@ -39,8 +39,10 @@ option +r;
  * uses MAX_AXES*MAX_ELEMENTS*8 bytes in this SNL program (up to 128KB).
  * Similar memory will be required for the records in the database.
  * (Note that currently MAX_AXES is fixed at 8, in trajectoryScan.h.)
+ * MAX_ELEMENTS_P2 = MAX_ELEMENTS+2 is needed for accel/decel
  */
 #define MAX_ELEMENTS 1000
+#define MAX_ELEMENTS_P2 1002
 
 /* Maximum # of output pulses.  For now, we emit a pulse at the beginning of
  * every trajectory element.
@@ -121,6 +123,10 @@ int nextra;
 int npoints;
 double dtime;
 double dpos;
+double accelDist[MAX_AXES];
+double decelDist[MAX_AXES];
+%%double aDist;
+%%double dDist;
 double posActual;
 double posTheory;
 double expectedTime;
@@ -158,19 +164,24 @@ unsigned long startTime;
 %% static int getMotorMoving(SS_ID ssId, struct UserVar *pVar, int movingMask);
 %% static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar);
 %% static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar);
-%% static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *timeTrajectory,
-%%	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, int npulses, double motorOffset,
-%%	double motorResolution, double motorVmin, int *position, int *velocity, int *acceleration);
+%% static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTrajectory,
+%%	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, double motorOffset,
+%%	double motorResolution, double motorVmin, int *position, int *velocity, int *acceleration,
+%%	double *accelDist, double *decelDist);
 %% static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode);
 %% static int getStarted(SS_ID ssId, struct UserVar *pVar);
 %% static int userToRaw(double user, double off, int dir, double res);
 %% static double rawToUser(int raw, double off, int dir, double res);
 
-int position[MAX_AXES][MAX_ELEMENTS];
-int velocity[MAX_AXES][MAX_ELEMENTS];
-int acceleration[MAX_AXES][MAX_ELEMENTS];
-double motorStart[MAX_AXES];
+int position[MAX_AXES][MAX_ELEMENTS_P2];
+int velocity[MAX_AXES][MAX_ELEMENTS_P2];
+int acceleration[MAX_AXES][MAX_ELEMENTS_P2];
+/* if we're adding accel/decel points, we need a copy of realTimeTrajectory we can modify. */
+double realTimeTrajectoryAccelDecel[MAX_ELEMENTS_P2];
+double *rttraj;
+
 int motorStartRaw[MAX_AXES];
+double motorEnd[MAX_AXES]; 
 double dbuf[MAX_PULSES];
 
 /* variables for constructing trajectory commands */
@@ -180,6 +191,7 @@ int waitingForTrigger;
 /* temporary variables to hold mav speed and acceleration for a motor */
 double vmax;
 double amax;
+
 
 ss maxTrajectoryScan {
 
@@ -270,6 +282,9 @@ ss maxTrajectoryScan {
 			efClear(readbackMon);
 			efClear(nelementsMon);
 			efClear(motorMDVSMon); /* we don't use this */
+			efClear(moveModeMon);
+
+			moveModePrev = moveMode;
 			if (initStatus == STATUS_UNDEFINED) initStatus = STATUS_SUCCESS;
 		} state monitor_inputs
 	}
@@ -296,6 +311,18 @@ ss maxTrajectoryScan {
 		when(efTestAndClear(motorMDVSMon)) {
 			/* We don't use this. */
 		} state monitor_inputs
+
+		when (efTestAndClear(moveModeMon)) {
+			/* We don't support hybrid mode (yet?). */
+			if (moveMode == MOVE_MODE_HYBRID) {
+				moveMode = moveModePrev;
+				pvPut(moveMode);
+			} else {
+				moveModePrev = moveMode;
+			}
+			buildStatus = STATUS_UNDEFINED;
+			pvPut(buildStatus);
+		} state monitor_inputs
 	}
 
 	/* Build trajectory */
@@ -313,9 +340,11 @@ ss maxTrajectoryScan {
 			buildStatus = STATUS_SUCCESS; /* presume we'll be successful */
 			/* Initialize new trajectory */
 			/* If time mode is TIME_MODE_TOTAL then construct timeTrajectory and post it */
+			/* Note that timeTrajectory[i] is the time to go from motorTrajectory[i] to motorTrajectory[i+1] */
 			if (timeMode == TIME_MODE_TOTAL) {
 				dtime = time/(nelements-1);
-				for (i=0; i<nelements; i++) timeTrajectory[i] = dtime;
+				for (i=0; i<nelements-1; i++) timeTrajectory[i] = dtime;
+				for (i=nelements-1; i<MAX_ELEMENTS; i++) timeTrajectory[i] = 0;
 				pvPut(timeTrajectory);
 			}
 
@@ -328,7 +357,7 @@ ss maxTrajectoryScan {
 			/* calculate time at which motor should reach each trajectory point */
 			realTimeTrajectory[0] = 0.;
 			for (i=1; i<npoints; i++) {
-				realTimeTrajectory[i] = realTimeTrajectory[i-1] + timeTrajectory[i];
+				realTimeTrajectory[i] = realTimeTrajectory[i-1] + timeTrajectory[i-1];
 			}
 			for (i=0; i<npoints; i++) realTimeTrajectory[i] *= timeScale;
 
@@ -336,19 +365,33 @@ ss maxTrajectoryScan {
 			for (; i<MAX_ELEMENTS; i++) realTimeTrajectory[i] = realTimeTrajectory[i-1];
 			pvPut(realTimeTrajectory);
 
+			/* Make a copy we can modify to add accel/decel points */
+			realTimeTrajectoryAccelDecel[0] = 0;
+			for (i=1; i<npoints+1; i++) realTimeTrajectoryAccelDecel[i] = realTimeTrajectory[i-1] + accel;
+			realTimeTrajectoryAccelDecel[npoints+1] = realTimeTrajectoryAccelDecel[npoints] + accel; /* decel time */
 
 			/* Calculate velocities and accelerations for trajectories. */
 			for (j=0; j<MAX_AXES; j++) {
 				if (moveAxis[j]) {
-					%%buildTrajectory(ssId, pVar, pVar->realTimeTrajectory, pVar->motorTrajectory[pVar->j],
-					%%	pVar->epicsMotorDir[pVar->j], pVar->moveMode, pVar->npoints, pVar->npulses,
+					rttraj = realTimeTrajectoryAccelDecel;
+					if (addAccelDecel) rttraj = realTimeTrajectoryAccelDecel;
+					%%buildTrajectory(ssId, pVar, pVar->rttraj, pVar->motorTrajectory[pVar->j],
+					%%	pVar->epicsMotorDir[pVar->j], pVar->moveMode, pVar->npoints,
 					%%	pVar->epicsMotorOff[pVar->j], pVar->epicsMotorMres[pVar->j], pVar->epicsMotorVMIN[pVar->j],
-					%%	pVar->position[pVar->j], pVar->velocity[pVar->j], pVar->acceleration[pVar->j]);
+					%%	pVar->position[pVar->j], pVar->velocity[pVar->j], pVar->acceleration[pVar->j],
+					%%	&aDist, &dDist);
+					%%pVar->accelDist[pVar->j] = aDist;
+					%%pVar->decelDist[pVar->j] = dDist;
 				}
 			}
 
 			/* Compute expected time for trajectory.  This includes timeScale factor. */
-			expectedTime = realTimeTrajectory[npoints-1];
+			if (addAccelDecel) {
+				/* Accel/decel segments are not scaled with timeScale factor. */
+				expectedTime = realTimeTrajectoryAccelDecel[npoints+1];
+			} else {
+				expectedTime = realTimeTrajectory[npoints-1];
+			}
 
 			/* Check trajectories against motor soft limits */
 			limitViolation = 0;
@@ -381,6 +424,33 @@ ss maxTrajectoryScan {
 			if (limitViolation) {
 				buildStatus = STATUS_FAILURE;
 			}
+
+			/* Post start positions.  For relative scans, positions will be recalculated at exec time. */
+			for (j=0; j<numAxes; j++) {
+				if (moveAxis[j]) {
+					if (moveMode == MOVE_MODE_ABSOLUTE) {
+						motorStart[j] = motorTrajectory[j][0];
+						motorEnd[j] = motorTrajectory[j][npoints-1];
+					} else {
+						motorStart[j] = epicsMotorPos[j];
+						motorEnd[j] = motorStart[j] + (motorTrajectory[j][npoints-1] - motorTrajectory[j][0]);
+					}
+					if (addAccelDecel) {
+						motorStart[j] -= accelDist[j];
+						motorEnd[j] += decelDist[j];
+					}
+					pvPut(motorStart[j]);
+				}
+			}
+
+			/* Post current positions. */
+			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
+			for (j=0; j<numAxes; j++) {
+				if (moveAxis[j]) {
+					pvPut(motorCurrent[j]);
+				}
+			}
+
 #if LOAD_EARLY
 			if ((buildStatus == STATUS_SUCCESS) && (moveMode != MOVE_MODE_ABSOLUTE)) {
 				/* We can load trajectory into controller, because we won't have to move to initial position. */
@@ -424,12 +494,31 @@ ss maxTrajectoryScan {
 			}
 			currPulse = 0;
 			/* Get the initial positions of the motors */
-			for (j=0; j<numAxes; j++) initialPos[j] = epicsMotorPos[j];
+			for (j=0; j<numAxes; j++) motorStart[j] = epicsMotorPos[j];
+
+			/* Recalculate start/end, because for non-absolute mode, they depend on current motor position. */
+			for (j=0; j<numAxes; j++) {
+				if (moveAxis[j]) {
+					if (moveMode == MOVE_MODE_ABSOLUTE) {
+						motorStart[j] = motorTrajectory[j][0];
+						motorEnd[j] = motorTrajectory[j][npoints-1];
+					} else {
+						motorStart[j] = epicsMotorPos[j];
+						motorEnd[j] = motorStart[j] + (motorTrajectory[j][npoints-1] - motorTrajectory[j][0]);
+					}
+					if (addAccelDecel) {
+						motorStart[j] -= accelDist[j];
+						motorEnd[j] += decelDist[j];
+					}
+					pvPut(motorStart[j]);
+				}
+			}
+
 			/* Move to start position if required */
-			if (moveMode == MOVE_MODE_ABSOLUTE) {
+			if ((moveMode == MOVE_MODE_ABSOLUTE) || addAccelDecel) {
 				for (j=0; j<numAxes; j++) {
 					if (moveAxis[j]) {
-						epicsMotorPos[j] = motorTrajectory[j][0];
+						epicsMotorPos[j] = motorStart[j];
 						pvPut(epicsMotorPos[j]);
 					}
 				}
@@ -525,14 +614,14 @@ ss maxTrajectoryScan {
 								j, motorReadbacks[j][currPulse], motorError[j][currPulse]);
 						}
 						/*** compare current time, position with desired trajectory ***/
-						/* bracket dtime in the interval [realTimeTrajectory[i], realTimeTrajectory[i+1]] */
-						for (i=lastRealTimePoint; (i<npoints-1) && (dtime>0.) && (dtime > realTimeTrajectory[i]); i++);
+						/* bracket dtime in the interval [realTimeTrajectoryAccelDecel[i], realTimeTrajectoryAccelDecel[i+1]] */
+						for (i=lastRealTimePoint; (i<npoints-1) && (dtime>0.) && (dtime > realTimeTrajectoryAccelDecel[i]); i++);
 						i--;
 						if (i<0) i = 0;
 						if (doPoll && (i > 2) && (i < npoints-2) && (overrideFactor >= .01) && (currPulse < MAX_PULSES-1)) {
-							if (debugLevel >= 10) printf("wait_execute: time=%f, i=%d, realTimeTrajectory[i]=%f\n",
-								dtime, i, realTimeTrajectory[i]);
-							frac = (dtime - realTimeTrajectory[i]) / (realTimeTrajectory[i+1] - realTimeTrajectory[i]);
+							if (debugLevel >= 10) printf("wait_execute: time=%f, i=%d, realTimeTrajectoryAccelDecel[i]=%f\n",
+								dtime, i, realTimeTrajectoryAccelDecel[i]);
+							frac = (dtime - realTimeTrajectoryAccelDecel[i]) / (realTimeTrajectoryAccelDecel[i+1] - realTimeTrajectoryAccelDecel[i]);
 							posTheory = motorTrajectory[j][i] + frac * (motorTrajectory[j][i+1] - motorTrajectory[j][i]);
 							if (moveMode != MOVE_MODE_ABSOLUTE) {
 								posTheory += motorStart[j];
@@ -545,7 +634,7 @@ ss maxTrajectoryScan {
 								(motorError[j][currPulse] - motorError[j][currPulse-1]);
 							/* change in speed needed to make up the position in a time equal to the length of the current
 							 * segment */
-							deltaV = dpos / (realTimeTrajectory[i+1] - realTimeTrajectory[i]);
+							deltaV = dpos / (realTimeTrajectoryAccelDecel[i+1] - realTimeTrajectoryAccelDecel[i]);
 							vO = (1-(deltaV/v)*overrideFactor) * 100;
 							%%pVar->vOverride = NINT(pVar->vO);
 							if (vOverride<80) vOverride=80;
@@ -608,10 +697,13 @@ ss maxTrajectoryScan {
 			pvPut(execMessage);
 			/* Get the current motor positions, post them */
 			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
-			for (j=0; j<numAxes; j++) pvPut(motorCurrent[j]);
 			for (j=0; j<numAxes; j++) {
 				if (moveAxis[j]) {
+					pvPut(motorCurrent[j]);
 					epicsMotorPos[j] = motorCurrent[j];
+					/* We don't expect motor to move, because it's already at its current position.
+					 * but the motor record wasn't involved in the trajectory, so its display is stale.
+					 * This gets the motor record to update its display with the current position. */
 					pvPut(epicsMotorPos[j]);
 				}
 			}
@@ -637,7 +729,6 @@ ss maxTrajectoryScan {
 			pvPut(readStatus);
 
             /* Post the readback arrays */
-            /*for (j=0; j<numAxes; j++) {*/ 
             for (j=0; j<MAX_AXES; j++) {
                 pvPut(motorReadbacks[j]);
                 pvPut(motorError[j]);
@@ -656,6 +747,7 @@ ss maxTrajectoryScan {
 			pvPut(readback);
 		} state monitor_inputs
 	}
+
 }
 
 /* This state set simply monitors the abort input.  It is a separate state set
@@ -889,19 +981,44 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
 volatile int MAXv_traj_quantized = 1;
 volatile int MAXv_traj_vmin = 0;
 
-double	y2[MAX_ELEMENTS], v_out[MAX_ELEMENTS], a_out[MAX_ELEMENTS], calcMotorTrajectory[MAX_ELEMENTS];
+double	y2[MAX_ELEMENTS_P2], v_out[MAX_ELEMENTS_P2], a_out[MAX_ELEMENTS_P2], calcMotorTrajectory[MAX_ELEMENTS_P2];
 static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTrajectory,
-	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, int npulses, double motorOffset,
-	double motorResolution, double motorVmin, int *position, int *velocity, int *acceleration)
+	double *motorTrajectory, int epicsMotorDir, int moveMode, int npoints, double motorOffset,
+	double motorResolution, double motorVmin, int *position, int *velocity, int *acceleration,
+	double *accelDist, double *decelDist)
 {
+
 	double dp, dt, v_ideal, v_lin, accel_p, accel_v, time;
 	double x0;
 	int i, dir;
 
+	*accelDist = 0; /* init; these are used only if pVar->addAccelDecel */
+	*decelDist = 0;
+
+	if (pVar->addAccelDecel) {
+		dp = motorTrajectory[1] - motorTrajectory[0];
+		dt = realTimeTrajectory[2] - realTimeTrajectory[1];
+		*accelDist = (dp/dt * pVar->accel) / 2;
+		/* Average speed over last trajectory segment is the speed from which we want to decelerate to 0 speed. */
+		dp = motorTrajectory[npoints-1] - motorTrajectory[npoints-2];
+		dt = realTimeTrajectory[npoints] - realTimeTrajectory[npoints-1];
+		/* Note that accel_time == decel_time, but the distances are different. */
+		*decelDist = (dp/dt * pVar->accel) / 2;
+
+		/* Shift motorTrajectory forward by one element; prepend accel, append decel; restore before returning.
+		 * realTimeTrajectory was modified for us by caller. */
+		for (i=npoints; i>0; i--) {
+			motorTrajectory[i] = motorTrajectory[i-1];
+		}
+		motorTrajectory[0] = motorTrajectory[1] - *accelDist;
+		motorTrajectory[npoints+1] = motorTrajectory[npoints] + *decelDist;
+		npoints += 2;
+	}
+
 	calcMotorTrajectory[0] = motorTrajectory[0];
 	v_out[0] = 0;
 	if (pVar->debugLevel >= 7) {
-		printf("###:%8s %8s %7s %8s %8s %8s %8s %8s\n",
+		printf("\n###:%8s %8s %7s %8s %8s %8s %8s %8s\n",
 			"pos", "calcPos", "dp", "t", "v_ideal", "accel_p", "accel_v", "accel_s");
 	}
 	for (i=1; i<npoints; i++) {
@@ -989,6 +1106,15 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 		if (pVar->debugLevel >= 1) printf("%10.2f %10d %10d %10d %10d\n", time, position[i], NINT(x0), velocity[i], acceleration[i]);
 	}
 
+	if (pVar->addAccelDecel) {
+		/* Shift motorTrajectory backward by one element, and clear decel element. */
+		npoints -= 2;
+		for (i=0; i<npoints; i++) {
+			motorTrajectory[i] = motorTrajectory[i+1];
+		}
+		motorTrajectory[npoints] = 0;
+	}
+
 	return(0);
 }
 
@@ -1015,6 +1141,19 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 	int p1=0, v1=0, do_split;
 	double p1_double, t_v0;
 	int pulsesEnabled = 0;
+	int startPulses, endPulses, npoints;
+	
+	startPulses = pVar->startPulses;
+	endPulses = pVar->endPulses;
+	npoints = pVar->npoints;
+
+	if (pVar->addAccelDecel) {
+		/* We assume the arrays pVar->position, pVar->acceleration, pVar->velocity, and pVar->realTimeTrajectoryAccelDecel
+		* have had accel/decel trajectory points added. */
+		startPulses++;
+		endPulses++;
+		npoints+=2;
+	}
 
 	sprintf(stringOut, "AM;");	/* multitasking mode, flush queue */
 	writeOnly(ssId, pVar, stringOut);
@@ -1058,7 +1197,8 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 	epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
 	getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
 
-#if 1
+#if 0
+	/* It's a bad idea to change updateFreq at run time.  Better to set it at init time. */
 	/* Set update rate. */
 	i = 1024 * pVar->updateFreq;
 	if (i != currUpdateRate) {
@@ -1078,7 +1218,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 #endif
 
 	/* we may need current raw positions to mock up relative mode */
-	epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs a value */
+	epicsTimeGetCurrent(&eStartTime); /* not actually the start time, getMotorPositions just needs eStartTime to have a value. */
 	getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
 
 	for (j=0, firstTask=1; j<MAX_AXES; j++) {
@@ -1117,7 +1257,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 				writeOnly(ssId, pVar, stringOut);
 			}
 
-			for (i=0; i<pVar->npoints; i++) {
+			for (i=0; i<npoints; i++) {
 				if (pVar->acceleration[j][i] > 0) {
 					segment_accel = pVar->acceleration[j][i];
 					segment_decel = pVar->acceleration[j][i];
@@ -1141,7 +1281,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 					/* time from the beginning of the trajectory segment at which the velocity reaches zero.*/
 					t_v0 = (double)(-segment_v_start) / pVar->acceleration[j][i];
 
-					if ((t_v0 < .005) || (((pVar->realTimeTrajectory[i] - pVar->realTimeTrajectory[i-1]) - t_v0) < .005)) {
+					if ((t_v0 < .005) || (((pVar->realTimeTrajectoryAccelDecel[i] - pVar->realTimeTrajectoryAccelDecel[i-1]) - t_v0) < .005)) {
 						/* Don't split very near either end of segment. */
 						if (pVar->debugLevel > 0) printf("declined to split segment at t=%f\n", t_v0);
 						do_split = 0;
@@ -1209,7 +1349,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 				} else {
 					/* enable pulses if we're within user specified range */
 					if (firstTask && ((pVar->outBitNum >= 0) && (pVar->outBitNum <= 15))) {
-						if (i >= pVar->startPulses && i <= pVar->endPulses) {
+						if (i >= startPulses && i <= endPulses) {
 							/* Enable output pulses */
 							if (!pulsesEnabled) {
 								sprintf(stringOut, "AM; VIO[%d]%04x,%04x,%04x;", j+1, onMask, offMask, outMask);
@@ -1249,5 +1389,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar, int simMode) {
 }
 
 }%
+
+
 
 
