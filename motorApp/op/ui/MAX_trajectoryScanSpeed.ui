@@ -22,14 +22,6 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
             <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
             </property>
-            <property name="geometry">
-                <rect>
-                    <x>0</x>
-                    <y>13</y>
-                    <width>380</width>
-                    <height>25</height>
-                </rect>
-            </property>
             <property name="foreground">
                 <color alpha="255">
                     <red>0</red>
@@ -48,10 +40,18 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 <string>$(TITLE) Speed</string>
             </property>
             <property name="fontScaleMode">
-                <enum>ESimpleLabel::Height</enum>
+                <enum>ESimpleLabel::WidthAndHeight</enum>
             </property>
             <property name="alignment">
                 <set>Qt::AlignAbsolute|Qt::AlignHCenter|Qt::AlignVCenter</set>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>13</y>
+                    <width>380</width>
+                    <height>25</height>
+                </rect>
             </property>
         </widget>
         <widget class="caGraphics" name="caRectangle_0">
@@ -104,7 +104,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M1).DESC</string>
@@ -158,7 +158,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M2).DESC</string>
@@ -212,7 +212,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M3).DESC</string>
@@ -266,7 +266,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M4).DESC</string>
@@ -320,7 +320,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M5).DESC</string>
@@ -374,7 +374,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M6).DESC</string>
@@ -428,7 +428,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M7).DESC</string>
@@ -482,7 +482,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M8).DESC</string>
@@ -539,14 +539,6 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 <property name="frameShape">
                     <enum>QFrame::NoFrame</enum>
                 </property>
-                <property name="geometry">
-                    <rect>
-                        <x>24</x>
-                        <y>0</y>
-                        <width>50</width>
-                        <height>20</height>
-                    </rect>
-                </property>
                 <property name="foreground">
                     <color alpha="255">
                         <red>0</red>
@@ -565,7 +557,15 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     <string>Min</string>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>ESimpleLabel::Height</enum>
+                    <enum>ESimpleLabel::WidthAndHeight</enum>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>24</x>
+                        <y>0</y>
+                        <width>50</width>
+                        <height>20</height>
+                    </rect>
                 </property>
                 <property name="alignment">
                     <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -574,14 +574,6 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
             <widget class="caLabel" name="caLabel_2">
                 <property name="frameShape">
                     <enum>QFrame::NoFrame</enum>
-                </property>
-                <property name="geometry">
-                    <rect>
-                        <x>19</x>
-                        <y>25</y>
-                        <width>60</width>
-                        <height>20</height>
-                    </rect>
                 </property>
                 <property name="foreground">
                     <color alpha="255">
@@ -601,7 +593,15 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     <string>Speed</string>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>ESimpleLabel::Height</enum>
+                    <enum>ESimpleLabel::WidthAndHeight</enum>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>19</x>
+                        <y>25</y>
+                        <width>60</width>
+                        <height>20</height>
+                    </rect>
                 </property>
                 <property name="alignment">
                     <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -617,7 +617,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(R)M4MinSpeed</string>
@@ -668,7 +668,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(R)M5MinSpeed</string>
@@ -719,7 +719,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(R)M6MinSpeed</string>
@@ -770,7 +770,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(R)M1MinSpeed</string>
@@ -821,7 +821,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(R)M2MinSpeed</string>
@@ -872,7 +872,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(R)M3MinSpeed</string>
@@ -923,7 +923,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(R)M8MinSpeed</string>
@@ -974,7 +974,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(R)M7MinSpeed</string>
@@ -1020,14 +1020,6 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
             <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
             </property>
-            <property name="geometry">
-                <rect>
-                    <x>299</x>
-                    <y>66</y>
-                    <width>50</width>
-                    <height>20</height>
-                </rect>
-            </property>
             <property name="foreground">
                 <color alpha="255">
                     <red>0</red>
@@ -1046,7 +1038,15 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 <string>Max</string>
             </property>
             <property name="fontScaleMode">
-                <enum>ESimpleLabel::Height</enum>
+                <enum>ESimpleLabel::WidthAndHeight</enum>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>299</x>
+                    <y>66</y>
+                    <width>50</width>
+                    <height>20</height>
+                </rect>
             </property>
             <property name="alignment">
                 <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1055,14 +1055,6 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
         <widget class="caLabel" name="caLabel_4">
             <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>294</x>
-                    <y>91</y>
-                    <width>60</width>
-                    <height>20</height>
-                </rect>
             </property>
             <property name="foreground">
                 <color alpha="255">
@@ -1082,7 +1074,15 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 <string>Speed</string>
             </property>
             <property name="fontScaleMode">
-                <enum>ESimpleLabel::Height</enum>
+                <enum>ESimpleLabel::WidthAndHeight</enum>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>294</x>
+                    <y>91</y>
+                    <width>60</width>
+                    <height>20</height>
+                </rect>
             </property>
             <property name="alignment">
                 <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1098,7 +1098,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(R)M4MaxSpeed</string>
@@ -1149,7 +1149,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(R)M5MaxSpeed</string>
@@ -1200,7 +1200,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(R)M6MaxSpeed</string>
@@ -1251,7 +1251,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(R)M1MaxSpeed</string>
@@ -1302,7 +1302,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(R)M2MaxSpeed</string>
@@ -1353,7 +1353,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(R)M3MaxSpeed</string>
@@ -1404,7 +1404,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(R)M8MaxSpeed</string>
@@ -1455,7 +1455,7 @@ QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(R)M7MaxSpeed</string>
