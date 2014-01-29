@@ -157,6 +157,22 @@ assign  motorMaxSpeed to
          "{P}{R}M7MaxSpeed.VAL",
          "{P}{R}M8MaxSpeed.VAL"};
 
+double  motorStart[MAX_AXES]; 
+assign  motorStart to
+        {"{P}{R}M1Start.VAL",
+         "{P}{R}M2Start.VAL",
+         "{P}{R}M3Start.VAL",
+         "{P}{R}M4Start.VAL",
+         "{P}{R}M5Start.VAL",
+         "{P}{R}M6Start.VAL",
+         "{P}{R}M7Start.VAL",
+         "{P}{R}M8Start.VAL"};
+
+int     addAccelDecel;    assign addAccelDecel     to "{P}{R}AddAccelDecel.VAL";    
+monitor addAccelDecel;
+evflag moveModeMon; sync moveMode moveModeMon;
+int moveModePrev;
+
 /*** END: Specific to MAX_trajectoryScan.st ***/
 
 int     moveAxis[MAX_AXES]; 
@@ -336,4 +352,6 @@ evflag abortMon;        sync abort      abortMon;
 evflag readbackMon;     sync readback   readbackMon;
 evflag nelementsMon;    sync nelements  nelementsMon;
 evflag motorMDVSMon;    sync motorMDVS  motorMDVSMon;
+
+
 
