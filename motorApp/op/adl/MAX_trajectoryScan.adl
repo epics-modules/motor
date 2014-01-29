@@ -1,7 +1,7 @@
 
 file {
 	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/MAX_trajectoryScan.adl"
-	version=030105
+	version=030107
 }
 display {
 	object {
@@ -15,7 +15,7 @@ display {
 	cmap=""
 	gridSpacing=10
 	gridOn=0
-	snapToGrid=0
+	snapToGrid=1
 }
 "color map" {
 	ncolors=65
@@ -100,18 +100,6 @@ rectangle {
 		width=2
 	}
 }
-text {
-	object {
-		x=20
-		y=55
-		width=210
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="# trajectory elements"
-}
 "text entry" {
 	object {
 		x=234
@@ -178,18 +166,6 @@ text {
 	limits {
 	}
 }
-text {
-	object {
-		x=80
-		y=105
-		width=150
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="# output pulses"
-}
 "text entry" {
 	object {
 		x=234
@@ -204,43 +180,6 @@ text {
 	}
 	limits {
 	}
-}
-text {
-	object {
-		x=140
-		y=155
-		width=90
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Time mode"
-}
-menu {
-	object {
-		x=234
-		y=155
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)TimeMode"
-		clr=14
-		bclr=51
-	}
-}
-text {
-	object {
-		x=130
-		y=180
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Total time"
 }
 "text entry" {
 	object {
@@ -271,18 +210,6 @@ text {
 	}
 	limits {
 	}
-}
-text {
-	object {
-		x=29
-		y=205
-		width=200
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Execution time scale"
 }
 "related display" {
 	object {
@@ -346,30 +273,6 @@ text {
 	}
 	limits {
 	}
-}
-text {
-	object {
-		x=10
-		y=130
-		width=210
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Range of pulses: Start"
-}
-text {
-	object {
-		x=20
-		y=80
-		width=210
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Trajectory definition"
 }
 menu {
 	object {
@@ -809,551 +712,6 @@ rectangle {
 		width=2
 	}
 }
-text {
-	object {
-		x=168
-		y=296
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Move axis?"
-}
-menu {
-	object {
-		x=168
-		y=345
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M2Move"
-		clr=14
-		bclr=51
-	}
-}
-menu {
-	object {
-		x=168
-		y=370
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M3Move"
-		clr=14
-		bclr=51
-	}
-}
-menu {
-	object {
-		x=168
-		y=320
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M1Move"
-		clr=14
-		bclr=51
-	}
-}
-menu {
-	object {
-		x=168
-		y=395
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M4Move"
-		clr=14
-		bclr=51
-	}
-}
-menu {
-	object {
-		x=168
-		y=420
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M5Move"
-		clr=14
-		bclr=51
-	}
-}
-text {
-	object {
-		x=300
-		y=296
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Current Pos."
-}
-"text update" {
-	object {
-		x=291
-		y=320
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M1Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=345
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M2Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=370
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M3Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=395
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M4Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=420
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M5Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-text {
-	object {
-		x=456
-		y=296
-		width=50
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Plots"
-}
-"related display" {
-	object {
-		x=440
-		y=320
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M1),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M1),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M1),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Error"
-	}
-	display[3] {
-		label="Desired&Readback&Error"
-		name="MAX_trajectoryPlot2.adl"
-		args="M=$(P)$(M1),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M1Error,Y2=$(P)$(R)M1Traj,Y3=$(P)$(R)M1Actual"
-	}
-	display[4] {
-		label="raw"
-		name="MAX_trajectoryPlot3.adl"
-		args="M=$(P)$(M1),TITLE=Output_Readback,X=$(P)$(R)M5Actual,Y1=$(P)$(R)M2Actual,Y2=$(P)$(R)M3Actual,Y3=$(P)$(R)M4Actual"
-	}
-	clr=14
-	bclr=51
-}
-"related display" {
-	object {
-		x=440
-		y=345
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M2),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M2Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M2),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M2Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M2),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M2Error"
-	}
-	display[3] {
-		label="Desired&Readback&Error"
-		name="MAX_trajectoryPlot2.adl"
-		args="M=$(P)$(M2),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M2Error,Y2=$(P)$(R)M2Traj,Y3=$(P)$(R)M2Actual"
-	}
-	clr=14
-	bclr=51
-}
-"related display" {
-	object {
-		x=440
-		y=370
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M3Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M3Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M3),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M3Error"
-	}
-	display[3] {
-		label="Desired&Readback&Error"
-		name="MAX_trajectoryPlot2.adl"
-		args="M=$(P)$(M3),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M3Error,Y2=$(P)$(R)M3Traj,Y3=$(P)$(R)M3Actual"
-	}
-	clr=14
-	bclr=51
-}
-"related display" {
-	object {
-		x=440
-		y=395
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M4Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M4Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M4),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M4Error"
-	}
-	display[3] {
-		label="Desired&Readback&Error"
-		name="MAX_trajectoryPlot2.adl"
-		args="M=$(P)$(M4),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M4Error,Y2=$(P)$(R)M4Traj,Y3=$(P)$(R)M4Actual"
-	}
-	clr=14
-	bclr=51
-}
-"related display" {
-	object {
-		x=440
-		y=420
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M5Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M5Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M5),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M5Error"
-	}
-	display[3] {
-		label="Desired&Readback&Error"
-		name="MAX_trajectoryPlot2.adl"
-		args="M=$(P)$(M5),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M5Error,Y2=$(P)$(R)M5Traj,Y3=$(P)$(R)M5Actual"
-	}
-	clr=14
-	bclr=51
-}
-menu {
-	object {
-		x=168
-		y=445
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M6Move"
-		clr=14
-		bclr=51
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=445
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M6Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"related display" {
-	object {
-		x=440
-		y=445
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M6Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M6Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M6),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M6Error"
-	}
-	display[3] {
-		label="Desired&Readback&Error"
-		name="MAX_trajectoryPlot2.adl"
-		args="M=$(P)$(M6),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M6Error,Y2=$(P)$(R)M6Traj,Y3=$(P)$(R)M6Actual"
-	}
-	clr=14
-	bclr=51
-}
-menu {
-	object {
-		x=168
-		y=470
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M7Move"
-		clr=14
-		bclr=51
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=470
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M7Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"related display" {
-	object {
-		x=440
-		y=470
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M7Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M7Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M7),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M7Error"
-	}
-	display[3] {
-		label="Desired&Readback&Error"
-		name="MAX_trajectoryPlot2.adl"
-		args="M=$(P)$(M7),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M7Error,Y2=$(P)$(R)M7Traj,Y3=$(P)$(R)M7Actual"
-	}
-	clr=14
-	bclr=51
-}
-menu {
-	object {
-		x=168
-		y=495
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)M8Move"
-		clr=14
-		bclr=51
-	}
-}
-"text update" {
-	object {
-		x=291
-		y=495
-		width=103
-		height=20
-	}
-	monitor {
-		chan="$(P)$(R)M8Current"
-		clr=54
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"related display" {
-	object {
-		x=440
-		y=495
-		width=75
-		height=20
-	}
-	display[0] {
-		label="Output"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M8Traj"
-	}
-	display[1] {
-		label="Readback"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M8Actual"
-	}
-	display[2] {
-		label="Following error"
-		name="MAX_trajectoryPlot.adl"
-		args="M=$(P)$(M8),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M8Error"
-	}
-	display[3] {
-		label="Desired&Readback&Error"
-		name="MAX_trajectoryPlot2.adl"
-		args="M=$(P)$(M8),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M8Error,Y2=$(P)$(R)M8Traj,Y3=$(P)$(R)M8Actual"
-	}
-	clr=14
-	bclr=51
-}
-"text update" {
-	object {
-		x=6
-		y=320
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M1).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=6
-		y=345
-		width=150
-		height=20
-	}
-	monitor {
-		chan="$(P)$(M2).DESC"
-		clr=14
-		bclr=4
-	}
-	align="horiz. right"
-	limits {
-	}
-}
 "text update" {
 	object {
 		x=6
@@ -1465,45 +823,6 @@ menu {
 	limits {
 	}
 }
-text {
-	object {
-		x=60
-		y=230
-		width=170
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Acceleration time"
-}
-"text entry" {
-	object {
-		x=234
-		y=255
-		width=180
-		height=20
-	}
-	control {
-		chan="$(P)$(R)TrajectoryFile"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=40
-		y=255
-		width=190
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="XPS trajectory file"
-}
 "text entry" {
 	object {
 		x=422
@@ -1613,4 +932,836 @@ text {
 		clr=14
 	}
 	textix="Input Bit#"
+}
+menu {
+	object {
+		x=168
+		y=370
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)M3Move"
+		clr=14
+		bclr=51
+	}
+}
+menu {
+	object {
+		x=168
+		y=395
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)M4Move"
+		clr=14
+		bclr=51
+	}
+}
+menu {
+	object {
+		x=168
+		y=420
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)M5Move"
+		clr=14
+		bclr=51
+	}
+}
+menu {
+	object {
+		x=168
+		y=445
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)M6Move"
+		clr=14
+		bclr=51
+	}
+}
+menu {
+	object {
+		x=168
+		y=470
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)M7Move"
+		clr=14
+		bclr=51
+	}
+}
+menu {
+	object {
+		x=168
+		y=495
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)M8Move"
+		clr=14
+		bclr=51
+	}
+}
+"text update" {
+	object {
+		x=230
+		y=370
+		width=110
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M3Current"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=230
+		y=395
+		width=110
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M4Current"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=230
+		y=420
+		width=110
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M5Current"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=230
+		y=445
+		width=110
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M6Current"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=230
+		y=470
+		width=110
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M7Current"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=230
+		y=495
+		width=110
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M8Current"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=470
+		y=370
+		width=50
+		height=20
+	}
+	display[0] {
+		label="Output"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M3),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M3Traj"
+	}
+	display[1] {
+		label="Readback"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M3),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M3Actual"
+	}
+	display[2] {
+		label="Following error"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M3),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M3Error"
+	}
+	display[3] {
+		label="Desired&Readback&Error"
+		name="MAX_trajectoryPlot2.adl"
+		args="M=$(P)$(M3),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M3Error,Y2=$(P)$(R)M3Traj,Y3=$(P)$(R)M3Actual"
+	}
+	clr=14
+	bclr=51
+}
+"related display" {
+	object {
+		x=470
+		y=395
+		width=50
+		height=20
+	}
+	display[0] {
+		label="Output"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M4),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M4Traj"
+	}
+	display[1] {
+		label="Readback"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M4),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M4Actual"
+	}
+	display[2] {
+		label="Following error"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M4),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M4Error"
+	}
+	display[3] {
+		label="Desired&Readback&Error"
+		name="MAX_trajectoryPlot2.adl"
+		args="M=$(P)$(M4),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M4Error,Y2=$(P)$(R)M4Traj,Y3=$(P)$(R)M4Actual"
+	}
+	clr=14
+	bclr=51
+}
+"related display" {
+	object {
+		x=470
+		y=420
+		width=50
+		height=20
+	}
+	display[0] {
+		label="Output"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M5),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M5Traj"
+	}
+	display[1] {
+		label="Readback"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M5),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M5Actual"
+	}
+	display[2] {
+		label="Following error"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M5),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M5Error"
+	}
+	display[3] {
+		label="Desired&Readback&Error"
+		name="MAX_trajectoryPlot2.adl"
+		args="M=$(P)$(M5),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M5Error,Y2=$(P)$(R)M5Traj,Y3=$(P)$(R)M5Actual"
+	}
+	clr=14
+	bclr=51
+}
+"related display" {
+	object {
+		x=470
+		y=445
+		width=50
+		height=20
+	}
+	display[0] {
+		label="Output"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M6),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M6Traj"
+	}
+	display[1] {
+		label="Readback"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M6),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M6Actual"
+	}
+	display[2] {
+		label="Following error"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M6),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M6Error"
+	}
+	display[3] {
+		label="Desired&Readback&Error"
+		name="MAX_trajectoryPlot2.adl"
+		args="M=$(P)$(M6),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M6Error,Y2=$(P)$(R)M6Traj,Y3=$(P)$(R)M6Actual"
+	}
+	clr=14
+	bclr=51
+}
+"related display" {
+	object {
+		x=470
+		y=470
+		width=50
+		height=20
+	}
+	display[0] {
+		label="Output"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M7),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M7Traj"
+	}
+	display[1] {
+		label="Readback"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M7),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M7Actual"
+	}
+	display[2] {
+		label="Following error"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M7),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M7Error"
+	}
+	display[3] {
+		label="Desired&Readback&Error"
+		name="MAX_trajectoryPlot2.adl"
+		args="M=$(P)$(M7),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M7Error,Y2=$(P)$(R)M7Traj,Y3=$(P)$(R)M7Actual"
+	}
+	clr=14
+	bclr=51
+}
+"related display" {
+	object {
+		x=470
+		y=495
+		width=50
+		height=20
+	}
+	display[0] {
+		label="Output"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M8),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M8Traj"
+	}
+	display[1] {
+		label="Readback"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M8),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M8Actual"
+	}
+	display[2] {
+		label="Following error"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M8),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M8Error"
+	}
+	display[3] {
+		label="Desired&Readback&Error"
+		name="MAX_trajectoryPlot2.adl"
+		args="M=$(P)$(M8),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M8Error,Y2=$(P)$(R)M8Traj,Y3=$(P)$(R)M8Actual"
+	}
+	clr=14
+	bclr=51
+}
+"text update" {
+	object {
+		x=348
+		y=370
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M3Start"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=348
+		y=395
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M4Start"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=348
+		y=420
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M5Start"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=348
+		y=445
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M6Start"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=348
+		y=470
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M7Start"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=348
+		y=495
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M8Start"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+text {
+	object {
+		x=470
+		y=296
+		width=50
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Plots"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=6
+		y=320
+		width=150
+		height=20
+	}
+	monitor {
+		chan="$(P)$(M1).DESC"
+		clr=14
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+text {
+	object {
+		x=168
+		y=296
+		width=60
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Move?"
+	align="horiz. centered"
+}
+menu {
+	object {
+		x=168
+		y=320
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)M1Move"
+		clr=14
+		bclr=51
+	}
+}
+text {
+	object {
+		x=230
+		y=296
+		width=110
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Current Pos"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=230
+		y=320
+		width=110
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M1Current"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=470
+		y=320
+		width=50
+		height=20
+	}
+	display[0] {
+		label="Output"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M1),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Traj"
+	}
+	display[1] {
+		label="Readback"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M1),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Actual"
+	}
+	display[2] {
+		label="Following error"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M1),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M1Error"
+	}
+	display[3] {
+		label="Desired&Readback&Error"
+		name="MAX_trajectoryPlot2.adl"
+		args="M=$(P)$(M1),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M1Error,Y2=$(P)$(R)M1Traj,Y3=$(P)$(R)M1Actual"
+	}
+	display[4] {
+		label="raw"
+		name="MAX_trajectoryPlot3.adl"
+		args="M=$(P)$(M1),TITLE=Output_Readback,X=$(P)$(R)M5Actual,Y1=$(P)$(R)M2Actual,Y2=$(P)$(R)M3Actual,Y3=$(P)$(R)M4Actual"
+	}
+	clr=14
+	bclr=51
+}
+text {
+	object {
+		x=348
+		y=296
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Start Pos"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=348
+		y=320
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M1Start"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=6
+		y=345
+		width=150
+		height=20
+	}
+	monitor {
+		chan="$(P)$(M2).DESC"
+		clr=14
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+menu {
+	object {
+		x=168
+		y=345
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)M2Move"
+		clr=14
+		bclr=51
+	}
+}
+"text update" {
+	object {
+		x=230
+		y=345
+		width=110
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M2Current"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=470
+		y=345
+		width=50
+		height=20
+	}
+	display[0] {
+		label="Output"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M2),TITLE=Output_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M2Traj"
+	}
+	display[1] {
+		label="Readback"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M2),TITLE=Actual_Trajectory,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M2Actual"
+	}
+	display[2] {
+		label="Following error"
+		name="MAX_trajectoryPlot.adl"
+		args="M=$(P)$(M2),TITLE=Following_Error,X=$(P)$(R)realTimeTrajectory,Y=$(P)$(R)M2Error"
+	}
+	display[3] {
+		label="Desired&Readback&Error"
+		name="MAX_trajectoryPlot2.adl"
+		args="M=$(P)$(M2),TITLE=Output_Readback,X=$(P)$(R)realTimeTrajectory,Y1=$(P)$(R)M2Error,Y2=$(P)$(R)M2Traj,Y3=$(P)$(R)M2Actual"
+	}
+	clr=14
+	bclr=51
+}
+"text update" {
+	object {
+		x=348
+		y=345
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)M2Start"
+		clr=54
+		bclr=4
+	}
+	align="horiz. right"
+	limits {
+	}
+}
+menu {
+	object {
+		x=234
+		y=155
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)TimeMode"
+		clr=14
+		bclr=51
+	}
+}
+menu {
+	object {
+		x=234
+		y=255
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)AddAccelDecel"
+		clr=14
+		bclr=51
+	}
+}
+text {
+	object {
+		x=10
+		y=55
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="# trajectory elements"
+	align="horiz. right"
+}
+text {
+	object {
+		x=10
+		y=105
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="# output pulses"
+	align="horiz. right"
+}
+text {
+	object {
+		x=10
+		y=180
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Total time"
+	align="horiz. right"
+}
+text {
+	object {
+		x=10
+		y=205
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Execution time scale"
+	align="horiz. right"
+}
+text {
+	object {
+		x=10
+		y=130
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Range of pulses: Start"
+	align="horiz. right"
+}
+text {
+	object {
+		x=10
+		y=80
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Trajectory definition"
+	align="horiz. right"
+}
+text {
+	object {
+		x=10
+		y=230
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Acceleration time"
+	align="horiz. right"
+}
+text {
+	object {
+		x=10
+		y=155
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Time mode"
+	align="horiz. right"
+}
+text {
+	object {
+		x=10
+		y=255
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Add accel/decel pts?"
+	align="horiz. right"
 }
