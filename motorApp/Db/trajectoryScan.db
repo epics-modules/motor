@@ -496,6 +496,48 @@ grecord(ao,"$(P)$(R)M8Current") {
 }
 
 #
+# PVs for display of motor start positions
+# (in case modified to provide for acceleration onto trajectory)
+#
+grecord(ao,"$(P)$(R)M1Start") {
+    field(DESC,"M1 start position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M2Start") {
+    field(DESC,"M2 start position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M3Start") {
+    field(DESC,"M3 start position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M4Start") {
+    field(DESC,"M4 start position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M5Start") {
+    field(DESC,"M5 start position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M6Start") {
+    field(DESC,"M6 start position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M7Start") {
+    field(DESC,"M7 start position")
+    field(PREC, "4")
+}
+grecord(ao,"$(P)$(R)M8Start") {
+    field(DESC,"M8 start position")
+    field(PREC, "4")
+}
+
+record(bo, "$(P)$(R)AddAccelDecel") {
+	field(ZNAM, "No")
+	field(ONAM, "Yes")
+}
+
+#
 # PVs to set minimum motor speed (MAXV only)
 #
 grecord(ao,"$(P)$(R)M1MinSpeed") {
