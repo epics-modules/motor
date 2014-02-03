@@ -37,12 +37,15 @@ HeadURL:        $URL$
  * NOTES
  * -----
  * Verified with firmware:
- *      - MAXv ver:1.25
- *      - MAXv ver:1.29 (has ECO #1432; fixes initialization problem).
- *      - MAXv ver:1.31 (fixes DPRAM encoder position data problem when using
- *                       mixed motor types.)
- *      - MAXv ver:1.33, FPGA:B2:A6 BOOT:1.2 (Watchdog Timeout Counter added)
- *      - MAXv ver:1.34, FPGA:03:A6 BOOT:1.3 
+ *      - ver:1.25
+ *      - ver:1.29 (has ECO #1432; fixes initialization problem).
+ *      - ver:1.31 (fixes DPRAM encoder position data problem when using
+ *                  mixed motor types.)
+ *      - ver:1.33, FPGA:B2:A6 BOOT:1.2 (Watchdog Timeout Counter added)
+ *      - ver:1.34, FPGA:03:A6 BOOT:1.3
+ *      - ver:1.41 & 1.42, suffer from having limit switches disabled at
+ *                  power-up.
+ *      - ver:1.44, No known problems.
  *
  * Modification Log:
  * -----------------
