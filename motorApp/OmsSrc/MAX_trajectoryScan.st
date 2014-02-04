@@ -572,8 +572,26 @@ ss maxTrajectoryScan {
 
 		when (execStatus == STATUS_ABORT) {
 			/* The trajectory_abort state set has detected an abort. It has
-			 * already posted the status and message.  Don't execute flyback
-			 * return to top */
+			 * already posted the status and message.  Tell the motors where
+			 * they are. */
+			if (debugLevel) printf("\nabort\n");
+			pvPut(elapsedTime);
+			pvPut(execStatus);
+			pvPut(execMessage);
+			/* Get the current motor positions, post them */
+			%%getMotorPositions(ssId, pVar, pVar->motorCurrent, pVar->motorCurrentRaw, &(pVar->dtime));
+			for (j=0; j<numAxes; j++) {
+				if (moveAxis[j]) {
+					pvPut(motorCurrent[j]);
+					epicsMotorPos[j] = motorCurrent[j];
+					/* We don't expect motor to move, because it's already at its current position.
+					 * but the motor record wasn't involved in the trajectory, so its display is stale.
+					 * This gets the motor record to update its display with the current position. */
+					pvPut(epicsMotorPos[j]);
+				}
+			}
+			%%waitEpicsMotors(ssId, pVar);
+			if (debugLevel) printf("\n...abort done\n");
 			execState = EXECUTE_STATE_DONE;
 			pvPut(execState);
 			/* Clear execute command, post.  This is a "busy" record, don't
@@ -1038,6 +1056,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 
 			/* compromise between desired position and ideal velocity */
 			a_out[i-1] = (accel_p + accel_v)/2;
+
 		} else {
 			v_ideal = 0.;
 			accel_v = (v_ideal - v_out[i-1])/dt;
