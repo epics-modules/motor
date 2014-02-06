@@ -230,7 +230,8 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
     if (trans->state != BUILD_STATE)
         return(rtnind = ERROR);
 
-    brdptr = (*trans->tabptr->card_array)[card];
+    if ((brdptr = (*trans->tabptr->card_array)[card]) == NULL) /* Test for disabled board. */
+        return(rtnind = ERROR);
 
     if (strncmp(brdptr->ident, "MAXv", 4) == 0)
     {
@@ -518,7 +519,7 @@ errorexit:                  errMessage(-1, "Invalid device directive");
                 break;
 
             case LOAD_POS:
-                if ((MAXv == true) && (MAXvCntrl->typeID[signal] != PSO))
+                if ((MAXv == true) && (MAXvCntrl->typeID[signal] != PSO) && (MAXvCntrl->fwver > 1.29))
                 {
                     long int ref  = NINT(parms[0]);
                     long int fdbk = ref;

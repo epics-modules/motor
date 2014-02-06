@@ -268,11 +268,6 @@ extern "C" {epicsExportAddress(drvet, drvMAXv);}
 
 static struct thread_args targs = {SCAN_RATE, &MAXv_access, 0.000};
 
-static struct MAXvbrdinfo           /* MAXv board info. */
-{
-    float fwver[MAXv_NUM_CARDS];    /* firmware version */
-} MAXvdata;
-
 static char wdctrmsg[] = "\n***MAXv card #%d Disabled*** Watchdog Timeout CTR %s\n\n";
 static char norunmsg[] = "\n*** MAXv card #%d is NOT running *** status = 0x%x\n";
 
@@ -371,6 +366,9 @@ static int set_status(int card, int signal)
     char *p, *tok_save;
     struct axis_status *ax_stat;
     struct encoder_status *en_stat;
+    struct controller *brdptr;
+    struct MAXvController *MAXvCntrl;
+
     char q_buf[MAX_IDENT_LEN], outbuf[50];
     int index;
     bool ls_active = false;
@@ -386,7 +384,11 @@ static int set_status(int card, int signal)
     pmotor = (struct MAXv_motor *) motor_state[card]->localaddr;
     status.All = motor_info->status.All;
 
-    if (MAXvdata.fwver[card] >= 1.33)
+    if ((brdptr = motor_state[card]) == NULL)   /* Test for board disabled. */
+        return(rtn_state = 1);                  /* End move. */
+
+    MAXvCntrl = (struct MAXvController *) brdptr->DevicePrivate;
+    if (MAXvCntrl->fwver >= 1.33)
     {
         send_recv_mess(card, "#WS", (char) NULL, q_buf, 1);
         if (strcmp(q_buf, "=0") != 0)
@@ -585,7 +587,7 @@ errorexit:      errMessage(-1, "Invalid device directive");
     }
 
     motor_info->status.All = status.All;        /* Update status from local copy. */
-    return (rtn_state);
+    return(rtn_state);
 }
 
 /**************************************************
@@ -1243,13 +1245,13 @@ static int motor_init()
         send_recv_mess(card_index, GET_IDENT, (char) NULL, (char *) pmotorState->ident, 1);
         Debug(3, "Identification = %s\n", pmotorState->ident);
 
-        /* Save firmware version to static float array. */
+        /* Save firmware version. */
         pos_ptr = strchr((char *)pmotorState->ident, ':');
-        sscanf(++pos_ptr, "%f", &MAXvdata.fwver[card_index]);
+        sscanf(++pos_ptr, "%f", &pvtdata->fwver);
 
         wdtrip = false;
 
-        if (MAXvdata.fwver[card_index] >= 1.33)
+        if (pvtdata->fwver >= 1.33)
         {
             send_recv_mess(card_index, "#WS", (char) NULL, axis_pos, 1);
             if (strcmp(axis_pos, "=0") != 0)
