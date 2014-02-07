@@ -174,6 +174,8 @@ static char *MAXv_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 static double quantum;
 static char **initstring = 0;
 static epicsUInt32 MAXv_brd_size;  /* card address boundary */
+static char cmndbuf[MAX_MSG_SIZE]; /* Command buffer used by send_mess() and
+                                    * motorIsr if there is a "command error"*/
 
 /* First 8-bits [0..7] used to indicate absolute or */
 /* incremental position registers to be read */
@@ -614,7 +616,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 {
     volatile struct MAXv_motor *pmotor;
     epicsInt16 putIndex;
-    char outbuf[MAX_MSG_SIZE], *p;
+    char *pcmndbuf;
     RTN_STATUS return_code;
     int count;
 
@@ -647,31 +649,31 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     if (pmotor->inGetIndex != pmotor->inPutIndex)
     {
         Debug(1, "send_mess - clearing data in buffer\n");
-        recv_mess(card, outbuf, FLUSH);
+        recv_mess(card, cmndbuf, FLUSH);
     }
 
 
     if (name == NULL)
-        strcpy(outbuf, com);
+        strcpy(cmndbuf, com);
     else
     {
-        strcpy(outbuf, "A");
-        strcat(outbuf, name);
-        strcat(outbuf, " ");
-        strcat(outbuf, com);
+        strcpy(cmndbuf, "A");
+        strcat(cmndbuf, name);
+        strcat(cmndbuf, " ");
+        strcat(cmndbuf, com);
     }
 
     Debug(9, "send_mess: ready to send message.\n");
     putIndex = pmotor->outPutIndex;
-    for (p = outbuf; *p != '\0'; p++)
+    for (pcmndbuf = cmndbuf; *pcmndbuf != '\0'; pcmndbuf++)
     {
-        pmotor->outBuffer[putIndex++] = *p;
+        pmotor->outBuffer[putIndex++] = *pcmndbuf;
         if (putIndex >= BUFFER_SIZE)
             putIndex = 0;
     }
 
     Debug(4, "send_mess: sent card %d message:", card);
-    Debug(4, "%s\n", outbuf);
+    Debug(4, "%s\n", cmndbuf);
 
     pmotor->outPutIndex = putIndex;     /* Message Sent */
 
@@ -1047,13 +1049,13 @@ static void motorIsr(int card)
     volatile struct controller *pmotorState;
     volatile struct MAXv_motor *pmotor;
     STATUS1 status1_flag;
-    static char errmsg1[] = "\ndrvMAXv.cc:motorIsr: Invalid entry - card xx\n";
-    static char errmsg2[] = "\ndrvMAXv.cc:motorIsr: command error - card xx\n";
+    static char errmsg1[] = "drvMAXv.cc:motorIsr: ***Invalid entry*** - card xx\n";
+    static char errmsg2[] = "drvMAXv.cc:motorIsr: ***Command Error*** - card xx\n";
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
-        errmsg1[46-2] = '0' + card%10;
-        errmsg1[46-3] = '0' + (card/10)%10;
+        errmsg1[51-2] = '0' + card%10;
+        errmsg1[51-3] = '0' + (card/10)%10;
         epicsInterruptContextMessage(errmsg1);
         return;
     }
@@ -1067,9 +1069,11 @@ static void motorIsr(int card)
 
     if (status1_flag.Bits.cmndError)
     {
-        errmsg2[46-2] = '0' + card%10;
-        errmsg2[46-3] = '0' + (card/10)%10;
+        errmsg2[51-2] = '0' + card%10;
+        errmsg2[51-3] = '0' + (card/10)%10;
         epicsInterruptContextMessage(errmsg2);
+        strcat(cmndbuf,"\n\n");
+        epicsInterruptContextMessage(cmndbuf);
     }
 
     if (status1_flag.Bits.text_response != 0)   /* Don't clear this. */
