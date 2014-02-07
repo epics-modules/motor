@@ -285,8 +285,8 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
         else
             strcpy(buffer, mr->init);
 
-        strcat(motor_call->message, " ");
         strcat(motor_call->message, buffer);
+        strcat(motor_call->message, ";");
     }
     else
     {
