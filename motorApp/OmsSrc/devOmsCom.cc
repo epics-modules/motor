@@ -208,7 +208,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct MAXvController *MAXvCntrl;
+    struct MAXvController *MAXvCntrl = NULL;
     char buffer[40];
     msg_types cmnd_type;
     RTN_STATUS rtnind;
@@ -452,9 +452,9 @@ errorexit:                  errMessage(-1, "Invalid device directive");
                 case SET_IGAIN:
                 case SET_DGAIN:
                     if (MAXv == true)
-                        sprintf(buffer, "%.1f", (parms[itera] * 32767.0));
+                        sprintf(buffer, "%.1f;", (parms[itera] * 32767.0));
                     else
-                        sprintf(buffer, "%.1f", (parms[itera] * 1999.9));
+                        sprintf(buffer, "%.1f;", (parms[itera] * 1999.9));
                     break;
 
                 case SET_VELOCITY:  /* OMS errors if VB = VL. */
