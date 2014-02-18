@@ -34,6 +34,7 @@ COMMONDBDS += devKohzuMotor.dbd
 COMMONDBDS += devAttocube.dbd
 COMMONDBDS += devAerotech.dbd
 COMMONDBDS += ACRMotorSupport.dbd
+COMMONDBDS += asyn.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
 COMMONDBDS += drvAsynIPPort.dbd
 COMMONDBDS += busySupport.dbd
