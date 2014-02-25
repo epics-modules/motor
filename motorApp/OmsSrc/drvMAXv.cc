@@ -97,6 +97,10 @@ HeadURL:        $URL$
  *                    motor record to store motor type. Motor type used in
  *                    device support (devOmsCom.cc) to allow MRES and ERES with
  *                    different polarity (signs).
+ * 24  02-24-14 rls - After the initialization string is read, if limit mode is
+ *                    "Off", set it to "Hard".
+ *                  - Added MAXvConfig() 4th argument to support absolute
+ *                    encoders with grey code data formats.
  *
  */
 
@@ -179,7 +183,8 @@ static char cmndbuf[MAX_MSG_SIZE]; /* Command buffer used by send_mess() and
 
 /* First 8-bits [0..7] used to indicate absolute or */
 /* incremental position registers to be read */
-static int configurationFlags[MAXv_NUM_CARDS] = {0};
+static int configurationFlags[MAXv_NUM_CARDS]  = {0};
+static int greycodeConfigFlags[MAXv_NUM_CARDS] = {0};
 
 /*----------------functions-----------------*/
 
@@ -496,7 +501,20 @@ static int set_status(int card, int signal)
 
     /* Get encoder position */
     if (absoluteAxis)
-        motorData = pmotor->absPos[signal];
+    {
+        bool greyCode = (greycodeConfigFlags[card] & (1 << signal));
+
+        if (greyCode == true)
+        {
+            epicsUInt32 mask, num;
+            num = pmotor->absPos[signal];
+            for (mask = num >> 1; mask != 0; mask = mask >> 1)
+                num = num ^ mask;
+            motorData = num;
+        }
+        else
+            motorData = pmotor->absPos[signal];
+    }
     else
         motorData = pmotor->encPos[signal];
 
@@ -1015,7 +1033,8 @@ MAXvSetup(int num_cards,        /* maximum number of cards in rack */
 
 RTN_VALUES MAXvConfig(int card,                 /* number of card being configured */
                       const char *initstr,      /* configuration string */
-                      int config)        /* initialization configuration */
+                      int AbsConfig,            /* absolute encoder configuration */
+                      int GreyConfig)           /* absolute encoder grey code configuration */
 {
     if (card < 0 || card >= MAXv_num_cards)
     {
@@ -1033,9 +1052,9 @@ RTN_VALUES MAXvConfig(int card,                 /* number of card being configur
     }
     strcpy(initstring[card], initstr);
     
-    /* get the configuation flags */
-    configurationFlags[card] = config;
-    
+    /* Save absolute encoder and grey code configuation flags */
+    configurationFlags[card]  = AbsConfig;
+    greycodeConfigFlags[card] = GreyConfig;
     return(OK);
 }
 
@@ -1332,6 +1351,13 @@ static int motor_init()
                     pvtdata->typeID[motor_index] = PSE;
                 else
                     pvtdata->typeID[motor_index] = PSO;
+
+                if (pvtdata->fwver >= 1.30)
+                {
+                    send_recv_mess(card_index, "LM?", MAXv_axis[motor_index], axis_pos, 1);
+                    if (strcmp(axis_pos, "=f") == 0) /* If limit mode is set to "Off". */
+                        send_mess(card_index, "LMH", MAXv_axis[motor_index]); /* Set limit mode to "Hard". */
+                }
             }
 
             /* Enable interrupt-when-done if selected */
@@ -1419,19 +1445,20 @@ extern "C"
     static const iocshArg setupArg2 = {"Base Address on 4K (0x1000) boundary", iocshArgInt};
     static const iocshArg setupArg3 = {"noninterrupting(0), valid vectors(64-255)", iocshArgInt};
     static const iocshArg setupArg4 = {"interrupt level (1-6)", iocshArgInt};
-    static const iocshArg setupArg5 = {"polling rate - 1/60 sec units", iocshArgInt};
+    static const iocshArg setupArg5 = {"polling rate (Hz)", iocshArgInt};
 // Oms Config arguments
-    static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
+    static const iocshArg configArg0 = {"Card # being configured", iocshArgInt};
     static const iocshArg configArg1 = {"configuration string", iocshArgString};
-    static const iocshArg configArg2 = {"configuration flags", };
+    static const iocshArg configArg2 = {"absolute encoder flags (0/1 - incremental/absolute, 0x07 -> ZYX)", iocshArgInt};
+    static const iocshArg configArg3 = {"grey code flags (0/1 - yes/no, 0x12 -> UY)", iocshArgInt};
 
     static const iocshArg * const OmsSetupArgs[6] = {&setupArg0, &setupArg1,
         &setupArg2, &setupArg3, &setupArg4, &setupArg5};
-    static const iocshArg * const OmsConfigArgs[3] = {&configArg0, &configArg1, &configArg2};
+    static const iocshArg * const OmsConfigArgs[4] = {&configArg0, &configArg1, &configArg2, &configArg3};
 
     static const iocshFuncDef setupMAXv = {"MAXvSetup", 6, OmsSetupArgs};
 
-    static const iocshFuncDef configMAXv = {"MAXvConfig", 3, OmsConfigArgs};
+    static const iocshFuncDef configMAXv = {"MAXvConfig", 4, OmsConfigArgs};
 
     static void setupMAXvCallFunc(const iocshArgBuf *args)
     {
@@ -1440,7 +1467,7 @@ extern "C"
 
     static void configMAXvCallFunc(const iocshArgBuf *args)
     {
-        MAXvConfig(args[0].ival, args[1].sval, args[2].ival);
+        MAXvConfig(args[0].ival, args[1].sval, args[2].ival, args[3].ival);
     }
 
     static void OmsMAXvRegister(void)
