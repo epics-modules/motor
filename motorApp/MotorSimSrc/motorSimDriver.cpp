@@ -22,8 +22,11 @@ December 13, 2009
 #include <ellLib.h>
 #include <iocsh.h>
 
-#include "motorSimDriver.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
+
 #include <epicsExport.h>
+#include "motorSimDriver.h"
 
 #define DEFAULT_LOW_LIMIT -10000
 #define DEFAULT_HI_LIMIT   10000
@@ -76,7 +79,6 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
                          priority, stackSize)
 {
   int axis;
-  motorSimAxis *pAxis;
   motorSimControllerNode *pNode;
   
   if (!motorSimControllerListInitialized) {
@@ -94,7 +96,7 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
   numAxes_ = numAxes;
   this->movesDeferred_ = 0;
   for (axis=0; axis<numAxes; axis++) {
-    pAxis  = new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
+    new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
     setDoubleParam(axis, this->motorPosition_, DEFAULT_START);
   }
 
@@ -448,9 +450,7 @@ void motorSimAxis::process(double delta )
 /** Configuration command, called directly or from iocsh */
 extern "C" int motorSimCreateController(const char *portName, int numAxes, int priority, int stackSize)
 {
-  motorSimController *pSimController
-    = new motorSimController(portName,numAxes, priority, stackSize);
-  pSimController = NULL;
+  new motorSimController(portName,numAxes, priority, stackSize);
   return(asynSuccess);
 }
 

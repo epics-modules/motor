@@ -19,7 +19,7 @@ March 28, 2010
 
 #define NUM_SIM_CONTROLLER_PARAMS 0
 
-class motorSimAxis : public asynMotorAxis
+class epicsShareClass motorSimAxis : public asynMotorAxis
 {
 public:
 
@@ -56,7 +56,7 @@ private:
 friend class motorSimController;
 };
 
-class motorSimController : asynMotorController {
+class epicsShareClass motorSimController : asynMotorController {
 public:
 
   /* These are the fucntions we override from the base class */
