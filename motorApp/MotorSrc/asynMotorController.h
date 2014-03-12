@@ -138,13 +138,15 @@ enum ProfileStatus {
 
 class asynMotorAxis;
 
-class epicsShareFunc asynMotorController : public asynPortDriver {
+class epicsShareClass asynMotorController : public asynPortDriver {
 
   public:
   /* This is the constructor for the class. */
   asynMotorController(const char *portName, int numAxes, int numParams,
                       int interfaceMask, int interruptMask,
                       int asynFlags, int autoConnect, int priority, int stackSize);
+                      
+  virtual ~asynMotorController();
 
   /* These are the methods that we override from asynPortDriver */
   virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
