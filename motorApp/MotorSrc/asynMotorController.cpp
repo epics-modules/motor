@@ -133,6 +133,10 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
     driverName, functionName);
 }
 
+asynMotorController::~asynMotorController()
+{
+}
+
 /** Called when asyn clients call pasynManager->report().
   * This calls the report method for each axis, and then the base class
   * asynPortDriver report method.
