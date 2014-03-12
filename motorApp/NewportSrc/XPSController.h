@@ -35,7 +35,7 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define XPSTclScriptString              "XPS_TCL_SCRIPT"
 #define XPSTclScriptExecuteString       "XPS_TCL_SCRIPT_EXECUTE"
 
-class XPSController : public asynMotorController {
+class epicsShareClass XPSController : public asynMotorController {
 
   public:
   XPSController(const char *portName, const char *IPAddress, int IPPort,
