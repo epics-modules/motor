@@ -94,10 +94,13 @@ using std::endl;
 #include <epicsString.h>
 #include <iocsh.h>
 
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
 #include "XPSController.h"
 #include "XPS_C8_drivers.h"
 #include "asynOctetSocket.h"
 #include <epicsExport.h>
+#include "XPSAxis.h"
 
 #define XPSC8_END_OF_RUN_MINUS  0x80000100
 #define XPSC8_END_OF_RUN_PLUS   0x80000200
