@@ -89,11 +89,16 @@ Versions: Release 4-5 and higher.
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <iocsh.h>
+#include <asynDriver.h>
 
-#include "XPSController.h"
 #include "XPS_C8_drivers.h"
 #include "xps_ftp.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
+#include "XPSAxis.h"
+
 #include <epicsExport.h>
+#include "XPSController.h"
 
 static const char *driverName = "XPSController";
 
@@ -241,7 +246,7 @@ asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
   int function = pasynUser->reason;
   int status = asynSuccess;
   XPSAxis *pAxis;
-  static const char *functionName = "writeInt32";
+  //static const char *functionName = "writeInt32";
 
   pAxis = this->getAxis(pasynUser);
   if (!pAxis) return asynError;
