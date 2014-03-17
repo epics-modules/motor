@@ -249,7 +249,7 @@ void omsMAXv::initialize(const char* portName, int numAxes, int cardNo, const ch
 
     Debug(64, "motor_init: send init string\n");
 
-    if( Init(initString, 1) != asynSuccess) {
+    if( Init(initString, 0) != asynSuccess) {
         errlogPrintf("%s:%s:%s: unable to send initstring to controller card %d\n",
                         driverName, functionName, portName, cardNo);
         return;
@@ -283,6 +283,7 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
     STATUS1 flag1;
     const char* functionName = "sendOnly";
     int len = strlen(outputBuff);
+    double timeout = 0.01;
     epicsUInt16 getIndex, putIndex;
 
     if (!enabled) return asynError;
@@ -296,7 +297,8 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
     }
 
     /* see if junk at input port - should not be any data available */
-    if ((epicsUInt16) pmotor->inGetIndex != (epicsUInt16) pmotor->inPutIndex)
+    int flushTime = 0;
+    while (((epicsUInt16) pmotor->inGetIndex != (epicsUInt16) pmotor->inPutIndex) && (flushTime < 100))
     {
         // flush cards response Buffer
 #ifdef DEBUG
@@ -311,7 +313,12 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
         flag1.All = pmotor->status1_flag.All;
         pmotor->status1_flag.All = flag1.All;
         pmotor->msg_semaphore=0;
-
+        epicsThreadSleep(timeout);
+        flushTime++;
+        if (flushTime == 100 ) {
+        	Debug(1, "%s:%s:%s: unable to flush more than 100 strings\n", driverName, functionName, portName);
+        	return asynError;
+        }
     }
 
     putIndex = (epicsUInt16) pmotor->outPutIndex;
@@ -324,10 +331,12 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
 
     pmotor->outPutIndex = putIndex;    /* Message Sent */
 
-    int count=0, prevdeltaIndex =0;
+    int count = 0, prevdeltaIndex = 0, index = 0;
+    int maxcount = (int)(0.1 / epicsThreadSleepQuantum());
+    // skip busy-waiting for small epicsThreadSleepQuantum
+    if (epicsThreadSleepQuantum() <= 0.01) index = 100;
     int deltaIndex = ((epicsUInt16)pmotor->outPutIndex) - ((epicsUInt16)pmotor->outGetIndex);
-    int index = 0;
-    while (deltaIndex != 0)
+    while ((deltaIndex != 0) && (count <= maxcount))
     {
         deltaIndex  = ((epicsUInt16)pmotor->outPutIndex) - ((epicsUInt16)pmotor->outGetIndex);
         //  do busy-waiting but not more than 100 times
@@ -335,16 +344,13 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
             deltaIndex  = ((epicsUInt16)pmotor->outPutIndex) - ((epicsUInt16)pmotor->outGetIndex);
             ++index;
         }
-        //  epicsThreadSleepQuantum => 0.02s for RTEMS
-        if ((index >= 100) && (deltaIndex != 0)) epicsThreadSleep(epicsThreadSleepQuantum());
+        if ((index >= 100) && (deltaIndex != 0)) epicsThreadSleep(timeout);
         if (deltaIndex == prevdeltaIndex)
             ++count;
         else
-            count =0;
-        if (count > 10) break;
+            count = 0;
         prevdeltaIndex = deltaIndex;
     };
-    Debug(32, "%s:%s:%s: Waited %d loops\n", driverName, functionName, portName, index);
 
     if (deltaIndex != 0) {
         Debug(1, "%s:%s:%s: Timeout\n", driverName, functionName, portName);
@@ -369,7 +375,7 @@ asynStatus omsMAXv::sendReceive(const char *outputBuff, char *inputBuff, unsigne
     size_t bufsize;
     size_t usedSpace = 0;
     char *start, *end;
-    int itera;
+    int itera = 0;
     asynStatus status;
 
     if (!enabled) return asynError;
@@ -381,9 +387,10 @@ asynStatus omsMAXv::sendReceive(const char *outputBuff, char *inputBuff, unsigne
 
     *inputBuff = '\0';
 
-    itera = 0;
     double time = 0.0;
-    double timeout = epicsThreadSleepQuantum() + 0.001;
+    double timeout = 0.1;
+    // skip busy-waiting for small epicsThreadSleepQuantum
+    if (epicsThreadSleepQuantum() <= 0.01) itera = 2001;
     while ((pmotor->status1_flag.Bits.text_response == 0) && (time < timeout)){
         Debug(32, "%s:%s:%s: Waiting for reponse, itera:%d\n",
                 driverName, functionName, portName, itera);
