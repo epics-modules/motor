@@ -462,6 +462,9 @@ asynStatus omsBaseController::Init(const char* initString, int multiple){
     /* Stop all axes */
     sendOnlyLock("AM SA;");
 
+    /* wait before sending init commands */
+    epicsThreadSleep(0.5);
+
     /* send InitString */
     if ((initString != NULL) && (strlen(initString) > 0)) {
         if (multiple){
