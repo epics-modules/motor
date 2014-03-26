@@ -590,7 +590,7 @@ asynStatus XPSController::buildProfile()
   }
 
   /* Create the profile file */
-  trajFile =  fopen(fileName, "w");
+  trajFile =  fopen(fileName, "wb");
   if (trajFile == 0) {
     buildOK = false;
     status = -1;
@@ -641,7 +641,6 @@ asynStatus XPSController::buildProfile()
     if (!inGroup[j]) continue;
     fprintf(trajFile,", %f, %f", pAxes_[j]->profilePostDistance_, 0.);
   }
-  fprintf(trajFile,"\n");
   fclose (trajFile);
   
   /* FTP the trajectory file from the local directory to the XPS */
@@ -696,6 +695,7 @@ asynStatus XPSController::buildProfile()
       sprintf(message, "Unknown trajectory verify error=%d", status);
       break;
   }
+  if (!verifyOK) goto done;
 
   /* Read dynamic parameters*/
   for (j=0; j<numAxes_; j++) {
@@ -714,6 +714,7 @@ asynStatus XPSController::buildProfile()
       verifyOK = false;
       sprintf(message, "MultipleAxesPVTVerificationResultGet error for axis %s, status=%d\n",
               pAxes_[j]->positionerName_, status);
+      goto done;
     }
     // Don't do the rest if the axis is not being used
     if (!useAxis[j]) continue;
@@ -729,12 +730,14 @@ asynStatus XPSController::buildProfile()
       verifyOK = false;
       sprintf(message, "Low soft limit violation for axis %s, position=%f, limit=%f\n",
               pAxes_[j]->positionerName_, minProfile, lowLimit);
+      goto done;
     }
     maxProfile = pAxes_[j]->profilePositions_[0] + maxPositionActual;
     if (maxProfile > highLimit) {
       verifyOK = false;
       sprintf(message, "High soft limit violation for axis %s, position=%f, limit=%f\n",
               pAxes_[j]->positionerName_, maxProfile, highLimit);
+      goto done;
     }
   }
   done:
