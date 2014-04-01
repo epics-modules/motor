@@ -53,6 +53,24 @@ grecord(longout,"$(P)$(R)Nactual") {
     field(DESC,"Actual # of output pulses")
 }
 
+record(mbbo, "$(P)$(R)PulseDir") {
+    field(DESC,"Both, Neg, or Pos")
+	field(ZRVL, "0")
+	field(ZRST, "Both")
+	field(ONVL, "1")
+	field(ONST, "Pos")
+	field(TWVL, "2")
+	field(TWST, "Neg")
+}
+record(ao, "$(P)$(R)PulseLenUS") {
+    field(DESC,"pulse length in microseconds")
+	field(DOL, "25")
+}
+record(longout, "$(P)$(R)PulseSrc") {
+    field(DESC,"pulse source (1 or 3)")
+	field(DOL, "1")
+}
+
 #
 # PVs controlling the trajectory speed and acceleration
 #
