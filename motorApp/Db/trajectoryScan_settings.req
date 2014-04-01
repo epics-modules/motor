@@ -51,3 +51,6 @@ $(P)$(R)M6MaxSpeed
 $(P)$(R)M7MaxSpeed
 $(P)$(R)M8MaxSpeed
 $(P)$(R)AddAccelDecel
+$(P)$(R)PulseDir
+$(P)$(R)PulseLenUS
+$(P)$(R)PulseSrc
