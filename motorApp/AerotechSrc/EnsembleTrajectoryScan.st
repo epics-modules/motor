@@ -602,7 +602,7 @@ ss EnsembleTrajectoryScan {
 						if (j==10) printf("abandoned read of point %d\n", i);
 					}
 					k = atoi(&stringIn[1]);
-					if (encoder_runs_backwards) k *= -1;
+					%%if (encoder_runs_backwards) pVar->k *= -1;
 					motorReadbacks[0][i] = k * epicsMotorMres[0] + motorPosOffset[0];
 					motorError[0][i] = motorReadbacks[0][i] - motorTrajectory[0][i];
 				}
