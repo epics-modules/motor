@@ -1315,14 +1315,18 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 
 		/* (total time, on time) in microseconds */
 		/* strcpy(stringOut, "PSOPULSE @0 TIME 50,25"); */
-		strcpy(stringOut, "PSOPULSE @0 TIME 30000,20000");
+		sprintf(stringOut, "PSOPULSE @0 TIME %f,%f", pVar->pulseLenUS*1.5, pVar->pulseLenUS);
 		status = writeRead(ssId, pVar, stringOut, reply);
 		strcpy(stringOut, "PSOOUTPUT @0 PULSE");
 		status = writeRead(ssId, pVar, stringOut, reply);
 
-		/* some controllers need to track source 3 instead of 1.  I think 3 is the interpolated analog sin/cos */
+		/* some controllers need to track source 3 instead of 1. */
 		/* strcpy(stringOut, "PSOTRACK @0 INPUT 1"); */
-		strcpy(stringOut, "PSOTRACK @0 INPUT 3");
+		sprintf(stringOut, "PSOTRACK @0 INPUT %d", pVar->pulseSrc);
+		status = writeRead(ssId, pVar, stringOut, reply);
+
+		/* encoder direction in which PSO pulses will be sent */
+		sprintf(stringOut, "PSOTRACK @0 DIRECTION %d", pVar->pulseDir);
 		status = writeRead(ssId, pVar, stringOut, reply);
 
 		/* Not all Ensemble controllers support the "PSODISTANCE X ARRAY" command */
