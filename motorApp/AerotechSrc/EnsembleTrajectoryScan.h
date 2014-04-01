@@ -152,6 +152,22 @@ assign  motorMaxSpeed to
 
 /*** END: Specific to MAX_trajectoryScan.st ***/
 
+/*** BEGIN: Specific to EnsembleTrajectoryScan.st ***/
+
+int pulseDir;
+assign pulseDir to "{P}{R}PulseDir";
+monitor pulseDir;
+
+double pulseLenUS;
+assign pulseLenUS to "{P}{R}PulseLenUS";
+monitor pulseLenUS;
+
+int pulseSrc;
+assign pulseSrc to "{P}{R}PulseSrc";
+monitor pulseSrc;
+
+/*** END: Specific to EnsembleTrajectoryScan.st ***/
+
 int     moveAxis[MAX_AXES]; 
 assign  moveAxis     to
         {"{P}{R}M1Move.VAL",
