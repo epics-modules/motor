@@ -217,8 +217,8 @@ PROGRAM
 			next i
 		elseif IGLOBAL(cmdVar) = cmdDONE then
 			' do nothing
-		else
-			IGLOBAL(cmdVar) = 1000
+	'	else
+	'		IGLOBAL(cmdVar) = 1000
 		END IF
 		
 		IF IGLOBAL(cmdVar) = cmdPVT1 THEN
@@ -226,7 +226,9 @@ PROGRAM
 		ELSE
 			D = .001
 		END IF
-	    IGLOBAL(cmdVar) = -(IGLOBAL(cmdVar))
+		if IGLOBAL(cmdVar) > 0 then
+	    	IGLOBAL(cmdVar) = -(IGLOBAL(cmdVar))
+		end if
 		DWELL D
 	WEND
 
