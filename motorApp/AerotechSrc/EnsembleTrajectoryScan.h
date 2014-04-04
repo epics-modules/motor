@@ -152,6 +152,21 @@ assign  motorMaxSpeed to
 
 /*** END: Specific to MAX_trajectoryScan.st ***/
 
+/*** BEGIN: Specific to MAX_trajectoryScan.st and EnsembleTrajectoryScan.st ***/
+
+double  motorStart[MAX_AXES]; 
+assign  motorStart to
+        {"{P}{R}M1Start.VAL",
+         "{P}{R}M2Start.VAL",
+         "{P}{R}M3Start.VAL",
+         "{P}{R}M4Start.VAL",
+         "{P}{R}M5Start.VAL",
+         "{P}{R}M6Start.VAL",
+         "{P}{R}M7Start.VAL",
+         "{P}{R}M8Start.VAL"};
+
+/*** END: Specific to MAX_trajectoryScan.st and EnsembleTrajectoryScan.st ***/
+
 /*** BEGIN: Specific to EnsembleTrajectoryScan.st ***/
 
 int pulseDir;
