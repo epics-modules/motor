@@ -382,6 +382,8 @@ ss EnsembleTrajectoryScan {
 						motorMVA[j] = MAX(motorMVA[j], fabs(velocity[j][k]));
 						/*motorMAA[j] = MAX(motorMAA[j], fabs(acceleration[j][k]));*/
 					}
+					pvPut(motorMVA[j]);
+					pvPut(motorMAA[j]);
 				}
 			}
 			if (limitViolation) {
