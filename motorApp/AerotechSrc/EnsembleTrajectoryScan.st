@@ -131,7 +131,7 @@ int abortState;
 %% int writeIntAndCheck(SS_ID ssId, struct UserVar *pVar, int n, int ival);
 double position[MAX_AXES][MAX_ELEMENTS];
 double velocity[MAX_AXES][MAX_ELEMENTS];
-double motorStart[MAX_AXES];
+/*double motorStart[MAX_AXES]; now in header and assigned to PVs */
 double motorCurr[MAX_AXES];
 double motorPosOffset[MAX_AXES];
 
@@ -353,6 +353,8 @@ ss EnsembleTrajectoryScan {
 					if (fabs(vmax) < .001) vmax = epicsMotorVELO[j];
 					if (debugLevel>1) printf("vmax=%f\n", vmax);
 					amax = vmax/epicsMotorACCL[j];
+					motorMVA[j] = 0.;
+					motorMAA[j] = 0.;
 					for (k=0; k<npoints && !limitViolation; k++) {
 						posActual = motorTrajectory[j][k];
 						if (moveMode != MOVE_MODE_ABSOLUTE) posActual += epicsMotorPos[j];
@@ -377,6 +379,8 @@ ss EnsembleTrajectoryScan {
 								epicsSnprintf(buildMessage, MSGSIZE, "!! deltaT(=%.3f) < .03 at pt. %d", dtime, k+1);
 							}
 						}
+						motorMVA[j] = MAX(motorMVA[j], fabs(velocity[j][k]));
+						/*motorMAA[j] = MAX(motorMAA[j], fabs(acceleration[j][k]));*/
 					}
 				}
 			}
@@ -422,6 +426,7 @@ ss EnsembleTrajectoryScan {
 				initialPos[j] = epicsMotorPos[j];
 				motorStart[j] = motorTrajectory[j][0] - (velocity[j][0] * epicsMotorACCL[j]) / 2;
 				if (moveMode != MOVE_MODE_ABSOLUTE) motorStart[j] += epicsMotorPos[j];
+				pvPut(motorStart[j]);
 			}
 			/* Move to start position */
 			for (j=0; j<numAxes; j++) {
