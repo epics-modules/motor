@@ -10,6 +10,12 @@ April 11, 2013
 #include "asynMotorController.h"
 #include "asynMotorAxis.h"
 
+typedef enum {
+  ModelAG_UC2,
+  ModelAG_UC8,
+  ModelAG_UC8PC
+} AG_UCModel_t;
+
 // No controller-specific parameters yet
 #define NUM_AG_UC_PARAMS 0  
 
@@ -28,6 +34,8 @@ public:
 
 private:
   int velocityToSpeedCode(double velocity);
+  asynStatus writeAgilis();
+  asynStatus writeAgilis(const char *output, double timeout);
   AG_UCController *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   bool hasLimits_;
@@ -36,6 +44,7 @@ private:
   int currentPosition_;
   int positionOffset_;
   int axisID_;
+  int channelID_;
   
 friend class AG_UCController;
 };
@@ -47,8 +56,13 @@ public:
   void report(FILE *fp, int level);
   AG_UCAxis* getAxis(asynUser *pasynUser);
   AG_UCAxis* getAxis(int axisNo);
-  asynStatus writeAgilis();
-  asynStatus writeAgilis(const char *output, double timeout);
+  asynStatus setChannel(int channelID);
+  asynStatus writeAgilis(int channelID);
+  asynStatus writeAgilis(int channelID, const char *output, double timeout);
 
   friend class AG_UCAxis;
+  
+private:
+  char controllerVersion_[40];
+  AG_UCModel_t AG_UCModel_;
 };
