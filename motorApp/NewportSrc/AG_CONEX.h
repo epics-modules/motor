@@ -1,6 +1,6 @@
 /*
 FILENAME...  AG_CONEX.h
-USAGE...      Motor driver support for the Newport Agilis AG-UC series of controllers.
+USAGE...      Motor driver support for the Newport CONEX-AGP and CONEX-CC series of controllers.
 
 Mark Rivers
 April 11, 2013
@@ -9,6 +9,11 @@ April 11, 2013
 
 #include "asynMotorController.h"
 #include "asynMotorAxis.h"
+
+typedef enum {
+  ModelConexAGP,
+  ModelConexCC
+} ConexModel_t;
 
 // No controller-specific parameters yet
 #define NUM_AG_CONEX_PARAMS 0  
@@ -43,8 +48,14 @@ private:
   double lowLimit_;
   double KP_;
   double KI_;
+  double KD_;
   double LF_;
+  double KPMax_;
+  double KDMax_;
+  double KIMax_;
+  double LFMax_;
   char   stageID_[40];
+  ConexModel_t conexModel_;
   
 friend class AG_CONEXController;
 };
@@ -56,8 +67,8 @@ public:
   void report(FILE *fp, int level);
   AG_CONEXAxis* getAxis(asynUser *pasynUser);
   AG_CONEXAxis* getAxis(int axisNo);
-  asynStatus writeAgilis();
-  asynStatus writeAgilis(const char *output, double timeout);
+  asynStatus writeCONEX();
+  asynStatus writeCONEX(const char *output, double timeout);
 
 private:
   int controllerID_;
