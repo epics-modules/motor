@@ -24,7 +24,7 @@ April 11, 2013
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
 #define AGILIS_TIMEOUT 2.0
-#define LINUX_WRITE_DELAY 0.1
+#define WRITE_DELAY 0.01
 
 /** Creates a new AG_UCController object.
   * \param[in] portName          The name of the asyn port that will be created for this driver
@@ -55,16 +55,43 @@ AG_UCController::AG_UCController(const char *portName, const char *serialPortNam
   
   // Reset the controller
   sprintf(outString_, "RS");
-  status = writeAgilis();
+  status = writeAgilis(0);
+  // Reset takes some time?
+  epicsThreadSleep(0.5);
 
   // Put the controller in remote mode
   sprintf(outString_, "MR");
-  status = writeAgilis();
+  status = writeAgilis(0);
   
   // Flush any characters that controller has, read firmware version
   sprintf(outString_, "VE");
   status = writeReadController();
+  // Seems to be necessary to delay a short time between writes
+  epicsThreadSleep(WRITE_DELAY);  
   printf("Agilis controller firmware version = %s\n", inString_);
+  if (status) {
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR, 
+      "%s: cannot read version information from Agilis controller\n",
+      functionName);
+    return;
+  }
+  strcpy(controllerVersion_, inString_);
+  // Figure out what model this is
+  if (strstr(controllerVersion_, "AG-UC2")) {
+    AG_UCModel_ = ModelAG_UC2;
+  } 
+  else if (strstr(controllerVersion_, "AG-UC8PC")) {
+    AG_UCModel_ = ModelAG_UC8PC;
+  } 
+  else if (strstr(controllerVersion_, "AG-UC8")) {
+    AG_UCModel_ = ModelAG_UC8;
+  } 
+  else {
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+      "%s: unknown model, firmware string=%s\n",
+      functionName, controllerVersion_);
+    return;
+  }
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
@@ -112,29 +139,44 @@ asynStatus AG_UCCreateAxis(const char *AG_UCName,  /* specify which controller b
 
 /** Writes a string to the controller.
   * Calls writeAgilis() with a default location of the string to write and a default timeout. */ 
-asynStatus AG_UCController::writeAgilis()
+asynStatus AG_UCController::writeAgilis(int channelID)
 {
-  return writeAgilis(outString_, AGILIS_TIMEOUT);
+  return writeAgilis(channelID, outString_, AGILIS_TIMEOUT);
 }
+
 
 /** Writes a string to the controller.
   * \param[in] output The string to be written.
   * \param[in] timeout Timeout before returning an error.*/
-asynStatus AG_UCController::writeAgilis(const char *output, double timeout)
+asynStatus AG_UCController::writeAgilis(int channelID, const char *output, double timeout)
 {
   size_t nwrite;
   asynStatus status;
   // const char *functionName="writeAgilis";
   
+  // If channelID is non-zero then we need to send the CC command first
+  
+  if (channelID != 0) setChannel(channelID);
+
   status = pasynOctetSyncIO->write(pasynUserController_, output,
                                    strlen(output), timeout, &nwrite);
                                    
-  // On Linux it seems to be necessary to delay a short time between writes
-  #ifdef linux
-  epicsThreadSleep(LINUX_WRITE_DELAY);
-  #endif
+  // Seems to be necessary to delay a short time between writes
+  epicsThreadSleep(WRITE_DELAY);
                                   
   return status ;
+}
+
+asynStatus AG_UCController::setChannel(int channelID)
+{
+  char tempString[40];
+  asynStatus status;
+  
+  sprintf(tempString, "CC%d", channelID);
+  status = writeController(tempString, AGILIS_TIMEOUT);
+  // Seems to be necessary to delay a short time between writes
+  epicsThreadSleep(WRITE_DELAY);
+  return status;
 }
 
 /** Reports on status of the driver
@@ -146,8 +188,10 @@ asynStatus AG_UCController::writeAgilis(const char *output, double timeout)
   */
 void AG_UCController::report(FILE *fp, int level)
 {
-  fprintf(fp, "Agilis UC motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
-    this->portName, numAxes_, movingPollPeriod_, idlePollPeriod_);
+  fprintf(fp, "Agilis UC motor driver %s, model=%d, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
+    this->portName, AG_UCModel_, numAxes_, movingPollPeriod_, idlePollPeriod_);
+  fprintf(fp, "controller version %s\n", 
+    controllerVersion_);
 
   // Call the base class method
   asynMotorController::report(fp, level);
@@ -183,14 +227,20 @@ AG_UCAxis::AG_UCAxis(AG_UCController *pC, int axisNo, bool hasLimits,
   : asynMotorAxis(pC, axisNo),
     pC_(pC), hasLimits_(hasLimits), 
     forwardAmplitude_(forwardAmplitude), reverseAmplitude_(reverseAmplitude),
-    currentPosition_(0), positionOffset_(0), axisID_(axisNo+1)
+    currentPosition_(0), positionOffset_(0)
 {
+  axisID_ = (axisNo % 2) + 1;  // Either 1 or 2
+  if (pC_->AG_UCModel_ == ModelAG_UC2) {
+    channelID_ = 0;
+  } else {
+    channelID_ = axisNo/2 + 1;
+  }
   if (forwardAmplitude_ <= 0) forwardAmplitude_ = 50;
   if (reverseAmplitude_ >= 0) forwardAmplitude_ = -50;
   sprintf(pC_->outString_, "%dSU%d", axisID_, forwardAmplitude_);
-  pC_->writeAgilis();
+  writeAgilis();
   sprintf(pC_->outString_, "%dSU%d", axisID_, reverseAmplitude_);
-  pC_->writeAgilis();
+  writeAgilis();
 }
 
 /** Reports on status of the axis
@@ -202,8 +252,12 @@ AG_UCAxis::AG_UCAxis(AG_UCController *pC, int axisNo, bool hasLimits,
 void AG_UCAxis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    fprintf(fp, "  axis %d, hasLimits=%d, forwardAmplitude=%d, reverseAmplitude=%d\n",
-            axisID_, hasLimits_, forwardAmplitude_, reverseAmplitude_);
+    fprintf(fp, "  axisID=%d, channelID=%d, hasLimits=%d\n"
+                "  forwardAmplitude=%d, reverseAmplitude=%d\n"
+                "  currentPosition=%d, positionOffset=%d\n",
+            axisID_, channelID_, hasLimits_, 
+            forwardAmplitude_, reverseAmplitude_,
+            currentPosition_, positionOffset_);
   }
 
   // Call the base class method
@@ -222,7 +276,7 @@ asynStatus AG_UCAxis::move(double position, int relative, double minVelocity, do
     steps = NINT(position - currentPosition_);
     sprintf(pC_->outString_, "%dPR%d", axisID_, steps);
   }
-  status = pC_->writeAgilis();
+  status = writeAgilis();
   return status;
 }
 
@@ -232,7 +286,7 @@ int AG_UCAxis::velocityToSpeedCode(double velocity)
   if      (fabs(velocity) <= 5)   speed = 1;
   else if (fabs(velocity) <= 100) speed = 2;
   else if (fabs(velocity) <= 666) speed = 4;
-  else                           speed = 3;
+  else                            speed = 3;
   if (velocity < 0) speed = -speed;
   return speed;
 }
@@ -244,7 +298,7 @@ asynStatus AG_UCAxis::home(double minVelocity, double maxVelocity, double accele
 
   if (!hasLimits_) return asynError;
   sprintf(pC_->outString_, "%dMV%d", axisID_, velocityToSpeedCode(maxVelocity));
-  status = pC_->writeAgilis();
+  status = writeAgilis();
   return status;
 }
 
@@ -254,7 +308,7 @@ asynStatus AG_UCAxis::moveVelocity(double minVelocity, double maxVelocity, doubl
   //static const char *functionName = "AG_UCAxis::moveVelocity";
 
   sprintf(pC_->outString_, "%dJA%d", axisID_, velocityToSpeedCode(maxVelocity));
-  status = pC_->writeAgilis();
+  status = writeAgilis();
   return status;
 }
 
@@ -264,7 +318,7 @@ asynStatus AG_UCAxis::stop(double acceleration )
   //static const char *functionName = "AG_UCAxis::stop";
 
   sprintf(pC_->outString_, "%dST", axisID_);
-  status = pC_->writeAgilis();
+  status = writeAgilis();
   return status;
 }
 
@@ -289,10 +343,15 @@ asynStatus AG_UCAxis::poll(bool *moving)
   int position;
   asynStatus comStatus;
 
+  //  Select this channel
+  pC_->setChannel(channelID_);
+  
   // Read the current motor position
   sprintf(pC_->outString_, "%dTP", axisID_);
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
+  // Seems to be necessary to delay a short time between writes
+  epicsThreadSleep(WRITE_DELAY);  
   // The response string is of the form "1TPxxx"
   position = atoi(&pC_->inString_[3]);
   currentPosition_ = position + positionOffset_;
@@ -302,6 +361,8 @@ asynStatus AG_UCAxis::poll(bool *moving)
   sprintf(pC_->outString_, "%dTS", axisID_);
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
+  // Seems to be necessary to delay a short time between writes
+  epicsThreadSleep(WRITE_DELAY);  
   // The response string is of the form "1TSn"
   done = (pC_->inString_[3] == '0') ? 1:0;
   setIntegerParam(pC_->motorStatusDone_, done);
@@ -311,6 +372,8 @@ asynStatus AG_UCAxis::poll(bool *moving)
   sprintf(pC_->outString_, "PH");
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
+  // Seems to be necessary to delay a short time between writes
+  epicsThreadSleep(WRITE_DELAY);  
   // The response string is of the form "PHn"
   lim = atoi(&pC_->inString_[2]);
   if ((axisID_ == 1) && (lim == 1 || lim == 3)) limit = 1;
@@ -322,6 +385,19 @@ asynStatus AG_UCAxis::poll(bool *moving)
   setIntegerParam(pC_->motorStatusProblem_, comStatus ? 1:0);
   callParamCallbacks();
   return comStatus ? asynError : asynSuccess;
+}
+
+/** Writes a string to the controller.
+  * Calls writeAgilis() with a default location of the string to write and a default timeout. */ 
+asynStatus AG_UCAxis::writeAgilis()
+{
+  return pC_->writeAgilis(channelID_, pC_->outString_, AGILIS_TIMEOUT);
+}
+
+
+asynStatus AG_UCAxis::writeAgilis(const char *output, double timeout)
+{
+  return pC_->writeAgilis(channelID_, output, timeout);
 }
 
 /** Code for iocsh registration */
