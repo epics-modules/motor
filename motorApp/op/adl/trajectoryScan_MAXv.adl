@@ -5,10 +5,10 @@ file {
 }
 display {
 	object {
-		x=18
-		y=123
+		x=767
+		y=535
 		width=530
-		height=140
+		height=95
 	}
 	clr=14
 	bclr=4
@@ -130,8 +130,8 @@ rectangle {
 	object {
 		x=5
 		y=25
-		width=524
-		height=110
+		width=520
+		height=65
 	}
 	"basic attribute" {
 		clr=14
