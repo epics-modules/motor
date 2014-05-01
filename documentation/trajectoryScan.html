@@ -276,21 +276,6 @@ define the trajectory. Some of these are explained in more detail below.</P>
       can be changed again after changing <CODE>Nelements</CODE> if 
       desired.</TD></TR>
 
-  <TR> <TD><CODE>PulseDir</CODE> (Ensemble only)</TD> <TD>mbbo</TD> <TD>The
-	encoder direction in which output pulses will be generated.  Choices are
-	0=<code>Both</code>, 1=<code>Pos</code>, and 2=<code>Neg</code>. 
-	Default=<code>Both</code>.</TD></TR>
-
-  <TR>
-    <TD><CODE>PulseLenUS</CODE> (Ensemble only)</TD>
-    <TD>ao</TD>
-    <TD>The pulse length in microseconds. Default=25.</TD></TR>
-
-  <TR> <TD><CODE>PulseSrc</CODE> (Ensemble only)</TD> <TD>longout</TD>
-	<TD>The pulse source.  This depends on the controller and
-	from where it gets its encoder signal.  Normally, the value is 1 or 3. 
-	Default=1.</TD></TR>
-
   <TR>
     <TD><CODE>TimeMode</CODE></TD>
     <TD>bo</TD>
@@ -320,6 +305,22 @@ define the trajectory. Some of these are explained in more detail below.</P>
 	<TD>The acceleration time for the trajectory. Default=0.5 seconds. 
 	<i>Currently, the Ensemble support gets this value from the motor
 	record.</i></TD></TR>
+
+  <TR> <TD><CODE>PulseDir</CODE> (Ensemble only)</TD> <TD>mbbo</TD> <TD>The
+	encoder direction in which output pulses will be generated.  Choices are
+	0=<code>Both</code>, 1=<code>Pos</code>, and 2=<code>Neg</code>. 
+	Default=<code>Both</code>.</TD></TR>
+
+  <TR>
+    <TD><CODE>PulseLenUS</CODE> (Ensemble only)</TD>
+    <TD>ao</TD>
+    <TD>The pulse length in microseconds. Default=25.</TD></TR>
+
+  <TR> <TD><CODE>PulseSrc</CODE> (Ensemble only)</TD> <TD>longout</TD>
+	<TD>The pulse source.  This depends on the controller and
+	from where it gets its encoder signal.  Normally, the value is 1 or 3. 
+	Default=1.</TD></TR>
+
   </TBODY>
 </TABLE>
       
@@ -368,9 +369,10 @@ move from position <CODE>MnTraj[i]</CODE> to <CODE>MnTraj[i+1]</CODE>.</P>
 MAXv may, and Ensemble always does, send the motor to a starting point that is
 the acceleration distance from the start position, whether the trajectory mode
 is <CODE>Absolute</CODE> or <CODE>Relative</CODE>.  The acceleration distance is
-Accel*V0, where Accel is the acceleration time, and V0 is the average velocity
-over the first trajectory segment.  Currently, the Ensemble support reads the
-acceleration time directly from the motor record.
+AccelTime*velocity[0]/2, where AccelTime is the acceleration time, and
+velocity[0] is the average velocity over the first trajectory segment. 
+Currently, the Ensemble support reads the acceleration time directly from the
+motor record.
 
 <P>The MM4005 requires the number of elements in a trajectory to be a multiple 
 of 4. This means that <CODE>Nelements</CODE> 
@@ -416,14 +418,14 @@ to be somewhat larger than the range in the trajectory itself.  This means that 
 cannot execute right up to the software or hardware limits for an axis, because there
 will not be room for the acceleration motion.
 
-<P> The MAXv and Ensemble controllers also do not do this acceleration
-automatically. The SNL programs add an element to the beginning of the
+<P> The MAXv and Ensemble controllers also do not automatically accelerate onto
+the trajectory. The SNL programs add an element to the beginning of the
 trajectory and one (MAXv) or two (Ensemble) elements to the end.  (Ensemble
-always does this; MAXv does it if <code>AddAccelDecel=Yes</code>.) These elements
-cause the actual range of motion of each of the motors to be somewhat larger
-than the range in the trajectory itself.  This means that trajectories cannot
-execute right up to the software or hardware limits for an axis, because there
-will not be room for the acceleration motion.
+always does this; MAXv does it if <code>AddAccelDecel=Yes</code>.) These
+elements cause the actual range of motion of each of the motors to be somewhat
+larger than the range in the trajectory itself.  This means that trajectories
+cannot execute right up to the software or hardware limits for an axis, because
+there will not be room for the acceleration motion.
 
 <P>
 The number of trajectory elements, <CODE>Nelements </CODE>is limited as 
