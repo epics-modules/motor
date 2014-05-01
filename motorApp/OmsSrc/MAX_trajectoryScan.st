@@ -400,6 +400,10 @@ ss maxTrajectoryScan {
 					vmax = epicsMotorVMAX[j];
 					if (fabs(vmax) < .001) vmax = epicsMotorVELO[j];
 					amax = vmax/epicsMotorACCL[j];
+					motorMVA[j] = 0.;
+					motorMAA[j] = 0.;
+					motorMVE[j] = 0;
+					motorMAE[j] = 0;
 					for (k=0; k<npoints && !limitViolation; k++) {
 						posActual = motorTrajectory[j][k];
 						if (moveMode != MOVE_MODE_ABSOLUTE) posActual += epicsMotorPos[j];
@@ -417,7 +421,21 @@ ss maxTrajectoryScan {
 							epicsSnprintf(buildMessage, MSGSIZE, "A limit: m%d at pt. %d (%f)", j+1, k+1,
 								acceleration[j][k]*epicsMotorMres[j]);
 						}
+						if (fabs(velocity[j][k]) > motorMVA[j]) {
+							motorMVA[j] = velocity[j][k];
+							motorMVE[j] = k;
+						}
+						if (fabs(acceleration[j][k]) > motorMAA[j]) {
+							motorMAA[j] = acceleration[j][k];
+							motorMAE[j] = k;
+						}
 					}
+					motorMVA[j] *= epicsMotorMres[j];
+					motorMAA[j] *= epicsMotorMres[j];
+					pvPut(motorMVA[j]);
+					pvPut(motorMAA[j]);
+					pvPut(motorMVE[j]);
+					pvPut(motorMAE[j]);
 				}
 			}
 
@@ -1060,7 +1078,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 		} else {
 			v_ideal = 0.;
 			accel_v = (v_ideal - v_out[i-1])/dt;
-			a_out[i-1] = accel_p;
+			a_out[i-1] = accel_v;
 		}
 		if (pVar->debugLevel >= 7) {
 			printf("%3d:%8.2f %8.2f %7.2f %8.3f %8.3f %8.3f %8.3f %8.3f\n",
@@ -1086,7 +1104,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 		calcMotorTrajectory[i] = calcMotorTrajectory[i-1] + v_out[i-1]*dt + .5 * a_out[i-1]*dt*dt;
 	}
 	a_out[npoints-1] = a_out[npoints-2];
-	
+
 	if (pVar->debugLevel >= 7) {
 		printf("buildTrajectory:\n");
 		printf("%10s %10s %10s %10s %10s\n", "realTime", "motorTraj", "calcTraj", "v_out", "a_out");
