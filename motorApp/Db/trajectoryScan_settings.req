@@ -54,3 +54,5 @@ $(P)$(R)AddAccelDecel
 $(P)$(R)PulseDir
 $(P)$(R)PulseLenUS
 $(P)$(R)PulseSrc
+$(P)$(R)PulseMode
+$(P)$(R)PulsePositions
