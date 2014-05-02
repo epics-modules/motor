@@ -1,14 +1,14 @@
 
 file {
-	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/trajectoryScan_Ensemble.adl"
+	name="/home/oxygen4/MOONEY/epics/synAppsSVN/support/motor/motorApp/op/adl/trajectoryScan_Ensemble.adl"
 	version=030107
 }
 display {
 	object {
-		x=18
-		y=123
+		x=768
+		y=157
 		width=530
-		height=120
+		height=170
 	}
 	clr=14
 	bclr=4
@@ -90,32 +90,6 @@ display {
 text {
 	object {
 		x=10
-		y=35
-		width=220
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="PSO Pulse Direction"
-	align="horiz. right"
-}
-menu {
-	object {
-		x=234
-		y=35
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)PulseDir"
-		clr=14
-		bclr=51
-	}
-}
-text {
-	object {
-		x=10
 		y=60
 		width=220
 		height=20
@@ -144,61 +118,6 @@ text {
 text {
 	object {
 		x=10
-		y=85
-		width=220
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="PSO Pulse Source"
-	align="horiz. right"
-}
-"text entry" {
-	object {
-		x=234
-		y=85
-		width=100
-		height=20
-	}
-	control {
-		chan="$(P)$(R)PulseSrc"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-"text entry" {
-	object {
-		x=485
-		y=46
-		width=25
-		height=20
-	}
-	control {
-		chan="$(P)$(R)OutBitNum"
-		clr=14
-		bclr=51
-	}
-	limits {
-	}
-}
-text {
-	object {
-		x=370
-		y=45
-		width=110
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Output Bit#"
-}
-text {
-	object {
-		x=10
 		y=0
 		width=510
 		height=20
@@ -214,11 +133,157 @@ rectangle {
 		x=5
 		y=25
 		width=520
-		height=90
+		height=140
 	}
 	"basic attribute" {
 		clr=14
 		fill="outline"
 		width=2
 	}
+}
+composite {
+	object {
+		x=10
+		y=35
+		width=324
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=10
+				y=35
+				width=220
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="PSO Pulse Direction"
+			align="horiz. right"
+		}
+		menu {
+			object {
+				x=234
+				y=35
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)PulseDir"
+				clr=14
+				bclr=51
+			}
+		}
+	}
+}
+text {
+	object {
+		x=10
+		y=110
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="PSO Pulse Mode"
+	align="horiz. right"
+}
+menu {
+	object {
+		x=234
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)PulseMode"
+		clr=14
+		bclr=51
+	}
+}
+composite {
+	object {
+		x=10
+		y=85
+		width=324
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=10
+				y=85
+				width=220
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="PSO Pulse Source"
+			align="horiz. right"
+		}
+		"text entry" {
+			object {
+				x=234
+				y=85
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)PulseSrc"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+	}
+}
+text {
+	object {
+		x=10
+		y=135
+		width=220
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="PSO Pulse Positions"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=234
+		y=135
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)PulsePositions"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=343
+		y=135
+		width=50
+		height=20
+	}
+	display[0] {
+		label="PSO pulse positions"
+		name="PSOarrayPlot.adl"
+		args="TITLE=PSO-pulse positions,Y=$(P)$(R)PulsePositions"
+	}
+	clr=0
+	bclr=63
+	label="-Plot"
 }
