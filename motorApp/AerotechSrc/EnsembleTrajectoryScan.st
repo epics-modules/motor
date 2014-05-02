@@ -138,6 +138,7 @@ double motorPosOffset[MAX_AXES];
 /* variables for constructing trajectory commands */
 int movingMask;
 int numGlobalDoubles;
+int numGlobalIntegers;
 
 /* temporary variables to hold mav speed and acceleration for a motor */
 double vmax;
@@ -163,6 +164,8 @@ int nAcqDataPoints;
 #define HomePositionSet_PARM_NUM 166
 
 %%int encoder_runs_backwards=0;
+
+int pulsePositionsLoaded;
 
 ss EnsembleTrajectoryScan {
 
@@ -245,6 +248,13 @@ ss EnsembleTrajectoryScan {
 			efClear(readbackMon);
 			efClear(nelementsMon);
 			efClear(motorMDVSMon); /* we don't use this */
+
+			/* We don't want to upload pulse positions unless they have never been loaded,
+			 * or they have changed since they were loaded.
+			 */
+			efClear(pulsePositionsMon);
+			pulsePositionsLoaded = 0;
+
 			if (initStatus == STATUS_UNDEFINED) initStatus = STATUS_SUCCESS;
 			loadingTrajectory = 0;
 
@@ -262,6 +272,22 @@ ss EnsembleTrajectoryScan {
 					numGlobalDoubles = 0;
 				}
 			}
+
+			/* PARAMETERID_GlobalIntegers is 124 */
+			%%pVar->status = writeRead(ssId, pVar, "getparm(124)", pVar->stringIn);
+			if (stringIn[0] == '%') {
+				numGlobalIntegers = atol(&stringIn[1]);
+			} else {
+				/* try again */
+				%%pVar->status = writeRead(ssId, pVar, "getparm(@0,124)", pVar->stringIn);
+				if (stringIn[0] == '%') {
+					numGlobalIntegers = atol(&stringIn[1]);
+				} else {
+					printf("Can't read number of global integers.  Motor controller problem?\n");
+					numGlobalIntegers = 0;
+				}
+			}
+
 		} state monitor_inputs
 	}
 
@@ -291,6 +317,12 @@ ss EnsembleTrajectoryScan {
 			endPulses = nelements;
 			pvPut(endPulses);
 		} state monitor_inputs
+
+		when (efTestAndClear(pulsePositionsMon)) {
+			if (debugLevel>1) printf("EnsembleTrajectoryScan: new pulse positions detected\n");
+			pulsePositionsLoaded = PULSE_POSITIONS_LOADED_NONE;
+		} state monitor_inputs
+
 	}
 
 	/* Build trajectory */
@@ -548,7 +580,7 @@ ss EnsembleTrajectoryScan {
 			pvPut(execStatus);
 			pvPut(execMessage);
 			/* Turn PSO off */
-			if ((outBitNum >= 0) && (outBitNum <= 15)) {
+			if (pulseMode != PULSE_MODE_NONE) {
 				strcpy(stringOut, "PSOCONTROL @0 OFF");
 				%%pVar->status = writeRead(ssId, pVar, pVar->stringOut, pVar->stringIn);
 			}
@@ -1223,11 +1255,6 @@ int writeIntAndCheck(SS_ID ssId, struct UserVar *pVar, int n, int ival) {
 }
 
 
-/* Not all Ensemble controllers support PSOARRAY commands.  There doesn't seem to be a command
- * that allows software to determine whether or not PSOARRAY commands are supported.
- */
-#define PSO_DISTANCE_ARRAY 0
-
 /* For trajectories of unlimited length, PVT commands can be executed via sendReceiveCommand(),
  * but this has not been reliable enough, so if PVT_BY_CONTROLLER, we send the whole trajectory
  * to the controller via DGLOBAL variables.
@@ -1240,14 +1267,12 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 	char stringOut[MAX_MESSAGE_STRING], reply[MAX_MESSAGE_STRING];
 	double position, p, v, t, dp, dtime;
 	int iGlobalIndex;
-	int nPulses = 1 + pVar->endPulses - pVar->startPulses;
 	int intPosition;
 	double accelDist, accelTime, decelDist, decelTime, positionLast;
 	double home_position_set=0.;
 	double posfbkprog, posfbkcal;
 
 	pVar->loadingTrajectory = 1;
-	iGlobalIndex = GLOBALINDEXSTART;
 
 	sprintf(stringOut, "getparm(@0,%d)", ReverseMotionDirection_PARM_NUM);
 	status = writeRead(ssId, pVar, stringOut, reply);
@@ -1273,55 +1298,81 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		pVar->motorPosOffset[j] = posfbkprog - posfbkcal;
 	}
 
-#if PSO_DISTANCE_ARRAY
+	/* We can write an array of positions at which PSO pulses are wanted, and the array can be either
+	 * the trajectory points, or points specified by the user in pulsePositions[].  If we're doing this,
+	 * we'd like not to write the PSO positions unless they have changed.  If we're doing pulses at
+	 * trajectory points, just write them every time, because we don't yet have a mechanism to keep track
+	 * of everything that might require a rewrite.  But if we're doing pulses at pulsePositions[], make a
+	 * note when we write them, and don't write them again unless pulsePositions[] has changed, or we've
+	 * overwritten the IGLOBAL array with trajectory-point positions.
+	 */ 
+	if ((pVar->pulseMode == PULSE_MODE_ARRAY) || (pVar->pulseMode == PULSE_MODE_TRAJPTS)) {
+		/* Program PSO array output */
+		int np;
+		int maxArrayPulses = MIN(MAX_PSO_PULSES, pVar->numGlobalIntegers - GLOBALINDEXSTART);
+		
+		
 
-	/* Program PSO array output */
-	for (j=0; j<1; j++) {
-
-		/* Calc accel portion of trajectory.  Note epicsMotorACCL is accel time. */
-		accelTime = pVar->epicsMotorACCL[j];
-		accelDist = (pVar->velocity[j][0] * pVar->epicsMotorACCL[j]) / 2;
-
-		decelTime = pVar->epicsMotorACCL[j];
-		decelDist = (pVar->velocity[j][pVar->npoints - 1] * pVar->epicsMotorACCL[j]) / 2;
-
-		if (pVar->moveAxis[j]) {
+		if ((pVar->pulseMode == PULSE_MODE_ARRAY) &&
+			(pVar->pulsePositionsLoaded != PULSE_POSITIONS_LOADED_ARRAY)) {
+			j = 0; /* For now, we only support one motor */
+			/* user has loaded an array of pulse positions into pulsePositions[] */
 			positionLast = pVar->motorStart[j];
-			for (i=0; i<pVar->npoints; i++) {
-				/* enable pulses if we're within user specified range */
-				if ((pVar->outBitNum >= 0) && (pVar->outBitNum <= 15)) {
-					if (i >= pVar->startPulses && i <= pVar->endPulses) {
-						/* Add this pulse-out location to the list */
-						position = pVar->motorTrajectory[j][i];
-						intPosition = NINT((position - positionLast)/pVar->epicsMotorMres[j]);
-						status = writeIntAndCheck(ssId, pVar, iGlobalIndex++, abs(intPosition));
-						positionLast += intPosition*pVar->epicsMotorMres[j]; /* position of last pulse */
-					}
-				}
-
+			iGlobalIndex = GLOBALINDEXSTART;
+			if (pVar->numGlobalIntegers < (pVar->numPulsePositions + GLOBALINDEXSTART)) {
+				printf("EnsembleTrajectoryScan: The Ensemble only has enough global integers for %d pulses\n",
+					pVar->numGlobalIntegers - GLOBALINDEXSTART);
 			}
+			if (pVar->numPulsePositions > MAX_PSO_PULSES) {
+				printf("EnsembleTrajectoryScan: The Ensemble can't load more than %d PSOARRAY pulses\n",
+					MAX_PSO_PULSES);
+			}
+			for (i=0, np=0; i<pVar->numPulsePositions && np<maxArrayPulses; i++) {
+				/* Add this pulse-out location to the list */
+				position = pVar->pulsePositions[i];
+				intPosition = NINT((position - positionLast)/pVar->epicsMotorMres[j]);
+				status = writeIntAndCheck(ssId, pVar, iGlobalIndex++, abs(intPosition));
+				positionLast += intPosition*pVar->epicsMotorMres[j]; /* position of last pulse */
+			}
+			pVar->pulsePositionsLoaded = PULSE_POSITIONS_LOADED_ARRAY;
+		} else {
+			/* user wants pulses at trajectory points */
+			j = 0; /* For now, we only support one motor */
+			positionLast = pVar->motorStart[j];
+			iGlobalIndex = GLOBALINDEXSTART;
+			if (pVar->numGlobalIntegers < (pVar->npoints + GLOBALINDEXSTART)) {
+				printf("EnsembleTrajectoryScan: The Ensemble only has enough global integers for %d pulses\n",
+					pVar->numGlobalIntegers - GLOBALINDEXSTART);
+			}
+			if (pVar->npoints > MAX_PSO_PULSES) {
+				printf("EnsembleTrajectoryScan: The Ensemble can't load more than %d PSOARRAY pulses\n",
+					MAX_PSO_PULSES);
+			}
+			for (i=0, np=0; i<pVar->npoints && np<maxArrayPulses; i++) {
+				/* enable pulses if we're within user specified range */
+				if (i >= pVar->startPulses && i <= pVar->endPulses) {
+					/* Add this pulse-out location to the list */
+					position = pVar->motorTrajectory[j][i];
+					intPosition = NINT((position - positionLast)/pVar->epicsMotorMres[j]);
+					status = writeIntAndCheck(ssId, pVar, iGlobalIndex++, abs(intPosition));
+					positionLast += intPosition*pVar->epicsMotorMres[j]; /* position of last pulse */
+				}
+			}
+			pVar->pulsePositionsLoaded = PULSE_POSITIONS_LOADED_TRAJ;
 		}
+
+		/* Copy from IGLOBAL variables into the drive array */
+		sprintf(stringOut, "PSOARRAY @0,%d,%d", GLOBALINDEXSTART, np);
+		status = writeRead(ssId, pVar, stringOut, reply);
+		/* Send PSO pulses at specified positions. */
+		strcpy(stringOut, "PSODISTANCE @0 ARRAY");
+		status = writeRead(ssId, pVar, stringOut, reply);
 	}
-	/* Copy from IGLOBAL variables into the drive array */
-	sprintf(stringOut, "PSOARRAY @0,%d,%d", GLOBALINDEXSTART, nPulses);
-	status = writeRead(ssId, pVar, stringOut, reply);
-	/* Send a PSO pulse at every trajectory point. */
-	strcpy(stringOut, "PSODISTANCE @0 ARRAY"); /* use IGLOBAL array */
-	status = writeRead(ssId, pVar, stringOut, reply);
-#endif
 
 	/* digital I/O commands */
-	if ((pVar->outBitNum >= 0) && (pVar->outBitNum <= 15)) {
-/* first trajectory doesn't work.  Try commenting this out.*/
-#if 0
-		strcpy(stringOut, "PSOCONTROL @0 RESET");
-		status = writeRead(ssId, pVar, stringOut, reply);
-#endif
-		/*strcpy(stringOut, "PSOOUTPUT @0 CONTROL 1");*/
-		/*status = writeRead(ssId, pVar, stringOut, reply);*/
+	if (pVar->pulseMode != PULSE_MODE_NONE) {
 
 		/* (total time, on time) in microseconds */
-		/* strcpy(stringOut, "PSOPULSE @0 TIME 50,25"); */
 		sprintf(stringOut, "PSOPULSE @0 TIME %f,%f", pVar->pulseLenUS*1.5, pVar->pulseLenUS);
 		status = writeRead(ssId, pVar, stringOut, reply);
 		strcpy(stringOut, "PSOOUTPUT @0 PULSE");
@@ -1336,18 +1387,16 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		sprintf(stringOut, "PSOTRACK @0 DIRECTION %d", pVar->pulseDir);
 		status = writeRead(ssId, pVar, stringOut, reply);
 
-		/* Not all Ensemble controllers support the "PSODISTANCE X ARRAY" command */
-#if PSO_DISTANCE_ARRAY
-		/* Send a PSO pulse at every trajectory point. */
-		strcpy(stringOut, "PSODISTANCE @0 ARRAY"); /* use IGLOBAL array */
-		status = writeRead(ssId, pVar, stringOut, reply);
-#else
-		/* Just send fixed-distance pulses.  For now, don't even worry about StartPulses, EndPulses */
-		dp = fabs(pVar->motorTrajectory[0][pVar->npoints-1] - pVar->motorTrajectory[0][0]) / pVar->npulses;
-		sprintf(stringOut, "PSODISTANCE @0 FIXED %f UNITS", dp);
-		status = writeRead(ssId, pVar, stringOut, reply);
-#endif
-
+		if ((pVar->pulseMode == PULSE_MODE_ARRAY) || (pVar->pulseMode == PULSE_MODE_TRAJPTS)) {
+			/* Send PSO pulses at specified points. */
+			strcpy(stringOut, "PSODISTANCE @0 ARRAY");
+			status = writeRead(ssId, pVar, stringOut, reply);
+		} else if (pVar->pulseMode == PULSE_MODE_FIXED) {
+			/* Just send fixed-distance pulses.  For now, don't even worry about StartPulses, EndPulses */
+			dp = fabs(pVar->motorTrajectory[0][pVar->npoints-1] - pVar->motorTrajectory[0][0]) / pVar->npulses;
+			sprintf(stringOut, "PSODISTANCE @0 FIXED %f UNITS", dp);
+			status = writeRead(ssId, pVar, stringOut, reply);
+		}
 		strcpy(stringOut, "PSOCONTROL @0 ARM");
 		status = writeRead(ssId, pVar, stringOut, reply);
 	}
@@ -1423,7 +1472,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		if (status) goto bad;
 	}
 
-	/* add extra trajectory point to reduce end transient */
+	/* add extra trajectory points to reduce end transient */
 	p = 2*pVar->motorTrajectory[j][pVar->npoints-1] - pVar->motorTrajectory[j][pVar->npoints-2];
 	v = pVar->velocity[j][pVar->npoints-1];
 	t = accelTime + 2*pVar->realTimeTrajectory[pVar->npoints-1] - pVar->realTimeTrajectory[pVar->npoints-2];
@@ -1459,7 +1508,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 	sprintf(stringOut, "DOTRAJECTORY");
 	status = sendReceiveCommand(ssId, pVar, stringOut, reply, 0);
 
-#else
+#else /* PVT_BY_CONTROLLER */
 
 #if USE_SCOPE
 	status = sendReceiveCommand(ssId, pVar, "SCOPETRIG", reply, 0);
@@ -1597,7 +1646,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		}
 	}
 
-#endif
+#endif /* PVT_BY_CONTROLLER */
 
 	if (pVar->abortState != ABORT_STATE_NONE) goto abort;
 	
@@ -1655,7 +1704,7 @@ abort:
 	status = writeRead(ssId, pVar, pVar->abortCommand, pVar->stringIn);
 	pVar->abortState = ABORT_STATE_SENT;
 	pVar->loadingTrajectory = 0;
-	if ((pVar->outBitNum >= 0) && (pVar->outBitNum <= 15)) {
+	if (pVar->pulseMode != PULSE_MODE_NONE) {
 		strcpy(stringOut, "PSOCONTROL @0 OFF");
 		status = writeRead(ssId, pVar, stringOut, reply);
 	}
@@ -1826,3 +1875,45 @@ int  parabola(double *x, double *y, int npts, double *xFit) {
 }
 
 }%
+
+
+/************************************************************************
+
+How to find out if an Ensemble controller supports the PSOARRAY command:
+
+There is an AeroBasic command called DriveInfo.  This function can be used to
+get the DriveTypeID of the drive.  This is not an ASCII command, but you could
+have a program running on the drive that could get this information and set a
+variable you can read.
+
+In the Ensemble help under DriveInfo is a section on DriveInfoConstants include
+that shows the values to use in place of the AeroBasic constants.
+
+This command requires V4.03 or higher.  It is not available via the ASCII
+interface.  It has to be done via AeroBasic.
+
+The command would look like this:
+ 
+IGLOBAL(0)=DRIVEINFO (X,59)
+ 
+      The value returned by the DRIVEINFO function will correspond to the below list of defines.  The revision is not included in this information.
+ 
+#define DRIVE_ID_ENSEMBLE             0x0800
+#define DRIVE_ID_CP                   0x8005
+#define DRIVE_ID_MP                   0x8006
+#define DRIVE_ID_EPAQ                 0x8007
+#define DRIVE_ID_CL                   0x8008
+#define DRIVE_ID_HPE                  0x8009
+#define DRIVE_ID_HLE                  0x800A
+#define DRIVE_ID_ML                   0x800B
+#define DRIVE_ID_PMT                  0x800C
+#define DRIVE_ID_LAB                  0x800D
+#define DRIVE_ID_QLAB                 0x800E
+ 
+For Ensemble drives, the DRIVE_ID_ENSEMBLE will be bitwise ORed with the other
+ID.  In other words, a Soloist CP will return 0x8005, while an Ensemble CP will
+return 0x8805.
+
+Per email from Matt Davis at Aerotech.
+
+***************************************************************************/
