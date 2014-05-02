@@ -53,6 +53,27 @@ grecord(longout,"$(P)$(R)Nactual") {
     field(DESC,"Actual # of output pulses")
 }
 
+record(mbbi,"$(P)$(R)PulseMode") {
+    field(DESC,"Pulse mode")
+    field(VAL, "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Fixed")
+    field(ONVL, "1")
+    field(ONST, "Array")
+    field(TWVL, "2")
+    field(TWST, "TrajPts")
+    field(THVL, "3")
+    field(THST, "None")
+}
+
+grecord(waveform,"$(P)$(R)PulsePositions") {
+    field(DESC,"Output-pulse positions")
+    field(NELM,"$(NPULSE)")
+    field(FTVL,"DOUBLE")
+    field(PREC, "3")
+}
+
 record(mbbo, "$(P)$(R)PulseDir") {
     field(DESC,"Both, Neg, or Pos")
 	field(ZRVL, "0")
