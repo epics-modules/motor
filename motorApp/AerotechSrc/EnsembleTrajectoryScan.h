@@ -88,27 +88,14 @@ monitor timeTrajectory;
 string  trajectoryFile; assign trajectoryFile to "{P}{R}TrajectoryFile.VAL";
 monitor trajectoryFile;
 
-/*** BEGIN: Specific to MAX_trajectoryScan.st ***/
+/*** BEGIN: Specific to EnsembleTrajectoryScan.st ***/
 
 /* time since trajectory start */
 double  elapsedTime; assign elapsedTime  to "{P}{R}ElapsedTime.VAL";      
 
-/* Number (0..15) of general purpose I/O bit to be used for output pulses (e.g., to trigger detector). */
-int     outBitNum;   assign outBitNum    to "{P}{R}OutBitNum.VAL"; 
-monitor outBitNum;
-
-/* Number (0..15) of general purpose I/O bit to be used for input start-trajectory pulse. */
-int     inBitNum;    assign inBitNum     to "{P}{R}InBitNum.VAL"; 
-monitor inBitNum;
-
 /* time in seconds from trajectory start */
 double  realTimeTrajectory[MAX_ELEMENTS];
 assign  realTimeTrajectory to "{P}{R}realTimeTrajectory.VAL"; 
-
-/* raw values read from the controller, generally while a trajectory is executing */
-int  motorCurrentRaw[MAX_AXES];
-int  motorCurrentVRaw[MAX_AXES];
-int  motorCurrentARaw[MAX_AXES];
 
 /* EPICS motor record resolution */
 double  epicsMotorMres[MAX_AXES]; 
@@ -128,32 +115,6 @@ double  epicsMotorLLM[MAX_AXES];
 assign  epicsMotorLLM to {"","","","","","","",""};
 monitor epicsMotorLLM;
 
-double  motorMinSpeed[MAX_AXES]; 
-assign  motorMinSpeed to
-        {"{P}{R}M1MinSpeed.VAL",
-         "{P}{R}M2MinSpeed.VAL",
-         "{P}{R}M3MinSpeed.VAL",
-         "{P}{R}M4MinSpeed.VAL",
-         "{P}{R}M5MinSpeed.VAL",
-         "{P}{R}M6MinSpeed.VAL",
-         "{P}{R}M7MinSpeed.VAL",
-         "{P}{R}M8MinSpeed.VAL"};
-
-double  motorMaxSpeed[MAX_AXES]; 
-assign  motorMaxSpeed to
-        {"{P}{R}M1MaxSpeed.VAL",
-         "{P}{R}M2MaxSpeed.VAL",
-         "{P}{R}M3MaxSpeed.VAL",
-         "{P}{R}M4MaxSpeed.VAL",
-         "{P}{R}M5MaxSpeed.VAL",
-         "{P}{R}M6MaxSpeed.VAL",
-         "{P}{R}M7MaxSpeed.VAL",
-         "{P}{R}M8MaxSpeed.VAL"};
-
-/*** END: Specific to MAX_trajectoryScan.st ***/
-
-/*** BEGIN: Specific to MAX_trajectoryScan.st and EnsembleTrajectoryScan.st ***/
-
 double  motorStart[MAX_AXES]; 
 assign  motorStart to
         {"{P}{R}M1Start.VAL",
@@ -164,10 +125,6 @@ assign  motorStart to
          "{P}{R}M6Start.VAL",
          "{P}{R}M7Start.VAL",
          "{P}{R}M8Start.VAL"};
-
-/*** END: Specific to MAX_trajectoryScan.st and EnsembleTrajectoryScan.st ***/
-
-/*** BEGIN: Specific to EnsembleTrajectoryScan.st ***/
 
 int pulseDir;
 assign pulseDir to "{P}{R}PulseDir";
@@ -180,6 +137,29 @@ monitor pulseLenUS;
 int pulseSrc;
 assign pulseSrc to "{P}{R}PulseSrc";
 monitor pulseSrc;
+
+/* Pulse modes */
+#define PULSE_MODE_FIXED   0
+#define PULSE_MODE_ARRAY   1
+#define PULSE_MODE_TRAJPTS 2
+#define PULSE_MODE_NONE    3
+
+#define MAX_PSO_PULSES 8192
+
+double pulsePositions[MAX_PULSES]; 
+assign pulsePositions to "{P}{R}PulsePositions";
+monitor pulsePositions;
+evflag pulsePositionsMon;	sync pulsePositions pulsePositionsMon;
+
+int     numPulsePositions;    assign numPulsePositions to "{P}{R}PulsePositions.NORD";    
+monitor numPulsePositions;
+
+#define PULSE_POSITIONS_LOADED_NONE 0
+#define PULSE_POSITIONS_LOADED_ARRAY 1
+#define PULSE_POSITIONS_LOADED_TRAJ 1
+
+int     pulseMode;    assign pulseMode     to "{P}{R}PulseMode.VAL";    
+monitor pulseMode;
 
 /*** END: Specific to EnsembleTrajectoryScan.st ***/
 
