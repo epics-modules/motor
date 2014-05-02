@@ -1,0 +1,146 @@
+
+file {
+	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/PSOarrayPlot.adl"
+	version=030107
+}
+display {
+	object {
+		x=578
+		y=571
+		width=400
+		height=235
+	}
+	clr=14
+	bclr=0
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+"cartesian plot" {
+	object {
+		x=0
+		y=15
+		width=400
+		height=200
+	}
+	plotcom {
+		ylabel="$(YLABEL)"
+		clr=14
+		bclr=0
+	}
+	style="line"
+	count="$(Y).NORD"
+	trace[0] {
+		ydata="$(Y)"
+		data_clr=14
+		yaxis=0
+	}
+	x_axis {
+		rangeStyle="auto-scale"
+	}
+	y1_axis {
+		rangeStyle="auto-scale"
+	}
+	y2_axis {
+		rangeStyle="auto-scale"
+	}
+	countPvName="$(Y).NORD"
+	eraseMode="if zero"
+}
+text {
+	object {
+		x=0
+		y=0
+		width=400
+		height=13
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Y=$(Y)"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=0
+		y=218
+		width=400
+		height=13
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="X=array index"
+	align="horiz. centered"
+}
