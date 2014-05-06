@@ -78,15 +78,19 @@ static void statusCallback(void *, asynUser *, void *);
 
 typedef enum {int32Type, float64Type, float64ArrayType} interfaceType;
 
-struct motor_dset devMotorAsyn={ { 8,
-				NULL,
-				(DEVSUPFUN) init,
-				(DEVSUPFUN) init_record,
-                                  NULL },
-				update_values,
-				start_trans,
-				build_trans,
-				end_trans };
+struct motor_dset devMotorAsyn={ 
+    {
+         8,
+         NULL,
+         (DEVSUPFUN) init,
+         (DEVSUPFUN) init_record,
+         NULL 
+    },
+    update_values,
+    start_trans,
+    build_trans,
+    end_trans
+};
 
 epicsExportAddress(dset,devMotorAsyn);
 
@@ -175,8 +179,8 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
 
         pPvt->initEvent = initEvent;
 
-	/*Before setting position, set the correct encoder ratio.*/
-	start_trans(pmr);
+        /*Before setting position, set the correct encoder ratio.*/
+        start_trans(pmr);
         build_trans(SET_ENC_RATIO, encRatio, pmr);
         end_trans(pmr);
 
@@ -238,7 +242,7 @@ static long init_record(struct motorRecord * pmr )
     pmr->dpvt = pPvt;
 
     status = pasynEpicsUtils->parseLink(pasynUser, &pmr->out,
-                                    &port, &signal, &userParam);
+                                        &port, &signal, &userParam);
     if (status != asynSuccess) {
         errlogPrintf("devMotorAsyn::init_record %s bad link %s\n",
                      pmr->name, pasynUser->errorMessage);
@@ -334,13 +338,14 @@ static long init_record(struct motorRecord * pmr )
     pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
     pasynUser->reason = pPvt->driverReasons[motorStatus];
     status = pPvt->pasynGenericPointer->registerInterruptUser(pPvt->asynGenericPointerPvt,
-							   pasynUser,
-							   statusCallback,
-							   pPvt,
-							   &pPvt->registrarPvt);
+                               pasynUser,
+                               statusCallback,
+                               pPvt,
+                               &pPvt->registrarPvt);
     if(status!=asynSuccess) {
-	printf("%s devMotorAsyn::init_record registerInterruptUser %s\n",
-	       pmr->name, pasynUser->errorMessage);
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "devMotorAsyn::init_record %s devMotorAsyn::init_record registerInterruptUser failed, error=%s\n",
+                  pmr->name, pasynUser->errorMessage);
     }
 
     /* Initiate calls to get the initial motor parameters
@@ -355,15 +360,15 @@ static long init_record(struct motorRecord * pmr )
     resolution = pmr->mres;
     pasynUser->reason = pPvt->driverReasons[motorResolution];
     pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser,
-			      resolution);
+                  resolution);
 */
     pasynUser->reason = pPvt->driverReasons[motorStatus];
     status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt, pasynUser,
-					  (void *)&pPvt->status);
+                      (void *)&pPvt->status);
     if (status != asynSuccess) {
-	asynPrint(pasynUser, ASYN_TRACE_ERROR,
-		  "%s devMotorAsyn.c::init_record: pasynGenericPointer->read "
-		  "returned %s", pmr->name, pasynUser->errorMessage);
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "devMotorAsyn::init_record: %s pasynGenericPointer->read returned %s", 
+                  pmr->name, pasynUser->errorMessage);
     }
 
     /* We must get the first set of status values from the controller before
@@ -398,20 +403,20 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         "%s devMotorAsyn::update_values, needUpdate=%d\n",
         pmr->name, pPvt->needUpdate);
     if ( pPvt->needUpdate ) {
-	epicsInt32 rawvel;
-	pmr->rmp = (epicsInt32)floor(pPvt->status.position + 0.5);
-	pmr->rep = (epicsInt32)floor(pPvt->status.encoderPosition + 0.5);
-	/* pmr->rvel = (epicsInt32)round(pPvt->status.velocity); */
-	pmr->msta = pPvt->status.status;
-	rawvel = (epicsInt32)floor(pPvt->status.velocity);
-	if (pmr->rvel != rawvel)
-	{
-	    pmr->rvel = rawvel;
-	    db_post_events(pmr, &pmr->rvel, DBE_VAL_LOG);
-	}
+        epicsInt32 rawvel;
+        pmr->rmp = (epicsInt32)floor(pPvt->status.position + 0.5);
+        pmr->rep = (epicsInt32)floor(pPvt->status.encoderPosition + 0.5);
+        /* pmr->rvel = (epicsInt32)round(pPvt->status.velocity); */
+        pmr->msta = pPvt->status.status;
+        rawvel = (epicsInt32)floor(pPvt->status.velocity);
+        if (pmr->rvel != rawvel)
+        {
+            pmr->rvel = rawvel;
+            db_post_events(pmr, &pmr->rvel, DBE_VAL_LOG);
+        }
 
-	rc = CALLBACK_DATA;
-	pPvt->needUpdate = 0;
+        rc = CALLBACK_DATA;
+        pPvt->needUpdate = 0;
     }
     return (rc);
 }
@@ -422,8 +427,8 @@ static long start_trans(struct motorRecord * pmr )
 }
 
 static RTN_STATUS build_trans( motor_cmnd command, 
-			       double * param,
-			       struct motorRecord * pmr )
+                   double * param,
+                   struct motorRecord * pmr )
 {
     RTN_STATUS rtnind = OK;
     asynStatus status;
@@ -433,34 +438,34 @@ static RTN_STATUS build_trans( motor_cmnd command,
     int need_call=0;
 
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
-              "devMotorAsyn::send_msg: %s command=%d, pact=%d\n",
-              pmr->name, command, pmr->pact);
+              "devMotorAsyn::build_trans: %s motor_cmnd=%d, pact=%d, value=%f\n",
+              pmr->name, command, pmr->pact, param ? *param : 0.0);
 
     /* These primitives don't cause a call to the Asyn layer */
     switch ( command ) {
-    case MOVE_ABS:
-	pPvt->move_cmd = motorMoveAbs;
-	pPvt->param = *param;
-	break;
-    case MOVE_REL:
-	pPvt->move_cmd = motorMoveRel;
-	pPvt->param = *param;
-	break;
-    case HOME_FOR:
-	pPvt->move_cmd = motorHome;
-	pPvt->param = 1;
-	break;
-    case HOME_REV:
-	pPvt->move_cmd = motorHome;
-	pPvt->param = 0;
-	break;
-    default:
-	need_call = 1;
+        case MOVE_ABS:
+            pPvt->move_cmd = motorMoveAbs;
+            pPvt->param = *param;
+            break;
+        case MOVE_REL:
+            pPvt->move_cmd = motorMoveRel;
+            pPvt->param = *param;
+            break;
+        case HOME_FOR:
+            pPvt->move_cmd = motorHome;
+            pPvt->param = 1;
+            break;
+        case HOME_REV:
+            pPvt->move_cmd = motorHome;
+            pPvt->param = 0;
+            break;
+        default:
+            need_call = 1;
     }
 
     /* Decide whether to quit here */
     if (!need_call) {
-	return (OK);
+        return (OK);
     }
 
     /* If we are already in COMM_ALARM then this server is not reachable,
@@ -478,104 +483,109 @@ static RTN_STATUS build_trans( motor_cmnd command,
     pasynUser->userData = pmsg;
  
     switch (command) {
-    case LOAD_POS:
-	pmsg->command = motorPosition;
-	pmsg->dvalue = *param;
-	pPvt->moveRequestPending++;
-	break;
-    case SET_VEL_BASE:
-	pmsg->command = motorVelBase;
-	pmsg->dvalue = *param;
-	break;
-    case SET_VELOCITY:
-	pmsg->command = motorVelocity;
-	pmsg->dvalue = *param;
-	break;
-    case SET_ACCEL:
-	pmsg->command = motorAccel;
-	pmsg->dvalue = *param;
-	break;
-    case GO:
-	pmsg->command = pPvt->move_cmd;
-	pmsg->dvalue = pPvt->param;
-	pPvt->move_cmd = -1;
-	pPvt->moveRequestPending++;
-	/* Do we need to set needUpdate and schedule a process here? */
-	/* or can we always guarantee to get at least one callback? */
-	/* Do we really need the callback? I assume so */
-	break;
-    case SET_ENC_RATIO:
-	pmsg->command = motorEncRatio;
-	pmsg->dvalue = param[0]/param[1];
-	break;
-    case STOP_AXIS:
-	pmsg->command = motorStop;
-	pmsg->interface = int32Type;
-	break;
-    case JOG:
-    case JOG_VELOCITY:
-	pmsg->command = motorMoveVel;
-	pmsg->dvalue = *param;
-	pPvt->moveRequestPending++;
-	break;
-    case SET_PGAIN:
-	pmsg->command = motorPGain;
-	pmsg->dvalue = *param;
-	break;
-    case SET_IGAIN:
-	pmsg->command = motorIGain;
-	pmsg->dvalue = *param;
-	break;
-    case SET_DGAIN:
-	pmsg->command = motorDGain;
-	pmsg->dvalue = *param;
-	break;
-    case ENABLE_TORQUE:
-	pmsg->command = motorSetClosedLoop;
-	pmsg->ivalue = 1;
-	pmsg->interface = int32Type;
-	break;
-    case DISABL_TORQUE:
-	pmsg->command = motorSetClosedLoop;
-	pmsg->ivalue = 0;
-	pmsg->interface = int32Type;
-	break;
-    case PRIMITIVE:
-	asynPrint(pasynUser, ASYN_TRACE_ERROR,
-		  "devMotorAsyn::send_msg: %s: PRIMITIVE no longer supported\n",
-		  pmr->name);
-	return(ERROR);
-    case SET_HIGH_LIMIT:
-	pmsg->command = motorHighLimit;
-	pmsg->dvalue = *param;
-	break;
-    case SET_LOW_LIMIT:
-	pmsg->command = motorLowLimit;
-	pmsg->dvalue = *param;
-	break;
-    case GET_INFO:
-	pmsg->command = motorUpdateStatus;
-	pmsg->interface = int32Type;
-	break;
-    case SET_RESOLUTION:
-	pmsg->command = motorResolution;
-	pmsg->dvalue = *param;
-	break;
-    default:
-	asynPrint(pasynUser, ASYN_TRACE_ERROR,
-		  "devMotorAsyn::send_msg: %s: motor command %d not recognised\n",
-		  pmr->name, command);
-	return(ERROR);
+        case LOAD_POS:
+            pmsg->command = motorPosition;
+            pmsg->dvalue = *param;
+            pPvt->moveRequestPending++;
+            break;
+        case SET_VEL_BASE:
+            pmsg->command = motorVelBase;
+            pmsg->dvalue = *param;
+            break;
+        case SET_VELOCITY:
+            pmsg->command = motorVelocity;
+            pmsg->dvalue = *param;
+            break;
+        case SET_ACCEL:
+            pmsg->command = motorAccel;
+            pmsg->dvalue = *param;
+            break;
+        case GO:
+            pmsg->command = pPvt->move_cmd;
+            pmsg->dvalue = pPvt->param;
+            pPvt->move_cmd = -1;
+            pPvt->moveRequestPending++;
+            /* Do we need to set needUpdate and schedule a process here? */
+            /* or can we always guarantee to get at least one callback? */
+            /* Do we really need the callback? I assume so */
+            break;
+        case SET_ENC_RATIO:
+            pmsg->command = motorEncRatio;
+            pmsg->dvalue = param[0]/param[1];
+            break;
+        case STOP_AXIS:
+            pmsg->command = motorStop;
+            pmsg->interface = int32Type;
+            break;
+        case JOG:
+        case JOG_VELOCITY:
+            pmsg->command = motorMoveVel;
+            pmsg->dvalue = *param;
+            pPvt->moveRequestPending++;
+            break;
+        case SET_PGAIN:
+            pmsg->command = motorPGain;
+            pmsg->dvalue = *param;
+            break;
+        case SET_IGAIN:
+            pmsg->command = motorIGain;
+            pmsg->dvalue = *param;
+            break;
+        case SET_DGAIN:
+            pmsg->command = motorDGain;
+            pmsg->dvalue = *param;
+            break;
+        case ENABLE_TORQUE:
+            pmsg->command = motorSetClosedLoop;
+            pmsg->ivalue = 1;
+            pmsg->interface = int32Type;
+            break;
+        case DISABL_TORQUE:
+            pmsg->command = motorSetClosedLoop;
+            pmsg->ivalue = 0;
+            pmsg->interface = int32Type;
+            break;
+        case PRIMITIVE:
+            asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "devMotorAsyn::build_trans: %s: PRIMITIVE no longer supported\n",
+                  pmr->name);
+            return(ERROR);
+        case SET_HIGH_LIMIT:
+            pmsg->command = motorHighLimit;
+            pmsg->dvalue = *param;
+            break;
+        case SET_LOW_LIMIT:
+            pmsg->command = motorLowLimit;
+            pmsg->dvalue = *param;
+            break;
+        case GET_INFO:
+            pmsg->command = motorUpdateStatus;
+            pmsg->interface = int32Type;
+            break;
+        case SET_RESOLUTION:
+            pmsg->command = motorResolution;
+            pmsg->dvalue = *param;
+            break;
+        default:
+            asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                  "devMotorAsyn::build_trans: %s: motor command %d not recognised\n",
+                  pmr->name, command);
+            return(ERROR);
     }
-    
+
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+        "devAsynMotor::build_trans: calling queueRequest, pmsg=%p, sizeof(*pmsg)=%d"
+        "pmsg->command=%d, pmsg->interface=%d, pmsg->dvalue=%f\n",
+        pmsg, (int)sizeof(*pmsg), pmsg->command, pmsg->interface, pmsg->dvalue);   
+
     /* Queue asyn request, so we get a callback when driver is ready */
     pasynUser->reason = pPvt->driverReasons[pmsg->command];
     status = pasynManager->queueRequest(pasynUser, 0, 0);
     if (status != asynSuccess) {
-	asynPrint(pasynUser, ASYN_TRACE_ERROR,
-		  "devMotorAsyn::send_msg: %s error calling queueRequest, %s\n",
-		  pmr->name, pasynUser->errorMessage);
-	rtnind = ERROR;
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+              "devMotorAsyn::build_trans: %s error calling queueRequest, %s\n",
+              pmr->name, pasynUser->errorMessage);
+        rtnind = ERROR;
     }
     return(rtnind);
 }
@@ -600,60 +610,62 @@ static void asynCallback(asynUser *pasynUser)
 
     pasynUser->reason = pPvt->driverReasons[pmsg->command];
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
-              "devMotorAsyn::asynCallback: %s command=%d, ivalue=%d, dvalue=%f, pasynUser->reason=%d\n",
-              pmr->name, pmsg->command, pmsg->ivalue, pmsg->dvalue, pasynUser->reason);
+              "devMotorAsyn::asynCallback: %s pmsg=%p, sizeof(*pmsg)=%d, pmsg->command=%d,"
+              "pmsg->interface=%d, pmsg->ivalue=%d, pmsg->dvalue=%f, pasynUser->reason=%d\n",
+              pmr->name, pmsg, (int)sizeof(*pmsg), pmsg->command, 
+              pmsg->interface, pmsg->ivalue, pmsg->dvalue, pasynUser->reason);
 
     switch (pmsg->command) {
-    case motorStatus:
-	/* Read the current status of the device */
-	status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt,
-					      pasynUser,
-					      (void *)&pPvt->status);
-	if (status != asynSuccess) {
-	    asynPrint(pasynUser, ASYN_TRACE_ERROR,
-		      "devMotorAsyn::asynCallback: %s pasynGenericPointer->read"
-		      "returned %s\n", pmr->name, pasynUser->errorMessage);
-	}
-	break;
+        case motorStatus:
+            /* Read the current status of the device */
+            status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt,
+                                  pasynUser,
+                                  (void *)&pPvt->status);
+            if (status != asynSuccess) {
+                asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                          "devMotorAsyn::asynCallback: %s pasynGenericPointer->read returned %s\n", 
+                          pmr->name, pasynUser->errorMessage);
+            }
+            break;
 
-    case motorUpdateStatus:
-        status = pPvt->pasynInt32->write(pPvt->asynInt32Pvt, pasynUser,
-                                         pmsg->ivalue);
-        break;
-
-    case motorMoveAbs:
-    case motorMoveRel:
-    case motorHome:
-    case motorPosition:
-    case motorMoveVel:
-	commandIsMove = 1;
-	/* Intentional fall-through */
-    default:
-        if (pmsg->interface == int32Type) {
+        case motorUpdateStatus:
             status = pPvt->pasynInt32->write(pPvt->asynInt32Pvt, pasynUser,
-					     pmsg->ivalue);
-        } else {
-            status = pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser,
-					       pmsg->dvalue);
-        }
-	if (status != asynSuccess) {
-	    asynPrint(pasynUser, ASYN_TRACE_ERROR,
-		      "devMotorAsyn::asynCallback: %s pasyn{Float64,Int32}->"
-		      "write returned %s\n", pmr->name, pasynUser->errorMessage);
-	}
-        break;
+                                             pmsg->ivalue);
+            break;
+
+        case motorMoveAbs:
+        case motorMoveRel:
+        case motorHome:
+        case motorPosition:
+        case motorMoveVel:
+        commandIsMove = 1;
+        /* Intentional fall-through */
+        default:
+            if (pmsg->interface == int32Type) {
+                status = pPvt->pasynInt32->write(pPvt->asynInt32Pvt, pasynUser,
+                             pmsg->ivalue);
+            } else {
+                status = pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser,
+                               pmsg->dvalue);
+            }
+            if (status != asynSuccess) {
+                asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                          "devMotorAsyn::asynCallback: %s pasyn{Float64,Int32}->write returned %s\n", 
+                          pmr->name, pasynUser->errorMessage);
+            }
+            break;
     }
 
     if (dbScanLockOK) { /* effectively if iocInit has completed */
-	dbScanLock((dbCommon *)pmr);
-	if (commandIsMove) {
-	    pPvt->moveRequestPending--;
-	    if (!pPvt->moveRequestPending) {
-	      pPvt->needUpdate = 1;
+        dbScanLock((dbCommon *)pmr);
+        if (commandIsMove) {
+            pPvt->moveRequestPending--;
+            if (!pPvt->moveRequestPending) {
+                pPvt->needUpdate = 1;
                 dbProcess((dbCommon*)pmr);
-	    }
-	}
-	dbScanUnlock((dbCommon *)pmr);
+            }
+        }
+        dbScanUnlock((dbCommon *)pmr);
     }
     else if (pmsg->command == motorPosition)
         pPvt->moveRequestPending = 0;
@@ -667,7 +679,7 @@ static void asynCallback(asynUser *pasynUser)
     }
 
     if ( pPvt->initEvent && pmsg->command == motorPosition) {
-      epicsEventSignal(  pPvt->initEvent );
+        epicsEventSignal( pPvt->initEvent );
     }
 }
 
@@ -675,23 +687,24 @@ static void asynCallback(asynUser *pasynUser)
  * True callback to notify that controller status has changed.
  */
 static void statusCallback(void *drvPvt, asynUser *pasynUser,
-			   void *pValue)
+               void *pValue)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)drvPvt;
     motorRecord *pmr = pPvt->pmr;
     MotorStatus *value = (MotorStatus *)pValue;
 
     asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
-	      "%s devMotorAsyn::statusCallback new value=[p:%f,e:%f,s:%x] %c%c\n",
-	      pmr->name, value->position, value->encoderPosition, value->status,
-	      pPvt->needUpdate?'N':' ', pPvt->moveRequestPending?'P':' ');
+              "%s devMotorAsyn::statusCallback new value=[p:%f,e:%f,s:%x] %c%c\n",
+              pmr->name, value->position, value->encoderPosition, value->status,
+              pPvt->needUpdate ? 'N':' ', 
+              pPvt->moveRequestPending ? 'P':' ');
 
     if (dbScanLockOK) {
         dbScanLock((dbCommon *)pmr);
         memcpy(&pPvt->status, value, sizeof(struct MotorStatus));
         if (!pPvt->moveRequestPending) {
-	    pPvt->needUpdate = 1;
-	    /* pmr->rset->process((dbCommon*)pmr); */
+        pPvt->needUpdate = 1;
+        /* pmr->rset->process((dbCommon*)pmr); */
             dbProcess((dbCommon*)pmr);
         }
         dbScanUnlock((dbCommon*)pmr);
