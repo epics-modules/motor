@@ -12,7 +12,7 @@ USAGE...      Motor driver support for the Micos SMC hydra controller.
 // No controller-specific parameters yet
 #define NUM_SMCHYDRA_PARAMS 0  
 
-class SMChydraAxis : public asynMotorAxis
+class epicsShareClass SMChydraAxis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
@@ -44,7 +44,7 @@ private:
 friend class SMChydraController;
 };
 
-class SMChydraController : public asynMotorController {
+class epicsShareClass SMChydraController : public asynMotorController {
 public:
   SMChydraController(const char *portName, const char *SMChydraPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
 
