@@ -366,9 +366,7 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
  */
 asynStatus omsMAXv::sendReceive(const char *outputBuff, char *inputBuff, unsigned int inputSize)
 {
-#ifdef DEBUG
     static const char* functionName = "sendReceive";
-#endif
 
     STATUS1 flag1;
     epicsUInt16 getIndex, putIndex;
