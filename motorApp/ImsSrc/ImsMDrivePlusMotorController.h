@@ -13,7 +13,7 @@
 //  ImsMDrivePlusMotorController class
 //! derived from asynMotorController class
 ////////////////////////////////////
-class ImsMDrivePlusMotorController : public asynMotorController
+class epicsShareClass ImsMDrivePlusMotorController : public asynMotorController
 {
 public:
 	/////////////////////////////////////////

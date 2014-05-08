@@ -20,7 +20,7 @@
 #define MAX_NAME_LEN 10
 #define LOCAL_LINE_LEN 256
 
-class ImsMDrivePlusMotorController;
+class epicsShareClass ImsMDrivePlusMotorController;
 
 ////////////////////////////////////
 // ImsMDrivePlusMotorAxis class
