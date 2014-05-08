@@ -17,7 +17,7 @@ March 28, 2011
 #define ACRBinaryOutString      "ACR_BINARY_OUT"
 #define ACRBinaryOutRBVString   "ACR_BINARY_OUT_RBV"
 
-class ACRAxis : public asynMotorAxis
+class epicsShareClass ACRAxis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
@@ -48,7 +48,7 @@ private:
 friend class ACRController;
 };
 
-class ACRController : public asynMotorController {
+class epicsShareClass ACRController : public asynMotorController {
 public:
   ACRController(const char *portName, const char *ACRPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
 
