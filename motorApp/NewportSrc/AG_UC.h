@@ -19,7 +19,7 @@ typedef enum {
 // No controller-specific parameters yet
 #define NUM_AG_UC_PARAMS 0  
 
-class AG_UCAxis : public asynMotorAxis
+class epicsShareClass AG_UCAxis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
@@ -49,7 +49,7 @@ private:
 friend class AG_UCController;
 };
 
-class AG_UCController : public asynMotorController {
+class epicsShareClass AG_UCController : public asynMotorController {
 public:
   AG_UCController(const char *portName, const char *serialPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
 

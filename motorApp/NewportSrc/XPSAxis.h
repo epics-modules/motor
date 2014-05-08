@@ -29,7 +29,7 @@ typedef struct
 
 class XPSController;
 
-class XPSAxis : public asynMotorAxis
+class epicsShareClass XPSAxis : public asynMotorAxis
 {
   public:
   /* These are the methods we override from the base class */

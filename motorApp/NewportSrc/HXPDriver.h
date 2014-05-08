@@ -52,7 +52,7 @@ USAGE...      Motor driver support for the Newport Hexapod controller.
 #define HXPCoordSysSetWString		    "HXP_COORD_SYS_SET_W"
 
 
-class HXPAxis : public asynMotorAxis
+class epicsShareClass HXPAxis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
@@ -82,7 +82,7 @@ private:
 friend class HXPController;
 };
 
-class HXPController : public asynMotorController {
+class epicsShareClass HXPController : public asynMotorController {
 public:
   HXPController(const char *portName, const char *HXPPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
 

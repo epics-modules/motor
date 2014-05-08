@@ -18,7 +18,7 @@ K. Goetze 2012-03-23
 // No controller-specific parameters yet
 #define NUM_SMC100_PARAMS 0  
 
-class SMC100Axis : public asynMotorAxis
+class epicsShareClass SMC100Axis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
