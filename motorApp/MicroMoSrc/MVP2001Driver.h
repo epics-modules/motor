@@ -16,7 +16,7 @@ August 14, 2013
 // No controller-specific parameters yet
 #define NUM_MVP2001_PARAMS 0  
 
-class MVP2001Axis : public asynMotorAxis
+class epicsShareClass MVP2001Axis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
@@ -47,7 +47,7 @@ private:
 friend class MVP2001Controller;
 };
 
-class MVP2001Controller : public asynMotorController {
+class epicsShareClass MVP2001Controller : public asynMotorController {
 public:
   MVP2001Controller(const char *portName, const char *MVP2001PortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
 
