@@ -15,7 +15,7 @@ March 1, 2012
 // No controller-specific parameters yet
 #define NUM_MCB4B_PARAMS 0  
 
-class MCB4BAxis : public asynMotorAxis
+class epicsShareClass MCB4BAxis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
@@ -37,7 +37,7 @@ private:
 friend class MCB4BController;
 };
 
-class MCB4BController : public asynMotorController {
+class epicsShareClass MCB4BController : public asynMotorController {
 public:
   MCB4BController(const char *portName, const char *MCB4BPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
 
