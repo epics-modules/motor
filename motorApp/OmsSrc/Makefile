@@ -27,7 +27,9 @@ SRCS += devMAXv.cc drvMAXv.cc
 
 # Trajectory support for MAXV controller
 ifdef SNCSEQ
+ifdef ASYN
 SRCS += MAX_trajectoryScan.st
+endif
 endif
 
 # The following is required for all OMS device drivers.
