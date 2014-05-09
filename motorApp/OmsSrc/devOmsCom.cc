@@ -519,7 +519,7 @@ errorexit:                  errMessage(-1, "Invalid device directive");
                 break;
 
             case LOAD_POS:
-                if ((MAXv == true) && (MAXvCntrl->typeID[signal] != PSO) && (MAXvCntrl->fwver > 1.29))
+                if ((MAXv == true) && (MAXvCntrl != NULL) && (MAXvCntrl->typeID[signal] != PSO) && (MAXvCntrl->fwver > 1.29))
                 {
                     long int ref  = NINT(parms[0]);
                     long int fdbk = ref;
