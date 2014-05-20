@@ -147,19 +147,28 @@ monitor pulseSrc;
 #define MAX_PSO_PULSES 8192
 
 double pulsePositions[MAX_PULSES]; 
-assign pulsePositions to "{P}{R}PulsePositions";
+assign pulsePositions to "{P}{R}PulsePositions.VAL";
+#if 0
+/* The "monitor pulsePositions;" command crashes all SNL programs in the ioc. */
 monitor pulsePositions;
 evflag pulsePositionsMon;	sync pulsePositions pulsePositionsMon;
+#else
+double newPulsePositions; 
+assign newPulsePositions to "{P}{R}NewPulsePositions.VAL";
+monitor newPulsePositions;
+evflag pulsePositionsMon;	sync newPulsePositions pulsePositionsMon;
+#endif
 
 int     numPulsePositions;    assign numPulsePositions to "{P}{R}PulsePositions.NORD";    
 monitor numPulsePositions;
 
 #define PULSE_POSITIONS_LOADED_NONE 0
 #define PULSE_POSITIONS_LOADED_ARRAY 1
-#define PULSE_POSITIONS_LOADED_TRAJ 1
+#define PULSE_POSITIONS_LOADED_TRAJ 2
 
 int     pulseMode;    assign pulseMode     to "{P}{R}PulseMode.VAL";    
 monitor pulseMode;
+
 
 /*** END: Specific to EnsembleTrajectoryScan.st ***/
 
