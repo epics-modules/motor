@@ -72,6 +72,13 @@ grecord(waveform,"$(P)$(R)PulsePositions") {
     field(NELM,"$(NPULSE)")
     field(FTVL,"DOUBLE")
     field(PREC, "3")
+	field(FLNK, "$(P)$(R)NewPulsePositions")
+}
+
+grecord(ao,"$(P)$(R)NewPulsePositions") {
+    field(DESC,"New pulse positions loaded")
+    field(MDEL,"-1")
+    field(PREC, "3")
 }
 
 record(mbbo, "$(P)$(R)PulseDir") {
