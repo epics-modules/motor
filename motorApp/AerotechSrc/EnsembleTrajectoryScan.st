@@ -47,7 +47,7 @@ option +r;
 /* Maximum # of output pulses.  For now, we emit a pulse at the beginning of
  * every trajectory element.
  */
-#define MAX_PULSES 10000
+#define MAX_PULSES 1000
 
 /* Note that MAX_ELEMENTS, and MAX_PULSES must be defined before including
  * trajectoryScan.h, which defines MAX_AXES. */
@@ -172,6 +172,7 @@ ss EnsembleTrajectoryScan {
 	/* Initialize things when first starting */
 	state init {
 		when() {
+			if (debugLevel) printf("EnsembleTrajectoryScan:init: entry\n");
 			initStatus = STATUS_UNDEFINED;
 			/* Force numAxes to be <= MAX_AXES */
 			if (numAxes > MAX_AXES) numAxes = MAX_AXES;
@@ -253,6 +254,7 @@ ss EnsembleTrajectoryScan {
 			 * or they have changed since they were loaded.
 			 */
 			efClear(pulsePositionsMon);
+			pvGet(pulsePositions);
 			pulsePositionsLoaded = 0;
 
 			if (initStatus == STATUS_UNDEFINED) initStatus = STATUS_SUCCESS;
@@ -287,12 +289,16 @@ ss EnsembleTrajectoryScan {
 					numGlobalIntegers = 0;
 				}
 			}
+			if (debugLevel) printf("EnsembleTrajectoryScan:init: done; going to 'monitor_inputs'\n");
 
 		} state monitor_inputs
 	}
 
 	/* Monitor inputs which control what to do (Build, Execute, Read) */
 	state monitor_inputs {
+		entry {
+			if (debugLevel) printf("EnsembleTrajectoryScan:monitor_inputs: entry\n");
+		}
 		when(efTestAndClear(buildMon) && (build==1) && (initStatus == STATUS_SUCCESS)) {
 		} state build
 
@@ -319,10 +325,13 @@ ss EnsembleTrajectoryScan {
 		} state monitor_inputs
 
 		when (efTestAndClear(pulsePositionsMon)) {
-			if (debugLevel>1) printf("EnsembleTrajectoryScan: new pulse positions detected\n");
+			pvGet(pulsePositions);
+			if (debugLevel>1) {
+				printf("EnsembleTrajectoryScan: new pulse positions detected\n");
+				printf("...%lf, %lf...\n", pulsePositions[0], pulsePositions[1]);
+			}
 			pulsePositionsLoaded = PULSE_POSITIONS_LOADED_NONE;
 		} state monitor_inputs
-
 	}
 
 	/* Build trajectory */
@@ -1368,7 +1377,6 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		strcpy(stringOut, "PSODISTANCE @0 ARRAY");
 		status = writeRead(ssId, pVar, stringOut, reply);
 	}
-
 	/* digital I/O commands */
 	if (pVar->pulseMode != PULSE_MODE_NONE) {
 
