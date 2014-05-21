@@ -38,11 +38,12 @@ HeadURL:        $URL$
  * .01	2008/04/10 caw Initial support for Ensemble
  * .02	2009/04/29 hcf Added support for Soloist
  * .03	2009/07/28 cjb Added support for Ensemble asynMotor
+ * .04  2013/11/26 cjb Added support for A3200 asynMotor
  */
 
 #include "motor.h"
 #include "motordrvCom.h"
 #include "drvEnsembleAsyn.h"
 #include "drvSoloist.h"
-
+#include "drvA3200Asyn.h"
 

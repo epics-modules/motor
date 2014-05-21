@@ -5,6 +5,9 @@ driver(drvSoloist)
 # Aerotech Ensemble asynMotor support
 driver(motorEnsemble)
 
+# Aerotech A3200 asynMotor support
+driver(motorA3200)
+
 registrar(AerotechRegister)
 registrar(concatStringRegister)
 registrar(EnsembleTrajectoryScanRegistrar)

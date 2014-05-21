@@ -13,6 +13,7 @@ LIBRARY_IOC = Aerotech
 SRCS += AerotechRegister.cc
 SRCS += devSoloist.cc  drvSoloist.cc
 SRCS += drvEnsembleAsyn.cc
+SRCS += drvA3200Asyn.cc
 
 # EnsemblePSOFly.db support
 SRCS += concatString.c
