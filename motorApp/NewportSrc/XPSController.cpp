@@ -488,8 +488,8 @@ asynStatus XPSController::buildProfile()
   int status;
   bool buildOK=true;
   bool verifyOK=true;
-  int nPoints;
-  int nElements;
+  int numPoints;
+  int numElements;
   double trajVel;
   double D0, D1, T0, T1;
   SOCKET ftpSocket;
@@ -536,7 +536,7 @@ asynStatus XPSController::buildProfile()
 
   preTimeMax = 0.;
   postTimeMax = 0.;
-  getIntegerParam(profileNumPoints_, &nPoints);
+  getIntegerParam(profileNumPoints_, &numPoints);
   getStringParam(XPSTrajectoryFile_, (int)sizeof(fileName), fileName);
   getStringParam(XPSProfileGroupName_, (int)sizeof(groupName), groupName);
 
@@ -567,14 +567,14 @@ asynStatus XPSController::buildProfile()
     preVelocity[j] = distance/profileTimes_[0];
     time = fabs(preVelocity[j]) / maxAcceleration;
     preTimeMax = MAX(preTimeMax, time);
-    distance = pAxes_[j]->profilePositions_[nPoints-1] - 
-               pAxes_[j]->profilePositions_[nPoints-2];
-    postVelocity[j] = distance/profileTimes_[nPoints-1];
+    distance = pAxes_[j]->profilePositions_[numPoints-1] - 
+               pAxes_[j]->profilePositions_[numPoints-2];
+    postVelocity[j] = distance/profileTimes_[numPoints-1];
     time = fabs(postVelocity[j]) / maxAcceleration;
     postTimeMax = MAX(postTimeMax, time);
     asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
               "%s:%s: axis %d profilePositions[0]=%f, profilePositions[%d]=%f, maxAcceleration=%f, preTimeMax=%f, postTimeMax=%f\n",
-              driverName, functionName, j, pAxes_[j]->profilePositions_[0], nPoints-1, pAxes_[j]->profilePositions_[nPoints-1],
+              driverName, functionName, j, pAxes_[j]->profilePositions_[0], numPoints-1, pAxes_[j]->profilePositions_[numPoints-1],
               maxAcceleration, preTimeMax, postTimeMax);
   }
     
@@ -606,11 +606,11 @@ asynStatus XPSController::buildProfile()
   }
   fprintf(trajFile,"\n");
  
-  /* The number of profile elements in the file is nPoints-1 */
-  nElements = nPoints - 1;
-  for (i=0; i<nElements; i++) {
+  /* The number of profile elements in the file is numPoints-1 */
+  numElements = numPoints - 1;
+  for (i=0; i<numElements; i++) {
     T0 = profileTimes_[i];
-    if (i < nElements-1)
+    if (i < numElements-1)
       T1 = profileTimes_[i+1];
     else
       T1 = T0;
@@ -619,7 +619,7 @@ asynStatus XPSController::buildProfile()
       if (!inGroup[j]) continue;
       D0 = pAxes_[j]->profilePositions_[i+1] - 
            pAxes_[j]->profilePositions_[i];
-      if (i < nElements-1) 
+      if (i < numElements-1) 
         D1 = pAxes_[j]->profilePositions_[i+2] - 
              pAxes_[j]->profilePositions_[i+1];
       else
@@ -789,7 +789,8 @@ asynStatus XPSController::runProfile()
   bool aborted=false;
   int j;
   int startPulses, endPulses;
-  int numPoints, numPulses;
+  int lastTime;
+  int numPoints, numElements, numPulses;
   int executeStatus;
   double pulsePeriod;
   double position;
@@ -879,10 +880,15 @@ asynStatus XPSController::runProfile()
             status, buffer);
     goto done;
   }
+  
+  /* The number of trajectory elements for the user is numPoints-1 
+     The actual number is 2 greater because of the acceleration and decelleration */
+  numElements = numPoints - 1;
 
-  // Check valid range of start and end pulses;  these start at 1, not 0
-  if ((startPulses < 1)           || (startPulses > numPoints) ||
-      (endPulses   < startPulses) || (endPulses   > numPoints)) {
+  // Check valid range of start and end pulses;  these start at 1, not 0.
+  // numElements+1 is the decelleration element
+  if ((startPulses < 1)           || (startPulses > numElements+1) ||
+      (endPulses   < startPulses) || (endPulses   > numElements+1)) {
     executeOK = false;
     sprintf(message, "Error: start or end pulses outside valid range");
     goto done;
@@ -892,14 +898,15 @@ asynStatus XPSController::runProfile()
   // Compute the time between pulses as the total time over which pulses should be output divided 
   //  by the number of pulses to be output. */
   time = 0;
-  for (i=startPulses; i<endPulses; i++) {
+  lastTime = endPulses;
+  if (endPulses > numElements) lastTime = numElements;
+  for (i=startPulses; i<=lastTime; i++) {
     time += profileTimes_[i-1];
   }
-  // We put out pulses starting at the beginning of element startPulses and ending at the beginning of element
-  // endPulses.  To get exactly numPulses pulses we need to subtract 1 from numPulses when determining the
-  // pulsePeriod
+  // We put out pulses starting at the beginning of element startPulses and ending at the end of element
+  // endPulses.
   if (numPulses != 0)
-    pulsePeriod = time / (numPulses-1);
+    pulsePeriod = time / numPulses;
   else
     pulsePeriod = 0;
   
@@ -1136,8 +1143,9 @@ asynStatus XPSController::readbackProfile()
     readbackOK = false;
     sprintf(message, "Error, numPulses=%d, currentSamples=%d", numPulses, currentSamples);
     //goto done;
-  } else {
-    currentSamples = numPulses; // Only read as many as were asked for
+  } 
+  if (currentSamples > (int) maxProfilePoints_) {
+      currentSamples = maxProfilePoints_;
   }
   buffer = (char *)calloc(GATHERING_MAX_READ_LEN, sizeof(char));
   numInBuffer = 0;
