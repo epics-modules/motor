@@ -1,14 +1,14 @@
 
 file {
-	name="/home/epics/support/motor/motorApp/op/adl/profileMove.adl"
-	version=030102
+	name="/home/epics/support/motor-6-8/motorApp/op/adl/profileMove.adl"
+	version=030107
 }
 display {
 	object {
 		x=189
 		y=53
 		width=530
-		height=730
+		height=755
 	}
 	clr=14
 	bclr=4
@@ -111,10 +111,142 @@ text {
 	textix="$(TITLE)"
 	align="horiz. centered"
 }
+rectangle {
+	object {
+		x=5
+		y=51
+		width=524
+		height=195
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+		width=2
+	}
+}
+composite {
+	object {
+		x=55
+		y=56
+		width=455
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=55
+				y=56
+				width=160
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="# Profile points"
+		}
+		"text entry" {
+			object {
+				x=219
+				y=56
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)NumPoints"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		text {
+			object {
+				x=336
+				y=56
+				width=70
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Current"
+		}
+		"text update" {
+			object {
+				x=410
+				y=56
+				width=100
+				height=20
+			}
+			monitor {
+				chan="$(P)$(R)CurrentPoint"
+				clr=54
+				bclr=4
+			}
+			limits {
+			}
+		}
+	}
+}
+text {
+	object {
+		x=65
+		y=86
+		width=150
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="# Output pulses"
+}
+"text entry" {
+	object {
+		x=219
+		y=86
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)NumPulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=346
+		y=86
+		width=60
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Actual"
+}
+"text update" {
+	object {
+		x=410
+		y=86
+		width=100
+		height=20
+	}
+	monitor {
+		chan="$(P)$(R)NumActualPulses"
+		clr=54
+		bclr=4
+	}
+	limits {
+	}
+}
 composite {
 	object {
 		x=4
-		y=231
+		y=256
 		width=524
 		height=230
 	}
@@ -123,7 +255,7 @@ composite {
 		rectangle {
 			object {
 				x=4
-				y=231
+				y=256
 				width=524
 				height=230
 			}
@@ -136,7 +268,7 @@ composite {
 		text {
 			object {
 				x=168
-				y=234
+				y=259
 				width=100
 				height=20
 			}
@@ -148,7 +280,7 @@ composite {
 		menu {
 			object {
 				x=168
-				y=283
+				y=308
 				width=100
 				height=20
 			}
@@ -161,7 +293,7 @@ composite {
 		menu {
 			object {
 				x=168
-				y=308
+				y=333
 				width=100
 				height=20
 			}
@@ -174,7 +306,7 @@ composite {
 		menu {
 			object {
 				x=168
-				y=258
+				y=283
 				width=100
 				height=20
 			}
@@ -187,7 +319,7 @@ composite {
 		menu {
 			object {
 				x=168
-				y=333
+				y=358
 				width=100
 				height=20
 			}
@@ -200,7 +332,7 @@ composite {
 		menu {
 			object {
 				x=168
-				y=358
+				y=383
 				width=100
 				height=20
 			}
@@ -213,7 +345,7 @@ composite {
 		text {
 			object {
 				x=300
-				y=234
+				y=259
 				width=100
 				height=20
 			}
@@ -225,7 +357,7 @@ composite {
 		"text update" {
 			object {
 				x=291
-				y=258
+				y=283
 				width=103
 				height=20
 			}
@@ -241,7 +373,7 @@ composite {
 		"text update" {
 			object {
 				x=291
-				y=283
+				y=308
 				width=103
 				height=20
 			}
@@ -257,7 +389,7 @@ composite {
 		"text update" {
 			object {
 				x=291
-				y=308
+				y=333
 				width=103
 				height=20
 			}
@@ -273,7 +405,7 @@ composite {
 		"text update" {
 			object {
 				x=291
-				y=333
+				y=358
 				width=103
 				height=20
 			}
@@ -289,7 +421,7 @@ composite {
 		"text update" {
 			object {
 				x=291
-				y=358
+				y=383
 				width=103
 				height=20
 			}
@@ -305,7 +437,7 @@ composite {
 		text {
 			object {
 				x=456
-				y=234
+				y=259
 				width=50
 				height=20
 			}
@@ -317,7 +449,7 @@ composite {
 		"related display" {
 			object {
 				x=440
-				y=258
+				y=283
 				width=75
 				height=20
 			}
@@ -342,7 +474,7 @@ composite {
 		"related display" {
 			object {
 				x=440
-				y=283
+				y=308
 				width=75
 				height=20
 			}
@@ -367,7 +499,7 @@ composite {
 		"related display" {
 			object {
 				x=440
-				y=308
+				y=333
 				width=75
 				height=20
 			}
@@ -392,7 +524,7 @@ composite {
 		"related display" {
 			object {
 				x=440
-				y=333
+				y=358
 				width=75
 				height=20
 			}
@@ -417,7 +549,7 @@ composite {
 		"related display" {
 			object {
 				x=440
-				y=358
+				y=383
 				width=75
 				height=20
 			}
@@ -442,7 +574,7 @@ composite {
 		menu {
 			object {
 				x=168
-				y=383
+				y=408
 				width=100
 				height=20
 			}
@@ -455,7 +587,7 @@ composite {
 		"text update" {
 			object {
 				x=291
-				y=383
+				y=408
 				width=103
 				height=20
 			}
@@ -471,7 +603,7 @@ composite {
 		"related display" {
 			object {
 				x=440
-				y=383
+				y=408
 				width=75
 				height=20
 			}
@@ -496,7 +628,7 @@ composite {
 		menu {
 			object {
 				x=168
-				y=408
+				y=433
 				width=100
 				height=20
 			}
@@ -509,7 +641,7 @@ composite {
 		"text update" {
 			object {
 				x=291
-				y=408
+				y=433
 				width=103
 				height=20
 			}
@@ -525,7 +657,7 @@ composite {
 		"related display" {
 			object {
 				x=440
-				y=408
+				y=433
 				width=75
 				height=20
 			}
@@ -550,7 +682,7 @@ composite {
 		menu {
 			object {
 				x=168
-				y=433
+				y=458
 				width=100
 				height=20
 			}
@@ -563,7 +695,7 @@ composite {
 		"text update" {
 			object {
 				x=291
-				y=433
+				y=458
 				width=103
 				height=20
 			}
@@ -579,7 +711,7 @@ composite {
 		"related display" {
 			object {
 				x=440
-				y=433
+				y=458
 				width=75
 				height=20
 			}
@@ -604,7 +736,7 @@ composite {
 		"text update" {
 			object {
 				x=6
-				y=258
+				y=283
 				width=150
 				height=20
 			}
@@ -620,7 +752,7 @@ composite {
 		"text update" {
 			object {
 				x=6
-				y=283
+				y=308
 				width=150
 				height=20
 			}
@@ -636,7 +768,7 @@ composite {
 		"text update" {
 			object {
 				x=6
-				y=308
+				y=333
 				width=150
 				height=20
 			}
@@ -652,7 +784,7 @@ composite {
 		"text update" {
 			object {
 				x=6
-				y=333
+				y=358
 				width=150
 				height=20
 			}
@@ -668,7 +800,7 @@ composite {
 		"text update" {
 			object {
 				x=6
-				y=358
+				y=383
 				width=150
 				height=20
 			}
@@ -684,7 +816,7 @@ composite {
 		"text update" {
 			object {
 				x=6
-				y=383
+				y=408
 				width=150
 				height=20
 			}
@@ -700,7 +832,7 @@ composite {
 		"text update" {
 			object {
 				x=6
-				y=408
+				y=433
 				width=150
 				height=20
 			}
@@ -716,7 +848,7 @@ composite {
 		"text update" {
 			object {
 				x=6
-				y=433
+				y=458
 				width=150
 				height=20
 			}
@@ -734,7 +866,7 @@ composite {
 composite {
 	object {
 		x=4
-		y=471
+		y=496
 		width=524
 		height=250
 	}
@@ -743,7 +875,7 @@ composite {
 		rectangle {
 			object {
 				x=4
-				y=471
+				y=496
 				width=524
 				height=250
 			}
@@ -756,7 +888,7 @@ composite {
 		text {
 			object {
 				x=40
-				y=501
+				y=526
 				width=50
 				height=20
 			}
@@ -768,7 +900,7 @@ composite {
 		"message button" {
 			object {
 				x=96
-				y=501
+				y=526
 				width=96
 				height=20
 			}
@@ -783,7 +915,7 @@ composite {
 		"text update" {
 			object {
 				x=97
-				y=529
+				y=554
 				width=425
 				height=15
 			}
@@ -799,7 +931,7 @@ composite {
 		text {
 			object {
 				x=20
-				y=526
+				y=551
 				width=70
 				height=20
 			}
@@ -811,7 +943,7 @@ composite {
 		"text update" {
 			object {
 				x=201
-				y=501
+				y=526
 				width=103
 				height=20
 			}
@@ -827,7 +959,7 @@ composite {
 		"text update" {
 			object {
 				x=201
-				y=576
+				y=601
 				width=103
 				height=20
 			}
@@ -843,7 +975,7 @@ composite {
 		"text update" {
 			object {
 				x=315
-				y=501
+				y=526
 				width=103
 				height=20
 			}
@@ -859,7 +991,7 @@ composite {
 		"text update" {
 			object {
 				x=315
-				y=576
+				y=601
 				width=103
 				height=20
 			}
@@ -875,7 +1007,7 @@ composite {
 		text {
 			object {
 				x=109
-				y=476
+				y=501
 				width=70
 				height=20
 			}
@@ -887,7 +1019,7 @@ composite {
 		text {
 			object {
 				x=227
-				y=476
+				y=501
 				width=50
 				height=20
 			}
@@ -899,7 +1031,7 @@ composite {
 		text {
 			object {
 				x=336
-				y=476
+				y=501
 				width=60
 				height=20
 			}
@@ -911,7 +1043,7 @@ composite {
 		text {
 			object {
 				x=40
-				y=631
+				y=656
 				width=50
 				height=20
 			}
@@ -923,7 +1055,7 @@ composite {
 		"message button" {
 			object {
 				x=96
-				y=626
+				y=651
 				width=150
 				height=30
 			}
@@ -939,7 +1071,7 @@ composite {
 		text {
 			object {
 				x=20
-				y=601
+				y=626
 				width=70
 				height=20
 			}
@@ -951,7 +1083,7 @@ composite {
 		"text update" {
 			object {
 				x=97
-				y=604
+				y=629
 				width=425
 				height=15
 			}
@@ -967,7 +1099,7 @@ composite {
 		"message button" {
 			object {
 				x=96
-				y=666
+				y=691
 				width=96
 				height=20
 			}
@@ -982,7 +1114,7 @@ composite {
 		text {
 			object {
 				x=10
-				y=666
+				y=691
 				width=80
 				height=20
 			}
@@ -994,7 +1126,7 @@ composite {
 		"text update" {
 			object {
 				x=201
-				y=666
+				y=691
 				width=103
 				height=20
 			}
@@ -1010,7 +1142,7 @@ composite {
 		"text update" {
 			object {
 				x=315
-				y=666
+				y=691
 				width=103
 				height=20
 			}
@@ -1026,7 +1158,7 @@ composite {
 		text {
 			object {
 				x=20
-				y=691
+				y=716
 				width=70
 				height=20
 			}
@@ -1038,7 +1170,7 @@ composite {
 		"text update" {
 			object {
 				x=97
-				y=694
+				y=719
 				width=425
 				height=15
 			}
@@ -1054,7 +1186,7 @@ composite {
 		text {
 			object {
 				x=20
-				y=576
+				y=601
 				width=70
 				height=20
 			}
@@ -1066,7 +1198,7 @@ composite {
 		"message button" {
 			object {
 				x=96
-				y=576
+				y=601
 				width=96
 				height=20
 			}
@@ -1080,344 +1212,226 @@ composite {
 		}
 	}
 }
+"related display" {
+	object {
+		x=390
+		y=216
+		width=120
+		height=20
+	}
+	display[0] {
+		label="XPS settings"
+		name="profileMoveXPS.adl"
+		args="P=$(P),R=$(R),TITLE=$(TITLE)_XPS,M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
+	}
+	clr=14
+	bclr=51
+	label="More"
+}
+text {
+	object {
+		x=15
+		y=186
+		width=200
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Fixed time per point"
+}
+"text entry" {
+	object {
+		x=219
+		y=186
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)FixedTime"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=219
+		y=136
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)StartPulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=35
+		y=136
+		width=180
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Pulse range: Start"
+}
+text {
+	object {
+		x=376
+		y=136
+		width=30
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="End"
+}
+"text entry" {
+	object {
+		x=410
+		y=136
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)EndPulses"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=435
+		y=186
+		width=75
+		height=20
+	}
+	display[0] {
+		label="Time per element"
+		name="trajectoryPlot.adl"
+		args="TITLE=Time_per_element, Y=$(P)$(R)Times"
+	}
+	clr=14
+	bclr=51
+}
+text {
+	object {
+		x=340
+		y=186
+		width=90
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Plot time"
+}
 composite {
 	object {
-		x=5
-		y=51
-		width=524
-		height=170
+		x=45
+		y=216
+		width=274
+		height=20
 	}
 	"composite name"=""
 	children {
-		rectangle {
+		"text entry" {
 			object {
-				x=5
-				y=51
-				width=524
-				height=170
+				x=219
+				y=216
+				width=100
+				height=20
+			}
+			control {
+				chan="$(P)$(R)Acceleration"
+				clr=14
+				bclr=51
+			}
+			limits {
+			}
+		}
+		text {
+			object {
+				x=45
+				y=216
+				width=170
+				height=20
 			}
 			"basic attribute" {
 				clr=14
-				fill="outline"
-				width=2
 			}
+			textix="Acceleration time"
 		}
-		"related display" {
+	}
+}
+composite {
+	object {
+		x=125
+		y=161
+		width=194
+		height=20
+	}
+	"composite name"=""
+	children {
+		text {
 			object {
-				x=390
-				y=191
-				width=120
+				x=125
+				y=161
+				width=90
 				height=20
 			}
-			display[0] {
-				label="XPS settings"
-				name="profileMoveXPS.adl"
-				args="P=$(P),R=$(R),TITLE=$(TITLE)_XPS,M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6),M7=$(M7),M8=$(M8)"
+			"basic attribute" {
+				clr=14
 			}
-			clr=14
-			bclr=51
-			label="More"
+			textix="Time mode"
 		}
-		composite {
+		menu {
 			object {
-				x=55
-				y=56
-				width=455
+				x=219
+				y=161
+				width=100
 				height=20
 			}
-			"composite name"=""
-			children {
-				text {
-					object {
-						x=55
-						y=56
-						width=160
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="# Profile points"
-				}
-				"text entry" {
-					object {
-						x=219
-						y=56
-						width=100
-						height=20
-					}
-					control {
-						chan="$(P)$(R)NumPoints"
-						clr=14
-						bclr=51
-					}
-					limits {
-					}
-				}
-				text {
-					object {
-						x=336
-						y=56
-						width=70
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="Current"
-				}
-				"text update" {
-					object {
-						x=410
-						y=56
-						width=100
-						height=20
-					}
-					monitor {
-						chan="$(P)$(R)CurrentPoint"
-						clr=54
-						bclr=4
-					}
-					limits {
-					}
-				}
+			control {
+				chan="$(P)$(R)TimeMode"
+				clr=14
+				bclr=51
 			}
 		}
-		composite {
-			object {
-				x=15
-				y=86
-				width=495
-				height=95
-			}
-			"composite name"=""
-			children {
-				text {
-					object {
-						x=65
-						y=86
-						width=150
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="# Output pulses"
-				}
-				"text entry" {
-					object {
-						x=219
-						y=86
-						width=100
-						height=20
-					}
-					control {
-						chan="$(P)$(R)NumPulses"
-						clr=14
-						bclr=51
-					}
-					limits {
-					}
-				}
-				text {
-					object {
-						x=125
-						y=136
-						width=90
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="Time mode"
-				}
-				menu {
-					object {
-						x=219
-						y=136
-						width=100
-						height=20
-					}
-					control {
-						chan="$(P)$(R)TimeMode"
-						clr=14
-						bclr=51
-					}
-				}
-				text {
-					object {
-						x=15
-						y=161
-						width=200
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="Fixed time per point"
-				}
-				"text entry" {
-					object {
-						x=219
-						y=161
-						width=100
-						height=20
-					}
-					control {
-						chan="$(P)$(R)FixedTime"
-						clr=14
-						bclr=51
-					}
-					limits {
-					}
-				}
-				"text entry" {
-					object {
-						x=219
-						y=111
-						width=100
-						height=20
-					}
-					control {
-						chan="$(P)$(R)StartPulses"
-						clr=14
-						bclr=51
-					}
-					limits {
-					}
-				}
-				text {
-					object {
-						x=35
-						y=111
-						width=180
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="Pulse range: Start"
-				}
-				text {
-					object {
-						x=346
-						y=86
-						width=60
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="Actual"
-				}
-				"text update" {
-					object {
-						x=410
-						y=86
-						width=100
-						height=20
-					}
-					monitor {
-						chan="$(P)$(R)NumActualPulses"
-						clr=54
-						bclr=4
-					}
-					limits {
-					}
-				}
-				text {
-					object {
-						x=376
-						y=111
-						width=30
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="End"
-				}
-				"text entry" {
-					object {
-						x=410
-						y=111
-						width=100
-						height=20
-					}
-					control {
-						chan="$(P)$(R)EndPulses"
-						clr=14
-						bclr=51
-					}
-					limits {
-					}
-				}
-				"related display" {
-					object {
-						x=435
-						y=161
-						width=75
-						height=20
-					}
-					display[0] {
-						label="Time per element"
-						name="trajectoryPlot.adl"
-						args="TITLE=Time_per_element, Y=$(P)$(R)Times"
-					}
-					clr=14
-					bclr=51
-				}
-				text {
-					object {
-						x=340
-						y=161
-						width=90
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="Plot time"
-				}
-			}
-		}
-		composite {
-			object {
-				x=45
-				y=191
-				width=274
-				height=20
-			}
-			"composite name"=""
-			children {
-				"text entry" {
-					object {
-						x=219
-						y=191
-						width=100
-						height=20
-					}
-					control {
-						chan="$(P)$(R)Acceleration"
-						clr=14
-						bclr=51
-					}
-					limits {
-					}
-				}
-				text {
-					object {
-						x=45
-						y=191
-						width=170
-						height=20
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="Acceleration time"
-				}
-			}
-		}
+	}
+}
+text {
+	object {
+		x=125
+		y=111
+		width=90
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Move mode"
+}
+menu {
+	object {
+		x=219
+		y=111
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(R)MoveMode"
+		clr=14
+		bclr=51
 	}
 }
