@@ -796,6 +796,7 @@ asynStatus XPSController::runProfile()
   double position;
   double time;
   int i;
+  int moveMode;
   char message[MAX_MESSAGE_LEN];
   char buffer[MAX_GATHERING_STRING];
   char fileName[MAX_FILENAME_LEN];
@@ -825,14 +826,24 @@ asynStatus XPSController::runProfile()
   unlock();
 
   // Move the motors to the start position
+  // This depends on whether we are in absolute or relative mode
+  getIntegerParam(profileMoveMode_, &moveMode);
   for (j=0; j<numAxes_; j++) {
     if (!useAxis[j] || !inGroup[j]) continue;
     pAxis = getAxis(j);
-    position = pAxis->profilePositions_[0] - pAxis->profilePreDistance_;
-    status = GroupMoveAbsolute(pAxis->moveSocket_,
-                               pAxis->positionerName_,
-                               1,
-                               &position);
+    if (moveMode == PROFILE_MOVE_MODE_ABSOLUTE) {
+      position = pAxis->profilePositions_[0] - pAxis->profilePreDistance_;
+      status = GroupMoveAbsolute(pAxis->moveSocket_,
+                                 pAxis->positionerName_,
+                                 1,
+                                 &position);
+    } else {
+      position = -pAxis->profilePreDistance_;
+      status = GroupMoveRelative(pAxis->moveSocket_,
+                                 pAxis->positionerName_,
+                                 1,
+                                 &position);
+    }
   }
 
   // Wait for the motors to get there
@@ -1022,11 +1033,19 @@ asynStatus XPSController::runProfile()
   for (j=0; j<numAxes_; j++) {
     if (!useAxis[j] ||!inGroup[j]) continue;
     pAxis = getAxis(j);
-    position = pAxis->profilePositions_[numPoints-1] + pAxis->profilePostDistance_;
-    status = GroupMoveAbsolute(pAxis->moveSocket_,
-                               pAxis->positionerName_,
-                               1,
-                               &position); 
+    if (moveMode == PROFILE_MOVE_MODE_ABSOLUTE) {
+      position = pAxis->profilePositions_[numPoints-1];
+      status = GroupMoveAbsolute(pAxis->moveSocket_,
+                                 pAxis->positionerName_,
+                                 1,
+                                 &position); 
+    } else {
+      position = -pAxis->profilePostDistance_;
+      status = GroupMoveRelative(pAxis->moveSocket_,
+                                 pAxis->positionerName_,
+                                 1,
+                                 &position); 
+    }  
   }
   
   // Wait for the motors to get there
