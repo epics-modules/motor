@@ -95,6 +95,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(profileFixedTimeString,          asynParamFloat64,      &profileFixedTime_);
   createParam(profileTimeArrayString,     asynParamFloat64Array,      &profileTimeArray_);
   createParam(profileAccelerationString,       asynParamFloat64,      &profileAcceleration_);
+  createParam(profileMoveModeString,             asynParamInt32,      &profileMoveMode_);
   createParam(profileBuildString,                asynParamInt32,      &profileBuild_);
   createParam(profileBuildStateString,           asynParamInt32,      &profileBuildState_);
   createParam(profileBuildStatusString,          asynParamInt32,      &profileBuildStatus_);
