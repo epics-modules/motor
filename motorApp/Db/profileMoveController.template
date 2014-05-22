@@ -102,6 +102,19 @@ record(ao,"$(P)$(R)Acceleration") {
     field(VAL,  "0.5")
     field(PREC, "3")
 }
+
+#
+# PV for absolute/relative mode
+#
+grecord(bo,"$(P)$(R)MoveMode") {
+    field(DESC, "Profile move mode")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0,$(TIMEOUT))PROFILE_MOVE_MODE")
+    field(ZNAM, "Absolute")
+    field(ONAM, "Relative")
+}
+
 #
 # PVs to build the profile
 #
