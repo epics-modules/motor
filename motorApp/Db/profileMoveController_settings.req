@@ -1,0 +1,11 @@
+$(P)$(R)Nelements
+$(P)$(R)Npulses
+$(P)$(R)NumPoints
+$(P)$(R)NumPulses
+$(P)$(R)StartPulses
+$(P)$(R)EndPulses
+$(P)$(R)TimeMode
+$(P)$(R)FixedTime
+$(P)$(R)Times
+$(P)$(R)Acceleration
+$(P)$(R)MoveMode
