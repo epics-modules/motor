@@ -59,11 +59,13 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #     (3) SSI based absolute encoder bit flag. Bit #0 for Axis X, bit #1 for
 #         Axis Y, etc.. Set a bit flag to '1' for absolute encoder values; '0'
 #         for the standard incremental encoder values.
+#     (4) SSI based absolute encoder grey code flags (0/1 - yes/no, 0x12 -> UY)
 
-#config0="AX LTL PSO; AY LTL PSO; AZ LTL PSO; AT LTL PSO; AU LTH PSO; AV LTH PSO; AR LTH PSO; AS LTH PSO;"
-
-#!config0="AX LTH PSM; AY LTL PSO; AZ LTL PSO; AT LTL PSO; AU LTH PSO; AV LTH PSO; AR LTH PSO; AS LTH PSO;"
-#!MAXvConfig(0, config0, 0x00)
+#!str = malloc(200);
+#!strcpy str, "AA; LMH,H,H,H,H,H,H,H;"
+#!strcat str, "AX LH PSO; AY LH PSO; AZ LL PSO; AT LL PSO; AU LL PSO; AV LL PSO; AR LL PSO; AS LL PSO;"
+#!MAXvConfig(0, str, 0, 0)
+#!free(str)
 
 
 # PMAC VME driver setup parameters: 
