@@ -69,6 +69,7 @@
 #define profileFixedTimeString          "PROFILE_FIXED_TIME"
 #define profileTimeArrayString          "PROFILE_TIME_ARRAY"
 #define profileAccelerationString       "PROFILE_ACCELERATION"
+#define profileMoveModeString           "PROFILE_MOVE_MODE"
 #define profileBuildString              "PROFILE_BUILD"
 #define profileBuildStateString         "PROFILE_BUILD_STATE"
 #define profileBuildStatusString        "PROFILE_BUILD_STATUS"
@@ -105,6 +106,11 @@ enum ProfileTimeMode{
   PROFILE_TIME_MODE_ARRAY
 };
 
+enum ProfileMoveMode{
+  PROFILE_MOVE_MODE_ABSOLUTE,
+  PROFILE_MOVE_MODE_RELATIVE
+};
+
 /* State codes for Build, Read and Execute. Careful, these must match the
  * corresponding MBBI records, but there is no way to check this */
 enum ProfileBuildState{
@@ -123,6 +129,7 @@ enum ProfileReadbackState{
   PROFILE_READBACK_DONE,
   PROFILE_READBACK_BUSY
 };
+
 
 /* Status codes for Build, Execute and Read */
 enum ProfileStatus {
@@ -239,6 +246,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int profileFixedTime_;
   int profileTimeArray_;
   int profileAcceleration_;
+  int profileMoveMode_;
   int profileBuild_;
   int profileBuildState_;
   int profileBuildStatus_;
