@@ -18,14 +18,82 @@ Octal I/O manual is jumpered as follows; 1-5, 2-6, 9-13, 10-14.
 The correct jumpering for the ESP300 is; 1-5, 2-6, 9-13, 10-11, 15-16.
 
 
-Setting the motor resolution (MRES) field.
-------------------------------------------
+Setting the motor resolution (MRES) and Engineering Units fields to the
+SAME values as the controller's.
+-------------------------------------------------------------------------
 
-Set the MRES like any other motor; i.e., to the precision of the stage.
-(Prior to motor module R6.8, the driver used the controllers resolution
-to scale the EGUtoRAWbacktoEGU conversion done between motor record and
-device driver support. With R6.8 the driver uses the motor record's MRES
-to scale the conversion).
+For DC motors, set MRES to the ESP300's response to the SU? command.
+
+If there is no other mechanism (e.g., generic serial record, dumb terminal,
+etc.) to communicate to the ESP300, the response to the SU? command can be
+determined by following this procedure;
+
+1 - uncomment the "USR_CFLAGS += -DDEBUG" line in the NewportSrc/Makefile.Vx
+    file (This selects the diagnostic messages to be compiled).
+2 - "cd <motor>/motorApp/NewportSrc; gnumake clean; gnumake"; this re-compiles
+    the device drivers with the diagnostic messages selected.
+3 - Rebuild your IOC; "cd <IOC>; gnumake".
+4 - Add "drvESP300debug = 4" to the IOC's st.cmd file before "iocInit".
+5 - Connect to the VxWorks shell and reboot the IOC.
+
+The VxWorks shell output should contain lines like the following;
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Starting iocInit
+send_mess(): message = VE?
+recv_mess(): message = "ESP300 Version 3.08 09/09/02"
+send_mess(): message = ZU
+recv_mess(): message = "0H"
+send_mess(): message = 01ST
+send_mess(): message = 02ST
+send_mess(): message = 03ST
+send_mess(): message = 01SN?
+recv_mess(): message = "2"
+send_mess(): message = 01SU?
+recv_mess(): message = "0.00003539317"
+send_mess(): message = 01MD
+recv_mess(): message = "1"
+send_mess(): message = 01TP
+recv_mess(): message = "0.00000"
+send_mess(): message = 01PH
+recv_mess(): message = "18000606H, 6H"
+send_mess(): message = 01MO?
+recv_mess(): message = "0"
+send_mess(): message = 01TE?
+recv_mess(): message = "0"
+send_mess(): message = 02SN?
+recv_mess(): message = "2"
+send_mess(): message = 02SU?
+recv_mess(): message = "0.00009765625"
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Note the response to the SU? and SN? commands and set MRES to that value.
+
+All three supported controllers (ESP100/300/301) have the same response
+to the SN? command; 0 to 10 where
+0 = encoder count       6 = micro-inches
+1 = motor step          7 = degree
+2 = millimeter          8 = gradian
+3 = micrometer          9 = radian
+4 = inches             10 = milliradian
+5 = milli-inches       11 = microradian
+
+5 - Set the motor record's EGU field to "mm" (based on SN-2) and the MRES field
+    to 3.539317E-5 (based on SU = 0.00003539317).
+6 - Turn off diagnostic messages. Either set drvESP300debug = 0 in the st.cmd
+    file (there is a very small amount of CPU overhead associated with leaving
+    the diagnostic messages loaded), or go to step #1, and reverse the steps;
+    comment out the "USR_CFLAGS += -DDEBUG" line in the NewportSrc/Makefile.Vx,
+    etc., etc.,
+    
+Setting the motor record's Engineering Units field (EGU) to a value DIFFERENT
+from the controller's EGU.
+-------------------------------------------------------------------------------
+In the above example the controller returned SU = "0.00003539317" and SN = "2"
+for axis #1. If the user prefers the motor record EGU to be in inches rather
+than millimeters, then set EGU = "inch" and,
+MRES = (3.539317E-5 mm / 1 encoder tick) X (1 inch / 25.4 mm)
+     = 1.39343189E-6 inch / 1 encoder tick
 
 Newport ESP100
 ==============

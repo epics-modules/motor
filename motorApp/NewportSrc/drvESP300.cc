@@ -53,14 +53,13 @@ HeadURL:        $URL$
  *            extern "C" linkage.
  * .09 08/07/06 rls - GPIB under ASYN only allows 1 input EOS character.
  *                    No output EOS. Adjustments accordingly.
- * .10 02/22/13 rls - Scrap driver resolution, use MRES.
+ * .10 05/19/14 rls - Print controller's error code and set RA_PROBLEM.
  */
 
 
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
-#include "motorRecord.h"
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"
@@ -216,24 +215,15 @@ static int set_status(int card, int signal)
     /* Message parsing variables */
     char *cptr, *tok_save;
     char inbuff[BUFF_SIZE], outbuff[BUFF_SIZE];
-    int rtn_state, charcnt;
+    int rtn_state, charcnt, errcode;
     long mstatus;
-    double motorData, MRES;
+    double motorData;
     bool power, plusdir, ls_active = false;
     msta_field status;
-    struct motorRecord *mr;
 
     cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-    {
-	mr = (struct motorRecord *) nodeptr->mrecord;
-        MRES = mr->mres;
-    }
-    else
-	MRES = 1.0;
-
     status.All = motor_info->status.All;
 
     sprintf(outbuff, "%.2dMD", signal + 1);
@@ -270,7 +260,7 @@ static int set_status(int card, int signal)
     send_mess(card, outbuff, (char) NULL);
     charcnt = recv_mess(card, inbuff, 1);
 
-    motorData = atof(inbuff) / MRES;
+    motorData = atof(inbuff) / cntrl->drive_resolution[signal];
 
     if (motorData == motor_info->position)
     {
@@ -340,7 +330,19 @@ static int set_status(int card, int signal)
     status.Bits.EA_SLIP     = 0;
     status.Bits.EA_SLIP_STALL   = 0;
     status.Bits.EA_HOME     = 0;
-    status.Bits.RA_PROBLEM  = 0;
+
+    /* Get error code. */
+    sprintf(outbuff, "%.2dTE?", signal + 1);
+    send_mess(card, outbuff, (char) NULL);
+    charcnt = recv_mess(card, inbuff, 1);
+    errcode = atoi(inbuff);
+    if (errcode != 0)
+    {
+        status.Bits.RA_PROBLEM = 1;
+        printf("ESP300 controller error = %d.\n", errcode);
+    }
+    else
+        status.Bits.RA_PROBLEM = 0;
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
@@ -674,6 +676,17 @@ errexit:
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 struct mess_info *motor_info = &brdptr->motor_info[motor_index];
+
+                /* Get controller's EGU for the user (see README). */
+                sprintf(buff, "%.2dSN?", motor_index + 1);
+                send_mess(card_index, buff, 0);
+                recv_mess(card_index, buff, 1);
+
+                /* Set axis resolution. */
+                sprintf(buff, "%.2dSU?", motor_index + 1);
+                send_mess(card_index, buff, 0);
+                recv_mess(card_index, buff, 1);
+                cntrl->drive_resolution[motor_index] = atof(&buff[0]);
 
                 motor_info->status.All = 0;
                 motor_info->no_motion_count = 0;
