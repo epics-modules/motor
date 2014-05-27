@@ -276,6 +276,7 @@ static double query_axis(int card, struct driver_table *tabptr, epicsTime tick,
                     motor_free(motor_motion, tabptr);
                     motor_motion = (struct mess_node *) NULL;
                     motor_info->motor_motion = (struct mess_node *) NULL;
+                    mess_ret->status.Bits.RA_DONE = 1;
                 }
 
                 callbackRequest(&mess_ret->callback);
