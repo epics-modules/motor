@@ -356,6 +356,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
     char *p, *tok_save;
     char response[BUFF_SIZE];
+    char temp[BUFF_SIZE];
     struct PM304controller *cntrl;
     size_t nwrite, nread;
     int eomReason;
@@ -372,7 +373,8 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
     /* Device support can send us multiple commands separated with ';'
      * characters.  The PM304 cannot handle more than 1 command on a line
      * so send them separately */
-    for (p = epicsStrtok_r((char *) com, ";", &tok_save);
+    strcpy(temp, com);
+    for (p = epicsStrtok_r(temp, ";", &tok_save);
                 ((p != NULL) && (strlen(p) != 0));
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, p);
@@ -487,7 +489,8 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     /* Device support can send us multiple commands separated with ';'
      * characters.  The PM304 cannot handle more than 1 command on a line
      * so send them separately */
-    for (p = epicsStrtok_r((char *) out, ";", &tok_save);
+    strcpy(temp, out);
+    for (p = epicsStrtok_r(temp, ";", &tok_save);
                 ((p != NULL) && (strlen(p) != 0));
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, p);

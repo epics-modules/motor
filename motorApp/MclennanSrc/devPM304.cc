@@ -175,8 +175,9 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
 
     rtnval = OK;
     buff[0] = '\0';
-    dval = parms[0];
-    ival = NINT(parms[0]);
+    /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
+    dval = (parms == NULL) ? 0.0 : *parms;
+    ival = NINT(dval);
 
     motor_call = &(trans->motor_call);
     card = motor_call->card;

@@ -12,6 +12,56 @@
 </head>
 
 <body>
+
+  <div style="text-align: center">
+    <h1><b>Motor Record Version 6-8-1 Release Notice</b></h1>
+  </div>
+  <div style="text-align: center">
+    <h4>Modifications to Existing Features</h4>
+  </div>
+  <div style="text-align: left">
+    <p><b>motor record</b></p>
+    <p>
+    Previous to this release, if an EPICS motor driver signaled a controller error 
+    by setting the RA_PROBLEM bit of the MSTA filed true, then the motor record 
+    assumed that the controller had stopped motor motion. In some cases this was not 
+    true. For example, if a Newport ESP300 controller's maximum velocity parameter 
+    is exceeded, the controller signals an error, but then continues jogging the 
+    motor at the maximum velocity parameter value.
+    </p>
+    <p>
+    With this release, the motor record stops motion whenever RA_PROBLEM is set true.
+    </p>
+
+    <p><b>Newport ESP100/300/301</b></p>
+    <p>
+    The changes made to the Newport ESP100/300/301 driver in the previous release (R6-8) 
+    were rolled back. Since the motor record's data structure is not always 
+    available to driver level code, using MRES to scale the EGUtoRAWbacktoEGU 
+    conversion proved to be unworkable.
+    </p>
+
+    <p><b>OMS MAXv limit mode</b></p>
+    <p>
+    Since the default mode of the limit switches is "Off" on some OMS MAXv firmware 
+    versions after 1.30, during iocInit, if the limit mode is "Off" the driver will 
+    set the limit mode to "Hard".
+    </p>
+
+    <p><b>Micos MoCo</b></p>
+    <p>
+    Bug fix for protection against NULL *parms pointer from motor record.
+    </p>
+
+    <p><b>Mclennan PM304</b></p>
+    <p>
+    Bug fixes for both protection against NULL *parms pointer from motor record and 
+    incorrect epicsStrtok_r() argument.
+    </p>
+  </div>
+  <p>
+  </p>
+
   <div style="text-align: center">
     <h1>
       <b>Motor Record Version 6-8 Release Notice</b></h1>

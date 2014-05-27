@@ -65,6 +65,7 @@ enum MotorTypes {PSO,  // Stepper; w/o  encoder
 struct MAXvController
 {
     MotorTypes typeID[8];
+    float fwver;                /* firmware version */
     epicsMutexId message_mutex;
 };
 

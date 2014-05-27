@@ -173,9 +173,12 @@ HeadURL:        $URL$
  *                    No need in process() to test MIP_MOVE type moves for soft-travel limits.
  *                  - Need "preferred_dir" for LVIO test. Moved LVIO test in do_work() to
  *                    after "preferred_dir" is set.
+ * .69 05-19-14 rls - Set "stop" field true if driver returns RA_PROBLEM true. (Motor record
+ *                    stops motion when controller signals error but does not stop motion; e.g.,
+ *                    maximum velocity exceeded.)
  */
 
-#define VERSION 6.8
+#define VERSION 6.81
 
 #include    <stdlib.h>
 #include    <string.h>
@@ -3584,8 +3587,15 @@ static void
     if (ls_active == true || msta.Bits.RA_DONE || msta.Bits.RA_PROBLEM)
     {
         pmr->movn = 0;
-        if (ls_active == true)
+        if (ls_active == true || msta.Bits.RA_PROBLEM)
+        {
             clear_buttons(pmr);
+            if (msta.Bits.RA_PROBLEM)
+            {
+                pmr->stop = 1;
+                MARK(M_STOP);
+            }
+        }
     }
     else
         pmr->movn = 1;

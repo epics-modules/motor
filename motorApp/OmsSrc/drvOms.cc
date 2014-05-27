@@ -82,6 +82,8 @@ HeadURL:        $URL$
  * .17  07-26-12 rls - Added reboot flag to IRQ control register. Driver
  *                     sets IRQ_RESET_ID bit on; set_status() and send_mess()
  *                     read IRQ register and disable board if flag is off.
+ * .18  11-15-03 rls - Added bus flushing read on exit from ISR to prevent
+ *                     "out of order transactions".
  */
 
 /*========================stepper motor driver ========================
@@ -900,8 +902,8 @@ static void motorIsr(int card)
         }
         irqdata->recv_sem->signal();
     }
-    /* Update-interrupt state */
-    pmotor->control = control;
+    pmotor->control = control;  /* Update-interrupt state. */
+    control = pmotor->control;  /* Read it back to flush last write cycle. */
 }
 
 static int motorIsrEnable(int card)
