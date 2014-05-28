@@ -408,10 +408,20 @@ static void printChIDCallFunc(const iocshArgBuf *args)
     printChIDlist();
 }
 
+static const iocshArg ArgL = {"List moving motors", iocshArgString};
+static const iocshArg * const listMovingMotorsArg[1]  = {&ArgL};
+static const iocshFuncDef listMovingMotorsDef  = {"listMovingMotors", 1, listMovingMotorsArg};
+
+static void listMovingMotorsCallFunc(const iocshArgBuf *args)
+{
+    listMovingMotors();
+}
+
 static void motorUtilRegister(void)
 {
     iocshRegister(&motorUtilDef,  motorUtilCallFunc);
     iocshRegister(&printChIDDef,  printChIDCallFunc);
+    iocshRegister(&listMovingMotorsDef,  listMovingMotorsCallFunc);
 }
 
 epicsExportRegistrar(motorUtilRegister);
