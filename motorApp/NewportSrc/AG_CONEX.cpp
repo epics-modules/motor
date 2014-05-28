@@ -18,8 +18,11 @@ April 11, 2013
 
 #include <asynOctetSyncIO.h>
 
-#include "AG_CONEX.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
+
 #include <epicsExport.h>
+#include "AG_CONEX.h"
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
