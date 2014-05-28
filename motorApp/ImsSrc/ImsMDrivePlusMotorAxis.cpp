@@ -20,8 +20,11 @@
 #include <iocsh.h>
 #include <asynOctetSyncIO.h>
 
-#include "ImsMDrivePlusMotorController.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
+
 #include <epicsExport.h>
+#include "ImsMDrivePlusMotorController.h"
 
 ////////////////////////////////////////////////////////
 //! ImsMDrivePlusMotorAxis()
