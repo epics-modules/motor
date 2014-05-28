@@ -17,8 +17,11 @@ August 14, 2013
 
 #include <asynOctetSyncIO.h>
 
-#include "MVP2001Driver.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
+
 #include <epicsExport.h>
+#include "MVP2001Driver.h"
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
