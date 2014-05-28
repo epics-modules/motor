@@ -18,9 +18,12 @@ Note: This driver was tested with the v1.3.x of the firmware
 
 #include <asynOctetSyncIO.h>
 
-#include "HXPDriver.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
 #include "hxp_drivers.h"
+
 #include <epicsExport.h>
+#include "HXPDriver.h"
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 #define NUM_AXES 6
