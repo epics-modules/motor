@@ -18,8 +18,11 @@ Note: This driver was tested with the Micos SMC hydra CM and
 
 #include <asynOctetSyncIO.h>
 
-#include "SMChydraDriver.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
+
 #include <epicsExport.h>
+#include "SMChydraDriver.h"
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
