@@ -18,8 +18,8 @@ March 1, 2012
 
 #include <asynOctetSyncIO.h>
 
-#include "MCB4BDriver.h"
 #include <epicsExport.h>
+#include "MCB4BDriver.h"
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
