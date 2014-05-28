@@ -23,8 +23,8 @@ K. Goetze 2012-03-23  Initial version
 
 #include <asynOctetSyncIO.h>
 
-#include "SMC100Driver.h"
 #include <epicsExport.h>
+#include "SMC100Driver.h"
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
 
