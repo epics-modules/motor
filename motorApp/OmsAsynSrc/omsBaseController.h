@@ -27,7 +27,7 @@ HeadURL:        $URL$
 #include "omsBaseAxis.h"
 #include <epicsExport.h>
 
-#define OMS_MAX_AXES 8
+#define OMS_MAX_AXES 10
 #define OMSBASE_MAXNUMBERLEN 12
 #define OMSINPUTBUFFERLEN OMSBASE_MAXNUMBERLEN * OMS_MAX_AXES + 2
 

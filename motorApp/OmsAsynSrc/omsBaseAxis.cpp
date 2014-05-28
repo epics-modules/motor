@@ -48,7 +48,11 @@ asynStatus omsBaseAxis::move(double position, int relative, double min_velocity,
     else
         rela = 0;
 
-    pos = (epicsInt32) (position + 0.5);
+    if ( position < 0.0)
+    	pos = (epicsInt32) (position - 0.5);
+    else
+    	pos = (epicsInt32) (position + 0.5);
+
     if (abs(pos) > 67000000){
         asynPrint(pasynUser_, ASYN_TRACE_ERROR,
               "%s:%s:%s axis %d position out of range %f\n",
@@ -167,7 +171,7 @@ asynStatus omsBaseAxis::stop(double acceleration )
 
     asynPrint(pasynUser_, ASYN_TRACE_FLOW,
         "%s:%s: port %s, set axis %d to stop with accel=%f\n",
-        driverName, functionName, pC_->portName, axisNo_, axisNo_, acceleration );
+        driverName, functionName, pC_->portName, axisNo_, acceleration );
 
     return status;
 }
