@@ -17,8 +17,11 @@ March 4, 2011
 
 #include <asynOctetSyncIO.h>
 
-#include "ACRMotorDriver.h"
+#include "asynMotorController.h"
+#include "asynMotorAxis.h"
+
 #include <epicsExport.h>
+#include "ACRMotorDriver.h"
 
 #define CtlY 25
 
