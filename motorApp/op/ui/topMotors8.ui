@@ -22,14 +22,6 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
             <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
             </property>
-            <property name="geometry">
-                <rect>
-                    <x>0</x>
-                    <y>0</y>
-                    <width>30</width>
-                    <height>14</height>
-                </rect>
-            </property>
             <property name="foreground">
                 <color alpha="255">
                     <red>0</red>
@@ -48,7 +40,15 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <string>Card</string>
             </property>
             <property name="fontScaleMode">
-                <enum>ESimpleLabel::Height</enum>
+                <enum>ESimpleLabel::WidthAndHeight</enum>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>33</width>
+                    <height>14</height>
+                </rect>
             </property>
             <property name="alignment">
                 <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -64,7 +64,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M1).CARD</string>
@@ -112,14 +112,6 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
             <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
             </property>
-            <property name="geometry">
-                <rect>
-                    <x>60</x>
-                    <y>0</y>
-                    <width>75</width>
-                    <height>14</height>
-                </rect>
-            </property>
             <property name="foreground">
                 <color alpha="255">
                     <red>0</red>
@@ -138,7 +130,15 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <string>($(M1)..$(M8))</string>
             </property>
             <property name="fontScaleMode">
-                <enum>ESimpleLabel::Height</enum>
+                <enum>ESimpleLabel::WidthAndHeight</enum>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>60</x>
+                    <y>0</y>
+                    <width>117</width>
+                    <height>14</height>
+                </rect>
             </property>
             <property name="alignment">
                 <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -154,7 +154,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 </rect>
             </property>
             <property name="fontScaleMode">
-                <enum>caLineEdit::Height</enum>
+                <enum>caLineEdit::WidthAndHeight</enum>
             </property>
             <property name="channel">
                 <string>$(P)$(M1).DTYP</string>
@@ -1819,7 +1819,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(M7).DESC</string>
@@ -1870,7 +1870,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(M6).DESC</string>
@@ -1921,7 +1921,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(M5).DESC</string>
@@ -1972,7 +1972,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(M4).DESC</string>
@@ -2023,7 +2023,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(M3).DESC</string>
@@ -2074,7 +2074,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(M2).DESC</string>
@@ -2125,7 +2125,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(M1).DESC</string>
@@ -2176,7 +2176,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     </rect>
                 </property>
                 <property name="fontScaleMode">
-                    <enum>caLineEdit::Height</enum>
+                    <enum>caLineEdit::WidthAndHeight</enum>
                 </property>
                 <property name="channel">
                     <string>$(P)$(M8).DESC</string>

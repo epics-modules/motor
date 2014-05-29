@@ -4,10 +4,10 @@
 <widget class="QMainWindow" name="MainWindow">
     <property name="geometry">
         <rect>
-            <x>729</x>
-            <y>391</y>
+            <x>578</x>
+            <y>571</y>
             <width>400</width>
-            <height>230</height>
+            <height>235</height>
         </rect>
     </property>
     <property name="styleSheet">
@@ -22,16 +22,13 @@ QWidget#centralWidget {background: rgba(255, 255, 255, 255);}
             <property name="geometry">
                 <rect>
                     <x>0</x>
-                    <y>30</y>
+                    <y>15</y>
                     <width>400</width>
                     <height>200</height>
                 </rect>
             </property>
-            <property name="TitleX">
-                <string>Point</string>
-            </property>
             <property name="TitleY">
-                <string>Position</string>
+                <string>$(YLABEL)</string>
             </property>
             <property name="scaleColor">
                 <color alpha="255">
@@ -73,11 +70,11 @@ QWidget#centralWidget {background: rgba(255, 255, 255, 255);}
                 <enum>caCartesianPlot::Triangle</enum>
             </property>
             <property name="countNumOrChannel">
-                <string>2000</string>
+                <string>$(Y).NORD</string>
             </property>
             <property name="color_1">
                 <color alpha="255">
-                    <red>253</red>
+                    <red>0</red>
                     <green>0</green>
                     <blue>0</blue>
                 </color>
@@ -97,59 +94,8 @@ QWidget#centralWidget {background: rgba(255, 255, 255, 255);}
             <property name="YaxisLimits">
                 <string>0;1</string>
             </property>
-        </widget>
-        <widget class="caLineEdit" name="caLineEdit_0">
-            <property name="geometry">
-                <rect>
-                    <x>69</x>
-                    <y>11</y>
-                    <width>85</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="fontScaleMode">
-                <enum>caLineEdit::WidthAndHeight</enum>
-            </property>
-            <property name="channel">
-                <string>$(M).DESC</string>
-            </property>
-            <property name="foreground">
-                <color alpha="255">
-                    <red>0</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                </color>
-            </property>
-            <property name="background">
-                <color alpha="255">
-                    <red>255</red>
-                    <green>255</green>
-                    <blue>255</blue>
-                </color>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignAbsolute|Qt::AlignRight|Qt::AlignVCenter</set>
-            </property>
-            <property name="limitsMode">
-                <enum>caLineEdit::Channel</enum>
-            </property>
-            <property name="limitsMode">
-                <enum>caLineEdit::Channel</enum>
-            </property>
-            <property name="precisionMode">
-                <enum>caLineEdit::Channel</enum>
-            </property>
-            <property name="minValue">
-                <double>0.0</double>
-            </property>
-            <property name="maxValue">
-                <double>1.0</double>
-            </property>
-            <property name="formatType">
-                <enum>decimal</enum>
-            </property>
-            <property name="colorMode">
-                <enum>caLineEdit::Static</enum>
+            <property name="eraseMode">
+                <enum>caCartesianPlot::ifzero</enum>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_0">
@@ -171,26 +117,62 @@ QWidget#centralWidget {background: rgba(255, 255, 255, 255);}
                 </color>
             </property>
             <property name="text">
-                <string>$(TITLE)</string>
+                <string>Y=$(Y)</string>
             </property>
             <property name="fontScaleMode">
                 <enum>ESimpleLabel::WidthAndHeight</enum>
             </property>
+            <property name="alignment">
+                <set>Qt::AlignAbsolute|Qt::AlignHCenter|Qt::AlignVCenter</set>
+            </property>
             <property name="geometry">
                 <rect>
-                    <x>161</x>
-                    <y>11</y>
-                    <width>96</width>
-                    <height>20</height>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>400</width>
+                    <height>13</height>
                 </rect>
             </property>
+        </widget>
+        <widget class="caLabel" name="caLabel_1">
+            <property name="frameShape">
+                <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="background">
+                <color alpha="0">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="text">
+                <string>X=array index</string>
+            </property>
+            <property name="fontScaleMode">
+                <enum>ESimpleLabel::WidthAndHeight</enum>
+            </property>
             <property name="alignment">
-                <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
+                <set>Qt::AlignAbsolute|Qt::AlignHCenter|Qt::AlignVCenter</set>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>218</y>
+                    <width>400</width>
+                    <height>13</height>
+                </rect>
             </property>
         </widget>
         <zorder>caLabel_0</zorder>
+        <zorder>caLabel_1</zorder>
         <zorder>caCartesianPlot_0</zorder>
-        <zorder>caLineEdit_0</zorder>
     </widget>
 </widget>
 </ui>
