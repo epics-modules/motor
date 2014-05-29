@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+<class>MainWindow</class>
+<widget class="QMainWindow" name="MainWindow">
+    <property name="geometry">
+        <rect>
+            <x>342</x>
+            <y>122</y>
+            <width>150</width>
+            <height>189</height>
+        </rect>
+    </property>
+    <property name="styleSheet">
+        <string>
+
+QWidget#centralWidget {background: rgba(236, 236, 236, 255);}
+
+</string>
+    </property>
+    <widget class="QWidget" name="centralWidget">
+        <widget class="caFrame" name="caFrame_0">
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>132</width>
+                    <height>166</height>
+                </rect>
+            </property>
+            <widget class="caRelatedDisplay" name="caRelatedDisplay_0">
+                <property name="geometry">
+                    <rect>
+                        <x>0</x>
+                        <y>77</y>
+                        <width>130</width>
+                        <height>22</height>
+                    </rect>
+                </property>
+                <property name="foreground">
+                    <color alpha="255">
+                        <red>255</red>
+                        <green>255</green>
+                        <blue>255</blue>
+                    </color>
+                </property>
+                <property name="background">
+                    <color alpha="255">
+                        <red>51</red>
+                        <green>153</green>
+                        <blue>0</blue>
+                    </color>
+                </property>
+                <property name="label">
+                    <string>-HXP extra</string>
+                </property>
+                <property name="stackingMode">
+                    <enum>Menu</enum>
+                </property>
+                <property name="labels">
+                    <string>HXP_extra.adl</string>
+                </property>
+                <property name="files">
+                    <string>HXP_extra.adl</string>
+                </property>
+                <property name="args">
+                    <string>P=$(P),R=$(R)</string>
+                </property>
+                <property name="removeParent">
+                    <string>false</string>
+                </property>
+            </widget>
+            <widget class="caRelatedDisplay" name="caRelatedDisplay_1">
+                <property name="geometry">
+                    <rect>
+                        <x>0</x>
+                        <y>142</y>
+                        <width>130</width>
+                        <height>22</height>
+                    </rect>
+                </property>
+                <property name="foreground">
+                    <color alpha="255">
+                        <red>255</red>
+                        <green>255</green>
+                        <blue>255</blue>
+                    </color>
+                </property>
+                <property name="background">
+                    <color alpha="255">
+                        <red>51</red>
+                        <green>153</green>
+                        <blue>0</blue>
+                    </color>
+                </property>
+                <property name="label">
+                    <string>-HXP coordSys</string>
+                </property>
+                <property name="stackingMode">
+                    <enum>Menu</enum>
+                </property>
+                <property name="labels">
+                    <string>HXP_coordSys.adl</string>
+                </property>
+                <property name="files">
+                    <string>HXP_coordSys.adl</string>
+                </property>
+                <property name="args">
+                    <string>P=$(P),R=$(R)</string>
+                </property>
+                <property name="removeParent">
+                    <string>false</string>
+                </property>
+            </widget>
+            <widget class="caRelatedDisplay" name="caRelatedDisplay_2">
+                <property name="geometry">
+                    <rect>
+                        <x>0</x>
+                        <y>45</y>
+                        <width>130</width>
+                        <height>22</height>
+                    </rect>
+                </property>
+                <property name="foreground">
+                    <color alpha="255">
+                        <red>255</red>
+                        <green>255</green>
+                        <blue>255</blue>
+                    </color>
+                </property>
+                <property name="background">
+                    <color alpha="255">
+                        <red>51</red>
+                        <green>153</green>
+                        <blue>0</blue>
+                    </color>
+                </property>
+                <property name="label">
+                    <string>-HXP motors</string>
+                </property>
+                <property name="stackingMode">
+                    <enum>Menu</enum>
+                </property>
+                <property name="labels">
+                    <string>HXP_motors.adl</string>
+                </property>
+                <property name="files">
+                    <string>HXP_motors.adl</string>
+                </property>
+                <property name="args">
+                    <string>P=$(P),R=$(R),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6)</string>
+                </property>
+                <property name="removeParent">
+                    <string>false</string>
+                </property>
+            </widget>
+            <widget class="caRelatedDisplay" name="caRelatedDisplay_3">
+                <property name="geometry">
+                    <rect>
+                        <x>0</x>
+                        <y>110</y>
+                        <width>130</width>
+                        <height>22</height>
+                    </rect>
+                </property>
+                <property name="foreground">
+                    <color alpha="255">
+                        <red>255</red>
+                        <green>255</green>
+                        <blue>255</blue>
+                    </color>
+                </property>
+                <property name="background">
+                    <color alpha="255">
+                        <red>51</red>
+                        <green>153</green>
+                        <blue>0</blue>
+                    </color>
+                </property>
+                <property name="label">
+                    <string>-HXP moveAll</string>
+                </property>
+                <property name="stackingMode">
+                    <enum>Menu</enum>
+                </property>
+                <property name="labels">
+                    <string>HXP_moveAll.adl</string>
+                </property>
+                <property name="files">
+                    <string>HXP_moveAll.adl</string>
+                </property>
+                <property name="args">
+                    <string>P=$(P),R=$(R),M1=$(M1),M2=$(M2),M3=$(M3),M4=$(M4),M5=$(M5),M6=$(M6)</string>
+                </property>
+                <property name="removeParent">
+                    <string>false</string>
+                </property>
+            </widget>
+            <widget class="caLabel" name="caLabel_0">
+                <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="foreground">
+                    <color alpha="255">
+                        <red>0</red>
+                        <green>0</green>
+                        <blue>0</blue>
+                    </color>
+                </property>
+                <property name="background">
+                    <color alpha="0">
+                        <red>0</red>
+                        <green>0</green>
+                        <blue>0</blue>
+                    </color>
+                </property>
+                <property name="text">
+                    <string>$(P)$(R)</string>
+                </property>
+                <property name="fontScaleMode">
+                    <enum>ESimpleLabel::WidthAndHeight</enum>
+                </property>
+                <property name="alignment">
+                    <set>Qt::AlignAbsolute|Qt::AlignHCenter|Qt::AlignVCenter</set>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>144</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+            </widget>
+        </widget>
+        <zorder>caLabel_0</zorder>
+        <zorder>caFrame_0</zorder>
+        <zorder>caRelatedDisplay_0</zorder>
+        <zorder>caRelatedDisplay_1</zorder>
+        <zorder>caRelatedDisplay_2</zorder>
+        <zorder>caRelatedDisplay_3</zorder>
+    </widget>
+</widget>
+</ui>
