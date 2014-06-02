@@ -51,6 +51,8 @@ Last Modified:  $Date: 2009-04-27 14:28:42 $
  *                    tested by jph with simMotorDriver.
  * .10 08-25-11 rls - Replaced deprecated #cpu preprocessor assertions with
  *                    the defined() operator.
+ * .11 06-02-14 rls - Jens Eden's modification to add EPICS_BYTE_ORDER to the
+ *                    logic of setting {MSB/LSB}_First.
  */
 
 #ifndef INCmotorh
@@ -61,6 +63,7 @@ Last Modified:  $Date: 2009-04-27 14:28:42 $
 #include <devSup.h>
 #include <osiUnistd.h> 
 #include <epicsVersion.h>
+#include <epicsEndian.h>
 
 /* Less than EPICS base version test.*/
 #define LT_EPICSBASE(v,r,l) ((EPICS_VERSION<=(v)) && (EPICS_REVISION<=(r)) && (EPICS_MODIFICATION<(l)))
@@ -137,8 +140,14 @@ typedef enum  {
     #define LSB_First (TRUE)  /* LSB is packed first. */    
 #elif defined(sparc) || defined(m68k) || defined(powerpc)
     #define MSB_First (TRUE)  /* MSB is packed first. */
-#elif (CPU == PPC604) || (CPU == PPC603) || (CPU == PPC85XX) || (CPU == MC68040) || (CPU == PPC32)
+#elif defined(CPU) && ((CPU == PPC604) || (CPU == PPC603) || (CPU == PPC85XX) || (CPU == MC68040) || (CPU == PPC32))
     #define MSB_First (TRUE)  /* MSB is packed first. */
+#elif defined(__GNUC__)
+    #if (EPICS_BYTE_ORDER == EPICS_ENDIAN_LITTLE)
+        #define LSB_First (TRUE)
+    #else
+        #define MSB_First (TRUE)
+    #endif
 #else
     #error: unknown bit order!
 #endif
