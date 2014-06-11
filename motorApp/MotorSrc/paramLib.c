@@ -265,8 +265,11 @@ static void paramCallCallback( PARAMS params )
 
     }
     if ( (params->forceCallback || nFlags > 0) && params->callback != NULL )
+    {
+        if (params->forceCallback)
+            params->forceCallback = 0; 
         params->callback( params->param, nFlags, params->set_flags );
-    params->forceCallback=0;
+    }
 }
 
 /** Forces the next paramCallCallback to actually call the callback routine
