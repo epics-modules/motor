@@ -192,6 +192,8 @@ int waitingForTrigger;
 double vmax;
 double amax;
 
+int card;
+int signal;
 
 ss maxTrajectoryScan {
 
@@ -252,6 +254,16 @@ ss maxTrajectoryScan {
 				sprintf(motorName, "%s%s.ACCL", macValueGet("P"), macValueGet(macroBuf));
 				pvAssign(epicsMotorACCL[i], motorName);
 				pvMonitor(epicsMotorACCL[i]);
+
+				sprintf(motorName, "%s%s.OUT", macValueGet("P"), macValueGet(macroBuf));
+				pvAssign(epicsMotorOUT[i], motorName);
+				pvGet(epicsMotorOUT[i]);
+
+				sscanf(epicsMotorOUT[i], "#C%d S%d", &card, &signal);
+				if (signal != i) {
+					printf("MAX_trajectoryScan: motor %d has signal %d (must be same)\n", i, signal);
+					initStatus = STATUS_FAILURE;
+				}
 
 				if (cardNumber == -2) {
 					cardNumber = epicsMotorCard[i];
