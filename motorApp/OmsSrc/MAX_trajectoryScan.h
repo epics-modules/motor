@@ -344,6 +344,9 @@ double  epicsMotorACCL[MAX_AXES];
 assign  epicsMotorACCL to {"","","","","","","",""};
 monitor epicsMotorACCL;
 
+string  epicsMotorOUT[MAX_AXES]; 
+assign  epicsMotorOUT to {"","","","","","","",""};
+
 
 evflag buildMon;        sync build      buildMon;
 evflag executeMon;      sync execute    executeMon;
