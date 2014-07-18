@@ -159,7 +159,7 @@ monitor newPulsePositions;
 evflag pulsePositionsMon;	sync newPulsePositions pulsePositionsMon;
 #endif
 
-int     numPulsePositions;    assign numPulsePositions to "{P}{R}PulsePositions.NORD";    
+int     numPulsePositions;    assign numPulsePositions to "{P}{R}NumPulsePositions";    
 monitor numPulsePositions;
 
 #define PULSE_POSITIONS_LOADED_NONE 0
