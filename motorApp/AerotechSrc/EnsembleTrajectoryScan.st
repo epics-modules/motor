@@ -47,7 +47,7 @@ option +r;
 /* Maximum # of output pulses.  For now, we emit a pulse at the beginning of
  * every trajectory element.
  */
-#define MAX_PULSES 1000
+#define MAX_PULSES 8000
 
 /* Note that MAX_ELEMENTS, and MAX_PULSES must be defined before including
  * trajectoryScan.h, which defines MAX_AXES. */
@@ -166,6 +166,7 @@ int nAcqDataPoints;
 %%int encoder_runs_backwards=0;
 
 int pulsePositionsLoaded;
+int numPulsePositionsLoaded;
 
 ss EnsembleTrajectoryScan {
 
@@ -256,6 +257,7 @@ ss EnsembleTrajectoryScan {
 			efClear(pulsePositionsMon);
 			pvGet(pulsePositions);
 			pulsePositionsLoaded = 0;
+			numPulsePositionsLoaded = 0;
 
 			if (initStatus == STATUS_UNDEFINED) initStatus = STATUS_SUCCESS;
 			loadingTrajectory = 0;
@@ -325,12 +327,15 @@ ss EnsembleTrajectoryScan {
 		} state monitor_inputs
 
 		when (efTestAndClear(pulsePositionsMon)) {
+			if (debugLevel) printf("EnsembleTrajectoryScan:monitor_inputs: pvGet(pulsePositions)\n");
+			epicsThreadSleep(1.);
 			pvGet(pulsePositions);
 			if (debugLevel>1) {
 				printf("EnsembleTrajectoryScan: new pulse positions detected\n");
 				printf("...%lf, %lf...\n", pulsePositions[0], pulsePositions[1]);
 			}
 			pulsePositionsLoaded = PULSE_POSITIONS_LOADED_NONE;
+			numPulsePositionsLoaded = 0;
 		} state monitor_inputs
 	}
 
@@ -400,7 +405,7 @@ ss EnsembleTrajectoryScan {
 						posActual = motorTrajectory[j][k];
 						if (moveMode != MOVE_MODE_ABSOLUTE) posActual += epicsMotorPos[j];
 						limitViolation |= (posActual > epicsMotorHLM[j]) || (posActual < epicsMotorLLM[j]);
-                		if (limitViolation) {
+						if (limitViolation) {
 							epicsSnprintf(buildMessage, MSGSIZE, "Limit: m%d at pt. %d (%f)", j+1, k+1, posActual);
 						}
 						if (velocity[j][k] > vmax) {
@@ -427,6 +432,7 @@ ss EnsembleTrajectoryScan {
 					pvPut(motorMAA[j]);
 				}
 			}
+			if (debugLevel>1) printf("limitViolation=%d\n", limitViolation);
 			if (limitViolation) {
 				buildStatus = STATUS_FAILURE;
 			}
@@ -1307,6 +1313,13 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		pVar->motorPosOffset[j] = posfbkprog - posfbkcal;
 	}
 
+#if 1
+	if (pVar->pulseMode != PULSE_MODE_NONE) {
+
+		strcpy(stringOut, "PSOCONTROL @0 RESET");
+		status = writeRead(ssId, pVar, stringOut, reply);
+	}
+#endif
 	/* We can write an array of positions at which PSO pulses are wanted, and the array can be either
 	 * the trajectory points, or points specified by the user in pulsePositions[].  If we're doing this,
 	 * we'd like not to write the PSO positions unless they have changed.  If we're doing pulses at
@@ -1323,7 +1336,8 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		
 
 		if ((pVar->pulseMode == PULSE_MODE_ARRAY) &&
-			(pVar->pulsePositionsLoaded != PULSE_POSITIONS_LOADED_ARRAY)) {
+				(pVar->pulsePositionsLoaded != PULSE_POSITIONS_LOADED_ARRAY)) {
+			if (pVar->debugLevel > 2) printf("loadTrajectory: load PULSE_MODE_ARRAY array\n");
 			j = 0; /* For now, we only support one motor */
 			/* user has loaded an array of pulse positions into pulsePositions[] */
 			positionLast = pVar->motorStart[j];
@@ -1331,36 +1345,43 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 			if (pVar->numGlobalIntegers < (pVar->numPulsePositions + GLOBALINDEXSTART)) {
 				printf("EnsembleTrajectoryScan: The Ensemble only has enough global integers for %d pulses\n",
 					pVar->numGlobalIntegers - GLOBALINDEXSTART);
+				pVar->numPulsePositions = pVar->numGlobalIntegers - GLOBALINDEXSTART;
 			}
 			if (pVar->numPulsePositions > MAX_PSO_PULSES) {
 				printf("EnsembleTrajectoryScan: The Ensemble can't load more than %d PSOARRAY pulses\n",
 					MAX_PSO_PULSES);
+				pVar->numPulsePositions = MAX_PSO_PULSES;
 			}
 			for (i=0, np=0; i<pVar->numPulsePositions && np<maxArrayPulses; i++) {
 				/* Add this pulse-out location to the list */
+				np++;
 				position = pVar->pulsePositions[i];
 				intPosition = NINT((position - positionLast)/pVar->epicsMotorMres[j]);
 				status = writeIntAndCheck(ssId, pVar, iGlobalIndex++, abs(intPosition));
 				positionLast += intPosition*pVar->epicsMotorMres[j]; /* position of last pulse */
 			}
 			pVar->pulsePositionsLoaded = PULSE_POSITIONS_LOADED_ARRAY;
-		} else {
+			pVar->numPulsePositionsLoaded = np;
+		} else if ((pVar->pulseMode == PULSE_MODE_TRAJPTS) &&
+				(pVar->pulsePositionsLoaded != PULSE_POSITIONS_LOADED_TRAJ)) {
 			/* user wants pulses at trajectory points */
+			if (pVar->debugLevel > 2) printf("loadTrajectory: load PULSE_MODE_TRAJPTS array\n");
 			j = 0; /* For now, we only support one motor */
 			positionLast = pVar->motorStart[j];
 			iGlobalIndex = GLOBALINDEXSTART;
-			if (pVar->numGlobalIntegers < (pVar->npoints + GLOBALINDEXSTART)) {
+			if (pVar->numGlobalIntegers < (pVar->nelements + GLOBALINDEXSTART)) {
 				printf("EnsembleTrajectoryScan: The Ensemble only has enough global integers for %d pulses\n",
 					pVar->numGlobalIntegers - GLOBALINDEXSTART);
 			}
-			if (pVar->npoints > MAX_PSO_PULSES) {
+			if (pVar->nelements > MAX_PSO_PULSES) {
 				printf("EnsembleTrajectoryScan: The Ensemble can't load more than %d PSOARRAY pulses\n",
 					MAX_PSO_PULSES);
 			}
-			for (i=0, np=0; i<pVar->npoints && np<maxArrayPulses; i++) {
+			for (i=0, np=0; i<pVar->nelements && np<maxArrayPulses; i++) {
 				/* enable pulses if we're within user specified range */
 				if (i >= pVar->startPulses && i <= pVar->endPulses) {
 					/* Add this pulse-out location to the list */
+					np++;
 					position = pVar->motorTrajectory[j][i];
 					intPosition = NINT((position - positionLast)/pVar->epicsMotorMres[j]);
 					status = writeIntAndCheck(ssId, pVar, iGlobalIndex++, abs(intPosition));
@@ -1368,16 +1389,22 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 				}
 			}
 			pVar->pulsePositionsLoaded = PULSE_POSITIONS_LOADED_TRAJ;
+			pVar->numPulsePositionsLoaded = np;
 		}
 
 		/* Copy from IGLOBAL variables into the drive array */
-		sprintf(stringOut, "PSOARRAY @0,%d,%d", GLOBALINDEXSTART, np);
+		sprintf(stringOut, "PSOARRAY @0,%d,%d", GLOBALINDEXSTART, pVar->numPulsePositionsLoaded);
 		status = writeRead(ssId, pVar, stringOut, reply);
 		/* Send PSO pulses at specified positions. */
 		strcpy(stringOut, "PSODISTANCE @0 ARRAY");
 		status = writeRead(ssId, pVar, stringOut, reply);
 	}
 	/* digital I/O commands */
+	/* For HLe controller, set parameter Axis:I/O:EncoderDivider to nonzero
+	 * value to make the Aux I/O an output.
+	 * Also, I set the Axis:I/O:IOSetup parameter to configure the Opto Output Mode
+	 * for current sourcing.
+	 */
 	if (pVar->pulseMode != PULSE_MODE_NONE) {
 
 		/* (total time, on time) in microseconds */
