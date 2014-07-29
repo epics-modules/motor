@@ -7,7 +7,7 @@ CONFIGURATION NOTES
 
 - Startup command file (st.cmd) requirements.
 ("#"  is used to denote st.cmd comment lines.)
-("#!" is used to denote st.cmd command lines.)
+("#!" is used to denote st.cmd commented out command lines.)
 
 Configure an asyn communications port driver for the Ensemble.  This can be
 either RS-232 or ethernet. For example,
@@ -64,6 +64,10 @@ move in the direction of the CCW EOT limit switch.  If the PosScaleFactor
 parameter is negative, then a positive move is a move in the direction of the
 CCW EOT limit switch and a negative move is a move in the direction of the CW
 EOT limit switch
+
+- If the stage has no limit switches, then configure the EndOfTravelLimitSetup
+parameter to active low (assuming the limit switch inputs are unconnected and
+always high).
 
 
 ENSEMBLE CONFIGURATION NOTES
