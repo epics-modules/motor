@@ -33,7 +33,12 @@
  * 
  * .03 2013-01-02 rls
  * Support for motor record raw actual velocity (RVEL).
- * 
+ *
+ * .04 2014-08-05 MRP
+ * Fix for manual set position after IOC startup. The encoder ratio was not being set at IOC startup
+ * which meant that set position failed for Asyn drivers. We now always set the encoder ratio
+ * at the beginning of the init_controller function.
+ *
  */
 
 #include <stddef.h>
@@ -171,6 +176,11 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
     double encRatio[2] = {pmr->mres, pmr->eres};
 
+    /*Before setting position, set the correct encoder ratio.*/
+    start_trans(pmr);
+    build_trans(SET_ENC_RATIO, encRatio, pmr);
+    end_trans(pmr);
+
     if ((fabs(pmr->dval) > rdbd && pmr->mres != 0) &&
         (fabs(position * pmr->mres) < rdbd))
     {
@@ -178,11 +188,6 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
         epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );
 
         pPvt->initEvent = initEvent;
-
-        /*Before setting position, set the correct encoder ratio.*/
-        start_trans(pmr);
-        build_trans(SET_ENC_RATIO, encRatio, pmr);
-        end_trans(pmr);
 
         start_trans(pmr);
         build_trans(LOAD_POS, &setPos, pmr);
