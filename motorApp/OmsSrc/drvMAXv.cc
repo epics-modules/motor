@@ -39,69 +39,64 @@ HeadURL:        $URL$
  * Verified with MAXv firmware:
  *      - ver:1.25
  *      - ver:1.29 (has ECO #1432; fixes initialization problem).
- *      - ver:1.31 (fixes DPRAM encoder position data problem when using
- *                  mixed motor types.)
+ *      - ver:1.31 (fixes DPRAM encoder position data problem when using mixed motor types.)
  *      - ver:1.33, FPGA:B2:A6 BOOT:1.2 (Watchdog Timeout Counter added)
  *      - ver:1.34, FPGA:03:A6 BOOT:1.3
- *      - ver:1.41 & 1.42, suffers from having limit switches disabled at
- *                  power-up.
+ *      - ver:1.41 & 1.42, suffers from having limit switches disabled at power-up.
  *      - ver:1.44, No known problems.
  *      - ver:1.45, limit switches are disabled by default.
  *
  * Modification Log:
  * -----------------
- * 01  04-05-04 rls Copied from drvOms58.cc
+ * 01  04-05-04 rls - Copied from drvOms58.cc
  * 02  09-20-04 rls - support for 32axes/controller.
- *                  - added MAXvConfig() with initilization string.  Axis type
- *                    MUST be set before iocInit is called.
+ *                  - added MAXvConfig() with initilization string.  Axis type MUST be set before iocInit is called.
  * 03  12-14-04 rls - MS Visual C compiler support.
- *                  - eliminate calls to devConnectInterrupt() due to C++
- *                    problems with devLib.h; i.e. "sorry, not implemented:
- *                    `tree_list' not supported..." compiler error message.
+ *                  - eliminate calls to devConnectInterrupt() due to C++ problems with devLib.h; i.e. "sorry, not
+ *                    implemented: `tree_list' not supported..." compiler error message.
  * 04  03-21-05 rls - Make MAXv OSI.
  * 05  05-02-05 rls - Bug fix for stale data delay; set delay = 10ms.
  * 06  05-17-06 rls - Allow polling rate up to 1/epicsThreadSleepQuantum().
  *                  - Protect against multiple MAXvSetup() calls.
  * 07  06-05-07 rls - Added Jens Eden (BESSY) modifications;
- *                    - register iocsh commands.
- *                    - added USE_DEVLIB with RTEMS conditionial.
- *                    - replaced errlogPrintf calls in ISR with
- *                      epicsInterruptContextMessage calls.
+ *                  - register iocsh commands.
+ *                  - added USE_DEVLIB with RTEMS conditionial.
+ *                  - replaced errlogPrintf calls in ISR with epicsInterruptContextMessage calls.
  * 08  08-20-07 rls - Make send_mess() and recv_mess() non-global.
  *                  - removed unneeded stub start_status().
  * 09  02-26-08 rls - set "update delay" to zero.
  * 10  05-14-08 rls - read the commanded velocity.
  * 11  05-20-08 rls - A24/A32 address mode bug fix.
- * 12  01-05-09 rls - Dirk Zimoch's (PSI) bug fix for set_status() overwriting
- *                    the home switch status in the response string.
+ * 12  01-05-09 rls - Dirk Zimoch's (PSI) bug fix for set_status() overwriting the home switch status in the response
+ *                    string.
  * 13  06-18-09 rls - Make MAXvSetup() error messages more prominent.
- * 14  07-02-09 rls - backwards compatibility with ver:1.29 and earlier
- *                    firmware. OMS changed from '<LF><NULL>' to '<LF>' for
- *                    RA, QA, EA and RL command with ver:1.30
+ * 14  07-02-09 rls - backwards compatibility with ver:1.29 and earlier firmware. OMS changed from '<LF><NULL>' to
+ *                   '<LF>' for RA, QA, EA and RL command with ver:1.30
  * 15  09-09-09 rls - board "running" error check added.
  * 16  03-08-10 rls - sprintf() not callable from RTEMS interrupt context.
  * 17  03-09-10 rls - sprintf() not callable from any OS ISR.
  * 18  06-01-10 rls - Save firmware version in static float array.
- *                  - For firmware ver:1.33 and above, read Watchdog Timeout
- *                    Counter. If Counter is nonzero, print error message and
- *                    clear Counter.
+ *                  - For firmware ver:1.33 and above, read Watchdog Timeout Counter. If Counter is nonzero, print
+ *                    error message and clear Counter.
  * 19  06-07-10 rls - Disable board if WDT CTR is nonzero; don't clear CTR.
  * 20  02-03-11 rls - Increase max. config. string size from 150 to 300 bytes.
  *                  - Increase all receive buffer sizes to same 300 bytes.
- *                  - Add error checks for buffer overflow with MAXvConfig()'s
- *                    configuration string argument and in readbuf().
- * 21  02-04-11 rls - Added counter to send_mess()'s "waiting for message
- *                    acknowledgement" loop to prevent infinite loop.
+ *                  - Add error checks for buffer overflow with MAXvConfig()'s configuration string argument and in
+ *                    readbuf().
+ * 21  02-04-11 rls - Added counter to send_mess()'s "waiting for message acknowledgement" loop to prevent infinite
+ *                    loop.
  * 22  09-23-11 ajr - Added configuration word MAXvConfig.
  * 23  10-26-11 rls - Changed Debug() to Mark River's variable arguments macro.
- *                  - Added MAXvController data structure using private data in
- *                    motor record to store motor type. Motor type used in
- *                    device support (devOmsCom.cc) to allow MRES and ERES with
- *                    different polarity (signs).
- * 24  02-24-14 rls - After the initialization string is read, if limit mode is
- *                    "Off", set it to "Hard".
- *                  - Added MAXvConfig() 4th argument to support absolute
- *                    encoders with grey code data formats.
+ *                  - Added MAXvController data structure using private data in motor record to store motor type. Motor
+ *                    type used in device support (devOmsCom.cc) to allow MRES and ERES with different polarity (signs).
+ * 24  02-24-14 rls - After the initialization string is read, if limit mode is "Off", set it to "Hard".
+ *                  - Added MAXvConfig() 4th argument to support absolute encoders with grey code data formats.
+ * 25  07-05-14 rls - send_mess() terminates all commands with a ';'. OMS tech support's suggested fix for intermittent
+ *                    "Command Error" messages on valid messages (e.g., "AY VB100 VL4000 AC19500 MA5100 GD ID").
+ *                  - More than one command with a response not allowed when terminated with a ';'. Broke "QA EA"
+ *                    command into two commands.
+ *                  - Fix for intermittent wrong command displayed from Command Error message. motorIsr() saves the
+ *                    message in a separate static buffer.
  *
  */
 
@@ -138,7 +133,6 @@ HeadURL:        $URL$
 #endif
 
 /* jps: INFO messages - add RV and move QA to top */
-#define ALL_INFO        "QA EA"
 #define AXIS_INFO       "QA"
 #define ENCODER_QUERY   "EA ID"
 #define AXIS_CLEAR      "CA"            /* Clear done of addressed axis */
@@ -414,7 +408,9 @@ static int set_status(int card, int signal)
     if (motor_info->encoder_present == YES)
     {
         /* get 4 pieces of info from axis */
-        send_recv_mess(card, ALL_INFO, MAXv_axis[signal], q_buf, 2);
+        send_recv_mess(card, "QA", MAXv_axis[signal], &q_buf[0], 1);
+        q_buf[4] = ',';
+        send_recv_mess(card, "EA", MAXv_axis[signal], &q_buf[5], 1);
         got_encoder = true;
     }
     else
@@ -681,6 +677,9 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
         strcat(cmndbuf, " ");
         strcat(cmndbuf, com);
     }
+
+    if (cmndbuf[strlen(cmndbuf) - 1] != ';') /* Terminate command with a ';'. */
+        strcat(cmndbuf, ";");
 
     Debug(9, "send_mess: ready to send message.\n");
     putIndex = pmotor->outPutIndex;
@@ -1071,6 +1070,7 @@ static void motorIsr(int card)
     STATUS1 status1_flag;
     static char errmsg1[] = "drvMAXv.cc:motorIsr: ***Invalid entry*** - card xx\n";
     static char errmsg2[] = "drvMAXv.cc:motorIsr: ***Command Error*** - card xx\n";
+    static char CmndErrBuf[MAX_MSG_SIZE];   /* Hold the message that caused a Command Error here. */
 
     if (card >= total_cards || (pmotorState = motor_state[card]) == NULL)
     {
@@ -1092,8 +1092,9 @@ static void motorIsr(int card)
         errmsg2[51-2] = '0' + card%10;
         errmsg2[51-3] = '0' + (card/10)%10;
         epicsInterruptContextMessage(errmsg2);
-        strcat(cmndbuf,"\n\n");
-        epicsInterruptContextMessage(cmndbuf);
+        strcpy(CmndErrBuf, cmndbuf);            /* Copy message to static buffer. */
+        strcat(CmndErrBuf,"\n\n");
+        epicsInterruptContextMessage(CmndErrBuf);
     }
 
     if (status1_flag.Bits.text_response != 0)   /* Don't clear this. */
