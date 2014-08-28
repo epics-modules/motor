@@ -25,6 +25,10 @@ program MAX_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6=M6
 %% #include <epicsStdio.h>
 %% #include <asynOctetSyncIO.h>
 
+#include <seq_release.h> /* definition of MAGIC */
+#define VERSION_INT(MAJ,MIN) ((MAJ)*1000000+(MIN)*1000)
+#define LT_SEQ_VERSION(MAJ,MIN) ((MAGIC) < VERSION_INT(MAJ,MIN))
+
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) > (b) ? (b) : (a))
 #define NINT(f)  (int)((f)>0 ? (f)+0.5 : (f)-0.5)
@@ -354,7 +358,7 @@ ss maxTrajectoryScan {
 			/* If time mode is TIME_MODE_TOTAL then construct timeTrajectory and post it */
 			/* Note that timeTrajectory[i] is the time to go from motorTrajectory[i] to motorTrajectory[i+1] */
 			if (timeMode == TIME_MODE_TOTAL) {
-				dtime = time/(nelements-1);
+				dtime = time_PV/(nelements-1);
 				for (i=0; i<nelements-1; i++) timeTrajectory[i] = dtime;
 				for (i=nelements-1; i<MAX_ELEMENTS; i++) timeTrajectory[i] = 0;
 				pvPut(timeTrajectory);
@@ -992,7 +996,11 @@ static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar)
 	int result=0, mask=0x01;
 
 	for (j=0; j<pVar->numAxes; j++) {
+#if LT_SEQ_VERSION(2,2)
 		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0);
+#else
+		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
 		if (pVar->epicsMotorDone[j] == 0) result |= mask;
 		mask = mask << 1;
 	}
@@ -1011,14 +1019,22 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
 		/* Get the current motor positions, post them */
 		for (j=0; j<pVar->numAxes; j++) {
 			pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
+#if LT_SEQ_VERSION(2,2)
 			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
 		}
 		if (pVar->debugLevel >= 1) printf("waitEpicsMotors: m1=%f\n", pVar->epicsMotorPos[0]);
 		epicsThreadSleep(POLL_INTERVAL);
 	}
 	for (j=0; j<pVar->numAxes; j++) {
 		pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
+#if LT_SEQ_VERSION(2,2)
 		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
 	}
 	return(0);
 }
@@ -1036,7 +1052,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 	double *accelDist, double *decelDist)
 {
 
-	double dp, dt, v_ideal, v_lin, accel_p, accel_v, time;
+	double dp, dt, v_ideal, v_lin, accel_p, accel_v, thisTime;
 	double x0;
 	int i, dir;
 
@@ -1135,13 +1151,13 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 	}
 	for (i=0; i<npoints; i++) {
 		if (i < npoints-1) {
-			time = realTimeTrajectory[i+1];
+			thisTime = realTimeTrajectory[i+1];
 			dt = realTimeTrajectory[i+1] - realTimeTrajectory[i];
 			position[i] = userToRaw(calcMotorTrajectory[i+1], motorOffset, dir, motorResolution);
 			velocity[i] = NINT(dir*v_out[i+1]/motorResolution);
 			acceleration[i] = NINT(dir*a_out[i]/motorResolution);
 		} else {
-			time = realTimeTrajectory[i];
+			thisTime = realTimeTrajectory[i];
 			dt = realTimeTrajectory[i] - realTimeTrajectory[i-1];
 			position[i] = userToRaw(calcMotorTrajectory[i], motorOffset, dir, motorResolution);
 			velocity[i] = 0;
@@ -1152,7 +1168,7 @@ static int buildTrajectory(SS_ID ssId, struct UserVar *pVar, double *realTimeTra
 		} else {
 			x0 = .5 * acceleration[i]*dt*dt;
 		}
-		if (pVar->debugLevel >= 1) printf("%10.2f %10d %10d %10d %10d\n", time, position[i], NINT(x0), velocity[i], acceleration[i]);
+		if (pVar->debugLevel >= 1) printf("%10.2f %10d %10d %10d %10d\n", thisTime, position[i], NINT(x0), velocity[i], acceleration[i]);
 	}
 
 	if (pVar->addAccelDecel) {
