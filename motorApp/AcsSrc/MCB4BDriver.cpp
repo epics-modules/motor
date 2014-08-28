@@ -296,7 +296,7 @@ asynStatus MCB4BAxis::poll(bool *moving)
   setIntegerParam(pC_->motorStatusAtHome_, limit);
 
   // Read the drive power on status
-  sprintf(pC_->outString_, "#%02dE", axisNo_);
+  sprintf(pC_->outString_, "#%02dW", axisNo_);
   comStatus = pC_->writeReadController();
   if (comStatus) goto skip;
   driveOn = (pC_->inString_[5] == '1') ? 1:0;
