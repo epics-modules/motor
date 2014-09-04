@@ -30,6 +30,10 @@ program EnsembleTrajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M
 %% #include <epicsStdio.h>
 %% #include <asynOctetSyncIO.h>
 
+#include <seq_release.h> /* definition of MAGIC */
+#define VERSION_INT(MAJ,MIN) ((MAJ)*1000000+(MIN)*1000)
+#define LT_SEQ_VERSION(MAJ,MIN) ((MAGIC) < VERSION_INT(MAJ,MIN))
+
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) > (b) ? (b) : (a))
 #define NINT(f)  (int)((f)>0 ? (f)+0.5 : (f)-0.5)
@@ -405,7 +409,7 @@ ss EnsembleTrajectoryScan {
 						posActual = motorTrajectory[j][k];
 						if (moveMode != MOVE_MODE_ABSOLUTE) posActual += epicsMotorPos[j];
 						limitViolation |= (posActual > epicsMotorHLM[j]) || (posActual < epicsMotorLLM[j]);
-						if (limitViolation) {
+                		if (limitViolation) {
 							epicsSnprintf(buildMessage, MSGSIZE, "Limit: m%d at pt. %d (%f)", j+1, k+1, posActual);
 						}
 						if (velocity[j][k] > vmax) {
@@ -872,7 +876,11 @@ static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar)
 	int result=0, mask=0x01;
 
 	for (j=0; j<pVar->numAxes; j++) {
+#if LT_SEQ_VERSION(2,2)
 		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0);
+#else
+		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
 		if (pVar->epicsMotorDone[j] == 0) result |= mask;
 		mask = mask << 1;
 	}
@@ -891,13 +899,21 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
 		/* Get the current motor positions, post them */
 		for (j=0; j<pVar->numAxes; j++) {
 			pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
+#if LT_SEQ_VERSION(2,2)
 			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
 		}
 		epicsThreadSleep(POLL_INTERVAL);
 	}
 	for (j=0; j<pVar->numAxes; j++) {
 		pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
+#if LT_SEQ_VERSION(2,2)
 		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
 	}
 	return(0);
 }
@@ -1336,7 +1352,7 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 		
 
 		if ((pVar->pulseMode == PULSE_MODE_ARRAY) &&
-				(pVar->pulsePositionsLoaded != PULSE_POSITIONS_LOADED_ARRAY)) {
+			(pVar->pulsePositionsLoaded != PULSE_POSITIONS_LOADED_ARRAY)) {
 			if (pVar->debugLevel > 2) printf("loadTrajectory: load PULSE_MODE_ARRAY array\n");
 			j = 0; /* For now, we only support one motor */
 			/* user has loaded an array of pulse positions into pulsePositions[] */
@@ -1639,12 +1655,20 @@ static int loadTrajectory(SS_ID ssId, struct UserVar *pVar) {
 				dtime = epicsTimeDiffInSeconds(&currTime, &lastPollTime);
 				if (dtime > POLL_INTERVAL) {
 					pVar->elapsedTime = epicsTimeDiffInSeconds(&currTime, &startTime);
+#if LT_SEQ_VERSION(2,2)
 					seq_pvPut(ssId, pVar->elapsedTimeIndex, 0);
+#else
+					seq_pvPut(ssId, pVar->elapsedTimeIndex, 0, DEFAULT_TIMEOUT);
+#endif
 					epicsTimeGetCurrent(&lastPollTime);
 					getMotorPositions(ssId, pVar, pVar->motorCurrent);
 					for (k=0; k<pVar->numAxes; k++) {
 						if (pVar->moveAxis[k]) {
+#if LT_SEQ_VERSION(2,2)
 							seq_pvPut(ssId, pVar->motorCurrentIndex[k], 0);
+#else
+							seq_pvPut(ssId, pVar->motorCurrentIndex[k], 0, DEFAULT_TIMEOUT);
+#endif
 						}
 					}
 				}
