@@ -160,6 +160,24 @@ Modification Log for R6-9
 	Files added:	motorApp/MicroMoSrc/MVP2001Driver.cpp
 			motorApp/MicroMoSrc/MVP2001Driver.h
 
+3) Mark Rivers fixed bugs in motorApp/AcsSrc/MCB4BDriver.[h,cpp]
+     It was sending E query to read motor current status, should be W query
+
+4) Mark Rivers fixed bugs in asynMotorAxis, asynMotorController, MCB4BDriver, ACRMotorDirver
+     Added epicsShareClass to avoid errors when building dynamically on Windows
+     Added destructor
+
+5) Matt Pearson added features to XPSController and XPSAxis
+     Added support for reading the XPS positioner status string in XPSAxis, and adding it to the parameter library.
+     Reverted back to the old definition of moving axis in the poller in XPSAxis.cpp. 
+     Made the new method, of checking the socket return value, an option which is enabled by using a new function called XPSEnableMovingMode. 
+     Added the ability to run a TCL script. 
+     Added a Db template to set and execute a TCL script.
+
+6) Mark Rivers fixed bugs in MclennanSrc/devPM304.cc, drvPM304.cc
+     It was passing a const char* pointer to epicsStrtok_r, which is incorrect and crashes on some systems.
+     Protect against dereferencing null pointer, was crashing on Linux
+
 
 Modification Log for R6-8
 =========================
