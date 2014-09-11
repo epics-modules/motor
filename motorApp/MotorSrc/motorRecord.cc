@@ -176,7 +176,14 @@ HeadURL:        $URL$
  * .69 05-19-14 rls - Set "stop" field true if driver returns RA_PROBLEM true. (Motor record
  *                    stops motion when controller signals error but does not stop motion; e.g.,
  *                    maximum velocity exceeded.)
- */
+ * .70 07-30-14 rls - Removed postProcess flag (pp) from LOAD_POS. Fixes bug where target positions
+ *                    were not updating.
+ *                  - Removed redundant postings of RMP and REP by moving them to device support's
+ *                    motor_update_values() and update_values().
+ *                  - Fix for LOAD_POS not posting RVAL.
+ *                  - Reversed order of issuing SET_VEL_BASE and SET_VELOCITY commands. Fixes MAXv
+ *                    command errors.
+ */                                                          
 
 #define VERSION 6.9
 
@@ -348,8 +355,6 @@ typedef union
         unsigned int M_HLS      :1;
         unsigned int M_LLS      :1;
         unsigned int M_RRBV     :1;
-        unsigned int M_RMP      :1;
-        unsigned int M_REP      :1;
         unsigned int M_MSTA     :1;
         unsigned int M_ATHM     :1;
         unsigned int M_TDIR     :1;
@@ -790,8 +795,8 @@ static long postProcess(motorRecord * pmr)
             pmr->rcnt = 0;
             MARK(M_RCNT);
             INIT_MSG();
-            WRITE_MSG(SET_VEL_BASE, &vbase);
             WRITE_MSG(SET_VELOCITY, &hvel);
+            WRITE_MSG(SET_VEL_BASE, &vbase);
             if (acc > 0.0)  /* Don't SET_ACCEL to zero. */
                 WRITE_MSG(SET_ACCEL, &acc);
             
@@ -854,10 +859,10 @@ static long postProcess(motorRecord * pmr)
             {
                 double acc = (vel - vbase) / pmr->accl;
 
-                WRITE_MSG(SET_VEL_BASE, &vbase);
                 if (vel <= vbase)
                     vel = vbase + 1;
                 WRITE_MSG(SET_VELOCITY, &vel);
+                WRITE_MSG(SET_VEL_BASE, &vbase);
                 if (acc > 0.0)  /* Don't SET_ACCEL if vel = vbase. */
                     WRITE_MSG(SET_ACCEL, &acc);
                 if (use_rel == true)
@@ -1928,8 +1933,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 hpos = 0;
 
                 INIT_MSG();
-                WRITE_MSG(SET_VEL_BASE, &vbase);
                 WRITE_MSG(SET_VELOCITY, &hvel);
+                WRITE_MSG(SET_VEL_BASE, &vbase);
                 if (acc > 0.0)  /* Don't SET_ACCEL to zero. */
                     WRITE_MSG(SET_ACCEL, &acc);
 
@@ -2362,8 +2367,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 }
 
                 pmr->cdir = (pmr->rdif < 0.0) ? 0 : 1;
-                WRITE_MSG(SET_VEL_BASE, &vbase);
                 WRITE_MSG(SET_VELOCITY, &velocity);
+                WRITE_MSG(SET_VEL_BASE, &vbase);
                 if (accel > 0.0)        /* Don't SET_ACCEL = 0.0 */
                     WRITE_MSG(SET_ACCEL, &accel);
                 if (use_rel == true)
@@ -3383,18 +3388,6 @@ static void monitor(motorRecord * pmr)
         UNMARK(M_DRBV);
     }
     
-    if ((local_mask = monitor_mask | (MARKED(M_RMP) ? DBE_VAL_LOG : 0)))
-    {
-        db_post_events(pmr, &pmr->rmp, local_mask);
-        UNMARK(M_RMP);
-    }
-    
-    if ((local_mask = monitor_mask | (MARKED(M_REP) ? DBE_VAL_LOG : 0)))
-    {
-        db_post_events(pmr, &pmr->rep, local_mask);
-        UNMARK(M_REP);
-    }
-    
     if ((local_mask = monitor_mask | (MARKED(M_DIFF) ? DBE_VAL_LOG : 0)))
     {
         db_post_events(pmr, &pmr->diff, local_mask);
@@ -3553,8 +3546,6 @@ static void
             pmr->drbv = pmr->rrbv * pmr->mres;
     }
 
-    MARK(M_RMP);
-    MARK(M_REP);
     if (pmr->rrbv != old_rrbv)
         MARK(M_RRBV);
     if (pmr->drbv != old_drbv)
@@ -3652,7 +3643,9 @@ static void load_pos(motorRecord * pmr)
 
     pmr->ldvl = pmr->dval;
     pmr->lval = pmr->val;
-    pmr->lrvl = pmr->rval = (long) newpos;
+    if (pmr->rval != (epicsInt32) NINT(newpos))
+        MARK(M_RVAL);
+    pmr->lrvl = pmr->rval = (epicsInt32) NINT(newpos);
 
     if (pmr->foff)
     {
@@ -3676,7 +3669,6 @@ static void load_pos(motorRecord * pmr)
     }
     pmr->mip = MIP_LOAD_P;
     MARK(M_MIP);
-    pmr->pp = TRUE;
     if (pmr->dmov == TRUE)
     {
         pmr->dmov = FALSE;
