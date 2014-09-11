@@ -58,6 +58,7 @@ HeadURL:        $URL$
  * .12  03/08/10 rls Always send positive encoder ratio values.
  * .13  06/09/10 rls Set RA_PROBLEM instead of CNTRL_COMM_ERR when a NULL
  *                   motor_state[] ptr is detected in motor_end_trans_com().
+ * .14  08/19/14 rls Moved RMP and REP posting from record to here.
  */
 
 
@@ -409,8 +410,16 @@ epicsShareFunc CALLBACK_VALUE motor_update_values(struct motorRecord * mr)
     /* raw motor pulse count */
     if (ptrans->callback_changed == YES)
     {
-        mr->rmp = ptrans->motor_pos;
-        mr->rep = ptrans->encoder_pos;
+        if (mr->rmp != ptrans->motor_pos)
+        {
+            mr->rmp = ptrans->motor_pos;
+            db_post_events(mr, &mr->rmp, DBE_VAL_LOG);
+        }
+        if (mr->rep != ptrans->encoder_pos)
+        {
+            mr->rep = ptrans->encoder_pos;
+            db_post_events(mr, &mr->rep, DBE_VAL_LOG);
+        }
         if (mr->rvel != ptrans->vel)
         {
             mr->rvel = ptrans->vel;

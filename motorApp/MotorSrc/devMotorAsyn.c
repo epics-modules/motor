@@ -38,7 +38,9 @@
  * Fix for manual set position after IOC startup. The encoder ratio was not being set at IOC startup
  * which meant that set position failed for Asyn drivers. We now always set the encoder ratio
  * at the beginning of the init_controller function.
- *
+ * 
+ * .05 2014-09-11 RLS
+ * Moved CA posting of changes to the RMP, REP and RVEL fields from motor record to update_values().
  */
 
 #include <stddef.h>
@@ -407,16 +409,31 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
     asynPrint(pPvt->pasynUser, ASYN_TRACEIO_DEVICE,
         "%s devMotorAsyn::update_values, needUpdate=%d\n",
         pmr->name, pPvt->needUpdate);
-    if ( pPvt->needUpdate ) {
-        epicsInt32 rawvel;
-        pmr->rmp = (epicsInt32)floor(pPvt->status.position + 0.5);
-        pmr->rep = (epicsInt32)floor(pPvt->status.encoderPosition + 0.5);
-        /* pmr->rvel = (epicsInt32)round(pPvt->status.velocity); */
-        pmr->msta = pPvt->status.status;
-        rawvel = (epicsInt32)floor(pPvt->status.velocity);
-        if (pmr->rvel != rawvel)
+    if ( pPvt->needUpdate )
+    {
+        epicsInt32 rawvalue;
+
+        rawvalue = (epicsInt32)floor(pPvt->status.position + 0.5);
+        if (pmr->rmp != rawvalue)
         {
-            pmr->rvel = rawvel;
+            pmr->rmp = rawvalue;
+            db_post_events(pmr, &pmr->rmp, DBE_VAL_LOG);
+        }
+
+        rawvalue = (epicsInt32)floor(pPvt->status.encoderPosition + 0.5);
+        if (pmr->rep != rawvalue)
+        {
+            pmr->rep = rawvalue;
+            db_post_events(pmr, &pmr->rep, DBE_VAL_LOG);
+        }
+
+        /* Don't post MSTA changes here; motor record's process() function does efficent MSTA posting. */
+        pmr->msta = pPvt->status.status;
+
+        rawvalue = (epicsInt32)floor(pPvt->status.velocity);
+        if (pmr->rvel != rawvalue)
+        {
+            pmr->rvel = rawvalue;
             db_post_events(pmr, &pmr->rvel, DBE_VAL_LOG);
         }
 
