@@ -65,6 +65,7 @@ in file LICENSE that is included with this distribution.
 *                  - Deleted duplicate error messages. 
 * .17 09-27-12 rls - Bug fix for incorrect jog acceleration rate.
 * .18 09-27-12 rls - Support for actual velocity in status update. 
+* .19 09-11-14 rls - sendAndReceive() diagnostic message added when controller returns NAK.
 */
 
 
@@ -1039,6 +1040,9 @@ static asynStatus sendAndReceive(EnsembleController *pController, char *outputBu
             PRINT(pController->pAxis->logParam, TERROR,
                   "drvEnsembleAsyn:sendAndReceive: Retry succeeded for command = %s with response = %s\n", outputCopy, inputBuff);
     }
+    else if (status == asynSuccess && inputBuff[0] == ASCII_FAULT_CHAR)
+        PRINT(pController->pAxis->logParam, TERROR,
+              "drvEnsembleAsyn:sendAndReceive: Error returned for command = %s with response = %s\n", outputCopy, inputBuff);
 
     if (status != asynSuccess)
         asynPrint(pController->pasynUser, ASYN_TRACE_ERROR,
