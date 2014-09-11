@@ -581,6 +581,8 @@ INPUT                  = ../../asyn/asyn/miscellaneous/asynPortDriver.cpp \
                          ../motorApp/MotorSrc/asynMotorAxis.cpp \
                          ../motorApp/ACRSrc/ACRMotorDriver.h \
                          ../motorApp/ACRSrc/ACRMotorDriver.cpp \
+                         ../motorApp/AcsSrc/MCB4BDriver.h \
+                         ../motorApp/AcsSrc/MCB4BDriver.cpp \
                          ../motorApp/NewportSrc/XPSController.h \
                          ../motorApp/NewportSrc/XPSController.cpp \
                          ../motorApp/NewportSrc/XPSAxis.h \
