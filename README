@@ -178,6 +178,25 @@ Modification Log for R6-9
      It was passing a const char* pointer to epicsStrtok_r, which is incorrect and crashes on some systems.
      Protect against dereferencing null pointer, was crashing on Linux
 
+7) Changes were made to the Model 1 OMS MAXv driver to eliminate "Command Error"
+     messages. At the suggestion of Pro-Dex, all commands are now terminated
+     with a ';' character. In addition, the motor record now always sends the
+     SET_VELOCITY command before issuing a SET_VEL_BASE command. This prevents
+     MAXv errors where the controller checks that BASE < SLEW. (There is some
+     speculation that excessive MAXv "Command Error" messages may be causing
+     "Watchdog Timeout" errors).
+
+        Files modified: motorApp/OmsSrc/drvMAXv.cc
+                        motorApp/MotorSrc/motorRecord.cc
+
+8) Moved CA posting of changes to the RMP, REP and RVEL fields from motor record
+     to device support update_values(). This eliminates posting's with the same
+     value and is more efficient.
+
+        Files modified: motorApp/MotorSrc/motorRecord.cc
+                        motorApp/MotorSrc/devMotorAsyn.c
+                        motorApp/MotorSrc/motordevCom.cc
+    
 
 Modification Log for R6-8
 =========================
