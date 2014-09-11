@@ -21,6 +21,7 @@ program MAX_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6=M6
 %% #include <ctype.h>
 %% #include <stdio.h>
 %% #include <math.h>
+%% #include <time.h>
 %% #include <epicsString.h>
 %% #include <epicsStdio.h>
 %% #include <asynOctetSyncIO.h>
