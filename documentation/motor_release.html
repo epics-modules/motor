@@ -10,7 +10,6 @@
   <meta content="Notification of bug fixes, functional changes and new features." name="description" />
   <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
 </head>
-
 <body>
   <div style="text-align: center">
     <h1>
@@ -25,7 +24,6 @@
       <b></b>
     </p>
   </div>
-  
   <div style="text-align: center">
     <h4>
       New Features</h4>
@@ -35,7 +33,7 @@
       <b>Micronix MMC-200 Asyn Motor Support</b>
     </p>
     <p>
-      Kevin Peterson (APS) added asyn motor support for the Micronix MMC-200 Controller. 
+      Kevin Peterson (APS) added asyn motor support for the Micronix MMC-200 Controller.
     </p>
   </div>
   <div style="text-align: left">
@@ -51,13 +49,33 @@
       <b>Trajectory support</b>
     </p>
     <p>
-      Tim Mooney (APS) added trajectory support for a single-motor Aerotech Ensemble 
+      Tim Mooney (APS) added trajectory support for a single-motor Aerotech Ensemble
     </p>
     <p>
       Tim Mooney (APS) added trajectory support for the Pro-Dex OMS MAXv
     </p>
   </div>
-
+  <div style="text-align: left">
+    <p>
+      <b>ProfileMove support</b>
+    </p>
+    <p>
+      Mark Rivers (GSECARS) added ProfileMoveMode to support absolute and relative moves.
+    </p>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>Newport AG_CONEX and AG_UC controllers</b>
+    </p>
+    <p>
+      Mark Rivers (GSECARS) made changes to support CONEX-CC servo controller; it has
+      KD; supports limits, velocity, acceleration; fixed homing problems
+    </p>
+    <p>
+      Mark Rivers (GSECARS) made changes to support AG-UC8 model that requires CC command
+      to select a channel pair; add delay between writes for all commands on all ARCHs.
+    </p>
+  </div>
   <div style="text-align: center">
     <h1>
       <b>Motor Record Version 6-8 Release Notice</b></h1>
@@ -67,65 +85,57 @@
       Modifications to Existing Features</h4>
   </div>
   <div style="text-align: left">
-    <b>!WARNING!</b><br />
-    motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and all 
-    user trees (i.e., &lt;ioctop&gt;) that load the motor record.
+    <p>
+      <b>!WARNING!</b><br />
+      motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and all user
+      trees (i.e., &lt;ioctop&gt;) that load the motor record.
     </p>
     <p>
       <b>Newport XPS Asyn Motor (Phase-2) Support</b>
     </p>
     <p>
       The stepsPerUnit argument of XPSConfigAxis has changed from an integer to a string
-      to make phase-2 consistent with phase-3 support.  Failing to change the stepsPerUnit
-      argument to a string results in parameter-out-of-range errors when attempting to 
+      to make phase-2 consistent with phase-3 support. Failing to change the stepsPerUnit
+      argument to a string results in parameter-out-of-range errors when attempting to
       move XPS motors.
     </p>
     <p>
       <b>Newport ESP300</b>
     </p>
     <p>
-      Prior to this release, the ESP300 driver used the controller's resolution to 
-      scale the EGUtoRAWbacktoEGU conversion that is done between motor record and 
-      device driver support. With R6.8 the driver uses the motor record's MRES to 
-      scale this conversion. Users should now set the MRES like any other motor; i.e., 
-      to the precision of the stage.
+      Prior to this release, the ESP300 driver used the controller's resolution to scale
+      the EGUtoRAWbacktoEGU conversion that is done between motor record and device driver
+      support. With R6.8 the driver uses the motor record's MRES to scale this conversion.
+      Users should now set the MRES like any other motor; i.e., to the precision of the
+      stage.
     </p>
   </div>
-  
-  <div style="text-align: left">
-    <b>Soft-travel limits</b>
-  </p>
-  <p>
-  Several changes have been made with regard to the motor record's soft-travel 
-  limits (LVIO field).
-  <ul>
-    <li>
-      Since the soft-travel limits (HLM/LLM, DHLM/DLLM) are not defined until after a 
-      successful home search is performed, error checks have been removed from the 
-      home search request (HOMF/HOMR).
-    </li>
-    <li>
-      All moves out of the invalid soft-limit travel range, toward the valid range, 
-      are allowed.
-    </li>
-  </ul>
-  </p>
-  </div>
-  
   <div style="text-align: left">
     <p>
-  <b>Retry Deadband </b>
-  </p>
-  <p>
-  The retry deadband (RDBD) field no longer limits the smallest allowed move. The 
-  size of a move is now only limited by the motor resolution (MRES).
-  </p>
+      <b>Soft-travel limits</b>
+    </p>
+    <p>
+      Several changes have been made with regard to the motor record's soft-travel limits
+      (LVIO field).</p>
+    <ul>
+      <li>Since the soft-travel limits (HLM/LLM, DHLM/DLLM) are not defined until after
+        a successful home search is performed, error checks have been removed from the home
+        search request (HOMF/HOMR). </li>
+      <li>All moves out of the invalid soft-limit travel range, toward the valid range,
+        are allowed. </li>
+    </ul>
   </div>
-  
   <div style="text-align: left">
-  
+    <p>
+      <b>Retry Deadband </b>
+    </p>
+    <p>
+      The retry deadband (RDBD) field no longer limits the smallest allowed move. The
+      size of a move is now only limited by the motor resolution (MRES).
+    </p>
   </div>
-
+  <div style="text-align: left">
+  </div>
   <div style="text-align: center">
     <h4>
       New Features</h4>
@@ -135,10 +145,9 @@
       <b>Physik Instrumente (PI) Asyn Motor Support</b>
     </p>
     <p>
-      Steffen Rau (Physik Instrumente GmbH & Co.) has added asyn motor support for PI 
-      motion controllers that use the GCS2 (General Command Set) command language. 
-      This support resides in the &ltmotor&gt/motorApp/PIGCS2Src/ directory of the 
-      motor module.
+      Steffen Rau (Physik Instrumente GmbH & Co.) has added asyn motor support for PI
+      motion controllers that use the GCS2 (General Command Set) command language. This
+      support resides in the &ltmotor&gt/motorApp/PIGCS2Src/ directory of the motor module.
     </p>
   </div>
   <div style="text-align: left">
@@ -146,8 +155,8 @@
       <b>PI micos SMC hydra Asyn Motor Support</b>
     </p>
     <p>
-      Kevin Peterson (APS) added support for asyn motor support for the PI micos SMC 
-      hydra controller.
+      Kevin Peterson (APS) added support for asyn motor support for the PI micos SMC hydra
+      controller.
     </p>
   </div>
   <div style="text-align: left">
@@ -155,7 +164,8 @@
       <b>Schneider Electric (IMS) MDrive/MForce Asyn Motor Support</b>
     </p>
     <p>
-      Nia Fong (SLAC) added asyn motor support for the Schneider Electric (IMS) MDrive/MForce controller that uses the MCode command language.
+      Nia Fong (SLAC) added asyn motor support for the Schneider Electric (IMS) MDrive/MForce
+      controller that uses the MCode command language.
     </p>
   </div>
   <div style="text-align: left">
@@ -163,7 +173,8 @@
       <b>Newport XPS Support</b>
     </p>
     <p>
-      Kevin Peterson (APS) added a sequence program, xpsSlave.st, that allows master/slave mode to be used with any version of the XPS motor support.
+      Kevin Peterson (APS) added a sequence program, xpsSlave.st, that allows master/slave
+      mode to be used with any version of the XPS motor support.
     </p>
   </div>
   <div style="text-align: left">
@@ -182,16 +193,16 @@
       Kevin Peterson (APS) added asyn motor support for the nPoint C300 piezo controller.
     </p>
   </div>
-    <div style="text-align: left">
+  <div style="text-align: left">
     <p>
       <b>OMS MAXv and MAXnet Asyn Motor Support</b>
     </p>
     <p>
-      Jens Eden (PTB) added asyn motor support for both the OMS MAXv and the OMS MAXnet controllers.
+      Jens Eden (PTB) added asyn motor support for both the OMS MAXv and the OMS MAXnet
+      controllers.
     </p>
   </div>
-    </div>
-    <div style="text-align: left">
+  <div style="text-align: left">
     <p>
       <b>Newport Agilis UC series Asyn Motor Support</b>
     </p>
@@ -201,7 +212,6 @@
   </div>
   <p>
   </p>
-
   <div style="text-align: center">
     <h1>
       <b>Motor Record Version 6-6 and 6-7 Release Notice</b></h1>
@@ -212,81 +222,67 @@
   </div>
   <div style="text-align: left">
     <p>
-    <b>Aerotech Ensemble</b>
-    </p>
-    <p>
-    <ul>
-      <li>
-        Since the Ensemble network connection requires period communication from the 
-        host to prevent the Ensemble from closing the network socket, the Ensemble 
-        support based on the old device driver architecture (phase 1) was removed with 
-        this release.  The asyn motor architecture supports continuous, periodic updates; 
-        the old architecture does not.
-      </li>
-      <li>
-        With this release, the Aerotech Ensemble driver only supports 4.01.00 Ensemble 
-        version firmware and above.
-      </li>
-      <li>
-        In order to support SCURVE trajectories, the move commands have been changed 
-        from MOVE[ABS/INC] to LINEAR.  Currently, the SCURVE command can only be set 
-        from an asyn record (e.g., SCURVE 75).
-      </li>
-      <li>
-        There is a problem with initiating a home search with the Aerotech Ensemble 
-        motor controller with EPICS.  The problem is that the EPICS Ensemble driver uses 
-        Aerotech's ASCII communication protocol and that protocol blocks all 
-        communication on ASCII communication ports during a home search.  Consequently, 
-        once a home search is started from EPICS, it is unable to stop it.  With release 
-        R6-6, the home search function was commented out of the Ensemble driver.  Users 
-        that need to perform a home search should do it from Aerotech's IDE software, 
-        which can abort a home search.  The Home Search ability will be restored in a 
-        future release.
-      </li>
-    </ul>
-    <p>
-    <b>OMS</b>
+      <b>Aerotech Ensemble</b>
     </p>
     <ul>
-    <li>
-    <p>
-    Watchdog and reboot error checks have been added to both the VME58 and MAXv (with 
-    firmware ver:1.33 and above) device drivers.  The EPICS drivers check for a 
-    reboot error or Watchdog timeout (MAXv) with every motor status update.
-    </p>
-    <p>
-    If an error occurs, an error message is sent to both the errlog task and the 
-    console.  Since a reboot or watchdog timer trip indicates that the controller 
-    has rebooted and no longer has valid motor positions, the controller is disabled 
-    and is no longer available to EPICS until after the VME crate has been rebooted.  
-    Other OMS boards in the system are unaffected by this scenario.
-    </p>
-    <p>
-    To better communicate this problem to the user, several medm displays have been 
-    changed.  Small displays (motorx_tiny.adl, motorx.adl) will show a yellow border 
-    around their position readback values.  Larger displays (motorx_more.adl, 
-    motorx_all.adl) will display the message "Controller Error" in yellow.  The 
-    following error message at the console and/or in the IOC errlog is definitive;
-    </p>
-    <div style="text-align: center">
-    <p>
-    "***MAXv card #<card>Disabled*** Watchdog Timeout CTR =<ctr>"
-    </p>
-    <p>
-    "***VME58 card #<card>Disabled*** Reboot Detected."
-    </p>
-    </li>
-    <li>
-      A third argument was added to the MAXvConfig() call; the SSI based absolute 
-      encoder bit flag.
-      <p>
-      MAXvConfig(0, config0, 0x00)
-      </p>
-      Bit #0 for Axis X, bit #1 for Axis Y, etc.. Set a bit flag to '1' for absolute 
-      encoder values; '0' for the standard incremental encoder values.
-    </li>
+      <li>Since the Ensemble network connection requires period communication from the host
+        to prevent the Ensemble from closing the network socket, the Ensemble support based
+        on the old device driver architecture (phase 1) was removed with this release. The
+        asyn motor architecture supports continuous, periodic updates; the old architecture
+        does not. </li>
+      <li>With this release, the Aerotech Ensemble driver only supports 4.01.00 Ensemble
+        version firmware and above. </li>
+      <li>In order to support SCURVE trajectories, the move commands have been changed from
+        MOVE[ABS/INC] to LINEAR. Currently, the SCURVE command can only be set from an asyn
+        record (e.g., SCURVE 75). </li>
+      <li>There is a problem with initiating a home search with the Aerotech Ensemble motor
+        controller with EPICS. The problem is that the EPICS Ensemble driver uses Aerotech's
+        ASCII communication protocol and that protocol blocks all communication on ASCII
+        communication ports during a home search. Consequently, once a home search is started
+        from EPICS, it is unable to stop it. With release R6-6, the home search function
+        was commented out of the Ensemble driver. Users that need to perform a home search
+        should do it from Aerotech's IDE software, which can abort a home search. The Home
+        Search ability will be restored in a future release. </li>
     </ul>
-    </div>
+    <p>
+      <b>OMS</b>
+    </p>
+    <ul>
+      <li>
+        <p>
+          Watchdog and reboot error checks have been added to both the VME58 and MAXv (with
+          firmware ver:1.33 and above) device drivers. The EPICS drivers check for a reboot
+          error or Watchdog timeout (MAXv) with every motor status update.
+        </p>
+        <p>
+          If an error occurs, an error message is sent to both the errlog task and the console.
+          Since a reboot or watchdog timer trip indicates that the controller has rebooted
+          and no longer has valid motor positions, the controller is disabled and is no longer
+          available to EPICS until after the VME crate has been rebooted. Other OMS boards
+          in the system are unaffected by this scenario.
+        </p>
+        <p>
+          To better communicate this problem to the user, several medm displays have been
+          changed. Small displays (motorx_tiny.adl, motorx.adl) will show a yellow border
+          around their position readback values. Larger displays (motorx_more.adl, motorx_all.adl)
+          will display the message "Controller Error" in yellow. The following error message
+          at the console and/or in the IOC errlog is definitive;
+        </p>
+        <p>
+          "***MAXv card #&lt;card&gt;Disabled*** Watchdog Timeout CTR =&lt;ctr&gt;"
+        </p>
+        <p>
+          "***VME58 card #&lt;card&gt;Disabled*** Reboot Detected."
+        </p>
+      </li>
+      <li>A third argument was added to the MAXvConfig() call; the SSI based absolute encoder
+        bit flag.
+        <p>
+          MAXvConfig(0, config0, 0x00)
+        </p>
+        Bit #0 for Axis X, bit #1 for Axis Y, etc.. Set a bit flag to '1' for absolute encoder
+        values; '0' for the standard incremental encoder values. </li>
+    </ul>
   </div>
   <div style="text-align: center">
     <h4>
@@ -297,7 +293,7 @@
       <b>Hytec 8601</b>
     </p>
     <p>
-    Asyn motor driver support was added by Hytec for the 8601 stepper motor driver.
+      Asyn motor driver support was added by Hytec for the 8601 stepper motor driver.
     </p>
     <p>
       <b></b>
@@ -307,8 +303,6 @@
   </div>
   <p>
   </p>
-
-
   <div style="text-align: center">
     <h1>
       <b>Motor Record Version 6-5 Release Notice</b></h1>
@@ -362,8 +356,8 @@
       <b>RES field deleted</b>
     </p>
     <p>
-      The RES field was removed from the motor record database definition with this 
-      release (R6-5). The RES field has been depreciated by the MRES field since R4-5.
+      The RES field was removed from the motor record database definition with this release
+      (R6-5). The RES field has been depreciated by the MRES field since R4-5.
     </p>
   </div>
   <div style="text-align: center">
@@ -375,26 +369,26 @@
       <b>Aerotech Soloist and Ensemble motor controller support</b>
     </p>
     <p>
-      Two new drivers from Aerotech were add; an asyn motor version of the Ensemble 
-      and the Soloist under the old driver architecture. Since the Ensemble network 
-      connection requires period communication from the host to prevent the Ensemble 
-      from closing the network socket, the Ensemble support based on the old device 
-      driver architecture will be removed after R5-6. The asyn motor architecture 
-      supports continuous, periodic updates; the old architecture does not.
+      Two new drivers from Aerotech were add; an asyn motor version of the Ensemble and
+      the Soloist under the old driver architecture. Since the Ensemble network connection
+      requires period communication from the host to prevent the Ensemble from closing
+      the network socket, the Ensemble support based on the old device driver architecture
+      will be removed after R5-6. The asyn motor architecture supports continuous, periodic
+      updates; the old architecture does not.
     </p>
     <p>
       <b>ADEL and MDEL fields added</b>
     </p>
     <p>
-      Matthew Pearson (Diamond) added support for the ADEL and MDEL motor record 
-      fields. Unlike most records, the ADEL/MDEL fields in the motor record apply to 
-      the User Readback Value (RBV).  See the motorRecord.html document for details.
+      Matthew Pearson (Diamond) added support for the ADEL and MDEL motor record fields.
+      Unlike most records, the ADEL/MDEL fields in the motor record apply to the User
+      Readback Value (RBV). See the motorRecord.html document for details.
     </p>
     <p>
       <b>Synchronize field (SYNC)</b>
     </p>
     <p>
-      When the SYNC field is set to Yes(1) the record sets the Drive fields (VAL/DVAL/RVAL) 
+      When the SYNC field is set to Yes(1) the record sets the Drive fields (VAL/DVAL/RVAL)
       to their readback values (RBV/DRBV/RRBV) and sets SYNC field back to No(0).
     </p>
   </div>
@@ -1117,7 +1111,8 @@
       <li>A Channel Access (CA) client writes ON(1) to the STUP field which causes the motor
         record to set STUP to BUSY(2) and request a single controller status update. After
         the status is updated the record sets STUP to OFF(0). </li>
-      <li>CA clients are restricted to writing ON(1) to STUP only when STUP is OFF(0). </li>
+      <li>CA clients are restricted to writing ON(1) to STUP only when STUP is OFF(0).
+      </li>
       <li>It is the responsibility of the user to restrict the frequency (and thus the incurred
         overhead) at which the CA client writes ON(1) to STUP. </li>
     </ul>
@@ -2064,7 +2059,8 @@
     Driver Power Monitoring</h4>
   <ul>
     <li>This feature is only available with the OMS VME58 device support. </li>
-    <li>The 8 User I/O signals are assigned to the 8 possible VME58 axes as follows: </li>
+    <li>The 8 User I/O signals are assigned to the 8 possible VME58 axes as follows:
+    </li>
   </ul>
   <p>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
