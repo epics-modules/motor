@@ -25,6 +25,9 @@ program XPS_trajectoryScan("P=13BMC:,R=traj1,IPADDR=164.54.160.34,PORT=5001,"
 %% #include "Socket.h"
 %% #include "xps_ftp.h"
 
+#include <seq_release.h> /* definition of MAGIC */
+#define VERSION_INT(MAJ,MIN) ((MAJ)*1000000+(MIN)*1000)
+#define LT_SEQ_VERSION(MAJ,MIN) ((MAGIC) < VERSION_INT(MAJ,MIN))
 
 /* This program must be compiled with the recursive option */
 option +r;
@@ -256,7 +259,7 @@ ss xpsTrajectoryScan {
             /* If total time mode, calc time per element and write,
                else use the array timeTraj  */
             if (timeMode == TIME_MODE_TOTAL) {
-                dtime = time/npoints;
+                dtime = time_PV/npoints;
                 for (i=0; i<nelements; i++) timeTrajectory[i] = dtime;
                 pvPut(timeTrajectory);
             }
@@ -696,7 +699,11 @@ static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar)
     int result=0, mask=0x01;
 
     for (j=0; j<pVar->numAxes; j++) {
-        seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0);
+#if LT_SEQ_VERSION(2,2)
+		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0);
+#else
+		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
         if (pVar->epicsMotorDone[j] == 0) result |= mask;
         mask = mask << 1;
     }
@@ -714,11 +721,23 @@ static int waitMotors(SS_ID ssId, struct UserVar *pVar)
     while(getMotorMoving(ssId, pVar)) {
         /* Get the current motor positions, post them */
         getMotorPositions(ssId, pVar, pVar->motorCurrent);
-        for (j=0; j<pVar->numAxes; j++) seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+        for (j=0; j<pVar->numAxes; j++) {
+#if LT_SEQ_VERSION(2,2)
+			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
+		}
         epicsThreadSleep(POLL_INTERVAL);
     }
     getMotorPositions(ssId, pVar, pVar->motorCurrent);
-    for (j=0; j<pVar->numAxes; j++) seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+    for (j=0; j<pVar->numAxes; j++) {
+#if LT_SEQ_VERSION(2,2)
+		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
+	}
     return(0);
 }
 
@@ -734,13 +753,21 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
         /* Get the current motor positions, post them */
         for (j=0; j<pVar->numAxes; j++) {
             pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
-            seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#if LT_SEQ_VERSION(2,2)
+			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
         }
         epicsThreadSleep(POLL_INTERVAL);
     }
     for (j=0; j<pVar->numAxes; j++) {
         pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
-        seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#if LT_SEQ_VERSION(2,2)
+		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
     }
     return(0);
 }

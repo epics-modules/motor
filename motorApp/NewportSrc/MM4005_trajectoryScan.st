@@ -15,6 +15,10 @@ program MM4005_trajectoryScan("P=13IDC:,R=traj1,M1=M1,M2=M2,M3=M3,M4=M4,M5=M5,M6
 %% #include <epicsString.h>
 %% #include <asynOctetSyncIO.h>
 
+#include <seq_release.h> /* definition of MAGIC */
+#define VERSION_INT(MAJ,MIN) ((MAJ)*1000000+(MIN)*1000)
+#define LT_SEQ_VERSION(MAJ,MIN) ((MAGIC) < VERSION_INT(MAJ,MIN))
+
 /* This program must be compiled with the recursive option */
 option +r;
 
@@ -203,7 +207,7 @@ ss trajectoryScan {
             /* If time mode is TIME_MODE_TOTAL then construct timeTrajectory 
              * and post it */
             if (timeMode == TIME_MODE_TOTAL) {
-                dtime = time/nelements;
+                dtime = time_PV/nelements;
                 for (i=0; i<nelements; i++) timeTrajectory[i] = dtime;
                 pvPut(timeTrajectory);
             }
@@ -641,7 +645,11 @@ static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar)
     int result=0, mask=0x01;
 
     for (j=0; j<pVar->numAxes; j++) {
-        seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0);
+#if LT_SEQ_VERSION(2,2)
+		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0);
+#else
+		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
         if (pVar->epicsMotorDone[j] == 0) result |= mask;
         mask = mask << 1;
     }
@@ -661,13 +669,21 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
         /* Get the current motor positions, post them */
         for (j=0; j<pVar->numAxes; j++) {
             pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
-            seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#if LT_SEQ_VERSION(2,2)
+			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
         }
         epicsThreadSleep(POLL_INTERVAL);
     }
     for (j=0; j<pVar->numAxes; j++) {
         pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
-        seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#if LT_SEQ_VERSION(2,2)
+		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
+#else
+		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
+#endif
     }
     return(0);
 }
