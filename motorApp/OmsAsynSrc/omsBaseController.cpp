@@ -732,7 +732,7 @@ void omsBaseController::omsPoller()
                         pAxis->setIntegerParam(motorStatusDone_, 1);
                         pAxis->setIntegerParam(motorStatusMoving_, 0);
                         if (pAxis->homing) pAxis->homing = 0;
-                        if (statusBuffer[i*STATUSSTRINGLEN + 2] == 'P')
+                        if (statusBuffer[i*STATUSSTRINGLEN] == 'P')
                         	pAxis->setIntegerParam(motorStatusHighLimit_, 1);
                         else
                         	pAxis->setIntegerParam(motorStatusLowLimit_, 1);
