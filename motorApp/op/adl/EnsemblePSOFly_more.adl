@@ -1,14 +1,14 @@
 
 file {
-	name="/home/oxygen/MOONEY/epics/synApps/support/xxx/xxxApp/op/adl/EnsemblePSOFly_more.adl"
+	name="/home/oxygen4/MOONEY/epics/synAppsSVN/support/motor/motorApp/op/adl/EnsemblePSOFly_more.adl"
 	version=030107
 }
 display {
 	object {
-		x=869
-		y=435
+		x=1076
+		y=257
 		width=450
-		height=180
+		height=190
 	}
 	clr=14
 	bclr=2
@@ -252,7 +252,7 @@ text {
 "related display" {
 	object {
 		x=296
-		y=160
+		y=165
 		width=50
 		height=20
 	}
@@ -513,7 +513,7 @@ text {
 "related display" {
 	object {
 		x=390
-		y=160
+		y=165
 		width=60
 		height=20
 	}
@@ -583,7 +583,7 @@ text {
 "related display" {
 	object {
 		x=349
-		y=160
+		y=165
 		width=40
 		height=20
 	}
@@ -596,4 +596,66 @@ text {
 	clr=0
 	bclr=17
 	label="-Less"
+}
+menu {
+	object {
+		x=120
+		y=165
+		width=100
+		height=22
+	}
+	control {
+		chan="$(P)$(Q)scanControl"
+		clr=14
+		bclr=51
+	}
+}
+text {
+	object {
+		x=14
+		y=168
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Scan Control"
+	align="horiz. centered"
+}
+"related display" {
+	object {
+		x=245
+		y=165
+		width=50
+		height=20
+	}
+	display[8] {
+		label="userCalc1"
+		name="yyCalcoutRecord.adl"
+		args="P=$(P),C=$(Q)userCalc1"
+	}
+	display[9] {
+		label="userCalc2"
+		name="yyCalcoutRecord.adl"
+		args="P=$(P),C=$(Q)userCalc2"
+	}
+	display[12] {
+		label="userPreTaxi"
+		name="yySseq.adl"
+		args="P=$(P),S=$(Q)userPreTaxi"
+	}
+	display[13] {
+		label="userPreFly"
+		name="yySseq.adl"
+		args="P=$(P),S=$(Q)userPreFly"
+	}
+	display[15] {
+		label="userPostFly"
+		name="yySseq.adl"
+		args="P=$(P),S=$(Q)userPostFly"
+	}
+	clr=0
+	bclr=17
+	label="-custom"
 }
