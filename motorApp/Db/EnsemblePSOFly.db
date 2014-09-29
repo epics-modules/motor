@@ -6,53 +6,53 @@
 # Here's an example of the output we want to send via $(P)$(Q)cmdWriteRead.BOUT:
 # 
 # on Taxi:
-# PSOCONTROL X RESET STATE MINOR
-# PSOOUTPUT X CONTROL 1 STATE MINOR
-# PSOPULSE X TIME 10000,0 STATE MINOR
-# PSOOUTPUT X PULSE WINDOW MASK  STATE MINOR
-# PSOTRACK X INPUT 3 STATE MINOR
-# PSODISTANCE X FIXED 0.001000 UNITS STATE MINOR
-# PSOWINDOW X 1 INPUT 3 STATE MINOR
-# PSOWINDOW X 1 RANGE 0.010500,180.010500 UNITS STATE MINOR
-# PSOCONTROL X ARM STATE MINOR
+# PSOCONTROL X RESET
+# PSOOUTPUT X CONTROL 1
+# PSOPULSE X TIME 10000,0
+# PSOOUTPUT X PULSE WINDOW MASK 
+# PSOTRACK X INPUT 3
+# PSODISTANCE X FIXED 0.001000 UNITS
+# PSOWINDOW X 1 INPUT 3
+# PSOWINDOW X 1 RANGE 0.010500,180.010500 UNITS
+# PSOCONTROL X ARM
 # 
 # on fly:
-# PSOCONTROL X ARM STATE MINOR
+# PSOCONTROL X ARM
 # 
 # when fly completes:
-# PSOWINDOW X 1 OFF STATE MINOR
-# PSOCONTROL X OFF STATE MINOR
+# PSOWINDOW X 1 OFF
+# PSOCONTROL X OFF
 record(ao, "$(P)$(Q)startPos") {
   field(DESC, "data aqc start")
   field(EGU, "degrees")
-  field(PREC, "3")
+  field(PREC, "5")
 }
 
 record(calcout, "$(P)$(Q)startPosDial") {
   field(INPA, "$(P)$(Q)startPos CP")
   field(INPB, "$(M).OFF")
   field(INPC, "$(M).DIR")
-  field(PREC, "3")
+  field(PREC, "5")
   field(CALC, "(a-b)*(c?-1:1)")
 }
 
 record(ao, "$(P)$(Q)endPos") {
   field(DESC, "data aqc end")
   field(EGU, "degrees")
-  field(PREC, "3")
+  field(PREC, "5")
 }
 
 record(calcout, "$(P)$(Q)endPosDial") {
   field(INPA, "$(P)$(Q)endPos CP")
   field(INPB, "$(M).OFF")
   field(INPC, "$(M).DIR")
-  field(PREC, "3")
+  field(PREC, "5")
   field(CALC, "(a-b)*(c?-1:1)")
 }
 
 record(ao, "$(P)$(Q)slewSpeed") {
   field(EGU, "degrees/s")
-  field(PREC, "3")
+  field(PREC, "5")
 }
 
 record(busy, "$(P)$(Q)taxi") {
@@ -69,7 +69,7 @@ record(ao, "$(P)$(Q)trigStartFrac") {
   field(DRVH, "1")
   field(DRVL, "0")
   field(DESC, "trigger loc within scanDelta")
-  field(PREC, "3")
+  field(PREC, "5")
   field(DOL, "0")
 }
 
@@ -96,7 +96,7 @@ record(transform, "$(P)$(Q)calcStartEnd") {
   field(CMTI, "taxi dist as multiple of scanDelta")
   field(CMTJ, "dataOffset from start of scanDelta")
   field(CMTK, "dataStart")
-  field(PREC, "3")
+  field(PREC, "5")
   field(CLCL, "k-i*g")
   field(CLCM, "b+h*g")
   field(CMTL, "taxi position")
@@ -126,39 +126,50 @@ record(calcout, "$(P)$(Q)checkScanDelta") {
 record(sseq, "$(P)$(Q)doFly") {
   field(DISV, "0")
   field(SDIS, "$(P)$(Q)fly.VAL")
-  field(DOL1, "$(M).VELO")
-  field(LNK1, "$(P)$(Q)armPSO.PROC CA")
-  field(DOL2, "$(P)$(Q)slewSpeed")
-  field(LNK2, "$(M).VELO")
-  field(DOL3, "$(P)$(Q)calcStartEnd.M")
-  field(LNK3, "$(M).DVAL CA")
-  field(WAIT3, "Wait")
-  field(DOL4, "$(P)$(Q)doFly.DO1")
-  field(LNK4, "$(M).VELO")
-  field(LNK5, "$(P)$(Q)disablePSO.PROC CA")
-  field(PREC, "3")
-  field(DO6, "0")
-  field(LNK6, "$(P)$(Q)fly CA")
-  field(STR6, "Done")
+  field(PREC, "5")
+
+  field(LNK1, "$(P)$(Q)userPreFly.PROC CA")
   field(WAIT1, "Wait")
-  field(WAIT5, "Wait")
+  field(DOL2, "$(M).VELO")
+  field(LNK2, "$(P)$(Q)armPSO.PROC CA")
+  field(WAIT2, "Wait")
+  field(DOL3, "$(P)$(Q)slewSpeed")
+  field(LNK3, "$(M).VELO")
+  field(DOL4, "$(P)$(Q)calcStartEnd.M")
+  field(LNK4, "$(M).DVAL CA")
+  field(WAIT4, "Wait")
+  field(DOL5, "$(P)$(Q)doFly.DO2")
+  field(LNK5, "$(M).VELO")
+  field(LNK6, "$(P)$(Q)disablePSO.PROC CA")
+  field(WAIT6, "Wait")
+  field(LNK7, "$(P)$(Q)userPostFly.PROC CA")
+  field(WAIT7, "Wait")
+  field(STR8, "Done")
+  field(LNK8, "$(P)$(Q)fly CA")
 }
 
 record(sseq, "$(P)$(Q)doTaxi") {
   field(DISV, "0")
   field(SDIS, "$(P)$(Q)taxi.VAL")
-  field(PREC, "3")
-  field(DOL1, "$(P)$(Q)calcStartEnd.L")
-  field(LNK1, "$(M).DVAL CA")
+  field(PREC, "5")
+
+  field(LNK1, "$(P)$(Q)userPreTaxi.PROC CA")
   field(WAIT1, "Wait")
-  field(DO2, "0")
-  field(LNK2, "$(P)$(Q)initPSO.PROC CA")
-  field(LNK4, "$(P)$(Q)taxi CA")
-  field(STR4, "Done")
-  field(LNK3, "$(P)$(Q)armPSO.PROC CA")
+
+  field(DOL2, "$(P)$(Q)calcStartEnd.L")
+  field(LNK2, "$(M).DVAL CA")
   field(WAIT2, "Wait")
-  field(WAIT4, "NoWait")
+
+  field(DO3, "0")
+  field(LNK3, "$(P)$(Q)initPSO.PROC CA")
   field(WAIT3, "Wait")
+
+  field(LNK4, "$(P)$(Q)armPSO.PROC CA")
+  field(WAIT4, "Wait")
+
+  field(STR5, "Done")
+  field(LNK5, "$(P)$(Q)taxi CA")
+  field(WAIT5, "NoWait")
 }
 
 record(seq, "$(P)$(Q)fanHiLimit") {
@@ -190,7 +201,7 @@ record(ao, "$(P)$(Q)detSetupTime") {
   field(DRVH, "100")
   field(DRVL, ".0001")
   field(DOL, "0.01")
-  field(PREC, "3")
+  field(PREC, "5")
   field(EGU, "s")
 }
 
@@ -206,15 +217,20 @@ record(calcout, "$(P)$(Q)deltaTime") {
   field(PREC, "6")
 }
 
-record(scalcout, "$(P)$(Q)calcPulseTime") {
+record(scalcout, "$(P)$(Q)calcPulseTime0") {
   field(INPA, "$(P)$(Q)scanDelta")
   field(INPB, "$(P)$(Q)detSetupTime")
   field(INPC, "$(P)$(Q)slewSpeed")
   field(D, "1.e6")
+  field(CALC, "$P('%d,',a/c*d)+$P('%d',(a/c-b)*d)")
+  field(PREC, "6")
+}
+record(scalcout, "$(P)$(Q)calcPulseTime") {
   field(INPE, "$(P)$(Q)pulseType")
   field(AA, "PSOPULSE X TIME ")
-  field(BB, "50,25 ")
-  field(CALC, "AA+(e?$P('%d,',a/c*d)+$P('%d',(a/c-b)*d):bb)")
+  field(BB, "2,1 ")
+  field(INCC, "$(P)$(Q)calcPulseTime0.SVAL PP")
+  field(CALC, "AA+(e?cc:bb)")
   field(PREC, "6")
 }
 
@@ -271,7 +287,7 @@ record(scalcout, "$(P)$(Q)pulseDstBld") {
 # $(P)$(Q)calcRangeOffset and $(P)$(Q)pulseWndwBld together do this calculation
 # and build a command for the Ensemble controller.
 record(calcout, "$(P)$(Q)calcRangeOffset") {
-  field(PREC, "3")
+  field(PREC, "5")
   field(INPA, "$(P)$(Q)calcStartEnd.C")
   field(INPB, "$(P)$(Q)calcStartEnd.G")
   field(INPC, "$(P)$(Q)calcStartEnd.L")
@@ -279,23 +295,31 @@ record(calcout, "$(P)$(Q)calcRangeOffset") {
 }
 
 record(scalcout, "$(P)$(Q)pulseWndwBld") {
-  field(PREC, "3")
+  field(PREC, "5")
   field(INPA, "$(P)$(Q)startPosDial.VAL")
   field(INPB, "$(P)$(Q)endPosDial.VAL")
   field(INPC, "$(P)$(Q)calcRangeOffset PP")
+  field(INPD, "$(P)$(Q)scanControl NPP")
+  field(INPE, "$(P)$(Q)scanDelta NPP")
   field(AA, "PSOWINDOW X 1 RANGE %.6f,")
-  field(CALC, "$P(AA,min(A,B)-C)")
+  field(CALC, "$P(AA,min(A,B)-(d?0:C)-(a>b?e:0))")
   field(OUT, "$(P)$(Q)pulseWndwBlds.A NPP")
   field(FLNK, "$(P)$(Q)pulseWndwBld2")
 }
 
+# For custom (scanControl==1) we'd like to let custom app set window end to
+# (desired end of data) + (half the last data interval), ensuring that any
+# roundoff error allows at least one extra PSO pulse.  For tableFly, an extra
+# pulse is needed to return the trigger signal to zero.
 record(scalcout, "$(P)$(Q)pulseWndwBld2") {
-  field(PREC, "3")
+  field(PREC, "5")
   field(INPA, "$(P)$(Q)pulseWndwBld.A")
   field(INPB, "$(P)$(Q)pulseWndwBld.B")
   field(INPC, "$(P)$(Q)pulseWndwBld.C")
+  field(INPD, "$(P)$(Q)scanControl NPP")
+  field(INPE, "$(P)$(Q)scanDelta NPP")
   field(AA, "%.6f UNITS")
-  field(CALC, "$P(AA,max(A,B)-C)")
+  field(CALC, "$P(AA,max(A,B)-C+(d?e*2:0)-(a>b?e:0))")
   field(OUT, "$(P)$(Q)pulseWndwBlds.B PP")
 }
 
@@ -327,6 +351,36 @@ record(sseq, "$(P)$(Q)disablePSO") {
 
 record(stringout, "$(P)$(Q)motorName") {
   field(VAL, "$(M)")
+}
+
+# Provide records for the user to program
+# prefly and postfly operations
+record(bo, "$(P)$(Q)scanControl") {
+  field(ZNAM, "Standard")
+  field(ONAM, "Custom")
+}
+record(calcout, "$(P)$(Q)userCalc1") {
+  field(PREC, "5")
+  field(CALC, "0")
+}
+record(calcout, "$(P)$(Q)userCalc2") {
+  field(PREC, "5")
+  field(CALC, "0")
+}
+record(sseq, "$(P)$(Q)userPreTaxi") {
+  field(SDIS, "$(P)$(Q)scanControl")
+  field(DISV, "0")
+  field(PREC, "5")
+}
+record(sseq, "$(P)$(Q)userPreFly") {
+  field(SDIS, "$(P)$(Q)scanControl")
+  field(DISV, "0")
+  field(PREC, "5")
+}
+record(sseq, "$(P)$(Q)userPostFly") {
+  field(SDIS, "$(P)$(Q)scanControl")
+  field(DISV, "0")
+  field(PREC, "5")
 }
 
 #! Further lines contain data used by VisualDCT
