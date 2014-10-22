@@ -12,6 +12,3 @@ $(P)$(M)C3
 $(P)$(M)C4
 $(P)$(M)C5
 $(P)$(M)_able.VAL
-$(P)$(M):scanParms.SP
-$(P)$(M):scanParms.EP
-$(P)$(M):scanParms.NP
