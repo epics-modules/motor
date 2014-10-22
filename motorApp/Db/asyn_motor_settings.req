@@ -1,0 +1,8 @@
+# FILE... motor_settings.req
+# Version:        $Revision$
+# Modified By:    $Author$
+# Last Modified:  $Date$
+# HeadURL:        $URL$
+
+file basic_motor_settings.req P=$(P),M=$(M)
+$(P)$(M)_able.VAL
