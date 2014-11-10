@@ -1,11 +1,18 @@
-Commands to tell the Aerotech Ensemble to output pulses every {delta} units,
-beginning at scan_start and ending at scan_end.  Note that the Ensemble fires
-pulses at positions n*delta from the position at which the PSOCONTROL X ARM
-command was invoked.  Thus, the pre-fly position of the motor must be an
-integer multiple of {delta}.
+EnsemblePSOFly.db supports fly scans of a single motor controlled by an Aerotech
+Ensemble controller.  It uses the motor record to move the motor, and read
+position, and to read control fields such as offset and direction.  It uses an
+asyn port to talk to the controller about capabilities that the motor record
+doesn't support, such as the control of PSO (position synchronized output)
+pulses.
 
-{start} = scan_start - {delta}
-{end} = scan_end + {delta}/2
+Commands to tell the Aerotech Ensemble to output pulses every scanDelta units,
+beginning at startPos and ending at scan_end.  Note that the Ensemble fires
+pulses at positions n*delta from the position at which the PSOCONTROL X ARM
+command was invoked.  Thus, the pre-fly ("taxi") position of the motor must be
+an integer multiple of scanDelta.
+
+{start} = startPos - scanDelta
+{end} = scan_end + scanDelta/2
 
 
 PSOCONTROL X RESET                             ' Reset PSO.
@@ -20,7 +27,7 @@ PSOOUTPUT X PULSE WINDOW MASK                  ' Set PSO output type to PULSE.
 PSOTRACK X INPUT 1                             ' Track primary encoder for
                                                ' axis.
 
-PSODISTANCE X FIXED {delta} UNITS              ' Set the incremental firing
+PSODISTANCE X FIXED scanDelta UNITS              ' Set the incremental firing
                                                ' distance ((units).
 
 PSOWINDOW X 1 INPUT 1                          ' Track primary encoder for
