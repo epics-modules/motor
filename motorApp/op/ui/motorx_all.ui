@@ -14,12 +14,53 @@
         <string>
 
 QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
-QPushButton::menu-indicator {image: url(none.png); width: 0}
 
 </string>
     </property>
     <widget class="QWidget" name="centralWidget">
         <widget class="caGraphics" name="caRectangle_0">
+            <property name="form">
+                <enum>caGraphics::Rectangle</enum>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>80</x>
+                    <y>99</y>
+                    <width>210</width>
+                    <height>31</height>
+                </rect>
+            </property>
+            <property name="lineSize">
+                <number>1</number>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="fillstyle">
+                <enum>Filled</enum>
+            </property>
+            <property name="lineColor">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="linestyle">
+                <enum>Solid</enum>
+            </property>
+            <property name="visibility">
+                <enum>caGraphics::IfNotZero</enum>
+            </property>
+            <property name="channel">
+                <string>$(P)$(M)_able.VAL</string>
+            </property>
+        </widget>
+        <widget class="caGraphics" name="caRectangle_1">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -1241,7 +1282,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <string>1,1;448,1;</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_1">
+        <widget class="caGraphics" name="caRectangle_2">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -1445,7 +1486,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <enum>decimal</enum>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_2">
+        <widget class="caGraphics" name="caRectangle_3">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -1556,7 +1597,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 </rect>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_3">
+        <widget class="caGraphics" name="caRectangle_4">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -1602,7 +1643,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <string>$(P)$(M).HOMF</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_4">
+        <widget class="caGraphics" name="caRectangle_5">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -2647,7 +2688,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                     <height>24</height>
                 </rect>
             </property>
-            <widget class="caGraphics" name="caRectangle_5">
+            <widget class="caGraphics" name="caRectangle_6">
                 <property name="form">
                     <enum>caGraphics::Rectangle</enum>
                 </property>
@@ -2693,7 +2734,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                     <string>$(P)$(M).SET</string>
                 </property>
             </widget>
-            <widget class="caGraphics" name="caRectangle_6">
+            <widget class="caGraphics" name="caRectangle_7">
                 <property name="form">
                     <enum>caGraphics::Rectangle</enum>
                 </property>
@@ -3086,7 +3127,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <enum>caChoice::Static</enum>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_7">
+        <widget class="caGraphics" name="caRectangle_8">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -3221,7 +3262,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 </rect>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_8">
+        <widget class="caGraphics" name="caRectangle_9">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -4284,7 +4325,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 </property>
             </widget>
         </widget>
-        <widget class="caGraphics" name="caRectangle_9">
+        <widget class="caGraphics" name="caRectangle_10">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -4330,7 +4371,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <string>$(P)$(M).JOGF</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_10">
+        <widget class="caGraphics" name="caRectangle_11">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -4416,7 +4457,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <string>2,1;1,345;</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_11">
+        <widget class="caGraphics" name="caRectangle_12">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -7061,7 +7102,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <string>1,1;448,1;</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_12">
+        <widget class="caGraphics" name="caRectangle_13">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -7505,7 +7546,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <enum>decimal</enum>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_13">
+        <widget class="caGraphics" name="caRectangle_14">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -8151,7 +8192,54 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
                 <enum>caMessageButton::Static</enum>
             </property>
         </widget>
+        <widget class="caGraphics" name="caRectangle_15">
+            <property name="form">
+                <enum>caGraphics::Rectangle</enum>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>80</x>
+                    <y>99</y>
+                    <width>210</width>
+                    <height>31</height>
+                </rect>
+            </property>
+            <property name="lineSize">
+                <number>2</number>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>253</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="background">
+                <color alpha="0">
+                    <red>253</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="lineColor">
+                <color alpha="255">
+                    <red>253</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="linestyle">
+                <enum>Dash</enum>
+            </property>
+            <property name="visibility">
+                <enum>caGraphics::IfNotZero</enum>
+            </property>
+            <property name="channel">
+                <string>$(P)$(M)_able.VAL</string>
+            </property>
+        </widget>
         <zorder>caRectangle_0</zorder>
+        <zorder>caRectangle_1</zorder>
         <zorder>caLabel_0</zorder>
         <zorder>caLabel_1</zorder>
         <zorder>caLabel_2</zorder>
@@ -8168,23 +8256,23 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
         <zorder>caLabel_11</zorder>
         <zorder>caFrame_1</zorder>
         <zorder>caPolyLine_1</zorder>
-        <zorder>caRectangle_1</zorder>
+        <zorder>caRectangle_2</zorder>
         <zorder>caLabel_12</zorder>
         <zorder>caLabel_13</zorder>
         <zorder>caLabel_14</zorder>
-        <zorder>caRectangle_2</zorder>
+        <zorder>caRectangle_3</zorder>
         <zorder>caLabel_15</zorder>
         <zorder>caLabel_16</zorder>
-        <zorder>caRectangle_3</zorder>
         <zorder>caRectangle_4</zorder>
+        <zorder>caRectangle_5</zorder>
         <zorder>caLabel_17</zorder>
         <zorder>caLabel_18</zorder>
         <zorder>caLabel_19</zorder>
         <zorder>caGraphics_0</zorder>
         <zorder>caGraphics_1</zorder>
         <zorder>caLabel_20</zorder>
-        <zorder>caRectangle_5</zorder>
         <zorder>caRectangle_6</zorder>
+        <zorder>caRectangle_7</zorder>
         <zorder>caFrame_2</zorder>
         <zorder>caLabel_21</zorder>
         <zorder>caLabel_22</zorder>
@@ -8194,9 +8282,9 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
         <zorder>caLabel_26</zorder>
         <zorder>caFrame_3</zorder>
         <zorder>caLabel_27</zorder>
-        <zorder>caRectangle_7</zorder>
-        <zorder>caLabel_28</zorder>
         <zorder>caRectangle_8</zorder>
+        <zorder>caLabel_28</zorder>
+        <zorder>caRectangle_9</zorder>
         <zorder>caPolyLine_2</zorder>
         <zorder>caLabel_29</zorder>
         <zorder>caLabel_30</zorder>
@@ -8223,10 +8311,10 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
         <zorder>caLabel_43</zorder>
         <zorder>caPolyLine_8</zorder>
         <zorder>caFrame_7</zorder>
-        <zorder>caRectangle_9</zorder>
         <zorder>caRectangle_10</zorder>
-        <zorder>caPolyLine_9</zorder>
         <zorder>caRectangle_11</zorder>
+        <zorder>caPolyLine_9</zorder>
+        <zorder>caRectangle_12</zorder>
         <zorder>caLabel_44</zorder>
         <zorder>caLabel_45</zorder>
         <zorder>caLabel_46</zorder>
@@ -8268,7 +8356,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
         <zorder>caLabel_76</zorder>
         <zorder>caFrame_11</zorder>
         <zorder>caPolyLine_13</zorder>
-        <zorder>caRectangle_12</zorder>
+        <zorder>caRectangle_13</zorder>
         <zorder>caPolyLine_14</zorder>
         <zorder>caLabel_77</zorder>
         <zorder>caLabel_78</zorder>
@@ -8276,7 +8364,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
         <zorder>caLabel_80</zorder>
         <zorder>caPolyLine_15</zorder>
         <zorder>caPolyLine_16</zorder>
-        <zorder>caRectangle_13</zorder>
+        <zorder>caRectangle_14</zorder>
         <zorder>caPolyLine_17</zorder>
         <zorder>caLabel_81</zorder>
         <zorder>caLabel_82</zorder>
@@ -8284,6 +8372,7 @@ QPushButton::menu-indicator {image: url(none.png); width: 0}
         <zorder>caLabel_84</zorder>
         <zorder>caLabel_85</zorder>
         <zorder>caLabel_86</zorder>
+        <zorder>caRectangle_15</zorder>
         <zorder>caTextEntry_0</zorder>
         <zorder>caTextEntry_1</zorder>
         <zorder>caTextEntry_2</zorder>
