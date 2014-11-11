@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen/SLUITER/local/epics/synAppsSVN/support/motor/svn/motorApp/op/adl/motorx_all.adl"
-	version=030102
+	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/motorx_all.adl"
+	version=030107
 }
 display {
 	object {
@@ -85,6 +85,22 @@ display {
 		3cb420,
 		289315,
 		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=80
+		y=99
+		width=210
+		height=31
+	}
+	"basic attribute" {
+		clr=14
+		width=1
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)$(M)_able.VAL"
 	}
 }
 rectangle {
@@ -3046,4 +3062,22 @@ text {
 	}
 	label="SYNC"
 	press_msg="1"
+}
+rectangle {
+	object {
+		x=80
+		y=99
+		width=210
+		height=31
+	}
+	"basic attribute" {
+		clr=20
+		style="dash"
+		fill="outline"
+		width=2
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="$(P)$(M)_able.VAL"
+	}
 }
