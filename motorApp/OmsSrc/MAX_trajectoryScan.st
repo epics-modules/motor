@@ -997,11 +997,7 @@ static int getEpicsMotorMoving(SS_ID ssId, struct UserVar *pVar)
 	int result=0, mask=0x01;
 
 	for (j=0; j<pVar->numAxes; j++) {
-#if LT_SEQ_VERSION(2,2)
 		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0);
-#else
-		seq_pvGet(ssId, pVar->epicsMotorDoneIndex[j], 0, DEFAULT_TIMEOUT);
-#endif
 		if (pVar->epicsMotorDone[j] == 0) result |= mask;
 		mask = mask << 1;
 	}
@@ -1020,22 +1016,14 @@ static int waitEpicsMotors(SS_ID ssId, struct UserVar *pVar)
 		/* Get the current motor positions, post them */
 		for (j=0; j<pVar->numAxes; j++) {
 			pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
-#if LT_SEQ_VERSION(2,2)
 			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
-#else
-			seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
-#endif
 		}
 		if (pVar->debugLevel >= 1) printf("waitEpicsMotors: m1=%f\n", pVar->epicsMotorPos[0]);
 		epicsThreadSleep(POLL_INTERVAL);
 	}
 	for (j=0; j<pVar->numAxes; j++) {
 		pVar->motorCurrent[j] = pVar->epicsMotorPos[j];
-#if LT_SEQ_VERSION(2,2)
 		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0);
-#else
-		seq_pvPut(ssId, pVar->motorCurrentIndex[j], 0, DEFAULT_TIMEOUT);
-#endif
 	}
 	return(0);
 }
