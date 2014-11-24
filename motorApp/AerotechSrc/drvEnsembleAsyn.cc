@@ -65,7 +65,9 @@ in file LICENSE that is included with this distribution.
 *                  - Deleted duplicate error messages. 
 * .17 09-27-12 rls - Bug fix for incorrect jog acceleration rate.
 * .18 09-27-12 rls - Support for actual velocity in status update. 
-* .19 09-11-14 rls - sendAndReceive() diagnostic message added when controller returns NAK.
+* .19 09-11-14 rls - sendAndReceive() diagnostic message added when controller returns NAK. 
+* .20 11-24-14 rls - Moved "WAIT MODE NOWAIT" from EnsembleAsynConfig to motorAxisSetInteger 
+*                    where torque is enabled/disabled. 
 */
 
 
@@ -437,6 +439,10 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
             sprintf(outputBuff, "ENABLE @%d", pAxis->axis);
         }
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+
+        /* Prevent ASCII interpreter from blocking during MOVEABS/INC commands. */
+        ret_status = sendAndReceive(pAxis->pController, (char *) "WAIT MODE NOWAIT", inputBuff, sizeof(inputBuff));
+
         break;
     default:
         PRINT(pAxis->logParam, TERROR, "motorAxisSetInteger: unknown function %d\n", function);
@@ -974,9 +980,6 @@ int EnsembleAsynConfig(int card,             /* Controller number */
             sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (inputBuff[0] == ASCII_ACK_CHAR)
                 pAxis->swconfig.All = atoi(&inputBuff[1]);
-
-            /* Prevent ASCII interpreter from blocking during MOVEABS/INC commands. */
-            sendAndReceive(pController, (char *) "WAIT MODE NOWAIT", inputBuff, sizeof(inputBuff));
 
             /* Set RAMP MODE to RATE. */
             sprintf(outputBuff, "RAMP MODE @%d RATE", axis);
