@@ -40,6 +40,13 @@ to the proximity of the reference is done with the a velocity limited by the cur
 velocity (set with VELO) and the maximum possible velocity to decelerate in case of
 hitting a limit switch.
 
+d) stages without reference or limit switch sensors
+The position can be set with setting the SET fiels to "Set"(1) and then setting DVAL
+to the new position to be used. This will cause no motion on the controller.
+The controller must support the commands "RON" and "POS"
+(please see the user manual of the controller for details).
+Especially digital piezo contorllers do not support this. 
+
  "Motion Errors"
 =================
 

@@ -7,9 +7,9 @@ FILENAME...     PIHexapodController.h
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 3$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 05.11.2013 17:38:32$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -26,14 +26,19 @@ Original Author: Steffen Rau
 class PIHexapodController : public PIGCSController
 {
 public:
-	PIHexapodController(asynUser* pCom, const char* szIDN)
-	: PIGCSController(pCom, szIDN)
+	PIHexapodController(PIInterface* pInterface, const char* szIDN)
+	: PIGCSController(pInterface, szIDN)
 	{
 	}
 	~PIHexapodController() {}
 
 	virtual asynStatus init(void);
 	virtual asynStatus initAxis(PIasynAxis* pAxis);
+
+    virtual asynStatus setVelocityCts( PIasynAxis* pAxis, double velocity )
+    {
+    	return PIGCSController::setVelocityCts(pAxis, velocity);
+    }
 
 	virtual asynStatus setAccelerationCts( PIasynAxis* pAxis, double acceleration)	{ return asynSuccess; }
 	virtual asynStatus setAcceleration( PIasynAxis* pAxis, double acceleration)	{ return asynSuccess; }
@@ -68,6 +73,7 @@ public:
 
 protected:
     virtual asynStatus findConnectedAxes();
+	virtual const char* GetReadPivotCommand() { return "SPI? RST"; }
     asynStatus ReadPivotSettings();
     asynStatus SetPivot(char cAxis, double value);
 

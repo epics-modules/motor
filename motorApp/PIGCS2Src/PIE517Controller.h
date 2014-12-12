@@ -7,9 +7,9 @@ FILENAME...     PIGCScontroller.h
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 3$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 25.10.2013 10:43:08$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -33,8 +33,8 @@ Created: 15.12.2010
 class PIE517Controller : public PIGCSPiezoController
 {
 public:
-	PIE517Controller(asynUser* pCom, const char* szIDN)
-	: PIGCSPiezoController(pCom, szIDN)
+	PIE517Controller(PIInterface* pInterface, const char* szIDN)
+	: PIGCSPiezoController(pInterface, szIDN)
 	{
 	}
 	~PIE517Controller() {}

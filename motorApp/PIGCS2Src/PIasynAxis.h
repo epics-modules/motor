@@ -8,9 +8,9 @@ USAGE...        PI GCS Motor Support.
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
  
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 2$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 09.10.2013 16:34:01$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -42,6 +42,7 @@ public:
     virtual asynStatus moveVelocity(double minVelocity, double maxVelocity, double acceleration);
     virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
     virtual asynStatus stop(double acceleration);
+    virtual asynStatus setPosition(double position);
 
 
     char* m_szAxisName;			///< GCS name

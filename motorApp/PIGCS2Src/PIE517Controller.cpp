@@ -7,9 +7,9 @@ FILENAME...     PIGCSPiezoController
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 3$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 25.10.2013 10:43:08$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -18,6 +18,7 @@ Created: 15.12.2010
 
 #include "PIE517Controller.h"
 #include "PIasynAxis.h"
+#include "PIInterface.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -57,14 +58,14 @@ asynStatus PIE517Controller::setOnline(int channel, int onlineState)
 {
     char cmd[100];
     sprintf(cmd, "ONL %d %d", channel, onlineState);
-    asynStatus status = sendOnly(cmd);
+    asynStatus status = m_pInterface->sendOnly(cmd);
     return status;
 }
 
 asynStatus PIE517Controller::getNrOutputChannels()
 {
 	char buf[255];
-	asynStatus status = sendAndReceive("TPC?", buf, 99);
+	asynStatus status = m_pInterface->sendAndReceive("TPC?", buf, 99);
 	if (status != asynSuccess)
 	{
 		return status;

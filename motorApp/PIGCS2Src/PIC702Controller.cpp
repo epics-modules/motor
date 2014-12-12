@@ -8,9 +8,9 @@ USAGE...
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 2$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 25.10.2013 10:43:08$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -20,6 +20,7 @@ Created: January 2011
 
 #include "PIC702Controller.h"
 #include "PIasynAxis.h"
+#include "PIInterface.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -76,7 +77,7 @@ asynStatus PIC702Controller::findConnectedAxes()
 		m_axesIDs[i] = NULL;
 	}
 	char allAxesIDs[127];
-	asynStatus status = PIGCSController::sendAndReceive("SAI?", allAxesIDs, 127);
+	asynStatus status = m_pInterface->sendAndReceive("SAI?", allAxesIDs, 127);
 
 	if (asynSuccess != status)
 	{
@@ -130,7 +131,7 @@ asynStatus PIC702Controller::hasReferenceSensor(PIasynAxis* pAxis)
 	}
     pAxis->m_bHasReference = hasref > 0.1;
 
-    asynPrint(m_pCurrentLogSink, ASYN_TRACE_FLOW,
+    asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW,
    		 "PIC702Controller::hasReferenceSwitch() axis has %sreference sensor\n",
    		 pAxis->m_bHasReference?"":"no ");
 	return status;
@@ -180,16 +181,16 @@ asynStatus PIC702Controller::referenceVelCts( PIasynAxis* pAxis, double velocity
 	}
 	else
 	{
-	    asynPrint(m_pCurrentLogSink, ASYN_TRACE_ERROR,
+	    asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR,
 	    		"PIC702Controller::referenceVelCts() failed - axis has no reference/limit switch\n");
 		epicsSnprintf(pAxis->m_pasynUser->errorMessage,pAxis->m_pasynUser->errorMessageSize,
 			"PIC702Controller::referenceVelCts() failed - axis has no reference/limit switch\n");
 		return asynError;
 	}
-	status = sendOnly(cmd);
+	status = m_pInterface->sendOnly(cmd);
 	if (asynSuccess != status)
 	{
-		asynPrint(m_pCurrentLogSink, ASYN_TRACE_ERROR,
+		asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR,
     		"PIC702Controller::referenceVelCts() failed\n");
 		return status;
 	}

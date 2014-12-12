@@ -7,9 +7,9 @@ FILENAME...     PIE755Controller.h
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 2$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 25.10.2013 10:43:08$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -31,8 +31,8 @@ Original Author: Steffen Rau
 class PIE755Controller : public PIGCSMotorController
 {
 public:
-	PIE755Controller(asynUser* pCom, const char* szIDN)
-	: PIGCSMotorController(pCom, szIDN)
+	PIE755Controller(PIInterface* pInterface, const char* szIDN)
+	: PIGCSMotorController(pInterface, szIDN)
 	{
 	}
 	~PIE755Controller() {}

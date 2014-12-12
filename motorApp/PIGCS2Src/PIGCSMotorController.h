@@ -7,9 +7,9 @@ FILENAME...     PIGCSMotorController.h
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 2$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 25.10.2013 10:43:08$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -31,8 +31,8 @@ Created: 15.12.2010
 class PIGCSMotorController : public PIGCSController
 {
 public:
-	PIGCSMotorController(asynUser* pCom, const char* szIDN)
-	: PIGCSController(pCom, szIDN)
+	PIGCSMotorController(PIInterface* pInterface, const char* szIDN)
+	: PIGCSController(pInterface, szIDN)
 	{
 	}
 	~PIGCSMotorController() {}

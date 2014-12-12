@@ -7,9 +7,9 @@ FILENAME...     PIasynController.cpp
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
  
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 1$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 23.09.2013 14:19:03$
 HeadURL:        $URL$
 
 Based on drvMotorSim.c

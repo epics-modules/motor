@@ -8,9 +8,9 @@ USAGE...
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 4$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 25.10.2013 10:43:08$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -35,6 +35,7 @@ Based on drvMotorSim.c, Mark Rivers, December 13, 2009
 #include "PIasynAxis.h"
 #include "PIasynController.h"
 #include "PIGCSController.h"
+#include "PIInterface.h"
 
 #include <epicsExport.h>
 
@@ -83,7 +84,7 @@ void PIasynAxis::Init(const char *portName)
 				"PIasynController::configAxis() - connectDevice() failed\n");
 		return;
 	}
-	m_pGCSController->m_pCurrentLogSink = logSink;
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = logSink;
 
 	setIntegerParam(motorAxisHasClosedLoop, 1);
 
@@ -172,7 +173,7 @@ asynStatus PIasynAxis::poll(bool *returnMoving)
 
 asynStatus PIasynAxis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
-	m_pGCSController->m_pCurrentLogSink = pasynUser_;
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = pasynUser_;
 	asynStatus status = asynError;
 	static const char *functionName = "moveAxis";
 
@@ -235,7 +236,7 @@ asynStatus PIasynAxis::move(double position, int relative, double minVelocity, d
 
 asynStatus PIasynAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
-	m_pGCSController->m_pCurrentLogSink = pasynUser_;
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = pasynUser_;
 	asynStatus status = asynError;
     static const char *functionName = "moveVelocityAxis";
 
@@ -271,7 +272,7 @@ asynStatus PIasynAxis::moveVelocity(double minVelocity, double maxVelocity, doub
 
 asynStatus PIasynAxis::stop(double acceleration)
 {
-	m_pGCSController->m_pCurrentLogSink = pasynUser_;
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = pasynUser_;
     static const char *functionName = "stopAxis";
 
     deferred_move = 0;
@@ -290,7 +291,7 @@ asynStatus PIasynAxis::stop(double acceleration)
 
 asynStatus PIasynAxis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
-	m_pGCSController->m_pCurrentLogSink = pasynUser_;
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = pasynUser_;
     asynStatus status = asynError;
     static const char *functionName = "homeAxis";
 
@@ -312,5 +313,17 @@ asynStatus PIasynAxis::home(double minVelocity, double maxVelocity, double accel
     return status;
 }
 
+asynStatus PIasynAxis::setPosition(double position)
+{
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = pasynUser_;
+	asynStatus status = asynError;
+	status = m_pGCSController->setAxisPositionCts(this, position);
+    epicsEventSignal(pController_->pollEventId_);
+
+    asynPrint(pasynUser_, ASYN_TRACE_FLOW,
+        "%s:%s: Set driver %s, axis %d set position to %f - status=%d\n",
+        driverName, "setPositionAxis", pC_->portName, axisNo_, position, int(status) );
+    return status;
+}
 
 

@@ -7,9 +7,9 @@ FILENAME...     PIGCSMotorController.cpp
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 2$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 25.10.2013 10:43:08$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -18,6 +18,7 @@ Created: 15.12.2010
 
 #include "PIGCSMotorController.h"
 #include "PIasynAxis.h"
+#include "PIInterface.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -66,7 +67,7 @@ asynStatus PIGCSMotorController::referenceVelCts( PIasynAxis* pAxis, double velo
 	{
 		velocity = fabs(velocity) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
 		sprintf(cmd,"SPA %s 0x50 %f", pAxis->m_szAxisName, velocity);
-		sendOnly(cmd);
+		m_pInterface->sendOnly(cmd);
 	}
 
 	if (pAxis->m_bHasReference)
@@ -89,13 +90,13 @@ asynStatus PIGCSMotorController::referenceVelCts( PIasynAxis* pAxis, double velo
 	}
 	else
 	{
-	    asynPrint(m_pCurrentLogSink, ASYN_TRACE_ERROR,
+	    asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR,
 	    		"PIGCSMotorController::referenceVelCts() failed - axis has no reference/limit switch\n");
 		epicsSnprintf(pAxis->m_pasynUser->errorMessage,pAxis->m_pasynUser->errorMessageSize,
 			"PIGCSMotorController::referenceVelCts() failed - axis has no reference/limit switch\n");
 		return asynError;
 	}
-	status = sendOnly(cmd);
+	status = m_pInterface->sendOnly(cmd);
 	if (asynSuccess != status)
 		return status;
 	int errorCode = getGCSError();
@@ -103,7 +104,7 @@ asynStatus PIGCSMotorController::referenceVelCts( PIasynAxis* pAxis, double velo
 	{
 		return asynSuccess;
 	}
-    asynPrint(m_pCurrentLogSink, ASYN_TRACE_ERROR,
+    asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR,
     		"PIGCSMotorController::referenceVelCts() failed\n");
 	epicsSnprintf(pAxis->m_pasynUser->errorMessage,pAxis->m_pasynUser->errorMessageSize,
 		"PIGCSMotorController::referenceVelCts() failed - GCS Error %d\n",errorCode);
@@ -139,7 +140,7 @@ asynStatus PIGCSMotorController::getResolution(PIasynAxis* pAxis, double& resolu
 asynStatus PIGCSMotorController::getStatus(PIasynAxis* pAxis, int& homing, int& moving, int& negLimit, int& posLimit, int& servoControl)
 {
 	char buf[255];
-    asynStatus status = sendAndReceive(char(4), buf, 99);
+    asynStatus status = m_pInterface->sendAndReceive(char(4), buf, 99);
     if (status != asynSuccess)
     {
     	return status;
@@ -157,7 +158,7 @@ asynStatus PIGCSMotorController::getStatus(PIasynAxis* pAxis, int& homing, int& 
     negLimit = (mask & 0x0001) ? 1 : 0;
     posLimit = (mask & 0x0004) ? 1 : 0;
     servoControl = (mask & 0x1000) ? 1 : 0;
-    asynPrint(m_pCurrentLogSink, ASYN_TRACE_FLOW,
+    asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW,
                "PIGCSMotorController::getStatus() buf:%s moving %d, svo: %d\n",
                buf, moving, servoControl);
 

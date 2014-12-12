@@ -8,9 +8,9 @@ USAGE...        PI GCS2 Motor Support.
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
  
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 4$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 25.10.2013 10:43:08$
 HeadURL:        $URL$
  
 Original Author: Steffen Rau
@@ -41,6 +41,7 @@ Based on drvMotorSim.c, Mark Rivers, December 13, 2009
 #include "PIasynController.h"
 #include "PIGCSController.h"
 #include "PIasynAxis.h"
+#include "PIInterface.h"
 #include <epicsExport.h>
 
 
@@ -61,8 +62,8 @@ PIasynController::PIasynController(const char *portName, const char* asynPort, i
             ASYN_CANBLOCK | ASYN_MULTIDEVICE,
             1, // autoconnect
             priority, stackSize)
-	, m_pGCSController( NULL )
 	, movesDeferred( 0 )
+	, m_pGCSController( NULL )
 {
     createParam(PI_SUP_POSITION_String,		asynParamFloat64,	&PI_SUP_POSITION);
     createParam(PI_SUP_TARGET_String,		asynParamFloat64,	&PI_SUP_TARGET);
@@ -93,34 +94,35 @@ PIasynController::PIasynController(const char *portName, const char* asynPort, i
 
 
     asynStatus status;
-    asynUser* pInterface;
-    status = pasynOctetSyncIO->connect(asynPort, 0, &pInterface, NULL);
+    asynUser* pAsynCom;
+    status = pasynOctetSyncIO->connect(asynPort, 0, &pAsynCom, NULL);
     if (status)
     {
-    	asynPrint(pInterface, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
+    	asynPrint(pAsynCom, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
           "echoHandler: unable to connect to port %s\n",
           asynPort);
     	return;
 	}
-	status = pasynOctetSyncIO->setInputEos(pInterface, "\n", 1);
+	status = pasynOctetSyncIO->setInputEos(pAsynCom, "\n", 1);
 	if (status) {
-		asynPrint(pInterface, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
+		asynPrint(pAsynCom, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
 			  "echoHandler: unable to set input EOS on %s: %s\n",
-			  asynPort, pInterface->errorMessage);
+			  asynPort, pAsynCom->errorMessage);
 		return;
 	}
-	status = pasynOctetSyncIO->setOutputEos(pInterface, "", 0);
+	status = pasynOctetSyncIO->setOutputEos(pAsynCom, "", 0);
 	if (status) {
-		asynPrint(pInterface, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
+		asynPrint(pAsynCom, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
 			  "echoHandler: unable to set output EOS on %s: %s\n",
-			  asynPort, pInterface->errorMessage);
+			  asynPort, pAsynCom->errorMessage);
 		return;
 	}
 
+	PIInterface* pInterface = new PIInterface(pAsynCom);
 	char inputBuff[256];
 	inputBuff[0] = '\0';
-	status = PIGCSController::sendAndReceive(pInterface, "*IDN?", inputBuff, 255, pInterface);
-	asynPrint(pInterface, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
+	status = pInterface->sendAndReceive("*IDN?", inputBuff, 255, pAsynCom);
+	asynPrint(pAsynCom, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
 			  "read from %s: %s\n",
 			  asynPort, inputBuff);
 
@@ -130,7 +132,7 @@ PIasynController::PIasynController(const char *portName, const char* asynPort, i
 	m_pGCSController = PIGCSController::CreateGCSController(pInterface, inputBuff);
 	if (NULL == m_pGCSController)
 	{
-		asynPrint(pInterface, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
+		asynPrint(pAsynCom, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
 			  "PIasynController: unknown controller type %s: %s\n",
 			  asynPort, inputBuff);
 		return;
@@ -144,7 +146,7 @@ PIasynController::PIasynController(const char *portName, const char* asynPort, i
 	if (m_pGCSController->getNrFoundAxes()<size_t(numAxes))
 	{
 		// more axes configured than connected to controller
-		asynPrint(pInterface, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
+		asynPrint(pAsynCom, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
 			  "PIasynController: requested number of axes (%d) out of range, only %d axis/axes supported\n",
 			  numAxes, int(m_pGCSController->getNrFoundAxes()));
 		delete m_pGCSController;
@@ -251,7 +253,7 @@ asynStatus PIasynController::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 		return asynError;
 	}
-	m_pGCSController->m_pCurrentLogSink = pasynUser;
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = pasynUser;
     int function = pasynUser->reason;
     asynStatus status = asynSuccess;
     PIasynAxis *pAxis = (PIasynAxis *)this->getAxis(pasynUser);
@@ -309,7 +311,7 @@ asynStatus PIasynController::writeFloat64(asynUser *pasynUser, epicsFloat64 valu
 
 		return asynError;
 	}
-	m_pGCSController->m_pCurrentLogSink = pasynUser;
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = pasynUser;
     int function = pasynUser->reason;
     asynStatus status = asynSuccess;
     PIasynAxis *pAxis = (PIasynAxis *)this->getAxis(pasynUser);
@@ -335,13 +337,13 @@ asynStatus PIasynController::writeFloat64(asynUser *pasynUser, epicsFloat64 valu
     {
     	status = m_pGCSController->SetPivotZ(value);
     }
-    else if (function == motorPosition_) // Entspricht das DFH ?
-    {
-  //      pAxis->enc_offset = (double) value - pAxis->nextpoint.axis[0].p;
-        asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-            "%s:%s: Set axis %d to position %d", 
-            driverName, functionName, pAxis->axisNo_, value);
-    }
+//    else if (function == motorPosition_) // Entspricht das DFH ?
+//    {
+//  //      pAxis->enc_offset = (double) value - pAxis->nextpoint.axis[0].p;
+//        asynPrint(pasynUser, ASYN_TRACE_FLOW,
+//            "%s:%s: Set axis %d to position %d",
+//            driverName, functionName, pAxis->axisNo_, value);
+//    }
     else if (function == motorResolution_ )
     {
         /* Call base class call its method (if we have our parameters check this here) */
@@ -397,7 +399,7 @@ asynStatus PIasynController::configAxis(PIasynAxis *pAxis)
 				"PIasynController::configAxis() - connectDevice() failed\n");
 		return status;
 	}
-	m_pGCSController->m_pCurrentLogSink = logSink;
+	m_pGCSController->m_pInterface->m_pCurrentLogSink = logSink;
     
     pAxis->setIntegerParam(motorAxisHasClosedLoop, 1);
     pAxis->callParamCallbacks();

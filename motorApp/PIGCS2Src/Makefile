@@ -23,8 +23,10 @@ PI_GCS2Support_SRCS += PIGCSPiezoController.cpp
 PI_GCS2Support_SRCS += PIE517Controller.cpp
 PI_GCS2Support_SRCS += PIE755Controller.cpp
 PI_GCS2Support_SRCS += PIHexapodController.cpp
+PI_GCS2Support_SRCS += PIGCS2_HexapodController.cpp
 PI_GCS2Support_SRCS += PIC702Controller.cpp
 PI_GCS2Support_SRCS += translateerror.c
+PI_GCS2Support_SRCS += PIInterface.cpp
 
 PI_GCS2Support_LIBS += motor
 PI_GCS2Support_LIBS += asyn

@@ -7,9 +7,9 @@ FILENAME...     PIGCScontroller.h
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 5$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 05.11.2013 17:38:32$
 HeadURL:        $URL$
 
 Original Author: Steffen Rau 
@@ -21,12 +21,12 @@ Created: 15.12.2010
 
 #include <asynDriver.h>
 #include <string.h>
-#include <epicsMutex.h>
 #include "picontrollererrors.h"
 
 
 class PIasynAxis;
 class asynMotorAxis;
+class PIInterface;
 
 /**
  * Base class for all PI GCS(2) controllers.
@@ -37,18 +37,13 @@ class asynMotorAxis;
 class PIGCSController
 {
 public:
-	PIGCSController(asynUser* pCom, const char* szIDN);
+	PIGCSController(PIInterface* pInterface, const char* szIDN);
 	virtual ~PIGCSController();
 
-	static PIGCSController* CreateGCSController(asynUser* pCom, const char* szIDN);
+	static PIGCSController* CreateGCSController(PIInterface* pInterface, const char* szIDN);
 
 	virtual asynStatus init(void);
 	virtual asynStatus initAxis(PIasynAxis* pAxis);
-
-	static asynStatus sendOnly(asynUser* pInterface, char c, asynUser* logSink);
-	static asynStatus sendOnly(asynUser* pInterface, const char *outputBuff, asynUser* logSink);
-    static asynStatus sendAndReceive(asynUser* pInterface, const char *outputBuff, char *inputBuff, int inputSize, asynUser* logSink);
-    static asynStatus sendAndReceive(asynUser* pInterface, char c, char *inputBuff, int inputSize, asynUser* logSink);
 
     bool getValue(const char* szMsg, double& value);
     bool getValue(const char* szMsg, int& value);
@@ -62,6 +57,10 @@ public:
 	virtual asynStatus moveCts( PIasynAxis** pAxesArray, int* pTargetCtsArray, int numAxes);
 	virtual asynStatus referenceVelCts( PIasynAxis* pAxis, double velocity, int forwards) { return asynSuccess;	}
 	virtual asynStatus haltAxis(PIasynAxis* pAxis);
+
+
+    virtual asynStatus setAxisPositionCts(PIasynAxis* pAxis, double positionCts);
+    virtual asynStatus setAxisPosition(PIasynAxis* pAxis, double position);
 
     virtual asynStatus getAxisPosition(PIasynAxis* pAxis, double& position);
     virtual asynStatus getAxisVelocity(PIasynAxis* pAxis);
@@ -88,11 +87,6 @@ public:
     virtual bool AcceptsNewTarget() { return true; }
     virtual bool CanCommunicateWhileHoming() { return true; }
 
-	asynStatus sendOnly(const char *outputBuff);
-	asynStatus sendOnly(char c);
-    asynStatus sendAndReceive(const char *outputBuff, char *inputBuff, int inputSize);
-    asynStatus sendAndReceive(char c, char *inputBuff, int inputSize);
-
     const char* getAxesID(size_t axisIdx) { return m_axesIDs[axisIdx]; }
     size_t getNrFoundAxes() { return m_nrFoundAxes; }
 
@@ -102,7 +96,7 @@ public:
 
     int GetLastError() { return m_LastError; }
 
-    asynUser* m_pCurrentLogSink;
+    PIInterface* m_pInterface;
     static const size_t MAX_NR_AXES = 64;
 	bool m_bAnyAxisMoving;
 protected:
@@ -111,9 +105,8 @@ protected:
 
     virtual asynStatus findConnectedAxes();
 
-	asynUser* m_pInterface;
-	epicsMutex m_interfaceMutex;
-    static double TIMEOUT;
+    static bool IsGCS2(PIInterface* pInterface);
+
 	char szIdentification[200];
 	int m_nrAxesOnController;
 	char* m_axesIDs[MAX_NR_AXES];

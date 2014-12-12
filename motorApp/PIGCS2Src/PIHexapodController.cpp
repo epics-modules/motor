@@ -7,16 +7,17 @@ FILENAME...     PIHexapodController.cpp
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
+Version:        $Revision: 5$
+Modified By:    $Author: Steffen Rau$
+Last Modified:  $Date: 05.11.2013 17:38:32$
 HeadURL:        $URL$
 
-Original Author: Steffen Rau 
+Original Author: Steffen Rau
 */
 
 #include "PIHexapodController.h"
 #include "PIasynAxis.h"
+#include "PIInterface.h"
 #include <stdlib.h>
 #include <epicsThread.h>
 
@@ -33,7 +34,7 @@ asynStatus PIHexapodController::init(void)
 
 	// Try to find out if #4 is supported
 	char buf[200];
-	status = sendAndReceive(char(4), buf, 199);
+	status = m_pInterface->sendAndReceive(char(4), buf, 199);
 	if (status == asynSuccess)
 	{
 		m_bCanReadStatusWithChar4 = true;
@@ -43,13 +44,12 @@ asynStatus PIHexapodController::init(void)
 		m_bCanReadStatusWithChar4 = false;
 		getGCSError(); // clear error UNKNOWN COMMAND
 	}
-/* m_bCanReadPosWithChar3=true causes DMOV problems */
-//	status = sendAndReceive(char(3), buf, 199);
-//	if (status == asynSuccess)
-//	{
-//		m_bCanReadPosWithChar3 = true;
-//	}
-//	else if (status == asynTimeout)
+	status = m_pInterface->sendAndReceive(char(3), buf, 199);
+	if (status == asynSuccess)
+	{
+		m_bCanReadPosWithChar3 = true;
+	}
+	else if (status == asynTimeout)
 	{
 		m_bCanReadPosWithChar3 = false;
 		getGCSError(); // clear error UNKNOWN COMMAND
@@ -68,7 +68,7 @@ asynStatus PIHexapodController::getGlobalState(asynMotorAxis** pAxes, int numAxe
 	// do not call moving here, at least simulation software does return
 	// values != 0 with bit 1 not set (e.g. "2")
 	char buf[255];
-    asynStatus status = sendAndReceive(char(5), buf, 99);;
+    asynStatus status = m_pInterface->sendAndReceive(char(5), buf, 99);;
     if (status != asynSuccess)
     {
 printf("PIGCSController::getGlobalState() failed, status %d", status);
@@ -142,7 +142,7 @@ asynStatus PIHexapodController::getReferencedState(PIasynAxis* pAxis)
 	}
 
 	char buf[255];
-    asynStatus status = sendAndReceive(char(4), buf, 99);
+    asynStatus status = m_pInterface->sendAndReceive(char(4), buf, 99);
     if (status != asynSuccess)
     {
     	return status;
@@ -159,7 +159,7 @@ asynStatus PIHexapodController::moveCts( PIasynAxis* pAxis, int targetCts )
 	char cmd[100];
 	double target = double(targetCts) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
     sprintf(cmd,"MOV %s %f", pAxis->m_szAxisName, target);
-    status = sendOnly(cmd);
+    status = m_pInterface->sendOnly(cmd);
     if (asynSuccess != status)
     {
     	return status;
@@ -178,7 +178,7 @@ asynStatus PIHexapodController::moveCts( PIasynAxis* pAxis, int targetCts )
 //    	printf("PIHexapodController::moveCts(,%d) - not moving after MOV() gcserror=%d\n",targetCts, errorCode);
         if (errorCode != 0)
         {
-        	asynPrint(m_pInterface, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
+        	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
         		"PIHexapodController::moveCts() failed, GCS error %d\n", errorCode);
         	return asynError;
         }
@@ -202,7 +202,7 @@ asynStatus PIHexapodController::moveCts( PIasynAxis** pAxesArray, int* pTargetCt
 		strcat(cmd, subCmd);
 	    pAxis->m_lastDirection = (pTargetCtsArray[axis] > pAxis->m_positionCts) ? 1 : 0;
 	}
-    status = sendOnly(cmd);
+    status = m_pInterface->sendOnly(cmd);
     if (asynSuccess != status)
     {
     	return status;
@@ -218,7 +218,7 @@ asynStatus PIHexapodController::moveCts( PIasynAxis** pAxesArray, int* pTargetCt
         int errorCode = getGCSError();
         if (errorCode != 0)
         {
-        	asynPrint(m_pInterface, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
+        	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
         		"PIHexapodController::moveCts() failed, GCS error %d\n", errorCode);
         	return asynError;
         }
@@ -230,7 +230,7 @@ asynStatus PIHexapodController::moveCts( PIasynAxis** pAxesArray, int* pTargetCt
 
 asynStatus PIHexapodController::getAxisPosition(PIasynAxis* pAxis, double& position)
 {
-	m_pCurrentLogSink = m_pInterface;
+	//m_pInterface->m_pCurrentLogSink = m_pInterface;
 	if (!m_bAnyAxisMoving)
 	{
 		return PIGCSController::getAxisPosition(pAxis, position);
@@ -238,7 +238,7 @@ asynStatus PIHexapodController::getAxisPosition(PIasynAxis* pAxis, double& posit
 	if (m_bCanReadPosWithChar3)
 	{
 		char buf[255];
-		asynStatus status = sendAndReceive(char(3), buf, 99);
+		asynStatus status = m_pInterface->sendAndReceive(char(3), buf, 99);
 		if (status != asynSuccess)
 		{
 			return status;
@@ -289,9 +289,9 @@ asynStatus PIHexapodController::getAxisPosition(PIasynAxis* pAxis, double& posit
 
 asynStatus PIHexapodController::SetPivotX(double value)
 {
-    if (NULL != m_pCurrentLogSink)
+    if (NULL != m_pInterface->m_pCurrentLogSink)
     {
-    	asynPrint(m_pCurrentLogSink, ASYN_TRACE_FLOW,
+    	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW,
     			"PIHexapodController::SetPivotX() value %f", value);
     }
     asynStatus status = SetPivot('R', value);
@@ -304,9 +304,9 @@ asynStatus PIHexapodController::SetPivotX(double value)
 
 asynStatus PIHexapodController::SetPivotY(double value)
 {
-    if (NULL != m_pCurrentLogSink)
+    if (NULL != m_pInterface->m_pCurrentLogSink)
     {
-    	asynPrint(m_pCurrentLogSink, ASYN_TRACE_FLOW,
+    	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW,
    		 "PIHexapodController::SetPivotY() value %f", value);
     }
     asynStatus status = SetPivot('S', value);
@@ -319,9 +319,9 @@ asynStatus PIHexapodController::SetPivotY(double value)
 
 asynStatus PIHexapodController::SetPivotZ(double value)
 {
-    if (NULL != m_pCurrentLogSink)
+    if (NULL != m_pInterface->m_pCurrentLogSink)
     {
-    	asynPrint(m_pCurrentLogSink, ASYN_TRACE_FLOW,
+    	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW,
    		 "PIHexapodController::SetPivotZ() value %f", value);
     }
 	asynStatus status = SetPivot('T', value);
@@ -336,9 +336,9 @@ asynStatus PIHexapodController::SetPivot(char cAxis, double value)
 {
 	if (m_bAnyAxisMoving)
 	{
-	    if (NULL != m_pCurrentLogSink)
+	    if (NULL != m_pInterface->m_pCurrentLogSink)
 	    {
-	    	asynPrint(m_pCurrentLogSink, ASYN_TRACE_FLOW,
+	    	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW,
     			"PIHexapodController::SetPivot() cannot change pivot point while platform is moving");
 	    }
 	    return asynError;
@@ -347,7 +347,7 @@ asynStatus PIHexapodController::SetPivot(char cAxis, double value)
 	asynStatus status;
 	char cmd[100];
     sprintf(cmd,"SPI %c %f", cAxis, value);
-    status = sendOnly(cmd);
+    status = m_pInterface->sendOnly(cmd);
     if (asynSuccess != status)
     {
     	return status;
@@ -356,7 +356,7 @@ asynStatus PIHexapodController::SetPivot(char cAxis, double value)
     int errorCode = getGCSError();
     if (errorCode != 0)
     {
-    	asynPrint(m_pInterface, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
+    	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
     		"PIHexapodController::SetPivot() failed, GCS error %d\n", errorCode);
     	return asynError;
     }
@@ -367,8 +367,8 @@ asynStatus PIHexapodController::SetPivot(char cAxis, double value)
 asynStatus PIHexapodController::ReadPivotSettings()
 {
 	char buf[100];
-	char cmd[] = "SPI? RST";
-	asynStatus status = sendAndReceive(cmd, buf, 99);
+	const char* cmd = GetReadPivotCommand();
+	asynStatus status = m_pInterface->sendAndReceive(cmd, buf, 99);
 	if (status != asynSuccess)
 	{
 		return status;
@@ -421,11 +421,11 @@ asynStatus PIHexapodController::ReadPivotSettings()
 
 asynStatus PIHexapodController::referenceVelCts( PIasynAxis* pAxis, double velocity, int forwards)
 {
-	asynStatus status = sendOnly("INI X");
+	asynStatus status = m_pInterface->sendOnly("INI X");
 	if (asynSuccess != status)
 	{
 		int errorCode = getGCSError();
-	   asynPrint(m_pCurrentLogSink, ASYN_TRACE_ERROR,
+	   asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR,
 	    		"PIHexapodController::referenceVelCts() failed\n");
 		epicsSnprintf(pAxis->m_pasynUser->errorMessage,pAxis->m_pasynUser->errorMessageSize,
 			"PIHexapodController::referenceVelCts() failed - GCS Error %d\n",errorCode);
@@ -437,7 +437,7 @@ asynStatus PIHexapodController::referenceVelCts( PIasynAxis* pAxis, double veloc
 
 asynStatus PIHexapodController::haltAxis(PIasynAxis* pAxis)
 {
-    asynStatus status = sendOnly(char(24));
+    asynStatus status = m_pInterface->sendOnly(char(24));
     if (status != asynSuccess)
     {
     	return status;
@@ -447,7 +447,7 @@ asynStatus PIHexapodController::haltAxis(PIasynAxis* pAxis)
 	// controller will set error code to PI_CNTR_STOP (10)
     if (err != PI_CNTR_STOP)
     {
-        asynPrint(m_pCurrentLogSink, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
+        asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
         		"PIGCSController::haltAxis() failed, GCS error %d", err);
         return asynError;
     }
