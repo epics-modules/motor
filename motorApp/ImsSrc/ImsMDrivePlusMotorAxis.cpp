@@ -9,6 +9,7 @@
 //  Revision History
 //  ----------------
 //  11-21-2011  NF Initial version
+//  12-15-2014 RLS Bug fix from Thierry Zamofing (PSI); acceleration was set to the same value as the speed.
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -135,7 +136,7 @@ asynStatus ImsMDrivePlusMotorAxis::setAxisMoveParameters(double minVelocity, dou
 
 	// set accceleration
 	if (acceleration != 0) {
-		sprintf(cmd, "A=%ld", (long)maxVelocity);
+		sprintf(cmd, "A=%ld", (long)acceleration);
 		status = pController->writeController(cmd, IMS_TIMEOUT);
 		if (status) goto bail;
 	}
