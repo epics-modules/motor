@@ -9,8 +9,7 @@ Please note:
   with checksum 0xffff.
 - MAXnet cards with firmware versions below 1.33 use "\n\r" as input EOS 
   on Ethernet ports. Version 1.33 and higher use "\n" on ethernet and serial ports.
-  Comment the setInputEos call and set input EOS in st.cmd if using firmware
-  versions below 1.33
+  The input and output EOS must be set prior to calling omsMAXnetConfig()
 
 add this to st.cmd if using the ethernet port:
   drvAsynIPPortConfigure("MAXNET","maxnet-ip-address:23",0,0,0)
@@ -22,3 +21,9 @@ add this to st.cmd if using the serial port:
   asynSetOption("MAXNET",0,"parity","none")
   asynSetOption("MAXNET",0,"crtscts","Y")
 
+set the input/output EOS based on the MAXnet firmware version:
+  
+  ### Uncomment one of the following two lines:
+  #asynOctetSetInputEos("MAXNET",0,"\n\r")
+  #asynOctetSetInputEos("MAXNET",0,"\n")
+  asynOctetSetOutputEos("MAXNET",0,"\n")

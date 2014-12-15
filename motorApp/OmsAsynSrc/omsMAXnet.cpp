@@ -128,19 +128,7 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
     timeout = 2.0;
     pasynUserSerial->timeout = 0.0;
 
-    // CAUTION firmware versions before 1.33.4 use '\n' for serial port and '\n\r' for IP port as InputEOS
-    // Set inputEOS in st.cmd for old firmware versions
-    status = pasynOctetSyncIO->setInputEos(pasynUserSyncIOSerial, "\n\r", 2);
-    if(status != asynSuccess){
-        printf("MAXnetConfig: unable to set InputEOS %s: %s\n", serialPortName, pasynUserSyncIOSerial->errorMessage);
-        return ;
-    }
-
-    status = pasynOctetSyncIO->setOutputEos(pasynUserSyncIOSerial, "\n", 1);
-    if(status != asynSuccess){
-        printf("MAXnetConfig: unable to set OutputEOS %s: %s\n",serialPortName,pasynUserSyncIOSerial->errorMessage);
-        return ;
-    }
+    // Set input and output EOS in st.cmd
 
     void* registrarPvt= NULL;
     status = pasynOctetSerial->registerInterruptUser(octetPvtSerial, pasynUserSerial, omsMAXnet::asynCallback, this, &registrarPvt);
