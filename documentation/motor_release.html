@@ -30,10 +30,10 @@
   </div>
   <div style="text-align: left">
     <p>
-      <b>Micronix MMC-200 Asyn Motor Support</b>
+      <b>Micronix Asyn Motor Support</b>
     </p>
     <p>
-      Kevin Peterson (APS) added asyn motor support for the Micronix MMC-200 Controller.
+      Kevin Peterson (APS) added asyn motor support for the Micronix MMC-200 & MMC-100 Controllers.
     </p>
   </div>
   <div style="text-align: left">
@@ -76,6 +76,27 @@
       to select a channel pair; add delay between writes for all commands on all ARCHs.
     </p>
   </div>
+  <div style="text-align: left">
+    <p>
+      <b>SmarAct MCS Motor Support</b>
+    </p>
+    <p>
+      Kevin Peterson (APS) added support for rotary stages.
+    </p>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>motorUtil improvements</b>
+    </p>
+    <p>
+      Kevin Peterson (APS) made the following improvments to motorUtil:
+    <ul>
+      <li>The listMovingMotors function can now be called on non-VxWorks iocs</li>
+      <li>The name of the motor is written to a waveform record when its DMOV field changes, 
+      enabling smart clients to maintain a list of moving motors.</li>
+    </ul>    </p>
+  </div>
+
   <div style="text-align: center">
     <h1>
       <b>Motor Record Version 6-8 Release Notice</b></h1>

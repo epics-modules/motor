@@ -147,13 +147,16 @@ Known Problems
 Modification Log for R6-9
 =========================
 
-1) Kevin Peterson added support for the Micronix MMC-200 Controller.
+1) Kevin Peterson added support for the Micronix MMC-200 & MMC-100 controllers.
 
 	Files added: 	motorApp/MicronixSrc
 			motorApp/MicronixSrc/MMC200Driver.h
 			motorApp/MicronixSrc/MMC200Driver.cpp
 			motorApp/MicronixSrc/Makefile
 			motorApp/MicronixSrc/MicronixSupport.dbd
+			iocBoot/iocWithAsyn/motor.cmd.mmc200
+			iocBoot/iocWithAsyn/motor.substitutions.mmc200
+	Files modified:	motorApp/Makefile
 
 2) Kevin Peterson added an asyn (model 3) driver for the Micro MVP2001.
 
@@ -196,7 +199,17 @@ Modification Log for R6-9
         Files modified: motorApp/MotorSrc/motorRecord.cc
                         motorApp/MotorSrc/devMotorAsyn.c
                         motorApp/MotorSrc/motordevCom.cc
-    
+
+9) Kevin Peterson added support for rotary stages to the SmarAct MCS driver
+
+	Files modified: motorApp/SmarActMCSSrc/smarActMCSMotorDriver.cpp
+			motorApp/SmarActMCSSrc/smarActMCSMotorDriver.h
+
+10) Kevin Peterson made the following improvments to motorUtil: (1) the 
+     listMovingMotors function is now registered with the iocsh, so non-VxWorks iocs can 
+     use it and (2) the name of the motor is written to a waveform record, $(P)movingDiff,
+     when its DMOV field changes, allowing smart clients to maintain a list of moving motors.
+
 
 Modification Log for R6-8
 =========================
