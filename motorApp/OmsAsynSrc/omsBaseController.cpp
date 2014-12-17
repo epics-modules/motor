@@ -436,8 +436,11 @@ asynStatus omsBaseController::getFirmwareVersion()
         count++;
         errlogPrintf("OMS Firmware Version: %s\n", inputBuffer);
     }
-    //
-    if ((p = strstr(inputBuffer, "ver:"))){
+    //beta versions have a B as first letter
+    if ((p = strstr(inputBuffer, "ver:B"))){
+        count = sscanf(p, "ver:B%d.%d.%d,", &fwMajor, &fwMinor, &fwRevision);
+    }
+    else if ((p = strstr(inputBuffer, "ver:"))){
         count = sscanf(p, "ver:%d.%d.%d,", &fwMajor, &fwMinor, &fwRevision);
     }
     if ((p == NULL) || (count < 2)) {
