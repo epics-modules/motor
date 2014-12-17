@@ -48,6 +48,7 @@ private:
     omsBaseController *pC_;
     int stepper;
     int invertLimit;
+    epicsInt32 lastminvelo;
 
 friend class omsBaseController;
 };
