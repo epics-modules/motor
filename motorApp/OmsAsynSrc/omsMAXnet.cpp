@@ -88,6 +88,8 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
     notificationMutex = new epicsMutex();
     notificationCounter = 0;
     useWatchdog = true;
+    char eosstring[5];
+    int eoslen=0;
 
     serialPortName = epicsStrDup(serialPortName);
 
@@ -128,7 +130,17 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
     timeout = 2.0;
     pasynUserSerial->timeout = 0.0;
 
-    // Set input and output EOS in st.cmd
+    // to override default setting, set input and output EOS in st.cmd
+    if (pasynOctetSyncIO->getInputEos(pasynUserSyncIOSerial, eosstring, 5, &eoslen) == asynSuccess) {
+        if (eoslen == 0)
+            if (pasynOctetSyncIO->setInputEos(pasynUserSyncIOSerial, "\n\r", 2) != asynSuccess)
+                printf("MAXnetConfig: unable to set InputEOS %s: %s\n", serialPortName, pasynUserSyncIOSerial->errorMessage);
+    }
+    if (pasynOctetSyncIO->getOutputEos(pasynUserSyncIOSerial, eosstring, 5, &eoslen) == asynSuccess) {
+        if (eoslen == 0)
+            if (pasynOctetSyncIO->setOutputEos(pasynUserSyncIOSerial, "\n", 1) != asynSuccess)
+                printf("MAXnetConfig: unable to set OutputEOS %s: %s\n", serialPortName, pasynUserSyncIOSerial->errorMessage);
+    }
 
     void* registrarPvt= NULL;
     status = pasynOctetSerial->registerInterruptUser(octetPvtSerial, pasynUserSerial, omsMAXnet::asynCallback, this, &registrarPvt);
