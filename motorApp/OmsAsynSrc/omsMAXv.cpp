@@ -249,7 +249,7 @@ void omsMAXv::initialize(const char* portName, int numAxes, int cardNo, const ch
 
     Debug(64, "motor_init: send init string\n");
 
-    if( Init(initString, 0) != asynSuccess) {
+    if( Init(initString, 1) != asynSuccess) {
         errlogPrintf("%s:%s:%s: unable to send initstring to controller card %d\n",
                         driverName, functionName, portName, cardNo);
         return;
