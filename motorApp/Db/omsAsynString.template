@@ -1,0 +1,20 @@
+#
+
+record(stringout,"$(type):$(host)$(subAddr)omsSend") {
+    field(DESC,  "Oms String Send")
+    field(DTYP,  "asynOctetWrite")
+    field(OUT,   "@asyn($(asynPort),0,1)OMS_STRING_SEND")
+}
+
+record(stringout,"$(type):$(host)$(subAddr)omsSendRecv") {
+    field(DESC,  "Oms String Send Receive")
+    field(DTYP,  "asynOctetWrite")
+    field(OUT,   "@asyn($(asynPort),0,1)OMS_STRING_SENDRECV")
+}
+
+record(stringin,"$(type):$(host)$(subAddr)omsRecv") {
+    field(DESC, "Oms String Receive")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(asynPort),0,1)OMS_STRING_RECV")
+    field(SCAN, "I/O Intr")
+}
