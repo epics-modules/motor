@@ -1,9 +1,11 @@
 
 Please note:
 
-- The MAXnet IP-stack is very basic. You cannot ping the card and it doesn't know 
-  anything about routing, which means you can only use it from hosts in the same
-  subnet.
+- The MAXnet IP-stack is very basic. It doesn't know anything about routing,
+  which means, you can only use it from hosts in the same subnet.
+  If IP packets get lost, the controller will ignore retransmission requests and
+  the connection will not recover. The driver tries to reset the connection in this case.
+  It is recommended to operate the controller in a separate network.
 - MAXnet cards with firmware versions older than 1.33.4 shouldn't be used
   with the ethernet port. They abort communication, if they detect a tcp packet 
   with checksum 0xffff.
