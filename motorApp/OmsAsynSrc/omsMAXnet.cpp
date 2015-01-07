@@ -272,9 +272,9 @@ asynStatus omsMAXnet::sendReceive(const char *outputBuff, char *inputBuff, unsig
         nRead += nReadnext;
     }
     localBuffer[nRead] = '\0';
-	// cut off a leading /006
+	// cut off a leading CR, NL, /006
     outString = localBuffer;
-	while (*outString == 6) ++outString;
+    while ((*outString == 6)||(*outString == 13)||(*outString == 10)) ++outString;
 
 	// if input data is a notification read until expected data arrived
     while ((status == asynSuccess) && isNotification(outString)) {
@@ -288,9 +288,9 @@ asynStatus omsMAXnet::sendReceive(const char *outputBuff, char *inputBuff, unsig
             nRead += nReadnext;
         }
         localBuffer[nRead] = '\0';
-    	// cut off a leading /006
+    	// cut off a leading CR, NL, /006
         outString = localBuffer;
-    	while (*outString == 6) ++outString;
+        while ((*outString == 6)||(*outString == 13)||(*outString == 10)) ++outString;
     	if (notificationCounter > 0) --notificationCounter;
     }
 
@@ -324,6 +324,29 @@ int omsMAXnet::isNotification (char *buffer) {
     }
     else
         return 0;
+}
+
+/*
+ * disconnect and reconnect the serial / IP connection
+ */
+bool omsMAXnet::resetConnection(){
+
+    asynStatus status;
+    int autoConnect;
+
+    asynInterface *pasynInterface = pasynManager->findInterface(pasynUserSerial,asynCommonType,1);
+    if( pasynInterface == NULL) return false;
+
+    asynCommon* pasynCommonIntf = (asynCommon*)pasynInterface->pinterface;
+    pasynManager->isAutoConnect(pasynUserSerial, &autoConnect);
+
+    errlogPrintf("*** disconnect and reconnect serial/IP connection ****\n");
+    status = pasynCommonIntf->disconnect(pasynInterface->drvPvt, pasynUserSerial);
+    if (!autoConnect) status = pasynCommonIntf->connect(pasynInterface->drvPvt, pasynUserSerial);
+    epicsThreadSleep(0.1);
+    if (portConnected) errlogPrintf("*** reconnect done ****\n");
+
+   return true;
 }
 
 extern "C" int omsMAXnetConfig(

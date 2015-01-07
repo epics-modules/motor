@@ -28,6 +28,7 @@ public:
     epicsEventWaitStatus waitInterruptible(double);
     asynStatus sendReceive(const char *, char *, unsigned int );
     asynStatus sendOnly(const char *);
+    virtual bool resetConnection();
 
 private:
     int isNotification (char *);
