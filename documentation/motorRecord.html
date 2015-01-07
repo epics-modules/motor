@@ -10,8 +10,6 @@
 
 <h1>Motor Record and related software</h1>
 
-<address>Tim Mooney, Joe Sullivan, Ron Sluiter</address> <br>
-
 <hr>
 <h2>Contents</h2>
 
@@ -37,9 +35,9 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version R6-8 of the EPICS motor
+<h2>Overview</h2> This documentation describes version R6-9 of the EPICS motor
 record, and related EPICS software required to build and use it.&nbsp; Version
-R6-8 of the motor record is compatible with EPICS base R3.14.12.2 and above.
+R6-9 of the motor record is compatible with EPICS base R3.14.12.2 and above.
 <p>
 The motor record is intended to support motors of all kinds, but currently 
 supports only the following variety of motor controllers (in addition to Soft 
@@ -48,10 +46,10 @@ Channel support):
 
 <ul>
   <li>
-    Oregon Micro Systems, Inc. (OMS) models; VME8, VME44, VME58, VS4, VX2, MAXv, PC68 and PC78.
+    Pro-Dex, Inc. (Oregon Micro Systems) models; VME8/44/58, VS4, VX2, PC68/78, MAXv and MAXnet.
   </li>
   <li>
-    Newport models MM3000, MM4000/5/6, PM500, ESP300/301/100 and XPSC8.
+    Newport models MM3000, MM4000/5/6, PM500, ESP300/301/100, XPSC8, HXP100-ELEC, AG_CONEX and AG_UC.
   </li>
   <li>
     Schneider Electric (formally IMS) models IM483, MDrive and MForce.
@@ -63,7 +61,7 @@ Channel support):
     Mclennan models PM304 and PM600.
   </li>
   <LI>
-    Physik Instrumente (PI) GmbH & Co. model C-630, C-844, C-848, C-862/863, E-662, E-710 and E-816.
+    Physik Instrumente (PI) GmbH & Co. models; C-630/844/848/862/863, E-662/710/816, micos SMC hydra and all GCS2 (General Command Set) compatible controllers.
   </LI>
   <li>
     MicroMo model MVP 2001 B02.
@@ -72,10 +70,8 @@ Channel support):
     Micos model MoCo dc controller, SMC hydra controller.
   </li>
   <li>
-    Delta Tau PMAC2-VME controller.
-  </li>
-  <li>
     Faulhaber MCDC2805 servo controller.
+  </li>
   <li>
     Parker Hannifin, Compumotor Division, 6K Series controllers.
   </li>
@@ -108,6 +104,18 @@ Channel support):
   </li>
   <li>
     Hytec 8601 Industry Pack based 4-channel Stepper Motor Controller.
+  </li>
+  <li>
+    nPoint C300 piezo controller
+  </li>
+  <li>
+    Micronix MMC-100 and MMC-200 
+  </li>
+  <li>
+    SmarAct GmbH Modular Control System (MCS) Controller.
+  </li>
+  <li>
+    Phytron I1AM01 Stepper Motor Controller.
   </li>
 </ul>
 The record maintains two coordinate systems for motor position ("user" and "dial 
@@ -3882,8 +3890,7 @@ specific value (e.g., kV) that is not supported by the motor controller. <br>
 <hr>
 <address>Suggestions and comments to:</address> <br>
 <a href="mailto:sluiter@aps.anl.gov">Ron Sluiter</a> : (sluiter@aps.anl.gov) <br>
-<a href="mailto:mooney@aps.anl.gov">Tim Mooney</a> : (mooney@aps.anl.gov) <br>
-<a href="mailto:sullivan@aps.anl.gov">Joe Sullivan</a> : (sullivan@aps.anl.gov) <br>
-Last modified: June 25, 2003
+<a href="mailto:kmpeters@anl.gov">Kevin Peterson</a> : (kmpeters@anl.gov) <br>
+Last modified: January 7, 2015
 </body>
 </html>
