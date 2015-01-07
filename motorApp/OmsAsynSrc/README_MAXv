@@ -14,12 +14,12 @@ There are two alternatives to configure the driver in the startup script
 
    omsMAXvSetup(1, 16, 0x0000, 190, 5, 10)
    omsMAXvConfig(a,b,c,d,e,f)
-   a: "number of card", iocshArgInt};
-   b: "asyn motor port name", iocshArgString};
-   c: "number of axes", iocshArgInt};
-   d: "moving poll rate", iocshArgInt};
-   e: "idle poll rate", iocshArgInt};
-   f: "initstring", iocshArgString};
+   a: "number of card"
+   b: "asyn motor port name"
+   c: "number of axes"
+   d: "moving poll rate"
+   e: "idle poll rate"
+   f: "initstring"
 
    e.g.
    omsMAXvSetup(1, 16, 0x0000, 190, 5, 10)
@@ -47,4 +47,7 @@ There are two alternatives to configure the driver in the startup script
    omsMAXvConfig2(2, "A16", 0x1000, 191, 5, "MAXv2", 8, 0, 0, 100, 500, "AX LH PSO;")
    omsMAXvConfig2(3, "A16", 0x4000, 192, 5, "MAXv3", 8, 0, 0, 100, 500, "AX LH PSO;")
    omsMAXvConfig2(4, "A16", 0x6000, 193, 5, "MAXv4", 8, 0, 0, 100, 500, "AX LH PSO;")
+
+It is possible to send command strings to the controller and receive the answer.
+Use the omsAsynString.template to generate appropriate PVs in the database.
 
