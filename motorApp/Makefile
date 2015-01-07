@@ -99,6 +99,9 @@ NPointSrc_DEPEND_DIRS = MotorSrc
 DIRS += MicronixSrc
 MicronixSrc_DEPEND_DIRS = MotorSrc
 
+DIRS += PhytronSrc
+PhytronSrc_DEPEND_DIRS = MotorSrc
+
 endif
 
 # Install the edl files

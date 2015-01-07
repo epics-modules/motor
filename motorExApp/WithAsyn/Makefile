@@ -37,8 +37,12 @@ COMMONDBDS += ACRMotorSupport.dbd
 COMMONDBDS += asyn.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
 COMMONDBDS += drvAsynIPPort.dbd
-COMMONDBDS += busySupport.dbd
+ifdef BUSY
+	COMMONDBDS += busySupport.dbd
+	COMMONLIBS := busy $(COMMONLIBS)
+endif
 COMMONDBDS += PI_GCS2Support.dbd
+COMMONDBDS += phytron.dbd
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -75,9 +79,8 @@ COMMONLIBS += SmartMotor
 COMMONLIBS += KohzuMotor
 COMMONLIBS += ACRMotor
 COMMONLIBS += PI_GCS2Support
+COMMONLIBS += phytronAxisMotor
 COMMONLIBS += motor
-
-WithAsyn_LIBS += busy
 
 # Needed for Newport SNL programs
 WithAsyn_LIBS += $(COMMONLIBS)

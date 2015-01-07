@@ -1,0 +1,223 @@
+################################################################################
+# This database contains records used to monitor status and reset the MCM01
+# controller.
+################################################################################
+
+################################################################################
+#ai record reads controller status from the device, mbbiDirect is used to parse
+# the status bits
+################################################################################
+record(ai, "$(P)-STATUS_")
+{
+    field(DESC, "Status")
+    field(DTYP, "asynInt32")
+    field(INP, "@asyn($(PORT), $(ADDR), $(TIMEOUT))CONTROLLER_STATUS")
+    field(SCAN, "1 second")
+    field(FLNK, "$(P)-STATUS-BITS_")
+}
+
+record(mbbiDirect, "$(P)-STATUS-BITS_")
+{
+    field(DESC, "Status bits")
+    field(DTYP, "Raw Soft Channel")
+    field(INP, "$(P)-STATUS_")
+    field(FLNK, "$(P)-PROGRAM")
+}
+
+################################################################################
+#Controller status records. See DESC fields
+################################################################################
+record(bi, "$(P)-PROGRAM")
+{
+    field(DESC, "Program in local mode")
+    field(INP, "$(P)-STATUS-BITS_.B0")
+    field(ZNAM, "DONE")
+    field(ONAM, "RUNNING")
+    field(FLNK, "$(P)-SW-REMOTE")
+}
+
+record(bi, "$(P)-SW-REMOTE")
+{
+    field(DESC, "Software remote")
+    field(INP, "$(P)-STATUS-BITS_.B1")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-LIMIT-SWITCH")
+}
+
+record(bi, "$(P)-LIMIT-SWITCH")
+{
+    field(DESC, "Axis limit switch")
+    field(INP, "$(P)-STATUS-BITS_.B2")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-PS-AXIS-ERR")
+}
+
+record(bi, "$(P)-PS-AXIS-ERR")
+{
+    field(DESC, "Power stage axis error")
+    field(INP, "$(P)-STATUS-BITS_.B3")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-PROG-ERR")
+}
+
+record(bi, "$(P)-PROG-ERR")
+{
+    field(DESC, "Programming error")
+    field(INP, "$(P)-STATUS-BITS_.B4")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-TERM-ACT")
+}
+
+record(bi, "$(P)-TERM-ACT")
+{
+    field(DESC, "Terminal activated")
+    field(INP, "$(P)-STATUS-BITS_.B5")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-INP-SCAN")
+}
+
+record(bi, "$(P)-INP-SCAN")
+{
+    field(DESC, "Input scan running")
+    field(INP, "$(P)-STATUS-BITS_.B6")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-REMOTE")
+}
+
+record(bi, "$(P)-REMOTE")
+{
+    field(DESC, "Remote")
+    field(INP, "$(P)-STATUS-BITS_.B7")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-AXIS-MODULE")
+}
+
+record(bi, "$(P)-AXIS-MODULE")
+{
+    field(DESC, "Axis module availability")
+    field(INP, "$(P)-STATUS-BITS_.B8")
+    field(ZNAM, "AVAILABLE")
+    field(ONAM, "NOT AVAILABLE")
+    field(FLNK, "$(P)-AXIS")
+}
+
+record(bi, "$(P)-AXIS")
+{
+    field(DESC, "Axis availability")
+    field(INP, "$(P)-STATUS-BITS_.B9")
+    field(ZNAM, "AVAILABLE")
+    field(ONAM, "NOT AVAILABLE")
+    field(FLNK, "$(P)-IO-MODULE")
+}
+
+record(bi, "$(P)-IO-MODULE")
+{
+    field(DESC, "I/O module availability")
+    field(INP, "$(P)-STATUS-BITS_.BA")
+    field(ZNAM, "AVAILABLE")
+    field(ONAM, "NOT AVAILABLE")
+    field(FLNK, "$(P)-IO")
+}
+
+record(bi, "$(P)-IO")
+{
+    field(DESC, "I/O availability")
+    field(INP, "$(P)-STATUS-BITS_.BB")
+    field(ZNAM, "AVAILABLE")
+    field(ONAM, "NOT AVAILABLE")
+    field(FLNK, "$(P)-INT-BUS-ERR")
+}
+
+record(bi, "$(P)-INT-BUS-ERR")
+{
+    field(DESC, "Internal data transf. err.")
+    field(INP, "$(P)-STATUS-BITS_.BC")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-INT-MOD-ERR")
+}
+
+record(bi, "$(P)-INT-MOD-ERR")
+{
+    field(DESC, "Internal bus module err.")
+    field(INP, "$(P)-STATUS-BITS_.BD")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-AIOM-MODULE")
+}
+
+record(bi, "$(P)-AIOM-MODULE")
+{
+    field(DESC, "AIOM module availability")
+    field(INP, "$(P)-STATUS-BITS_.BE")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-AIOM-CHANNEL")
+}
+
+record(bi, "$(P)-AIOM-CHANNEL")
+{
+    field(DESC, "AIOM channel availability")
+    field(INP, "$(P)-STATUS-BITS_.BF")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+    field(FLNK, "$(P)-CON-ERR")
+}
+
+record(calc, "$(P)-CON-ERR")
+{
+    field(INPA, "$(P)-LIMIT-SWITCH")
+    field(INPB, "$(P)-PS-AXIS-ERR")
+    field(INPC, "$(P)-PROG-ERR")
+    field(INPD, "$(P)-INT-BUS-ERR")
+    field(INPE, "$(P)-INT-MOD-ERR")
+    field(INPF, "$(P)-AXIS-MODULE")
+    field(INPG, "$(P)-AXIS")
+    field(INPH, "$(P)-IO-MODULE")
+    field(INPI, "$(P)-IO")
+    field(INPJ, "$(P)-AIOM-MODULE")
+    field(INPK, "$(P)-AIOM-CHANNEL")
+    field(CALC, "A||B||C||D||E||F||G||H||I||J")
+}
+
+################################################################################
+# Reset controller
+# RESET_ changes value between 0 and 1, so the monitor is posted and the 
+# REINIT_ record in Phytron_I1AM01.db is processed
+################################################################################
+record(bo, "$(P)-RESET")
+{
+    field(DESC, "Reset controller")
+    field(DTYP, "asynInt32")
+    field(OUT, "@asyn($(PORT), $(ADDR), $(TIMEOUT))CONTROLLER_RESET")
+    field(ONAM, "RESET")
+    field(ZNAM, "RESET")
+    field(FLNK, "$(P)-RESET_")
+}
+
+record(calc, "$(P)-RESET_")
+{
+    field(DESC, "Reset monitor")
+    field(INPA, "$(P)-RESET_")
+    field(CALC, "(A=0)?1:0")
+}
+
+################################################################################
+#Reset controller status
+################################################################################
+record(bo, "$(P)-RESET-STATUS")
+{
+    field(DESC, "Reset cont. status")
+    field(DTYP, "asynInt32")
+    field(OUT, "@asyn($(PORT), $(ADDR), $(TIMEOUT))CONTROLLER_STATUS_RESET")
+    field(ONAM, "RESET")
+    field(ZNAM, "RESET")
+}
+
