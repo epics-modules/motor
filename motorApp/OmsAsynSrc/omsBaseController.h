@@ -62,6 +62,7 @@ protected:
     virtual asynStatus getClosedLoopStatus(int clstatus[OMS_MAX_AXES]);
     virtual epicsEventWaitStatus waitInterruptible(double timeout);
     virtual bool watchdogOK();
+    virtual bool resetConnection(){return false;};
     char* getPortName(){return portName;};
     bool firmwareMin(int, int, int);
     static omsBaseController* findController(const char*);
