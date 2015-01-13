@@ -81,6 +81,10 @@ grecord(ao,"$(P)$(R)NewPulsePositions") {
     field(PREC, "3")
 }
 
+grecord(longout,"$(P)$(R)NumPulsePositions") {
+    field(DESC,"Num pulse positions to load")
+}
+
 record(mbbo, "$(P)$(R)PulseDir") {
     field(DESC,"Both, Neg, or Pos")
 	field(ZRVL, "0")
