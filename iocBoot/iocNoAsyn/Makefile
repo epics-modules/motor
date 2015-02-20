@@ -1,6 +1,6 @@
 TOP = ../..
 include $(TOP)/configure/CONFIG
-ARCH = vxWorks-68040
+ARCH = $(EPICS_HOST_ARCH)
 #!ARCH = vxWorks-ppc604_long
 TARGETS = cdCommands
 TARGETS += envPaths

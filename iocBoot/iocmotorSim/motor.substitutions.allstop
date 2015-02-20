@@ -1,0 +1,14 @@
+file "../../db/stop_all.db"
+{
+pattern
+{P,     N,  M,        AS}
+{"NDW1298:sjb99183:",  1,  "MOT:MTR060$(N,undefined)",  NDW1298:sjb99183:CS}
+{"NDW1298:sjb99183:",  2,  "MOT:MTR060$(N,undefined)",  NDW1298:sjb99183:CS}
+{"NDW1298:sjb99183:",  3,  "MOT:MTR060$(N,undefined)",  NDW1298:sjb99183:CS}
+{"NDW1298:sjb99183:",  4,  "MOT:MTR060$(N,undefined)",  NDW1298:sjb99183:CS}
+
+{"NDW1298:sjb99183:",  5,  "MOT:MTR060$(N,undefined)",  NDW1298:sjb99183:CS}
+{"NDW1298:sjb99183:",  6,  "MOT:MTR060$(N,undefined)",  NDW1298:sjb99183:CS}
+{"NDW1298:sjb99183:",  7,  "MOT:MTR060$(N,undefined)",  NDW1298:sjb99183:CS}
+{"NDW1298:sjb99183:",  8,  "MOT:MTR060$(N,undefined)",  NDW1298:sjb99183:CS}
+}

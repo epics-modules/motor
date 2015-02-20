@@ -1,0 +1,27 @@
+# The is the ASYN example for communication to 4 simulated motors
+# "#!" marks lines that can be uncommented.
+
+# The following must be added for many board support packages
+#!cd "... IOC st.cmd complete directory path ... "
+
+< cdCommands
+#!< ../nfsCommands
+
+cd topbin
+
+# If the VxWorks kernel was built using the project facility, the following must
+# be added before any C++ code is loaded (see SPR #28980).
+sysCplusEnable=1
+
+ld(0,0,"WithAsynVx.munch")
+
+cd startup
+dbLoadDatabase("$(TOP)/dbd/WithAsynVx.dbd")
+WithAsynVx_registerRecordDeviceDriver(pdbbase)
+dbLoadTemplate("motor.substitutions")
+
+# Create simulated motors: ( start card , start axis , low limit, high limit, home posn, # cards, # axes to setup)
+motorSimCreate( 0, 0, -32000, 32000, 0, 1, 4 )
+# Setup the Asyn layer (portname, low-level driver drvet name, card, number of axes on card)
+drvAsynMotorConfigure("motorSim1", "motorSim", 0, 4)
+iocInit

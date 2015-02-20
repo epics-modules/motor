@@ -84,10 +84,11 @@ COMMONLIBS += motor
 
 # Needed for Newport SNL programs
 WithAsyn_LIBS += $(COMMONLIBS)
-WithAsyn_LIBS += asyn
 ifdef SNCSEQ
 WithAsyn_LIBS += seqDev seq pv
 endif
+WithAsyn_LIBS += busy
+WithAsyn_LIBS += asyn
 WithAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 WithAsynVx_LIBS += $(COMMONLIBS)

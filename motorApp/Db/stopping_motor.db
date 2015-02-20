@@ -1,0 +1,31 @@
+record(swait, "$(P)$(M):ALLSTOP")
+{
+	field(SCAN, "1 second")
+	field(INAN, "$(AS)")
+	field(INAP, "Yes")
+	field(CALC, "A")
+	field(OUTN, "$(P)$(M).STOP")
+	field(DOPT, "Use VAL")
+	field(OOPT, "On Change")
+}
+record(motor,"$(P)$(M)")
+{
+	field(DESC,"$(DESC)")
+	field(DTYP,"$(DTYP)")
+	field(DIR,"$(DIR)")
+	field(VELO,"$(VELO)")
+	field(VBAS,"$(VBAS)")
+	field(ACCL,"$(ACCL)")
+	field(BDST,"$(BDST)")
+	field(BVEL,"$(BVEL)")
+	field(BACC,"$(BACC)")
+	field(OUT,"@asyn($(PORT),$(ADDR))")
+	field(MRES,"$(MRES)")
+	field(PREC,"$(PREC)")
+	field(EGU,"$(EGU)")
+	field(DHLM,"$(DHLM)")
+	field(DLLM,"$(DLLM)")
+	field(INIT,"$(INIT)")
+	field(TWV,"1")
+}
+

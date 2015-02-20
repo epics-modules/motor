@@ -602,7 +602,7 @@ static RTN_STATUS build_trans( motor_cmnd command,
 
     /* Queue asyn request, so we get a callback when driver is ready */
     pasynUser->reason = pPvt->driverReasons[pmsg->command];
-    status = pasynManager->queueRequest(pasynUser, 0, 0);
+    status = pasynManager->queueRequest(pasynUser, asynQueuePriorityHigh, 0);
     if (status != asynSuccess) {
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
               "devMotorAsyn::build_trans: %s error calling queueRequest, %s\n",

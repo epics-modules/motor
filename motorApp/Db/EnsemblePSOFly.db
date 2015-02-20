@@ -24,7 +24,7 @@
 # PSOCONTROL X OFF
 record(ao, "$(P)$(Q)startPos") {
   field(DESC, "data aqc start")
-  field(EGU, "degrees")
+  field(EGU, "degree")
   field(PREC, "5")
 }
 
@@ -38,7 +38,7 @@ record(calcout, "$(P)$(Q)startPosDial") {
 
 record(ao, "$(P)$(Q)endPos") {
   field(DESC, "data aqc end")
-  field(EGU, "degrees")
+  field(EGU, "degree")
   field(PREC, "5")
 }
 
@@ -51,7 +51,7 @@ record(calcout, "$(P)$(Q)endPosDial") {
 }
 
 record(ao, "$(P)$(Q)slewSpeed") {
-  field(EGU, "degrees/s")
+  field(EGU, "degree/s")
   field(PREC, "5")
 }
 
@@ -109,7 +109,7 @@ record(ao, "$(P)$(Q)scanDelta") {
   field(DRVH, "180")
   field(DRVL, ".0001")
   field(DESC, "data aqc end")
-  field(EGU, "degrees")
+  field(EGU, "degree")
   field(PREC, "5")
   field(OUT, "$(P)$(Q)checkScanDelta.A PP")
 }

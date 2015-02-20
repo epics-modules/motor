@@ -44,6 +44,7 @@ Based on drvMotorSim.c, Mark Rivers, December 13, 2009
 #include "PIInterface.h"
 #include <epicsExport.h>
 
+#include <epicsExport.h>
 
 //#undef asynPrint
 //#define asynPrint(user,reason,format...) 0

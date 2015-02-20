@@ -1,0 +1,11 @@
+$(P)saveData_config
+
+file motor_settings.req P=$(P),M=m1
+file motor_settings.req P=$(P),M=m2
+file motor_settings.req P=$(P),M=m3
+file motor_settings.req P=$(P),M=m4
+file motor_settings.req P=$(P),M=m5
+file motor_settings.req P=$(P),M=m6
+file motor_settings.req P=$(P),M=m7
+file motor_settings.req P=$(P),M=m8
+

@@ -1,0 +1,43 @@
+[prefix]
+$(P)
+
+[status]
+$(P)saveData_status
+
+[message]
+$(P)saveData_message
+
+[filename]
+$(P)saveData_fileName
+
+[counter]	# scan counter
+$(P)saveData_scanNumber
+
+[fileSystem] # scan file system
+$(P)saveData_fileSystem
+
+[subdir]	# scan file subdirectory
+$(P)saveData_subDir
+
+[basename]	# PV containing the desired data-file base name
+$(P)saveData_baseName
+
+[fullPathName]
+$(P)saveData_fullPathName
+
+[realTime1D] # if nonzero, write 1D data as it comes in
+$(P)saveData_realTime1D
+
+[scanRecord]	# specify scan records to be monitored
+$(P)scanH
+$(P)scan1
+$(P)scan2
+$(P)scan3
+$(P)scan4
+
+[extraPV]
+$(P)userCalc1.CALC	"string"
+$(P)saveData_realTime1D "enum"
+$(P)saveData_scanNumber	"long"
+$(P)saveData_fileSystem	"filesystem"
+$(P)scan1.P1SM		"scan mode"

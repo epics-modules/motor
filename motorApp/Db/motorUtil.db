@@ -11,13 +11,47 @@ record(bo, "$(P)allstop") {
   field(DESC, "Stop All IOC motors.")
 }
 
+# Monitors the global STOP:ALL PV. When this PV changes, '1' is
+# sent to $(P)allstop over channel access.
+record(calcout, "$(P)allstop:MONITOR") {
+  field(SCAN, ".1 second")
+  field(DESC, "Stop All IOC motors.")
+  field(INPA, "$(PVPREFIX)CS:MOT:STOP:ALL PP")
+  field(OOPT, "On Change")
+  field(CALC, "A")
+  field(DOPT, "Use OCAL")
+  field(OUT, "$(P)allstop.VAL CA")
+  field(OCAL, 1)
+}
+
 # Indicates if all motors in this IOC are done moving.
 # Set by motorUtil when $(P)moving.VAL == 0.
-record(bi, "$(P)alldone") {
+#record(bi, "$(P)alldone") {
+# note: have changed from "bi" to "bo" so can push output value properly 
+record(bo, "$(P)alldone") {
   field(ZNAM, "moving")
   field(ONAM, "done")
-  field(INP,  "1")
+  field(VAL,  "1")
   field(DESC, "All IOC motors done moving.")
+  field(OUT, "$(P)_MOVING.A PP")
+}
+
+record(calcout, "$(P)_MOVING")
+{
+  field(SCAN, "Passive")
+  field(CALC, "A")
+  field(VAL, "1")
+  field(OOPT, "On Change")
+  field(DOPT, "Use OCAL")
+  field(OCAL, "(1-2*A)")
+  field(OUT, "$(P)_SEQ.DO1 PP")
+}
+
+# need to use an SSEQ with WAIT to make sure we do not loose a PUT
+record(sseq, "$(P)_SEQ")
+{
+    field(LNK1, "$(PVPREFIX)CS:MOT:MOVING:SP CA")
+    field(WAIT1, "Wait")
 }
 
 # The number of motors moving in this IOC.
@@ -27,12 +61,12 @@ record(longout, "$(P)moving") {
 }
 
 # Used by xxx.adl to blink "Moving" indicator.
-record(calc, "$(P)alldoneBlink") {
-  field(SCAN, ".5 second")
-  field(CALC, "A?0:!B")
-  field(INPA, "$(P)alldone")
-  field(INPB, "$(P)alldoneBlink")
-}
+#record(calc, "$(P)alldoneBlink") {
+#  field(SCAN, ".5 second")
+#  field(CALC, "A?0:!B")
+#  field(INPA, "$(P)alldone")
+#  field(INPB, "$(P)alldoneBlink")
+#}
 
 # Allow smart clients to maintain a list of moving motors
 record(waveform, "$(P)movingDiff") {
