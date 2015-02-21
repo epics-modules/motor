@@ -10,9 +10,6 @@ K. Goetze 2012-03-23
 
 */
 
-#include "asynMotorController.h"
-#include "asynMotorAxis.h"
-
 #define MAX_SMC100_AXES 1
 
 // No controller-specific parameters yet

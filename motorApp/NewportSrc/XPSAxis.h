@@ -5,9 +5,6 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #ifndef XPSMotorAxis_H
 #define XPSMotorAxis_H
 
-#include "asynMotorController.h"
-#include "asynMotorAxis.h"
-
 /** Struct that contains information about the XPS corrector loop.*/ 
 typedef struct
 {
