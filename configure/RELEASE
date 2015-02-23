@@ -21,7 +21,7 @@ ASYN=$(SUPPORT)/asyn/4-26
 # Recommended SNCSEQ release: R2-1-12
 SNCSEQ=$(SUPPORT)/seq/2-1-11
 # Recommended BUSY release: R1-5
-BUSY=$(SUPPORT)/busy/1-4
+BUSY=$(SUPPORT)/busy/1-6-1
 CALC=$(SUPPORT)/calc/3-4
 
 AUTOSAVE=$(SUPPORT)/autosave/R5_4_2
