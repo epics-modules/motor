@@ -589,6 +589,11 @@ recordtype(motor) {
                 special(SPC_NOMOD)
                 initial("1")
         }
+        field(LDMV,DBF_SHORT) {
+                prompt("Last Done moving value")
+                special(SPC_NOMOD)
+                initial("1")
+        }
         field(MOVN,DBF_SHORT) {
                 prompt("Motor is moving")
                 special(SPC_NOMOD)

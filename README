@@ -1,4 +1,4 @@
-Motor Module R6-9 Release Notes
+Motor Module R6-10 Release Notes
 ===============================================================================
 
 The motor module software in this release is compatible with EPICS base
@@ -143,6 +143,17 @@ Known Problems
           increment value (TWV field).
         - Tapping the Jog button can cause the motor to move past the
           soft-travel limit when backlash is nonzero.
+
+Modification Log for R6-9
+=========================
+
+1) Alexander Aulin Söderqvist (Cosylab) reported illogical motor record FLNK
+        processing. Corrected FLNK processing so that recGblFwdLink() is only
+        called on a False to True transition of DMOV.
+
+        Files modified: motorApp/MotorSrc/motorRecord.cc
+                        motorApp/MotorSrc/motorRecord.dbd
+
 
 Modification Log for R6-9
 =========================

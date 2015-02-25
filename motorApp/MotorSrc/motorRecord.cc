@@ -183,9 +183,11 @@ HeadURL:        $URL$
  *                  - Fix for LOAD_POS not posting RVAL.
  *                  - Reversed order of issuing SET_VEL_BASE and SET_VELOCITY commands. Fixes MAXv
  *                    command errors.
+ * .71 02-25-15 rls - Fix for excessive motor record forward link processing.
+ * 
  */                                                          
 
-#define VERSION 6.9
+#define VERSION 6.10
 
 #include    <stdlib.h>
 #include    <string.h>
@@ -1164,9 +1166,10 @@ Exit:
     Update record timestamp, call recGblGetTimeStamp().
     Process alarms, call alarm_sub().
     Monitor changes to record fields, call monitor().
-    IF Done Moving field (DMOV) is TRUE.
+    IF Done Moving field (DMOV) is TRUE, AND, Last Done Moving (LDMV) was False.
         Process the forward-scan-link record, call recGblFwdLink().
     ENDIF
+    Update Last Done Moving (LDMV).
     Set Processing Active indicator field (PACT) false.
     Exit.
 
@@ -1402,9 +1405,10 @@ process_exit:
     alarm_sub(pmr);                     /* If we've violated alarm limits, yell. */
     monitor(pmr);               /* If values have changed, broadcast them. */
 
-    if (pmr->dmov)
-        recGblFwdLink(pmr);     /* Process the forward-scan-link record. */
-    
+    if (pmr->dmov != 0 && pmr->ldmv == 0)   /* Test for False to True transition. */
+        recGblFwdLink(pmr);                 /* Process the forward-scan-link record. */
+    pmr->ldmv = pmr->dmov;
+
     pmr->pact = 0;
     Debug(4, "process:---------------------- end; motor \"%s\"\n", pmr->name);
     return (status);
@@ -1590,8 +1594,7 @@ LOGIC:
         ELSE
             Calculate....
             
-            IF Retry enabled, AND, [(encoder present, AND, use encoder true),
-                    OR, use readback link true]
+            IF Retry enabled, AND, Retry mode is Not "In-Position", AND, [(encoder present, AND, use encoder true), OR, use readback link true]
                 Set relative positioning indicator true.
             ELSE
                 Set relative positioning indicator false.
