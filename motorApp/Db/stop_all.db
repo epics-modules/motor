@@ -1,11 +1,10 @@
 record(calcout, "$(P)$(M):ALLSTOP")
 {
-	field(SCAN, ".1 second")
-	field(INPA, "$(AS):STOP:ALL")
+	field(INPA, "$(AS):STOP:ALL CP")
 	field(INPB, "$(P)$(M).DMOV")
 	field(CALC, "A")
 	field(OUT, "$(P)$(M).STOP")
 	field(OCAL, "(1-B)*A")
 	field(DOPT, "Use OCAL")
-	field(OOPT, "On Change")
+	field(OOPT, "When Non-zero")
 }
