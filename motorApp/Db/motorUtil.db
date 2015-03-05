@@ -11,17 +11,17 @@ record(bo, "$(P)allstop") {
   field(DESC, "Stop All IOC motors.")
 }
 
+
 # Monitors the global STOP:ALL PV. When this PV changes, '1' is
 # sent to $(P)allstop over channel access.
 record(calcout, "$(P)allstop:MONITOR") {
-  field(SCAN, ".1 second")
   field(DESC, "Stop All IOC motors.")
-  field(INPA, "$(PVPREFIX)CS:MOT:STOP:ALL PP")
-  field(OOPT, "On Change")
+  field(INPA, "$(PVPREFIX)CS:MOT:STOP:ALL CP")
+  field(OOPT, "When Non-zero")
   field(CALC, "A")
   field(DOPT, "Use OCAL")
-  field(OUT, "$(P)allstop.VAL CA")
   field(OCAL, 1)
+  field(OUT, "$(P)allstop.VAL CA")
 }
 
 # Indicates if all motors in this IOC are done moving.
