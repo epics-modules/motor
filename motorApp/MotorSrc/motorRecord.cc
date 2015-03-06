@@ -1370,8 +1370,8 @@ enter_do_work:
     else
     {
         if (pmr->mip & MIP_JOG)
-            pmr->lvio = (pmr->jogf && (pmr->drbv > pmr->dhlm - pmr->jvel)) ||
-                        (pmr->jogr && (pmr->drbv < pmr->dllm + pmr->jvel));
+            pmr->lvio = (pmr->cdir && (pmr->drbv > pmr->dhlm - pmr->jvel)) ||
+                        (!pmr->cdir && (pmr->drbv < pmr->dllm + pmr->jvel));
         else if (pmr->mip & MIP_HOME)
             pmr->lvio = false;  /* Disable soft-limit error check during home search. */
     }
@@ -1973,11 +1973,16 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
         if (!(pmr->mip & MIP_JOG) && stop_or_pause == false &&
             (pmr->mip & MIP_JOG_REQ))
         {
+            int cdir = 0;
+            if (pmr->jogf) cdir = 1;
+            if (pmr->mres < 0.0)  cdir = !cdir;
+            if (dir == -1)  cdir = !cdir;
+
             /* check for limit violation */
             if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
                 ;
-            else if ((pmr->jogf && (pmr->dval > pmr->dhlm - pmr->jvel)) ||
-                     (pmr->jogr && (pmr->dval < pmr->dllm + pmr->jvel)))
+            else if ((cdir && (pmr->dval > pmr->dhlm - pmr->jvel)) ||
+                     (!cdir && (pmr->dval < pmr->dllm + pmr->jvel)))
             {
                 pmr->lvio = 1;
                 MARK(M_LVIO);
@@ -2003,18 +2008,9 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 pmr->dmov = FALSE;
                 MARK(M_DMOV);
                 pmr->pp = TRUE;
-                if (pmr->jogf)
-                    pmr->cdir = 1;
-                else
-                {
-                    pmr->cdir = 0;
+                pmr->cdir = cdir;
+                if (pmr->jogr)
                     jogv = -jogv;
-                }
-
-                if (pmr->mres < 0.0)
-                    pmr->cdir = !pmr->cdir;
-                if (dir == -1)
-                    pmr->cdir = !pmr->cdir;
 
                 INIT_MSG();
                 WRITE_MSG(SET_VEL_BASE, &vbase);
