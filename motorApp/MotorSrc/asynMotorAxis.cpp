@@ -53,6 +53,10 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   /* Used to enable/disable move to home, and to tell driver how far to move.*/
   referencingModeMove_ = 0;
 
+  wasMovingFlag_ = 0;
+  disableFlag_ = 0;
+  lastEndOfMoveTime_ = 0;
+
   // Create the asynUser, connect to this axis
   pasynUser_ = pasynManager->createAsynUser(NULL, NULL);
   pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
@@ -186,7 +190,6 @@ asynStatus asynMotorAxis::setEncoderRatio(double ratio)
 {
   return asynSuccess;
 }
-
 
 void asynMotorAxis::report(FILE *fp, int details)
 {
@@ -431,3 +434,60 @@ asynStatus asynMotorAxis::readbackProfile()
   status |= pC_->doCallbacksFloat64Array(profileFollowingErrors_, numReadbacks, pC_->profileFollowingErrors_, axisNo_);
   return asynSuccess;
 }
+
+/****************************************************************************/
+/* The following functions are used by the automatic drive power control in the 
+   base class poller in the asynMotorController class.*/
+
+/**
+ * Read the flag that indicates if the last poll was moving.
+ */
+int asynMotorAxis::getWasMovingFlag(void)
+{
+  return wasMovingFlag_;
+}
+
+/**
+ * Set this to 1 if the previous poll indicated moving state 
+ */
+void asynMotorAxis::setWasMovingFlag(int wasMovingFlag)
+{
+  wasMovingFlag_ = wasMovingFlag;
+}
+
+/**
+ * Read the flag that indicates if the drive should be automatically
+ * disabled.
+ */
+int asynMotorAxis::getDisableFlag(void)
+{
+  return disableFlag_;
+}
+
+/**
+ * Set this to 1 if the drive should be automatically disabled.
+ */
+void asynMotorAxis::setDisableFlag(int disableFlag)
+{
+  disableFlag_ = disableFlag;
+}
+
+/**
+ * Read the time in seconds of the last end of move.
+ */
+double asynMotorAxis::getLastEndOfMoveTime(void)
+{
+  return lastEndOfMoveTime_;
+}
+
+/**
+ * Set this to the current time at the end of a move.
+ */
+void asynMotorAxis::setLastEndOfMoveTime(double time)
+{
+  lastEndOfMoveTime_ = time;
+}
+
+
+/********************************************************************/
+

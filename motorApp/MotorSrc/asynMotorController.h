@@ -38,6 +38,11 @@
 #define motorHighLimitString            "MOTOR_HIGH_LIMIT"
 #define motorLowLimitString             "MOTOR_LOW_LIMIT"
 #define motorClosedLoopString           "MOTOR_CLOSED_LOOP"
+#define motorPowerAutoOnOffString       "MOTOR_POWER_AUTO_ONOFF"
+#define motorPowerOnDelayString         "MOTOR_POWER_ON_DELAY"
+#define motorPowerOffDelayString        "MOTOR_POWER_OFF_DELAY"
+#define motorPowerOffFractionString     "MOTOR_POWER_OFF_FRACTION"
+#define motorPostMoveDelayString        "MOTOR_POST_MOVE_DELAY"
 #define motorStatusString               "MOTOR_STATUS"
 #define motorUpdateStatusString         "MOTOR_UPDATE_STATUS"
 #define motorStatusDirectionString      "MOTOR_STATUS_DIRECTION" 
@@ -213,6 +218,11 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorHighLimit_;
   int motorLowLimit_;
   int motorClosedLoop_;
+  int motorPowerAutoOnOff_;
+  int motorPowerOnDelay_;
+  int motorPowerOffDelay_;
+  int motorPowerOffFraction_;
+  int motorPostMoveDelay_;
   int motorStatus_;
   int motorUpdateStatus_;
 

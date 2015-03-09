@@ -1,0 +1,90 @@
+
+############################################################
+#
+# Template to provide records that enable automatic control
+# of the amplifier power. This works with the Asyn model 3 
+# based drivers. Amplifier power control is done via the 
+# setClosedLoop driver function (which also maps to the 
+# motor record CNEN field).
+#
+# Macros:
+# P, M - motor name
+# PORT - asyn port
+# ADDR - asyn addr
+# FRAC - holding current % (optional, default 0)
+# 
+# Matt Pearson, ORNL
+# March 2015
+#
+############################################################
+
+# ///
+# /// Automatically control amplifier power.
+# ///
+record(bo, "$(P)$(M):AutoEnable")
+{
+   field(DESC, "Auto Power Control")
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_POWER_AUTO_ONOFF")
+   field(VAL, "0")
+   field(PINI, "YES")
+   field(ZNAM, "Disabled")
+   field(ONAM, "Enabled")
+   info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Delay the move after the amplifier has been
+# /// automatically enabled.
+# ///
+record(ao, "$(P)$(M):AutoEnableDelay")
+{
+   field(DESC, "Delay after power on")
+   field(DTYP, "asynFloat64")
+   field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_POWER_ON_DELAY")
+   field(VAL, "0")
+   field(PINI, "YES")
+   field(EGU, "s")
+   field(PREC, "1")
+   info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Delay the end of move after the amplifier has been
+# /// automatically disabled.
+# /// This is independent of the motor record DLY
+# /// field, but the delay will only start once the driver
+# /// notified that the move is complete (which takes 
+# /// into account any controller specific post move delay).
+# ///
+record(ao, "$(P)$(M):AutoDisableDelay")
+{
+   field(DESC, "Delay after power off")
+   field(DTYP, "asynFloat64")
+   field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_POWER_OFF_DELAY")
+   field(VAL, "0")
+   field(PINI, "YES")
+   field(EGU, "s")
+   field(PREC, "1")
+   info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Instead of power off completely, set a holding current
+# /// which is a fraction of the moving current.
+# ///
+# /// If this is non zero it needs to be handled in the 
+# /// controller specific driver setClosedLoop function. 
+# ///
+record(longout, "$(P)$(M):PowerOffFraction")
+{
+   field(DESC, "Holding Current %")
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_POWER_OFF_FRACTION")
+   field(VAL, "$(FRAC=0)")
+   field(PINI, "YES")
+   field(HOPR, "100")
+   field(LOPR, "0")
+   info(autosaveFields, "VAL")
+}
+
