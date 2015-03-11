@@ -48,10 +48,8 @@ class epicsShareClass XPSAxis : public asynMotorAxis
   asynStatus setIGain(double gain);
   asynStatus setDGain(double gain);
   asynStatus setClosedLoop(bool closedLoop);
-  asynStatus setPositionCompare(bool enable, double min, double max, double step, 
-                                double pulseWidth, double settlingTime);
-  asynStatus getPositionCompare(bool *enable, double *min, double *max, double *step, 
-                                double *pulseWidth, double *settlingTime);
+  asynStatus setPositionCompare();
+  asynStatus getPositionCompare();
 
   virtual asynStatus defineProfile(double *positions, size_t numPoints);
   virtual asynStatus readbackProfile();
