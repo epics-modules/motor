@@ -59,32 +59,61 @@ record(ai,"$(P)$(R)PositionCompareStepSize_RBV") {
     field(SCAN, "I/O Intr")
 }
 
-record(ao,"$(P)$(R)PositionComparePulseWidth") {
+record(mbbo,"$(P)$(R)PositionComparePulseWidth") {
     field(PINI, "YES")
-    field(PREC,"$(PREC)")
-    field(DTYP, "asynFloat64")
+    field(DTYP, "asynInt32")
     field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_PULSE_WIDTH")
-    field(VAL, "0.200")
+    field(ZRVL, "0")
+    field(ZRST, "0.2")
+    field(ONVL, "1")
+    field(ONST, "1.0")
+    field(TWVL, "2")
+    field(TWST, "2.5")
+    field(THVL, "3")
+    field(THST, "10.0")
 }
 
-record(ai,"$(P)$(R)PositionComparePulseWidth_RBV") {
-    field(PREC,"$(PREC)")
-    field(DTYP, "asynFloat64")
-    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_PULSE_WIDTH")
-    field(SCAN, "I/O Intr")
-}
-
-record(ao,"$(P)$(R)PositionCompareSettlingTime") {
+record(mbbi,"$(P)$(R)PositionComparePulseWidth_RBV") {
     field(PINI, "YES")
-    field(PREC,"$(PREC)")
-    field(DTYP, "asynFloat64")
-    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_SETTLING_TIME")
-    field(VAL, "0.075")
-}
-
-record(ai,"$(P)$(R)PositionCompareSettlingTime_RBV") {
-    field(PREC,"$(PREC)")
-    field(DTYP, "asynFloat64")
-    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_SETTLING_TIME")
+    field(DTYP, "asynInt32")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_PULSE_WIDTH")
+    field(ZRVL, "0")
+    field(ZRST, "0.2")
+    field(ONVL, "1")
+    field(ONST, "1.0")
+    field(TWVL, "2")
+    field(TWST, "2.5")
+    field(THVL, "3")
+    field(THST, "10.0")
     field(SCAN, "I/O Intr")
 }
+
+record(mbbo,"$(P)$(R)PositionCompareSettlingTime") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_SETTLING_TIME")
+    field(ZRVL, "0")
+    field(ZRST, "0.075")
+    field(ONVL, "1")
+    field(ONST, "1.0")
+    field(TWVL, "2")
+    field(TWST, "4.0")
+    field(THVL, "3")
+    field(THST, "12.0")
+}
+
+record(mbbi,"$(P)$(R)PositionCompareSettlingTime_RBV") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_SETTLING_TIME")
+    field(ZRVL, "0")
+    field(ZRST, "0.075")
+    field(ONVL, "1")
+    field(ONST, "1.0")
+    field(TWVL, "2")
+    field(TWST, "4.0")
+    field(THVL, "3")
+    field(THST, "12.0")
+    field(SCAN, "I/O Intr")
+}
+
