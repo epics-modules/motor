@@ -159,18 +159,24 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   movesDeferred_ = false;
 
   // Create controller-specific parameters
-  createParam(XPSMinJerkString,                asynParamFloat64, &XPSMinJerk_);
-  createParam(XPSMaxJerkString,                asynParamFloat64, &XPSMaxJerk_);
-  createParam(XPSProfileMaxVelocityString,     asynParamFloat64, &XPSProfileMaxVelocity_);
-  createParam(XPSProfileMaxAccelerationString, asynParamFloat64, &XPSProfileMaxAcceleration_);
-  createParam(XPSProfileMinPositionString,     asynParamFloat64, &XPSProfileMinPosition_);
-  createParam(XPSProfileMaxPositionString,     asynParamFloat64, &XPSProfileMaxPosition_);
-  createParam(XPSProfileGroupNameString,         asynParamOctet, &XPSProfileGroupName_);
-  createParam(XPSTrajectoryFileString,           asynParamOctet, &XPSTrajectoryFile_);
-  createParam(XPSStatusString,                   asynParamInt32, &XPSStatus_);
-  createParam(XPSStatusStringString,             asynParamOctet, &XPSStatusString_);
-  createParam(XPSTclScriptString,                asynParamOctet, &XPSTclScript_);
-  createParam(XPSTclScriptExecuteString,         asynParamInt32, &XPSTclScriptExecute_);
+  createParam(XPSMinJerkString,                       asynParamFloat64, &XPSMinJerk_);
+  createParam(XPSMaxJerkString,                       asynParamFloat64, &XPSMaxJerk_);
+  createParam(XPSPositionCompareEnableString,           asynParamInt32, &XPSPositionCompareEnable_);
+  createParam(XPSPositionCompareMinPositionString,    asynParamFloat64, &XPSPositionCompareMinPosition_);
+  createParam(XPSPositionCompareMaxPositionString,    asynParamFloat64, &XPSPositionCompareMaxPosition_);
+  createParam(XPSPositionCompareStepSizeString,       asynParamFloat64, &XPSPositionCompareStepSize_);
+  createParam(XPSPositionComparePulseWidthString,     asynParamFloat64, &XPSPositionComparePulseWidth_);
+  createParam(XPSPositionCompareSettlingTimeString,   asynParamFloat64, &XPSPositionCompareSettlingTime_);
+  createParam(XPSProfileMaxVelocityString,            asynParamFloat64, &XPSProfileMaxVelocity_);
+  createParam(XPSProfileMaxAccelerationString,        asynParamFloat64, &XPSProfileMaxAcceleration_);
+  createParam(XPSProfileMinPositionString,            asynParamFloat64, &XPSProfileMinPosition_);
+  createParam(XPSProfileMaxPositionString,            asynParamFloat64, &XPSProfileMaxPosition_);
+  createParam(XPSProfileGroupNameString,                asynParamOctet, &XPSProfileGroupName_);
+  createParam(XPSTrajectoryFileString,                  asynParamOctet, &XPSTrajectoryFile_);
+  createParam(XPSStatusString,                          asynParamInt32, &XPSStatus_);
+  createParam(XPSStatusStringString,                    asynParamOctet, &XPSStatusString_);
+  createParam(XPSTclScriptString,                       asynParamOctet, &XPSTclScript_);
+  createParam(XPSTclScriptExecuteString,                asynParamInt32, &XPSTclScriptExecute_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, XPS_POLL_TIMEOUT);
@@ -261,21 +267,39 @@ asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
     getStringParam(XPSTclScript_, (int)sizeof(fileName), fileName);
     if (fileName != NULL) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"Executing TCL script %s on XPS: %s\n", 
-		fileName, this->portName);
+                "Executing TCL script %s on XPS: %s\n", 
+                fileName, this->portName);
       status = TCLScriptExecute(pAxis->moveSocket_,
-				fileName,"0","0");
+                                fileName,"0","0");
       if (status != 0) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		  "TCLScriptExecute returned error %d, on XPS: %s\n", 
-		  status, this->portName);
-	status = asynError;
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+                  "TCLScriptExecute returned error %d, on XPS: %s\n", 
+                  status, this->portName);
+        status = asynError;
       }
     } else {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-              "TCL script name has not been set on XPS: %s\n", 
-              this->portName);
+                "TCL script name has not been set on XPS: %s\n", 
+                this->portName);
       status = asynError;
+    }
+  } else if (function == XPSPositionCompareEnable_) {
+    bool enable = value;
+    double minPosition, maxPosition, stepSize, pulseWidth, settlingTime;
+    getDoubleParam(XPSPositionCompareMinPosition_,  &minPosition);
+    getDoubleParam(XPSPositionCompareMaxPosition_,  &maxPosition);
+    getDoubleParam(XPSPositionCompareStepSize_,     &stepSize);
+    getDoubleParam(XPSPositionComparePulseWidth_,   &pulseWidth);
+    getDoubleParam(XPSPositionCompareSettlingTime_, &settlingTime);
+    status = pAxis->setPositionCompare(enable, minPosition, maxPosition, stepSize, pulseWidth, settlingTime);
+    status = pAxis->getPositionCompare(&enable, &minPosition, &maxPosition, &stepSize, &pulseWidth, &settlingTime);
+    if (status == asynSuccess) {
+      setIntegerParam(XPSPositionCompareEnable_,      enable);
+      setDoubleParam(XPSPositionCompareMinPosition_,  minPosition);
+      setDoubleParam(XPSPositionCompareMaxPosition_,  maxPosition);
+      setDoubleParam(XPSPositionCompareStepSize_,     stepSize);
+      setDoubleParam(XPSPositionComparePulseWidth_,   pulseWidth);
+      setDoubleParam(XPSPositionCompareSettlingTime_, settlingTime);
     }
   } else {
     /* Call base class method */
