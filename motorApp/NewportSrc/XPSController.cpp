@@ -161,22 +161,22 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   // Create controller-specific parameters
   createParam(XPSMinJerkString,                       asynParamFloat64, &XPSMinJerk_);
   createParam(XPSMaxJerkString,                       asynParamFloat64, &XPSMaxJerk_);
-  createParam(XPSPositionCompareEnableString,           asynParamInt32, &XPSPositionCompareEnable_);
+  createParam(XPSPositionCompareEnableString,         asynParamInt32,   &XPSPositionCompareEnable_);
   createParam(XPSPositionCompareMinPositionString,    asynParamFloat64, &XPSPositionCompareMinPosition_);
   createParam(XPSPositionCompareMaxPositionString,    asynParamFloat64, &XPSPositionCompareMaxPosition_);
   createParam(XPSPositionCompareStepSizeString,       asynParamFloat64, &XPSPositionCompareStepSize_);
-  createParam(XPSPositionComparePulseWidthString,     asynParamFloat64, &XPSPositionComparePulseWidth_);
-  createParam(XPSPositionCompareSettlingTimeString,   asynParamFloat64, &XPSPositionCompareSettlingTime_);
+  createParam(XPSPositionComparePulseWidthString,     asynParamInt32,   &XPSPositionComparePulseWidth_);
+  createParam(XPSPositionCompareSettlingTimeString,   asynParamInt32,   &XPSPositionCompareSettlingTime_);
   createParam(XPSProfileMaxVelocityString,            asynParamFloat64, &XPSProfileMaxVelocity_);
   createParam(XPSProfileMaxAccelerationString,        asynParamFloat64, &XPSProfileMaxAcceleration_);
   createParam(XPSProfileMinPositionString,            asynParamFloat64, &XPSProfileMinPosition_);
   createParam(XPSProfileMaxPositionString,            asynParamFloat64, &XPSProfileMaxPosition_);
-  createParam(XPSProfileGroupNameString,                asynParamOctet, &XPSProfileGroupName_);
-  createParam(XPSTrajectoryFileString,                  asynParamOctet, &XPSTrajectoryFile_);
-  createParam(XPSStatusString,                          asynParamInt32, &XPSStatus_);
-  createParam(XPSStatusStringString,                    asynParamOctet, &XPSStatusString_);
-  createParam(XPSTclScriptString,                       asynParamOctet, &XPSTclScript_);
-  createParam(XPSTclScriptExecuteString,                asynParamInt32, &XPSTclScriptExecute_);
+  createParam(XPSProfileGroupNameString,              asynParamOctet,   &XPSProfileGroupName_);
+  createParam(XPSTrajectoryFileString,                asynParamOctet,   &XPSTrajectoryFile_);
+  createParam(XPSStatusString,                        asynParamInt32,   &XPSStatus_);
+  createParam(XPSStatusStringString,                  asynParamOctet,   &XPSStatusString_);
+  createParam(XPSTclScriptString,                     asynParamOctet,   &XPSTclScript_);
+  createParam(XPSTclScriptExecuteString,              asynParamInt32,   &XPSTclScriptExecute_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, XPS_POLL_TIMEOUT);
@@ -283,31 +283,57 @@ asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
                 this->portName);
       status = asynError;
     }
-  } else if (function == XPSPositionCompareEnable_) {
-    bool enable = value;
-    double minPosition, maxPosition, stepSize, pulseWidth, settlingTime;
-    getDoubleParam(XPSPositionCompareMinPosition_,  &minPosition);
-    getDoubleParam(XPSPositionCompareMaxPosition_,  &maxPosition);
-    getDoubleParam(XPSPositionCompareStepSize_,     &stepSize);
-    getDoubleParam(XPSPositionComparePulseWidth_,   &pulseWidth);
-    getDoubleParam(XPSPositionCompareSettlingTime_, &settlingTime);
-    status = pAxis->setPositionCompare(enable, minPosition, maxPosition, stepSize, pulseWidth, settlingTime);
-    status = pAxis->getPositionCompare(&enable, &minPosition, &maxPosition, &stepSize, &pulseWidth, &settlingTime);
-    if (status == asynSuccess) {
-      setIntegerParam(XPSPositionCompareEnable_,      enable);
-      setDoubleParam(XPSPositionCompareMinPosition_,  minPosition);
-      setDoubleParam(XPSPositionCompareMaxPosition_,  maxPosition);
-      setDoubleParam(XPSPositionCompareStepSize_,     stepSize);
-      setDoubleParam(XPSPositionComparePulseWidth_,   pulseWidth);
-      setDoubleParam(XPSPositionCompareSettlingTime_, settlingTime);
-    }
+
+  } else if ((function == XPSPositionCompareEnable_) ||
+             (function == XPSPositionComparePulseWidth_) ||
+             (function == XPSPositionCompareStepSize_)) {
+    status = pAxis->setPositionCompare();
+    status = pAxis->getPositionCompare();
+
   } else {
     /* Call base class method */
     status = asynMotorController::writeInt32(pasynUser, value);
   }
 
+  /* Do callbacks so higher layers see any changes */
+  pAxis->callParamCallbacks();
+
   return (asynStatus)status;
 
+}
+
+/** Called when asyn clients call pasynFloat64->write().
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] value Value to write. */
+asynStatus XPSController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
+{
+  int function = pasynUser->reason;
+  XPSAxis *pAxis;
+  asynStatus status = asynError;
+  //static const char *functionName = "writeFloat64";
+
+  pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
+
+  /* Set the parameter and readback in the parameter library. */
+  status = pAxis->setDoubleParam(function, value);
+
+  if ((function == XPSPositionCompareMinPosition_) ||
+      (function == XPSPositionCompareMaxPosition_) ||
+      (function == XPSPositionCompareStepSize_)) {
+    status = pAxis->setPositionCompare();
+    status = pAxis->getPositionCompare();
+
+  } else {
+    /* Call base class method */
+    status = asynMotorController::writeFloat64(pasynUser, value);
+
+  }
+  /* Do callbacks so higher layers see any changes */
+  pAxis->callParamCallbacks();
+  
+  return status;
+    
 }
 
 /**

@@ -21,6 +21,11 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define MAX_MESSAGE_LEN   256
 #define MAX_GROUPNAME_LEN  64
 
+#define MAX_PULSE_WIDTHS 4
+#define MAX_SETTLING_TIMES 4
+static const double positionComparePulseWidths[MAX_PULSE_WIDTHS]     = {0.2,   1.0, 2.5, 10.0};
+static const double positionCompareSettlingTimes[MAX_SETTLING_TIMES] = {0.075, 1.0, 4.0, 12.0};
+
 // drvInfo strings for extra parameters that the XPS controller supports
 #define XPSMinJerkString                      "XPS_MIN_JERK"
 #define XPSMaxJerkString                      "XPS_MAX_JERK"
@@ -50,6 +55,7 @@ class epicsShareClass XPSController : public asynMotorController {
 
   /* These are the methods that we override from asynMotorDriver */
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+  asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
   void report(FILE *fp, int level);
   XPSAxis* getAxis(asynUser *pasynUser);
   XPSAxis* getAxis(int axisNo);
