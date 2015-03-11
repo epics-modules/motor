@@ -177,7 +177,7 @@ text {
 	}
 	display[0] {
 		label="XPS Position Compare"
-		name="XPSPositionCompare.adl"
+		name="XPSPositionCompare8.adl"
 		args="P=IOC:, R=PC1:, TITLE=XPSProfileMove, M1=m1,M2=m2,M3=m3,M4=m4,M5=m5,M6=m6,M7=m7,M8=m8"
 	}
 	clr=14
