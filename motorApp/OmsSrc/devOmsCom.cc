@@ -70,6 +70,8 @@ HeadURL:        $URL$
  *                   different polarity (signs).
  * .24  11-29-12 rls Terminate UU command argument with a ';' character.
  *                   Fixes "Command error" with MAXv ver:1.41 firmware.
+ * .25  03-13-15 rls Bug fix for incorrect deceleration calculation at end of
+ *                   JOG command.
  *
  */
 
@@ -311,7 +313,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
 
                 /* Use MIP to determine which acc. rate to use. */
                 if (mr->mip & MIP_JOG_STOP)
-                    acc = ((mr->jar) / fabs(mr->mres)) / mr->accl;
+                    acc = mr->jar / fabs(mr->mres);
                 else
                     acc = ((mr->velo - mr->vbas) / fabs(mr->mres)) / mr->accl;
 
