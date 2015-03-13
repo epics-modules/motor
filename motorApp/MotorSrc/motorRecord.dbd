@@ -290,6 +290,7 @@ recordtype(motor) {
         field(URIP,DBF_MENU) {
                 prompt("Use RDBL Link If Presen")
                 promptgroup(GUI_COMMON)
+                special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
                 menu(motorUEIP)
