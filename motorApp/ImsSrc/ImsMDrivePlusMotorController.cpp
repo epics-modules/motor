@@ -3,8 +3,9 @@
 //!         MDrivePlus series; M17, M23, M34.
 //!	      Simple implementation using "model 3" asynMotorController and asynMotorAxis base classes (derived from asynPortDriver)
 //!
-//!  Author : Nia Fong 
+//!  Original Author : Nia Fong
 //!  Date : 11-21-2011
+//!  Current Author : Mitch D'Ewart (SLAC)
 //!
 //!  Assumptions :
 //!    1) Like all controllers, the MDrivePlus must be powered-on when EPICS is first booted up.
