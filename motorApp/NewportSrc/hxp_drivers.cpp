@@ -10,7 +10,7 @@
 #include "Socket.h" 
 
 #ifdef _WIN32
-	#define DLL _declspec(dllexport)
+	#define DLL __declspec(dllexport)
 	#include "strtok_r.h"
 #else
 	#define DLL 

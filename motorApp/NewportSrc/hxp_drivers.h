@@ -8,7 +8,7 @@
 #ifdef _WIN32
     #ifndef DLL
         #ifdef _DLL  /* _DLL is defined by EPICS if we are being compiled to call DLLs */
-            #define DLL _declspec(dllimport)
+            #define DLL __declspec(dllimport)
         #else
             #define DLL
         #endif
