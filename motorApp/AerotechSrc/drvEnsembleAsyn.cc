@@ -820,7 +820,7 @@ static void EnsemblePoller(EnsembleController *pController)
             }
             else
             {
-                double actvelocity = atof(&inputBuff[1]) * 1000.;
+                double actvelocity = atof(&inputBuff[1]) / fabs(pAxis->stepSize);
                 motorParam->setDouble(pAxis->params, motorAxisActualVel, actvelocity);
             }
             motorParam->callCallback(pAxis->params);
