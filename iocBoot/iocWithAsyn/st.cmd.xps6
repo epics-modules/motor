@@ -1,0 +1,48 @@
+#errlogInit(5000)
+< envPaths
+# Tell EPICS all about the record types, device-support modules, drivers,
+# etc. in this build from CARS
+dbLoadDatabase("../../dbd/WithAsyn.dbd")
+WithAsyn_registerRecordDeviceDriver(pdbbase)
+
+### Motors
+dbLoadTemplate "motor.substitutions.xps6"
+
+dbLoadTemplate "XPSAux.substitutions"
+
+dbLoadTemplate "XPSPositionCompare.substitutions"
+
+# asyn port, IP address, IP port, number of axes, 
+# active poll period (ms), idle poll period (ms), 
+# enable set position, set position settling time (ms)
+XPSCreateController("XPS1", "164.54.164.24", 5001, 4, 10, 500, 0, 500)
+asynSetTraceIOMask("XPS1", 0, 2)
+#asynSetTraceMask("XPS1", 0, 255)
+
+# asynPort, IP address, IP port, poll period (ms)
+XPSAuxConfig("XPS_AUX1", "164.54.164.24", 5001, 50)
+#asynSetTraceIOMask("XPS_AUX1", 0, 2)
+#asynSetTraceMask("XPS_AUX1", 0, 255)
+
+# XPS asyn port,  axis, groupName.positionerName, stepSize
+XPSCreateAxis("XPS1",0,"Group1.Pos",   "10000")
+XPSCreateAxis("XPS1",1,"Group2.Pos",   "10000")
+XPSCreateAxis("XPS1",2,"Group3.Pos",   "20000")
+XPSCreateAxis("XPS1",3,"Group4.Pos",   "1000")
+
+# XPS asyn port,  max points, FTP username, FTP password
+# Note: this must be done after configuring axes
+XPSCreateProfile("XPS1", 2000, "Administrator", "Administrator")
+
+iocInit
+
+# This IOC does not use save/restore, so set values of some PVs
+dbpf("IOC:m1.RTRY", "0")
+dbpf("IOC:m1.TWV", "0.1")
+dbpf("IOC:m2.RTRY", "0")
+dbpf("IOC:m2.TWV", "0.1")
+dbpf("IOC:m3.RTRY", "0")
+dbpf("IOC:m3.TWV", "0.1")
+dbpf("IOC:m4.RTRY", "0")
+dbpf("IOC:m4.TWV", "0.1")
+
