@@ -872,19 +872,19 @@ asynStatus XPSAxis::setClosedLoop(bool closedLoop)
 
 asynStatus XPSAxis::setPositionCompare()
 {
-  int enable;
+  int mode;
   double minPosition, maxPosition, stepSize, pulseWidth, settlingTime;
   int itemp;
   int status;
   static const char *functionName = "setPositionCompare";
 
-  pC_->getIntegerParam(pC_->XPSPositionCompareEnable_,       &enable);
-  pC_->getDoubleParam (pC_->XPSPositionCompareMinPosition_,  &minPosition);
-  pC_->getDoubleParam (pC_->XPSPositionCompareMaxPosition_,  &maxPosition);
-  pC_->getDoubleParam (pC_->XPSPositionCompareStepSize_,     &stepSize);
-  pC_->getIntegerParam(pC_->XPSPositionComparePulseWidth_,   &itemp);
+  pC_->getIntegerParam(axisNo_, pC_->XPSPositionCompareMode_,         &mode);
+  pC_->getDoubleParam (axisNo_, pC_->XPSPositionCompareMinPosition_,  &minPosition);
+  pC_->getDoubleParam (axisNo_, pC_->XPSPositionCompareMaxPosition_,  &maxPosition);
+  pC_->getDoubleParam (axisNo_, pC_->XPSPositionCompareStepSize_,     &stepSize);
+  pC_->getIntegerParam(axisNo_, pC_->XPSPositionComparePulseWidth_,   &itemp);
   pulseWidth = positionComparePulseWidths[itemp];
-  pC_->getIntegerParam(pC_->XPSPositionCompareSettlingTime_, &itemp);
+  pC_->getIntegerParam(axisNo_, pC_->XPSPositionCompareSettlingTime_, &itemp);
   settlingTime = positionCompareSettlingTimes[itemp];
   
   // Disable the position compare so we can set parameters
@@ -902,21 +902,46 @@ asynStatus XPSAxis::setPositionCompare()
                driverName, functionName, pC_->portName, axisNo_, status);
     return asynError;
   }
-  status = PositionerPositionCompareSet(pollSocket_, positionerName_, minPosition, maxPosition, stepSize);
-  if (status) {
-    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-              "%s:%s: [%s,%d]: error calling PositionerPositionCompareSet status=%d\n",
-               driverName, functionName, pC_->portName, axisNo_, status);
-    return asynError;
-  }
-  if (enable) {
-    status = PositionerPositionCompareEnable(pollSocket_, positionerName_);
-    if (status) {
-      asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-                "%s:%s: [%s,%d]: error calling PositionerPositionCompareEnable status=%d\n",
-                 driverName, functionName, pC_->portName, axisNo_, status);
-      return asynError;
-    }
+  switch (mode) {
+     case XPSPositionCompareModeDisable:
+      break;
+  
+     case XPSPositionCompareModePulse:
+      status = PositionerPositionCompareAquadBWindowedSet(pollSocket_, positionerName_, minPosition, maxPosition);
+      if (status) {
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareSet status=%d\n",
+                   driverName, functionName, pC_->portName, axisNo_, status);
+        return asynError;
+      }
+      status = PositionerPositionCompareEnable(pollSocket_, positionerName_);
+      if (status) {
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareEnable status=%d\n",
+                   driverName, functionName, pC_->portName, axisNo_, status);
+        return asynError;
+      }
+      break;
+
+    case XPSPositionCompareModeAquadBWindowed:
+      status = PositionerPositionCompareAquadBWindowedSet(pollSocket_, positionerName_, minPosition, maxPosition);
+      if (status) {
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareAquadBWindowedSet status=%d\n",
+                   driverName, functionName, pC_->portName, axisNo_, status);
+        return asynError;
+      }
+      break;
+
+    case XPSPositionCompareModeAquadBAlways:
+      status = PositionerPositionCompareAquadBAlwaysEnable(pollSocket_, positionerName_);
+      if (status) {
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareAquadBAlwaysEnable status=%d\n",
+                   driverName, functionName, pC_->portName, axisNo_, status);
+        return asynError;
+      }
+      break;
   } 
   
   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
@@ -934,6 +959,7 @@ asynStatus XPSAxis::getPositionCompare()
   double minPosition, maxPosition, stepSize, pulseWidth, settlingTime;
   static const char *functionName = "getPositionCompare";
   
+  setIntegerParam(pC_->XPSPositionCompareMode_,  XPSPositionCompareModeDisable);
   status = PositionerPositionComparePulseParametersGet(pollSocket_, positionerName_, &pulseWidth, &settlingTime);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR,
@@ -948,13 +974,13 @@ asynStatus XPSAxis::getPositionCompare()
                driverName, functionName, pC_->portName, axisNo_, status);
     return asynError;
   } 
-  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
+  if (enable) setIntegerParam(pC_->XPSPositionCompareMode_,  XPSPositionCompareModePulse);
+   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
             "%s:%s: set XPS %s, axis %d positionCompareGet,"
             " enable=%d, minPosition=%f, maxPosition=%f, stepSize=%f, pulseWidth=%f, settlingTime=%f\n",
              driverName, functionName, pC_->portName, axisNo_,
              enable, minPosition, maxPosition, stepSize, pulseWidth, settlingTime);
 
-  setIntegerParam(pC_->XPSPositionCompareEnable_,      enable);
   setDoubleParam(pC_->XPSPositionCompareMinPosition_,  minPosition);
   setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  maxPosition);
   setDoubleParam(pC_->XPSPositionCompareStepSize_,     stepSize);
