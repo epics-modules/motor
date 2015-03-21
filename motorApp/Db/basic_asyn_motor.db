@@ -28,7 +28,7 @@ record(longout,"$(P)$(M)Direction") {
     field(DOL,  "$(P)$(M).DIR CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))MOTOR_DIRECTION")
+    field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_DIRECTION")
 }
 
 
@@ -38,7 +38,7 @@ record(ao,"$(P)$(M)Offset") {
     field(DOL,  "$(P)$(M).OFF CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynFloat64")
-    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))MOTOR_OFFSET")
+    field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_OFFSET")
     field(PREC, "$(PREC)")
 }
 
@@ -49,7 +49,7 @@ record(ao,"$(P)$(M)Resolution") {
     field(DOL,  "$(P)$(M).MRES CP MS")
     field(OMSL, "closed_loop")
     field(DTYP, "asynFloat64")
-    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))MOTOR_RESOLUTION")
+    field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_RESOLUTION")
     field(PREC, "$(PREC)")
 }
 
