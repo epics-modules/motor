@@ -1061,7 +1061,7 @@ asynStatus XPSAxis::getPositionCompare()
     }
     setDoubleParam(pC_->XPSPositionCompareMinPosition_,  XPSPositionToMotorRecPosition(minPosition));
     setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  XPSPositionToMotorRecPosition(maxPosition));
-    setDoubleParam(pC_->XPSPositionCompareStepSize_,     XPSStepToMotorRecStep(stepSize));
+    setDoubleParam(pC_->XPSPositionCompareStepSize_,     fabs(XPSStepToMotorRecStep(stepSize)));
   } 
   status = PositionerPositionCompareAquadBWindowedGet(pollSocket_, positionerName_, &minPosition, &maxPosition, &enable);
   if (status == 0) {
