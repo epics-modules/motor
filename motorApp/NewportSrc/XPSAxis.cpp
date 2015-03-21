@@ -949,6 +949,13 @@ asynStatus XPSAxis::setPositionCompare()
   minPosition = motorRecPositionToXPSPosition(minPosition);
   maxPosition = motorRecPositionToXPSPosition(maxPosition);
   stepSize = fabs(motorRecStepToXPSStep(stepSize));
+  
+  // Swap max and min positions if needed
+  if (minPosition > maxPosition) {
+    double temp=maxPosition;
+    maxPosition = minPosition;
+    minPosition = temp;
+  }
 
   // Disable the position compare so we can set parameters
   status = PositionerPositionCompareDisable(pollSocket_, positionerName_);
