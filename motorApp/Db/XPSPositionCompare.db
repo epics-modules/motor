@@ -2,18 +2,30 @@
 # Mark Rivers
 # March 10, 2015
 
-record(bo,"$(P)$(R)PositionCompareEnable") {
+record(mbbo,"$(P)$(R)PositionCompareMode") {
     field(DTYP, "asynInt32")
-    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_ENABLE")
-    field(ZNAM, "Disable")
-    field(ONAM, "Enable")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Disable")
+    field(ONVL, "1")
+    field(ONST, "Position compare")
+    field(TWVL, "2")
+    field(TWST, "AquadB windowed")
+    field(THVL, "3")
+    field(THST, "AquadB always")
 }
 
-record(bi,"$(P)$(R)PositionCompareEnable_RBV") {
+record(bi,"$(P)$(R)PositionCompareMode_RBV") {
     field(DTYP, "asynInt32")
-    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_ENABLE")
-    field(ZNAM, "Disable")
-    field(ONAM, "Enable")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Disable")
+    field(ONVL, "1")
+    field(ONST, "Position compare")
+    field(TWVL, "2")
+    field(TWST, "AquadB windowed")
+    field(THVL, "3")
+    field(THST, "AquadB always")
     field(SCAN, "I/O Intr")
 }
 
