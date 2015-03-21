@@ -933,6 +933,7 @@ asynStatus XPSAxis::setPositionCompare()
   int mode;
   double minPosition, maxPosition, stepSize, pulseWidth, settlingTime;
   int itemp;
+  int direction;
   int status;
   static const char *functionName = "setPositionCompare";
 
@@ -951,7 +952,8 @@ asynStatus XPSAxis::setPositionCompare()
   stepSize = fabs(motorRecStepToXPSStep(stepSize));
   
   // Swap max and min positions if needed
-  if (minPosition > maxPosition) {
+  pC_->getIntegerParam(axisNo_, pC_->motorRecDirection_, &direction);
+  if (direction != 0) {
     double temp=maxPosition;
     maxPosition = minPosition;
     minPosition = temp;
@@ -1036,10 +1038,13 @@ asynStatus XPSAxis::getPositionCompare()
   bool enable;
   int status;
   int i;
+  int direction;
   double minPosition=0, maxPosition=0, stepSize=0, pulseWidth, settlingTime;
   static const char *functionName = "getPositionCompare";
   
   status = PositionerPositionComparePulseParametersGet(pollSocket_, positionerName_, &pulseWidth, &settlingTime);
+  pC_->getIntegerParam(axisNo_, pC_->motorRecDirection_, &direction);
+
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR,
               "%s:%s: [%s,%d]: error calling PositionerPositionComparePulseParametersGet status=%d\n",
@@ -1054,6 +1059,12 @@ asynStatus XPSAxis::getPositionCompare()
   } 
   status = PositionerPositionCompareAquadBWindowedGet(pollSocket_, positionerName_, &minPosition, &maxPosition, &enable);
   if (status == 0) {
+    // Swap max and min positions if needed
+    if (direction != 0) {
+      double temp=maxPosition;
+      maxPosition = minPosition;
+      minPosition = temp;
+    }
     setDoubleParam(pC_->XPSPositionCompareMinPosition_,  XPSPositionToMotorRecPosition(minPosition));
     setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  XPSPositionToMotorRecPosition(maxPosition));
   } 
