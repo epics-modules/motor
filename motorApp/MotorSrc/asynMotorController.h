@@ -61,6 +61,11 @@
 #define motorStatusLowLimitString       "MOTOR_STATUS_LOW_LIMIT"
 #define motorStatusHomedString          "MOTOR_STATUS_HOMED"
 
+/* These are per-axis parameters for passing additional motor record information to the driver */
+#define motorRecResolutionString        "MOTOR_REC_RESOLUTION"
+#define motorRecDirectionString         "MOTOR_REC_DIRECTION"
+#define motorRecOffsetString            "MOTOR_REC_OFFSET"
+
 /* These are the per-controller parameters for profile moves (coordinated motion) */
 #define profileNumAxesString            "PROFILE_NUM_AXES"
 #define profileNumPointsString          "PROFILE_NUM_POINTS"
@@ -94,9 +99,6 @@
 #define profilePositionsString          "PROFILE_POSITIONS"
 #define profileReadbacksString          "PROFILE_READBACKS"
 #define profileFollowingErrorsString    "PROFILE_FOLLOWING_ERRORS"
-#define profileMotorResolutionString    "PROFILE_MOTOR_RESOLUTION"
-#define profileMotorDirectionString     "PROFILE_MOTOR_DIRECTION"
-#define profileMotorOffsetString        "PROFILE_MOTOR_OFFSET"
 
 /** The structure that is passed back to devMotorAsyn when the status changes. */
 typedef struct MotorStatus {
@@ -243,6 +245,11 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorStatusLowLimit_;
   int motorStatusHomed_;
 
+  // These are per-axis parameters for passing additional motor record information to the driver
+  int motorRecResolution_;
+  int motorRecDirection_;
+  int motorRecOffset_;
+
   // These are the per-controller parameters for profile moves
   int profileNumAxes_;
   int profileNumPoints_;
@@ -276,10 +283,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int profilePositions_;
   int profileReadbacks_;
   int profileFollowingErrors_;
-  int profileMotorResolution_;
-  int profileMotorDirection_;
-  int profileMotorOffset_;
-  #define LAST_MOTOR_PARAM profileMotorOffset_
+  #define LAST_MOTOR_PARAM profileFollowingErrors_
 
   int numAxes_;                 /**< Number of axes this controller supports */
   asynMotorAxis **pAxes_;       /**< Array of pointers to axis objects */

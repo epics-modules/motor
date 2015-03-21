@@ -87,6 +87,11 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorStatusLowLimitString,         asynParamInt32,      &motorStatusLowLimit_);
   createParam(motorStatusHomedString,            asynParamInt32,      &motorStatusHomed_);
 
+  // These are per-axis parameters for passing additional motor record information to the driver
+  createParam(motorRecResolutionString,        asynParamFloat64,      &motorRecResolution_);
+  createParam(motorRecDirectionString,           asynParamInt32,      &motorRecDirection_);
+  createParam(motorRecOffsetString,            asynParamFloat64,      &motorRecOffset_);
+
   // These are the per-controller parameters for profile moves
   createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);
   createParam(profileNumPointsString,            asynParamInt32,      &profileNumPoints_);
@@ -120,9 +125,6 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(profilePositionsString,     asynParamFloat64Array,      &profilePositions_);
   createParam(profileReadbacksString,     asynParamFloat64Array,      &profileReadbacks_);
   createParam(profileFollowingErrorsString, asynParamFloat64Array,    &profileFollowingErrors_);
-  createParam(profileMotorResolutionString,    asynParamFloat64,      &profileMotorResolution_);
-  createParam(profileMotorDirectionString,       asynParamInt32,      &profileMotorDirection_);
-  createParam(profileMotorOffsetString,        asynParamFloat64,      &profileMotorOffset_);
 
   pAxes_ = (asynMotorAxis**) calloc(numAxes, sizeof(asynMotorAxis*));
   pollEventId_ = epicsEventMustCreate(epicsEventEmpty);

@@ -345,13 +345,13 @@ asynStatus asynMotorAxis::defineProfile(double *positions, size_t numPoints)
   
   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
             "%s:%s: axis=%d, numPoints=%d, positions[0]=%f\n",
-            driverName, functionName, axisNo_, numPoints, positions[0]);
+            driverName, functionName, axisNo_, (int)numPoints, positions[0]);
 
   if (numPoints > pC_->maxProfilePoints_) return asynError;
 
-  status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
-  status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorOffset_, &offset);
-  status |= pC_->getIntegerParam(axisNo_, pC_->profileMotorDirection_, &direction);
+  status |= pC_->getDoubleParam(axisNo_, pC_->motorRecResolution_, &resolution);
+  status |= pC_->getDoubleParam(axisNo_, pC_->motorRecOffset_, &offset);
+  status |= pC_->getIntegerParam(axisNo_, pC_->motorRecDirection_, &direction);
   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
             "%s:%s: axis=%d, status=%d, offset=%f direction=%d, resolution=%f\n",
             driverName, functionName, axisNo_, status, offset, direction, resolution);
@@ -418,9 +418,9 @@ asynStatus asynMotorAxis::readbackProfile()
   int status=0;
   //static const char *functionName = "readbackProfile";
 
-  status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorResolution_, &resolution);
-  status |= pC_->getDoubleParam(axisNo_, pC_->profileMotorOffset_, &offset);
-  status |= pC_->getIntegerParam(axisNo_, pC_->profileMotorDirection_, &direction);
+  status |= pC_->getDoubleParam(axisNo_, pC_->motorRecResolution_, &resolution);
+  status |= pC_->getDoubleParam(axisNo_, pC_->motorRecOffset_, &offset);
+  status |= pC_->getIntegerParam(axisNo_, pC_->motorRecDirection_, &direction);
   status |= pC_->getIntegerParam(0, pC_->profileNumReadbacks_, &numReadbacks);
   if (status) return asynError;
   
