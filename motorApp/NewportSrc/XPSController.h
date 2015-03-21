@@ -25,11 +25,17 @@ USAGE...        Newport XPS EPICS asyn motor device driver
 #define MAX_SETTLING_TIMES 4
 static const double positionComparePulseWidths[MAX_PULSE_WIDTHS]     = {0.2,   1.0, 2.5, 10.0};
 static const double positionCompareSettlingTimes[MAX_SETTLING_TIMES] = {0.075, 1.0, 4.0, 12.0};
-
+typedef enum {
+  XPSPositionCompareModeDisable,
+  XPSPositionCompareModePulse,
+  XPSPositionCompareModeAquadBWindowed,
+  XPSPositionCompareModeAquadBAlways
+} XPSPositionCompareMode_t;
+  
 // drvInfo strings for extra parameters that the XPS controller supports
 #define XPSMinJerkString                      "XPS_MIN_JERK"
 #define XPSMaxJerkString                      "XPS_MAX_JERK"
-#define XPSPositionCompareEnableString        "XPS_POSITION_COMPARE_ENABLE"
+#define XPSPositionCompareModeString          "XPS_POSITION_COMPARE_MODE"
 #define XPSPositionCompareMinPositionString   "XPS_POSITION_COMPARE_MIN_POSITION"
 #define XPSPositionCompareMaxPositionString   "XPS_POSITION_COMPARE_MAX_POSITION"
 #define XPSPositionCompareStepSizeString      "XPS_POSITION_COMPARE_STEP_SIZE"
@@ -93,7 +99,7 @@ class epicsShareClass XPSController : public asynMotorController {
   #define FIRST_XPS_PARAM XPSMinJerk_
   int XPSMinJerk_;
   int XPSMaxJerk_;
-  int XPSPositionCompareEnable_;
+  int XPSPositionCompareMode_;
   int XPSPositionCompareMinPosition_;
   int XPSPositionCompareMaxPosition_;
   int XPSPositionCompareStepSize_;
