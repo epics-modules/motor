@@ -966,7 +966,6 @@ asynStatus XPSAxis::getPositionCompare()
   double minPosition=0, maxPosition=0, stepSize=0, pulseWidth, settlingTime;
   static const char *functionName = "getPositionCompare";
   
-  setIntegerParam(pC_->XPSPositionCompareMode_,  XPSPositionCompareModeDisable);
   status = PositionerPositionComparePulseParametersGet(pollSocket_, positionerName_, &pulseWidth, &settlingTime);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR,
