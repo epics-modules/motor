@@ -7,7 +7,7 @@ display {
 	object {
 		x=428
 		y=115
-		width=850
+		width=880
 		height=140
 	}
 	clr=14
@@ -133,7 +133,7 @@ polyline {
 	object {
 		x=2
 		y=34
-		width=850
+		width=880
 		height=0
 	}
 	"basic attribute" {
@@ -142,22 +142,8 @@ polyline {
 	}
 	points {
 		(2,34)
-		(852,34)
+		(882,34)
 	}
-}
-text {
-	object {
-		x=320
-		y=56
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Mode"
-	align="horiz. centered"
 }
 text {
 	object {
@@ -173,350 +159,364 @@ text {
 	textix="Enable"
 	align="horiz. centered"
 }
-text {
-	object {
-		x=425
-		y=56
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Position"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=530
-		y=56
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Size"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=320
-		y=40
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Minimum"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=425
-		y=40
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Maximum"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=530
-		y=40
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Step"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=635
-		y=56
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Width (us)"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=635
-		y=40
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Pulse"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=740
-		y=56
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Time (us)"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=740
-		y=40
-		width=100
-		height=20
-	}
-	"basic attribute" {
-		clr=54
-		fill="outline"
-	}
-	textix="Settling"
-	align="horiz. centered"
-}
-composite {
+rectangle {
 	object {
 		x=5
 		y=80
-		width=840
+		width=870
 		height=55
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+}
+"text update" {
+	object {
+		x=10
+		y=110
+		width=200
+		height=20
+	}
+	monitor {
+		chan="$(P)$(M1).DESC"
+		clr=14
+		bclr=45
+	}
+	limits {
+	}
+}
+menu {
+	object {
+		x=215
+		y=110
+		width=130
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareMode"
+		clr=14
+		bclr=51
+	}
+}
+"text update" {
+	object {
+		x=215
+		y=88
+		width=130
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareMode_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=560
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareStepSize"
+		clr=14
+		bclr=51
+	}
+	clrmod="discrete"
+	limits {
+	}
+}
+menu {
+	object {
+		x=665
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionComparePulseWidth"
+		clr=14
+		bclr=51
+	}
+}
+menu {
+	object {
+		x=770
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareSettlingTime"
+		clr=14
+		bclr=51
+	}
+}
+"text update" {
+	object {
+		x=560
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareStepSize_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=665
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionComparePulseWidth_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=770
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareSettlingTime_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=350
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareMinPosition"
+		clr=14
+		bclr=51
+	}
+	clrmod="discrete"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=350
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareMinPosition_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=455
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareMaxPosition"
+		clr=14
+		bclr=51
+	}
+	clrmod="discrete"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=455
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareMaxPosition_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+composite {
+	object {
+		x=350
+		y=40
+		width=520
+		height=36
 	}
 	"composite name"=""
 	children {
-		rectangle {
+		text {
 			object {
-				x=5
-				y=80
-				width=840
-				height=55
+				x=350
+				y=56
+				width=100
+				height=20
 			}
 			"basic attribute" {
-				clr=14
+				clr=54
 				fill="outline"
 			}
-		}
-		"text update" {
-			object {
-				x=10
-				y=110
-				width=200
-				height=20
-			}
-			monitor {
-				chan="$(P)$(M1).DESC"
-				clr=14
-				bclr=45
-			}
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=320
-				y=110
-				width=100
-				height=20
-			}
-			control {
-				chan="$(P)$(M1)PositionCompareMinPosition"
-				clr=14
-				bclr=51
-			}
-			clrmod="discrete"
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=425
-				y=110
-				width=100
-				height=20
-			}
-			control {
-				chan="$(P)$(M1)PositionCompareMaxPosition"
-				clr=14
-				bclr=51
-			}
-			clrmod="discrete"
-			limits {
-			}
-		}
-		menu {
-			object {
-				x=215
-				y=110
-				width=100
-				height=20
-			}
-			control {
-				chan="$(P)$(M1)PositionCompareMode"
-				clr=14
-				bclr=51
-			}
-		}
-		"text entry" {
-			object {
-				x=530
-				y=110
-				width=100
-				height=20
-			}
-			control {
-				chan="$(P)$(M1)PositionCompareStepSize"
-				clr=14
-				bclr=51
-			}
-			clrmod="discrete"
-			limits {
-			}
-		}
-		menu {
-			object {
-				x=635
-				y=110
-				width=100
-				height=20
-			}
-			control {
-				chan="$(P)$(M1)PositionComparePulseWidth"
-				clr=14
-				bclr=51
-			}
-		}
-		menu {
-			object {
-				x=740
-				y=110
-				width=100
-				height=20
-			}
-			control {
-				chan="$(P)$(M1)PositionCompareSettlingTime"
-				clr=14
-				bclr=51
-			}
-		}
-		"text update" {
-			object {
-				x=215
-				y=88
-				width=100
-				height=18
-			}
-			monitor {
-				chan="$(P)$(M1)PositionCompareMode_RBV"
-				clr=54
-				bclr=4
-			}
+			textix="Mode"
 			align="horiz. centered"
-			limits {
-			}
 		}
-		"text update" {
+		text {
 			object {
-				x=320
-				y=88
+				x=455
+				y=56
 				width=100
-				height=18
+				height=20
 			}
-			monitor {
-				chan="$(P)$(M1)PositionCompareMinPosition_RBV"
+			"basic attribute" {
 				clr=54
-				bclr=4
+				fill="outline"
 			}
+			textix="Position"
 			align="horiz. centered"
-			limits {
-			}
 		}
-		"text update" {
+		text {
 			object {
-				x=425
-				y=88
+				x=560
+				y=56
 				width=100
-				height=18
+				height=20
 			}
-			monitor {
-				chan="$(P)$(M1)PositionCompareMaxPosition_RBV"
+			"basic attribute" {
 				clr=54
-				bclr=4
+				fill="outline"
 			}
+			textix="Size"
 			align="horiz. centered"
-			limits {
-			}
 		}
-		"text update" {
+		text {
 			object {
-				x=530
-				y=88
+				x=350
+				y=40
 				width=100
-				height=18
+				height=20
 			}
-			monitor {
-				chan="$(P)$(M1)PositionCompareStepSize_RBV"
+			"basic attribute" {
 				clr=54
-				bclr=4
+				fill="outline"
 			}
+			textix="Minimum"
 			align="horiz. centered"
-			limits {
-			}
 		}
-		"text update" {
+		text {
 			object {
-				x=635
-				y=88
+				x=455
+				y=40
 				width=100
-				height=18
+				height=20
 			}
-			monitor {
-				chan="$(P)$(M1)PositionComparePulseWidth_RBV"
+			"basic attribute" {
 				clr=54
-				bclr=4
+				fill="outline"
 			}
+			textix="Maximum"
 			align="horiz. centered"
-			limits {
-			}
 		}
-		"text update" {
+		text {
 			object {
-				x=740
-				y=88
+				x=560
+				y=40
 				width=100
-				height=18
+				height=20
 			}
-			monitor {
-				chan="$(P)$(M1)PositionCompareSettlingTime_RBV"
+			"basic attribute" {
 				clr=54
-				bclr=4
+				fill="outline"
 			}
+			textix="Step"
 			align="horiz. centered"
-			limits {
+		}
+		text {
+			object {
+				x=665
+				y=56
+				width=100
+				height=20
 			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Width (us)"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=665
+				y=40
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Pulse"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=770
+				y=56
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Time (us)"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=770
+				y=40
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Settling"
+			align="horiz. centered"
 		}
 	}
 }
