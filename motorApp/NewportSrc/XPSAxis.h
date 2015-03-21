@@ -60,7 +60,11 @@ class epicsShareClass XPSAxis : public asynMotorAxis
   int isInGroup();
   asynStatus setPID(const double * value, int pidoption);
   asynStatus getPID();
-  asynStatus setPIDValue(const double * value, int pidoption); 
+  asynStatus setPIDValue(const double * value, int pidoption);
+  double motorRecPositionToXPSPosition(double motorRecPosition);
+  double XPSPositionToMotorRecPosition(double XPSPosition);
+  double motorRecStepToXPSStep(double motorRecStep);
+  double XPSStepToMotorRecStep(double XPSStep);
 
   /* Wrapper functions for the verbose PositionerCorrector functions. */
   asynStatus PositionerCorrectorPIPositionGet();
