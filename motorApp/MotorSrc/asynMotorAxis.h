@@ -2,7 +2,7 @@
  * 
  * Mark Rivers
  *
- * This file defines the base class for an asynMotoAxis.  It is the class
+ * This file defines the base class for an asynMotorAxis.  It is the class
  * from which real motor axes are derived.
  */
 #ifndef asynMotorAxis_H
