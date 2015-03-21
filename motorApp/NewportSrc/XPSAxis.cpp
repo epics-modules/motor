@@ -963,7 +963,7 @@ asynStatus XPSAxis::getPositionCompare()
   bool enable;
   int status;
   int i;
-  double minPosition, maxPosition, stepSize, pulseWidth, settlingTime;
+  double minPosition=0, maxPosition=0, stepSize=0, pulseWidth, settlingTime;
   static const char *functionName = "getPositionCompare";
   
   setIntegerParam(pC_->XPSPositionCompareMode_,  XPSPositionCompareModeDisable);
@@ -975,22 +975,22 @@ asynStatus XPSAxis::getPositionCompare()
     return asynError;
   }
   status = PositionerPositionCompareGet(pollSocket_, positionerName_, &minPosition, &maxPosition, &stepSize, &enable);
-  if (status) {
-    asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-              "%s:%s: [%s,%d]: error calling PositionerPositionCompareGet status=%d\n",
-               driverName, functionName, pC_->portName, axisNo_, status);
-    return asynError;
+  if (status == 0) {
+    setDoubleParam(pC_->XPSPositionCompareMinPosition_,  minPosition);
+    setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  maxPosition);
+    setDoubleParam(pC_->XPSPositionCompareStepSize_,     stepSize);
   } 
-  if (enable) setIntegerParam(pC_->XPSPositionCompareMode_,  XPSPositionCompareModePulse);
+  status = PositionerPositionCompareAquadBWindowedGet(pollSocket_, positionerName_, &minPosition, &maxPosition, &enable);
+  if (status == 0) {
+    setDoubleParam(pC_->XPSPositionCompareMinPosition_,  minPosition);
+    setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  maxPosition);
+  } 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
             "%s:%s: set XPS %s, axis %d "
             " enable=%d, minPosition=%f, maxPosition=%f, stepSize=%f, pulseWidth=%f, settlingTime=%f\n",
              driverName, functionName, pC_->portName, axisNo_,
              enable, minPosition, maxPosition, stepSize, pulseWidth, settlingTime);
 
-  setDoubleParam(pC_->XPSPositionCompareMinPosition_,  minPosition);
-  setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  maxPosition);
-  setDoubleParam(pC_->XPSPositionCompareStepSize_,     stepSize);
   for (i=0; i<MAX_PULSE_WIDTHS; i++) {
     if (fabs(pulseWidth - positionComparePulseWidths[i]) < 0.001) break;
   }
