@@ -870,6 +870,64 @@ asynStatus XPSAxis::setClosedLoop(bool closedLoop)
   return (asynStatus)status;
 }
 
+double XPSAxis::motorRecPositionToXPSPosition(double motorRecPosition)
+{
+  int direction;
+  double offset, resolution, XPSPosition;
+  
+  pC_->getDoubleParam (axisNo_, pC_->motorRecResolution_,   &resolution);
+  pC_->getDoubleParam (axisNo_, pC_->motorRecOffset_,       &offset);
+  pC_->getIntegerParam(axisNo_, pC_->motorRecDirection_,    &direction);
+  
+  if (direction != 0) resolution = -resolution;
+  if (resolution == 0) resolution = 1;
+  XPSPosition = (motorRecPosition - offset) / resolution * stepSize_;
+  return XPSPosition;
+}
+
+double XPSAxis::XPSPositionToMotorRecPosition(double XPSPosition)
+{
+  int direction;
+  double offset, resolution, motorRecPosition;
+  
+  pC_->getDoubleParam (axisNo_, pC_->motorRecResolution_,   &resolution);
+  pC_->getDoubleParam (axisNo_, pC_->motorRecOffset_,       &offset);
+  pC_->getIntegerParam(axisNo_, pC_->motorRecDirection_,    &direction);
+  
+  if (direction != 0) resolution = -resolution;
+  if (stepSize_ == 0) stepSize_ = 1;
+  motorRecPosition = XPSPosition * resolution / stepSize_ + offset;
+  return motorRecPosition;
+}
+
+double XPSAxis::motorRecStepToXPSStep(double motorRecStep)
+{
+  int direction;
+  double resolution, XPSStep;
+  
+  pC_->getDoubleParam (axisNo_, pC_->motorRecResolution_,   &resolution);
+  pC_->getIntegerParam(axisNo_, pC_->motorRecDirection_,    &direction);
+  
+  if (direction != 0) resolution = -resolution;
+  if (resolution == 0) resolution = 1;
+  XPSStep = motorRecStep / resolution * stepSize_;
+  return XPSStep;
+}
+
+double XPSAxis::XPSStepToMotorRecStep(double XPSStep)
+{
+  int direction;
+  double resolution, motorRecStep;
+  
+  pC_->getDoubleParam (axisNo_, pC_->motorRecResolution_,   &resolution);
+  pC_->getIntegerParam(axisNo_, pC_->motorRecDirection_,    &direction);
+  
+  if (direction != 0) resolution = -resolution;
+  if (stepSize_ == 0) stepSize_ = 1;
+  motorRecStep = XPSStep * resolution / stepSize_;
+  return motorRecStep;
+}
+
 asynStatus XPSAxis::setPositionCompare()
 {
   int mode;
@@ -887,6 +945,11 @@ asynStatus XPSAxis::setPositionCompare()
   pC_->getIntegerParam(axisNo_, pC_->XPSPositionCompareSettlingTime_, &itemp);
   settlingTime = positionCompareSettlingTimes[itemp];
   
+  // minPosition and maxPosition are in motor record units. Convert to XPS units
+  minPosition = motorRecPositionToXPSPosition(minPosition);
+  maxPosition = motorRecPositionToXPSPosition(maxPosition);
+  stepSize = fabs(motorRecStepToXPSStep(stepSize));
+
   // Disable the position compare so we can set parameters
   status = PositionerPositionCompareDisable(pollSocket_, positionerName_);
   if (status) {
@@ -975,14 +1038,14 @@ asynStatus XPSAxis::getPositionCompare()
   }
   status = PositionerPositionCompareGet(pollSocket_, positionerName_, &minPosition, &maxPosition, &stepSize, &enable);
   if (status == 0) {
-    setDoubleParam(pC_->XPSPositionCompareMinPosition_,  minPosition);
-    setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  maxPosition);
-    setDoubleParam(pC_->XPSPositionCompareStepSize_,     stepSize);
+    setDoubleParam(pC_->XPSPositionCompareMinPosition_,  XPSPositionToMotorRecPosition(minPosition));
+    setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  XPSPositionToMotorRecPosition(maxPosition));
+    setDoubleParam(pC_->XPSPositionCompareStepSize_,     XPSStepToMotorRecStep(stepSize));
   } 
   status = PositionerPositionCompareAquadBWindowedGet(pollSocket_, positionerName_, &minPosition, &maxPosition, &enable);
   if (status == 0) {
-    setDoubleParam(pC_->XPSPositionCompareMinPosition_,  minPosition);
-    setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  maxPosition);
+    setDoubleParam(pC_->XPSPositionCompareMinPosition_,  XPSPositionToMotorRecPosition(minPosition));
+    setDoubleParam(pC_->XPSPositionCompareMaxPosition_,  XPSPositionToMotorRecPosition(maxPosition));
   } 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
             "%s:%s: set XPS %s, axis %d "
