@@ -968,8 +968,9 @@ asynStatus XPSAxis::setPositionCompare()
   status = PositionerPositionComparePulseParametersSet(pollSocket_, positionerName_, pulseWidth, settlingTime);
   if (status) {
     asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-              "%s:%s: [%s,%d]: error calling PositionerPositionComparePulseParametersSet status=%d\n",
-               driverName, functionName, pC_->portName, axisNo_, status);
+              "%s:%s: [%s,%d]: error calling PositionerPositionComparePulseParametersSet"
+              " status=%d, pulseWidth=%f, settlingTime=%f\n",
+               driverName, functionName, pC_->portName, axisNo_, status, pulseWidth, settlingTime);
     return asynError;
   }
   switch (mode) {
@@ -980,8 +981,9 @@ asynStatus XPSAxis::setPositionCompare()
       status = PositionerPositionCompareSet(pollSocket_, positionerName_, minPosition, maxPosition, stepSize);
       if (status) {
         asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareSet status=%d\n",
-                   driverName, functionName, pC_->portName, axisNo_, status);
+                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareSet"
+                  " status=%d, minPosition=%f, maxPosition=%f, stepSize=%f\n",
+                   driverName, functionName, pC_->portName, axisNo_, status, minPosition, maxPosition, stepSize);
         return asynError;
       }
       status = PositionerPositionCompareEnable(pollSocket_, positionerName_);
@@ -997,8 +999,9 @@ asynStatus XPSAxis::setPositionCompare()
       status = PositionerPositionCompareAquadBWindowedSet(pollSocket_, positionerName_, minPosition, maxPosition);
       if (status) {
         asynPrint(pasynUser_, ASYN_TRACE_ERROR,
-                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareAquadBWindowedSet status=%d\n",
-                   driverName, functionName, pC_->portName, axisNo_, status);
+                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareAquadBWindowedSet"
+                  " status=%d, minPosition=%f, maxPosition=%f\n",
+                   driverName, functionName, pC_->portName, axisNo_, status, minPosition, maxPosition);
         return asynError;
       }
       status = PositionerPositionCompareEnable(pollSocket_, positionerName_);
