@@ -156,7 +156,7 @@ text {
 		clr=54
 		fill="outline"
 	}
-	textix="Position"
+	textix="Mode"
 	align="horiz. centered"
 }
 text {
@@ -375,7 +375,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M1)PositionCompareEnable"
+				chan="$(P)$(M1)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -430,7 +430,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M1)PositionCompareEnable_RBV"
+				chan="$(P)$(M1)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}

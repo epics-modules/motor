@@ -170,7 +170,7 @@ text {
 		clr=54
 		fill="outline"
 	}
-	textix="Enable"
+	textix="Mode"
 	align="horiz. centered"
 }
 text {
@@ -375,7 +375,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M1)PositionCompareEnable"
+				chan="$(P)$(M1)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -430,7 +430,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M1)PositionCompareEnable_RBV"
+				chan="$(P)$(M1)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
@@ -596,7 +596,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M1)PositionCompareEnable"
+				chan="$(P)$(M1)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -651,7 +651,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M1)PositionCompareEnable_RBV"
+				chan="$(P)$(M1)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
@@ -806,7 +806,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M2)PositionCompareEnable"
+				chan="$(P)$(M2)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -861,7 +861,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M2)PositionCompareEnable_RBV"
+				chan="$(P)$(M2)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
@@ -1027,7 +1027,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M3)PositionCompareEnable"
+				chan="$(P)$(M3)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -1082,7 +1082,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M3)PositionCompareEnable_RBV"
+				chan="$(P)$(M3)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
@@ -1248,7 +1248,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M4)PositionCompareEnable"
+				chan="$(P)$(M4)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -1303,7 +1303,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M4)PositionCompareEnable_RBV"
+				chan="$(P)$(M4)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
@@ -1469,7 +1469,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M5)PositionCompareEnable"
+				chan="$(P)$(M5)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -1524,7 +1524,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M5)PositionCompareEnable_RBV"
+				chan="$(P)$(M5)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
@@ -1690,7 +1690,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M6)PositionCompareEnable"
+				chan="$(P)$(M6)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -1745,7 +1745,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M6)PositionCompareEnable_RBV"
+				chan="$(P)$(M6)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
@@ -1911,7 +1911,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M7)PositionCompareEnable"
+				chan="$(P)$(M7)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -1966,7 +1966,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M7)PositionCompareEnable_RBV"
+				chan="$(P)$(M7)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
@@ -2132,7 +2132,7 @@ composite {
 				height=20
 			}
 			control {
-				chan="$(P)$(M8)PositionCompareEnable"
+				chan="$(P)$(M8)PositionCompareMode"
 				clr=14
 				bclr=51
 			}
@@ -2187,7 +2187,7 @@ composite {
 				height=18
 			}
 			monitor {
-				chan="$(P)$(M8)PositionCompareEnable_RBV"
+				chan="$(P)$(M8)PositionCompareMode_RBV"
 				clr=54
 				bclr=4
 			}
