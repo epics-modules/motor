@@ -10,8 +10,6 @@ dbLoadTemplate "motor.substitutions.xps6"
 
 dbLoadTemplate "XPSAux.substitutions"
 
-dbLoadTemplate "XPSPositionCompare.substitutions"
-
 # asyn port, IP address, IP port, number of axes, 
 # active poll period (ms), idle poll period (ms), 
 # enable set position, set position settling time (ms)
@@ -28,7 +26,7 @@ XPSAuxConfig("XPS_AUX1", "164.54.164.24", 5001, 50)
 XPSCreateAxis("XPS1",0,"Group1.Pos",   "10000")
 XPSCreateAxis("XPS1",1,"Group2.Pos",   "10000")
 XPSCreateAxis("XPS1",2,"Group3.Pos",   "20000")
-XPSCreateAxis("XPS1",3,"Group4.Pos",   "1000")
+XPSCreateAxis("XPS1",3,"Group4.Pos",   "2000")
 
 # XPS asyn port,  max points, FTP username, FTP password
 # Note: this must be done after configuring axes
