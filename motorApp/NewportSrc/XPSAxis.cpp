@@ -931,6 +931,13 @@ asynStatus XPSAxis::setPositionCompare()
                    driverName, functionName, pC_->portName, axisNo_, status);
         return asynError;
       }
+      status = PositionerPositionCompareEnable(pollSocket_, positionerName_);
+      if (status) {
+        asynPrint(pasynUser_, ASYN_TRACE_ERROR,
+                  "%s:%s: [%s,%d]: error calling PositionerPositionCompareEnable status=%d\n",
+                   driverName, functionName, pC_->portName, axisNo_, status);
+        return asynError;
+      }
       break;
 
     case XPSPositionCompareModeAquadBAlways:
