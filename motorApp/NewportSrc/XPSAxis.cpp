@@ -903,11 +903,11 @@ asynStatus XPSAxis::setPositionCompare()
     return asynError;
   }
   switch (mode) {
-     case XPSPositionCompareModeDisable:
+    case XPSPositionCompareModeDisable:
       break;
   
-     case XPSPositionCompareModePulse:
-      status = PositionerPositionCompareAquadBWindowedSet(pollSocket_, positionerName_, minPosition, maxPosition);
+    case XPSPositionCompareModePulse:
+      status = PositionerPositionCompareSet(pollSocket_, positionerName_, minPosition, maxPosition, stepSize);
       if (status) {
         asynPrint(pasynUser_, ASYN_TRACE_ERROR,
                   "%s:%s: [%s,%d]: error calling PositionerPositionCompareSet status=%d\n",
@@ -975,8 +975,8 @@ asynStatus XPSAxis::getPositionCompare()
     return asynError;
   } 
   if (enable) setIntegerParam(pC_->XPSPositionCompareMode_,  XPSPositionCompareModePulse);
-   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
-            "%s:%s: set XPS %s, axis %d positionCompareGet,"
+  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
+            "%s:%s: set XPS %s, axis %d "
             " enable=%d, minPosition=%f, maxPosition=%f, stepSize=%f, pulseWidth=%f, settlingTime=%f\n",
              driverName, functionName, pC_->portName, axisNo_,
              enable, minPosition, maxPosition, stepSize, pulseWidth, settlingTime);
