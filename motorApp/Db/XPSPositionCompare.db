@@ -15,7 +15,7 @@ record(mbbo,"$(P)$(R)PositionCompareMode") {
     field(THST, "AquadB always")
 }
 
-record(bi,"$(P)$(R)PositionCompareMode_RBV") {
+record(mbbi,"$(P)$(R)PositionCompareMode_RBV") {
     field(DTYP, "asynInt32")
     field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MODE")
     field(ZRVL, "0")
