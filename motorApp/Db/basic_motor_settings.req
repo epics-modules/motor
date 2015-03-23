@@ -47,4 +47,6 @@ $(P)$(M).PREM
 $(P)$(M).POST
 $(P)$(M).FLNK
 $(P)$(M).RMOD
+$(P)$(M).ADEL
+$(P)$(M).MDEL
 
