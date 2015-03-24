@@ -24,7 +24,7 @@ SNCSEQ=$(SUPPORT)/seq/2-1-11
 BUSY=$(SUPPORT)/busy/1-6-1
 CALC=$(SUPPORT)/calc/3-4
 
-AUTOSAVE=$(SUPPORT)/autosave/R5_4_2
+AUTOSAVE=$(SUPPORT)/autosave/R5_6_1
 
 ONCRPC=$(SUPPORT)/oncrpc/2
 WAIT=$(SUPPORT)/calc/2-9
