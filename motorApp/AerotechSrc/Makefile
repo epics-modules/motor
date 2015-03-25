@@ -18,11 +18,15 @@ SRCS += drvA3200Asyn.cc
 # EnsemblePSOFly.db support
 SRCS += concatString.c
 
+ifdef SNCSEQ
 # Ensemble trajectory support
 SRCS += EnsembleTrajectoryScan.st
+endif
 
 Aerotech_LIBS += motor asyn
+ifdef SNCSEQ
 Aerotech_LIBS += seq pv
+endif
 Aerotech_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
