@@ -19,7 +19,9 @@ HeadURL:        $URL$
 #include <stdlib.h>
 #include <vector>
 #include <math.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include <drvAsynIPPort.h>
 #include <iocsh.h>
