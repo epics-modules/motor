@@ -40,7 +40,6 @@ private:
                                    *   Abbreviated because it is used very frequently */
   asynStatus getClosedLoop(bool *closedLoop);
   double currentPosition_;
-  double positionOffset_;
   double encoderIncrement_;
   double interpolationFactor_;
   double stepSize_;

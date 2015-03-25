@@ -169,7 +169,7 @@ AG_CONEXAxis* AG_CONEXController::getAxis(int axisNo)
 AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
   : asynMotorAxis(pC, 0),
     pC_(pC), 
-    currentPosition_(0.), positionOffset_(0.)
+    currentPosition_(0.)
 {
   static const char *functionName = "AG_CONEXAxis::AG_CONEXAxis";
 
@@ -255,11 +255,11 @@ void AG_CONEXAxis::report(FILE *fp, int level)
     }
 
     fprintf(fp, "  stageID=%s\n"
-                "  currentPosition=%f, positionOffset=%f, encoderIncrement=%f\n"
+                "  currentPosition=%f, encoderIncrement=%f\n"
                 "  interpolationFactor=%f, stepSize=%f, lowLimit=%f, highLimit=%f\n"
                 "  KP=%f, KI=%f, KD/LF=%f\n",
             stageID_,
-            currentPosition_, positionOffset_, encoderIncrement_, 
+            currentPosition_, encoderIncrement_, 
             interpolationFactor_, stepSize_, lowLimit_, highLimit_,
             KP_, KI_, LF_);
   }
@@ -284,7 +284,7 @@ asynStatus AG_CONEXAxis::move(double position, int relative, double minVelocity,
   if (relative) {
     sprintf(pC_->outString_, "%dPR%f", pC_->controllerID_, position*stepSize_);
   } else {
-    sprintf(pC_->outString_, "%dPA%f", pC_->controllerID_, (position-positionOffset_)*stepSize_);
+    sprintf(pC_->outString_, "%dPA%f", pC_->controllerID_, position*stepSize_);
   }
   status = pC_->writeCONEX();
   return status;
@@ -338,7 +338,6 @@ asynStatus AG_CONEXAxis::setPosition(double position)
 {
   //static const char *functionName = "AG_CONEXAxis::setPosition";
 
-  positionOffset_ = position - currentPosition_;
   return asynSuccess;
 }
 
@@ -440,7 +439,7 @@ asynStatus AG_CONEXAxis::poll(bool *moving)
   if (comStatus) goto skip;
   // The response string is of the form "1TPxxx"
   position = atof(&pC_->inString_[3]);
-  currentPosition_ = (position + positionOffset_)/stepSize_;
+  currentPosition_ = position /stepSize_;
   setDoubleParam(pC_->motorPosition_, currentPosition_);
 
   // Read the moving status of this motor
