@@ -6,6 +6,9 @@ include $(TOP)/configure/CONFIG
 #!USR_CXXFLAGS += -DDEBUG
 
 DBD += devAerotech.dbd
+ifdef SNCSEQ
+DBD += devAerotechSeq.dbd
+endif
 
 LIBRARY_IOC = Aerotech
 

@@ -10,4 +10,3 @@ driver(motorA3200)
 
 registrar(AerotechRegister)
 registrar(concatStringRegister)
-registrar(EnsembleTrajectoryScanRegistrar)

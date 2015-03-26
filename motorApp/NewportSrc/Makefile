@@ -14,6 +14,9 @@ USR_CPPFLAGS_Linux += -Wno-write-strings
 INC += XPS_C8_drivers.h
 
 DBD += devNewport.dbd
+ifdef SNCSEQ
+DBD += devNewportSeq.dbd
+endif
 
 LIBRARY_IOC = Newport
 
