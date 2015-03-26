@@ -178,6 +178,15 @@ Modification Log for R6-10
         Files modified: motorApp/MotorSrc/motorRecord.cc
                         motorApp/MotorSrc/motorRecord.dbd
 
+4) Fix for build errors when SNCSEQ isn't defined in the RELEASE file.
+
+	Files added: 	motorApp/AerotechSrc/devAerotechSeq.dbd
+			motorApp/NewportSrc/devNewportSeq.dbd
+	Files modified:	motorApp/AerotechSrc/Makefile
+			motorApp/AerotechSrc/devAerotech.dbd
+			motorApp/NewportSrc/Makefile
+			motorApp/NewportSrc/devNewport.dbd
+
 
 Modification Log for R6-9
 =========================
