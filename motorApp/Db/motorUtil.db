@@ -43,15 +43,21 @@ record(calcout, "$(P)_MOVING")
   field(VAL, "1")
   field(OOPT, "On Change")
   field(DOPT, "Use OCAL")
-  field(OCAL, "(1-2*A)")
-  field(OUT, "$(P)_SEQ.DO1 PP")
+  field(OCAL, "A = 0 ? 1 : 0")
+  field(OUT, "$(P)_FAN PP")
 }
 
-# need to use an SSEQ with WAIT to make sure we do not loose a PUT
-record(sseq, "$(P)_SEQ")
+record(dfanout, "$(P)_FAN")
 {
-    field(LNK1, "$(PVPREFIX)CS:MOT:MOVING:SP CA")
-    field(WAIT1, "Wait")
+    field(OMSL, "supervisory")
+    field(SELM, "All")
+$(IFDMC01)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.A PP")
+$(IFDMC02)  field(OUTB, "$(PVPREFIX)CS:MOT:MOVING.B PP")
+$(IFDMC03)  field(OUTC, "$(PVPREFIX)CS:MOT:MOVING.C PP")
+$(IFDMC04)  field(OUTD, "$(PVPREFIX)CS:MOT:MOVING.D PP")
+$(IFDMC05)  field(OUTE, "$(PVPREFIX)CS:MOT:MOVING.E PP")
+$(IFDMC06)  field(OUTF, "$(PVPREFIX)CS:MOT:MOVING.F PP")
+$(IFDMC07)  field(OUTG, "$(PVPREFIX)CS:MOT:MOVING.G PP")
 }
 
 # The number of motors moving in this IOC.
