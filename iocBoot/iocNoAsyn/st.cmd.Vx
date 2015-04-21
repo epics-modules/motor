@@ -63,7 +63,7 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 
 #!str = malloc(200);
 #!strcpy str, "AA; LMH,H,H,H,H,H,H,H;"
-#!strcat str, "AX LH PSO; AY LH PSO; AZ LL PSO; AT LL PSO; AU LL PSO; AV LL PSO; AR LL PSO; AS LL PSO;"
+#!strcat str, "AX LTH PSO; AY LTH PSO; AZ LTL PSO; AT LTL PSO; AU LTL PSO; AV LTL PSO; AR LTL PSO; AS LTL PSO;"
 #!MAXvConfig(0, str, 0, 0)
 #!free(str)
 
