@@ -26,19 +26,17 @@ record(calcout, "$(P)allstop:MONITOR") {
 
 # Indicates if all motors in this IOC are done moving.
 # Set by motorUtil when $(P)moving.VAL == 0.
-#record(bi, "$(P)alldone") {
-# note: have changed from "bi" to "bo" so can push output value properly 
-record(bo, "$(P)alldone") {
+record(bi, "$(P)alldone") {
   field(ZNAM, "moving")
   field(ONAM, "done")
   field(VAL,  "1")
   field(DESC, "All IOC motors done moving.")
-  field(OUT, "$(P)_MOVING.A PP")
 }
 
 record(calcout, "$(P)_MOVING")
 {
   field(SCAN, "Passive")
+  field(INPA, "$(P)alldone CP")
   field(CALC, "A")
   field(VAL, "1")
   field(OOPT, "On Change")
@@ -58,6 +56,15 @@ $(IFDMC04)  field(OUTD, "$(PVPREFIX)CS:MOT:MOVING.D PP")
 $(IFDMC05)  field(OUTE, "$(PVPREFIX)CS:MOT:MOVING.E PP")
 $(IFDMC06)  field(OUTF, "$(PVPREFIX)CS:MOT:MOVING.F PP")
 $(IFDMC07)  field(OUTG, "$(PVPREFIX)CS:MOT:MOVING.G PP")
+}
+
+# force periodoc processing to catch up any missing, shouldn't
+# be necessaryu but no harm to be careful 
+record(fanout, "$(P)_FAN2")
+{
+    field(SCAN, "10 second")
+    field(SELM, "All")
+    field(LNK1, "$(P)_MOVING.PROC")
 }
 
 # The number of motors moving in this IOC.
