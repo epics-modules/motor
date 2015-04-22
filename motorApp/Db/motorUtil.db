@@ -33,13 +33,14 @@ record(bi, "$(P)alldone") {
   field(DESC, "All IOC motors done moving.")
 }
 
+# process "Every Time" so value can be re-applied by periodic processing by _FAN2
 record(calcout, "$(P)_MOVING")
 {
   field(SCAN, "Passive")
   field(INPA, "$(P)alldone CP")
   field(CALC, "A")
   field(VAL, "1")
-  field(OOPT, "On Change")
+  field(OOPT, "Every Time")
   field(DOPT, "Use OCAL")
   field(OCAL, "A = 0 ? 1 : 0")
   field(OUT, "$(P)_FAN PP")
