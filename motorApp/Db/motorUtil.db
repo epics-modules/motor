@@ -50,13 +50,13 @@ record(dfanout, "$(P)_FAN")
 {
     field(OMSL, "supervisory")
     field(SELM, "All")
-$(IFDMC01)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.A PP")
-$(IFDMC02)  field(OUTB, "$(PVPREFIX)CS:MOT:MOVING.B PP")
-$(IFDMC03)  field(OUTC, "$(PVPREFIX)CS:MOT:MOVING.C PP")
-$(IFDMC04)  field(OUTD, "$(PVPREFIX)CS:MOT:MOVING.D PP")
-$(IFDMC05)  field(OUTE, "$(PVPREFIX)CS:MOT:MOVING.E PP")
-$(IFDMC06)  field(OUTF, "$(PVPREFIX)CS:MOT:MOVING.F PP")
-$(IFDMC07)  field(OUTG, "$(PVPREFIX)CS:MOT:MOVING.G PP")
+$(IFDMC01)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.A CA")
+$(IFDMC02)  field(OUTB, "$(PVPREFIX)CS:MOT:MOVING.B CA")
+$(IFDMC03)  field(OUTC, "$(PVPREFIX)CS:MOT:MOVING.C CA")
+$(IFDMC04)  field(OUTD, "$(PVPREFIX)CS:MOT:MOVING.D CA")
+$(IFDMC05)  field(OUTE, "$(PVPREFIX)CS:MOT:MOVING.E CA")
+$(IFDMC06)  field(OUTF, "$(PVPREFIX)CS:MOT:MOVING.F CA")
+$(IFDMC07)  field(OUTG, "$(PVPREFIX)CS:MOT:MOVING.G CA")
 }
 
 # force periodoc processing to catch up any missing, shouldn't
@@ -66,6 +66,8 @@ record(fanout, "$(P)_FAN2")
     field(SCAN, "10 second")
     field(SELM, "All")
     field(LNK1, "$(P)_MOVING.PROC")
+    field(SDIS, "$(P)_MOVING.PACT")
+    field(DISV, 1)
 }
 
 # The number of motors moving in this IOC.
