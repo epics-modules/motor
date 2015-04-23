@@ -72,7 +72,7 @@ typedef struct motor_pv_info
 
 
 /* ----- Global Variables ----- */
-volatile int motorUtil_debug = 0;
+int motorUtil_debug = 0;
 int numMotors = 0;
 /* ----- ---------------- ----- */
 
@@ -113,7 +113,6 @@ RTN_STATUS motorUtilInit(char *vme_name)
     return(status);
 }
 
-static CA_SYNC_GID moving_sync_gid; 
 
 static int motorUtil_task(void *arg)
 {
@@ -183,9 +182,6 @@ static int motorUtil_task(void *arg)
 	    status = pvMonitor(0, chid_allstop, -1);
 	}
     }
-    
-    SEVCHK ( ca_sg_create ( &moving_sync_gid ), "motorUtil: Sync group create failed" ); 
-
     
     /* Wait on a (never signalled) event here, rather than suspending the
        thread, so as not to show up in the thread list as "SUSPENDED", which
@@ -327,16 +323,15 @@ static void moving(int callback_motor_index, chid callback_chid,
             if (motorUtil_debug)
                 errlogPrintf("sending alldone = TRUE\n");
 
-            ca_sg_array_put(moving_sync_gid, DBR_SHORT, 1, chid_alldone, &done);
-//            ca_put(DBR_SHORT, chid_alldone, &done);
+            ca_put(DBR_SHORT, chid_alldone, &done);
             old_alldone_value = new_alldone_value;
         }
         else
         {
             if (motorUtil_debug)
                 errlogPrintf("sending alldone = FALSE\n");
-            ca_sg_array_put(moving_sync_gid, DBR_SHORT, 1, chid_alldone, &not_done);
-//            ca_put(DBR_SHORT, chid_alldone, &not_done);
+
+            ca_put(DBR_SHORT, chid_alldone, &not_done);
             old_alldone_value = new_alldone_value;
         }
     }
@@ -350,8 +345,7 @@ static void moving(int callback_motor_index, chid callback_chid,
             errlogPrintf("updating number of motors moving\n");
 
         /* give $(P)moving the appropriate value */
-        ca_sg_array_put(moving_sync_gid, DBR_LONG, 1, chid_moving, &numMotorsMoving);
-//        ca_put(DBR_LONG, chid_moving, &numMotorsMoving);
+        ca_put(DBR_LONG, chid_moving, &numMotorsMoving);
 	
 	/* Tell which motor's dmov changed */
 	sprintf(diffStr, "%c%s", diffChar, motorArray[callback_motor_index].name);
@@ -364,7 +358,6 @@ static void moving(int callback_motor_index, chid callback_chid,
     
     /* send the ca_puts */
     status = ca_flush_io();
-    status = ca_sg_block(moving_sync_gid, 1.0);
 }
 
 
