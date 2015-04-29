@@ -47,7 +47,13 @@ COMMONDBDS += phytron.dbd
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
 ifdef SNCSEQ
-WithAsyn_DBD += devSequencer.dbd
+	# seq-2-1 and earlier has devSequencer
+	ifeq (seq-2-1, $(findstring seq-2-1, $(SNCSEQ)))
+		WithAsyn_DBD += devSequencer.dbd
+	else ifeq (seq-2.1, $(findstring seq-2.1, $(SNCSEQ)))
+		WithAsyn_DBD += devSequencer.dbd
+	endif
+
 endif
 
 DBD += WithAsynVx.dbd
@@ -86,7 +92,15 @@ COMMONLIBS += motor
 WithAsyn_LIBS += $(COMMONLIBS)
 WithAsyn_LIBS += asyn
 ifdef SNCSEQ
-WithAsyn_LIBS += seqDev seq pv
+	# seq-2-1 and earlier has devSequencer
+	ifeq (seq-2-1, $(findstring seq-2-1, $(SNCSEQ)))
+		WithAsyn_LIBS += seqDev seq pv
+	else ifeq (seq-2.1, $(findstring seq-2.1, $(SNCSEQ)))
+		WithAsyn_LIBS += seqDev seq pv
+	else
+		# seq 2.2.
+		WithAsyn_LIBS += seq pv
+	endif
 endif
 WithAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
 
