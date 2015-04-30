@@ -16,23 +16,31 @@ HeadURL:        $URL$
 -----------------------------------------------------------------------------
 COPYRIGHT NOTICE
 -----------------------------------------------------------------------------
-Copyright (c) 2002 The University of Chicago, as Operator of Argonne
-National Laboratory.
+Copyright (c) 2002 The University of Chicago, as Operator of Argonne National Laboratory.
 Copyright (c) 2002 The Regents of the University of California, as
 Operator of Los Alamos National Laboratory.
-Synapps Versions 4-5
-and higher are distributed subject to a Software License Agreement found
+Synapps Versions 4-5 and higher are distributed subject to a Software License Agreement found
 in file LICENSE that is included with this distribution.
 -----------------------------------------------------------------------------
 * NOTES
 * -----
 * Verified with firmware:
 *      - 4.07.000
-*
+* 
+* A3200 Task Usage - This driver uses Task #2 for the ASCII Interface. Task #3 is used to clear Task #2 errors and
+*                    ABORT axis moves issued by Task #2. 
+* 
 * Modification Log:
 * -----------------
 *
 * .01 11-15-13 cjb Initialized from drvEnsembleAsyn.c (Aerotech)
+* .02 30-04-14 rls - Removed "Task number" argument from A3200AsynConfig and switched to using Task #2 for the ASCII 
+*                    Interface. Task #3 is used to clear Task #2 errors and ABORT axis moves issued by Task #2.
+*                  - Deleted duplicate A3200 Setup and Config arguments from AerotechRegister.cc.
+*                  - Switched from "LINEAR" TO "MOVE[ABS/INC]" commands.
+*                  - Added delays to motorAxisMove() and motorAxisVelocityMove() so controller has time to set 
+*                    MoveDone false before the 1st status update.
+*                  - Added axis name to "RAMP RATE" command.
 */
 
 #include <stddef.h>
@@ -145,7 +153,6 @@ typedef struct
     epicsEventId pollEventId;
     epicsMutexId sendReceiveMutex;
     AXIS_HDL pAxis;  /* array of axes */
-    epicsUInt32 taskNumber; /* the task number to use for motion commands */
 } A3200Controller;
 
 typedef struct motorAxisHandle
@@ -392,8 +399,9 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 
 static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
 {
-    int ret_status = MOTOR_AXIS_ERROR;
+    int task2state, task3state, ret_status = MOTOR_AXIS_ERROR;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
+    const char* TaskStateStr = "~STATUS (2, TaskState) (3, TaskState)";
 
     if (pAxis == NULL || pAxis->pController == NULL)
         return MOTOR_AXIS_ERROR;
@@ -403,19 +411,52 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     switch (function)
     {
         case motorAxisClosedLoop:
+            ret_status = sendAndReceive(pAxis->pController, (char *) TaskStateStr, inputBuff, sizeof(inputBuff));
+            if (ret_status != asynSuccess || inputBuff[0] != ASCII_ACK_CHAR)
+            {
+                motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
+                epicsMutexUnlock(pAxis->mutexId);
+                break;
+            }
+
+            sscanf(&inputBuff[1], "%d %d", &task2state, &task3state);
+            if (task2state == TASKSTATE_Idle)
+                sendAndReceive(pAxis->pController, "~INITQUEUE 2", inputBuff, sizeof(inputBuff));
+/*
+            if (task3state == TASKSTATE_Idle)
+                sendAndReceive(pController, "~INITQUEUE 3", inputBuff, sizeof(inputBuff));
+*/
             if (value == 0)
                 sprintf(outputBuff, "DISABLE %s", pAxis->axisName);
             else
             {
                 if (pAxis->lastFault)
                 {
-                    sprintf(outputBuff, "FAULTACK %s", pAxis->axisName);
+                    if (pAxis->lastFault == 52 || pAxis->lastFault == 78)
+                    {
+                        ret_status = sendAndReceive(pAxis->pController, (char *) "~TASK 3", inputBuff, sizeof(inputBuff));
+                        /* Prevent Task #3 from blocking during LINEAR commands. */
+                        ret_status = sendAndReceive(pAxis->pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
+                        ret_status = sendAndReceive(pAxis->pController, (char *) "ACKNOWLEDGEALL", inputBuff, sizeof(inputBuff));
+                        ret_status = sendAndReceive(pAxis->pController, (char *) "~TASK 2", inputBuff, sizeof(inputBuff));
+                        sprintf(outputBuff, "~INITQUEUE");
+                    }
+                    else
+                        sprintf(outputBuff, "FAULTACK %s", pAxis->axisName);
+
                     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+                    pAxis->lastFault = 0; /* Clear fault indicator. */
+                    motorParam->setInteger(pAxis->params, motorAxisProblem, 0);
                 }
                 sprintf(outputBuff, "ENABLE %s", pAxis->axisName);
             }
             ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+
+            /* Prevent Task #2 from blocking during LINEAR commands. */
+            ret_status = sendAndReceive(pAxis->pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
+
             break;
+
         default:
             PRINT(pAxis->logParam, TERROR, "motorAxisSetInteger: unknown function %d\n", function);
             break;
@@ -447,30 +488,39 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
     if (relative)
     {
         posdir = position >= 0.0;
-        moveCommand = "INCREMENTAL";
+        moveCommand = "MOVEIINC";
     }
     else
     {
         posdir = position >= pAxis->currentCmdPos;
-        moveCommand = "ABSOLUTE";
+        moveCommand = "MOVEABS";
     }
-
-    ret_status = sendAndReceive(pAxis->pController, moveCommand, inputBuff, sizeof(inputBuff));
-    if (ret_status)
-        return MOTOR_AXIS_ERROR;
 
     if (acceleration > 0)
     { /* only use the acceleration if > 0 */
-        sprintf(outputBuff, "RAMP RATE %.*f", pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
+        sprintf(outputBuff, "RAMP RATE %s %.*f", pAxis->axisName, pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     }
 
-    sprintf(outputBuff, "LINEAR %s %.*f F%.*f", pAxis->axisName, pAxis->maxDigits, position * fabs(pAxis->stepSize),
+    sprintf(outputBuff, "%s %s %.*f %.*f", moveCommand, pAxis->axisName, pAxis->maxDigits, position * fabs(pAxis->stepSize),
             pAxis->maxDigits, max_velocity * fabs(pAxis->stepSize));
 
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
-    if (ret_status)
+    if (ret_status || inputBuff[0] != ASCII_ACK_CHAR)
+    {
+        if (inputBuff[0] == ASCII_FAULT_CHAR)
+        {
+            int taskerr;
+
+            motorParam->setInteger(pAxis->params, motorAxisProblem, 1);  /* Signal "Controller Error" to user. */
+            sprintf(outputBuff, "~STATUS(2, TaskErrorCode)");
+            ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+            taskerr = atoi(&inputBuff[1]);
+            if (taskerr != 0)
+                pAxis->lastFault = taskerr; /* Indicate a Fault needs to be ACK'd. */
+        }
         return MOTOR_AXIS_ERROR;
+    }
 
     if (epicsMutexLock(pAxis->mutexId) == epicsMutexLockOK)
     {
@@ -478,6 +528,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
         /* Ensure that the motor record's next status update sees motorAxisDone = False. */
         motorParam->setInteger(pAxis->params, motorAxisDone, 0);
         motorParam->callCallback(pAxis->params);
+        epicsThreadSleep(0.010);    /* Delay status update so controller has time to set MoveDone false. */
         epicsMutexUnlock(pAxis->mutexId);
     }
 
@@ -564,6 +615,7 @@ static int motorAxisVelocityMove(AXIS_HDL pAxis, double min_velocity, double vel
         /* Ensure that the motor record's next status update sees motorAxisDone = False. */
         motorParam->setInteger(pAxis->params, motorAxisDone, 0);
         motorParam->callCallback(pAxis->params);
+        epicsThreadSleep(0.010);    /* Delay status update so controller has time to set MoveDone false. */
         epicsMutexUnlock(pAxis->mutexId);
     }
 
@@ -595,7 +647,11 @@ static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
 
     /* we can't accurately determine which type of motion is occurring on the controller,
     * so don't worry about the acceleration rate, just stop the motion on the axis */
+    sprintf(outputBuff, "~TASK 3");
+    ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     sprintf(outputBuff, "ABORT %s", pAxis->axisName);
+    ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+    sprintf(outputBuff, "~TASK 2");
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     return ret_status;
 }
@@ -660,14 +716,7 @@ static void A3200Poller(A3200Controller *pController)
                     pAxis->axisName);
 
             status = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
-            if (status != asynSuccess)
-            {
-                motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
-                epicsMutexUnlock(pAxis->mutexId);
-                continue;
-            }
-
-            if (inputBuff[0] != ASCII_ACK_CHAR)
+            if (status != asynSuccess || inputBuff[0] != ASCII_ACK_CHAR)
             {
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
                 epicsMutexUnlock(pAxis->mutexId);
@@ -678,7 +727,7 @@ static void A3200Poller(A3200Controller *pController)
 
             motorParam->setInteger(params, motorAxisCommError, 0);
 
-            move_active = drive_status & DRIVESTATUS_MoveActive;
+            move_active = !(axis_status & AXISSTATUS_MoveDone);
             motorParam->setInteger(params, motorAxisDone, !move_active);
             if (move_active)
                 anyMoving = true;
@@ -711,9 +760,8 @@ static void A3200Poller(A3200Controller *pController)
             if (axis_fault && axis_fault != pAxis->lastFault)
             {
                 PRINT(pAxis->logParam, TERROR, "A3200Poller: controller fault on axis=%s fault=0x%X\n", pAxis->axisName, axis_fault);
+                pAxis->lastFault = axis_fault;
             }
-
-            pAxis->lastFault = axis_fault;
 
             vfbk /= fabs(pAxis->stepSize);
             motorParam->setDouble(pAxis->params, motorAxisActualVel, vfbk);
@@ -760,7 +808,6 @@ int A3200AsynConfig(int card,             /* Controller number */
                                         const char *portName, /* asyn port name of serial or GPIB port */
                                         int asynAddress,      /* asyn subaddress for GPIB */
                                         int numAxes,         /* The number of axes that the driver controls */
-                                        int taskNumber,       /* the task number to use for motion commands */
                                         int movingPollPeriod, /* Time to poll (msec) when an axis is in motion */
                                         int idlePollPeriod)   /* Time to poll (msec) when an axis is idle. 0 for no polling */
 
@@ -791,7 +838,6 @@ int A3200AsynConfig(int card,             /* Controller number */
     pController = &pA3200Controller[card];
 
     pController->numAxes = numAxes;
-    pController->taskNumber = taskNumber;
     pController->movingPollPeriod = movingPollPeriod / 1000.;
     pController->idlePollPeriod = idlePollPeriod / 1000.;
 
@@ -820,7 +866,7 @@ int A3200AsynConfig(int card,             /* Controller number */
 
     do
     {
-        sprintf(outputBuff, "~TASK %u", pController->taskNumber);
+        sprintf(outputBuff, "~TASK 2");
         status = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
         retry++;
     } while(status != asynSuccess && retry < 3);
@@ -891,6 +937,12 @@ int A3200AsynConfig(int card,             /* Controller number */
     }
 
     sendAndReceive(pController, "~INITQUEUE", inputBuff, sizeof(inputBuff));
+
+    /* Prevent Task #2 and #3 from blocking during LINEAR commands. */
+    sendAndReceive(pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
+    sendAndReceive(pController, (char *) "~TASK 3", inputBuff, sizeof(inputBuff));
+    sendAndReceive(pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
+    sendAndReceive(pController, (char *) "~TASK 2", inputBuff, sizeof(inputBuff));
 
     pController->pollEventId = epicsEventMustCreate(epicsEventEmpty);
 

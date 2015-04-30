@@ -50,17 +50,6 @@ static const iocshArg ensembleAsynConfigArg3 = {"Number of Axes", iocshArgInt};
 static const iocshArg ensembleAsynConfigArg4 = {"Moving poll rate", iocshArgInt};
 static const iocshArg ensembleAsynConfigArg5 = {"Idle poll rate", iocshArgInt};
 
-// A3200 Asyn Setup arguments
-static const iocshArg a3200AsynSetupArg0 = {"Max. controller count", iocshArgInt};
-// A3200 Asyn Config arguments
-static const iocshArg a3200AsynConfigArg0 = {"Card being configured", iocshArgInt};
-static const iocshArg a3200AsynConfigArg1 = {"asyn port name", iocshArgString};
-static const iocshArg a3200AsynConfigArg2 = {"asyn address", iocshArgInt};
-static const iocshArg a3200AsynConfigArg3 = {"Number of Axes", iocshArgInt};
-static const iocshArg a3200AsynConfigArg4 = {"Task number", iocshArgInt};
-static const iocshArg a3200AsynConfigArg5 = {"Moving poll rate", iocshArgInt};
-static const iocshArg a3200AsynConfigArg6 = {"Idle poll rate", iocshArgInt};
-
 static const iocshArg * const EnsembleAsynSetupArgs[2] = {&ensembleAsynSetupArg0};
 static const iocshArg * const EnsembleAsynConfigArgs[6] = {&ensembleAsynConfigArg0, 
     &ensembleAsynConfigArg1,
@@ -72,17 +61,8 @@ static const iocshArg * const EnsembleAsynConfigArgs[6] = {&ensembleAsynConfigAr
 static const iocshFuncDef setupEnsembleAsyn = {"EnsembleAsynSetup", 1, EnsembleAsynSetupArgs};
 static const iocshFuncDef configEnsembleAsyn = {"EnsembleAsynConfig", 6, EnsembleAsynConfigArgs};
 
-static const iocshArg * const A3200AsynSetupArgs[2] = {&a3200AsynSetupArg0};
-static const iocshArg * const A3200AsynConfigArgs[7] = {&a3200AsynConfigArg0, 
-    &a3200AsynConfigArg1,
-    &a3200AsynConfigArg2,
-    &a3200AsynConfigArg3,
-    &a3200AsynConfigArg4,
-    &a3200AsynConfigArg5,
-    &a3200AsynConfigArg6};
-
-static const iocshFuncDef setupA3200Asyn = {"A3200AsynSetup", 1, A3200AsynSetupArgs};
-static const iocshFuncDef configA3200Asyn = {"A3200AsynConfig", 7, A3200AsynConfigArgs};
+static const iocshFuncDef setupA3200Asyn = {"A3200AsynSetup", 1, EnsembleAsynSetupArgs};
+static const iocshFuncDef configA3200Asyn = {"A3200AsynConfig", 6, EnsembleAsynConfigArgs};
 
 static void setupSoloistCallFunc(const iocshArgBuf *args)
 {
@@ -99,8 +79,7 @@ static void setupEnsembleAsynCallFunc(const iocshArgBuf *args)
 }
 static void configEnsembleAsynCallFunc(const iocshArgBuf *args)
 {
-    EnsembleAsynConfig(args[0].ival, args[1].sval, args[2].ival, 
-                       args[3].ival, args[4].ival, args[5].ival);
+    EnsembleAsynConfig(args[0].ival, args[1].sval, args[2].ival, args[3].ival, args[4].ival, args[5].ival);
 }
 
 static void setupA3200AsynCallFunc(const iocshArgBuf *args)
@@ -109,8 +88,7 @@ static void setupA3200AsynCallFunc(const iocshArgBuf *args)
 }
 static void configA3200AsynCallFunc(const iocshArgBuf *args)
 {
-    A3200AsynConfig(args[0].ival, args[1].sval, args[2].ival, 
-                       args[3].ival, args[4].ival, args[5].ival, args[6].ival);
+    A3200AsynConfig(args[0].ival, args[1].sval, args[2].ival, args[3].ival, args[4].ival, args[5].ival);
 }
 
 static void AerotechRegister(void)

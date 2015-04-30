@@ -53,7 +53,6 @@ extern "C" {
                 const char *portName, /* asyn port name of serial or GPIB port */
                 int asynAddress,      /* asyn subaddress for GPIB */
                 int numAxes,          /* The number of axes that the driver controls */
-                int taskNumber,        /* The task number to use for motion commands */
                 int movingPollPeriod, /* Time to poll (msec) when an axis is in motion */
                 int idlePollPeriod);  /* Time to poll (msec) when an axis is idle. 0 for no polling */
 
