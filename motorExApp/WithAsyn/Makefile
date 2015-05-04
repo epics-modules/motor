@@ -111,7 +111,14 @@ endif
 WithAsynVx_LIBS += asyn
 # Needed for Newport SNL programs
 ifdef SNCSEQ
-WithAsynVx_LIBS   += seqDev seq pv
+	ifeq (seq-2-1, $(findstring seq-2-1, $(SNCSEQ)))
+		WithAsynVx_LIBS += seqDev seq pv
+	else ifeq (seq-2.1, $(findstring seq-2.1, $(SNCSEQ)))
+		WithAsynVx_LIBS += seqDev seq pv
+	else
+		# seq 2.2.
+		WithAsynVx_LIBS += seq pv
+	endif
 endif
 WithAsynVx_LIBS += $(EPICS_BASE_IOC_LIBS)
 
