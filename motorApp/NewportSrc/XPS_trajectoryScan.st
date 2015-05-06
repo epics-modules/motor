@@ -20,6 +20,8 @@ program XPS_trajectoryScan("P=13BMC:,R=traj1,IPADDR=164.54.160.34,PORT=5001,"
 %% #include <stdio.h>
 %% #include <math.h>
 %% #include <stdarg.h>
+%% #define epicsExportSharedSymbols
+%% #include <shareLib.h>
 %% #include "XPS_C8_drivers.h"
 %% #include "XPS_C8_errors.h"
 %% #include "Socket.h"

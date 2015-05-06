@@ -9,13 +9,8 @@
 #include <string.h> 
 #include "Socket.h" 
 
-#ifdef _WIN32
-	#define DLL __declspec(dllexport)
-	#include "strtok_r.h"
-#else
-	#define DLL 
-#endif
-
+#define epicsExportSharedSymbols
+#include <shareLib.h>
 #include "XPS_C8_drivers.h" 
 
 #define SIZE_SMALL 1024

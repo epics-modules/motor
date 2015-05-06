@@ -25,8 +25,8 @@
 #include <asynUInt32Digital.h>
 #include <asynDrvUser.h>
 
-#include <XPS_C8_drivers.h>
 #include <epicsExport.h>
+#include <XPS_C8_drivers.h>
 
 typedef struct {
     char *portName;
