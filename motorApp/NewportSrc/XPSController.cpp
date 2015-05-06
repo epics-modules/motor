@@ -91,14 +91,14 @@ Versions: Release 4-5 and higher.
 #include <iocsh.h>
 #include <asynDriver.h>
 
-#include "XPS_C8_drivers.h"
-#include "xps_ftp.h"
 #include "asynMotorController.h"
 #include "asynMotorAxis.h"
-#include "XPSAxis.h"
 
 #include <epicsExport.h>
 #include "XPSController.h"
+#include "XPS_C8_drivers.h"
+#include "xps_ftp.h"
+#include "XPSAxis.h"
 
 static const char *driverName = "XPSController";
 
