@@ -5,24 +5,23 @@
  *       XPS functions                           *
  *************************************************/
 
-#ifdef _WIN32
-    #ifndef DLL
-        #ifdef _DLL  /* _DLL is defined by EPICS if we are being compiled to call DLLs */
-            #define DLL __declspec(dllimport)
-        #else
-            #define DLL
-        #endif
-    #endif
-#else
-    #define DLL 
-    #define __stdcall
+#define DLL epicsShareFunc
+
+#if !defined(_WIN32) && !defined(CYGWIN32)
+#define __stdcall
 #endif
+
+#ifdef __rtems__
+    #include "strtok_r.h"
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
 #else
-#typedef int bool;  /* C does not know bool, only C++ */
+typedef int bool;  /* C does not know bool, only C++ */
 #endif
+
 
 
 DLL int __stdcall HXPTCP_ConnectToServer(char *Ip_Address, int Ip_Port, double TimeOut); 
