@@ -30,8 +30,8 @@ record(ao, "$(P)$(Q)startPos") {
 
 record(calcout, "$(P)$(Q)startPosDial") {
   field(INPA, "$(P)$(Q)startPos CP")
-  field(INPB, "$(M).OFF")
-  field(INPC, "$(M).DIR")
+  field(INPB, "$(M).OFF CP")
+  field(INPC, "$(M).DIR CP")
   field(PREC, "5")
   field(CALC, "(a-b)*(c?-1:1)")
 }
@@ -44,8 +44,8 @@ record(ao, "$(P)$(Q)endPos") {
 
 record(calcout, "$(P)$(Q)endPosDial") {
   field(INPA, "$(P)$(Q)endPos CP")
-  field(INPB, "$(M).OFF")
-  field(INPC, "$(M).DIR")
+  field(INPB, "$(M).OFF CP")
+  field(INPC, "$(M).DIR CP")
   field(PREC, "5")
   field(CALC, "(a-b)*(c?-1:1)")
 }
@@ -227,7 +227,7 @@ record(scalcout, "$(P)$(Q)calcPulseTime0") {
 }
 record(scalcout, "$(P)$(Q)calcPulseTime") {
   field(INPE, "$(P)$(Q)pulseType")
-  field(AA, "PSOPULSE X TIME ")
+  field(AA, "PSOPULSE $(AXIS=X) TIME ")
   field(BB, "2,1 ")
   field(INCC, "$(P)$(Q)calcPulseTime0.SVAL PP")
   field(CALC, "AA+(e?cc:bb)")
@@ -236,19 +236,19 @@ record(scalcout, "$(P)$(Q)calcPulseTime") {
 
 record(sseq, "$(P)$(Q)initPSO") {
   field(LNK2, "$(P)$(Q)cmdWriteRead.BOUT CA")
-  field(STR2, "PSOOUTPUT X CONTROL 1")
+  field(STR2, "PSOOUTPUT $(AXIS=X) CONTROL 1")
   field(LNK3, "$(P)$(Q)cmdWriteRead.BOUT CA")
   field(DOL3, "$(P)$(Q)calcPulseTime.SVAL  PP")
   field(LNK4, "$(P)$(Q)cmdWriteRead.BOUT CA")
-  field(STR4, "PSOOUTPUT X PULSE WINDOW MASK ")
+  field(STR4, "PSOOUTPUT $(AXIS=X) PULSE WINDOW MASK ")
   field(LNK5, "$(P)$(Q)cmdWriteRead.BOUT CA")
-  field(STR5, "PSOTRACK X INPUT 3")
+  field(STR5, "PSOTRACK $(AXIS=X) INPUT 3")
   field(LNK6, "$(P)$(Q)pulseDstBld.PROC CA")
   field(LNK7, "$(P)$(Q)cmdWriteRead.BOUT CA")
-  field(STR7, "PSOWINDOW X 1 INPUT 3")
+  field(STR7, "PSOWINDOW $(AXIS=X) 1 INPUT 3")
   field(LNK8, "$(P)$(Q)pulseWndwBld.PROC CA")
   field(LNK1, "$(P)$(Q)cmdWriteRead.BOUT CA")
-  field(STR1, "PSOCONTROL X RESET")
+  field(STR1, "PSOCONTROL $(AXIS=X) RESET")
   field(WAIT1, "Wait")
   field(WAIT2, "Wait")
   field(WAIT3, "Wait")
@@ -273,7 +273,7 @@ record(scalcout, "$(P)$(Q)pulseDstBld") {
   field(CALC, "$P(AA,A)")
   field(INPA, "$(P)$(Q)scanDelta.VAL")
   field(OUT, "$(P)$(Q)cmdWriteRead.BOUT PP")
-  field(AA, "PSODISTANCE X FIXED %f UNITS")
+  field(AA, "PSODISTANCE $(AXIS=X) FIXED %f UNITS")
 }
 
 # The PSO range command arguments are relative to the motor position at which
@@ -301,7 +301,7 @@ record(scalcout, "$(P)$(Q)pulseWndwBld") {
   field(INPC, "$(P)$(Q)calcRangeOffset PP")
   field(INPD, "$(P)$(Q)scanControl NPP")
   field(INPE, "$(P)$(Q)scanDelta NPP")
-  field(AA, "PSOWINDOW X 1 RANGE %.6f,")
+  field(AA, "PSOWINDOW $(AXIS=X) 1 RANGE %.6f,")
   field(CALC, "$P(AA,min(A,B)-(d?0:C)-(a>b?e:0))")
   field(OUT, "$(P)$(Q)pulseWndwBlds.A NPP")
   field(FLNK, "$(P)$(Q)pulseWndwBld2")
@@ -335,16 +335,16 @@ record(aSub, "$(P)$(Q)pulseWndwBlds") {
 }
 
 record(scalcout, "$(P)$(Q)armPSO") {
-  field(AA, "PSOCONTROL X ARM")
+  field(AA, "PSOCONTROL $(AXIS=X) ARM")
   field(CALC, "aa")
   field(OUT, "$(P)$(Q)cmdWriteRead.BOUT PP")
 }
 
 record(sseq, "$(P)$(Q)disablePSO") {
   field(LNK1, "$(P)$(Q)cmdWriteRead.BOUT CA")
-  field(STR1, "PSOWINDOW X 1 OFF")
+  field(STR1, "PSOWINDOW $(AXIS=X) 1 OFF")
   field(LNK2, "$(P)$(Q)cmdWriteRead.BOUT CA")
-  field(STR2, "PSOCONTROL X OFF")
+  field(STR2, "PSOCONTROL $(AXIS=X) OFF")
   field(WAIT1, "Wait")
   field(WAIT2, "Wait")
 }
@@ -353,8 +353,8 @@ record(stringout, "$(P)$(Q)motorName") {
   field(VAL, "$(M)")
 }
 
-# Provide records for the user to program
-# prefly and postfly operations
+# Provide blank records for the user to program custom prefly and postfly
+# operations
 record(bo, "$(P)$(Q)scanControl") {
   field(ZNAM, "Standard")
   field(ONAM, "Custom")
@@ -364,8 +364,10 @@ record(calcout, "$(P)$(Q)userCalc1") {
   field(CALC, "0")
 }
 record(calcout, "$(P)$(Q)userCalc2") {
+  field(DESC, "")
   field(PREC, "5")
   field(CALC, "0")
+
 }
 record(sseq, "$(P)$(Q)userPreTaxi") {
   field(SDIS, "$(P)$(Q)scanControl")
