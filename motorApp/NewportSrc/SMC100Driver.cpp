@@ -197,6 +197,12 @@ asynStatus SMC100Axis::home(double minVelocity, double maxVelocity, double accel
   asynStatus status;
   // static const char *functionName = "SMC100Axis::home";
 
+  // Must be in unreferenced state to home, so can only home once after a reset
+  // this code should force a reset and allow a rehome, but controller doesn't seem happy
+  //  sprintf(pC_->outString_, "%1dRS", axisNo_ + 1);
+  //  status = pC_->writeController();
+  //  epicsThreadSleep(5.0);
+  
   // set Home search velocity
   //sprintf(pC_->outString_, "%1dOH%f", axisNo_ + 1, maxVelocity);
   //status = pC_->writeController();
