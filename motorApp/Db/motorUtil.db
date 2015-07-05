@@ -50,13 +50,14 @@ record(dfanout, "$(P)_FAN")
 {
     field(OMSL, "supervisory")
     field(SELM, "All")
-$(IFDMC01)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.A CA")
-$(IFDMC02)  field(OUTB, "$(PVPREFIX)CS:MOT:MOVING.B CA")
-$(IFDMC03)  field(OUTC, "$(PVPREFIX)CS:MOT:MOVING.C CA")
-$(IFDMC04)  field(OUTD, "$(PVPREFIX)CS:MOT:MOVING.D CA")
-$(IFDMC05)  field(OUTE, "$(PVPREFIX)CS:MOT:MOVING.E CA")
-$(IFDMC06)  field(OUTF, "$(PVPREFIX)CS:MOT:MOVING.F CA")
-$(IFDMC07)  field(OUTG, "$(PVPREFIX)CS:MOT:MOVING.G CA")
+$(IFDMC01=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.A CA")
+$(IFDMC02=#)  field(OUTB, "$(PVPREFIX)CS:MOT:MOVING.B CA")
+$(IFDMC03=#)  field(OUTC, "$(PVPREFIX)CS:MOT:MOVING.C CA")
+$(IFDMC04=#)  field(OUTD, "$(PVPREFIX)CS:MOT:MOVING.D CA")
+$(IFDMC05=#)  field(OUTE, "$(PVPREFIX)CS:MOT:MOVING.E CA")
+$(IFDMC06=#)  field(OUTF, "$(PVPREFIX)CS:MOT:MOVING.F CA")
+$(IFDMC07=#)  field(OUTG, "$(PVPREFIX)CS:MOT:MOVING.G CA")
+$(IFDMC08=#)  field(OUTH, "$(PVPREFIX)CS:MOT:MOVING.H CA")
 }
 
 # force periodoc processing to catch up any missing, shouldn't
