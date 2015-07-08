@@ -49,4 +49,4 @@ $(P)$(M).FLNK
 $(P)$(M).RMOD
 $(P)$(M).ADEL
 $(P)$(M).MDEL
-
+$(P)$(M).SPMG

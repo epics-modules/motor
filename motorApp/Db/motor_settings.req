@@ -5,6 +5,4 @@
 # HeadURL:        $URL$
 
 file basic_motor_settings.req P=$(P),M=$(M)
-$(P)$(M).RMOD
 $(P)$(M)_able.VAL
-$(P)$(M).SPMG
