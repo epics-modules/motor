@@ -1,7 +1,7 @@
 
 file {
-	name="motorx_msta_detail.adl"
-	version=030102
+	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/motorx_msta_detail.adl"
+	version=030107
 }
 display {
 	object {
@@ -15,7 +15,7 @@ display {
 	cmap=""
 	gridSpacing=5
 	gridOn=0
-	snapToGrid=0
+	snapToGrid=1
 }
 "color map" {
 	ncolors=65
@@ -182,7 +182,7 @@ text {
 byte {
 	object {
 		x=5
-		y=65
+		y=62
 		width=37
 		height=320
 	}
@@ -192,207 +192,198 @@ byte {
 		bclr=3
 	}
 	direction="down"
+	sbit=0
+	ebit=15
 }
-composite {
+text {
 	object {
 		x=50
-		y=68
+		y=365
+		width=171
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Unused"
+}
+text {
+	object {
+		x=50
+		y=345
+		width=171
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Unused"
+}
+text {
+	object {
+		x=50
+		y=325
 		width=350
-		height=315
+		height=15
 	}
-	"composite name"=""
-	children {
-		text {
-			object {
-				x=50
-				y=68
-				width=171
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Unused"
-		}
-		text {
-			object {
-				x=50
-				y=88
-				width=171
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Unused"
-		}
-		text {
-			object {
-				x=50
-				y=108
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="MINUS_LS: minus limit switch has been hit"
-		}
-		text {
-			object {
-				x=50
-				y=128
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="COMM_ERR: Communication Error"
-		}
-		text {
-			object {
-				x=50
-				y=148
-				width=345
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="GAIN_SUPPORT: motor supports closed-loop position control"
-		}
-		text {
-			object {
-				x=50
-				y=168
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="MOVING: non-zero velocity present"
-		}
-		text {
-			object {
-				x=50
-				y=188
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="PROBLEM: driver stopped polling"
-		}
-		text {
-			object {
-				x=50
-				y=208
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="PRESENT: encoder is present"
-		}
-		text {
-			object {
-				x=50
-				y=228
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="HOME: if at home position"
-		}
-		text {
-			object {
-				x=50
-				y=248
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Unused"
-		}
-		text {
-			object {
-				x=50
-				y=268
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="POSITION: closed-loop position control enabled"
-		}
-		text {
-			object {
-				x=50
-				y=288
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Unused"
-		}
-		text {
-			object {
-				x=50
-				y=308
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="HOMELS: state of home limit switch"
-		}
-		text {
-			object {
-				x=50
-				y=328
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="PLUS_LS: plus limit has been hit"
-		}
-		text {
-			object {
-				x=50
-				y=348
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="DONE: motion is complete"
-		}
-		text {
-			object {
-				x=50
-				y=368
-				width=350
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="DIRECTION: last raw (0:Neg, 1:Pos)"
-		}
+	"basic attribute" {
+		clr=14
 	}
+	textix="MINUS_LS: minus limit switch has been hit"
+}
+text {
+	object {
+		x=50
+		y=305
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="COMM_ERR: Communication Error"
+}
+text {
+	object {
+		x=50
+		y=285
+		width=345
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="GAIN_SUPPORT: motor supports closed-loop position control"
+}
+text {
+	object {
+		x=50
+		y=265
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="MOVING: non-zero velocity present"
+}
+text {
+	object {
+		x=50
+		y=245
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="PROBLEM: driver stopped polling"
+}
+text {
+	object {
+		x=50
+		y=225
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="PRESENT: encoder is present"
+}
+text {
+	object {
+		x=50
+		y=205
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="HOME: if at home position"
+}
+text {
+	object {
+		x=50
+		y=185
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Unused"
+}
+text {
+	object {
+		x=50
+		y=165
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="POSITION: closed-loop position control enabled"
+}
+text {
+	object {
+		x=50
+		y=145
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Unused"
+}
+text {
+	object {
+		x=50
+		y=125
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="HOMELS: state of home limit switch"
+}
+text {
+	object {
+		x=50
+		y=105
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="PLUS_LS: plus limit has been hit"
+}
+text {
+	object {
+		x=50
+		y=85
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="DONE: motion is complete"
+}
+text {
+	object {
+		x=50
+		y=65
+		width=350
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="DIRECTION: last raw (0:Neg, 1:Pos)"
 }
