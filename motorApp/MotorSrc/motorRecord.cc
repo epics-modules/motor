@@ -4047,6 +4047,8 @@ static void syncTargetPosition(motorRecord *pmr)
 {
     int dir = (pmr->dir == motorDIR_Pos) ? 1 : -1;
     msta_field msta;
+    double rdblvalue;
+    long rtnstat;
 
     msta.All = pmr->msta;
 
@@ -4056,13 +4058,28 @@ static void syncTargetPosition(motorRecord *pmr)
         pmr->rrbv = pmr->rep;
         pmr->drbv = pmr->rrbv * pmr->eres;
     }
+    else if (pmr->urip)
+    {
+        /* user wants us to use the readback link */
+        rtnstat = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &rdblvalue, 0, 0 );
+        if (!RTN_SUCCESS(rtnstat))
+            printf("%s: syncTargetPosition: error reading RDBL link.\n", pmr->name);
+        else
+        {
+            pmr->rrbv = NINT((rdblvalue * pmr->rres) / pmr->mres);
+            pmr->drbv = pmr->rrbv * pmr->mres;
+        }
+    }
     else
     {
         pmr->rrbv = pmr->rmp;
         pmr->drbv = pmr->rrbv * pmr->mres;
     }
+    MARK(M_RRBV);
+    MARK(M_DRBV);
     pmr->rbv = pmr->drbv * dir + pmr->off;
-    
+    MARK(M_RBV);
+
     pmr->val  = pmr->lval = pmr->rbv ;
     MARK(M_VAL);
     pmr->dval = pmr->ldvl = pmr->drbv;
