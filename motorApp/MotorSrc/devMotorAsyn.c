@@ -41,6 +41,11 @@
  * 
  * .05 2014-09-11 RLS
  * Moved CA posting of changes to the RMP, REP and RVEL fields from motor record to update_values().
+ * 
+ * .06 2015-07-29 RLS
+ * Added "Use Relative" (use_rel) indicator to init_controller()'s "LOAD_POS" logic.
+ * See README R6-10 item #6 for details.
+ * 
  */
 
 #include <stddef.h>
@@ -177,14 +182,16 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     double position = pPvt->status.position;
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
     double encRatio[2] = {pmr->mres, pmr->eres};
+    int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
 
     /*Before setting position, set the correct encoder ratio.*/
     start_trans(pmr);
     build_trans(SET_ENC_RATIO, encRatio, pmr);
     end_trans(pmr);
 
-    if ((fabs(pmr->dval) > rdbd && pmr->mres != 0) &&
-        (fabs(position * pmr->mres) < rdbd))
+    if ((use_rel != 0) ||
+        ((fabs(pmr->dval) > rdbd) && (pmr->mres != 0) && (fabs(position * pmr->mres) < rdbd))
+       )
     {
         double setPos = pmr->dval / pmr->mres;
         epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );

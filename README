@@ -155,8 +155,8 @@ Modification Log for R6-10
         Files modified: motorApp/MotorSrc/motorRecord.cc
                         motorApp/MotorSrc/motorRecord.dbd
 
-2) Fix for OMS controllers not have the correct deceleration rate at the end
-        of a JOG. Bug introduced with item #9 under R6-6.
+2) Fix for OMS controllers that do not have the correct deceleration rate at
+        the end of a JOG. Bug introduced with item #9 under R6-6.
 
         File modified: OmsSrc/devOmsCom.cc
 
@@ -187,6 +187,32 @@ Modification Log for R6-10
 			motorApp/NewportSrc/Makefile
 			motorApp/NewportSrc/devNewport.dbd
 
+5) Márcio Paduan Donadio (LNLS) fixed a bug with SYNC field processing. SYNC
+        was being ignored when URIP == True.
+
+	Files modified:	syncTargetPosition() in motorRecord.cc
+
+6) Kevin Peterson discovered an initialization bug when the motor record is
+        configured to do retries. When configured to do retries, the motor
+        record issues incremental rather than absolute moves. If the motor
+        behaves badly (e.g., a piezo stiction motor) the controller's absolute
+        step count can be far from its' absolute readback position. The motor
+        record initialization logic that determines how the target positions
+        are initialized at boot-up was not taking into consideration whether
+        or not the motor record is configured to do retries, and therefore,
+        whether or not absolute or incremental moves were issued by the motor
+        record. With this release, if the motor record is configured to do
+        retries, then the controller's absolute position is ignored (because
+        the controller's absolute position was "corrupted" by retries) and the
+        autosave/restore position is used to set the controllers position.
+
+        Switching between retries on and off (relative vs. absolute moves)
+        between reboots will cause unpredictable results and is not covered
+        by this bug fix.
+
+	Files modified:	motor_init_record_com() in MotorSrc/motordevCom.cc
+	                init_controller()       in MotorSrc/devMotorAsyn.c
+        
 
 Modification Log for R6-9
 =========================
