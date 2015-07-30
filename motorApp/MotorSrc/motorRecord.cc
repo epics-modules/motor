@@ -1122,8 +1122,7 @@ LOGIC:
             ENDIF
             IF a limit switch is activated, OR, a load-position command is in progress (MIP = MIP_LOAD_P)
                 Set MIP to DONE and MARK it.
-            ELSE
-                Initialize delay ticks.
+            ELSE IF Done Moving (DMOV) is TRUE
                 IF process delay acknowledged is true, OR, ticks <= 0.
                     Clear process delay request and ack. indicators in MIP field.
                     Mark MIP as changed.
@@ -1313,7 +1312,7 @@ static long process(dbCommon *arg)
                 pmr->mip = MIP_DONE;
                 MARK(M_MIP);
             }
-            else
+            else if (pmr->dmov == TRUE)
             {
                 mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
 
