@@ -9,3 +9,4 @@ envPaths
 cdCommands
 dllPath.bat
 runIoc.bat
+iocBoot/iocmotorSim/motor.substitutions.local
