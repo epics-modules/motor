@@ -1,51 +1,6 @@
-# RELEASE - Location of external products
-#
-# Note: This file will be scanned to automatically generate
-#       include path definitions etc.
-#       The order of the following declarations will be retained
-#       within those definitions.
-#
-# Note that "#!" marks lines that can be uncommented.
-#
-# Add your declarations here
+include $(TOP)/../../../configure/MASTER_RELEASE
 
-SUPPORT=
--include $(TOP)/../configure/SUPPORT.$(EPICS_HOST_ARCH)
-
-# If any motor controller communication mechanism besides the VME backplane is
-# required, then ASYN must be defined.
-# Recommended ASYN release: R4-21
-ASYN=$(SUPPORT)/asyn/4-26
-
-# Need the sequencer and the bust record for the MM4005 and XPS trajectory scanning
-# Recommended SNCSEQ release: R2-1-12
-SNCSEQ=$(SUPPORT)/seq/2-1-11
-# Recommended BUSY release: R1-5
-BUSY=$(SUPPORT)/busy/1-6-1
-CALC=$(SUPPORT)/calc/3-4
-
-AUTOSAVE=$(SUPPORT)/autosave/R5_6_1
-
-ONCRPC=$(SUPPORT)/oncrpc/2
-WAIT=$(SUPPORT)/calc/2-9
-SSCAN=$(SUPPORT)/sscan/2-8
-
-# Recommended EPICS release: R3.14.12.1
-EPICS_BASE=
--include $(TOP)/../configure/EPICS_BASE.$(EPICS_HOST_ARCH)
-
-# The following must be defined for the MXmotor device driver.
-#!MX=$(SUPPORT)/mx/mx
-
-# The following support modules are required for the Hytec driver and for the examples in
-# <motor>/motorExApp.  To build examples, the top Makefile,
-# <motor>/Makefile must also be edited.
-
-# Recommended IPAC release: R2-11
-IPAC=$(SUPPORT)/ipac/2-11
-
-# The following is only needed for the motor examples in iocBoot.
-MOTOR=$(SUPPORT)/motor/R6-9
-
+# overrdie module definitions here
+-include $(TOP)/configure/RELEASE.private
 
 include $(TOP)/../../../ISIS_CONFIG.$(EPICS_HOST_ARCH)
