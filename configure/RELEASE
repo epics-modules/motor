@@ -1,6 +1,10 @@
+# top level master release and local private options 
 include $(TOP)/../../../configure/MASTER_RELEASE
+-include $(TOP)/../../../configure/MASTER_RELEASE.$(EPICS_HOST_ARCH)
+-include $(TOP)/../../../configure/MASTER_RELEASE.private
+-include $(TOP)/../../../configure/MASTER_RELEASE.private.$(EPICS_HOST_ARCH)
 
-# overrdie module definitions here
+# optional extra local definitions here
 -include $(TOP)/configure/RELEASE.private
 
 include $(TOP)/../../../ISIS_CONFIG.$(EPICS_HOST_ARCH)
