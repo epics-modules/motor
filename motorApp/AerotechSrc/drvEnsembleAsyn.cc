@@ -68,6 +68,7 @@ in file LICENSE that is included with this distribution.
 * .19 09-11-14 rls - sendAndReceive() diagnostic message added when controller returns NAK. 
 * .20 11-24-14 rls - Moved "WAIT MODE NOWAIT" from EnsembleAsynConfig to motorAxisSetInteger 
 *                    where torque is enabled/disabled. 
+* .21 10-14-15 rls - Use "ReverseDirec" parameter to set "HomeSetup" parameter.
 */
 
 
@@ -531,7 +532,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     int ret_status;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
     epicsUInt32 hparam;
-    int axis;
+    int axis, posdir;
 
     if (pAxis == NULL || pAxis->pController == NULL)
         return (MOTOR_AXIS_ERROR);
@@ -552,8 +553,9 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
         sprintf(outputBuff, "SETPARM @%d, %d, %.*f", axis, PARAMETERID_HomeRampRate, pAxis->maxDigits,
                 acceleration * fabs(pAxis->stepSize)); /* HomeAccelDecelRate */
 
+    posdir = (forwards == (int) pAxis->ReverseDirec); /* Adjust home direction for Reverse Direction paramter. */
     hparam = pAxis->homeDirection;
-    if (forwards == 1)
+    if (posdir == 1)
         hparam |= 0x00000001;
     else
         hparam &= 0xFFFFFFFE;
