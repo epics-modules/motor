@@ -41,6 +41,7 @@ in file LICENSE that is included with this distribution.
 *                  - Added delays to motorAxisMove() and motorAxisVelocityMove() so controller has time to set 
 *                    MoveDone false before the 1st status update.
 *                  - Added axis name to "RAMP RATE" command.
+* .03 10-14-15 rls - Use "ReverseDirec" parameter to set "HomeSetup" parameter.
 */
 
 #include <stddef.h>
@@ -543,7 +544,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     int ret_status;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
     epicsUInt32 hparam;
-    int axis;
+    int axis, posdir;
 
     if (pAxis == NULL || pAxis->pController == NULL)
         return MOTOR_AXIS_ERROR;
@@ -566,8 +567,13 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
                 acceleration * fabs(pAxis->stepSize));
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     }
+
+    posdir = (forwards == (int) pAxis->reverseDirec); /* Adjust home direction for Reverse Direction paramter. */
     hparam = pAxis->homeDirection;
-    hparam = forwards ? 0x00000001 : 0x0;
+    if (posdir == 1)
+        hparam |= 0x00000001;
+    else
+        hparam &= 0xFFFFFFFE;
     pAxis->homeDirection = hparam;
 
     sprintf(outputBuff, "HomeSetup.%s = %d", pAxis->axisName, hparam);
