@@ -1,0 +1,14 @@
+*~
+*.cre
+*.hre
+CYGWIN*/
+Darwin_i386/
+Darwin_x86_64/
+Linux_*/
+MINGW32*/
+.AppleDouble/
+today.h
+version.h
+*.o
+simMotor
+*.pyc

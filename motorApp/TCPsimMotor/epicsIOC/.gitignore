@@ -1,0 +1,8 @@
+.set*.txt
+configure/RELEASE
+iocBoot/iocTCPsimMotor/envPaths*
+iocBoot/iocTCPsimMotor/st.cmd.*
+iocBoot/iocTCPsimMotor/st.gdb.*
+iocBoot/iocTCPsimMotor/xx
+*.pyc
+
