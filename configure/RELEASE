@@ -17,7 +17,7 @@ SUPPORT=
 # Recommended ASYN release: R4-23
 ASYN=$(SUPPORT)/asyn/R4-23
 
-# Need the sequencer and the bust record for the MM4005 and XPS trajectory scanning
+# Need the sequencer and the busy record for the MM4005 and XPS trajectory scanning
 # Recommended SNCSEQ release: R2.1.16
 SNCSEQ=$(SUPPORT)/seq/seq-2-1-16
 # Recommended BUSY release: R1-6
