@@ -11,9 +11,6 @@
  * Notwithstanding the above, explicit permission is granted for APS to 
  * redistribute this software.
  *
- * Version: $Revision: 1.32 $
- * Modified by: $Author: rivers $
- * Last Modified: $Date: 2009-09-01 14:05:38 $
  *
  * Original Author: Peter Denison
  * Current Author: Peter Denison

@@ -5,10 +5,6 @@ USAGE...    Motor record  support for Phytron Axis controller.
 Tom Slejko & Bor Marolt
 Cosylab d.d. 2014
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 #include "asynMotorController.h"

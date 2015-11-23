@@ -2,9 +2,6 @@
 FILENAME...	SMC100Register.h
 USAGE... This file contains function prototypes for SMC100 IOC shell commands.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:06:58 $
 */
 
 /*

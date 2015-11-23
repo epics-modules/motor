@@ -8,10 +8,6 @@ USAGE...
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision: 2$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 25.10.2013 10:43:08$
-HeadURL:        $URL$
 
 Original Author: Steffen Rau 
 Created: January 2011

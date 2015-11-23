@@ -2,10 +2,6 @@
 FILENAME...	drvSoloist.h
 USAGE... This file contains Aerotech Soloist driver "include" information.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

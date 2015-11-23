@@ -2,9 +2,6 @@
 FILENAME...	drvPmac.h
 USAGE... This file contains Delta Tau PMAC driver "include" information.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-05-01 18:26:29 $
 */
 
 /*

@@ -1,10 +1,6 @@
 #FILENAME...     Makefile
 #USAGE...        Makefile for motor application example with Asyn
 
-#Version:        $Revision$
-#Modified By:    $Author$
-#Last Modified:  $Date$
-#HeadURL:        $URL$
 
 # "#!" marks lines that can be uncommented.
 

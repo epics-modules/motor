@@ -3,9 +3,6 @@ FILENAME...	MXmotor.h
 USAGE... This file contains "include" information that is specific to
 	MX motor device driver support.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2003-02-14 15:15:27 $
 */
 
 /*

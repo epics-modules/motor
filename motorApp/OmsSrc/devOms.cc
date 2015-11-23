@@ -3,10 +3,6 @@ FILENAME...	devOms.cc
 USAGE... Device level support for OMS VME8 and VME44 models.
 
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

@@ -2,10 +2,6 @@
 FILENAME...	AerotechRegister.h
 USAGE... This file contains function prototypes for ACS IOC shell commands.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

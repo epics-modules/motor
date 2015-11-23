@@ -3,10 +3,6 @@ FILENAME...     drvOms58.h
 USAGE...        OMS driver level "include" information that is specific to OMS
                 model VME58.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

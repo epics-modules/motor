@@ -2,9 +2,6 @@
 FILENAME...	ACSTech80Register.cc
 USAGE...	Register ACS Tech80 motor device driver shell commands.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2008-05-21 21:18:52 $
 */
 
 /*****************************************************************

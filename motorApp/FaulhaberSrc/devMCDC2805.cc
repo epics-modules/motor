@@ -3,9 +3,6 @@ FILENAME...	devMCDC2805.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MCDC2805 series of controllers.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:09:24 $
 */
 
 /*

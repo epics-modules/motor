@@ -2,10 +2,6 @@
 FILENAME...     devSC800.cc
 USAGE...        Motor record device level support for Kohzu SC800 motor controller.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 
 */
 

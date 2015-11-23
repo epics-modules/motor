@@ -1,8 +1,4 @@
 # FILE... basic_motor_settings.req
-# Version:        $Revision$
-# Modified By:    $Author$
-# Last Modified:  $Date$
-# HeadURL:        $URL$
 
 $(P)$(M).DIR
 $(P)$(M).DHLM

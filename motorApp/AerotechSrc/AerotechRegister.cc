@@ -2,10 +2,6 @@
 FILENAME...	AerotechRegister.cc
 USAGE...	Register Aerotech motor device driver shell commands.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*****************************************************************

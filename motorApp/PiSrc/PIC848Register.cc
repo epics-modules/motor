@@ -2,9 +2,6 @@
 FILENAME...	PIC848Register.cc
 USAGE...	Register PI motor device driver shell commands.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2005-10-04 19:45:52 $
 */
 
 /*****************************************************************

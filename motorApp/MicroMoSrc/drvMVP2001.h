@@ -3,9 +3,6 @@ FILENAME...	drvMVP2001.h
 USAGE... This file contains driver "include" information that is specific to
 	 the MicroMo MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.5 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2004-08-17 21:29:32 $
 */
 
 /*

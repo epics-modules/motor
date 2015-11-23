@@ -2,10 +2,6 @@
 FILENAME...     devSoft.cc
 USAGE...        Motor record device level support for Soft channel.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
