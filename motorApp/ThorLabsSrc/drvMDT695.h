@@ -3,9 +3,6 @@ FILENAME...	drvMDT695.h
 USAGE...    This file contains ThorLabs Piezo Control Module (MDT695)
 	    motorRecord driver information . 
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-27 20:32:37 $
 */
 
 /*

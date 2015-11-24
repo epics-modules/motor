@@ -7,10 +7,6 @@ FILENAME...     PIInterface.cpp
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision: 1$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 25.10.2013 10:42:52$
-HeadURL:        $URL$
 
 Original Author: Steffen Rau 
 Created: 15.12.2010

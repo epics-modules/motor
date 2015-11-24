@@ -2,10 +2,6 @@
 FILENAME...     omsMAXvEncFunc.cpp
 USAGE...        Pro-Dex OMS MAXv encoder asyn motor support
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

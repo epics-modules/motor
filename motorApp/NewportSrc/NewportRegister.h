@@ -2,9 +2,6 @@
 FILENAME...	NewportRegister.h
 USAGE... This file contains function prototypes for Newport IOC shell commands.
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: rivers $
-Last Modified:	$Date: 2006-06-15 19:04:58 $
 */
 
 /*

@@ -2,9 +2,6 @@
 FILENAME...	drvPmac.cc
 USAGE...	Driver level support for Delta Tau PMAC model.
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-09-08 18:25:19 $
 */
 
 /*

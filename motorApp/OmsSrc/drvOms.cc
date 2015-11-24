@@ -2,10 +2,6 @@
 FILENAME...     drvOms.cc
 USAGE...        Driver level support for OMS models VME8, VME44, VS4 and VX2.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

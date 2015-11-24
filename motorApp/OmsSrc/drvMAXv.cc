@@ -2,10 +2,6 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

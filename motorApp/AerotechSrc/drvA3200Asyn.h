@@ -2,10 +2,6 @@
 FILENAME...     drvA3200Asyn.h
 USAGE... This file contains Aerotech A3200 Asyn driver "include" information.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

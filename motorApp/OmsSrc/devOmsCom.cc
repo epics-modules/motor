@@ -2,10 +2,6 @@
 FILENAME...     devOmsCom.cc
 USAGE...        Data and functions common to all OMS device level support.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

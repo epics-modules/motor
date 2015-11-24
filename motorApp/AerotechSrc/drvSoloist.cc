@@ -2,10 +2,6 @@
 * FILENAME... drvSoloist.cc
 * USAGE...    Motor record driver level support for Aerotech Soloist.
 *
-* Version:        $Revision$
-* Modified By:    $Author$
-* Last Modified:  $Date$
-* HeadURL:        $URL$
 */
 
 /*

@@ -7,10 +7,6 @@ FILENAME...     PIGCSController.cpp
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision: 6$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 05.11.2013 17:38:32$
-HeadURL:        $URL$
 
 Original Author: Steffen Rau 
 Created: 15.12.2010

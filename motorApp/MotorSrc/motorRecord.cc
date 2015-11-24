@@ -2,10 +2,6 @@
 FILENAME...     motorRecord.cc
 USAGE...        Motor Record Support.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

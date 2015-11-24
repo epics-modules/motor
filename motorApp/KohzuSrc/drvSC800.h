@@ -2,10 +2,6 @@
 FILENAME...	drvSC800.h
 USAGE...    This file contains Kohzu SC800 motorRecord driver information.
 
-Version:	    $Revision$
-Modified By:	$Author$
-Last Modified:	$Date$
-HeadURL:        $URL$
 */
 
 /*

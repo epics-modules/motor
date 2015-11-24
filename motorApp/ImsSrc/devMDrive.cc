@@ -3,10 +3,6 @@ FILENAME...	devMDrive.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MDrive series of controllers.
 
-Version:	$Revision$
-Modified By:	$Author$
-Last Modified:	$Date$
-HeadURL:	$URL$
 */
 
 /*

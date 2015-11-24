@@ -2,10 +2,6 @@
 FILENAME... drvA3200Asyn.cc
 USAGE...    Motor record asyn driver level support for Aerotech A3200.
  
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$ 
 */
 
 /*

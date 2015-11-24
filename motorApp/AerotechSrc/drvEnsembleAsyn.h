@@ -2,10 +2,6 @@
 FILENAME...     drvEnsembleAsyn.h
 USAGE... This file contains Aerotech Ensemble Asyn driver "include" information.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

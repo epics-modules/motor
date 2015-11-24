@@ -2,10 +2,6 @@
 FILENAME...     omsMAXv.cpp
 USAGE...        Pro-Dex OMS MAXv asyn motor controller support
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

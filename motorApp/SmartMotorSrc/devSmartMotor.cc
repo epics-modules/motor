@@ -2,9 +2,6 @@
 FILENAME... devSmartMotor.cc
 USAGE...    Motor record driver level support for Animatics Corporation SmartMotors.
 
-Version:        $Revision: 1.2 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-03-14 20:21:56 $
 */
 
 /*

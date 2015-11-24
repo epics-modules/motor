@@ -2,9 +2,6 @@
 FILENAME...	SMC100Register.cc
 USAGE...	Register SMC100 motor device driver shell commands.
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:06:58 $
 */
 
 /*****************************************************************

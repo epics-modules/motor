@@ -4,10 +4,6 @@ FILENAME...	motordrvCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record driver support modules.
 
-Version:	$Revision$
-Modified By:	$Author$
-Last Modified:	$Date$
-HeadURL:        $URL$
 */
 
 /*

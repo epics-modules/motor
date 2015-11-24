@@ -2,10 +2,6 @@
 FILENAME...     motorUtilAux.cc
 USAGE...        Motor Record Utility Support.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

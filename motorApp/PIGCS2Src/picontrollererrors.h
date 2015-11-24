@@ -7,10 +7,6 @@ FILENAME...     picontrollererrors.h
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
   
-Version:        $Revision: 1$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 23.09.2013 14:19:03$
-HeadURL:        $URL$
  
 Original Author: Steffen Rau, January 2011
 */

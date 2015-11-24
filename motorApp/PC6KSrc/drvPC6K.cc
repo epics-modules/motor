@@ -3,10 +3,6 @@ FILENAME...	drvPC6K.cc
 USAGE...	Motor record driver level support for Parker Computmotor
                 6K Series motor controllers
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

@@ -3,9 +3,6 @@ FILENAME...	drvSPiiPlus.h
 USAGE...    This file contains ACS Tech80 driver "include"
 	    information that is specific to the SPiiPlus serial controller
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2008-05-21 21:18:53 $
 
 */
 

@@ -2,9 +2,6 @@
 FILENAME...	PIE516Register.cc
 USAGE...	Register PI motor device driver shell commands.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2007-03-30 20:01:05 $
 */
 
 /*****************************************************************

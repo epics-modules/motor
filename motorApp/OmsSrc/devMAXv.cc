@@ -2,10 +2,6 @@
 FILENAME...	devMAXV.cc
 USAGE... Device level support for OMS MAXv model.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

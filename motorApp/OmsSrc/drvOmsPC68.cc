@@ -2,9 +2,6 @@
 FILENAME...     drvOmsPC68.cc
 USAGE...        Motor record driver level support for OMS PC68 serial device.
 
-Version:	$Revision$
-Modified By:	$Author$
-Last Modified:	$Date$
 */
 
 /*

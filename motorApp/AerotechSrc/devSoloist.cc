@@ -2,10 +2,6 @@
 * FILENAME... devSoloist.cc
 * USAGE... Motor record device level support for Aerotech Soloist.
 *
-* Version:        $Revision$
-* Modified By:    $Author$
-* Last Modified:  $Date$
-* HeadURL:        $URL$
 *
 */
 
