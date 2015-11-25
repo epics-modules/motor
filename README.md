@@ -2,7 +2,7 @@
 APS BCDA synApps module: motor
 
 For more information, see:
-*  [main page](http://htmlpreview.github.io/?https://github.com/epics-modules/motor/blob/master/documentation/index.html)
+*  [main page](http://htmlpreview.github.io/?https://github.com/epics-modules/motor/blob/master/documentation/motor.html)
 *  [motor wiki](https://github.com/epics-modules/motor/wiki)
 *  http://www.aps.anl.gov/bcda/synApps
 
