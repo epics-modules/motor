@@ -93,6 +93,7 @@ USAGE...        Motor record driver level support for OMS model MAXv.
  *                    command into two commands.
  *                  - Fix for intermittent wrong command displayed from Command Error message. motorIsr() saves the
  *                    message in a separate static buffer.
+ * 26  11-05-13 rls - Valid IRQ levels are 2 thru 6.
  *
  */
 
@@ -891,7 +892,7 @@ MAXvSetup(int num_cards,        /* maximum number of cards in rack */
           int addrs_type,       /* VME address type; 16 - A16, 24 - A24 or 32 - A32. */
           unsigned int addrs,   /* Base Address. */
           unsigned int vector,  /* noninterrupting(0), valid vectors(64-255) */
-          int int_level,        /* interrupt level (1-6) */
+          int int_level,        /* interrupt level (2-6) */
           int scan_rate)        /* 1 <= polling rate <= (1/epicsThreadSleepQuantum) */
 {
     int itera;
@@ -991,9 +992,9 @@ MAXvSetup(int num_cards,        /* maximum number of cards in rack */
         }
     }
 
-    if (int_level < 1 || int_level > 6)
+    if (int_level < 2 || int_level > 6)
     {
-        char format[] = "%sinterrupt level = %d ***\n";
+        char format[] = "%sinterrupt level = %d *** default = 5\n";
         omsInterruptLevel = OMS_INT_LEVEL;
         errlogPrintf(format, errbase, int_level);
         epicsThreadSleep(5.0);

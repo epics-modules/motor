@@ -213,6 +213,12 @@ Modification Log for R6-10
 	Files modified:	motor_init_record_com() in MotorSrc/motordevCom.cc
 	                init_controller()       in MotorSrc/devMotorAsyn.c
         
+7) The MAXv User's Manual specifies that "The IRQ interrupt level range is
+        0x010-0x111 (IRQ2-7)...". The appropriate error check has been added to
+        the MAXvSetup() call.
+
+	File modified:	OmsSrc/drvMAXv.cc
+
 
 Modification Log for R6-9
 =========================
