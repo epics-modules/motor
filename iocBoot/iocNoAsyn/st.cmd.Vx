@@ -42,7 +42,7 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #     (2)VME Address Space - A(16,24,32).
 #     (3)Base Address (see README file).
 #     (4)interrupt vector (0=disable or  64 - 255).
-#     (5)interrupt level (1 - 6).
+#     (5)interrupt level (2 - 6).
 #     (6)motor task polling rate (min=1Hz,max=60Hz).
 #!MAXvSetup(1, 16,     0xF000, 200, 5, 10)
 #!MAXvSetup(1, 24,   0xFF0000, 200, 5, 10)
