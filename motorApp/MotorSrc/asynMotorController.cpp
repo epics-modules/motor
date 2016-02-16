@@ -284,6 +284,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   if (function == motorMoveRel_) {
     if (autoPower == 1) {
       status = pAxis->setClosedLoop(true);
+      pAxis->setWasMovingFlag(1);
       epicsThreadSleep(autoPowerOnDelay);
     }
     status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
@@ -297,6 +298,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   } else if (function == motorMoveAbs_) {
     if (autoPower == 1) {
       status = pAxis->setClosedLoop(true);
+      pAxis->setWasMovingFlag(1);
       epicsThreadSleep(autoPowerOnDelay);
     }
     status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
@@ -310,6 +312,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   } else if (function == motorMoveVel_) {
     if (autoPower == 1) {
       status = pAxis->setClosedLoop(true);
+      pAxis->setWasMovingFlag(1);
       epicsThreadSleep(autoPowerOnDelay);
     }
     status = pAxis->moveVelocity(baseVelocity, value, acceleration);
@@ -324,6 +327,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   } else if (function == motorHome_) {
     if (autoPower == 1) {
       status = pAxis->setClosedLoop(true);
+      pAxis->setWasMovingFlag(1);
       epicsThreadSleep(autoPowerOnDelay);
     }
     forwards = (value == 0) ? 0 : 1;
@@ -636,7 +640,6 @@ void asynMotorController::asynMotorPoller()
       pAxis->poll(&moving);
       if (moving) {
 	anyMoving = true;
-	pAxis->setWasMovingFlag(1);
       } else {
 	if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
 	  pAxis->setDisableFlag(1);
