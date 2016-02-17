@@ -19,3 +19,6 @@ record(motor,"$(P)$(M)")
 	field(TWV,"1")
 }
 
+# ISIS local aliases for genie_python
+alias("$(P)$(M)", "$(P)$(M):SP")
+alias("$(P)$(M)", "$(P)$(M):SP:RBV")

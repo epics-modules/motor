@@ -25,6 +25,10 @@ record(motor, "$(P)$(M)") {
   field(SDIS, "$(P)$(M)_able.VAL")
 }
 
+# ISIS local aliases for genie_python
+alias("$(P)$(M)", "$(P)$(M):SP")
+alias("$(P)$(M)", "$(P)$(M):SP:RBV")
+
 record(bo, "$(P)$(M)_able") {
   field(DESC, "motor enable")
   field(PINI, "YES")

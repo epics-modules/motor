@@ -37,6 +37,11 @@ grecord(motor,"$(P)$(M)")
         field(FOFF,"Frozen")
 	field(NTM,"NO")
 }
+
+# ISIS local aliases for genie_python
+alias("$(P)$(M)", "$(P)$(M):SP")
+alias("$(P)$(M)", "$(P)$(M):SP:RBV")
+
 grecord(transform,"$(P)$(M)_ableput")
 {
 	field(CLCB,"a")
