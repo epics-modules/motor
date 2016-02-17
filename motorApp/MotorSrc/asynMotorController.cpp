@@ -640,6 +640,7 @@ void asynMotorController::asynMotorPoller()
       pAxis->poll(&moving);
       if (moving) {
 	anyMoving = true;
+	pAxis->setWasMovingFlag(1);
       } else {
 	if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
 	  pAxis->setDisableFlag(1);
