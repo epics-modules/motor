@@ -180,9 +180,9 @@ USAGE...        Motor Record Support.
  *                  - Reversed order of issuing SET_VEL_BASE and SET_VELOCITY commands. Fixes MAXv
  *                    command errors.
  * .71 02-25-15 rls - Fix for excessive motor record forward link processing.
- * 
  * .72 03-13-15 rls - Changed RDBL to set RRBV rather than DRBV.
- * 
+ * .73 02-15-16 rls - JOGF/R soft limit error check was using the wrong coordinate sytem limits.
+ *                    Changed error checks from dial to user limits.
  */                                                          
 
 #define VERSION 6.10
@@ -1366,8 +1366,8 @@ enter_do_work:
     else
     {
         if (pmr->mip & MIP_JOG)
-            pmr->lvio = (pmr->jogf && (pmr->drbv > pmr->dhlm - pmr->jvel)) ||
-                        (pmr->jogr && (pmr->drbv < pmr->dllm + pmr->jvel));
+            pmr->lvio = (pmr->jogf && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
+                        (pmr->jogr && (pmr->rbv < pmr->llm + pmr->jvel));
         else if (pmr->mip & MIP_HOME)
             pmr->lvio = false;  /* Disable soft-limit error check during home search. */
     }
@@ -1972,8 +1972,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             /* check for limit violation */
             if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
                 ;
-            else if ((pmr->jogf && (pmr->dval > pmr->dhlm - pmr->jvel)) ||
-                     (pmr->jogr && (pmr->dval < pmr->dllm + pmr->jvel)))
+            else if ((pmr->jogf && (pmr->val > pmr->hlm - pmr->jvel)) ||
+                     (pmr->jogr && (pmr->val < pmr->llm + pmr->jvel)))
             {
                 pmr->lvio = 1;
                 MARK(M_LVIO);
