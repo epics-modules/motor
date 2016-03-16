@@ -41,9 +41,9 @@ asynSetTraceIOMask("$(Port)",-1,0x1)
 nf874xCreateController("$(ControllerPort)", "$(Port)", 4, 200, 1000)
 
 ## Load record instances
-dbLoadTemplate("db/newfocus8742.asyn.motor.substitutions")
+dbLoadTemplate("iocBoot/iocNewFocus874x/newfocus8742.asyn.motor.substitutions")
 
-dbLoadRecords("${EPICS_BASE}/db/asynRecord.db", "P=$(MC_PREFIX),R=Asyn,PORT=$(Port),ADDR=,OMAX=80,IMAX=80")
+dbLoadRecords("${ASYN}/db/asynRecord.db", "P=$(MC_PREFIX),R=Asyn,PORT=$(Port),ADDR=,OMAX=80,IMAX=80")
 
 ## autosave/restore machinery
 save_restoreSet_Debug(0)
