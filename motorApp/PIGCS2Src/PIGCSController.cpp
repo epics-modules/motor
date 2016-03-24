@@ -55,6 +55,7 @@ PIGCSController* PIGCSController::CreateGCSController(PIInterface* pInterface, c
 	else if ( 		strstr(szIDN, "E-753") != NULL
 				||	strstr(szIDN, "E-709") != NULL
 				||	strstr(szIDN, "E-725") != NULL
+				||	strstr(szIDN, "E-727") != NULL
 				)
 	{
 		return new PIGCSPiezoController(pInterface, szIDN);
