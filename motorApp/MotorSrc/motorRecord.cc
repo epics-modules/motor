@@ -3605,7 +3605,10 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     pmr->rlls = (msta.Bits.RA_MINUS_LS) && !pmr->cdir;
 
     if ((pmr->mip & MIP_HOMF) || (pmr->mip & MIP_HOMR))
+    {
         ls_active = false;
+        msta.Bits.RA_PROBLEM = 0; /* Suppress problem while homing */
+    }
     else
         ls_active = (pmr->rhls || pmr->rlls) ? true : false;
     
