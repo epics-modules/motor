@@ -356,6 +356,8 @@ asynStatus XPSAxis::home(double min_velocity, double max_velocity, double accele
   }
   moving_ = true;
 
+  setIntegerParam(pC_->motorStatusProblem_, 0);
+
   return asynSuccess;
 }
 
