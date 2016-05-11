@@ -44,6 +44,8 @@ PIGCSController* PIGCSController::CreateGCSController(PIInterface* pInterface, c
 	if ( 		strstr(szIDN, "C-663") != NULL
 			||	strstr(szIDN, "C-863") != NULL
 			||	strstr(szIDN, "C-867") != NULL
+			||	strstr(szIDN, "C-884") != NULL
+			||	strstr(szIDN, "E-861") != NULL
 		)
 	{
 		return new PIGCSMotorController(pInterface, szIDN);
@@ -54,6 +56,7 @@ PIGCSController* PIGCSController::CreateGCSController(PIInterface* pInterface, c
 	}
 	else if ( 		strstr(szIDN, "E-753") != NULL
 				||	strstr(szIDN, "E-709") != NULL
+				||	strstr(szIDN, "E-712") != NULL
 				||	strstr(szIDN, "E-725") != NULL
 				||	strstr(szIDN, "E-727") != NULL
 				)
