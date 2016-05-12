@@ -3619,6 +3619,13 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     if (pmr->lls != old_lls)
         MARK(M_LLS);
 
+    /* If the motor has a problem, stop it if needed */
+    if ((ls_active == true || msta.Bits.RA_PROBLEM) && !msta.Bits.RA_DONE)
+    {
+        pmr->stop = 1;
+        MARK(M_STOP);
+    }
+
     /* Get motor-now-moving indicator. */
     if (ls_active == true || msta.Bits.RA_DONE || msta.Bits.RA_PROBLEM)
     {
@@ -3626,11 +3633,6 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
         if (ls_active == true || msta.Bits.RA_PROBLEM)
         {
             clear_buttons(pmr);
-            if (msta.Bits.RA_PROBLEM)
-            {
-                pmr->stop = 1;
-                MARK(M_STOP);
-            }
         }
     }
     else
