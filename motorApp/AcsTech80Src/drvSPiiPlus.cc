@@ -47,6 +47,8 @@ USAGE...	Motor record driver level support for ACS Tech80
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <drvSup.h>
+#include <errlog.h>
+#include <stdlib.h>
 #include "motor.h"
 #include "ACSTech80Register.h"
 #include "drvSPiiPlus.h"

@@ -22,6 +22,8 @@
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "drvPIC630.h"
 #include "asynOctetSyncIO.h"

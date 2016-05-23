@@ -38,6 +38,7 @@ USAGE...	Motor record device level support for Newport ESP300.
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"

@@ -78,6 +78,7 @@ USAGE...        Data and functions common to all OMS device level support.
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <dbAccess.h>
+#include <stdlib.h>
 
 #include "motorRecord.h"
 #include "motor.h"

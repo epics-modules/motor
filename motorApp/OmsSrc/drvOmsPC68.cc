@@ -72,6 +72,8 @@ USAGE...        Motor record driver level support for OMS PC68 serial device.
 #include <dbAccess.h>
 #include <drvSup.h>
 #include <iocsh.h>
+#include <errlog.h>
+#include <stdlib.h>
 
 #include "motor.h"
 #include "drvOmsPC68Com.h"

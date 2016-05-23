@@ -43,6 +43,8 @@ USAGE...	Motor record driver level support for Parker Computmotor
 #include <stdio.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "ParkerRegister.h"
 #include "drvPC6K.h"
