@@ -412,7 +412,6 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
             if (ret_status != asynSuccess || inputBuff[0] != ASCII_ACK_CHAR)
             {
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
-                epicsMutexUnlock(pAxis->mutexId);
                 break;
             }
 
