@@ -72,10 +72,10 @@ class epicsShareClass asynMotorAxis {
   double *profileReadbacks_;         /**< Array of readback positions for profile moves */
   double *profileFollowingErrors_;   /**< Array of following errors for profile moves */   
   int referencingMode_;
+
+  private:
   MotorStatus status_;
   int statusChanged_;
-  
-  private:
   int referencingModeMove_;
   int wasMovingFlag_;
   int disableFlag_;
