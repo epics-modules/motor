@@ -15,6 +15,7 @@ record(motor, "$(P)$(M)") {
   field(BACC, "$(BACC)")
   field(OUT, "#C$(C) S$(S) @")
   field(MRES, "$(MRES)")
+  field(ERES, "$(ERES)")
   field(PREC, "$(PREC)")
   field(EGU, "$(EGU)")
   field(DHLM, "$(DHLM)")
