@@ -965,7 +965,12 @@ that it will happen when we return.
 ******************************************************************************/
 static void maybeRetry(motorRecord * pmr)
 {
-    if ((fabs(pmr->diff) >= pmr->rdbd) && !pmr->hls && !pmr->lls)
+    bool user_cdir;
+
+    /* Commanded direction in user coordinates. */
+    user_cdir = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->cdir : !pmr->cdir;
+
+    if ((fabs(pmr->diff) >= pmr->rdbd) && !(pmr->hls && user_cdir) && !(pmr->lls && !user_cdir))
     {
         /* No, we're not close enough.  Try again. */
         Debug(1, "maybeRetry: not close enough; diff = %f\n", pmr->diff);
@@ -1274,7 +1279,7 @@ static long process(dbCommon *arg)
             }
 
             /* Do another update after LS error. */
-            if (pmr->mip != MIP_DONE && (pmr->rhls || pmr->rlls))
+            if (pmr->mip != MIP_DONE && ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)))
             {
                 /* Restore DMOV to false and UNMARK it so it is not posted. */
                 pmr->dmov = FALSE;
@@ -1303,7 +1308,8 @@ static long process(dbCommon *arg)
                     status = postProcess(pmr);
             }
 
-            if ((pmr->rhls || pmr->rlls) || (pmr->mip == MIP_LOAD_P)) /* Should we test for a retry? */
+            /* Should we test for a retry? Consider limit only if in direction of move.*/
+            if (((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)) || (pmr->mip == MIP_LOAD_P))
             {
                 pmr->mip = MIP_DONE;
                 MARK(M_MIP);
@@ -3271,7 +3277,8 @@ static void alarm_sub(motorRecord * pmr)
         status = recGblSetSevr((dbCommon *) pmr, UDF_ALARM, INVALID_ALARM);
         return;
     }
-    /* limit-switch and soft-limit violations */
+    /* Limit-switch and soft-limit violations. Consider limit switches also if not in
+     * direction of move (limit hit by externally triggered move)*/
     if (pmr->hlsv && (pmr->hls || (pmr->dval > pmr->dhlm)))
     {
         status = recGblSetSevr((dbCommon *) pmr, HIGH_ALARM, pmr->hlsv);
@@ -3600,11 +3607,12 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     if (pmr->tdir != old_tdir)
         MARK(M_TDIR);
 
-    /* Get states of high, low limit switches. */
-    pmr->rhls = (msta.Bits.RA_PLUS_LS)  &&  pmr->cdir;
-    pmr->rlls = (msta.Bits.RA_MINUS_LS) && !pmr->cdir;
+    /* Get states of high, low limit switches. State is independent of direction. */
+    pmr->rhls = (msta.Bits.RA_PLUS_LS);
+    pmr->rlls = (msta.Bits.RA_MINUS_LS);
 
-    ls_active = (pmr->rhls || pmr->rlls) ? true : false;
+    /* Treat limit switch active only when it is pressed and in direction of movement. */
+    ls_active = ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)) ? true : false;
     
     pmr->hls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rhls : pmr->rlls;
     pmr->lls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rlls : pmr->rhls;
