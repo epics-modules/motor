@@ -13,14 +13,15 @@ record(motor, "$(P)$(M)") {
   field(BDST, "$(BDST)")
   field(BVEL, "$(BVEL)")
   field(BACC, "$(BACC)")
-  field(OUT, "#C$(C) S$(S) @")
+  field(OUT,  "$(OUT)")
   field(MRES, "$(MRES)")
+  field(ERES, "$(ERES)")
   field(PREC, "$(PREC)")
-  field(EGU, "$(EGU)")
+  field(EGU,  "$(EGU)")
   field(DHLM, "$(DHLM)")
   field(DLLM, "$(DLLM)")
   field(INIT, "$(INIT)")
-  field(TWV, "1")
+  field(TWV,  "1")
   field(SDIS, "$(P)$(M)_able.VAL")
 }
 
