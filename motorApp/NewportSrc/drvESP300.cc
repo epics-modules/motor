@@ -56,6 +56,8 @@ USAGE...    Motor record driver level support for Newport ESP300/100.
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <errlog.h>
+#include <stdlib.h>
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"

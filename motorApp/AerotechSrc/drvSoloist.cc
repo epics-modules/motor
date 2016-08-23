@@ -43,6 +43,8 @@
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "drvSoloist.h"
 #include "asynOctetSyncIO.h"

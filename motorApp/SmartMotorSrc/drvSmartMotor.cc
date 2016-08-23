@@ -44,6 +44,8 @@ USAGE...    Motor record driver level support for Animatics Corporation SmartMot
 #include <epicsThread.h>
 #include <drvSup.h>
 #include <iocsh.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "motorRecord.h"
 #include "drvSmartMotor.h"
