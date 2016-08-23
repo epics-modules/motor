@@ -191,9 +191,6 @@ static int numA3200Controllers;
 /* Pointer to array of controller structures */
 static A3200Controller *pA3200Controller = NULL;
 
-#define MAX(a, b) ((a)>(b) ? (a) : (b))
-#define MIN(a, b) ((a)<(b) ? (a) : (b))
-
 static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
     if (level > 0)
@@ -447,6 +444,8 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
                 sprintf(outputBuff, "ENABLE %s", pAxis->axisName);
             }
             ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+            /* Set indicator to force status update when Enable does not work. */
+            motorParam->setInteger(pAxis->params, motorAxisPowerOn, value);
 
             /* Prevent Task #2 from blocking during LINEAR commands. */
             ret_status = sendAndReceive(pAxis->pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
