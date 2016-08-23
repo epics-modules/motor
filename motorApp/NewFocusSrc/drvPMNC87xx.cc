@@ -66,6 +66,8 @@ Last Modified:	2005/03/30 19:10:48
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "NewFocusRegister.h"
 #include "drvPMNCCom.h"
 #include "asynOctetSyncIO.h"

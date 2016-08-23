@@ -48,6 +48,8 @@ DESIGN LIMITATIONS...
 #include <math.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "drvPIC662.h"
 #include "epicsExport.h"
