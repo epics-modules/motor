@@ -1,0 +1,30 @@
+# ### PI_E816.iocsh ###
+
+#- ###################################################
+#- PORT             - Serial port for communications
+#- CONTROLLER       - Optional: Which controller is being configured
+#-                    Default: 0
+#-
+#- MAX_CONTROLLERS  - Optional: Max number of controllers that will be configured
+#-                    Default: 1
+#-
+#- POLL_RATE        - Optional: Controller poll rate in hertz
+#-                    Default: 10
+#- ###################################################
+
+#- PI E-816 driver setup parameters:
+#-     (1) maximum number of controllers in system
+#-     (2) motor task polling rate (min=1Hz,max=60Hz)
+$(E816_INIT_COMPLETE="") PIE816Setup($(MAX_CONTROLLERS=1), $(POLL_RATE=10))
+
+# PI E816 serial connection settings
+iocshLoad("$(IP)/iocsh/setSerialParams.iocsh", "PORT=$(PORT), BAUD=38400, BITS=8, STOP=1, PARITY=none, HANDSHAKE=hardware")
+asynOctetSetInputEos( "$(PORT)", -1, "\n")
+asynOctetSetOutputEos("$(PORT)", -1, "\n")
+
+# PI E-816 driver configuration parameters:
+#     (1) controller# being configured,
+#     (2) ASYN port name
+PIE816Config($(CONTROLLER=0), "$(PORT)")
+
+epicsEnvSet("E816_INIT_COMPLETE", "#")
