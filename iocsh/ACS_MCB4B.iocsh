@@ -2,29 +2,24 @@
 
 #- ###################################################
 #- PORT             - Serial port for communications
-#- CONTROLLER       - Optional: Which controller is being configured
-#-                    Default: 0
+#- INSTANCE         - Name of asyn port to create
 #-
-#- MAX_CONTROLLERS  - Optional: Max number of controllers that will be configured
+#- NUM_AXES         - Optional: Number of axes to create for this controller
 #-                    Default: 1
 #-
-#- POLL_RATE        - Optional: Controller poll rate in hertz
-#-                    Default: 10
+#- MOVING_POLL      - Optional: Moving poll rate (ms)
+#-                    Default: POLL_RATE
+#- 
+#- IDLE_POLL        - Optional: Idle poll rate (ms)
+#-                    Default: POLL_RATE
+#-
+#- POLL_RATE        - Optional: Poll rate (ms)
+#-                    Default: 100
 #- ###################################################
-
-# ACS MCB-4B driver setup parameters:
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz, max=60Hz)
-$(MCB4B_INIT_COMPLETE="") MCB4BSetup($(MAX_CONTROLLERS=1), $(POLL_RATE=10))
 
 # ACS MCB-4B serial connection settings
 iocshLoad("$(IP)/iocsh/setSerialParams.iocsh", "PORT=$(PORT), BAUD=19200, BITS=8, STOP=1, PARITY=none")
 asynOctetSetInputEos( "$(PORT)", -1, "\r")
 asynOctetSetOutputEos("$(PORT)", -1, "\r")
 
-# ACS MCB-4B driver configuration parameters:
-#     (1) controller being configured
-#     (2) asyn port name (string)
-MCB4BConfig($(CONTROLLER=0), "$(PORT)")
-
-epicsEnvSet("MCB4B_INIT_COMPLETE", "#")
+MCB4BCreateController("$(INSTANCE)", "$(PORT)", $(NUM_AXES=1), $(MOVING_POLL=$(POLL_RATE=100)), $(IDLE_POLL=$(POLL_RATE=100)))
