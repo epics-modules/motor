@@ -7,7 +7,7 @@
 #-
 #- SUB              - Optional: Subsitutions file (asyn_motor.db), Macros P, DTYP, PORT, 
 #-                              DHLM, DLLM, and INIT will be predefined.
-#-                    Default: $(MOTOR)/iocsh/motorSim_default.substitutions
+#-                    Default: $(MOTOR)/iocsh/EXAMPLE_motorSim.substitutions
 #-
 #- CONTROLLER       - Optional: Which controller is being configured
 #-                    Default: 0
@@ -31,4 +31,4 @@ motorSimCreate($(CONTROLLER=0), 0, $(LOW_LIM=-32000), $(HIGH_LIM=32000), $(HOME=
 # Setup the Asyn layer (portname, low-level driver drvet name, card, number of axes on card)
 drvAsynMotorConfigure("$(INSTANCE)$(CONTROLLER=0)", "$(INSTANCE)", $(CONTROLLER=0), $(NUM_AXES=1))
 
-dbLoadTemplate("$(SUB=$(MOTOR)/iocsh/motorSim_default.substitutions", "P=$(PREFIX), DTYP='asynMotor', PORT=$(INSTANCE)$(CONTROLLER=0), DHLM=$(HIGH_LIM=32000), DLLM$(LOW_LIM=32000), INIT=\"\"")
+dbLoadTemplate("$(SUB=$(MOTOR)/iocsh/EXAMPLE_motorSim.substitutions", "P=$(PREFIX), DTYP='asynMotor', PORT=$(INSTANCE)$(CONTROLLER=0), DHLM=$(HIGH_LIM=32000), DLLM$(LOW_LIM=32000), INIT=\"\"")
