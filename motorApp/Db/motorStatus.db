@@ -1,0 +1,32 @@
+# monitor the motor status and update a string field with results
+record(aSub, "$(P)$(M):_MSTACALC")
+{
+    field(SNAM, "displayMotorMSTA")
+	field(INPA, "$(P)$(M).MSTA CP")
+	field(FTA, "ULONG")
+	field(OUTA, "$(P)$(M)_MSTA_STR PP")
+	field(FTVA, "CHAR")
+	field(NOVA, "512")	
+}
+
+record(waveform, "$(P)$(M)_MSTA_STR")
+{
+	field(NELM, "512")
+	field(FTVL, "CHAR")
+	field(DESC, "Text version of motor MSTA")
+}
+
+record(aSub, "$(P)$(M):_STATUSCALC")
+{
+    field(SNAM, "displayMotorMSTASimple")
+	field(INPA, "$(P)$(M).MSTA CP")
+	field(FTA, "ULONG")
+	field(OUTA, "$(P)$(M)_STATUS PP")
+	field(FTVA, "STRING")
+	field(NOVA, "1")	
+}
+
+record(stringin, "$(P)$(M)_STATUS")
+{
+	field(DESC, "Simple Text version of motor MSTA")
+}
