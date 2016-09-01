@@ -1,0 +1,34 @@
+# ### motorSim.iocsh ###
+
+#- ###################################################
+#- PREFIX           - IOC Prefix
+#- INSTANCE         - Instance name, used to create the low-level driver drvet name
+#-                    Combined with the controller number to create the asyn port name
+#-
+#- SUB              - Optional: Subsitutions file (asyn_motor.db), Macros P, DTYP, PORT, 
+#-                              DHLM, DLLM, and INIT will be predefined.
+#-                    Default: $(MOTOR)/iocsh/EXAMPLE_motorSim.substitutions
+#-
+#- CONTROLLER       - Optional: Which controller is being configured
+#-                    Default: 0
+#-
+#- NUM_AXES         - Optional: Number of axes on this controller
+#-                    Default: 1
+#-
+#- LOW_LIM          - Optional: Low Limit
+#-                    Default: -32000
+#-
+#- HIGH_LIM         - Optional: High Limit
+#-                    Default: 32000
+#- 
+#- HOME             - Optional: Home position
+#-                    Default: 0
+#- ###################################################
+
+# Create simulated motors: ( start card , start axis , low limit, high limit, home posn, # cards, # axes to setup)
+motorSimCreate($(CONTROLLER=0), 0, $(LOW_LIM=-32000), $(HIGH_LIM=32000), $(HOME=0), 1, $(NUM_AXES=1))
+
+# Setup the Asyn layer (portname, low-level driver drvet name, card, number of axes on card)
+drvAsynMotorConfigure("$(INSTANCE)$(CONTROLLER=0)", "$(INSTANCE)", $(CONTROLLER=0), $(NUM_AXES=1))
+
+dbLoadTemplate("$(SUB=$(MOTOR)/iocsh/EXAMPLE_motorSim.substitutions", "P=$(PREFIX), DTYP='asynMotor', PORT=$(INSTANCE)$(CONTROLLER=0), DHLM=$(HIGH_LIM=32000), DLLM$(LOW_LIM=32000), INIT=\"\"")
