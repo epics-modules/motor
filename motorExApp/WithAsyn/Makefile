@@ -39,6 +39,9 @@ ifdef BUSY
 endif
 COMMONDBDS += PI_GCS2Support.dbd
 COMMONDBDS += phytron.dbd
+ifdef SCRIPT
+COMMONDBDS += ScriptMotorDriver.dbd
+endif
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
