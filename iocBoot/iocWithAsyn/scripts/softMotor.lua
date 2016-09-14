@@ -1,3 +1,4 @@
+IdlePollPeriod = 1.00
 MovingPollPeriod = 0.25
 
 lastPos = 0
@@ -26,8 +27,13 @@ end
 
 
 function poll()
-	local curr = epics.get(READBACK_PV)	
 	local MRES = asyn.getDoubleParam( DRIVER, AXIS, "MOTOR_REC_RESOLUTION")
+	
+	if (MRES == 0.0) then
+		return true
+	end
+	
+	local curr = epics.get(READBACK_PV)
 	
 	asyn.setDoubleParam( DRIVER, AXIS, "MOTOR_POSITION", curr / MRES)
 	
