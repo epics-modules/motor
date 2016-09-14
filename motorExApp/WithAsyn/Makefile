@@ -86,6 +86,10 @@ COMMONLIBS += ACRMotor
 COMMONLIBS += PI_GCS2Support
 COMMONLIBS += phytronAxisMotor
 COMMONLIBS += motor
+ifdef SCRIPT
+COMMONLIBS += ScriptMotor
+COMMONLIBS += script
+endif
 
 # Needed for Newport SNL programs
 WithAsyn_LIBS += $(COMMONLIBS)
