@@ -105,6 +105,12 @@ MicronixSrc_DEPEND_DIRS = MotorSrc
 DIRS += PhytronSrc
 PhytronSrc_DEPEND_DIRS = MotorSrc
 
+# The Script motor support requires the lua scripting module
+ifdef SCRIPT
+DIRS += ScriptMotorSrc
+ScriptMotorSrc_DEPEND_DIRS = MotorSrc
+endif
+
 endif
 
 # Install the edl files
