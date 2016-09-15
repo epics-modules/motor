@@ -79,7 +79,7 @@ void ScriptMotorController::reload()
   * \param[in] script_file 
   * \param[in] params
   */
-extern "C" int ScriptMotorCreateController(const char* asyn_port,
+extern "C" int ScriptControllerConfig(const char* asyn_port,
                                            int max_axes, 
                                            const char* script_file, 
                                            const char* params)
@@ -282,7 +282,7 @@ void ScriptMotorAxis::setPositionParam(int index, double value)
 /*
  *
  */
-extern "C" int ScriptMotorCreateAxis(const char* ScriptMotorName, int axisNo, const char* params)
+extern "C" int ScriptAxisConfig(const char* ScriptMotorName, int axisNo, const char* params)
 {
   static const char *functionName = "VirtualMotorCreateAxis";
  
@@ -826,7 +826,7 @@ static const iocshArg * const ScriptMotorCreateControllerArgs[] = {&ScriptMotorC
 static const iocshFuncDef ScriptMotorCreateControllerDef = {"ScriptControllerConfig", 4, ScriptMotorCreateControllerArgs};
 static void ScriptMotorCreateContollerCallFunc(const iocshArgBuf *args)
 {
-  ScriptMotorCreateController(args[0].sval, args[1].ival, args[2].sval, args[3].sval);
+  ScriptControllerConfig(args[0].sval, args[1].ival, args[2].sval, args[3].sval);
 }
 
 
@@ -841,7 +841,7 @@ static const iocshArg * const ScriptMotorCreateAxisArgs[] = {&ScriptMotorCreateA
 static const iocshFuncDef ScriptMotorCreateAxisDef = {"ScriptAxisConfig", 3, ScriptMotorCreateAxisArgs};
 static void ScriptMotorCreateAxisCallFunc(const iocshArgBuf *args)
 {
-  ScriptMotorCreateAxis(args[0].sval, args[1].ival, args[2].sval);
+  ScriptAxisConfig(args[0].sval, args[1].ival, args[2].sval);
 }
 
 
