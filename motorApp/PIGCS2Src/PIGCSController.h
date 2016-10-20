@@ -109,6 +109,8 @@ protected:
 	size_t m_nrFoundAxes;
 	char m_allAxesIDs[255];
 	int m_LastError;
+
+    bool m_KnowsVELcommand;
 };
 
 #endif /* PIGCSCONTROLLER_H_ */
