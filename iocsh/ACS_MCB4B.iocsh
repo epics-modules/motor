@@ -1,0 +1,25 @@
+# ### ACS_MCB4B.iocsh ###
+
+#- ###################################################
+#- PORT             - Serial port for communications
+#- INSTANCE         - Name of asyn port to create
+#-
+#- NUM_AXES         - Optional: Number of axes to create for this controller
+#-                    Default: 1
+#-
+#- MOVING_POLL      - Optional: Moving poll rate (ms)
+#-                    Default: POLL_RATE
+#- 
+#- IDLE_POLL        - Optional: Idle poll rate (ms)
+#-                    Default: POLL_RATE
+#-
+#- POLL_RATE        - Optional: Poll rate (ms)
+#-                    Default: 100
+#- ###################################################
+
+# ACS MCB-4B serial connection settings
+iocshLoad("$(IP)/iocsh/setSerialParams.iocsh", "PORT=$(PORT), BAUD=19200, BITS=8, STOP=1, PARITY=none")
+asynOctetSetInputEos( "$(PORT)", -1, "\r")
+asynOctetSetOutputEos("$(PORT)", -1, "\r")
+
+MCB4BCreateController("$(INSTANCE)", "$(PORT)", $(NUM_AXES=1), $(MOVING_POLL=$(POLL_RATE=100)), $(IDLE_POLL=$(POLL_RATE=100)))

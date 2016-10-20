@@ -44,6 +44,8 @@ Last Modified:	2004/12/20 21:10:53
 
 
 #include <string.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"

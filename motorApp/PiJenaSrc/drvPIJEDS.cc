@@ -44,6 +44,8 @@ DESIGN LIMITATIONS...
 #include <math.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "drvPIJEDS.h"

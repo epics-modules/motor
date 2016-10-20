@@ -1,0 +1,37 @@
+# ### Newfocus_PMNC87xx.iocsh ###
+
+#- ###################################################
+#- PORT             - Serial port for communications
+#- CONTROLLER       - Optional: Which controller is being configured
+#-                    Default: 0
+#-
+#- NUM_AXES         - Optional: Number of axes on this controller
+#-                    Default: 1
+#-
+#- MAX_CONTROLLERS  - Optional: Max number of controllers that will be configured
+#-                    Default: 1
+#-
+#- MAX_DRIVES       - Optional: Max number of drives per controller
+#-                    Default: 1
+#-
+#- POLL_RATE        - Optional: Controller poll rate in hertz
+#-                    Default: 10
+#- ###################################################
+
+#- NewFocus Picomotor driver setup parameters:
+#-     (1) maximum number of controllers in system
+#-     (2) maximum drives per controller
+#-     (3) motor task polling rate (min=1Hz, max=60Hz)
+$(PMNC87XX_INIT_COMPLETE="") PMNC87xxSetup($(MAX_CONTROLLERS=1), $(MAX_DRIVES=1), $(POLL_RATE=10))
+
+#- Serial port configuration
+iocshLoad("$(IP)/iocsh/setSerialParams.iocsh", "PORT=$(PORT), BAUD=19200, BITS=8, STOP=1, PARITY=none")
+asynOctetSetInputEos( "$(PORT)", -1, "\r")
+asynOctetSetOutputEos("$(PORT)", -1, "\r")
+
+#- NewFocus Picomotor driver configuration parameters:
+#-     (1) controller being configured
+#-     (2) asyn port name (string)
+PMNC87xxConfig($(CONTROLLER=0), "$(PORT)")
+
+epicsEnvSet("PMNC87XX_INIT_COMPLETE", "#")

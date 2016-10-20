@@ -125,6 +125,8 @@ USAGE...	Motor record driver level support for OMS model VME58.
 #include	<epicsThread.h>
 #include	<epicsExit.h>
 #include	<epicsInterrupt.h>
+#include        <errlog.h>
+#include        <stdlib.h>
 
 #include	"motorRecord.h"	/* For Driver Power Monitor feature only. */
 #include	"motor.h"

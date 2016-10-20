@@ -44,6 +44,7 @@ USAGE...        Motor record device level support for Newport MM4000.
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"

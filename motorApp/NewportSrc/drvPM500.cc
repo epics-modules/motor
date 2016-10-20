@@ -55,6 +55,8 @@ USAGE...    Motor record driver level support for Newport PM500.
 #include <math.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"

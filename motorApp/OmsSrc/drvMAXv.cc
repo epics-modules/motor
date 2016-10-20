@@ -111,6 +111,7 @@ USAGE...        Motor record driver level support for OMS model MAXv.
 #include <iocsh.h>
 #include <epicsExit.h>
 #include <cantProceed.h>
+#include <errlog.h>
 
 #include "motorRecord.h" /* For Driver Power Monitor feature only. */
 #include "motor.h"

@@ -40,6 +40,8 @@ USAGE...	Motor record device level support for Newport MM3000.
 
 
 #include <string.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"

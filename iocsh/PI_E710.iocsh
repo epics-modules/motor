@@ -1,0 +1,31 @@
+# ### PI_E710.iocsh ###
+
+#- ###################################################
+#- PORT             - Serial port for communications
+#- CONTROLLER       - Optional: Which controller is being configured
+#-                    Default: 0
+#-
+#- MAX_CONTROLLERS  - Optional: Max number of controllers that will be configured
+#-                    Default: 1
+#-
+#- POLL_RATE        - Optional: Controller poll rate in hertz
+#-                    Default: 10
+#- ###################################################
+
+#- PI E-710 driver setup parameters:
+#-     (1) maximum # of controllers,
+#-     (2) motor task polling rate (min=1Hz, max=60Hz)
+$(E710_INIT_COMPLETE="") PIE710Setup($(MAX_CONTROLLERS=1), $(POLL_RATE=10))
+
+# PI E710 serial connection settings
+iocshLoad("$(IP)/iocsh/setSerialParams.iocsh", "PORT=$(PORT), BAUD=9600, BITS=8, STOP=1, PARITY=none")
+asynOctetSetInputEos( "$(PORT)", -1, "\n")
+asynOctetSetOutputEos("$(PORT)", -1, "\n")
+
+#- PI E-710 driver configuration parameters:
+#-     (1) controller
+#-     (2) asyn port name (e.g. serial1 or gpib1)
+#-     (3) GPIB address (0 for serial)
+PIE710Config($(CONTROLLER=0), "$(PORT)", 0)
+
+epicsEnvSet("E710_INIT_COMPLETE", "#")

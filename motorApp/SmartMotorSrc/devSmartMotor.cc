@@ -41,6 +41,7 @@ USAGE...    Motor record driver level support for Animatics Corporation SmartMot
  */
 
 #include <string.h>
+#include <errlog.h>
 
 #include "motorRecord.h"
 #include "motor.h"
