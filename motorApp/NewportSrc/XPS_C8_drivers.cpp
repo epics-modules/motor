@@ -28,7 +28,7 @@
 extern "C"
 {
 #else
-#typedef int bool;  /* C does not know bool, only C++ */
+typedef int bool;  /* C does not know bool, only C++ */
 #endif
 
 #define DLL_VERSION "Library version for XPS-C8 Firmware V2.6.x"
@@ -90,10 +90,8 @@ int __stdcall ControllerMotionKernelTimeLoadGet (int SocketIndex, double * CPUTo
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CPUTotalLoadRatio);
@@ -142,10 +140,8 @@ int __stdcall ControllerStatusGet (int SocketIndex, int * ControllerStatus)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ControllerStatus);
@@ -231,10 +227,8 @@ int __stdcall ElapsedTimeGet (int SocketIndex, double * ElapsedTime)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", ElapsedTime);
@@ -515,10 +509,8 @@ int __stdcall TimerGet (int SocketIndex, char * TimerName, int * FrequencyTicks)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", FrequencyTicks);
@@ -1261,10 +1253,8 @@ int __stdcall EventExtendedStart (int SocketIndex, int * ID)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ID);
@@ -1578,10 +1568,8 @@ int __stdcall GatheringCurrentNumberGet (int SocketIndex, int * CurrentNumber, i
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", CurrentNumber);
@@ -2019,10 +2007,8 @@ int __stdcall GatheringExternalCurrentNumberGet (int SocketIndex, int * CurrentN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", CurrentNumber);
@@ -2222,10 +2208,8 @@ int __stdcall DoubleGlobalArrayGet (int SocketIndex, int Number, double * Double
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", DoubleValue);
@@ -2335,10 +2319,8 @@ int __stdcall GPIOAnalogGet (int SocketIndex, int NbElements, char * GPIONameLis
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2488,10 +2470,8 @@ int __stdcall GPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIONam
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2605,10 +2585,8 @@ int __stdcall GPIODigitalGet (int SocketIndex, char * GPIOName, unsigned short *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%hu", DigitalValue);
@@ -2695,10 +2673,8 @@ int __stdcall GroupAccelerationSetpointGet (int SocketIndex, char * GroupName, i
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2820,10 +2796,8 @@ int __stdcall GroupCorrectorOutputGet (int SocketIndex, char * GroupName, int Nb
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2880,10 +2854,8 @@ int __stdcall GroupCurrentFollowingErrorGet (int SocketIndex, char * GroupName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3126,10 +3098,8 @@ int __stdcall GroupJogParametersGet (int SocketIndex, char * GroupName, int NbEl
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3190,10 +3160,8 @@ int __stdcall GroupJogCurrentGet (int SocketIndex, char * GroupName, int NbEleme
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3524,10 +3492,8 @@ int __stdcall GroupPositionCorrectedProfilerGet (int SocketIndex, char * GroupNa
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CorrectedProfilerPositionX);
@@ -3583,10 +3549,8 @@ int __stdcall GroupPositionCurrentGet (int SocketIndex, char * GroupName, int Nb
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3634,10 +3598,8 @@ int __stdcall GroupPositionPCORawEncoderGet (int SocketIndex, char * GroupName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", PCORawPositionX);
@@ -3693,10 +3655,8 @@ int __stdcall GroupPositionSetpointGet (int SocketIndex, char * GroupName, int N
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3753,10 +3713,8 @@ int __stdcall GroupPositionTargetGet (int SocketIndex, char * GroupName, int NbE
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3900,10 +3858,8 @@ int __stdcall GroupStatusGet (int SocketIndex, char * GroupName, int * Status)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", Status);
@@ -4002,10 +3958,8 @@ int __stdcall GroupVelocityCurrentGet (int SocketIndex, char * GroupName, int Nb
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -4479,10 +4433,8 @@ int __stdcall PositionerCorrectorNotchFiltersGet (int SocketIndex, char * Positi
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", NotchFrequency1);
@@ -4579,7 +4531,7 @@ int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * P
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
 	char *ReturnedValue = (char *) malloc (sizeof(char) * SIZE_SMALL); 
-	int boolScanTmp;
+	int boolScanTmp = 0;
 
 	/* Convert to string */ 
 	sprintf (ExecuteMethod, "PositionerCorrectorPIDFFAccelerationGet (%s,bool *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *)", PositionerName);
@@ -4594,10 +4546,8 @@ int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * P
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4713,7 +4663,7 @@ int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Posit
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
 	char *ReturnedValue = (char *) malloc (sizeof(char) * SIZE_SMALL); 
-	int boolScanTmp;
+	int boolScanTmp = 0;
 
 	/* Convert to string */ 
 	sprintf (ExecuteMethod, "PositionerCorrectorPIDFFVelocityGet (%s,bool *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *,double *)", PositionerName);
@@ -4728,10 +4678,8 @@ int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Posit
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4866,10 +4814,8 @@ int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4990,10 +4936,8 @@ int __stdcall PositionerCorrectorPIPositionGet (int SocketIndex, char * Position
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -5091,10 +5035,8 @@ int __stdcall PositionerCurrentVelocityAccelerationFiltersGet (int SocketIndex, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CurrentVelocityCutOffFrequency);
@@ -5176,10 +5118,8 @@ int __stdcall PositionerDriverFiltersGet (int SocketIndex, char * PositionerName
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", KI);
@@ -5270,10 +5210,8 @@ int __stdcall PositionerDriverPositionOffsetsGet (int SocketIndex, char * Positi
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", StagePositionOffset);
@@ -5317,10 +5255,8 @@ int __stdcall PositionerDriverStatusGet (int SocketIndex, char * PositionerName,
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", DriverStatus);
@@ -5410,10 +5346,8 @@ int __stdcall PositionerEncoderAmplitudeValuesGet (int SocketIndex, char * Posit
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CalibrationSinusAmplitude);
@@ -5466,10 +5400,8 @@ int __stdcall PositionerEncoderCalibrationParametersGet (int SocketIndex, char *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", SinusOffset);
@@ -5519,10 +5451,8 @@ int __stdcall PositionerErrorGet (int SocketIndex, char * PositionerName, int * 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ErrorCode);
@@ -5563,10 +5493,8 @@ int __stdcall PositionerErrorRead (int SocketIndex, char * PositionerName, int *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ErrorCode);
@@ -5656,10 +5584,8 @@ int __stdcall PositionerExcitationSignalGet (int SocketIndex, char * PositionerN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", Mode);
@@ -5745,10 +5671,8 @@ int __stdcall PositionerExternalLatchPositionGet (int SocketIndex, char * Positi
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Position);
@@ -5789,10 +5713,8 @@ int __stdcall PositionerHardwareStatusGet (int SocketIndex, char * PositionerNam
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", HardwareStatus);
@@ -5879,10 +5801,8 @@ int __stdcall PositionerHardInterpolatorFactorGet (int SocketIndex, char * Posit
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", InterpolationFactor);
@@ -5957,10 +5877,8 @@ int __stdcall PositionerMaximumVelocityAndAccelerationGet (int SocketIndex, char
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MaximumVelocity);
@@ -6008,10 +5926,8 @@ int __stdcall PositionerMotionDoneGet (int SocketIndex, char * PositionerName, d
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", PositionWindow);
@@ -6136,10 +6052,8 @@ int __stdcall PositionerPositionCompareAquadBWindowedGet (int SocketIndex, char 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumPosition);
@@ -6225,10 +6139,8 @@ int __stdcall PositionerPositionCompareGet (int SocketIndex, char * PositionerNa
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumPosition);
@@ -6379,10 +6291,8 @@ int __stdcall PositionerPositionComparePulseParametersGet (int SocketIndex, char
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", PCOPulseWidth);
@@ -6461,10 +6371,8 @@ int __stdcall PositionerRawEncoderPositionGet (int SocketIndex, char * Positione
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", RawEncoderPosition);
@@ -6505,10 +6413,8 @@ int __stdcall PositionersEncoderIndexDifferenceGet (int SocketIndex, char * Posi
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", distance);
@@ -6550,10 +6456,8 @@ int __stdcall PositionerSGammaExactVelocityAjustedDisplacementGet (int SocketInd
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", AdjustedDisplacement);
@@ -6597,10 +6501,8 @@ int __stdcall PositionerSGammaParametersGet (int SocketIndex, char * PositionerN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Velocity);
@@ -6687,10 +6589,8 @@ int __stdcall PositionerSGammaPreviousMotionTimesGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", SettingTime);
@@ -6819,10 +6719,8 @@ int __stdcall PositionerTimeFlasherGet (int SocketIndex, char * PositionerName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumPosition);
@@ -6973,10 +6871,8 @@ int __stdcall PositionerUserTravelLimitsGet (int SocketIndex, char * PositionerN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", UserMinimumTarget);
@@ -7055,10 +6951,8 @@ int __stdcall PositionerDACOffsetGet (int SocketIndex, char * PositionerName, sh
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%hd", DACOffset1);
@@ -7139,10 +7033,8 @@ int __stdcall PositionerDACOffsetDualGet (int SocketIndex, char * PositionerName
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%hd", PrimaryDACOffset1);
@@ -7231,10 +7123,8 @@ int __stdcall PositionerCorrectorAutoTuning (int SocketIndex, char * PositionerN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", KP);
@@ -7281,10 +7171,8 @@ int __stdcall PositionerAccelerationAutoScaling (int SocketIndex, char * Positio
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Scaling);
@@ -7541,10 +7429,8 @@ int __stdcall MultipleAxesPVTPulseOutputGet (int SocketIndex, char * GroupName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", StartElement);
@@ -7922,10 +7808,8 @@ int __stdcall GroupSpinParametersGet (int SocketIndex, char * GroupName, double 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Velocity);
@@ -7970,10 +7854,8 @@ int __stdcall GroupSpinCurrentGet (int SocketIndex, char * GroupName, double * V
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Velocity);
@@ -8276,10 +8158,8 @@ int __stdcall XYLineArcPulseOutputGet (int SocketIndex, char * GroupName, double
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", StartLength);
@@ -8331,10 +8211,8 @@ int __stdcall XYZGroupPositionCorrectedProfilerGet (int SocketIndex, char * Grou
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CorrectedProfilerPositionX);
@@ -8773,10 +8651,8 @@ int __stdcall CPUCoreAndBoardSupplyVoltagesGet (int SocketIndex, double * Voltag
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", VoltageCPUCore);
@@ -8838,10 +8714,8 @@ int __stdcall CPUTemperatureAndFanSpeedGet (int SocketIndex, double * CPUTempera
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CPUTemperature);
@@ -9753,10 +9627,8 @@ int __stdcall GatheringUserDatasGet (int SocketIndex, double * UserData1, double
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", UserData1);
@@ -9822,10 +9694,8 @@ int __stdcall ControllerMotionKernelPeriodMinMaxGet (int SocketIndex, double * M
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumCorrectorPeriod);
