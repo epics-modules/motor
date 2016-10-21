@@ -163,7 +163,7 @@ asynStatus PIGCSController::setAxisPositionCts(PIasynAxis* pAxis, double positio
 	double position = double(positionCts) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
 
 	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW|ASYN_TRACE_ERROR,
-		"PIGCSController::setAxisPositionCts(, %d) \n", positionCts);
+		"PIGCSController::setAxisPositionCts(, %f) \n", positionCts);
 	return setAxisPosition(pAxis, position);
 }
 

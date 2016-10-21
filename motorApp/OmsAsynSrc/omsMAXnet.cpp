@@ -33,12 +33,11 @@ extern "C" {epicsExportAddress(int, motorMAXnetdebug);}
 
 static void connectCallback(asynUser *pasynUser, asynException exception)
 {
-    asynStatus status;
     int connected = 0;
     omsMAXnet* pController = (omsMAXnet*)pasynUser->userPvt;
 
     if (exception == asynExceptionConnect) {
-        status = pasynManager->isConnected(pasynUser, &connected);
+        (void)pasynManager->isConnected(pasynUser, &connected);
         if (connected){
             if (motorMAXnetdebug & 8) asynPrint(pasynUser, ASYN_TRACE_FLOW,
                 "MAXnet connectCallback:  TCP-Port connected\n");
@@ -164,7 +163,6 @@ omsMAXnet::omsMAXnet(const char* portName, int numAxes, const char* serialPortNa
 epicsEventWaitStatus omsMAXnet::waitInterruptible(double timeout)
 {
     double pollWait, timeToWait = timeout;
-    asynStatus status;
     size_t nRead;
     char inputBuff[1];
     int eomReason = 0;
@@ -185,8 +183,8 @@ epicsEventWaitStatus omsMAXnet::waitInterruptible(double timeout)
          * poll event, if a notification is outstanding. One character will be read. */
         if (enabled) {
             pasynManager->lockPort(pasynUserSerial);
-            status = pasynOctetSerial->read(octetPvtSerial, pasynUserSerial, inputBuff,
-                                                0, &nRead, &eomReason);
+            (void)pasynOctetSerial->read(octetPvtSerial, pasynUserSerial, inputBuff,
+                                         0, &nRead, &eomReason);
             pasynManager->unlockPort(pasynUserSerial);
         }
         if (epicsEventWaitWithTimeout(pollEventId_, pollWait) == epicsEventWaitOK) {
@@ -211,8 +209,8 @@ asynStatus omsMAXnet::sendOnly(const char *outputBuff)
 
     if (status != asynSuccess) {
         asynPrint(pasynUserSyncIOSerial, ASYN_TRACE_ERROR,
-                  "drvMAXnetAsyn:sendOnly: error sending command %s, sent=%d, status=%d\n",
-                  outputBuff, nActual, status);
+                  "drvMAXnetAsyn:sendOnly: error sending command %s, sent=%ld, status=%d\n",
+                  outputBuff, (long)nActual, status);
     }
     Debug(4, "omsMAXnet::sendOnly: wrote: %s \n", outputBuff);
     return(status);
@@ -327,7 +325,6 @@ int omsMAXnet::isNotification (char *buffer) {
  */
 bool omsMAXnet::resetConnection(){
 
-    asynStatus status;
     int autoConnect;
 
     asynInterface *pasynInterface = pasynManager->findInterface(pasynUserSerial,asynCommonType,1);
@@ -337,8 +334,8 @@ bool omsMAXnet::resetConnection(){
     pasynManager->isAutoConnect(pasynUserSerial, &autoConnect);
 
     errlogPrintf("*** disconnect and reconnect serial/IP connection ****\n");
-    status = pasynCommonIntf->disconnect(pasynInterface->drvPvt, pasynUserSerial);
-    if (!autoConnect) status = pasynCommonIntf->connect(pasynInterface->drvPvt, pasynUserSerial);
+    (void)pasynCommonIntf->disconnect(pasynInterface->drvPvt, pasynUserSerial);
+    if (!autoConnect) (void)pasynCommonIntf->connect(pasynInterface->drvPvt, pasynUserSerial);
     epicsThreadSleep(0.1);
     if (portConnected) errlogPrintf("*** reconnect done ****\n");
 
