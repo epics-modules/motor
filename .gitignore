@@ -12,3 +12,4 @@ runIOC.bat
 runIOC.sh
 relPaths.sh
 iocBoot/iocmotorSim/motor.substitutions.local
+.project
