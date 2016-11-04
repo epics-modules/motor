@@ -66,6 +66,7 @@ STATIC long PM304_init_record(void *);
 STATIC long PM304_start_trans(struct motorRecord *);
 STATIC RTN_STATUS PM304_build_trans(motor_cmnd, double *, struct motorRecord *);
 STATIC RTN_STATUS PM304_end_trans(struct motorRecord *);
+STATIC long VELO;
 
 struct motor_dset devPM304 =
 {
@@ -232,14 +233,18 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
         if (cntrl->model == MODEL_PM304){
            sprintf(buff, "%dIX;", axis);
         } else {
-           sprintf(buff, "%dHD;", axis);
+           //sprintf(buff, "%dHD;", axis);
+		   // Motor always sends an SV before CV for VELO will be current base velocity
+		   sprintf(buff, "%dCV%ld;", axis, VELO);
         }
         break;
     case HOME_REV:
         if (cntrl->model == MODEL_PM304){
            sprintf(buff, "%dIX-1;", axis);
         } else {
-           sprintf(buff, "%dHD-1;", axis);
+           //sprintf(buff, "%dHD-1;", axis);
+		   // Motor always sends an SV before CV for VELO will be current base velocity
+		   sprintf(buff, "%dCV-%ld;", axis, VELO);
         }
         break;
     case LOAD_POS:
@@ -253,10 +258,10 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
         break;          /* PM304 does not use base velocity */
     case SET_VELOCITY:
         sprintf(buff, "%dSV%ld;", axis, ival);
+		VELO = ival;
         break;
     case SET_ACCEL:
         sprintf(buff, "%dSA%ld;", axis, ival);
-        strcat(motor_call->message, buff);
         sprintf(buff, "%dSD%ld;", axis, ival);
         break;
     case GO:
