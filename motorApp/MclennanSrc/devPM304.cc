@@ -66,7 +66,7 @@ STATIC long PM304_init_record(void *);
 STATIC long PM304_start_trans(struct motorRecord *);
 STATIC RTN_STATUS PM304_build_trans(motor_cmnd, double *, struct motorRecord *);
 STATIC RTN_STATUS PM304_end_trans(struct motorRecord *);
-STATIC long VELO;
+STATIC long VELO = 0;
 
 struct motor_dset devPM304 =
 {
