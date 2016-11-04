@@ -262,6 +262,7 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
         break;
     case SET_ACCEL:
         sprintf(buff, "%dSA%ld;", axis, ival);
+        strcat(motor_call->message, buff);
         sprintf(buff, "%dSD%ld;", axis, ival);
         break;
     case GO:
