@@ -179,7 +179,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
                                             &eomReason);
             asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
                   "SendAndReceive, received: nread=%d, returnSize-nread=%d, nbytesIn=%d\n",
-                  (int)nread, returnSize-nread, (int)nbytesIn);
+                  (int)nread, (int)(returnSize-nread), (int)nbytesIn);
             nread += nbytesIn;
         }
     } else {
@@ -260,7 +260,7 @@ int ReadXPSSocket (int SocketIndex, char valueRtrn[], int returnSize, double tim
                                         &eomReason);
         asynPrint(psock->pasynUser, ASYN_TRACEIO_DRIVER,
               "ReadXPSSocket, received: nread=%d, returnSize-nread=%d, nbytesIn=%d\n",
-              (int)nread, returnSize-nread, (int)nbytesIn);
+              (int)nread, (long)(returnSize-nread), (int)nbytesIn);
         nread += nbytesIn;
     } while ((status==asynSuccess) && 
              (strcmp(valueRtrn + nread - strlen(XPS_TERMINATOR), XPS_TERMINATOR) != 0));
