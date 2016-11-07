@@ -28,7 +28,7 @@
 extern "C"
 {
 #else
-#typedef int bool;  /* C does not know bool, only C++ */
+typedef int bool;  /* C does not know bool, only C++ */
 #endif
 
 #define DLL_VERSION "Library version for XPS-C8 Firmware V2.6.x"
