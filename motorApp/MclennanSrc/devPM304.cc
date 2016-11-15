@@ -67,6 +67,7 @@ STATIC long PM304_start_trans(struct motorRecord *);
 STATIC RTN_STATUS PM304_build_trans(motor_cmnd, double *, struct motorRecord *);
 STATIC RTN_STATUS PM304_end_trans(struct motorRecord *);
 STATIC long VELO = 0;
+STATIC int HOME_TYPE;
 
 struct motor_dset devPM304 =
 {
@@ -241,18 +242,26 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
     case HOME_REV:
         if (cntrl->model == MODEL_PM304){
            sprintf(buff, "%dIX-1;", axis);
-        } else {
-           //sprintf(buff, "%dHD-1;", axis);
-           // Motor always sends an SV before CV for VELO will be current base velocity
-           sprintf(buff, "%dCV-%ld;", axis, VELO);
-        }
+        } 
+		/*  
+		 *  Homing for PM600 done via SNL. See homing.st
+		 *  else {
+         *  //sprintf(buff, "%dHD-1;", axis);
+         *  // Motor always sends an SV before CV for VELO will be current base velocity
+         *  sprintf(buff, "%dCV-%ld;", axis, VELO);
+         * }
+		 */
         break;
     case LOAD_POS:
         if (cntrl->use_encoder[axis-1]){
            sprintf(buff, "%dAP%ld;", axis, ival);
-        } else {
-           sprintf(buff, "%dCP%ld;", axis, ival);
         }
+		/*
+		 *  Homing for PM600 done via SNL. See homing.st
+		 *  else {
+         *     sprintf(buff, "%dCP%ld;", axis, ival);
+         *  }
+		 */
         break;
     case SET_VEL_BASE:
         break;          /* PM304 does not use base velocity */
