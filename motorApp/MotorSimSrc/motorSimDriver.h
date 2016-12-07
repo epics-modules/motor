@@ -31,6 +31,9 @@ public:
   asynStatus stop(double acceleration);
   asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
+  asynStatus setHighLimit(double highLimit);
+  asynStatus setLowLimit(double lowLimit);
+
 
   /* These are the methods that are new to this class */
   asynStatus config(int hiHardLimit, int lowHardLimit, int home, int start);

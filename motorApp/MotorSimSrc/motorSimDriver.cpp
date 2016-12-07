@@ -376,6 +376,24 @@ asynStatus motorSimAxis::poll(bool *moving)
 }
 
 
+/** Set the high limit position of the motor.
+  * \param[in] highLimit The new high limit position that should be set in the hardware. Units=steps.*/
+asynStatus motorSimAxis::setHighLimit(double highLimit)
+{
+  hiHardLimit_ = highLimit;
+  return asynSuccess;
+}
+
+
+/** Set the low limit position of the motor.
+  * \param[in] lowLimit The new low limit position that should be set in the hardware. Units=steps.*/
+asynStatus motorSimAxis::setLowLimit(double lowLimit)
+{
+  lowHardLimit_ = lowLimit;
+  return asynSuccess;
+}
+
+
 /** Process one iteration of an axis
 
   This routine takes a single axis and propogates its motion forward a given amount
@@ -407,14 +425,16 @@ void motorSimAxis::process(double delta )
     endpoint_.axis[0].p = home_;
     endpoint_.axis[0].v = 0.0;
   }
+  
+  route_pars_t pars;
+  routeGetParams(route_, &pars);
+  
   if ( nextpoint_.axis[0].p > hiHardLimit_ && nextpoint_.axis[0].v > 0 )
   {
     if (homing_) setVelocity(-endpoint_.axis[0].v, 0.0 );
     else
     {
-      reroute_ = ROUTE_NEW_ROUTE;
-      endpoint_.axis[0].p = hiHardLimit_;
-      endpoint_.axis[0].v = 0.0;
+	  stop(pars.axis[0].Amax);
     }
   }
   else if (nextpoint_.axis[0].p < lowHardLimit_ && nextpoint_.axis[0].v < 0)
@@ -422,9 +442,7 @@ void motorSimAxis::process(double delta )
     if (homing_) setVelocity(-endpoint_.axis[0].v, 0.0 );
     else
     {
-      reroute_ = ROUTE_NEW_ROUTE;
-      endpoint_.axis[0].p = lowHardLimit_;
-      endpoint_.axis[0].v = 0.0;
+	  stop(pars.axis[0].Amax);
     }
   }
 
