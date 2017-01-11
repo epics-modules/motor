@@ -163,6 +163,10 @@ asynStatus PIGCSMotorController::getStatus(PIasynAxis* pAxis, int& homing, int& 
 
 asynStatus PIGCSMotorController::getMaxAcceleration(PIasynAxis* pAxis)
 {
+    if (!m_KnowsVELcommand)
+    {
+        return asynSuccess;
+    }
 	double maxAcc, maxDec;
 	asynStatus status = getGCSParameter(pAxis, PI_PARA_MOT_MAX_ACCEL, maxAcc);
 	if (asynSuccess != status)
@@ -184,6 +188,10 @@ asynStatus PIGCSMotorController::getMaxAcceleration(PIasynAxis* pAxis)
 
 asynStatus PIGCSMotorController::setAcceleration( PIasynAxis* pAxis, double acceleration)
 {
+    if (!m_KnowsVELcommand)
+    {
+        return asynSuccess;
+    }
 	asynStatus status = setGCSParameter(pAxis, PI_PARA_MOT_CURR_ACCEL, acceleration);
 	if (asynSuccess != status)
 		return status;
