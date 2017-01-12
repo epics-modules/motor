@@ -1378,7 +1378,7 @@ enter_do_work:
     if (pmr->lvio != old_lvio)
     {
         MARK(M_LVIO);
-        if (pmr->lvio && !pmr->set)
+        if (pmr->lvio && (!pmr->set && !pmr->igset))
         {
             pmr->stop = 1;
             MARK(M_STOP);
@@ -1868,7 +1868,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             WRITE_MSG(SET_ENC_RATIO, ep_mp);
             SEND_MSG();
         }
-        if (pmr->set)
+        if (pmr->set && !pmr->igset)
         {
             pmr->pp = TRUE;
             INIT_MSG();
@@ -2082,7 +2082,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     if (pmr->val != pmr->lval)
     {
         MARK(M_VAL);
-        if (set && !pmr->foff)
+        if ((set && !pmr->igset) && !pmr->foff)
         {
             /*
              * Act directly on .val. and return. User wants to redefine .val
@@ -2132,7 +2132,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
         pmr->rdif = NINT(pmr->diff / pmr->mres);
         MARK(M_RDIF);
-        if (set)
+        if (set && !pmr->igset)
         {
             if ((pmr->mip & MIP_LOAD_P) == 0) /* Test for LOAD_POS completion. */
                 load_pos(pmr);
