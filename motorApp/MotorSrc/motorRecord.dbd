@@ -788,4 +788,8 @@ recordtype(motor) {
 		pp(TRUE)
 		interest(1)
 	}
+	field(IGSET,DBF_SHORT) {
+		prompt("Ignore SET field")
+		interest(2)
+	}
 }
