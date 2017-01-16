@@ -24,87 +24,87 @@ Created: 15.12.2010
 
 asynStatus PIGCSMotorController::initAxis(PIasynAxis* pAxis)
 {
-	asynStatus status = hasLimitSwitches(pAxis);
-	if (asynSuccess != status)
-	{
-		return status;
-	}
-	status = hasReferenceSensor(pAxis);
-	if (asynSuccess != status)
-	{
-		return status;
-	}
-	return PIGCSController::initAxis(pAxis);
+    asynStatus status = hasLimitSwitches(pAxis);
+    if (asynSuccess != status)
+    {
+        return status;
+    }
+    status = hasReferenceSensor(pAxis);
+    if (asynSuccess != status)
+    {
+        return status;
+    }
+    return PIGCSController::initAxis(pAxis);
 }
 
 asynStatus PIGCSMotorController::setAccelerationCts( PIasynAxis* pAxis, double accelerationCts)
 {
-	double acceleration = fabs(accelerationCts) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
-	if (acceleration == pAxis->m_acceleration)
-		return asynSuccess;
-	if (pAxis->m_maxAcceleration < 0)
-	{
-		getMaxAcceleration(pAxis);
-	}
-	if (acceleration > pAxis->m_maxAcceleration)
-		acceleration = pAxis->m_maxAcceleration;
+    double acceleration = fabs(accelerationCts) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
+    if (acceleration == pAxis->m_acceleration)
+        return asynSuccess;
+    if (pAxis->m_maxAcceleration < 0)
+    {
+        getMaxAcceleration(pAxis);
+    }
+    if (acceleration > pAxis->m_maxAcceleration)
+        acceleration = pAxis->m_maxAcceleration;
 
-	return setAcceleration(pAxis, acceleration);
+    return setAcceleration(pAxis, acceleration);
 }
 
 asynStatus PIGCSMotorController::referenceVelCts( PIasynAxis* pAxis, double velocity, int forwards)
 {
-	asynStatus status = setServo(pAxis, 1);
+    asynStatus status = setServo(pAxis, 1);
     if (asynSuccess != status)
-    	return status;
+        return status;
 
-	char cmd[100];
-	if (velocity != 0)
-	{
-		velocity = fabs(velocity) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
-		sprintf(cmd,"SPA %s 0x50 %f", pAxis->m_szAxisName, velocity);
-		m_pInterface->sendOnly(cmd);
-	}
+    char cmd[100];
+    if (velocity != 0)
+    {
+        velocity = fabs(velocity) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
+        sprintf(cmd,"SPA %s 0x50 %f", pAxis->m_szAxisName, velocity);
+        m_pInterface->sendOnly(cmd);
+    }
 
-	if (pAxis->m_bHasReference)
-	{
-		// call FRF - find reference
-		sprintf(cmd,"FRF %s", pAxis->m_szAxisName);
-	}
-	else if (pAxis->m_bHasLimitSwitches)
-	{
-		if (forwards)
-		{
-			// call FPL - find positive limit switch
-			sprintf(cmd,"FPL %s", pAxis->m_szAxisName);
-		}
-		else
-		{
-			// call FNL - find negative limit switch
-			sprintf(cmd,"FNL %s", pAxis->m_szAxisName);
-		}
-	}
-	else
-	{
-	    asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR,
-	    		"PIGCSMotorController::referenceVelCts() failed - axis has no reference/limit switch\n");
-		epicsSnprintf(pAxis->m_pasynUser->errorMessage,pAxis->m_pasynUser->errorMessageSize,
-			"PIGCSMotorController::referenceVelCts() failed - axis has no reference/limit switch\n");
-		return asynError;
-	}
-	status = m_pInterface->sendOnly(cmd);
-	if (asynSuccess != status)
-		return status;
-	int errorCode = getGCSError();
-	if (errorCode == 0)
-	{
-		return asynSuccess;
-	}
+    if (pAxis->m_bHasReference)
+    {
+        // call FRF - find reference
+        sprintf(cmd,"FRF %s", pAxis->m_szAxisName);
+    }
+    else if (pAxis->m_bHasLimitSwitches)
+    {
+        if (forwards)
+        {
+            // call FPL - find positive limit switch
+            sprintf(cmd,"FPL %s", pAxis->m_szAxisName);
+        }
+        else
+        {
+            // call FNL - find negative limit switch
+            sprintf(cmd,"FNL %s", pAxis->m_szAxisName);
+        }
+    }
+    else
+    {
+        asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR,
+                "PIGCSMotorController::referenceVelCts() failed - axis has no reference/limit switch\n");
+        epicsSnprintf(pAxis->m_pasynUser->errorMessage,pAxis->m_pasynUser->errorMessageSize,
+            "PIGCSMotorController::referenceVelCts() failed - axis has no reference/limit switch\n");
+        return asynError;
+    }
+    status = m_pInterface->sendOnly(cmd);
+    if (asynSuccess != status)
+        return status;
+    int errorCode = getGCSError();
+    if (errorCode == 0)
+    {
+        return asynSuccess;
+    }
     asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR,
-    		"PIGCSMotorController::referenceVelCts() failed\n");
-	epicsSnprintf(pAxis->m_pasynUser->errorMessage,pAxis->m_pasynUser->errorMessageSize,
-		"PIGCSMotorController::referenceVelCts() failed - GCS Error %d\n",errorCode);
-	return asynError;
+            "PIGCSMotorController::referenceVelCts() failed\n");
+    epicsSnprintf(pAxis->m_pasynUser->errorMessage,pAxis->m_pasynUser->errorMessageSize,
+        "PIGCSMotorController::referenceVelCts() failed - GCS Error %d\n",errorCode);
+    return asynError;
 
 }
 
@@ -113,18 +113,18 @@ asynStatus PIGCSMotorController::referenceVelCts( PIasynAxis* pAxis, double velo
  */
 asynStatus PIGCSMotorController::getResolution(PIasynAxis* pAxis, double& resolution )
 {
-	// CPU is "Counts Per Unit"
-	// this is stored as two integers in the controller
+    // CPU is "Counts Per Unit"
+    // this is stored as two integers in the controller
     double num, denom;
     asynStatus status = getGCSParameter(pAxis, PI_PARA_MOT_CPU_Z, num);
     if (status != asynSuccess)
     {
-    	return status;
+        return status;
     }
     status = getGCSParameter(pAxis, PI_PARA_MOT_CPU_N, denom);
     if (status != asynSuccess)
     {
-    	return status;
+        return status;
     }
     pAxis->m_CPUnumerator = num;
     pAxis->m_CPUdenominator = denom;
@@ -135,11 +135,11 @@ asynStatus PIGCSMotorController::getResolution(PIasynAxis* pAxis, double& resolu
 
 asynStatus PIGCSMotorController::getStatus(PIasynAxis* pAxis, int& homing, int& moving, int& negLimit, int& posLimit, int& servoControl)
 {
-	char buf[255];
+    char buf[255];
     asynStatus status = m_pInterface->sendAndReceive(char(4), buf, 99);
     if (status != asynSuccess)
     {
-    	return status;
+        return status;
     }
     // TODO this is for a single axis C-863/867 controller!!!!
     // TODO a) change it to multi-axis code.
@@ -167,23 +167,23 @@ asynStatus PIGCSMotorController::getMaxAcceleration(PIasynAxis* pAxis)
     {
         return asynSuccess;
     }
-	double maxAcc, maxDec;
-	asynStatus status = getGCSParameter(pAxis, PI_PARA_MOT_MAX_ACCEL, maxAcc);
-	if (asynSuccess != status)
-		return status;
-	status = getGCSParameter(pAxis, PI_PARA_MOT_MAX_DECEL, maxDec);
-	if (asynSuccess != status)
-		return status;
+    double maxAcc, maxDec;
+    asynStatus status = getGCSParameter(pAxis, PI_PARA_MOT_MAX_ACCEL, maxAcc);
+    if (asynSuccess != status)
+        return status;
+    status = getGCSParameter(pAxis, PI_PARA_MOT_MAX_DECEL, maxDec);
+    if (asynSuccess != status)
+        return status;
 
-	if (maxAcc < maxDec)
-	{
-		pAxis->m_maxAcceleration = maxAcc;
-	}
-	else
-	{
-		pAxis->m_maxAcceleration = maxDec;
-	}
-	return status;
+    if (maxAcc < maxDec)
+    {
+        pAxis->m_maxAcceleration = maxAcc;
+    }
+    else
+    {
+        pAxis->m_maxAcceleration = maxDec;
+    }
+    return status;
 }
 
 asynStatus PIGCSMotorController::setAcceleration( PIasynAxis* pAxis, double acceleration)
@@ -192,14 +192,14 @@ asynStatus PIGCSMotorController::setAcceleration( PIasynAxis* pAxis, double acce
     {
         return asynSuccess;
     }
-	asynStatus status = setGCSParameter(pAxis, PI_PARA_MOT_CURR_ACCEL, acceleration);
-	if (asynSuccess != status)
-		return status;
-	status = setGCSParameter(pAxis, PI_PARA_MOT_CURR_DECEL, acceleration);
-	if (asynSuccess != status)
-		return status;
-	pAxis->m_acceleration = acceleration;
-	return status;
+    asynStatus status = setGCSParameter(pAxis, PI_PARA_MOT_CURR_ACCEL, acceleration);
+    if (asynSuccess != status)
+        return status;
+    status = setGCSParameter(pAxis, PI_PARA_MOT_CURR_DECEL, acceleration);
+    if (asynSuccess != status)
+        return status;
+    pAxis->m_acceleration = acceleration;
+    return status;
 }
 
 
