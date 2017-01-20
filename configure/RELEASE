@@ -7,4 +7,5 @@ include $(TOP)/../../../configure/MASTER_RELEASE
 # optional extra local definitions here
 -include $(TOP)/configure/RELEASE.private
 
-include $(TOP)/../../../ISIS_CONFIG.$(EPICS_HOST_ARCH)
+include $(TOP)/../../../ISIS_CONFIG
+-include $(TOP)/../../../ISIS_CONFIG.$(EPICS_HOST_ARCH)
