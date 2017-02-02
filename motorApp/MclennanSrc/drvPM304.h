@@ -36,10 +36,11 @@ struct PM304controller
     int n_axes;             /* Number of axes on this controller */
     int model;              /* Model = MODEL_PM304 or MODEL_PM600 */
     int use_encoder[PM304_MAX_CHANNELS];  /* Does axis have an encoder? */
+	int home_modes; /* The combined home modes for all axes */
     char port[80];          /* asyn port name */
 };
 
 RTN_STATUS PM304Setup(int, int);
-RTN_STATUS PM304Config(int, const char *, int);
+RTN_STATUS PM304Config(int, const char *, int, int);
 
 #endif	/* INCdrvPM304h */

@@ -566,7 +566,8 @@ PM304Setup(int num_cards,       /* maximum number of controllers in system */
 RTN_STATUS
 PM304Config(int card,           /* card being configured */
             const char *port,   /* asyn port name */
-            int n_axes)         /* Number of axes */
+            int n_axes,         /* Number of axes */
+            int home_modes)     /* Combined home modes of all axes */
 {
     struct PM304controller *cntrl;
 
@@ -578,6 +579,7 @@ PM304Config(int card,           /* card being configured */
     motor_state[card]->DevicePrivate = malloc(sizeof(struct PM304controller));
     cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
     cntrl->n_axes = n_axes;
+	cntrl->home_modes = home_modes;
     cntrl->model = MODEL_PM304;  /* Assume PM304 initially */
     strcpy(cntrl->port, port);
     return(OK);
