@@ -36,7 +36,7 @@ struct PM304controller
     int n_axes;             /* Number of axes on this controller */
     int model;              /* Model = MODEL_PM304 or MODEL_PM600 */
     int use_encoder[PM304_MAX_CHANNELS];  /* Does axis have an encoder? */
-	int home_modes; /* The combined home modes for all axes */
+	int home_mode[PM304_MAX_CHANNELS]; /* The combined home modes for all axes */
     char port[80];          /* asyn port name */
 };
 

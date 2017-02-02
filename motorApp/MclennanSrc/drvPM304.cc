@@ -32,6 +32,7 @@
 
 
 #include    <string.h>
+#include    <math.h>
 #include    <stdio.h>
 #include    <epicsThread.h>
 #include    <epicsString.h>
@@ -579,7 +580,12 @@ PM304Config(int card,           /* card being configured */
     motor_state[card]->DevicePrivate = malloc(sizeof(struct PM304controller));
     cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
     cntrl->n_axes = n_axes;
-	cntrl->home_modes = home_modes;
+	for (int i=0; i<n_axes; i++) {
+		// Based on 32-bit integer, splitting across 8 axis. 4 bits -> 8 modes
+		int n_modes = 8;
+		cntrl->home_mode[i] = int(home_modes/float(pow(double(n_modes), i)))%n_modes;
+		printf("Homing axis %i using mode %i\n", i+1, cntrl->home_mode[i]);
+	}
     cntrl->model = MODEL_PM304;  /* Assume PM304 initially */
     strcpy(cntrl->port, port);
     return(OK);
