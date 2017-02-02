@@ -30,8 +30,9 @@ ss motor
   {
 	when ()
 	{
-	  /* "0": Use motor home, "1": Constant velocity move */
+	  /* 0: Use motor home, 1: Constant velocity move, 2: Reverse home and s position to 0 */
 	  mode = atoi(macValueGet("MODE"));
+	  printf("Homing sequence move mode set to %i\n", mode);
 	} state ready
   }
 
@@ -70,7 +71,7 @@ ss motor
   {	
     when (movable==1)
     { 
-	  if ( mode==0 ) {
+	  if ( mode==2 ) {
 		set = 1;
 		position = 0;
 		position_d = 0;

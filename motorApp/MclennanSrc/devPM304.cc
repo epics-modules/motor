@@ -239,14 +239,17 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
            sprintf(buff, "%dIX%d;", axis, home_direction);
         } 
 		else {
-			int motor_default=0, constant_velocity=1, n_modes = 2;
+			int motor_default=0, constant_velocity=1, reverse_and_zero=2, n_modes = 3;
 			//int band = pow(double(n_modes), axis-1);
 			//int home_mode = int((1 % band)/band);
-			int home_mode = 0;
-			if ( home_mode==motor_default ) {
+			int home_mode = 2;
+			if ( home_mode==motor_default || home_mode==reverse_and_zero ) {
+				if ( home_mode==reverse_and_zero ) {
+					home_direction = -1;
+				}
 				sprintf(buff, "%dHD%d;", axis, home_direction);
 			} else {
-				// Let SNL take care of it
+				// Let SNL take care of everything. See homing.st
 			}
 		}
         break;
