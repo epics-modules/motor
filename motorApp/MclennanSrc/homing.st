@@ -1,4 +1,4 @@
-program homing("MOTPV=xxx,MODE=Constant_velocity")
+program homing("MOTPV=xxx,MODE=0")
 
 #include "seqPVmacros.h"
 
@@ -23,8 +23,8 @@ ss motor
   {
 	when ()
 	{
-	  /* Currently we only have one mode so it isn't used. */
-	  mode = "{MODE}";
+	  /* 0: Use motor home, 1: Constant velocity move */
+	  mode = 1;
 	} state ready
   }
 
@@ -42,16 +42,20 @@ ss motor
   state forward_home_requested
   {
 	when (home_forward_pv==0) {
-	  jog_forward_value = 1;
-	  pvPut(jog_forward_value);
+	  if ( mode==1 ) {
+	    jog_forward_value = 1;
+	    pvPut(jog_forward_value);
+	  }
 	} state moving
   }
   
   state reverse_home_requested
   {
 	when (home_reverse_pv==0) {
-	  jog_reverse_value = 1;
-	  pvPut(jog_reverse_value);	  
+	  if ( mode==1 ) {
+	    jog_reverse_value = 1;
+	    pvPut(jog_reverse_value);
+	  }
 	} state moving
   }
 
