@@ -1,10 +1,9 @@
-program homing("MOTPV=xxx,MODE")
+program homing("MOTPV=xxx,MODE,AXIS")
 
 #include "seqPVmacros.h"
 
 char* SNLtaskName;
 int jog_forward_value, jog_reverse_value;
-char* macros;
 assign jog_forward_value to "{MOTPV}.JOGF";
 assign jog_reverse_value to "{MOTPV}.JOGR";
 
@@ -15,6 +14,7 @@ assign position_d to "{MOTPV}.DVAL";
 
 int debug_flag;
 int mode;
+int axis;
 
 /* Turn on run-time debug messages */
 option +d;
@@ -32,7 +32,8 @@ ss motor
 	{
 	  /* 0: Use motor home, 1: Constant velocity move, 2: Reverse home and s position to 0 */
 	  mode = atoi(macValueGet("MODE"));
-	  printf("Homing sequence move mode set to %i\n", mode);
+	  axis = atoi(macValueGet("AXIS"));
+	  printf("Sequencer: Homing mode for axis %i set to %i\n", axis, mode);
 	} state ready
   }
 

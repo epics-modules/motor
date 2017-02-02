@@ -243,7 +243,8 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
 			// Based on 32-bit integer, splitting across 8 axis. 4 bits -> 8 modes
 			int n_modes = 8;
 			int band = pow(double(n_modes), axis-1);
-			int home_mode = int(cntrl->home_modes/float(band)) % band;
+			int home_mode = int(cntrl->home_modes/float(band)) % n_modes;
+			printf("Homing axis %i using mode %i\n", axis, home_mode);
 			if ( home_mode==motor_default || home_mode==reverse_and_zero ) {
 				if ( home_mode==reverse_and_zero ) {
 					home_direction = -1;
