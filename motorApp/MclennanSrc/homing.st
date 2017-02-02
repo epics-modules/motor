@@ -1,13 +1,20 @@
-program homing("MOTPV=xxx,MODE=0")
+program homing("MOTPV=xxx,MODE")
 
 #include "seqPVmacros.h"
 
 char* SNLtaskName;
-char* mode;
 int jog_forward_value, jog_reverse_value;
+char* macros;
 assign jog_forward_value to "{MOTPV}.JOGF";
 assign jog_reverse_value to "{MOTPV}.JOGR";
+
+int set, position, position_d;
+assign set to "{MOTPV}.SET";
+assign position to "{MOTPV}.VAL";
+assign position_d to "{MOTPV}.DVAL";
+
 int debug_flag;
+int mode;
 
 /* Turn on run-time debug messages */
 option +d;
@@ -23,8 +30,8 @@ ss motor
   {
 	when ()
 	{
-	  /* 0: Use motor home, 1: Constant velocity move */
-	  mode = 1;
+	  /* "0": Use motor home, "1": Constant velocity move */
+	  mode = atoi(macValueGet("MODE"));
 	} state ready
   }
 
@@ -63,6 +70,18 @@ ss motor
   {	
     when (movable==1)
     { 
+	  if ( mode==0 ) {
+		set = 1;
+		position = 0;
+		position_d = 0;
+		
+		pvPut(set);
+		pvPut(position);
+		pvPut(position_d);
+		
+		set = 0;
+		pvPut(set);
+	  }
     } state ready
   }
 }

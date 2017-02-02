@@ -242,7 +242,7 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
 			int motor_default=0, constant_velocity=1, n_modes = 2;
 			//int band = pow(double(n_modes), axis-1);
 			//int home_mode = int((1 % band)/band);
-			int home_mode = 1;
+			int home_mode = 0;
 			if ( home_mode==motor_default ) {
 				sprintf(buff, "%dHD%d;", axis, home_direction);
 			} else {
