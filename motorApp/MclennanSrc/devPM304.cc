@@ -25,6 +25,7 @@
 
 
 #include    <string.h>
+#include    <math.h>
 #include        "motorRecord.h"
 #include        "motor.h"
 #include        "motordevCom.h"
@@ -221,6 +222,8 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
             break;
     }
 
+	int home_direction = 1;
+	
     switch (command)
     {
     case MOVE_ABS:
@@ -229,17 +232,23 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
     case MOVE_REL:
         sprintf(buff, "%dMR%ld;", axis, ival);
         break;
+    case HOME_REV:
+		home_direction = -1;
     case HOME_FOR:
         if (cntrl->model == MODEL_PM304){
-           sprintf(buff, "%dIX;", axis);
-        }
-		/*  Homing for PM600 done via SNL. See homing.st */
-        break;
-    case HOME_REV:
-        if (cntrl->model == MODEL_PM304){
-           sprintf(buff, "%dIX-1;", axis);
+           sprintf(buff, "%dIX%d;", axis, home_direction);
         } 
-		/*  Homing for PM600 done via SNL. See homing.st */
+		else {
+			int motor_default=0, constant_velocity=1, n_modes = 2;
+			//int band = pow(double(n_modes), axis-1);
+			//int home_mode = int((1 % band)/band);
+			int home_mode = 1;
+			if ( home_mode==motor_default ) {
+				sprintf(buff, "%dHD%d;", axis, home_direction);
+			} else {
+				// Let SNL take care of it
+			}
+		}
         break;
     case LOAD_POS:
         if (cntrl->use_encoder[axis-1]){
