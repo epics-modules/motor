@@ -206,9 +206,6 @@ static int numEnsembleControllers;
 /* Pointer to array of controller structures */
 static EnsembleController *pEnsembleController=NULL;
 
-#define MAX(a,b) ((a)>(b)? (a): (b))
-#define MIN(a,b) ((a)<(b)? (a): (b))
-
 static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
     if (level > 0)
@@ -436,6 +433,8 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
             sprintf(outputBuff, "ENABLE @%d", pAxis->axis);
         }
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+        /* Set indicator to force status update when Enable does not work. */
+        motorParam->setInteger(pAxis->params, motorAxisPowerOn, value);
 
         /* Prevent ASCII interpreter from blocking during MOVEABS/INC commands. */
         ret_status = sendAndReceive(pAxis->pController, (char *) "WAIT MODE NOWAIT", inputBuff, sizeof(inputBuff));

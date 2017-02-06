@@ -125,6 +125,8 @@ MORE DESIGN LIMITATIONS
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "drvMVP2001.h"
 #include "epicsExport.h"

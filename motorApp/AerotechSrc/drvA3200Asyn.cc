@@ -191,9 +191,6 @@ static int numA3200Controllers;
 /* Pointer to array of controller structures */
 static A3200Controller *pA3200Controller = NULL;
 
-#define MAX(a, b) ((a)>(b) ? (a) : (b))
-#define MIN(a, b) ((a)<(b) ? (a) : (b))
-
 static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
     if (level > 0)
@@ -412,7 +409,6 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
             if (ret_status != asynSuccess || inputBuff[0] != ASCII_ACK_CHAR)
             {
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
-                epicsMutexUnlock(pAxis->mutexId);
                 break;
             }
 
@@ -448,6 +444,8 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
                 sprintf(outputBuff, "ENABLE %s", pAxis->axisName);
             }
             ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+            /* Set indicator to force status update when Enable does not work. */
+            motorParam->setInteger(pAxis->params, motorAxisPowerOn, value);
 
             /* Prevent Task #2 from blocking during LINEAR commands. */
             ret_status = sendAndReceive(pAxis->pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
@@ -881,18 +879,22 @@ int A3200AsynConfig(int card,             /* Controller number */
     /* Get axes info */
     for (axis = 0; axis < numAxes; axis++)
     {
-        sprintf(outputBuff, "$strtask0 = GETPARMSTRING %d, PARAMETERID_AxisName", axis);
-        sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
+        AXIS_HDL pAxis = &pController->pAxis[axis];
+        pAxis->pController = pController;
+        pAxis->card = card;
+        pAxis->axis = axis;
+        pAxis->mutexId = epicsMutexMustCreate();
+        pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS);
 
-        sendAndReceive(pController, "~GETVARIABLE $strtask0", inputBuff, sizeof(inputBuff));
-        if (inputBuff[0] == ASCII_ACK_CHAR)
+        if (inputBuff[0] != ASCII_ACK_CHAR)
+            motorParam->setInteger(pAxis->params, motorAxisProblem, 1);  /* Signal "Controller Error" to user. */
+        else
         {
-            AXIS_HDL pAxis = &pController->pAxis[axis];
-            pAxis->pController = pController;
-            pAxis->card = card;
-            pAxis->axis = axis;
-            pAxis->mutexId = epicsMutexMustCreate();
-            pAxis->params = motorParam->create(0, MOTOR_AXIS_NUM_PARAMS);
+            sprintf(outputBuff, "$strtask0 = GETPARMSTRING %d, PARAMETERID_AxisName", axis);
+            sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
+
+            sendAndReceive(pController, "~GETVARIABLE $strtask0", inputBuff, sizeof(inputBuff));
+
             strncpy(pAxis->axisName, &inputBuff[1], sizeof(pAxis->axisName) - 1);
 
             sprintf(outputBuff, GET_PARAM_FORMAT_STRING, "PositionFeedbackType", pAxis->axisName);
@@ -937,6 +939,9 @@ int A3200AsynConfig(int card,             /* Controller number */
                 pAxis->reverseDirec = (bool) atoi(&inputBuff[1]);
         }
     }
+
+    if (inputBuff[0] != ASCII_ACK_CHAR)
+        return MOTOR_AXIS_ERROR;
 
     sendAndReceive(pController, "~INITQUEUE", inputBuff, sizeof(inputBuff));
 

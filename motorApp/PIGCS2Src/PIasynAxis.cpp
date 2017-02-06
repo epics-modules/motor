@@ -82,7 +82,7 @@ void PIasynAxis::Init(const char *portName)
 	}
 	m_pGCSController->m_pInterface->m_pCurrentLogSink = logSink;
 
-	setIntegerParam(motorAxisHasClosedLoop, 1);
+	setIntegerParam(pController_->motorStatusGainSupport_, 1);
 
 	m_pGCSController->initAxis(this);
 	double resolution;

@@ -110,6 +110,8 @@ USAGE...        Driver level support for OMS models VME8, VME44, VS4 and VX2.
 #include        <epicsInterrupt.h>
 #include        <epicsExit.h>
 #include        <epicsEvent.h>
+#include        <errlog.h>
+#include        <stdlib.h>
 
 #include        "motor.h"
 #include        "drvOms.h"

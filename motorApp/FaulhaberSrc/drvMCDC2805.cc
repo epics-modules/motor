@@ -47,6 +47,7 @@ DESIGN LIMITATIONS...
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <errlog.h>
 #include "motor.h"
 #include "drvMCDC2805.h"
 #include "asynOctetSyncIO.h"

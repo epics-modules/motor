@@ -38,6 +38,8 @@ USAGE...        Motor record device level support for Kohzu SC800 motor controll
 
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"

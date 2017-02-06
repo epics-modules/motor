@@ -243,58 +243,6 @@ text {
 "text entry" {
 	object {
 		x=1000
-		y=113
-		width=50
-		height=16
-	}
-	control {
-		chan="$(P)$(M5).BACC"
-		clr=14
-		bclr=2
-	}
-}
-"text entry" {
-	object {
-		x=1000
-		y=128
-		width=50
-		height=16
-	}
-	control {
-		chan="$(P)$(M6).BACC"
-		clr=14
-		bclr=2
-	}
-}
-"text entry" {
-	object {
-		x=1000
-		y=143
-		width=50
-		height=16
-	}
-	control {
-		chan="$(P)$(M7).BACC"
-		clr=14
-		bclr=2
-	}
-}
-"text entry" {
-	object {
-		x=1000
-		y=158
-		width=50
-		height=16
-	}
-	control {
-		chan="$(P)$(M8).BACC"
-		clr=14
-		bclr=2
-	}
-}
-"text entry" {
-	object {
-		x=1000
 		y=65
 		width=50
 		height=16

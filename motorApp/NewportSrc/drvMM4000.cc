@@ -84,6 +84,8 @@ USAGE...    Motor record driver level support for Newport MM4000.
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"

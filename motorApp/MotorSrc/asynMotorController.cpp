@@ -277,16 +277,15 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   /* Set the parameter and readback in the parameter library. */
   status = pAxis->setDoubleParam(function, value);
 
-  getDoubleParam(axis, motorVelBase_, &baseVelocity);
-  getDoubleParam(axis, motorVelocity_, &velocity);
-  getDoubleParam(axis, motorAccel_, &acceleration);
-
   if (function == motorMoveRel_) {
     if (autoPower == 1) {
       status = pAxis->setClosedLoop(true);
       pAxis->setWasMovingFlag(1);
       epicsThreadSleep(autoPowerOnDelay);
     }
+    getDoubleParam(axis, motorVelBase_, &baseVelocity);
+    getDoubleParam(axis, motorVelocity_, &velocity);
+    getDoubleParam(axis, motorAccel_, &acceleration);
     status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
@@ -301,6 +300,9 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       pAxis->setWasMovingFlag(1);
       epicsThreadSleep(autoPowerOnDelay);
     }
+    getDoubleParam(axis, motorVelBase_, &baseVelocity);
+    getDoubleParam(axis, motorVelocity_, &velocity);
+    getDoubleParam(axis, motorAccel_, &acceleration);
     status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
@@ -315,6 +317,8 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       pAxis->setWasMovingFlag(1);
       epicsThreadSleep(autoPowerOnDelay);
     }
+    getDoubleParam(axis, motorVelBase_, &baseVelocity);
+    getDoubleParam(axis, motorAccel_, &acceleration);
     status = pAxis->moveVelocity(baseVelocity, value, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
@@ -330,6 +334,9 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       pAxis->setWasMovingFlag(1);
       epicsThreadSleep(autoPowerOnDelay);
     }
+    getDoubleParam(axis, motorVelBase_, &baseVelocity);
+    getDoubleParam(axis, motorVelocity_, &velocity);
+    getDoubleParam(axis, motorAccel_, &acceleration);
     forwards = (value == 0) ? 0 : 1;
     status = pAxis->home(baseVelocity, velocity, acceleration, forwards);
     pAxis->setIntegerParam(motorStatusDone_, 0);

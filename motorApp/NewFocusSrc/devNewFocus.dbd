@@ -4,3 +4,6 @@ driver(drvPMNC87xx)
 registrar(NewFocusRegister)
 variable(drvPMNC87xxdebug)
 
+# NewFocus 874x controller support
+registrar(nf874xMotorRegister)
+

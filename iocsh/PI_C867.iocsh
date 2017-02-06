@@ -1,0 +1,28 @@
+# ### PI_C867.iocsh ###
+
+#- ###################################################
+#- PORT             - Serial port for communications
+#- CONTROLLER       - Optional: Which controller is being configured
+#-                              Controller port name will be PIC867$(CONTROLLER)
+#-                    Default: 0
+#-
+#- NUM_AXES         - Optional: Max number of axes per controller
+#-                    Default: 1
+#-
+#- MOVING_POLL      - Optional: Moving poll rate (in msec)
+#-                    Default: POLL_RATE
+#- 
+#- IDLE_POLL        - Optional: Idle poll rate (in msec)
+#-                    Default: POLL_RATE
+#-
+#- POLL_RATE        - Optional: Poll rate in msec
+#-                    Default: 100
+#- ###################################################
+
+
+# PI C867 serial connection settings
+iocshLoad("$(IP)/iocsh/setSerialParams.iocsh", "PORT=$(PORT), BAUD=38400, BITS=8, STOP=1, PARITY=none")
+asynOctetSetInputEos( "$(PORT)", -1, "\n\r")
+asynOctetSetOutputEos("$(PORT)", -1, "\n")
+
+PI_GCS2_CreateController("PIC867$(CONTROLLER)", "$(PORT)", $(NUM_AXES=0), 0, 0, $(MOVING_POLL=$(POLL_RATE=100)), $(IDLE_POLL=$(POLL_RATE=100)))

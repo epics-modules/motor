@@ -1,0 +1,10 @@
+# ### allstop.iocsh ###
+
+#- ###################################################
+#- PREFIX           - IOC Prefix
+#- MOTOR            - Location of motor module
+#- ###################################################
+
+#- Allstop, alldone
+dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=$(PREFIX)")
+doAfterIocInit("motorUtilInit('$(PREFIX)')")
