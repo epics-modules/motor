@@ -52,6 +52,13 @@ ss motor
   {
 	when (home_forward_pv==0) {
 	  if ( mode==1 ) {
+		/* Clear any outstanding jogs */
+	    jog_reverse_value = 0;
+	    pvPut(jog_reverse_value);
+	    jog_forward_value = 0;
+	    pvPut(jog_forward_value);
+		
+		/* New jog */
 	    jog_forward_value = 1;
 	    pvPut(jog_forward_value);
 	  }
@@ -62,6 +69,13 @@ ss motor
   {
 	when (home_reverse_pv==0) {
 	  if ( mode==1 ) {
+		/* Clear any outstanding jogs */
+	    jog_reverse_value = 0;
+	    pvPut(jog_reverse_value);
+	    jog_forward_value = 0;
+	    pvPut(jog_forward_value);
+		
+		/* New jog */
 	    jog_reverse_value = 1;
 	    pvPut(jog_reverse_value);
 	  }
