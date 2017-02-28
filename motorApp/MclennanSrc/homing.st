@@ -38,7 +38,7 @@ ss motor
   }
 
   state ready
-  {
+  {	
     when (home_reverse_pv==1)
     {
     } state reverse_home_requested
@@ -52,33 +52,25 @@ ss motor
   {
 	when (home_forward_pv==0) {
 	  if ( mode==1 ) {
-		/* Clear any outstanding jogs */
-	    jog_reverse_value = 0;
-	    pvPut(jog_reverse_value);
-	    jog_forward_value = 0;
-	    pvPut(jog_forward_value);
-		
-		/* New jog */
 	    jog_forward_value = 1;
 	    pvPut(jog_forward_value);
 	  }
-	} state moving
+	} state processing_jog_request
   }
   
   state reverse_home_requested
   {
 	when (home_reverse_pv==0) {
-	  if ( mode==1 ) {
-		/* Clear any outstanding jogs */
-	    jog_reverse_value = 0;
-	    pvPut(jog_reverse_value);
-	    jog_forward_value = 0;
-	    pvPut(jog_forward_value);
-		
-		/* New jog */
+	  if ( mode==1 ) {		
 	    jog_reverse_value = 1;
 	    pvPut(jog_reverse_value);
 	  }
+	} state processing_jog_request
+  }
+  
+  state processing_jog_request
+  {
+	when (movable==0) {
 	} state moving
   }
 
@@ -98,6 +90,15 @@ ss motor
 		set = 0;
 		pvPut(set);
 	  }
-    } state ready
+    } state done
   }
+  
+  state done {
+    when () {
+	  jog_reverse_value = 0;
+	  pvPut(jog_reverse_value);
+	  jog_forward_value = 0;
+	  pvPut(jog_forward_value);
+	} state ready
+  } 
 }
