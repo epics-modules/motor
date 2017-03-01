@@ -783,7 +783,7 @@ asynStatus ScriptMotorAxis::poll(bool *moving)
 
 void ScriptMotorAxis::config(const char* params)
 {
-  luaLoadParams(this->state, params);
+  luaLoadMacros(this->state, params);
 }
 
 void ScriptMotorAxis::logError()
