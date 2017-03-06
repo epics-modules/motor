@@ -160,6 +160,22 @@ STATIC RTN_STATUS PM304_end_trans(struct motorRecord *mr)
     
 }
 
+/* request homing move */
+STATIC void request_home(char* buff, int model, int axis, int home_direction, int home_mode) {
+    if (model == MODEL_PM304){
+        sprintf(buff, "%dIX%d;", axis, home_direction);
+    } else {
+        int motor_default=0, constant_velocity=1, reverse_and_zero=2;
+        if ( home_mode==motor_default || home_mode==reverse_and_zero ) {
+            if ( home_mode==reverse_and_zero ) {
+                home_direction = -1;
+            }
+            sprintf(buff, "%dHD%d;", axis, home_direction);
+        } else {
+            // Let SNL take care of everything. See homing.st
+        }
+    }
+}
 
 /* add a part to the transaction */
 STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
@@ -220,9 +236,7 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
         default:
             break;
     }
-
-	int home_direction = 1;
-	
+    
     switch (command)
     {
     case MOVE_ABS:
@@ -232,23 +246,10 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
         sprintf(buff, "%dMR%ld;", axis, ival);
         break;
     case HOME_REV:
-		home_direction = -1;
+        request_home(buff, cntrl->model, axis, -1, cntrl->home_mode[axis-1]);
+        break;
     case HOME_FOR:
-        if (cntrl->model == MODEL_PM304){
-           sprintf(buff, "%dIX%d;", axis, home_direction);
-        } 
-		else {
-			int motor_default=0, constant_velocity=1, reverse_and_zero=2;
-			int home_mode = cntrl->home_mode[axis-1];
-			if ( home_mode==motor_default || home_mode==reverse_and_zero ) {
-				if ( home_mode==reverse_and_zero ) {
-					home_direction = -1;
-				}
-				sprintf(buff, "%dHD%d;", axis, home_direction);
-			} else {
-				// Let SNL take care of everything. See homing.st
-			}
-		}
+        request_home(buff, cntrl->model, axis, 1, cntrl->home_mode[axis-1]);
         break;
     case LOAD_POS:
         if (cntrl->use_encoder[axis-1]){
