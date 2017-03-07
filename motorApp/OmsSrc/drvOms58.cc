@@ -111,6 +111,13 @@ USAGE...	Motor record driver level support for OMS model VME58.
  * .41  10-20-11 rls - Added counter in send_mess() to prevent endless loop
  *                     after VME58 reboot.
  * .42  07-26-12 rls - Added reboot test to send_mess().
+ * .43  02-21-16 rls - Added code to send_mess() that test for a VME58 reboot
+ *                     after a motion related (ST, MA, MR) command. Found new
+ *                     VME58 failure mode where board reboots after the 1st
+ *                     motion related command. Since delay between motion
+ *                     command and reboot test must be long enough to avoid a
+ *                     VMEbus error, delay is excessive for normal operation.
+ *                     Hence, the oms58_reboot_test external variable.
  *
  */
 
@@ -167,6 +174,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* Global data. */
 int oms58_num_cards = 0;
+int oms58_reboot_test = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -720,7 +728,20 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     Debug(4, "send_mess: sent card %d message:", card);
     Debug(4, "%s\n", outbuf);
 
-    pmotor->outPutIndex = putIndex; /* Message Sent */
+    pmotor->outPutIndex = putIndex;     /* Send message. */
+
+    if (oms58_reboot_test != 0)         /* Test if board has rebooted after sending message. */
+    {
+        epicsThreadSleep(0.300);
+        if (pmotor->rebootind != 0x4321)
+        {
+            errlogPrintf(rebootmsg, card);
+            /* Disable board. */
+            motor_state[card] = (struct controller *)NULL;
+            epicsThreadSleep(1.0);
+            return (ERROR);
+        }
+    }
 
     for (count = 0; (putIndex != pmotor->outGetIndex) && (count < 1000); count++)
     {
