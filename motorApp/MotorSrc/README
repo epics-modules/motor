@@ -1,17 +1,17 @@
 Model 3 (asyn, C++) driver base classes
---------------------------------
+---------------------------------------
 asynMotorAxis.cpp
 asynMotorAxis.h
 asynMotorController.cpp
 asynMotorController.h
 
 Model 2 and Model 3 device support
---------------------------------
+----------------------------------
 devMotorAsyn.c
 motor_interface.h
 
 Model 2 (asyn, C)
---------------
+-----------------
 drvMotorAsyn.c
 paramLib.c
 paramLib.h
@@ -26,7 +26,7 @@ motorRecord.cc
 motorRecord.dbd
 
 Model 1 (non-asyn) device/driver support
-------------------------------
+----------------------------------------
 motordevCom.cc
 motordevCom.h
 motordrvCom.cc
