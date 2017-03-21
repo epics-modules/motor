@@ -34,9 +34,6 @@ struct LinMotController
 {
     asynUser *pasynUser;    /* asyn */
     int n_axes;             /* Number of axes on this controller */
-    int model;              /* Model = MODEL_LinMot or MODEL_PM600 */
-    int use_encoder[LinMot_MAX_CHANNELS];  /* Does axis have an encoder? */
-	int home_mode[LinMot_MAX_CHANNELS]; /* The combined home modes for all axes */
     char port[80];          /* asyn port name */
 };
 

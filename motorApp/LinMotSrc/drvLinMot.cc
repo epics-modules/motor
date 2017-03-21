@@ -1,36 +1,3 @@
-/* File: drvLinMot.cc                    */
-/* Version: 2.01                        */
-/* Date Last Modified: 10/26/99         */
-
-
-/* Device Driver Support routines for motor */
-/*
- *      Original Author: Mark Rivers
- *      Date: 11/20/98
- *
- * Modification Log:
- * -----------------
- * .01  11-20-98   mlr  initialized from drvMM4000
- * .02  09-29-99   mlr  Converted to motor record V4.04
- * .03  10-26-99   mlr  Minor fixes for motor record V4.0
- * .04  08-16-00   mlr  Fixed serious problem with limits - they were not
- *                      correct, bring extract from wrong character in response
- *                      Minor fixes to avoid compiler warnings
- * .05  11-27-01   mlr  Added global variable drvLinMotReadbackDelay.  This is a
- *                      double time in seconds to wait after the LinMot says the move
- *                      is complete before reading the encoder position the final
- *                      time.
- * .06  07-03-2002 rls  replaced RA_OVERTRAVEL with RA_PLUS_LS and RA_MINUS_LS
- * .07  02-11-2003 mlr  Added support for PM600 model.  Added send_recv_mess which
- *                      simplifies and cleans up.
- * .08  03/27/03   rls  R3.14 conversion.
- * .09  02/03/04   rls  Eliminate erroneous "Motor motion timeout ERROR".
- * .10  04/20/04   mlr  Convert from MPF to ASYN
- * .11  07/16/04   rls  removed unused <driver>Setup() argument.
- * .12  09/20/04   rls  support for 32axes/controller.
- */
-
-
 #include    <string.h>
 #include    <math.h>
 #include    <stdio.h>
@@ -233,57 +200,35 @@ STATIC int set_status(int card, int signal)
     status.Bits.RA_PLUS_LS = 0;
     status.Bits.RA_MINUS_LS = 0;
 
-    if (cntrl->model == MODEL_LinMot) {
-        /* The response string is an eight character string of ones and zeroes */
-
-        if (response[3] == '0') {
-            status.Bits.RA_DONE = 0;
-        } else {
-            status.Bits.RA_DONE = 1;
-            if (drvLinMotReadbackDelay != 0.)
-                epicsThreadSleep(drvLinMotReadbackDelay);
-        }
-
-        /* We used to check just response[2] for problem.
-         * However, it turns out that in firmware version 6.15 that bit=1 for no problem,
-         * but in 6.17 it is 0 for no problem!  Check the last 4 bits individually instead. */
-        status.Bits.RA_PROBLEM = 0;
-        if ((response[4] == '1') || 
-            (response[5] == '1') || 
-            (response[6] == '1') || 
-            (response[7] == '1')) status.Bits.RA_PROBLEM = 1;
-
-        if (response[1] == '1') {
+    /* The response string is an eight character string of ones and zeroes */
+    
+    if (response[3] == '0') {
+        status.Bits.RA_DONE = 0;
+    } else {
+        status.Bits.RA_DONE = 1;
+        if (drvLinMotReadbackDelay != 0.)
+            epicsThreadSleep(drvLinMotReadbackDelay);
+    }
+    
+    /* We used to check just response[2] for problem.
+     * However, it turns out that in firmware version 6.15 that bit=1 for no problem,
+     * but in 6.17 it is 0 for no problem!  Check the last 4 bits individually instead. */
+    status.Bits.RA_PROBLEM = 0;
+    if ((response[4] == '1') || 
+        (response[5] == '1') || 
+        (response[6] == '1') || 
+        (response[7] == '1')) status.Bits.RA_PROBLEM = 1;
+    
+    if (response[1] == '1') {
         status.Bits.RA_PLUS_LS = 1;
         status.Bits.RA_DIRECTION = 1;
         ls_active = true;
-        }
-        if (response[0] == '1') {
+    }
+    if (response[0] == '1') {
         status.Bits.RA_MINUS_LS = 1;
         status.Bits.RA_DIRECTION = 0;
         ls_active = true;
-        }
-    } else {
-        /* The response string is 01: followed by an eight character string of ones and zeroes */
-        strcpy(response, &response[3]);
-        if (response[0] == '0')
-            status.Bits.RA_DONE = 0;
-        else {
-            status.Bits.RA_DONE = 1;
-            if (drvLinMotReadbackDelay != 0.)
-                epicsThreadSleep(drvLinMotReadbackDelay);
-        }
-
-        status.Bits.RA_PROBLEM = (response[1] == '1') ? 1 : 0;
-
-        if (response[2] == '1') {
-        status.Bits.RA_PLUS_LS = 1;
-        }
-        if (response[3] == '1') {
-        status.Bits.RA_MINUS_LS = 1;
-        }
     }
-
 
     /* encoder status */
     status.Bits.EA_SLIP       = 0;
@@ -292,11 +237,7 @@ STATIC int set_status(int card, int signal)
     status.Bits.EA_HOME       = 0;
 
     /* Request the position of this motor */
-    if (cntrl->use_encoder[signal]) {
-        sprintf(command, "%dOA;", signal+1);
-    } else {
-        sprintf(command, "%dOC;", signal+1);
-    }
+    sprintf(command, "%dOA;", signal+1);
     send_recv_mess(card, command, response);
     /* Parse the response string which is of the form "AP=10234" (LinMot) or 01:10234 (PM600)*/
     motorData = atoi(&response[3]);
@@ -441,16 +382,6 @@ STATIC int recv_mess(int card, char *com, int flag)
             Debug(3, "recv_mess: card %d flush returned no characters\n", card);
         }
     }
-    /* The PM600 always echoes the command sent to it, before sending the response.  It is terminated
-       with a carriage return.  So we need to delete all characters up to and including the first
-       carriage return */
-    if (cntrl->model == MODEL_PM600) {
-       pos = strchr(com, '\r');
-       if (pos != NULL) {
-           strcpy(temp, pos+1);
-           strcpy(com, temp);
-       }
-    }
     return(strlen(com));
 }
 
@@ -507,16 +438,6 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     }
     if (nread == 0) {
         Debug(1, "send_recv_mess: card %d ERROR: no response\n", card);
-    }
-    /* The PM600 always echoes the command sent to it, before sending the response.  It is terminated
-       with a carriage return.  So we need to delete all characters up to and including the first
-       carriage return */
-    if (cntrl->model == MODEL_PM600) {
-       pos = strchr(response, '\r');
-       if (pos != NULL) {
-           strcpy(temp, pos+1);
-           strcpy(response, temp);
-       }
     }
     return(strlen(response));
 }
@@ -579,7 +500,6 @@ LinMotConfig(int card,           /* card being configured */
     motor_state[card]->DevicePrivate = malloc(sizeof(struct LinMotController));
     cntrl = (struct LinMotController *) motor_state[card]->DevicePrivate;
     cntrl->n_axes = n_axes;
-    cntrl->model = MODEL_LinMot;  /* Assume LinMot initially */
     strcpy(cntrl->port, port);
     return(OK);
 }
@@ -660,12 +580,6 @@ STATIC int motor_init()
             send_mess(card_index, "1ST;", 0);     /* Stop motor */
             send_recv_mess(card_index, "1ID;", buff);    /* Read controller ID string */
             strncpy(brdptr->ident, buff, MAX_IDENT_LEN);
-            /* Parse the response to figure out what model this is */
-            if (strstr(brdptr->ident, "LinMot") != NULL) {
-                cntrl->model = MODEL_LinMot;
-            } else {
-                cntrl->model = MODEL_PM600;
-            }
 
             total_axis = cntrl->n_axes;
             brdptr->total_axis = total_axis;
@@ -682,19 +596,6 @@ STATIC int motor_init()
                 /* Figure out if we have an encoder or not.  If so use 0A, else use OC for readback. */
                 sprintf(command, "%dID", motor_index+1);
                 send_recv_mess(card_index, command, buff);    /* Read controller ID string for this axis */
-                if (cntrl->model == MODEL_LinMot) {
-                    /* For now always assume encoder if LinMot - needs work */
-                    cntrl->use_encoder[motor_index] = 1;
-                } else {
-                    /* PM600 ident string identifies open loop stepper motors */
-                    if (strstr(buff, "Open loop stepper mode") != NULL) {
-                        cntrl->use_encoder[motor_index] = 0;
-                    } else {
-                        cntrl->use_encoder[motor_index] = 1;
-                    }
-                }
-
-                Debug(3, "LinMot motor_init(), cntrl->model=%d, cntrl->use_encoder[%d]=%d.\n", cntrl->model, motor_index, cntrl->use_encoder[motor_index]);
 
                 set_status(card_index, motor_index);  /* Read status of each motor */
             }

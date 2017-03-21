@@ -207,9 +207,6 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
     case HOME_FOR:
         break;
     case LOAD_POS:
-        if (cntrl->use_encoder[axis-1]){
-           sprintf(buff, "%dAP%ld;", axis, ival);
-        }
         break;
     case SET_VEL_BASE:
         break;          /* LinMot does not use base velocity */
@@ -243,19 +240,7 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
         sprintf(buff, "%dST;", axis);
         break;
     case JOG:
-        if (cntrl->model == MODEL_LinMot) {
-            sprintf(buff, "%dSV%ld;", axis, ival);
-            strcat(motor_call->message, buff);
-            if (ival > 0) {
-                /* This is a positive move in LinMot coordinates */
-                sprintf(buff, "%dCV1;", axis);
-            } else {
-                /* This is a negative move in LinMot coordinates */
-                sprintf(buff, "%dCV-1;", axis);
-            }
-        } else {
-            sprintf(buff, "%dCV%ld;", axis, ival);
-        }
+        sprintf(buff, "%dCV%ld;", axis, ival);
         break;
     case SET_PGAIN:
         sprintf(buff, "%dKP%ld;", axis, ival);
