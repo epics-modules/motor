@@ -4,14 +4,16 @@
 #include    <epicsThread.h>
 #include    <epicsString.h>
 #include    <drvSup.h>
-#include        "motor.h"
-#include        "drvLinMot.h"
-#include        "asynOctetSyncIO.h"
+#include    "motor.h"
+#include    "drvLinMot.h"
+#include    "asynOctetSyncIO.h"
 #include    "epicsExport.h"
 
 #define STATIC static
 
-#define TIMEOUT 2.0 /* Command timeout in sec */
+#define TIMEOUT 2.0         /* Command timeout in sec */
+
+#define ASCII_0_TO_A 65     /* ASCII offset between 0 and A */
 
 #define BUFF_SIZE 200       /* Maximum length of string to/from LinMot */
 
@@ -31,30 +33,19 @@ volatile int drvLinMotDebug = 0;
 extern "C" {epicsExportAddress(int, drvLinMotDebug);}
 
 static inline void Debug(int level, const char *format, ...) {
-  #ifdef DEBUG
     if (level < drvLinMotDebug) {
       va_list pVar;
       va_start(pVar, format);
       vprintf(format, pVar);
       va_end(pVar);
     }
-  #endif
 }
-
-/* Debugging notes:
- *   drvLinMotDebug == 0  No debugging information is printed
- *   drvLinMotDebug >= 1  Warning information is printed
- *   drvLinMotDebug >= 2  Time-stamped messages are printed for each string
- *                       sent to and received from the controller
- *   drvLinMotDebug >= 3  Additional debugging messages
- */
 
 int LinMot_num_cards = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include        "motordrvComCode.h"
 
-
 /*----------------functions-----------------*/
 STATIC int recv_mess(int card, char *buff, int len);
 STATIC RTN_STATUS send_mess(int, const char *, char *);
@@ -108,71 +99,45 @@ extern "C" {epicsExportAddress(drvet, drvLinMot);}
 
 STATIC struct thread_args targs = {SCAN_RATE, &LinMot_access, 0.0};
 
-
 /*********************************************************
  * Print out driver status report
  *********************************************************/
 static long report(int level)
 {
-  int card;
-
-  if (LinMot_num_cards <=0)
-    printf("    NO LinMot controllers found\n");
-  else
-    {
-      for (card = 0; card < LinMot_num_cards; card++)
-          if (motor_state[card])
-             printf("    LinMot controller %d, id: %s \n",
-                   card,
-                   motor_state[card]->ident);
+    if (LinMot_num_cards <=0) {
+        epicsPrintf("LinMot report: No ontrollers found\n");
+	}
+    else {
+        for (int card = 0; card < LinMot_num_cards; card++)
+            if (motor_state[card])
+                printf("LinMot controller %d active\n",
+                    card);
     }
-  return (0);
+    return (OK);
 }
 
-
 static long init()
 {
-   /*
-    * We cannot call motor_init() here, because that function can do GPIB I/O,
-    * and hence requires that the drvGPIB have already been initialized.
-    * That cannot be guaranteed, so we need to call motor_init from device
-    * support
-    */
-    /* Check for setup */
     if (LinMot_num_cards <= 0)
     {
-        Debug(1, "init: *LinMot driver disabled*\n");
         Debug(1, "LinMotSetup() is missing from startup script.\n");
         return (ERROR);
     }
-
-    return ((long) 0);
+    return (OK);
 }
 
 STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 {
 }
 
-
-/*********************************************************
- * Read the status and position of all motors on a card
- * start_status(int card)
- *            if card == -1 then start all cards
- *********************************************************/
 STATIC void start_status(int card)
 {
-    /* The LinMot cannot query status or positions of all axes with a
-     * single command.  This needs to be done on an axis-by-axis basis,
-     * so this function does nothing
-     */
 }
 
-
+
 /**************************************************************
  * Query position and status for an axis
- * set_status()
- ************************************************************/
-
+ **************************************************************/
 STATIC int set_status(int card, int signal)
 {
     register struct mess_info *motor_info;
@@ -193,14 +158,14 @@ STATIC int set_status(int card, int signal)
     status.All = motor_info->status.All;
 
     /* Request the status of this motor */
-    sprintf(command, "%dOS;", signal+1);
+    sprintf(command, "!EW%c", signal+ASCII_0_TO_A);
     send_recv_mess(card, command, response);
     Debug(2, "set_status, status query, card %d, response=%s\n", card, response);
 
     status.Bits.RA_PLUS_LS = 0;
     status.Bits.RA_MINUS_LS = 0;
 
-    /* The response string is an eight character string of ones and zeroes */
+    /* The response string is an integer representation of a bit sequence */
     
     if (response[3] == '0') {
         status.Bits.RA_DONE = 0;
@@ -214,7 +179,7 @@ STATIC int set_status(int card, int signal)
      * However, it turns out that in firmware version 6.15 that bit=1 for no problem,
      * but in 6.17 it is 0 for no problem!  Check the last 4 bits individually instead. */
     status.Bits.RA_PROBLEM = 0;
-    if ((response[4] == '1') || 
+    /*if ((response[4] == '1') || 
         (response[5] == '1') || 
         (response[6] == '1') || 
         (response[7] == '1')) status.Bits.RA_PROBLEM = 1;
@@ -228,7 +193,7 @@ STATIC int set_status(int card, int signal)
         status.Bits.RA_MINUS_LS = 1;
         status.Bits.RA_DIRECTION = 0;
         ls_active = true;
-    }
+    }*/
 
     /* encoder status */
     status.Bits.EA_SLIP       = 0;
@@ -237,10 +202,10 @@ STATIC int set_status(int card, int signal)
     status.Bits.EA_HOME       = 0;
 
     /* Request the position of this motor */
-    sprintf(command, "%dOA;", signal+1);
+    sprintf(command, "!GP%c", signal+ASCII_0_TO_A);
     send_recv_mess(card, command, response);
-    /* Parse the response string which is of the form "AP=10234" (LinMot) or 01:10234 (PM600)*/
-    motorData = atoi(&response[3]);
+    /* Parse the response string which is of the form "#1234" */
+    motorData = atoi(&response[1]);
     Debug(2, "set_status, position query, card %d, response=%s\n", card, response);
 
     if (motorData == motor_info->position)
@@ -282,12 +247,11 @@ STATIC int set_status(int card, int signal)
     return (rtn_state);
 }
 
-
 /*****************************************************/
-/* send a message to the LinMot board                 */
-/* this function should be used when the LinMot       */
-/* response string should be ignorred.               */
-/* It reads the response string, since the LinMot     */
+/* send a message to the LinMot board                */
+/* this function should be used when the LinMot      */
+/* response string should be ignored.                */
+/* It reads the response string, since the LinMot    */
 /* always sends one, but discards it.                */
 /* Note that since it uses serialIOSendRecv it       */
 /* flushes any remaining characters in the input     */
@@ -307,7 +271,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
     if (!motor_state[card])
     {
         epicsPrintf("send_mess - invalid card #%d\n", card);
-    return(ERROR);
+        return(ERROR);
     }
 
     cntrl = (struct LinMotController *) motor_state[card]->DevicePrivate;
@@ -317,21 +281,18 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
      * so send them separately */
     strcpy(temp, com);
     for (p = epicsStrtok_r(temp, ";", &tok_save);
-                ((p != NULL) && (strlen(p) != 0));
-                p = epicsStrtok_r(NULL, ";", &tok_save)) {
+            ((p != NULL) && (strlen(p) != 0));
+            p = epicsStrtok_r(NULL, ";", &tok_save)) {
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, p);
-    pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
-                BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
+        pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
+            BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
         Debug(2, "send_mess: card %d, response=%s\n", card, response);
     }
-
     return(OK);
 }
 
-
-
 /*****************************************************/
-/* receive a message from the LinMot board            */
+/* receive a message from the LinMot board           */
 /* NOTE: This function is required by motordrvCom,   */
 /* but it should not be used.  Use send_recv_mess    */
 /* instead, since it sends a receives a message as   */
@@ -388,9 +349,9 @@ STATIC int recv_mess(int card, char *com, int flag)
 
 
 /*****************************************************/
-/* Send a message to the LinMot board and receive a   */
+/* Send a message to the LinMot board and receive a  */
 /* response as an atomic operation.                  */
-/* This function should be used when the LinMot       */
+/* This function should be used when the LinMot      */
 /* response string is required.                      */
 /* Note that since it uses serialIOSendRecv it       */
 /* flushes any remaining characters in the input     */
@@ -442,15 +403,9 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     return(strlen(response));
 }
 
-
-
-/*****************************************************/
-/* Setup system configuration                        */
-/* LinMotSetup()                                      */
-/*****************************************************/
 RTN_STATUS
 LinMotSetup(int num_cards,       /* maximum number of controllers in system */
-           int scan_rate)       /* polling rate - 1/60 sec units */
+           int scan_rate)        /* polling rate - 1/60 sec units */
 {
     int itera;
 
@@ -480,15 +435,10 @@ LinMotSetup(int num_cards,       /* maximum number of controllers in system */
     return(OK);
 }
 
-
-/*****************************************************/
-/* Configure a controller                            */
-/* LinMotConfig()                                    */
-/*****************************************************/
 RTN_STATUS
 LinMotConfig(int card,           /* card being configured */
-            const char *port,   /* asyn port name */
-            int n_axes)         /* Number of axes */
+            const char *port,    /* asyn port name */
+            int n_axes)          /* Number of axes */
 {
     struct LinMotController *cntrl;
 
@@ -505,7 +455,6 @@ LinMotConfig(int card,           /* card being configured */
 }
 
 
-
 /*****************************************************/
 /* initialize all software and hardware              */
 /* This is called from the initialization routine in */
@@ -561,7 +510,7 @@ STATIC int motor_init()
 
             do
             {
-                send_recv_mess(card_index, "1OA;", buff);
+                send_recv_mess(card_index, "!GPA", buff);
                 retry++;
                 /* Return value is length of response string */
             } while(strlen(buff) == 0 && retry < 3);
@@ -575,12 +524,6 @@ STATIC int motor_init()
             /* in send_mess and send_recv_mess. */
             brdptr->cmnd_response = false;
 
-            /* Don't turn on motor power, too dangerous */
-            /* send_mess(i, "1RSES;", buff); */
-            send_mess(card_index, "1ST;", 0);     /* Stop motor */
-            send_recv_mess(card_index, "1ID;", buff);    /* Read controller ID string */
-            strncpy(brdptr->ident, buff, MAX_IDENT_LEN);
-
             total_axis = cntrl->n_axes;
             brdptr->total_axis = total_axis;
             start_status(card_index);
@@ -593,16 +536,12 @@ STATIC int motor_init()
                 motor_info->no_motion_count = 0;
                 motor_info->encoder_position = 0;
                 motor_info->position = 0;
-                /* Figure out if we have an encoder or not.  If so use 0A, else use OC for readback. */
-                sprintf(command, "%dID", motor_index+1);
-                send_recv_mess(card_index, command, buff);    /* Read controller ID string for this axis */
-
                 set_status(card_index, motor_index);  /* Read status of each motor */
             }
-
         }
-        else
+        else {
             motor_state[card_index] = (struct controller *) NULL;
+		}
     }
 
     any_motor_in_motion = 0;
