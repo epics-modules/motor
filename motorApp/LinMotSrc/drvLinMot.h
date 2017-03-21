@@ -1,27 +1,46 @@
+/* File: drvLinMot.h             */
+/* Version: 2.0                 */
+/* Date Last Modified: 09-29-99 */
+
+
+/* Device Driver Support definitions for motor */
+/*
+ *      Original Author: Mark Rivers
+ *      Current Author: Mark Rivers
+ *      Date: 11/20/98
+ *
+ * Modification Log:
+ * -----------------
+ * .01  11/20/98  mlr  initialized from drvMM4000.h
+ * .02  09/29/99  mlr  re-wrote for new version of motor software (V4)
+ * .03  02/11/03  mlr  Added support for PM600 model
+ */
+
 #ifndef	INCdrvLinMoth
 #define	INCdrvLinMoth 1
 
-#include "motor.h"
 #include "motordrvCom.h"
-#include "asynDriver.h"
 #include "asynOctetSyncIO.h"
 
-#define LinMot_MAX_MOTORS  4
-#define LinMot_MSG_SIZE 80
-#define LinMot_STATUS_RETRY 10
+/* LinMot default profile. */
 
-/* End-of-string defines */
-#define LinMot_OUT_EOS   "\r\n" /* Command */
-#define LinMot_IN_EOS    "\r\n"  /* Reply */
+#define LinMot_NUM_CARDS           4
+#define LinMot_MAX_CHANNELS        10
 
-/* Motion Master specific data is stored in this structure. */
+#define MODEL_LinMot 0
+#define MODEL_PM600 1
+
 struct LinMotController
 {
-    asynUser *pasynUser;  	/* For RS-232 */
+    asynUser *pasynUser;    /* asyn */
+    int n_axes;             /* Number of axes on this controller */
+    int model;              /* Model = MODEL_LinMot or MODEL_PM600 */
+    int use_encoder[LinMot_MAX_CHANNELS];  /* Does axis have an encoder? */
+	int home_mode[LinMot_MAX_CHANNELS]; /* The combined home modes for all axes */
     char port[80];          /* asyn port name */
-    int n_axes;     		/* Number of axes */
-    int max_speed[LinMot_MAX_MOTORS]; /* steps/sec. */
 };
 
-#endif	/* INCdrvLinMoth */
+RTN_STATUS LinMotSetup(int, int);
+RTN_STATUS LinMotConfig(int, const char *, int);
 
+#endif	/* INCdrvLinMoth */

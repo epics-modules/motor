@@ -1,20 +1,34 @@
-#include <string.h>
-#include <math.h>
-#include "motorRecord.h"
-#include "motor.h"
-#include "motordevCom.h"
-#include "drvLinMot.h"
-#include "epicsExport.h"
+#define VERSION 3.00
+
+
+#include    <string.h>
+#include        "motorRecord.h"
+#include        "motor.h"
+#include        "motordevCom.h"
+#include        "drvLinMot.h"
+#include    "epicsExport.h"
+
+#define STATIC static
 
 extern struct driver_table LinMot_access;
 
+#define NINT(f) (long)((f)>0 ? (f)+0.5 : (f)-0.5)
+
+/*----------------debugging-----------------*/
+volatile int devLinMotDebug = 0;
+extern "C" {epicsExportAddress(int, devLinMotDebug);}
+
+static inline void Debug(int level, const char *format, ...) {
+}
+
 /* ----------------Create the dsets for devLinMot----------------- */
-static struct driver_table *drvtabptr;
-static long LinMot_init(void *);
-static long LinMot_init_record(void *);
-static long LinMot_start_trans(struct motorRecord *);
-static RTN_STATUS LinMot_build_trans(motor_cmnd, double *, struct motorRecord *);
-static RTN_STATUS LinMot_end_trans(struct motorRecord *);
+STATIC struct driver_table *drvtabptr;
+STATIC long LinMot_init(void *);
+STATIC long LinMot_init_record(void *);
+STATIC long LinMot_start_trans(struct motorRecord *);
+STATIC RTN_STATUS LinMot_build_trans(motor_cmnd, double *, struct motorRecord *);
+STATIC RTN_STATUS LinMot_end_trans(struct motorRecord *);
+STATIC long VELO = 0;
 
 struct motor_dset devLinMot =
 {
@@ -28,9 +42,7 @@ struct motor_dset devLinMot =
 extern "C" {epicsExportAddress(dset,devLinMot);}
 
 /* --------------------------- program data --------------------- */
-
 /* This table is used to define the command types */
-/* WARNING! this must match "motor_cmnd" in motor.h */
 
 static msg_types LinMot_table[] = {
     MOTION,     /* MOVE_ABS */
@@ -53,59 +65,44 @@ static msg_types LinMot_table[] = {
     IMMEDIATE,  /* DISABL_TORQUE */
     IMMEDIATE,  /* PRIMITIVE */
     IMMEDIATE,  /* SET_HIGH_LIMIT */
-    IMMEDIATE,  /* SET_LOW_LIMIT */
-    VELOCITY,   /* JOG_VELOCITY */
-    IMMEDIATE   /* SET_RESOLUTION */
+    IMMEDIATE   /* SET_LOW_LIMIT */
 };
-
-static inline void Debug(int level, const char *format, ...) {
-  #ifdef DEBUG
-    if (level < devLinMotDebug) {
-      va_list pVar;
-      va_start(pVar, format);
-      vprintf(format, pVar);
-      va_end(pVar);
-    }
-  #endif
-}
 
 
 static struct board_stat **LinMot_cards;
 
 /* --------------------------- program data --------------------- */
 
-
 /* initialize device support for LinMot stepper motor */
-static long LinMot_init(void *arg)
+STATIC long LinMot_init(void *arg)
 {
-    return(OK);
+    return((long)0);
 }
 
 
 /* initialize a record instance */
-static long LinMot_init_record(void *arg)
+STATIC long LinMot_init_record(void *arg)
 {
-    return(OK);
+    return((long)0);
 }
 
 
 /* start building a transaction */
-static long LinMot_start_trans(struct motorRecord *mr)
+STATIC long LinMot_start_trans(struct motorRecord *mr)
 {
-    return(OK);
+    return((long)0);
 }
 
 
 /* end building a transaction */
-static RTN_STATUS LinMot_end_trans(struct motorRecord *mr)
+STATIC RTN_STATUS LinMot_end_trans(struct motorRecord *mr)
 {
     return(OK);
+    
 }
-
 
 /* add a part to the transaction */
-static RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
+STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 {
-    return(OK);
+    return (OK);
 }
-
