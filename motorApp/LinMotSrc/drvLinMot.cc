@@ -167,7 +167,7 @@ STATIC int set_status(int card, int signal)
 
     /* The response string is an integer representation of a bit sequence */
     
-    if (response[3] == '0') {
+    if (atoi(&response[1]) == '0') {
         status.Bits.RA_DONE = 0;
     } else {
         status.Bits.RA_DONE = 1;
@@ -334,6 +334,8 @@ STATIC int recv_mess(int card, char *com, int flag)
     /* The response from the LinMot is terminated with CR/LF.  Remove these */
     if (nread == 0) com[0] = '\0';
     if (nread > 0) {
+		/* Get rid of the preliminary # */
+		memmove (com, com+1, strlen (com+1) + 1);
         Debug(2, "recv_mess: card %d, flag=%d, message = \"%s\"\n", card, flag, com);
     }
     if (nread == 0) {
@@ -395,6 +397,8 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     /* The response from the LinMot is terminated with CR/LF.  Remove these */
     if (nread == 0) response[0] = '\0';;
     if (nread > 0) {
+		/* Get rid of the preliminary # */
+		memmove (response, response+1, strlen (response+1) + 1);
         Debug(2, "send_recv_mess: card %d, response = \"%s\"\n", card, response);
     }
     if (nread == 0) {
