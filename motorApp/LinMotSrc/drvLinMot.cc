@@ -99,6 +99,8 @@ STATIC struct thread_args targs = {SCAN_RATE, &LinMot_access, 0.0};
  *********************************************************/
 static long report(int level)
 {
+	Debug(4, "report...\n");
+	
     if (LinMot_num_cards <=0) {
         epicsPrintf("LinMot report: No ontrollers found\n");
 	}
@@ -113,6 +115,8 @@ static long report(int level)
 
 static long init()
 {
+	Debug(4, "init...\n");
+	
     if (LinMot_num_cards <= 0)
     {
         Debug(1, "LinMotSetup() is missing from startup script.\n");
@@ -123,10 +127,14 @@ static long init()
 
 STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
 {
+	Debug(4, "query_done...\n");
+	
 }
 
 STATIC void start_status(int card)
 {
+	Debug(4, "start_status...\n");
+	
 }
 
 
@@ -135,6 +143,8 @@ STATIC void start_status(int card)
  **************************************************************/
 STATIC int set_status(int card, int signal)
 {
+	Debug(4, "set_status...\n");
+	
     register struct mess_info *motor_info;
     char command[BUFF_SIZE];
     char warning_response[BUFF_SIZE], error_response[BUFF_SIZE], position_response[BUFF_SIZE];
@@ -241,6 +251,8 @@ STATIC int set_status(int card, int signal)
 /*****************************************************/
 STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
+	Debug(4, "send_mess...\n");
+	
     char *p, *tok_save;
     char response[BUFF_SIZE];
     char temp[BUFF_SIZE];
@@ -282,6 +294,8 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 /*****************************************************/
 STATIC int recv_mess(int card, char *com, int flag)
 {
+	Debug(4, "recv_mess...\n");
+	
     double timeout;
     char *pos;
     char temp[BUFF_SIZE];
@@ -343,6 +357,8 @@ STATIC int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 STATIC int send_recv_mess(int card, const char *out, char *response)
 {
+	Debug(4, "send_recv_mess...\n");
+	
     char *p, *tok_save;
     struct LinMotController *cntrl;
     char *pos;
@@ -392,6 +408,8 @@ RTN_STATUS
 LinMotSetup(int num_cards,       /* maximum number of controllers in system */
            int scan_rate)        /* polling rate - 1/60 sec units */
 {
+	Debug(4, "LinMotSetup...\n");
+	
     int itera;
 
     if (num_cards < 1 || num_cards > LinMot_NUM_CARDS)
@@ -425,6 +443,8 @@ LinMotConfig(int card,           /* card being configured */
             const char *port,    /* asyn port name */
             int n_axes)          /* Number of axes */
 {
+	Debug(4, "LinMotConfig...\n");
+	
     struct LinMotController *cntrl;
 
     if (card < 0 || card >= LinMot_num_cards)
@@ -448,6 +468,8 @@ LinMotConfig(int card,           /* card being configured */
 /*****************************************************/
 STATIC int motor_init()
 {
+	Debug(4, "motor_init...\n");
+	
     struct controller *brdptr;
     struct LinMotController *cntrl;
     int card_index, motor_index;
