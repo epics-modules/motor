@@ -10,11 +10,8 @@
 #include    "epicsExport.h"
 
 #define STATIC static
-
-#define TIMEOUT 5.0         /* Command timeout in sec */
-
+#define TIMEOUT 3.0         /* Command timeout in sec */
 #define ASCII_0_TO_A 65     /* ASCII offset between 0 and A */
-
 #define BUFF_SIZE 200       /* Maximum length of string to/from LinMot */
 
 struct mess_queue
@@ -39,7 +36,7 @@ static inline void Debug(int level, const char *format, ...) {
 int LinMot_num_cards = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
-#include        "motordrvComCode.h"
+#include "motordrvComCode.h"
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int card, char *buff, int len);
@@ -53,7 +50,6 @@ STATIC int motor_init();
 STATIC void query_done(int, int, struct mess_node *);
 
 /*----------------functions-----------------*/
-
 struct driver_table LinMot_access =
 {
     motor_init,
@@ -200,13 +196,6 @@ STATIC int set_status(int card, int signal)
 		motor_info->no_motion_count = 0;
     }
 
-	/*
-    motor_info->velocity = 0;
-
-    if (!status.Bits.RA_DIRECTION)
-        motor_info->velocity *= -1;
-	*/
-
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
         status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
@@ -225,16 +214,9 @@ STATIC int set_status(int card, int signal)
     return (rtn_state);
 }
 
-/*****************************************************/
-/* Send a message to the LinMot board.               */
-/* This function should be used when the LinMot      */
-/* response string should be ignored.                */
-/* It reads the response string, since the LinMot    */
-/* always sends one, but discards it.                */
-/* Note that since it uses serialIOSendRecv it       */
-/* flushes any remaining characters in the input     */
-/* ring buffer                                       */
-/*****************************************************/
+/*********************************************************
+ * Send a message to the LinMot board.   
+ *********************************************************/
 STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {	
     char temp[BUFF_SIZE];
@@ -242,14 +224,9 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 	return (RTN_STATUS)send_recv_mess(card, com, temp);
 }
 
-/*****************************************************/
-/* receive a message from the LinMot board           */
-/* NOTE: This function is required by motordrvCom,   */
-/* but it should not be used.  Use send_recv_mess    */
-/* instead, since it sends a receives a message as   */
-/* atomic operation.                                 */
-/* recv_mess()                                       */
-/*****************************************************/
+/*********************************************************
+ * Receive a message from the LinMot board.   
+ *********************************************************/
 STATIC int recv_mess(int card, char *com, int flag)
 {
     double timeout;
@@ -297,16 +274,9 @@ STATIC int recv_mess(int card, char *com, int flag)
     return(strlen(com));
 }
 
-/*****************************************************/
-/* Send a message to the LinMot board and receive a  */
-/* response as an atomic operation.                  */
-/* This function should be used when the LinMot      */
-/* response string is required.                      */
-/* Note that since it uses serialIOSendRecv it       */
-/* flushes any remaining characters in the input     */
-/* ring buffer                                       */
-/* send_recv_mess()                                  */
-/*****************************************************/
+/************************************************************
+ * Send a message to the LinMot board and receive a resonse   
+ ************************************************************/
 STATIC int send_recv_mess(int card, const char *out, char *response)
 {
     char *p, *tok_save;
@@ -353,9 +323,11 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     return(strlen(response));
 }
 
-RTN_STATUS
-LinMotSetup(int num_cards,       /* maximum number of controllers in system */
-           int scan_rate)        /* polling rate - 1/60 sec units */
+/************************************************************
+ * Set up the LinMot motor
+ * Scan rat is in units of 1/60 seconds
+ ************************************************************/
+RTN_STATUS LinMotSetup(int num_cards, int scan_rate)
 {
     int itera;
 
@@ -385,10 +357,9 @@ LinMotSetup(int num_cards,       /* maximum number of controllers in system */
     return(OK);
 }
 
-RTN_STATUS
-LinMotConfig(int card,           /* card being configured */
-            const char *port,    /* asyn port name */
-            int n_axes)          /* Number of axes */
+RTN_STATUS LinMotConfig(int card,            /* Card being configured */
+                        const char *port,    /* Asyn port name */
+                        int n_axes)          /* Number of axes */
 {
     struct LinMotController *cntrl;
 
@@ -404,13 +375,9 @@ LinMotConfig(int card,           /* card being configured */
     return(OK);
 }
 
-
-/*****************************************************/
-/* initialize all software and hardware              */
-/* This is called from the initialization routine in */
-/* device support.                                   */
-/* motor_init()                                      */
-/*****************************************************/
+/************************************************************
+ * Initialise motor software/hardware
+ ************************************************************/
 STATIC int motor_init()
 {
     struct controller *brdptr;

@@ -6,12 +6,10 @@
 #include    "epicsExport.h"
 
 #define STATIC static
-
 #define ASCII_0_TO_A 65     /* ASCII offset between 0 and A */
+#define NINT(f) (long)((f)>0 ? (f)+0.5 : (f)-0.5)
 
 extern struct driver_table LinMot_access;
-
-#define NINT(f) (long)((f)>0 ? (f)+0.5 : (f)-0.5)
 
 /*----------------debugging-----------------*/
 volatile int devLinMotDebug = 0;
@@ -71,7 +69,6 @@ static msg_types LinMot_table[] = {
     IMMEDIATE,  /* SET_HIGH_LIMIT */
     IMMEDIATE   /* SET_LOW_LIMIT */
 };
-
 
 static struct board_stat **LinMot_cards;
 
@@ -209,13 +206,14 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
     case HOME_FOR:
         sprintf(buff, "!SR-1;");
         strcat(motor_call->message, buff);
-        sprintf(buff, "!SR+1;");
 		break;
     case LOAD_POS:
         sprintf(buff, "!RP%ld%c;", ival, axis);
         break;
-    case GO:
+	/* These commands are unimplemented because there are no suitable motor commands
+	   that fit them */
     case STOP_AXIS:
+    case GO:
     case SET_ENC_RATIO:
     case GET_INFO:
     case JOG:
@@ -225,7 +223,6 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
     case DISABL_TORQUE:
     case SET_HIGH_LIMIT:
     case SET_LOW_LIMIT:
-		Debug(3, "LinMot_build_trans: command=%d, %d, %d\n", command, GET_INFO, LOAD_POS);
         break;
     default:
         rtnval = ERROR;
