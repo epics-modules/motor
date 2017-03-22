@@ -11,7 +11,7 @@
 
 #define STATIC static
 
-#define TIMEOUT 3.0         /* Command timeout in sec */
+#define TIMEOUT 5.0         /* Command timeout in sec */
 
 #define ASCII_0_TO_A 65     /* ASCII offset between 0 and A */
 
@@ -135,7 +135,6 @@ STATIC void start_status(int card)
  **************************************************************/
 STATIC int set_status(int card, int signal)
 {	
-    Debug(2, "set_status...\n");
     register struct mess_info *motor_info;
     char command[BUFF_SIZE];
     char warning_response[BUFF_SIZE], error_response[BUFF_SIZE], position_response[BUFF_SIZE];
@@ -239,6 +238,7 @@ STATIC int set_status(int card, int signal)
 STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {	
     char temp[BUFF_SIZE];
+    Debug(2, "send_mess: sending message via send_recv_mess to card %d, message=%s\n", card, com);
 	return (RTN_STATUS)send_recv_mess(card, com, temp);
 }
 
@@ -253,8 +253,6 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 STATIC int recv_mess(int card, char *com, int flag)
 {
     double timeout;
-    char *pos;
-    char temp[BUFF_SIZE];
     int flush;
     asynStatus status;
     size_t nread=0;
@@ -299,8 +297,6 @@ STATIC int recv_mess(int card, char *com, int flag)
     return(strlen(com));
 }
 
-
-
 /*****************************************************/
 /* Send a message to the LinMot board and receive a  */
 /* response as an atomic operation.                  */
@@ -315,7 +311,6 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
 {
     char *p, *tok_save;
     struct LinMotController *cntrl;
-    char *pos;
     asynStatus status;
     size_t nwrite=0, nread=0;
     int eomReason;
@@ -422,7 +417,6 @@ STATIC int motor_init()
     struct LinMotController *cntrl;
     int card_index, motor_index;
     char buff[BUFF_SIZE];
-    char command[20];
     int total_axis = 0;
     int status;
     bool success_rtn;

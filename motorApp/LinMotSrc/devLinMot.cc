@@ -23,7 +23,7 @@ static inline void Debug(int level, const char *format, ...) {
       va_start(pVar, format);
       vprintf(format, pVar);
       va_end(pVar);
-    }
+	}
 }
 
 /* ----------------Create the dsets for devLinMot----------------- */
@@ -205,20 +205,27 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
     case SET_DGAIN:
         sprintf(buff, "!DD%ld%c;", ival, axis);
         break;
+    case HOME_REV:
+    case HOME_FOR:
+        sprintf(buff, "!SR-1;");
+        strcat(motor_call->message, buff);
+        sprintf(buff, "!SR+1;");
+		break;
+    case LOAD_POS:
+        sprintf(buff, "!RP%ld%c;", ival, axis);
+        break;
     case GO:
     case STOP_AXIS:
     case SET_ENC_RATIO:
     case GET_INFO:
     case JOG:
     case MOVE_REL:
-    case HOME_REV:
-    case HOME_FOR:
-    case LOAD_POS:
     case SET_VEL_BASE:
     case ENABLE_TORQUE:
     case DISABL_TORQUE:
     case SET_HIGH_LIMIT:
     case SET_LOW_LIMIT:
+		Debug(3, "LinMot_build_trans: command=%d, %d, %d\n", command, GET_INFO, LOAD_POS);
         break;
     default:
         rtnval = ERROR;
