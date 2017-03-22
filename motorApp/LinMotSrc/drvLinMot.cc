@@ -165,13 +165,15 @@ STATIC int set_status(int card, int signal)
 	int warning_code = atoi(warning_response);
 	int moving_bit = 9;
 	int moving = (warning_code & ( 1 << moving_bit )) >> moving_bit;
-    status.Bits.RA_DONE = !moving;
+    status.Bits.RA_DONE = moving ? 0 : 1;
+    Debug(2, "set_status, warning query, card %d, response=%d, moving=%d, done=%d\n", card, warning_code, moving, status.Bits.RA_DONE);
 	
     /* Request the error state of the motor */
     sprintf(command, "!EE%c", signal+ASCII_0_TO_A);
     send_recv_mess(card, command, error_response);
-    Debug(2, "set_status, warning query, card %d, response=%s\n", card, error_response);
-    status.Bits.RA_PROBLEM = atoi(error_response) > 0;
+	int error_code = atoi(error_response);
+    Debug(2, "set_status, error query, card %d, response=%d\n", card, error_code);
+    status.Bits.RA_PROBLEM = error_code > 0;
 
     /* encoder status */
     status.Bits.EA_SLIP       = 0;
@@ -185,6 +187,7 @@ STATIC int set_status(int card, int signal)
     motorData = atoi(position_response);
     Debug(2, "set_status, position query, card %d, response=%s\n", card, position_response);
 
+    Debug(2, "set_status, position check, motorData %d, position %d\n", motorData, motor_info->position);
     if (motorData == motor_info->position)
     {
 		if (nodeptr != 0)   /* Increment counter only if motor is moving. */
@@ -193,10 +196,11 @@ STATIC int set_status(int card, int signal)
     else
     {
 		status.Bits.RA_DIRECTION = (motorData >= motor_info->position) ? 1 : 0;
-			motor_info->position = motorData;
-			motor_info->encoder_position = motorData;
-			motor_info->no_motion_count = 0;
+		motor_info->position = motorData;
+		motor_info->encoder_position = motorData;
+		motor_info->no_motion_count = 0;
     }
+    Debug(2, "set_status, position check 2, motorData %d, position %d\n", motorData, motor_info->position);
 
 	/*
     motor_info->velocity = 0;
@@ -219,6 +223,7 @@ STATIC int set_status(int card, int signal)
     }
 
     motor_info->status.All = status.All;
+    Debug(2, "set_status, status, card %d, RA_DONE %d, RA_PROBLEM %d, RA_DIRECTION %d\n", card, status.Bits.RA_DONE, status.Bits.RA_PROBLEM, status.Bits.RA_DIRECTION);
     Debug(2, "set_status, return value=%d\n", rtn_state);
     return (rtn_state);
 }
