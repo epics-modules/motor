@@ -138,7 +138,6 @@ STATIC int set_status(int card, int signal)
     int rtn_state;
     long motorData;
     char buff[BUFF_SIZE];
-    bool ls_active = false;
     struct LinMotController *cntrl;
     msta_field status;
 
@@ -196,11 +195,11 @@ STATIC int set_status(int card, int signal)
 		motor_info->no_motion_count = 0;
     }
 
-    rtn_state = (!motor_info->no_motion_count || ls_active == true ||
+    rtn_state = (!motor_info->no_motion_count || 
         status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
 
     /* Test for post-move string. */
-    if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 &&
+    if (status.Bits.RA_DONE && nodeptr != 0 &&
     nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
