@@ -80,8 +80,6 @@ static struct board_stat **LinMot_cards;
 /* initialize device support for LinMot stepper motor */
 STATIC long LinMot_init(void *arg)
 {
-	Debug(4, "LinMot_init...\n");
-	
     long rtnval;
     int after = (arg == 0) ? 0 : 1;
 
@@ -99,8 +97,6 @@ STATIC long LinMot_init(void *arg)
 /* initialize a record instance */
 STATIC long LinMot_init_record(void *arg)
 {
-	Debug(4, "LinMot_init_record...\n");
-	
     struct motorRecord *mr = (struct motorRecord *) arg;
     long rtnval;
 
@@ -113,8 +109,6 @@ STATIC long LinMot_init_record(void *arg)
 /* start building a transaction */
 STATIC long LinMot_start_trans(struct motorRecord *mr)
 {
-	Debug(4, "LinMot_start_trans...\n");
-	
     long rtnval;
     rtnval = motor_start_trans_com(mr, LinMot_cards);
     return(rtnval);
@@ -124,8 +118,6 @@ STATIC long LinMot_start_trans(struct motorRecord *mr)
 /* end building a transaction */
 STATIC RTN_STATUS LinMot_end_trans(struct motorRecord *mr)
 {
-	Debug(4, "LinMot_end_trans...\n");
-	
     RTN_STATUS rtnval;
     rtnval = motor_end_trans_com(mr, drvtabptr);
     return(rtnval);
@@ -135,8 +127,6 @@ STATIC RTN_STATUS LinMot_end_trans(struct motorRecord *mr)
 /* add a part to the transaction */
 STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 {
-	Debug(4, "LinMot_build_trans...\n");
-	
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;

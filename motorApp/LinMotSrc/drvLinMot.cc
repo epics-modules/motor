@@ -11,7 +11,7 @@
 
 #define STATIC static
 
-#define TIMEOUT 2.0         /* Command timeout in sec */
+#define TIMEOUT 3.0         /* Command timeout in sec */
 
 #define ASCII_0_TO_A 65     /* ASCII offset between 0 and A */
 
@@ -98,9 +98,7 @@ STATIC struct thread_args targs = {SCAN_RATE, &LinMot_access, 0.0};
  * Print out driver status report
  *********************************************************/
 static long report(int level)
-{
-	Debug(4, "report...\n");
-	
+{	
     if (LinMot_num_cards <=0) {
         epicsPrintf("LinMot report: No ontrollers found\n");
 	}
@@ -114,9 +112,7 @@ static long report(int level)
 }
 
 static long init()
-{
-	Debug(4, "init...\n");
-	
+{	
     if (LinMot_num_cards <= 0)
     {
         Debug(1, "LinMotSetup() is missing from startup script.\n");
@@ -126,15 +122,11 @@ static long init()
 }
 
 STATIC void query_done(int card, int axis, struct mess_node *nodeptr)
-{
-	Debug(4, "query_done...\n");
-	
+{	
 }
 
 STATIC void start_status(int card)
-{
-	Debug(4, "start_status...\n");
-	
+{	
 }
 
 
@@ -142,9 +134,8 @@ STATIC void start_status(int card)
  * Query position and status for an axis
  **************************************************************/
 STATIC int set_status(int card, int signal)
-{
-	Debug(4, "set_status...\n");
-	
+{	
+    Debug(2, "set_status...\n");
     register struct mess_info *motor_info;
     char command[BUFF_SIZE];
     char warning_response[BUFF_SIZE], error_response[BUFF_SIZE], position_response[BUFF_SIZE];
@@ -196,8 +187,7 @@ STATIC int set_status(int card, int signal)
     send_recv_mess(card, command, position_response);
     motorData = atoi(position_response);
     Debug(2, "set_status, position query, card %d, response=%s\n", card, position_response);
-
-    Debug(2, "set_status, position check, motorData %d, position %d\n", motorData, motor_info->position);
+	
     if (motorData == motor_info->position)
     {
 		if (nodeptr != 0)   /* Increment counter only if motor is moving. */
@@ -210,7 +200,6 @@ STATIC int set_status(int card, int signal)
 		motor_info->encoder_position = motorData;
 		motor_info->no_motion_count = 0;
     }
-    Debug(2, "set_status, position check 2, motorData %d, position %d\n", motorData, motor_info->position);
 
 	/*
     motor_info->velocity = 0;
@@ -233,55 +222,24 @@ STATIC int set_status(int card, int signal)
     }
 
     motor_info->status.All = status.All;
-    Debug(2, "set_status, status, card %d, RA_DONE %d, RA_PROBLEM %d, RA_DIRECTION %d\n", card, status.Bits.RA_DONE, status.Bits.RA_PROBLEM, status.Bits.RA_DIRECTION);
     Debug(2, "set_status, return value=%d\n", rtn_state);
     return (rtn_state);
 }
 
 /*****************************************************/
-/* send a message to the LinMot board                */
-/* this function should be used when the LinMot      */
+/* Send a message to the LinMot board.               */
+/* This function should be used when the LinMot      */
 /* response string should be ignored.                */
 /* It reads the response string, since the LinMot    */
 /* always sends one, but discards it.                */
 /* Note that since it uses serialIOSendRecv it       */
 /* flushes any remaining characters in the input     */
 /* ring buffer                                       */
-/* send_mess()                                       */
 /*****************************************************/
 STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
-{
-	Debug(4, "send_mess...\n");
-	
-    char *p, *tok_save;
-    char response[BUFF_SIZE];
+{	
     char temp[BUFF_SIZE];
-    struct LinMotController *cntrl;
-    size_t nwrite, nread;
-    int eomReason;
-
-    /* Check that card exists */
-    if (!motor_state[card])
-    {
-        epicsPrintf("send_mess - invalid card #%d\n", card);
-        return(ERROR);
-    }
-
-    cntrl = (struct LinMotController *) motor_state[card]->DevicePrivate;
-
-    /* Device support can send us multiple commands separated with ';'
-     * characters.  The LinMot cannot handle more than 1 command on a line
-     * so send them separately */
-    strcpy(temp, com);
-    for (p = epicsStrtok_r(temp, ";", &tok_save);
-            ((p != NULL) && (strlen(p) != 0));
-            p = epicsStrtok_r(NULL, ";", &tok_save)) {
-        Debug(2, "send_mess: sending message to card %d, message=%s\n", card, p);
-        pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
-            BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
-        Debug(2, "send_mess: card %d, response=%s\n", card, response);
-    }
-    return(OK);
+	return (RTN_STATUS)send_recv_mess(card, com, temp);
 }
 
 /*****************************************************/
@@ -294,8 +252,6 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 /*****************************************************/
 STATIC int recv_mess(int card, char *com, int flag)
 {
-	Debug(4, "recv_mess...\n");
-	
     double timeout;
     char *pos;
     char temp[BUFF_SIZE];
@@ -357,8 +313,6 @@ STATIC int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 STATIC int send_recv_mess(int card, const char *out, char *response)
 {
-	Debug(4, "send_recv_mess...\n");
-	
     char *p, *tok_save;
     struct LinMotController *cntrl;
     char *pos;
@@ -386,16 +340,16 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
                 ((p != NULL) && (strlen(p) != 0));
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, p);
-    status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
+		status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
                          response, BUFF_SIZE, TIMEOUT,
                          &nwrite, &nread, &eomReason);
     }
 
     /* The response from the LinMot is terminated with CR/LF.  Remove these */
-    if (nread == 0) response[0] = '\0';;
+    if (nread == 0) response[0] = '\0';
     if (nread > 0) {
 		/* Get rid of the preliminary # */
-		memmove (response, response+1, strlen (response+1) + 1);
+		memmove(response, response+1, strlen (response+1) + 1);
         Debug(2, "send_recv_mess: card %d, response=%s\n", card, response);
     }
     if (nread == 0) {
@@ -408,8 +362,6 @@ RTN_STATUS
 LinMotSetup(int num_cards,       /* maximum number of controllers in system */
            int scan_rate)        /* polling rate - 1/60 sec units */
 {
-	Debug(4, "LinMotSetup...\n");
-	
     int itera;
 
     if (num_cards < 1 || num_cards > LinMot_NUM_CARDS)
@@ -443,8 +395,6 @@ LinMotConfig(int card,           /* card being configured */
             const char *port,    /* asyn port name */
             int n_axes)          /* Number of axes */
 {
-	Debug(4, "LinMotConfig...\n");
-	
     struct LinMotController *cntrl;
 
     if (card < 0 || card >= LinMot_num_cards)
@@ -468,8 +418,6 @@ LinMotConfig(int card,           /* card being configured */
 /*****************************************************/
 STATIC int motor_init()
 {
-	Debug(4, "motor_init...\n");
-	
     struct controller *brdptr;
     struct LinMotController *cntrl;
     int card_index, motor_index;
