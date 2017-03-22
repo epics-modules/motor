@@ -206,6 +206,7 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
     case HOME_FOR:
         sprintf(buff, "!SR-1;");
         strcat(motor_call->message, buff);
+        sprintf(buff, "!SR+1;");
 		break;
     case LOAD_POS:
         sprintf(buff, "!RP%ld%c;", ival, axis);
