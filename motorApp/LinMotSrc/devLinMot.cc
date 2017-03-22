@@ -1,14 +1,13 @@
-#define VERSION 3.00
-
-
 #include    <string.h>
-#include        "motorRecord.h"
-#include        "motor.h"
-#include        "motordevCom.h"
-#include        "drvLinMot.h"
+#include    "motorRecord.h"
+#include    "motor.h"
+#include    "motordevCom.h"
+#include    "drvLinMot.h"
 #include    "epicsExport.h"
 
 #define STATIC static
+
+#define ASCII_0_TO_A 65     /* ASCII offset between 0 and A */
 
 extern struct driver_table LinMot_access;
 
@@ -19,21 +18,13 @@ volatile int devLinMotDebug = 0;
 extern "C" {epicsExportAddress(int, devLinMotDebug);}
 
 static inline void Debug(int level, const char *format, ...) {
-  #ifdef DEBUG
     if (level < devLinMotDebug) {
       va_list pVar;
       va_start(pVar, format);
       vprintf(format, pVar);
       va_end(pVar);
     }
-  #endif
 }
-
-
-/* Debugging levels: 
- *      devLinMotDebug >= 3  Print new part of command and command string so far
- *                          at the end of LinMot_build_trans
- */
 
 /* ----------------Create the dsets for devLinMot----------------- */
 STATIC struct driver_table *drvtabptr;
@@ -42,7 +33,6 @@ STATIC long LinMot_init_record(void *);
 STATIC long LinMot_start_trans(struct motorRecord *);
 STATIC RTN_STATUS LinMot_build_trans(motor_cmnd, double *, struct motorRecord *);
 STATIC RTN_STATUS LinMot_end_trans(struct motorRecord *);
-STATIC long VELO = 0;
 
 struct motor_dset devLinMot =
 {
@@ -137,12 +127,14 @@ STATIC RTN_STATUS LinMot_end_trans(struct motorRecord *mr)
 /* add a part to the transaction */
 STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct motorRecord *mr)
 {
+    Debug(2, "LinMot_build_trans\n");
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
     struct LinMotController *cntrl;
     char buff[30];
-    int axis, card;
+    int card;
+	char axis;	
     RTN_STATUS rtnval;
     double dval;
     long ival;
@@ -155,7 +147,7 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
 
     motor_call = &(trans->motor_call);
     card = motor_call->card;
-    axis = motor_call->signal + 1;
+    axis = motor_call->signal + ASCII_0_TO_A;
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
         return(rtnval = ERROR);
@@ -197,83 +189,42 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
     switch (command)
     {
     case MOVE_ABS:
-        sprintf(buff, "%dMA%ld;", axis, ival);
+        sprintf(buff, "!SP%ld%c;", ival, axis);
         break;
-    case MOVE_REL:
-        sprintf(buff, "%dMR%ld;", axis, ival);
-        break;
-    case HOME_REV:
-        break;
-    case HOME_FOR:
-        break;
-    case LOAD_POS:
-        break;
-    case SET_VEL_BASE:
-        break;          /* LinMot does not use base velocity */
     case SET_VELOCITY:
-        sprintf(buff, "%dSV%ld;", axis, ival);
-        VELO = ival;
+        sprintf(buff, "!SV%ld%c;", ival, axis);
         break;
     case SET_ACCEL:
-        sprintf(buff, "%dSA%ld;", axis, ival);
-        strcat(motor_call->message, buff);
-        sprintf(buff, "%dSD%ld;", axis, ival);
-        break;
-    case GO:
-        /*
-         * The LinMot starts moving immediately on move commands, GO command
-         * does nothing
-         */
-        break;
-    case SET_ENC_RATIO:
-        /*
-         * The LinMot does not have the concept of encoder ratio, ignore this
-         * command
-         */
-        break;
-    case GET_INFO:
-        /* These commands are not actually done by sending a message, but
-           rather they will indirectly cause the driver to read the status
-           of all motors */
-        break;
-    case STOP_AXIS:
-        sprintf(buff, "%dST;", axis);
-        break;
-    case JOG:
-        sprintf(buff, "%dCV%ld;", axis, ival);
+        sprintf(buff, "!SA%ld%c;", ival, axis);
         break;
     case SET_PGAIN:
-        sprintf(buff, "%dKP%ld;", axis, ival);
+        sprintf(buff, "!DP%ld%c;", ival, axis);
         break;
-
     case SET_IGAIN:
-        sprintf(buff, "%dKS%ld;", axis, ival);
+        sprintf(buff, "!DI%ld%c;", ival, axis);
         break;
-
     case SET_DGAIN:
-        sprintf(buff, "%dKV%ld;", axis, ival);
+        sprintf(buff, "!DD%ld%c;", ival, axis);
         break;
-
+    case GO:
+    case STOP_AXIS:
+    case SET_ENC_RATIO:
+    case GET_INFO:
+    case JOG:
+    case MOVE_REL:
+    case HOME_REV:
+    case HOME_FOR:
+    case LOAD_POS:
+    case SET_VEL_BASE:
     case ENABLE_TORQUE:
-        sprintf(buff, "%dRS;", axis);
-        break;
-
     case DISABL_TORQUE:
-        sprintf(buff, "%dAB;", axis);
-        break;
-
     case SET_HIGH_LIMIT:
     case SET_LOW_LIMIT:
-        trans->state = IDLE_STATE;  /* No command sent to the controller. */
-        /* The LinMot internal soft limits are very difficult to retrieve, not
-         * implemented yet */
         break;
-
     default:
         rtnval = ERROR;
     }
     strcat(motor_call->message, buff);
     Debug(3, "LinMot_build_trans: buff=%s, motor_call->message=%s\n", buff, motor_call->message);
-
     return (rtnval);
 }

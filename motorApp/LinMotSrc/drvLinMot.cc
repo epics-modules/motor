@@ -17,11 +17,6 @@
 
 #define BUFF_SIZE 200       /* Maximum length of string to/from LinMot */
 
-/* This is a temporary fix to introduce a delayed reading of the motor
- * position after a move completes
- */
-volatile double drvLinMotReadbackDelay = 0.;
-
 struct mess_queue
 {
     struct mess_node *head;
@@ -169,14 +164,8 @@ STATIC int set_status(int card, int signal)
     
 	int warning_code = atoi(warning_response);
 	int moving_bit = 9;
-	int moving = (warning_code & ( 1 << moving_bit )) >> moving_bit;	
-    if (moving) {
-        status.Bits.RA_DONE = 0;
-    } else {
-        status.Bits.RA_DONE = 1;
-        if (drvLinMotReadbackDelay != 0.)
-            epicsThreadSleep(drvLinMotReadbackDelay);
-    }
+	int moving = (warning_code & ( 1 << moving_bit )) >> moving_bit;
+    status.Bits.RA_DONE = !moving;
 	
     /* Request the error state of the motor */
     sprintf(command, "!EE%c", signal+ASCII_0_TO_A);
@@ -209,10 +198,12 @@ STATIC int set_status(int card, int signal)
 			motor_info->no_motion_count = 0;
     }
 
+	/*
     motor_info->velocity = 0;
 
     if (!status.Bits.RA_DIRECTION)
         motor_info->velocity *= -1;
+	*/
 
     rtn_state = (!motor_info->no_motion_count || ls_active == true ||
         status.Bits.RA_DONE | status.Bits.RA_PROBLEM) ? 1 : 0;
@@ -384,7 +375,7 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     if (nread > 0) {
 		/* Get rid of the preliminary # */
 		memmove (response, response+1, strlen (response+1) + 1);
-        Debug(2, "send_recv_mess: card %d, response = \"%s\"\n", card, response);
+        Debug(2, "send_recv_mess: card %d, response=%s\n", card, response);
     }
     if (nread == 0) {
         Debug(1, "send_recv_mess: card %d ERROR: no response\n", card);
