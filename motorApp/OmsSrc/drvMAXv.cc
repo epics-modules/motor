@@ -94,6 +94,7 @@ USAGE...        Motor record driver level support for OMS model MAXv.
  *                  - Fix for intermittent wrong command displayed from Command Error message. motorIsr() saves the
  *                    message in a separate static buffer.
  * 26  02-08-16 rls - Valid IRQ levels are 2 thru 6.
+ * 27  04-04-17 rls - Added error check for new failure mode where board reboots after 1st command with response.
  *
  */
 
@@ -1190,6 +1191,7 @@ static int motor_init()
         epicsInt8 *startAddr;
         epicsInt8 *endAddr;
         bool wdtrip;
+        int rtn_code;
 
         Debug(2, "motor_init: card %d\n", card_index);
 
@@ -1262,7 +1264,13 @@ static int motor_init()
         send_mess(card_index, ERROR_CLEAR, (char) NULL);
         send_mess(card_index, STOP_ALL, (char) NULL);
 
-        send_recv_mess(card_index, GET_IDENT, (char) NULL, (char *) pmotorState->ident, 1);
+        rtn_code = send_recv_mess(card_index, GET_IDENT, (char) NULL, (char *) pmotorState->ident, 1);
+        if (rtn_code != 0)
+        {
+            errlogPrintf("\n***MAXv card #%d Disabled*** not responding to commands!\n\n", card_index);
+            motor_state[card_index] = (struct controller *) NULL;
+            goto loopend;
+        }
         Debug(3, "Identification = %s\n", pmotorState->ident);
 
         /* Save firmware version. */
