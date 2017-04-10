@@ -16,7 +16,6 @@ include $(TOP)/configure/CONFIG
 # Create and install (or just install)
 # databases, templates, substitutions like this
 DB += motor.db
-DB += linmot_motor.db
 DB += basic_motor.db
 DB += basic_asyn_motor.db
 DB += IMS_extra.db
@@ -46,6 +45,7 @@ DB += profileMoveControllerXPS.template
 DB += profileMoveAxisXPS.template
 DB += PI_Support.db PI_SupportCtrl.db
 DB += Phytron_motor.db Phytron_I1AM01.db Phytron_MCM01.db
+DB += linmot_extra.db
 
 #----------------------------------------------------
 # Declare template files which do not show up in DB
