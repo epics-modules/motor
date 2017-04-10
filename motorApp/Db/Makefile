@@ -16,6 +16,7 @@ include $(TOP)/configure/CONFIG
 # Create and install (or just install)
 # databases, templates, substitutions like this
 DB += motor.db
+DB += linmot_motor.db
 DB += basic_motor.db
 DB += basic_asyn_motor.db
 DB += IMS_extra.db
