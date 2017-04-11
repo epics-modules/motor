@@ -382,7 +382,7 @@ STATIC int motor_init()
     struct controller *brdptr;
     struct LinMotController *cntrl;
     int card_index, motor_index;
-    char buff[BUFF_SIZE];
+    char response[BUFF_SIZE], command[BUFF_SIZE];
     int total_axis = 0;
     int status;
     bool success_rtn;
@@ -420,18 +420,19 @@ STATIC int motor_init()
             /* Send a message to the board, see if it exists */
             /* flush any junk at input port - should not be any data available */
             do {
-                recv_mess(card_index, buff, FLUSH);
-            } while (strlen(buff) != 0);
+                recv_mess(card_index, response, FLUSH);
+            } while (strlen(response) != 0);
 
             do
             {
-                send_recv_mess(card_index, "!GPA", buff);
+				sprintf(command, "!VI%c;", card_index + ASCII_0_TO_A);
+                send_recv_mess(card_index, command, response);
                 retry++;
                 /* Return value is length of response string */
-            } while(strlen(buff) == 0 && retry < 3);
+            } while(strlen(response) == 0 && retry < 3);
         }
 
-        if (success_rtn == true && strlen(buff) > 0)
+        if (success_rtn == true && strlen(response) > 0)
         {
             brdptr->localaddr = (char *) NULL;
             brdptr->motor_in_motion = 0;
@@ -439,6 +440,7 @@ STATIC int motor_init()
             /* in send_mess and send_recv_mess. */
             brdptr->cmnd_response = false;
 
+			cntrl->speed_resolution = atoi(response);
             total_axis = cntrl->n_axes;
             brdptr->total_axis = total_axis;
             start_status(card_index);

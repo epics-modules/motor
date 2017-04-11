@@ -16,7 +16,7 @@ volatile int devLinMotDebug = 0;
 extern "C" {epicsExportAddress(int, devLinMotDebug);}
 
 static inline void Debug(int level, const char *format, ...) {
-    if (level < devLinMotDebug) {
+    if (true) {
       va_list pVar;
       va_start(pVar, format);
       vprintf(format, pVar);
@@ -188,7 +188,9 @@ STATIC RTN_STATUS LinMot_build_trans(motor_cmnd command, double *parms, struct m
         sprintf(buff, "!SP%ld%c;", ival, axis);
         break;
     case SET_VELOCITY:
-        sprintf(buff, "!SV%ld%c;", ival, axis);
+	    /* Speed resolution in nm/s. Convert to mm/s. */
+		Debug(2, "Speed %ld, %ld", ival, cntrl->speed_resolution);
+        sprintf(buff, "!SV%ld%c;", int(ival*1000000.0/cntrl->speed_resolution), axis);
         break;
     case SET_ACCEL:
         sprintf(buff, "!SA%ld%c;", ival, axis);
