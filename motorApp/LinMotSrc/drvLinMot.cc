@@ -370,6 +370,8 @@ RTN_STATUS LinMotConfig(int card,            /* Card being configured */
     motor_state[card]->DevicePrivate = malloc(sizeof(struct LinMotController));
     cntrl = (struct LinMotController *) motor_state[card]->DevicePrivate;
     cntrl->n_axes = n_axes;
+	/* Will be updated later but this is the default for a LinMot */
+	cntrl->speed_resolution =  = 190735;
     strcpy(cntrl->port, port);
     return(OK);
 }

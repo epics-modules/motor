@@ -35,7 +35,7 @@ struct LinMotController
     asynUser *pasynUser;    /* asyn */
     int n_axes;             /* Number of axes on this controller */
     char port[80];          /* asyn port name */
-    int speed_resolution = 190735;   /* The motor speed resolution. Default set to LinMot standard */
+    int speed_resolution;   /* The motor speed resolution. Default set to LinMot standard */
 };
 
 RTN_STATUS LinMotSetup(int, int);
