@@ -1,6 +1,6 @@
 /*
 FILENAME... AG_CONEX.cpp
-USAGE...    Motor driver support for the Newport CONEX-AGP and CONEX-CC series controllers.
+USAGE...    Motor driver support for the Newport CONEX-AGP, CONEX-CC and CONEX-PP series controllers.
 
 Mark Rivers
 April 11, 2013
@@ -28,6 +28,9 @@ April 11, 2013
 
 #define CONEX_TIMEOUT 2.0
 #define LINUX_WRITE_DELAY 0.1
+
+// We force minus end-of-run home type for Conex-PP for now
+#define HOME_TYPE_MINUS_EOR 4
 
 /** Creates a new AG_CONEXController object.
   * \param[in] portName          The name of the asyn port that will be created for this driver
@@ -186,6 +189,9 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
     KIMax_ = 1.e6;
     KDMax_ = 1.e6;
   } 
+  else if (strstr(pC->controllerVersion_, "Conex PP")) {
+    conexModel_ = ModelConexPP;
+  } 
   else {
     asynPrint(pC->pasynUserSelf, ASYN_TRACE_ERROR,
       "%s: unknown model, firmware string=%s\n",
@@ -196,12 +202,16 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
   // Read the stage ID
   sprintf(pC_->outString_, "%dID?", pC->controllerID_);
   pC_->writeReadController();
-  strcpy(stageID_, &pC_->inString_[4]);
+  strcpy(stageID_, &pC_->inString_[3]);
 
-  // Read the encoder increment
-  sprintf(pC_->outString_, "%dSU?", pC->controllerID_);
-  pC_->writeReadController();
-  encoderIncrement_ = atof(&pC_->inString_[3]);
+  // Read the encoder increment (CC and AGP only)
+  if ((conexModel_ == ModelConexAGP) || (conexModel_ == ModelConexCC)) {  
+    sprintf(pC_->outString_, "%dSU?", pC->controllerID_);
+    pC_->writeReadController();
+    encoderIncrement_ = atof(&pC_->inString_[3]);
+  } else {
+    encoderIncrement_ = 1.;
+  }
 
   // Read the interpolation factor (AGP only)
   if (conexModel_ == ModelConexAGP) {
@@ -212,8 +222,21 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
     interpolationFactor_ = 1.;
   }
   
+  if (conexModel_ == ModelConexPP) {
+    sprintf(pC_->outString_, "%dFRM?", pC->controllerID_);
+    pC_->writeReadController();
+    microStepsPerFullStep_ = atoi(&pC_->inString_[4]);
+    sprintf(pC_->outString_, "%dFRS?", pC->controllerID_);
+    pC_->writeReadController();
+    fullStepSize_ = atof(&pC_->inString_[4]);
+  }
+
   // Compute the minimum step size
-  stepSize_ = encoderIncrement_ / interpolationFactor_;
+  if ((conexModel_ == ModelConexAGP) || (conexModel_ == ModelConexCC)) {
+    stepSize_ = encoderIncrement_ / interpolationFactor_;
+  } else {
+    stepSize_ = fullStepSize_ / microStepsPerFullStep_ / 1000.;
+  }
   
   // Read the low and high software limits
   sprintf(pC_->outString_, "%dSL?", pC->controllerID_);
@@ -223,8 +246,10 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
   pC_->writeReadController();
   highLimit_ = atof(&pC_->inString_[3]);  
   
-  // Tell the motor record that we have an gain supprt
-  setIntegerParam(pC_->motorStatusGainSupport_, 1);
+  // Tell the motor record that we have an gain support (CC and AGP only)
+  if ((conexModel_ == ModelConexAGP) || (conexModel_ == ModelConexCC)) {  
+    setIntegerParam(pC_->motorStatusGainSupport_, 1);
+  }
 }
 
 /** Reports on status of the axis
@@ -236,32 +261,36 @@ AG_CONEXAxis::AG_CONEXAxis(AG_CONEXController *pC)
 void AG_CONEXAxis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    // Read KOP, KI, LF
-    sprintf(pC_->outString_, "%dKP?", pC_->controllerID_);
-    pC_->writeReadController();
-    KP_ = atof(&pC_->inString_[3]);
-    sprintf(pC_->outString_, "%dKI?", pC_->controllerID_);
-    pC_->writeReadController();
-    KI_ = atof(&pC_->inString_[3]);
-    if (conexModel_ == ModelConexAGP) {
-      sprintf(pC_->outString_, "%dLF?", pC_->controllerID_);
+    // Read KOP, KI, LF (CC and AGP only)
+    if ((conexModel_ == ModelConexAGP) || (conexModel_ == ModelConexCC)) {  
+      sprintf(pC_->outString_, "%dKP?", pC_->controllerID_);
       pC_->writeReadController();
-      LF_ = atof(&pC_->inString_[3]);
-    } else if (conexModel_ == ModelConexCC) {
-      sprintf(pC_->outString_, "%dKD?", pC_->controllerID_);
+      KP_ = atof(&pC_->inString_[3]);
+      sprintf(pC_->outString_, "%dKI?", pC_->controllerID_);
       pC_->writeReadController();
-      KD_ = atof(&pC_->inString_[3]);
-      LF_ = KD_;  // For printout below
+      KI_ = atof(&pC_->inString_[3]);
+      if (conexModel_ == ModelConexAGP) {
+        sprintf(pC_->outString_, "%dLF?", pC_->controllerID_);
+        pC_->writeReadController();
+        LF_ = atof(&pC_->inString_[3]);
+      } else if (conexModel_ == ModelConexCC) {
+        sprintf(pC_->outString_, "%dKD?", pC_->controllerID_);
+        pC_->writeReadController();
+        KD_ = atof(&pC_->inString_[3]);
+        LF_ = KD_;  // For printout below
+      }
     }
 
     fprintf(fp, "  stageID=%s\n"
                 "  currentPosition=%f, encoderIncrement=%f\n"
                 "  interpolationFactor=%f, stepSize=%f, lowLimit=%f, highLimit=%f\n"
-                "  KP=%f, KI=%f, KD/LF=%f\n",
+                "  KP=%f, KI=%f, KD/LF=%f\n"
+                "  fullStepSize=%f, microStepsPerFullStep=%d\n",
             stageID_,
             currentPosition_, encoderIncrement_, 
             interpolationFactor_, stepSize_, lowLimit_, highLimit_,
-            KP_, KI_, LF_);
+            KP_, KI_, LF_,
+            fullStepSize_, microStepsPerFullStep_);
   }
 
   // Call the base class method
@@ -273,8 +302,8 @@ asynStatus AG_CONEXAxis::move(double position, int relative, double minVelocity,
   asynStatus status;
   // static const char *functionName = "AG_CONEXAxis::move";
   
-  // The CONEX-CC supports velocity and acceleration, the CONEX-AGP does not
-  if (conexModel_ == ModelConexCC) {
+  // The CONEX-CC and CONEX-PP support velocity and acceleration, the CONEX-AGP does not
+  if ((conexModel_ == ModelConexCC) || (conexModel_ == ModelConexPP)) {
     sprintf(pC_->outString_, "%dAC%f", pC_->controllerID_, acceleration*stepSize_);
     status = pC_->writeCONEX();
     sprintf(pC_->outString_, "%dVA%f", pC_->controllerID_, maxVelocity*stepSize_);
@@ -303,6 +332,14 @@ asynStatus AG_CONEXAxis::home(double minVelocity, double maxVelocity, double acc
   // The CONEX-CC supports home velocity, but only by going to Configuration state (PW1) 
   // and writing to non-volatile memory with the OH command.
   // This is time-consuming and can only be done a limited number of times so we don't do it here.
+
+  // The CONEX-PP supports home velocity and home type.  We force negative limit switch home type.
+  if (conexModel_ == ModelConexPP) {
+    sprintf(pC_->outString_, "%dOH%f", pC_->controllerID_, maxVelocity);
+    status = pC_->writeCONEX();
+    sprintf(pC_->outString_, "%dHT%d", pC_->controllerID_, HOME_TYPE_MINUS_EOR);
+    status = pC_->writeCONEX();
+  }
 
   sprintf(pC_->outString_, "%dOR", pC_->controllerID_);
   status = pC_->writeCONEX();
@@ -367,52 +404,58 @@ asynStatus AG_CONEXAxis::getClosedLoop(bool *closedLoop)
 
 asynStatus AG_CONEXAxis::setPGain(double pGain)
 {
-  asynStatus status;
+  asynStatus status = asynSuccess;
   bool closedLoop;
   //static const char *functionName = "AG_CONEXAxis::setPGain";
 
-  getClosedLoop(&closedLoop);
-  setClosedLoop(false);
-  // The pGain value from the motor record is between 0 and 1.
-  sprintf(pC_->outString_, "%dKP%f", pC_->controllerID_, pGain*KPMax_);
-  status = pC_->writeCONEX();
-  if (closedLoop) setClosedLoop(true);
+  if ((conexModel_ == ModelConexAGP) || (conexModel_ == ModelConexCC)) {
+    getClosedLoop(&closedLoop);
+    setClosedLoop(false);
+    // The pGain value from the motor record is between 0 and 1.
+    sprintf(pC_->outString_, "%dKP%f", pC_->controllerID_, pGain*KPMax_);
+    status = pC_->writeCONEX();
+    if (closedLoop) setClosedLoop(true);
+  }
   return status;
 }
 
 asynStatus AG_CONEXAxis::setIGain(double iGain)
 {
-  asynStatus status;
+  asynStatus status = asynSuccess;
   bool closedLoop;
   //static const char *functionName = "AG_CONEXAxis::setIGain";
 
-  getClosedLoop(&closedLoop);
-  setClosedLoop(false);
-  // The iGain value from the motor record is between 0 and 1.
-  sprintf(pC_->outString_, "%dKI%f", pC_->controllerID_, iGain*KIMax_);
-  status = pC_->writeCONEX();
-  if (closedLoop) setClosedLoop(true);
+  if ((conexModel_ == ModelConexAGP) || (conexModel_ == ModelConexCC)) {
+    getClosedLoop(&closedLoop);
+    setClosedLoop(false);
+    // The iGain value from the motor record is between 0 and 1.
+    sprintf(pC_->outString_, "%dKI%f", pC_->controllerID_, iGain*KIMax_);
+    status = pC_->writeCONEX();
+    if (closedLoop) setClosedLoop(true);
+  }
   return status;
 }
 
 asynStatus AG_CONEXAxis::setDGain(double dGain)
 {
-  asynStatus status;
+  asynStatus status = asynSuccess;
   bool closedLoop;
   //static const char *functionName = "AG_CONEXAxis::setPGain";
 
-  getClosedLoop(&closedLoop);
-  setClosedLoop(false);
-  if (conexModel_ == ModelConexCC) {
-    // The dGain value from the motor record is between 0 and 1.
-    sprintf(pC_->outString_, "%dKI%f", pC_->controllerID_, dGain*KDMax_);
-  } else if (conexModel_ == ModelConexAGP) {
-    // We are using the DGain for the Low pass filter frequency.
-    // DGain value is between 0 and 1
-    sprintf(pC_->outString_, "%dLF%f", pC_->controllerID_, dGain*LFMax_);
+  if ((conexModel_ == ModelConexAGP) || (conexModel_ == ModelConexCC)) {
+    getClosedLoop(&closedLoop);
+    setClosedLoop(false);
+    if (conexModel_ == ModelConexCC) {
+      // The dGain value from the motor record is between 0 and 1.
+      sprintf(pC_->outString_, "%dKI%f", pC_->controllerID_, dGain*KDMax_);
+    } else if (conexModel_ == ModelConexAGP) {
+      // We are using the DGain for the Low pass filter frequency.
+      // DGain value is between 0 and 1
+      sprintf(pC_->outString_, "%dLF%f", pC_->controllerID_, dGain*LFMax_);
+    }
+    status = pC_->writeCONEX();
+    if (closedLoop) setClosedLoop(true);
   }
-  status = pC_->writeCONEX();
-  if (closedLoop) setClosedLoop(true);
   return status;
 }
 
@@ -455,10 +498,10 @@ asynStatus AG_CONEXAxis::poll(bool *moving)
   setIntegerParam(pC_->motorStatusDone_, done);
   *moving = done ? false:true;
 
-  // The meaning of the error bits is different for the CC and AGP
-  if (conexModel_ == ModelConexCC) {
-      if (status & 0x100) lowLimit = 1;
-      if (status & 0x200) highLimit = 1;
+  // The meaning of the error bits is different for the CC, AGP, and PP
+  if ((conexModel_ == ModelConexCC) || (conexModel_ == ModelConexPP)) {
+    if (status & 0x100) lowLimit = 1;
+    if (status & 0x200) highLimit = 1;
   }
   
   setIntegerParam(pC_->motorStatusLowLimit_, lowLimit);
