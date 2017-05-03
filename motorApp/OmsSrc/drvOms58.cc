@@ -141,6 +141,7 @@ USAGE...	Motor record driver level support for OMS model VME58.
 #include	"drvOms58.h"
 
 #include	"epicsExport.h"
+#include    "iocsh.h"
 
 #define PRIVATE_FUNCTIONS 1	/* normal:1, debug:0 */
 
@@ -1356,5 +1357,29 @@ static void oms_reset(void *arg)
     }
 }
 
+
+/* Epics iocsh bindings */
+
+static const iocshArg oms58Arg0 = {"num_card",  iocshArgInt};
+static const iocshArg oms58Arg1 = {"addrs",     iocshArgInt};
+static const iocshArg oms58Arg2 = {"vector",    iocshArgInt};
+static const iocshArg oms58Arg3 = {"int_level", iocshArgInt};
+static const iocshArg oms58Arg4 = {"scan_rate", iocshArgInt};
+
+static const iocshArg* const oms58Args[5] = {&oms58Arg0, &oms58Arg1, &oms58Arg2, &oms58Arg3, &oms58Arg4};
+
+static const iocshFuncDef oms58FuncDef = {"oms58Setup", 5, oms58Args};
+
+static void oms58CallFunc(const iocshArgBuf* args)
+{
+	oms58Setup(args[0].ival, (void*) args[1].ival, (unsigned) args[2].ival, args[3].ival, args[4].ival);
+}
+
+void oms58Registrar(void)
+{
+	iocshRegister(&oms58FuncDef, &oms58CallFunc);
+}
+
+epicsExportRegistrar(oms58Registrar);
 
 /*---------------------------------------------------------------------*/
