@@ -929,8 +929,8 @@ static int sendOnly(MM4000Controller *pController, char *outputBuff)
         if (status != asynSuccess)
         {
             asynPrint(pController->pasynUser, ASYN_TRACE_ERROR,
-                      "drvMM4000Asyn:sendOnly: error sending command %s, sent=%d, status=%d\n",
-                      outputBuff, nActual, status);
+                      "drvMM4000Asyn:sendOnly: error sending command %s, sent=%ld, status=%d\n",
+                      outputBuff, (long)nActual, status);
         }
     }
     return(status);

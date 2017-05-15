@@ -92,6 +92,7 @@ Versions: Release 4-5 and higher.
 
 #include <epicsExport.h>
 #include "XPSController.h"
+//warning: 'XPSController::initializeProfile' hides overloaded virtual function [-Woverloaded-virtual]
 #include "XPS_C8_drivers.h"
 #include "xps_ftp.h"
 #include "XPSAxis.h"
@@ -109,13 +110,13 @@ typedef struct {
   char *NoCorrector;
 } CorrectorTypes_t;
 
-const static CorrectorTypes_t CorrectorTypes = { 
-  "PositionerCorrectorPIPosition",
-  "PositionerCorrectorPIDFFVelocity",
-  "PositionerCorrectorPIDFFAcceleration",
-  "PositionerCorrectorPIDDualFFVoltage",
-  "NoCorrector"
-};
+//const static CorrectorTypes_t CorrectorTypes = { 
+//  "PositionerCorrectorPIPosition",
+//  "PositionerCorrectorPIDFFVelocity",
+//  "PositionerCorrectorPIDFFAcceleration",
+//  "PositionerCorrectorPIDDualFFVoltage",
+//  "NoCorrector"
+//};
 
 /* The maximum size of the item names in gathering, e.g. "GROUP2.POSITIONER1.CurrentPosition" */
 #define MAX_GATHERING_AXIS_STRING 60
@@ -1434,7 +1435,7 @@ static const iocshArg XPSCreateControllerArg7 = {"Set position settling time (ms
 static const iocshArg * const XPSCreateControllerArgs[] = {&XPSCreateControllerArg0,
                                                            &XPSCreateControllerArg1,
                                                            &XPSCreateControllerArg2,
-                                                           &XPSCreateControllerArg2,
+                                                           &XPSCreateControllerArg3,
                                                            &XPSCreateControllerArg4,
                                                            &XPSCreateControllerArg5,
                                                            &XPSCreateControllerArg6,
