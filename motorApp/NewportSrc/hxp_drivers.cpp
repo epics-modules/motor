@@ -28,7 +28,7 @@
 extern "C"
 {
 #else
-#typedef int bool;  /* C does not know bool, only C++ */
+typedef int bool;  /* C does not know bool, only C++ */
 #endif
 
 
