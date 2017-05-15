@@ -61,8 +61,8 @@ asynStatus PIInterface::sendOnly(const char *outputBuff, asynUser* logSink)
     if (status != asynSuccess)
     {
         asynPrint(logSink, ASYN_TRACE_ERROR|ASYN_TRACEIO_DRIVER,
-                  "PIGCSController:sendOnly: error sending command %s, sent=%d, status=%d\n",
-                  outputBuff, nActual, status);
+                  "PIGCSController:sendOnly: error sending command %s, sent=%ld, status=%d\n",
+                  outputBuff, (long)nActual, status);
     }
     return(status);
 }
@@ -83,8 +83,8 @@ asynStatus PIInterface::sendOnly(char c, asynUser* logSink)
     if (status != asynSuccess)
     {
         asynPrint(logSink, ASYN_TRACE_ERROR|ASYN_TRACEIO_DRIVER,
-                  "PIGCSController:sendOnly: error sending command %d, sent=%d, status=%d\n",
-                  int(c), nActual, status);
+                  "PIGCSController:sendOnly: error sending command %d, sent=%ld, status=%d\n",
+                  int(c), (long)nActual, status);
         //printf("PIInterface::sendOnly() sending \"#%d\"\n", int(c));
     }
     return(status);
