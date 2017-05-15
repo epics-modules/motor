@@ -1,0 +1,7 @@
+file "TCPsimMotor.template"
+{
+pattern
+{P,       N,  M,      DTYP,         PORT,     ADDR,  DESC,          EGU, DIR,  VELO, JVEL,  VBAS,  ACCL,  BDST, DLY,  BVEL,  BACC,  MRES,  ERES,       PREC,   DLLM,   DHLM,  INIT}
+{"$(P)",  1,  $(M1),  "asynMotor",  $(PORT),  1,     "motor $(N)",  mm,  Pos,  25,   10,    2,     1,     0,    0.3,  1,     .2,    0.001, 0.01754386, 3,      -1,     151,    ""}
+}
+
