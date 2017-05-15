@@ -1,4 +1,4 @@
-program homing("MOTPV=xxx,MODE,AXIS")
+program homing("MOTPV=xxx,MODE,AXIS,DEBUG")
 
 #include "seqPVmacros.h"
 
@@ -13,6 +13,7 @@ assign position to "{MOTPV}.VAL";
 assign position_d to "{MOTPV}.DVAL";
 
 int debug_flag;
+int debug;
 int mode;
 int axis;
 
@@ -33,6 +34,7 @@ ss motor
 	  /* 0: Use motor home, 1: Constant velocity move, 2: Reverse home and s position to 0 */
 	  mode = atoi(macValueGet("MODE"));
 	  axis = atoi(macValueGet("AXIS"));
+	  axis = atoi(macValueGet("DEBUG"));
 	  printf("Sequencer: Homing mode for axis %i set to %i\n", axis, mode);
 	} state ready
   }
@@ -41,36 +43,63 @@ ss motor
   {	
     when (home_reverse_pv==1)
     {
+	  if (debug) {
+	    printf("Sequencer: FROM ready TO reverse_home_requested\n");
+	  }
     } state reverse_home_requested
 	
     when (home_forward_pv==1)
     {
+	  if (debug) {
+	    printf("Sequencer: FROM ready TO forward_home_requested\n");
+	  }
     } state forward_home_requested
   }
   
   state forward_home_requested
   {
-	when (home_forward_pv==0) {
-	  if ( mode==1 ) {
-	    jog_forward_value = 1;
-	    pvPut(jog_forward_value);
+    /* In mode 1 we need to wait for the home to be cancelled before requesting a jog */
+	when (home_forward_pv==0 && mode==1) {
+	  jog_forward_value = 1;
+	  pvPut(jog_forward_value);
+	  if (debug) {
+	    printf("Sequencer: FROM forward_home_requested TO processing_move_request (mode 1)\n");
 	  }
-	} state processing_jog_request
+	} state processing_move_request
+	
+    /* No delay needed for modes other than 1 */
+	when (mode!=1) {
+	  if (debug) {
+	    printf("Sequencer: FROM forward_home_requested TO processing_move_request\n");
+	  }
+	} state processing_move_request
   }
   
   state reverse_home_requested
   {
-	when (home_reverse_pv==0) {
-	  if ( mode==1 ) {		
-	    jog_reverse_value = 1;
-	    pvPut(jog_reverse_value);
+    /* In mode 1 we need to wait for the home to be cancelled before requesting a jog */
+	when (mode==1 && home_reverse_pv==0) {
+	  jog_reverse_value = 1;
+	  pvPut(jog_reverse_value);
+	  if (debug) {
+	    printf("Sequencer: FROM reverse_home_requested TO processing_move_request (mode 1)\n");
 	  }
-	} state processing_jog_request
+	} state processing_move_request
+	
+    /* No delay needed for modes other than 1 */
+	when (mode!=1) {
+	  if (debug) {
+	    printf("Sequencer: FROM reverse_home_requested TO processing_move_request\n");
+	  }
+	} state processing_move_request
   }
   
-  state processing_jog_request
+  state processing_move_request
   {
 	when (movable==0) {
+	  if (debug) {
+	    printf("Sequencer: FROM processing_move_request TO moving\n");
+	  }
 	} state moving
   }
 
@@ -90,15 +119,23 @@ ss motor
 		set = 0;
 		pvPut(set);
 	  }
+	  if (debug) {
+	    printf("Sequencer: FROM moving TO done\n");
+	  }
     } state done
   }
   
   state done {
     when () {
-	  jog_reverse_value = 0;
-	  pvPut(jog_reverse_value);
-	  jog_forward_value = 0;
-	  pvPut(jog_forward_value);
+	  if ( mode==1 ) {
+	    jog_reverse_value = 0;
+	    pvPut(jog_reverse_value);
+	    jog_forward_value = 0;
+	    pvPut(jog_forward_value);
+	  }
+	  if (debug) {
+	    printf("Sequencer: FROM done TO ready\n");
+	  }
 	} state ready
   } 
 }
