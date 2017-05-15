@@ -33,6 +33,7 @@ USAGE...	This file contains definitions and structures that
 #include <epicsEvent.h>
 #include "motor.h"
 #include "motordrvCom.h"
+#include "motorRecord.h"
 
 #define IDLE_STATE 0
 #define BUILD_STATE 1
