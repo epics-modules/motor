@@ -2308,7 +2308,7 @@ static const iocshArg XPSConfigArg5 = {"Idle poll rate", iocshArgInt};
 static const iocshArg * const XPSConfigArgs[6] = {&XPSConfigArg0,
                                                   &XPSConfigArg1,
                                                   &XPSConfigArg2,
-                                                  &XPSConfigArg2,
+                                                  &XPSConfigArg3,
                                                   &XPSConfigArg4,
                                                   &XPSConfigArg5};
 static const iocshFuncDef configXPS = {"XPSConfig", 6, XPSConfigArgs};
