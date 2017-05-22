@@ -34,8 +34,11 @@ ss motor
 	  /* 0: Use motor home, 1: Constant velocity move, 2: Reverse home and s position to 0 */
 	  mode = atoi(macValueGet("MODE"));
 	  axis = atoi(macValueGet("AXIS"));
-	  axis = atoi(macValueGet("DEBUG"));
+	  debug = atoi(macValueGet("DEBUG"));
 	  printf("Sequencer: Homing mode for axis %i set to %i\n", axis, mode);
+	  if (debug) {
+		printf("Sequencer: Debug mode ON");
+	  }
 	} state ready
   }
 
