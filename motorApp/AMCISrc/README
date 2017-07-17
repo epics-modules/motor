@@ -4,7 +4,7 @@ AMCI ANG1
 Asyn model 3 driver support for the AMCI ANG1 stepper motor
 controller/driver.
 
-Modbus/TCP communication, using the synApps modbus module
+Modbus/TCP communication, using Mark Rivers' modbus module
 
 Currently some basic parameters, such as IP address, motor current,
 etc., will need to be set up on the controller using AMCI's PC/Win software.
@@ -26,7 +26,7 @@ port.  A group of controller/drivers can contain up to 6 modules, one of
 which needs to have the ethernet option.  A single-channel
 implementation would need the module with ethernet.  This software is 
 intended to support configurations of multiple groups of 1 to 6 modules.  
-Again, each group will need 1 ethernet enabled module.
+Again, each group will need 1 ethernet enabled module (ANG1-E).
 
 
 
