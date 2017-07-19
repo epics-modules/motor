@@ -1,5 +1,10 @@
-# ANG1_motors.cmd
+# ANG1 motors Command file Example
 #
+### Note:  Modbus support (the EPICS modbus module) is required to be included in the 
+###        EPICS application where the ANG1 support will be loaded.  This file is an 
+###        example of how to load the ANG1 support, in an ioc that is built with the 
+###        EPICS modbus module.
+
 
 # Use the following commands for TCP/IP
 #drvAsynIPPortConfigure(const char *portName,
