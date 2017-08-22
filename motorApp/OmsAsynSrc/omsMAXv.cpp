@@ -589,6 +589,10 @@ extern "C" int omsMAXvConfig2(
 }
 
 /* Code for iocsh registration */
+
+extern "C"
+{
+
 /* omsMAXvSetup */
 static const iocshArg setupArg0 = {"Max. controller count", iocshArgInt};
 static const iocshArg setupArg1 = {"VME address type", iocshArgInt};
@@ -649,3 +653,4 @@ static void OmsMAXvAsynRegister(void)
 
 epicsExportRegistrar(OmsMAXvAsynRegister);
 
+}
