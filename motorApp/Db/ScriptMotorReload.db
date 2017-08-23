@@ -1,0 +1,9 @@
+record(bo, "$(P)$(PORT):ScriptReload")
+{
+	field(DESC, "$(PORT) Script Reload")
+	field(DTYP, "asynInt32")
+	field(OUT, "@asyn($(PORT), 0, 0)RELOAD_SCRIPT")
+	
+	field(ZNAM, "Loaded")
+	field(ONAM, "Reload")
+}
