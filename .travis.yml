@@ -1,0 +1,32 @@
+language: cpp
+compiler: gcc
+sudo: required
+dist: trusty
+
+env:
+  - EPICS_BASE=/usr/lib/epics EPICS_HOST_ARCH=linux-x86_64
+  
+before_install:
+  # Enabling the NSLS-II EPICS debian package repositories
+  - curl http://epics.nsls2.bnl.gov/debian/repo-key.pub | sudo apt-key add -
+  - echo "deb http://epics.nsls2.bnl.gov/debian/ wheezy main contrib" | sudo tee -a /etc/apt/sources.list
+  - echo "deb-src http://epics.nsls2.bnl.gov/debian/ wheezy main contrib" | sudo tee -a /etc/apt/sources.list
+  
+  # Installing EPICS base
+  - sudo apt-get update -qq
+  - sudo apt-get install epics-dev epics-synapps-dev
+  
+  # Setup configure/RELEASE for the environment
+  - echo "EPICS_BASE=$EPICS_BASE" > configure/RELEASE
+  - echo "ASYN=$EPICS_BASE" >> configure/RELEASE
+  - echo "SNCSEQ=$EPICS_BASE" >> configure/RELEASE
+  - echo "BUSY=$EPICS_BASE" >> configure/RELEASE
+  - echo "IPAC=$EPICS_BASE" >> configure/RELEASE
+
+install: 
+  # Build the module
+  - make
+
+script:
+  - find bin/ lib/ include/
+  - echo 'help' | bin/$EPICS_HOST_ARCH/motorSim
