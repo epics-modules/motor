@@ -5,6 +5,7 @@ driver(drvOms)
 # Oregon Micro Systems VME58 driver support.
 device(motor,VME_IO,devOms58,"OMS VME58")
 driver(drvOms58)
+registrar(oms58Registrar)
 
 # Oregon Micro Systems MAXv driver support.
 device(motor,VME_IO,devMAXv,"OMS MAXv")

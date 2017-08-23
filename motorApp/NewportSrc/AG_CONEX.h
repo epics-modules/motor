@@ -12,7 +12,8 @@ April 11, 2013
 
 typedef enum {
   ModelConexAGP,
-  ModelConexCC
+  ModelConexCC,
+  ModelConexPP
 } ConexModel_t;
 
 // No controller-specific parameters yet
@@ -43,6 +44,8 @@ private:
   double encoderIncrement_;
   double interpolationFactor_;
   double stepSize_;
+  double fullStepSize_;
+  int    microStepsPerFullStep_;
   double highLimit_;
   double lowLimit_;
   double KP_;

@@ -1,4 +1,3 @@
-# Makefile
 TOP=../..
 
 include $(TOP)/configure/CONFIG
@@ -8,21 +7,21 @@ include $(TOP)/configure/CONFIG
 
 #==================================================
 # Build an IOC support library
-LIBRARY_IOC  = ScriptMotor
+
+LIBRARY_IOC += AMCI
+
+SRCS += AMCIRegister.cc
 
 # motorRecord.h will be created from motorRecord.dbd
 # install devMotorSoft.dbd into <top>/dbd
-DBD += ScriptMotorDriver.dbd
-
-INC += ScriptMotorDriver.h
+DBD += ANG1Support.dbd
 
 # The following are compiled and added to the Support library
-ScriptMotor_SRCS += ScriptMotorDriver.cpp
+AMCI_SRCS += ANG1Driver.cpp
 
-ScriptMotor_LIBS += motor
-ScriptMotor_LIBS += asyn
-ScriptMotor_LIBS += script
-ScriptMotor_LIBS += $(EPICS_BASE_IOC_LIBS)
+AMCI_LIBS += motor
+AMCI_LIBS += asyn
+AMCI_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES
 #----------------------------------------

@@ -183,6 +183,9 @@ USAGE...        Motor Record Support.
  * .72 03-13-15 rls - Changed RDBL to set RRBV rather than DRBV.
  * .73 02-15-16 rls - JOGF/R soft limit error check was using the wrong coordinate sytem limits.
  *                    Changed error checks from dial to user limits.
+ * .74 09-28-16 rls - Reverted .71 FLNK change. Except for the condition that DMOV == FALSE, FLNK
+ *                    processing was standard. If processing is needed on a DMOV false to true
+ *                    transition, a new motor record field should be added. 
  */                                                          
 
 #define VERSION 6.10
@@ -1163,10 +1166,10 @@ Exit:
     Update record timestamp, call recGblGetTimeStamp().
     Process alarms, call alarm_sub().
     Monitor changes to record fields, call monitor().
-    IF Done Moving field (DMOV) is TRUE, AND, Last Done Moving (LDMV) was False.
+ 
+    IF Done Moving field (DMOV) is TRUE
         Process the forward-scan-link record, call recGblFwdLink().
     ENDIF
-    Update Last Done Moving (LDMV).
     Set Processing Active indicator field (PACT) false.
     Exit.
 
@@ -1375,7 +1378,7 @@ enter_do_work:
     if (pmr->lvio != old_lvio)
     {
         MARK(M_LVIO);
-        if (pmr->lvio && !pmr->set)
+        if (pmr->lvio && (!pmr->set && !pmr->igset))
         {
             pmr->stop = 1;
             MARK(M_STOP);
@@ -1406,9 +1409,8 @@ process_exit:
     alarm_sub(pmr);                     /* If we've violated alarm limits, yell. */
     monitor(pmr);               /* If values have changed, broadcast them. */
 
-    if (pmr->dmov != 0 && pmr->ldmv == 0)   /* Test for False to True transition. */
+    if (pmr->dmov != 0)
         recGblFwdLink(pmr);                 /* Process the forward-scan-link record. */
-    pmr->ldmv = pmr->dmov;
 
     pmr->pact = 0;
     Debug(4, "process:---------------------- end; motor \"%s\"\n", pmr->name);
@@ -1866,7 +1868,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             WRITE_MSG(SET_ENC_RATIO, ep_mp);
             SEND_MSG();
         }
-        if (pmr->set)
+        if (pmr->set && !pmr->igset)
         {
             pmr->pp = TRUE;
             INIT_MSG();
@@ -2080,7 +2082,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     if (pmr->val != pmr->lval)
     {
         MARK(M_VAL);
-        if (set && !pmr->foff)
+        if ((set && !pmr->igset) && !pmr->foff)
         {
             /*
              * Act directly on .val. and return. User wants to redefine .val
@@ -2130,7 +2132,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
         pmr->rdif = NINT(pmr->diff / pmr->mres);
         MARK(M_RDIF);
-        if (set)
+        if (set && !pmr->igset)
         {
             if ((pmr->mip & MIP_LOAD_P) == 0) /* Test for LOAD_POS completion. */
                 load_pos(pmr);
@@ -2450,7 +2452,6 @@ static long special(DBADDR *paddr, int after)
                 if (pmr->dmov == TRUE)
                 {
                     pmr->dmov = FALSE;
-                    pmr->ldmv = pmr->dmov;
                     db_post_events(pmr, &pmr->dmov, DBE_VAL_LOG);
                 }
                 return(OK);
