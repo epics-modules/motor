@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/epics-modules/motor.svg?branch=master)](https://travis-ci.org/epics-modules/motor)
+
 # motor
 APS BCDA synApps module: motor
 
