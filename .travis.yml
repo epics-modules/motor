@@ -1,0 +1,27 @@
+sudo: false
+dist: trusty
+language: c
+compiler:
+  - gcc
+cache:
+  directories:
+    - $HOME/.cache
+addons:
+  apt:
+    packages:
+    - libreadline6-dev
+    - libncurses5-dev
+    - perl
+    - clang
+    - g++-mingw-w64-i686
+    - re2c
+env:
+ - BASE=3.14 STATIC=shared SEQ=2.2.4 ASYN=4-31 IPAC=2.14
+ - BASE=3.14 STATIC=static SEQ=2.2.4 ASYN=4-31 IPAC=2.14
+ - BASE=3.15 STATIC=shared SEQ=2.2.4 ASYN=4-31 IPAC=2.14
+ - BASE=3.15 STATIC=static SEQ=2.2.4 ASYN=4-31 IPAC=2.14
+ - BASE=3.16 STATIC=shared RTEMS=4.10 SEQ=2.2.4 ASYN=4-31 IPAC=2.14
+ - BASE=3.16 STATIC=shared CMPLR=clang WINE=32 SEQ=2.2.4 ASYN=4-31 IPAC=
+ - BASE=3.16 STATIC=static WINE=32 SEQ=2.2.4 ASYN=4-31 IPAC=
+install: ./.ci/travis-prepare.sh
+script: make

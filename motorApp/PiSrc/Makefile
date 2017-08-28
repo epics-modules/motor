@@ -19,6 +19,7 @@ SRCS += devPIC862.cc drvPIC862.cc PIC862Register.cc
 SRCS += devPIC663.cc drvPIC663.cc PIC663Register.cc
 SRCS += devPIE710.cc drvPIE710.cc PIE710Register.cc
 SRCS += devPIE516.cc drvPIE516.cc PIE516Register.cc
+SRCS += devPIE517.cc drvPIE517.cc PIE517Register.cc
 SRCS += devPIE816.cc drvPIE816.cc PIE816Register.cc
 
 
