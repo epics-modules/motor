@@ -1,6 +1,8 @@
 # motor
 APS BCDA synApps module: motor
 
+[![Build Status](https://travis-ci.org/epics-modules/motor.png)](https://travis-ci.org/epics-modules/motor)
+
 For more information, see:
 *  [main page](http://htmlpreview.github.io/?https://github.com/epics-modules/motor/blob/master/documentation/motor.html)
 *  [motor wiki](https://github.com/epics-modules/motor/wiki)
