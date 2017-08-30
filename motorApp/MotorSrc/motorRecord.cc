@@ -786,7 +786,7 @@ static long postProcess(motorRecord * pmr)
             double vbase = pmr->vbas / fabs(pmr->mres);
             double hpos = 0;
             double hvel =  pmr->hvel / fabs(pmr->mres);
-            double acc = (hvel - vbase) / pmr->accl;
+            double acc = (hvel - vbase) > 0 ? ((hvel - vbase)/ pmr->accl): (hvel / pmr->accl);
 
             motor_cmnd command;
 
@@ -858,7 +858,7 @@ static long postProcess(motorRecord * pmr)
 
             if (pmr->mip & MIP_JOG_STOP)
             {
-                double acc = (vel - vbase) / pmr->accl;
+                double acc = (vel - vbase) > 0 ? ((vel - vbase)/ pmr->accl) : (vel / pmr->accl);
 
                 if (vel <= vbase)
                     vel = vbase + 1;
@@ -875,7 +875,7 @@ static long postProcess(motorRecord * pmr)
             else
             {
                 double bvel = pmr->bvel / fabs(pmr->mres);
-                double bacc = (bvel - vbase) / pmr->bacc;
+                double bacc = (bvel - vbase) > 0 ? ((bvel - vbase)/ pmr->bacc) : (bvel / pmr->bacc);
 
                 if (bvel <= vbase)
                     bvel = vbase + 1;
@@ -911,7 +911,7 @@ static long postProcess(motorRecord * pmr)
         /* First part of jog done. Do backlash correction. */
         double bvel = pmr->bvel / fabs(pmr->mres);
         double vbase = pmr->vbas / fabs(pmr->mres);
-        double bacc = (bvel - vbase) / pmr->bacc;
+        double bacc = (bvel - vbase) > 0 ? ((bvel - vbase)/ pmr->bacc) : (bvel / pmr->bacc);
         double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
 
         /* Use if encoder or ReadbackLink is in use. */
@@ -1935,7 +1935,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
                 vbase = pmr->vbas / fabs(pmr->mres);
                 hvel  = pmr->hvel / fabs(pmr->mres);
-                acc   = (hvel - vbase) / pmr->accl;
+                acc   = (hvel - vbase) > 0 ? ((hvel - vbase) / pmr->accl) : (hvel / pmr->accl);
                 hpos = 0;
 
                 INIT_MSG();
@@ -2147,13 +2147,13 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             double newpos = pmr->dval / pmr->mres;      /* where to go     */
             double vbase = pmr->vbas / fabs(pmr->mres); /* base speed      */
             double vel = pmr->velo / fabs(pmr->mres);   /* normal speed    */
-            double acc = (vel - vbase) / pmr->accl;     /* normal accel.   */
+            double acc = (vel - vbase) > 0 ? ((vel - vbase) / pmr->accl) : (vel / pmr->accl);     /* normal accel.   */
             /*
              * 'bpos' is one backlash distance away from 'newpos'.
              */
             double bpos = (pmr->dval - pmr->bdst) / pmr->mres;
             double bvel = pmr->bvel / fabs(pmr->mres);  /* backlash speed  */
-            double bacc = (bvel - vbase) / pmr->bacc;   /* backlash accel. */
+            double bacc = (bvel - vbase) > 0 ? ((bvel - vbase) / pmr->bacc) : (bvel / pmr->bacc);   /* backlash accel. */
             bool use_rel, preferred_dir, too_small;
             double relpos = pmr->diff / pmr->mres;
             double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv) / pmr->mres;

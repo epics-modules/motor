@@ -1380,6 +1380,8 @@ void oms58Registrar(void)
 	iocshRegister(&oms58FuncDef, &oms58CallFunc);
 }
 
+extern "C"{
 epicsExportRegistrar(oms58Registrar);
+}
 
 /*---------------------------------------------------------------------*/
