@@ -21,6 +21,8 @@
 #include "asynDriver.h"
 #include "asynOctetSyncIO.h"
 
+#include "errlog.h"
+
 #define COMM_TIMEOUT 2		/* Timeout in seconds. */
 #define POS_RES 0.001		/* Position resolution. */
 
