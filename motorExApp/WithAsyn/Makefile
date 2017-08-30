@@ -39,7 +39,7 @@ ifdef BUSY
 endif
 COMMONDBDS += PI_GCS2Support.dbd
 COMMONDBDS += phytron.dbd
-ifdef SCRIPT
+ifdef LUA
 COMMONDBDS += ScriptMotorDriver.dbd
 endif
 
@@ -86,9 +86,9 @@ COMMONLIBS += ACRMotor
 COMMONLIBS += PI_GCS2Support
 COMMONLIBS += phytronAxisMotor
 COMMONLIBS += motor
-ifdef SCRIPT
+ifdef LUA
 COMMONLIBS += ScriptMotor
-COMMONLIBS += script
+COMMONLIBS += lua
 endif
 
 # Needed for Newport SNL programs
