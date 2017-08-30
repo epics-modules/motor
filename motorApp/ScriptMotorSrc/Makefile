@@ -21,7 +21,7 @@ ScriptMotor_SRCS += ScriptMotorDriver.cpp
 
 ScriptMotor_LIBS += motor
 ScriptMotor_LIBS += asyn
-ScriptMotor_LIBS += script
+ScriptMotor_LIBS += lua
 ScriptMotor_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 include $(TOP)/configure/RULES

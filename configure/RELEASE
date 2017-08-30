@@ -38,7 +38,7 @@ EPICS_BASE=
 IPAC=$(SUPPORT)/ipac/R2-12
 
 # Script module needed to build ScriptMotorController
-#!SCRIPT=$(SUPPORT)/script
+#!LUA=$(SUPPORT)/lua
 
 # The following is only needed for the motor examples in iocBoot.
 #!MOTOR=$(TOP)

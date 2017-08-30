@@ -2,7 +2,7 @@
 #include "asynMotorAxis.h"
 
 #include <string>
-#include "epicsScript.h"
+#include "luaEpics.h"
 
 class epicsShareClass ScriptMotorAxis : public asynMotorAxis
 {
