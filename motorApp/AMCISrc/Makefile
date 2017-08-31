@@ -10,8 +10,6 @@ include $(TOP)/configure/CONFIG
 
 LIBRARY_IOC += AMCI
 
-SRCS += AMCIRegister.cc
-
 # motorRecord.h will be created from motorRecord.dbd
 # install devMotorSoft.dbd into <top>/dbd
 DBD += ANG1Support.dbd
