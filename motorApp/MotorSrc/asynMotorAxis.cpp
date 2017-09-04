@@ -237,7 +237,7 @@ int  asynMotorAxis::getReferencingModeMove()
 
 /** Sets the value for an integer for this axis in the parameter library.
   * This function takes special action if the parameter is one of the motorStatus parameters
-  * (motorStatusDirection_, motorStatusHomed_, etc.).  In that case it sets or clears the appropriate
+  * (motorStatusDirection_, motorStatusZeroVbas_, etc.).  In that case it sets or clears the appropriate
   * bit in its private MotorStatus.status structure and if that status has changed sets a flag to
   * do callbacks to devMotorAsyn when callParamCallbacks() is called.
   * \param[in] function The function (parameter) number 
@@ -248,7 +248,7 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
   epicsUInt32 status=0;
   // This assumes the parameters defined above are in the same order as the bits the motor record expects!
   if (function >= pC_->motorStatusDirection_ && 
-      function <= pC_->motorStatusHomed_) {
+      function <= pC_->motorStatusZeroVbas_) {
     status = status_.status;
     mask = 1 << (function - pC_->motorStatusDirection_);
     if (value) status |= mask;
