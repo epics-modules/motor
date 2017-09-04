@@ -1197,7 +1197,15 @@ static long process(dbCommon *arg)
      */
     process_reason = (*pdset->update_values) (pmr);
     if (pmr->msta != old_msta)
+    {
+        msta_field msta;
+        msta.All = pmr->msta;
         MARK(M_MSTA);
+        if (msta.Bits.RA_VBAS_UNSUPPORTED && pmr->vbas)
+        {
+            pmr->sbas = pmr->vbas = 0.0;
+        }
+    }
 
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
     {
@@ -2431,6 +2439,10 @@ static long special(DBADDR *paddr, int after)
     msta_field msta;
 
     msta.All = pmr->msta;
+    if (msta.Bits.RA_VBAS_UNSUPPORTED)
+    {
+        pmr->sbas = pmr->vbas = 0.0;
+    }
 
     Debug(3, "special: after = %d\n", after);
 
@@ -3763,6 +3775,8 @@ static void load_pos(motorRecord * pmr)
 static void check_speed_and_resolution(motorRecord * pmr)
 {
     double fabs_urev = fabs(pmr->urev);
+    msta_field msta;
+    msta.All = pmr->msta;
 
     /*
      * Reconcile two different ways of specifying speed, resolution, and make
@@ -3804,6 +3818,10 @@ static void check_speed_and_resolution(motorRecord * pmr)
     db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->smax, DBE_VAL_LOG);
 
+    if (msta.Bits.RA_VBAS_UNSUPPORTED)
+    {
+        pmr->sbas = pmr->vbas = 0.0;
+    }
     /* SBAS (revolutions/sec) <--> VBAS (EGU/sec) */
     if (pmr->sbas != 0.0)
     {
