@@ -363,6 +363,9 @@ extern "C" int omsMAXnetConfig(
 
 /* Code for iocsh registration */
 
+extern "C"
+{
+
 /* omsMAXnetConfig */
 static const iocshArg omsMAXnetConfigArg0 = {"asyn motor port name", iocshArgString};
 static const iocshArg omsMAXnetConfigArg1 = {"number of axes", iocshArgInt};
@@ -389,3 +392,4 @@ static void OmsMAXnetAsynRegister(void)
 
 epicsExportRegistrar(OmsMAXnetAsynRegister);
 
+}
