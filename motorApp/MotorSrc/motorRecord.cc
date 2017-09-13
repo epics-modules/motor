@@ -185,7 +185,8 @@ USAGE...        Motor Record Support.
  *                    Changed error checks from dial to user limits.
  * .74 09-28-16 rls - Reverted .71 FLNK change. Except for the condition that DMOV == FALSE, FLNK
  *                    processing was standard. If processing is needed on a DMOV false to true
- *                    transition, a new motor record field should be added. 
+ *                    transition, a new motor record field should be added.
+ * .75 05-18-17 rls - Stop motor if URIP is Yes and RDBL read returns an error. 
  */                                                          
 
 #define VERSION 6.10
@@ -3573,7 +3574,16 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
 
         rtnstat = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &rdblvalue, 0, 0 );
         if (!RTN_SUCCESS(rtnstat))
+        {
             Debug(3, "process_motor_info: error reading RDBL link.\n");
+            if (pmr->mip != MIP_DONE)
+            {
+                /* Error reading RDBL - stop move. */
+                clear_buttons(pmr);
+                pmr->stop = 1;
+                MARK(M_STOP);
+            }
+        }
         else
         {
             pmr->rrbv = NINT((rdblvalue * pmr->rres) / pmr->mres);
