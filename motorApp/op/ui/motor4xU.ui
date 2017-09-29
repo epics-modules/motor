@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>704</width>
+    <height>282</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="caInclude" name="cainclude">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>176</width>
+      <height>282</height>
+     </rect>
+    </property>
+    <property name="macro">
+     <string notr="true">P=$(P),M=$(M1)</string>
+    </property>
+    <property name="filename" stdset="0">
+     <string notr="true">motorxU.ui</string>
+    </property>
+   </widget>
+   <widget class="caInclude" name="cainclude_2">
+    <property name="geometry">
+     <rect>
+      <x>176</x>
+      <y>0</y>
+      <width>176</width>
+      <height>282</height>
+     </rect>
+    </property>
+    <property name="macro">
+     <string notr="true">P=$(P),M=$(M2)</string>
+    </property>
+    <property name="filename" stdset="0">
+     <string notr="true">motorxU.ui</string>
+    </property>
+   </widget>
+   <widget class="caInclude" name="cainclude_3">
+    <property name="geometry">
+     <rect>
+      <x>352</x>
+      <y>0</y>
+      <width>176</width>
+      <height>282</height>
+     </rect>
+    </property>
+    <property name="macro">
+     <string notr="true">P=$(P),M=$(M3)</string>
+    </property>
+    <property name="filename" stdset="0">
+     <string notr="true">motorxU.ui</string>
+    </property>
+   </widget>
+   <widget class="caInclude" name="cainclude_4">
+    <property name="geometry">
+     <rect>
+      <x>528</x>
+      <y>0</y>
+      <width>176</width>
+      <height>282</height>
+     </rect>
+    </property>
+    <property name="macro">
+     <string notr="true">P=$(P),M=$(M4)</string>
+    </property>
+    <property name="filename" stdset="0">
+     <string notr="true">motorxU.ui</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>caInclude</class>
+   <extends>QWidget</extends>
+   <header>caInclude</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -111,6 +111,13 @@ USAGE...	Motor record driver level support for OMS model VME58.
  * .41  10-20-11 rls - Added counter in send_mess() to prevent endless loop
  *                     after VME58 reboot.
  * .42  07-26-12 rls - Added reboot test to send_mess().
+ * .43  02-21-16 rls - Added code to send_mess() that test for a VME58 reboot
+ *                     after a motion related (ST, MA, MR) command. Found new
+ *                     VME58 failure mode where board reboots after the 1st
+ *                     motion related command. Since delay between motion
+ *                     command and reboot test must be long enough to avoid a
+ *                     VMEbus error, delay is excessive for normal operation.
+ *                     Hence, the oms58_reboot_test external variable.
  *
  */
 
@@ -134,6 +141,7 @@ USAGE...	Motor record driver level support for OMS model VME58.
 #include	"drvOms58.h"
 
 #include	"epicsExport.h"
+#include    "iocsh.h"
 
 #define PRIVATE_FUNCTIONS 1	/* normal:1, debug:0 */
 
@@ -167,6 +175,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* Global data. */
 int oms58_num_cards = 0;
+int oms58_reboot_test = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -720,7 +729,20 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     Debug(4, "send_mess: sent card %d message:", card);
     Debug(4, "%s\n", outbuf);
 
-    pmotor->outPutIndex = putIndex; /* Message Sent */
+    pmotor->outPutIndex = putIndex;     /* Send message. */
+
+    if (oms58_reboot_test != 0)         /* Test if board has rebooted after sending message. */
+    {
+        epicsThreadSleep(0.300);
+        if (pmotor->rebootind != 0x4321)
+        {
+            errlogPrintf(rebootmsg, card);
+            /* Disable board. */
+            motor_state[card] = (struct controller *)NULL;
+            epicsThreadSleep(1.0);
+            return (ERROR);
+        }
+    }
 
     for (count = 0; (putIndex != pmotor->outGetIndex) && (count < 1000); count++)
     {
@@ -1335,5 +1357,31 @@ static void oms_reset(void *arg)
     }
 }
 
+
+/* Epics iocsh bindings */
+
+static const iocshArg oms58Arg0 = {"num_card",  iocshArgInt};
+static const iocshArg oms58Arg1 = {"addrs",     iocshArgInt};
+static const iocshArg oms58Arg2 = {"vector",    iocshArgInt};
+static const iocshArg oms58Arg3 = {"int_level", iocshArgInt};
+static const iocshArg oms58Arg4 = {"scan_rate", iocshArgInt};
+
+static const iocshArg* const oms58Args[5] = {&oms58Arg0, &oms58Arg1, &oms58Arg2, &oms58Arg3, &oms58Arg4};
+
+static const iocshFuncDef oms58FuncDef = {"oms58Setup", 5, oms58Args};
+
+static void oms58CallFunc(const iocshArgBuf* args)
+{
+	oms58Setup(args[0].ival, (void*) args[1].ival, (unsigned) args[2].ival, args[3].ival, args[4].ival);
+}
+
+void oms58Registrar(void)
+{
+	iocshRegister(&oms58FuncDef, &oms58CallFunc);
+}
+
+extern "C"{
+epicsExportRegistrar(oms58Registrar);
+}
 
 /*---------------------------------------------------------------------*/

@@ -1,0 +1,17 @@
+file "$(MOTOR)/motorApp/Db/basic_asyn_motor.db"
+{
+pattern
+{P,      N,     M,         DTYP,      PORT,  ADDR,    DESC,        EGU,     DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC,  DHLM,  DLLM,  INIT, RTRY}
+
+{IOC:,  1,  "m$(N)",  "asynMotor",  "ANG1_1_1",  0,  "AMCI ANG1 1",  steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  2,  "m$(N)",  "asynMotor",  "ANG1_1_2",  0,  "AMCI ANG1 2",  steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+}
+
+file "$(MOTOR)/motorApp/Db/ANG1Aux.template"
+{
+pattern
+{P,       R,  PORT,  ADDR}
+{IOC:,  m1:,  ANG1_1_1,  0}
+{IOC:,  m2:,  ANG1_1_2,  0}
+}
+

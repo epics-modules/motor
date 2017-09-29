@@ -1067,6 +1067,9 @@ extern "C" int Hytec8601Configure(const char *portName,
     return(asynSuccess);
 }
 
+extern "C"
+{
+
 static const iocshArg Hy8601ConfigArg0 = {"portName", iocshArgString};
 static const iocshArg Hy8601ConfigArg1 = {"numAxes", iocshArgInt};
 static const iocshArg Hy8601ConfigArg2 = {"movingPollPeriod", iocshArgInt};
@@ -1110,4 +1113,4 @@ static void Hytec8601Register(void)
 
 epicsExportRegistrar(Hytec8601Register);
 
-
+}
