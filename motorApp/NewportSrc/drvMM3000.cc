@@ -245,7 +245,7 @@ STATIC int set_status(int card, int signal)
     status.All = motor_info->status.All;
 
     sprintf(outbuff, "%dMS", signal + 1);
-    send_mess(card, outbuff, (char) NULL);
+    send_mess(card, outbuff, (char*) NULL);
     charcnt = recv_mess(card, inbuff, 1);
     if (charcnt > 0)
     {
@@ -310,7 +310,7 @@ STATIC int set_status(int card, int signal)
     status.Bits.EA_HOME     = 0;
 
     sprintf(outbuff, "%dTP", signal + 1);
-    send_mess(card, outbuff, (char) NULL);
+    send_mess(card, outbuff, (char*) NULL);
     charcnt = recv_mess(card, inbuff, 1);
     if (charcnt > 0)
     {
@@ -373,7 +373,7 @@ STATIC int set_status(int card, int signal)
         nodeptr->postmsgptr != 0)
     {
         strcpy(outbuff, nodeptr->postmsgptr);
-        send_mess(card, outbuff, (char) NULL);
+        send_mess(card, outbuff, (char*) NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -631,7 +631,7 @@ STATIC int motor_init()
             /* flush any junk at input port - should not be any data available */
             pasynOctetSyncIO->flush(cntrl->pasynUser);
 
-            send_mess(card_index, GET_IDENT, (char) NULL);
+            send_mess(card_index, GET_IDENT, (char*) NULL);
             status = recv_mess(card_index, axis_pos, 1);
             /* Return value is length of response string */
         }
@@ -640,12 +640,12 @@ STATIC int motor_init()
         {
             brdptr->localaddr = (char *) NULL;
             brdptr->motor_in_motion = 0;
-            send_mess(card_index, STOP_ALL, (char) NULL);   /* Stop all motors */
-            send_mess(card_index, GET_IDENT, (char) NULL);  /* Read controller ID string */
+            send_mess(card_index, STOP_ALL, (char*) NULL);   /* Stop all motors */
+            send_mess(card_index, GET_IDENT, (char*) NULL);  /* Read controller ID string */
             recv_mess(card_index, buff, 1);
             strncpy(brdptr->ident, &buff[0], MAX_IDENT_LEN);  /* Skip "VE" */
 
-            send_mess(card_index, "RC", (char) NULL);
+            send_mess(card_index, "RC", (char*) NULL);
             recv_mess(card_index, buff, 1);
             bufptr = epicsStrtok_r(buff, "=", &tok_save);
             bufptr = epicsStrtok_r(NULL, " ", &tok_save);
@@ -692,7 +692,7 @@ STATIC int motor_init()
                 else
                 {
                     sprintf(buff, "%dTPE", motor_index + 1);
-                    send_mess(card_index, buff, (char) NULL);
+                    send_mess(card_index, buff, (char*) NULL);
                     recv_mess(card_index, buff, 1);
 
                     if (strcmp(buff, "E01") == 0)

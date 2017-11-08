@@ -770,7 +770,7 @@ static int motor_init()
             /* Try 3 times to connect to controller. */
             do
             {
-                send_mess (card_index, GET_IDENT, (char) NULL);
+                send_mess (card_index, GET_IDENT, (char*) NULL);
                 status = recv_mess(card_index, (char *) pmotorState->ident, 1);
                 retry++;
             } while (status == 0 && retry < 3);
@@ -783,11 +783,11 @@ static int motor_init()
             pmotorState->motor_in_motion = 0;
             pmotorState->cmnd_response = false;
 
-            send_mess (card_index, ECHO_OFF, (char) NULL);
-            send_mess (card_index, ERROR_CLEAR, (char) NULL);
-            send_mess (card_index, STOP_ALL, (char) NULL);
+            send_mess (card_index, ECHO_OFF, (char*) NULL);
+            send_mess (card_index, ERROR_CLEAR, (char*) NULL);
+            send_mess (card_index, STOP_ALL, (char*) NULL);
 
-            send_mess (card_index, ALL_POS, (char) NULL);
+            send_mess (card_index, ALL_POS, (char*) NULL);
             recv_mess (card_index, axis_pos, 1);
 
             for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
@@ -822,7 +822,7 @@ static int motor_init()
              * dummy communication transaction.
              */
 
-            send_mess (card_index, ALL_POS, (char) NULL);
+            send_mess (card_index, ALL_POS, (char*) NULL);
             recv_mess (card_index, axis_pos, 1);
 
             for (motor_index=0;motor_index<total_axis;motor_index++)

@@ -214,7 +214,7 @@ static int set_status(int card, int signal)
     if (cntrl->status != NORMAL)
 	charcnt = recv_mess(card, buff, FLUSH);
 
-    send_mess(card, "TS", (char) NULL);		/*  Tell Status */
+    send_mess(card, "TS", (char*) NULL);		/*  Tell Status */
     charcnt = recv_mess(card, buff, 1);
     if (charcnt > 9)
 	convert_cnt = sscanf(buff, "S:%2hx %2hx %2hx\n", 
@@ -255,7 +255,7 @@ static int set_status(int card, int signal)
     minusLS = mstat2.Bits.lo_limit ? 0 : 1;
 
    /* Parse motor position */
-    send_mess(card, "TP", (char) NULL);  /*  Tell Position */
+    send_mess(card, "TP", (char*) NULL);  /*  Tell Position */
     recv_mess(card, buff, 1);
     motorData = NINT(atof(&buff[2]));
      
@@ -309,7 +309,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -521,7 +521,7 @@ static int motor_init()
 	    do
 	    {
                 sprintf(buff,"\001%1XVE", cntrl->asyn_address);
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
 		status = recv_mess(card_index, buff, 1);
 		retry++;
 	    } while (status == 0 && retry < 3);

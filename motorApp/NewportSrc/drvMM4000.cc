@@ -259,14 +259,14 @@ static void start_status(int card)
     if (card >= 0)
     {
         cntrl = (struct MMcontroller *) motor_state[card]->DevicePrivate;
-        send_mess(card, READ_STATUS, (char) NULL);
+        send_mess(card, READ_STATUS, (char*) NULL);
         status = recv_mess(card, cntrl->status_string, 1);
         if (status > 0)
         {
             cntrl->status = NORMAL;
-            send_mess(card, READ_POSITION, (char) NULL);
+            send_mess(card, READ_POSITION, (char*) NULL);
             recv_mess(card, cntrl->position_string, 1);
-            send_mess(card, READ_FEEDBACK, (char) NULL);
+            send_mess(card, READ_FEEDBACK, (char*) NULL);
             recv_mess(card, cntrl->feedback_string, 1);
         }
         else
@@ -284,7 +284,7 @@ static void start_status(int card)
          * responses.  This minimizes the latency due to processing on each card
          */
         for (itera = 0; (itera < total_cards) && motor_state[itera]; itera++)
-            send_mess(itera, READ_STATUS, (char) NULL);
+            send_mess(itera, READ_STATUS, (char*) NULL);
         for (itera = 0; (itera < total_cards) && motor_state[itera]; itera++)
         {
             cntrl = (struct MMcontroller *) motor_state[itera]->DevicePrivate;
@@ -292,7 +292,7 @@ static void start_status(int card)
             if (status > 0)
             {
                 cntrl->status = NORMAL;
-                send_mess(itera, READ_FEEDBACK, (char) NULL);
+                send_mess(itera, READ_FEEDBACK, (char*) NULL);
                 recv_mess(itera, cntrl->feedback_string, 1);
             }
             else
@@ -304,7 +304,7 @@ static void start_status(int card)
             }
         }
         for (itera = 0; (itera < total_cards) && motor_state[itera]; itera++)
-            send_mess(itera, READ_POSITION, (char) NULL);
+            send_mess(itera, READ_POSITION, (char*) NULL);
         for (itera = 0; (itera < total_cards) && motor_state[itera]; itera++)
         {
             cntrl = (struct MMcontroller *) motor_state[itera]->DevicePrivate;
@@ -388,7 +388,7 @@ static int set_status(int card, int signal)
         if (motor_info->pid_present == YES && drvMM4000ReadbackDelay != 0)
         {
             epicsThreadSleep((double) drvMM4000ReadbackDelay/1000.0);
-            send_mess(card, READ_STATUS, (char) NULL);
+            send_mess(card, READ_STATUS, (char*) NULL);
             recv_mess(card, cntrl->status_string, 1);
             pos = signal*5 + 3;  /* Offset in status string */
             mstat.All = cntrl->status_string[pos];
@@ -469,7 +469,7 @@ static int set_status(int card, int signal)
 
 
     /* Check for controller error. */
-    send_mess(card, "TE;", (char) NULL);
+    send_mess(card, "TE;", (char*) NULL);
     recv_mess(card, buff, 1);
     if (buff[2] == '@')
         status.Bits.RA_PROBLEM = 0;
@@ -496,7 +496,7 @@ static int set_status(int card, int signal)
         nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
-        send_mess(card, buff, (char) NULL);
+        send_mess(card, buff, (char*) NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -708,7 +708,7 @@ static int motor_init()
 
             do
             {
-                send_mess(card_index, READ_POSITION, (char) NULL);
+                send_mess(card_index, READ_POSITION, (char*) NULL);
                 status = recv_mess(card_index, axis_pos, 1);
                 retry++;
                 /* Return value is length of response string */
@@ -719,8 +719,8 @@ static int motor_init()
         {
             brdptr->localaddr = (char *) NULL;
             brdptr->motor_in_motion = 0;
-            send_mess(card_index, STOP_ALL, (char) NULL);   /* Stop all motors */
-            send_mess(card_index, GET_IDENT, (char) NULL);  /* Read controller ID string */
+            send_mess(card_index, STOP_ALL, (char*) NULL);   /* Stop all motors */
+            send_mess(card_index, GET_IDENT, (char*) NULL);  /* Read controller ID string */
             recv_mess(card_index, buff, 1);
             strcpy(brdptr->ident, &buff[2]);  /* Skip "VE" */
 
@@ -744,7 +744,7 @@ static int motor_init()
                 continue;
             }
 
-            send_mess(card_index, READ_POSITION, (char) NULL);
+            send_mess(card_index, READ_POSITION, (char*) NULL);
             recv_mess(card_index, axis_pos, 1);
 
             /* The return string will tell us how many axes this controller has */
@@ -769,7 +769,7 @@ static int motor_init()
 
                 /* Determine if encoder present based on open/closed loop mode. */
                 sprintf(buff, "%dTC", motor_index + 1);
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 recv_mess(card_index, buff, 1);
                 loop_state = atoi(&buff[3]);    /* Skip first 3 characters */
                 if (loop_state != 0)
@@ -781,7 +781,7 @@ static int motor_init()
 
                 /* Determine drive resolution. */
                 sprintf(buff, "%dTU", motor_index + 1);
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 recv_mess(card_index, buff, 1);
                 cntrl->drive_resolution[motor_index] = atof(&buff[3]);
 
@@ -792,19 +792,19 @@ static int motor_init()
 
                 /* Save home preset position. */
                 sprintf(buff, "%dXH", motor_index + 1);
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 recv_mess(card_index, buff, 1);
                 cntrl->home_preset[motor_index] = atof(&buff[3]);
 
                 /* Determine low limit */
                 sprintf(buff, "%dTL", motor_index + 1);
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 recv_mess(card_index, buff, 1);
                 motor_info->low_limit = atof(&buff[3]);
 
                 /* Determine high limit */
                 sprintf(buff, "%dTR", motor_index + 1);
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 recv_mess(card_index, buff, 1);
                 motor_info->high_limit = atof(&buff[3]);
 

@@ -256,7 +256,7 @@ static int set_status(int card, int signal)
 //	  {
 //	    /* Assume Controller Reboot - Set ONLINE and Velocity Control ON */
 //	    send_mess(card, SET_ONLINE, PIE517_axis[signal]);
-//	    //send_mess(card, SET_VELCTRL, (char) NULL);
+//	    //send_mess(card, SET_VELCTRL, (char*) NULL);
 //	  }
 
 	send_mess(card, READ_ONTARGET, PIE517_axis[signal]);
@@ -372,7 +372,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -595,15 +595,15 @@ static int motor_init()
 	    //{
 	    //  online = false;
 	    //  /* Set Controller to ONLINE mode */
-	    //  send_mess(card_index, SET_ONLINE, (char) NULL);
-	    //  send_mess(card_index, READ_ONLINE, (char) NULL);
+	    //  send_mess(card_index, SET_ONLINE, (char*) NULL);
+	    //  send_mess(card_index, READ_ONLINE, (char*) NULL);
 	    //  if ((status = recv_mess(card_index, buff, 1)))
 		//online = (atoi(buff)==1) ? true : false;
 	    //  else
 		//retry++;
 	    //} while (online == false && retry < 3);
 
-	    //send_mess(card_index, GET_IDENT, (char) NULL);
+	    //send_mess(card_index, GET_IDENT, (char*) NULL);
 	    //status = recv_mess(card_index, buff, 1);
 	    
 	    /* Parse out E517 revision (2 decimal places) and convert to int */
@@ -636,7 +636,7 @@ static int motor_init()
 	    brdptr->total_axis = total_axis;
 
 	    /* Turn ON velocity control mode  - All axis */
-	    //send_mess(card_index, SET_VELCTRL, (char) NULL);
+	    //send_mess(card_index, SET_VELCTRL, (char*) NULL);
 
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
