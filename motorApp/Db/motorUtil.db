@@ -51,7 +51,7 @@ record(calcout, "$(P)_MOVING")
 ## 
 ## it is OK to reuse OUTA in the lines when they refer to a
 ## specific IOC and no two lines will get loaded at one. However
-## if is IMPORTANT to not re-use one of the outputs on the
+## it is IMPORTANT to not re-use one of the outputs on the
 ## MOVING or _MOVING calc record target 
 record(dfanout, "$(P)_FAN")
 {
