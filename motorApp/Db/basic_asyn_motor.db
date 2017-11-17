@@ -17,6 +17,9 @@ record(motor,"$(P)$(M)")
 	field(DLLM,"$(DLLM)")
 	field(INIT,"$(INIT)")
 	field(TWV,"1")
+	# ISIS local archiving and alarm
+	info(archive, "0.02 VAL RBV DVAL OFF MSTA DIR CNEN MOVN DMOV MISS RCNT")
+	info(alarm, "Motors")
 }
 
 # ISIS local aliases for genie_python
