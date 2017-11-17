@@ -53,20 +53,20 @@ record(calcout, "$(P)_MOVING")
 ## specific IOC and no two lines will get loaded at one. However
 ## if is IMPORTANT to not re-use one of the outputs on the
 ## MOVING or _MOVING calc record target 
-## galils done in a slightly diffrent way for historical reasons,
-## will be fixed in upcoming ticket.
 record(dfanout, "$(P)_FAN")
 {
     field(OMSL, "supervisory")
     field(SELM, "All")
-$(IFDMC01=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.A CA")
-$(IFDMC02=#)  field(OUTB, "$(PVPREFIX)CS:MOT:MOVING.B CA")
-$(IFDMC03=#)  field(OUTC, "$(PVPREFIX)CS:MOT:MOVING.C CA")
-$(IFDMC04=#)  field(OUTD, "$(PVPREFIX)CS:MOT:MOVING.D CA")
-$(IFDMC05=#)  field(OUTE, "$(PVPREFIX)CS:MOT:MOVING.E CA")
-$(IFDMC06=#)  field(OUTF, "$(PVPREFIX)CS:MOT:MOVING.F CA")
-$(IFDMC07=#)  field(OUTG, "$(PVPREFIX)CS:MOT:MOVING.G CA")
-$(IFDMC08=#)  field(OUTH, "$(PVPREFIX)CS:MOT:MOVING.H CA")
+$(IFIOC_GALIL_01=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.A CA")
+$(IFIOC_GALIL_02=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.B CA")
+$(IFIOC_GALIL_03=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.C CA")
+$(IFIOC_GALIL_04=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.D CA")
+$(IFIOC_GALIL_05=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.E CA")
+$(IFIOC_GALIL_06=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.F CA")
+$(IFIOC_GALIL_07=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.G CA")
+$(IFIOC_GALIL_08=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.H CA")
+$(IFIOC_GALIL_09=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.I CA")
+$(IFIOC_GALIL_10=#)  field(OUTA, "$(PVPREFIX)CS:MOT:MOVING.J CA")
 $(IFIOC_SMC100_01=#)  field(OUTA, "$(PVPREFIX)CS:MOT:_MOVING1.A CA")
 $(IFIOC_CONEXAGP_01=#)  field(OUTA, "$(PVPREFIX)CS:MOT:_MOVING1.B CA")
 $(IFIOC_MCLEN_01=#)  field(OUTA, "$(PVPREFIX)CS:MOT:_MOVING1.C CA")
@@ -80,7 +80,7 @@ $(IFIOC_PIMOT_01=#)  field(OUTA, "$(PVPREFIX)CS:MOT:_MOVING1.J CA")
 }
 
 # force periodic processing to catch up any missing, shouldn't
-# be necessaryu but no harm to be careful 
+# be necessary but no harm to be careful 
 record(fanout, "$(P)_FAN2")
 {
     field(SCAN, "10 second")
