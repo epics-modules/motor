@@ -684,13 +684,15 @@ errexit:
                 recv_mess(card_index, buff, 1);
 
                 /* Set axis resolution. */
-                /* If encoder feedback is being used then use SU command */
-                /* If not then assume open-loop stepper and use full-step resolution (FR) and microstepping (QS) */
+                /* Read the feedback status */
                 sprintf(buff, "%.2dZB?", motor_index + 1);
                 send_mess(card_index, buff, 0);
                 recv_mess(card_index, buff, 1);
                 feedback = strtol(buff,0,16);
-                if ((feedback & 0x100) == 0) {
+                /* If stepper closed loop positioning is enabled (bit 9=1) and encoder feedback is disabled (bit 8=0) 
+                 * then use the full-step resolution (FR) and microstepping (QS) to determine drive_resolution.
+                 * If not then use SU (encoder resolution) for drive_resolution. */
+                if ((feedback & 0x300) == 0x200) {
                     sprintf(buff, "%.2dFR?", motor_index + 1);
                     send_mess(card_index, buff, 0);
                     recv_mess(card_index, buff, 1);
@@ -699,7 +701,7 @@ errexit:
                     send_mess(card_index, buff, 0);
                     recv_mess(card_index, buff, 1);
                     microStep = strtol(buff, 0, 10);
-                    cntrl->drive_resolution[motor_index] = fullStep/microStep;
+                    cntrl->drive_resolution[motor_index] = fullStep / microStep;
                 } else {
                     sprintf(buff, "%.2dSU?", motor_index + 1);
                     send_mess(card_index, buff, 0);
