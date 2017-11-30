@@ -218,7 +218,7 @@ static int set_status(int card, int signal)
 
 	// get the axis status
 	sprintf(buff, "AXISSTATUS()");
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	comm_status = recv_mess(card, buff, 1);
 	if (comm_status > 0 && buff[0] == ASCII_ACK_CHAR)
 	{
@@ -271,7 +271,7 @@ static int set_status(int card, int signal)
 
 	/* get the axis fault status */
 	sprintf(buff, "AXISFAULT()");
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	comm_status = recv_mess(card, buff, 1);
 	axis_status = atoi(&buff[1]);
 	status.Bits.RA_PLUS_LS   = axis_status & CW_FAULT_BIT ? 1 : 0;
@@ -285,7 +285,7 @@ static int set_status(int card, int signal)
 
 	// get the position
 	sprintf(buff, "PFBKPROG()");
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	recv_mess(card, buff, 1);
 	if (buff[0] == ASCII_ACK_CHAR)
 	{
@@ -337,7 +337,7 @@ static int set_status(int card, int signal)
 	if ((status.Bits.RA_DONE || ls_active) && nodeptr != 0 && nodeptr->postmsgptr != 0)
 	{
 		strcpy(buff, nodeptr->postmsgptr);
-		send_mess(card, buff, (char) NULL);
+		send_mess(card, buff, (char*) NULL);
 		nodeptr->postmsgptr = NULL;
 	}
 
@@ -591,7 +591,7 @@ static int motor_init()
 				// we only care if we get a response
 				// so we don't need to send a valid command
 				strcpy(buff, "NONE");
-				send_mess(card_index, buff, (char) NULL);
+				send_mess(card_index, buff, (char*) NULL);
 				status = recv_mess(card_index, buff, 1);
 
 				retry++;
@@ -603,7 +603,7 @@ static int motor_init()
 				brdptr->motor_in_motion = 0;
 				// Read controller ID string
 				strcpy(buff, "GETPARM(265)"); //UserString1
-				send_mess(card_index, buff, (char) NULL);
+				send_mess(card_index, buff, (char*) NULL);
 				recv_mess(card_index, buff, 1);
 				if (buff[0] == ASCII_ACK_CHAR)
 				{
@@ -620,7 +620,7 @@ static int motor_init()
 				{
 					// Does this axis actually exist?
 					sprintf(buff, "GETPARM(257)"); //AxisName
-					send_mess(card_index, buff, (char) NULL);
+					send_mess(card_index, buff, (char*) NULL);
 					recv_mess(card_index, buff, 1);
 
 					// We know the axis exists if we got an ACK response
@@ -645,7 +645,7 @@ static int motor_init()
 
 						// Determine if encoder present based on open/closed loop mode.
 						sprintf(buff, "GETPARM(58)"); //CfgFbkPosType
-						send_mess(card_index, buff, (char) NULL);
+						send_mess(card_index, buff, (char*) NULL);
 						recv_mess(card_index, buff, 1);
 						if (buff[0] == ASCII_ACK_CHAR)
 						{
@@ -658,7 +658,7 @@ static int motor_init()
 
 						// Determine if gains are supported based on the motor type.
 						sprintf(buff, "GETPARM(33)"); //CfgMotType
-						send_mess(card_index, buff, (char) NULL);
+						send_mess(card_index, buff, (char*) NULL);
 						recv_mess(card_index, buff, 1);
 						if (buff[0] == ASCII_ACK_CHAR)
 						{
@@ -671,12 +671,12 @@ static int motor_init()
 
 						// Stop all motors
 						sprintf(buff, "ABORT");
-						send_mess(card_index, buff, (char) NULL);
+						send_mess(card_index, buff, (char*) NULL);
 						recv_mess(card_index, buff, 1);
 
 						// Determine drive resolution
 						sprintf(buff, "GETPARM(3)"); //PosScaleFactor
-						send_mess(card_index, buff, (char) NULL);
+						send_mess(card_index, buff, (char*) NULL);
 						recv_mess(card_index, buff, 1);
 						if (buff[0] == ASCII_ACK_CHAR)
 						{
@@ -696,7 +696,7 @@ static int motor_init()
 
 						// Save home preset position
 						sprintf(buff, "GETPARM(108)"); //HomeOffset
-						send_mess(card_index, buff, (char) NULL);
+						send_mess(card_index, buff, (char*) NULL);
 						recv_mess(card_index, buff, 1);
 						if (buff[0] == ASCII_ACK_CHAR)
 						{
@@ -705,7 +705,7 @@ static int motor_init()
 
 						// Determine low limit
 						sprintf(buff, "GETPARM(47)"); //ThresholdSoftCCW
-						send_mess(card_index, buff, (char) NULL);
+						send_mess(card_index, buff, (char*) NULL);
 						recv_mess(card_index, buff, 1);
 						if (buff[0] == ASCII_ACK_CHAR)
 						{
@@ -714,7 +714,7 @@ static int motor_init()
 
 						// Determine high limit
 						sprintf(buff, "GETPARM(48)"); //ThresholdSoftCW
-						send_mess(card_index, buff, (char) NULL);
+						send_mess(card_index, buff, (char*) NULL);
 						recv_mess(card_index, buff, 1);
 						if (buff[0] == ASCII_ACK_CHAR)
 						{
@@ -723,7 +723,7 @@ static int motor_init()
 
 						// Save the HomeDirection parameter
 						sprintf(buff, "GETPARM(106)"); //HomeDirection
-						send_mess(card_index, buff, (char) NULL);
+						send_mess(card_index, buff, (char*) NULL);
 						recv_mess(card_index, buff, 1);
 						if (buff[0] == ASCII_ACK_CHAR)
 						{

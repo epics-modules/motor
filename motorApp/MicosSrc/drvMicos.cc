@@ -286,7 +286,7 @@ static int set_status(int card, int signal)
     nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
-        send_mess(card, buff, (char) NULL);
+        send_mess(card, buff, (char*) NULL);
         /* The Micos will not send back a response for a 'set' command, don't need next line */
         /* recv_mess(card, buff, WAIT); */
         nodeptr->postmsgptr = NULL;

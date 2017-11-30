@@ -334,7 +334,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
         strncpy(send_buff, nodeptr->postmsgptr, 80);
-	send_mess(card, send_buff, (char) NULL);
+	send_mess(card, send_buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 

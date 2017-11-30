@@ -341,7 +341,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -548,7 +548,7 @@ static int motor_init()
 
 	    do
 	    {
-		send_mess(card_index, GET_IDENT, (char) NULL);
+		send_mess(card_index, GET_IDENT, (char*) NULL);
 		status = recv_mess(card_index, buff, 1);
 		retry++;
 	    } while (status == 0 && retry < 3);

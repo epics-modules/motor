@@ -264,7 +264,7 @@ STATIC int set_status(int card, int signal)
     /* Test for post-move string. */
     if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 && nodeptr->postmsgptr != 0)
     {
-        send_mess(card, nodeptr->postmsgptr, (char) NULL);
+        send_mess(card, nodeptr->postmsgptr, (char*) NULL);
         /* The MCB4B always sends back a response, read it and discard */
         recv_mess(card, buff, WAIT);
         nodeptr->postmsgptr = NULL;

@@ -396,7 +396,7 @@ static int set_status(int card, int signal)
             errlogPrintf(wdctrmsg, card, q_buf);
             status.Bits.RA_PROBLEM = 1;
             motor_info->status.All = status.All;
-            send_mess(card, STOP_ALL, (char) NULL);
+            send_mess(card, STOP_ALL, (char*) NULL);
             /* Disable board. */
             motor_state[card] = (struct controller *) NULL;
             return(rtn_state = 1); /* End move. */
@@ -1261,8 +1261,8 @@ static int motor_init()
         pmotor->status1_irq_enable.All = 0;
         pmotor->status2_irq_enable = 0;
 
-        send_mess(card_index, ERROR_CLEAR, (char) NULL);
-        send_mess(card_index, STOP_ALL, (char) NULL);
+        send_mess(card_index, ERROR_CLEAR, (char*) NULL);
+        send_mess(card_index, STOP_ALL, (char*) NULL);
 
         rtn_code = send_recv_mess(card_index, GET_IDENT, (char) NULL, (char *) pmotorState->ident, 1);
         if (rtn_code != 0)
@@ -1293,7 +1293,7 @@ static int motor_init()
 
         if (wdtrip == false)
         {
-            send_mess(card_index, initstring[card_index], (char) NULL);
+            send_mess(card_index, initstring[card_index], (char*) NULL);
 
             send_recv_mess(card_index, ALL_POS, (char) NULL, axis_pos, 1);
 

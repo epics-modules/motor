@@ -225,7 +225,7 @@ static int set_status(int card, int signal)
     status.All = motor_info->status.All;
 
     sprintf(outbuff, "%.2dMD", signal + 1);
-    send_mess(card, outbuff, (char) NULL);
+    send_mess(card, outbuff, (char*) NULL);
     charcnt = recv_mess(card, inbuff, 1);
 
     if (charcnt == 1 && (inbuff[0] == '0' || inbuff[0] == '1'))
@@ -255,7 +255,7 @@ static int set_status(int card, int signal)
 
     /* Get motor position. */
     sprintf(outbuff, READ_POSITION, signal + 1);
-    send_mess(card, outbuff, (char) NULL);
+    send_mess(card, outbuff, (char*) NULL);
     charcnt = recv_mess(card, inbuff, 1);
 
     motorData = atof(inbuff) / cntrl->drive_resolution[signal];
@@ -279,7 +279,7 @@ static int set_status(int card, int signal)
 
     /* Get travel limit switch status. */
     sprintf(outbuff, "%.2dPH", signal + 1);
-    send_mess(card, outbuff, (char) NULL);
+    send_mess(card, outbuff, (char*) NULL);
     charcnt = recv_mess(card, inbuff, 1);
     cptr = strchr(inbuff, 'H');
     if (cptr == NULL)
@@ -318,7 +318,7 @@ static int set_status(int card, int signal)
 
     /* Get motor power on/off status. */
     sprintf(outbuff, "%.2dMO?", signal + 1);
-    send_mess(card, outbuff, (char) NULL);
+    send_mess(card, outbuff, (char*) NULL);
     charcnt = recv_mess(card, inbuff, 1);
     power = atoi(inbuff) ? true : false;
 
@@ -331,7 +331,7 @@ static int set_status(int card, int signal)
 
     /* Get error code. */
     sprintf(outbuff, "%.2dTE?", signal + 1);
-    send_mess(card, outbuff, (char) NULL);
+    send_mess(card, outbuff, (char*) NULL);
     charcnt = recv_mess(card, inbuff, 1);
     errcode = atoi(inbuff);
     if (errcode != 0)
@@ -358,7 +358,7 @@ static int set_status(int card, int signal)
         nodeptr->postmsgptr != 0)
     {
         strcpy(outbuff, nodeptr->postmsgptr);
-        send_mess(card, outbuff, (char) NULL);
+        send_mess(card, outbuff, (char*) NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -638,7 +638,7 @@ static int motor_init()
 
             do
             {
-                send_mess(card_index, GET_IDENT, (char) NULL);
+                send_mess(card_index, GET_IDENT, (char*) NULL);
                 status = recv_mess(card_index, buff, 1);
                 retry++;
                 /* Return value is length of response string */
@@ -652,7 +652,7 @@ errexit:
             brdptr->motor_in_motion = 0;
             strcpy(brdptr->ident, &buff[1]);  /* Skip "\n" */
 
-            send_mess(card_index, "ZU", (char) NULL);
+            send_mess(card_index, "ZU", (char*) NULL);
             recv_mess(card_index, buff, 1);
             total_axis = buff[0] >> 4;
             if (total_axis > 4)
@@ -664,7 +664,7 @@ errexit:
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 sprintf(buff, STOP_AXIS, motor_index + 1);  /* Stop motor */
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 /* Initialize. */
                 brdptr->motor_info[motor_index].motor_motion = NULL;
             }
