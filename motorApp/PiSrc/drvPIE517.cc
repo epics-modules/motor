@@ -51,8 +51,10 @@ DESIGN LIMITATIONS...
 */
 
 #include <string.h>
+#include <stdlib.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "drvPIE517.h"
