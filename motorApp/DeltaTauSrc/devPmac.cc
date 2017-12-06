@@ -38,6 +38,7 @@ USAGE... Device level support for Delta Tau PMAC.
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
