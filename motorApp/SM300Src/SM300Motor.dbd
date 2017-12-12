@@ -1,0 +1,3 @@
+# SM300 Device Driver support.
+registrar(SM300Register)
+

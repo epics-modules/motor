@@ -105,6 +105,9 @@ MicronixSrc_DEPEND_DIRS = MotorSrc
 DIRS += PhytronSrc
 PhytronSrc_DEPEND_DIRS = MotorSrc
 
+DIRS += SM300Src
+SM300Src_DEPEND_DIRS = MotorSrc
+
 endif
 
 # Install the edl files
