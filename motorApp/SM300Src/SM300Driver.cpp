@@ -27,6 +27,7 @@ K. Goetze 2012-03-23  Initial version
 #include "asynMotorAxis.h"
 
 #include <epicsExport.h>
+#include <errlog.h>
 #include "SM300Driver.h"
 
 #define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
@@ -59,10 +60,12 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
       "%s: cannot connect to SM300 controller\n",
       functionName);
   }
-  for (axis=0; axis<numAxes; axis++) {
+//  for (axis=0; axis<numAxes; axis++) {
   //for (axis=1; axis < (numAxes + 1); axis++) {
-    pAxis = new SM300Axis(this, axis, stepSize);
-  }
+ //   pAxis = new SM300Axis(this, axis, stepSize);
+ // }
+  pAxis = new SM300Axis(this, 0, 'X');
+  pAxis = new SM300Axis(this, 1, 'Y');
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
@@ -151,27 +154,26 @@ asynStatus SM300Controller::poll()
 	SM300Axis *axis;
 	// Read the current motor position
 	sprintf(this->outString_, "LQ");
-		
 
 	comStatus = this->writeReadController();
 	if (comStatus) goto skip;
-	
-	// The response string is of the form "\06\02X%d,Y%d"
-	position_start = &this->inString_[3];
-	position = (atof(position_start) / 1.0);
-	//printf("Position0: %f", position);
-	axis = this->getAxis(0);
-	axis->setDoubleParam(this->motorPosition_, position);
-	axis->callParamCallbacks();
-	axis->setIntegerParam(this->motorStatusDone_, 0);
-	position_start = strchr(this->inString_, ',');
 
-	position = (atof(&position_start[2]) / 1.0);
-	//printf("Position1: %f", position);
+	// The response string is of the form "\06\02X%d,Y%d"
+	if (strlen(this->inString_) < 2) {
+		comStatus = asynError;
+		errlogPrintf("SM300 poll: status return string is too short.\n");
+		goto skip;
+	}
+
+	position_start = &this->inString_[1];
+	axis = this->getAxis(0);
+	comStatus = axis->setMotorPosition(position_start);
+	if (comStatus) goto skip;
+
+	position_start = strchr(this->inString_, ',');
 	axis = this->getAxis(1);
-	axis->setDoubleParam(this->motorPosition_, position);
-	axis->setIntegerParam(this->motorStatusDone_, 1);
-	axis->callParamCallbacks();
+	comStatus = axis->setMotorPosition(position_start);
+	if (comStatus) goto skip;
 
 	// Read the moving status of this motor
 //	sprintf(this->outString_, "%1dTS", axisNo_ + 1);
@@ -180,7 +182,7 @@ asynStatus SM300Controller::poll()
 	// The response string is of the form "1TS000028"
 	// May need to add logic for moving while homing
 //	done = ((this->inString_[7] == '2') && (this->inString_[8] == '8')) ? 0 : 1;
-	
+
 
 	// Read the limit status
 	// The response string is of the form "1TS001328"
@@ -209,7 +211,11 @@ asynStatus SM300Controller::poll()
 	//setIntegerParam(this->motorStatusProblem_, 0);
 
 skip:
-	axis->setIntegerParam(this->motorStatusProblem_, comStatus ? 1 : 0);
+	for (int i; i < this->numAxes_; i++) {
+		axis = this->getAxis(i);
+		axis->setIntegerParam(this->motorStatusProblem_, comStatus ? 1 : 0);
+		axis->callParamCallbacks();
+	}
 	callParamCallbacks();
 	return comStatus ? asynError : asynSuccess;
 }
@@ -222,18 +228,36 @@ skip:
 // These are the SM300Axis methods
 
 /** Creates a new SM300Axis object.
-  * \param[in] pC Pointer to the SM300Controller to which this axis belongs. 
+  * \param[in] pC Pointer to the SM300Controller to which this axis belongs.
   * \param[in] axisNo Index number of this axis, range 0 to pC->numAxes_-1.
-  * 
+  *
   * Initializes register numbers, etc.
   */
-SM300Axis::SM300Axis(SM300Controller *pC, int axisNo, double stepSize)
-  : asynMotorAxis(pC, axisNo),
-    pC_(pC), stepSize_(stepSize)
-{ 
+SM300Axis::SM300Axis(SM300Controller *pC, int axisNo, char axisLabel)
+	: asynMotorAxis(pC, axisNo),
+	pC_(pC), axisLabel(axisLabel)
+{
 
 }
 
+/** Set the known motor position from the return string.
+  *  \param(in) lqReply the reply to LQ status request, should be a character followed by the motor axis then an integer
+ */
+asynStatus SM300Axis::setMotorPosition(const char * lqReply)
+{
+	char *stop_char;
+	if ((lqReply == NULL) || (strlen(lqReply) < 3) || (lqReply[1] != axisLabel)) {
+		errlogPrintf("SM300 poll: LQ reply does not contain position for 2 motors.\n");
+		return asynError;
+	}
+	double position = (strtod(&lqReply[2], &stop_char) / 1.0);
+	if (stop_char[0]!='\0' && stop_char[0]!=',')	{
+		errlogPrintf("SM300 poll: LQ reply contains non number %s.\n", &lqReply[2]);
+		return asynError;
+	}
+	setDoubleParam(pC_->motorPosition_, position);
+	return asynSuccess;
+}
 
 
 /** Reports on status of the axis

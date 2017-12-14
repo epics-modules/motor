@@ -14,7 +14,7 @@ class epicsShareClass SM300Axis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
-  SM300Axis(class SM300Controller *pC, int axis, double stepSize);
+  SM300Axis(class SM300Controller *pC, int axis, char axisLabel);
   void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
@@ -30,7 +30,8 @@ private:
   asynStatus sendAccelAndVelocity(double accel, double velocity);
   double stepSize_;      /**< Encoder increment value obtained with SU? command _or_ resolution, set at boot time */
                          /*   with SMC100CreateController command */
-  
+  char axisLabel; /** label for the axis*/
+  asynStatus setMotorPosition(const char * lq_return);
 friend class SM300Controller;
 };
 
@@ -41,7 +42,8 @@ public:
   SM300Axis* getAxis(asynUser *pasynUser);
   SM300Axis* getAxis(int axisNo);
 
-  virtual asynStatus poll();
+  virtual asynStatus poll();  
 
 friend class SM300Axis;
+	
 };
