@@ -44,6 +44,9 @@ public:
 
   virtual asynStatus poll();  
 
+private:
+	int _status_set;
+
 friend class SM300Axis;
 	
 };

@@ -41,7 +41,8 @@ K. Goetze 2012-03-23  Initial version
   */
 SM300Controller::SM300Controller(const char *portName, const char *SM300PortName, int numAxes, 
                                  double movingPollPeriod, double idlePollPeriod, double stepSize)
-  :  asynMotorController(portName, numAxes, NUM_SM300_PARAMS, 
+  : _status_set(0),
+	asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
                          0, // No additional interfaces beyond those in base class
                          0, // No additional callback interfaces beyond those in base class
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
@@ -64,8 +65,9 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
   //for (axis=1; axis < (numAxes + 1); axis++) {
  //   pAxis = new SM300Axis(this, axis, stepSize);
  // }
-  pAxis = new SM300Axis(this, 0, 'X');
+  pAxis = new SM300Axis(this, 0, 'X');  
   pAxis = new SM300Axis(this, 1, 'Y');
+
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
@@ -175,43 +177,42 @@ asynStatus SM300Controller::poll()
 	comStatus = axis->setMotorPosition(position_start);
 	if (comStatus) goto skip;
 
-	// Read the moving status of this motor
-//	sprintf(this->outString_, "%1dTS", axisNo_ + 1);
-//	comStatus = this->writeReadController();
-//	if (comStatus) goto skip;
-	// The response string is of the form "1TS000028"
-	// May need to add logic for moving while homing
-//	done = ((this->inString_[7] == '2') && (this->inString_[8] == '8')) ? 0 : 1;
+	// Read the current motor position
+	sprintf(this->outString_, "LM");
 
+	comStatus = this->writeReadController();
+	if (comStatus) goto skip;
 
-	// Read the limit status
-	// The response string is of the form "1TS001328"
-	//
-	//   The stage I tested this with is a GTS30V vertical jack.  When the controller is initialized
-	//   for this device using Newport's software, +25 and -5 limits get set.  The controller does not
-	//   let you set limits outside these values, so I never was able to run into a "hard" limit. 
-	//   The controller also does not allow position settings outside these limits, and does not give
-	//   an indication.  So, my recommendation is to leave the controller's travel limits set to the
-	//   Newport defaults, and use the motor record's soft limits, set to the controller's limits or within.
-	//
-	// Should a hard limit be actually encounted, this code *should* report it to the motor record
-//	limit = (this->inString_[6] == '2') ? 1 : 0;
-//	setIntegerParam(this->motorStatusHighLimit_, limit);
-//	limit = (this->inString_[6] == '1') ? 1 : 0;
-//	setIntegerParam(this->motorStatusLowLimit_, limit);
-//	limit = ((this->inString_[7] == '3') && (this->inString_[8] == '2')) ? 1 : 0;
-//	setIntegerParam(this->motorStatusAtHome_, limit);
+	if (strlen(this->inString_) < 3) {
+		comStatus = asynError;
+		errlogPrintf("SM300 poll: moving status return string is too short.\n");
+		goto skip;
+	}
+	errlogPrintf("SM300 poll: moving status returned string is %s.\n", this->inString_);
 
-	// Read the drive power on status
-	//sprintf(this->outString_, "#%02dE", axisNo_ + 1);
-	//comStatus = this->writeReadController();
-	//if (comStatus) goto skip;
-	//driveOn = (this->inString_[5] == '1') ? 1:0;
-	//setIntegerParam(this->motorStatusPowerOn_, driveOn);
-	//setIntegerParam(this->motorStatusProblem_, 0);
+	bool done_moving;
+	if (this->inString_[2] == 'P') {
+		done_moving = true;
+	}
+	else if (this->inString_[2] == 'N') {
+		done_moving = false;
+	}
+	else {
+		comStatus = asynError;
+		errlogPrintf("SM300 poll: moving status returned error.\n");
+		goto skip;
+	}
+	for (int i=0; i < this->numAxes_; i++) {
+		axis = this->getAxis(i);
+		// Driver appears to ignore the first and second change in status so instead make sure change is registered
+		if (_status_set < 3) axis->setIntegerParam(motorStatusDone_, done_moving ? 0 : 1);
+		axis->setIntegerParam(motorStatusDone_, done_moving ? 1 : 0);
+		errlogPrintf("SM300 poll: set axis status done %i to %i.\n", i, done_moving ? 1 : 0);
+	}
+	_status_set ++;
 
 skip:
-	for (int i; i < this->numAxes_; i++) {
+	for (int i=0; i < this->numAxes_; i++) {
 		axis = this->getAxis(i);
 		axis->setIntegerParam(this->motorStatusProblem_, comStatus ? 1 : 0);
 		axis->callParamCallbacks();
@@ -237,7 +238,6 @@ SM300Axis::SM300Axis(SM300Controller *pC, int axisNo, char axisLabel)
 	: asynMotorAxis(pC, axisNo),
 	pC_(pC), axisLabel(axisLabel)
 {
-
 }
 
 /** Set the known motor position from the return string.
