@@ -20,10 +20,10 @@ public:
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
   asynStatus home(double min_velocity, double max_velocity, double acceleration, int forwards);
   asynStatus stop(double acceleration);
-  //asynStatus poll(bool *moving);
+  asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
   asynStatus setClosedLoop(bool closedLoop);
-
+  bool has_error();
 private:
   SM300Controller *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
@@ -31,7 +31,7 @@ private:
   double stepSize_;      /**< Encoder increment value obtained with SU? command _or_ resolution, set at boot time */
                          /*   with SMC100CreateController command */
   char axisLabel; /** label for the axis*/
-  asynStatus setMotorPosition(const char * lq_return);
+  bool has_error_;
 friend class SM300Controller;
 };
 
@@ -41,11 +41,13 @@ public:
   void report(FILE *fp, int level);
   SM300Axis* getAxis(asynUser *pasynUser);
   SM300Axis* getAxis(int axisNo);
+  void setTerminationChars(const char *eosIn, int eosInlen, const char *eosOut, int eosOutlen);
 
   virtual asynStatus poll();  
+  bool has_error();
 
 private:
-	int _status_set;
+	bool has_error_;
 
 friend class SM300Axis;
 	

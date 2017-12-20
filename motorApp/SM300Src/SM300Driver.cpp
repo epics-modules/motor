@@ -41,19 +41,17 @@ K. Goetze 2012-03-23  Initial version
   */
 SM300Controller::SM300Controller(const char *portName, const char *SM300PortName, int numAxes, 
                                  double movingPollPeriod, double idlePollPeriod, double stepSize)
-  : _status_set(0),
-	asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
+  : asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
                          0, // No additional interfaces beyond those in base class
                          0, // No additional callback interfaces beyond those in base class
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
                          0, 0)  // Default priority and stack size
 {
-  int axis;
   asynStatus status;
   SM300Axis *pAxis;
   static const char *functionName = "SM300Controller::SM300Controller";
-  
+
   /* Connect to SM300 controller */
   status = pasynOctetSyncIO->connect(SM300PortName, 0, &pasynUserController_, NULL);
   if (status) {
@@ -61,13 +59,11 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
       "%s: cannot connect to SM300 controller\n",
       functionName);
   }
-//  for (axis=0; axis<numAxes; axis++) {
-  //for (axis=1; axis < (numAxes + 1); axis++) {
- //   pAxis = new SM300Axis(this, axis, stepSize);
- // }
+  if (numAxes != 2) {
+	  errlogPrintf("SM300: Driver is only setup for two axes X and Y!\n");
+  }
   pAxis = new SM300Axis(this, 0, 'X');  
   pAxis = new SM300Axis(this, 1, 'Y');
-
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
@@ -130,52 +126,29 @@ SM300Axis* SM300Controller::getAxis(int axisNo)
   return static_cast<SM300Axis*>(asynMotorController::getAxis(axisNo));
 }
 
+/** Set the termination characters on the output and input buffers
+ * \param[in] eosIn end of string for input
+ * \param[in] eosInlen length of end of string for input
+ * \param[in] eosOut end of string for output
+ * \param[in] eosOutlen length of end of string for output
+ */
+void SM300Controller::setTerminationChars(const char *eosIn, int eosInlen, const char *eosOut, int eosOutlen) {
 
-
-
-
-
-
-
-
-
+	pasynOctetSyncIO->setOutputEos(this->pasynUserController_, eosOut, eosOutlen);
+	pasynOctetSyncIO->setInputEos(this->pasynUserController_, eosIn, eosInlen);
+}
 
 /** Polls the axis.
-* This function reads motor position, limit status, home status, and moving status
-* It calls setIntegerParam() and setDoubleParam() for each item that it polls,
-* and then calls callParamCallbacks() at the end.
-* \param[out] moving A flag that is set indicating that the axis is moving (true) or done (false). */
+ * This function reads moving status which is done on a controller
+ */
 asynStatus SM300Controller::poll()
 {
-	int done;
-	//int driveOn;
-	int limit;
-	double position;
+
 	asynStatus comStatus;
-	char * position_start;
 	SM300Axis *axis;
+
 	// Read the current motor position
-	sprintf(this->outString_, "LQ");
-
-	comStatus = this->writeReadController();
-	if (comStatus) goto skip;
-
-	// The response string is of the form "\06\02X%d,Y%d"
-	if (strlen(this->inString_) < 2) {
-		comStatus = asynError;
-		errlogPrintf("SM300 poll: status return string is too short.\n");
-		goto skip;
-	}
-
-	position_start = &this->inString_[1];
-	axis = this->getAxis(0);
-	comStatus = axis->setMotorPosition(position_start);
-	if (comStatus) goto skip;
-
-	position_start = strchr(this->inString_, ',');
-	axis = this->getAxis(1);
-	comStatus = axis->setMotorPosition(position_start);
-	if (comStatus) goto skip;
+	setTerminationChars("\x04", 1, "\x04", 1);
 
 	// Read the current motor position
 	sprintf(this->outString_, "LM");
@@ -188,7 +161,6 @@ asynStatus SM300Controller::poll()
 		errlogPrintf("SM300 poll: moving status return string is too short.\n");
 		goto skip;
 	}
-	errlogPrintf("SM300 poll: moving status returned string is %s.\n", this->inString_);
 
 	bool done_moving;
 	if (this->inString_[2] == 'P') {
@@ -199,31 +171,31 @@ asynStatus SM300Controller::poll()
 	}
 	else {
 		comStatus = asynError;
-		errlogPrintf("SM300 poll: moving status returned error.\n");
+		errlogPrintf("SM300 poll: moving status returned error status.\n");
 		goto skip;
 	}
 	for (int i=0; i < this->numAxes_; i++) {
 		axis = this->getAxis(i);
-		// Driver appears to ignore the first and second change in status so instead make sure change is registered
-		if (_status_set < 3) axis->setIntegerParam(motorStatusDone_, done_moving ? 0 : 1);
 		axis->setIntegerParam(motorStatusDone_, done_moving ? 1 : 0);
-		errlogPrintf("SM300 poll: set axis status done %i to %i.\n", i, done_moving ? 1 : 0);
 	}
-	_status_set ++;
 
 skip:
+	has_error_ = comStatus != asynSuccess;
+
 	for (int i=0; i < this->numAxes_; i++) {
 		axis = this->getAxis(i);
-		axis->setIntegerParam(this->motorStatusProblem_, comStatus ? 1 : 0);
+		axis->setIntegerParam(this->motorStatusProblem_, axis->has_error() || has_error_ ? 1 : 0);
 		axis->callParamCallbacks();
 	}
 	callParamCallbacks();
 	return comStatus ? asynError : asynSuccess;
 }
 
-
-
-
+/** Get an whether the controller has an error.
+*/
+bool SM300Controller::has_error() {
+	return has_error_;
+}
 
 
 // These are the SM300Axis methods
@@ -240,23 +212,49 @@ SM300Axis::SM300Axis(SM300Controller *pC, int axisNo, char axisLabel)
 {
 }
 
-/** Set the known motor position from the return string.
-  *  \param(in) lqReply the reply to LQ status request, should be a character followed by the motor axis then an integer
- */
-asynStatus SM300Axis::setMotorPosition(const char * lqReply)
+/** Get an whether the axis has an error.
+*/
+bool SM300Axis::has_error() {
+	return has_error_;
+}
+
+/** Polls the axis.
+* This function reads the position of the axis 
+* \param[out] moving A flag that is set indicating that the axis is moving (true) or done (false). Not used as this is reported at the controller level
+*/
+asynStatus SM300Axis::poll(bool *moving)
 {
-	char *stop_char;
-	if ((lqReply == NULL) || (strlen(lqReply) < 3) || (lqReply[1] != axisLabel)) {
-		errlogPrintf("SM300 poll: LQ reply does not contain position for 2 motors.\n");
-		return asynError;
+	double position;
+	asynStatus comStatus;
+
+	// Read the current motor position
+	pC_->setTerminationChars("\x04", 1, "\x04", 1);
+	sprintf(pC_->outString_, "LI%c", this->axisLabel);
+	comStatus = pC_->writeReadController();
+	if (comStatus) goto skip;
+
+	// The response string is of the form "\06\02%d"
+	if (strlen(pC_->inString_) < 3) {
+		comStatus = asynError;
+		errlogPrintf("SM300 poll: position return string is too short.\n");
+		goto skip;
 	}
-	double position = (strtod(&lqReply[2], &stop_char) / 1.0);
-	if (stop_char[0]!='\0' && stop_char[0]!=',')	{
-		errlogPrintf("SM300 poll: LQ reply contains non number %s.\n", &lqReply[2]);
-		return asynError;
+
+
+	char *stop_char;
+	position = (strtod(&pC_->inString_[2], &stop_char) / 1.0);
+	if (stop_char[0] != '\0') {
+		errlogPrintf("SM300 poll: LI reply contains non number %s.\n", &pC_->inString_[2]);
+		comStatus = asynError;
+		goto skip;
 	}
 	setDoubleParam(pC_->motorPosition_, position);
-	return asynSuccess;
+	
+skip:
+	has_error_ = comStatus != asynSuccess;
+	setIntegerParam(pC_->motorStatusProblem_, has_error_ || pC_->has_error() ? 1 : 0);
+	callParamCallbacks();
+	return comStatus ? asynError : asynSuccess;
 }
 
 
@@ -294,20 +292,28 @@ asynStatus SM300Axis::sendAccelAndVelocity(double acceleration, double velocity)
   return status;
 }
 
-
+/** Move the motor to an absolute location or by a relative amount (uses current location since the motor doesw not support a relative command).
+* \param[in] position  The absolute position to move to (if relative=0) or the relative distance to move
+* by (if relative=1). Units=steps.
+* \param[in] relative  Flag indicating relative move (1) or absolute move (0).
+* \param[in] minVelocity The initial velocity, often called the base velocity. Units=steps/sec.
+* \param[in] maxVelocity The maximum velocity, often called the slew velocity. Units=steps/sec.
+* \param[in] acceleration The acceleration value. Units=steps/sec/sec. */
 asynStatus SM300Axis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  // static const char *functionName = "SM300Axis::move";
 
-  status = sendAccelAndVelocity(acceleration, maxVelocity);
+  //status = sendAccelAndVelocity(acceleration, maxVelocity);
   
-  if (relative) {
+  if (relative==1) { //relative move
     sprintf(pC_->outString_, "%1dPR%f", axisNo_ + 1, (position*stepSize_));
-  } else {
-    sprintf(pC_->outString_, "%1dPA%f", axisNo_ + 1, (position*stepSize_));
-  }
-  status = pC_->writeController();
+  } 
+
+  sprintf(pC_->outString_, "B%c%.0f", axisLabel, round(position));
+  
+  pC_->setTerminationChars("\06", 1, "\04", 1);
+  status = pC_->writeReadController();
+    
   return status;
 }
 
