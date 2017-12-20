@@ -302,14 +302,16 @@ asynStatus SM300Axis::sendAccelAndVelocity(double acceleration, double velocity)
 asynStatus SM300Axis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
+  double move_to = position;
 
   //status = sendAccelAndVelocity(acceleration, maxVelocity);
   
   if (relative==1) { //relative move
-    sprintf(pC_->outString_, "%1dPR%f", axisNo_ + 1, (position*stepSize_));
+	  errlogPrintf("SM300 move: Can not do relative move with this motor.\n");
+	  return asynError;
   } 
 
-  sprintf(pC_->outString_, "B%c%.0f", axisLabel, round(position));
+  sprintf(pC_->outString_, "B%c%.0f", axisLabel, round(move_to));
   
   pC_->setTerminationChars("\06", 1, "\04", 1);
   status = pC_->writeReadController();
@@ -320,21 +322,12 @@ asynStatus SM300Axis::move(double position, int relative, double minVelocity, do
 asynStatus SM300Axis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
   asynStatus status;
-  // static const char *functionName = "SM300Axis::home";
-
-  // Must be in unreferenced state to home, so can only home once after a reset
-  // this code should force a reset and allow a rehome, but controller doesn't seem happy
-  //  sprintf(pC_->outString_, "%1dRS", axisNo_ + 1);
-  //  status = pC_->writeController();
-  //  epicsThreadSleep(5.0);
   
-  // set Home search velocity
-  //sprintf(pC_->outString_, "%1dOH%f", axisNo_ + 1, maxVelocity);
-  //status = pC_->writeController();
+  sprintf(pC_->outString_, "BR%c", axisLabel);
 
-  sprintf(pC_->outString_, "%1dOR", axisNo_ + 1);
-  
-  status = pC_->writeController();
+  pC_->setTerminationChars("\06", 1, "\04", 1);
+  status = pC_->writeReadController();
+
   return status;
 }
 
