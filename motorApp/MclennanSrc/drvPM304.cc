@@ -565,10 +565,11 @@ PM304Setup(int num_cards,       /* maximum number of controllers in system */
 /* PM304Config()                                    */
 /*****************************************************/
 RTN_STATUS
-PM304Config(int card,           /* card being configured */
-            const char *port,   /* asyn port name */
-            int n_axes,         /* Number of axes */
-            int home_modes)     /* Combined home modes of all axes */
+PM304Config(int card,             /* card being configured */
+            const char *port,     /* asyn port name */
+            int n_axes,           /* Number of axes */
+            int home_modes,       /* Combined home modes of all axes */
+			int reset_before_move) /* Reset the McLennan before every move */
 {
     struct PM304controller *cntrl;
 
@@ -586,6 +587,7 @@ PM304Config(int card,           /* card being configured */
 		cntrl->home_mode[i] = int(home_modes/float(pow(double(n_modes), i)))%n_modes;
 		printf("Homing axis %i using mode %i\n", i+1, cntrl->home_mode[i]);
 	}
+	cntrl->reset_before_move = reset_before_move;
     cntrl->model = MODEL_PM304;  /* Assume PM304 initially */
     strcpy(cntrl->port, port);
     return(OK);

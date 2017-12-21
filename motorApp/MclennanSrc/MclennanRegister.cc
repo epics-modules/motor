@@ -34,13 +34,14 @@ static const iocshArg configArg0 = {"Card being configured", iocshArgInt};
 static const iocshArg configArg1 = {"asyn port name", iocshArgString};
 static const iocshArg configArg2 = {"Number of axes", iocshArgInt};
 static const iocshArg configArg3 = {"Combined home modes for all axes", iocshArgInt};
+static const iocshArg configArg4 = {"Reset before move", iocshArgInt};
 
 static const iocshArg * const PM304SetupArgs[2]  = {&setupArg0, &setupArg1};
-static const iocshArg * const PM304ConfigArgs[4] = {&configArg0, &configArg1,
-    &configArg2, &configArg3};
+static const iocshArg * const PM304ConfigArgs[5] = {&configArg0, &configArg1,
+    &configArg2, &configArg3, &configArg4};
 
 static const iocshFuncDef setupPM304  = {"PM304Setup",  2, PM304SetupArgs};
-static const iocshFuncDef configPM304 = {"PM304Config", 4, PM304ConfigArgs};
+static const iocshFuncDef configPM304 = {"PM304Config", 5, PM304ConfigArgs};
 
 static void setupPM304CallFunc(const iocshArgBuf *args)
 {
@@ -48,7 +49,7 @@ static void setupPM304CallFunc(const iocshArgBuf *args)
 }
 static void configPM304CallFunc(const iocshArgBuf *args)
 {
-    PM304Config(args[0].ival, args[1].sval, args[2].ival, args[3].ival);
+    PM304Config(args[0].ival, args[1].sval, args[2].ival, args[3].ival, args[4].ival);
 }
 
 static void MclennanRegister(void)

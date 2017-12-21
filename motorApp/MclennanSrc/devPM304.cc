@@ -232,7 +232,10 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
             if (strlen(mr->post) != 0)
                 motor_call->postmsgptr = (char *) &mr->post;
             break;
-
+	        /* Send a reset command before any move */
+			if (cntrl->reset_before_move==1) {
+				sprintf(buff, "%dRS;", axis);
+			}
         default:
             break;
     }
