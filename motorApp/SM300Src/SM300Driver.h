@@ -7,8 +7,9 @@ Based on the Newport SMC100 device driver written by:
 */
 
 
-// No controller-specific parameters yet
-#define NUM_SM300_PARAMS 0  
+// controller-specific parameters yet
+#define NUM_SM300_PARAMS 1
+#define SM300ResetString		"RESET"
 
 class epicsShareClass SM300Axis : public asynMotorAxis
 {
@@ -43,11 +44,16 @@ public:
   SM300Axis* getAxis(int axisNo);
   void setTerminationChars(const char *eosIn, int eosInlen, const char *eosOut, int eosOutlen);
 
+  virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
   virtual asynStatus poll();  
+  asynStatus sendCommand(const char * querry);
+  asynStatus sendQuerry(const char * querry);
   bool has_error();
 
 private:
 	bool has_error_;
+	int reset_;
 
 friend class SM300Axis;
 	

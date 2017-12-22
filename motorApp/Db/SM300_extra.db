@@ -1,0 +1,11 @@
+# Database for SM300
+
+record(bo,"$(P)RESET") {
+field(DTYP, "asynInt32")
+  field(DESC,"Reset the motor parameters")
+    
+  field(ZNAM, "Done")
+  field(ONAM, "Reseting")
+  field(VAL,  "0")
+  field(OUT, "@asyn($(PORT))RESET")
+}

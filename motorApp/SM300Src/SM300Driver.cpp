@@ -65,7 +65,111 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
   pAxis = new SM300Axis(this, 0, 'X');  
   pAxis = new SM300Axis(this, 1, 'Y');
 
+  
+  createParam(SM300ResetString, asynParamInt32, &reset_);
   startPoller(movingPollPeriod, idlePollPeriod, 2);
+}
+
+asynStatus SM300Controller::sendQuerry(const char * querry) {
+	setTerminationChars("\x04", 1, "\x04", 1);
+	//send data format 2
+	sprintf(this->outString_, "\x06\x02%s", querry);
+	return this->writeReadController();
+}
+
+
+asynStatus SM300Controller::sendCommand(const char * querry) {
+	setTerminationChars("\x06", 1, "\x04", 1);
+	//send data format 2
+	sprintf(this->outString_, "\x06\x02%s", querry);
+	return this->writeReadController();
+}
+
+
+asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
+	asynStatus status;
+
+	int function = pasynUser->reason;		//Function requested
+	if (function == reset_) {
+		if (value == 0) return asynSuccess;
+		setTerminationChars("\x04", 1, "\x04", 1);
+
+		//send empty string with ACK to clear the buffer		
+		status = this->writeController();
+
+		//set termination character is EOT without check sum *
+		// when sedning send <CR> incase this mode is switched on
+		setTerminationChars("\x06", 1, "\x04\x0D", 2);
+		if (sendCommand("PEK0")) return status; 
+
+		
+		setTerminationChars("\x06", 1, "\x04", 1);
+		// set achknowlegement on
+		if (sendCommand("PEL1")) return status;
+		// set linear interpolation
+		if (sendCommand("B/ G01")) return status;
+		// absoulute coordinates
+		if (sendCommand("B/ G90")) return status;
+		// switch off message from contrl unit when motor is in position or in error (will poll instead)
+		if (sendCommand("PER0")) return status;
+
+		//send data format 2 - 100s
+		if (sendCommand("PXA2")) return status;
+		if (sendCommand("PYA2")) return status;
+		// Gear factor numerator
+		if (sendCommand("PXB5")) return status;
+		if (sendCommand("PYB1")) return status;
+		// Gear factor denomenator
+		if (sendCommand("PXC10")) return status;
+		if (sendCommand("PYC10")) return status;
+		// Drag Error
+		if (sendCommand("PXD2500")) return status;
+		if (sendCommand("PYD2500")) return status;
+		// Start/stop ramp
+		if (sendCommand("PXE100000")) return status;
+		if (sendCommand("PYE25000")) return status;
+		// KV factor oe feedback control amplification
+		if (sendCommand("PXF1000")) return status;
+		if (sendCommand("PYF1000")) return status;
+		// Regulator factor A
+		if (sendCommand("PXG0")) return status;
+		if (sendCommand("PYG0")) return status;
+		// +Software switch limit
+		if (sendCommand("PXH+57000")) return status;
+		if (sendCommand("PYH+64000")) return status;
+		// -Software switch limit
+		if (sendCommand("PXI-50")) return status;
+		if (sendCommand("PYI-20")) return status;
+		// maximum speed
+		if (sendCommand("PXJ25000")) return status;
+		if (sendCommand("PYJ25000")) return status;
+		// direction and speed of homing procedure
+		if (sendCommand("PXK-2500")) return status;
+		if (sendCommand("PYK-7500")) return status;
+		// standstill check
+		if (sendCommand("PXL100")) return status;
+		if (sendCommand("PYL100")) return status;
+		// Inposition window
+		if (sendCommand("PXM5")) return status;
+		if (sendCommand("PYM5")) return status;
+		// Distance from reference switch
+		if (sendCommand("PXN1000")) return status;
+		if (sendCommand("PYN5000")) return status;
+		// Backlash compensation
+		if (sendCommand("PXO0")) return status;
+		if (sendCommand("PYO0")) return status;
+		// Moving direction
+		if (sendCommand("PXP0")) return status;
+		if (sendCommand("PYP0")) return status;
+		// Feed for axes
+		if (sendCommand("BF15000")) return status;
+		//TODO Do I need a PR?
+
+	}
+	else {
+		status = asynMotorController::writeInt32(pasynUser, value);
+	}
+	return status;
 }
 
 
@@ -147,13 +251,8 @@ asynStatus SM300Controller::poll()
 	asynStatus comStatus;
 	SM300Axis *axis;
 
-	// Read the current motor position
-	setTerminationChars("\x04", 1, "\x04", 1);
-
-	// Read the current motor position
-	sprintf(this->outString_, "LM");
-
-	comStatus = this->writeReadController();
+	// Read the current status of the motor (at Poition, Not at position, Error)
+	comStatus = this->sendQuerry("LM");
 	if (comStatus) goto skip;
 
 	if (strlen(this->inString_) < 3) {
@@ -224,13 +323,13 @@ bool SM300Axis::has_error() {
 */
 asynStatus SM300Axis::poll(bool *moving)
 {
+	char temp[MAX_CONTROLLER_STRING_SIZE];
 	double position;
 	asynStatus comStatus;
 
-	// Read the current motor position
-	pC_->setTerminationChars("\x04", 1, "\x04", 1);
-	sprintf(pC_->outString_, "LI%c", this->axisLabel);
-	comStatus = pC_->writeReadController();
+	// Read the current motor position	
+	sprintf(temp, "LI%c", this->axisLabel);
+	comStatus = pC_->sendQuerry(temp);
 	if (comStatus) goto skip;
 
 	// The response string is of the form "\06\02%d"
@@ -301,7 +400,7 @@ asynStatus SM300Axis::sendAccelAndVelocity(double acceleration, double velocity)
 * \param[in] acceleration The acceleration value. Units=steps/sec/sec. */
 asynStatus SM300Axis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
-  asynStatus status;
+  char temp[MAX_CONTROLLER_STRING_SIZE];
   double move_to = position;
 
   //status = sendAccelAndVelocity(acceleration, maxVelocity);
@@ -310,25 +409,16 @@ asynStatus SM300Axis::move(double position, int relative, double minVelocity, do
 	  errlogPrintf("SM300 move: Can not do relative move with this motor.\n");
 	  return asynError;
   } 
-
-  sprintf(pC_->outString_, "B%c%.0f", axisLabel, round(move_to));
   
-  pC_->setTerminationChars("\06", 1, "\04", 1);
-  status = pC_->writeReadController();
-    
-  return status;
+  sprintf(temp, "B%c%.0f", axisLabel, round(move_to));
+  return pC_->sendCommand(temp);    
 }
 
 asynStatus SM300Axis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
-  asynStatus status;
-  
-  sprintf(pC_->outString_, "BR%c", axisLabel);
-
-  pC_->setTerminationChars("\06", 1, "\04", 1);
-  status = pC_->writeReadController();
-
-  return status;
+  char temp[MAX_CONTROLLER_STRING_SIZE];
+  sprintf(temp, "BR%c", axisLabel);
+  return pC_->sendCommand(temp);
 }
 
 // Jog
