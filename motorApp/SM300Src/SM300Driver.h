@@ -50,9 +50,11 @@ public:
   asynStatus sendCommand(const char * querry);
   asynStatus sendQuerry(const char * querry);
   bool has_error();
+  bool is_moving();
 
 private:
 	bool has_error_;
+	bool is_moving_;
 	int reset_;
 
 friend class SM300Axis;

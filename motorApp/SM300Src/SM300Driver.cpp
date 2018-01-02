@@ -41,7 +41,8 @@ K. Goetze 2012-03-23  Initial version
   */
 SM300Controller::SM300Controller(const char *portName, const char *SM300PortName, int numAxes, 
                                  double movingPollPeriod, double idlePollPeriod, double stepSize)
-  : asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
+  : is_moving_(false),
+	asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
                          0, // No additional interfaces beyond those in base class
                          0, // No additional callback interfaces beyond those in base class
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
@@ -85,6 +86,12 @@ asynStatus SM300Controller::sendCommand(const char * querry) {
 	return this->writeReadController();
 }
 
+/** 
+  * Return true if the controller registering moving motors
+  */
+bool SM300Controller::is_moving() {
+	return is_moving_;
+}
 
 asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 	asynStatus status;
@@ -261,21 +268,21 @@ asynStatus SM300Controller::poll()
 		goto skip;
 	}
 
-	bool done_moving;
 	if (this->inString_[2] == 'P') {
-		done_moving = true;
+		is_moving_ = false;
 	}
 	else if (this->inString_[2] == 'N') {
-		done_moving = false;
+		is_moving_ = true;
 	}
 	else {
+		is_moving_ = false;
 		comStatus = asynError;
 		errlogPrintf("SM300 poll: moving status returned error status.\n");
 		goto skip;
 	}
 	for (int i=0; i < this->numAxes_; i++) {
 		axis = this->getAxis(i);
-		axis->setIntegerParam(motorStatusDone_, done_moving ? 1 : 0);
+		axis->setIntegerParam(motorStatusDone_, is_moving_ ? 0 : 1);
 	}
 
 skip:
@@ -327,6 +334,8 @@ asynStatus SM300Axis::poll(bool *moving)
 	double position;
 	asynStatus comStatus;
 
+	*moving = pC_->is_moving();
+
 	// Read the current motor position	
 	sprintf(temp, "LI%c", this->axisLabel);
 	comStatus = pC_->sendQuerry(temp);
@@ -338,7 +347,6 @@ asynStatus SM300Axis::poll(bool *moving)
 		errlogPrintf("SM300 poll: position return string is too short.\n");
 		goto skip;
 	}
-
 
 	char *stop_char;
 	position = (strtod(&pC_->inString_[2], &stop_char) / 1.0);
