@@ -1,6 +1,6 @@
 # Database for SM300
 
-record(bo,"$(P)RESET") {
+record(busy,"$(P)RESET") {
 field(DTYP, "asynInt32")
   field(DESC,"Reset the motor parameters")
     

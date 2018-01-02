@@ -1,14 +1,7 @@
 /*
-FILENAME... SM300Driver.cpp
-USAGE...    Motor driver support for the Newport SM300 controller.
+Motor driver support for the SM300 controller.
 
-Based on the ACS MCB-4B Model 3 device driver written by:
-Mark Rivers
-March 1, 2012
-
-K. Goetze 2012-03-23  Initial version
-          2013-06-07  Allow motor resolution to be set using "SM300CreateController" at boot time
-
+Based on the SM100 Model 3 device driver 
 */
 
 
@@ -71,6 +64,12 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
 
+/** Send a querry string to the controller and get a return value.
+  * Querry string is prefeced with ACK STX and postfixed with EOT
+  * return string ends with ETX
+  * \param[in] querry the querry to send
+  * \returns success of write and read of querry string
+  */
 asynStatus SM300Controller::sendQuerry(const char * querry) {
 	setTerminationChars("\x04", 1, "\x04", 1);
 	//send data format 2
@@ -78,11 +77,15 @@ asynStatus SM300Controller::sendQuerry(const char * querry) {
 	return this->writeReadController();
 }
 
-
-asynStatus SM300Controller::sendCommand(const char * querry) {
+/** Send a command string to the controller.
+* Command string is prefeced with ACK STX and postfixed with EOT
+* \param[in] command the command to send
+* \returns success of write and read of acknowledgement from controller
+*/
+asynStatus SM300Controller::sendCommand(const char * command) {
 	setTerminationChars("\x06", 1, "\x04", 1);
 	//send data format 2
-	sprintf(this->outString_, "\x06\x02%s", querry);
+	sprintf(this->outString_, "\x06\x02%s", command);
 	return this->writeReadController();
 }
 
@@ -93,12 +96,17 @@ bool SM300Controller::is_moving() {
 	return is_moving_;
 }
 
+/**
+  * deal with db records being set which are integers
+  * return status
+  */
 asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 	asynStatus status;
 
 	int function = pasynUser->reason;		//Function requested
 	if (function == reset_) {
 		if (value == 0) return asynSuccess;
+
 		setTerminationChars("\x04", 1, "\x04", 1);
 
 		//send empty string with ACK to clear the buffer		
@@ -170,8 +178,8 @@ asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 		if (sendCommand("PYP0")) return status;
 		// Feed for axes
 		if (sendCommand("BF15000")) return status;
-		//TODO Do I need a PR?
-
+		setIntegerParam(reset_, 0);
+		callParamCallbacks();
 	}
 	else {
 		status = asynMotorController::writeInt32(pasynUser, value);
@@ -326,7 +334,8 @@ bool SM300Axis::has_error() {
 
 /** Polls the axis.
 * This function reads the position of the axis 
-* \param[out] moving A flag that is set indicating that the axis is moving (true) or done (false). Not used as this is reported at the controller level
+* \param[out] moving A flag that is set indicating that the axis is moving (true) or done (false).
+* \returns success of poll
 */
 asynStatus SM300Axis::poll(bool *moving)
 {
@@ -374,30 +383,13 @@ skip:
 void SM300Axis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    fprintf(fp, "  axis %d\n",
-            axisNo_ + 1);
+    fprintf(fp, "  axis %d\n", axisNo_ + 1);
   }
 
   // Call the base class method
   asynMotorAxis::report(fp, level);
 }
 
-asynStatus SM300Axis::sendAccelAndVelocity(double acceleration, double velocity) 
-{
-  asynStatus status;
-  // static const char *functionName = "SM300::sendAccelAndVelocity";
-
-  // Send the velocity in egus
-  sprintf(pC_->outString_, "%1dVA%f", axisNo_ + 1, (velocity*stepSize_));
-  status = pC_->writeController();
-
-  // Send the acceleration in egus/sec/sec
-  //printf("velocity: %f\n", velocity);
-  //printf("acceleration: %f", acceleration);
-  sprintf(pC_->outString_, "%1dAC%f", axisNo_ + 1, (acceleration*stepSize_));
-  status = pC_->writeController();
-  return status;
-}
 
 /** Move the motor to an absolute location or by a relative amount (uses current location since the motor doesw not support a relative command).
 * \param[in] position  The absolute position to move to (if relative=0) or the relative distance to move
@@ -432,53 +424,14 @@ asynStatus SM300Axis::home(double minVelocity, double maxVelocity, double accele
 // Jog
 asynStatus SM300Axis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
-  double high_limit;
-  double low_limit;
-  asynStatus comStatus;
-  static const char *functionName = "SM300Axis::moveVelocity";
-
-  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
-    "%s: minVelocity=%f, maxVelocity=%f, acceleration=%f\n",
-    functionName, minVelocity, maxVelocity, acceleration);
-    
-  comStatus = sendAccelAndVelocity(acceleration, maxVelocity);
-  if (comStatus) goto skip;
-
-  /* SM300 supports the notion of jog, but only for a remote control keypad */
-  // SM300 will not allow moves outside of those set with the SL and SR commands
-  // first we query these limits and then make the jog a move to the limit
-  
-  // get the high limit
-  sprintf(pC_->outString_, "%1dSR?", axisNo_ + 1);
-  comStatus = pC_->writeReadController();
-  if (comStatus) goto skip;
-  // The response string is of the form "1SR25.0"
-  high_limit = (atof(&pC_->inString_[3]));
-  
-    // get the low limit
-  sprintf(pC_->outString_, "%1dSL?", axisNo_ + 1);
-  comStatus = pC_->writeReadController();
-  if (comStatus) goto skip;
-  // The response string is of the form "1SL-5.0"
-  low_limit = (atof(&pC_->inString_[3]));
-  
-  if (maxVelocity > 0.) {
-    /* This is a positive move in SM300 coordinates (egus) */
-    sprintf(pC_->outString_, "%1dPA%f", axisNo_ + 1, high_limit);
-  } else {
-      /* This is a negative move in SM300 coordinates (egus) */
-      sprintf(pC_->outString_, "%1dPA%f", axisNo_ + 1, low_limit);
-  }
-  comStatus = pC_->writeController();
-  if (comStatus) goto skip;
-  
-  skip:
-  setIntegerParam(pC_->motorStatusProblem_, comStatus ? 1:0);
-  callParamCallbacks();
-  return comStatus ? asynError : asynSuccess;
+	errlogPrintf("Device does not support move velocity (jog)");
+	return asynError;
 
 }
 
+/** Stop of motor axis moving (Stops all axes)
+ * \returns send command status
+*/
 asynStatus SM300Axis::stop(double acceleration )
 {
   asynStatus status;
@@ -488,29 +441,14 @@ asynStatus SM300Axis::stop(double acceleration )
   return status ? asynError : asynSuccess;
 }
 
+/** Set absolute position in hardware
+  * Not supported
+  */
 asynStatus SM300Axis::setPosition(double position)
 {
-  asynStatus status;
-  //static const char *functionName = "SM300Axis::setPosition";
-
-  // ? not sure yet
-  //sprintf(pC_->outString_, "#%02dP=%+d", axisNo_ + 1, NINT(position));
-  status = pC_->writeReadController();
-  return status;
+	errlogPrintf("Device does not support set position");
+	return asynError;
 }
-
-asynStatus SM300Axis::setClosedLoop(bool closedLoop)
-{
-  asynStatus status;
-  //static const char *functionName = "SM300Axis::setClosedLoop";
-
-  // ? not sure yet
-  //sprintf(pC_->outString_, "#%02dW=%d", axisNo_ + 1, closedLoop ? 1:0);
-  status = pC_->writeReadController();
-  return status;
-}
-
-
 
 /** Code for iocsh registration */
 static const iocshArg SM300CreateControllerArg0 = {"Port name", iocshArgString};

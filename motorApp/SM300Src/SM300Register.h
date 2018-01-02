@@ -1,6 +1,5 @@
 /*
-FILENAME...	SM300Register.h
-USAGE... This file contains function prototypes for SM300 IOC shell commands.
+This file contains function prototypes for SM300 IOC shell commands.
 
 */
 

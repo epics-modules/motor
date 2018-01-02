@@ -1,9 +1,5 @@
 /*
-FILENAME...   SM300Driver.h
-USAGE...      Motor driver support for the SM300 controller.
-
-Based on the Newport SMC100 device driver written by:
-
+Motor driver support for the SM300 controller.
 */
 
 
@@ -23,12 +19,10 @@ public:
   asynStatus stop(double acceleration);
   asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
-  asynStatus setClosedLoop(bool closedLoop);
   bool has_error();
 private:
   SM300Controller *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
-  asynStatus sendAccelAndVelocity(double accel, double velocity);
   double stepSize_;      /**< Encoder increment value obtained with SU? command _or_ resolution, set at boot time */
                          /*   with SMC100CreateController command */
   char axisLabel; /** label for the axis*/
