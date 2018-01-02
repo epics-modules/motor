@@ -474,11 +474,10 @@ asynStatus SM300Axis::moveVelocity(double minVelocity, double maxVelocity, doubl
 asynStatus SM300Axis::stop(double acceleration )
 {
   asynStatus status;
-  //static const char *functionName = "SM300Axis::stop";
 
-  sprintf(pC_->outString_, "%1dST", axisNo_ + 1);
-  status = pC_->writeController();
-  return status;
+  status = pC_->sendQuerry("BSS"); 
+  // ignore reply it has to be <STX>P<EOT>
+  return status ? asynError : asynSuccess;
 }
 
 asynStatus SM300Axis::setPosition(double position)
