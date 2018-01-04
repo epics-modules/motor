@@ -468,7 +468,7 @@ static void callbackFunc(struct callback *pcb)
     {
         pmr->mip &= ~MIP_DELAY_REQ;     /* Turn off REQ. */
         pmr->mip |= MIP_DELAY_ACK;      /* Turn on ACK. */
-#if LT_EPICSBASE(3,14,10)
+#if LT_EPICSBASE(3,14,10,0)
 	scanOnce(pmr);
 #else
 	scanOnce((struct dbCommon *) pmr);

@@ -1070,7 +1070,7 @@ static int motorIsrSetup(int card)
     pmotor = (struct vmex_motor *) (motor_state[card]->localaddr);
 
     status = pdevLibVirtualOS->pDevConnectInterruptVME(omsInterruptVector + card,
-#if LT_EPICSBASE(3,14,8)
+#if LT_EPICSBASE(3,14,8,0)
         (void (*)()) motorIsr,
 #else
         (void (*)(void *)) motorIsr,

@@ -922,7 +922,7 @@ static int motorIsrEnable(int card)
         long status;
         status = pdevLibVirtualOS->pDevConnectInterruptVME(
                                                           omsInterruptVector + card,
-#if LT_EPICSBASE(3,14,8)
+#if LT_EPICSBASE(3,14,8,0)
                                                           (void (*)()) motorIsr,
 #else
                                                           (void (*)(void *)) motorIsr,
