@@ -416,9 +416,14 @@ asynStatus SM300Axis::move(double position, int relative, double minVelocity, do
 	  errlogPrintf("SM300 move: Can not do relative move with this motor.\n");
 	  return asynError;
   } 
-  
+
+  // perform a stop so new positions can be set
+  comStatus = pC_->sendQuerry("BSS", false);
+  if (comStatus) goto skip;
+
   sprintf(temp, "B%c%.0f", axisLabel, round(move_to));
   comStatus = pC_->sendCommand(temp);
+  
   if (comStatus) goto skip;
   comStatus = pC_->sendCommand("BSL");
 
