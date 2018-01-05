@@ -68,10 +68,16 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
   * Querry string is prefeced with ACK STX and postfixed with EOT
   * return string ends with ETX
   * \param[in] querry the querry to send
+  * \param[in] what form the querry reply has; true if the reply has EOT false for ETX with BCC
   * \returns success of write and read of querry string
   */
-asynStatus SM300Controller::sendQuerry(const char * querry) {
-	setTerminationChars("\x04", 1, "\x04", 1);
+asynStatus SM300Controller::sendQuerry(const char * querry, bool hasEotEnding) {
+	if (hasEotEnding) {
+		setTerminationChars("\x04", 1, "\x04", 1);
+	} 
+	else {
+		setTerminationChars("\x03", 1, "\x04", 1);
+	}
 	//send data format 2
 	sprintf(this->outString_, "\x06\x02%s", querry);
 	return this->writeReadController();
@@ -267,7 +273,7 @@ asynStatus SM300Controller::poll()
 	SM300Axis *axis;
 
 	// Read the current status of the motor (at Poition, Not at position, Error)
-	comStatus = this->sendQuerry("LM");
+	comStatus = this->sendQuerry("LM", true);
 	if (comStatus) goto skip;
 
 	if (strlen(this->inString_) < 3) {
@@ -347,7 +353,7 @@ asynStatus SM300Axis::poll(bool *moving)
 
 	// Read the current motor position	
 	sprintf(temp, "LI%c", this->axisLabel);
-	comStatus = pC_->sendQuerry(temp);
+	comStatus = pC_->sendQuerry(temp, false);
 	if (comStatus) goto skip;
 
 	// The response string is of the form "\06\02%d"
@@ -400,6 +406,7 @@ void SM300Axis::report(FILE *fp, int level)
 * \param[in] acceleration The acceleration value. Units=steps/sec/sec. */
 asynStatus SM300Axis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
+  asynStatus comStatus;
   char temp[MAX_CONTROLLER_STRING_SIZE];
   double move_to = position;
 
@@ -411,7 +418,13 @@ asynStatus SM300Axis::move(double position, int relative, double minVelocity, do
   } 
   
   sprintf(temp, "B%c%.0f", axisLabel, round(move_to));
-  return pC_->sendCommand(temp);    
+  comStatus = pC_->sendCommand(temp);
+  if (comStatus) goto skip;
+  comStatus = pC_->sendCommand("BSL");
+
+skip:
+  return comStatus;
+
 }
 
 asynStatus SM300Axis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
@@ -436,7 +449,7 @@ asynStatus SM300Axis::stop(double acceleration )
 {
   asynStatus status;
 
-  status = pC_->sendQuerry("BSS"); 
+  status = pC_->sendQuerry("BSS", false); 
   // ignore reply it has to be <STX>P<EOT>
   return status ? asynError : asynSuccess;
 }

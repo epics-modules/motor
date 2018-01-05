@@ -42,7 +42,7 @@ public:
 
   virtual asynStatus poll();  
   asynStatus sendCommand(const char * querry);
-  asynStatus sendQuerry(const char * querry);
+  asynStatus sendQuerry(const char * querry, bool hasEotEnding);
   bool has_error();
   bool is_moving();
 
