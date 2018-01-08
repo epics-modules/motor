@@ -19,3 +19,77 @@ record(busy, "$(P)DISCONNECT") {
   field(VAL,  "0")
   field(OUT, "@asyn($(PORT))DISCONNECT")
 }
+
+record(mbbi, "$(P)ERROR") {
+
+    field(DTYP, "asynInt32")
+    field(DESC, "Error code")
+    field(SCAN, "1 second")
+    
+    field(ZRST, "")
+    field(ZRSV, "NO_ALARM")
+    field(ZRVL, "0")
+    
+    field(ONST, "Servo error")
+    field(ONSV, "MAJOR")
+    field(ONVL, "1")
+
+    field(TWST, "Standstill check")
+    field(TWSV, "MAJOR")
+    field(TWVL, "2")
+
+    field(THST, "Drag error")
+    field(THSV, "MAJOR")
+    field(THVL, "3")
+    
+    field(FRST, "Software limit switch")
+    field(FRSV, "MAJOR")
+    field(FRVL, "4")
+    
+    field(FVST, "Hardware limit switch")
+    field(FVSV, "MAJOR")
+    field(FVVL, "5")
+    
+    field(SXST, "DAC overflow")
+    field(SXSV, "MAJOR")
+    field(SXVL, "6")
+    
+    field(SVST, "Unknown")
+    field(SVSV, "MAJOR")
+    field(SVVL, "7")
+    
+    field(EIST, "Unknown")
+    field(EISV, "MAJOR")
+    field(EIVL, "8")
+    
+    field(NIST, "Unknown")
+    field(NISV, "MAJOR")
+    field(NIVL, "9")
+
+    field(TEST, "No RAM memory card exists")
+    field(TESV, "MAJOR")
+    field(TEVL, "10")
+    
+    field(ELST, "RAM card not formatted")
+    field(ELSV, "MAJOR")
+    field(ELVL, "11")
+    
+    field(TWST, "Unknown")
+    field(TWSV, "MAJOR")
+    field(TWVL, "12")
+    
+    field(TTST, "Cmd rep x4 no success")
+    field(TTSV, "MAJOR")
+    field(TTVL, "13")
+    
+    field(FTST, "CNC cmd error code")
+    field(FTSV, "MAJOR")
+    field(FTVL, "14")
+    
+    field(FFST, "Cmd error code")
+    field(FFSV, "MAJOR")
+    field(FFVL, "15")
+    
+    field(VAL,  "0")
+    field(INP, "@asyn($(PORT))ERROR_CODE")
+}

@@ -4,9 +4,10 @@ Motor driver support for the SM300 controller.
 
 
 // controller-specific parameters yet
-#define NUM_SM300_PARAMS 2
+#define NUM_SM300_PARAMS 3
 #define SM300ResetString		"RESET"
 #define SM300DisconnectString	"DISCONNECT"
+#define SM300ErrorCodeString	"ERROR_CODE"
 
 class epicsShareClass SM300Axis : public asynMotorAxis
 {
@@ -52,6 +53,7 @@ private:
 	bool is_moving_;
 	int reset_;
 	int disconnect_;
+	int error_code_;
 
 friend class SM300Axis;
 	

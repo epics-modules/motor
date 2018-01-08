@@ -62,6 +62,7 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
   
   createParam(SM300ResetString, asynParamInt32, &reset_);
   createParam(SM300DisconnectString, asynParamInt32, &disconnect_);  
+  createParam(SM300ErrorCodeString, asynParamInt32, &error_code_);  
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
@@ -269,7 +270,6 @@ void SM300Controller::setTerminationChars(const char *eosIn, int eosInlen, const
  */
 asynStatus SM300Controller::poll()
 {
-
 	asynStatus comStatus;
 	SM300Axis *axis;
 
@@ -299,6 +299,28 @@ asynStatus SM300Controller::poll()
 		axis = this->getAxis(i);
 		axis->setIntegerParam(motorStatusDone_, is_moving_ ? 0 : 1);
 	}
+	
+	comStatus = sendQuerry("LS10", false);
+	if (comStatus) goto skip;
+
+	if (strlen(this->inString_) < 3) {
+		comStatus = asynError;
+		errlogPrintf("SM300 error code: return string is too short.\n");
+		goto skip;
+	}
+	int code = strtol(&this->inString_[2], NULL, 16);
+    // special case for error in sending command
+	if (code >= 0xF && code <= 0x14) {
+		errlogPrintf("SM300 error code: CNC cmd error code, code = %.2x\n", code);
+		code = 0xF;		
+	}
+	// speacial case for error in CNC interpreter
+	if (code >= 0x1E && code <= 0x4F) {
+		errlogPrintf("SM300 error code: CNC cmd error, code = %.2x\n", code);
+		code = 0xE;		
+	}
+	
+	setIntegerParam(error_code_, code);
 
 skip:
 	has_error_ = comStatus != asynSuccess;
@@ -307,7 +329,7 @@ skip:
 		axis = this->getAxis(i);
 		axis->setIntegerParam(this->motorStatusProblem_, axis->has_error() || has_error_ ? 1 : 0);
 		axis->callParamCallbacks();
-	}
+	}	
 	callParamCallbacks();
 	return comStatus ? asynError : asynSuccess;
 }
