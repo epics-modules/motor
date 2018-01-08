@@ -32,7 +32,7 @@ friend class SM300Controller;
 
 class SM300Controller : public asynMotorController {
 public:
-  SM300Controller(const char *portName, const char *SMC100PortName, int numAxes, double movingPollPeriod, double idlePollPeriod, double stepSize);
+  SM300Controller(const char *portName, const char *SMC100PortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
   void report(FILE *fp, int level);
   SM300Axis* getAxis(asynUser *pasynUser);
   SM300Axis* getAxis(int axisNo);

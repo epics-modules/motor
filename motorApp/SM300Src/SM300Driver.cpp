@@ -33,7 +33,7 @@ Based on the SM100 Model 3 device driver
   * \param[in] idlePollPeriod    The time between polls when no axis is moving 
   */
 SM300Controller::SM300Controller(const char *portName, const char *SM300PortName, int numAxes, 
-                                 double movingPollPeriod, double idlePollPeriod, double stepSize)
+                                 double movingPollPeriod, double idlePollPeriod)
   : is_moving_(false),
 	asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
                          0, // No additional interfaces beyond those in base class
@@ -119,10 +119,9 @@ asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 		status = this->writeController();
 
 		//set termination character is EOT without check sum *
-		// when sedning send <CR> incase this mode is switched on
+		// when sending send <CR> incase this mode is switched on
 		setTerminationChars("\x06", 1, "\x04\x0D", 2);
 		if (sendCommand("PEK0")) return status; 
-
 		
 		setTerminationChars("\x06", 1, "\x04", 1);
 		// set achknowlegement on
@@ -204,17 +203,10 @@ asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
   * \param[in] eguPerStep        The stage resolution
   */
 extern "C" int SM300CreateController(const char *portName, const char *SM300PortName, int numAxes, 
-                                   int movingPollPeriod, int idlePollPeriod, const char *eguPerStep)
+                                   int movingPollPeriod, int idlePollPeriod)
 {
-  double stepSize;
-   
-  stepSize = strtod(eguPerStep, NULL);
-  new SM300Controller(portName, SM300PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000., stepSize);
+  new SM300Controller(portName, SM300PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   //printf("\n *** SM300: stepSize=%f\n", stepSize);
-  if (errno != 0) {
-    printf("SM300: Error invalid steps per unit=%s\n", eguPerStep);
-    return asynError;
-  }
   
   return(asynSuccess);
 }
@@ -474,17 +466,15 @@ static const iocshArg SM300CreateControllerArg1 = {"SM300 port name", iocshArgSt
 static const iocshArg SM300CreateControllerArg2 = {"Number of axes", iocshArgInt};
 static const iocshArg SM300CreateControllerArg3 = {"Moving poll period (ms)", iocshArgInt};
 static const iocshArg SM300CreateControllerArg4 = {"Idle poll period (ms)", iocshArgInt};
-static const iocshArg SM300CreateControllerArg5 = {"EGUs per step", iocshArgString};
 static const iocshArg * const SM300CreateControllerArgs[] = {&SM300CreateControllerArg0,
                                                              &SM300CreateControllerArg1,
                                                              &SM300CreateControllerArg2,
                                                              &SM300CreateControllerArg3,
-                                                             &SM300CreateControllerArg4,
-															 &SM300CreateControllerArg5};
-static const iocshFuncDef SM300CreateControllerDef = {"SM300CreateController", 6, SM300CreateControllerArgs};
+                                                             &SM300CreateControllerArg4};
+static const iocshFuncDef SM300CreateControllerDef = {"SM300CreateController", 5, SM300CreateControllerArgs};
 static void SM300CreateContollerCallFunc(const iocshArgBuf *args)
 {
-  SM300CreateController(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival, args[5].sval);
+  SM300CreateController(args[0].sval, args[1].sval, args[2].ival, args[3].ival, args[4].ival);
 }
 
 static void SM300Register(void)
