@@ -61,6 +61,8 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
 
   
   createParam(SM300ResetString, asynParamInt32, &reset_);
+  createParam(SM300DisconnectString, asynParamInt32, &disconnect_);  
+
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
 
@@ -184,6 +186,13 @@ asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 		// Feed for axes
 		if (sendCommand("BF15000")) return status;
 		setIntegerParam(reset_, 0);
+		callParamCallbacks();
+	}
+	else if (function == disconnect_) {
+		setTerminationChars("\x06", 1, "\x04", 1);
+		sprintf(this->outString_, "\x06\x02%s", "M77");
+		status = writeController();
+		setIntegerParam(disconnect_, 0);
 		callParamCallbacks();
 	}
 	else {
