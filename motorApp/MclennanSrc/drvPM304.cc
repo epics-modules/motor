@@ -375,13 +375,17 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
      * characters.  The PM304 cannot handle more than 1 command on a line
      * so send them separately */
     strcpy(temp, com);
-    for (p = epicsStrtok_r(temp, ";", &tok_save);
+    for (p = epicsStrtok_r(temp, ";", &tok_save);		 
                 ((p != NULL) && (strlen(p) != 0));
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
+		
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, p);
-    pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
+	    pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
                 BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
-        Debug(2, "send_mess: card %d, response=%s\n", card, response);
+		/* Set the debug level for most responses to be 2. Flag reset messages
+		 * to 1 so we can spot them more easily */
+		int level = strcmp(&p[1],"RS")==0 && strstr(response, "NOT ABORTED") == NULL ? 1 : 2;
+        Debug(level, "send_mess: card %d, response=...\n%s\n", card, response);
     }
 
     return(OK);
