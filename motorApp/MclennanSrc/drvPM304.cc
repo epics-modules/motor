@@ -83,6 +83,7 @@ static inline void Debug(int level, const char *format, ...) {
  */
 
 int PM304_num_cards = 0;
+int controller_error = 0;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include        "motordrvComCode.h"
@@ -314,6 +315,9 @@ STATIC int set_status(int card, int signal)
         motor_info->encoder_position = motorData;
         motor_info->no_motion_count = 0;
     }
+	
+	/* Problem if controller error */
+	status.Bits.RA_PROBLEM = controller_error > 0 ? 1 : status.Bits.RA_PROBLEM;
 
     /* Parse motor velocity? */
     /* NEEDS WORK */
@@ -384,7 +388,14 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
                 BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
 		/* Set the debug level for most responses to be 2. Flag reset messages
 		 * to 1 so we can spot them more easily */
-		int level = strcmp(&p[1],"RS")==0 && strstr(response, "NOT ABORTED") == NULL ? 1 : 2;
+		int level;
+		if (strcmp(&p[1],"RS")==0 && strstr(response, "NOT ABORTED") == NULL) {
+			level = 1;
+			controller_error = 1;
+		} else {
+			level = 2;
+			controller_error = 0;
+		}
         Debug(level, "send_mess: card %d, response=...\n%s\n", card, response);
     }
 
