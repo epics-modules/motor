@@ -1,9 +1,22 @@
 # Database for SM300
 
+record (busy, "$(P)RESET_AND_HOME")
+{
+  field(DTYP, "asynInt32")
+  field(DESC,"Reset and home the motor")
+  field(SCAN, "I/O Intr")
+    
+  field(ZNAM, "Done")
+  field(ONAM, "Reseting")
+  field(VAL,  "0")
+  field(OUT, "@asyn($(PORT))RESET_AND_HOME")
+}
+
+
 record(busy,"$(P)RESET") {
   field(DTYP, "asynInt32")
   field(DESC,"Reset the motor parameters")
-    
+  field(SCAN, "I/O Intr")  
   field(ZNAM, "Done")
   field(ONAM, "Reseting")
   field(VAL,  "0")

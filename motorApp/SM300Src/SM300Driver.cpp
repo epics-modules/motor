@@ -59,8 +59,8 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
   pAxis = new SM300Axis(this, 0, 'X');  
   pAxis = new SM300Axis(this, 1, 'Y');
 
-  
   createParam(SM300ResetString, asynParamInt32, &reset_);
+  createParam(SM300ResetAndHomeString, asynParamInt32, &reset_and_home_);
   createParam(SM300DisconnectString, asynParamInt32, &disconnect_);  
   createParam(SM300ErrorCodeString, asynParamInt32, &error_code_);  
 
@@ -107,7 +107,7 @@ bool SM300Controller::is_moving() {
 
 /**
   * deal with db records being set which are integers
-  * return status
+  * \returns status
   */
 asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 	asynStatus status;
@@ -115,91 +115,112 @@ asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 	int function = pasynUser->reason;		//Function requested
 	if (function == reset_) {
 		if (value == 0) return asynSuccess;
-
-		setTerminationChars("\x04", 1, "\x04", 1);
-
-		//send empty string with ACK to clear the buffer		
-		status = this->writeController();
-
-		//set termination character is EOT without check sum *
-		// when sending send <CR> incase this mode is switched on
-		setTerminationChars("\x06", 1, "\x04\x0D", 2);
-		if (sendCommand("PEK0")) return status; 
-		
-		setTerminationChars("\x06", 1, "\x04", 1);
-		// set achknowlegement on
-		if (sendCommand("PEL1")) return status;
-		// set linear interpolation
-		if (sendCommand("B/ G01")) return status;
-		// absoulute coordinates
-		if (sendCommand("B/ G90")) return status;
-		// switch off message from contrl unit when motor is in position or in error (will poll instead)
-		if (sendCommand("PER0")) return status;
-
-		//send data format 2 - 100s
-		if (sendCommand("PXA2")) return status;
-		if (sendCommand("PYA2")) return status;
-		// Gear factor numerator
-		if (sendCommand("PXB5")) return status;
-		if (sendCommand("PYB1")) return status;
-		// Gear factor denomenator
-		if (sendCommand("PXC10")) return status;
-		if (sendCommand("PYC10")) return status;
-		// Drag Error
-		if (sendCommand("PXD2500")) return status;
-		if (sendCommand("PYD2500")) return status;
-		// Start/stop ramp
-		if (sendCommand("PXE100000")) return status;
-		if (sendCommand("PYE25000")) return status;
-		// KV factor oe feedback control amplification
-		if (sendCommand("PXF1000")) return status;
-		if (sendCommand("PYF1000")) return status;
-		// Regulator factor A
-		if (sendCommand("PXG0")) return status;
-		if (sendCommand("PYG0")) return status;
-		// +Software switch limit
-		if (sendCommand("PXH+57000")) return status;
-		if (sendCommand("PYH+64000")) return status;
-		// -Software switch limit
-		if (sendCommand("PXI-50")) return status;
-		if (sendCommand("PYI-20")) return status;
-		// maximum speed
-		if (sendCommand("PXJ25000")) return status;
-		if (sendCommand("PYJ25000")) return status;
-		// direction and speed of homing procedure
-		if (sendCommand("PXK-2500")) return status;
-		if (sendCommand("PYK-7500")) return status;
-		// standstill check
-		if (sendCommand("PXL100")) return status;
-		if (sendCommand("PYL100")) return status;
-		// Inposition window
-		if (sendCommand("PXM5")) return status;
-		if (sendCommand("PYM5")) return status;
-		// Distance from reference switch
-		if (sendCommand("PXN1000")) return status;
-		if (sendCommand("PYN5000")) return status;
-		// Backlash compensation
-		if (sendCommand("PXO0")) return status;
-		if (sendCommand("PYO0")) return status;
-		// Moving direction
-		if (sendCommand("PXP0")) return status;
-		if (sendCommand("PYP0")) return status;
-		// Feed for axes
-		if (sendCommand("BF15000")) return status;
-		setIntegerParam(reset_, 0);
+		status = perform_reset();
 		callParamCallbacks();
 	}
 	else if (function == disconnect_) {
+		setIntegerParam(disconnect_, 1);
 		setTerminationChars("\x06", 1, "\x04", 1);
 		sprintf(this->outString_, "\x06\x02%s", "M77");
 		status = writeController();
 		setIntegerParam(disconnect_, 0);
 		callParamCallbacks();
 	}
+	else if (function == reset_and_home_) {
+		setIntegerParam(reset_and_home_, 1);
+		callParamCallbacks();
+		perform_reset();
+		for (int i = 0; i < numAxes_; i++) {
+			getAxis(i)->home(0, 0, 0, 0);
+		}
+		setIntegerParam(reset_and_home_, 0);
+		callParamCallbacks();
+	}
 	else {
 		status = asynMotorController::writeInt32(pasynUser, value);
 	}
 	return status;
+}
+
+/**
+ * Perform a reset of the controller sending it initiation parameters
+ * \returns status
+*/
+asynStatus SM300Controller::perform_reset() {
+	setIntegerParam(reset_, 1);
+	callParamCallbacks();
+	setTerminationChars("\x04", 1, "\x04", 1);
+
+	//send empty string with ACK to clear the buffer		
+	asynStatus status = this->writeController();
+
+	//set termination character is EOT without check sum *
+	// when sending send <CR> incase this mode is switched on
+	setTerminationChars("\x06", 1, "\x04\x0D", 2);
+	if (sendCommand("PEK0")) return status;
+
+	setTerminationChars("\x06", 1, "\x04", 1);
+	// set achknowlegement on
+	if (sendCommand("PEL1")) return status;
+	// set linear interpolation
+	if (sendCommand("B/ G01")) return status;
+	// absoulute coordinates
+	if (sendCommand("B/ G90")) return status;
+	// switch off message from contrl unit when motor is in position or in error (will poll instead)
+	if (sendCommand("PER0")) return status;
+
+	//send data format 2 - 100s
+	if (sendCommand("PXA2")) return status;
+	if (sendCommand("PYA2")) return status;
+	// Gear factor numerator
+	if (sendCommand("PXB5")) return status;
+	if (sendCommand("PYB1")) return status;
+	// Gear factor denomenator
+	if (sendCommand("PXC10")) return status;
+	if (sendCommand("PYC10")) return status;
+	// Drag Error
+	if (sendCommand("PXD2500")) return status;
+	if (sendCommand("PYD2500")) return status;
+	// Start/stop ramp
+	if (sendCommand("PXE100000")) return status;
+	if (sendCommand("PYE25000")) return status;
+	// KV factor oe feedback control amplification
+	if (sendCommand("PXF1000")) return status;
+	if (sendCommand("PYF1000")) return status;
+	// Regulator factor A
+	if (sendCommand("PXG0")) return status;
+	if (sendCommand("PYG0")) return status;
+	// +Software switch limit
+	if (sendCommand("PXH+57000")) return status;
+	if (sendCommand("PYH+64000")) return status;
+	// -Software switch limit
+	if (sendCommand("PXI-50")) return status;
+	if (sendCommand("PYI-20")) return status;
+	// maximum speed
+	if (sendCommand("PXJ25000")) return status;
+	if (sendCommand("PYJ25000")) return status;
+	// direction and speed of homing procedure
+	if (sendCommand("PXK-2500")) return status;
+	if (sendCommand("PYK-7500")) return status;
+	// standstill check
+	if (sendCommand("PXL100")) return status;
+	if (sendCommand("PYL100")) return status;
+	// Inposition window
+	if (sendCommand("PXM5")) return status;
+	if (sendCommand("PYM5")) return status;
+	// Distance from reference switch
+	if (sendCommand("PXN1000")) return status;
+	if (sendCommand("PYN5000")) return status;
+	// Backlash compensation
+	if (sendCommand("PXO0")) return status;
+	if (sendCommand("PYO0")) return status;
+	// Moving direction
+	if (sendCommand("PXP0")) return status;
+	if (sendCommand("PYP0")) return status;
+	// Feed for axes
+	if (sendCommand("BF15000")) return status;
+	setIntegerParam(reset_, 0);
+	return asynSuccess;
 }
 
 
@@ -272,6 +293,7 @@ asynStatus SM300Controller::poll()
 {
 	asynStatus comStatus;
 	SM300Axis *axis;
+	bool motorInError = false;
 
 	// Read the current status of the motor (at Poition, Not at position, Error)
 	comStatus = this->sendQuerry("LM", true);
@@ -283,17 +305,41 @@ asynStatus SM300Controller::poll()
 		goto skip;
 	}
 
-	if (this->inString_[2] == 'P') {
+	if (this->inString_[2] == 'P') {       // axis in Position
 		is_moving_ = false;
+
+		// Finished a home
+		if (axis_x_homing_) {
+			axis_x_homing_ = false;
+			home_axis_x_ = false;
+		}
+		if (axis_y_homing_) {
+			axis_y_homing_ = false;
+			home_axis_y_ = false;
+		}
+		// If need to home to now
+		if (home_axis_x_) {
+			comStatus = sendCommand("BRX");
+			axis_x_homing_ = true;
+			if (comStatus) {
+				errlogPrintf("SM300 poll: Failed to home x.\n");
+			}
+		} else if (home_axis_y_) {
+			comStatus = sendCommand("BRY");
+			axis_y_homing_ = true;
+			if (comStatus) {
+				errlogPrintf("SM300 poll: Failed to home y.\n");
+			}
+		}
 	}
-	else if (this->inString_[2] == 'N') {
+	else if (this->inString_[2] == 'N') {  // Not in position
 		is_moving_ = true;
 	}
 	else {
+		motorInError = true;
 		is_moving_ = false;
 		comStatus = asynError;
-		errlogPrintf("SM300 poll: moving status returned error status.\n");
-		goto skip;
+		errlogPrintf("SM300 poll: moving status returned errors status.\n");
 	}
 	for (int i=0; i < this->numAxes_; i++) {
 		axis = this->getAxis(i);
@@ -309,6 +355,11 @@ asynStatus SM300Controller::poll()
 		goto skip;
 	}
 	int code = strtol(&this->inString_[2], NULL, 16);
+
+	if (code != 0) {
+		motorInError = true;
+	}
+
     // special case for error in sending command
 	if (code >= 0xF && code <= 0x14) {
 		errlogPrintf("SM300 error code: CNC cmd error code, code = %.2x\n", code);
@@ -323,7 +374,7 @@ asynStatus SM300Controller::poll()
 	setIntegerParam(error_code_, code);
 
 skip:
-	has_error_ = comStatus != asynSuccess;
+	has_error_ = motorInError || comStatus != asynSuccess;
 
 	for (int i=0; i < this->numAxes_; i++) {
 		axis = this->getAxis(i);
@@ -440,10 +491,6 @@ asynStatus SM300Axis::move(double position, int relative, double minVelocity, do
 	  return asynError;
   } 
 
-  // perform a stop so new positions can be set
-  comStatus = pC_->sendQuerry("BSS", false);
-  if (comStatus) goto skip;
-
   sprintf(temp, "B%c%.0f", axisLabel, round(move_to));
   comStatus = pC_->sendCommand(temp);
   
@@ -455,11 +502,32 @@ skip:
 
 }
 
+/** Home an axis
+ *
+ *  This stores the intention to home when the motor comes to a stop. The reason it is done this way is that if the motors is homing
+ *	one axis it can not home any other axis. It wil home the next time the motor is stationary.
+ * /param[in] axis the axis to home (X or Y)
+*/
+void SM300Controller::homeAxis(const char axis) {
+	if (axis == 'X') {
+		if (!axis_x_homing_) {
+			home_axis_x_ = true;
+		}
+	}
+	if (axis == 'Y') {
+		if (!axis_y_homing_) {
+			home_axis_y_ = true;
+		}
+	}
+}
+
+/** Home the axis 
+ *  velocities and accelerations are ignored these are set by the controller.
+ */
 asynStatus SM300Axis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
-  char temp[MAX_CONTROLLER_STRING_SIZE];
-  sprintf(temp, "BR%c", axisLabel);
-  return pC_->sendCommand(temp);
+  pC_->homeAxis(axisLabel);
+  return asynSuccess;
 }
 
 // Jog
@@ -475,11 +543,8 @@ asynStatus SM300Axis::moveVelocity(double minVelocity, double maxVelocity, doubl
 */
 asynStatus SM300Axis::stop(double acceleration )
 {
-  asynStatus status;
-
-  status = pC_->sendQuerry("BSS", false); 
-  // ignore reply it has to be <STX>P<EOT>
-  return status ? asynError : asynSuccess;
+  // Motor can not be stopped using BSS because if it is then it immediately sets the position to 0 wherever the motor stops.
+  return asynSuccess;
 }
 
 /** Set absolute position in hardware
