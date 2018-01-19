@@ -1176,15 +1176,15 @@ static int motor_init()
             pmotor->control.cntrlReg = 0;   /* Disable all interrupts */
             pmotor->rebootind = 0x4321;     /* Set reboot indicator (before send_mess call). */
 
-            send_mess(card_index, "EF", (char) NULL);
-            send_mess(card_index, ERROR_CLEAR, (char) NULL);
-            send_mess(card_index, STOP_ALL, (char) NULL);
+            send_mess(card_index, "EF", (char*) NULL);
+            send_mess(card_index, ERROR_CLEAR, (char*) NULL);
+            send_mess(card_index, STOP_ALL, (char*) NULL);
 
-            send_mess(card_index, GET_IDENT, (char) NULL);
+            send_mess(card_index, GET_IDENT, (char*) NULL);
             recv_mess(card_index, (char *) pmotorState->ident, 1);
             Debug(3, "Identification = %s\n", pmotorState->ident);
 
-            send_mess(card_index, ALL_POS, (char) NULL);
+            send_mess(card_index, ALL_POS, (char*) NULL);
             recv_mess(card_index, axis_pos, 1);
 
             for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);

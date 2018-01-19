@@ -375,7 +375,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -603,7 +603,7 @@ static int motor_init()
 		retry++;
 	    } while (online == false && retry < 3);
 */
-	    send_mess(card_index, GET_IDENT, (char) NULL);
+	    send_mess(card_index, GET_IDENT, (char*) NULL);
 	    status = recv_mess(card_index, buff, 1);
 	    
 	    /* Parse out E816 revision (2 decimal places) and convert to int */

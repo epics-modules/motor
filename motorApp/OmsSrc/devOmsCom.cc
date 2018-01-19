@@ -265,7 +265,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
                     char respbuf[10];
 
                     (*tabptr->getmsg)(card, respbuf, -1);
-                    (*tabptr->sendmsg)(card, "RB\r", (char) NULL);
+                    (*tabptr->sendmsg)(card, "RB\r", (char*) NULL);
                     (*tabptr->getmsg)(card, respbuf, 1);
                     if (sscanf(respbuf, "%x", &response) == 0)
                         response = 0;   /* Force an error. */

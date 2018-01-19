@@ -307,7 +307,7 @@ static int set_status(int card, int signal)
     statusStr[0] = positionStr[0] = buff[0] = '\0';
 
     sprintf(buff, "%d ST", (signal + 1));
-    send_mess(card, buff, (char) NULL);
+    send_mess(card, buff, (char*) NULL);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
@@ -343,7 +343,7 @@ static int set_status(int card, int signal)
     status.Bits.RA_DONE = !mstat.Bits.inMotion;
 
     sprintf(buff, "%d POS", (signal + 1));
-    send_mess(card, buff, (char) NULL);
+    send_mess(card, buff, (char*) NULL);
     recv_mess(card, buff, 1);
 
     /*
@@ -434,7 +434,7 @@ static int set_status(int card, int signal)
         nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
-        send_mess(card, buff, (char) NULL);
+        send_mess(card, buff, (char*) NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -645,7 +645,7 @@ static int motor_init()
                 do
                 {
                     sprintf(buff, "%d ST", (total_axis + 1));
-                    send_mess(card_index, buff, (char) NULL);
+                    send_mess(card_index, buff, (char*) NULL);
                     status = recv_mess(card_index, buff, 1);
                     retry++;
                 } while (status <= 0 && retry < 3);
@@ -667,11 +667,11 @@ static int motor_init()
 
                 /* stop and initialize the controller */
                 sprintf(buff, "%d V 0", (motor_index + 1));
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 sprintf(buff, "%d HO", (motor_index + 1));
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 sprintf(buff, "%d EN", (motor_index + 1));
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
 
                 motor_info->status.All = 0;
                 motor_info->no_motion_count = 0;
@@ -690,7 +690,7 @@ static int motor_init()
                 limitStr[0] = '\0';
                 /* Determine low limit */
                 sprintf(buff, "%d LL -", (motor_index + 1));
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 recv_mess(card_index, buff, 1);
                 strncat(limitStr, &buff[5], 8);
                 motor_info->low_limit = (epicsInt32) strtoul(limitStr, NULL, 16);
@@ -698,7 +698,7 @@ static int motor_init()
                 limitStr[0] = '\0';
                 /* Determine high limit */
                 sprintf(buff, "%d LL", (motor_index + 1));
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
                 recv_mess(card_index, buff, 1);
                 strncat(limitStr, &buff[5], 8);
                 motor_info->high_limit = (epicsInt32) strtoul(limitStr, NULL, 16);
@@ -716,7 +716,7 @@ static int motor_init()
                 epicsThreadSleep(0.2);
 
                 sprintf(buff, "%d HO", (motor_index + 1));
-                send_mess(card_index, buff, (char) NULL);
+                send_mess(card_index, buff, (char*) NULL);
 
                 set_status(card_index, motor_index);    /* Read status of each
                                      * motor */

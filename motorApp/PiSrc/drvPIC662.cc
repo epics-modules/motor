@@ -232,7 +232,7 @@ static int set_status(int card, int signal)
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
 
-    send_mess(card, GET_STATUS, (char) NULL);
+    send_mess(card, GET_STATUS, (char*) NULL);
     comm_status = recv_mess(card, buff, 1);
     if (comm_status == 0)
     {
@@ -271,7 +271,7 @@ static int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, GET_POS, (char) NULL);
+    send_mess(card, GET_POS, (char*) NULL);
     recv_mess(card, buff, 1);
 
     motorData = NINT (atof(buff) / cntrl->drive_resolution);
@@ -340,7 +340,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -539,7 +539,7 @@ static int motor_init()
 
 	    do
 	    {
-		send_mess(card_index, GET_IDENT, (char) NULL);
+		send_mess(card_index, GET_IDENT, (char*) NULL);
 		status = recv_mess(card_index, buff, 1);
                 retry++;
 	    } while (status == 0 && retry < 3);
@@ -558,7 +558,7 @@ static int motor_init()
 
 
 	    /* Set Controller to REMOTE mode */
-     	    send_mess(card_index, REMOTE_MODE, (char) NULL);
+     	    send_mess(card_index, REMOTE_MODE, (char*) NULL);
 
 	    {
 	        struct mess_info *motor_info = &brdptr->motor_info[0];

@@ -336,7 +336,7 @@ STATIC int set_status(int card, int signal)
     {
         strcpy(buff, nodeptr->postmsgptr);
         strcat(buff, "\r");
-        send_mess(card, buff, (char) NULL);
+        send_mess(card, buff, (char*) NULL);
         nodeptr->postmsgptr = NULL;
     }
 

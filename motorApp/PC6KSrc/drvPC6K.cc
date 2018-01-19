@@ -433,7 +433,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
         strncpy(send_buff, nodeptr->postmsgptr, 80);
-	send_mess(card, send_buff, (char) NULL);
+	send_mess(card, send_buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -706,12 +706,12 @@ PC6KUpLoad(int card,               /* Controller Number */
 	/* Copy file into PC6K Program */
 	sprintf(nextLine, "DEL %s", progName);
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff);
-	send_mess(card, nextLine, (char) NULL);
+	send_mess(card, nextLine, (char*) NULL);
 	// eos_ptr = eos_str;
 	sprintf(nextLine, "DEF %s", progName);
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff, eos_ptr);
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff);
-	send_mess(card, nextLine, (char) NULL);
+	send_mess(card, nextLine, (char*) NULL);
       }
 
     while (fgets(nextLine, BUFF_SIZE, fd) != NULL)
@@ -723,7 +723,7 @@ PC6KUpLoad(int card,               /* Controller Number */
 	
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff, eos_ptr);
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff);
-	send_mess(card, nextLine, (char) NULL);
+	send_mess(card, nextLine, (char*) NULL);
       }
 
     fclose(fd);
@@ -731,7 +731,7 @@ PC6KUpLoad(int card,               /* Controller Number */
     if (progName && strlen(progName))
 	/* End PC6K Program */
         // recvCnt = send_recv_mess(card, "END", replyBuff);
-        send_mess(card, "END", (char) NULL);
+        send_mess(card, "END", (char*) NULL);
 
     return(OK);
 }

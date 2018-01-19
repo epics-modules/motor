@@ -265,7 +265,7 @@ static int set_status(int card, int signal)
     cntrl->status = NORMAL;
     status.Bits.CNTRL_COMM_ERR = 0;
 
-    send_mess(card, "MOT:COND?", (char) NULL);
+    send_mess(card, "MOT:COND?", (char*) NULL);
     recv_mess(card, buff, 1);
 
     mstat.All = atoi(&buff[0]);
@@ -296,7 +296,7 @@ static int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, "CURR:TPOS?", (char) NULL);
+    send_mess(card, "CURR:TPOS?", (char*) NULL);
     recv_mess(card, buff, 1);
 
     motorData = atof(buff);
@@ -365,7 +365,7 @@ static int set_status(int card, int signal)
     status.Bits.EA_SLIP_STALL = 0;
     status.Bits.EA_HOME	      = 0;
 
-    send_mess(card, "AXIS:POS?", (char) NULL);
+    send_mess(card, "AXIS:POS?", (char*) NULL);
     recv_mess(card, buff, 1);
     motorData = atof(buff);
     motor_info->encoder_position = (epicsInt32) motorData;
@@ -388,7 +388,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -597,7 +597,7 @@ static int motor_init()
 
 	    do
 	    {
-		send_mess(card_index, GET_IDENT, (char) NULL);
+		send_mess(card_index, GET_IDENT, (char*) NULL);
 		status = recv_mess(card_index, buff, 1);
                 retry++;
 	    } while (status == 0 && retry < 3);

@@ -392,13 +392,13 @@ static int set_status(int card, int signal)
     MAXvCntrl = (struct MAXvController *) brdptr->DevicePrivate;
     if (MAXvCntrl->fwver >= 1.33)
     {
-        send_recv_mess(card, "#WS", (char) NULL, q_buf, 1);
+        send_recv_mess(card, "#WS", (char*) NULL, q_buf, 1);
         if (strcmp(q_buf, "=0") != 0)
         {
             errlogPrintf(wdctrmsg, card, q_buf);
             status.Bits.RA_PROBLEM = 1;
             motor_info->status.All = status.All;
-            send_mess(card, STOP_ALL, (char) NULL);
+            send_mess(card, STOP_ALL, (char*) NULL);
             /* Disable board. */
             motor_state[card] = (struct controller *) NULL;
             return(rtn_state = 1); /* End move. */
@@ -1264,10 +1264,10 @@ static int motor_init()
         pmotor->status1_irq_enable.All = 0;
         pmotor->status2_irq_enable = 0;
 
-        send_mess(card_index, ERROR_CLEAR, (char) NULL);
-        send_mess(card_index, STOP_ALL, (char) NULL);
+        send_mess(card_index, ERROR_CLEAR, (char*) NULL);
+        send_mess(card_index, STOP_ALL, (char*) NULL);
 
-        send_recv_mess(card_index, GET_IDENT, (char) NULL, (char *) pmotorState->ident, 1);
+        send_recv_mess(card_index, GET_IDENT, (char*) NULL, (char *) pmotorState->ident, 1);
         Debug(3, "Identification = %s\n", pmotorState->ident);
 
         /* Save firmware version. */
@@ -1278,7 +1278,7 @@ static int motor_init()
 
         if (pvtdata->fwver >= 1.33)
         {
-            send_recv_mess(card_index, "#WS", (char) NULL, axis_pos, 1);
+            send_recv_mess(card_index, "#WS", (char*) NULL, axis_pos, 1);
             if (strcmp(axis_pos, "=0") != 0)
             {
                 errlogPrintf(wdctrmsg, card_index, axis_pos);
@@ -1290,9 +1290,9 @@ static int motor_init()
 
         if (wdtrip == false)
         {
-            send_mess(card_index, initstring[card_index], (char) NULL);
+            send_mess(card_index, initstring[card_index], (char*) NULL);
 
-            send_recv_mess(card_index, ALL_POS, (char) NULL, axis_pos, 1);
+            send_recv_mess(card_index, ALL_POS, (char*) NULL, axis_pos, 1);
 
             for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
                  pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
