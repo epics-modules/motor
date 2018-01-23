@@ -23,8 +23,6 @@ Based on the SM100 Model 3 device driver
 #include <errlog.h>
 #include "SM300Driver.h"
 
-#define NINT(f) (int)((f)>0 ? (f)+0.5 : (f)-0.5)
-
 /** Creates a new SM300Controller object.
   * \param[in] portName          The name of the asyn port that will be created for this driver
   * \param[in] SM300PortName     The name of the drvAsynSerialPort that was created previously to connect to the SM300 controller 
@@ -67,14 +65,14 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
 
-/** Send a querry string to the controller and get a return value.
-  * Querry string is prefeced with ACK STX and postfixed with EOT
+/** Send a query string to the controller and get a return value.
+  * query string is prefeced with ACK STX and postfixed with EOT
   * return string ends with ETX
-  * \param[in] querry the querry to send
-  * \param[in] what form the querry reply has; true if the reply has EOT false for ETX with BCC
-  * \returns success of write and read of querry string
+  * \param[in] query the query to send
+  * \param[in] what form the query reply has; true if the reply has EOT false for ETX with BCC
+  * \returns success of write and read of query string
   */
-asynStatus SM300Controller::sendQuerry(const char * querry, bool hasEotEnding) {
+asynStatus SM300Controller::sendQuery(const char * query, bool hasEotEnding) {
 	if (hasEotEnding) {
 		setTerminationChars("\x04", 1, "\x04", 1);
 	} 
@@ -82,7 +80,7 @@ asynStatus SM300Controller::sendQuerry(const char * querry, bool hasEotEnding) {
 		setTerminationChars("\x03", 1, "\x04", 1);
 	}
 	//send data format 2
-	sprintf(this->outString_, "\x06\x02%s", querry);
+	sprintf(this->outString_, "\x06\x02%s", query);
 	return this->writeReadController();
 }
 
@@ -160,65 +158,72 @@ asynStatus SM300Controller::perform_reset() {
 	if (sendCommand("PEK0")) return status;
 
 	setTerminationChars("\x06", 1, "\x04", 1);
-	// set achknowlegement on
-	if (sendCommand("PEL1")) return status;
-	// set linear interpolation
-	if (sendCommand("B/ G01")) return status;
-	// absoulute coordinates
-	if (sendCommand("B/ G90")) return status;
-	// switch off message from contrl unit when motor is in position or in error (will poll instead)
-	if (sendCommand("PER0")) return status;
+	const char * commands[] = {
+		// set achknowlegement on
+		"PEL1",  
+		// set linear interpolation
+		"B/ G01", 
+		// absoulute coordinates
+	    "B/ G90", 
+		// switch off message from contrl unit when motor is in position or in error (will poll instead)
+		"PER0", 
+		//send data format 2 - 100s
+		"PXA2",
+		"PYA2",
+		// Gear factor numerator
+	    "PXB5",
+	    "PYB1",
+	    // Gear factor denomenator
+	    "PXC10",
+	    "PYC10",
+	    // Drag Error
+	    "PXD2500",
+	    "PYD2500",
+	    // Start/stop ramp
+	    "PXE100000",
+	    "PYE25000",
+	    // KV factor oe feedback control amplification
+	    "PXF1000",
+	    "PYF1000",
+	    // Regulator factor A
+	    "PXG0",
+	    "PYG0",
+	    // +Software switch limit
+	    "PXH+57000",
+	    "PYH+64000",
+	    // -Software switch limit
+	    "PXI-50",
+	    "PYI-20",
+	    // maximum speed
+	    "PXJ25000",
+	    "PYJ25000",
+	    // direction and speed of homing procedure
+	    "PXK-2500",
+	    "PYK-7500",
+	    // standstill check
+	    "PXL100",
+	    "PYL100",
+	    // Inposition window
+	    "PXM5",
+	    "PYM5",
+	    // Distance from reference switch
+	    "PXN1000",
+	    "PYN5000",
+	    // Backlash compensation
+	    "PXO0",
+	    "PYO0",
+	    // Moving direction
+	    "PXP0",
+	    "PYP0",
+	    // Feed for axes
+	    "BF15000"
+	};
 
-	//send data format 2 - 100s
-	if (sendCommand("PXA2")) return status;
-	if (sendCommand("PYA2")) return status;
-	// Gear factor numerator
-	if (sendCommand("PXB5")) return status;
-	if (sendCommand("PYB1")) return status;
-	// Gear factor denomenator
-	if (sendCommand("PXC10")) return status;
-	if (sendCommand("PYC10")) return status;
-	// Drag Error
-	if (sendCommand("PXD2500")) return status;
-	if (sendCommand("PYD2500")) return status;
-	// Start/stop ramp
-	if (sendCommand("PXE100000")) return status;
-	if (sendCommand("PYE25000")) return status;
-	// KV factor oe feedback control amplification
-	if (sendCommand("PXF1000")) return status;
-	if (sendCommand("PYF1000")) return status;
-	// Regulator factor A
-	if (sendCommand("PXG0")) return status;
-	if (sendCommand("PYG0")) return status;
-	// +Software switch limit
-	if (sendCommand("PXH+57000")) return status;
-	if (sendCommand("PYH+64000")) return status;
-	// -Software switch limit
-	if (sendCommand("PXI-50")) return status;
-	if (sendCommand("PYI-20")) return status;
-	// maximum speed
-	if (sendCommand("PXJ25000")) return status;
-	if (sendCommand("PYJ25000")) return status;
-	// direction and speed of homing procedure
-	if (sendCommand("PXK-2500")) return status;
-	if (sendCommand("PYK-7500")) return status;
-	// standstill check
-	if (sendCommand("PXL100")) return status;
-	if (sendCommand("PYL100")) return status;
-	// Inposition window
-	if (sendCommand("PXM5")) return status;
-	if (sendCommand("PYM5")) return status;
-	// Distance from reference switch
-	if (sendCommand("PXN1000")) return status;
-	if (sendCommand("PYN5000")) return status;
-	// Backlash compensation
-	if (sendCommand("PXO0")) return status;
-	if (sendCommand("PYO0")) return status;
-	// Moving direction
-	if (sendCommand("PXP0")) return status;
-	if (sendCommand("PYP0")) return status;
-	// Feed for axes
-	if (sendCommand("BF15000")) return status;
+	int n_array = (sizeof(commands) / sizeof(const char *));
+	for (int i = 0; i < n_array; i++) {
+		if (sendCommand(commands[i])) return status;
+	}
+
 	setIntegerParam(reset_, 0);
 	return asynSuccess;
 }
@@ -296,7 +301,7 @@ asynStatus SM300Controller::poll()
 	bool motorInError = false;
 
 	// Read the current status of the motor (at Poition, Not at position, Error)
-	comStatus = this->sendQuerry("LM", true);
+	comStatus = this->sendQuery("LM", true);
 	if (comStatus) goto skip;
 
 	if (strlen(this->inString_) < 3) {
@@ -346,7 +351,7 @@ asynStatus SM300Controller::poll()
 		axis->setIntegerParam(motorStatusDone_, is_moving_ ? 0 : 1);
 	}
 	
-	comStatus = sendQuerry("LS10", false);
+	comStatus = sendQuery("LS10", false);
 	if (comStatus) goto skip;
 
 	if (strlen(this->inString_) < 3) {
@@ -427,7 +432,7 @@ asynStatus SM300Axis::poll(bool *moving)
 
 	// Read the current motor position	
 	sprintf(temp, "LI%c", this->axisLabel);
-	comStatus = pC_->sendQuerry(temp, false);
+	comStatus = pC_->sendQuery(temp, false);
 	if (comStatus) goto skip;
 
 	// The response string is of the form "\06\02%d"

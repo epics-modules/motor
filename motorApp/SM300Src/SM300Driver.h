@@ -2,9 +2,10 @@
 Motor driver support for the SM300 controller.
 */
 
+#ifndef SM300Driver_H
+#define SM300Driver_H
 
 // controller-specific parameters yet
-#define NUM_SM300_PARAMS 4
 #define SM300ResetString		"RESET"
 #define SM300ResetAndHomeString		"RESET_AND_HOME"
 #define SM300DisconnectString	"DISCONNECT"
@@ -44,8 +45,8 @@ public:
   virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
   virtual asynStatus poll();  
-  asynStatus sendCommand(const char * querry);
-  asynStatus sendQuerry(const char * querry, bool hasEotEnding);
+  asynStatus sendCommand(const char * query);
+  asynStatus sendQuery(const char * query, bool hasEotEnding);
   bool has_error();
   bool is_moving();
   void homeAxis(const char axis);
@@ -54,16 +55,22 @@ private:
 
 	bool has_error_;
 	bool is_moving_;
-	int reset_;
-	int reset_and_home_;
-	int disconnect_;
-	int error_code_;
 	bool axis_x_homing_;
 	bool axis_y_homing_;
 	bool home_axis_x_;
 	bool home_axis_y_;
 
+	#define FIRST_SM300_PARAM reset_
+	int reset_;
+	int reset_and_home_;
+	int disconnect_;
+	int error_code_;
+	#define LAST_SM300_PARAM error_code_
+	
 
 friend class SM300Axis;
 	
 };
+
+#define NUM_SM300_PARAMS (&LAST_SM300_PARAM - &FIRST_SM300_PARAM + 1)
+#endif  // SM300Driver_H
