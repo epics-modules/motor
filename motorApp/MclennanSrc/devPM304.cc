@@ -231,9 +231,9 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
             }
             if (strlen(mr->post) != 0)
                 motor_call->postmsgptr = (char *) &mr->post;
-	        /* Send a reset command before any move */
-			if (cntrl->reset_before_move==1) {
-				sprintf(buff, "%dRS;", axis);
+            /* Send a reset command before any move */
+            if (cntrl->reset_before_move==1) {
+                sprintf(buff, "%dRS;", axis);
                 strcat(motor_call->message, buff);
 			}
             break;
@@ -289,8 +289,8 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
            of all motors */
         break;
     case STOP_AXIS:
-	    /* Send a reset before the stop command so that it's not impeded by a tracking abort */
-		sprintf(buff, "%dRS;", axis);
+        /* Send a reset before the stop command so that it's not impeded by a tracking abort */
+        sprintf(buff, "%dRS;", axis);
         strcat(motor_call->message, buff);
 		
         sprintf(buff, "%dST;", axis);
