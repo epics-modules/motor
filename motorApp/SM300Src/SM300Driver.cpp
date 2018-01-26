@@ -33,6 +33,7 @@ Based on the SM100 Model 3 device driver
 SM300Controller::SM300Controller(const char *portName, const char *SM300PortName, int numAxes, 
                                  double movingPollPeriod, double idlePollPeriod)
   : is_moving_(false),
+	polls_count_(0),
 	asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
                          0, // No additional interfaces beyond those in base class
                          0, // No additional callback interfaces beyond those in base class
@@ -298,7 +299,7 @@ asynStatus SM300Controller::poll()
 {
 	asynStatus comStatus;
 	SM300Axis *axis;
-	bool motorInError = false;
+	bool motorHasError = false;
 
 	// Read the current status of the motor (at Poition, Not at position, Error)
 	comStatus = this->sendQuery("LM", true);
@@ -341,11 +342,12 @@ asynStatus SM300Controller::poll()
 		is_moving_ = true;
 	}
 	else {
-		motorInError = true;
+		motorHasError = true;
 		is_moving_ = false;
 		comStatus = asynError;
 		errlogPrintf("SM300 poll: moving status returned errors status.\n");
 	}
+
 	for (int i=0; i < this->numAxes_; i++) {
 		axis = this->getAxis(i);
 		axis->setIntegerParam(motorStatusDone_, is_moving_ ? 0 : 1);
@@ -362,7 +364,7 @@ asynStatus SM300Controller::poll()
 	int code = strtol(&this->inString_[2], NULL, 16);
 
 	if (code != 0) {
-		motorInError = true;
+		motorHasError = true;
 	}
 
     // special case for error in sending command
@@ -379,13 +381,20 @@ asynStatus SM300Controller::poll()
 	setIntegerParam(error_code_, code);
 
 skip:
-	has_error_ = motorInError || comStatus != asynSuccess;
+	has_error_ = comStatus != asynSuccess;
 
-	for (int i=0; i < this->numAxes_; i++) {
+	for (int i = 0; i < this->numAxes_; i++) {
 		axis = this->getAxis(i);
-		axis->setIntegerParam(this->motorStatusProblem_, axis->has_error() || has_error_ ? 1 : 0);
-		axis->callParamCallbacks();
-	}	
+		// make sure status is set for refresh during first 10 polls otherwise it is set on start
+		if (polls_count_ < REFRESH_ERROR_FOR_POLL_COUNTS) {
+			axis->setIntegerParam(this->motorStatusCommsError_, axis->has_error() || has_error_ ? 0 : 1);	
+			polls_count_++;
+		}
+		axis->setIntegerParam(this->motorStatusCommsError_, axis->has_error() || has_error_ ? 1 : 0);
+		axis->setIntegerParam(this->motorStatusProblem_, motorHasError ? 1 : 0);
+		axis->callParamCallbacks();		
+	}
+	
 	callParamCallbacks();
 	return comStatus ? asynError : asynSuccess;
 }
@@ -453,7 +462,7 @@ asynStatus SM300Axis::poll(bool *moving)
 	
 skip:
 	has_error_ = comStatus != asynSuccess;
-	setIntegerParam(pC_->motorStatusProblem_, has_error_ || pC_->has_error() ? 1 : 0);
+	setIntegerParam(pC_->motorStatusCommsError_, has_error_ || pC_->has_error() ? 1 : 0);
 	callParamCallbacks();
 	return comStatus ? asynError : asynSuccess;
 }

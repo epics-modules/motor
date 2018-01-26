@@ -60,6 +60,11 @@ private:
 	bool home_axis_x_;
 	bool home_axis_y_;
 
+	int polls_count_;
+
+	// number of times the error flag should be refreshed manually. 10 is arbitary bt works.
+	const int REFRESH_ERROR_FOR_POLL_COUNTS = 10;
+
 	#define FIRST_SM300_PARAM reset_
 	int reset_;
 	int reset_and_home_;
