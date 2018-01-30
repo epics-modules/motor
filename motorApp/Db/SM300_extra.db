@@ -87,9 +87,9 @@ record(mbbi, "$(P)ERROR") {
     field(ELSV, "MAJOR")
     field(ELVL, "11")
     
-    field(TWST, "Unknown")
-    field(TWSV, "MAJOR")
-    field(TWVL, "12")
+    field(TVST, "Unknown")
+    field(TVSV, "MAJOR")
+    field(TVVL, "12")
     
     field(TTST, "Cmd rep x4 no success")
     field(TTSV, "MAJOR")
