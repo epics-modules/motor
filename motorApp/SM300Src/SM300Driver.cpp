@@ -32,17 +32,16 @@ Based on the SM100 Model 3 device driver
   */
 SM300Controller::SM300Controller(const char *portName, const char *SM300PortName, int numAxes, 
                                  double movingPollPeriod, double idlePollPeriod)
-  : is_moving_(false),
-	polls_count_(0),
-	asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
+  : asynMotorController(portName, numAxes, NUM_SM300_PARAMS,
                          0, // No additional interfaces beyond those in base class
                          0, // No additional callback interfaces beyond those in base class
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
-                         0, 0)  // Default priority and stack size
+                         0, 0),  // Default priority and stack size
+	is_moving_(false),
+	polls_count_(0)
 {
   asynStatus status;
-  SM300Axis *pAxis;
   static const char *functionName = "SM300Controller::SM300Controller";
 
   /* Connect to SM300 controller */
@@ -55,8 +54,8 @@ SM300Controller::SM300Controller(const char *portName, const char *SM300PortName
   if (numAxes != 2) {
 	  errlogPrintf("SM300: Driver is only setup for two axes X and Y!\n");
   }
-  pAxis = new SM300Axis(this, 0, 'X');  
-  pAxis = new SM300Axis(this, 1, 'Y');
+  new SM300Axis(this, 0, 'X');
+  new SM300Axis(this, 1, 'Y');
 
   createParam(SM300ResetString, asynParamInt32, &reset_);
   createParam(SM300ResetAndHomeString, asynParamInt32, &reset_and_home_);
@@ -300,6 +299,7 @@ asynStatus SM300Controller::poll()
 	asynStatus comStatus;
 	SM300Axis *axis;
 	bool motorHasError = false;
+	int code;
 
 	// Read the current status of the motor (at Poition, Not at position, Error)
 	comStatus = this->sendQuery("LM", true);
@@ -361,7 +361,7 @@ asynStatus SM300Controller::poll()
 		errlogPrintf("SM300 error code: return string is too short.\n");
 		goto skip;
 	}
-	int code = strtol(&this->inString_[2], NULL, 16);
+	code = strtol(&this->inString_[2], NULL, 16);
 
 	if (code != 0) {
 		motorHasError = true;
@@ -392,7 +392,7 @@ skip:
 		}
 		axis->setIntegerParam(this->motorStatusCommsError_, axis->has_error() || has_error_ ? 1 : 0);
 		axis->setIntegerParam(this->motorStatusProblem_, motorHasError ? 1 : 0);
-		axis->callParamCallbacks();		
+		axis->callParamCallbacks();
 	}
 	
 	callParamCallbacks();
