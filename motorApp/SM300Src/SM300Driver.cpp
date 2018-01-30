@@ -505,7 +505,7 @@ asynStatus SM300Axis::move(double position, int relative, double minVelocity, do
 	  return asynError;
   } 
 
-  sprintf(temp, "B%c%.0f", axisLabel, round(move_to));
+  sprintf(temp, "B%c%.0f", axisLabel, floor(move_to + 0.5));
   comStatus = pC_->sendCommand(temp);
   
   if (comStatus) goto skip;
