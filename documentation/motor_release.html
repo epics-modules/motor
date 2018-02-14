@@ -5,12 +5,117 @@
   <meta content="Ronald L. Sluiter" name="Author" />
   <meta content="Synopsis of modifications, fixes and new features for each motor record release."
     name="Description" />
-  <title>EPICS Motor Record Release R6-10 Notice</title>
+  <title>Unofficial EPICS Motor Record Release R6-9-2 Notice</title>
   <meta content="Ronald L. Sluiter" name="author" />
   <meta content="Notification of bug fixes, functional changes and new features." name="description" />
   <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
 </head>
 <body>
+  <div style="text-align: center">
+    <h1>
+      <b>Unofficial Motor Record Version 6-9-2 Release Notice</b></h1>
+  </div>
+  <div style="text-align: center">
+    <h4>
+      Modifications to Existing Features</h4>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>!WARNING!</b><br />
+      motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and all user
+      trees (i.e., &lt;ioctop&gt;) that load the motor record.
+      Beside that, lots of code had been touched, intensive tests are needed.
+    </p>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>Encoder readback > 32 bit</b>
+    </p>
+    <p>
+      Some encoders need a wider range than what a 32 bit integer can provide.
+      Make it possible to forward a "double" value into the record.
+    </p>
+    <p>
+      See even FeadbackDataflowModel3.ppt
+    </p>
+    <p>
+      <b>Improved connect for model 3 drivers</b>
+    </p>
+    <p>
+      When the IOC is started and the motorRecord is initialized,
+      the (TCP/IP) connection to the controller must have been established.
+      Introduce a initialPoll() which does the read out of axis values and keep
+      the record in UDF state. (This needs a better explanations, right?)
+    </p>
+    <p>
+      <b>Motor stops while jogging</b>
+    </p>
+    <p>
+      When the motor stopps while jogging (and the record did not request the stop)
+      the statemachine got confused. Handle the situation gracefully
+    </p>
+    <p>
+      <b>STOP while inside the DLY phase </b>
+    </p>
+    <p>
+      When the motor was stopped while in the delay phase, to record locked up.
+    </p>
+    <p>
+      <b>FRAC field has now function any more </b>
+    </p>
+    <p>
+      The value in the FRAC field is ignored.
+    </p>
+  </div>
+  <div style="text-align: center">
+    <h4>
+      New Features</h4>
+  </div>
+  <div style="text-align: left">
+    <p>
+      <b>Set Point Deadband </b>
+    </p>
+    <p>
+      The set point deadband (SDBD) field limits the smallest allowed move. The
+      size of a move is now no longer limited by the motor resolution (MRES).
+    </p>
+    <p>
+      <b>New flag field MFLG</b>
+    </p>
+    <p>
+      The driver of an advanced controler may switch off features in the record:
+      <ul>
+      <li> Bit 0: Homing ignores the limit switches. </li>
+      <li> Bit 1: Don't stop the motor when the PROBLEM bit is set. </li>
+      <li> Bit 2: The motor needs time to ramp down after a stop. </li>
+      </ul>
+    </p>
+    <p>
+      <b>Read only soft limits from controller</b>
+    </p>
+    <p>
+      For a model 1 and 2 driver the driver could limit the motorRecord softlimits
+      to stay inside the "read only" soft limits configured in the controller.
+      This was never implemented to model 3 drivers.
+    </p>
+      <b>Velocities and acceleration from controller</b>
+    </p>
+    <p>
+      A modern controller may have all values for velocities, acceleration (anf jerk)
+      configured inside the controller.
+      Make it possible for a model 3 driver to forward these values to the record
+      when the record is initialized.
+    </p>
+    </p>
+      <b>ASCII messages from controller</b>
+    </p>
+    <p>
+      Some controllers are able to give a human readable error string to the user.
+      Add a new parameter "motorMessageText_ ("MOTOR_MESSAGE_TEXT") where a model 3
+      driver can put information.
+      (This is not a field in the motorRecord, but an own PV)
+    </p>
+  </div>
   <div style="text-align: center">
     <h1>
       <b>Motor Record Version 6-10 Release Notice</b></h1>
