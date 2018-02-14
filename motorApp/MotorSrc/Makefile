@@ -24,6 +24,7 @@ LIBRARY_IOC += motor
 
 # The following are required for all motor record configurations.
 motor_SRCS += motorRecord.cc motordevCom.cc motordrvCom.cc
+motor_SRCS += motorDevSup.c
 motor_SRCS += motorUtil.cc motorUtilAux.cc
 
 ifdef ASYN

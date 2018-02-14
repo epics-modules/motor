@@ -71,6 +71,9 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorPostMoveDelayString,          asynParamFloat64,    &motorPostMoveDelay_);
   createParam(motorStatusString,                 asynParamInt32,      &motorStatus_);
   createParam(motorUpdateStatusString,           asynParamInt32,      &motorUpdateStatus_);
+  createParam(motorLatestCommandString,          asynParamInt32,      &motorLatestCommand_);
+  createParam(motorMessageIsFromDriverString,    asynParamInt32,      &motorMessageIsFromDriver_);
+  createParam(motorMessageTextString,            asynParamOctet,      &motorMessageText_);
   createParam(motorStatusDirectionString,        asynParamInt32,      &motorStatusDirection_);
   createParam(motorStatusDoneString,             asynParamInt32,      &motorStatusDone_);
   createParam(motorStatusHighLimitString,        asynParamInt32,      &motorStatusHighLimit_);
@@ -87,10 +90,27 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorStatusLowLimitString,         asynParamInt32,      &motorStatusLowLimit_);
   createParam(motorStatusHomedString,            asynParamInt32,      &motorStatusHomed_);
 
+  /* Addition flags which can be set by the specific driver */
+  createParam(motorFlagsHomeOnLsString,          asynParamInt32,      &motorFlagsHomeOnLs_);
+  createParam(motorFlagsNoStopProblemString,     asynParamInt32,      &motorFlagsNoStopProblem_);
+  createParam(motorFlagsLSrampDownString,          asynParamInt32,      &motorFlagsLSrampDown_);
+
+  createParam(motorNotHomedProblemString,        asynParamInt32,      &motorNotHomedProblem_);
+
   // These are per-axis parameters for passing additional motor record information to the driver
   createParam(motorRecResolutionString,        asynParamFloat64,      &motorRecResolution_);
   createParam(motorRecDirectionString,           asynParamInt32,      &motorRecDirection_);
   createParam(motorRecOffsetString,            asynParamFloat64,      &motorRecOffset_);
+
+  /* Parameters from the controller to the driver and record */
+  createParam(motorHighLimitROString,            asynParamFloat64,    &motorHighLimitRO_);
+  createParam(motorLowLimitROString,             asynParamFloat64,    &motorLowLimitRO_);
+  createParam(motorDefVelocityROString,          asynParamFloat64,    &motorDefVelocityRO_);
+  createParam(motorMaxVelocityROString,          asynParamFloat64,    &motorMaxVelocityRO_);
+  createParam(motorDefJogVeloROString,           asynParamFloat64,    &motorDefJogVeloRO_);
+  createParam(motorDefJogAccROString,            asynParamFloat64,    &motorDefJogAccRO_);
+  createParam(motorSDBDROString,                 asynParamFloat64,    &motorSDBDRO_);
+  createParam(motorRDBDROString,                 asynParamFloat64,    &motorRDBDRO_);
 
   // These are the per-controller parameters for profile moves
   createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);
@@ -195,6 +215,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   if (function == motorStop_) {
     double accel;
     getDoubleParam(axis, motorAccel_, &accel);
+    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_STOP);
     status = pAxis->stop(accel);
   
   } else if (function == motorDeferMoves_) {
@@ -207,6 +228,11 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     bool moving;
     /* Do a poll, and then force a callback */
     poll();
+    if (!pAxis->initialPollDone_) {
+      asynStatus asynstatus;
+      asynstatus = pAxis->initialPoll();
+      if (asynstatus == asynSuccess) pAxis->initialPollDone_ = 1;
+    }
     status = pAxis->poll(&moving);
     pAxis->statusChanged_ = 1;
 
@@ -224,6 +250,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
 
   } else if (function == motorMoveToHome_) {
     if (value == 1) {
+      pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_TO_HOME);
       asynPrint(pasynUser, ASYN_TRACE_FLOW, 
         "%s:%s:: Starting a move to home for axis %d\n",  driverName, functionName, axis);
       moveToHomeAxis_ = axis;
@@ -285,8 +312,11 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     getDoubleParam(axis, motorVelBase_, &baseVelocity);
     getDoubleParam(axis, motorVelocity_, &velocity);
     getDoubleParam(axis, motorAccel_, &acceleration);
+    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_REL);
     status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->waitNumPollsBeforeReady_ =
+      pAxis->defWaitNumPollsBeforeReady_;
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -301,8 +331,11 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     getDoubleParam(axis, motorVelBase_, &baseVelocity);
     getDoubleParam(axis, motorVelocity_, &velocity);
     getDoubleParam(axis, motorAccel_, &acceleration);
+    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_ABS);
     status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->waitNumPollsBeforeReady_ =
+      pAxis->defWaitNumPollsBeforeReady_;
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -316,8 +349,11 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     }
     getDoubleParam(axis, motorVelBase_, &baseVelocity);
     getDoubleParam(axis, motorAccel_, &acceleration);
+    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_VEL);
     status = pAxis->moveVelocity(baseVelocity, value, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->waitNumPollsBeforeReady_ =
+      pAxis->defWaitNumPollsBeforeReady_;
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -334,8 +370,11 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
     getDoubleParam(axis, motorVelocity_, &velocity);
     getDoubleParam(axis, motorAccel_, &acceleration);
     forwards = (value == 0) ? 0 : 1;
+    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_HOMING);
     status = pAxis->home(baseVelocity, velocity, acceleration, forwards);
     pAxis->setIntegerParam(motorStatusDone_, 0);
+    pAxis->waitNumPollsBeforeReady_ =
+      pAxis->defWaitNumPollsBeforeReady_;
     pAxis->callParamCallbacks();
     wakeupPoller();
     asynPrint(pasynUser, ASYN_TRACE_FLOW, 
@@ -491,6 +530,7 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
 {
   MotorStatus *pStatus = (MotorStatus *)pointer;
   int axis;
+  asynStatus status = asynSuccess;
   asynMotorAxis *pAxis;
   static const char *functionName = "readGenericPointer";
 
@@ -499,15 +539,55 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
   axis = pAxis->axisNo_;
  
   getAddress(pasynUser, &axis);
-  getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
-  getDoubleParam(axis, motorPosition_, &pStatus->position);
-  getDoubleParam(axis, motorEncoderPosition_, &pStatus->encoderPosition);
-  getDoubleParam(axis, motorVelocity_, &pStatus->velocity);
-  asynPrint(pasynUser, ASYN_TRACE_FLOW,
-    "%s:%s: MotorStatus = status%d, position=%f, encoder position=%f, velocity=%f\n", 
-    driverName, functionName, pStatus->status, pStatus->position, pStatus->encoderPosition, pStatus->velocity);
-  return asynSuccess;
+  /*  We need to make sure that the most important member had been retrieved
+      from the controller */
+  if (!pAxis->initialPollDone_) status = asynError;
+  if (status == asynSuccess) status = getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
+  if (status == asynSuccess) {
+    memcpy(pStatus, &pAxis->status_, sizeof(*pStatus));
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+	      "%s:%s: axis=%d status=0x%04x, position=%f, encoder position=%f, velocity=%f, "
+	      "highLimit=%f lowLimit=%f defVelo=%f maxVelo=%f defJogVelo=%f defJogAcc=%f sdbd=%f rdbd=%f\n",
+	      driverName, functionName,  axis, pStatus->status, pStatus->position,
+	      pStatus->encoderPosition, pStatus->velocity,
+	      pStatus->MotorConfigRO.motorHighLimitRaw,
+	      pStatus->MotorConfigRO.motorLowLimitRaw,
+	      pStatus->MotorConfigRO.motorDefVelocityRaw,
+	      pStatus->MotorConfigRO.motorMaxVelocityRaw,
+	      pStatus->MotorConfigRO.motorDefJogVeloRaw,
+	      pStatus->MotorConfigRO.motorDefJogAccRaw,
+	      pStatus->MotorConfigRO.motorSDBDRaw,
+	      pStatus->MotorConfigRO.motorRDBDRaw);
+  } else {
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+	      "%s:%s: axis=%d return asynStatus=%d \n",
+	      driverName, functionName, axis, (int)status);
+  }
+  return status;
 }  
+
+/** Called when asyn clients call pasynOctetSyncIO->write().
+  * Extracts the function and axis number from pasynUser.
+  * Sets the value in the parameter library.
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] value Value to write.
+  * \param[in] nChars len (but we only support strings ?!).
+  * \param[out] nActual. number of octets that had been written */
+asynStatus asynMotorController::writeOctet(asynUser *pasynUser, const char *value,
+                                          size_t nChars, size_t *nActual)
+{
+  asynStatus status = asynSuccess;
+  asynMotorAxis *pAxis;
+  int function = pasynUser->reason;
+
+  pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
+
+  status = pAxis->setStringParam(function, value);
+  if (status == asynSuccess) *nActual = strlen(value);
+  return status;
+}
+
 
 /** Returns a pointer to an asynMotorAxis object.
   * Returns NULL if the axis number encoded in pasynUser is invalid.
@@ -632,11 +712,37 @@ void asynMotorController::asynMotorPoller()
       break;
     }
 
+    /*
+     * A poller does may not use an pasynUserController_, because e.g. it
+     * can access the hardware directly), then we dont have to wait for Connect
+     * But if the poller uses pasynUserController_, then it must be connected.
+     */
+    while (pasynUserController_ && (asynStatusConnected_ != asynSuccess)) {
+      unlock(); /* CreateAxis may need the lock */
+      asynStatus asynstatus = pasynManager->waitConnect(pasynUserController_,
+							idlePollPeriod_);
+      if (asynStatusConnected_ != asynstatus) {
+	asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
+		  "%s:%s: waitConnect asynstatus=%d\n",
+		  driverName, "asynMotorPoller", (int)asynstatus);
+	asynStatusConnected_ = asynstatus;
+      }
+      lock();
+      if (shuttingDown_) {
+	unlock();
+	return; /* Terminate while(1) loop */
+      }
+    }
     poll();
     for (i=0; i<numAxes_; i++) {
       pAxis=getAxis(i);
       if (!pAxis) continue;
-      
+
+      if (!pAxis->initialPollDone_) {
+          asynStatus asynstatus;
+          asynstatus = pAxis->initialPoll();
+          if (asynstatus == asynSuccess) pAxis->initialPollDone_ = 1;
+      }
       getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
       getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
       
@@ -771,12 +877,30 @@ asynStatus asynMotorController::writeReadController(const char *output, char *in
   size_t nwrite;
   asynStatus status;
   int eomReason;
-  // const char *functionName="writeReadController";
-  
+  const char *functionName="writeReadController";
+
   status = pasynOctetSyncIO->writeRead(pasynUserController_, output,
                                        strlen(output), input, maxChars, timeout,
                                        &nwrite, nread, &eomReason);
-                        
+  if (status == asynTimeout) {
+    asynPrint(pasynUserController_, ASYN_TRACE_ERROR,
+      "%s:%s Timeout\n",
+      driverName, functionName);
+    asynStatusConnected_ = status;
+  } else if ((status != asynSuccess) ||
+	     ((*nread == 0) && (eomReason & ASYN_EOM_END))) {
+    int  i;
+    asynPrint(pasynUserController_, ASYN_TRACE_ERROR,
+	      "%s:%s nread=%u status=%s (%d)\n",
+	      driverName, functionName,
+	      (unsigned)*nread, pasynManager->strStatus(status), (int)status);
+    asynStatusConnected_ = asynDisconnected;
+    for (i=0; i<numAxes_; i++) {
+      asynMotorAxis *pAxis = getAxis(i);
+      if (!pAxis) continue;
+      pAxis->handleDisconnect(asynDisconnected);
+    }
+  }
   return status;
 }
 

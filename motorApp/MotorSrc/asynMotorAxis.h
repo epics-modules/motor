@@ -34,6 +34,8 @@ class epicsShareClass asynMotorAxis {
   virtual asynStatus moveVelocity(double minVelocity, double maxVelocity, double acceleration);
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
   virtual asynStatus stop(double acceleration);
+  virtual asynStatus initialPoll(void);
+  virtual void       handleDisconnect(asynStatus);
   virtual asynStatus poll(bool *moving);
   virtual asynStatus setPosition(double position);
   virtual asynStatus setEncoderPosition(double position);
@@ -62,6 +64,7 @@ class epicsShareClass asynMotorAxis {
   void setDisableFlag(int disableFlag);
   double getLastEndOfMoveTime();
   void setLastEndOfMoveTime(double time);
+  void updateMsgTxtFromDriver(const char *value);
 
   protected:
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
@@ -75,8 +78,12 @@ class epicsShareClass asynMotorAxis {
 
   MotorStatus status_;
   int statusChanged_;
+  int waitNumPollsBeforeReady_;
+  int defWaitNumPollsBeforeReady_;
+  int initialPollDone_;
 
   private:
+  void updateMsgTxtField(void);
   int referencingModeMove_;
   int wasMovingFlag_;
   int disableFlag_;

@@ -3,6 +3,9 @@ O.*
 *.swp
 *BAK.adl
 bin/
+builddir/
+configure/RELEASE_LIBS.local
+configure/RELEASE_PATHS.local
 db/
 dbd/
 html/

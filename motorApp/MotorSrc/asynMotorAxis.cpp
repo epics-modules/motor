@@ -53,8 +53,11 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   /* Used to enable/disable move to home, and to tell driver how far to move.*/
   referencingModeMove_ = 0;
 
+  waitNumPollsBeforeReady_  = 0;
+  defWaitNumPollsBeforeReady_ = 0;
   wasMovingFlag_ = 0;
   disableFlag_ = 0;
+  initialPollDone_ = 0;
   lastEndOfMoveTime_ = 0;
 
   // Create the asynUser, connect to this axis
@@ -108,6 +111,22 @@ asynStatus asynMotorAxis::stop(double acceleration)
   return asynSuccess;
 }
 
+
+/** initial poll of the axis.
+  * This function is only called once and should read the configuration of the controller,
+  * soft limits and other variables that can be used to initiate the record. */
+asynStatus asynMotorAxis::initialPoll(void)
+{
+  return asynSuccess;
+}
+
+/** Indicate that the controller is disconnected
+  * This function does noy need to do anything.
+  * It may set initialPollDone_ to 0. */
+void asynMotorAxis::handleDisconnect(asynStatus status)
+{
+  (void)status;
+}
 
 /** Poll the axis.
   * This function should read the controller position, encoder position, and as many of the motorStatus flags
@@ -245,16 +264,38 @@ int  asynMotorAxis::getReferencingModeMove()
 asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
   int mask;
-  epicsUInt32 status=0;
+  epicsUInt32 status=0, flags=0;
   // This assumes the parameters defined above are in the same order as the bits the motor record expects!
   if (function >= pC_->motorStatusDirection_ && 
       function <= pC_->motorStatusHomed_) {
+    if ((function == pC_->motorStatusDone_) &&
+        waitNumPollsBeforeReady_) {
+      /* Work around the ready before started problem */
+      if (value) {
+        waitNumPollsBeforeReady_--;
+        value = 0;
+      } else {
+        waitNumPollsBeforeReady_ = 0;
+      }
+      statusChanged_ = 1;
+    }
+
     status = status_.status;
     mask = 1 << (function - pC_->motorStatusDirection_);
     if (value) status |= mask;
     else       status &= ~mask;
     if (status != status_.status) {
       status_.status = status;
+      statusChanged_ = 1;
+    }
+  } else  if (function >= pC_->motorFlagsHomeOnLs_ &&
+              function <= pC_->motorFlagsLSrampDown_) {
+    flags = status_.flags;
+    mask = 1 << (function - pC_->motorFlagsHomeOnLs_);
+    if (value) flags |= mask;
+    else       flags &= ~mask;
+    if (flags != status_.flags) {
+      status_.flags = flags;
       statusChanged_ = 1;
     }
   }
@@ -283,7 +324,47 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
         statusChanged_ = 1;
         status_.encoderPosition = value;
     }
-  }  
+  } else if (function == pC_->motorHighLimitRO_) {
+    if (value != status_.MotorConfigRO.motorHighLimitRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorHighLimitRaw = value;
+    }
+  } else if (function == pC_->motorLowLimitRO_) {
+    if (value != status_.MotorConfigRO.motorLowLimitRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorLowLimitRaw = value;
+    }
+  } else if (function == pC_->motorDefVelocityRO_) {
+    if (value != status_.MotorConfigRO.motorDefVelocityRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorDefVelocityRaw = value;
+    }
+  } else if (function == pC_->motorMaxVelocityRO_) {
+    if (value != status_.MotorConfigRO.motorMaxVelocityRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorMaxVelocityRaw = value;
+    }
+  } else if (function == pC_->motorDefJogVeloRO_) {
+    if (value != status_.MotorConfigRO.motorDefJogVeloRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorDefJogVeloRaw = value;
+    }
+  } else if (function == pC_->motorDefJogAccRO_) {
+    if (value != status_.MotorConfigRO.motorDefJogAccRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorDefJogAccRaw = value;
+    }
+  } else if (function == pC_->motorSDBDRO_) {
+    if (value != status_.MotorConfigRO.motorSDBDRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorSDBDRaw = value;
+    }
+  } else if (function == pC_->motorRDBDRO_) {
+    if (value != status_.MotorConfigRO.motorRDBDRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorRDBDRaw = value;
+    }
+  }
   // Call the base class method
   return pC_->setDoubleParam(axisNo_, function, value);
 }   
@@ -299,6 +380,154 @@ asynStatus asynMotorAxis::setStringParam(int function, const char *value)
 }
 
 
+void asynMotorAxis::updateMsgTxtFromDriver(const char *value)
+{
+  if (value && value[0]) {
+    pC_->setIntegerParam(axisNo_,pC_->motorMessageIsFromDriver_, 1);
+    setStringParam(pC_->motorMessageText_,value);
+  } else {
+    pC_->setIntegerParam(axisNo_,pC_->motorMessageIsFromDriver_, 0);
+  }
+}
+
+/** Update the MsgTxt field*/
+void asynMotorAxis::updateMsgTxtField()
+{
+  int motorMessageIsFromDriver;
+  pC_->getIntegerParam(axisNo_,pC_->motorMessageIsFromDriver_, &motorMessageIsFromDriver);
+  /* The driver has put in a message, keep it */
+  if (motorMessageIsFromDriver) return;
+
+  int motorStatusDone;
+  int motorStatusCommsError;
+  pC_->getIntegerParam(axisNo_,pC_->motorStatusCommsError_, &motorStatusCommsError);
+  if (motorStatusCommsError) {
+    setStringParam(pC_->motorMessageText_,"E: Communication error");
+    return;
+  }
+  pC_->getIntegerParam(axisNo_,pC_->motorStatusDone_, &motorStatusDone);
+
+  if (motorStatusDone) {
+    int motorStatusHighLimit;
+    int motorStatusLowLimit;
+    pC_->getIntegerParam(axisNo_,pC_->motorStatusHighLimit_, &motorStatusHighLimit);
+    pC_->getIntegerParam(axisNo_,pC_->motorStatusLowLimit_, &motorStatusLowLimit);
+    if (motorStatusHighLimit && motorStatusLowLimit)
+      setStringParam(pC_->motorMessageText_,"W: Both limit switches");
+    else if (motorStatusHighLimit)
+      setStringParam(pC_->motorMessageText_,"W: Raw high limit switch");
+    else if (motorStatusLowLimit)
+      setStringParam(pC_->motorMessageText_,"W: Raw low limit switch");
+    else {
+      int motorStatusProblem;
+      int motorLatestCommand;
+      int motorStatusHomed;
+      int motorNotHomedProblem;
+      double motorHighLimit;
+      double motorLowLimit;
+      pC_->getIntegerParam(axisNo_,pC_->motorStatusProblem_, &motorStatusProblem);
+      pC_->getIntegerParam(axisNo_,pC_->motorNotHomedProblem_, &motorNotHomedProblem);
+      pC_->getIntegerParam(axisNo_,pC_->motorStatusHomed_, &motorStatusHomed);
+      if (motorStatusProblem) {
+	if (!motorStatusHomed && (motorNotHomedProblem & MOTORNOTHOMEDPROBLEM_ERROR)) {
+	  setStringParam(pC_->motorMessageText_,"E: Axis not homed");
+	  return;
+	}
+        setStringParam(pC_->motorMessageText_,"E: Problem");
+        return;
+      }
+      pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
+
+      if (!motorStatusHomed && motorNotHomedProblem) {
+	if (motorNotHomedProblem & MOTORNOTHOMEDPROBLEM_ERROR)
+	  setStringParam(pC_->motorMessageText_,"E: Axis not homed");
+	else
+	  setStringParam(pC_->motorMessageText_,"W: Axis not homed");
+        return;
+      }
+      /* If both soft limits are defined, and both are != 0,
+         check if the axis is below or above the range.
+         motorLowLimit == motorHighLimit == 0 means "no limits"
+         (e.g. a rotary axis) */
+      if (!pC_->getDoubleParam(axisNo_, pC_->motorLowLimit_, &motorLowLimit) &&
+          !pC_->getDoubleParam(axisNo_, pC_->motorHighLimit_, &motorHighLimit) &&
+          (motorLowLimit != 0.0 || motorHighLimit != 0.0)) {
+        double motorPosition;
+        pC_->getDoubleParam(axisNo_, pC_->motorPosition_, &motorPosition);
+        if (motorPosition < motorLowLimit) {
+          setStringParam(pC_->motorMessageText_,"W: Below soft limit");
+          return;
+        }
+        else if (motorPosition > motorHighLimit) {
+          setStringParam(pC_->motorMessageText_,"W: Above soft limit");
+          return;
+        }
+      }
+      if (motorLatestCommand == LATEST_COMMAND_STOP)
+        setStringParam(pC_->motorMessageText_,"I: Stop");
+      else
+        setStringParam(pC_->motorMessageText_," ");
+    }
+    return;
+  }
+  int motorStatusMoving;
+  pC_->getIntegerParam(axisNo_,pC_->motorStatusMoving_, &motorStatusMoving);
+  int motorLatestCommand;
+  pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
+  if (motorStatusMoving) {
+    switch (motorLatestCommand) {
+    case LATEST_COMMAND_HOMING:
+        setStringParam(pC_->motorMessageText_,"I: Homing");
+        break;
+    case LATEST_COMMAND_MOVE_TO_HOME:
+        setStringParam(pC_->motorMessageText_,"I: Moving to home");
+        break;
+    case LATEST_COMMAND_MOVE_ABS:
+        setStringParam(pC_->motorMessageText_,"I: Moving abs");
+        break;
+    case LATEST_COMMAND_MOVE_REL:
+        setStringParam(pC_->motorMessageText_,"I: Moving rel");
+        break;
+    case LATEST_COMMAND_MOVE_VEL:
+        setStringParam(pC_->motorMessageText_,"I: Moving vel");
+        break;
+    case LATEST_COMMAND_STOP:
+        /* Stopped, but moving */
+         pC_->setIntegerParam(axisNo_, pC_->motorLatestCommand_,
+                              LATEST_COMMAND_UNDEFINED);
+         /* fall through */
+    default:
+        setStringParam(pC_->motorMessageText_,"I: Moving");
+    }
+  } else {
+    /* Not done, not moving. Show the latest command */
+    switch (motorLatestCommand) {
+    case LATEST_COMMAND_STOP:
+        setStringParam(pC_->motorMessageText_,"I: Stop");
+        break;
+    case LATEST_COMMAND_HOMING:
+        setStringParam(pC_->motorMessageText_,"I: Home");
+        break;
+    case LATEST_COMMAND_MOVE_TO_HOME:
+        setStringParam(pC_->motorMessageText_,"I: Move to home");
+        break;
+    case LATEST_COMMAND_MOVE_ABS:
+        setStringParam(pC_->motorMessageText_,"I: Move abs");
+        break;
+    case LATEST_COMMAND_MOVE_REL:
+        setStringParam(pC_->motorMessageText_,"I: Move rel");
+        break;
+    case LATEST_COMMAND_MOVE_VEL:
+        setStringParam(pC_->motorMessageText_,"I: Move vel");
+        break;
+    case LATEST_COMMAND_UNDEFINED:
+        setStringParam(pC_->motorMessageText_," ");
+        break;
+    default:
+        setStringParam(pC_->motorMessageText_,"I: Unkown");
+    }
+  }
+}
 
 /** Calls the callbacks for any parameters that have changed for this axis in the parameter library.
   * This function takes special action if the aggregate MotorStatus structure has changed.
@@ -307,6 +536,7 @@ asynStatus asynMotorAxis::callParamCallbacks()
 {
   if (statusChanged_) {
     statusChanged_ = 0;
+    updateMsgTxtField();
     pC_->doCallbacksGenericPointer((void *)&status_, pC_->motorStatus_, axisNo_);
   }
   return pC_->callParamCallbacks(axisNo_);

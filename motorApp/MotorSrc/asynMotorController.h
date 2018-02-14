@@ -14,6 +14,10 @@
 #define MAX_CONTROLLER_STRING_SIZE 256
 #define DEFAULT_CONTROLLER_TIMEOUT 2.0
 
+#define  MOTORNOTHOMEDPROBLEM_IGNORE    0
+#define  MOTORNOTHOMEDPROBLEM_WARNING   1
+#define  MOTORNOTHOMEDPROBLEM_ERROR     2
+
 /** Strings defining parameters for the driver. 
   * These are the values passed to drvUserCreate. 
   * The driver will place in pasynUser->reason an integer to be used when the
@@ -44,6 +48,9 @@
 #define motorPowerOffFractionString     "MOTOR_POWER_OFF_FRACTION"
 #define motorPostMoveDelayString        "MOTOR_POST_MOVE_DELAY"
 #define motorStatusString               "MOTOR_STATUS"
+#define motorLatestCommandString        "MOTOR_LATEST_COMMAND"
+#define motorMessageIsFromDriverString  "MOTOR_MESSAGE_DRIVER"
+#define motorMessageTextString          "MOTOR_MESSAGE_TEXT"
 #define motorUpdateStatusString         "MOTOR_UPDATE_STATUS"
 #define motorStatusDirectionString      "MOTOR_STATUS_DIRECTION" 
 #define motorStatusDoneString           "MOTOR_STATUS_DONE"
@@ -61,10 +68,28 @@
 #define motorStatusLowLimitString       "MOTOR_STATUS_LOW_LIMIT"
 #define motorStatusHomedString          "MOTOR_STATUS_HOMED"
 
+/* Addition flags which can be set by the specific driver */
+#define motorFlagsHomeOnLsString        "MOTOR_FLAGSS_HOME_ON_LS"
+#define motorFlagsNoStopProblemString   "MOTOR_FLAGS_NO_STOP_PROBLEM"
+#define motorFlagsLSrampDownString        "MOTOR_FLAGS_NO_STOP_LS"
+
+/* Not homed is ignored, shown, problem */
+#define motorNotHomedProblemString    "MOTOR_NOT_HOMED_PROBLEM"
+
 /* These are per-axis parameters for passing additional motor record information to the driver */
 #define motorRecResolutionString        "MOTOR_REC_RESOLUTION"
 #define motorRecDirectionString         "MOTOR_REC_DIRECTION"
 #define motorRecOffsetString            "MOTOR_REC_OFFSET"
+
+  /* Parameters from the controller to the driver and record */
+#define motorHighLimitROString          "MOTOR_HIGH_LIMIT_RO"
+#define motorLowLimitROString           "MOTOR_LOW_LIMIT_RO"
+#define motorDefVelocityROString        "MOTOR_DEF_VELO_RO"
+#define motorMaxVelocityROString        "MOTOR_MAX_VELO_RO"
+#define motorDefJogVeloROString         "MOTOR_DEF_JVEL_RO"
+#define motorDefJogAccROString          "MOTOR_DEF_JACC_RO"
+#define motorSDBDROString               "MOTOR_SDBD_RO"
+#define motorRDBDROString               "MOTOR_RDBD_RO"
 
 /* These are the per-controller parameters for profile moves (coordinated motion) */
 #define profileNumAxesString            "PROFILE_NUM_AXES"
@@ -100,12 +125,43 @@
 #define profileReadbacksString          "PROFILE_READBACKS"
 #define profileFollowingErrorsString    "PROFILE_FOLLOWING_ERRORS"
 
+/* bits in status word */
+#define STATUS_BIT_DIRECTION       (1<<0)
+#define STATUS_BIT_DONE            (1<<1)
+#define STATUS_BIT_HIGH_LIMIT      (1<<2)
+#define STATUS_BIT_AT_HOME         (1<<3)
+#define STATUS_BIT_SLIP            (1<<4)
+#define STATUS_BIT_POWERED         (1<<5)
+#define STATUS_BIT_FOLLOWING_ERROR (1<<6)
+#define STATUS_BIT_HOME            (1<<7)
+#define STATUS_BIT_HAS_ENCODER     (1<<8)
+#define STATUS_BIT_PROBLEM         (1<<9)
+#define STATUS_BIT_MOVING          (1<<10)
+#define STATUS_BIT_GAIN_SUPPORT    (1<<11)
+#define STATUS_BIT_COMMS_ERROR     (1<<12)
+#define STATUS_BIT_LOW_LIMIT       (1<<13)
+#define STATUS_BIT_HOMED           (1<<14)
+
+
+typedef struct MotorConfigRO {
+  double motorHighLimitRaw;   /**< Read only high soft limit from controller */
+  double motorLowLimitRaw;    /**< Read only low soft limit from controller */
+  double motorDefVelocityRaw; /**< Default velocity (for movements) */
+  double motorMaxVelocityRaw; /**< Maximum velocity */
+  double motorDefJogVeloRaw;  /**< Default velocity (for jogging) */
+  double motorDefJogAccRaw;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
+  double motorSDBDRaw;        /**< Minimal movement */
+  double motorRDBDRaw;        /**< "At target position" deadband */
+} MotorConfigRO;
+
 /** The structure that is passed back to devMotorAsyn when the status changes. */
 typedef struct MotorStatus {
   double position;           /**< Commanded motor position */
   double encoderPosition;    /**< Actual encoder position */
   double velocity;           /**< Actual velocity */
   epicsUInt32 status;        /**< Word containing status bits (motion done, limits, etc.) */
+  epicsUInt32 flags;         /**< Word containing flag bits  */
+  struct MotorConfigRO MotorConfigRO;
 } MotorStatus;
 
 enum ProfileTimeMode{
@@ -147,6 +203,19 @@ enum ProfileStatus {
   PROFILE_STATUS_TIMEOUT
 };
 
+/* Latest command, needed for MsgTxt */
+enum LatestCommand {
+  LATEST_COMMAND_UNDEFINED,
+  LATEST_COMMAND_STOP,
+  LATEST_COMMAND_HOMING,
+  LATEST_COMMAND_MOVE_TO_HOME,
+  LATEST_COMMAND_MOVE_ABS,
+  LATEST_COMMAND_MOVE_REL,
+  LATEST_COMMAND_MOVE_VEL
+  /* More to be added, like profile move */
+};
+
+
 #ifdef __cplusplus
 #include <asynPortDriver.h>
 
@@ -168,6 +237,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   virtual asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements);
   virtual asynStatus readFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements, size_t *nRead);
   virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
+  virtual asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
   virtual void report(FILE *fp, int details);
 
   /* These are the methods that are new to this class */
@@ -227,6 +297,9 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorPostMoveDelay_;
   int motorStatus_;
   int motorUpdateStatus_;
+  int motorLatestCommand_;
+  int motorMessageIsFromDriver_;
+  int motorMessageText_;
 
   // These are the status bits
   int motorStatusDirection_;
@@ -245,11 +318,31 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorStatusLowLimit_;
   int motorStatusHomed_;
 
-  // These are per-axis parameters for passing additional motor record information to the driver
+  /*
+   * Flags from driver/controller to the record
+   * Don't change the order here, Add new values at the end
+   * Keep in sync with motor.h: #define MF_HOME
+   * Don't forget to update asynMotorMotor::setIntegerParam()
+   */
+  int motorFlagsHomeOnLs_;
+  int motorFlagsNoStopProblem_;
+  int motorFlagsLSrampDown_;
+
+  // These are per-motor parameters for passing additional motor record information to the driver
   int motorRecResolution_;
   int motorRecDirection_;
   int motorRecOffset_;
 
+  // Parameters from the controller to the driver and record
+  int motorNotHomedProblem_;
+  int motorHighLimitRO_;
+  int motorLowLimitRO_;
+  int motorDefVelocityRO_;
+  int motorMaxVelocityRO_;
+  int motorDefJogVeloRO_;
+  int motorDefJogAccRO_;
+  int motorSDBDRO_;
+  int motorRDBDRO_;
   // These are the per-controller parameters for profile moves
   int profileNumAxes_;
   int profileNumPoints_;
@@ -290,7 +383,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   epicsEventId pollEventId_;    /**< Event ID to wake up poller */
   epicsEventId moveToHomeId_;    /**< Event ID to wake up move to home thread */
   double idlePollPeriod_;       /**< The time between polls when no axes are moving */
-  double movingPollPeriod_;     /**< The time between polls when any axis is moving */
+  double movingPollPeriod_;     /**< The time between polls when any motor is moving */
   int    forcedFastPolls_;      /**< The number of forced fast polls when the poller wakes up */
  
   size_t maxProfilePoints_;     /**< Maximum number of profile points */
@@ -304,6 +397,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   asynStatus writeReadController();
   asynStatus writeReadController(const char *output, char *response, size_t maxResponseLen, size_t *responseLen, double timeout);
   asynUser *pasynUserController_;
+  asynStatus asynStatusConnected_;
   char outString_[MAX_CONTROLLER_STRING_SIZE];
   char inString_[MAX_CONTROLLER_STRING_SIZE];
 
