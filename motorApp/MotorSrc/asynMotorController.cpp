@@ -24,6 +24,14 @@ static void asynMotorPollerC(void *drvPvt);
 static void asynMotorMoveToHomeC(void *drvPvt);
 
 
+extern "C" {
+  double getNowTimeSecs(void)
+  {
+    epicsTimeStamp nowTime;
+    epicsTimeGetCurrent(&nowTime);
+    return nowTime.secPastEpoch + (nowTime.nsec * 0.000000001);
+  }
+}
 
 /** Creates a new asynMotorController object.
   * All of the arguments are simply passed to the constructor for the asynPortDriver base class. 
@@ -185,6 +193,21 @@ void asynMotorController::report(FILE *fp, int level)
   asynPortDriver::report(fp, level);
 }
 
+asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
+{
+  asynStatus status = asynSuccess;
+  int axis = pAxis->axisNo_;
+  int autoPower = 0;
+
+  getIntegerParam(axis, motorPowerAutoOnOff_, &autoPower);
+  if (autoPower == 1) {
+    double autoPowerOnDelay = 0.0;
+    getDoubleParam(axis, motorPowerOnDelay_, &autoPowerOnDelay);
+    status = pAxis->setClosedLoop(true);
+    epicsThreadSleep(autoPowerOnDelay);
+  }
+  return status;
+}
 
 /** Called when asyn clients call pasynInt32->write().
   * Extracts the function and axis number from pasynUser.
@@ -289,8 +312,6 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   asynMotorAxis *pAxis;
   int axis;
   int forwards;
-  int autoPower = 0;
-  double autoPowerOnDelay = 0.0;
   asynStatus status = asynError;
   static const char *functionName = "writeFloat64";
 
@@ -298,17 +319,11 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   if (!pAxis) return asynError;
   axis = pAxis->axisNo_;
 
-  getIntegerParam(axis, motorPowerAutoOnOff_, &autoPower);
-  getDoubleParam(axis, motorPowerOnDelay_, &autoPowerOnDelay);
-
   /* Set the parameter and readback in the parameter library. */
   status = pAxis->setDoubleParam(function, value);
 
   if (function == motorMoveRel_) {
-    if (autoPower == 1) {
-      status = pAxis->setClosedLoop(true);
-      epicsThreadSleep(autoPowerOnDelay);
-    }
+    autoPowerOn(pAxis);
     getDoubleParam(axis, motorVelBase_, &baseVelocity);
     getDoubleParam(axis, motorVelocity_, &velocity);
     getDoubleParam(axis, motorAccel_, &acceleration);
@@ -324,10 +339,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
   
   } else if (function == motorMoveAbs_) {
-    if (autoPower == 1) {
-      status = pAxis->setClosedLoop(true);
-      epicsThreadSleep(autoPowerOnDelay);
-    }
+    autoPowerOn(pAxis);
     getDoubleParam(axis, motorVelBase_, &baseVelocity);
     getDoubleParam(axis, motorVelocity_, &velocity);
     getDoubleParam(axis, motorAccel_, &acceleration);
@@ -343,10 +355,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
 
   } else if (function == motorMoveVel_) {
-    if (autoPower == 1) {
-      status = pAxis->setClosedLoop(true);
-      epicsThreadSleep(autoPowerOnDelay);
-    }
+    autoPowerOn(pAxis);
     getDoubleParam(axis, motorVelBase_, &baseVelocity);
     getDoubleParam(axis, motorAccel_, &acceleration);
     pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_VEL);
@@ -362,10 +371,7 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   // Note, the motorHome command happens on the asynFloat64 interface, even though the value (direction) is really integer 
   } else if (function == motorHome_) {
-    if (autoPower == 1) {
-      status = pAxis->setClosedLoop(true);
-      epicsThreadSleep(autoPowerOnDelay);
-    }
+    autoPowerOn(pAxis);
     getDoubleParam(axis, motorVelBase_, &baseVelocity);
     getDoubleParam(axis, motorVelocity_, &velocity);
     getDoubleParam(axis, motorAccel_, &acceleration);
@@ -684,7 +690,6 @@ void asynMotorController::asynMotorPoller()
   int forcedFastPolls=0;
   bool anyMoving;
   bool moving;
-  epicsTimeStamp nowTime;
   double nowTimeSecs = 0.0;
   asynMotorAxis *pAxis;
   int autoPower = 0;
@@ -754,8 +759,7 @@ void asynMotorController::asynMotorPoller()
 	if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
 	  pAxis->setDisableFlag(1);
           pAxis->setWasMovingFlag(0);
-          epicsTimeGetCurrent(&nowTime);
-          pAxis->setLastEndOfMoveTime(nowTime.secPastEpoch + (nowTime.nsec / 1.e9));
+          pAxis->setLastEndOfMoveTime(getNowTimeSecs());
 	}
       }
 
@@ -765,8 +769,7 @@ void asynMotorController::asynMotorPoller()
       //  Auto power off is enabled
       //  Auto power off delay timer has expired
       if ((!moving) && (autoPower == 1) && (pAxis->getDisableFlag() == 1)) {
-	epicsTimeGetCurrent(&nowTime);
-	nowTimeSecs = nowTime.secPastEpoch + (nowTime.nsec / 1.e9);
+	nowTimeSecs = getNowTimeSecs();
 	if ((nowTimeSecs - pAxis->getLastEndOfMoveTime()) >= autoPowerOffDelay) {
 	  pAxis->setClosedLoop(0);
 	  pAxis->setDisableFlag(0);
