@@ -200,11 +200,26 @@ asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
   int autoPower = 0;
 
   getIntegerParam(axis, motorPowerAutoOnOff_, &autoPower);
+  if (!autoPower) return asynSuccess;
+
+  double autoPowerOnDelay = 0.0;
+  getDoubleParam(axis, motorPowerOnDelay_, &autoPowerOnDelay);
   if (autoPower == 1) {
-    double autoPowerOnDelay = 0.0;
-    getDoubleParam(axis, motorPowerOnDelay_, &autoPowerOnDelay);
     status = pAxis->setClosedLoop(true);
     epicsThreadSleep(autoPowerOnDelay);
+    return status;
+  }
+  else if (autoPower == 2) {
+    pAxis->setDisableFlag(0);
+    if (!pAxis->pollPowerIsOn()) {
+      status = pAxis->setClosedLoop(true);
+    }
+    while (autoPowerOnDelay > 0.0) {
+      if (pAxis->pollPowerIsOn())
+        break;
+      epicsThreadSleep(movingPollPeriod_);
+      autoPowerOnDelay -= movingPollPeriod_;
+    }
   }
   return status;
 }
@@ -756,6 +771,10 @@ void asynMotorController::asynMotorPoller()
 	anyMoving = true;
 	pAxis->setWasMovingFlag(1);
       } else {
+        /* autoPower mode 2 does allow to keep power on
+           forever, if autoPowerOffDelay < 0.0 */
+        if ((autoPower == 2) && (autoPowerOffDelay >= 0.0))
+          autoPower = 1;
 	if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
 	  pAxis->setDisableFlag(1);
           pAxis->setWasMovingFlag(0);

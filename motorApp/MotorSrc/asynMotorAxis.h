@@ -16,6 +16,9 @@
 
 #include "asynMotorController.h"
 
+/* Auto-Power, needed in driver */
+#define POWERAUTOONOFFMODE2 2
+
 /** Class from which motor axis objects are derived. */
 class epicsShareClass asynMotorAxis {
 
@@ -35,6 +38,7 @@ class epicsShareClass asynMotorAxis {
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
   virtual asynStatus stop(double acceleration);
   virtual asynStatus initialPoll(void);
+  virtual bool       pollPowerIsOn(void);
   virtual void       handleDisconnect(asynStatus);
   virtual asynStatus poll(bool *moving);
   virtual asynStatus setPosition(double position);

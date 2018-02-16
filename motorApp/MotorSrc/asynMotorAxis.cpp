@@ -120,6 +120,18 @@ asynStatus asynMotorAxis::initialPoll(void)
   return asynSuccess;
 }
 
+
+/** poll of power on status of the axis.
+  * This function is called when the power is turned on before a movement.
+  * Typically there is a "blind" timeout, e.g. 3 seconds.
+  * If the drive can be polled and reports that the power is on,
+  * the timeout will be shortened. */
+
+bool asynMotorAxis::pollPowerIsOn(void)
+{
+  return false;
+}
+
 /** Indicate that the controller is disconnected
   * This function does noy need to do anything.
   * It may set initialPollDone_ to 0. */
