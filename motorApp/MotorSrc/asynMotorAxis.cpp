@@ -54,7 +54,6 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   referencingModeMove_ = 0;
 
   waitNumPollsBeforeReady_  = 0;
-  defWaitNumPollsBeforeReady_ = 0;
   wasMovingFlag_ = 0;
   disableFlag_ = 0;
   initialPollDone_ = 0;

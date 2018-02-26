@@ -83,7 +83,6 @@ class epicsShareClass asynMotorAxis {
   MotorStatus status_;
   int statusChanged_;
   int waitNumPollsBeforeReady_;
-  int defWaitNumPollsBeforeReady_;
   int initialPollDone_;
 
   private:

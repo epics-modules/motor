@@ -73,6 +73,8 @@
 #define motorFlagsNoStopProblemString   "MOTOR_FLAGS_NO_STOP_PROBLEM"
 #define motorFlagsLSrampDownString        "MOTOR_FLAGS_NO_STOP_LS"
 
+#define motorWaitPollsBeforeReadyString "MOTOR_WAIT_POLLS_BEFORE_READY"
+
 /* Not homed is ignored, shown, problem */
 #define motorNotHomedProblemString    "MOTOR_NOT_HOMED_PROBLEM"
 
@@ -333,6 +335,8 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorRecResolution_;
   int motorRecDirection_;
   int motorRecOffset_;
+
+  int motorWaitPollsBeforeReady_;
 
   // Parameters from the controller to the driver and record
   int motorNotHomedProblem_;
