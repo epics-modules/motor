@@ -1,8 +1,10 @@
-# top level master release and local private options 
-include $(TOP)/../../../configure/MASTER_RELEASE
--include $(TOP)/../../../configure/MASTER_RELEASE.$(EPICS_HOST_ARCH)
--include $(TOP)/../../../configure/MASTER_RELEASE.private
--include $(TOP)/../../../configure/MASTER_RELEASE.private.$(EPICS_HOST_ARCH)
+ASYN=$(SUPPORT)/asyn/master
+AUTOSAVE=$(SUPPORT)/autosave/master
+BUSY=$(SUPPORT)/busy/master
+CALC=$(SUPPORT)/calc/master
+IPAC=$(SUPPORT)/ipac/master
+SNCSEQ=$(SUPPORT)/seq/master
+SSCAN=$(SUPPORT)/sscan/master
 
 # optional extra local definitions here
 -include $(TOP)/configure/RELEASE.private
