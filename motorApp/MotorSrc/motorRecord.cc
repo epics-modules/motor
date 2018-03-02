@@ -858,7 +858,7 @@ static void doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
 {
     /* Use if encoder or ReadbackLink is in use. */
     bool use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
-    double diff = position - pmr->drbv;
+    double diff = (position - pmr->drbv) * pmr->frac;
     double amres = fabs(pmr->mres);
     double vbase = pmr->vbas;
     double vel, accEGU;
