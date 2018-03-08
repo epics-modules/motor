@@ -277,7 +277,9 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
     pC_(pC)	
 { 
   int status;
+  
   axisNo_ = axisNo;
+  //this->axisNo_ = axisNo;
 
   //status = pasynInt32SyncIO->connect(myModbusInputDriver, 0, &pasynUserForceRead_, "MODBUS_READ");
   status = pasynInt32SyncIO->connect(pC_->inputDriver_, 0, &pasynUserForceRead_, "MODBUS_READ");
@@ -351,8 +353,10 @@ extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which con
 void ANF2Axis::report(FILE *fp, int level)
 {
   if (level > 0) {
-    fprintf(fp, "  axis %d\n",
-            axisNo_);
+    fprintf(fp, "  axis %d\n", axisNo_);
+    fprintf(fp, "    this->axisNo_ %i\n", this->axisNo_);
+    fprintf(fp, "    this->config_ %x\n", this->config_);
+    fprintf(fp, "    config_ %x\n", config_);
   }
 
   // Call the base class method
@@ -391,7 +395,7 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   asynStatus status;
   int distance, move_bit;
   
-  printf(" ** ANF2Axis::move called, relative = %d\n", relative);
+  printf(" ** ANF2Axis::move called, relative = %d, axisNo_ = %i\n", relative, this->axisNo_);
 
   status = sendAccelAndVelocity(acceleration, maxVelocity);
   
@@ -583,10 +587,10 @@ asynStatus ANF2Axis::poll(bool *moving)
   // 
   //readReg32(int reg, epicsInt32 *combo, double timeout)
   status = pC_->readReg32(axisNo_, POS_RD_UPR, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
-  printf("ANF2Axis::poll:  Motor position raw: %d\n", read_val);
+  //printf("ANF2Axis::poll:  Motor position raw: %d\n", read_val);
   position = (double) read_val;
   setDoubleParam(pC_->motorPosition_, position);
-  printf("ANF2Axis::poll:  Motor position: %f\n", position);
+  //printf("ANF2Axis::poll:  Motor position: %f\n", position);
 
   // Read the moving status of this motor
   //
@@ -597,12 +601,12 @@ asynStatus ANF2Axis::poll(bool *moving)
   done = ((read_val & 0x8) >> 3);  // status word 1 bit 3 set to 1 when the motor is not in motion.
   setIntegerParam(pC_->motorStatusDone_, done);
   *moving = done ? false:true;
-  printf("done is %d\n", done);
+  //printf("done is %d\n", done);
   
   // Read the limit status
   //
   status = pC_->readReg16(axisNo_, STATUS_2, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
-  printf("status 2 is 0x%X\n", read_val);  
+  //printf("status 2 is 0x%X\n", read_val);  
   
   limit  = (read_val & 0x1);    // a cw limit has been reached
   setIntegerParam(pC_->motorStatusHighLimit_, limit);

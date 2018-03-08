@@ -77,6 +77,8 @@ private:
                                    *   Abbreviated because it is used very frequently */
   asynStatus sendAccelAndVelocity(double accel, double velocity);
   asynUser *pasynUserForceRead_;
+  int axisNo_;
+  epicsInt32 config_;
 
 friend class ANF2Controller;
 };
@@ -110,7 +112,6 @@ private:
   asynStatus readReg16(int, int, epicsInt32*, double);
   asynStatus readReg32(int, int, epicsInt32*, double);
   char *inputDriver_;
-  int axisNo_;
 
 friend class ANF2Axis;
 };
