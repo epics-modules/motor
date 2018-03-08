@@ -12,24 +12,50 @@ PROD_IOC_vxWorks = WithAsynVx
 
 COMMONDBDS  = base.dbd
 COMMONDBDS += motorSupport.dbd
+ifndef NO_MOTOR_ACSSRC
 COMMONDBDS += devAcsMotor.dbd
+endif
+ifndef NO_MOTOR_IMSSRC
 COMMONDBDS += devImsMotor.dbd
+endif
+ifndef NO_MOTOR_MCLENNANSRC
 COMMONDBDS += devMclennanMotor.dbd
+endif
+ifndef NO_MOTOR_MICOSSRC
 COMMONDBDS += devMicos.dbd
+endif
+ifndef NO_MOTOR_MICOSSRC
 COMMONDBDS += devMicroMo.dbd
+endif
+ifndef NO_MOTOR_NEWPORTSRC
 COMMONDBDS += devNewport.dbd
+endif
 ifdef SNCSEQ
 COMMONDBDS += LdevNewportTS.dbd
 endif
+ifndef NO_MOTOR_PISRC
 COMMONDBDS += devPIMotor.dbd
+endif
+ifndef NO_MOTOR_OMSSRC
 COMMONDBDS += devOms.dbd
+endif
 COMMONDBDS += devSoftMotor.dbd
 COMMONDBDS += motorSimSupport.dbd
+ifndef NO_MOTOR_SMARTMOTORSRC
 COMMONDBDS += devSmartMotorMotor.dbd
+endif
+ifndef NO_MOTOR_KOHZUSRC
 COMMONDBDS += devKohzuMotor.dbd
+endif
+ifndef NO_MOTOR_ATTOCUBESRC
 COMMONDBDS += devAttocube.dbd
+endif
+ifndef NO_MOTOR_AEROTECHSRC
 COMMONDBDS += devAerotech.dbd
+endif
+ifndef NO_MOTOR_ACRSRC
 COMMONDBDS += ACRMotorSupport.dbd
+endif
 COMMONDBDS += asyn.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
 COMMONDBDS += drvAsynIPPort.dbd
@@ -37,8 +63,12 @@ ifdef BUSY
 	COMMONDBDS += busySupport.dbd
 	COMMONLIBS := busy $(COMMONLIBS)
 endif
+ifndef NO_MOTOR_PISRC
 COMMONDBDS += PI_GCS2Support.dbd
+endif
+ifndef NO_MOTOR_PHYTRONSRC
 COMMONDBDS += phytron.dbd
+endif
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -65,23 +95,53 @@ WithAsynVx_SRCS += WithAsynVx_registerRecordDeviceDriver.cpp
 
 WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
+ifndef NO_MOTOR_AEROTECHSRC
 COMMONLIBS += Aerotech
+endif
+ifndef NO_MOTOR_ATTOCUBESRC
 COMMONLIBS += Attocube
+endif
+ifndef NO_MOTOR_OMSSRC
 COMMONLIBS += oms
+endif
+ifndef NO_MOTOR_MCLENNANSRC
 COMMONLIBS += Mclennan
+endif
+
+ifndef NO_MOTOR_MICOSSRC
 COMMONLIBS += Micos
 COMMONLIBS += MicroMo
+endif
+ifndef NO_MOTOR_PISRC
 COMMONLIBS += PI
+endif
+ifndef NO_MOTOR_ACSSRC
 COMMONLIBS += Acs
+endif
+ifndef NO_MOTOR_IMSSRC
 COMMONLIBS += Ims
+endif
+ifndef NO_MOTOR_NEWPORTSRC
 COMMONLIBS += Newport
+endif
 COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
+ifndef NO_MOTOR_SMARTMOTORSRC
 COMMONLIBS += SmartMotor
+endif
+ifndef NO_MOTOR_KOHZUSRC
 COMMONLIBS += KohzuMotor
+endif
+ifndef NO_MOTOR_ACRSRC
 COMMONLIBS += ACRMotor
+endif
+ifndef NO_MOTOR_PISRC
 COMMONLIBS += PI_GCS2Support
+endif
+ifndef NO_MOTOR_PHYTRONSRC
 COMMONLIBS += phytronAxisMotor
+endif
+
 COMMONLIBS += motor
 
 # Needed for Newport SNL programs

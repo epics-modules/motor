@@ -25,7 +25,9 @@ NoAsyn_DBD += Misc.dbd
 
 DBD += NoAsynVx.dbd
 NoAsynVx_DBD += $(COMMONDBDS)
+ifndef NO_MOTOR_DELTATAUSRC
 NoAsynVx_DBD += devDeltaTau.dbd
+endif
 NoAsynVx_DBD += MiscVx.dbd
 
 NoAsyn_SRCS += NoAsyn_registerRecordDeviceDriver.cpp

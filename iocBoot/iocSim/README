@@ -2,7 +2,7 @@ To build any examples;
 
 - in <motor>/configure/RELEASE: EPICS_BASE and MOTOR must be defined.
 
-- in <motor>/Makefile: the following three lines must be uncommented;
+- in <motor>/Makefile.epics: the following three lines must be uncommented;
   #!DIRS += motorExApp iocBoot
   #!motorExApp_DEPEND_DIRS = motorApp
   #!iocBoot_DEPEND_DIRS    = motorExApp
