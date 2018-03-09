@@ -283,7 +283,7 @@ asynStatus ANF2Controller::readReg32(int axisNo, int axisReg, epicsInt32 *combo,
   * 
   * Initializes register numbers, etc.
   */
-ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
+ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epicsInt32 config)
   : asynMotorAxis(pC, axisNo),
     pC_(pC)	
 { 
@@ -300,14 +300,22 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
   }
   printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
 
+  status = pasynInt32SyncIO->connect(ANF2ConfName, 0, &pasynUserConfWrite_, NULL);
+  if (status) {
+    printf("%s: Error, unable to connect pasynUserConfWrite_ to Modbus input driver\n", ANF2ConfName);	
+  }
+  printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_->reason=%d\n", pasynUserConfWrite_->reason);
+
   epicsThreadSleep(3.0);
 
   // Read data that is likely to be stale
-  //getInfo();
+  getInfo();
 
   // Send the configuration
   //status = pC_->writeReg32(axisNo_, CONFIG_MSW, config, DEFAULT_CONTROLLER_TIMEOUT);
-  status = pC_->writeReg16(axisNo_, CONFIG_MSW, 0x8600, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg16(axisNo_, CONFIG_MSW, 0x8600, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pasynInt32SyncIO->write(pasynUserConfWrite_, config, DEFAULT_CONTROLLER_TIMEOUT);
+  epicsThreadSleep(0.01);
 
   // Delay
   epicsThreadSleep(1.0);
@@ -347,6 +355,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
  */
 
 extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which controller by port name */
+                         const char *ANF2ConfName,          /* specify which config port name */
                          int axis,                         /* axis number 0-1 */
                          const char *hexConfig)            /* desired configuration in hex */
 {
@@ -373,7 +382,7 @@ extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which con
   }
   
   pC->lock();
-  new ANF2Axis(pC, axis, config);
+  new ANF2Axis(pC, ANF2ConfName, axis, config);
   pC->unlock();
   return asynSuccess;
 }
@@ -734,15 +743,17 @@ static void ANF2CreateControllerCallFunc(const iocshArgBuf *args)
 
 /* ANF2CreateAxis */
 static const iocshArg ANF2CreateAxisArg0 = {"Port name", iocshArgString};
-static const iocshArg ANF2CreateAxisArg1 = {"Axis number", iocshArgInt};
-static const iocshArg ANF2CreateAxisArg2 = {"Hex config", iocshArgString};
+static const iocshArg ANF2CreateAxisArg1 = {"Config port name", iocshArgString};
+static const iocshArg ANF2CreateAxisArg2 = {"Axis number", iocshArgInt};
+static const iocshArg ANF2CreateAxisArg3 = {"Hex config", iocshArgString};
 static const iocshArg * const ANF2CreateAxisArgs[] = {&ANF2CreateAxisArg0,
                                                              &ANF2CreateAxisArg1,
-                                                             &ANF2CreateAxisArg2};
-static const iocshFuncDef ANF2CreateAxisDef = {"ANF2CreateAxis", 3, ANF2CreateAxisArgs};
+                                                             &ANF2CreateAxisArg2,
+                                                             &ANF2CreateAxisArg3};
+static const iocshFuncDef ANF2CreateAxisDef = {"ANF2CreateAxis", 4, ANF2CreateAxisArgs};
 static void ANF2CreateAxisCallFunc(const iocshArgBuf *args)
 {
-  ANF2CreateAxis(args[0].sval, args[1].ival, args[2].sval);
+  ANF2CreateAxis(args[0].sval, args[1].sval, args[2].ival, args[3].sval);
 }
 
 
