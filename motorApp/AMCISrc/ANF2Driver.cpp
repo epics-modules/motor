@@ -49,6 +49,9 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   asynStatus status = asynSuccess;
   static const char *functionName = "ANF2Controller::ANF2Controller";
   
+  // Keep track of the number of axes created, so the poller can wait for all the axes to be created before starting
+  axesCreated_ = 0;
+  
   inputDriver_ = epicsStrDup(ANF2InPortName);    // Set this before calls to create Axis objects
   
   // Create controller-specific parameters
@@ -74,7 +77,7 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   }
 
   /* Create the poller thread for this controller (do 2 forced-fast polls)
-   * NOTE: at this point the axis objects don't yet exist, but the poller tolerates this <- KMP: how does it tolerate this? */
+   * NOTE: at this point the axis objects don't yet exist, but the poller tolerates this */
   startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
 
@@ -111,6 +114,7 @@ void ANF2Controller::report(FILE *fp, int level)
 {
   fprintf(fp, "ANF2 motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
     this->portName, numAxes_, movingPollPeriod_, idlePollPeriod_);
+  fprintf(fp, "    axesCreated=%i\n", axesCreated_);
 
   // Call the base class method
   asynMotorController::report(fp, level);
@@ -204,14 +208,21 @@ asynStatus ANF2Controller::writeReg32(int axisNo, int axisReg, int output, doubl
 //.. write the pieces into ANF2 registers
 
   asynStatus status;
-  float fnum;
+
   int lower,upper;
+  /*float fnum;
 
   fnum = (output / 1000.0);
   upper = (int)fnum;
   fnum = fnum - upper;
   fnum = NINT(fnum * 1000);
-  lower = (int)fnum;
+  lower = (int)fnum;*/
+  
+  upper = (output >> 16) & 0x0000FFFF;
+  lower = output & 0x0000FFFF;
+
+  printf("upper = 0x%x\t= %i\n", upper, upper);
+  printf("lower = 0x%x\t= %i\n", lower, lower);
 
   //  writeReg16(piece1 ie MSW ...
   status = writeReg16(axisNo, axisReg, upper, DEFAULT_CONTROLLER_TIMEOUT);
@@ -289,11 +300,35 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
   }
   printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
 
+  epicsThreadSleep(3.0);
+
+  // Read data that is likely to be stale
+  //getInfo();
+
   // Send the configuration
-  status = pC_->writeReg32(axisNo_, CONFIG_MSW, config, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg32(axisNo_, CONFIG_MSW, config, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg16(axisNo_, CONFIG_MSW, 0x8600, DEFAULT_CONTROLLER_TIMEOUT);
+
+  // Delay
+  epicsThreadSleep(1.0);
+
+  // Read the configuration? Or maybe the command registers?
+  getInfo();
+  
+  //IAMHERE
   
   // set position to 0
   setPosition(0);
+  //setPosition(1337);
+  
+  // Delay
+  epicsThreadSleep(1.0);
+  
+  // Read the command registers
+  getInfo();
+  
+  // Tell the driver the axis has been created
+  pC_->axesCreated_ += 1;
 }
 
 /*
@@ -341,6 +376,24 @@ extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which con
   new ANF2Axis(pC, axis, config);
   pC->unlock();
   return asynSuccess;
+}
+
+void ANF2Axis::getInfo()
+{
+  asynStatus status;
+  int i;
+  epicsInt32 read_val;
+  
+  // For a read (not sure why this is necessary)
+  status = pasynInt32SyncIO->write(pasynUserForceRead_, 1, DEFAULT_CONTROLLER_TIMEOUT);
+
+  printf("Info for axis %i\n", axisNo_);
+
+  for( i=0; i<MAX_INPUT_REGS; i++)
+  {
+    status = pC_->readReg16(axisNo_, i, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
+    printf("  status=%d, register=%i, val=0x%x\n", status, i, read_val);
+  }
 }
 
 
@@ -549,8 +602,10 @@ asynStatus ANF2Axis::setClosedLoop(bool closedLoop)
 
 	cmd = 0x0;
     status = pC_->writeReg16(axisNo_, CMD_MSW, cmd, DEFAULT_CONTROLLER_TIMEOUT);	
+    /*
     status = pC_->writeReg16(axisNo_, CMD_LSW, enable, DEFAULT_CONTROLLER_TIMEOUT);
 	setIntegerParam(pC_->motorStatusPowerOn_, 1);
+    */
 	
   } else {
     printf("setting disable %X\n", disable);
@@ -575,6 +630,12 @@ asynStatus ANF2Axis::poll(bool *moving)
   double position;
   asynStatus status;
   epicsInt32 read_val;  // don't use a pointer here.  The _address_ of read_val should be passed to the read function.
+  
+  // Don't do any polling until ALL the axes have been created; this ensures that we don't interpret the configuration values as command values
+  if (pC_->axesCreated_ != pC_->numAxes_) {
+    *moving = false;
+    return asynSuccess;
+  }
   
   // Force a read operation
   //printf(" . . . . . Calling pasynInt32SyncIO->write\n");
@@ -635,7 +696,9 @@ asynStatus ANF2Axis::poll(bool *moving)
   setIntegerParam(pC_->motorStatusGainSupport_, 1);
 
   // Check for the torque status and set accordingly.
-  enabled = (read_val & 0x8000);
+  // The ANG1 driver does the wrong thing for torque enable/disable
+  //enabled = (read_val & 0x8000);
+  enabled = 1;
   if (enabled)
     setIntegerParam(pC_->motorStatusPowerOn_, 1);
   else

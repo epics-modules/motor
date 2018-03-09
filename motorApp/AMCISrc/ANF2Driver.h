@@ -76,6 +76,7 @@ private:
   ANF2Controller *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   asynStatus sendAccelAndVelocity(double accel, double velocity);
+  void getInfo();
   asynUser *pasynUserForceRead_;
   int axisNo_;
   epicsInt32 config_;
@@ -112,6 +113,7 @@ private:
   asynStatus readReg16(int, int, epicsInt32*, double);
   asynStatus readReg32(int, int, epicsInt32*, double);
   char *inputDriver_;
+  int axesCreated_;
 
 friend class ANF2Axis;
 };
