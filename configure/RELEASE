@@ -5,6 +5,7 @@ CALC=$(SUPPORT)/calc/master
 IPAC=$(SUPPORT)/ipac/master
 SNCSEQ=$(SUPPORT)/seq/master
 SSCAN=$(SUPPORT)/sscan/master
+ONCRPC=$(SUPPORT)/oncrpc/master
 
 # optional extra local definitions here
 -include $(TOP)/configure/RELEASE.private
