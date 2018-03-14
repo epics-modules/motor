@@ -39,8 +39,8 @@ static const char *driverName = "ANF2MotorDriver";
 ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, int numAxes, 
                                  double movingPollPeriod, double idlePollPeriod)
   :  asynMotorController(portName, numAxes, NUM_ANF2_PARAMS, 
-                         0, // No additional interfaces beyond those in base class
-                         0, // No additional callback interfaces beyond those in base class
+                         asynInt32ArrayMask, // One additional interface beyond those in base class
+                         asynInt32ArrayMask, // One additional callback interface beyond those in base class
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
                          1, // autoconnect
                          0, 0)  // Default priority and stack size
@@ -68,6 +68,7 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
     }
     for (i=0; i<MAX_OUTPUT_REGS; i++) {
       status = pasynInt32SyncIO->connect(ANF2OutPortName, i, &pasynUserOutReg_[j][i], NULL);
+      //status = pasynInt32ArraySyncIO->connect(ANF2OutPortName, i, &pasynUserOutArrayReg_[j][i], NULL);
     }
   }
   if (status) {
@@ -197,10 +198,21 @@ asynStatus ANF2Controller::writeReg16(int axisNo, int axisReg, int output, doubl
   //printf("writeReg16: writing %d to register %d\n", output, axisReg);
   asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER,"writeReg16: writing %d to register %d\n", output, axisReg);  
   status = pasynInt32SyncIO->write(pasynUserOutReg_[axisNo][axisReg], output, timeout);
+  //status = pasynInt32ArraySyncIO->write(pasynUserOutArrayReg_[axisNo][axisReg], &output, 1, timeout);
   epicsThreadSleep(0.01);
                                   
   return status ;
 }
+
+/*asynStatus ANF2Controller::writeReg32Array(int axisNo, int axisReg, epicsInt32* output, int nElements, double timeout)
+{
+  asynStatus status;
+  
+  asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER,"writeReg32Array: writing %d elements starting at register %d\n", nElements, axisReg);  
+  status = pasynInt32ArraySyncIO->write(pasynUserOutArrayReg_[axisNo][axisReg], output, nElements, timeout);
+    
+  return status ;
+}*/
 
 asynStatus ANF2Controller::writeReg32(int axisNo, int axisReg, int output, double timeout)
 {
@@ -230,6 +242,9 @@ asynStatus ANF2Controller::writeReg32(int axisNo, int axisReg, int output, doubl
   //  writeReg16(piece2 ie LSW ...
   axisReg++;
   status = writeReg16(axisNo, axisReg, lower, DEFAULT_CONTROLLER_TIMEOUT);
+
+  // No breaking up the output value required when writing an array
+  //status = pasynInt32ArraySyncIO->write(pasynUserOutArrayReg_[axisNo][axisReg], &output, 2, timeout);
 
   return status ;
 }
@@ -288,6 +303,9 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
     pC_(pC)	
 { 
   int status;
+  long long bigConfig;
+  long long configAndSpeed;
+  epicsInt32 configBits[2];
   
   axisNo_ = axisNo;
   //this->axisNo_ = axisNo;
@@ -300,7 +318,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   }
   printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
 
-  status = pasynInt32SyncIO->connect(ANF2ConfName, 0, &pasynUserConfWrite_, NULL);
+  status = pasynInt32ArraySyncIO->connect(ANF2ConfName, 0, &pasynUserConfWrite_, NULL);
   if (status) {
     printf("%s: Error, unable to connect pasynUserConfWrite_ to Modbus input driver\n", ANF2ConfName);	
   }
@@ -314,11 +332,29 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   // Send the configuration
   //status = pC_->writeReg32(axisNo_, CONFIG_MSW, config, DEFAULT_CONTROLLER_TIMEOUT);
   //status = pC_->writeReg16(axisNo_, CONFIG_MSW, 0x8600, DEFAULT_CONTROLLER_TIMEOUT);
-  status = pasynInt32SyncIO->write(pasynUserConfWrite_, config, DEFAULT_CONTROLLER_TIMEOUT);
-  epicsThreadSleep(0.01);
+  // Send the configuration bits
+  //status = pasynInt32SyncIO->write(pasynUserConfWrite_, config, DEFAULT_CONTROLLER_TIMEOUT);
+  // Set the start speed to a non-zero value (100)
+  //status = pC_->writeReg16(axisNo_, POS_WR_LWR, 0x0064, DEFAULT_CONTROLLER_TIMEOUT);
+  //epicsThreadSleep(0.01);
+
+  /*bigConfig = (long long) config & 0xFFFFFFFF;
+  configAndSpeed = (bigConfig << 32) | 0x00000064;
+  printf("bigConfig = %lx, configAndSpeed = %lx\n", bigConfig, configAndSpeed);
+  status = pasynInt32SyncIO->write(pasynUserConfWrite_, configAndSpeed, DEFAULT_CONTROLLER_TIMEOUT);*/
+
+  configBits[0] = config;
+  configBits[1] = 0x00000064;
+  /*status = pasynInt32SyncIO->write(pasynUserConfWrite_, *configBits, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pasynInt32SyncIO->write(pasynUserConfWrite_, *(configBits+1), DEFAULT_CONTROLLER_TIMEOUT);*/
+  
+  // Does the number of elements refer to the number of 16-bit elements?
+  //status = this->pC_->writeReg32Array(axisNo, CONFIG_MSW, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
+  // 
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Delay
-  epicsThreadSleep(1.0);
+  epicsThreadSleep(10.0);
 
   // Read the configuration? Or maybe the command registers?
   getInfo();
@@ -326,8 +362,8 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   //IAMHERE
   
   // set position to 0
-  setPosition(0);
-  //setPosition(1337);
+  //setPosition(0);
+  setPosition(1337);
   
   // Delay
   epicsThreadSleep(1.0);

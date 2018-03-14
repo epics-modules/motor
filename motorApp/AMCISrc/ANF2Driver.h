@@ -12,6 +12,8 @@ K. Goetze 2014-03-24
 
 #include "asynMotorController.h"
 #include "asynMotorAxis.h"
+//#include <asynInt32Array.h>
+#include <asynInt32ArraySyncIO.h>
 
 #define MAX_AXES 2
 
@@ -94,8 +96,7 @@ public:
   ANF2Axis* getAxis(int axisNo); 
   asynUser *pasynUserInReg_[MAX_AXES][MAX_INPUT_REGS];
   asynUser *pasynUserOutReg_[MAX_AXES][MAX_OUTPUT_REGS]; 
-//  asynUser *pasynUserForceRead_;
-
+  //asynUser *pasynUserOutArrayReg_[MAX_AXES][MAX_OUTPUT_REGS]; 
 
   /* These are the methods that we override from asynMotorDriver */
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
@@ -111,6 +112,7 @@ protected:
 private:
   asynStatus writeReg16(int, int, int, double);
   asynStatus writeReg32(int, int, int, double);
+  //asynStatus writeReg32Array(int, int, epicsInt32*, int, double);
   asynStatus readReg16(int, int, epicsInt32*, double);
   asynStatus readReg32(int, int, epicsInt32*, double);
   char *inputDriver_;
