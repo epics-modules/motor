@@ -344,7 +344,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   registers_[1] = 0x00000064;
   
   // Does the number of elements refer to the number of 16-bit elements?
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
   // Mabye do it this way in the future
   //status = this->pC_->writeReg32Array(axisNo, CONFIG_MSW, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
   // Write all the registers
