@@ -454,10 +454,12 @@ asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity)
   // Therefore need to limit range received by motor record from 1000 to 5e6 steps/sec/sec
   if (acceleration < 1000) {
     // print message noting that accel has been capped low
+    //printf("Acceleration is < 1000: %lf\n", acceleration);
     acceleration = 1000;
   }
   if (acceleration > 5000000) {
     // print message noting that accel has been capped high
+    //printf("Acceleration is > 5000: %lf\n", acceleration);
     acceleration = 5000000;
   }
   // ANF2 acceleration units are steps/millisecond/second, so we divide by 1000 here
@@ -483,8 +485,8 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
     distance = NINT(position);
     status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
     
-    //move_bit = 0x0;
-    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    move_bit = 0x0;
+    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x2;
     status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
@@ -497,8 +499,8 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
     printf(" ** distance = %d\n", distance);
     status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
     
-    //move_bit = 0x0;
-    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    move_bit = 0x0;
+    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x1;
     status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);	
