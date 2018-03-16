@@ -83,6 +83,7 @@ private:
   asynUser *pasynUserConfWrite_;
   int axisNo_;
   epicsInt32 config_;
+  epicsInt32 registers_[5];
 
 friend class ANF2Controller;
 };

@@ -308,6 +308,12 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   axisNo_ = axisNo;
   //this->axisNo_ = axisNo;
 
+  registers_[0] = 0x0;
+  registers_[1] = 0x0;
+  registers_[2] = 0x0;
+  registers_[3] = 0x0;
+  registers_[4] = 0x0;
+
   status = pasynInt32SyncIO->connect(pC_->inputDriver_, 0, &pasynUserForceRead_, "MODBUS_READ");
   if (status) {
     //printf("%s:%s: Error, unable to connect pasynUserForceRead_ to Modbus input driver %s\n", pC_->inputDriver_, pC_->functionName, myModbusInputDriver);
@@ -334,10 +340,15 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   configBits[0] = config;
   configBits[1] = 0x00000064;
   
+  registers_[0] = config;
+  registers_[1] = 0x00000064;
+  
   // Does the number of elements refer to the number of 16-bit elements?
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
   // Mabye do it this way in the future
   //status = this->pC_->writeReg32Array(axisNo, CONFIG_MSW, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
+  // Write all the registers
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 10, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Delay
   epicsThreadSleep(1.0);
@@ -447,7 +458,10 @@ asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity)
   // static const char *functionName = "ANF2::sendAccelAndVelocity";
 
   // Send the velocity
-  status = pC_->writeReg32(axisNo_, SPD_UPR, NINT(velocity), DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg32(axisNo_, SPD_UPR, NINT(velocity), DEFAULT_CONTROLLER_TIMEOUT);
+
+  // Set the velocity register
+  registers_[2] = NINT(velocity);
 
   // Send the acceleration
   // ANF2 acceleration range 1 to 5000 steps/ms/sec
@@ -463,8 +477,12 @@ asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity)
     acceleration = 5000000;
   }
   // ANF2 acceleration units are steps/millisecond/second, so we divide by 1000 here
-  status = pC_->writeReg16(axisNo_, ACCEL, NINT(acceleration/1000.0), DEFAULT_CONTROLLER_TIMEOUT);
-  status = pC_->writeReg16(axisNo_, DECEL, NINT(acceleration/1000.0), DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg16(axisNo_, ACCEL, NINT(acceleration/1000.0), DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg16(axisNo_, DECEL, NINT(acceleration/1000.0), DEFAULT_CONTROLLER_TIMEOUT);
+  
+  // Set the accel/decel register
+  registers_[3] = (NINT(acceleration/1000.0) << 16) | (NINT(acceleration/1000.0));
+    
   return status;
 }
 
@@ -481,30 +499,46 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   if (relative) {
     printf(" ** relative move called\n");
     //status = pC_->writeReg32(axisNo_, SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
-    //distance = position *  SOM_OTHER_SCALE_FACTOR;
     distance = NINT(position);
-    status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
+    //status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x0;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x2;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+  
+    // Set position and cmd registers
+    registers_[1] = NINT(position);
+    registers_[0] = 0x2 << 16;
+  
   } else {
     // absolute
     printf(" ** absolute move called\n");
     //status = pC_->writeReg32(axisNo_, SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
-    //distance = position *  SOM_OTHER_SCALE_FACTOR;
     distance = NINT(position);
     printf(" ** distance = %d\n", distance);
-    status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
+    //status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x0;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x1;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);	
+    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);	
+  
+    // Set position and cmd registers
+    registers_[1] = NINT(position);
+    registers_[0] = 0x1 << 16;
+  
   }
+  
+  // The final registers are zero for absolute and relative moves
+  registers_[4] = 0x0;
+  
+  // Write all the registers atomically IAMHERE
+  // Does the number of elements refer to the number of 16-bit elements?
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 10, DEFAULT_CONTROLLER_TIMEOUT);
+  
   // Delay the first status read, give the controller some time to return moving status
   epicsThreadSleep(0.05);
   return status;
