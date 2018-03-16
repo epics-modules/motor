@@ -58,7 +58,7 @@ K. Goetze 2014-03-24
 #define NUM_ANF2_PARAMS 1 
 
 /** drvInfo strings for extra parameters that the ACR controller supports */
-#define ANF2JerkString           "ANF2_JERK"
+#define ANF2GetInfoString           "ANF2_GET_INFO"
 
 class ANF2Axis : public asynMotorAxis
 {
@@ -106,7 +106,7 @@ public:
   /* These are the methods that are new to this class */
   
 protected:
-  int ANF2Jerk_;          /**< Jerk time parameter index */        
+  int ANF2GetInfo_;          /**< Jerk time parameter index */        
 
 
 private:

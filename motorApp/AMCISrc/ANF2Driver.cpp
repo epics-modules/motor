@@ -55,7 +55,7 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   inputDriver_ = epicsStrDup(ANF2InPortName);    // Set this before calls to create Axis objects
   
   // Create controller-specific parameters
-  createParam(ANF2JerkString,         asynParamInt32,       &ANF2Jerk_);
+  createParam(ANF2GetInfoString,         asynParamInt32,       &ANF2GetInfo_);
   
   if (numAxes > MAX_AXES) {
     numAxes = MAX_AXES;
@@ -159,23 +159,19 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
   /* Set the parameter and readback in the parameter library. */
   status = setIntegerParam(pAxis->axisNo_, function, value);
   
-  // The ANF controller doesn't have a jerk variable
-  // Could probably just not overload writeInt32 at all
-  /*
-  if (function == ANF2Jerk_)
+  if (function == ANF2GetInfo_)
   {
-    // Jerk in units steps/sec/sec/sec (0 - 5000)
-    printf("Jerk = %d\n", value);
-	status = writeReg16(JERK, value, DEFAULT_CONTROLLER_TIMEOUT);
+    // Only get info when value is 1
+    if (value == 1) {
+        printf("ANF2Controller:writeInt32: Getting info for axis = %d\n", pAxis->axisNo_);
+        pAxis->getInfo();
 
-//    sprintf(outString_, "%s JOG JRK %f", pAxis->axisName_, value);
-//    status = writeController();
-    
+    }
   } else {
   // Call base class method
     status = asynMotorController::writeInt32(pasynUser, value);
   }
-  */
+  
   // Call base class method
   status = asynMotorController::writeInt32(pasynUser, value);
   
@@ -483,24 +479,28 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   if (relative) {
     printf(" ** relative move called\n");
     //status = pC_->writeReg32(axisNo_, SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
-	//distance = position *  SOM_OTHER_SCALE_FACTOR;
-	distance = NINT(position);
+    //distance = position *  SOM_OTHER_SCALE_FACTOR;
+    distance = NINT(position);
     status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
-	move_bit = 0x0;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
-	move_bit = 0x2;
+    
+    //move_bit = 0x0;
+    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    
+    move_bit = 0x2;
     status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
   } else {
     // absolute
     printf(" ** absolute move called\n");
     //status = pC_->writeReg32(axisNo_, SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
-	//distance = position *  SOM_OTHER_SCALE_FACTOR;
-	distance = NINT(position);
-	printf(" ** distance = %d\n", distance);
+    //distance = position *  SOM_OTHER_SCALE_FACTOR;
+    distance = NINT(position);
+    printf(" ** distance = %d\n", distance);
     status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
-	move_bit = 0x0;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
-	move_bit = 0x1;
+    
+    //move_bit = 0x0;
+    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    
+    move_bit = 0x1;
     status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);	
   }
   // Delay the first status read, give the controller some time to return moving status
@@ -665,12 +665,16 @@ asynStatus ANF2Axis::poll(bool *moving)
     return asynSuccess;
   }
   
+  //getInfo();
+  
   // Force a read operation
   //printf(" . . . . . Calling pasynInt32SyncIO->write\n");
   //printf("Calling pasynInt32SyncIO->write(pasynUserForceRead_, 1, TIMEOUT), pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
   status = pasynInt32SyncIO->write(pasynUserForceRead_, 1, DEFAULT_CONTROLLER_TIMEOUT);
   //printf(" . . . . . status = %d\n", status);
   // if status goto end
+
+  //getInfo();
 
   // Read the current motor position
   // 
@@ -697,7 +701,7 @@ asynStatus ANF2Axis::poll(bool *moving)
   status = pC_->readReg16(axisNo_, STATUS_2, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
   //printf("status 2 is 0x%X\n", read_val);  
   
-  limit  = (read_val & 0x1);    // a cw limit has been reached
+  limit  = (read_val & 0x8);    // a cw limit has been reached
   setIntegerParam(pC_->motorStatusHighLimit_, limit);
   //printf("+limit %d\n", limit);
     if (limit) {   // reset error and set position so we can move off of the limit
@@ -708,7 +712,7 @@ asynStatus ANF2Axis::poll(bool *moving)
 	setPosition(position);
   }
 
-  limit  = (read_val & 0x2);    // a ccw limit has been reached
+  limit  = (read_val & 0x10);    // a ccw limit has been reached
   setIntegerParam(pC_->motorStatusLowLimit_, limit);
   //printf("-limit %d\n", limit);
   if (limit) {   // reset error and set position so we can move off of the limit
