@@ -628,20 +628,29 @@ asynStatus ANF2Axis::stop(double acceleration)
 asynStatus ANF2Axis::setPosition(double position)
 {
   asynStatus status;
-  int set_position, set_bit;
+  int set_bit;
+  epicsInt32 set_position;
   //static const char *functionName = "ANF2Axis::setPosition";
 
   //status = writeReg32(SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
-  //distance = position *  SOM_OTHER_SCALE_FACTOR;
   set_position = NINT(position);
   
-  status = pC_->writeReg32(axisNo_, POS_WR_UPR, set_position, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg32(axisNo_, POS_WR_UPR, set_position, DEFAULT_CONTROLLER_TIMEOUT);
 
   set_bit = 0x200;
-  status = pC_->writeReg16(axisNo_, CMD_MSW, set_bit, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg16(axisNo_, CMD_MSW, set_bit, DEFAULT_CONTROLLER_TIMEOUT);
 
   set_bit = 0x0;
-  status = pC_->writeReg16(axisNo_, CMD_MSW, set_bit, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg16(axisNo_, CMD_MSW, set_bit, DEFAULT_CONTROLLER_TIMEOUT);
+
+  registers_[0] = 0x200 << 16;
+  registers_[1] = set_position;
+  registers_[2] = 0x0;
+  registers_[3] = 0x0;
+  registers_[4] = 0x0;
+
+  // Write all the registers atomically
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 10, DEFAULT_CONTROLLER_TIMEOUT);
 
   return status;
 }
