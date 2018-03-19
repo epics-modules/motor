@@ -503,7 +503,7 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
     //status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x0;
-    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x2;
     //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
@@ -521,7 +521,7 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
     //status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x0;
-    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
     
     move_bit = 0x1;
     //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);	
