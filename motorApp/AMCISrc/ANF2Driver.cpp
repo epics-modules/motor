@@ -64,10 +64,10 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   for (j=0; j<numAxes; j++) {
     /* Connect to ANF2 controller */
     for (i=0; i<MAX_INPUT_REGS; i++) {
-      status = pasynInt32SyncIO->connect(ANF2InPortName, i, &pasynUserInReg_[j][i], NULL);
+      status = pasynInt32SyncIO->connect(ANF2InPortName, i+j*AXIS_REG_OFFSET, &pasynUserInReg_[j][i], NULL);
     }
     for (i=0; i<MAX_OUTPUT_REGS; i++) {
-      status = pasynInt32SyncIO->connect(ANF2OutPortName, i, &pasynUserOutReg_[j][i], NULL);
+      status = pasynInt32SyncIO->connect(ANF2OutPortName, i+j*AXIS_REG_OFFSET, &pasynUserOutReg_[j][i], NULL);
       // Maybe send the outputs with Array calls in the future
       //status = pasynInt32ArraySyncIO->connect(ANF2OutPortName, i, &pasynUserOutArrayReg_[j][i], NULL);
     }
@@ -114,10 +114,18 @@ extern "C" int ANF2CreateController(const char *portName, const char *ANF2InPort
   */
 void ANF2Controller::report(FILE *fp, int level)
 {
+  int i, j;
+  
   fprintf(fp, "ANF2 motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
     this->portName, numAxes_, movingPollPeriod_, idlePollPeriod_);
   fprintf(fp, "    axesCreated=%i\n", axesCreated_);
-
+  
+  for (j=0; j<MAX_AXES; j++) {
+  fprintf(fp, "  axis #%i\n", j);
+    for (i=0; i<MAX_INPUT_REGS; i++) {
+       fprintf(fp, "    reg %i, pasynUserInReg_[%i][%i]=0x%x, pasynUserOutReg_[%i][%i]=0x%x\n", i, j, i, pasynUserInReg_[j][i], j, i, pasynUserOutReg_[j][i]);
+     }
+  }
   // Call the base class method
   asynMotorController::report(fp, level);
 }
@@ -321,11 +329,12 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   }
   printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
 
-  status = pasynInt32ArraySyncIO->connect(ANF2ConfName, 0, &pasynUserConfWrite_, NULL);
+  status = pasynInt32ArraySyncIO->connect(ANF2ConfName, axisNo_*AXIS_REG_OFFSET, &pasynUserConfWrite_, NULL);
   if (status) {
     printf("%s: Error, unable to connect pasynUserConfWrite_ to Modbus input driver\n", ANF2ConfName);	
   }
   printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_->reason=%d\n", pasynUserConfWrite_->reason);
+  printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_ offset=%d\n", axisNo_*AXIS_REG_OFFSET);
 
   epicsThreadSleep(1.0);
 
@@ -632,6 +641,9 @@ asynStatus ANF2Axis::setPosition(double position)
   epicsInt32 set_position;
   //static const char *functionName = "ANF2Axis::setPosition";
 
+  set_bit = 0x0;
+  status = pC_->writeReg16(axisNo_, CMD_MSW, set_bit, DEFAULT_CONTROLLER_TIMEOUT);
+
   //status = writeReg32(SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
   set_position = NINT(position);
   
@@ -728,7 +740,7 @@ asynStatus ANF2Axis::poll(bool *moving)
   //printf("ANF2Axis::poll:  Motor position raw: %d\n", read_val);
   position = (double) read_val;
   setDoubleParam(pC_->motorPosition_, position);
-  //printf("ANF2Axis::poll:  Motor position: %f\n", position);
+  //printf("ANF2Axis::poll:  Motor #%i position: %f\n", axisNo_, position);
 
   // Read the moving status of this motor
   //
