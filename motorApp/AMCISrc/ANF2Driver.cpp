@@ -311,8 +311,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
     pC_(pC)	
 { 
   int status;
-  epicsInt32 configBits[2];
-  
+
   axisNo_ = axisNo;
   //this->axisNo_ = axisNo;
 
@@ -346,16 +345,10 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
  
   // Send the configuration (array) 
   // assemble the configuration bits; set the start speed to a non-zero value (100), which is required for the configuration to be accepted
-  configBits[0] = config;
-  configBits[1] = 0x00000064;
-  
   registers_[0] = config;
   registers_[1] = 0x00000064;
   
   // Does the number of elements refer to the number of 16-bit elements?
-  //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
-  // Mabye do it this way in the future
-  //status = this->pC_->writeReg32Array(axisNo, CONFIG_MSW, configBits, 4, DEFAULT_CONTROLLER_TIMEOUT);
   // Write all the registers
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 10, DEFAULT_CONTROLLER_TIMEOUT);
 
