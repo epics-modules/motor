@@ -502,17 +502,17 @@ asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity)
   registers_[2] = NINT(velocity);
 
   // Send the acceleration
-  // ANF2 acceleration range 1 to 5000 steps/ms/sec
+  // ANF2 acceleration range 1 to 2000 steps/ms/sec
   // Therefore need to limit range received by motor record from 1000 to 5e6 steps/sec/sec
   if (acceleration < 1000) {
     // print message noting that accel has been capped low
     //printf("Acceleration is < 1000: %lf\n", acceleration);
     acceleration = 1000;
   }
-  if (acceleration > 5000000) {
+  if (acceleration > 2000000) {
     // print message noting that accel has been capped high
-    //printf("Acceleration is > 5000: %lf\n", acceleration);
-    acceleration = 5000000;
+    //printf("Acceleration is > 2000: %lf\n", acceleration);
+    acceleration = 2000000;
   }
   // ANF2 acceleration units are steps/millisecond/second, so we divide by 1000 here
   //status = pC_->writeReg16(axisNo_, ACCEL, NINT(acceleration/1000.0), DEFAULT_CONTROLLER_TIMEOUT);
