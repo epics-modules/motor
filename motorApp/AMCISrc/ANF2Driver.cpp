@@ -56,7 +56,8 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   
   // Create controller-specific parameters
   createParam(ANF2GetInfoString,         asynParamInt32,       &ANF2GetInfo_);
-  
+  createParam(ANF2ReconfigString,        asynParamInt32,       &ANF2Reconfig_);
+
   if (numAxes > MAX_AXES) {
     numAxes = MAX_AXES;
   }
@@ -175,6 +176,10 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
         pAxis->getInfo();
 
     }
+  } else if (function == ANF2Reconfig_)
+  {
+    // reconfig regardless of the value
+    pAxis->reconfig();
   } else {
   // Call base class method
     status = asynMotorController::writeInt32(pasynUser, value);
@@ -321,7 +326,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   registers_[3] = 0x0;
   registers_[4] = 0x0;
 
-  status = pasynInt32SyncIO->connect(pC_->inputDriver_, 0, &pasynUserForceRead_, "MODBUS_READ");
+  status = pasynInt32SyncIO->connect(pC_->inputDriver_, axisNo_*AXIS_REG_OFFSET, &pasynUserForceRead_, "MODBUS_READ");
   if (status) {
     //printf("%s:%s: Error, unable to connect pasynUserForceRead_ to Modbus input driver %s\n", pC_->inputDriver_, pC_->functionName, myModbusInputDriver);
     printf("%s: Error, unable to connect pasynUserForceRead_ to Modbus input driver\n", pC_->inputDriver_);	
@@ -348,9 +353,8 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   registers_[0] = config;
   registers_[1] = 0x00000064;
   
-  // Does the number of elements refer to the number of 16-bit elements?
   // Write all the registers
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 10, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Delay
   epicsThreadSleep(1.0);
@@ -431,6 +435,38 @@ void ANF2Axis::getInfo()
     status = pC_->readReg16(axisNo_, i, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
     printf("  status=%d, register=%i, val=0x%x\n", status, i, read_val);
   }
+}
+
+void ANF2Axis::reconfig()
+{
+  asynStatus status;
+  int reg;
+  
+  printf("Reconfiguring axis %i\n", axisNo_);
+
+  // The command/cfg register must first be zeroed
+  reg = 0x0;
+  status = pC_->writeReg16(axisNo_, CMD_MSW, reg, DEFAULT_CONTROLLER_TIMEOUT);
+
+  // Construct the new config
+  registers_[0] = 0x86000000;
+  registers_[1] = 0x00000064;
+  registers_[2] = 0x0;
+  registers_[3] = 0x0;
+  registers_[4] = 0x0;
+
+  epicsThreadSleep(2.0);
+  getInfo();
+
+  // Send the new config
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+
+  epicsThreadSleep(2.0);
+  getInfo();
+
+  // Set the position to clear the invalid position error  
+  setPosition(2048);
+  getInfo();
 }
 
 
@@ -537,9 +573,9 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   // The final registers are zero for absolute and relative moves
   registers_[4] = 0x0;
   
-  // Write all the registers atomically IAMHERE
-  // Does the number of elements refer to the number of 16-bit elements?
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 10, DEFAULT_CONTROLLER_TIMEOUT);
+  // Write all the registers atomically
+  // The number of elements refers to the number of epicsInt32s registers_
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 5, DEFAULT_CONTROLLER_TIMEOUT);
   
   // Delay the first status read, give the controller some time to return moving status
   epicsThreadSleep(0.05);
@@ -655,7 +691,7 @@ asynStatus ANF2Axis::setPosition(double position)
   registers_[4] = 0x0;
 
   // Write all the registers atomically
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 10, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, registers_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   return status;
 }
