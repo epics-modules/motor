@@ -1,7 +1,7 @@
 file "$(MOTOR)/db/asyn_motor.db"
 {
 pattern
-{N,  M,      ADDR,  DESC,          EGU,      DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC}
-{1,  "m$(N)",  0,  "motor $(N)",  degrees,  Pos,  1,     .1,    .2,    0,     1,     .2,    0.01,  5}
-#{2,  "m$(N)",  1,  "motor $(N)",  degrees,  Pos,  1,     .1,    .2,    0,     1,     .2,    0.01,  5}
+{N,  M,      ADDR,  DESC,          EGU,      DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC, INIT}
+{1,  "m$(N)",  0,  "motor $(N)",  degrees,  Pos,  1,     .1,    .2,    0,     1,     .2,    0.01,  5, ""}
+#{2,  "m$(N)",  1,  "motor $(N)",  degrees,  Pos,  1,     .1,    .2,    0,     1,     .2,    0.01,  5, ""}
 }
