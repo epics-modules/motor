@@ -81,11 +81,13 @@ private:
   asynStatus sendAccelAndVelocity(double accel, double velocity);
   void getInfo();
   void reconfig();
+  void zeroRegisters(epicsInt32 *reg);
   asynUser *pasynUserForceRead_;
   asynUser *pasynUserConfWrite_;
   int axisNo_;
   epicsInt32 config_;
-  epicsInt32 registers_[5];
+  epicsInt32 motionReg_[5];
+  epicsInt32 confReg_[5];
 
 friend class ANF2Controller;
 };
