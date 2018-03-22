@@ -490,43 +490,33 @@ void ANF2Axis::report(FILE *fp, int level)
 // SET VEL & ACCEL
 asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity) 
 {
-  asynStatus status;
   // static const char *functionName = "ANF2::sendAccelAndVelocity";
-
-  // Send the velocity
-  //status = pC_->writeReg32(axisNo_, SPD_UPR, NINT(velocity), DEFAULT_CONTROLLER_TIMEOUT);
 
   // Set the velocity register
   motionReg_[2] = NINT(velocity);
 
-  // Send the acceleration
   // ANF2 acceleration range 1 to 2000 steps/ms/sec
-  // Therefore need to limit range received by motor record from 1000 to 5e6 steps/sec/sec
+  // Therefore need to limit range received by motor record from 1000 to 2e6 steps/sec/sec
   if (acceleration < 1000) {
-    // print message noting that accel has been capped low
     //printf("Acceleration is < 1000: %lf\n", acceleration);
     acceleration = 1000;
   }
   if (acceleration > 2000000) {
-    // print message noting that accel has been capped high
     //printf("Acceleration is > 2000: %lf\n", acceleration);
     acceleration = 2000000;
   }
-  // ANF2 acceleration units are steps/millisecond/second, so we divide by 1000 here
-  //status = pC_->writeReg16(axisNo_, ACCEL, NINT(acceleration/1000.0), DEFAULT_CONTROLLER_TIMEOUT);
-  //status = pC_->writeReg16(axisNo_, DECEL, NINT(acceleration/1000.0), DEFAULT_CONTROLLER_TIMEOUT);
   
   // Set the accel/decel register
   motionReg_[3] = (NINT(acceleration/1000.0) << 16) | (NINT(acceleration/1000.0));
     
-  return status;
+  return asynSuccess;
 }
 
 // MOVE
 asynStatus ANF2Axis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  int distance, move_bit;
+  epicsInt32 distance;
   
   printf(" ** ANF2Axis::move called, relative = %d, axisNo_ = %i\n", relative, this->axisNo_);
 
@@ -541,15 +531,8 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   
   if (relative) {
     printf(" ** relative move called\n");
-    //status = pC_->writeReg32(axisNo_, SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
+
     distance = NINT(position);
-    //status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
-    
-    //move_bit = 0x0;
-    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
-    
-    move_bit = 0x2;
-    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
   
     // Set position and cmd registers
     motionReg_[1] = NINT(position);
@@ -558,21 +541,13 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   } else {
     // absolute
     printf(" ** absolute move called\n");
-    //status = pC_->writeReg32(axisNo_, SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
+
     distance = NINT(position);
     printf(" ** distance = %d\n", distance);
-    //status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
-    
-    //move_bit = 0x0;
-    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
-    
-    move_bit = 0x1;
-    //status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);	
   
     // Set position and cmd registers
     motionReg_[1] = NINT(position);
     motionReg_[0] = 0x1 << 16;
-  
   }
   
   // The final registers are zero for absolute and relative moves
