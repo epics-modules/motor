@@ -329,6 +329,12 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   // Read data that is likely to be stale
   //getInfo();
 
+  // Clear the command/configuration register
+  //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+
+  // Delay
+  //epicsThreadSleep(0.05);
+
   // These registers will always have the last config that was sent to the controller
   zeroRegisters(confReg_);
 
@@ -359,6 +365,8 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   
   // Tell the driver the axis has been created
   pC_->axesCreated_ += 1;
+  
+  //epicsThreadSleep(1.0);
 }
 
 /*
@@ -654,10 +662,12 @@ asynStatus ANF2Axis::setPosition(double position)
   epicsInt32 posReg[5];
   //static const char *functionName = "ANF2Axis::setPosition";
   
+  printf("setPosition(%lf) for axisNo_=%i\n", position, axisNo_);
+  
   // Clear the command/configuration register
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
-  epicsThreadSleep(0.05);
+  epicsThreadSleep(0.1);
 
   set_position = NINT(position);
 
@@ -671,7 +681,7 @@ asynStatus ANF2Axis::setPosition(double position)
   // Write all the registers atomically
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
-  //epicsThreadSleep(0.05);
+  epicsThreadSleep(0.20);
 
   // The ANG1 driver does this; do we need to?
   // Clear the command/configuration register
