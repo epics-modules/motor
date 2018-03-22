@@ -649,25 +649,13 @@ asynStatus ANF2Axis::setPosition(double position)
   epicsInt32 posReg[5];
   //static const char *functionName = "ANF2Axis::setPosition";
   
-  //set_bit = 0x0;
-  //status = pC_->writeReg16(axisNo_, CMD_MSW, set_bit, DEFAULT_CONTROLLER_TIMEOUT);
-
   zeroRegisters(posReg);
   // Clear the command/configuration register
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.05);
 
-  //status = writeReg32(SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
   set_position = NINT(position);
-  
-  //status = pC_->writeReg32(axisNo_, POS_WR_UPR, set_position, DEFAULT_CONTROLLER_TIMEOUT);
-
-  set_bit = 0x200;
-  //status = pC_->writeReg16(axisNo_, CMD_MSW, set_bit, DEFAULT_CONTROLLER_TIMEOUT);
-
-  //set_bit = 0x0;
-  //status = pC_->writeReg16(axisNo_, CMD_MSW, set_bit, DEFAULT_CONTROLLER_TIMEOUT);
 
   posReg[0] = 0x200 << 16;
   posReg[1] = set_position;
@@ -677,6 +665,13 @@ asynStatus ANF2Axis::setPosition(double position)
 
   // Write all the registers atomically
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
+
+  //epicsThreadSleep(0.05);
+
+  // The ANG1 driver does this; do we need to?
+  //zeroRegisters(posReg);
+  // Clear the command/configuration register
+  //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   return status;
 }
