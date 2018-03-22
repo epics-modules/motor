@@ -46,13 +46,12 @@ K. Goetze 2014-03-24
 // Not used must equal zero #define RESERVED 8
 // Not used must equal zero #define RESERVED 9
 
-/*** Output Configuration Registers ***/
-#define CONFIG_MSW   0
-#define CONFIG_LSW   1
-#define BASE_SPD_MSW 2
-#define BASE_SPD_LSW 3
-#define HOME_TIMEOUT 4
-
+/*** Output Configuration Registers (32-bit) ***/
+#define CONFIGURATION 0
+#define BASE_SPEED    1
+#define HOME_TIMEOUT  2
+#define CONFIG_REG_3  3
+#define CONFIG_REG_4  4
 
 // No. of controller-specific parameters
 #define NUM_ANF2_PARAMS 2

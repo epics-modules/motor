@@ -329,13 +329,10 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   // Read data that is likely to be stale
   getInfo();
 
-  // Send the configuration
-  //status = pC_->writeReg32(axisNo_, CONFIG_MSW, config, DEFAULT_CONTROLLER_TIMEOUT);
- 
   // Send the configuration (array) 
   // assemble the configuration bits; set the start speed to a non-zero value (100), which is required for the configuration to be accepted
-  confReg_[0] = config;
-  confReg_[1] = 0x00000064;
+  confReg_[CONFIGURATION] = config;
+  confReg_[BASE_SPEED] = 0x00000064;
   
   // Write all the registers
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, confReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
@@ -447,11 +444,11 @@ void ANF2Axis::reconfig()
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, confReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Construct the new config
-  confReg[0] = 0x86000000;
-  confReg[1] = 0x00000064;
-  //confReg[2] = 0x0;
-  //confReg[3] = 0x0;
-  //confReg[4] = 0x0;
+  confReg[CONFIGURATION] = 0x86000000;
+  confReg[BASE_SPEED] = 0x00000064;
+  //confReg[HOME_TIMEOUT] = 0x0;
+  //confReg[CONFIG_REG_3] = 0x0;
+  //confReg[CONFIG_REG_4] = 0x0;
 
   epicsThreadSleep(2.0);
   getInfo();
