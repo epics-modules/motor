@@ -8,7 +8,7 @@ record(bo,"$(P)$(R)GetInfo") {
     field(OUT,"@asyn($(PORT),$(ADDR))ANF2_GET_INFO")
 }
 
-record(bo,"$(P)$(R)Reconfig") {
+record(longout,"$(P)$(R)Reconfig") {
     field(DESC,"Reconfig")
     field(PINI, "0")
     field(VAL,"0")

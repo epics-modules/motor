@@ -79,7 +79,7 @@ private:
                                    *   Abbreviated because it is used very frequently */
   asynStatus sendAccelAndVelocity(double accel, double velocity);
   void getInfo();
-  void reconfig();
+  void reconfig(epicsInt32 value);
   void zeroRegisters(epicsInt32 *reg);
   asynUser *pasynUserForceRead_;
   asynUser *pasynUserConfWrite_;
@@ -87,6 +87,7 @@ private:
   epicsInt32 config_;
   epicsInt32 motionReg_[5];
   epicsInt32 confReg_[5];
+  epicsInt32 zeroReg_[5];
 
 friend class ANF2Controller;
 };

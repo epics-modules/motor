@@ -179,7 +179,7 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
   } else if (function == ANF2Reconfig_)
   {
     // reconfig regardless of the value
-    pAxis->reconfig();
+    pAxis->reconfig(value);
   } else {
   // Call base class method
     status = asynMotorController::writeInt32(pasynUser, value);
@@ -308,8 +308,9 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   axisNo_ = axisNo;
   //this->axisNo_ = axisNo;
 
-  zeroRegisters(confReg_);
-
+  // These registers will always be zero
+  zeroRegisters(zeroReg_);
+  
   status = pasynInt32SyncIO->connect(pC_->inputDriver_, axisNo_*AXIS_REG_OFFSET, &pasynUserForceRead_, "MODBUS_READ");
   if (status) {
     //printf("%s:%s: Error, unable to connect pasynUserForceRead_ to Modbus input driver %s\n", pC_->inputDriver_, pC_->functionName, myModbusInputDriver);
@@ -327,6 +328,9 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
 
   // Read data that is likely to be stale
   //getInfo();
+
+  // These registers will always have the last config that was sent to the controller
+  zeroRegisters(confReg_);
 
   // Send the configuration (array) 
   // assemble the configuration bits; set the start speed to a non-zero value (100), which is required for the configuration to be accepted
@@ -389,8 +393,8 @@ extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which con
            driverName, functionName, hexConfig);
     return asynError;
   } else {
-    printf("%s:%s: Config=>%s=%x\n",
-           driverName, functionName, hexConfig, config);
+    printf("%s:%s: Config=0x%x\n",
+           driverName, functionName, config);
   }
   
   pC->lock();
@@ -427,39 +431,37 @@ void ANF2Axis::getInfo()
   }
 }
 
-void ANF2Axis::reconfig()
+void ANF2Axis::reconfig(epicsInt32 value)
 {
   asynStatus status;
   epicsInt32 confReg[5];
   
   printf("Reconfiguring axis %i\n", axisNo_);
 
-  // The command/cfg register must first be zeroed
-  //reg = 0x0;
-  //status = pC_->writeReg16(axisNo_, CMD_MSW, reg, DEFAULT_CONTROLLER_TIMEOUT);
-
-  zeroRegisters(confReg);
   // Clear the command/configuration register
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, confReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Construct the new config
+  zeroRegisters(confReg);
   confReg[CONFIGURATION] = 0x86000000;
   confReg[BASE_SPEED] = 0x00000064;
   //confReg[HOME_TIMEOUT] = 0x0;
   //confReg[CONFIG_REG_3] = 0x0;
   //confReg[CONFIG_REG_4] = 0x0;
 
-  epicsThreadSleep(2.0);
+  epicsThreadSleep(0.05);
   getInfo();
 
   // Send the new config
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, confReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
-  epicsThreadSleep(2.0);
+  epicsThreadSleep(0.05);
   getInfo();
 
   // Set the position to clear the invalid position error  
-  setPosition(2048);
+  setPosition(value);
+
+  epicsThreadSleep(0.05);
   getInfo();
 }
 
@@ -514,13 +516,15 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   asynStatus status;
   epicsInt32 distance;
   
-  printf(" ** ANF2Axis::move called, relative = %d, axisNo_ = %i\n", relative, this->axisNo_);
+  //printf(" ** ANF2Axis::move called, relative = %d, axisNo_ = %i\n", relative, this->axisNo_);
 
-  zeroRegisters(motionReg_);
   // Clear the command/configuration register
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, motionReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.05);
+
+  // Clear the motition registers
+  zeroRegisters(motionReg_);
 
   // This sets indices 2 & 3 of motionReg_
   status = sendAccelAndVelocity(acceleration, maxVelocity);
@@ -590,7 +594,7 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
     functionName, minVelocity, maxVelocity, acceleration);
 
   velo = NINT(fabs(maxVelocity));
-    
+
   status = sendAccelAndVelocity(acceleration, velo);
 
   /* ANF2 does not have jog command. Move 1 million steps */
@@ -650,14 +654,14 @@ asynStatus ANF2Axis::setPosition(double position)
   epicsInt32 posReg[5];
   //static const char *functionName = "ANF2Axis::setPosition";
   
-  zeroRegisters(posReg);
   // Clear the command/configuration register
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.05);
 
   set_position = NINT(position);
 
+  zeroRegisters(posReg);
   posReg[0] = 0x200 << 16;
   posReg[1] = set_position;
   //posReg[2] = 0x0;
@@ -670,9 +674,8 @@ asynStatus ANF2Axis::setPosition(double position)
   //epicsThreadSleep(0.05);
 
   // The ANG1 driver does this; do we need to?
-  //zeroRegisters(posReg);
   // Clear the command/configuration register
-  //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   return status;
 }
