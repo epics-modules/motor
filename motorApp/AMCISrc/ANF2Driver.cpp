@@ -324,10 +324,10 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_->reason=%d\n", pasynUserConfWrite_->reason);
   printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_ offset=%d\n", axisNo_*AXIS_REG_OFFSET);
 
-  epicsThreadSleep(1.0);
+  epicsThreadSleep(0.1);
 
   // Read data that is likely to be stale
-  getInfo();
+  //getInfo();
 
   // Send the configuration (array) 
   // assemble the configuration bits; set the start speed to a non-zero value (100), which is required for the configuration to be accepted
@@ -338,21 +338,19 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, confReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Delay
-  epicsThreadSleep(1.0);
+  epicsThreadSleep(0.05);
 
   // Read the configuration? Or maybe the command registers?
-  getInfo();
+  //getInfo();
   
   // set position to 0
-  //setPosition(0);
-  setPosition(1337);
-  //setPosition(3141);
+  setPosition(0);
   
   // Delay
-  epicsThreadSleep(1.0);
+  //epicsThreadSleep(1.0);
   
   // Read the command registers
-  getInfo();
+  //getInfo();
   
   // Tell the driver the axis has been created
   pC_->axesCreated_ += 1;
@@ -657,6 +655,8 @@ asynStatus ANF2Axis::setPosition(double position)
   zeroRegisters(posReg);
   // Clear the command/configuration register
   status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
+
+  epicsThreadSleep(0.05);
 
   //status = writeReg32(SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);
   set_position = NINT(position);
