@@ -315,14 +315,13 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
     //printf("%s:%s: Error, unable to connect pasynUserForceRead_ to Modbus input driver %s\n", pC_->inputDriver_, pC_->functionName, myModbusInputDriver);
     printf("%s: Error, unable to connect pasynUserForceRead_ to Modbus input driver\n", pC_->inputDriver_);	
   }
-  printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
+  //printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
 
   status = pasynInt32ArraySyncIO->connect(ANF2ConfName, axisNo_*AXIS_REG_OFFSET, &pasynUserConfWrite_, NULL);
   if (status) {
     printf("%s: Error, unable to connect pasynUserConfWrite_ to Modbus input driver\n", ANF2ConfName);	
   }
-  printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_->reason=%d\n", pasynUserConfWrite_->reason);
-  printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_ offset=%d\n", axisNo_*AXIS_REG_OFFSET);
+  //printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_->reason=%d\n", pasynUserConfWrite_->reason);
 
   epicsThreadSleep(0.1);
 
@@ -527,7 +526,7 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   status = sendAccelAndVelocity(acceleration, maxVelocity);
   
   if (relative) {
-    printf(" ** relative move called\n");
+    //printf(" ** relative move called\n");
 
     distance = NINT(position);
   
@@ -537,10 +536,10 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   
   } else {
     // absolute
-    printf(" ** absolute move called\n");
+    //printf(" ** absolute move called\n");
 
     distance = NINT(position);
-    printf(" ** distance = %d\n", distance);
+    //printf(" ** distance = %d\n", distance);
   
     // Set position and cmd registers
     motionReg_[1] = NINT(position);
