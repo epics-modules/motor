@@ -345,6 +345,8 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   
   // set position to 0
   setPosition(0);
+  //setDoubleParam(pC_->motorPosition_, 0.0);
+  //callParamCallbacks();
   
   // Delay
   //epicsThreadSleep(1.0);
