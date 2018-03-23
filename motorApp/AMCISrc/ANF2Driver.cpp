@@ -664,20 +664,21 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
 asynStatus ANF2Axis::stop(double acceleration)
 {
   asynStatus status;
-  int stop_bit;
+  epicsInt32 stopReg;
   //static const char *functionName = "ANF2Axis::stop";
   
   printf("\n  STOP \n\n");
   
-  // do nothing (for testing)
-  //return asynSuccess;
+  // The stop commands ignore all 32-bit registers beyond the first
   
-  stop_bit = 0x0;
-  status = pC_->writeReg16(axisNo_, CMD_MSW, stop_bit, DEFAULT_CONTROLLER_TIMEOUT);
+  // Clear the command/configuration register
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
-//  stop_bit = 0x10;      Immediate stop
-  stop_bit = 0x4;      // Hold move
-  status = pC_->writeReg16(axisNo_, CMD_MSW, stop_bit, DEFAULT_CONTROLLER_TIMEOUT);
+  //stopReg = 0x10 << 16;      Immediate stop
+  stopReg = 0x4 << 16;      // Hold move
+  
+  //
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, &stopReg, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
   return status;
 }
