@@ -634,7 +634,7 @@ asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceler
 asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  int velo, distance, move_bit;
+  int velo, distance;
   static const char *functionName = "ANF2Axis::moveVelocity";
 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
@@ -643,27 +643,16 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
 
   velo = NINT(fabs(maxVelocity));
 
-  status = sendAccelAndVelocity(acceleration, velo);
-
   /* ANF2 does not have jog command. Move 1 million steps */
+  distance = 1000000;
   if (maxVelocity > 0.) {
     /* This is a positive move in ANF2 coordinates */
-	//printf(" ** relative move (JOG pos) called\n");
-	distance = 1000000;
-    status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
-	move_bit = 0x0;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
-	move_bit = 0x2;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    //printf(" ** relative move (JOG pos) called\n");
+    status = move(distance, 0, minVelocity, velo, acceleration);
   } else {
     /* This is a negative move in ANF2 coordinates */
     //printf(" ** relative move (JOG neg) called\n");
-	distance = -1000000;
-    status = pC_->writeReg32(axisNo_, POS_WR_UPR, distance, DEFAULT_CONTROLLER_TIMEOUT);
-	move_bit = 0x0;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
-	move_bit = 0x2;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, move_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    status = move((distance * -1.0), 0, minVelocity, velo, acceleration);
   }
   // Delay the first status read, give the controller some time to return moving status
   epicsThreadSleep(0.05);
@@ -697,7 +686,6 @@ asynStatus ANF2Axis::stop(double acceleration)
 asynStatus ANF2Axis::setPosition(double position)
 {
   asynStatus status;
-  int set_bit;
   epicsInt32 set_position;
   epicsInt32 posReg[5];
   //static const char *functionName = "ANF2Axis::setPosition";
