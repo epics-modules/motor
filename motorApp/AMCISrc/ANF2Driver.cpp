@@ -317,7 +317,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
    *  test config bits and set status bits to prevent methods from sending commands that would generate errors
    *  reduce the sleeps to see which ones are necessary
    *  make pasynUserConfWrite_ an output array; create a corresponding controller method to simplify calls
-   *  read encoder position
+   *  allow the base speed to be passed as an argument
    */
 
   epicsThreadSleep(0.1);
@@ -440,6 +440,8 @@ void ANF2Axis::reconfig(epicsInt32 value)
   asynStatus status;
   epicsInt32 confReg[5];
   
+  // TODO: modify this to use the base speed from the parameter, and instead accept a string for a new config
+  
   printf("Reconfiguring axis %i\n", axisNo_);
 
   // Clear the command/configuration register
@@ -478,6 +480,8 @@ void ANF2Axis::reconfig(epicsInt32 value)
   */
 void ANF2Axis::report(FILE *fp, int level)
 {
+  // TODO: make this more useful
+
   if (level > 0) {
     fprintf(fp, "  axis %d\n", axisNo_);
     fprintf(fp, "    this->axisNo_ %i\n", this->axisNo_);
@@ -753,6 +757,8 @@ asynStatus ANF2Axis::poll(bool *moving)
   position = (double) read_val;
   setDoubleParam(pC_->motorPosition_, position);
   //printf("ANF2Axis::poll:  Motor #%i position: %f\n", axisNo_, position);
+
+  //  TODO: read encoder position
 
   // Read the moving status of this motor
   //
