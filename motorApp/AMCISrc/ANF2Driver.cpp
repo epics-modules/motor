@@ -67,7 +67,6 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
       status = pasynInt32SyncIO->connect(ANF2InPortName, i+j*AXIS_REG_OFFSET, &pasynUserInReg_[j][i], NULL);
     }
     for (i=0; i<MAX_OUTPUT_REGS; i++) {
-      status = pasynInt32SyncIO->connect(ANF2OutPortName, i+j*AXIS_REG_OFFSET, &pasynUserOutReg_[j][i], NULL);
       // Maybe send the outputs with Array calls in the future
       //status = pasynInt32ArraySyncIO->connect(ANF2OutPortName, i, &pasynUserOutArrayReg_[j][i], NULL);
     }
@@ -164,7 +163,7 @@ void ANF2Controller::report(FILE *fp, int level)
   for (j=0; j<numAxes_; j++) {
   fprintf(fp, "  axis #%i\n", j);
     for (i=0; i<MAX_INPUT_REGS; i++) {
-       fprintf(fp, "    reg %i, pasynUserInReg_[%i][%i]=0x%x, pasynUserOutReg_[%i][%i]=0x%x\n", i, j, i, pasynUserInReg_[j][i], j, i, pasynUserOutReg_[j][i]);
+       fprintf(fp, "    reg %i, pasynUserInReg_[%i][%i]=0x%x\n", i, j, i, pasynUserInReg_[j][i]);
      }
   }
   // Call the base class method
@@ -241,19 +240,6 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
   return status;
 }
 
-asynStatus ANF2Controller::writeReg16(int axisNo, int axisReg, int output, double timeout)
-{
-  asynStatus status;
-
-  //printf("writeReg16: writing %d to register %d\n", output, axisReg);
-  asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER,"writeReg16: writing %d to register %d\n", output, axisReg);  
-  status = pasynInt32SyncIO->write(pasynUserOutReg_[axisNo][axisReg], output, timeout);
-  //status = pasynInt32ArraySyncIO->write(pasynUserOutArrayReg_[axisNo][axisReg], &output, 1, timeout);
-  epicsThreadSleep(0.01);
-                                  
-  return status ;
-}
-
 // This could be useful in the future, but it isn't needed yet
 /*asynStatus ANF2Controller::writeReg32Array(int axisNo, int axisReg, epicsInt32* output, int nElements, double timeout)
 {
@@ -264,43 +250,6 @@ asynStatus ANF2Controller::writeReg16(int axisNo, int axisReg, int output, doubl
     
   return status ;
 }*/
-
-asynStatus ANF2Controller::writeReg32(int axisNo, int axisReg, int output, double timeout)
-{
-//.. break 32-bit integer into 2 pieces
-//.. write the pieces into ANF2 registers
-
-  asynStatus status;
-
-  int lower,upper;
-  
-  // This is the way the ANG1 driver does it, and the code doesn't appear to work
-  /*float fnum;
-
-  fnum = (output / 1000.0);
-  upper = (int)fnum;
-  fnum = fnum - upper;
-  fnum = NINT(fnum * 1000);
-  lower = (int)fnum;*/
-  
-  upper = (output >> 16) & 0x0000FFFF;
-  lower = output & 0x0000FFFF;
-
-  printf("upper = 0x%x\t= %i\n", upper, upper);
-  printf("lower = 0x%x\t= %i\n", lower, lower);
-
-  //  writeReg16(piece1 ie MSW ...
-  status = writeReg16(axisNo, axisReg, upper, DEFAULT_CONTROLLER_TIMEOUT);
-  
-  //  writeReg16(piece2 ie LSW ...
-  axisReg++;
-  status = writeReg16(axisNo, axisReg, lower, DEFAULT_CONTROLLER_TIMEOUT);
-
-  // No breaking up the output value required when writing an array - maybe do this in the future
-  //status = pasynInt32ArraySyncIO->write(pasynUserOutArrayReg_[axisNo][axisReg], &output, 2, timeout);
-
-  return status ;
-}
 
 asynStatus ANF2Controller::readReg16(int axisNo, int axisReg, epicsInt32 *input, double timeout)
 {

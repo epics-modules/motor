@@ -102,7 +102,6 @@ public:
   ANF2Axis* getAxis(asynUser *pasynUser);
   ANF2Axis* getAxis(int axisNo); 
   asynUser *pasynUserInReg_[MAX_MODULES*MAX_AXES_PER_MODULE][MAX_INPUT_REGS];
-  asynUser *pasynUserOutReg_[MAX_MODULES*MAX_AXES_PER_MODULE][MAX_OUTPUT_REGS]; 
   //asynUser *pasynUserOutArrayReg_[MAX_MODULES*MAX_AXES_PER_MODULE][MAX_OUTPUT_REGS]; 
 
   /* These are the methods that we override from asynMotorDriver */
