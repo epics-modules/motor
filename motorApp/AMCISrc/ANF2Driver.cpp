@@ -155,19 +155,31 @@ void ANF2Controller::doStartPoller(double movingPollPeriod, double idlePollPerio
 void ANF2Controller::report(FILE *fp, int level)
 {
   int i, j;
+  ANF2Axis *pAxis;
   
-  fprintf(fp, "ANF2 motor driver %s, numAxes=%d, moving poll period=%f, idle poll period=%f\n", 
-    this->portName, numAxes_, movingPollPeriod_, idlePollPeriod_);
-  fprintf(fp, "    axesCreated=%i\n", axesCreated_);
+  fprintf(fp, "====================================\n");
+  fprintf(fp, "ANF2 motor driver:\n");
+  fprintf(fp, "    asyn port: %s\n", this->portName);
+  fprintf(fp, "    num axes: %i\n", numAxes_);
+  fprintf(fp, "    axes created: %i\n", axesCreated_);
+  fprintf(fp, "    moving poll period: %lf\n", movingPollPeriod_);
+  fprintf(fp, "    idle poll period: %lf\n", idlePollPeriod_);
   
   for (j=0; j<numAxes_; j++) {
-  fprintf(fp, "  axis #%i\n", j);
-    for (i=0; i<MAX_INPUT_REGS; i++) {
+    fprintf(fp, "========\n");
+    fprintf(fp, "AXIS #%i\n", j);
+    fprintf(fp, "========\n");
+  
+    pAxis = getAxis(j);
+    pAxis->getInfo();
+  
+    /*for (i=0; i<MAX_INPUT_REGS; i++) {
        fprintf(fp, "    reg %i, pasynUserInReg_[%i][%i]=0x%x\n", i, j, i, pasynUserInReg_[j][i]);
-     }
+    }*/
   }
   // Call the base class method
   asynMotorController::report(fp, level);
+  fprintf(fp, "====================================\n");
 }
 
 /** Returns a pointer to an ANF2Axis object.
@@ -426,12 +438,13 @@ void ANF2Axis::getInfo()
   // For a read (not sure why this is necessary)
   status = pasynInt32SyncIO->write(pasynUserForceRead_, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
-  printf("Info for axis %i\n", axisNo_);
+  printf("Registers for axis %i:\n", axisNo_);
 
   for( i=0; i<MAX_INPUT_REGS; i++)
   {
     status = pC_->readReg16(axisNo_, i, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
-    printf("  status=%d, register=%i, val=0x%x\n", status, i, read_val);
+    //printf("  status=%d, register=%i, val=0x%x\n", status, i, read_val);
+    printf("  register=%i, val=0x%x\n", i, read_val);
   }
 }
 
