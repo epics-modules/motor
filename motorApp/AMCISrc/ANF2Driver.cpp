@@ -614,19 +614,30 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
 asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
   asynStatus status;
-  int home_bit;
   // static const char *functionName = "ANF2Axis::home";
 
-  //status = sendAccelAndVelocity(acceleration, maxVelocity);
+  // Clear the command/configuration register
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+
+  epicsThreadSleep(0.05);
+
+  // Clear the motition registers
+  zeroRegisters(motionReg_);
+
+  // This sets indices 2 & 3 of motionReg_
+  status = sendAccelAndVelocity(acceleration, maxVelocity);
 
   if (forwards) {
     printf(" ** HOMING FORWARDS **\n");
-    home_bit = 0x20;
-	status = pC_->writeReg16(axisNo_, CMD_MSW, home_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    motionReg_[0] = 0x20 << 16;
   } else {
-    home_bit = 0x40;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, home_bit, DEFAULT_CONTROLLER_TIMEOUT);
+    printf(" ** HOMING REVERSE **\n");
+    motionReg_[0] = 0x40 << 16;
   }
+
+  // Write all the registers atomically
+  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, motionReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+
   return status;
 }
 
@@ -723,8 +734,8 @@ asynStatus ANF2Axis::setPosition(double position)
 // ENABLE TORQUE
 asynStatus ANF2Axis::setClosedLoop(bool closedLoop)
 {
-  asynStatus status;
-  epicsInt32 clReg[5];
+  //asynStatus status;
+  //epicsInt32 clReg[5];
   //static const char *functionName = "ANF2Axis::setClosedLoop";
 
   // The ANF2 doesn't have a closed-loop enable/disable command, so do nothing.
