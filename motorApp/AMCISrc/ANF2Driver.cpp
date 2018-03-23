@@ -32,13 +32,12 @@ static const char *driverName = "ANF2MotorDriver";
   * \param[in] portName          The name of the asyn port that will be created for this driver
   * \param[in] ANF2InPortName    The name of the drvAsynSerialPort that was created previously to connect to the ANF2 controller 
   * \param[in] ANF2OutPortName   The name of the drvAsynSerialPort that was created previously to connect to the ANF2 controller 
-  * \param[in] numAxes           The number of axes that this controller supports 
-  * \param[in] movingPollPeriod  The time between polls when any axis is moving 
-  * \param[in] idlePollPeriod    The time between polls when no axis is moving 
+  * \param[in] numModules        The number of modules on the controller stack 
+  * \param[in] axesPerModule     The number of axes per module (ANF1=1, ANF2=2)
   */
-ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, int numAxes, 
-                                 double movingPollPeriod, double idlePollPeriod)
-  :  asynMotorController(portName, numAxes, NUM_ANF2_PARAMS, 
+ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName,  
+                                 int numModules, int axesPerModule)
+  :  asynMotorController(portName, (numModules*axesPerModule), NUM_ANF2_PARAMS, 
                          asynInt32ArrayMask, // One additional interface beyond those in base class
                          asynInt32ArrayMask, // One additional callback interface beyond those in base class
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
@@ -52,20 +51,17 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   // Keep track of the number of axes created, so the poller can wait for all the axes to be created before starting
   axesCreated_ = 0;
   
-  movingPollPeriod_ = movingPollPeriod;
-  idlePollPeriod_ = idlePollPeriod;
-  
   inputDriver_ = epicsStrDup(ANF2InPortName);    // Set this before calls to create Axis objects
   
   // Create controller-specific parameters
   createParam(ANF2GetInfoString,         asynParamInt32,       &ANF2GetInfo_);
   createParam(ANF2ReconfigString,        asynParamInt32,       &ANF2Reconfig_);
 
-  if (numAxes > MAX_AXES) {
-    numAxes = MAX_AXES;
-  }
+  numModules_ = numModules;
+  axesPerModule_ = axesPerModule;
+  numAxes_ = numModules * axesPerModule;
   
-  for (j=0; j<numAxes; j++) {
+  for (j=0; j<numAxes_; j++) {
     /* Connect to ANF2 controller */
     for (i=0; i<MAX_INPUT_REGS; i++) {
       status = pasynInt32SyncIO->connect(ANF2InPortName, i+j*AXIS_REG_OFFSET, &pasynUserInReg_[j][i], NULL);
@@ -93,23 +89,35 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   * \param[in] portName          The name of the asyn port that will be created for this driver
   * \param[in] ANF2InPortName    The name of the drvAsynIPPPort that was created previously to connect to the ANF2 controller 
   * \param[in] ANF2OutPortName   The name of the drvAsynIPPPort that was created previously to connect to the ANF2 controller 
-  * \param[in] numAxes           The number of axes that this controller supports 
-  * \param[in] movingPollPeriod  The time in ms between polls when any axis is moving
-  * \param[in] idlePollPeriod    The time in ms between polls when no axis is moving 
+  * \param[in] numModules        The number of modules on the controller stack 
+  * \param[in] axesPerModule     The number of axes per module (ANF1=1, ANF2=2)
   */
-extern "C" int ANF2CreateController(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, int numAxes, 
-                                   int movingPollPeriod, int idlePollPeriod)
+extern "C" int ANF2CreateController(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, 
+                                      int numModules, int axesPerModule)
 {
+  // Enforce max values
+  if (numModules > MAX_MODULES) {
+    numModules = MAX_MODULES;
+  }
+  if (axesPerModule > MAX_AXES_PER_MODULE) {
+    axesPerModule = MAX_AXES_PER_MODULE;
+  }
+
   /*
   ANF2Controller *pANF2Controller
-    = new ANF2Controller(portName, ANF2InPortName, ANF2OutPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
+    = new ANF2Controller(portName, ANF2InPortName, ANF2OutPortName, numModules, axesPerModule);
   pANF2Controller = NULL;
   */
-  new ANF2Controller(portName, ANF2InPortName, ANF2OutPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
+  new ANF2Controller(portName, ANF2InPortName, ANF2OutPortName, numModules, axesPerModule);
   return(asynSuccess);
 }
 
-extern "C" asynStatus ANF2StartPoller(const char *ANF2Name)  /* specify which controller by port name */
+/** Starts the poller for a given controller
+  * \param[in] ANF2Name          The name of the asyn port that for the controller
+  * \param[in] movingPollPeriod  The time in ms between polls when any axis is moving
+  * \param[in] idlePollPeriod    The time in ms between polls when no axis is moving 
+  */
+extern "C" asynStatus ANF2StartPoller(const char *ANF2Name, int movingPollPeriod, int idlePollPeriod)
 {
   ANF2Controller *pC;
   static const char *functionName = "ANF2StartPoller";
@@ -122,13 +130,17 @@ extern "C" asynStatus ANF2StartPoller(const char *ANF2Name)  /* specify which co
   }
   
   pC->lock();
-  pC->doStartPoller();
+  pC->doStartPoller(movingPollPeriod/1000.0, idlePollPeriod/1000.0);
   pC->unlock();
   return asynSuccess;
 }
 
-void ANF2Controller::doStartPoller()
+void ANF2Controller::doStartPoller(double movingPollPeriod, double idlePollPeriod)
 {
+  //
+  movingPollPeriod_ = movingPollPeriod;
+  idlePollPeriod_ = idlePollPeriod;
+
   // 
   startPoller(movingPollPeriod_, idlePollPeriod_, 2);
 }
@@ -149,7 +161,7 @@ void ANF2Controller::report(FILE *fp, int level)
     this->portName, numAxes_, movingPollPeriod_, idlePollPeriod_);
   fprintf(fp, "    axesCreated=%i\n", axesCreated_);
   
-  for (j=0; j<MAX_AXES; j++) {
+  for (j=0; j<numAxes_; j++) {
   fprintf(fp, "  axis #%i\n", j);
     for (i=0; i<MAX_INPUT_REGS; i++) {
        fprintf(fp, "    reg %i, pasynUserInReg_[%i][%i]=0x%x, pasynUserOutReg_[%i][%i]=0x%x\n", i, j, i, pasynUserInReg_[j][i], j, i, pasynUserOutReg_[j][i]);
@@ -856,28 +868,30 @@ asynStatus ANF2Axis::poll(bool *moving)
 static const iocshArg ANF2CreateControllerArg0 = {"Port name", iocshArgString};
 static const iocshArg ANF2CreateControllerArg1 = {"ANF2 In port name", iocshArgString};
 static const iocshArg ANF2CreateControllerArg2 = {"ANF2 Out port name", iocshArgString};
-static const iocshArg ANF2CreateControllerArg3 = {"Number of axes", iocshArgInt};
-static const iocshArg ANF2CreateControllerArg4 = {"Moving poll period (ms)", iocshArgInt};
-static const iocshArg ANF2CreateControllerArg5 = {"Idle poll period (ms)", iocshArgInt};
+static const iocshArg ANF2CreateControllerArg3 = {"Number of modules", iocshArgInt};
+static const iocshArg ANF2CreateControllerArg4 = {"Axes per module", iocshArgInt};
 static const iocshArg * const ANF2CreateControllerArgs[] = {&ANF2CreateControllerArg0,
                                                              &ANF2CreateControllerArg1,
                                                              &ANF2CreateControllerArg2,
                                                              &ANF2CreateControllerArg3,
-                                                             &ANF2CreateControllerArg4,
-							     &ANF2CreateControllerArg5,};
-static const iocshFuncDef ANF2CreateControllerDef = {"ANF2CreateController", 6, ANF2CreateControllerArgs};
+                                                             &ANF2CreateControllerArg4};
+static const iocshFuncDef ANF2CreateControllerDef = {"ANF2CreateController", 5, ANF2CreateControllerArgs};
 static void ANF2CreateControllerCallFunc(const iocshArgBuf *args)
 {
-  ANF2CreateController(args[0].sval, args[1].sval, args[2].sval, args[3].ival, args[4].ival, args[5].ival);
+  ANF2CreateController(args[0].sval, args[1].sval, args[2].sval, args[3].ival, args[4].ival);
 }
 
 /* ANF2StartPoller */
 static const iocshArg ANF2StartPollerArg0 = {"Port name", iocshArgString};
-static const iocshArg * const ANF2StartPollerArgs[] = {&ANF2StartPollerArg0};
-static const iocshFuncDef ANF2StartPollerDef = {"ANF2StartPoller", 1, ANF2StartPollerArgs};
+static const iocshArg ANF2StartPollerArg1 = {"Moving poll period (ms)", iocshArgInt};
+static const iocshArg ANF2StartPollerArg2 = {"Idle poll period (ms)", iocshArgInt};
+static const iocshArg * const ANF2StartPollerArgs[] = {&ANF2StartPollerArg0,
+                                                       &ANF2StartPollerArg1,
+                                                       &ANF2StartPollerArg2};
+static const iocshFuncDef ANF2StartPollerDef = {"ANF2StartPoller", 3, ANF2StartPollerArgs};
 static void ANF2StartPollerCallFunc(const iocshArgBuf *args)
 {
-  ANF2StartPoller(args[0].sval);
+  ANF2StartPoller(args[0].sval, args[1].ival, args[2].ival);
 }
 
 /* ANF2CreateAxis */
