@@ -724,34 +724,26 @@ asynStatus ANF2Axis::setPosition(double position)
 asynStatus ANF2Axis::setClosedLoop(bool closedLoop)
 {
   asynStatus status;
-  int enable  = 0x8000;
-  int disable = 0x0000;
-  int cmd;
-  
-  printf(" ** setClosedLoop called \n");
+  epicsInt32 clReg[5];
+  //static const char *functionName = "ANF2Axis::setClosedLoop";
+
+  // The ANF2 doesn't have a closed-loop enable/disable command, so do nothing.
+  // The configuration of an axis:
+  //   * can be changed so that an axis is disabled, but that doesn't disable torque
+  //   * can be changed to disable the use of encoder inputs, but that isn't currently allowed on-the-fly
+
+  /*printf(" ** setClosedLoop called \n");
   if (closedLoop) {
-    printf("setting enable %X\n", enable);
-	// Let's reset errors first
-	cmd = 0x0;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, cmd, DEFAULT_CONTROLLER_TIMEOUT);
-
-	cmd = 0x400;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, cmd, DEFAULT_CONTROLLER_TIMEOUT);	
-
-	cmd = 0x0;
-    status = pC_->writeReg16(axisNo_, CMD_MSW, cmd, DEFAULT_CONTROLLER_TIMEOUT);	
-    /*
-    status = pC_->writeReg16(axisNo_, CMD_LSW, enable, DEFAULT_CONTROLLER_TIMEOUT);
-	setIntegerParam(pC_->motorStatusPowerOn_, 1);
-    */
-	
+    printf("setting enable true\n");
+  
+    setIntegerParam(pC_->motorStatusPowerOn_, 1);
   } else {
-    printf("setting disable %X\n", disable);
-    status = pC_->writeReg16(axisNo_, CMD_LSW, disable, DEFAULT_CONTROLLER_TIMEOUT);
+    printf("setting disable false\n");
     setIntegerParam(pC_->motorStatusPowerOn_, 0);
   }
+  return status;*/
 
-  return status;
+  return asynSuccess;
 }
 
 // POLL
@@ -805,6 +797,14 @@ asynStatus ANF2Axis::poll(bool *moving)
   setIntegerParam(pC_->motorStatusDone_, done);
   *moving = done ? false:true;
   //printf("done is %d\n", done);
+
+  // Check for enable/disable (not actually the torque status) and set accordingly.
+  // Enable/disable is determined by the configuration and it isn't obvious why one would disable an axis.
+  enabled = (read_val & 0x4000);
+  if (enabled)
+    setIntegerParam(pC_->motorStatusPowerOn_, 1);
+  else
+    setIntegerParam(pC_->motorStatusPowerOn_, 0);
   
   // Read the limit status
   //
@@ -837,15 +837,6 @@ asynStatus ANF2Axis::poll(bool *moving)
   // Should be in init routine?  Allows CNEN to be used.
   setIntegerParam(pC_->motorStatusGainSupport_, 1);
 
-  // Check for the torque status and set accordingly.
-  // The ANG1 driver does the wrong thing for torque enable/disable
-  //enabled = (read_val & 0x8000);
-  enabled = 1;
-  if (enabled)
-    setIntegerParam(pC_->motorStatusPowerOn_, 1);
-  else
-    setIntegerParam(pC_->motorStatusPowerOn_, 0);
-  
   // Notify asynMotorController polling routine that we're ready
   callParamCallbacks();
 
