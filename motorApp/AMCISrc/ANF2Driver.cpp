@@ -313,6 +313,13 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   }
   //printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_->reason=%d\n", pasynUserConfWrite_->reason);
 
+  /* TODO:
+   *  test config bits and set status bits to prevent methods from sending commands that would generate errors
+   *  reduce the sleeps to see which ones are necessary
+   *  make pasynUserConfWrite_ an output array; create a corresponding controller method to simplify calls
+   *  read encoder position
+   */
+
   epicsThreadSleep(0.1);
 
   // Read data that is likely to be stale
