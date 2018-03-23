@@ -95,7 +95,8 @@ friend class ANF2Controller;
 class ANF2Controller : public asynMotorController {
 public:
   ANF2Controller(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, int numAxes, double movingPollPeriod, double idlePollPeriod);
-
+  void doStartPoller();
+  
   void report(FILE *fp, int level);
   ANF2Axis* getAxis(asynUser *pasynUser);
   ANF2Axis* getAxis(int axisNo); 
@@ -122,6 +123,8 @@ private:
   asynStatus readReg16(int, int, epicsInt32*, double);
   asynStatus readReg32(int, int, epicsInt32*, double);
   char *inputDriver_;
+  double movingPollPeriod_;
+  double idlePollPeriod_;
   int axesCreated_;
 
 friend class ANF2Axis;

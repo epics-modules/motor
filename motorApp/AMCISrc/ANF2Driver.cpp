@@ -52,6 +52,9 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   // Keep track of the number of axes created, so the poller can wait for all the axes to be created before starting
   axesCreated_ = 0;
   
+  movingPollPeriod_ = movingPollPeriod;
+  idlePollPeriod_ = idlePollPeriod;
+  
   inputDriver_ = epicsStrDup(ANF2InPortName);    // Set this before calls to create Axis objects
   
   // Create controller-specific parameters
@@ -81,7 +84,7 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
 
   /* Create the poller thread for this controller (do 2 forced-fast polls)
    * NOTE: at this point the axis objects don't yet exist, but the poller tolerates this */
-  startPoller(movingPollPeriod, idlePollPeriod, 2);
+  //startPoller(movingPollPeriod, idlePollPeriod, 2);
 }
 
 
@@ -105,6 +108,31 @@ extern "C" int ANF2CreateController(const char *portName, const char *ANF2InPort
   new ANF2Controller(portName, ANF2InPortName, ANF2OutPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   return(asynSuccess);
 }
+
+extern "C" asynStatus ANF2StartPoller(const char *ANF2Name)  /* specify which controller by port name */
+{
+  ANF2Controller *pC;
+  static const char *functionName = "ANF2StartPoller";
+
+  pC = (ANF2Controller*) findAsynPortDriver(ANF2Name);
+  if (!pC) {
+    printf("%s:%s: Error port %s not found\n",
+           driverName, functionName, ANF2Name);
+    return asynError;
+  }
+  
+  pC->lock();
+  pC->doStartPoller();
+  pC->unlock();
+  return asynSuccess;
+}
+
+void ANF2Controller::doStartPoller()
+{
+  // 
+  startPoller(movingPollPeriod_, idlePollPeriod_, 2);
+}
+
 
 /** Reports on status of the driver
   * \param[in] fp The file pointer on which report information will be written
@@ -329,7 +357,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   // Read data that is likely to be stale
   //getInfo();
 
-  // Clear the command/configuration register
+  // Clear the command/configuration register (a good thing to do but doesn't appear to be necessary)
   //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Delay
@@ -352,10 +380,10 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   // Read the configuration? Or maybe the command registers?
   //getInfo();
   
-  // set position to 0
+  // set position to 0 to clear the "position invalid" status that results from configuring the axis
   setPosition(0);
+  // Tell asynMotor device support the position is zero so that autosave will restore the saved position (doesn't appear to be necessary)
   //setDoubleParam(pC_->motorPosition_, 0.0);
-  //callParamCallbacks();
   
   // Delay
   //epicsThreadSleep(1.0);
@@ -843,6 +871,14 @@ static void ANF2CreateControllerCallFunc(const iocshArgBuf *args)
   ANF2CreateController(args[0].sval, args[1].sval, args[2].sval, args[3].ival, args[4].ival, args[5].ival);
 }
 
+/* ANF2StartPoller */
+static const iocshArg ANF2StartPollerArg0 = {"Port name", iocshArgString};
+static const iocshArg * const ANF2StartPollerArgs[] = {&ANF2StartPollerArg0};
+static const iocshFuncDef ANF2StartPollerDef = {"ANF2StartPoller", 1, ANF2StartPollerArgs};
+static void ANF2StartPollerCallFunc(const iocshArgBuf *args)
+{
+  ANF2StartPoller(args[0].sval);
+}
 
 /* ANF2CreateAxis */
 static const iocshArg ANF2CreateAxisArg0 = {"Port name", iocshArgString};
@@ -863,6 +899,7 @@ static void ANF2CreateAxisCallFunc(const iocshArgBuf *args)
 static void ANF2Register(void)
 {
   iocshRegister(&ANF2CreateControllerDef, ANF2CreateControllerCallFunc);
+  iocshRegister(&ANF2StartPollerDef, ANF2StartPollerCallFunc);
   iocshRegister(&ANF2CreateAxisDef, ANF2CreateAxisCallFunc);
 }
 
