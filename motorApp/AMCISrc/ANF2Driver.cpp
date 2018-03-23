@@ -643,7 +643,8 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
 
   velo = NINT(fabs(maxVelocity));
 
-  /* ANF2 does not have jog command. Move 1 million steps */
+  /* ANF2 does have a jog command, but don't use it yet */
+  /* ANG1 does not have jog command. Move 1 million steps */
   distance = 1000000;
   if (maxVelocity > 0.) {
     /* This is a positive move in ANF2 coordinates */
