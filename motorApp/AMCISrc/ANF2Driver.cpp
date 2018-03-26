@@ -66,10 +66,7 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
     for (i=0; i<MAX_INPUT_REGS; i++) {
       status = pasynInt32SyncIO->connect(ANF2InPortName, i+j*AXIS_REG_OFFSET, &pasynUserInReg_[j][i], NULL);
     }
-    for (i=0; i<MAX_OUTPUT_REGS; i++) {
-      // Maybe send the outputs with Array calls in the future
-      //status = pasynInt32ArraySyncIO->connect(ANF2OutPortName, i, &pasynUserOutArrayReg_[j][i], NULL);
-    }
+    status = pasynInt32ArraySyncIO->connect(ANF2OutPortName, j*AXIS_REG_OFFSET, &pasynUserOutReg_[j], NULL);
   }
   if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
@@ -252,16 +249,15 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
   return status;
 }
 
-// This could be useful in the future, but it isn't needed yet
-/*asynStatus ANF2Controller::writeReg32Array(int axisNo, int axisReg, epicsInt32* output, int nElements, double timeout)
+asynStatus ANF2Controller::writeReg32Array(int axisNo, epicsInt32* output, int nElements, double timeout)
 {
   asynStatus status;
   
-  asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER,"writeReg32Array: writing %d elements starting at register %d\n", nElements, axisReg);  
-  status = pasynInt32ArraySyncIO->write(pasynUserOutArrayReg_[axisNo][axisReg], output, nElements, timeout);
-    
-  return status ;
-}*/
+  asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER,"writeReg32Array: writing %d elements starting for axis %d\n", nElements, axisNo);  
+  status = pasynInt32ArraySyncIO->write(pasynUserOutReg_[axisNo], output, nElements, timeout);
+ 
+  return status;
+}
 
 asynStatus ANF2Controller::readReg16(int axisNo, int axisReg, epicsInt32 *input, double timeout)
 {
@@ -300,7 +296,7 @@ asynStatus ANF2Controller::readReg32(int axisNo, int axisReg, epicsInt32 *combo,
   * 
   * Initializes register numbers, etc.
   */
-ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epicsInt32 config)
+ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
   : asynMotorAxis(pC, axisNo),
     pC_(pC)	
 { 
@@ -319,16 +315,9 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   }
   //printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
 
-  status = pasynInt32ArraySyncIO->connect(ANF2ConfName, axisNo_*AXIS_REG_OFFSET, &pasynUserConfWrite_, NULL);
-  if (status) {
-    printf("%s: Error, unable to connect pasynUserConfWrite_ to Modbus input driver\n", ANF2ConfName);	
-  }
-  //printf("ANF2Axis::ANF2Axis : pasynUserConfWrite_->reason=%d\n", pasynUserConfWrite_->reason);
-
   /* TODO:
    *  test config bits and set status bits to prevent methods from sending commands that would generate errors
    *  reduce the sleeps to see which ones are necessary
-   *  make pasynUserConfWrite_ an output array; create a corresponding controller method to simplify calls
    *  allow the base speed to be passed as an argument
    */
 
@@ -338,7 +327,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   //getInfo();
 
   // Clear the command/configuration register (a good thing to do but doesn't appear to be necessary)
-  //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Delay
   //epicsThreadSleep(0.05);
@@ -352,7 +341,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
   confReg_[BASE_SPEED] = 0x00000064;
   
   // Write all the registers
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, confReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, confReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   // Delay
   epicsThreadSleep(0.05);
@@ -387,7 +376,6 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epi
  */
 
 extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which controller by port name */
-                         const char *ANF2ConfName,          /* specify which config port name */
                          int axis,                         /* axis number 0-1 */
                          const char *hexConfig)            /* desired configuration in hex */
 {
@@ -414,7 +402,7 @@ extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which con
   }
   
   pC->lock();
-  new ANF2Axis(pC, ANF2ConfName, axis, config);
+  new ANF2Axis(pC, axis, config);
   pC->unlock();
   return asynSuccess;
 }
@@ -458,8 +446,8 @@ void ANF2Axis::reconfig(epicsInt32 value)
   printf("Reconfiguring axis %i\n", axisNo_);
 
   // Clear the command/configuration register
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
-
+  status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  
   // Construct the new config
   zeroRegisters(confReg);
   confReg[CONFIGURATION] = 0x86000000;
@@ -472,7 +460,7 @@ void ANF2Axis::reconfig(epicsInt32 value)
   getInfo();
 
   // Send the new config
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, confReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, confReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.05);
   getInfo();
@@ -540,7 +528,7 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   //printf(" ** ANF2Axis::move called, relative = %d, axisNo_ = %i\n", relative, this->axisNo_);
 
   // Clear the command/configuration register
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.05);
 
@@ -576,7 +564,7 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   
   // Write all the registers atomically
   // The number of elements refers to the number of epicsInt32s registers_
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, motionReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, motionReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
   
   // Delay the first status read, give the controller some time to return moving status
   epicsThreadSleep(0.05);
@@ -590,7 +578,7 @@ asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceler
   // static const char *functionName = "ANF2Axis::home";
 
   // Clear the command/configuration register
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.05);
 
@@ -609,7 +597,7 @@ asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceler
   }
 
   // Write all the registers atomically
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, motionReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, motionReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   return status;
 }
@@ -657,13 +645,13 @@ asynStatus ANF2Axis::stop(double acceleration)
   // The stop commands ignore all 32-bit registers beyond the first
   
   // Clear the command/configuration register
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 1, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, zeroReg_, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
   //stopReg = 0x10 << 16;      Immediate stop
   stopReg = 0x4 << 16;      // Hold move
   
   //
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, &stopReg, 1, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, &stopReg, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
   return status;
 }
@@ -679,7 +667,7 @@ asynStatus ANF2Axis::setPosition(double position)
   printf("setPosition(%lf) for axisNo_=%i\n", position, axisNo_);
   
   // Clear the command/configuration register
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.1);
 
@@ -693,13 +681,13 @@ asynStatus ANF2Axis::setPosition(double position)
   //posReg[4] = 0x0;
 
   // Write all the registers atomically
-  status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  status = pC_->writeReg32Array(axisNo_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.20);
 
   // The ANG1 driver does this; do we need to?
   // Clear the command/configuration register
-  //status = pasynInt32ArraySyncIO->write(pasynUserConfWrite_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  //status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   return status;
 }
@@ -863,17 +851,15 @@ static void ANF2StartPollerCallFunc(const iocshArgBuf *args)
 
 /* ANF2CreateAxis */
 static const iocshArg ANF2CreateAxisArg0 = {"Port name", iocshArgString};
-static const iocshArg ANF2CreateAxisArg1 = {"Config port name", iocshArgString};
-static const iocshArg ANF2CreateAxisArg2 = {"Axis number", iocshArgInt};
-static const iocshArg ANF2CreateAxisArg3 = {"Hex config", iocshArgString};
+static const iocshArg ANF2CreateAxisArg1 = {"Axis number", iocshArgInt};
+static const iocshArg ANF2CreateAxisArg2 = {"Hex config", iocshArgString};
 static const iocshArg * const ANF2CreateAxisArgs[] = {&ANF2CreateAxisArg0,
                                                              &ANF2CreateAxisArg1,
-                                                             &ANF2CreateAxisArg2,
-                                                             &ANF2CreateAxisArg3};
-static const iocshFuncDef ANF2CreateAxisDef = {"ANF2CreateAxis", 4, ANF2CreateAxisArgs};
+                                                             &ANF2CreateAxisArg2};
+static const iocshFuncDef ANF2CreateAxisDef = {"ANF2CreateAxis", 3, ANF2CreateAxisArgs};
 static void ANF2CreateAxisCallFunc(const iocshArgBuf *args)
 {
-  ANF2CreateAxis(args[0].sval, args[1].sval, args[2].ival, args[3].sval);
+  ANF2CreateAxis(args[0].sval, args[1].ival, args[2].sval);
 }
 
 

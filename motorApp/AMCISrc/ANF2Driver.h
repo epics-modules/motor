@@ -65,7 +65,7 @@ class ANF2Axis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
-  ANF2Axis(class ANF2Controller *pC, const char *ANF2ConfName, int axisNo, epicsInt32 config);
+  ANF2Axis(class ANF2Controller *pC, int axisNo, epicsInt32 config);
   void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
@@ -83,7 +83,6 @@ private:
   void reconfig(epicsInt32 value);
   void zeroRegisters(epicsInt32 *reg);
   asynUser *pasynUserForceRead_;
-  asynUser *pasynUserConfWrite_;
   int axisNo_;
   epicsInt32 config_;
   epicsInt32 motionReg_[5];
@@ -102,7 +101,7 @@ public:
   ANF2Axis* getAxis(asynUser *pasynUser);
   ANF2Axis* getAxis(int axisNo); 
   asynUser *pasynUserInReg_[MAX_MODULES*MAX_AXES_PER_MODULE][MAX_INPUT_REGS];
-  //asynUser *pasynUserOutArrayReg_[MAX_MODULES*MAX_AXES_PER_MODULE][MAX_OUTPUT_REGS]; 
+  asynUser *pasynUserOutReg_[MAX_MODULES*MAX_AXES_PER_MODULE];
 
   /* These are the methods that we override from asynMotorDriver */
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
@@ -119,7 +118,7 @@ protected:
 private:
   asynStatus writeReg16(int, int, int, double);
   asynStatus writeReg32(int, int, int, double);
-  //asynStatus writeReg32Array(int, int, epicsInt32*, int, double);
+  asynStatus writeReg32Array(int, epicsInt32*, int, double);
   asynStatus readReg16(int, int, epicsInt32*, double);
   asynStatus readReg32(int, int, epicsInt32*, double);
   char *inputDriver_;
