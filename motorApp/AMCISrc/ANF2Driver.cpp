@@ -823,6 +823,7 @@ asynStatus ANF2Axis::poll(bool *moving)
   int limit;
   int enabled;
   double position;
+  double encPosition;
   asynStatus status;
   epicsInt32 read_val;  // don't use a pointer here.  The _address_ of read_val should be passed to the read function.
   
@@ -853,6 +854,11 @@ asynStatus ANF2Axis::poll(bool *moving)
   //printf("ANF2Axis::poll:  Motor #%i position: %f\n", axisNo_, position);
 
   //  TODO: read encoder position
+  status = pC_->readReg32(axisNo_, EN_POS_UPR, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
+  //printf("ANF2Axis::poll:  Motor encoder position raw: %d\n", read_val);
+  encPosition = (double) read_val;
+  setDoubleParam(pC_->motorEncoderPosition_, encPosition);
+  //printf("ANF2Axis::poll:  Motor #%i encoder position: %f\n", axisNo_, encPosition);
 
   // Read the moving status of this motor
   //
