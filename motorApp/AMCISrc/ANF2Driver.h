@@ -79,6 +79,7 @@ private:
   ANF2Controller *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   asynStatus sendAccelAndVelocity(double accel, double velocity);
+  double correctAccel(double minVelocity, double maxVelocity, double acceleration);
   void getInfo();
   void reconfig(epicsInt32 value);
   void zeroRegisters(epicsInt32 *reg);

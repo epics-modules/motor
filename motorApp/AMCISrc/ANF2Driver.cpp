@@ -582,6 +582,30 @@ asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity)
   return asynSuccess;
 }
 
+/*
+ * This driver only sets the base speed at initialization when the configuration is sent.
+ * It is possible that the base speed (VBAS) in the motor record is inconsistent with the 
+ * base speed set at initialization, since there is no way for an asyn motor driver to force
+ * the base speed to be reset when a user changes it. The resulting acceleration calculated 
+ * by the motor record is likely to be incorrect.  The following method calculates the 
+ * acceleration that will give the correct acceleration time (ACCL) for the base speed that
+ * was specified at initialization.
+ */
+double ANF2Axis::correctAccel(double minVelocity, double maxVelocity, double acceleration)
+{
+  double accelTime;
+  double newAccel;
+  
+  accelTime = (maxVelocity - minVelocity) / acceleration;
+  newAccel = (maxVelocity - (double)baseSpeed_) / accelTime;
+
+  printf("old acceleration = %lf\n", acceleration);
+  printf("new acceleration = %lf\n", newAccel);
+  
+  return newAccel;
+}
+
+
 // MOVE
 asynStatus ANF2Axis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
@@ -597,6 +621,9 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
 
   // Clear the motition registers
   zeroRegisters(motionReg_);
+
+  // Correct the acceleration
+  acceleration = correctAccel(minVelocity, maxVelocity, acceleration);
 
   // This sets indices 2 & 3 of motionReg_
   status = sendAccelAndVelocity(acceleration, maxVelocity);
@@ -647,6 +674,9 @@ asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceler
 
   // Clear the motition registers
   zeroRegisters(motionReg_);
+
+  // Correct the acceleration
+  acceleration = correctAccel(minVelocity, maxVelocity, acceleration);
 
   // This sets indices 2 & 3 of motionReg_
   status = sendAccelAndVelocity(acceleration, maxVelocity);
