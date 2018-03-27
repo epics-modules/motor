@@ -562,18 +562,26 @@ asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity)
 {
   // static const char *functionName = "ANF2::sendAccelAndVelocity";
 
+  // ANF2 speed range is 1 to 1,000,000 steps/sec
+  if (velocity > 1000000.0) {
+    velocity = 1000000.0;
+  }
+  if (velocity < 1.0) {
+    velocity = 1.0;
+  }
+
   // Set the velocity register
   motionReg_[2] = NINT(velocity);
 
   // ANF2 acceleration range 1 to 2000 steps/ms/sec
   // Therefore need to limit range received by motor record from 1000 to 2e6 steps/sec/sec
-  if (acceleration < 1000) {
+  if (acceleration < 1000.0) {
     //printf("Acceleration is < 1000: %lf\n", acceleration);
-    acceleration = 1000;
+    acceleration = 1000.0;
   }
-  if (acceleration > 2000000) {
+  if (acceleration > 2000000.0) {
     //printf("Acceleration is > 2000: %lf\n", acceleration);
-    acceleration = 2000000;
+    acceleration = 2000000.0;
   }
   
   // Set the accel/decel register
@@ -706,20 +714,59 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
     "%s: minVelocity=%f, maxVelocity=%f, acceleration=%f\n",
     functionName, minVelocity, maxVelocity, acceleration);
 
+  /*
+  // The jog command doesn't work well.  It seems to require stopping with an immediate stop,
+  // but immediate stops cause problems for normal moves.  
+  
+  // Clear the command/configuration register
+  status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+
+  epicsThreadSleep(0.05);
+
+  // Clear the motition registers
+  zeroRegisters(motionReg_);
+
+  // Note: the jog acceleration doesn't need to be corrected; the JAR field has units of egu/s/s
+
+  if (maxVelocity > 0.0) {
+    //printf(" ** positive jog called\n");
+
+    // Set cmd register
+    motionReg_[0] = 0x80 << 16;
+    
+    // Do nothing to the velocity
+  
+  } else {
+    //printf(" ** negative jog called\n");
+
+    // Set cmd register
+    motionReg_[0] = 0x100 << 16;
+
+    // ANF2 only accepts speeds > 0
+    maxVelocity = fabs(maxVelocity);
+  }
+
+  // This sets indices 2 & 3 of motionReg_
+  status = sendAccelAndVelocity(acceleration, maxVelocity);
+  
+  // Write all the registers atomically
+  status = pC_->writeReg32Array(axisNo_, motionReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  */
+
   velo = NINT(fabs(maxVelocity));
 
-  /* ANF2 does have a jog command, but don't use it yet */
-  /* ANG1 does not have jog command. Move 1 million steps */
+  // Simulate a jog like the ANG1 driver does. Move 1 million steps
   distance = 1000000;
   if (maxVelocity > 0.) {
-    /* This is a positive move in ANF2 coordinates */
+    // This is a positive move in ANF2 coordinates
     //printf(" ** relative move (JOG pos) called\n");
     status = move(distance, 0, minVelocity, velo, acceleration);
   } else {
-    /* This is a negative move in ANF2 coordinates */
+    // This is a negative move in ANF2 coordinates
     //printf(" ** relative move (JOG neg) called\n");
     status = move((distance * -1.0), 0, minVelocity, velo, acceleration);
   }
+  
   // Delay the first status read, give the controller some time to return moving status
   epicsThreadSleep(0.05);
   return status;
@@ -740,12 +787,17 @@ asynStatus ANF2Axis::stop(double acceleration)
   // Clear the command/configuration register
   status = pC_->writeReg32Array(axisNo_, zeroReg_, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
-  //stopReg = 0x10 << 16;      Immediate stop
+  // Immediate stop works well with jogs, but breaks the first normal move
+  //stopReg = 0x10 << 16;     // Immediate stop
+  // Hold move works very well with normal moves
   stopReg = 0x4 << 16;      // Hold move
   
   //
   status = pC_->writeReg32Array(axisNo_, &stopReg, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
+  // Clear the command/configuration register
+  //status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  
   return status;
 }
 
