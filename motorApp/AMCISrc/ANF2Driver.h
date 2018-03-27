@@ -88,6 +88,25 @@ private:
   epicsInt32 motionReg_[5];
   epicsInt32 confReg_[5];
   epicsInt32 zeroReg_[5];
+  // Configuration bits
+  short CaptInput_;
+  short ExtInput_;
+  short HomeInput_;
+  short CWInput_;
+  short CCWInput_;
+  short BHPO_;
+  short QuadEnc_;
+  short DiagFbk_; 
+  short OutPulse_;
+  short HomeOp_;
+  short CardAxis_;
+  short OpMode_;
+  // LSW
+  short CaptInputAS_;
+  short ExtInputAS_;
+  short HomeInputAS_;
+  short CWInputAS_;
+  short CCWInputAS_;
 
 friend class ANF2Controller;
 };

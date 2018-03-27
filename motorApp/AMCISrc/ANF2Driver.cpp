@@ -349,6 +349,34 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
   // Read the configuration? Or maybe the command registers?
   //getInfo();
   
+  // Parse the configuration (mostly for asynReport purposes)
+  // MSW
+  CaptInput_ = (config & (0x1 << 16)) >> 16;
+  ExtInput_ = (config & (0x2 << 16)) >> 17;
+  HomeInput_ = (config & (0x4 << 16)) >> 18;
+  CWInput_ = (config & (0x18 << 16)) >> 19;
+  CCWInput_ = (config & (0x60 << 16)) >> 21;
+  BHPO_ = (config & (0x80 << 16)) >> 23;
+  QuadEnc_ = (config & (0x100 << 16)) >> 24;
+  DiagFbk_ = (config & (0x200 << 16)) >> 25;
+  OutPulse_ = (config & (0x400 << 16)) >> 26;
+  HomeOp_ = (config & (0x800 << 16)) >> 27; 
+  CardAxis_ = (config & (0x4000 << 16)) >> 30;
+  OpMode_ = (config & (0x8000 << 16)) >> 31;
+  // LSW
+  CaptInputAS_ = config & 0x1;
+  ExtInputAS_ = (config & 0x2) >> 1;
+  HomeInputAS_ = (config & 0x4) >> 2;
+  CWInputAS_ = (config & 0x8) >> 3;
+  CCWInputAS_ = (config & 0x10) >> 4;
+  
+  // Only allow UEIP to be used if the axis is configured to have a quadrature encoder
+  if (QuadEnc_ != 0x0) {
+    setIntegerParam(pC_->motorStatusHasEncoder_, 1);
+  } else {
+    setIntegerParam(pC_->motorStatusHasEncoder_, 0);
+  }
+  
   // set position to 0 to clear the "position invalid" status that results from configuring the axis
   setPosition(0);
   // Tell asynMotor device support the position is zero so that autosave will restore the saved position (doesn't appear to be necessary)
@@ -425,6 +453,20 @@ void ANF2Axis::getInfo()
   
   // For a read (not sure why this is necessary)
   status = pasynInt32SyncIO->write(pasynUserForceRead_, 1, DEFAULT_CONTROLLER_TIMEOUT);
+
+  printf("Configuration for axis %i:\n", axisNo_);
+  printf("  Capture Input: %i\tActive State: %i\n", CaptInput_, CaptInputAS_);
+  printf("  External Input: %i\tActive State: %i\n", ExtInput_, ExtInputAS_);
+  printf("  Home Input: %i\tActive State: %i\n", HomeInput_, HomeInputAS_);
+  printf("  CW Input: %i\tActive State: %i\n", CWInput_, CWInputAS_);
+  printf("  CCW Input: %i\tActive State: %i\n", CCWInput_, CCWInputAS_);
+  printf("  Backplane Home Proximity Operation: %i\n", BHPO_);
+  printf("  Quadrature Encoder: %i\n", QuadEnc_);
+  printf("  Diagnostic Feedback: %i\n", DiagFbk_);
+  printf("  Output Pulse Type: %i\n", OutPulse_);
+  printf("  Home Operation: %i\n", HomeOp_);
+  printf("  Card Axis: %i\n", CardAxis_);
+  printf("  Operation Mode for Axis: %i\n", OpMode_);
 
   printf("Registers for axis %i:\n", axisNo_);
 
