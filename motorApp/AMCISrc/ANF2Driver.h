@@ -81,6 +81,7 @@ private:
   asynStatus sendAccelAndVelocity(double accel, double velocity);
   double correctAccel(double minVelocity, double maxVelocity, double acceleration);
   void getInfo();
+  epicsInt32 inputReg_[10];
   void reconfig(epicsInt32 value);
   void zeroRegisters(epicsInt32 *reg);
   asynUser *pasynUserForceRead_;

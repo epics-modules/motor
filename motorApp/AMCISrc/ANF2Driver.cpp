@@ -152,7 +152,7 @@ void ANF2Controller::doStartPoller(double movingPollPeriod, double idlePollPerio
 void ANF2Controller::report(FILE *fp, int level)
 {
   int i, j;
-  ANF2Axis *pAxis;
+  ANF2Axis* pAxis[numAxes_];
   
   fprintf(fp, "====================================\n");
   fprintf(fp, "ANF2 motor driver:\n");
@@ -161,21 +161,35 @@ void ANF2Controller::report(FILE *fp, int level)
   fprintf(fp, "    axes created: %i\n", axesCreated_);
   fprintf(fp, "    moving poll period: %lf\n", movingPollPeriod_);
   fprintf(fp, "    idle poll period: %lf\n", idlePollPeriod_);
+  fprintf(fp, "\n");
+  fprintf(fp, "Input registers:\n\n");
   
   for (j=0; j<numAxes_; j++) {
-    fprintf(fp, "========\n");
-    fprintf(fp, "AXIS #%i\n", j);
-    fprintf(fp, "========\n");
+    pAxis[j] = getAxis(j);
+    pAxis[j]->getInfo();
+  }
   
-    pAxis = getAxis(j);
-    pAxis->getInfo();
+  fprintf(fp, " Reg\t");
+  for (j=0; j<numAxes_; j++) {
+    fprintf(fp, "Axis %i\t", j);
+  }
+  fprintf(fp, "\n");
   
+  for (i=0; i<MAX_INPUT_REGS; i++) {
+    fprintf(fp, "  %i\t", i);
+    for (j=0; j<numAxes_; j++) {
+      fprintf(fp, "0x%04x\t", pAxis[j]->inputReg_[i]);
+  
+    }
+    fprintf(fp, "\n");
+  }
+  
+  fprintf(fp, "\n");
     /*for (i=0; i<MAX_INPUT_REGS; i++) {
        fprintf(fp, "    reg %i, pasynUserInReg_[%i][%i]=0x%x\n", i, j, i, pasynUserInReg_[j][i]);
     }*/
-  }
   // Call the base class method
-  asynMotorController::report(fp, level);
+    asynMotorController::report(fp, level);
   fprintf(fp, "====================================\n");
 }
 
@@ -474,28 +488,14 @@ void ANF2Axis::getInfo()
   // For a read (not sure why this is necessary)
   status = pasynInt32SyncIO->write(pasynUserForceRead_, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
-  printf("Configuration for axis %i:\n", axisNo_);
-  printf("  Base Speed: %i\tHoming Timeout: %i\n", baseSpeed_, homingTimeout_);
-  printf("  Capture Input: %i\tActive State: %i\n", CaptInput_, CaptInputAS_);
-  printf("  External Input: %i\tActive State: %i\n", ExtInput_, ExtInputAS_);
-  printf("  Home Input: %i\tActive State: %i\n", HomeInput_, HomeInputAS_);
-  printf("  CW Input: %i\tActive State: %i\n", CWInput_, CWInputAS_);
-  printf("  CCW Input: %i\tActive State: %i\n", CCWInput_, CCWInputAS_);
-  printf("  Backplane Home Proximity Operation: %i\n", BHPO_);
-  printf("  Quadrature Encoder: %i\n", QuadEnc_);
-  printf("  Diagnostic Feedback: %i\n", DiagFbk_);
-  printf("  Output Pulse Type: %i\n", OutPulse_);
-  printf("  Home Operation: %i\n", HomeOp_);
-  printf("  Card Axis: %i\n", CardAxis_);
-  printf("  Operation Mode for Axis: %i\n", OpMode_);
-
-  printf("Registers for axis %i:\n", axisNo_);
+  //printf("Registers for axis %i:\n", axisNo_);
 
   for( i=0; i<MAX_INPUT_REGS; i++)
   {
-    status = pC_->readReg16(axisNo_, i, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
+    status = pC_->readReg16(axisNo_, i, &inputReg_[i], DEFAULT_CONTROLLER_TIMEOUT);
+    //status = pC_->readReg16(axisNo_, i, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
     //printf("  status=%d, register=%i, val=0x%x\n", status, i, read_val);
-    printf("  register=%i, val=0x%x\n", i, read_val);
+    //printf("  register=%i, val=0x%x\n", i, read_val);
   }
 }
 
@@ -547,14 +547,35 @@ void ANF2Axis::report(FILE *fp, int level)
   // TODO: make this more useful
 
   if (level > 0) {
-    fprintf(fp, "  axis %d\n", axisNo_);
+    fprintf(fp, "Configuration for axis %i:\n", axisNo_);
+    fprintf(fp, "  Base Speed: %i\tHoming Timeout: %i\n", baseSpeed_, homingTimeout_);
+    fprintf(fp, "  Capture Input: %i\tActive State: %i\n", CaptInput_, CaptInputAS_);
+    fprintf(fp, "  External Input: %i\tActive State: %i\n", ExtInput_, ExtInputAS_);
+    fprintf(fp, "  Home Input: %i\tActive State: %i\n", HomeInput_, HomeInputAS_);
+    fprintf(fp, "  CW Input: %i\tActive State: %i\n", CWInput_, CWInputAS_);
+    fprintf(fp, "  CCW Input: %i\tActive State: %i\n", CCWInput_, CCWInputAS_);
+    fprintf(fp, "  Backplane Home Proximity Operation: %i\n", BHPO_);
+    fprintf(fp, "  Quadrature Encoder: %i\n", QuadEnc_);
+    fprintf(fp, "  Diagnostic Feedback: %i\n", DiagFbk_);
+    fprintf(fp, "  Output Pulse Type: %i\n", OutPulse_);
+    fprintf(fp, "  Home Operation: %i\n", HomeOp_);
+    fprintf(fp, "  Card Axis: %i\n", CardAxis_);
+    fprintf(fp, "  Operation Mode for Axis: %i\n", OpMode_);
+    fprintf(fp, "\n");
+    
+    /*fprintf(fp, "  axis %d\n", axisNo_);
     fprintf(fp, "    this->axisNo_ %i\n", this->axisNo_);
     fprintf(fp, "    this->config_ %x\n", this->config_);
-    fprintf(fp, "    config_ %x\n", config_);
+    fprintf(fp, "    config_ %x\n", config_);*/
   }
+
+  //printf("ANF2Axis::report -> BEFORE asynMotorAxis::report!!\n");
 
   // Call the base class method
   asynMotorAxis::report(fp, level);
+
+  //printf("ANF2Axis::report -> AFTER asynMotorAxis::report!!\n");
+
 }
 
 // SET VEL & ACCEL
@@ -809,7 +830,7 @@ asynStatus ANF2Axis::setPosition(double position)
   epicsInt32 posReg[5];
   //static const char *functionName = "ANF2Axis::setPosition";
   
-  printf("setPosition(%lf) for axisNo_=%i\n", position, axisNo_);
+  //printf("setPosition(%lf) for axisNo_=%i\n", position, axisNo_);
   
   // Clear the command/configuration register
   status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
@@ -821,9 +842,6 @@ asynStatus ANF2Axis::setPosition(double position)
   zeroRegisters(posReg);
   posReg[0] = 0x200 << 16;
   posReg[1] = set_position;
-  //posReg[2] = 0x0;
-  //posReg[3] = 0x0;
-  //posReg[4] = 0x0;
 
   // Write all the registers atomically
   status = pC_->writeReg32Array(axisNo_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
