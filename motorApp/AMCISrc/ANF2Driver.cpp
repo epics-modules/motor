@@ -607,8 +607,8 @@ double ANF2Axis::correctAccel(double minVelocity, double maxVelocity, double acc
   accelTime = (maxVelocity - minVelocity) / acceleration;
   newAccel = (maxVelocity - (double)baseSpeed_) / accelTime;
 
-  printf("old acceleration = %lf\n", acceleration);
-  printf("new acceleration = %lf\n", newAccel);
+  //printf("old acceleration = %lf\n", acceleration);
+  //printf("new acceleration = %lf\n", newAccel);
   
   return newAccel;
 }
@@ -780,7 +780,7 @@ asynStatus ANF2Axis::stop(double acceleration)
   epicsInt32 stopReg;
   //static const char *functionName = "ANF2Axis::stop";
   
-  printf("\n  STOP \n\n");
+  //printf("\n  STOP \n\n");
   
   // The stop commands ignore all 32-bit registers beyond the first
   
