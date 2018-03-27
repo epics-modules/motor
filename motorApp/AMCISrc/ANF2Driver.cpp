@@ -320,7 +320,6 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
   /* TODO:
    *  test config bits and set status bits to prevent methods from sending commands that would generate errors
    *  reduce the sleeps to see which ones are necessary
-   *  allow the base speed to be passed as an argument
    */
 
   epicsThreadSleep(0.1);
