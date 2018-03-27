@@ -296,7 +296,7 @@ asynStatus ANF2Controller::readReg32(int axisNo, int axisReg, epicsInt32 *combo,
   * 
   * Initializes register numbers, etc.
   */
-ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
+ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32 baseSpeed, epicsInt32 homingTimeout)
   : asynMotorAxis(pC, axisNo),
     pC_(pC)	
 { 
@@ -304,6 +304,8 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
 
   axisNo_ = axisNo;
   //this->axisNo_ = axisNo;
+  baseSpeed_ = baseSpeed;
+  homingTimeout_ = homingTimeout;
 
   // These registers will always be zero
   zeroRegisters(zeroReg_);
@@ -338,7 +340,8 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
   // Send the configuration (array) 
   // assemble the configuration bits; set the start speed to a non-zero value (100), which is required for the configuration to be accepted
   confReg_[CONFIGURATION] = config;
-  confReg_[BASE_SPEED] = 0x00000064;
+  confReg_[BASE_SPEED] = baseSpeed;
+  confReg_[HOME_TIMEOUT] = homingTimeout << 16;
   
   // Write all the registers
   status = pC_->writeReg32Array(axisNo_, confReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
@@ -404,8 +407,10 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
  */
 
 extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which controller by port name */
-                         int axis,                         /* axis number 0-1 */
-                         const char *hexConfig)            /* desired configuration in hex */
+                         int axis,                          /* axis number 0-1 */
+                         const char *hexConfig,             /* desired configuration in hex */
+                         epicsInt32 baseSpeed,              /* base speed */
+                         epicsInt32 homingTimeout)          /* homing timeout */
 {
   ANF2Controller *pC;
   epicsInt32 config;
@@ -429,8 +434,24 @@ extern "C" asynStatus ANF2CreateAxis(const char *ANF2Name,  /* specify which con
            driverName, functionName, config);
   }
   
+  // baseSpeed is steps/second (1-1,000,000)
+  if (baseSpeed < 1) {
+    baseSpeed = 1;
+  }
+  if (baseSpeed > 1000000) {
+    baseSpeed = 1000000;
+  }
+  
+  // homingTimeout is seconds (0-300)
+  if (homingTimeout < 0) {
+    homingTimeout = 0;
+  }
+  if (homingTimeout > 300) {
+    homingTimeout = 300;
+  }
+  
   pC->lock();
-  new ANF2Axis(pC, axis, config);
+  new ANF2Axis(pC, axis, config, baseSpeed, homingTimeout);
   pC->unlock();
   return asynSuccess;
 }
@@ -455,6 +476,7 @@ void ANF2Axis::getInfo()
   status = pasynInt32SyncIO->write(pasynUserForceRead_, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
   printf("Configuration for axis %i:\n", axisNo_);
+  printf("  Base Speed: %i\tHoming Timeout: %i\n", baseSpeed_, homingTimeout_);
   printf("  Capture Input: %i\tActive State: %i\n", CaptInput_, CaptInputAS_);
   printf("  External Input: %i\tActive State: %i\n", ExtInput_, ExtInputAS_);
   printf("  Home Input: %i\tActive State: %i\n", HomeInput_, HomeInputAS_);
@@ -895,13 +917,17 @@ static void ANF2StartPollerCallFunc(const iocshArgBuf *args)
 static const iocshArg ANF2CreateAxisArg0 = {"Port name", iocshArgString};
 static const iocshArg ANF2CreateAxisArg1 = {"Axis number", iocshArgInt};
 static const iocshArg ANF2CreateAxisArg2 = {"Hex config", iocshArgString};
+static const iocshArg ANF2CreateAxisArg3 = {"Base speed", iocshArgInt};
+static const iocshArg ANF2CreateAxisArg4 = {"Homing timeout", iocshArgInt};
 static const iocshArg * const ANF2CreateAxisArgs[] = {&ANF2CreateAxisArg0,
                                                              &ANF2CreateAxisArg1,
-                                                             &ANF2CreateAxisArg2};
-static const iocshFuncDef ANF2CreateAxisDef = {"ANF2CreateAxis", 3, ANF2CreateAxisArgs};
+                                                             &ANF2CreateAxisArg2,
+                                                             &ANF2CreateAxisArg3,
+                                                             &ANF2CreateAxisArg4};
+static const iocshFuncDef ANF2CreateAxisDef = {"ANF2CreateAxis", 5, ANF2CreateAxisArgs};
 static void ANF2CreateAxisCallFunc(const iocshArgBuf *args)
 {
-  ANF2CreateAxis(args[0].sval, args[1].ival, args[2].sval);
+  ANF2CreateAxis(args[0].sval, args[1].ival, args[2].sval, args[3].ival, args[4].ival);
 }
 
 

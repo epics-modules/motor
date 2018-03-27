@@ -65,7 +65,7 @@ class ANF2Axis : public asynMotorAxis
 {
 public:
   /* These are the methods we override from the base class */
-  ANF2Axis(class ANF2Controller *pC, int axisNo, epicsInt32 config);
+  ANF2Axis(class ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32 baseSpeed, epicsInt32 homingTimeout);
   void report(FILE *fp, int level);
   asynStatus move(double position, int relative, double min_velocity, double max_velocity, double acceleration);
   asynStatus moveVelocity(double min_velocity, double max_velocity, double acceleration);
@@ -84,6 +84,8 @@ private:
   void zeroRegisters(epicsInt32 *reg);
   asynUser *pasynUserForceRead_;
   int axisNo_;
+  epicsInt32 baseSpeed_;
+  epicsInt32 homingTimeout_;
   epicsInt32 config_;
   epicsInt32 motionReg_[5];
   epicsInt32 confReg_[5];
