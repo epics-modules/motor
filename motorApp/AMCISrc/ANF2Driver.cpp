@@ -362,7 +362,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config)
   OutPulse_ = (config & (0x400 << 16)) >> 26;
   HomeOp_ = (config & (0x800 << 16)) >> 27; 
   CardAxis_ = (config & (0x4000 << 16)) >> 30;
-  OpMode_ = (config & (0x8000 << 16)) >> 31;
+  OpMode_ = (epicsUInt32)(config & (0x8000 << 16)) >> 31;
   // LSW
   CaptInputAS_ = config & 0x1;
   ExtInputAS_ = (config & 0x2) >> 1;
