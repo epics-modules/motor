@@ -384,7 +384,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
   CCWInputAS_ = (config & 0x10) >> 4;
   
   // Only allow UEIP to be used if the axis is configured to have a quadrature encoder
-  if (QuadEnc_ != 0x0) {
+  if ((QuadEnc_ != 0x0) || (DiagFbk_ != 0x0)) {
     setIntegerParam(pC_->motorStatusHasEncoder_, 1);
   } else {
     setIntegerParam(pC_->motorStatusHasEncoder_, 0);
