@@ -92,6 +92,7 @@ private:
   epicsInt32 motionReg_[5];
   epicsInt32 confReg_[5];
   epicsInt32 zeroReg_[5];
+  bool jogging_;
   // Configuration bits
   short CaptInput_;
   short ExtInput_;

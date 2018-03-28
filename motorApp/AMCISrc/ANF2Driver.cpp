@@ -247,9 +247,6 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
     status = asynMotorController::writeInt32(pasynUser, value);
   }
   
-  // Call base class method
-  status = asynMotorController::writeInt32(pasynUser, value);
-  
   /* Do callbacks so higher layers see any changes */
   pAxis->callParamCallbacks();
   if (status)
@@ -735,9 +732,11 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
     "%s: minVelocity=%f, maxVelocity=%f, acceleration=%f\n",
     functionName, minVelocity, maxVelocity, acceleration);
 
-  /*
-  // The jog command doesn't work well.  It seems to require stopping with an immediate stop,
-  // but immediate stops cause problems for normal moves.  
+  //
+  // The jog command requires a different stop than a move command
+  
+  // Set a jogging flag
+  jogging_ = true;
   
   // Clear the command/configuration register
   status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
@@ -772,8 +771,9 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
   
   // Write all the registers atomically
   status = pC_->writeReg32Array(axisNo_, motionReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
-  */
+  //
 
+  /*
   velo = NINT(fabs(maxVelocity));
 
   // Simulate a jog like the ANG1 driver does. Move 1 million steps
@@ -787,6 +787,7 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
     //printf(" ** relative move (JOG neg) called\n");
     status = move((distance * -1.0), 0, minVelocity, velo, acceleration);
   }
+  */
   
   // Delay the first status read, give the controller some time to return moving status
   epicsThreadSleep(0.05);
@@ -805,19 +806,27 @@ asynStatus ANF2Axis::stop(double acceleration)
   
   // The stop commands ignore all 32-bit registers beyond the first
   
-  // Clear the command/configuration register
+  // Clear the command/configuration register (this causes a jog to stop)
   status = pC_->writeReg32Array(axisNo_, zeroReg_, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
-  // Immediate stop works well with jogs, but breaks the first normal move
-  //stopReg = 0x10 << 16;     // Immediate stop
-  // Hold move works very well with normal moves
-  stopReg = 0x4 << 16;      // Hold move
+  if (jogging_ == false)
+  {
+    //printf("stopping a normal move\n");
+    // The immediate stop command cuts the pulses off without any deceleration and causes the position to become invalid
+    //stopReg = 0x10 << 16;     // Immediate stop
+    // Hold move works very well with normal moves
+    stopReg = 0x4 << 16;      // Hold move
   
-  //
-  status = pC_->writeReg32Array(axisNo_, &stopReg, 1, DEFAULT_CONTROLLER_TIMEOUT);
+    // This causes a normal move to stop
+    status = pC_->writeReg32Array(axisNo_, &stopReg, 1, DEFAULT_CONTROLLER_TIMEOUT);
 
-  // Clear the command/configuration register
-  //status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+    // Clear the command/configuration register
+    //status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  } else {
+    // Reset the jogging flag (assume the stop was successful)
+    //printf("resetting the jog flag\n");
+    jogging_ = false;
+  }
   
   return status;
 }
