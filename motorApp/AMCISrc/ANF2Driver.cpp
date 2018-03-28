@@ -54,6 +54,7 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   inputDriver_ = epicsStrDup(ANF2InPortName);    // Set this before calls to create Axis objects
   
   // Create controller-specific parameters
+  createParam(ANF2ResetErrorsString,     asynParamInt32,       &ANF2ResetErrors_);
   createParam(ANF2GetInfoString,         asynParamInt32,       &ANF2GetInfo_);
   createParam(ANF2ReconfigString,        asynParamInt32,       &ANF2Reconfig_);
 
@@ -230,7 +231,15 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
   /* Set the parameter and readback in the parameter library. */
   status = setIntegerParam(pAxis->axisNo_, function, value);
   
-  if (function == ANF2GetInfo_)
+  if (function == ANF2ResetErrors_)
+  {
+    // Only reset errors when value is 1
+    if (value == 1) {
+        printf("ANF2Controller:writeInt32: Resetting errors for axis = %d\n", pAxis->axisNo_);
+        pAxis->resetErrors();
+
+    }
+  } else if (function == ANF2GetInfo_)
   {
     // Only get info when value is 1
     if (value == 1) {
@@ -474,6 +483,22 @@ void ANF2Axis::zeroRegisters(epicsInt32 *reg)
   {
     reg[i] = 0x0;
   }
+}
+
+asynStatus ANF2Axis::resetErrors()
+{
+  asynStatus status;
+  epicsInt32 errorReg[5];
+  //static const char *functionName = "ANF2Axis::resetErrors";
+  
+  zeroRegisters(errorReg);
+  
+  errorReg[0] = 0x800 << 16;
+
+  // Send the reset error command
+  status = pC_->writeReg32Array(axisNo_, errorReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
+  
+  return status;
 }
 
 void ANF2Axis::getInfo()

@@ -1,5 +1,15 @@
 # Database for extra PVs for AMCI ANG1 controllers
 
+record(bo,"$(P)$(R)ResetErrors") {
+    field(DESC,"Reset Errors")
+    field(PINI, "0")
+    field(VAL,"0")
+    field(DTYP, "asynInt32")
+    field(OUT,"@asyn($(PORT),$(ADDR))ANF2_RESET_ERRORS")
+    field(ZNAM, "Done")
+    field(ONAM, "Reset")
+}
+
 record(bo,"$(P)$(R)GetInfo") {
     field(DESC,"Get Info")
     field(PINI, "0")

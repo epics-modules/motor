@@ -55,11 +55,12 @@ K. Goetze 2014-03-24
 #define CONFIG_REG_4  4
 
 // No. of controller-specific parameters
-#define NUM_ANF2_PARAMS 2
+#define NUM_ANF2_PARAMS 3
 
 /** drvInfo strings for extra parameters that the ACR controller supports */
+#define ANF2ResetErrorsString       "ANF2_RESET_ERRORS"
 #define ANF2GetInfoString           "ANF2_GET_INFO"
-#define ANF2ReconfigString           "ANF2_RECONFIG"
+#define ANF2ReconfigString          "ANF2_RECONFIG"
 
 class ANF2Axis : public asynMotorAxis
 {
@@ -80,6 +81,7 @@ private:
                                    *   Abbreviated because it is used very frequently */
   asynStatus sendAccelAndVelocity(double accel, double velocity);
   double correctAccel(double minVelocity, double maxVelocity, double acceleration);
+  asynStatus resetErrors();
   void getInfo();
   epicsInt32 inputReg_[10];
   void reconfig(epicsInt32 value);
@@ -135,8 +137,9 @@ public:
   /* These are the methods that are new to this class */
   
 protected:
-  int ANF2GetInfo_;          /**< Jerk time parameter index */        
-  int ANF2Reconfig_;          /**< Jerk time parameter index */        
+  int ANF2ResetErrors_;     /** Reset Errors parameter index */
+  int ANF2GetInfo_;          /**< Get Info parameter index */        
+  int ANF2Reconfig_;          /**< Reconfig parameter index */        
 
 
 private:
