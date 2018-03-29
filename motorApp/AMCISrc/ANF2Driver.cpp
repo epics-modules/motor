@@ -732,11 +732,14 @@ asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceler
   // This sets indices 2 & 3 of motionReg_
   status = sendAccelAndVelocity(acceleration, maxVelocity);
 
+  // Note: if the home input is active when the home command is sent, the axis will appear to move in the wrong direction
   if (forwards) {
     printf(" ** HOMING FORWARDS **\n");
+    // The +Find Home (CW) command
     motionReg_[0] = 0x20 << 16;
   } else {
     printf(" ** HOMING REVERSE **\n");
+    // The -Find Home (CCW) command 
     motionReg_[0] = 0x40 << 16;
   }
 
