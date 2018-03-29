@@ -927,8 +927,11 @@ asynStatus ANF2Axis::setClosedLoop(bool closedLoop)
 asynStatus ANF2Axis::poll(bool *moving)
 { 
   int done;
-  int limit;
+  int lowLimit;
+  int highLimit;
   int enabled;
+  int cmdError;
+  int direction;
   double position;
   double encPosition;
   asynStatus status;
@@ -978,6 +981,21 @@ asynStatus ANF2Axis::poll(bool *moving)
   *moving = done ? false:true;
   //printf("done is %d\n", done);
 
+  // Direction (only set the direction of the controller is moving)
+  if (!done) {
+    if (read_val & 0x1) {
+      direction = 1;
+      setIntegerParam(pC_->motorStatusDirection_, 1);      
+    }
+    if ((read_val & 0x2) > 1) {
+      direction = 0;
+      setIntegerParam(pC_->motorStatusDirection_, 0);      
+    }
+  }
+  
+  // Check for command errors
+  cmdError = (read_val & 0x1000) ? 1 : 0;
+
   // Check for enable/disable (not actually the torque status) and set accordingly.
   // Enable/disable is determined by the configuration and it isn't obvious why one would disable an axis.
   enabled = (read_val & 0x4000);
@@ -991,28 +1009,21 @@ asynStatus ANF2Axis::poll(bool *moving)
   status = pC_->readReg16(axisNo_, STATUS_2, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
   //printf("status 2 is 0x%X\n", read_val);  
   
-  limit  = (read_val & 0x8);    // a cw limit has been reached
-  setIntegerParam(pC_->motorStatusHighLimit_, limit);
-  //printf("+limit %d\n", limit);
-    if (limit) {   // reset error and set position so we can move off of the limit
-    // Reset error
-	setClosedLoop(1);
-	// Reset position
-	//printf(" Reset Position\n");
-	setPosition(position);
-  }
+  // Set the high limit only when moving in the positive direction
+  highLimit  = (read_val & 0x8) ? (direction & 1) : 0;    // a cw limit has been reached
+  setIntegerParam(pC_->motorStatusHighLimit_, highLimit);
+  //printf("+limit %d\n", highLimit);
 
-  limit  = (read_val & 0x10);    // a ccw limit has been reached
-  setIntegerParam(pC_->motorStatusLowLimit_, limit);
-  //printf("-limit %d\n", limit);
-  if (limit) {   // reset error and set position so we can move off of the limit
-    // Reset error
-	setClosedLoop(1);
-	// Reset position
-	setPosition(position);
-  }
+  // Set the low limit only when moving in the negative direction
+  lowLimit  = (read_val & 0x10) ? (!direction & 1) : 0;    // a ccw limit has been reached
+  setIntegerParam(pC_->motorStatusLowLimit_, lowLimit);
+  //printf("-limit %d\n", lowLimit);
 
-  // test for home
+  // Clear command errors so we can attempt to move again
+  if (cmdError) {
+    printf("poll: resetting errors\n");
+    resetErrors();
+  }
   
   // Should be in init routine?  Allows CNEN to be used.
   setIntegerParam(pC_->motorStatusGainSupport_, 1);
