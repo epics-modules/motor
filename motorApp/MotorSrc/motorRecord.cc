@@ -3946,7 +3946,11 @@ USAGE... Translate dial-coordinate limits to user-coordinate limits.
 */
 static void set_userlimits(motorRecord *pmr)
 {
-    if (pmr->dir == motorDIR_Pos)
+    if (!softLimitsDefined(pmr))
+    {
+        pmr->hlm = pmr->llm = 0.0;
+    }
+    else if (pmr->dir == motorDIR_Pos)
     {
         pmr->hlm = pmr->dhlm + pmr->off;
         pmr->llm = pmr->dllm + pmr->off;
