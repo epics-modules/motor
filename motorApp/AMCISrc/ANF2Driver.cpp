@@ -340,6 +340,8 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
   /* TODO:
    *  test config bits and set status bits to prevent methods from sending commands that would generate errors
    *  reduce the sleeps to see which ones are necessary
+   *  print out useful info for asyn traces
+   *  make reconfig useful
    */
 
   epicsThreadSleep(0.1);
@@ -493,7 +495,7 @@ asynStatus ANF2Axis::resetErrors()
   
   zeroRegisters(errorReg);
   
-  errorReg[0] = 0x800 << 16;
+  errorReg[COMMAND] = 0x800 << 16;
 
   // Send the reset error command
   status = pC_->writeReg32Array(axisNo_, errorReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
@@ -505,7 +507,6 @@ void ANF2Axis::getInfo()
 {
   asynStatus status;
   int i;
-  epicsInt32 read_val;
   
   // For a read (not sure why this is necessary)
   status = pasynInt32SyncIO->write(pasynUserForceRead_, 1, DEFAULT_CONTROLLER_TIMEOUT);
@@ -515,9 +516,7 @@ void ANF2Axis::getInfo()
   for( i=0; i<MAX_INPUT_REGS; i++)
   {
     status = pC_->readReg16(axisNo_, i, &inputReg_[i], DEFAULT_CONTROLLER_TIMEOUT);
-    //status = pC_->readReg16(axisNo_, i, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
-    //printf("  status=%d, register=%i, val=0x%x\n", status, i, read_val);
-    //printf("  register=%i, val=0x%x\n", i, read_val);
+    //printf("  status=%d, register=%i, val=0x%x\n", status, i, inputReg_[i]);
   }
 }
 
@@ -614,7 +613,7 @@ asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity)
   }
 
   // Set the velocity register
-  motionReg_[2] = NINT(velocity);
+  motionReg_[SPEED] = NINT(velocity);
 
   // ANF2 acceleration range 1 to 2000 steps/ms/sec
   // Therefore need to limit range received by motor record from 1000 to 2e6 steps/sec/sec
@@ -628,7 +627,7 @@ asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity)
   }
   
   // Set the accel/decel register
-  motionReg_[3] = (NINT(acceleration/1000.0) << 16) | (NINT(acceleration/1000.0));
+  motionReg_[ACCEL_DECEL] = (NINT(acceleration/1000.0) << 16) | (NINT(acceleration/1000.0));
     
   return asynSuccess;
 }
@@ -661,7 +660,7 @@ double ANF2Axis::correctAccel(double minVelocity, double maxVelocity, double acc
 asynStatus ANF2Axis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  epicsInt32 distance;
+  epicsInt32 posInt;
   
   //printf(" ** ANF2Axis::move called, relative = %d, axisNo_ = %i\n", relative, this->axisNo_);
 
@@ -679,29 +678,27 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
   // This sets indices 2 & 3 of motionReg_
   status = sendAccelAndVelocity(acceleration, maxVelocity);
   
+  posInt = NINT(position);
+  
   if (relative) {
     //printf(" ** relative move called\n");
-
-    distance = NINT(position);
   
     // Set position and cmd registers
-    motionReg_[1] = NINT(position);
-    motionReg_[0] = 0x2 << 16;
+    motionReg_[COMMAND] = 0x2 << 16;
+    motionReg_[POSITION] = posInt;
   
   } else {
-    // absolute
     //printf(" ** absolute move called\n");
-
-    distance = NINT(position);
-    //printf(" ** distance = %d\n", distance);
   
     // Set position and cmd registers
-    motionReg_[1] = NINT(position);
-    motionReg_[0] = 0x1 << 16;
+    motionReg_[COMMAND] = 0x1 << 16;
+    motionReg_[POSITION] = posInt;
   }
+
+  //printf(" ** position = %d\n", posInt);
   
-  // The final registers are zero for absolute and relative moves
-  motionReg_[4] = 0x0;
+  // The final registers are zero for absolute and relative moves (this shouldn't be necessary--DELETEME)
+  motionReg_[CMD_REG_4] = 0x0;
   
   // Write all the registers atomically
   // The number of elements refers to the number of epicsInt32s registers_
@@ -736,11 +733,11 @@ asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceler
   if (forwards) {
     printf(" ** HOMING FORWARDS **\n");
     // The +Find Home (CW) command
-    motionReg_[0] = 0x20 << 16;
+    motionReg_[COMMAND] = 0x20 << 16;
   } else {
     printf(" ** HOMING REVERSE **\n");
     // The -Find Home (CCW) command 
-    motionReg_[0] = 0x40 << 16;
+    motionReg_[COMMAND] = 0x40 << 16;
   }
 
   // Write all the registers atomically
@@ -753,7 +750,7 @@ asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceler
 asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  int velo, distance;
+  //int velo, distance;
   static const char *functionName = "ANF2Axis::moveVelocity";
 
   asynPrint(pasynUser_, ASYN_TRACE_FLOW,
@@ -780,7 +777,7 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
     //printf(" ** positive jog called\n");
 
     // Set cmd register
-    motionReg_[0] = 0x80 << 16;
+    motionReg_[COMMAND] = 0x80 << 16;
     
     // Do nothing to the velocity
   
@@ -788,7 +785,7 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
     //printf(" ** negative jog called\n");
 
     // Set cmd register
-    motionReg_[0] = 0x100 << 16;
+    motionReg_[COMMAND] = 0x100 << 16;
 
     // ANF2 only accepts speeds > 0
     maxVelocity = fabs(maxVelocity);
@@ -877,13 +874,14 @@ asynStatus ANF2Axis::setPosition(double position)
   set_position = NINT(position);
 
   zeroRegisters(posReg);
-  posReg[0] = 0x200 << 16;
-  posReg[1] = set_position;
+  posReg[COMMAND] = 0x200 << 16;
+  posReg[POSITION] = set_position;
 
   // Write all the registers atomically
   status = pC_->writeReg32Array(axisNo_, posReg, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
-  epicsThreadSleep(0.20);
+  // Can this delay be shorter?
+  epicsThreadSleep(0.2);
 
   // The ANG1 driver does this; do we need to?
   // Clear the command/configuration register
@@ -938,6 +936,7 @@ asynStatus ANF2Axis::poll(bool *moving)
   epicsInt32 read_val;  // don't use a pointer here.  The _address_ of read_val should be passed to the read function.
   
   // Don't do any polling until ALL the axes have been created; this ensures that we don't interpret the configuration values as command values
+  // This is probably not necessary now that the poller can be started after iocInit
   if (pC_->axesCreated_ != pC_->numAxes_) {
     *moving = false;
     return asynSuccess;
@@ -981,16 +980,18 @@ asynStatus ANF2Axis::poll(bool *moving)
   *moving = done ? false:true;
   //printf("done is %d\n", done);
 
+  // Initialize the direction bit to the last value
+  status = pC_->getIntegerParam(pC_->motorStatusDirection_, &direction);
+
   // Direction (only set the direction of the controller is moving)
   if (!done) {
     if (read_val & 0x1) {
       direction = 1;
-      setIntegerParam(pC_->motorStatusDirection_, 1);      
     }
-    if ((read_val & 0x2) > 1) {
+    if ((read_val & 0x2) >> 1) {
       direction = 0;
-      setIntegerParam(pC_->motorStatusDirection_, 0);      
     }
+    setIntegerParam(pC_->motorStatusDirection_, direction);
   }
   
   // Check for command errors

@@ -23,7 +23,7 @@ K. Goetze 2014-03-24
 
 #define AXIS_REG_OFFSET 10
 
-/*** Input CMD Registers ***/
+/*** Input CMD Registers (16-bit) ***/
 #define STATUS_1   0
 #define STATUS_2   1
 #define POS_RD_UPR 2
@@ -35,17 +35,12 @@ K. Goetze 2014-03-24
 // Not used must equal zero #define RESERVED 8
 #define NET_CONN   9
 
-/*** Output CMD Registers ***/
-#define CMD_MSW    0  // module 0 starts at register address 1024.  This is set in drvModbusAsynConfigure.
-#define CMD_LSW    1
-#define POS_WR_UPR 2
-#define POS_WR_LWR 3
-#define SPD_UPR    4
-#define SPD_LWR    5
-#define ACCEL      6
-#define DECEL      7
-// Not used must equal zero #define RESERVED 8
-// Not used must equal zero #define RESERVED 9
+/*** Output Command Registers (32-bit) ***/
+#define COMMAND       0
+#define POSITION      1
+#define SPEED         2
+#define ACCEL_DECEL   3
+#define CMD_REG_4     4
 
 /*** Output Configuration Registers (32-bit) ***/
 #define CONFIGURATION 0
