@@ -347,9 +347,6 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
 
   epicsThreadSleep(0.1);
 
-  // Read data that is likely to be stale
-  //getInfo();
-
   // Clear the command/configuration register (a good thing to do but doesn't appear to be necessary)
   //status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
@@ -371,9 +368,6 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
   // Delay
   epicsThreadSleep(0.05);
 
-  // Read the configuration? Or maybe the command registers?
-  //getInfo();
-  
   // Parse the configuration (mostly for asynReport purposes)
   // MSW
   CaptInput_ = (config & (0x1 << 16)) >> 16;
@@ -409,9 +403,6 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
   
   // Delay
   //epicsThreadSleep(1.0);
-  
-  // Read the command registers
-  //getInfo();
   
   // Tell the driver the axis has been created
   pC_->axesCreated_ += 1;
@@ -545,19 +536,16 @@ void ANF2Axis::reconfig(epicsInt32 value)
   //confReg[CONFIG_REG_4] = 0x0;
 
   epicsThreadSleep(0.05);
-  getInfo();
 
   // Send the new config
   status = pC_->writeReg32Array(axisNo_, confReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
 
   epicsThreadSleep(0.05);
-  getInfo();
 
   // Set the position to clear the invalid position error  
   setPosition(value);
 
   epicsThreadSleep(0.05);
-  getInfo();
 }
 */
 
@@ -947,16 +935,12 @@ asynStatus ANF2Axis::poll(bool *moving)
     return asynSuccess;
   }
   
-  //getInfo();
-  
   // Force a read operation
   //printf(" . . . . . Calling pasynInt32SyncIO->write\n");
   //printf("Calling pasynInt32SyncIO->write(pasynUserForceRead_, 1, TIMEOUT), pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
   status = pasynInt32SyncIO->write(pasynUserForceRead_, 1, DEFAULT_CONTROLLER_TIMEOUT);
   //printf(" . . . . . status = %d\n", status);
   // if status goto end
-
-  //getInfo();
 
   // Read the current motor position
   // 
