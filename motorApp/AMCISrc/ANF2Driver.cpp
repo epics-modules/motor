@@ -569,12 +569,13 @@ void ANF2Axis::report(FILE *fp, int level)
 
   if (level > 0) {
     fprintf(fp, "Configuration for axis %i:\n", axisNo_);
-    fprintf(fp, "  Base Speed: %i\tHoming Timeout: %i\n", baseSpeed_, homingTimeout_);
-    fprintf(fp, "  Capture Input: %i\tActive State: %i\n", CaptInput_, CaptInputAS_);
-    fprintf(fp, "  External Input: %i\tActive State: %i\n", ExtInput_, ExtInputAS_);
-    fprintf(fp, "  Home Input: %i\tActive State: %i\n", HomeInput_, HomeInputAS_);
-    fprintf(fp, "  CW Input: %i\tActive State: %i\n", CWInput_, CWInputAS_);
-    fprintf(fp, "  CCW Input: %i\tActive State: %i\n", CCWInput_, CCWInputAS_);
+    fprintf(fp, "  Base Speed: %i\n", baseSpeed_);
+    fprintf(fp, "  Homing Timeout: %i\n", homingTimeout_);
+    fprintf(fp, "  Capture Input: %i (Active State: %i)\n", CaptInput_, CaptInputAS_);
+    fprintf(fp, "  External Input: %i (Active State: %i)\n", ExtInput_, ExtInputAS_);
+    fprintf(fp, "  Home Input: %i (Active State: %i)\n", HomeInput_, HomeInputAS_);
+    fprintf(fp, "  CW Input: %i (Active State: %i)\n", CWInput_, CWInputAS_);
+    fprintf(fp, "  CCW Input: %i (Active State: %i)\n", CCWInput_, CCWInputAS_);
     fprintf(fp, "  Backplane Home Proximity Operation: %i\n", BHPO_);
     fprintf(fp, "  Quadrature Encoder: %i\n", QuadEnc_);
     fprintf(fp, "  Diagnostic Feedback: %i\n", DiagFbk_);
