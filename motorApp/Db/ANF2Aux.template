@@ -18,10 +18,11 @@ record(bo,"$(P)$(R)GetInfo") {
     field(OUT,"@asyn($(PORT),$(ADDR))ANF2_GET_INFO")
 }
 
-record(longout,"$(P)$(R)Reconfig") {
-    field(DESC,"Reconfig")
-    field(PINI, "0")
-    field(VAL,"0")
-    field(DTYP, "asynInt32")
-    field(OUT,"@asyn($(PORT),$(ADDR))ANF2_RECONFIG")
-}
+# Reconfig isn't yet implemented in a generally-useful way
+#record(longout,"$(P)$(R)Reconfig") {
+#    field(DESC,"Reconfig")
+#    field(PINI, "0")
+#    field(VAL,"0")
+#    field(DTYP, "asynInt32")
+#    field(OUT,"@asyn($(PORT),$(ADDR))ANF2_RECONFIG")
+#}

@@ -56,7 +56,7 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   // Create controller-specific parameters
   createParam(ANF2ResetErrorsString,     asynParamInt32,       &ANF2ResetErrors_);
   createParam(ANF2GetInfoString,         asynParamInt32,       &ANF2GetInfo_);
-  createParam(ANF2ReconfigString,        asynParamInt32,       &ANF2Reconfig_);
+  //createParam(ANF2ReconfigString,        asynParamInt32,       &ANF2Reconfig_);
 
   numModules_ = numModules;
   axesPerModule_ = axesPerModule;
@@ -247,10 +247,12 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
         pAxis->getInfo();
 
     }
+  /*
   } else if (function == ANF2Reconfig_)
   {
     // reconfig regardless of the value
     pAxis->reconfig(value);
+  */
   } else {
   // Call base class method
     status = asynMotorController::writeInt32(pasynUser, value);
@@ -338,10 +340,9 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
   //printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
 
   /* TODO:
-   *  test config bits and set status bits to prevent methods from sending commands that would generate errors
    *  reduce the sleeps to see which ones are necessary
    *  print out useful info for asyn traces
-   *  make reconfig useful
+   *  make reconfig useful?
    */
 
   epicsThreadSleep(0.1);
@@ -520,6 +521,9 @@ void ANF2Axis::getInfo()
   }
 }
 
+/*
+// reconfig was used during development. It won't be generally useful without effort.
+// It isn't obvious that this is a feature that should exist on-the-fly
 void ANF2Axis::reconfig(epicsInt32 value)
 {
   asynStatus status;
@@ -555,7 +559,7 @@ void ANF2Axis::reconfig(epicsInt32 value)
   epicsThreadSleep(0.05);
   getInfo();
 }
-
+*/
 
 /** Reports on status of the axis
   * \param[in] fp The file pointer on which report information will be written
