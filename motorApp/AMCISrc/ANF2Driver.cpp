@@ -404,6 +404,14 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
   // Delay
   //epicsThreadSleep(1.0);
   
+  // Initialize parameters to avoid ASYN_TRACE_FLOW errors
+  setIntegerParam(pC_->motorStatusDirection_, 1);
+  // The following are necessary after this commit: 
+  //    https://github.com/epics-modules/motor/commit/36dfab4a78725866fab5bd212c4c128a86e9f044
+  setIntegerParam(pC_->motorPowerAutoOnOff_, 0);
+  setDoubleParam(pC_->motorPowerOnDelay_, 0.0);
+  setDoubleParam(pC_->motorPowerOffDelay_, 0.0);
+  
   // Tell the driver the axis has been created
   pC_->axesCreated_ += 1;
   
