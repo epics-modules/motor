@@ -1,3 +1,11 @@
 record(motor, "$(P)$(M)") {
   field(OFF, "$(OFF)")
 }
+
+record(ao, "$(P)$(M):SCAN") {
+  field(SCAN, "1 second")
+  field(DTYP, "Soft Channel")
+  field(DESC, "Polls the motor position")
+  field(OUT, "$(P)$(M).STUP PP")
+  field(OVAL, "1")
+}
