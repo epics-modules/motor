@@ -1723,6 +1723,11 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     else if (absdiff < fabs(pmr->rdbd))
         too_small = true;
 
+    if (pmr->miss)
+    {
+        pmr->miss = 0;
+        MARK_AUX(M_MISS);
+    }
     if (too_small == true)
     {
         if (pmr->dmov == FALSE && (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY))
