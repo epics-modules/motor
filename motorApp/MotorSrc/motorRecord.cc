@@ -215,7 +215,7 @@ USAGE...        Motor Record Support.
 #include    "errlog.h"
 #include    "motorDevSup.h"
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 volatile int motorRecordDebug = 4;
 extern "C" {epicsExportAddress(int, motorRecordDebug);}
@@ -764,6 +764,27 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
 }
 
 
+static void recalcLVIO(motorRecord *pmr)
+{
+  int old_lvio = pmr->lvio;
+  int lvio = 0;
+  if (!softLimitsDefined(pmr))
+      ;
+  else if ((pmr->drbv > pmr->dhlm + pmr->rdbd) ||
+           (pmr->drbv < pmr->dllm - pmr->rdbd))
+  {
+      pmr->lvio = 1;
+  }
+  if (lvio != old_lvio)
+  {
+      pmr->lvio = lvio;
+      MARK(M_LVIO);
+  }
+  Debug(3,"%s:%d %s recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f\n",
+        __FILE__, __LINE__, pmr->name,
+        lvio, pmr->drbv, pmr->rdbd, pmr->dhlm, pmr->dllm);
+}
+
 /******************************************************************************
         init_record()
 
@@ -840,14 +861,7 @@ static long initial_poll(motorRecord *pmr)
     pmr->priv->last.rval = pmr->rval;
     pmr->lvio = 0;              /* init limit-violation field */
 
-    if (!softLimitsDefined(pmr))
-        ;
-    else if ((pmr->drbv > pmr->dhlm + pmr->sdbd) || (pmr->drbv < pmr->dllm - pmr->sdbd))
-    {
-        pmr->lvio = 1;
-        MARK(M_LVIO);
-    }
-
+    recalcLVIO(pmr);
     MARK(M_MSTA);   /* MSTA incorrect at boot-up; force posting. */
 
     monitor(pmr);
@@ -4053,6 +4067,7 @@ static void set_dial_highlimit(motorRecord *pmr)
         MARK(M_LLM);
     }
     MARK(M_DHLM);
+    recalcLVIO(pmr);
 }
 
 
@@ -4115,6 +4130,7 @@ static void set_dial_lowlimit(motorRecord *pmr)
         MARK(M_HLM);
     }
     MARK(M_DLLM);
+    recalcLVIO(pmr);
 }
 
 static void set_user_lowlimit(motorRecord *pmr)
