@@ -1,5 +1,5 @@
 record(ao, "$(P)$(M):SCAN") {
-  field(SCAN, "1 second")
+  field(SCAN, "10 second")
   field(DTYP, "Soft Channel")
   field(DESC, "Polls the motor position")
   field(OUT, "$(P)$(M).STUP PP")
