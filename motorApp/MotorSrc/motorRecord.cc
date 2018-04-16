@@ -1136,6 +1136,8 @@ static long postProcess(motorRecord * pmr)
         !(pmr->mip & MIP_MOVE_BL) && !(pmr->mip & MIP_JOG_BL1) &&
         !(pmr->mip & MIP_JOG_BL2))
     {
+        double old_val = pmr->val;
+        double old_dval = pmr->dval;
         /* Make drive values agree with readback value. */
 #ifdef DMR_SOFTMOTOR_MODS
         /* Mark Rivers - make val and dval agree with rrbv, rather than rbv or
@@ -1146,6 +1148,10 @@ static long postProcess(motorRecord * pmr)
         pmr->val = pmr->rbv;
         pmr->dval = pmr->drbv;
 #endif
+        Debug(3, "%s:%d %s postProcess oldval=%f olddval=%f val=%f dval=%f drbv=%f  rrbv=%ld\n",
+              __FILE__, __LINE__, pmr->name,
+              old_val, old_dval, pmr->val, pmr->dval, pmr->drbv, (long)pmr->rrbv);
+
         MARK(M_VAL);
         MARK(M_DVAL);
         pmr->rval = NINT(pmr->dval / pmr->mres);
@@ -1154,6 +1160,11 @@ static long postProcess(motorRecord * pmr)
         MARK(M_DIFF);
         pmr->rdif = 0;
         MARK(M_RDIF);
+        if (pmr->miss)
+        {
+            pmr->miss = 0;
+            MARK_AUX(M_MISS);
+        }
     }
 
     if (pmr->mip & MIP_LOAD_P)
@@ -1176,14 +1187,11 @@ static long postProcess(motorRecord * pmr)
         {
             if (pmr->mip & MIP_HOMF)
             {
-                MIP_CLR_BIT(MIP_HOMF);
                 pmr->homf = 0;
                 MARK_AUX(M_HOMF);
             }
             else if (pmr->mip & MIP_HOMR)
             {
-    
-                MIP_CLR_BIT(MIP_HOMR);
                 pmr->homr = 0;
                 MARK_AUX(M_HOMR);
             }
@@ -1636,7 +1644,6 @@ static long process(dbCommon *arg)
                               __FILE__, __LINE__, pmr->name, pmr->pp, pmr->mip, dbuf);
                     }
 #endif
-                    if (pmr->mip & MIP_EXTERNAL) MIP_CLR_BIT(MIP_EXTERNAL);
                     if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
                     {
                         MIP_SET_BIT(MIP_DELAY);
@@ -1650,6 +1657,12 @@ static long process(dbCommon *arg)
                     {
                         MIP_CLR_BIT(MIP_DELAY);
                         MARK(M_MIP);    /* done delaying */
+                        if (pmr->mip & (MIP_HOME | MIP_EXTERNAL))
+                        {
+                            MIP_SET_VAL(MIP_DONE);
+                            pmr->pp = TRUE;
+                            goto process_exit;
+                        }
                         maybeRetry(pmr);
                         if (pmr->mip == MIP_RETRY && pmr->rmod == motorRMOD_I)
                         {
