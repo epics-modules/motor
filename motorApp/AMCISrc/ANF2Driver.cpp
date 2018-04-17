@@ -274,8 +274,13 @@ asynStatus ANF2Controller::writeInt32(asynUser *pasynUser, epicsInt32 value)
 asynStatus ANF2Controller::writeReg32Array(int axisNo, epicsInt32* output, int nElements, double timeout)
 {
   asynStatus status;
-  
-  asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER,"writeReg32Array: writing %d elements starting for axis %d\n", nElements, axisNo);  
+  ANF2Axis *pAxis = getAxis(axisNo);
+  static const char *functionName = "ANF2Controller::writeReg32Array";
+
+  // This message isn't very helpful. Print something better in the future.
+  asynPrint(pAxis->pasynUser_, ASYN_TRACEIO_DRIVER,
+        "%s: axisNo=%i, nElements=%d\n", 
+        functionName, axisNo, nElements);  
   status = pasynInt32ArraySyncIO->write(pasynUserOutReg_[axisNo], output, nElements, timeout);
  
   return status;
@@ -286,7 +291,7 @@ asynStatus ANF2Controller::readReg16(int axisNo, int axisReg, epicsInt32 *input,
   asynStatus status;
   
   //printf("axisReg = %d\n", axisReg);
-  asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER,"readReg16 reg = %d\n", axisReg);
+  //asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER,"readReg16 reg = %d\n", axisReg);
   status = pasynInt32SyncIO->read(pasynUserInReg_[axisNo][axisReg], input, timeout);
                                   
   return status ;
@@ -325,7 +330,7 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
   int status;
 
   axisNo_ = axisNo;
-  //this->axisNo_ = axisNo;
+  config_ = config;
   baseSpeed_ = baseSpeed;
   homingTimeout_ = homingTimeout;
 
@@ -337,11 +342,9 @@ ANF2Axis::ANF2Axis(ANF2Controller *pC, int axisNo, epicsInt32 config, epicsInt32
     //printf("%s:%s: Error, unable to connect pasynUserForceRead_ to Modbus input driver %s\n", pC_->inputDriver_, pC_->functionName, myModbusInputDriver);
     printf("%s: Error, unable to connect pasynUserForceRead_ to Modbus input driver\n", pC_->inputDriver_);	
   }
-  //printf("ANF2Axis::ANF2Axis : pasynUserForceRead_->reason=%d\n", pasynUserForceRead_->reason);
 
   /* TODO:
    *  reduce the sleeps to see which ones are necessary
-   *  print out useful info for asyn traces
    *  make reconfig useful?
    */
 
@@ -491,7 +494,9 @@ asynStatus ANF2Axis::resetErrors()
 {
   asynStatus status;
   epicsInt32 errorReg[5];
-  //static const char *functionName = "ANF2Axis::resetErrors";
+  static const char *functionName = "ANF2Axis::resetErrors";
+
+  asynPrint(pasynUser_, ASYN_TRACEIO_DRIVER, "%s: axisNo=%i\n", functionName, axisNo_);
   
   zeroRegisters(errorReg);
   
@@ -568,7 +573,7 @@ void ANF2Axis::report(FILE *fp, int level)
   // TODO: make this more useful
 
   if (level > 0) {
-    fprintf(fp, "Configuration for axis %i:\n", axisNo_);
+    fprintf(fp, "Configuration for axis %i [0x%x]:\n", axisNo_, config_);
     fprintf(fp, "  Base Speed: %i\n", baseSpeed_);
     fprintf(fp, "  Homing Timeout: %i\n", homingTimeout_);
     fprintf(fp, "  Capture Input: %i (Active State: %i)\n", CaptInput_, CaptInputAS_);
@@ -584,11 +589,6 @@ void ANF2Axis::report(FILE *fp, int level)
     fprintf(fp, "  Card Axis: %i\n", CardAxis_);
     fprintf(fp, "  Operation Mode for Axis: %i\n", OpMode_);
     fprintf(fp, "\n");
-    
-    /*fprintf(fp, "  axis %d\n", axisNo_);
-    fprintf(fp, "    this->axisNo_ %i\n", this->axisNo_);
-    fprintf(fp, "    this->config_ %x\n", this->config_);
-    fprintf(fp, "    config_ %x\n", config_);*/
   }
 
   //printf("ANF2Axis::report -> BEFORE asynMotorAxis::report!!\n");
@@ -603,7 +603,7 @@ void ANF2Axis::report(FILE *fp, int level)
 // SET VEL & ACCEL
 asynStatus ANF2Axis::sendAccelAndVelocity(double acceleration, double velocity) 
 {
-  // static const char *functionName = "ANF2::sendAccelAndVelocity";
+  // static const char *functionName = "ANF2Axis::sendAccelAndVelocity";
 
   // ANF2 speed range is 1 to 1,000,000 steps/sec
   if (velocity > 1000000.0) {
@@ -646,12 +646,14 @@ double ANF2Axis::correctAccel(double minVelocity, double maxVelocity, double acc
 {
   double accelTime;
   double newAccel;
+  static const char *functionName = "ANF2Axis::correctAccel";
   
   accelTime = (maxVelocity - minVelocity) / acceleration;
   newAccel = (maxVelocity - (double)baseSpeed_) / accelTime;
 
-  //printf("old acceleration = %lf\n", acceleration);
-  //printf("new acceleration = %lf\n", newAccel);
+  asynPrint(pasynUser_, ASYN_TRACEIO_DRIVER,
+    "%s: axisNo=%i, old acceleration=%lf, new acceleration=%lf\n",
+    functionName, axisNo_, acceleration, newAccel);
   
   return newAccel;
 }
@@ -662,8 +664,11 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
 {
   asynStatus status;
   epicsInt32 posInt;
-  
-  //printf(" ** ANF2Axis::move called, relative = %d, axisNo_ = %i\n", relative, this->axisNo_);
+  static const char *functionName = "ANF2Axis::move";
+
+  asynPrint(pasynUser_, ASYN_TRACEIO_DRIVER,
+    "%s: axisNo=%i, relative=%i, minVelocity=%f, maxVelocity=%f, acceleration=%f\n",
+    functionName, axisNo_, relative, minVelocity, maxVelocity, acceleration);
 
   // Clear the command/configuration register
   status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
@@ -714,7 +719,11 @@ asynStatus ANF2Axis::move(double position, int relative, double minVelocity, dou
 asynStatus ANF2Axis::home(double minVelocity, double maxVelocity, double acceleration, int forwards)
 {
   asynStatus status;
-  // static const char *functionName = "ANF2Axis::home";
+  static const char *functionName = "ANF2Axis::home";
+
+  asynPrint(pasynUser_, ASYN_TRACEIO_DRIVER,
+    "%s: axisNo=%i, forwards=%i, minVelocity=%f, maxVelocity=%f, acceleration=%f\n",
+    functionName, axisNo_, forwards, minVelocity, maxVelocity, acceleration);
 
   // Clear the command/configuration register
   status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
@@ -754,9 +763,9 @@ asynStatus ANF2Axis::moveVelocity(double minVelocity, double maxVelocity, double
   //int velo, distance;
   static const char *functionName = "ANF2Axis::moveVelocity";
 
-  asynPrint(pasynUser_, ASYN_TRACE_FLOW,
-    "%s: minVelocity=%f, maxVelocity=%f, acceleration=%f\n",
-    functionName, minVelocity, maxVelocity, acceleration);
+  asynPrint(pasynUser_, ASYN_TRACEIO_DRIVER,
+    "%s: axisNo=%d, minVelocity=%f, maxVelocity=%f, acceleration=%f\n",
+    functionName, axisNo_, minVelocity, maxVelocity, acceleration);
 
   //
   // The jog command requires a different stop than a move command
@@ -826,7 +835,9 @@ asynStatus ANF2Axis::stop(double acceleration)
 {
   asynStatus status;
   epicsInt32 stopReg;
-  //static const char *functionName = "ANF2Axis::stop";
+  static const char *functionName = "ANF2Axis::stop";
+
+  asynPrint(pasynUser_, ASYN_TRACEIO_DRIVER, "%s: axisNo=%i\n", functionName, axisNo_);
   
   //printf("\n  STOP \n\n");
   
@@ -863,9 +874,9 @@ asynStatus ANF2Axis::setPosition(double position)
   asynStatus status;
   epicsInt32 set_position;
   epicsInt32 posReg[5];
-  //static const char *functionName = "ANF2Axis::setPosition";
+  static const char *functionName = "ANF2Axis::setPosition";
   
-  //printf("setPosition(%lf) for axisNo_=%i\n", position, axisNo_);
+  asynPrint(pasynUser_, ASYN_TRACEIO_DRIVER, "%s: axisNo=%i, position=%lf\n", functionName, axisNo_, position);
   
   // Clear the command/configuration register
   status = pC_->writeReg32Array(axisNo_, zeroReg_, 5, DEFAULT_CONTROLLER_TIMEOUT);
@@ -951,15 +962,13 @@ asynStatus ANF2Axis::poll(bool *moving)
   // if status goto end
 
   // Read the current motor position
-  // 
-  //readReg32(int reg, epicsInt32 *combo, double timeout)
   status = pC_->readReg32(axisNo_, POS_RD_UPR, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
   //printf("ANF2Axis::poll:  Motor position raw: %d\n", read_val);
   position = (double) read_val;
   setDoubleParam(pC_->motorPosition_, position);
   //printf("ANF2Axis::poll:  Motor #%i position: %f\n", axisNo_, position);
 
-  //  TODO: read encoder position
+  // Read encoder position
   status = pC_->readReg32(axisNo_, EN_POS_UPR, &read_val, DEFAULT_CONTROLLER_TIMEOUT);
   //printf("ANF2Axis::poll:  Motor encoder position raw: %d\n", read_val);
   encPosition = (double) read_val;
