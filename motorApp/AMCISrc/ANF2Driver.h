@@ -2,11 +2,9 @@
 FILENAME...   ANF2Driver.h
 USAGE...      Motor driver support for the AMCI ANF2 controller.
 
-Based on MCB-4B driver written by
-Mark Rivers
-March 1, 2012
+Kevin Peterson
 
-K. Goetze 2014-03-24
+Based on the AMCI ANG1 Model 3 device driver written by Kurt Goetze
 
 */
 
