@@ -15,8 +15,7 @@ K. Goetze 2014-03-24
 //#include <asynInt32Array.h>
 #include <asynInt32ArraySyncIO.h>
 
-#define MAX_MODULES 6
-#define MAX_AXES_PER_MODULE 2
+#define MAX_AXES 12
 
 #define MAX_INPUT_REGS 10
 #define MAX_OUTPUT_REGS 10
@@ -115,14 +114,14 @@ friend class ANF2Controller;
 
 class ANF2Controller : public asynMotorController {
 public:
-  ANF2Controller(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, int numModules, int axesPerModule);
+  ANF2Controller(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, int numAxes);
   void doStartPoller(double movingPollPeriod, double idlePollPeriod);
   
   void report(FILE *fp, int level);
   ANF2Axis* getAxis(asynUser *pasynUser);
   ANF2Axis* getAxis(int axisNo); 
-  asynUser *pasynUserInReg_[MAX_MODULES*MAX_AXES_PER_MODULE][MAX_INPUT_REGS];
-  asynUser *pasynUserOutReg_[MAX_MODULES*MAX_AXES_PER_MODULE];
+  asynUser *pasynUserInReg_[MAX_AXES][MAX_INPUT_REGS];
+  asynUser *pasynUserOutReg_[MAX_AXES];
 
   /* These are the methods that we override from asynMotorDriver */
   asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);

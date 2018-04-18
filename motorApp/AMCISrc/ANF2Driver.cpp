@@ -32,12 +32,11 @@ static const char *driverName = "ANF2MotorDriver";
   * \param[in] portName          The name of the asyn port that will be created for this driver
   * \param[in] ANF2InPortName    The name of the drvAsynSerialPort that was created previously to connect to the ANF2 controller 
   * \param[in] ANF2OutPortName   The name of the drvAsynSerialPort that was created previously to connect to the ANF2 controller 
-  * \param[in] numModules        The number of modules on the controller stack 
-  * \param[in] axesPerModule     The number of axes per module (ANF1=1, ANF2=2)
+  * \param[in] numAxes           The number of axes on the controller stack 
   */
 ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName,  
-                                 int numModules, int axesPerModule)
-  :  asynMotorController(portName, (numModules*axesPerModule), NUM_ANF2_PARAMS, 
+                                 int numAxes)
+  :  asynMotorController(portName, numAxes, NUM_ANF2_PARAMS, 
                          asynInt32ArrayMask, // One additional interface beyond those in base class
                          asynInt32ArrayMask, // One additional callback interface beyond those in base class
                          ASYN_CANBLOCK | ASYN_MULTIDEVICE, 
@@ -58,9 +57,7 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   createParam(ANF2GetInfoString,         asynParamInt32,       &ANF2GetInfo_);
   //createParam(ANF2ReconfigString,        asynParamInt32,       &ANF2Reconfig_);
 
-  numModules_ = numModules;
-  axesPerModule_ = axesPerModule;
-  numAxes_ = numModules * axesPerModule;
+  numAxes_ = numAxes;
   
   for (j=0; j<numAxes_; j++) {
     /* Connect to ANF2 controller */
@@ -86,26 +83,16 @@ ANF2Controller::ANF2Controller(const char *portName, const char *ANF2InPortName,
   * \param[in] portName          The name of the asyn port that will be created for this driver
   * \param[in] ANF2InPortName    The name of the drvAsynIPPPort that was created previously to connect to the ANF2 controller 
   * \param[in] ANF2OutPortName   The name of the drvAsynIPPPort that was created previously to connect to the ANF2 controller 
-  * \param[in] numModules        The number of modules on the controller stack 
-  * \param[in] axesPerModule     The number of axes per module (ANF1=1, ANF2=2)
+  * \param[in] numAxes           The number of axes on the controller stack 
   */
-extern "C" int ANF2CreateController(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, 
-                                      int numModules, int axesPerModule)
+extern "C" int ANF2CreateController(const char *portName, const char *ANF2InPortName, const char *ANF2OutPortName, int numAxes)
 {
   // Enforce max values
-  if (numModules > MAX_MODULES) {
-    numModules = MAX_MODULES;
-  }
-  if (axesPerModule > MAX_AXES_PER_MODULE) {
-    axesPerModule = MAX_AXES_PER_MODULE;
+  if (numAxes > MAX_AXES) {
+    numAxes = MAX_AXES;
   }
 
-  /*
-  ANF2Controller *pANF2Controller
-    = new ANF2Controller(portName, ANF2InPortName, ANF2OutPortName, numModules, axesPerModule);
-  pANF2Controller = NULL;
-  */
-  new ANF2Controller(portName, ANF2InPortName, ANF2OutPortName, numModules, axesPerModule);
+  new ANF2Controller(portName, ANF2InPortName, ANF2OutPortName, numAxes);
   return(asynSuccess);
 }
 
@@ -1047,17 +1034,15 @@ asynStatus ANF2Axis::poll(bool *moving)
 static const iocshArg ANF2CreateControllerArg0 = {"Port name", iocshArgString};
 static const iocshArg ANF2CreateControllerArg1 = {"ANF2 In port name", iocshArgString};
 static const iocshArg ANF2CreateControllerArg2 = {"ANF2 Out port name", iocshArgString};
-static const iocshArg ANF2CreateControllerArg3 = {"Number of modules", iocshArgInt};
-static const iocshArg ANF2CreateControllerArg4 = {"Axes per module", iocshArgInt};
+static const iocshArg ANF2CreateControllerArg3 = {"Number of axes", iocshArgInt};
 static const iocshArg * const ANF2CreateControllerArgs[] = {&ANF2CreateControllerArg0,
                                                              &ANF2CreateControllerArg1,
                                                              &ANF2CreateControllerArg2,
-                                                             &ANF2CreateControllerArg3,
-                                                             &ANF2CreateControllerArg4};
-static const iocshFuncDef ANF2CreateControllerDef = {"ANF2CreateController", 5, ANF2CreateControllerArgs};
+                                                             &ANF2CreateControllerArg3};
+static const iocshFuncDef ANF2CreateControllerDef = {"ANF2CreateController", 4, ANF2CreateControllerArgs};
 static void ANF2CreateControllerCallFunc(const iocshArgBuf *args)
 {
-  ANF2CreateController(args[0].sval, args[1].sval, args[2].sval, args[3].ival, args[4].ival);
+  ANF2CreateController(args[0].sval, args[1].sval, args[2].sval, args[3].ival);
 }
 
 /* ANF2StartPoller */

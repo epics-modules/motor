@@ -50,8 +50,7 @@ dbLoadTemplate("templates/motor.substitutions.ANF2")
 #    portName,        The name of the asyn port that will be created by this driver
 #    ANF2InPortName,  The name of the In drvAsynIPPPort to read from the ANF2 controller
 #    ANF2OutPortName, The name of the Out drvAsynIPPPort to write to the ANF2 controller
-#    numModules,      The number of modules in the stack (Max=6)
-#    axesPerModule)   The number of axes per module (ANF1=1, ANF2=2)
+#    numAxes)         The number of axes in the stack (max=12)
 #  
 #  ANF2CreateAxis(
 #    ANF2Name,        The controller's asyn port
@@ -64,10 +63,10 @@ dbLoadTemplate("templates/motor.substitutions.ANF2")
 #    does correct the acceleration sent by the motor record to give the desired acceleration time.
 
 # Controller 1 (One ANF2E, Five ANF2's)
-ANF2CreateController("$(PORT1)", "$(PORT1)_In", "$(PORT1)_Out", 6, 2)
+ANF2CreateController("$(PORT1)", "$(PORT1)_In", "$(PORT1)_Out", 12)
 # Axes for Controller 1
 ANF2CreateAxis("$(PORT1)", 0,  "0x86280000", 100, 0)
-ANF2CreateAxis("$(PORT1)", 1,  "0x86000000", 57, 32)
+ANF2CreateAxis("$(PORT1)", 1,  "0x86000000", 100, 0)
 ANF2CreateAxis("$(PORT1)", 2,  "0x84000000", 100, 0)
 ANF2CreateAxis("$(PORT1)", 3,  "0x84000000", 100, 0)
 ANF2CreateAxis("$(PORT1)", 4,  "0x84000000", 100, 0)
@@ -80,7 +79,7 @@ ANF2CreateAxis("$(PORT1)", 10, "0x84000000", 100, 0)
 ANF2CreateAxis("$(PORT1)", 11, "0x84000000", 100, 0)
 
 # Controller 2 (One ANF1E, Five ANF1's)
-ANF2CreateController("$(PORT2)", "$(PORT2)_In", "$(PORT2)_Out", 6, 1)
+ANF2CreateController("$(PORT2)", "$(PORT2)_In", "$(PORT2)_Out", 6)
 # Axes for Controller 2
 ANF2CreateAxis("$(PORT2)", 0, "0x84000000", 100, 0)
 ANF2CreateAxis("$(PORT2)", 1, "0x84000000", 100, 0)
