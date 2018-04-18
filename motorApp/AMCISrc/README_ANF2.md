@@ -7,12 +7,12 @@ Modbus/TCP communication, using Mark Rivers' modbus module
 ## Supported Controller Models
 
 The following ANF controller versions are supported:
-
+```
 ANF1E: 1-axis stepper controller, modbus tcp/ip
 ANF1:  1-axis stepper controller, no network interface
 ANF2E: 2-axis stepper controller, modbus tcp/ip
 ANF2:  2-axis stepper controller, no network interface
-
+```
 A stack of controller can contain up to 6 modules, one of
 which needs to have the ethernet option.  A single-channel
 implementation would need the module with ethernet.
@@ -30,7 +30,7 @@ requires the device to be configured for Modbus-TCP.
 ## Controller Quirks
 
 * The controller doesn't allow absolute moves when a limit is active; 
-The only way to move a motor off of a limit is by jogging.
+The only way to move a motor off of a limit is by **jogging**.
 
 * The base speed is set when an axis is configured.  This driver corrects 
 the acceleration sent by the motor record (VBAS isn't guaranteed to match
@@ -58,9 +58,8 @@ The AMCI Net Configurator can be used to:
 
 * Determine hex config strings for each axis
 
-### Example hex configurations
+### Example axis configuration
 
-The AMCI Net Configurator can be used to generate hex configurations.  Here are some example:
 ```
 0x86000000 - Step & Direction pulses, Diagnostic Feedback, No home switch, No limits
 0x86280000 - Step & Direction pulses, Diagnostic Feedback, No home switch, Active-low CW/CCW limits
