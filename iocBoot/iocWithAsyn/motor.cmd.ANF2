@@ -9,8 +9,8 @@ epicsEnvSet("PORT1", "ANF2_C1")
 epicsEnvSet("PORT2", "ANF2_C2")
 
 # drvAsynIPPortConfigure("portName", "hostInfo", priority, noAutoConnect, noProcessEos);
-drvAsynIPPortConfigure("$(PORT1)_IP","192.168.1.101:502",0,0,1)
-drvAsynIPPortConfigure("$(PORT2)_IP","192.168.1.102:502",0,0,1)
+drvAsynIPPortConfigure("$(PORT1)_IP","192.168.0.50:502",0,0,1)
+drvAsynIPPortConfigure("$(PORT2)_IP","192.168.0.51:502",0,0,1)
 
 # modbusInterposeConfig("portName", linkType, timeoutMsec, writeDelayMsec)
 modbusInterposeConfig("$(PORT1)_IP",0,2000,0)
