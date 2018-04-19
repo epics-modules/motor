@@ -140,7 +140,7 @@ void ANF2Controller::doStartPoller(double movingPollPeriod, double idlePollPerio
 void ANF2Controller::report(FILE *fp, int level)
 {
   int i, j;
-  ANF2Axis* pAxis[numAxes_];
+  ANF2Axis* pAxis[MAX_AXES];
   
   fprintf(fp, "====================================\n");
   fprintf(fp, "ANF2 motor driver:\n");
