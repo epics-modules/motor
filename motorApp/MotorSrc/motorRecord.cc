@@ -215,7 +215,7 @@ USAGE...        Motor Record Support.
 #include    "errlog.h"
 #include    "motorDevSup.h"
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 volatile int motorRecordDebug = 4;
 extern "C" {epicsExportAddress(int, motorRecordDebug);}
@@ -1491,8 +1491,16 @@ static long process(dbCommon *arg)
                     pmr->dhlm, maxValue,
                     pmr->dllm, minValue);
             fflush(stdout);
-            if (pmr->dllm < minValue) pmr->dllm = minValue;
-            if (pmr->dhlm > maxValue) pmr->dhlm = maxValue;
+            if (!softLimitsDefined(pmr))
+            {
+                pmr->dllm = minValue;
+                pmr->dhlm = maxValue;
+            }
+            else
+            {
+                if (pmr->dllm < minValue) pmr->dllm = minValue;
+                if (pmr->dhlm > maxValue) pmr->dhlm = maxValue;
+            }
         }
         process_reason = CALLBACK_DATA;
     }
