@@ -769,7 +769,7 @@ static void recalcLVIO(motorRecord *pmr)
   int old_lvio = pmr->lvio;
   int lvio = 0;
   if (!softLimitsDefined(pmr))
-      ;
+      pmr->lvio = 0;
   else if ((pmr->drbv > pmr->dhlm + pmr->rdbd) ||
            (pmr->drbv < pmr->dllm - pmr->rdbd))
   {
