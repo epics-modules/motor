@@ -913,7 +913,7 @@ static long init_record(dbCommon* arg, int pass)
     if (pmr->eres == 0.0)
     {
         pmr->eres = pmr->mres;
-        MARK(M_ERES);
+        //MARK(M_ERES);
     }
 
     /*
@@ -1869,7 +1869,7 @@ static void newMRES_ERES_UEIP(motorRecord *pmr)
         if (pmr->eres == 0.0)
         {
             pmr->eres = pmr->mres;
-            MARK(M_ERES);
+            //MARK(M_ERES);
         }
         /* Calculate encoder ratio. */
         for (m = 10000000; (m > 1) &&
@@ -2500,7 +2500,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 if (pmr->eres == 0.0)
                 {
                     pmr->eres = pmr->mres;
-                    MARK(M_ERES);
+                    //MARK(M_ERES);
                 }
                 doHomeSetcdir(pmr);
                 pmr->dmov = FALSE;
