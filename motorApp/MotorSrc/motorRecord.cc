@@ -3640,7 +3640,13 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     pmr->rhls = (msta.Bits.RA_PLUS_LS)  &&  pmr->cdir;
     pmr->rlls = (msta.Bits.RA_MINUS_LS) && !pmr->cdir;
 
-    ls_active = (pmr->rhls || pmr->rlls) ? true : false;
+    if ((pmr->mip & MIP_HOMF) || (pmr->mip & MIP_HOMR))
+    {
+        ls_active = false;
+        msta.Bits.RA_PROBLEM = 0; /* Suppress problem while homing */
+    }
+    else
+        ls_active = (pmr->rhls || pmr->rlls) ? true : false;
     
     pmr->hls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rhls : pmr->rlls;
     pmr->lls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rlls : pmr->rhls;
@@ -3649,6 +3655,13 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     if (pmr->lls != old_lls)
         MARK(M_LLS);
 
+    /* If the motor has a problem, stop it if needed */
+    if ((ls_active == true || msta.Bits.RA_PROBLEM) && !msta.Bits.RA_DONE)
+    {
+        pmr->stop = 1;
+        MARK(M_STOP);
+    }
+
     /* Get motor-now-moving indicator. */
     if (ls_active == true || msta.Bits.RA_DONE || msta.Bits.RA_PROBLEM)
     {
@@ -3656,11 +3669,6 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
         if (ls_active == true || msta.Bits.RA_PROBLEM)
         {
             clear_buttons(pmr);
-            if (msta.Bits.RA_PROBLEM)
-            {
-                pmr->stop = 1;
-                MARK(M_STOP);
-            }
         }
     }
     else
