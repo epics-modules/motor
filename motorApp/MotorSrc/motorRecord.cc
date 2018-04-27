@@ -3640,7 +3640,10 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     pmr->rhls = (msta.Bits.RA_PLUS_LS)  &&  pmr->cdir;
     pmr->rlls = (msta.Bits.RA_MINUS_LS) && !pmr->cdir;
 
-    ls_active = (pmr->rhls || pmr->rlls) ? true : false;
+    if ((pmr->mip & MIP_HOMF) || (pmr->mip & MIP_HOMR))
+        ls_active = false;
+    else
+        ls_active = (pmr->rhls || pmr->rlls) ? true : false;
     
     pmr->hls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rhls : pmr->rlls;
     pmr->lls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rlls : pmr->rhls;
