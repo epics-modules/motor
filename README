@@ -1,3 +1,12 @@
+Notice
+======
+
+This file was historically used to document changes to the motor module that
+were relevant to developers.  It is largely obsolete now that the motor module
+has moved github.  It will not be updated in the future and is likely to move
+to the documentation directory.
+
+
 Motor Module R6-10 Release Notes
 ===============================================================================
 
