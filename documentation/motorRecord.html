@@ -35,7 +35,7 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version R6-9 of the EPICS motor
+<h2>Overview</h2> This documentation describes version R6-10 of the EPICS motor
 record, and related EPICS software required to build and use it.&nbsp; Version
 R6-9 of the motor record is compatible with EPICS base R3.14.12.2 and above.
 <p>
@@ -61,7 +61,7 @@ Channel support):
     Mclennan models PM304 and PM600.
   </li>
   <LI>
-    Physik Instrumente (PI) GmbH & Co. models; C-630/844/848/862/863, E-662/710/816, micos SMC hydra and all GCS2 (General Command Set) compatible controllers.
+    Physik Instrumente (PI) GmbH & Co. models; C-630/662/663/844/848/862/863, E-516/517/710/816, micos SMC hydra and all GCS2 (General Command Set) compatible controllers.
   </LI>
   <li>
     MicroMo model MVP 2001 B02.
@@ -76,7 +76,7 @@ Channel support):
     Parker Hannifin, Compumotor Division, 6K Series controllers.
   </li>
   <li>
-    New Focus, models; 8750 and 8752.
+    New Focus, models; 8750, 8752, &amp 874x.
   </li>
   <li>
     ACS Motion Control, SPiiPlus model.
@@ -531,6 +531,14 @@ below.
     <td>Integral Gain</td>
     <td>DOUBLE</td>
     <td><br>
+    </td>
+  </tr>
+  <tr>
+    <td><a href="#Fields_calib">IGSET</a></td>
+    <td>R/W</td>
+    <td>Ignore SET Field</td>
+    <td>SHORT</td>
+    <td>(0:Normal operation, 1: SET is ignored)<br>
     </td>
   </tr>
   <tr>
@@ -1337,6 +1345,14 @@ below.
     <td>Set Set/Use switch to "Use".</td>
   </tr>
   <tr>
+    <td>IGSET</td>
+    <td>R/W</td>
+    <td>Ignore SET Field</td>
+    <td>SHORT</td>
+    <td>(0:Normal operation, 1: SET is ignored)<br>
+    </td>
+  </tr>
+  <tr>
     <td colspan="5">SET is a toggle switch used in calibrating the motor's user and 
     dial positions:&nbsp;
       <p>
@@ -1355,6 +1371,16 @@ below.
       field), with corresponding changes in the user-coordinate limit fields (HLM and 
       LLM). When the offset is frozen (FOFF=1), writes to any drive field affect both 
       user and dial values, and also load the hardware position register.
+      </p>
+      
+      <p>
+      When IGSET = 0, the motor record will obey the SET field and behave as described above.
+      </p>
+      
+      <p>
+      When IGSET = 1, the motor record will behave as though SET = 0. Ignoring the SET 
+      field can useful for applications with soft motors (motors with soft-channel device 
+      support).
       </p>
     </td>
   </tr>
