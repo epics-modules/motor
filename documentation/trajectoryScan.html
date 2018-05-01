@@ -937,7 +937,7 @@ controller must use the same units as the motor record that talks to it.
             Installation</A></H2>
 <P>
 The source files for trajectory scanning are in the synApps
-<A href="http://www.aps.anl.gov/upd/people/sluiter/epics/modules/mechanism/motor/index.html">motor module
+<A href="https://github.com/epics-modules/motor">motor module
 </A>, in the motorApp/ tree. 
 </P>
 <PRE>
@@ -1267,7 +1267,7 @@ P=13BMC:, R=traj1, TITLE=Trajectory Scans, M1=m33,M2=m34,M3=m35,M4=m36,M5=m37,M6
 </CODE>.
 
 <P>
-<IMG src="trajectoryScan.png"></P>
+<IMG src="trajectoryScan_files/trajectoryScan.png"></P>
 
 <P>
 <CODE>trajectoryPlot.adl</CODE> is used to plot the requested trajectory in 
@@ -1276,14 +1276,14 @@ positions (<CODE>MnActual</CODE>) and the following errors
 (<CODE>MnError</CODE>).</P>
 
 <P>
-<IMG src="trajectoryPlot1.png"><IMG src="trajectoryPlot2.png"></P>
+<IMG src="trajectoryScan_files/trajectoryPlot1.png"><IMG src="trajectoryScan_files/trajectoryPlot2.png"></P>
 
 <P>
 <CODE>trajectoryScanDebug.adl</CODE> is used to display detailed information, 
 useful for debugging.</P>
 
 <P>
-<IMG src="trajectoryScanDebug.png"></P>
+<IMG src="trajectoryScan_files/trajectoryScanDebug.png"></P>
 
 
 <P>MEDM displays for the MAXv and Ensemble are very similar, but also include
@@ -1554,10 +1554,10 @@ IDL> iplot, errors[*,1], /overplot
 <P>
 These are the resulting plots:
 <P>
-<IMG src="IDL_trajectory_actual.png"></P>
+<IMG src="trajectoryScan_files/IDL_trajectory_actual.png"></P>
 
 <P>
-<IMG src="IDL_trajectory_errors.png"></P>
+<IMG src="trajectoryScan_files/IDL_trajectory_errors.png"></P>
 
 
 <P>&nbsp;</P>
