@@ -147,14 +147,6 @@ Known Problems
 Modification Log for R6-10
 ==========================
 
-1) Alexander Aulin Söderqvist (Cosylab) reported illogical motor record FLNK
-        processing. Corrected FLNK processing so that recGblFwdLink() is only
-        called on a False to True transition of DMOV. Added "Last Done Moving
-        Value" field (LDMV) to the database definition.
-
-        Files modified: motorApp/MotorSrc/motorRecord.cc
-                        motorApp/MotorSrc/motorRecord.dbd
-
 2) Fix for OMS controllers that do not have the correct deceleration rate at
         the end of a JOG. Bug introduced with item #9 under R6-6.
 
