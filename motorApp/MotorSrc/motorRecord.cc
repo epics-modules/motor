@@ -1804,9 +1804,13 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             /* Cancel any operations. */
             if (pmr->mip & MIP_HOME)
                 clear_buttons(pmr);
-            
-            pmr->mip = MIP_STOP;
-            MARK(M_MIP);
+
+            if (!(pmr->mip & MIP_DELAY_REQ)) {
+               /* When we wait for DLY, keep it. */
+               /* Otherwise the record may lock up */
+                pmr->mip = MIP_STOP;     
+                MARK(M_MIP);
+            }
             INIT_MSG();
             WRITE_MSG(STOP_AXIS, NULL);
             SEND_MSG();
