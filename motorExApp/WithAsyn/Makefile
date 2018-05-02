@@ -39,6 +39,9 @@ ifdef BUSY
 endif
 COMMONDBDS += PI_GCS2Support.dbd
 COMMONDBDS += phytron.dbd
+ifdef LUA
+COMMONDBDS += ScriptMotorDriver.dbd
+endif
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -83,6 +86,10 @@ COMMONLIBS += ACRMotor
 COMMONLIBS += PI_GCS2Support
 COMMONLIBS += phytronAxisMotor
 COMMONLIBS += motor
+ifdef LUA
+COMMONLIBS += ScriptMotor
+COMMONLIBS += lua
+endif
 
 # Needed for Newport SNL programs
 WithAsyn_LIBS += $(COMMONLIBS)
