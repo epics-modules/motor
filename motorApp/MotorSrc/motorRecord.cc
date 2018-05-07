@@ -215,7 +215,7 @@ USAGE...        Motor Record Support.
 #include    "errlog.h"
 #include    "motorDevSup.h"
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 volatile int motorRecordDebug = 4;
 extern "C" {epicsExportAddress(int, motorRecordDebug);}
