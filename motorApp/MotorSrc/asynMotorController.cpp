@@ -760,6 +760,7 @@ void asynMotorController::asynMotorPoller()
           asynStatus asynstatus;
           asynstatus = pAxis->initialPoll();
           if (asynstatus == asynSuccess) pAxis->initialPollDone_ = 1;
+          forcedFastPolls++; /* Fast poll for the next axis */
       }
       getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
       getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
