@@ -189,7 +189,7 @@ USAGE...        Motor Record Support.
  * .75 05-18-17 rls - Stop motor if URIP is Yes and RDBL read returns an error. 
  */                                                          
 
-#define VERSION 6.92
+#define VERSION 6.94
 
 #include    <stdlib.h>
 #include    <string.h>
@@ -719,9 +719,9 @@ static void callbackFunc(struct callback *pcb)
         MIP_CLR_BIT(MIP_DELAY_REQ);      /* Turn off REQ. */
         MIP_SET_BIT(MIP_DELAY_ACK);      /* Turn on ACK. */
 #if LT_EPICSBASE(3,14,10,0)
-	scanOnce(pmr);
+        scanOnce(pmr);
 #else
-	scanOnce((struct dbCommon *) pmr);
+        scanOnce((struct dbCommon *) pmr);
 #endif
     }
 }
@@ -971,7 +971,7 @@ static long init_record(dbCommon* arg, int pass)
     process_reason = (*pdset->update_values) (pmr);
     switch (process_reason) {
         case NOTHING_DONE:
-	    if (pmr->dol.type == CONSTANT)
+            if (pmr->dol.type == CONSTANT)
                  pmr->udf = TRUE;
             break;
         case CALLBACK_DATA:
@@ -1517,7 +1517,7 @@ static long process(dbCommon *arg)
     if (process_reason == CALLBACK_DATA)
     {
       if ((pmr->dol.type == CONSTANT) && pmr->udf)
-	    pmr->udf = FALSE;
+            pmr->udf = FALSE;
     }
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
     {
@@ -1603,7 +1603,7 @@ static long process(dbCommon *arg)
                 pmr->dmov = TRUE;
                 MARK(M_DMOV);
                 if ((pmr->mip & ~MIP_JOG_REQ) == MIP_JOGF ||
-		    (pmr->mip & ~MIP_JOG_REQ)== MIP_JOGR)
+                    (pmr->mip & ~MIP_JOG_REQ)== MIP_JOGR)
                 {
                     /* Motor stopped while jogging and we didn't stop it */
                     MIP_SET_VAL(MIP_DONE);
@@ -3109,7 +3109,7 @@ pidcof:
         if (pmr->jogf == 0)
             MIP_CLR_BIT(MIP_JOG_REQ);
         else if (pmr->mip == MIP_DONE && !pmr->hls)
-	    MIP_SET_BIT(MIP_JOG_REQ);
+            MIP_SET_BIT(MIP_JOG_REQ);
         break;
 
     case motorRecordJOGR:
