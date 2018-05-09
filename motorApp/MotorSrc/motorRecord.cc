@@ -1495,11 +1495,21 @@ static long process(dbCommon *arg)
             {
                 pmr->dllm = minValue;
                 pmr->dhlm = maxValue;
+                set_dial_highlimit(pmr);
+                set_dial_lowlimit(pmr);
             }
             else
             {
-                if (pmr->dllm < minValue) pmr->dllm = minValue;
-                if (pmr->dhlm > maxValue) pmr->dhlm = maxValue;
+                if (pmr->dllm < minValue)
+                {
+                    pmr->dllm = minValue;
+                    set_dial_lowlimit(pmr);
+                }
+                if (pmr->dhlm > maxValue)
+                {
+                    pmr->dhlm = maxValue;
+                    set_dial_highlimit(pmr);
+                }
             }
         }
         process_reason = CALLBACK_DATA;
