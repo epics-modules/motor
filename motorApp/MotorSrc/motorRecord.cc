@@ -189,7 +189,7 @@ USAGE...        Motor Record Support.
  * .75 05-18-17 rls - Stop motor if URIP is Yes and RDBL read returns an error. 
  */                                                          
 
-#define VERSION 6.94
+#define VERSION 6.941
 
 #include    <stdlib.h>
 #include    <string.h>
@@ -587,7 +587,7 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
            v & MIP_JOGR      ? "Jr " : "",
            v & MIP_JOG_BL1   ? "J1 " : "",
            v & MIP_HOMF      ? "Hf " : "",
-           v & MIP_HOMR      ? "Jr " : "",
+           v & MIP_HOMR      ? "Hr " : "",
            v & MIP_MOVE      ? "Mo " : "",
            v & MIP_RETRY     ? "Ry " : "",
            v & MIP_LOAD_P    ? "Lp " : "",
@@ -3819,13 +3819,27 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     if ((ls_active == true ||
          (msta.Bits.RA_PROBLEM && (!(pmr->mflg & MF_NOSTOP_PROB)))))
     {
+#ifdef DEBUG
+    {
+        char dbuf[MBLE];
+        dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+        fprintf(stdout, "%s:%d %s STOP ls_active=%d PROBLEM=%d MF_NOSTOP_PROB=%d mip=0x%0x(%s)\n",
+                __FILE__, __LINE__,
+                pmr->name, ls_active ? 1 : 0,
+                msta.Bits.RA_PROBLEM ? 1 : 0,
+                pmr->mflg & MF_NOSTOP_PROB ? 1 : 0,
+                pmr->mip, dbuf);
+    }
+#else
+        fprintf(stdout, "%s:%d %s STOP ls_active=%d PROBLEM=%d MF_NOSTOP_PROB=%d\n",
+                __FILE__, __LINE__,
+                pmr->name, ls_active ? 1 : 0,
+                msta.Bits.RA_PROBLEM ? 1 : 0,
+                pmr->mflg & MF_NOSTOP_PROB ? 1 : 0);
+#endif
+
         pmr->stop = 1;
         MARK(M_STOP);
-        fprintf(stdout, "%s:%d %s STOP ls_active=%d PROBLEM=%d MF_NOSTOP_PROB=%d\n",
-               __FILE__, __LINE__,
-               pmr->name, ls_active ? 1 : 0,
-               msta.Bits.RA_PROBLEM ? 1 : 0,
-               pmr->mflg & MF_NOSTOP_PROB ? 1 : 0);
         clear_buttons(pmr);
     }
 
