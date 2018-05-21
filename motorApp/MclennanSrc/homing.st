@@ -133,7 +133,7 @@ ss motor
   
   state done {
     when () {
-      if ( (mode==1 || mode==3) ) {
+      if (mode==1 || mode==3) {
         jog_reverse_value = 0;
         pvPut(jog_reverse_value);
         jog_forward_value = 0;
