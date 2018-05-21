@@ -110,7 +110,7 @@ ss motor
   { 
     when (movable==1)
     { 
-      if ( mode==2 || mode==3 ) {
+      if (mode==2 || mode==3) {
         if (debug) {
             printf("Sequencer: Setting position to zero (modes 2 and 3)\n");
         }
