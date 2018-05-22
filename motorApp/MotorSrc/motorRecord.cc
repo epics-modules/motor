@@ -2706,7 +2706,7 @@ static long special(DBADDR *paddr, int after)
 
     msta.All = pmr->msta;
 
-    Debug(3, "%s:%d %s special fieldIndex=%s (%d)  after=%d\n",
+    Debug(4, "%s:%d %s special fieldIndex=%s (%d)  after=%d\n",
           __FILE__, __LINE__, pmr->name,
           fieldIndexToStr(fieldIndex), fieldIndex, after);
 
