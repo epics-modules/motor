@@ -289,10 +289,12 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
            of all motors */
         break;
     case STOP_AXIS:
-        /* Send a reset before the stop command so that it's not impeded by a tracking abort */
+	    /* Send a stop command as our first port of call */
+        sprintf(buff, "%dST;", axis);
+        strcat(motor_call->message, buff);
+        /* Send a second stop preceded by a reset command as a contingency in case the first stop is impeded by a tracking abort */
         sprintf(buff, "%dRS;", axis);
         strcat(motor_call->message, buff);
-		
         sprintf(buff, "%dST;", axis);
         break;
     case JOG:
