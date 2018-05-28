@@ -696,8 +696,9 @@ static void asynMotorPollerC(void *drvPvt)
   */
 double asynMotorController::pollAll(int forcedFastPolls)
 {
-  double timeout;
+  double timeout = idlePollPeriod_;
   asynMotorAxis *pAxis;
+  asynStatus asynstatus;
   bool anyMoving = false;
   int i;
   poll();
@@ -710,14 +711,15 @@ double asynMotorController::pollAll(int forcedFastPolls)
     if (!pAxis) continue;
 
     if (!pAxis->initialPollDone_) {
-        asynStatus asynstatus;
-        asynstatus = pAxis->initialPoll();
-        if (asynstatus == asynSuccess) pAxis->initialPollDone_ = 1;
+      asynstatus = pAxis->initialPoll();
+      if (asynstatus) return timeout;
+      pAxis->initialPollDone_ = 1;
     }
     getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
     getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
 
-    pAxis->poll(&moving);
+    asynstatus = pAxis->poll(&moving);
+    if (asynstatus) return timeout;
     if (moving) {
       anyMoving = true;
       pAxis->setWasMovingFlag(1);
@@ -752,8 +754,6 @@ double asynMotorController::pollAll(int forcedFastPolls)
     forcedFastPolls--;
   } else if (anyMoving) {
     timeout = movingPollPeriod_;
-  } else {
-    timeout = idlePollPeriod_;
   }
   return timeout;
 }
@@ -921,9 +921,10 @@ asynStatus asynMotorController::writeReadController(const char *output, char *in
 	     ((*nread == 0) && (eomReason & ASYN_EOM_END))) {
     int  i;
     asynPrint(pasynUserController_, ASYN_TRACE_ERROR,
-	      "%s:%s nread=%u status=%s (%d)\n",
+	      "%s:%s nread=%u out=%s status=%s (%d)\n",
 	      driverName, functionName,
-	      (unsigned)*nread, pasynManager->strStatus(status), (int)status);
+	      (unsigned)*nread, output ? output : "NULL",
+              pasynManager->strStatus(status), (int)status);
     asynStatusConnected_ = asynDisconnected;
     for (i=0; i<numAxes_; i++) {
       asynMotorAxis *pAxis = getAxis(i);
