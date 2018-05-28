@@ -465,11 +465,12 @@ static long init_record(struct motorRecord * pmr )
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
                   "devMotorAsyn::init_record: %s pasynGenericPointer->read returned Error\n",
                   pmr->name);
-	if (load_pos_needed(pmr, pasynUser)) {
-	    pmr->pact=1;
-	    return(1);
-	  }
-	  return 0;
+        if (load_pos_needed(pmr, pasynUser)) {
+            pmr->pact=1;
+            return(1);
+        }
+        pPvt->needUpdate = - 1;
+        return 0;
     }
 
     /* We must get the first set of status values from the controller before
@@ -522,7 +523,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
     asynPrint(pPvt->pasynUser, ASYN_TRACEIO_DEVICE,
         "%s devMotorAsyn::update_values, needUpdate=%d\n",
         pmr->name, pPvt->needUpdate);
-    if ( pPvt->needUpdate )
+    if ( pPvt->needUpdate > 0)
     {
         epicsInt32 rawvalue;
 
@@ -566,6 +567,8 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
               rc = CALLBACK_NEWLIMITS;
         }
         pPvt->needUpdate = 0;
+    } else if ( pPvt->needUpdate < 0) {
+        rc = CALLBACK_UDF;
     }
     return (rc);
 }
@@ -845,7 +848,7 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
     asynPrint(pasynUser, ASYN_TRACEIO_DEVICE,
               "%s devMotorAsyn::statusCallback new value=[p:%f,e:%f,s:%x] %c%c\n",
               pmr->name, value->position, value->encoderPosition, value->status,
-              pPvt->needUpdate ? 'N':' ', 
+              pPvt->needUpdate > 0 ? 'N':' ',
               pPvt->moveRequestPending ? 'P':' ');
 
     if (dbScanLockOK) {

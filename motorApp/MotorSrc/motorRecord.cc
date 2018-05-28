@@ -979,6 +979,12 @@ static long init_record(dbCommon* arg, int pass)
             break;
         case CALLBACK_NEWLIMITS:
             break;
+        case CALLBACK_UDF:
+            pmr->udf = TRUE;
+            Debug(3, "%s:%d %s init_record dval=%f drbv=%f rdbd=%f sdbd=%f udf=%d \n",
+                  __FILE__, __LINE__, pmr->name, pmr->dval, pmr->drbv,
+                  pmr->rdbd, pmr->sdbd, pmr->udf);
+            break;
     }
     return OK;
 }
@@ -1801,8 +1807,8 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     double rbdst1 = fabs(pmr->bdst) + pmr->sdbd;
     bool use_rel;
 
-    Debug(3, "%s:%d %s doRetryOrDone drbv=%f rcnt=%d preferred_dir=%d relpos=%f relbpos=%f drbv=%f\n",
-          __FILE__, __LINE__, pmr->name, pmr->drbv, pmr->rcnt, preferred_dir,
+    Debug(3, "%s:%d %s doRetryOrDone dval=%f rdbd=%f sdbd=%f udf=%d rcnt=%d preferred_dir=%d relpos=%f relbpos=%f drbv=%f\n",
+          __FILE__, __LINE__, pmr->name, pmr->dval, pmr->rdbd, pmr->sdbd, pmr->udf, pmr->rcnt, preferred_dir,
           relpos, relbpos, pmr->drbv);
 
     /*** Use if encoder or ReadbackLink is in use. ***/
