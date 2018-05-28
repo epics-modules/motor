@@ -689,6 +689,76 @@ static void asynMotorPollerC(void *drvPvt)
   pController->asynMotorPoller();
 }
   
+
+
+
+/** Poller helper function
+  */
+double asynMotorController::pollAll(int forcedFastPolls)
+{
+  double timeout;
+  asynMotorAxis *pAxis;
+  bool anyMoving = false;
+  int i;
+  poll();
+  for (i=0; i<numAxes_; i++) {
+    double autoPowerOffDelay = 0.0;
+    double nowTimeSecs = 0.0;
+    int autoPower = 0;
+    bool moving;
+    pAxis=getAxis(i);
+    if (!pAxis) continue;
+
+    if (!pAxis->initialPollDone_) {
+        asynStatus asynstatus;
+        asynstatus = pAxis->initialPoll();
+        if (asynstatus == asynSuccess) pAxis->initialPollDone_ = 1;
+    }
+    getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
+    getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
+
+    pAxis->poll(&moving);
+    if (moving) {
+      anyMoving = true;
+      pAxis->setWasMovingFlag(1);
+    } else {
+      /* autoPower mode 2 does allow to keep power on
+         forever, if autoPowerOffDelay < 0.0 */
+      if ((autoPower == 2) && (autoPowerOffDelay >= 0.0))
+        autoPower = 1;
+      if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
+        pAxis->setDisableFlag(1);
+        pAxis->setWasMovingFlag(0);
+        pAxis->setLastEndOfMoveTime(getNowTimeSecs());
+      }
+    }
+
+    //Auto power off drive, if:
+    //  We have detected an end of move
+    //  We are not moving again
+    //  Auto power off is enabled
+    //  Auto power off delay timer has expired
+    if ((!moving) && (autoPower == 1) && (pAxis->getDisableFlag() == 1)) {
+      nowTimeSecs = getNowTimeSecs();
+      if ((nowTimeSecs - pAxis->getLastEndOfMoveTime()) >= autoPowerOffDelay) {
+        pAxis->setClosedLoop(0);
+        pAxis->setDisableFlag(0);
+      }
+    }
+
+  }
+  if (forcedFastPolls > 0) {
+    timeout = movingPollPeriod_;
+    forcedFastPolls--;
+  } else if (anyMoving) {
+    timeout = movingPollPeriod_;
+  } else {
+    timeout = idlePollPeriod_;
+  }
+  return timeout;
+}
+
+
 /** Default poller function that runs in the thread created by asynMotorController::startPoller().
   * This base class implementation can be used by most derived classes. 
   * It polls at the idlePollPeriod_ when no axes are moving, and at the movingPollPeriod_ when
@@ -699,14 +769,6 @@ static void asynMotorPollerC(void *drvPvt)
 void asynMotorController::asynMotorPoller()
 {
   double timeout;
-  int i;
-  int forcedFastPolls=0;
-  bool anyMoving;
-  bool moving;
-  double nowTimeSecs = 0.0;
-  asynMotorAxis *pAxis;
-  int autoPower = 0;
-  double autoPowerOffDelay = 0.0;
   int status;
 
   timeout = idlePollPeriod_;
@@ -721,9 +783,7 @@ void asynMotorController::asynMotorPoller()
        * Force a minimum number of fast polls, because the controller status
        * might not have changed the first few polls
        */
-      forcedFastPolls = forcedFastPolls_;
     }
-    anyMoving = false;
     lock();
     if (shuttingDown_) {
       unlock();
@@ -751,58 +811,7 @@ void asynMotorController::asynMotorPoller()
 	return; /* Terminate while(1) loop */
       }
     }
-    poll();
-    for (i=0; i<numAxes_; i++) {
-      pAxis=getAxis(i);
-      if (!pAxis) continue;
-
-      if (!pAxis->initialPollDone_) {
-          asynStatus asynstatus;
-          asynstatus = pAxis->initialPoll();
-          if (asynstatus == asynSuccess) pAxis->initialPollDone_ = 1;
-          forcedFastPolls++; /* Fast poll for the next axis */
-      }
-      getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
-      getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
-      
-      pAxis->poll(&moving);
-      if (moving) {
-	anyMoving = true;
-	pAxis->setWasMovingFlag(1);
-      } else {
-        /* autoPower mode 2 does allow to keep power on
-           forever, if autoPowerOffDelay < 0.0 */
-        if ((autoPower == 2) && (autoPowerOffDelay >= 0.0))
-          autoPower = 1;
-	if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
-	  pAxis->setDisableFlag(1);
-          pAxis->setWasMovingFlag(0);
-          pAxis->setLastEndOfMoveTime(getNowTimeSecs());
-	}
-      }
-
-      //Auto power off drive, if:
-      //  We have detected an end of move
-      //  We are not moving again
-      //  Auto power off is enabled
-      //  Auto power off delay timer has expired
-      if ((!moving) && (autoPower == 1) && (pAxis->getDisableFlag() == 1)) {
-	nowTimeSecs = getNowTimeSecs();
-	if ((nowTimeSecs - pAxis->getLastEndOfMoveTime()) >= autoPowerOffDelay) {
-	  pAxis->setClosedLoop(0);
-	  pAxis->setDisableFlag(0);
-	}
-      }
-
-    }
-    if (forcedFastPolls > 0) {
-      timeout = movingPollPeriod_;
-      forcedFastPolls--;
-    } else if (anyMoving) {
-      timeout = movingPollPeriod_;
-    } else {
-      timeout = idlePollPeriod_;
-    }
+    timeout = pollAll(forcedFastPolls_);
     unlock();
   }
 }
