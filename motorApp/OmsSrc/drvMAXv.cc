@@ -390,7 +390,7 @@ static int set_status(int card, int signal)
     MAXvCntrl = (struct MAXvController *) brdptr->DevicePrivate;
     if (MAXvCntrl->fwver >= 1.33)
     {
-        send_recv_mess(card, "#WS", (char) NULL, q_buf, 1);
+        send_recv_mess(card, "#WS", (char *) NULL, q_buf, 1);
         if (strcmp(q_buf, "=0") != 0)
         {
             errlogPrintf(wdctrmsg, card, q_buf);
@@ -1264,7 +1264,7 @@ static int motor_init()
         send_mess(card_index, ERROR_CLEAR, (char*) NULL);
         send_mess(card_index, STOP_ALL, (char*) NULL);
 
-        rtn_code = send_recv_mess(card_index, GET_IDENT, (char) NULL, (char *) pmotorState->ident, 1);
+        rtn_code = send_recv_mess(card_index, GET_IDENT, (char* ) NULL, (char *) pmotorState->ident, 1);
         if (rtn_code != 0)
         {
             errlogPrintf("\n***MAXv card #%d Disabled*** not responding to commands!\n\n", card_index);
@@ -1281,7 +1281,7 @@ static int motor_init()
 
         if (pvtdata->fwver >= 1.33)
         {
-            send_recv_mess(card_index, "#WS", (char) NULL, axis_pos, 1);
+            send_recv_mess(card_index, "#WS", (char *) NULL, axis_pos, 1);
             if (strcmp(axis_pos, "=0") != 0)
             {
                 errlogPrintf(wdctrmsg, card_index, axis_pos);
@@ -1295,7 +1295,7 @@ static int motor_init()
         {
             send_mess(card_index, initstring[card_index], (char*) NULL);
 
-            send_recv_mess(card_index, ALL_POS, (char) NULL, axis_pos, 1);
+            send_recv_mess(card_index, ALL_POS, (char *) NULL, axis_pos, 1);
 
             for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
                  pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
