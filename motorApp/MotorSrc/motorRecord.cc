@@ -1807,9 +1807,12 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     double rbdst1 = fabs(pmr->bdst) + pmr->sdbd;
     bool use_rel;
 
-    Debug(3, "%s:%d %s doRetryOrDone dval=%f rdbd=%f sdbd=%f udf=%d rcnt=%d preferred_dir=%d relpos=%f relbpos=%f drbv=%f\n",
-          __FILE__, __LINE__, pmr->name, pmr->dval, pmr->rdbd, pmr->sdbd, pmr->udf, pmr->rcnt, preferred_dir,
+    Debug(3, "%s:%d %s doRetryOrDone dval=%f rdbd=%f sdbd=%f udf=%d stat=%d rcnt=%d preferred_dir=%d relpos=%f relbpos=%f drbv=%f\n",
+          __FILE__, __LINE__, pmr->name, pmr->dval, pmr->rdbd, pmr->sdbd, pmr->udf, pmr->stat, pmr->rcnt, preferred_dir,
           relpos, relbpos, pmr->drbv);
+
+    if (pmr->udf || (pmr->stat == epicsAlarmLink) || (pmr->stat == epicsAlarmUDF))
+        return;
 
     /*** Use if encoder or ReadbackLink is in use. ***/
     if (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip))
