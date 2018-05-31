@@ -91,6 +91,15 @@ between the call to drvAsynIPPortConfigure() and the call to
 EnsembleAsynConfig() in the st.cmd file must be less than the ->Socket2Timeout
 Parameter.  If this is not done a socket timeout will occur during IOC
 initialization and prevent EPICS from making a communication connection.)
+- In order to execute a home search from EPICS, configure the following.
+        - Set the System > TaskExecutionSetup parameter so that the Auxiliary task is enabled
+        - Copy the HomeAsync.ab from
+          C:\Program Files (x86)\Aerotech\Ensemble\Samples\AeroBasic
+          to convenient local directory, such as
+          C:\Users\Public\Documents\Aerotech\Ensemble\User Files\AeroBasicPrgms
+        - From Ensemble Motion Composer, select the Auxililary task, then build and load the HomeAsync program.
+        - Finally, from Ensemble Configuration Manager, drag and drop the HomeAsync.bcx file to the Ensemble congtroller's file system.
+
 
 
 DRIVER LIMITATIONS
