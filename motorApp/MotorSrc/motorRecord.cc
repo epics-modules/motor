@@ -766,6 +766,9 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
 
 static void recalcLVIO(motorRecord *pmr)
 {
+  if (pmr->udf || (pmr->stat == epicsAlarmLink) || (pmr->stat == epicsAlarmUDF))
+      return;
+  
   int old_lvio = pmr->lvio;
   int lvio = 0;
   if (!softLimitsDefined(pmr))
@@ -981,11 +984,11 @@ static long init_record(dbCommon* arg, int pass)
             break;
         case CALLBACK_UDF:
             pmr->udf = TRUE;
-            Debug(3, "%s:%d %s init_record dval=%f drbv=%f rdbd=%f sdbd=%f udf=%d \n",
-                  __FILE__, __LINE__, pmr->name, pmr->dval, pmr->drbv,
-                  pmr->rdbd, pmr->sdbd, pmr->udf);
             break;
     }
+    Debug(3, "%s:%d %s init_record process_reason=%d dval=%f drbv=%f rdbd=%f sdbd=%f udf=%d stat=%d\n",
+          __FILE__, __LINE__, pmr->name, (int)process_reason, pmr->dval, pmr->drbv,
+          pmr->rdbd, pmr->sdbd, pmr->udf, pmr->stat);
     return OK;
 }
 
@@ -1664,8 +1667,8 @@ static long process(dbCommon *arg)
                     {
                         char dbuf[MBLE];
                         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-                        Debug(3, "%s:%d %s (stopped) dmov==TRUE; no DLY; pp=%d mip=0x%0x(%s)\n",
-                              __FILE__, __LINE__, pmr->name, pmr->pp, pmr->mip, dbuf);
+                        Debug(3, "%s:%d %s (stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d mip=0x%0x(%s)\n",
+                              __FILE__, __LINE__, pmr->name, pmr->pp, pmr->udf, pmr->stat, pmr->mip, dbuf);
                     }
 #endif
                     if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
