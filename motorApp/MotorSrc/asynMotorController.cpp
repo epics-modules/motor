@@ -701,7 +701,9 @@ double asynMotorController::pollAll(int forcedFastPolls)
   asynStatus asynstatus;
   bool anyMoving = false;
   int i;
-  poll();
+  /* Do we need lock() here ? */
+  poll(); /* Do we need to look at the status */
+  /* Do we need unlock() here ? */
   for (i=0; i<numAxes_; i++) {
     double autoPowerOffDelay = 0.0;
     double nowTimeSecs = 0.0;
@@ -712,14 +714,20 @@ double asynMotorController::pollAll(int forcedFastPolls)
 
     if (!pAxis->initialPollDone_) {
       asynstatus = pAxis->initialPoll();
-      if (asynstatus) return timeout;
+      if (asynstatus) {
+        asynStatusConnected_ = asynstatus;
+        return timeout;
+      }
       pAxis->initialPollDone_ = 1;
     }
     getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
     getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
 
     asynstatus = pAxis->poll(&moving);
-    if (asynstatus) return timeout;
+    if (asynstatus) {
+      asynStatusConnected_ = asynstatus;
+      return timeout;
+    }
     if (moving) {
       anyMoving = true;
       pAxis->setWasMovingFlag(1);
@@ -784,10 +792,8 @@ void asynMotorController::asynMotorPoller()
        * might not have changed the first few polls
        */
     }
-    lock();
     if (shuttingDown_) {
-      unlock();
-      break;
+      return; /* Terminate while(1) loop */
     }
 
     /*
@@ -796,7 +802,6 @@ void asynMotorController::asynMotorPoller()
      * But if the poller uses pasynUserController_, then it must be connected.
      */
     while (pasynUserController_ && (asynStatusConnected_ != asynSuccess)) {
-      unlock(); /* CreateAxis may need the lock */
       asynStatus asynstatus = pasynManager->waitConnect(pasynUserController_,
 							idlePollPeriod_);
       if (asynStatusConnected_ != asynstatus) {
@@ -805,12 +810,11 @@ void asynMotorController::asynMotorPoller()
 		  driverName, "asynMotorPoller", (int)asynstatus);
 	asynStatusConnected_ = asynstatus;
       }
-      lock();
       if (shuttingDown_) {
-	unlock();
 	return; /* Terminate while(1) loop */
       }
     }
+    lock();
     timeout = pollAll(forcedFastPolls_);
     unlock();
   }
