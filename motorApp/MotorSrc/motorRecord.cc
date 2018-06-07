@@ -3415,7 +3415,7 @@ static void monitor(motorRecord * pmr)
         UNMARK(M_MSTA);
         if (msta.Bits.GAIN_SUPPORT)
         {
-            unsigned short pos_maint = (msta.Bits.EA_POSITION) ? 1 : 0;
+            unsigned short pos_maint = 0; /*(msta.Bits.EA_POSITION) ? 1 : 0;*/
             if (pos_maint != pmr->cnen)
             {
                 pmr->cnen = pos_maint;
