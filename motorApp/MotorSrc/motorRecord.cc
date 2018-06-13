@@ -961,6 +961,9 @@ static long init_record(dbCommon* arg, int pass)
     if (pmr->dol.type == CONSTANT)
     {
         pmr->udf = FALSE;
+        Debug(3, "%s:%d %s init_record set UDF=FALSE\n",
+              __FILE__, __LINE__, pmr->name);
+
         recGblInitConstantLink(&pmr->dol, DBF_DOUBLE, &pmr->val);
     }
 
@@ -1526,7 +1529,11 @@ static long process(dbCommon *arg)
     if (process_reason == CALLBACK_DATA)
     {
       if ((pmr->dol.type == CONSTANT) && pmr->udf)
-            pmr->udf = FALSE;
+      {
+          Debug(3, "%s:%d %s process set UDF=FALSE\n",
+                __FILE__, __LINE__, pmr->name);
+          pmr->udf = FALSE;
+      }
     }
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
     {
@@ -1605,8 +1612,8 @@ static long process(dbCommon *arg)
                 {
                     char dbuf[MBLE];
                     dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-                    Debug(3, "%s:%d %s motor has stopped drbv=%f pp=%d mip=0x%0x(%s)\n",
-                          __FILE__, __LINE__, pmr->name, pmr->drbv, pmr->pp, pmr->mip, dbuf);
+                    Debug(3, "%s:%d %s motor has stopped drbv=%f pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+                          __FILE__, __LINE__, pmr->name, pmr->drbv, pmr->pp, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
                 }
 #endif
                 pmr->dmov = TRUE;
@@ -1667,8 +1674,8 @@ static long process(dbCommon *arg)
                     {
                         char dbuf[MBLE];
                         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-                        Debug(3, "%s:%d %s (stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d mip=0x%0x(%s)\n",
-                              __FILE__, __LINE__, pmr->name, pmr->pp, pmr->udf, pmr->stat, pmr->mip, dbuf);
+                        Debug(3, "%s:%d %s (stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+                              __FILE__, __LINE__, pmr->name, pmr->pp, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
                     }
 #endif
                     if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
@@ -2354,8 +2361,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        Debug(3, "%s:%d %s do_work: begin mip=0x%0x(%s)\n",
-              __FILE__, __LINE__, pmr->name, pmr->mip, dbuf);
+        Debug(3, "%s:%d %s do_work: begin udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+              __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
     }
 #endif
     
@@ -2490,6 +2497,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             pmr->udf = TRUE;
             return(ERROR);
         }
+        Debug(3, "%s:%d %s udf=%d do_work set UDF=FALSE\n",
+              __FILE__, __LINE__, pmr->name, pmr->udf);
         pmr->udf = FALSE;
         /* Later, we'll act on this new value of .val. */
     }
