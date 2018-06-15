@@ -767,7 +767,11 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
 static void recalcLVIO(motorRecord *pmr)
 {
   if (pmr->udf || (pmr->stat == epicsAlarmLink) || (pmr->stat == epicsAlarmUDF))
+  {
+      Debug(3, "%s:%d %s recalcLVIO udf=%d stat=%d nsta=%d\n",
+            __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
       return;
+  }
   
   int old_lvio = pmr->lvio;
   int lvio = 0;
@@ -783,9 +787,9 @@ static void recalcLVIO(motorRecord *pmr)
       pmr->lvio = lvio;
       MARK(M_LVIO);
   }
-  Debug(3,"%s:%d %s recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f\n",
+  Debug(3,"%s:%d %s recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f udf=%d stat=%d nsta=%d\n",
         __FILE__, __LINE__, pmr->name,
-        lvio, pmr->drbv, pmr->rdbd, pmr->dhlm, pmr->dllm);
+        lvio, pmr->drbv, pmr->rdbd, pmr->dhlm, pmr->dllm, pmr->udf, pmr->stat, pmr->nsta);
 }
 
 /******************************************************************************
@@ -816,6 +820,8 @@ LOGIC:
 
 static long initial_poll(motorRecord *pmr)
 {
+    Debug(3, "%s:%d %s initial_poll udf=%d stat=%d nsta=%d\n",
+          __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
     process_motor_info(pmr, true);
 
     /*
@@ -1137,8 +1143,8 @@ static long postProcess(motorRecord * pmr)
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        Debug(3, "%s:%d %s postProcess: entry mip=0x%0x(%s)\n",
-              __FILE__, __LINE__, pmr->name, pmr->mip, dbuf);
+        Debug(3, "%s:%d %s postProcess: entry udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+              __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
     }
 #endif
 
