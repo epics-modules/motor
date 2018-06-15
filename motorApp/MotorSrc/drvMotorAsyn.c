@@ -94,7 +94,7 @@ typedef enum {
     motorStatusSlip, motorStatusPowerOn, motorStatusFollowingError,
     motorStatusHome, motorStatusHasEncoder, motorStatusProblem,
     motorStatusMoving, motorStatusGainSupport, motorStatusCommsError,
-    motorStatusLowLimit, motorStatusHomed, motorStatusLast,
+    motorStatusLowLimit, motorStatusHomed, motorStatusVbasUnsupported, motorStatusLast,
     /* Not exposed by the driver */
     motorVelocity=100, motorVelBase, motorAccel, 
     /* Commands */
@@ -147,6 +147,7 @@ static motorCommandStruct motorCommands[] = {
     {motorStatusCommsError,     motorStatusCommsErrorString},
     {motorStatusLowLimit,       motorStatusLowLimitString},
     {motorStatusHomed,          motorStatusHomedString},
+    {motorStatusVbasUnsupported, motorStatusVbasUnsupportedString},
 };
 
 typedef enum{typeInt32, typeFloat64, typeFloat64Array} dataType;
