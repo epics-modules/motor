@@ -1539,6 +1539,7 @@ static long process(dbCommon *arg)
           Debug(3, "%s:%d %s process set UDF=FALSE\n",
                 __FILE__, __LINE__, pmr->name);
           pmr->udf = FALSE;
+          initial_poll(pmr);
       }
     }
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
