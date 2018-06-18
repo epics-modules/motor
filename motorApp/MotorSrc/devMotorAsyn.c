@@ -568,9 +568,25 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
              pmr->priv->last.motorHighLimitRaw) ||
             (pPvt->status.MotorConfigRO.motorLowLimitRaw !=
              pmr->priv->last.motorLowLimitRaw))
-         {
-              re_init_update_soft_limits(pmr);
-              rc = CALLBACK_RE_INIT;
+        {
+            re_init_update_soft_limits(pmr);
+            rc = CALLBACK_RE_INIT;
+        }
+
+        if (pmr->priv->lastReadBack.msta.All != pmr->msta)
+        {
+            msta_field msta, prev_msta;
+            msta.All = pmr->msta;
+            prev_msta.All = pmr->priv->lastReadBack.msta.All;
+            /* either there has never been a poll: prev_msta.Bits.All == 0
+               or the COMM_ERR has just gone */
+            if (!prev_msta.All ||
+                ((msta.Bits.CNTRL_COMM_ERR == 0) &&(prev_msta.Bits.CNTRL_COMM_ERR != 0)))
+            {
+                re_init_update_velocities_xDBD(pmr);
+                rc = CALLBACK_RE_INIT;
+            }
+            pmr->priv->lastReadBack.msta.All = pmr->msta;
         }
         pPvt->needUpdate = 0;
     } else if ( pPvt->needUpdate < 0) {

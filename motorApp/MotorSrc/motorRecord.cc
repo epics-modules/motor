@@ -988,10 +988,9 @@ static long init_record(dbCommon* arg, int pass)
             if (pmr->dol.type == CONSTANT)
                  pmr->udf = TRUE;
             break;
+        case CALLBACK_RE_INIT:
         case CALLBACK_DATA:
             init_re_init(pmr);
-            break;
-        case CALLBACK_RE_INIT:
             break;
         case CALLBACK_UDF:
             pmr->udf = TRUE;

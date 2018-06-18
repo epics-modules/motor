@@ -4,6 +4,7 @@
 #define INC_motor_priv_H
 
 #include "epicsTypes.h"
+#include "motor.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +20,9 @@ extern "C" {
       double motorDialLowLimitRO;    /**< read only low limit from controller. */
       int motorDialLimitsValid;
     } softLimitRO;
+    struct {
+      msta_field msta;
+    } lastReadBack;
     struct {
       double motorMaxVelocityDial; /**< Maximum velocity */
       double motorDefVelocityDial; /**< Default velocity (moveAbs, moveRel) */
