@@ -244,7 +244,7 @@ static long findDrvInfo(motorRecord *pmotor, asynUser *pasynUser, char *drvInfoS
     return(0);
 }
 
-static void init_controller_update_soft_limits(struct motorRecord *pmr)
+static void re_init_update_soft_limits(struct motorRecord *pmr)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     asynUser *pasynUser = pPvt->pasynUser;
@@ -278,6 +278,28 @@ static void init_controller_update_soft_limits(struct motorRecord *pmr)
     pmr->priv->last.motorLowLimitRaw = rawLowLimitRO;
 }
 
+static void re_init_update_velocities_xDBD(struct motorRecord *pmr)
+{
+    motorAsynPvt * pPvt = (motorAsynPvt *) pmr->dpvt;
+    double amres = fabs(pmr->mres);
+    double tmp;
+    tmp = pPvt->status.MotorConfigRO.motorMaxVelocityRaw;
+    if (tmp > 0.0) pmr->priv->configRO.motorMaxVelocityDial = amres * tmp;
+    tmp = pPvt->status.MotorConfigRO.motorDefVelocityRaw;
+    if (tmp > 0.0) pmr->priv->configRO.motorDefVelocityDial = amres * tmp;
+
+    tmp = pPvt->status.MotorConfigRO.motorDefJogVeloRaw;
+    if (tmp > 0.0) pmr->priv->configRO.motorDefJogVeloDial = amres * tmp;
+
+    tmp = pPvt->status.MotorConfigRO.motorDefJogAccRaw;
+    if (tmp > 0.0) pmr->priv->configRO.motorDefJogAccDial = amres * tmp;
+
+    tmp = pPvt->status.MotorConfigRO.motorSDBDRaw;
+    if (tmp > 0.0) pmr->priv->configRO.motorSDBDDial = amres * tmp;
+
+    tmp = pPvt->status.MotorConfigRO.motorRDBDRaw;
+    if (tmp > 0.0) pmr->priv->configRO.motorRDBDDial = amres * tmp;
+}
 
 static asynStatus config_controller(struct motorRecord *pmr, motorAsynPvt *pPvt)
 {
@@ -319,8 +341,6 @@ static long init_record(struct motorRecord * pmr )
     asynStatus status;
     asynInterface *pasynInterface;
     motorAsynPvt *pPvt;
-    double amres = fabs(pmr->mres);
-    double tmp;
 
     /* Allocate motorAsynPvt private structure */
     pPvt = callocMustSucceed(1, sizeof(motorAsynPvt), "devMotorAsyn init_record()");
@@ -479,23 +499,9 @@ static long init_record(struct motorRecord * pmr )
      */
     init_controller_load_pos_if_needed(pmr, pasynUser);
 
-    init_controller_update_soft_limits(pmr);
-    tmp = pPvt->status.MotorConfigRO.motorMaxVelocityRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorMaxVelocityDial = amres * tmp;
-    tmp = pPvt->status.MotorConfigRO.motorDefVelocityRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorDefVelocityDial = amres * tmp;
+    re_init_update_soft_limits(pmr);
 
-    tmp = pPvt->status.MotorConfigRO.motorDefJogVeloRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorDefJogVeloDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorDefJogAccRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorDefJogAccDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorSDBDRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorSDBDDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorRDBDRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorRDBDDial = amres * tmp;
+    re_init_update_velocities_xDBD(pmr);
 
     /* Do not need to manually retrieve the new status values, as if they are
      * set, a callback will be generated
@@ -563,8 +569,8 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
             (pPvt->status.MotorConfigRO.motorLowLimitRaw !=
              pmr->priv->last.motorLowLimitRaw))
          {
-              init_controller_update_soft_limits(pmr);
-              rc = CALLBACK_NEWLIMITS;
+              re_init_update_soft_limits(pmr);
+              rc = CALLBACK_RE_INIT;
         }
         pPvt->needUpdate = 0;
     } else if ( pPvt->needUpdate < 0) {

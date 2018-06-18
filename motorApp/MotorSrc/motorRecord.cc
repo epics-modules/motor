@@ -761,6 +761,8 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
         db_post_events(pmr, &pmr->sdbd, DBE_VAL_LOG);
     if (pmr->rdbd != old_rdbd)
         db_post_events(pmr, &pmr->rdbd, DBE_VAL_LOG);
+    Debug(3, "%s:%d %s enforceMinRetryDeadband old_sdbd=%f old_rdbd=%f sdbd=%f rdbd=%f\n",
+          __FILE__, __LINE__, pmr->name, old_sdbd, old_rdbd, pmr->sdbd, pmr->rdbd);
 }
 
 
@@ -818,9 +820,9 @@ LOGIC:
 
 *******************************************************************************/
 
-static long initial_poll(motorRecord *pmr)
+static long init_re_init(motorRecord *pmr)
 {
-    Debug(3, "%s:%d %s initial_poll udf=%d stat=%d nsta=%d\n",
+    Debug(3, "%s:%d %s init_re_init udf=%d stat=%d nsta=%d\n",
           __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
     process_motor_info(pmr, true);
 
@@ -987,9 +989,9 @@ static long init_record(dbCommon* arg, int pass)
                  pmr->udf = TRUE;
             break;
         case CALLBACK_DATA:
-            initial_poll(pmr);
+            init_re_init(pmr);
             break;
-        case CALLBACK_NEWLIMITS:
+        case CALLBACK_RE_INIT:
             break;
         case CALLBACK_UDF:
             pmr->udf = TRUE;
@@ -1497,7 +1499,7 @@ static long process(dbCommon *arg)
     if (pmr->msta != old_msta)
         MARK(M_MSTA);
 
-    if (process_reason == CALLBACK_NEWLIMITS)
+    if (process_reason == CALLBACK_RE_INIT)
     {
         if (pmr->priv->softLimitRO.motorDialLimitsValid)
         {
@@ -1539,7 +1541,7 @@ static long process(dbCommon *arg)
           Debug(3, "%s:%d %s process set UDF=FALSE\n",
                 __FILE__, __LINE__, pmr->name);
           pmr->udf = FALSE;
-          initial_poll(pmr);
+          init_re_init(pmr);
       }
     }
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
