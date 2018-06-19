@@ -748,21 +748,24 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
     if (!pmr->rdbd && pmr->priv->configRO.motorRDBDDial > 0.0)
         pmr->rdbd = pmr->priv->configRO.motorRDBDDial;
 
+    if (!pmr->sdbd) /* SRDB from controller */
+        pmr->sdbd = pmr->priv->configRO.motorSDBDDial;
     if (!pmr->sdbd)
-    {
-        if (pmr->priv->configRO.motorSDBDDial > 0.0)
-            pmr->sdbd = pmr->priv->configRO.motorSDBDDial;
-        else /* SDBD is 0, set it to MRES */
-            pmr->sdbd = fabs(pmr->mres);
-        /* if SDBD was 0.0, it must be less than RDBD */
-        range_check(pmr, &pmr->sdbd, 0.0, pmr->rdbd);
-    }
+        pmr->sdbd = pmr->rdbd;
+    if (!pmr->sdbd)
+        pmr->sdbd = fabs(pmr->mres);
+
+    range_check(pmr, &pmr->sdbd, 0.0, pmr->rdbd);
+
     if (pmr->sdbd != old_sdbd)
         db_post_events(pmr, &pmr->sdbd, DBE_VAL_LOG);
     if (pmr->rdbd != old_rdbd)
         db_post_events(pmr, &pmr->rdbd, DBE_VAL_LOG);
-    Debug(3, "%s:%d %s enforceMinRetryDeadband old_sdbd=%f old_rdbd=%f sdbd=%f rdbd=%f\n",
-          __FILE__, __LINE__, pmr->name, old_sdbd, old_rdbd, pmr->sdbd, pmr->rdbd);
+    Debug(3, "%s:%d %s enforceMinRetryDeadband "
+          "old_sdbd=%f old_rdbd=%f cfg_sdbd=%f cfg_rdbd=%f sdbd=%f rdbd=%f mres=%f\n",
+          __FILE__, __LINE__, pmr->name,
+          old_sdbd, old_rdbd, pmr->priv->configRO.motorSDBDDial,
+          pmr->priv->configRO.motorRDBDDial, pmr->sdbd, pmr->rdbd, pmr->mres);
 }
 
 
