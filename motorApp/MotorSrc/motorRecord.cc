@@ -1534,6 +1534,7 @@ static long process(dbCommon *arg)
                 }
             }
         }
+        enforceMinRetryDeadband(pmr);
         process_reason = CALLBACK_DATA;
     }
     if (process_reason == CALLBACK_DATA)
