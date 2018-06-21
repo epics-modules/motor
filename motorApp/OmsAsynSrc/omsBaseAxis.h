@@ -2,10 +2,6 @@
 FILENAME...     omsBaseAxis.h
 USAGE...        Pro-Dex OMS asyn motor base axes support
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
