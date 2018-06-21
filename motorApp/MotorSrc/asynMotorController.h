@@ -11,7 +11,7 @@
 #include <epicsEvent.h>
 #include <epicsTypes.h>
 
-#define MAX_CONTROLLER_STRING_SIZE 256
+#define MAX_CONTROLLER_STRING_SIZE 1024
 #define DEFAULT_CONTROLLER_TIMEOUT 2.0
 
 #define  MOTORNOTHOMEDPROBLEM_IGNORE    0
