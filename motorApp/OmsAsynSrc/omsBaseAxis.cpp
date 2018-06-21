@@ -28,6 +28,7 @@ omsBaseAxis::omsBaseAxis(omsBaseController *pController, int axis, char axisChar
     stepper = 1;
     invertLimit = 0;
     lastminvelo = 0;
+    encoderRatio = 1.0;
 }
 
 asynStatus omsBaseAxis::move(double position, int relative, double min_velocity, double max_velocity, double acceleration)
@@ -36,9 +37,36 @@ asynStatus omsBaseAxis::move(double position, int relative, double min_velocity,
     static const char *functionName = "moveAxis";
 
     asynStatus status = asynError;
+
+    char buff[100];
+    char encoderPositionResponse[64];
+
+    int hasEncoder = 0;
+    if (pC_->getIntegerParam(axisNo_, pC_->motorStatusHasEncoder_, &hasEncoder) == asynError)
+    {
+        return asynError;
+    }
+
+    if (hasEncoder != 0)
+    {
+        sprintf(buff, "A%1c;RE;", axisChar);
+        status = pC_->sendReceiveLock(buff, encoderPositionResponse, 64);
+        if (status == asynError)
+        {
+            return status;
+        }
+
+        int motorPosition = static_cast<int>(atoi(encoderPositionResponse) / encoderRatio);
+        asynPrint(pasynUser_, ASYN_TRACE_FLOW,
+            "%s:%s: Set driver %s motor position %d from encoder position %s\n",
+            driverName, functionName, pC_->portName, motorPosition, encoderPositionResponse);
+
+        sprintf(buff, "A%1c;LO%d;", axisChar, motorPosition);
+        status = pC_->sendOnlyLock(buff);
+    }
+
     epicsInt32 minvelo, velo, acc, rela, pos;
     char *relabs[2] = {(char *) "MA", (char *) "MR"};
-    char buff[100];
 
     if (relative)
         rela = 1;
@@ -81,7 +109,7 @@ asynStatus omsBaseAxis::move(double position, int relative, double min_velocity,
     status = pC_->sendOnlyLock(buff);
 
     asynPrint(pasynUser_, ASYN_TRACE_FLOW,
-        "%s:%s: Set driver %s, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f",
+        "%s:%s: Set driver %s, axis %d move to %f, min vel=%f, max_vel=%f, accel=%f\n",
         driverName, functionName, pC_->portName, axisNo_, position, min_velocity, max_velocity, acceleration );
 
     return status;
@@ -124,7 +152,7 @@ asynStatus omsBaseAxis::home(double min_velocity, double max_velocity, double ac
     homing = 1;
 
     asynPrint(pasynUser_, ASYN_TRACE_FLOW,
-        "%s:%s: Set driver %s, axis %d to home %s, min vel=%f, max_vel=%f, accel=%f",
+        "%s:%s: Set driver %s, axis %d to home %s, min vel=%f, max_vel=%f, accel=%f\n",
         driverName, functionName, pC_->portName, axisNo_, (forwards?"FORWARDS":"REVERSE"), min_velocity, max_velocity, acceleration );
 
     return status;
