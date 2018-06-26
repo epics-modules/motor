@@ -580,8 +580,9 @@ static void mipSetMip(motorRecord *pmr, unsigned v)
 
 static void dbgMipToString(unsigned v, char *buf, size_t buflen)
 {
+  int len;
   memset(buf, 0, buflen);
-  snprintf(buf, buflen-1,
+  len = snprintf(buf, buflen-1,
            "'%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s'",
            v & MIP_JOGF      ? "Jf " : "",
            v & MIP_JOGR      ? "Jr " : "",
@@ -599,6 +600,12 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
            v & MIP_JOG_STOP  ? "jS " : "",
            v & MIP_JOG_BL2   ? "J2 " : "",
            v & MIP_EXTERNAL  ? "Ex " : "");
+  /* Remove trailing ' ', add a "'" */
+  if ((len > 1) && (len < (buflen-2)) && (buf[len-2] == ' '))
+  {
+    buf[len-2] = '\'';
+    buf[len-1] = '\0';
+  }
 }
 
 /*  abbreviated Bits: */
