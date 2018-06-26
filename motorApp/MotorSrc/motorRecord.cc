@@ -675,6 +675,23 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
 #endif
 
 
+#define SET_LVIO(value)                              \
+  do {                                               \
+    if (value || (pmr->lvio != value)) {             \
+      fprintf(stdout,                                \
+              "%s:%d %s setLvio old=%d new=%d\n",    \
+              __FILE__, __LINE__, pmr->name,         \
+              pmr->lvio, value);                     \
+      fflush(stdout);                                \
+    }                                                \
+    if (pmr->lvio != value) {                        \
+        pmr->lvio = value;                           \
+       MARK(M_LVIO);                                 \
+    }                                                \
+  }                                                  \
+  while(0)
+
+
 #define MARK(FIELD) {mmap_field temp; temp.All = pmr->mmap; \
                     temp.Bits.FIELD = 1; pmr->mmap = temp.All;}
 #define MARK_AUX(FIELD) {nmap_field temp; temp.All = pmr->nmap; \
@@ -788,7 +805,7 @@ static void recalcLVIO(motorRecord *pmr)
   int old_lvio = pmr->lvio;
   int lvio = 0;
   if (!softLimitsDefined(pmr))
-      pmr->lvio = 0;
+      SET_LVIO(0);
   else if ((pmr->drbv > pmr->dhlm + pmr->rdbd) ||
            (pmr->drbv < pmr->dllm - pmr->rdbd))
   {
@@ -796,7 +813,7 @@ static void recalcLVIO(motorRecord *pmr)
   }
   if (lvio != old_lvio)
   {
-      pmr->lvio = lvio;
+      SET_LVIO(lvio);
       MARK(M_LVIO);
   }
   Debug(3,"%s:%d %s recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f udf=%d stat=%d nsta=%d\n",
@@ -880,7 +897,7 @@ static long init_re_init(motorRecord *pmr)
     pmr->priv->last.val = pmr->val;
     pmr->priv->last.dval = pmr->dval;
     pmr->priv->last.rval = pmr->rval;
-    pmr->lvio = 0;              /* init limit-violation field */
+    SET_LVIO(0);              /* init limit-violation field */
 
     recalcLVIO(pmr);
     MARK(M_MSTA);   /* MSTA incorrect at boot-up; force posting. */
@@ -1751,19 +1768,18 @@ enter_do_work:
 
     /* check for soft-limit violation */
     if (!softLimitsDefined(pmr))
-        pmr->lvio = false;
+        SET_LVIO(0);
     else
     {
         if (pmr->mip & MIP_JOG)
-            pmr->lvio = (pmr->jogf && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
-                        (pmr->jogr && (pmr->rbv < pmr->llm + pmr->jvel));
+            SET_LVIO((pmr->jogf && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
+                     (pmr->jogr && (pmr->rbv < pmr->llm + pmr->jvel)));
         else if (pmr->mip & MIP_HOME)
-            pmr->lvio = false;  /* Disable soft-limit error check during home search. */
+            SET_LVIO(0);  /* Disable soft-limit error check during home search. */
     }
 
     if (pmr->lvio != old_lvio)
     {
-        MARK(M_LVIO);
         if (pmr->lvio && (!pmr->set && !pmr->igset))
         {
             pmr->stop = 1;
@@ -1953,7 +1969,6 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
 {
     int dir_positive = (pmr->dir == motorDIR_Pos);
     int dir = dir_positive ? 1 : -1;
-    int old_lvio = pmr->lvio;
     bool too_small;
     bool preferred_dir = true;
     double diff = pmr->dval - pmr->drbv;
@@ -2046,24 +2061,22 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     }
     /* Check for soft-travel limit violation */
     if (!softLimitsDefined(pmr))
-        pmr->lvio = false;
+        SET_LVIO(0);
     /* LVIO = TRUE, AND, Move request towards valid travel limit range. */
     else if (((pmr->dval > pmr->dhlm) && (pmr->dval < pmr->priv->last.dval)) ||
              ((pmr->dval < pmr->dllm) && (pmr->dval > pmr->priv->last.dval)))
-        pmr->lvio = false;
+        SET_LVIO(0);
     else
     {
         if (preferred_dir == true)
-            pmr->lvio = ((pmr->dval > pmr->dhlm) || (pmr->dval < pmr->dllm));
+            SET_LVIO(((pmr->dval > pmr->dhlm) || (pmr->dval < pmr->dllm)));
         else
         {
             double bdstpos = pmr->dval - pmr->bdst;
-            pmr->lvio = ((bdstpos > pmr->dhlm) || (bdstpos < pmr->dllm));
+            SET_LVIO(((bdstpos > pmr->dhlm) || (bdstpos < pmr->dllm)));
         }
     }
 
-    if (pmr->lvio != old_lvio)
-        MARK(M_LVIO);
     if (pmr->lvio)
     {
         pmr->val = pmr->priv->last.val;
@@ -2573,8 +2586,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             else if ((pmr->jogf && (pmr->val > pmr->hlm - pmr->jvel)) ||
                      (pmr->jogr && (pmr->val < pmr->llm + pmr->jvel)))
             {
-                pmr->lvio = 1;
-                MARK(M_LVIO);
+                SET_LVIO(1);
                 return(OK);
             }
             MIP_SET_VAL(pmr->jogf ? MIP_JOGF : MIP_JOGR);
