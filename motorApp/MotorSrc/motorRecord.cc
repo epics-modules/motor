@@ -2587,6 +2587,17 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                      (pmr->jogr && (pmr->val < pmr->llm + pmr->jvel)))
             {
                 SET_LVIO(1);
+                MIP_CLR_BIT(MIP_JOG_REQ);
+                if (pmr->jogf)
+                {
+                   pmr->jogf = 0;
+                   MARK_AUX(M_JOGF);
+                }
+                if (pmr->jogr)
+                {
+                    pmr->jogr = 0;
+                    MARK_AUX(M_JOGR);
+                }
                 return(OK);
             }
             MIP_SET_VAL(pmr->jogf ? MIP_JOGF : MIP_JOGR);
