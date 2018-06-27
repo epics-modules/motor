@@ -42,6 +42,7 @@ USAGE...	Motor record device level support for Newport MM3000.
 #include <string.h>
 #include <stdlib.h>
 #include <errlog.h>
+#include <math.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -276,6 +277,10 @@ STATIC RTN_STATUS MM3000_build_trans(motor_cmnd command, double *parms, struct m
 	     */
 	    break;
 	case SET_ENC_RATIO:
+            /* The motor record no longer passes unsigned values */
+            parms[0] = fabs(parms[0]);
+            parms[1] = fabs(parms[1]);
+
 	    /* MM3000 valid encoder ratio values < 10,000. */
 	    while (parms[0] > 10000.0 || parms[1] > 10000.0)
 	    {
