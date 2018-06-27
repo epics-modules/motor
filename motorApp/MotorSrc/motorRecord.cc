@@ -1872,8 +1872,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             /* Calculate encoder ratio. */
             for (m = 10000000; (m > 1) &&
                  (fabs(m / pmr->eres) > 1.e6 || fabs(m / pmr->mres) > 1.e6); m /= 10);
-            ep_mp[0] = fabs(m / pmr->eres);
-            ep_mp[1] = fabs(m / pmr->mres);
+            ep_mp[0] = m / pmr->eres;
+            ep_mp[1] = m / pmr->mres;
         }
         else
         {
