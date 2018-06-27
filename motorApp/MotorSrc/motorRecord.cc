@@ -1714,6 +1714,11 @@ static long process(dbCommon *arg)
                               __FILE__, __LINE__, pmr->name, pmr->pp, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
                     }
 #endif
+                    if ((pmr->mip & MIP_DELAY) == MIP_DELAY)
+                    {
+                        MIP_CLR_BIT(MIP_DELAY);
+                        MARK(M_MIP);    /* done delaying */
+                    }
                     if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
                     {
                         MIP_SET_BIT(MIP_DELAY);
@@ -1725,8 +1730,6 @@ static long process(dbCommon *arg)
                     }
                     else if (pmr->stup != motorSTUP_ON && pmr->mip != MIP_DONE)
                     {
-                        MIP_CLR_BIT(MIP_DELAY);
-                        MARK(M_MIP);    /* done delaying */
                         if (pmr->mip & (MIP_HOME | MIP_EXTERNAL))
                         {
                             MIP_SET_VAL(MIP_DONE);
