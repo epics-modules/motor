@@ -652,18 +652,16 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
 
 #define MIP_SET_VAL(v)                               \
   do {                                               \
-    char dbuf[MBLE];                                 \
     char obuf[MBLE];                                 \
     char nbuf[MBLE];                                 \
     epicsUInt16 old = pmr->mip;                      \
     mipSetMip(pmr,(v));                              \
-    dbgMipToString(v, dbuf, sizeof(dbuf));           \
     dbgMipToString(old, obuf, sizeof(obuf));         \
     dbgMipToString(pmr->mip, nbuf, sizeof(nbuf));    \
     fprintf(stdout,                                  \
-            "%s:%d %s mipSetVal %s old=%s new=%s\n", \
+            "%s:%d %s mipSetVal old=%s new=%s\n",    \
             __FILE__, __LINE__, pmr->name,           \
-            dbuf, obuf, nbuf);                       \
+            obuf, nbuf);                             \
     fflush(stdout);                                  \
     }                                                \
   while(0)
@@ -1741,7 +1739,7 @@ static long process(dbCommon *arg)
                         {
                             MIP_SET_BIT(MIP_DELAY_REQ);
                             MARK(M_MIP);
-                            Debug(3, "%s:%d %s callbackRequestDelayed() called\n\n",
+                            Debug(3, "%s:%d %s callbackRequestDelayed() called\n",
                                   __FILE__, __LINE__, pmr->name);
                             callbackRequestDelayed(&pcallback->dly_callback, pmr->dly);
                         }
@@ -1753,7 +1751,7 @@ static long process(dbCommon *arg)
                     {
                         MIP_SET_BIT(MIP_DELAY_REQ);
                         MARK(M_MIP);
-                        Debug(3, "%s:%d %s callbackRequestDelayed() called\n\n",
+                        Debug(3, "%s:%d %s callbackRequestDelayed() called\n",
                               __FILE__, __LINE__, pmr->name);
                         callbackRequestDelayed(&pcallback->dly_callback, pmr->dly);
                     }
