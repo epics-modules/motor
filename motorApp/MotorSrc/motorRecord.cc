@@ -1653,14 +1653,13 @@ static long process(dbCommon *arg)
                 pmr->dmov = TRUE;
                 MARK(M_DMOV);
                 if ((pmr->mip & ~MIP_JOG_REQ) == MIP_JOGF ||
-                    (pmr->mip & ~MIP_JOG_REQ)== MIP_JOGR)
+                    (pmr->mip & ~MIP_JOG_REQ) == MIP_JOGR)
                 {
                     /* Motor stopped while jogging and we didn't stop it */
                     MIP_SET_VAL(MIP_DONE);
                     MARK(M_MIP);
                     clear_buttons(pmr);
                     pmr->pp = TRUE;
-                    goto process_exit;
                 }
             }
 
