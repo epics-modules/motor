@@ -213,12 +213,14 @@ asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
   }
   else if (autoPower == 2) {
     pAxis->setDisableFlag(0);
-    if (!pAxis->pollPowerIsOn()) {
-      status = pAxis->setClosedLoop(true);
+    if (pAxis->pollPowerIsOn()) {
+      /* Amplifier is on, we are done */
+      return asynSuccess;
     }
+    status = pAxis->setClosedLoop(true);
     while (autoPowerOnDelay > 0.0) {
       if (pAxis->pollPowerIsOn())
-        break;
+        return asynSuccess;
       epicsThreadSleep(movingPollPeriod_);
       autoPowerOnDelay -= movingPollPeriod_;
     }
