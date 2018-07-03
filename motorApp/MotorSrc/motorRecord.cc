@@ -1280,8 +1280,18 @@ static long process(dbCommon *arg)
             /* Assume we're done moving until we find out otherwise. */
             if (pmr->dmov == FALSE)
             {
+                Debug(3, "%s:%d motor has stopped pp=%d mip=0x%0x\n",
+                      __FILE__, __LINE__, pmr->pp, pmr->mip);
                 pmr->dmov = TRUE;
                 MARK(M_DMOV);
+                if (pmr->mip == MIP_JOGF || pmr->mip == MIP_JOGR)
+                {
+                    /* Motor stopped while jogging and we didn't stop it */
+                    pmr->mip = MIP_DONE;
+                    MARK(M_MIP);
+                    clear_buttons(pmr);
+                    pmr->pp = TRUE;
+                }
             }
 
             /* Do another update after LS error. */
