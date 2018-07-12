@@ -52,9 +52,9 @@ record(calcout, "$(P)_MOVING")
 ## it is OK to reuse OUTA in the lines when they refer to a
 ## specific IOC and no two lines will get loaded at one. However
 ## it is IMPORTANT to not re-use one of the outputs on the
-## MOVING or _MOVING calc record target 
-## galils done in a slightly different way for historical reasons,
-## will be fixed in upcoming ticket.
+## MOVING or _MOVING1 etc calc record target 
+## don't write to the L fields of MOVING, _MOVING1 and _MOVING2
+## as this is written to already - see INSTETC.db
 record(dfanout, "$(P)_FAN")
 {
     field(OMSL, "supervisory")
