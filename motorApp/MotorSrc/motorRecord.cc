@@ -205,6 +205,7 @@ USAGE...        Motor Record Support.
 #include    <devSup.h>
 #include    <math.h>
 #include    <motor_priv.h>
+#include    <epicsStdio.h>
 
 #define GEN_SIZE_OFFSET
 #include    "motorRecord.h"
@@ -223,7 +224,6 @@ extern "C" {epicsExportAddress(int, motorRecordDebug);}
 
 /*----------------debugging-----------------*/
 
-static const char *fieldIndexToStr(int fieldIndex);
 static inline void Debug(int level, const char *format, ...) EPICS_PRINTF_STYLE(2,3);
 static inline void Debug(int level, const char *format, ...){
   #ifdef DEBUG
@@ -235,184 +235,6 @@ static inline void Debug(int level, const char *format, ...){
     }
   #endif
 }
-
-static const char *fieldIndexToStr(int fieldIndex)
-{
-#ifdef DEBUG
-    switch (fieldIndex)
-    {
-        case motorRecordNAME: return "NAME";
-        case motorRecordDESC: return "DESC";
-        case motorRecordASG: return "ASG";
-        case motorRecordSCAN: return "SCAN";
-        case motorRecordPINI: return "PINI";
-        case motorRecordPHAS: return "PHAS";
-        case motorRecordEVNT: return "EVNT";
-        case motorRecordTSE: return "TSE";
-        case motorRecordTSEL: return "TSEL";
-        case motorRecordDTYP: return "DTYP";
-        case motorRecordDISV: return "DISV";
-        case motorRecordDISA: return "DISA";
-        case motorRecordSDIS: return "SDIS";
-        case motorRecordMLOK: return "MLOK";
-        case motorRecordMLIS: return "MLIS";
-        case motorRecordDISP: return "DISP";
-        case motorRecordPROC: return "PROC";
-        case motorRecordSTAT: return "STAT";
-        case motorRecordSEVR: return "SEVR";
-        case motorRecordNSTA: return "NSTA";
-        case motorRecordNSEV: return "NSEV";
-        case motorRecordACKS: return "ACKS";
-        case motorRecordACKT: return "ACKT";
-        case motorRecordDISS: return "DISS";
-        case motorRecordLCNT: return "LCNT";
-        case motorRecordPACT: return "PACT";
-        case motorRecordPUTF: return "PUTF";
-        case motorRecordRPRO: return "RPRO";
-        case motorRecordASP: return "ASP";
-        case motorRecordPPN: return "PPN";
-        case motorRecordPPNR: return "PPNR";
-        case motorRecordSPVT: return "SPVT";
-        case motorRecordRSET: return "RSET";
-        case motorRecordDSET: return "DSET";
-        case motorRecordDPVT: return "DPVT";
-        case motorRecordRDES: return "RDES";
-        case motorRecordLSET: return "LSET";
-        case motorRecordPRIO: return "PRIO";
-        case motorRecordTPRO: return "TPRO";
-        case motorRecordBKPT: return "BKPT";
-        case motorRecordUDF: return "UDF";
-        case motorRecordUDFS: return "UDFS";
-        case motorRecordTIME: return "TIME";
-        case motorRecordFLNK: return "FLNK";
-        case motorRecordVERS: return "VERS";
-        case motorRecordOFF: return "OFF";
-        case motorRecordFOFF: return "FOFF";
-        case motorRecordFOF: return "FOF";
-        case motorRecordVOF: return "VOF";
-        case motorRecordDIR: return "DIR";
-        case motorRecordSET: return "SET";
-        case motorRecordSSET: return "SSET";
-        case motorRecordSUSE: return "SUSE";
-        case motorRecordVELO: return "VELO";
-        case motorRecordVBAS: return "VBAS";
-        case motorRecordVMAX: return "VMAX";
-        case motorRecordS: return "S";
-        case motorRecordSBAS: return "SBAS";
-        case motorRecordSMAX: return "SMAX";
-        case motorRecordACCL: return "ACCL";
-        case motorRecordBDST: return "BDST";
-        case motorRecordBVEL: return "BVEL";
-        case motorRecordSBAK: return "SBAK";
-        case motorRecordBACC: return "BACC";
-        case motorRecordFRAC: return "FRAC";
-        case motorRecordOUT: return "OUT";
-        case motorRecordCARD: return "CARD";
-        case motorRecordRDBL: return "RDBL";
-        case motorRecordDOL: return "DOL";
-        case motorRecordOMSL: return "OMSL";
-        case motorRecordRLNK: return "RLNK";
-        case motorRecordSREV: return "SREV";
-        case motorRecordUREV: return "UREV";
-        case motorRecordMRES: return "MRES";
-        case motorRecordERES: return "ERES";
-        case motorRecordRRES: return "RRES";
-        case motorRecordUEIP: return "UEIP";
-        case motorRecordURIP: return "URIP";
-        case motorRecordPREC: return "PREC";
-        case motorRecordEGU: return "EGU";
-        case motorRecordHLM: return "HLM";
-        case motorRecordLLM: return "LLM";
-        case motorRecordDHLM: return "DHLM";
-        case motorRecordDLLM: return "DLLM";
-        case motorRecordHOPR: return "HOPR";
-        case motorRecordLOPR: return "LOPR";
-        case motorRecordHLS: return "HLS";
-        case motorRecordLLS: return "LLS";
-        case motorRecordRHLS: return "RHLS";
-        case motorRecordRLLS: return "RLLS";
-        case motorRecordHIHI: return "HIHI";
-        case motorRecordLOLO: return "LOLO";
-        case motorRecordHIGH: return "HIGH";
-        case motorRecordLOW: return "LOW";
-        case motorRecordHHSV: return "HHSV";
-        case motorRecordLLSV: return "LLSV";
-        case motorRecordHSV: return "HSV";
-        case motorRecordLSV: return "LSV";
-        case motorRecordHLSV: return "HLSV";
-        case motorRecordMISV: return "MISV";
-        case motorRecordRDBD: return "RDBD";
-        case motorRecordSDBD: return "SDBD";
-        case motorRecordRCNT: return "RCNT";
-        case motorRecordRTRY: return "RTRY";
-        case motorRecordMISS: return "MISS";
-        case motorRecordSPMG: return "SPMG";
-        case motorRecordLSPG: return "LSPG";
-        case motorRecordSTOP: return "STOP";
-        case motorRecordHOMF: return "HOMF";
-        case motorRecordHOMR: return "HOMR";
-        case motorRecordJOGF: return "JOGF";
-        case motorRecordJOGR: return "JOGR";
-        case motorRecordTWF: return "TWF";
-        case motorRecordTWR: return "TWR";
-        case motorRecordTWV: return "TWV";
-        case motorRecordVAL: return "VAL";
-        case motorRecordDVAL: return "DVAL";
-        case motorRecordRVAL: return "RVAL";
-        case motorRecordRLV: return "RLV";
-        case motorRecordRBV: return "RBV";
-        case motorRecordDRBV: return "DRBV";
-        case motorRecordDIFF: return "DIFF";
-        case motorRecordRDIF: return "RDIF";
-        case motorRecordCDIR: return "CDIR";
-        case motorRecordRRBV: return "RRBV";
-        case motorRecordRMP: return "RMP";
-        case motorRecordREP: return "REP";
-        case motorRecordRVEL: return "RVEL";
-        case motorRecordDMOV: return "DMOV";
-        case motorRecordMOVN: return "MOVN";
-        case motorRecordMSTA: return "MSTA";
-        case motorRecordMFLG: return "MFLG";
-        case motorRecordLVIO: return "LVIO";
-        case motorRecordTDIR: return "TDIR";
-        case motorRecordATHM: return "ATHM";
-        case motorRecordPP: return "PP";
-        case motorRecordMIP: return "MIP";
-        case motorRecordMMAP: return "MMAP";
-        case motorRecordNMAP: return "NMAP";
-        case motorRecordDLY: return "DLY";
-        case motorRecordCBAK: return "CBAK";
-        case motorRecordpriv: return "priv";
-        case motorRecordPCOF: return "PCOF";
-        case motorRecordICOF: return "ICOF";
-        case motorRecordDCOF: return "DCOF";
-        case motorRecordCNEN: return "CNEN";
-        case motorRecordINIT: return "INIT";
-        case motorRecordPREM: return "PREM";
-        case motorRecordPOST: return "POST";
-        case motorRecordSTOO: return "STOO";
-        case motorRecordDINP: return "DINP";
-        case motorRecordRINP: return "RINP";
-        case motorRecordJVEL: return "JVEL";
-        case motorRecordJAR: return "JAR";
-        case motorRecordLOCK: return "LOCK";
-        case motorRecordNTM: return "NTM";
-        case motorRecordNTMF: return "NTMF";
-        case motorRecordHVEL: return "HVEL";
-        case motorRecordSTUP: return "STUP";
-        case motorRecordRMOD: return "RMOD";
-        case motorRecordADEL: return "ADEL";
-        case motorRecordMDEL: return "MDEL";
-        case motorRecordSYNC: return "SYNC";
-        case motorRecordIGSET: return "IGSET";
-        default: return "Unknown";
-        }
-#else
-    return "";
-#endif
-}
-
-
 
 /*** Forward references ***/
 
@@ -581,7 +403,7 @@ static void mipSetMip(motorRecord *pmr, unsigned v)
 static void dbgMipToString(unsigned v, char *buf, size_t buflen)
 {
   memset(buf, 0, buflen);
-  snprintf(buf, buflen-1,
+  epicsSnprintf(buf, buflen-1,
            "'%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s'",
            v & MIP_JOGF      ? "Jf " : "",
            v & MIP_JOGR      ? "Jr " : "",
@@ -2708,7 +2530,7 @@ static long special(DBADDR *paddr, int after)
 
     Debug(3, "%s:%d %s special fieldIndex=%s (%d)  after=%d\n",
           __FILE__, __LINE__, pmr->name,
-          fieldIndexToStr(fieldIndex), fieldIndex, after);
+          ((dbFldDes*)paddr->pfldDes)->name, fieldIndex, after);
 
     /*
      * Someone wrote to drive field.  Blink .dmov unless record is disabled.
