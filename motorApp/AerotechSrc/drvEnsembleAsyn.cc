@@ -66,7 +66,9 @@ in file LICENSE that is included with this distribution.
 *                    where torque is enabled/disabled. 
 * .21 10-14-15 rls - Use "ReverseDirec" parameter to set "HomeSetup" parameter.
 * .22 05-29-18 rls - To avoid EPICS IOC reboots after parameter file changes, update 
-*                    CountsPerUnit everytime torque is enabled.
+*                    CountsPerUnit everytime torque is enabled. 
+* .23 06-28-18 rls - If disabling torque due to a fault, clear motorAxisProblem so that 
+*                    user can Jog off limit switch. 
 */
 
 
@@ -95,8 +97,12 @@ in file LICENSE that is included with this distribution.
 
 #include "paramLib.h"
 #include "drvEnsembleAsyn.h"
-#include "ParameterId.h"
 #include "epicsExport.h"
+
+/* NOTE: The following two files are copied from the Ensemble C library include files.
+* If changing the driver to target a different version of the Ensemble, copy the following two files from that version's C library include files */
+#include "EnsembleCommonStructures.h"
+#include "EnsembleParameterId.h"
 
 motorAxisDrvSET_t motorEnsemble = 
 {
@@ -421,7 +427,12 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     {
     case motorAxisClosedLoop:
         if (value == 0)
+        {
+            int TravelLimitFaultMask = (1 << AXISFAULTBITS_CwEndOfTravelLimitFaultBit) | (1 << AXISFAULTBITS_CcwEndOfTravelLimitFaultBit);
             sprintf(outputBuff, "DISABLE @%d", pAxis->axis);
+            if ((pAxis->lastFault & TravelLimitFaultMask) != 0 )  /* If disabled due to a Travel Limit fault, clear motorAxisProblem. */
+                motorParam->setInteger(pAxis->params, motorAxisProblem, 0);
+        }
         else
         {
             sprintf(outputBuff, getparamstr, pAxis->axis, PARAMETERID_CountsPerUnit);
