@@ -83,7 +83,7 @@ OFF	User Offset (EGU).  User and dial coordinates can differ by a sign
 				the FOFF field is "Variable".
 			    OFF = VAL - (DVAL * DIR)
 			ENDIF
-	special():	IF new DIR
+	special():	IF new DIR, AND, FOFF is "Variable"
 			    OFF = VAL - (DVAL * DIR)
 			ENDIF
 	load_pos():	IF FOFF field is "Variable".
