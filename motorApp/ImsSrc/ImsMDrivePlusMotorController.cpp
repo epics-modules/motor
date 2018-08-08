@@ -63,7 +63,7 @@ ImsMDrivePlusMotorController::ImsMDrivePlusMotorController(const char *motorPort
 	pAxes_ = (ImsMDrivePlusMotorAxis **)(asynMotorController::pAxes_);
 
 	// copy names
-	strcpy(motorName, motorPortName);
+	strncpy(motorName, motorPortName, (MAX_NAME_LEN - 1));
 
 	// setup communication
 	status = pasynOctetSyncIO->connect(IOPortName, 0, &pAsynUserIMS, NULL);
@@ -111,7 +111,7 @@ ImsMDrivePlusMotorController::ImsMDrivePlusMotorController(const char *motorPort
 ////////////////////////////////////////
 void ImsMDrivePlusMotorController::initController(const char *devName, double movingPollPeriod, double idlePollPeriod)
 {
-	strcpy(this->deviceName, devName);
+	strncpy(this->deviceName, devName, (MAX_NAME_LEN - 1));
 
 	// initialize asynMotorController variables
 	this->numAxes_ = NUM_AXES;  // only support single axis
