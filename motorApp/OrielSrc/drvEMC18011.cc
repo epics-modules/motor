@@ -381,7 +381,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
         strncpy(send_buff, nodeptr->postmsgptr, 80);
-	send_mess(card, send_buff, (char*) NULL);
+	send_mess(card, send_buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -591,7 +591,7 @@ EMC18011Setup(int num_cards,	/* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < EMC18011_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -691,7 +691,7 @@ static int motor_init()
 	    strcpy(brdptr->ident, "Oriel Encoder Mike 18011");  /* Save Controller ID  */
 
 
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
 	    /* Make sure that motion is stopped - cannot change motor selection */
@@ -731,16 +731,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     // epicsThreadCreate((char *) "EMC18011_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
     epicsThreadCreate((char *) "EMC18011_motor", 

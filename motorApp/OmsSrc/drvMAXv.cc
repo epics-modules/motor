@@ -396,9 +396,9 @@ static int set_status(int card, int signal)
             errlogPrintf(wdctrmsg, card, q_buf);
             status.Bits.RA_PROBLEM = 1;
             motor_info->status.All = status.All;
-            send_mess(card, STOP_ALL, (char*) NULL);
+            send_mess(card, STOP_ALL, NULL);
             /* Disable board. */
-            motor_state[card] = (struct controller *) NULL;
+            motor_state[card] = NULL;
             return(rtn_state = 1); /* End move. */
         }
     }
@@ -1211,7 +1211,7 @@ static int motor_init()
         if (!PROBE_SUCCESS(status))
         {
             Debug(3, "motor_init: Card NOT found!\n");
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
             goto loopend;
         }
 
@@ -1224,7 +1224,7 @@ static int motor_init()
         {
             errPrintf(status, __FILE__, __LINE__, "Can't register address 0x%x\n",
                       (unsigned int) probeAddr);
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
             goto loopend;
         }
 #endif
@@ -1235,7 +1235,7 @@ static int motor_init()
         if (pmotor->firmware_status.Bits.running == 0)
         {
             errlogPrintf(norunmsg, card_index, (unsigned int) pmotor->firmware_status.All);
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
             goto loopend;
         }
 
@@ -1261,14 +1261,14 @@ static int motor_init()
         pmotor->status1_irq_enable.All = 0;
         pmotor->status2_irq_enable = 0;
 
-        send_mess(card_index, ERROR_CLEAR, (char*) NULL);
-        send_mess(card_index, STOP_ALL, (char*) NULL);
+        send_mess(card_index, ERROR_CLEAR, NULL);
+        send_mess(card_index, STOP_ALL, NULL);
 
         rtn_code = send_recv_mess(card_index, GET_IDENT, 0, (char *) pmotorState->ident, 1);
         if (rtn_code != 0)
         {
             errlogPrintf("\n***MAXv card #%d Disabled*** not responding to commands!\n\n", card_index);
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
             goto loopend;
         }
         Debug(3, "Identification = %s\n", pmotorState->ident);
@@ -1286,14 +1286,14 @@ static int motor_init()
             {
                 errlogPrintf(wdctrmsg, card_index, axis_pos);
                 epicsThreadSleep(2.0);
-                motor_state[card_index] = (struct controller *) NULL;
+                motor_state[card_index] = NULL;
                 wdtrip = true;
             }
         }
 
         if (wdtrip == false)
         {
-            send_mess(card_index, initstring[card_index], (char*) NULL);
+            send_mess(card_index, initstring[card_index], NULL);
 
             send_recv_mess(card_index, ALL_POS, 0, axis_pos, 1);
 
@@ -1400,11 +1400,11 @@ loopend:;
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "Motors initialized\n");
 

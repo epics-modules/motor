@@ -221,7 +221,7 @@ static int set_status(int card, int signal)
 	charcnt = recv_mess(card, buff, FLUSH);
 
     sprintf(buff,"STR1/%d",(signal + 1));
-    send_mess(card, buff, (char*) NULL);		/*  Tell Status */
+    send_mess(card, buff, NULL);		/*  Tell Status */
     charcnt = recv_mess(card, buff, 1);
     convert_cnt = sscanf(buff, "C\tSTR%d\t1\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
                          &str_axis, &str_move, &str_norg, &str_orgg,
@@ -256,7 +256,7 @@ static int set_status(int card, int signal)
 
    /* Parse motor position */
     sprintf(buff,"RDP%d/0", (signal + 1));
-    send_mess(card, buff, (char*) NULL);  /*  Tell Position */
+    send_mess(card, buff, NULL);  /*  Tell Position */
     recv_mess(card, buff, 1);
     convert_cnt = sscanf(buff, "C\tRDP%d\t%d", &str_axis, &motorData);
     
@@ -285,7 +285,7 @@ static int set_status(int card, int signal)
 
     /* Torque enabled? */
     sprintf(buff,"RSY%d/21", (signal + 1));
-    send_mess(card, buff, (char*) NULL);  /*  Tell Position */
+    send_mess(card, buff, NULL);  /*  Tell Position */
     recv_mess(card, buff, 1);
     convert_cnt = sscanf(buff, "C\tRSY%d\t21\t%d", &str_axis, &str_move);
     status.Bits.EA_POSITION = (str_move == 0) ? 1 : 0;
@@ -327,7 +327,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char*) NULL);
+	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -467,7 +467,7 @@ SC800Setup(int num_cards,       /* maximum number of controllers in system.  */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < SC800_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -598,7 +598,7 @@ static int motor_init()
             }
             brdptr->total_axis = total_axis;
 	    
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
 
@@ -622,16 +622,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     // epicsThreadCreate((char *) "SC800_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
     epicsThreadCreate((char *) "SC800_motor", 

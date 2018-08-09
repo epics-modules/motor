@@ -463,8 +463,8 @@ epicsShareFunc long motor_start_trans_com(struct motorRecord *mr, struct board_s
     motor_call->type = UNDEFINED;
     motor_call->mrecord = (struct dbCommon *) mr;
     motor_call->message[0] = 0;
-    motor_call->postmsgptr = (char*) NULL;
-    motor_call->termstring = (char*) NULL;
+    motor_call->postmsgptr = NULL;
+    motor_call->termstring = NULL;
     
     return (0);
 }

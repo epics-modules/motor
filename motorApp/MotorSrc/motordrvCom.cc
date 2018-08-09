@@ -270,8 +270,8 @@ static double query_axis(int card, struct driver_table *tabptr, epicsTime tick,
                     (*tabptr->query_done) (card, index, motor_motion);
                     brdptr->motor_in_motion--;
                     motor_free(motor_motion, tabptr);
-                    motor_motion = (struct mess_node *) NULL;
-                    motor_info->motor_motion = (struct mess_node *) NULL;
+                    motor_motion = NULL;
+                    motor_info->motor_motion = NULL;
                     mess_ret->status.Bits.RA_DONE = 1;
                 }
 
@@ -314,7 +314,7 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick,
             char *axis_name;
 
             if (tabptr->axis_names == NULL)
-                axis_name = (char *) NULL;
+                axis_name = NULL;
             else
                 axis_name = tabptr->axis_names[axis];
 
@@ -481,7 +481,7 @@ epicsShareFunc RTN_STATUS motor_send(struct mess_node *u_msg, struct driver_tabl
 
     new_message = motor_malloc(tabptr->freeptr, tabptr->freelockptr);
     new_message->callback = u_msg->callback;
-    new_message->next = (struct mess_node *) NULL;
+    new_message->next = NULL;
     new_message->type = u_msg->type;
     new_message->signal = u_msg->signal;
     new_message->card = u_msg->card;
@@ -542,7 +542,7 @@ static struct mess_node *motor_malloc(struct circ_queue *freelistptr, epicsEvent
         node = freelistptr->head;
         freelistptr->head = node->next;
         if (!freelistptr->head)
-            freelistptr->tail = (struct mess_node *) NULL;
+            freelistptr->tail = NULL;
     }
 
     lockptr->signal();
@@ -558,7 +558,7 @@ epicsShareFunc int motor_free(struct mess_node * node, struct driver_table *tabp
 
     tabptr->freelockptr->wait();
 
-    node->next = (struct mess_node *) NULL;
+    node->next = NULL;
 
     if (freelistptr->tail)
     {

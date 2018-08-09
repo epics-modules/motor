@@ -245,7 +245,7 @@ STATIC int set_status(int card, int signal)
     status.All = motor_info->status.All;
 
     sprintf(outbuff, "%dMS", signal + 1);
-    send_mess(card, outbuff, (char*) NULL);
+    send_mess(card, outbuff, NULL);
     charcnt = recv_mess(card, inbuff, 1);
     if (charcnt > 0)
     {
@@ -310,7 +310,7 @@ STATIC int set_status(int card, int signal)
     status.Bits.EA_HOME     = 0;
 
     sprintf(outbuff, "%dTP", signal + 1);
-    send_mess(card, outbuff, (char*) NULL);
+    send_mess(card, outbuff, NULL);
     charcnt = recv_mess(card, inbuff, 1);
     if (charcnt > 0)
     {
@@ -373,7 +373,7 @@ STATIC int set_status(int card, int signal)
         nodeptr->postmsgptr != 0)
     {
         strcpy(outbuff, nodeptr->postmsgptr);
-        send_mess(card, outbuff, (char*) NULL);
+        send_mess(card, outbuff, NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -555,7 +555,7 @@ MM3000Setup(int num_cards,  /* maximum number of controllers in system.  */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < MM3000_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -631,21 +631,21 @@ STATIC int motor_init()
             /* flush any junk at input port - should not be any data available */
             pasynOctetSyncIO->flush(cntrl->pasynUser);
 
-            send_mess(card_index, GET_IDENT, (char*) NULL);
+            send_mess(card_index, GET_IDENT, NULL);
             status = recv_mess(card_index, axis_pos, 1);
             /* Return value is length of response string */
         }
 
         if (success_rtn == asynSuccess && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
-            send_mess(card_index, STOP_ALL, (char*) NULL);   /* Stop all motors */
-            send_mess(card_index, GET_IDENT, (char*) NULL);  /* Read controller ID string */
+            send_mess(card_index, STOP_ALL, NULL);   /* Stop all motors */
+            send_mess(card_index, GET_IDENT, NULL);  /* Read controller ID string */
             recv_mess(card_index, buff, 1);
             strncpy(brdptr->ident, &buff[0], MAX_IDENT_LEN);  /* Skip "VE" */
 
-            send_mess(card_index, "RC", (char*) NULL);
+            send_mess(card_index, "RC", NULL);
             recv_mess(card_index, buff, 1);
             bufptr = epicsStrtok_r(buff, "=", &tok_save);
             bufptr = epicsStrtok_r(NULL, " ", &tok_save);
@@ -692,7 +692,7 @@ STATIC int motor_init()
                 else
                 {
                     sprintf(buff, "%dTPE", motor_index + 1);
-                    send_mess(card_index, buff, (char*) NULL);
+                    send_mess(card_index, buff, NULL);
                     recv_mess(card_index, buff, 1);
 
                     if (strcmp(buff, "E01") == 0)
@@ -712,16 +712,16 @@ STATIC int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "MM3000_motor", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),

@@ -105,7 +105,7 @@ RTN_STATUS motorUtilInit(char *vme_name)
 
     epicsThreadCreate((char *) "motorUtil", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),
-                      (EPICSTHREADFUNC) motorUtil_task, (void *) NULL);
+                      (EPICSTHREADFUNC) motorUtil_task, NULL);
     return(status);
 }
 

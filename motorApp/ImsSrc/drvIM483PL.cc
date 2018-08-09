@@ -480,7 +480,7 @@ IM483PLSetup(int num_cards, /* maximum number of controllers in system.  */
     motor_state = (struct controller **) malloc(IM483PL_num_cards * sizeof(struct controller *));
 
     for (itera = 0; itera < IM483PL_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -573,7 +573,7 @@ static int motor_init()
 
         if (success_rtn == asynSuccess && total_axis > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
 
             for (motor_index = 0; motor_index < total_axis; motor_index++)
@@ -602,16 +602,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "IM483PL_motor", epicsThreadPriorityMedium,
               epicsThreadGetStackSize(epicsThreadStackMedium),

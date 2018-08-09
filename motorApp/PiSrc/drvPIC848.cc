@@ -341,7 +341,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char*) NULL);
+	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -464,7 +464,7 @@ PIC848Setup(int num_cards,  /* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < PIC848_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -548,7 +548,7 @@ static int motor_init()
 
 	    do
 	    {
-		send_mess(card_index, GET_IDENT, (char*) NULL);
+		send_mess(card_index, GET_IDENT, NULL);
 		status = recv_mess(card_index, buff, 1);
 		retry++;
 	    } while (status == 0 && retry < 3);
@@ -557,7 +557,7 @@ static int motor_init()
 	if (success_rtn == asynSuccess && status > 0)
 	{
 	    strcpy(brdptr->ident, &buff[0]);
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
             /* Determine # of axes. Request stage name.  See if it responds */
@@ -599,16 +599,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "PIC848_motor", epicsThreadPriorityMedium,
 		      epicsThreadGetStackSize(epicsThreadStackMedium),

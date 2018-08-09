@@ -221,7 +221,7 @@ static int set_status(int card, int signal)
     status.Bits.EA_POSITION = (motorstat.word1.Bits.amp_enabled == YES) ? 1 : 0;
 
     sprintf(outbuf, "M%.2d61", (signal + 1));	// Get Commanded Position.
-    send_mess(card, outbuf, (char*) NULL);
+    send_mess(card, outbuf, NULL);
     recv_mess(card, buff, 1);
 
     motorData = atof(buff);
@@ -271,7 +271,7 @@ static int set_status(int card, int signal)
     status.Bits.EA_HOME	      = 0;
 
     sprintf(outbuf, "M%.2d62", (signal + 1));
-    send_mess(card, outbuf, (char*) NULL);	// Get Actual Position.
+    send_mess(card, outbuf, NULL);	// Get Actual Position.
     recv_mess(card, buff, 1);
     motorData = atof(buff);
     motor_info->encoder_position = (int32_t) motorData;
@@ -294,7 +294,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char*) NULL);
+	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -328,7 +328,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     }
 
     /* Flush receive buffer */
-    recv_mess(card, (char *) NULL, -1);
+    recv_mess(card, NULL, -1);
 
     if (name == NULL)
 	strcpy(outbuf, com);
@@ -702,7 +702,7 @@ int PmacSetup(int num_cards,	/* maximum number of cards in rack */
     {
 	errlogPrintf("%s(%d): Mailbox bus error - 0x%X\n", __FILE__, __LINE__,
 		     (unsigned int) (Mbox_addrs + 0x121));
-	Mbox_addrs = (char *) NULL;
+	Mbox_addrs = NULL;
 	Pmac_num_cards = 0;
     }
 
@@ -835,10 +835,10 @@ static int motor_init()
                 count = pmotor->response[0];
             }
 
-	    send_mess(card_index, "TYPE", (char*) NULL);
+	    send_mess(card_index, "TYPE", NULL);
 	    recv_mess(card_index, (char *) pmotorState->ident, 1);
 
-	    send_mess(card_index, "VERSION", (char*) NULL);
+	    send_mess(card_index, "VERSION", NULL);
 	    recv_mess(card_index, axis_pos, 1);
 	    strcat((char *) &pmotorState->ident, ", ");
 	    strcat((char *) &pmotorState->ident, axis_pos);
@@ -851,7 +851,7 @@ static int motor_init()
 		char outbuf[10];
 
 		sprintf(outbuf, "I%.2d00", (total_axis + 1));
-		send_mess(card_index, outbuf, (char*) NULL);
+		send_mess(card_index, outbuf, NULL);
 		recv_mess(card_index, axis_pos, 1);
 		if (strcmp(axis_pos, "0") == 0)
 		    errind = true;
@@ -862,12 +862,12 @@ static int motor_init()
 
 		    // Set Ixx20=1 and Ixx21=0; control acceleration via Ixx19.
 		    sprintf(outbuf, "I%.2d20=1", (total_axis + 1));
-		    send_mess(card_index, outbuf, (char*) NULL);
+		    send_mess(card_index, outbuf, NULL);
 		    sprintf(outbuf, "I%.2d21=0", (total_axis + 1));
-		    send_mess(card_index, outbuf, (char*) NULL);
+		    send_mess(card_index, outbuf, NULL);
 
 		    sprintf(outbuf, "I%.2d08", (total_axis + 1));
-		    send_mess(card_index, outbuf, (char*) NULL);
+		    send_mess(card_index, outbuf, NULL);
 		    recv_mess(card_index, axis_pos, 1);
 		    cntrl->pos_scaleFac[total_axis] = atof(axis_pos) * 32.0;
 		}
@@ -914,17 +914,17 @@ static int motor_init()
 	else
 	{
 	    Debug(3, "motor_init: Card NOT found!\n");
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
 	}
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "Motors initialized\n");
 

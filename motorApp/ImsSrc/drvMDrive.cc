@@ -524,7 +524,7 @@ MDriveSetup(int num_cards,  /* maximum number of chains in system.  */
                    malloc(MDrive_num_cards * sizeof(struct controller *));
 
     for (itera = 0; itera < MDrive_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -627,7 +627,7 @@ static int motor_init()
         {
             input_config *confptr = cntrl->inconfig;
 
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
 
             for (motor_index = 0; motor_index < total_axis; motor_index++)
@@ -726,16 +726,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "MDrive_motor", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),

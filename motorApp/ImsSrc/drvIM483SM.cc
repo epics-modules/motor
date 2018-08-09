@@ -238,7 +238,7 @@ static int set_status(int card, int signal)
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
 
-    send_mess(card, "^", (char*) NULL);
+    send_mess(card, "^", NULL);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
@@ -273,7 +273,7 @@ static int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, "Z 0", (char*) NULL);
+    send_mess(card, "Z 0", NULL);
     recv_mess(card, buff, 1);
 
     motorData = atof(&buff[5]);
@@ -295,7 +295,7 @@ static int set_status(int card, int signal)
 
     plusdir = (status.Bits.RA_DIRECTION) ? true : false;
 
-    send_mess(card, "] 0", (char*) NULL);
+    send_mess(card, "] 0", NULL);
     recv_mess(card, buff, 1);
     rtnval = atoi(&buff[5]);
 
@@ -318,7 +318,7 @@ static int set_status(int card, int signal)
     else
         status.Bits.RA_MINUS_LS = 0;
 
-    send_mess(card, "] 1", (char*) NULL);
+    send_mess(card, "] 1", NULL);
     recv_mess(card, buff, 1);
     rtnval = buff[5];
 
@@ -336,7 +336,7 @@ static int set_status(int card, int signal)
         motor_info->encoder_position = 0;
     else
     {
-        send_mess(card, "z 0", (char*) NULL);
+        send_mess(card, "z 0", NULL);
         recv_mess(card, buff, 1);
         motorData = atof(&buff[5]);
         motor_info->encoder_position = (epicsInt32) motorData;
@@ -359,7 +359,7 @@ static int set_status(int card, int signal)
         nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
-        send_mess(card, buff, (char*) NULL);
+        send_mess(card, buff, NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -473,7 +473,7 @@ IM483SMSetup(int num_cards, /* maximum number of controllers in system.  */
     motor_state = (struct controller **) malloc(IM483SM_num_cards * sizeof(struct controller *));
 
     for (itera = 0; itera < IM483SM_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -551,9 +551,9 @@ static int motor_init()
                 /* flush any junk at input port - should not be any data available */
                 pasynOctetSyncIO->flush(cntrl->pasynUser);
 
-                send_mess(card_index, "\003", (char*) NULL); /* Reset device. */
+                send_mess(card_index, "\003", NULL); /* Reset device. */
                 epicsThreadSleep(1.0);
-                send_mess(card_index, " ", (char*) NULL);
+                send_mess(card_index, " ", NULL);
 
                 /* Save controller identification message. */
                 src = buff;
@@ -604,7 +604,7 @@ static int motor_init()
 
         if (success_rtn == asynSuccess && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
 
             brdptr->total_axis = total_axis = 1;
@@ -634,16 +634,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "IM483SM_motor", epicsThreadPriorityMedium,
               epicsThreadGetStackSize(epicsThreadStackMedium),
