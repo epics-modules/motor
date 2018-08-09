@@ -479,7 +479,7 @@ static int motor_init()
         if (!motor_state[card_index])
             continue;
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
+        brdptr->ident[0] = 0;	/* No controller identification message. */
         /* device echos? then set to true. else false */
         brdptr->cmnd_response = false;
         total_cards = card_index + 1;

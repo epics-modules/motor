@@ -538,7 +538,7 @@ static int motor_init()
             continue;
 
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL; /* No controller identification message. */
+        brdptr->ident[0] = 0; /* No controller identification message. */
         brdptr->cmnd_response = true;
         total_cards = card_index + 1;
         cntrl = (struct IM483controller *) brdptr->DevicePrivate;

@@ -599,7 +599,7 @@ static int set_status(int card, int signal)
 
                 /* Copy device directive to buffer. */
                 strncpy(buffer, nodeptr->postmsgptr, size);
-                buffer[size] = (char) NULL;
+                buffer[size] = 0;
 
                 if (strncmp(buffer, "@PUT(", 5) != 0)
                     goto errorexit;

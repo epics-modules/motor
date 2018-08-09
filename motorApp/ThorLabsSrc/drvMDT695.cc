@@ -373,7 +373,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    local_buff[0] = (char) NULL;    /* Terminate local buffer. */
+    local_buff[0] = 0;    /* Terminate local buffer. */
 
     if (name == NULL)
 	strcat(local_buff, com);    /* Make a local copy of the string. */
@@ -588,7 +588,7 @@ static int motor_init()
 	      total_axis = 3;
 
 	    /* Get controller ID info -- multi-line response */
-	    *brdptr->ident = (char)NULL;
+	    *brdptr->ident = 0;
 	    send_mess(card_index, CMD_ID, NULL);
 	    do 
 	      {

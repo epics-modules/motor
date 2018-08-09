@@ -373,7 +373,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    local_buff[0] = (char) NULL;    /* Terminate local buffer. */
+    local_buff[0] = 0;    /* Terminate local buffer. */
 
     /*  this device deos not have axis info and so name is ignored!  */
 
@@ -514,7 +514,7 @@ static int motor_init()
 	    continue;
 
 	brdptr = motor_state[card_index];
-	brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
+	brdptr->ident[0] = 0;	/* No controller identification message. */
 	brdptr->cmnd_response = false;
 	total_cards = card_index + 1;
 	cntrl = (struct PIC862controller *) brdptr->DevicePrivate;

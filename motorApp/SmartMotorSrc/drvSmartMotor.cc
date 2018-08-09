@@ -583,7 +583,7 @@ static int motor_init()
             continue;
 
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL; /* No controller identification message. */
+        brdptr->ident[0] = 0; /* No controller identification message. */
         brdptr->total_axis = 0;         /* Default to zero motors. */
         brdptr->cmnd_response = false;
         total_cards = card_index + 1;

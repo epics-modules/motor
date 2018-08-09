@@ -542,7 +542,7 @@ static int motor_init()
         continue;
 
     brdptr = motor_state[card_index];
-    brdptr->ident[0] = (char) NULL; /* No controller identification message. */
+    brdptr->ident[0] = 0; /* No controller identification message. */
     brdptr->cmnd_response = false;
     total_cards = card_index + 1;
     cntrl = (struct MCDC2805controller *) brdptr->DevicePrivate;
