@@ -558,18 +558,18 @@ static int motor_init()
                 /* Save controller identification message. */
                 src = buff;
                 dest = brdptr->ident;
-                *src = (char) NULL;
+                *src = 0;
 
                 for (itera = 0; itera < 50; itera++)
                 {
-                    if (*src == (char) NULL)
+                    if (*src == 0)
                     {
                         status = recv_mess(card_index, buff, 1);
                         if (status <= 0)
                         {
                             if (itera != 0)
                             {
-                                *dest = (char) NULL;
+                                *dest = 0;
                                 status = 1;
                             }
                             break;

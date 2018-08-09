@@ -125,7 +125,7 @@ static RTN_STATUS PIC663_end_trans(struct motorRecord *mr)
     msgptr = motor_call->message;
     last = strlen(msgptr) - 1;
     if (msgptr[last] == ',')
-	msgptr[last] = (char) NULL;
+	msgptr[last] = 0;
     
     motor_end_trans_com(mr, drvtabptr);
     return(OK);

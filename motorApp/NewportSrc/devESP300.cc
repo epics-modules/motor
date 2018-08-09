@@ -151,7 +151,7 @@ static RTN_STATUS ESP300_end_trans(struct motorRecord *mr)
     msgptr = motor_call->message;
     last = strlen(msgptr) - 1;
     if (msgptr[last] == ';')
-    msgptr[last] = (char) NULL;
+    msgptr[last] = 0;
 
     return(motor_end_trans_com(mr, drvtabptr));
 }

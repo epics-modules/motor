@@ -610,7 +610,7 @@ static int motor_init()
             continue;
 
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL; /* No controller identification
+        brdptr->ident[0] = 0; /* No controller identification
                          * message. */
         brdptr->cmnd_response = false;  /* The MVP doesn't respond to every
                          * command */

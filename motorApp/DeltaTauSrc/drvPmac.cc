@@ -430,12 +430,12 @@ static int recv_mess(int card, char *com, int amount)
 	{
 	    const double flush_delay = quantum;
 
-	    if (control == (char) NULL)
+	    if (control == 0)
 	    {
 		Debug(6, "recv_mess() - flush wait on NULL\n");
 		epicsThreadSleep(flush_delay);
 		control = stptr->Bits.cntrl_char;
-		if (control == (char) NULL)
+		if (control == 0)
 		    flushed = true;
 		else
 		    Debug(6, "recv_mess() - NULL -> %c\n", control);
@@ -451,7 +451,7 @@ static int recv_mess(int card, char *com, int amount)
 	    {
 		stptr->All = 0;
 		Debug(6, "recv_mess() - flush wait on CR\n");
-		for (trys = 0; trys < 10 && stptr->Bits.cntrl_char == (char) NULL; trys++)
+		for (trys = 0; trys < 10 && stptr->Bits.cntrl_char == 0; trys++)
 		{
 		    epicsThreadSleep(quantum * trys);
 		    Debug(6, "recv_mess() - flush wait #%d\n", trys);
@@ -556,7 +556,7 @@ static RTN_STATUS PmacPut(int card, char *pmess)
     }
     
     /* Wait for response. */
-    for (itera = 0; itera < 10 && stptr->Bits.cntrl_char == (char) NULL; itera++)
+    for (itera = 0; itera < 10 && stptr->Bits.cntrl_char == 0; itera++)
     {
 	epicsThreadSleep(quantum * itera);
 	Debug(7, "PmacPut() - response wait #%d\n", itera);
