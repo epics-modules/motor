@@ -932,7 +932,7 @@ omsBaseController* omsBaseController::findController(const char* asynPort){
         }
         pNode = (omsBaseNode *)ellNext(&pNode->node);
     }
-    return (omsBaseController *) NULL;
+    return NULL;
 }
 
 epicsEventWaitStatus omsBaseController::waitInterruptible(double timeout)

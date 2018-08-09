@@ -407,7 +407,7 @@ PIC630Setup(int num_cards,      /* maximum number of "controllers" in system */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < PIC630_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
     return (OK);
 }
 
@@ -524,7 +524,7 @@ static int motor_init()
 
         if (success_rtn == asynSuccess && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             /* how did this get here? brdptr->cmnd_response = true; */
 
@@ -554,15 +554,15 @@ static int motor_init()
 
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "motor_init: spawning motor task\n");
 

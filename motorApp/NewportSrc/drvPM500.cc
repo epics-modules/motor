@@ -236,7 +236,7 @@ static int set_status(int card, int signal)
 
     /* Request the status and position of this motor */
     sprintf(buff, "%sR", axis_name);
-    send_mess(card, buff, (char*) NULL);
+    send_mess(card, buff, NULL);
     rtnval = recv_mess(card, response, 1);
     if (rtnval > 0)
     {
@@ -286,7 +286,7 @@ static int set_status(int card, int signal)
 
     /* Set Motor On/Off status */
     sprintf(buff, "%sM?", axis_name);
-    send_mess(card, buff, (char*) NULL);
+    send_mess(card, buff, NULL);
     rtnval = recv_mess(card, response, 1);
     status.Bits.EA_POSITION = (int) atof(&response[2]);
 
@@ -336,7 +336,7 @@ static int set_status(int card, int signal)
     {
         strcpy(buff, nodeptr->postmsgptr);
         strcat(buff, "\r");
-        send_mess(card, buff, (char*) NULL);
+        send_mess(card, buff, NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -470,7 +470,7 @@ PM500Setup(int num_cards,   /* maximum number of controllers in system.  */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < PM500_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -543,7 +543,7 @@ static int motor_init()
             pasynOctetSyncIO->flush(cntrl->pasynUser);
 
             /* Send a SCUM 1 command to put device in this mode. */
-            send_mess(card_index, "SCUM 1", (char*) NULL);
+            send_mess(card_index, "SCUM 1", NULL);
             recv_mess(card_index, buff, 1);
 
             /* Set up basic controller parameters
@@ -564,21 +564,21 @@ static int motor_init()
              *   Bit 13=0, Eearly serial poll mapping
              *   Bit 14=0, No SRQ assertion
              */
-            send_mess(card_index, "SENAINT $AF", (char*) NULL);
+            send_mess(card_index, "SENAINT $AF", NULL);
             recv_mess(card_index, buff, 1);
 
             /* Send a message and read response from controller to see if
              * it exists */
-            send_mess(card_index, GET_IDENT, (char*) NULL);
+            send_mess(card_index, GET_IDENT, NULL);
             status = recv_mess(card_index, buff, 1);
             /* Return value is length of response string */
         }
 
         if (success_rtn == asynSuccess && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
-            send_mess(card_index, GET_IDENT, (char*) NULL);  /* Read controller ID string */
+            send_mess(card_index, GET_IDENT, NULL);  /* Read controller ID string */
             recv_mess(card_index, buff, 1);
             strncpy(brdptr->ident, &buff[2], 50);  /* Skip "XD" */
 
@@ -589,7 +589,7 @@ static int motor_init()
                 int axis_name = (int) *PM500_axis_names[total_axis];
                 brdptr->motor_info[total_axis].motor_motion = NULL;
                 sprintf(buff, "%cSTAT?", axis_name);
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
                 recv_mess(card_index, buff, 1);
                 if (buff[1] == 'E')
                     break;
@@ -614,7 +614,7 @@ static int motor_init()
                 double res = 0.0;
 
                 sprintf(buff, "%sCONFIG?", axis_name);
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
                 recv_mess(card_index, buff, 1);
                 firmware = &buff[8];
                 Debug(3, "motor_init: firmware = %s\n", firmware);
@@ -667,16 +667,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "PM500_motor", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),

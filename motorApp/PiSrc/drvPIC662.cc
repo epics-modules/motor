@@ -231,7 +231,7 @@ static int set_status(int card, int signal)
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
 
-    send_mess(card, GET_STATUS, (char*) NULL);
+    send_mess(card, GET_STATUS, NULL);
     comm_status = recv_mess(card, buff, 1);
     if (comm_status == 0)
     {
@@ -270,7 +270,7 @@ static int set_status(int card, int signal)
      * Skip to substring for this motor, convert to double
      */
 
-    send_mess(card, GET_POS, (char*) NULL);
+    send_mess(card, GET_POS, NULL);
     recv_mess(card, buff, 1);
 
     motorData = NINT (atof(buff) / cntrl->drive_resolution);
@@ -339,7 +339,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char*) NULL);
+	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -457,7 +457,7 @@ PIC662Setup(int num_cards,	/* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < PIC662_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -538,7 +538,7 @@ static int motor_init()
 
 	    do
 	    {
-		send_mess(card_index, GET_IDENT, (char*) NULL);
+		send_mess(card_index, GET_IDENT, NULL);
 		status = recv_mess(card_index, buff, 1);
                 retry++;
 	    } while (status == 0 && retry < 3);
@@ -547,7 +547,7 @@ static int motor_init()
 	if (success_rtn == asynSuccess && status > 0)
 	{
 	    strcpy(brdptr->ident, &buff[0]);
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 	    brdptr->total_axis = 1; /* Single axis controller */
 
@@ -557,7 +557,7 @@ static int motor_init()
 
 
 	    /* Set Controller to REMOTE mode */
-     	    send_mess(card_index, REMOTE_MODE, (char*) NULL);
+     	    send_mess(card_index, REMOTE_MODE, NULL);
 
 	    {
 	        struct mess_info *motor_info = &brdptr->motor_info[0];
@@ -577,16 +577,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "PIC662_motor", epicsThreadPriorityMedium,
 		      epicsThreadGetStackSize(epicsThreadStackMedium),

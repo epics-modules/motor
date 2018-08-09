@@ -333,7 +333,7 @@ STATIC int set_status(int card, int signal)
     {
         strcpy(buff, nodeptr->postmsgptr);
         strcat(buff, "\r");
-        send_mess(card, buff, (char*) NULL);
+        send_mess(card, buff, NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -556,7 +556,7 @@ PM304Setup(int num_cards,       /* maximum number of controllers in system */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < PM304_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
     return(OK);
 }
 
@@ -650,7 +650,7 @@ STATIC int motor_init()
 
         if (success_rtn == true && strlen(buff) > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             /* Leave bdptr->cmnd_response false because we read each response */
             /* in send_mess and send_recv_mess. */
@@ -702,18 +702,18 @@ STATIC int motor_init()
 
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
     Debug(3, "motor_init: spawning motor task\n");
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "tPM304", epicsThreadPriorityMedium,
               epicsThreadGetStackSize(epicsThreadStackMedium),

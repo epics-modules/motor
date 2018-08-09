@@ -264,7 +264,7 @@ STATIC int set_status(int card, int signal)
     /* Test for post-move string. */
     if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 && nodeptr->postmsgptr != 0)
     {
-        send_mess(card, nodeptr->postmsgptr, (char*) NULL);
+        send_mess(card, nodeptr->postmsgptr, NULL);
         /* The MCB4B always sends back a response, read it and discard */
         recv_mess(card, buff, WAIT);
         nodeptr->postmsgptr = NULL;
@@ -393,7 +393,7 @@ MCB4BSetup(int num_cards,       /* maximum number of controllers in system */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < MCB4B_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
     return (OK);
 }
 
@@ -479,7 +479,7 @@ STATIC int motor_init()
 
         if (success_rtn == 0 && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             brdptr->cmnd_response = true;
 
@@ -508,16 +508,16 @@ STATIC int motor_init()
 
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "motor_init: spawning motor task\n");
 

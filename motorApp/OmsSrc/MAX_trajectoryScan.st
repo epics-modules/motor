@@ -862,7 +862,7 @@ static int writeOnly(SS_ID ssId, struct UserVar *pVar, char *command)
 	}
 #else
 	if (pVar->simMode==0) {
-		status = (asynStatus) MAXV_send_mess(pVar->cardNumber, command, (char *) NULL);
+		status = (asynStatus) MAXV_send_mess(pVar->cardNumber, command, NULL);
 	}
 #endif
 	if (pVar->execState==EXECUTE_STATE_EXECUTING)
@@ -896,10 +896,10 @@ static int writeRead(SS_ID ssId, struct UserVar *pVar, char *command, char *repl
 							   30.0, &nwrite, &nread, &eomReason);
 #else
 
-	/* status = (asynStatus) MAXV_send_mess(pVar->cardNumber, command, (char *) NULL);
+	/* status = (asynStatus) MAXV_send_mess(pVar->cardNumber, command, NULL);
 	 * status |= (asynStatus) MAXV_recv_mess(pVar->cardNumber, reply, 1);
 	 */
-	status = MAXV_send_recv_mess(pVar->cardNumber, command, (char *) NULL, reply, 1);
+	status = MAXV_send_recv_mess(pVar->cardNumber, command, NULL, reply, 1);
 #endif
 	if (pVar->debugLevel >= 2) {
 		printf("    writeRead:command='%s', reply='%s'\n", buffer, reply);

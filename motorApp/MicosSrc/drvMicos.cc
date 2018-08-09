@@ -219,7 +219,7 @@ static int set_status(int card, int signal)
     for (i = 0; i < 7; i++) {
         temp[2] = response[j];
         temp[3] = response[j+1];
-        bytes[i] = strtol(temp, (char **)NULL, 0);
+        bytes[i] = strtol(temp, NULL, 0);
         j += 3;
     }
     /* check to see if motor is moving */
@@ -286,7 +286,7 @@ static int set_status(int card, int signal)
     nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
-        send_mess(card, buff, (char*) NULL);
+        send_mess(card, buff, NULL);
         /* The Micos will not send back a response for a 'set' command, don't need next line */
         /* recv_mess(card, buff, WAIT); */
         nodeptr->postmsgptr = NULL;
@@ -411,7 +411,7 @@ MicosSetup(int num_cards,   /* maximum number of "controllers" in system */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < Micos_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
     return(OK);
 }
 
@@ -519,7 +519,7 @@ static int motor_init()
 
         if (success_rtn == asynSuccess && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             brdptr->cmnd_response = false;
 
@@ -555,18 +555,18 @@ static int motor_init()
 
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     Debug(3, "motor_init: spawning motor task\n");
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "tMicos", epicsThreadPriorityMedium,
               epicsThreadGetStackSize(epicsThreadStackMedium),

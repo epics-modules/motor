@@ -770,7 +770,7 @@ static int motor_init()
             /* Try 3 times to connect to controller. */
             do
             {
-                send_mess (card_index, GET_IDENT, (char*) NULL);
+                send_mess (card_index, GET_IDENT, NULL);
                 status = recv_mess(card_index, (char *) pmotorState->ident, 1);
                 retry++;
             } while (status == 0 && retry < 3);
@@ -783,11 +783,11 @@ static int motor_init()
             pmotorState->motor_in_motion = 0;
             pmotorState->cmnd_response = false;
 
-            send_mess (card_index, ECHO_OFF, (char*) NULL);
-            send_mess (card_index, ERROR_CLEAR, (char*) NULL);
-            send_mess (card_index, STOP_ALL, (char*) NULL);
+            send_mess (card_index, ECHO_OFF, NULL);
+            send_mess (card_index, ERROR_CLEAR, NULL);
+            send_mess (card_index, STOP_ALL, NULL);
 
-            send_mess (card_index, ALL_POS, (char*) NULL);
+            send_mess (card_index, ALL_POS, NULL);
             recv_mess (card_index, axis_pos, 1);
 
             for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
@@ -822,7 +822,7 @@ static int motor_init()
              * dummy communication transaction.
              */
 
-            send_mess (card_index, ALL_POS, (char*) NULL);
+            send_mess (card_index, ALL_POS, NULL);
             recv_mess (card_index, axis_pos, 1);
 
             for (motor_index=0;motor_index<total_axis;motor_index++)
@@ -841,16 +841,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "Motors initialized\n");
     epicsThreadCreate((char *) "OmsPC68_motor", epicsThreadPriorityMedium,
@@ -891,7 +891,7 @@ RTN_STATUS OmsPC68Setup (int num_cards, int scan_rate)
                   malloc(OmsPC68_num_cards * sizeof(struct controller *));
 
     for (itera = 0; itera < OmsPC68_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }

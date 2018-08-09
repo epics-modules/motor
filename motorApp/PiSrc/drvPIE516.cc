@@ -243,14 +243,14 @@ static int set_status(int card, int signal)
     recv_mess(card, buff, FLUSH);
 
     readOK = false;   
-    send_mess(card, READ_ONLINE, (char*) NULL);
+    send_mess(card, READ_ONLINE, NULL);
     if (recv_mess(card, buff, 1) && sscanf(buff, "%d", &online_status))
       {
 	if (!online_status)
 	  {
 	    /* Assume Controller Reboot - Set ONLINE and Velocity Control ON */
-	    send_mess(card, SET_ONLINE, (char*) NULL);
-	    send_mess(card, SET_VELCTRL, (char*) NULL);
+	    send_mess(card, SET_ONLINE, NULL);
+	    send_mess(card, SET_VELCTRL, NULL);
 	  }
 
 	send_mess(card, READ_ONTARGET, PIE516_axis[signal]);
@@ -367,7 +367,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char*) NULL);
+	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -495,7 +495,7 @@ PIE516Setup(int num_cards,  /* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < PIE516_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -585,15 +585,15 @@ static int motor_init()
 	    {
 	      online = false;
 	      /* Set Controller to ONLINE mode */
-	      send_mess(card_index, SET_ONLINE, (char*) NULL);
-	      send_mess(card_index, READ_ONLINE, (char*) NULL);
+	      send_mess(card_index, SET_ONLINE, NULL);
+	      send_mess(card_index, READ_ONLINE, NULL);
 	      if ((status = recv_mess(card_index, buff, 1)))
 		online = (atoi(buff)==1) ? true : false;
 	      else
 		retry++;
 	    } while (online == false && retry < 3);
 
-	    send_mess(card_index, GET_IDENT, (char*) NULL);
+	    send_mess(card_index, GET_IDENT, NULL);
 	    status = recv_mess(card_index, buff, 1);
 	    
 	    /* Parse out E516 revision (2 decimal places) and convert to int */
@@ -606,7 +606,7 @@ static int motor_init()
 	if (success_rtn == asynSuccess && online == true)
 	{
 	    strcpy(brdptr->ident, buff);
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
 	    /* Check for E516 versions that need the status word shifted up 8 bits */
@@ -626,7 +626,7 @@ static int motor_init()
 	    brdptr->total_axis = total_axis;
 
 	    /* Turn ON velocity control mode  - All axis */
-	    send_mess(card_index, SET_VELCTRL, (char*) NULL);
+	    send_mess(card_index, SET_VELCTRL, NULL);
 
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {
@@ -649,16 +649,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "PIE516_motor", epicsThreadPriorityMedium,
 		      epicsThreadGetStackSize(epicsThreadStackMedium),

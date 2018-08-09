@@ -278,7 +278,7 @@ static int set_status(int card, int signal)
         status.Bits.RA_PROBLEM = 1;
         motor_info->status.All = status.All;
         /* Disable board. */
-        motor_state[card] = (struct controller *) NULL;
+        motor_state[card] = NULL;
         return(rtn_state = 1); /* End move. */
     }
 
@@ -482,7 +482,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     {
         errlogPrintf(rebootmsg, card);
         /* Disable board. */
-        motor_state[card] = (struct controller *) NULL;
+        motor_state[card] = NULL;
         return(ERROR);
     }
 
@@ -490,7 +490,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
     omsError(card);
 
     /* Flush receive buffer */
-    recv_mess(card, (char *) NULL, -1);
+    recv_mess(card, NULL, -1);
 
     if (name == NULL)
         strcpy(outbuf, com);
@@ -1170,16 +1170,16 @@ static int motor_init()
             irqdata->irqEnable = FALSE;
             pmotor->control = IRQ_RESET_ID;
 
-            send_mess(card_index, "EF", (char*) NULL);
-            send_mess(card_index, ERROR_CLEAR, (char*) NULL);
-            send_mess(card_index, STOP_ALL, (char*) NULL);
+            send_mess(card_index, "EF", NULL);
+            send_mess(card_index, ERROR_CLEAR, NULL);
+            send_mess(card_index, STOP_ALL, NULL);
 
-            send_mess(card_index, GET_IDENT, (char*) NULL);
+            send_mess(card_index, GET_IDENT, NULL);
 
             recv_mess(card_index, (char *) pmotorState->ident, 1);
             Debug(3, "Identification = %s\n", pmotorState->ident);
 
-            send_mess(card_index, ALL_POS, (char*) NULL);
+            send_mess(card_index, ALL_POS, NULL);
             recv_mess(card_index, axis_pos, 1);
 
             for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
@@ -1235,17 +1235,17 @@ static int motor_init()
         else
         {
             Debug(3, "motor_init: Card NOT found!\n");
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
         }
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "Motors initialized\n");
 

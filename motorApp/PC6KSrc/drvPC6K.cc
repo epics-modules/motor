@@ -431,7 +431,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
         strncpy(send_buff, nodeptr->postmsgptr, 80);
-	send_mess(card, send_buff, (char*) NULL);
+	send_mess(card, send_buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -634,7 +634,7 @@ PC6KSetup(int num_cards,	/* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < PC6K_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -704,12 +704,12 @@ PC6KUpLoad(int card,               /* Controller Number */
 	/* Copy file into PC6K Program */
 	sprintf(nextLine, "DEL %s", progName);
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff);
-	send_mess(card, nextLine, (char*) NULL);
+	send_mess(card, nextLine, NULL);
 	// eos_ptr = eos_str;
 	sprintf(nextLine, "DEF %s", progName);
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff, eos_ptr);
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff);
-	send_mess(card, nextLine, (char*) NULL);
+	send_mess(card, nextLine, NULL);
       }
 
     while (fgets(nextLine, BUFF_SIZE, fd) != NULL)
@@ -721,7 +721,7 @@ PC6KUpLoad(int card,               /* Controller Number */
 	
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff, eos_ptr);
 	// recvCnt = send_recv_mess(card, nextLine, replyBuff);
-	send_mess(card, nextLine, (char*) NULL);
+	send_mess(card, nextLine, NULL);
       }
 
     fclose(fd);
@@ -729,7 +729,7 @@ PC6KUpLoad(int card,               /* Controller Number */
     if (progName && strlen(progName))
 	/* End PC6K Program */
         // recvCnt = send_recv_mess(card, "END", replyBuff);
-        send_mess(card, "END", (char*) NULL);
+        send_mess(card, "END", NULL);
 
     return(OK);
 }
@@ -818,7 +818,7 @@ static int motor_init()
 
 	    send_recv_mess(card_index, CMD_ECHO, buff);       /* Turn off echo */
 
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 	    /* Stop all motors */
 	    send_recv_mess(card_index, STOP_ALL, buff);   
@@ -832,7 +832,7 @@ static int motor_init()
 	    } while (!recvCnt && ++retryCnt < 3);
 
 
-	    /* send_mess(card_index, COMEXEC_ENA, (char*) NULL); */   /* Enable continuous commands */
+	    /* send_mess(card_index, COMEXEC_ENA, NULL); */   /* Enable continuous commands */
 	    send_recv_mess(card_index, COMEXEC_ENA, buff);   /* Enable continuous commands */
 	    // send_recv_mess(card_index, CMD_SCALE, buff);     /* Enable scaling  - unary */
 
@@ -915,16 +915,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     // epicsThreadCreate((char *) "PC6K_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
     epicsThreadCreate((char *) "PC6K_motor", 
