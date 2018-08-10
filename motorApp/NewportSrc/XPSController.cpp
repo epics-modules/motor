@@ -1445,7 +1445,7 @@ static const iocshArg XPSCreateControllerArg7 = {"Set position settling time (ms
 static const iocshArg * const XPSCreateControllerArgs[] = {&XPSCreateControllerArg0,
                                                            &XPSCreateControllerArg1,
                                                            &XPSCreateControllerArg2,
-                                                           &XPSCreateControllerArg2,
+                                                           &XPSCreateControllerArg3,
                                                            &XPSCreateControllerArg4,
                                                            &XPSCreateControllerArg5,
                                                            &XPSCreateControllerArg6,
