@@ -126,11 +126,6 @@ USAGE...        Motor record driver level support for OMS model MAXv.
 /* Define for return test on devNoResponseProbe() */
 #define PROBE_SUCCESS(STATUS) ((STATUS)==S_dev_addressOverlap)
 
-/* Are we using VME-Bus/devLib */
-#if (defined(vxWorks) || defined(__rtems__))
-    #define USE_DEVLIB
-#endif
-
 /* jps: INFO messages - add RV and move QA to top */
 #define AXIS_INFO       "QA"
 #define ENCODER_QUERY   "EA ID"
@@ -163,7 +158,7 @@ int MAXv_num_cards = 0;
 #include        "motordrvComCode.h"
 
 /* --- Local data common to all OMS drivers. --- */
-static char *MAXv_addrs = 0x0;
+static epicsUInt32 MAXv_addrs = 0x0;
 static epicsAddressType MAXv_ADDRS_TYPE;
 static volatile unsigned MAXvInterruptVector = 0;
 static volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
@@ -928,40 +923,40 @@ MAXvSetup(int num_cards,        /* maximum number of cards in rack */
         {
         case 16:
             MAXv_ADDRS_TYPE = atVMEA16;
-            if ((epicsUInt32) addrs & 0xFFFF0FFF)
+            if (addrs & 0xFFFF0FFF)
             {
                 errlogPrintf(addmsg, errbase, 16, (epicsUInt32) addrs);
                 rtncode = ERROR;
             }
             else
             {
-                MAXv_addrs = (char *) addrs;
+                MAXv_addrs = addrs;
                 MAXv_brd_size = 0x1000;
             }
             break;
         case 24:
             MAXv_ADDRS_TYPE = atVMEA24;
-            if ((epicsUInt32) addrs & 0xFF00FFFF)
+            if (addrs & 0xFF00FFFF)
             {
                 errlogPrintf(addmsg, errbase, 24, (epicsUInt32) addrs);
                 rtncode = ERROR;
             }
             else
             {
-                MAXv_addrs = (char *) addrs;
+                MAXv_addrs = addrs;
                 MAXv_brd_size = 0x10000;
             }
             break;
         case 32:
             MAXv_ADDRS_TYPE = atVMEA32;
-            if ((epicsUInt32) addrs & 0x00FFFFFF)
+            if (addrs & 0x00FFFFFF)
             {
                 errlogPrintf(addmsg, errbase, 32, (epicsUInt32) addrs);
                 rtncode = ERROR;
             }
             else
             {
-                MAXv_addrs = (char *) addrs;
+                MAXv_addrs = addrs;
                 MAXv_brd_size = 0x1000000;
             }
             break;
@@ -1103,15 +1098,11 @@ static int motorIsrSetup(int card)
 {
     volatile struct MAXv_motor *pmotor;
     STATUS1 status1_irq;
-#ifdef USE_DEVLIB
     long status;
-#endif
 
     Debug(5, "motorIsrSetup: Entry card#%d\n", card);
 
     pmotor = (struct MAXv_motor *) (motor_state[card]->localaddr);
-
-#ifdef USE_DEVLIB
 
     status = pdevLibVirtualOS->pDevConnectInterruptVME(
         MAXvInterruptVector + card,
@@ -1120,7 +1111,7 @@ static int motorIsrSetup(int card)
 #else
         (void (*)(void *)) motorIsr,
 #endif
-        (void *) card);
+        (void *)(size_t) card);
 
     if (!RTN_SUCCESS(status))
     {
@@ -1135,8 +1126,6 @@ static int motorIsrSetup(int card)
         errPrintf(status, __FILE__, __LINE__, "Can't enable enterrupt level %d\n", omsInterruptLevel);
         return (ERROR);
     }
-
-#endif
 
     /* Setup card for interrupt-on-done */
     status1_irq.All = 0;
@@ -1164,7 +1153,7 @@ static int motor_init()
     char *tok_save, *pos_ptr;
     int total_encoders = 0, total_axis = 0, total_pidcnt = 0;
     volatile void *localaddr=0;
-    void *probeAddr;
+    epicsUInt32 probeAddr;
 
     tok_save = NULL;
 
@@ -1188,26 +1177,25 @@ static int motor_init()
 
     for (card_index = 0; card_index < MAXv_num_cards; card_index++)
     {
-        epicsInt8 *startAddr;
-        epicsInt8 *endAddr;
+        epicsUInt32 startAddr;
+        epicsUInt32 endAddr;
         bool wdtrip;
         int rtn_code;
 
         Debug(2, "motor_init: card %d\n", card_index);
 
         probeAddr = MAXv_addrs + (card_index * MAXv_brd_size);
-        startAddr = (epicsInt8 *) probeAddr;
+        startAddr = probeAddr;
         endAddr = startAddr + MAXv_brd_size;
 
         Debug(9, "motor_init: devNoResponseProbe() on addr %p\n", probeAddr);
         /* Scan memory space to assure card id */
-#ifdef USE_DEVLIB
         do
         {
-            status = devNoResponseProbe(MAXv_ADDRS_TYPE, (unsigned int) startAddr, 2);
+            status = devNoResponseProbe(MAXv_ADDRS_TYPE, startAddr, 2);
             startAddr += (MAXv_brd_size / 10);
         } while (PROBE_SUCCESS(status) && startAddr < endAddr);
-#endif
+
         if (!PROBE_SUCCESS(status))
         {
             Debug(3, "motor_init: Card NOT found!\n");
@@ -1215,19 +1203,17 @@ static int motor_init()
             goto loopend;
         }
 
-#ifdef USE_DEVLIB
         status = devRegisterAddress(__FILE__, MAXv_ADDRS_TYPE,
                                     (size_t) probeAddr, MAXv_brd_size,
-                                    (volatile void **) &localaddr);
-        Debug(9, "motor_init: devRegisterAddress() status = %d\n", (int) status);
+                                    &localaddr);
+        Debug(9, "motor_init: devRegisterAddress() status = %ld\n", status);
         if (!RTN_SUCCESS(status))
         {
             errPrintf(status, __FILE__, __LINE__, "Can't register address 0x%x\n",
-                      (unsigned int) probeAddr);
+                      probeAddr);
             motor_state[card_index] = NULL;
             goto loopend;
         }
-#endif
 
         Debug(9, "motor_init: localaddr = %p\n", localaddr);
         pmotor = (struct MAXv_motor *) localaddr;
@@ -1275,7 +1261,7 @@ static int motor_init()
         Debug(3, "Identification = %s\n", pmotorState->ident);
 
         /* Save firmware version. */
-        pos_ptr = strchr((char *)pmotorState->ident, ':');
+        pos_ptr = strchr(pmotorState->ident, ':');
         sscanf(++pos_ptr, "%f", &pvtdata->fwver);
 
         wdtrip = false;
@@ -1314,7 +1300,7 @@ static int motor_init()
                 STATUS1 flag1;
 
                 /* Test if motor has an encoder. */
-                send_mess(card_index, ENCODER_QUERY, (char *) MAXv_axis[motor_index]);
+                send_mess(card_index, ENCODER_QUERY, MAXv_axis[motor_index]);
                 while (!pmotor->status1_flag.Bits.done) /* Wait for command to complete. */
                     epicsThreadSleep(quantum);
 
@@ -1333,7 +1319,7 @@ static int motor_init()
                 }
                 
                 /* Test if motor has PID parameters. */
-                send_mess(card_index, PID_QUERY, (char *) MAXv_axis[motor_index]);
+                send_mess(card_index, PID_QUERY, MAXv_axis[motor_index]);
                 while (!pmotor->status1_flag.Bits.done) /* Wait for command to complete. */
                     epicsThreadSleep(quantum);
                 if (pmotor->status1_flag.Bits.cmndError)
@@ -1411,7 +1397,7 @@ loopend:;
 
     epicsThreadCreate((char *) "MAXv_motor", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),
-                      (EPICSTHREADFUNC) motor_task, (void *) &targs);
+                      (EPICSTHREADFUNC) motor_task, &targs);
 
     Debug(3, "Started motor_task\n");
 
