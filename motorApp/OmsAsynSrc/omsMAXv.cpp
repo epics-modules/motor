@@ -36,7 +36,7 @@ static const char *driverName = "omsMAXvAsyn";
 volatile int motorMAXvdebug = 0;
 extern "C" {epicsExportAddress(int, motorMAXvdebug);}
 
-char* omsMAXv::baseAddress = 0x0;
+epicsUInt32 omsMAXv::baseAddress = 0x0;
 int   omsMAXv::numCards = 0;
 epicsUInt32 omsMAXv::baseInterruptVector = OMS_INT_VECTOR;
 epicsUInt8 omsMAXv::interruptLevel = OMS_INT_LEVEL;
@@ -138,7 +138,7 @@ void omsMAXv::initialize(const char* portName, int numAxes, int cardNo, const ch
 
     const char* functionName = "initialize";
     long status;
-    void* probeAddr;
+    epicsUInt32 probeAddr;
 
     Debug(32, "omsMAXv::initialize: start initialize\n" );
 
@@ -151,8 +151,8 @@ void omsMAXv::initialize(const char* portName, int numAxes, int cardNo, const ch
         return;
     }
 
-    epicsUInt8 *startAddr;
-    epicsUInt8 *endAddr;
+    epicsUInt32 startAddr;
+    epicsUInt32 endAddr;
     epicsUInt32 boardAddrSize = 0;
 
     if (vmeAddrType == atVMEA16)
@@ -166,12 +166,12 @@ void omsMAXv::initialize(const char* portName, int numAxes, int cardNo, const ch
     if (vmeAddr == 1)
         probeAddr = baseAddress + (cardNo * boardAddrSize);
     else
-        probeAddr = (void*) vmeAddr;
+        probeAddr = vmeAddr;
 
-    startAddr = (epicsUInt8 *) probeAddr;
+    startAddr = probeAddr;
     endAddr = startAddr + boardAddrSize;
 
-    Debug(64, "motor_init: devNoResponseProbe() on addr %p\n", probeAddr);
+    Debug(64, "motor_init: devNoResponseProbe() on addr 0x%x\n", probeAddr);
 
     /* Scan memory space to assure card id */
     while (startAddr < endAddr) {
@@ -186,13 +186,13 @@ void omsMAXv::initialize(const char* portName, int numAxes, int cardNo, const ch
     }
 
     status = devRegisterAddress(controllerType, vmeAddrType,
-                                (size_t) probeAddr, boardAddrSize,
+                                probeAddr, boardAddrSize,
                                 (volatile void **) &pmotor);
-    Debug(64, "motor_init: devRegisterAddress() status = %d\n", (int) status);
+    Debug(64, "motor_init: devRegisterAddress() status = %ld\n", status);
 
     if (status) {
-        errlogPrintf("%s:%s:%s: Can't register address 0x%lx \n",
-                        driverName, functionName, portName, (long unsigned int) probeAddr);
+        errlogPrintf("%s:%s:%s: Can't register address 0x%x \n",
+                        driverName, functionName, portName, probeAddr);
         return;
     }
 
@@ -502,7 +502,7 @@ extern "C" int omsMAXvSetup(
         return 1;
     }
     omsMAXv::numCards = num_cards;
-    omsMAXv::baseAddress = (char *) addrs;
+    omsMAXv::baseAddress = addrs;
 
     switch (addr_type)
     {
