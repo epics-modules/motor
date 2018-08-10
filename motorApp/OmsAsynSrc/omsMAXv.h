@@ -148,7 +148,7 @@ public:
 	omsMAXv(const char*, int, int, const char*, int, int, int );
     asynStatus sendReceive(const char *, char *, unsigned int );
     asynStatus sendOnly(const char *);
-    static char* baseAddress;
+    static epicsUInt32 baseAddress;
     static epicsAddressType addrType;
     static int numCards;
     static epicsUInt32 baseInterruptVector;
