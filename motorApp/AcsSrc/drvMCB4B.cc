@@ -68,7 +68,7 @@ int MCB4B_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int, const char *, char *);
+STATIC RTN_STATUS send_mess(int, const char *, const char *);
 STATIC void start_status(int card);
 STATIC int set_status(int card, int signal);
 static long report(int level);
@@ -279,7 +279,7 @@ STATIC int set_status(int card, int signal)
 /* send a message to the MCB4B board                 */
 /* send_mess()                                       */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
+STATIC RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MCB4Bcontroller *cntrl;
     size_t nwrite;

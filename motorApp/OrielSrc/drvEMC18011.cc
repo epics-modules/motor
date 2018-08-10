@@ -100,9 +100,9 @@ volatile double drvEMC18011ReadbackDelay = 0.;
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
 static int recv_mess(int card, char *com, int flag, int recv_len);
-static RTN_STATUS send_mess(int card, char const *, char *name);
-static int send_recv_mess(int card, char const *send_com, char *recv_com);
-static int send_recv_mess(int card, char const *send_com, char *recv_com, 
+static RTN_STATUS send_mess(int card, const char *, const char *name);
+static int send_recv_mess(int card, const char *send_com, char *recv_com);
+static int send_recv_mess(int card, const char *send_com, char *recv_com, 
 			  int recv_len);
 static int set_status(int card, int signal);
 static long report(int level);
@@ -395,12 +395,12 @@ exit:
 /* send_receive a message to the EMC18011 board	     */
 /* send_recv_mess()		                     */
 /*****************************************************/
-static int send_recv_mess(int card, char const *send_com, char *recv_com)
+static int send_recv_mess(int card, const char *send_com, char *recv_com)
 {
   return(send_recv_mess(card, send_com, recv_com, 0));
 }
 
-static int send_recv_mess(int card, char const *send_com, char *recv_com,
+static int send_recv_mess(int card, const char *send_com, char *recv_com,
 			  int recv_len)
 {
     struct EMC18011Controller *cntrl;
@@ -459,7 +459,7 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com,
 /* send a message to the EMC18011 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct EMC18011Controller *cntrl;
     int size;

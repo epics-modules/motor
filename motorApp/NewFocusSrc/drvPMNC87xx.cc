@@ -158,8 +158,8 @@ static socketStruct socketStructs[MAX_SOCKETS];
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int, char const *, char *);
-STATIC int send_recv_mess(int, char const *, char *, char const *);
+STATIC RTN_STATUS send_mess(int, const char *, const char *);
+STATIC int send_recv_mess(int, const char *, char *, const char *);
 STATIC int set_status(int, int);
 // STATIC void start_status(int);
 static long report(int);
@@ -550,7 +550,7 @@ exit:
 /* with the return of the prompt '>' character 	     */
 /* send_recv_mess()			             */
 /*****************************************************/
-STATIC int send_recv_mess(int card, char const *send_com, char *recv_com, char const *eos)
+STATIC int send_recv_mess(int card, const char *send_com, char *recv_com, const char *eos)
 {
     struct PMNCcontroller *cntrl;
     int size;
@@ -610,7 +610,7 @@ STATIC int send_recv_mess(int card, char const *send_com, char *recv_com, char c
 /* send a message to the PMNC87xx board		     */
 /* send_mess()			                     */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, char const *com, char *name)
+STATIC RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct PMNCcontroller *cntrl;
     int size;

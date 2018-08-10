@@ -107,12 +107,12 @@ int OmsPC68_num_cards = 0;
 static volatile int motionTO = 10;
 
 //OmsPC68 generic controller commands
-static char *oms_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
+static const char *oms_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *name);
+static RTN_STATUS send_mess(int, const char *, const char *name);
 static void start_status(int card);
 static int set_status(int card, int signal);
 static long report(int level);
@@ -454,7 +454,7 @@ exit:
 /* send a message to the OmsPC68 board               */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct OmsPC68controller    *cntrl;
     size_t              size,

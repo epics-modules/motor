@@ -93,7 +93,7 @@ int cardNumber;
  *		If name is null, command is sent without modification.
  *	return value: {OK = 0, ERROR = 1}
  */
-%%extern int MAXV_send_mess(int cardNumber, char const *message, char *name);
+%%extern int MAXV_send_mess(int cardNumber, const char *message, char *name);
 
 /* recv_mess:
  * amount: -1 means flush and discard; other values specify number of messages to read
@@ -101,7 +101,7 @@ int cardNumber;
  */
 %%extern int MAXV_recv_mess(int cardNumber, char *message, int amount);
 
-%%extern int MAXV_send_recv_mess(int cardNumber, char const *command, char *name, char *message, int amount);
+%%extern int MAXV_send_recv_mess(int cardNumber, const char *command, char *name, char *message, int amount);
 %%extern int MAXV_getPositions(int card, epicsInt32 *positions, int nPositions);
 #endif
 

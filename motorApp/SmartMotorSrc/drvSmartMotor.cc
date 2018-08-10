@@ -74,7 +74,7 @@ static inline void Debug(int level, const char *format, ...) {
 /* --- Local data. --- */
 int SmartMotor_num_cards = 0;
 
-static char *SmartMotor_addr[] = {"129", "130", "131", "132", "133", "134",
+static const char *SmartMotor_addr[] = {"129", "130", "131", "132", "133", "134",
     "135", "136", "137", "138", "139", "140",
     "141", "142", "143", "144", "145", "146",
     "147", "148", "149", "150", "151", "152",
@@ -86,7 +86,7 @@ static char *SmartMotor_addr[] = {"129", "130", "131", "132", "133", "134",
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -395,7 +395,7 @@ exit:
 /* send_mess()                                      */
 /****************************************************/
 
-static RTN_STATUS send_mess(int card, char const * com, char *name)
+static RTN_STATUS send_mess(int card, const char * com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     char echo_buff[BUFF_SIZE];

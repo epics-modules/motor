@@ -145,10 +145,10 @@ static socketStruct socketStructs[MAX_SOCKETS];
 
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
-static RTN_STATUS send_mess(int card, char const *, char *name);
-static int send_recv_mess(int card, char const *send_com, char *recv_com);
-static int send_recv_mess(int card, char const *send_com, char *recv_com, 
-			  char const *temp_eos);
+static RTN_STATUS send_mess(int card, const char *, const char *name);
+static int send_recv_mess(int card, const char *send_com, char *recv_com);
+static int send_recv_mess(int card, const char *send_com, char *recv_com, 
+			  const char *temp_eos);
 static int set_status(int card, int signal);
 static long report(int level);
 static long init();
@@ -445,12 +445,12 @@ exit:
 /* send_receive a message to the PC6K board	     */
 /* send_recv_mess()		                     */
 /*****************************************************/
-static int send_recv_mess(int card, char const *send_com, char *recv_com)
+static int send_recv_mess(int card, const char *send_com, char *recv_com)
 {
   return(send_recv_mess(card, send_com, recv_com, NULL));
 }
 
-static int send_recv_mess(int card, char const *send_com, char *recv_com,
+static int send_recv_mess(int card, const char *send_com, char *recv_com,
 			  const char *temp_eos)
 {
     struct PC6KController *cntrl;
@@ -514,7 +514,7 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com,
 /* send a message to the PC6K board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct PC6KController *cntrl;
     int size;

@@ -86,12 +86,12 @@ static inline void Debug(int level, const char *format, ...) {
 /* --- Local data. --- */
 int SPiiPlus_num_cards = 0;
 
-static char *ACSPL_axis[] = {"X", "Y", "Z", "T", "A", "B", "C", "D"};
+static const char *ACSPL_axis[] = {"X", "Y", "Z", "T", "A", "B", "C", "D"};
 
 // Array dimensions are defined in drvSPiiPlusy.h
 // First dimension order must match (enum)CMND_MODES
 // Second dimension (command list) order must match (enum)QUERY_TYPES 
-static char *queryCmnds[MODE_CNT][QUERY_CNT] = {
+static const char *queryCmnds[MODE_CNT][QUERY_CNT] = {
   {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_CMND,QVEL_CMND,QHOME_CMND,QDONE_CMND},
   {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_KIN_CMND,QVEL_CMND,SKIP_THIS,SKIP_THIS},
   {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_CMND,QVEL_CMND,SKIP_THIS,SKIP_THIS}
@@ -108,8 +108,8 @@ volatile double drvSPiiPlusReadbackDelay = 0.;
 
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
-static RTN_STATUS send_mess(int card, char const *, char *name);
-static int send_recv_mess(int card, char const *send_com, char *recv_com);
+static RTN_STATUS send_mess(int card, const char *, const char *name);
+static int send_recv_mess(int card, const char *send_com, char *recv_com);
 static int set_status(int card, int signal);
 static long report(int level);
 static long init();
@@ -226,7 +226,7 @@ static int set_status(int card, int signal)
     struct mess_node *nodeptr;
     register struct mess_info *motor_info;
     char send_buff[80];
-    char **cmndList;
+    const char **cmndList;
     int cmndID;
     int flags;
     double vel;
@@ -418,7 +418,7 @@ exit:
 /* send_receive a message to the SPiiPlus board	     */
 /* send_recv_mess()		                     */
 /*****************************************************/
-static int send_recv_mess(int card, char const *send_com, char *recv_com)
+static int send_recv_mess(int card, const char *send_com, char *recv_com)
 {
     struct SPiiPlusController *cntrl;
     int size;
@@ -472,7 +472,7 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com)
 /* send a message to the SPiiPlus board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct SPiiPlusController *cntrl;
     int size;

@@ -60,7 +60,7 @@ static long report(int level);
 static long init();
 static void query_done(int, int, struct mess_node *);
 static int set_status(int card, int signal);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int recv_mess(int, char *, int);
 static int motor_init();
 
@@ -136,7 +136,7 @@ static void query_done(int, int, struct mess_node *)
 
 
 RTN_STATUS MXmotorSetup(int max_motors,		/* Maximum number of motors. */
-			char const *filename,	/* MX data file. */
+			const char *filename,	/* MX data file. */
 			int scan_rate)		/* polling rate - 1/60 sec units */
 {
     RTN_STATUS rtnval = OK;
@@ -312,7 +312,7 @@ static int set_status(int card, int signal)
     return(rtn_state);
 }
 
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct controller *brdptr;
     struct MXcontroller *cntrl;

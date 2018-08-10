@@ -153,7 +153,7 @@ static char *oms_addrs = 0x0;
 static volatile unsigned omsInterruptVector = 0;
 static volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 static volatile int motionTO = 10;
-static char *oms_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
+static const char *oms_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 static double quantum;
 
 /*----------------functions-----------------*/
@@ -163,7 +163,7 @@ static long report(int);
 static long init();
 static void query_done(int, int, struct mess_node *);
 static int set_status(int, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int recv_mess(int, char *, int);
 static void motorIsr(int);
 static int motor_init();
@@ -209,7 +209,7 @@ struct drvOms_drvet
 extern "C" {epicsExportAddress(drvet, drvOms);}
 
 static struct thread_args targs = {SCAN_RATE, &oms_access, 0.010};
-static char rebootmsg[] = "\n\n*** OMS card #%d Disabled *** Reboot Detected.\n\n";
+static const char rebootmsg[] = "\n\n*** OMS card #%d Disabled *** Reboot Detected.\n\n";
 
 /*----------------functions-----------------*/
 
@@ -456,7 +456,7 @@ errorexit:      errMessage(-1, "Invalid device directive");
 /* send a message to the OMS board                   */
 /*              send_mess()                          */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char outbuf[MAX_MSG_SIZE];
     RTN_STATUS return_code;
@@ -801,7 +801,7 @@ static int omsError(int card)
     else
     {
         int i;
-        char const *p;
+        const char *p;
 
         /* Check/Clear command error from last message */
         if ((pmotor->status) & STAT_ERROR)
