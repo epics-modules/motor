@@ -8,7 +8,6 @@ Cosylab d.d. 2014
 */
 
 #include <stdio.h>
-#include <stdint.h>
 #include <algorithm>
 #include <iostream>
 #include <string.h>
@@ -414,7 +413,7 @@ asynStatus phytronController::readFloat64(asynUser *pasynUser, epicsFloat64 *val
  */
 void phytronController::resetAxisEncoderRatio(){
 
-  for(uint32_t i = 0; i < axes.size(); i++){
+  for(size_t i = 0; i < axes.size(); i++){
     setDoubleParam(axes[i]->axisNo_, motorEncoderRatio_, 1);
   }
 }
@@ -498,7 +497,7 @@ phytronStatus phytronController::sendPhytronCommand(const char *command, char *r
 
         /* Copy data from nack_ack to
          * separator into buffer */
-        uint32_t len = separator-nack_ack-1;              //calculate length of message
+        size_t len = separator-nack_ack-1;              //calculate length of message
         if(len > response_max_len) len=response_max_len;
 
         memcpy(response_buffer,nack_ack+1,len);           //copy payload to destination
@@ -543,7 +542,7 @@ extern "C" int phytronCreateAxis(const char* controllerName, int module, int axi
   phytronAxis *pAxis;
 
   //Find the controller
-  uint32_t i;
+  size_t i;
   for(i = 0; i < controllers.size(); i++){
     if(!strcmp(controllers[i]->controllerName_, controllerName)) {
       pAxis = new phytronAxis(controllers[i], module*10 + axis);
