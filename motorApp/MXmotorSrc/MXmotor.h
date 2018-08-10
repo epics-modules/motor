@@ -52,7 +52,7 @@ struct MXcontroller
     MX_RECORD *MXmotor_record;
 };
 
-RTN_STATUS MXmotorSetup(int, char const *, int);
+RTN_STATUS MXmotorSetup(int, const char *, int);
 extern MX_RECORD *MXmotor_record_list;
 
 #endif	/* INCMXmotorh */

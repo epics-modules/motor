@@ -151,7 +151,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
 
     if (psock->timeout > 0.0) {
         status = pasynOctetSyncIO->writeRead(psock->pasynUser,
-                                             (char const *)buffer, 
+                                             (const char *)buffer, 
                                              bufferLength,
                                              valueRtrn,
                                              returnSize,
@@ -187,7 +187,7 @@ void SendAndReceive (int SocketIndex, char buffer[], char valueRtrn[], int retur
         /* Fake the response by putting "-1" (for error) or "0" (for success) in the return string */
         for (retries=0; retries<MAX_RETRIES; retries++) {
             status = pasynOctetSyncIO->writeRead(psock->pasynUser,
-                                                 (char const *)buffer, 
+                                                 (const char *)buffer, 
                                                  bufferLength,
                                                  valueRtrn,
                                                  returnSize,
