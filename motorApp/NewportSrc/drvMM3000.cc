@@ -123,7 +123,7 @@ int MM3000_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int, char const *, char *);
+STATIC RTN_STATUS send_mess(int, const char *, const char *);
 STATIC int set_status(int, int);
 static long report(int);
 static long init();
@@ -387,7 +387,7 @@ exit:
 /* send a message to the MM3000 board            */
 /* send_mess()                               */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, char const *com, char *name)
+STATIC RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MMcontroller *cntrl;
     size_t size;

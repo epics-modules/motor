@@ -90,7 +90,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int PIE816_num_cards = 0;
-static char *PIE816_axis[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+static const char *PIE816_axis[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
                                "K","L"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
@@ -99,7 +99,7 @@ static char *PIE816_axis[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -391,7 +391,7 @@ exit:
 /* send a message to the PIE816 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     char *pbuff;

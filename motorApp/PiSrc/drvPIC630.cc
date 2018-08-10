@@ -63,7 +63,7 @@ volatile int PIC630_current[9];  /* current settings per axis */
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static void start_status(int);
 static int set_status(int, int);
 static long report(int);
@@ -287,7 +287,7 @@ static int set_status(int card, int signal)
 /* send a message to the PIC630 board                 */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, const char *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char buff[BUFF_SIZE];
     char inp_buff[BUFF_SIZE];

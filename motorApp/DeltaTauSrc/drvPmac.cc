@@ -102,7 +102,7 @@ static char *Pmac_addrs = 0x0;	/* Base address of DPRAM. */
 static epicsAddressType Pmac_ADDRS_TYPE;
 static volatile unsigned PmacInterruptVector = 0;
 static volatile epicsUInt8 PmacInterruptLevel = Pmac_INT_LEVEL;
-static char *Pmac_axis[] =
+static const char *Pmac_axis[] =
     {"1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9", "10",
     "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
     "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
@@ -117,7 +117,7 @@ static long report(int);
 static long init();
 static void query_done(int, int, struct mess_node *);
 static int set_status(int, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int recv_mess(int, char *, int);
 static void motorIsr(int);
 static int motor_init();
@@ -307,7 +307,7 @@ static int set_status(int card, int signal)
 /* send a message to the Pmac board		     */
 /*		send_mess()			     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char outbuf[MAX_MSG_SIZE];
     RTN_STATUS return_code;

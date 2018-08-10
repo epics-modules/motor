@@ -82,7 +82,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int MDT695_num_cards = 0;
-static char *MDT694_axis[] = {"X", "Y", "Z"};
+static const char *MDT694_axis[] = {"X", "Y", "Z"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -95,7 +95,7 @@ volatile double drvMDT695ReadbackDelay = 0.;
 
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
-static RTN_STATUS send_mess(int card, char const *, char *name);
+static RTN_STATUS send_mess(int card, const char *, const char *name);
 static int set_status(int card, int signal);
 static long report(int level);
 static long init();
@@ -348,7 +348,7 @@ exit:
 /* send a message to the MDT695 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MDT695Controller *cntrl;
     char local_buff[MAX_MSG_SIZE];

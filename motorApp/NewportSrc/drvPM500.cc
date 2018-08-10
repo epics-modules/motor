@@ -99,7 +99,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int PM500_num_cards = 0;
-static char *PM500_axis_names[] = {"X", "Y", "Z", "A", "B", "C", "D", "E", "F",
+static const char *PM500_axis_names[] = {"X", "Y", "Z", "A", "B", "C", "D", "E", "F",
     "G", "H", "I"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
@@ -108,7 +108,7 @@ static char *PM500_axis_names[] = {"X", "Y", "Z", "A", "B", "C", "D", "E", "F",
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -222,7 +222,8 @@ static int set_status(int card, int signal)
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
     /* Message parsing variables */
-    char *axis_name, status_char, dir_char, buff[BUFF_SIZE], response[BUFF_SIZE];
+    const char *axis_name;
+    char status_char, dir_char, buff[BUFF_SIZE], response[BUFF_SIZE];
     int rtnval, rtn_state = 0;
     double motorData;
     bool ls_active;
@@ -350,7 +351,7 @@ exit:
 /* send a message to the PM500 board             */
 /* send_mess()                               */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MMcontroller *cntrl;
     size_t size;
@@ -586,9 +587,9 @@ static int motor_init()
              * Do this by querying status of each axis in order */
             for (total_axis = 0; total_axis < PM500_NUM_CHANNELS; total_axis++)
             {
-                int axis_name = (int) *PM500_axis_names[total_axis];
+                const char *axis_name = PM500_axis_names[total_axis];
                 brdptr->motor_info[total_axis].motor_motion = NULL;
-                sprintf(buff, "%cSTAT?", axis_name);
+                sprintf(buff, "%sSTAT?", axis_name);
                 send_mess(card_index, buff, NULL);
                 recv_mess(card_index, buff, 1);
                 if (buff[1] == 'E')
@@ -610,7 +611,8 @@ static int motor_init()
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 struct mess_info *motor_info = &brdptr->motor_info[motor_index];
-                char *firmware, *axis_name = PM500_axis_names[motor_index];
+                char *firmware;
+                const char *axis_name = PM500_axis_names[motor_index];
                 double res = 0.0;
 
                 sprintf(buff, "%sCONFIG?", axis_name);

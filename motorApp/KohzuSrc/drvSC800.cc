@@ -94,7 +94,7 @@ volatile double drvSC800ReadbackDelay = 0.;
 
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
-static RTN_STATUS send_mess(int card, char const *, char *name);
+static RTN_STATUS send_mess(int card, const char *, const char *name);
 static int set_status(int card, int signal);
 static long report(int level);
 static long init();
@@ -341,7 +341,7 @@ exit:
 /* send a message to the SC800 board                 */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct SC800Controller *cntrl;
     char local_buff[MAX_MSG_SIZE];

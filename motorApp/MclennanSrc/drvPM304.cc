@@ -91,7 +91,7 @@ int PM304_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int card, char *buff, int len);
-STATIC RTN_STATUS send_mess(int, const char *, char *);
+STATIC RTN_STATUS send_mess(int, const char *, const char *);
 STATIC int send_recv_mess(int card, const char *out, char *in);
 STATIC void start_status(int card);
 STATIC int set_status(int card, int signal);
@@ -354,7 +354,7 @@ STATIC int set_status(int card, int signal)
 /* ring buffer                                       */
 /* send_mess()                                       */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
+STATIC RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char *p, *tok_save;
     char response[BUFF_SIZE];
