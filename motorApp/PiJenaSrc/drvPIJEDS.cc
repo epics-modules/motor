@@ -2,7 +2,7 @@
 FILENAME...	drvPIJEDS.cc
 USAGE...	Motor record driver level support for piezosystem jena
 	        GmbH & Co. E-516 motor controller.
-
+*/
 
 /*
  *      Original Author: Joe Sullivan
