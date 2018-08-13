@@ -42,11 +42,11 @@ extern "C" {
 
 /******[ prototypes ]************************************************/
 /* FTP commands */
-epicsShareFunc int ftpConnect (char*, char*, char*, SOCKET*);
+epicsShareFunc int ftpConnect (const char*, const char*, const char*, SOCKET*);
 epicsShareFunc int ftpDisconnect (SOCKET);
-epicsShareFunc int ftpChangeDir (SOCKET, char*);
-epicsShareFunc int ftpRetrieveFile (SOCKET, char*);
-epicsShareFunc int ftpStoreFile(SOCKET, char*);
+epicsShareFunc int ftpChangeDir (SOCKET, const char*);
+epicsShareFunc int ftpRetrieveFile (SOCKET, const char*);
+epicsShareFunc int ftpStoreFile(SOCKET, const char*);
 
 #ifdef __cplusplus
 }
