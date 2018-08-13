@@ -57,6 +57,7 @@ static void configMicosCallFunc(const iocshArgBuf *args)
 static void MicosmotorRegister(void)
 {
     iocshRegister(&setupMicos, setupMicosCallFunc);
+    iocshRegister(&configMicos, configMicosCallFunc);
 }
 
 epicsExportRegistrar(MicosmotorRegister);
