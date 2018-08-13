@@ -110,11 +110,11 @@ typedef enum { none, positionMove, velocityMove, homeReverseMove, homeForwardsMo
 
 /** Struct for a list of strings describing the different corrector types possible on the XPS.*/
 typedef struct {
-  char *PIPosition;
-  char *PIDFFVelocity;
-  char *PIDFFAcceleration;
-  char *PIDDualFFVoltage;
-  char *NoCorrector;
+  const char *PIPosition;
+  const char *PIDFFVelocity;
+  const char *PIDFFAcceleration;
+  const char *PIDDualFFVoltage;
+  const char *NoCorrector;
 } CorrectorTypes_t;
 
 const static CorrectorTypes_t CorrectorTypes = { 
