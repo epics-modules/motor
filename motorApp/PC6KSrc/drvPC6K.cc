@@ -116,7 +116,7 @@ volatile double drvPC6KReadbackDelay = 0.;
 
 /* NOTICE !!!! Command order must match drvPC6K.h/PC6K_query_types !!!! */
 static struct {
-  char *cmnd;
+  const char *cmnd;
   int  cmndLen;
 } queryOps[]= {{CMD_STATUS, 0}, {CMD_POS, 0}, {CMD_EA_POS, 0}, {CMD_VEL, 0}, {CMD_DRIVE, 0}};
 
