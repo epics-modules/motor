@@ -145,8 +145,7 @@ phytronController::phytronController(const char *phytronPortName, const char *as
 extern "C" int phytronCreateController(const char *phytronPortName, const char *asynPortName,
                                    int movingPollPeriod, int idlePollPeriod, double timeout)
 {
-  phytronController *pphytronController = new phytronController(phytronPortName, asynPortName, movingPollPeriod/1000., idlePollPeriod/1000., timeout);
-  pphytronController = NULL;
+  new phytronController(phytronPortName, asynPortName, movingPollPeriod/1000., idlePollPeriod/1000., timeout);
   return asynSuccess;
 }
 

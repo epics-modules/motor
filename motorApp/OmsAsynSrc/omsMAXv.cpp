@@ -280,7 +280,7 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
     const char* functionName = "sendOnly";
     int len = strlen(outputBuff);
     double timeout = 0.01;
-    epicsUInt16 getIndex, putIndex;
+    epicsUInt16 putIndex;
 
     if (!enabled) return asynError;
     Debug(16, "omsMAXv::send: sending: %s \n", outputBuff);
@@ -318,7 +318,6 @@ asynStatus omsMAXv::sendOnly(const char *outputBuff)
     }
 
     putIndex = (epicsUInt16) pmotor->outPutIndex;
-    getIndex = (epicsUInt16) pmotor->outGetIndex;
 
     for (int i = 0; (i < len); i++) {
         pmotor->outBuffer[putIndex++]= outputBuff[i];

@@ -149,8 +149,6 @@ static RTN_STATUS PIC630_build_trans(motor_cmnd command, double *parms, struct m
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct PIC630Controller *cntrl;
-    char buff[30];
     int axis, card;
     RTN_STATUS rtnval;
     bool send;
@@ -159,7 +157,6 @@ static RTN_STATUS PIC630_build_trans(motor_cmnd command, double *parms, struct m
 
     send = true;   /* default to send motor command */
     rtnval = OK;
-    buff[0] = '\0';
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     dval = (parms == NULL) ? 0.0 : *parms;
 
@@ -177,9 +174,6 @@ static RTN_STATUS PIC630_build_trans(motor_cmnd command, double *parms, struct m
     Debug(5, "PIC630_build_trans: axis=%d, command=%d\n", axis, command);
     if (brdptr == NULL)
         return(rtnval = ERROR);
-
-    cntrl = (struct PIC630Controller *) brdptr->DevicePrivate;
-
 
     if (trans->state != BUILD_STATE)
         return(rtnval = ERROR);

@@ -166,7 +166,6 @@ private:
     void motorIsrSetup(volatile unsigned int, volatile epicsUInt8);
     int cardNo;
     volatile struct MAXv_motor *pmotor;
-    char readBuffer[BUFFER_SIZE];
 };
 
 #endif /* OMSMAXV_H_ */

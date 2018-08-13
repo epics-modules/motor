@@ -226,7 +226,6 @@ static int set_status(int card, int signal)
   int rtn_state;
   int recvCnt;
   int motorData;
-  int motor;
   double datad;
   bool recvRetry;
   bool plusdir, ls_active = false;
@@ -235,8 +234,6 @@ static int set_status(int card, int signal)
   cntrl = (struct EMC18011Controller *) motor_state[card]->DevicePrivate;
   motor_info = &(motor_state[card]->motor_info[signal]);
   status.All = motor_info->status.All;
-  motor = signal+1;
-
 
   recvRetry = true;
 
@@ -407,7 +404,6 @@ static int send_recv_mess(int card, const char *send_com, char *recv_com,
     int sendLen, recvLen;
     size_t nwrite;
     size_t nread = 0;
-    double timeout = 0.;
     asynStatus status;
     int eomReason;
 
@@ -435,7 +431,6 @@ static int send_recv_mess(int card, const char *send_com, char *recv_com,
 
     cntrl = (struct EMC18011Controller *) motor_state[card]->DevicePrivate;
 
-    timeout = TIMEOUT;
     /* flush any junk at input port - should not be any data available */
     // pasynOctetSyncIO->flush(cntrl->pasynUser); 
 

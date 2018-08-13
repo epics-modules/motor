@@ -488,7 +488,6 @@ static int recv_mess(int card, char *com, int flag)
     char temp[BUFF_SIZE];
     size_t nread = 0, lenTemp = 0;
     asynStatus status = asynError;
-    int timeout;
     int eomReason;
 
     /* Check that card exists */
@@ -496,11 +495,6 @@ static int recv_mess(int card, char *com, int flag)
         return(-1);
 
     cntrl = (struct MVPcontroller *) motor_state[card]->DevicePrivate;
-
-    if (flag == FLUSH)
-        timeout = 0;
-    else
-        timeout = COMM_TIMEOUT;
 
     status = pasynOctetSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE,
                                     COMM_TIMEOUT, &lenTemp, &eomReason);

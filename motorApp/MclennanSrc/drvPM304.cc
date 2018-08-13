@@ -404,7 +404,6 @@ STATIC int recv_mess(int card, char *com, int flag)
     char *pos;
     char temp[BUFF_SIZE];
     int flush;
-    asynStatus status;
     size_t nread=0;
     int eomReason;
     struct PM304controller *cntrl;
@@ -426,8 +425,8 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
-    if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
-    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+    if (flush) pasynOctetSyncIO->flush(cntrl->pasynUser);
+    pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
                                     timeout, &nread, &eomReason);
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
@@ -472,7 +471,6 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     char *p, *tok_save;
     struct PM304controller *cntrl;
     char *pos;
-    asynStatus status;
     size_t nwrite=0, nread=0;
     int eomReason;
     char temp[BUFF_SIZE];
@@ -496,7 +494,7 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
                 ((p != NULL) && (strlen(p) != 0));
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, p);
-    status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
+        pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
                          response, BUFF_SIZE, TIMEOUT,
                          &nwrite, &nread, &eomReason);
     }

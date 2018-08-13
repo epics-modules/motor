@@ -37,7 +37,6 @@ private:
   MVP2001Controller *pC_;          /**< Pointer to the asynMotorController to which this axis belongs.
                                    *   Abbreviated because it is used very frequently */
   int axisIndex_;
-  double stepsPerRev_;
   int encoderLinesPerRev_;
   int maxCurrent_;
   int samplePeriod_;

@@ -32,7 +32,6 @@ private:
     asynUser* pasynUserSyncIOSerial;
     asynOctet *pasynOctetSerial;
     void* octetPvtSerial;
-    char* serialPortName;
     double timeout;
 };
 

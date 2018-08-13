@@ -424,7 +424,6 @@ static int send_recv_mess(int card, const char *send_com, char *recv_com)
     int size;
     size_t nwrite;
     size_t nread = 0;
-    double timeout = 0.;
     asynStatus status;
     int eomReason;
 
@@ -449,7 +448,6 @@ static int send_recv_mess(int card, const char *send_com, char *recv_com)
 
     cntrl = (struct SPiiPlusController *) motor_state[card]->DevicePrivate;
 
-    timeout = TIMEOUT;
     /* flush any junk at input port - should not be any data available */
     pasynOctetSyncIO->flush(cntrl->pasynUser);
 

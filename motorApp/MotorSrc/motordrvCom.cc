@@ -130,7 +130,6 @@ static struct mess_node *motor_malloc(struct circ_queue *, epicsEvent *);
 epicsShareFunc int motor_task(struct thread_args *args)
 {
     struct driver_table *tabptr;
-    bool sem_ret;
     epicsTime previous_time, current_time;
     double scan_sec, wait_time, time_lapse, stale_data_max_delay, stale_data_delay = 0.0;
     const double quantum = epicsThreadSleepQuantum();
@@ -176,7 +175,7 @@ epicsShareFunc int motor_task(struct thread_args *args)
         Debug(5, "motor_task: wait_time = %f\n", wait_time);
 
         if (wait_time != 0.0)
-            sem_ret = tabptr->semptr->wait(wait_time);
+            tabptr->semptr->wait(wait_time);
         previous_time = epicsTime::getCurrent();
 
         if (*tabptr->any_inmotion_ptr)
