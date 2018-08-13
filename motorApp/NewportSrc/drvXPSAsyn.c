@@ -1592,7 +1592,6 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     XPSController *pController;
     AXIS_HDL pAxis;
     char *index;
-    int status;
     double stepSize;
 
     if (numXPSControllers < 1) {
@@ -1623,7 +1622,7 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     stepSize = strtod(stepsPerUnit, NULL);
     pAxis->stepSize = 1./stepSize;
     /* Read some information from the controller for this axis */
-    status = PositionerSGammaParametersGet(pAxis->pollSocket,
+    PositionerSGammaParametersGet(pAxis->pollSocket,
                                            pAxis->positionerName,
                                            &pAxis->velocity,
                                            &pAxis->accel,

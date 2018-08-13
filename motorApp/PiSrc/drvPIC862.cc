@@ -198,11 +198,9 @@ static int set_status(int card, int signal)
     struct PIC862controller *cntrl;
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
-    struct motorRecord *mr;
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     C862_Status_Reg1 mstat1;
-    C862_Status_Reg2 mstat2;
     C862_Status_Reg3 mstat3;
     C862_Status_Reg4 mstat4;
     C862_Status_Reg5 mstat5;
@@ -216,10 +214,6 @@ static int set_status(int card, int signal)
     cntrl = (struct PIC862controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-	mr = (struct motorRecord *) nodeptr->mrecord;
-    else
-	mr = NULL;
     status.All = motor_info->status.All;
 
     if (cntrl->status != NORMAL)
@@ -255,7 +249,6 @@ static int set_status(int card, int signal)
     }
 
     mstat1.All = dev_sts1;
-    mstat2.All = dev_sts2;
     mstat3.All = dev_sts3;
     mstat4.All = dev_sts4;
     mstat5.All = dev_sts5;

@@ -414,7 +414,7 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
-    int status, FaultStatus;
+    int FaultStatus;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
     static char getparamstr[] = "GETPARM(@%d, %d)";
 
@@ -470,7 +470,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     }
     if (ret_status != MOTOR_AXIS_ERROR)
     {
-        status = motorParam->setInteger(pAxis->params, function, value);
+        motorParam->setInteger(pAxis->params, function, value);
         motorParam->callCallback(pAxis->params);
     }
     epicsMutexUnlock(pAxis->mutexId);
@@ -688,7 +688,7 @@ static void EnsemblePoller(EnsembleController *pController)
     /* This is the task that polls the Ensemble */
     double timeout;
     AXIS_HDL pAxis;
-    int status, itera, comStatus;
+    int itera, comStatus;
     Axis_Status axisStatus;
     bool anyMoving;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
@@ -699,9 +699,9 @@ static void EnsemblePoller(EnsembleController *pController)
     while (1)
     {
         if (timeout != 0.)
-            status = epicsEventWaitWithTimeout(pController->pollEventId, timeout);
+            epicsEventWaitWithTimeout(pController->pollEventId, timeout);
         else
-            status = epicsEventWait(pController->pollEventId);
+            epicsEventWait(pController->pollEventId);
 
         anyMoving = false;
 

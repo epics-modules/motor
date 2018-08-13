@@ -158,13 +158,11 @@ STATIC RTN_STATUS EMC18011_build_trans(motor_cmnd command, double *parms, struct
     double dval, cntrl_units;
     unsigned int size;
     bool sendMsg;
-    bool switchMotor;
     RTN_STATUS rtnval;
 
     rtnval = OK;
     buff[0] = '\0';
     sendMsg = true;
-    switchMotor = false;
 
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     intval = (parms == NULL) ? 0 : NINT(parms[0]);

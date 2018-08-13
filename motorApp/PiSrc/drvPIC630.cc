@@ -172,7 +172,6 @@ static void start_status(int card)
 
 static int set_status(int card, int signal)
 {
-    struct PIC630Controller *cntrl;
     struct mess_node *nodeptr;
     register struct mess_info *motor_info;
     char command[BUFF_SIZE];
@@ -184,7 +183,6 @@ static int set_status(int card, int signal)
     bool plusdir, ls_active = false;
     msta_field status;
 
-    cntrl = (struct PIC630Controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
@@ -291,7 +289,6 @@ static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char buff[BUFF_SIZE];
     char inp_buff[BUFF_SIZE];
-    int status = 0;
     size_t nwrite;
     struct PIC630Controller *cntrl;
 
@@ -311,7 +308,7 @@ static RTN_STATUS send_mess(int card, const char *com, const char *name)
 	pasynOctetSyncIO->write(cntrl->pasynUser, buff, strlen(buff), COMM_TIMEOUT, &nwrite);
 
     /* This thing always echos everything sent to it. Read this response. */
-    status = recv_mess(card, inp_buff, WAIT); 
+    recv_mess(card, inp_buff, WAIT); 
 
     return (OK);
 }
@@ -328,7 +325,6 @@ static int recv_mess(int card, char *com, int flag)
     int eomReason;
     int flush;
     struct PIC630Controller *cntrl;
-    asynStatus status;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -350,8 +346,8 @@ static int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = COMM_TIMEOUT;
     }
-	if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
-    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
+    if (flush) pasynOctetSyncIO->flush(cntrl->pasynUser);
+    pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
                                     timeout, &nread, &eomReason);
 
     if (nread < 1) com[0] = '\0';

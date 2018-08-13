@@ -155,8 +155,6 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct MCB4Bcontroller *cntrl;
-    char buff[30];
     int axis, card;
     RTN_STATUS rtnval;
     double dval;
@@ -165,7 +163,6 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
 
     send = true;
     rtnval = OK;
-    buff[0] = '\0';
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     dval = (parms == NULL) ? 0.0 : *parms;
     ival = NINT(dval);
@@ -181,9 +178,6 @@ STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd command, double *parms, struct mo
     Debug(5, "MCB4B_build_trans: axis=%d, command=%d\n", axis, command);
     if (brdptr == NULL)
         return(rtnval = ERROR);
-
-    cntrl = (struct MCB4Bcontroller *) brdptr->DevicePrivate;
-
 
     if (trans->state != BUILD_STATE)
         return(rtnval = ERROR);

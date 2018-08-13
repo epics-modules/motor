@@ -453,7 +453,6 @@ static int motor_init()
     char buff[BUFF_SIZE];
     int total_axis = 0;
     int status = 0;
-    bool errind;
     asynStatus success_rtn;
     static const char output_terminator[] = "\r";
     /* The response from the Micos is terminated with <CR><LF><ETX>. */
@@ -479,11 +478,10 @@ static int motor_init()
         cntrl = (struct MicosController *) brdptr->DevicePrivate;
 
         /* Initialize communications channel */
-        errind = false;
-    success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
+        success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
                         &cntrl->pasynUser, NULL);
 
-    if (success_rtn == asynSuccess)
+        if (success_rtn == asynSuccess)
         {
             int retry = 0;
 
@@ -532,7 +530,7 @@ static int motor_init()
                 sprintf(buff, "%c%def", CTLA, motor_index);
                 send_mess(card_index, buff, 0);
                 /* Don't turn on motor power, too dangerous */
-           /*sprintf(buff,"#%02dW=1", motor_index); */
+            /*sprintf(buff,"#%02dW=1", motor_index); */
                 /* send_mess(card_index, buff, 0); */
                 /* Stop motor */
                 sprintf(buff,"%c%dab1", CTLA, motor_index);
@@ -546,9 +544,9 @@ static int motor_init()
                 motor_info->position = 0;
 
                 motor_info->encoder_present = YES;
-        motor_info->status.Bits.EA_PRESENT = 1;
-        motor_info->pid_present = YES;
-        motor_info->status.Bits.GAIN_SUPPORT = 1;
+                motor_info->status.Bits.EA_PRESENT = 1;
+                motor_info->pid_present = YES;
+                motor_info->status.Bits.GAIN_SUPPORT = 1;
 
                 set_status(card_index, motor_index);  /* Read status of each motor */
             }

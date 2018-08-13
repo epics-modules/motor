@@ -221,7 +221,6 @@ static int set_status(int card, int signal)
     struct PIE516controller *cntrl;
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
-    struct motorRecord *mr;
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     int rtn_state;
@@ -234,10 +233,6 @@ static int set_status(int card, int signal)
     cntrl = (struct PIE516controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-	mr = (struct motorRecord *) nodeptr->mrecord;
-    else
-	mr = NULL;
     status.All = motor_info->status.All;
 
     recv_mess(card, buff, FLUSH);

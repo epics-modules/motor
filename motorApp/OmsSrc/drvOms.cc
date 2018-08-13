@@ -833,7 +833,6 @@ static void motorIsr(int card)
     struct irqdatastr *irqdata;
     epicsUInt8 control;
     epicsUInt8 status;
-    epicsUInt8 doneFlags;
     char dataChar;
     static char errmsg1[] = "\ndrvOms.cc:motorIsr: Invalid entry - card xx\n";
     static char errmsg2[] = "\ndrvOms.cc:motorIsr: command error - card xx\n";
@@ -857,7 +856,7 @@ static void motorIsr(int card)
     status = pmotor->status;
 
     /* Done register - clears on read */
-    doneFlags = pmotor->done;
+    (void)pmotor->done;
 
     /* Determine cause of entry */
 
@@ -911,7 +910,6 @@ static int motorIsrEnable(int card)
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
     struct irqdatastr *irqdata;
-    epicsUInt8 cardStatus;
     long status;
 
     Debug(5, "motorIsrEnable: Entry card#%d\n", card);
@@ -963,7 +961,7 @@ static int motorIsrEnable(int card)
     irqdata->irqErrno = 0;
 
     /* Clear board status */
-    cardStatus = pmotor->status;
+    (void) pmotor->status;
 
     /* enable interrupt-when-done and input-buffer-full interrupts */
     pmotor->control = (IRQ_ENABLE_ALL | IRQ_RESET_ID);

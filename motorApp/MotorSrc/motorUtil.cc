@@ -113,7 +113,7 @@ RTN_STATUS motorUtilInit(char *vme_name)
 static int motorUtil_task(void *arg)
 {
     char temp[PVNAME_STRINGSZ+5];
-    int itera, status;
+    int itera;
     epicsEventId wait_forever;
 
     SEVCHK(ca_context_create(ca_enable_preemptive_callback),
@@ -160,7 +160,7 @@ static int motorUtil_task(void *arg)
             strcpy(temp, motorlist[itera]);
             strcat(temp, ".DMOV");
             motorArray[itera].chid_dmov = getChID(temp);
-            status = pvMonitor(1, motorArray[itera].chid_dmov, itera);
+            pvMonitor(1, motorArray[itera].chid_dmov, itera);
                     
             /* Setup .STOPs */
             strcpy(temp, motorlist[itera]);
@@ -175,7 +175,7 @@ static int motorUtil_task(void *arg)
 	if (!chid_allstop) {
 	    errlogPrintf("Failed to connect to %sallstop\n",vme);
 	} else {
-	    status = pvMonitor(0, chid_allstop, -1);
+	    pvMonitor(0, chid_allstop, -1);
 	}
     }
     
@@ -246,7 +246,7 @@ static void allstop_handler(struct event_handler_args args)
 
 static void stopAll(chid callback_chid, char *callback_value)
 {
-    int itera, status = 0;
+    int itera;
     short val = 1, release_val = 0;
     
     if (callback_chid != chid_allstop)
@@ -263,12 +263,12 @@ static void stopAll(chid callback_chid, char *callback_value)
 		to stop motor records for which device and driver support have not been loaded.*/
                 if (motorArray[itera].in_motion == 1)
 		    ca_put(DBR_SHORT, motorArray[itera].chid_stop, &val);
-            status = ca_flush_io(); 
+            ca_flush_io(); 
         }
 
         /* reset allstop so that it may be called again */
         ca_put(DBR_SHORT, chid_allstop, &release_val);
-        status = ca_flush_io();
+        ca_flush_io();
         if (motorUtil_debug)
             errlogPrintf("reset allstop to \"release\"\n");
     }
@@ -287,7 +287,7 @@ static void moving(int callback_motor_index, chid callback_chid,
                    short callback_dmov)
 {
     short new_alldone_value, done = 1, not_done = 0;
-    int numMotorsMoving, status;
+    int numMotorsMoving;
     char diffChar;
     char diffStr[PVNAME_STRINGSZ+1];
 
@@ -353,7 +353,7 @@ static void moving(int callback_motor_index, chid callback_chid,
 	errlogPrintf("the number of motors moving remains the same.\n");
     
     /* send the ca_puts */
-    status = ca_flush_io();
+    ca_flush_io();
 }
 
 

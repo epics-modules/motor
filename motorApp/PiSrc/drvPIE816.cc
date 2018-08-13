@@ -230,11 +230,11 @@ static int set_status(int card, int signal)
     struct PIE816controller *cntrl;
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
-    struct motorRecord *mr;
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     int rtn_state;
-    unsigned int overflow_status, ontarget_status, servo_status, online_status;
+    unsigned int overflow_status, ontarget_status, servo_status;
+//    unsigned int online_status;
     epicsInt32 motorData;
     bool plusdir, ls_active, plusLS, minusLS;
     bool readOK; 
@@ -243,10 +243,6 @@ static int set_status(int card, int signal)
     cntrl = (struct PIE816controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-	mr = (struct motorRecord *) nodeptr->mrecord;
-    else
-	mr = NULL;
     status.All = motor_info->status.All;
 
     recv_mess(card, buff, FLUSH);
@@ -579,8 +575,8 @@ static int motor_init()
 						&cntrl->pasynUser, NULL);
 	if (success_rtn == asynSuccess)
 	{
-	    int retry = 0;
-
+/*	    int retry = 0;
+*/
 	    pasynOctetSyncIO->setOutputEos(cntrl->pasynUser, output_terminator,
 					   strlen(output_terminator));
 	    pasynOctetSyncIO->setInputEos(cntrl->pasynUser, input_terminator,

@@ -215,7 +215,8 @@ static int set_status(int card, int signal)
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     char status_buff[BUFF_SIZE];
-    int rtnval, rtn_state;
+    /* int rtnval; */
+    int rtn_state;
     double motorData;
     epicsUInt8 Lswitch;
     bool plusdir, ls_active = false;
@@ -251,7 +252,7 @@ static int set_status(int card, int signal)
        }
     }
 
-    rtnval = status_buff[4] == '1';
+    /* rtnval = status_buff[4] == '1';*/
 
     /* We can't use this logic for done, because it won't work in jog mode or when
      * a move is stopped by setting velocity=0. */

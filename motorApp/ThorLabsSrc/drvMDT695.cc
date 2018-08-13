@@ -216,7 +216,6 @@ static int set_status(int card, int signal)
   int rtn_state;
   int recvCnt;
   int motorData;
-  int motor;
   bool recvRetry;
   bool ls_active = false;
   msta_field status;
@@ -224,8 +223,6 @@ static int set_status(int card, int signal)
   cntrl = (struct MDT695Controller *) motor_state[card]->DevicePrivate;
   motor_info = &(motor_state[card]->motor_info[signal]);
   status.All = motor_info->status.All;
-  motor = signal+1;
-
 
   recvRetry = true;
 

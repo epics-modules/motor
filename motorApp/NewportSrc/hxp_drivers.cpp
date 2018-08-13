@@ -187,10 +187,8 @@ int __stdcall HXPControllerMotionKernelTimeLoadGet (int SocketIndex, double * CP
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CPUTotalLoadRatio);
@@ -239,10 +237,8 @@ int __stdcall HXPElapsedTimeGet (int SocketIndex, double * ElapsedTime)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", ElapsedTime);
@@ -488,10 +484,8 @@ int __stdcall HXPTimerGet (int SocketIndex, char * TimerName, int * FrequencyTic
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", FrequencyTicks);
@@ -1199,10 +1193,8 @@ int __stdcall HXPEventExtendedStart (int SocketIndex, int * ID)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ID);
@@ -1521,10 +1513,8 @@ int __stdcall HXPGatheringCurrentNumberGet (int SocketIndex, int * CurrentNumber
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", CurrentNumber);
@@ -1889,10 +1879,8 @@ int __stdcall HXPGatheringExternalCurrentNumberGet (int SocketIndex, int * Curre
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", CurrentNumber);
@@ -2046,10 +2034,8 @@ int __stdcall HXPDoubleGlobalArrayGet (int SocketIndex, int Number, double * Dou
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", DoubleValue);
@@ -2164,10 +2150,8 @@ int __stdcall HXPGPIOAnalogGet (int SocketIndex, int NbElements, char * GPIOName
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2327,10 +2311,8 @@ int __stdcall HXPGPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIO
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2449,10 +2431,8 @@ int __stdcall HXPGPIODigitalGet (int SocketIndex, char * GPIOName, unsigned shor
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%hu", DigitalValue);
@@ -2539,10 +2519,8 @@ int __stdcall HXPGroupCorrectorOutputGet (int SocketIndex, char * GroupName, int
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2946,10 +2924,8 @@ int __stdcall HXPGroupPositionCorrectedProfilerGet (int SocketIndex, char * Grou
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CorrectedProfilerPositionX);
@@ -3005,10 +2981,8 @@ int __stdcall HXPGroupPositionCurrentGet (int SocketIndex, char * GroupName, int
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3065,10 +3039,8 @@ int __stdcall HXPGroupPositionSetpointGet (int SocketIndex, char * GroupName, in
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3125,10 +3097,8 @@ int __stdcall HXPGroupPositionTargetGet (int SocketIndex, char * GroupName, int 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3173,10 +3143,8 @@ int __stdcall HXPGroupStatusGet (int SocketIndex, char * GroupName, int * Status
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", Status);
@@ -3515,10 +3483,8 @@ int __stdcall HXPPositionerCorrectorNotchFiltersGet (int SocketIndex, char * Pos
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", NotchFrequency1);
@@ -3630,10 +3596,8 @@ int __stdcall HXPPositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -3764,10 +3728,8 @@ int __stdcall HXPPositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -3902,10 +3864,8 @@ int __stdcall HXPPositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4026,10 +3986,8 @@ int __stdcall HXPPositionerCorrectorPIPositionGet (int SocketIndex, char * Posit
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4161,10 +4119,8 @@ int __stdcall HXPPositionerCurrentVelocityAccelerationFiltersGet (int SocketInde
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CurrentVelocityCutOffFrequency);
@@ -4208,10 +4164,8 @@ int __stdcall HXPPositionerDriverStatusGet (int SocketIndex, char * PositionerNa
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", DriverStatus);
@@ -4301,10 +4255,8 @@ int __stdcall HXPPositionerEncoderAmplitudeValuesGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CalibrationSinusAmplitude);
@@ -4357,10 +4309,8 @@ int __stdcall HXPPositionerEncoderCalibrationParametersGet (int SocketIndex, cha
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", SinusOffset);
@@ -4410,10 +4360,8 @@ int __stdcall HXPPositionerErrorGet (int SocketIndex, char * PositionerName, int
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ErrorCode);
@@ -4454,10 +4402,8 @@ int __stdcall HXPPositionerErrorRead (int SocketIndex, char * PositionerName, in
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ErrorCode);
@@ -4544,10 +4490,8 @@ int __stdcall HXPPositionerHardwareStatusGet (int SocketIndex, char * Positioner
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", HardwareStatus);
@@ -4634,10 +4578,8 @@ int __stdcall HXPPositionerHardInterpolatorFactorGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", InterpolationFactor);
@@ -4712,10 +4654,8 @@ int __stdcall HXPPositionerMaximumVelocityAndAccelerationGet (int SocketIndex, c
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MaximumVelocity);
@@ -4763,10 +4703,8 @@ int __stdcall HXPPositionerMotionDoneGet (int SocketIndex, char * PositionerName
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", PositionWindow);
@@ -4857,10 +4795,8 @@ int __stdcall HXPPositionerSGammaExactVelocityAjustedDisplacementGet (int Socket
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", AdjustedDisplacement);
@@ -4904,10 +4840,8 @@ int __stdcall HXPPositionerSGammaParametersGet (int SocketIndex, char * Position
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Velocity);
@@ -4994,10 +4928,8 @@ int __stdcall HXPPositionerSGammaPreviousMotionTimesGet (int SocketIndex, char *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", SettingTime);
@@ -5123,10 +5055,8 @@ int __stdcall HXPPositionerUserTravelLimitsGet (int SocketIndex, char * Position
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", UserMinimumTarget);
@@ -5295,10 +5225,8 @@ int __stdcall HXPHexapodCoordinatesGet (int SocketIndex, char * GroupName, char 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Xout);
@@ -5399,10 +5327,8 @@ int __stdcall HXPHexapodCoordinateSystemGet (int SocketIndex, char * GroupName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", X);
@@ -5522,10 +5448,8 @@ int __stdcall HXPControllerStatusGet (int SocketIndex, int * ControllerStatus)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ControllerStatus);
@@ -5751,10 +5675,8 @@ int __stdcall HXPCPUCoreAndBoardSupplyVoltagesGet (int SocketIndex, double * Vol
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", VoltageCPUCore);
@@ -5816,10 +5738,8 @@ int __stdcall HXPCPUTemperatureAndFanSpeedGet (int SocketIndex, double * CPUTemp
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CPUTemperature);
@@ -6686,10 +6606,8 @@ int __stdcall HXPGatheringUserDatasGet (int SocketIndex, double * UserData1, dou
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", UserData1);
@@ -6755,10 +6673,8 @@ int __stdcall HXPControllerMotionKernelPeriodMinMaxGet (int SocketIndex, double 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumCorrectorPeriod);

@@ -149,7 +149,7 @@ static RTN_STATUS PIC662_build_trans(motor_cmnd command, double *parms, struct m
     struct controller *brdptr;
     struct PIC662controller *cntrl;
     char buff[110];
-    int axis, card, maxdigits;
+    int card, maxdigits;
     unsigned int size;
     double dval, cntrl_units;
     RTN_STATUS rtnval;
@@ -164,7 +164,6 @@ static RTN_STATUS PIC662_build_trans(motor_cmnd command, double *parms, struct m
 
     motor_call = &(trans->motor_call);
     card = motor_call->card;
-    axis = motor_call->signal + 1;
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
 	return(rtnval = ERROR);

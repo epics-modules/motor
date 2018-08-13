@@ -656,12 +656,11 @@ static int recv_mess(int card, char *com, int amount)
 static int omsGet(int card, char *pchar)
 {
     int         eomReason;
-    size_t      nread;
-    asynStatus  status;
+    size_t      nread = 0;
     struct OmsPC68controller *cntrl;
     
     cntrl = (struct OmsPC68controller *) motor_state[card]->DevicePrivate;
-    status = cntrl->pasynOctet->read(cntrl->octetPvt,cntrl->pasynUser,pchar,1,&nread,&eomReason);
+    cntrl->pasynOctet->read(cntrl->octetPvt,cntrl->pasynUser,pchar,1,&nread,&eomReason);
 
     return(nread);
 }

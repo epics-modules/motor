@@ -170,14 +170,12 @@ static RTN_STATUS SmartMotor_build_trans(motor_cmnd command, double *parms, stru
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct SmartMotorcontroller *cntrl;
     char buff[110];
     int card, intval, cvel, cacc;
     unsigned int size;
     double dval;
     RTN_STATUS rtnval;
     bool send;
-    msta_field msta;
     static bool invalid_accmsg_latch = false;
 
     send = true;        /* Default to send motor command. */
@@ -190,8 +188,6 @@ static RTN_STATUS SmartMotor_build_trans(motor_cmnd command, double *parms, stru
     cvel = NINT(dval * VCONFAC);
     cacc = NINT(dval * ACONFAC);
 
-    msta.All = mr->msta;
-
     motor_start_trans_com(mr, SmartMotor_cards);
 
     motor_call = &(trans->motor_call);
@@ -199,8 +195,6 @@ static RTN_STATUS SmartMotor_build_trans(motor_cmnd command, double *parms, stru
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
         return(rtnval = ERROR);
-
-    cntrl = (struct SmartMotorcontroller *) brdptr->DevicePrivate;
 
     if (SmartMotor_table[command] > motor_call->type)
         motor_call->type = SmartMotor_table[command];

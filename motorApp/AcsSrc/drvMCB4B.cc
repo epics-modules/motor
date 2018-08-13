@@ -312,7 +312,6 @@ STATIC int recv_mess(int card, char *com, int flag)
 {
     double timeout;
     size_t nread=0;
-    asynStatus status;
     struct MCB4Bcontroller *cntrl;
     int flush;
     int eomReason;
@@ -335,8 +334,8 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
-    if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
-        status = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
+    if (flush) pasynOctetSyncIO->flush(cntrl->pasynUser);
+        pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
                                     timeout, &nread, &eomReason);
 
     if (nread < 1)

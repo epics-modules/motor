@@ -421,7 +421,6 @@ static int set_status(int card, int signal)
     char q_buf[50], outbuf[50];
     int index;
     bool ls_active = false;
-    bool got_encoder;
     msta_field status;
 
     int rtn_state;
@@ -446,14 +445,12 @@ static int set_status(int card, int signal)
         /* get 4 peices of info from axis */
         send_mess(card, ALL_INFO, oms58_axis[signal]);
         recv_mess(card, q_buf, 2);
-        got_encoder = true;
     }
     else
     {
         /* get 2 peices of info from axis */
         send_mess(card, AXIS_INFO, oms58_axis[signal]);
         recv_mess(card, q_buf, 1);
-        got_encoder = false;
     }
 
     for (index = 0, p = epicsStrtok_r(q_buf, ",", &tok_save); p;
@@ -1001,7 +998,7 @@ static void motorIsr(int card)
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
     STATUS_REG statusBuf;
-    epicsUInt8 doneFlags, userIO, slipFlags, limitFlags, cntrlReg;
+    epicsUInt8 cntrlReg;
     static char errmsg1[] = "\ndrvOms58.cc:motorIsr: Invalid entry - card xx\n";
     static char errmsg2[] = "\ndrvOms58.cc:motorIsr: command error - card xx\n";
 
@@ -1019,20 +1016,20 @@ static void motorIsr(int card)
     statusBuf.All = pmotor->control.statusReg;
 
     /* Done register - clears on read */
-    doneFlags = pmotor->control.doneReg;
+    (void) pmotor->control.doneReg;
 
     /* UserIO register - clears on read */
-    userIO = pmotor->control.ioLowReg;
+    (void) pmotor->control.ioLowReg;
 
 /* Questioniable Fix for undefined problem Starts Here. The following
  * code is meant to fix a problem that exhibted "spurious" interrupts
  * and "stuck in the Oms ISR" behavior.
 */
     /* Slip detection  - clear on read */
-    slipFlags = pmotor->control.slipReg;
+    (void) pmotor->control.slipReg;
 
     /* Overtravel - clear on read */
-    limitFlags = pmotor->control.limitReg;
+    (void) pmotor->control.limitReg;
 
     /* Only write control register if update bit is false. */
     /* Assure proper control register settings  */
@@ -1113,7 +1110,6 @@ static int motor_init()
     volatile struct controller *pmotorState;
     volatile struct vmex_motor *pmotor;
     STATUS_REG statusReg;
-    epicsInt8 omsReg;
     long status;
     int card_index, motor_index;
     char axis_pos[50], encoder_pos[50];
@@ -1211,7 +1207,7 @@ static int motor_init()
 
             /* Assure done is cleared */
             statusReg.All = pmotor->control.statusReg;
-            omsReg = pmotor->control.doneReg;
+            (void) pmotor->control.doneReg;
             for (total_encoders = total_pidcnt = 0, motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 /* Test if motor has an encoder. */

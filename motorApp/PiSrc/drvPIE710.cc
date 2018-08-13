@@ -213,7 +213,6 @@ static int set_status(int card, int signal)
     struct PIE710controller *cntrl;
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
-    struct motorRecord *mr;
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     char rtnBuff[BUFF_SIZE];
@@ -227,10 +226,6 @@ static int set_status(int card, int signal)
     cntrl = (struct PIE710controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-	mr = (struct motorRecord *) nodeptr->mrecord;
-    else
-	mr = NULL;
     status.All = motor_info->status.All;
 
     if (cntrl->status != NORMAL)

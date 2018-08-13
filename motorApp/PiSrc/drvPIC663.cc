@@ -189,26 +189,20 @@ static int set_status(int card, int signal)
     struct PIC663controller *cntrl;
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
-    struct motorRecord *mr;
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     C663_Status_Reg1 mstat1;
     C663_Status_Reg2 mstat2;
-    C663_Status_Reg3 mstat3;
     epicsUInt16 dev_sts1, dev_sts2, dev_sts3;
     
     int rtn_state, convert_cnt, charcnt;
     epicsInt32 motorData;
-    bool plusdir, ls_active = false, plusLS, minusLS, LSactiveH;
+    bool plusdir, ls_active = false, plusLS, minusLS;
     msta_field status;
 
     cntrl = (struct PIC663controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-	mr = (struct motorRecord *) nodeptr->mrecord;
-    else
-	mr = NULL;
     status.All = motor_info->status.All;
 
     if (cntrl->status != NORMAL)
@@ -245,7 +239,6 @@ static int set_status(int card, int signal)
 
     mstat1.All = dev_sts1;
     mstat2.All = dev_sts2;
-    mstat3.All = dev_sts3;
    
     status.Bits.RA_DONE = (mstat1.Bits.on_target) ? 1 : 0;
     status.Bits.EA_POSITION = (mstat1.Bits.drv_cur_act) ? 0 : 1;

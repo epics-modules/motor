@@ -457,7 +457,6 @@ static int send_recv_mess(int card, const char *send_com, char *recv_com,
     int size;
     size_t nwrite;
     size_t nread = 0;
-    double timeout = 0.;
     asynStatus status;
     int eomReason;
 
@@ -486,7 +485,6 @@ static int send_recv_mess(int card, const char *send_com, char *recv_com,
     if (temp_eos != NULL && strlen(temp_eos))
       pasynOctetSyncIO->setInputEos(cntrl->pasynUser,temp_eos,strlen(temp_eos));
 
-    timeout = TIMEOUT;
     /* flush any junk at input port - should not be any data available */
     // pasynOctetSyncIO->flush(cntrl->pasynUser); 
 
