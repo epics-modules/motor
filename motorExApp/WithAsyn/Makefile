@@ -20,6 +20,7 @@ COMMONDBDS += devMicroMo.dbd
 COMMONDBDS += devNewport.dbd
 ifdef SNCSEQ
 COMMONDBDS += LdevNewportTS.dbd
+COMMONDBDS += devAerotechSeq.dbd
 endif
 COMMONDBDS += devPIMotor.dbd
 COMMONDBDS += devOms.dbd
