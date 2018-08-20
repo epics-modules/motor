@@ -12,35 +12,35 @@ extern "C" {
 
   struct motor_priv {
     struct {
-      double position;           /**< Commanded motor position */
-      double encoderPosition;    /**< Actual encoder position */
+      epicsFloat64 position;           /**< Commanded motor position */
+      epicsFloat64 encoderPosition;    /**< Actual encoder position */
     } readBack;
     struct {
-      double motorDialHighLimitRO;   /**< read only high limit from controller. */
-      double motorDialLowLimitRO;    /**< read only low limit from controller. */
+      epicsFloat64 motorDialHighLimitRO;   /**< read only high limit from controller. */
+      epicsFloat64 motorDialLowLimitRO;    /**< read only low limit from controller. */
       int motorDialLimitsValid;
     } softLimitRO;
     struct {
       msta_field msta;
     } lastReadBack;
     struct {
-      double motorMaxVelocityDial; /**< Maximum velocity */
-      double motorDefVelocityDial; /**< Default velocity (moveAbs, moveRel) */
-      double motorDefJogVeloDial;  /**< Default velocity (for jogging) */
-      double motorDefJogAccDial;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
-      double motorSDBDDial;        /**< Minimal movement */
-      double motorRDBDDial;        /**< "At target position" deadband */
+      epicsFloat64 motorMaxVelocityDial; /**< Maximum velocity */
+      epicsFloat64 motorDefVelocityDial; /**< Default velocity (moveAbs, moveRel) */
+      epicsFloat64 motorDefJogVeloDial;  /**< Default velocity (for jogging) */
+      epicsFloat64 motorDefJogAccDial;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
+      epicsFloat64 motorSDBDDial;        /**< Minimal movement */
+      epicsFloat64 motorRDBDDial;        /**< "At target position" deadband */
     } configRO;
     struct {
-      double motorHighLimitRaw;  /* last from dev support in status */
-      double motorLowLimitRaw;   /* last from dev support in status */
-      double val;               /* last .VAL */
-      double dval;               /* last .DVAL */
-      double commandedDval;      /* Where did we tell the motor to go */
-      double rval;               /* last .RVAL */
-      double rlv;                /* Last Rel Value (EGU) */
-      double alst;               /* Last Value Archived */
-      double mlst;               /* Last Val Monitored */
+      epicsFloat64 motorHighLimitRaw;  /* last from dev support in status */
+      epicsFloat64 motorLowLimitRaw;   /* last from dev support in status */
+      epicsFloat64 val;               /* last .VAL */
+      epicsFloat64 dval;               /* last .DVAL */
+      epicsFloat64 commandedDval;      /* Where did we tell the motor to go */
+      epicsInt32   rval;               /* last .RVAL */
+      epicsFloat64 rlv;                /* Last Rel Value (EGU) */
+      epicsFloat64 alst;               /* Last Value Archived */
+      epicsFloat64 mlst;               /* Last Val Monitored */
     } last;
   };
 
