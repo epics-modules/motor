@@ -101,7 +101,8 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   /* Addition flags which can be set by the specific driver */
   createParam(motorFlagsHomeOnLsString,          asynParamInt32,      &motorFlagsHomeOnLs_);
   createParam(motorFlagsNoStopProblemString,     asynParamInt32,      &motorFlagsNoStopProblem_);
-  createParam(motorFlagsLSrampDownString,          asynParamInt32,      &motorFlagsLSrampDown_);
+  createParam(motorFlagsLSrampDownString,        asynParamInt32,      &motorFlagsLSrampDown_);
+  createParam(motorFlagsNoStopOnLsString,        asynParamInt32,      &motorFlagsNoStopOnLS_);
 
   createParam(motorWaitPollsBeforeReadyString,   asynParamInt32,      &motorWaitPollsBeforeReady_);
 

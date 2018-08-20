@@ -300,7 +300,7 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
       statusChanged_ = 1;
     }
   } else  if (function >= pC_->motorFlagsHomeOnLs_ &&
-              function <= pC_->motorFlagsLSrampDown_) {
+              function <= pC_->motorFlagsNoStopOnLS_) {
     flags = status_.flags;
     mask = 1 << (function - pC_->motorFlagsHomeOnLs_);
     if (value) flags |= mask;

@@ -3695,6 +3695,8 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     /* Treat limit switch active only when it is pressed and in direction of movement. */
     ls_active = ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)) ? true : false;
 
+    if (pmr->mflg & MF_NOSTOP_ONLS)
+        ls_active = false;    /*Suppress stop on LS if configured  */
     if ((pmr->mip & MIP_HOMF) || (pmr->mip & MIP_HOMR))
     {
         if (pmr->mflg & MF_HOME_ON_LS)

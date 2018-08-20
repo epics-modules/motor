@@ -71,7 +71,8 @@
 /* Addition flags which can be set by the specific driver */
 #define motorFlagsHomeOnLsString        "MOTOR_FLAGSS_HOME_ON_LS"
 #define motorFlagsNoStopProblemString   "MOTOR_FLAGS_NO_STOP_PROBLEM"
-#define motorFlagsLSrampDownString        "MOTOR_FLAGS_NO_STOP_LS"
+#define motorFlagsLSrampDownString      "MOTOR_FLAGS_LS_RAMP_DOWN"
+#define motorFlagsNoStopOnLsString      "MOTOR_FLAGS_NO_STOP_ON_LS"
 
 #define motorWaitPollsBeforeReadyString "MOTOR_WAIT_POLLS_BEFORE_READY"
 
@@ -333,6 +334,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorFlagsHomeOnLs_;
   int motorFlagsNoStopProblem_;
   int motorFlagsLSrampDown_;
+  int motorFlagsNoStopOnLS_;
 
   // These are per-motor parameters for passing additional motor record information to the driver
   int motorRecResolution_;
