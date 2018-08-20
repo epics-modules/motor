@@ -2001,6 +2001,17 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             {
                 pmr->lvio = 1;
                 MARK(M_LVIO);
+                /* Prevent record from locking up in mip=JOG_REQ */
+                if (pmr->jogf)
+                {
+                    pmr->jogf = 0;
+                    MARK_AUX(M_JOGF);
+                }
+                if (pmr->jogr)
+                {
+                    pmr->jogr = 0;
+                    MARK_AUX(M_JOGR);
+                }
                 return(OK);
             }
             pmr->mip = pmr->jogf ? MIP_JOGF : MIP_JOGR;
