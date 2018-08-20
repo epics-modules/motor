@@ -278,7 +278,7 @@ static void re_init_update_soft_limits(struct motorRecord *pmr)
     pmr->priv->last.motorLowLimitRaw = rawLowLimitRO;
 }
 
-static void re_init_update_velocities_xDBD(struct motorRecord *pmr)
+static void re_init_update_MinRetryDeadband(struct motorRecord *pmr)
 {
     motorAsynPvt * pPvt = (motorAsynPvt *) pmr->dpvt;
     double amres = fabs(pmr->mres);
@@ -299,6 +299,9 @@ static void re_init_update_velocities_xDBD(struct motorRecord *pmr)
 
     tmp = pPvt->status.MotorConfigRO.motorRDBDRaw;
     if (tmp > 0.0) pmr->priv->configRO.motorRDBDDial = amres * tmp;
+
+    tmp = pPvt->status.MotorConfigRO.motorERESRaw;
+    if (tmp > 0.0) pmr->priv->configRO.motorERESDial = amres * tmp;
 }
 
 static asynStatus config_controller(struct motorRecord *pmr, motorAsynPvt *pPvt)
@@ -501,7 +504,7 @@ static long init_record(struct motorRecord * pmr )
 
     re_init_update_soft_limits(pmr);
 
-    re_init_update_velocities_xDBD(pmr);
+    re_init_update_MinRetryDeadband(pmr);
 
     /* Do not need to manually retrieve the new status values, as if they are
      * set, a callback will be generated
@@ -583,7 +586,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
             if (!prev_msta.All ||
                 ((msta.Bits.CNTRL_COMM_ERR == 0) &&(prev_msta.Bits.CNTRL_COMM_ERR != 0)))
             {
-                re_init_update_velocities_xDBD(pmr);
+                re_init_update_MinRetryDeadband(pmr);
                 rc = CALLBACK_RE_INIT;
             }
             pmr->priv->lastReadBack.msta.All = pmr->msta;

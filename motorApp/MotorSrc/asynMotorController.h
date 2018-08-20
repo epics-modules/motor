@@ -92,6 +92,7 @@
 #define motorDefJogAccROString          "MOTOR_DEF_JACC_RO"
 #define motorSDBDROString               "MOTOR_SDBD_RO"
 #define motorRDBDROString               "MOTOR_RDBD_RO"
+#define motorERESROString               "MOTOR_ERES_RO"
 
 /* These are the per-controller parameters for profile moves (coordinated motion) */
 #define profileNumAxesString            "PROFILE_NUM_AXES"
@@ -154,6 +155,7 @@ typedef struct MotorConfigRO {
   double motorDefJogAccRaw;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
   double motorSDBDRaw;        /**< Minimal movement */
   double motorRDBDRaw;        /**< "At target position" deadband */
+  double motorERESRaw;        /**< ERES as configured in the controller */
 } MotorConfigRO;
 
 /** The structure that is passed back to devMotorAsyn when the status changes. */
@@ -349,6 +351,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorDefJogAccRO_;
   int motorSDBDRO_;
   int motorRDBDRO_;
+  int motorERESRO_;
   // These are the per-controller parameters for profile moves
   int profileNumAxes_;
   int profileNumPoints_;

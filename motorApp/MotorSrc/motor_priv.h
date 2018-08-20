@@ -30,6 +30,7 @@ extern "C" {
       epicsFloat64 motorDefJogAccDial;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
       epicsFloat64 motorSDBDDial;        /**< Minimal movement */
       epicsFloat64 motorRDBDDial;        /**< "At target position" deadband */
+      epicsFloat64 motorERESDial;        /**< ERES as configured in the controller */
     } configRO;
     struct {
       epicsFloat64 motorHighLimitRaw;  /* last from dev support in status */

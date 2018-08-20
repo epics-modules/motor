@@ -375,6 +375,11 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
       statusChanged_ = 1;
       status_.MotorConfigRO.motorRDBDRaw = value;
     }
+  } else if (function == pC_->motorERESRO_) {
+    if (value != status_.MotorConfigRO.motorERESRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorERESRaw = value;
+    }
   }
   // Call the base class method
   return pC_->setDoubleParam(axisNo_, function, value);
