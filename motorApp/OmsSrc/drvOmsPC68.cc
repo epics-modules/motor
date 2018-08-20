@@ -107,12 +107,12 @@ int OmsPC68_num_cards = 0;
 static volatile int motionTO = 10;
 
 //OmsPC68 generic controller commands
-static char *oms_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
+static const char *oms_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *name);
+static RTN_STATUS send_mess(int, const char *, const char *name);
 static void start_status(int card);
 static int set_status(int card, int signal);
 static long report(int level);
@@ -454,7 +454,7 @@ exit:
 /* send a message to the OmsPC68 board               */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct OmsPC68controller    *cntrl;
     size_t              size,
@@ -656,12 +656,11 @@ static int recv_mess(int card, char *com, int amount)
 static int omsGet(int card, char *pchar)
 {
     int         eomReason;
-    size_t      nread;
-    asynStatus  status;
+    size_t      nread = 0;
     struct OmsPC68controller *cntrl;
     
     cntrl = (struct OmsPC68controller *) motor_state[card]->DevicePrivate;
-    status = cntrl->pasynOctet->read(cntrl->octetPvt,cntrl->pasynUser,pchar,1,&nread,&eomReason);
+    cntrl->pasynOctet->read(cntrl->octetPvt,cntrl->pasynUser,pchar,1,&nread,&eomReason);
 
     return(nread);
 }
@@ -770,7 +769,7 @@ static int motor_init()
             /* Try 3 times to connect to controller. */
             do
             {
-                send_mess (card_index, GET_IDENT, (char*) NULL);
+                send_mess (card_index, GET_IDENT, NULL);
                 status = recv_mess(card_index, (char *) pmotorState->ident, 1);
                 retry++;
             } while (status == 0 && retry < 3);
@@ -783,11 +782,11 @@ static int motor_init()
             pmotorState->motor_in_motion = 0;
             pmotorState->cmnd_response = false;
 
-            send_mess (card_index, ECHO_OFF, (char*) NULL);
-            send_mess (card_index, ERROR_CLEAR, (char*) NULL);
-            send_mess (card_index, STOP_ALL, (char*) NULL);
+            send_mess (card_index, ECHO_OFF, NULL);
+            send_mess (card_index, ERROR_CLEAR, NULL);
+            send_mess (card_index, STOP_ALL, NULL);
 
-            send_mess (card_index, ALL_POS, (char*) NULL);
+            send_mess (card_index, ALL_POS, NULL);
             recv_mess (card_index, axis_pos, 1);
 
             for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
@@ -822,7 +821,7 @@ static int motor_init()
              * dummy communication transaction.
              */
 
-            send_mess (card_index, ALL_POS, (char*) NULL);
+            send_mess (card_index, ALL_POS, NULL);
             recv_mess (card_index, axis_pos, 1);
 
             for (motor_index=0;motor_index<total_axis;motor_index++)
@@ -841,16 +840,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "Motors initialized\n");
     epicsThreadCreate((char *) "OmsPC68_motor", epicsThreadPriorityMedium,
@@ -891,7 +890,7 @@ RTN_STATUS OmsPC68Setup (int num_cards, int scan_rate)
                   malloc(OmsPC68_num_cards * sizeof(struct controller *));
 
     for (itera = 0; itera < OmsPC68_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }

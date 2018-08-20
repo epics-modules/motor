@@ -155,23 +155,19 @@ STATIC RTN_STATUS MDT695_build_trans(motor_cmnd command, double *parms, struct m
     // struct mess_info *motor_info;
     struct MDT695Controller *cntrl;
     char buff[110];
-    int signal, card, intval;
+    int card;
     double dval, cntrl_units;
     unsigned int size;
-    bool sendMsg;
     RTN_STATUS rtnval;
 
     rtnval = OK;
     buff[0] = '\0';
-    sendMsg = true;
 
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
-    intval = (parms == NULL) ? 0 : NINT(parms[0]);
     dval = (parms == NULL) ? 0 : *parms;
 
     motor_call = &(trans->motor_call);
     card = motor_call->card;
-    signal = motor_call->signal;
 
     brdptr = (*trans->tabptr->card_array)[card];
       if (brdptr == NULL)

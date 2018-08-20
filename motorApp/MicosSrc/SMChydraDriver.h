@@ -35,7 +35,6 @@ private:
   int polePairs_;
   double clPeriod_;
   double axisRes_;
-  double mres_;
   int lowLimitConfig_;
   int highLimitConfig_;
   double posTravelLimit_;

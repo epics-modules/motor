@@ -30,7 +30,7 @@ static void printRecv (char*, int);
 
 
 /******[ ftpConnect ]************************************************/
-epicsShareFunc int ftpConnect (char* ip, char* login, char* password, SOCKET* socketFD)
+epicsShareFunc int ftpConnect (const char* ip, const char* login, const char* password, SOCKET* socketFD)
 {
   char command[COMMAND_SIZE];
   char returnString[RETURN_SIZE];
@@ -85,7 +85,7 @@ epicsShareFunc int ftpDisconnect (SOCKET socketFD)
 
 
 /******[ ftpChangeDir ]**********************************************/
-epicsShareFunc int ftpChangeDir (SOCKET socketFD, char* destination)
+epicsShareFunc int ftpChangeDir (SOCKET socketFD, const char* destination)
 {
   char command[COMMAND_SIZE];
   char returnString[RETURN_SIZE];
@@ -99,7 +99,7 @@ epicsShareFunc int ftpChangeDir (SOCKET socketFD, char* destination)
 
 
 /******[ ftpRetrieveFile ]*******************************************/
-epicsShareFunc int ftpRetrieveFile(SOCKET socketFD, char *filename)
+epicsShareFunc int ftpRetrieveFile(SOCKET socketFD, const char *filename)
 {
   int port_rcv, i;
   SOCKET socketFDReceive;
@@ -173,7 +173,7 @@ epicsShareFunc int ftpRetrieveFile(SOCKET socketFD, char *filename)
 
 
 /******[ ftpStoreFile ]**********************************************/
-epicsShareFunc int ftpStoreFile(SOCKET socketFD, char *filename)
+epicsShareFunc int ftpStoreFile(SOCKET socketFD, const char *filename)
 {
   int port_snd, i;
   SOCKET socketFDSend;

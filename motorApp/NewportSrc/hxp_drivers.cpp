@@ -11,7 +11,7 @@
 
 #define epicsExportSharedSymbols
 #include <shareLib.h>
-#include "XPS_C8_drivers.h" 
+#include "hxp_drivers.h" 
 #ifdef _WIN32
 #include "strtok_r.h"
 #endif
@@ -103,7 +103,7 @@ void CleanString (char *strSourceInOut, char startChar, char endChar)
 /*************************************************************************
 * Delete a specified characters 
 *************************************************************************/ 
-void DeleteCharacters (char *strSourceInOut, char *charactersToDelete)
+void DeleteCharacters (char *strSourceInOut, const char *charactersToDelete)
 {
 	int len = 0;
 	int nbChar = 0;
@@ -151,7 +151,7 @@ char * __stdcall HXPTCP_GetError(int SocketIndex)
 	return (GetError(SocketIndex));
 }
 /***********************************************************************/
-char * __stdcall HXPGetLibraryVersion(void) 
+const char * __stdcall HXPGetLibraryVersion(void) 
 {
 	return (DLL_VERSION);
 }
@@ -187,10 +187,8 @@ int __stdcall HXPControllerMotionKernelTimeLoadGet (int SocketIndex, double * CP
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CPUTotalLoadRatio);
@@ -239,10 +237,8 @@ int __stdcall HXPElapsedTimeGet (int SocketIndex, double * ElapsedTime)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", ElapsedTime);
@@ -350,13 +346,13 @@ int __stdcall HXPFirmwareVersionGet (int SocketIndex, char * Version)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TCLFileName
- *            char *TaskName
- *            char *ParametersList
+ *            const char *TCLFileName
+ *            const char *TaskName
+ *            const char *ParametersList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPTCLScriptExecute (int SocketIndex, char * TCLFileName, char * TaskName, char * ParametersList) 
+int __stdcall HXPTCLScriptExecute (int SocketIndex, const char * TCLFileName, const char * TaskName, const char * ParametersList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -384,14 +380,14 @@ int __stdcall HXPTCLScriptExecute (int SocketIndex, char * TCLFileName, char * T
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TCLFileName
- *            char *TaskName
- *            char *InputParametersList
+ *            const char *TCLFileName
+ *            const char *TaskName
+ *            const char *InputParametersList
  *            char *OutputParametersList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPTCLScriptExecuteAndWait (int SocketIndex, char * TCLFileName, char * TaskName, char * InputParametersList, char * OutputParametersList) 
+int __stdcall HXPTCLScriptExecuteAndWait (int SocketIndex, const char * TCLFileName, const char * TaskName, const char * InputParametersList, char * OutputParametersList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -432,11 +428,11 @@ int __stdcall HXPTCLScriptExecuteAndWait (int SocketIndex, char * TCLFileName, c
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TaskName
+ *            const char *TaskName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPTCLScriptKill (int SocketIndex, char * TaskName) 
+int __stdcall HXPTCLScriptKill (int SocketIndex, const char * TaskName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -464,12 +460,12 @@ int __stdcall HXPTCLScriptKill (int SocketIndex, char * TaskName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TimerName
+ *            const char *TimerName
  *            int *FrequencyTicks
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPTimerGet (int SocketIndex, char * TimerName, int * FrequencyTicks) 
+int __stdcall HXPTimerGet (int SocketIndex, const char * TimerName, int * FrequencyTicks) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -488,10 +484,8 @@ int __stdcall HXPTimerGet (int SocketIndex, char * TimerName, int * FrequencyTic
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", FrequencyTicks);
@@ -508,12 +502,12 @@ int __stdcall HXPTimerGet (int SocketIndex, char * TimerName, int * FrequencyTic
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TimerName
+ *            const char *TimerName
  *            int FrequencyTicks
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPTimerSet (int SocketIndex, char * TimerName, int FrequencyTicks) 
+int __stdcall HXPTimerSet (int SocketIndex, const char * TimerName, int FrequencyTicks) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -572,12 +566,12 @@ int __stdcall HXPReboot (int SocketIndex)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *Name
- *            char *Password
+ *            const char *Name
+ *            const char *Password
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPLogin (int SocketIndex, char * Name, char * Password) 
+int __stdcall HXPLogin (int SocketIndex, const char * Name, const char * Password) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -636,17 +630,17 @@ int __stdcall HXPCloseAllOtherSockets (int SocketIndex)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *EventName
- *            char *EventParameter
- *            char *ActionName
- *            char *ActionParameter1
- *            char *ActionParameter2
- *            char *ActionParameter3
+ *            const char *PositionerName
+ *            const char *EventName
+ *            const char *EventParameter
+ *            const char *ActionName
+ *            const char *ActionParameter1
+ *            const char *ActionParameter2
+ *            const char *ActionParameter3
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEventAdd (int SocketIndex, char * PositionerName, char * EventName, char * EventParameter, char * ActionName, char * ActionParameter1, char * ActionParameter2, char * ActionParameter3) 
+int __stdcall HXPEventAdd (int SocketIndex, const char * PositionerName, const char * EventName, const char * EventParameter, const char * ActionName, const char * ActionParameter1, const char * ActionParameter2, const char * ActionParameter3) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -674,12 +668,12 @@ int __stdcall HXPEventAdd (int SocketIndex, char * PositionerName, char * EventN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            char *EventsAndActionsList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEventGet (int SocketIndex, char * PositionerName, char * EventsAndActionsList) 
+int __stdcall HXPEventGet (int SocketIndex, const char * PositionerName, char * EventsAndActionsList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -720,13 +714,13 @@ int __stdcall HXPEventGet (int SocketIndex, char * PositionerName, char * Events
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *EventName
- *            char *EventParameter
+ *            const char *PositionerName
+ *            const char *EventName
+ *            const char *EventParameter
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEventRemove (int SocketIndex, char * PositionerName, char * EventName, char * EventParameter) 
+int __stdcall HXPEventRemove (int SocketIndex, const char * PositionerName, const char * EventName, const char * EventParameter) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -754,13 +748,13 @@ int __stdcall HXPEventRemove (int SocketIndex, char * PositionerName, char * Eve
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *EventName
- *            char *EventParameter
+ *            const char *PositionerName
+ *            const char *EventName
+ *            const char *EventParameter
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEventWait (int SocketIndex, char * PositionerName, char * EventName, char * EventParameter) 
+int __stdcall HXPEventWait (int SocketIndex, const char * PositionerName, const char * EventName, const char * EventParameter) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -789,15 +783,15 @@ int __stdcall HXPEventWait (int SocketIndex, char * PositionerName, char * Event
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *ExtendedEventName
- *            char *EventParameter1
- *            char *EventParameter2
- *            char *EventParameter3
- *            char *EventParameter4
+ *            const char *ExtendedEventNameList
+ *            const char *EventParameter1
+ *            const char *EventParameter2
+ *            const char *EventParameter3
+ *            const char *EventParameter4
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEventExtendedConfigurationTriggerSet (int SocketIndex, int NbElements, char * ExtendedEventNameList, char * EventParameter1List, char * EventParameter2List, char * EventParameter3List, char * EventParameter4List) 
+int __stdcall HXPEventExtendedConfigurationTriggerSet (int SocketIndex, int NbElements, const char * ExtendedEventNameList, const char * EventParameter1List, const char * EventParameter2List, const char * EventParameter3List, const char * EventParameter4List) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -983,15 +977,15 @@ int __stdcall HXPEventExtendedConfigurationTriggerGet (int SocketIndex, char * E
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *ExtendedActionName
- *            char *ActionParameter1
- *            char *ActionParameter2
- *            char *ActionParameter3
- *            char *ActionParameter4
+ *            const char *ExtendedActionName
+ *            const char *ActionParameter1
+ *            const char *ActionParameter2
+ *            const char *ActionParameter3
+ *            const char *ActionParameter4
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEventExtendedConfigurationActionSet (int SocketIndex, int NbElements, char * ExtendedActionNameList, char * ActionParameter1List, char * ActionParameter2List, char * ActionParameter3List, char * ActionParameter4List) 
+int __stdcall HXPEventExtendedConfigurationActionSet (int SocketIndex, int NbElements, const char * ExtendedActionNameList, const char * ActionParameter1List, const char * ActionParameter2List, const char * ActionParameter3List, const char * ActionParameter4List) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -1176,7 +1170,7 @@ int __stdcall HXPEventExtendedConfigurationActionGet (int SocketIndex, char * Ac
  *
  *     - Parameters :
  *            int SocketIndex
- *            int *ID
+ *            const int *ID
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
@@ -1199,10 +1193,8 @@ int __stdcall HXPEventExtendedStart (int SocketIndex, int * ID)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ID);
@@ -1316,11 +1308,11 @@ int __stdcall HXPEventExtendedGet (int SocketIndex, int ID, char * EventTriggerC
  *
  *     - Parameters :
  *            int SocketIndex
- *            int ID
+ *            const int ID
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEventExtendedRemove (int SocketIndex, int ID) 
+int __stdcall HXPEventExtendedRemove (int SocketIndex, const int ID) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -1425,11 +1417,11 @@ int __stdcall HXPGatheringConfigurationGet (int SocketIndex, char * Type)
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *Type
+ *            const char *TypeList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGatheringConfigurationSet (int SocketIndex, int NbElements, char * TypeList) 
+int __stdcall HXPGatheringConfigurationSet (int SocketIndex, int NbElements, const char * TypeList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -1521,10 +1513,8 @@ int __stdcall HXPGatheringCurrentNumberGet (int SocketIndex, int * CurrentNumber
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", CurrentNumber);
@@ -1748,11 +1738,11 @@ int __stdcall HXPGatheringStop (int SocketIndex)
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *Type
+ *            const char *TypeList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGatheringExternalConfigurationSet (int SocketIndex, int NbElements, char * TypeList) 
+int __stdcall HXPGatheringExternalConfigurationSet (int SocketIndex, int NbElements, const char * TypeList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -1889,10 +1879,8 @@ int __stdcall HXPGatheringExternalCurrentNumberGet (int SocketIndex, int * Curre
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", CurrentNumber);
@@ -1990,11 +1978,11 @@ int __stdcall HXPGlobalArrayGet (int SocketIndex, int Number, char * ValueString
  *     - Parameters :
  *            int SocketIndex
  *            int Number
- *            char *ValueString
+ *            const char *ValueString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGlobalArraySet (int SocketIndex, int Number, char * ValueString) 
+int __stdcall HXPGlobalArraySet (int SocketIndex, int Number, const char * ValueString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2046,10 +2034,8 @@ int __stdcall HXPDoubleGlobalArrayGet (int SocketIndex, int Number, double * Dou
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", DoubleValue);
@@ -2100,12 +2086,12 @@ int __stdcall HXPDoubleGlobalArraySet (int SocketIndex, int Number, double Doubl
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *GPIOName
+ *            const char *GPIONameList
  *            double *AnalogValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGPIOAnalogGet (int SocketIndex, int NbElements, char * GPIONameList, double AnalogValue[]) 
+int __stdcall HXPGPIOAnalogGet (int SocketIndex, int NbElements, const char * GPIONameList, double AnalogValue[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2164,10 +2150,8 @@ int __stdcall HXPGPIOAnalogGet (int SocketIndex, int NbElements, char * GPIOName
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2189,12 +2173,12 @@ int __stdcall HXPGPIOAnalogGet (int SocketIndex, int NbElements, char * GPIOName
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *GPIOName
+ *            const char *GPIONameList
  *            double AnalogOutputValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGPIOAnalogSet (int SocketIndex, int NbElements, char * GPIONameList, double AnalogOutputValue[]) 
+int __stdcall HXPGPIOAnalogSet (int SocketIndex, int NbElements, const char * GPIONameList, double AnalogOutputValue[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2263,12 +2247,12 @@ int __stdcall HXPGPIOAnalogSet (int SocketIndex, int NbElements, char * GPIOName
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *GPIOName
+ *            const char *GPIONameList
  *            int *AnalogInputGainValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIONameList, int AnalogInputGainValue[]) 
+int __stdcall HXPGPIOAnalogGainGet (int SocketIndex, int NbElements, const char * GPIONameList, int AnalogInputGainValue[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2327,10 +2311,8 @@ int __stdcall HXPGPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIO
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2352,12 +2334,12 @@ int __stdcall HXPGPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIO
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *GPIOName
+ *            const char *GPIONameList
  *            int AnalogInputGainValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGPIOAnalogGainSet (int SocketIndex, int NbElements, char * GPIONameList, int AnalogInputGainValue[]) 
+int __stdcall HXPGPIOAnalogGainSet (int SocketIndex, int NbElements, const char * GPIONameList, int AnalogInputGainValue[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2425,12 +2407,12 @@ int __stdcall HXPGPIOAnalogGainSet (int SocketIndex, int NbElements, char * GPIO
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GPIOName
+ *            const char *GPIOName
  *            unsigned short *DigitalValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGPIODigitalGet (int SocketIndex, char * GPIOName, unsigned short * DigitalValue) 
+int __stdcall HXPGPIODigitalGet (int SocketIndex, const char * GPIOName, unsigned short * DigitalValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2449,10 +2431,8 @@ int __stdcall HXPGPIODigitalGet (int SocketIndex, char * GPIOName, unsigned shor
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%hu", DigitalValue);
@@ -2469,13 +2449,13 @@ int __stdcall HXPGPIODigitalGet (int SocketIndex, char * GPIOName, unsigned shor
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GPIOName
+ *            const char *GPIOName
  *            unsigned short Mask
  *            unsigned short DigitalOutputValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGPIODigitalSet (int SocketIndex, char * GPIOName, unsigned short Mask, unsigned short DigitalOutputValue) 
+int __stdcall HXPGPIODigitalSet (int SocketIndex, const char * GPIOName, unsigned short Mask, unsigned short DigitalOutputValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2503,13 +2483,13 @@ int __stdcall HXPGPIODigitalSet (int SocketIndex, char * GPIOName, unsigned shor
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *CorrectorOutput
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupCorrectorOutputGet (int SocketIndex, char * GroupName, int NbElements, double CorrectorOutput[]) 
+int __stdcall HXPGroupCorrectorOutputGet (int SocketIndex, const char * GroupName, int NbElements, double CorrectorOutput[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2539,10 +2519,8 @@ int __stdcall HXPGroupCorrectorOutputGet (int SocketIndex, char * GroupName, int
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2563,11 +2541,11 @@ int __stdcall HXPGroupCorrectorOutputGet (int SocketIndex, char * GroupName, int
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupHomeSearch (int SocketIndex, char * GroupName) 
+int __stdcall HXPGroupHomeSearch (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2595,12 +2573,12 @@ int __stdcall HXPGroupHomeSearch (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double TargetDisplacement
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupHomeSearchAndRelativeMove (int SocketIndex, char * GroupName, int NbElements, double TargetDisplacement[]) 
+int __stdcall HXPGroupHomeSearchAndRelativeMove (int SocketIndex, const char * GroupName, int NbElements, double TargetDisplacement[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2639,11 +2617,11 @@ int __stdcall HXPGroupHomeSearchAndRelativeMove (int SocketIndex, char * GroupNa
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupInitialize (int SocketIndex, char * GroupName) 
+int __stdcall HXPGroupInitialize (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2671,11 +2649,11 @@ int __stdcall HXPGroupInitialize (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupInitializeWithEncoderCalibration (int SocketIndex, char * GroupName) 
+int __stdcall HXPGroupInitializeWithEncoderCalibration (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2703,11 +2681,11 @@ int __stdcall HXPGroupInitializeWithEncoderCalibration (int SocketIndex, char * 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupKill (int SocketIndex, char * GroupName) 
+int __stdcall HXPGroupKill (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2735,11 +2713,11 @@ int __stdcall HXPGroupKill (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupMoveAbort (int SocketIndex, char * GroupName) 
+int __stdcall HXPGroupMoveAbort (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2767,12 +2745,12 @@ int __stdcall HXPGroupMoveAbort (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double TargetPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupMoveAbsolute (int SocketIndex, char * GroupName, int NbElements, double TargetPosition[]) 
+int __stdcall HXPGroupMoveAbsolute (int SocketIndex, const char * GroupName, int NbElements, double TargetPosition[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2811,12 +2789,12 @@ int __stdcall HXPGroupMoveAbsolute (int SocketIndex, char * GroupName, int NbEle
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double TargetDisplacement
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupMoveRelative (int SocketIndex, char * GroupName, int NbElements, double TargetDisplacement[]) 
+int __stdcall HXPGroupMoveRelative (int SocketIndex, const char * GroupName, int NbElements, double TargetDisplacement[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2855,11 +2833,11 @@ int __stdcall HXPGroupMoveRelative (int SocketIndex, char * GroupName, int NbEle
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupMotionDisable (int SocketIndex, char * GroupName) 
+int __stdcall HXPGroupMotionDisable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2887,11 +2865,11 @@ int __stdcall HXPGroupMotionDisable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupMotionEnable (int SocketIndex, char * GroupName) 
+int __stdcall HXPGroupMotionEnable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2919,7 +2897,7 @@ int __stdcall HXPGroupMotionEnable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double PositionX
  *            double PositionY
  *            double *CorrectedProfilerPositionX
@@ -2927,7 +2905,7 @@ int __stdcall HXPGroupMotionEnable (int SocketIndex, char * GroupName)
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupPositionCorrectedProfilerGet (int SocketIndex, char * GroupName, double PositionX, double PositionY, double * CorrectedProfilerPositionX, double * CorrectedProfilerPositionY) 
+int __stdcall HXPGroupPositionCorrectedProfilerGet (int SocketIndex, const char * GroupName, double PositionX, double PositionY, double * CorrectedProfilerPositionX, double * CorrectedProfilerPositionY) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2946,10 +2924,8 @@ int __stdcall HXPGroupPositionCorrectedProfilerGet (int SocketIndex, char * Grou
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CorrectedProfilerPositionX);
@@ -2969,13 +2945,13 @@ int __stdcall HXPGroupPositionCorrectedProfilerGet (int SocketIndex, char * Grou
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *CurrentEncoderPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupPositionCurrentGet (int SocketIndex, char * GroupName, int NbElements, double CurrentEncoderPosition[]) 
+int __stdcall HXPGroupPositionCurrentGet (int SocketIndex, const char * GroupName, int NbElements, double CurrentEncoderPosition[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3005,10 +2981,8 @@ int __stdcall HXPGroupPositionCurrentGet (int SocketIndex, char * GroupName, int
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3029,13 +3003,13 @@ int __stdcall HXPGroupPositionCurrentGet (int SocketIndex, char * GroupName, int
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *SetPointPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupPositionSetpointGet (int SocketIndex, char * GroupName, int NbElements, double SetPointPosition[]) 
+int __stdcall HXPGroupPositionSetpointGet (int SocketIndex, const char * GroupName, int NbElements, double SetPointPosition[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3065,10 +3039,8 @@ int __stdcall HXPGroupPositionSetpointGet (int SocketIndex, char * GroupName, in
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3089,13 +3061,13 @@ int __stdcall HXPGroupPositionSetpointGet (int SocketIndex, char * GroupName, in
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *TargetPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupPositionTargetGet (int SocketIndex, char * GroupName, int NbElements, double TargetPosition[]) 
+int __stdcall HXPGroupPositionTargetGet (int SocketIndex, const char * GroupName, int NbElements, double TargetPosition[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3125,10 +3097,8 @@ int __stdcall HXPGroupPositionTargetGet (int SocketIndex, char * GroupName, int 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3149,12 +3119,12 @@ int __stdcall HXPGroupPositionTargetGet (int SocketIndex, char * GroupName, int 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int *Status
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPGroupStatusGet (int SocketIndex, char * GroupName, int * Status) 
+int __stdcall HXPGroupStatusGet (int SocketIndex, const char * GroupName, int * Status) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3173,10 +3143,8 @@ int __stdcall HXPGroupStatusGet (int SocketIndex, char * GroupName, int * Status
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", Status);
@@ -3301,13 +3269,13 @@ int __stdcall HXPRestartApplication (int SocketIndex)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *BacklashValue
  *            char *BacklaskStatus
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerBacklashGet (int SocketIndex, char * PositionerName, double * BacklashValue, char * BacklaskStatus) 
+int __stdcall HXPPositionerBacklashGet (int SocketIndex, const char * PositionerName, double * BacklashValue, char * BacklaskStatus) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3351,12 +3319,12 @@ int __stdcall HXPPositionerBacklashGet (int SocketIndex, char * PositionerName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double BacklashValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerBacklashSet (int SocketIndex, char * PositionerName, double BacklashValue) 
+int __stdcall HXPPositionerBacklashSet (int SocketIndex, const char * PositionerName, double BacklashValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3384,11 +3352,11 @@ int __stdcall HXPPositionerBacklashSet (int SocketIndex, char * PositionerName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerBacklashEnable (int SocketIndex, char * PositionerName) 
+int __stdcall HXPPositionerBacklashEnable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3416,11 +3384,11 @@ int __stdcall HXPPositionerBacklashEnable (int SocketIndex, char * PositionerNam
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerBacklashDisable (int SocketIndex, char * PositionerName) 
+int __stdcall HXPPositionerBacklashDisable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3448,7 +3416,7 @@ int __stdcall HXPPositionerBacklashDisable (int SocketIndex, char * PositionerNa
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double NotchFrequency1
  *            double NotchBandwith1
  *            double NotchGain1
@@ -3458,7 +3426,7 @@ int __stdcall HXPPositionerBacklashDisable (int SocketIndex, char * PositionerNa
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorNotchFiltersSet (int SocketIndex, char * PositionerName, double NotchFrequency1, double NotchBandwith1, double NotchGain1, double NotchFrequency2, double NotchBandwith2, double NotchGain2) 
+int __stdcall HXPPositionerCorrectorNotchFiltersSet (int SocketIndex, const char * PositionerName, double NotchFrequency1, double NotchBandwith1, double NotchGain1, double NotchFrequency2, double NotchBandwith2, double NotchGain2) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3486,7 +3454,7 @@ int __stdcall HXPPositionerCorrectorNotchFiltersSet (int SocketIndex, char * Pos
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *NotchFrequency1
  *            double *NotchBandwith1
  *            double *NotchGain1
@@ -3496,7 +3464,7 @@ int __stdcall HXPPositionerCorrectorNotchFiltersSet (int SocketIndex, char * Pos
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorNotchFiltersGet (int SocketIndex, char * PositionerName, double * NotchFrequency1, double * NotchBandwith1, double * NotchGain1, double * NotchFrequency2, double * NotchBandwith2, double * NotchGain2) 
+int __stdcall HXPPositionerCorrectorNotchFiltersGet (int SocketIndex, const char * PositionerName, double * NotchFrequency1, double * NotchBandwith1, double * NotchGain1, double * NotchFrequency2, double * NotchBandwith2, double * NotchGain2) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3515,10 +3483,8 @@ int __stdcall HXPPositionerCorrectorNotchFiltersGet (int SocketIndex, char * Pos
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", NotchFrequency1);
@@ -3550,7 +3516,7 @@ int __stdcall HXPPositionerCorrectorNotchFiltersGet (int SocketIndex, char * Pos
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool ClosedLoopStatus
  *            double KP
  *            double KI
@@ -3566,7 +3532,7 @@ int __stdcall HXPPositionerCorrectorNotchFiltersGet (int SocketIndex, char * Pos
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainAcceleration) 
+int __stdcall HXPPositionerCorrectorPIDFFAccelerationSet (int SocketIndex, const char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3594,7 +3560,7 @@ int __stdcall HXPPositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool *ClosedLoopStatus
  *            double *KP
  *            double *KI
@@ -3610,7 +3576,7 @@ int __stdcall HXPPositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char 
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainAcceleration) 
+int __stdcall HXPPositionerCorrectorPIDFFAccelerationGet (int SocketIndex, const char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3630,10 +3596,8 @@ int __stdcall HXPPositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -3684,7 +3648,7 @@ int __stdcall HXPPositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool ClosedLoopStatus
  *            double KP
  *            double KI
@@ -3700,7 +3664,7 @@ int __stdcall HXPPositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char 
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity) 
+int __stdcall HXPPositionerCorrectorPIDFFVelocitySet (int SocketIndex, const char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3728,7 +3692,7 @@ int __stdcall HXPPositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * Po
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool *ClosedLoopStatus
  *            double *KP
  *            double *KI
@@ -3744,7 +3708,7 @@ int __stdcall HXPPositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * Po
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity) 
+int __stdcall HXPPositionerCorrectorPIDFFVelocityGet (int SocketIndex, const char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3764,10 +3728,8 @@ int __stdcall HXPPositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -3818,7 +3780,7 @@ int __stdcall HXPPositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Po
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool ClosedLoopStatus
  *            double KP
  *            double KI
@@ -3836,7 +3798,7 @@ int __stdcall HXPPositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Po
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity, double FeedForwardGainAcceleration, double Friction) 
+int __stdcall HXPPositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, const char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity, double FeedForwardGainAcceleration, double Friction) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3864,7 +3826,7 @@ int __stdcall HXPPositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char *
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool *ClosedLoopStatus
  *            double *KP
  *            double *KI
@@ -3882,7 +3844,7 @@ int __stdcall HXPPositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char *
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity, double * FeedForwardGainAcceleration, double * Friction) 
+int __stdcall HXPPositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, const char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity, double * FeedForwardGainAcceleration, double * Friction) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3902,10 +3864,8 @@ int __stdcall HXPPositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -3962,7 +3922,7 @@ int __stdcall HXPPositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char *
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool ClosedLoopStatus
  *            double KP
  *            double KI
@@ -3970,7 +3930,7 @@ int __stdcall HXPPositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char *
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorPIPositionSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double IntegrationTime) 
+int __stdcall HXPPositionerCorrectorPIPositionSet (int SocketIndex, const char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double IntegrationTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3998,7 +3958,7 @@ int __stdcall HXPPositionerCorrectorPIPositionSet (int SocketIndex, char * Posit
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool *ClosedLoopStatus
  *            double *KP
  *            double *KI
@@ -4006,7 +3966,7 @@ int __stdcall HXPPositionerCorrectorPIPositionSet (int SocketIndex, char * Posit
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorPIPositionGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * IntegrationTime) 
+int __stdcall HXPPositionerCorrectorPIPositionGet (int SocketIndex, const char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * IntegrationTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4026,10 +3986,8 @@ int __stdcall HXPPositionerCorrectorPIPositionGet (int SocketIndex, char * Posit
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4056,12 +4014,12 @@ int __stdcall HXPPositionerCorrectorPIPositionGet (int SocketIndex, char * Posit
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            char *CorrectorType
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCorrectorTypeGet (int SocketIndex, char * PositionerName, char * CorrectorType) 
+int __stdcall HXPPositionerCorrectorTypeGet (int SocketIndex, const char * PositionerName, char * CorrectorType) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4102,13 +4060,13 @@ int __stdcall HXPPositionerCorrectorTypeGet (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double CurrentVelocityCutOffFrequency
  *            double CurrentAccelerationCutOffFrequency
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCurrentVelocityAccelerationFiltersSet (int SocketIndex, char * PositionerName, double CurrentVelocityCutOffFrequency, double CurrentAccelerationCutOffFrequency) 
+int __stdcall HXPPositionerCurrentVelocityAccelerationFiltersSet (int SocketIndex, const char * PositionerName, double CurrentVelocityCutOffFrequency, double CurrentAccelerationCutOffFrequency) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4136,13 +4094,13 @@ int __stdcall HXPPositionerCurrentVelocityAccelerationFiltersSet (int SocketInde
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *CurrentVelocityCutOffFrequency
  *            double *CurrentAccelerationCutOffFrequency
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerCurrentVelocityAccelerationFiltersGet (int SocketIndex, char * PositionerName, double * CurrentVelocityCutOffFrequency, double * CurrentAccelerationCutOffFrequency) 
+int __stdcall HXPPositionerCurrentVelocityAccelerationFiltersGet (int SocketIndex, const char * PositionerName, double * CurrentVelocityCutOffFrequency, double * CurrentAccelerationCutOffFrequency) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4161,10 +4119,8 @@ int __stdcall HXPPositionerCurrentVelocityAccelerationFiltersGet (int SocketInde
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CurrentVelocityCutOffFrequency);
@@ -4184,12 +4140,12 @@ int __stdcall HXPPositionerCurrentVelocityAccelerationFiltersGet (int SocketInde
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *DriverStatus
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerDriverStatusGet (int SocketIndex, char * PositionerName, int * DriverStatus) 
+int __stdcall HXPPositionerDriverStatusGet (int SocketIndex, const char * PositionerName, int * DriverStatus) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4208,10 +4164,8 @@ int __stdcall HXPPositionerDriverStatusGet (int SocketIndex, char * PositionerNa
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", DriverStatus);
@@ -4274,7 +4228,7 @@ int __stdcall HXPPositionerDriverStatusStringGet (int SocketIndex, int Positione
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *CalibrationSinusAmplitude
  *            double *CurrentSinusAmplitude
  *            double *CalibrationCosinusAmplitude
@@ -4282,7 +4236,7 @@ int __stdcall HXPPositionerDriverStatusStringGet (int SocketIndex, int Positione
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerEncoderAmplitudeValuesGet (int SocketIndex, char * PositionerName, double * CalibrationSinusAmplitude, double * CurrentSinusAmplitude, double * CalibrationCosinusAmplitude, double * CurrentCosinusAmplitude) 
+int __stdcall HXPPositionerEncoderAmplitudeValuesGet (int SocketIndex, const char * PositionerName, double * CalibrationSinusAmplitude, double * CurrentSinusAmplitude, double * CalibrationCosinusAmplitude, double * CurrentCosinusAmplitude) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4301,10 +4255,8 @@ int __stdcall HXPPositionerEncoderAmplitudeValuesGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CalibrationSinusAmplitude);
@@ -4330,7 +4282,7 @@ int __stdcall HXPPositionerEncoderAmplitudeValuesGet (int SocketIndex, char * Po
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *SinusOffset
  *            double *CosinusOffset
  *            double *DifferentialGain
@@ -4338,7 +4290,7 @@ int __stdcall HXPPositionerEncoderAmplitudeValuesGet (int SocketIndex, char * Po
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerEncoderCalibrationParametersGet (int SocketIndex, char * PositionerName, double * SinusOffset, double * CosinusOffset, double * DifferentialGain, double * PhaseCompensation) 
+int __stdcall HXPPositionerEncoderCalibrationParametersGet (int SocketIndex, const char * PositionerName, double * SinusOffset, double * CosinusOffset, double * DifferentialGain, double * PhaseCompensation) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4357,10 +4309,8 @@ int __stdcall HXPPositionerEncoderCalibrationParametersGet (int SocketIndex, cha
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", SinusOffset);
@@ -4386,12 +4336,12 @@ int __stdcall HXPPositionerEncoderCalibrationParametersGet (int SocketIndex, cha
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *ErrorCode
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerErrorGet (int SocketIndex, char * PositionerName, int * ErrorCode) 
+int __stdcall HXPPositionerErrorGet (int SocketIndex, const char * PositionerName, int * ErrorCode) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4410,10 +4360,8 @@ int __stdcall HXPPositionerErrorGet (int SocketIndex, char * PositionerName, int
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ErrorCode);
@@ -4430,12 +4378,12 @@ int __stdcall HXPPositionerErrorGet (int SocketIndex, char * PositionerName, int
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *ErrorCode
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerErrorRead (int SocketIndex, char * PositionerName, int * ErrorCode) 
+int __stdcall HXPPositionerErrorRead (int SocketIndex, const char * PositionerName, int * ErrorCode) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4454,10 +4402,8 @@ int __stdcall HXPPositionerErrorRead (int SocketIndex, char * PositionerName, in
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ErrorCode);
@@ -4520,12 +4466,12 @@ int __stdcall HXPPositionerErrorStringGet (int SocketIndex, int PositionerErrorC
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *HardwareStatus
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerHardwareStatusGet (int SocketIndex, char * PositionerName, int * HardwareStatus) 
+int __stdcall HXPPositionerHardwareStatusGet (int SocketIndex, const char * PositionerName, int * HardwareStatus) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4544,10 +4490,8 @@ int __stdcall HXPPositionerHardwareStatusGet (int SocketIndex, char * Positioner
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", HardwareStatus);
@@ -4610,12 +4554,12 @@ int __stdcall HXPPositionerHardwareStatusStringGet (int SocketIndex, int Positio
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *InterpolationFactor
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerHardInterpolatorFactorGet (int SocketIndex, char * PositionerName, int * InterpolationFactor) 
+int __stdcall HXPPositionerHardInterpolatorFactorGet (int SocketIndex, const char * PositionerName, int * InterpolationFactor) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4634,10 +4578,8 @@ int __stdcall HXPPositionerHardInterpolatorFactorGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", InterpolationFactor);
@@ -4654,12 +4596,12 @@ int __stdcall HXPPositionerHardInterpolatorFactorGet (int SocketIndex, char * Po
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int InterpolationFactor
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerHardInterpolatorFactorSet (int SocketIndex, char * PositionerName, int InterpolationFactor) 
+int __stdcall HXPPositionerHardInterpolatorFactorSet (int SocketIndex, const char * PositionerName, int InterpolationFactor) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4687,13 +4629,13 @@ int __stdcall HXPPositionerHardInterpolatorFactorSet (int SocketIndex, char * Po
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *MaximumVelocity
  *            double *MaximumAcceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerMaximumVelocityAndAccelerationGet (int SocketIndex, char * PositionerName, double * MaximumVelocity, double * MaximumAcceleration) 
+int __stdcall HXPPositionerMaximumVelocityAndAccelerationGet (int SocketIndex, const char * PositionerName, double * MaximumVelocity, double * MaximumAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4712,10 +4654,8 @@ int __stdcall HXPPositionerMaximumVelocityAndAccelerationGet (int SocketIndex, c
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MaximumVelocity);
@@ -4735,7 +4675,7 @@ int __stdcall HXPPositionerMaximumVelocityAndAccelerationGet (int SocketIndex, c
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *PositionWindow
  *            double *VelocityWindow
  *            double *CheckingTime
@@ -4744,7 +4684,7 @@ int __stdcall HXPPositionerMaximumVelocityAndAccelerationGet (int SocketIndex, c
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerMotionDoneGet (int SocketIndex, char * PositionerName, double * PositionWindow, double * VelocityWindow, double * CheckingTime, double * MeanPeriod, double * TimeOut) 
+int __stdcall HXPPositionerMotionDoneGet (int SocketIndex, const char * PositionerName, double * PositionWindow, double * VelocityWindow, double * CheckingTime, double * MeanPeriod, double * TimeOut) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4763,10 +4703,8 @@ int __stdcall HXPPositionerMotionDoneGet (int SocketIndex, char * PositionerName
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", PositionWindow);
@@ -4795,7 +4733,7 @@ int __stdcall HXPPositionerMotionDoneGet (int SocketIndex, char * PositionerName
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double PositionWindow
  *            double VelocityWindow
  *            double CheckingTime
@@ -4804,7 +4742,7 @@ int __stdcall HXPPositionerMotionDoneGet (int SocketIndex, char * PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerMotionDoneSet (int SocketIndex, char * PositionerName, double PositionWindow, double VelocityWindow, double CheckingTime, double MeanPeriod, double TimeOut) 
+int __stdcall HXPPositionerMotionDoneSet (int SocketIndex, const char * PositionerName, double PositionWindow, double VelocityWindow, double CheckingTime, double MeanPeriod, double TimeOut) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4832,13 +4770,13 @@ int __stdcall HXPPositionerMotionDoneSet (int SocketIndex, char * PositionerName
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double DesiredDisplacement
  *            double *AdjustedDisplacement
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerSGammaExactVelocityAjustedDisplacementGet (int SocketIndex, char * PositionerName, double DesiredDisplacement, double * AdjustedDisplacement) 
+int __stdcall HXPPositionerSGammaExactVelocityAjustedDisplacementGet (int SocketIndex, const char * PositionerName, double DesiredDisplacement, double * AdjustedDisplacement) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4857,10 +4795,8 @@ int __stdcall HXPPositionerSGammaExactVelocityAjustedDisplacementGet (int Socket
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", AdjustedDisplacement);
@@ -4877,7 +4813,7 @@ int __stdcall HXPPositionerSGammaExactVelocityAjustedDisplacementGet (int Socket
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *Velocity
  *            double *Acceleration
  *            double *MinimumTjerkTime
@@ -4885,7 +4821,7 @@ int __stdcall HXPPositionerSGammaExactVelocityAjustedDisplacementGet (int Socket
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerSGammaParametersGet (int SocketIndex, char * PositionerName, double * Velocity, double * Acceleration, double * MinimumTjerkTime, double * MaximumTjerkTime) 
+int __stdcall HXPPositionerSGammaParametersGet (int SocketIndex, const char * PositionerName, double * Velocity, double * Acceleration, double * MinimumTjerkTime, double * MaximumTjerkTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4904,10 +4840,8 @@ int __stdcall HXPPositionerSGammaParametersGet (int SocketIndex, char * Position
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Velocity);
@@ -4933,7 +4867,7 @@ int __stdcall HXPPositionerSGammaParametersGet (int SocketIndex, char * Position
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double Velocity
  *            double Acceleration
  *            double MinimumTjerkTime
@@ -4941,7 +4875,7 @@ int __stdcall HXPPositionerSGammaParametersGet (int SocketIndex, char * Position
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerSGammaParametersSet (int SocketIndex, char * PositionerName, double Velocity, double Acceleration, double MinimumTjerkTime, double MaximumTjerkTime) 
+int __stdcall HXPPositionerSGammaParametersSet (int SocketIndex, const char * PositionerName, double Velocity, double Acceleration, double MinimumTjerkTime, double MaximumTjerkTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4969,13 +4903,13 @@ int __stdcall HXPPositionerSGammaParametersSet (int SocketIndex, char * Position
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *SettingTime
  *            double *SettlingTime
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerSGammaPreviousMotionTimesGet (int SocketIndex, char * PositionerName, double * SettingTime, double * SettlingTime) 
+int __stdcall HXPPositionerSGammaPreviousMotionTimesGet (int SocketIndex, const char * PositionerName, double * SettingTime, double * SettlingTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4994,10 +4928,8 @@ int __stdcall HXPPositionerSGammaPreviousMotionTimesGet (int SocketIndex, char *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", SettingTime);
@@ -5017,13 +4949,13 @@ int __stdcall HXPPositionerSGammaPreviousMotionTimesGet (int SocketIndex, char *
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *ParameterName
+ *            const char *PositionerName
+ *            const char *ParameterName
  *            char *ParameterValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerStageParameterGet (int SocketIndex, char * PositionerName, char * ParameterName, char * ParameterValue) 
+int __stdcall HXPPositionerStageParameterGet (int SocketIndex, const char * PositionerName, const char * ParameterName, char * ParameterValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5064,13 +4996,13 @@ int __stdcall HXPPositionerStageParameterGet (int SocketIndex, char * Positioner
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *ParameterName
- *            char *ParameterValue
+ *            const char *PositionerName
+ *            const char *ParameterName
+ *            const char *ParameterValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerStageParameterSet (int SocketIndex, char * PositionerName, char * ParameterName, char * ParameterValue) 
+int __stdcall HXPPositionerStageParameterSet (int SocketIndex, const char * PositionerName, const char * ParameterName, const char * ParameterValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5098,13 +5030,13 @@ int __stdcall HXPPositionerStageParameterSet (int SocketIndex, char * Positioner
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *UserMinimumTarget
  *            double *UserMaximumTarget
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerUserTravelLimitsGet (int SocketIndex, char * PositionerName, double * UserMinimumTarget, double * UserMaximumTarget) 
+int __stdcall HXPPositionerUserTravelLimitsGet (int SocketIndex, const char * PositionerName, double * UserMinimumTarget, double * UserMaximumTarget) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5123,10 +5055,8 @@ int __stdcall HXPPositionerUserTravelLimitsGet (int SocketIndex, char * Position
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", UserMinimumTarget);
@@ -5146,13 +5076,13 @@ int __stdcall HXPPositionerUserTravelLimitsGet (int SocketIndex, char * Position
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double UserMinimumTarget
  *            double UserMaximumTarget
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPPositionerUserTravelLimitsSet (int SocketIndex, char * PositionerName, double UserMinimumTarget, double UserMaximumTarget) 
+int __stdcall HXPPositionerUserTravelLimitsSet (int SocketIndex, const char * PositionerName, double UserMinimumTarget, double UserMaximumTarget) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5180,8 +5110,8 @@ int __stdcall HXPPositionerUserTravelLimitsSet (int SocketIndex, char * Position
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *CoordinateSystem
+ *            const char *GroupName
+ *            const char *CoordinateSystem
  *            double X
  *            double Y
  *            double Z
@@ -5191,7 +5121,7 @@ int __stdcall HXPPositionerUserTravelLimitsSet (int SocketIndex, char * Position
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPHexapodMoveAbsolute (int SocketIndex, char * GroupName, char * CoordinateSystem, double X, double Y, double Z, double U, double V, double W) 
+int __stdcall HXPHexapodMoveAbsolute (int SocketIndex, const char * GroupName, const char * CoordinateSystem, double X, double Y, double Z, double U, double V, double W) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5219,8 +5149,8 @@ int __stdcall HXPHexapodMoveAbsolute (int SocketIndex, char * GroupName, char * 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *CoordinateSystem
+ *            const char *GroupName
+ *            const char *CoordinateSystem
  *            double dX
  *            double dY
  *            double dZ
@@ -5230,7 +5160,7 @@ int __stdcall HXPHexapodMoveAbsolute (int SocketIndex, char * GroupName, char * 
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPHexapodMoveIncremental (int SocketIndex, char * GroupName, char * CoordinateSystem, double dX, double dY, double dZ, double dU, double dV, double dW) 
+int __stdcall HXPHexapodMoveIncremental (int SocketIndex, const char * GroupName, const char * CoordinateSystem, double dX, double dY, double dZ, double dU, double dV, double dW) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5258,9 +5188,9 @@ int __stdcall HXPHexapodMoveIncremental (int SocketIndex, char * GroupName, char
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *CoordinateSystemIn
- *            char *CoordinateSystemOut
+ *            const char *GroupName
+ *            const char *CoordinateSystemIn
+ *            const char *CoordinateSystemOut
  *            double Xin
  *            double Yin
  *            double Zin
@@ -5276,7 +5206,7 @@ int __stdcall HXPHexapodMoveIncremental (int SocketIndex, char * GroupName, char
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPHexapodCoordinatesGet (int SocketIndex, char * GroupName, char * CoordinateSystemIn, char * CoordinateSystemOut, double Xin, double Yin, double Zin, double Uin, double Vin, double Win, double * Xout, double * Yout, double * Zout, double * Uout, double * Vout, double * Wout) 
+int __stdcall HXPHexapodCoordinatesGet (int SocketIndex, const char * GroupName, const char * CoordinateSystemIn, const char * CoordinateSystemOut, double Xin, double Yin, double Zin, double Uin, double Vin, double Win, double * Xout, double * Yout, double * Zout, double * Uout, double * Vout, double * Wout) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5295,10 +5225,8 @@ int __stdcall HXPHexapodCoordinatesGet (int SocketIndex, char * GroupName, char 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Xout);
@@ -5330,8 +5258,8 @@ int __stdcall HXPHexapodCoordinatesGet (int SocketIndex, char * GroupName, char 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *CoordinateSystem
+ *            const char *GroupName
+ *            const char *CoordinateSystem
  *            double X
  *            double Y
  *            double Z
@@ -5341,7 +5269,7 @@ int __stdcall HXPHexapodCoordinatesGet (int SocketIndex, char * GroupName, char 
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPHexapodCoordinateSystemSet (int SocketIndex, char * GroupName, char * CoordinateSystem, double X, double Y, double Z, double U, double V, double W) 
+int __stdcall HXPHexapodCoordinateSystemSet (int SocketIndex, const char * GroupName, const char * CoordinateSystem, double X, double Y, double Z, double U, double V, double W) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5369,8 +5297,8 @@ int __stdcall HXPHexapodCoordinateSystemSet (int SocketIndex, char * GroupName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *CoordinateSystem
+ *            const char *GroupName
+ *            const char *CoordinateSystem
  *            double *X
  *            double *Y
  *            double *Z
@@ -5380,7 +5308,7 @@ int __stdcall HXPHexapodCoordinateSystemSet (int SocketIndex, char * GroupName, 
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPHexapodCoordinateSystemGet (int SocketIndex, char * GroupName, char * CoordinateSystem, double * X, double * Y, double * Z, double * U, double * V, double * W) 
+int __stdcall HXPHexapodCoordinateSystemGet (int SocketIndex, const char * GroupName, const char * CoordinateSystem, double * X, double * Y, double * Z, double * U, double * V, double * W) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5399,10 +5327,8 @@ int __stdcall HXPHexapodCoordinateSystemGet (int SocketIndex, char * GroupName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", X);
@@ -5439,7 +5365,7 @@ int __stdcall HXPHexapodCoordinateSystemGet (int SocketIndex, char * GroupName, 
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPOptionalModuleExecute (int SocketIndex, char * ModuleFileName, char * TaskName) 
+int __stdcall HXPOptionalModuleExecute (int SocketIndex, const char * ModuleFileName, const char * TaskName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5467,11 +5393,11 @@ int __stdcall HXPOptionalModuleExecute (int SocketIndex, char * ModuleFileName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TaskName
+ *            const char *TaskName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPOptionalModuleKill (int SocketIndex, char * TaskName) 
+int __stdcall HXPOptionalModuleKill (int SocketIndex, const char * TaskName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5522,10 +5448,8 @@ int __stdcall HXPControllerStatusGet (int SocketIndex, int * ControllerStatus)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ControllerStatus);
@@ -5589,11 +5513,11 @@ int __stdcall HXPControllerStatusStringGet (int SocketIndex, int ControllerStatu
  *     - Parameters :
  *            int SocketIndex
  *            int CardNumber
- *            char *ReferenceString
+ *            const char *ReferenceString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEEPROMCIESet (int SocketIndex, int CardNumber, char * ReferenceString) 
+int __stdcall HXPEEPROMCIESet (int SocketIndex, int CardNumber, const char * ReferenceString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5656,11 +5580,11 @@ int __stdcall HXPEEPROMDACOffsetCIESet (int SocketIndex, int PlugNumber, double 
  *     - Parameters :
  *            int SocketIndex
  *            int PlugNumber
- *            char *ReferenceString
+ *            const char *ReferenceString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEEPROMDriverSet (int SocketIndex, int PlugNumber, char * ReferenceString) 
+int __stdcall HXPEEPROMDriverSet (int SocketIndex, int PlugNumber, const char * ReferenceString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5689,11 +5613,11 @@ int __stdcall HXPEEPROMDriverSet (int SocketIndex, int PlugNumber, char * Refere
  *     - Parameters :
  *            int SocketIndex
  *            int CardNumber
- *            char *ReferenceString
+ *            const char *ReferenceString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPEEPROMINTSet (int SocketIndex, int CardNumber, char * ReferenceString) 
+int __stdcall HXPEEPROMINTSet (int SocketIndex, int CardNumber, const char * ReferenceString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5751,10 +5675,8 @@ int __stdcall HXPCPUCoreAndBoardSupplyVoltagesGet (int SocketIndex, double * Vol
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", VoltageCPUCore);
@@ -5816,10 +5738,8 @@ int __stdcall HXPCPUTemperatureAndFanSpeedGet (int SocketIndex, double * CPUTemp
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CPUTemperature);
@@ -6686,10 +6606,8 @@ int __stdcall HXPGatheringUserDatasGet (int SocketIndex, double * UserData1, dou
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", UserData1);
@@ -6755,10 +6673,8 @@ int __stdcall HXPControllerMotionKernelPeriodMinMaxGet (int SocketIndex, double 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumCorrectorPeriod);
@@ -6821,12 +6737,12 @@ int __stdcall HXPControllerMotionKernelPeriodMinMaxReset (int SocketIndex)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *InputString
+ *            const char *InputString
  *            char *ReturnString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HXPTestTCP (int SocketIndex, char * InputString, char * ReturnString) 
+int __stdcall HXPTestTCP (int SocketIndex, const char * InputString, char * ReturnString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 

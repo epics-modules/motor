@@ -54,7 +54,7 @@ char * __stdcall TCP_GetError(int SocketIndex)
 	return (GetError(SocketIndex));
 }
 /***********************************************************************/
-char * __stdcall GetLibraryVersion(void) 
+const char * __stdcall GetLibraryVersion(void) 
 {
 	return (DLL_VERSION);
 }
@@ -90,10 +90,8 @@ int __stdcall ControllerMotionKernelTimeLoadGet (int SocketIndex, double * CPUTo
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CPUTotalLoadRatio);
@@ -142,10 +140,8 @@ int __stdcall ControllerStatusGet (int SocketIndex, int * ControllerStatus)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ControllerStatus);
@@ -231,10 +227,8 @@ int __stdcall ElapsedTimeGet (int SocketIndex, double * ElapsedTime)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", ElapsedTime);
@@ -342,13 +336,13 @@ int __stdcall FirmwareVersionGet (int SocketIndex, char * Version)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TCLFileName
- *            char *TaskName
- *            char *ParametersList
+ *            const char *TCLFileName
+ *            const char *TaskName
+ *            const char *ParametersList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall TCLScriptExecute (int SocketIndex, char * TCLFileName, char * TaskName, char * ParametersList) 
+int __stdcall TCLScriptExecute (int SocketIndex, const char * TCLFileName, const char * TaskName, const char * ParametersList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -376,14 +370,14 @@ int __stdcall TCLScriptExecute (int SocketIndex, char * TCLFileName, char * Task
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TCLFileName
- *            char *TaskName
- *            char *InputParametersList
+ *            const char *TCLFileName
+ *            const char *TaskName
+ *            const char *InputParametersList
  *            char *OutputParametersList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall TCLScriptExecuteAndWait (int SocketIndex, char * TCLFileName, char * TaskName, char * InputParametersList, char * OutputParametersList) 
+int __stdcall TCLScriptExecuteAndWait (int SocketIndex, const char * TCLFileName, const char * TaskName, const char * InputParametersList, char * OutputParametersList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -424,14 +418,14 @@ int __stdcall TCLScriptExecuteAndWait (int SocketIndex, char * TCLFileName, char
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TCLFileName
- *            char *TaskName
- *            char *TaskPriorityLevel
- *            char *ParametersList
+ *            const char *TCLFileName
+ *            const char *TaskName
+ *            const char *TaskPriorityLevel
+ *            const char *ParametersList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall TCLScriptExecuteWithPriority (int SocketIndex, char * TCLFileName, char * TaskName, char * TaskPriorityLevel, char * ParametersList) 
+int __stdcall TCLScriptExecuteWithPriority (int SocketIndex, const char * TCLFileName, const char * TaskName, const char * TaskPriorityLevel, const char * ParametersList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -459,11 +453,11 @@ int __stdcall TCLScriptExecuteWithPriority (int SocketIndex, char * TCLFileName,
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TaskName
+ *            const char *TaskName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall TCLScriptKill (int SocketIndex, char * TaskName) 
+int __stdcall TCLScriptKill (int SocketIndex, const char * TaskName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -491,12 +485,12 @@ int __stdcall TCLScriptKill (int SocketIndex, char * TaskName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TimerName
+ *            const char *TimerName
  *            int *FrequencyTicks
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall TimerGet (int SocketIndex, char * TimerName, int * FrequencyTicks) 
+int __stdcall TimerGet (int SocketIndex, const char * TimerName, int * FrequencyTicks) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -515,10 +509,8 @@ int __stdcall TimerGet (int SocketIndex, char * TimerName, int * FrequencyTicks)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", FrequencyTicks);
@@ -535,12 +527,12 @@ int __stdcall TimerGet (int SocketIndex, char * TimerName, int * FrequencyTicks)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TimerName
+ *            const char *TimerName
  *            int FrequencyTicks
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall TimerSet (int SocketIndex, char * TimerName, int FrequencyTicks) 
+int __stdcall TimerSet (int SocketIndex, const char * TimerName, int FrequencyTicks) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -599,12 +591,12 @@ int __stdcall Reboot (int SocketIndex)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *Name
- *            char *Password
+ *            const char *Name
+ *            const char *Password
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall Login (int SocketIndex, char * Name, char * Password) 
+int __stdcall Login (int SocketIndex, const char * Name, const char * Password) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -712,7 +704,7 @@ int __stdcall HardwareDateAndTimeGet (int SocketIndex, char * DateAndTime)
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall HardwareDateAndTimeSet (int SocketIndex, char * DateAndTime) 
+int __stdcall HardwareDateAndTimeSet (int SocketIndex, const char * DateAndTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -740,17 +732,17 @@ int __stdcall HardwareDateAndTimeSet (int SocketIndex, char * DateAndTime)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *EventName
- *            char *EventParameter
- *            char *ActionName
- *            char *ActionParameter1
- *            char *ActionParameter2
- *            char *ActionParameter3
+ *            const char *PositionerName
+ *            const char *EventName
+ *            const char *EventParameter
+ *            const char *ActionName
+ *            const char *ActionParameter1
+ *            const char *ActionParameter2
+ *            const char *ActionParameter3
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EventAdd (int SocketIndex, char * PositionerName, char * EventName, char * EventParameter, char * ActionName, char * ActionParameter1, char * ActionParameter2, char * ActionParameter3) 
+int __stdcall EventAdd (int SocketIndex, const char * PositionerName, const char * EventName, const char * EventParameter, const char * ActionName, const char * ActionParameter1, const char * ActionParameter2, const char * ActionParameter3) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -778,12 +770,12 @@ int __stdcall EventAdd (int SocketIndex, char * PositionerName, char * EventName
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            char *EventsAndActionsList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EventGet (int SocketIndex, char * PositionerName, char * EventsAndActionsList) 
+int __stdcall EventGet (int SocketIndex, const char * PositionerName, char * EventsAndActionsList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -824,13 +816,13 @@ int __stdcall EventGet (int SocketIndex, char * PositionerName, char * EventsAnd
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *EventName
- *            char *EventParameter
+ *            const char *PositionerName
+ *            const char *EventName
+ *            const char *EventParameter
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EventRemove (int SocketIndex, char * PositionerName, char * EventName, char * EventParameter) 
+int __stdcall EventRemove (int SocketIndex, const char * PositionerName, const char * EventName, const char * EventParameter) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -858,13 +850,13 @@ int __stdcall EventRemove (int SocketIndex, char * PositionerName, char * EventN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *EventName
- *            char *EventParameter
+ *            const char *PositionerName
+ *            const char *EventName
+ *            const char *EventParameter
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EventWait (int SocketIndex, char * PositionerName, char * EventName, char * EventParameter) 
+int __stdcall EventWait (int SocketIndex, const char * PositionerName, const char * EventName, const char * EventParameter) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -893,15 +885,15 @@ int __stdcall EventWait (int SocketIndex, char * PositionerName, char * EventNam
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *ExtendedEventName
- *            char *EventParameter1
- *            char *EventParameter2
- *            char *EventParameter3
- *            char *EventParameter4
+ *            const char *ExtendedEventName
+ *            const char *EventParameter1
+ *            const char *EventParameter2
+ *            const char *EventParameter3
+ *            const char *EventParameter4
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EventExtendedConfigurationTriggerSet (int SocketIndex, int NbElements, char * ExtendedEventNameList, char * EventParameter1List, char * EventParameter2List, char * EventParameter3List, char * EventParameter4List) 
+int __stdcall EventExtendedConfigurationTriggerSet (int SocketIndex, int NbElements, const char * ExtendedEventNameList, const char * EventParameter1List, const char * EventParameter2List, const char * EventParameter3List, const char * EventParameter4List) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -1066,15 +1058,15 @@ int __stdcall EventExtendedConfigurationTriggerGet (int SocketIndex, char * Even
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *ExtendedActionName
- *            char *ActionParameter1
- *            char *ActionParameter2
- *            char *ActionParameter3
- *            char *ActionParameter4
+ *            const char *ExtendedActionName
+ *            const char *ActionParameter1
+ *            const char *ActionParameter2
+ *            const char *ActionParameter3
+ *            const char *ActionParameter4
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EventExtendedConfigurationActionSet (int SocketIndex, int NbElements, char * ExtendedActionNameList, char * ActionParameter1List, char * ActionParameter2List, char * ActionParameter3List, char * ActionParameter4List) 
+int __stdcall EventExtendedConfigurationActionSet (int SocketIndex, int NbElements, const char * ExtendedActionNameList, const char * ActionParameter1List, const char * ActionParameter2List, const char * ActionParameter3List, const char * ActionParameter4List) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -1261,10 +1253,8 @@ int __stdcall EventExtendedStart (int SocketIndex, int * ID)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ID);
@@ -1491,7 +1481,7 @@ int __stdcall GatheringConfigurationGet (int SocketIndex, char * Type)
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GatheringConfigurationSet (int SocketIndex, int NbElements, char * TypeList) 
+int __stdcall GatheringConfigurationSet (int SocketIndex, int NbElements, const char * TypeList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -1578,10 +1568,8 @@ int __stdcall GatheringCurrentNumberGet (int SocketIndex, int * CurrentNumber, i
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", CurrentNumber);
@@ -1883,11 +1871,11 @@ int __stdcall GatheringStop (int SocketIndex)
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *Type
+ *            const char *TypeList
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GatheringExternalConfigurationSet (int SocketIndex, int NbElements, char * TypeList) 
+int __stdcall GatheringExternalConfigurationSet (int SocketIndex, int NbElements, const char * TypeList) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2019,10 +2007,8 @@ int __stdcall GatheringExternalCurrentNumberGet (int SocketIndex, int * CurrentN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", CurrentNumber);
@@ -2166,11 +2152,11 @@ int __stdcall GlobalArrayGet (int SocketIndex, int Number, char * ValueString)
  *     - Parameters :
  *            int SocketIndex
  *            int Number
- *            char *ValueString
+ *            const char *ValueString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GlobalArraySet (int SocketIndex, int Number, char * ValueString) 
+int __stdcall GlobalArraySet (int SocketIndex, int Number, const char * ValueString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2222,10 +2208,8 @@ int __stdcall DoubleGlobalArrayGet (int SocketIndex, int Number, double * Double
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", DoubleValue);
@@ -2281,7 +2265,7 @@ int __stdcall DoubleGlobalArraySet (int SocketIndex, int Number, double DoubleVa
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GPIOAnalogGet (int SocketIndex, int NbElements, char * GPIONameList, double AnalogValue[]) 
+int __stdcall GPIOAnalogGet (int SocketIndex, int NbElements, const char * GPIONameList, double AnalogValue[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2335,10 +2319,8 @@ int __stdcall GPIOAnalogGet (int SocketIndex, int NbElements, char * GPIONameLis
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2360,12 +2342,12 @@ int __stdcall GPIOAnalogGet (int SocketIndex, int NbElements, char * GPIONameLis
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *GPIOName
+ *            const char *GPIOName
  *            double AnalogOutputValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GPIOAnalogSet (int SocketIndex, int NbElements, char * GPIONameList, double AnalogOutputValue[]) 
+int __stdcall GPIOAnalogSet (int SocketIndex, int NbElements, const char * GPIONameList, double AnalogOutputValue[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2429,12 +2411,12 @@ int __stdcall GPIOAnalogSet (int SocketIndex, int NbElements, char * GPIONameLis
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *GPIOName
+ *            const char *GPIOName
  *            int *AnalogInputGainValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIONameList, int AnalogInputGainValue[]) 
+int __stdcall GPIOAnalogGainGet (int SocketIndex, int NbElements, const char * GPIONameList, int AnalogInputGainValue[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2488,10 +2470,8 @@ int __stdcall GPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIONam
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2513,12 +2493,12 @@ int __stdcall GPIOAnalogGainGet (int SocketIndex, int NbElements, char * GPIONam
  *     - Parameters :
  *            int SocketIndex
  *            int nbElement
- *            char *GPIOName
+ *            const char *GPIOName
  *            int AnalogInputGainValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GPIOAnalogGainSet (int SocketIndex, int NbElements, char * GPIONameList, int AnalogInputGainValue[]) 
+int __stdcall GPIOAnalogGainSet (int SocketIndex, int NbElements, const char * GPIONameList, int AnalogInputGainValue[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2581,12 +2561,12 @@ int __stdcall GPIOAnalogGainSet (int SocketIndex, int NbElements, char * GPIONam
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GPIOName
+ *            const char *GPIOName
  *            unsigned short *DigitalValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GPIODigitalGet (int SocketIndex, char * GPIOName, unsigned short * DigitalValue) 
+int __stdcall GPIODigitalGet (int SocketIndex, const char * GPIOName, unsigned short * DigitalValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2605,10 +2585,8 @@ int __stdcall GPIODigitalGet (int SocketIndex, char * GPIOName, unsigned short *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%hu", DigitalValue);
@@ -2625,13 +2603,13 @@ int __stdcall GPIODigitalGet (int SocketIndex, char * GPIOName, unsigned short *
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GPIOName
+ *            const char *GPIOName
  *            unsigned short Mask
  *            unsigned short DigitalOutputValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GPIODigitalSet (int SocketIndex, char * GPIOName, unsigned short Mask, unsigned short DigitalOutputValue) 
+int __stdcall GPIODigitalSet (int SocketIndex, const char * GPIOName, unsigned short Mask, unsigned short DigitalOutputValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2659,13 +2637,13 @@ int __stdcall GPIODigitalSet (int SocketIndex, char * GPIOName, unsigned short M
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *SetpointAcceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupAccelerationSetpointGet (int SocketIndex, char * GroupName, int NbElements, double SetpointAcceleration[]) 
+int __stdcall GroupAccelerationSetpointGet (int SocketIndex, const char * GroupName, int NbElements, double SetpointAcceleration[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2695,10 +2673,8 @@ int __stdcall GroupAccelerationSetpointGet (int SocketIndex, char * GroupName, i
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2719,12 +2695,12 @@ int __stdcall GroupAccelerationSetpointGet (int SocketIndex, char * GroupName, i
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *Type
+ *            const char *GroupName
+ *            const char *Type
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupAnalogTrackingModeEnable (int SocketIndex, char * GroupName, char * Type) 
+int __stdcall GroupAnalogTrackingModeEnable (int SocketIndex, const char * GroupName, const char * Type) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2752,11 +2728,11 @@ int __stdcall GroupAnalogTrackingModeEnable (int SocketIndex, char * GroupName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupAnalogTrackingModeDisable (int SocketIndex, char * GroupName) 
+int __stdcall GroupAnalogTrackingModeDisable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2784,13 +2760,13 @@ int __stdcall GroupAnalogTrackingModeDisable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *CorrectorOutput
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupCorrectorOutputGet (int SocketIndex, char * GroupName, int NbElements, double CorrectorOutput[]) 
+int __stdcall GroupCorrectorOutputGet (int SocketIndex, const char * GroupName, int NbElements, double CorrectorOutput[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2820,10 +2796,8 @@ int __stdcall GroupCorrectorOutputGet (int SocketIndex, char * GroupName, int Nb
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2844,13 +2818,13 @@ int __stdcall GroupCorrectorOutputGet (int SocketIndex, char * GroupName, int Nb
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *CurrentFollowingError
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupCurrentFollowingErrorGet (int SocketIndex, char * GroupName, int NbElements, double CurrentFollowingError[]) 
+int __stdcall GroupCurrentFollowingErrorGet (int SocketIndex, const char * GroupName, int NbElements, double CurrentFollowingError[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2880,10 +2854,8 @@ int __stdcall GroupCurrentFollowingErrorGet (int SocketIndex, char * GroupName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -2904,11 +2876,11 @@ int __stdcall GroupCurrentFollowingErrorGet (int SocketIndex, char * GroupName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupHomeSearch (int SocketIndex, char * GroupName) 
+int __stdcall GroupHomeSearch (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2936,12 +2908,12 @@ int __stdcall GroupHomeSearch (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double TargetDisplacement
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupHomeSearchAndRelativeMove (int SocketIndex, char * GroupName, int NbElements, double TargetDisplacement[]) 
+int __stdcall GroupHomeSearchAndRelativeMove (int SocketIndex, const char * GroupName, int NbElements, double TargetDisplacement[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -2980,11 +2952,11 @@ int __stdcall GroupHomeSearchAndRelativeMove (int SocketIndex, char * GroupName,
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupInitialize (int SocketIndex, char * GroupName) 
+int __stdcall GroupInitialize (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3012,11 +2984,11 @@ int __stdcall GroupInitialize (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupInitializeWithEncoderCalibration (int SocketIndex, char * GroupName) 
+int __stdcall GroupInitializeWithEncoderCalibration (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3044,13 +3016,13 @@ int __stdcall GroupInitializeWithEncoderCalibration (int SocketIndex, char * Gro
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double Velocity
  *            double Acceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupJogParametersSet (int SocketIndex, char * GroupName, int NbElements, double Velocity[], double Acceleration[]) 
+int __stdcall GroupJogParametersSet (int SocketIndex, const char * GroupName, int NbElements, double Velocity[], double Acceleration[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3089,14 +3061,14 @@ int __stdcall GroupJogParametersSet (int SocketIndex, char * GroupName, int NbEl
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *Velocity
  *            double *Acceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupJogParametersGet (int SocketIndex, char * GroupName, int NbElements, double Velocity[], double Acceleration[]) 
+int __stdcall GroupJogParametersGet (int SocketIndex, const char * GroupName, int NbElements, double Velocity[], double Acceleration[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3126,10 +3098,8 @@ int __stdcall GroupJogParametersGet (int SocketIndex, char * GroupName, int NbEl
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3153,14 +3123,14 @@ int __stdcall GroupJogParametersGet (int SocketIndex, char * GroupName, int NbEl
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *Velocity
  *            double *Acceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupJogCurrentGet (int SocketIndex, char * GroupName, int NbElements, double Velocity[], double Acceleration[]) 
+int __stdcall GroupJogCurrentGet (int SocketIndex, const char * GroupName, int NbElements, double Velocity[], double Acceleration[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3190,10 +3160,8 @@ int __stdcall GroupJogCurrentGet (int SocketIndex, char * GroupName, int NbEleme
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3217,11 +3185,11 @@ int __stdcall GroupJogCurrentGet (int SocketIndex, char * GroupName, int NbEleme
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupJogModeEnable (int SocketIndex, char * GroupName) 
+int __stdcall GroupJogModeEnable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3249,11 +3217,11 @@ int __stdcall GroupJogModeEnable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupJogModeDisable (int SocketIndex, char * GroupName) 
+int __stdcall GroupJogModeDisable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3281,11 +3249,11 @@ int __stdcall GroupJogModeDisable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupKill (int SocketIndex, char * GroupName) 
+int __stdcall GroupKill (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3313,11 +3281,11 @@ int __stdcall GroupKill (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupMoveAbort (int SocketIndex, char * GroupName) 
+int __stdcall GroupMoveAbort (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3345,12 +3313,12 @@ int __stdcall GroupMoveAbort (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double TargetPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupMoveAbsolute (int SocketIndex, char * GroupName, int NbElements, double TargetPosition[]) 
+int __stdcall GroupMoveAbsolute (int SocketIndex, const char * GroupName, int NbElements, double TargetPosition[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3389,12 +3357,12 @@ int __stdcall GroupMoveAbsolute (int SocketIndex, char * GroupName, int NbElemen
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double TargetDisplacement
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupMoveRelative (int SocketIndex, char * GroupName, int NbElements, double TargetDisplacement[]) 
+int __stdcall GroupMoveRelative (int SocketIndex, const char * GroupName, int NbElements, double TargetDisplacement[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3433,11 +3401,11 @@ int __stdcall GroupMoveRelative (int SocketIndex, char * GroupName, int NbElemen
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupMotionDisable (int SocketIndex, char * GroupName) 
+int __stdcall GroupMotionDisable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3465,11 +3433,11 @@ int __stdcall GroupMotionDisable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupMotionEnable (int SocketIndex, char * GroupName) 
+int __stdcall GroupMotionEnable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3497,7 +3465,7 @@ int __stdcall GroupMotionEnable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double PositionX
  *            double PositionY
  *            double *CorrectedProfilerPositionX
@@ -3505,7 +3473,7 @@ int __stdcall GroupMotionEnable (int SocketIndex, char * GroupName)
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupPositionCorrectedProfilerGet (int SocketIndex, char * GroupName, double PositionX, double PositionY, double * CorrectedProfilerPositionX, double * CorrectedProfilerPositionY) 
+int __stdcall GroupPositionCorrectedProfilerGet (int SocketIndex, const char * GroupName, double PositionX, double PositionY, double * CorrectedProfilerPositionX, double * CorrectedProfilerPositionY) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3524,10 +3492,8 @@ int __stdcall GroupPositionCorrectedProfilerGet (int SocketIndex, char * GroupNa
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CorrectedProfilerPositionX);
@@ -3547,13 +3513,13 @@ int __stdcall GroupPositionCorrectedProfilerGet (int SocketIndex, char * GroupNa
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *CurrentEncoderPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupPositionCurrentGet (int SocketIndex, char * GroupName, int NbElements, double CurrentEncoderPosition[]) 
+int __stdcall GroupPositionCurrentGet (int SocketIndex, const char * GroupName, int NbElements, double CurrentEncoderPosition[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3583,10 +3549,8 @@ int __stdcall GroupPositionCurrentGet (int SocketIndex, char * GroupName, int Nb
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3607,7 +3571,7 @@ int __stdcall GroupPositionCurrentGet (int SocketIndex, char * GroupName, int Nb
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double PositionX
  *            double PositionY
  *            double *PCORawPositionX
@@ -3615,7 +3579,7 @@ int __stdcall GroupPositionCurrentGet (int SocketIndex, char * GroupName, int Nb
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupPositionPCORawEncoderGet (int SocketIndex, char * GroupName, double PositionX, double PositionY, double * PCORawPositionX, double * PCORawPositionY) 
+int __stdcall GroupPositionPCORawEncoderGet (int SocketIndex, const char * GroupName, double PositionX, double PositionY, double * PCORawPositionX, double * PCORawPositionY) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3634,10 +3598,8 @@ int __stdcall GroupPositionPCORawEncoderGet (int SocketIndex, char * GroupName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", PCORawPositionX);
@@ -3657,13 +3619,13 @@ int __stdcall GroupPositionPCORawEncoderGet (int SocketIndex, char * GroupName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *SetPointPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupPositionSetpointGet (int SocketIndex, char * GroupName, int NbElements, double SetPointPosition[]) 
+int __stdcall GroupPositionSetpointGet (int SocketIndex, const char * GroupName, int NbElements, double SetPointPosition[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3693,10 +3655,8 @@ int __stdcall GroupPositionSetpointGet (int SocketIndex, char * GroupName, int N
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3717,13 +3677,13 @@ int __stdcall GroupPositionSetpointGet (int SocketIndex, char * GroupName, int N
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *TargetPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupPositionTargetGet (int SocketIndex, char * GroupName, int NbElements, double TargetPosition[]) 
+int __stdcall GroupPositionTargetGet (int SocketIndex, const char * GroupName, int NbElements, double TargetPosition[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3753,10 +3713,8 @@ int __stdcall GroupPositionTargetGet (int SocketIndex, char * GroupName, int NbE
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -3777,14 +3735,14 @@ int __stdcall GroupPositionTargetGet (int SocketIndex, char * GroupName, int NbE
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *ReferencingAction
- *            char *ReferencingSensor
+ *            const char *PositionerName
+ *            const char *ReferencingAction
+ *            const char *ReferencingSensor
  *            double ReferencingParameter
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupReferencingActionExecute (int SocketIndex, char * PositionerName, char * ReferencingAction, char * ReferencingSensor, double ReferencingParameter) 
+int __stdcall GroupReferencingActionExecute (int SocketIndex, const char * PositionerName, const char * ReferencingAction, const char * ReferencingSensor, double ReferencingParameter) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3812,11 +3770,11 @@ int __stdcall GroupReferencingActionExecute (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupReferencingStart (int SocketIndex, char * GroupName) 
+int __stdcall GroupReferencingStart (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3844,11 +3802,11 @@ int __stdcall GroupReferencingStart (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupReferencingStop (int SocketIndex, char * GroupName) 
+int __stdcall GroupReferencingStop (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3876,12 +3834,12 @@ int __stdcall GroupReferencingStop (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int *Status
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupStatusGet (int SocketIndex, char * GroupName, int * Status) 
+int __stdcall GroupStatusGet (int SocketIndex, const char * GroupName, int * Status) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -3900,10 +3858,8 @@ int __stdcall GroupStatusGet (int SocketIndex, char * GroupName, int * Status)
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", Status);
@@ -3966,13 +3922,13 @@ int __stdcall GroupStatusStringGet (int SocketIndex, int GroupStatusCode, char *
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int nbElement
  *            double *CurrentVelocity
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupVelocityCurrentGet (int SocketIndex, char * GroupName, int NbElements, double CurrentVelocity[]) 
+int __stdcall GroupVelocityCurrentGet (int SocketIndex, const char * GroupName, int NbElements, double CurrentVelocity[]) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4002,10 +3958,8 @@ int __stdcall GroupVelocityCurrentGet (int SocketIndex, char * GroupName, int Nb
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 
 		for (int i = 0; i < NbElements; i++)
 		{
@@ -4057,8 +4011,8 @@ int __stdcall KillAll (int SocketIndex)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *GPIOName
+ *            const char *PositionerName
+ *            const char *GPIOName
  *            double *Offset
  *            double *Scale
  *            double *Velocity
@@ -4066,7 +4020,7 @@ int __stdcall KillAll (int SocketIndex)
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerAnalogTrackingPositionParametersGet (int SocketIndex, char * PositionerName, char * GPIOName, double * Offset, double * Scale, double * Velocity, double * Acceleration) 
+int __stdcall PositionerAnalogTrackingPositionParametersGet (int SocketIndex, const char * PositionerName, char * GPIOName, double * Offset, double * Scale, double * Velocity, double * Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4089,6 +4043,8 @@ int __stdcall PositionerAnalogTrackingPositionParametersGet (int SocketIndex, ch
 
 		pt = ReturnedValue;
 		ptNext = NULL;
+
+		pt = ReturnedValue;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) strcpy (GPIOName, pt);
@@ -4119,8 +4075,8 @@ int __stdcall PositionerAnalogTrackingPositionParametersGet (int SocketIndex, ch
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *GPIOName
+ *            const char *PositionerName
+ *            const char *GPIOName
  *            double Offset
  *            double Scale
  *            double Velocity
@@ -4128,7 +4084,7 @@ int __stdcall PositionerAnalogTrackingPositionParametersGet (int SocketIndex, ch
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerAnalogTrackingPositionParametersSet (int SocketIndex, char * PositionerName, char * GPIOName, double Offset, double Scale, double Velocity, double Acceleration) 
+int __stdcall PositionerAnalogTrackingPositionParametersSet (int SocketIndex, const char * PositionerName, const char * GPIOName, double Offset, double Scale, double Velocity, double Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4156,8 +4112,8 @@ int __stdcall PositionerAnalogTrackingPositionParametersSet (int SocketIndex, ch
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *GPIOName
+ *            const char *PositionerName
+ *            const char *GPIOName
  *            double *Offset
  *            double *Scale
  *            double *DeadBandThreshold
@@ -4167,7 +4123,7 @@ int __stdcall PositionerAnalogTrackingPositionParametersSet (int SocketIndex, ch
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerAnalogTrackingVelocityParametersGet (int SocketIndex, char * PositionerName, char * GPIOName, double * Offset, double * Scale, double * DeadBandThreshold, int * Order, double * Velocity, double * Acceleration) 
+int __stdcall PositionerAnalogTrackingVelocityParametersGet (int SocketIndex, const char * PositionerName, char * GPIOName, double * Offset, double * Scale, double * DeadBandThreshold, int * Order, double * Velocity, double * Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4226,8 +4182,8 @@ int __stdcall PositionerAnalogTrackingVelocityParametersGet (int SocketIndex, ch
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *GPIOName
+ *            const char *PositionerName
+ *            const char *GPIOName
  *            double Offset
  *            double Scale
  *            double DeadBandThreshold
@@ -4237,7 +4193,7 @@ int __stdcall PositionerAnalogTrackingVelocityParametersGet (int SocketIndex, ch
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerAnalogTrackingVelocityParametersSet (int SocketIndex, char * PositionerName, char * GPIOName, double Offset, double Scale, double DeadBandThreshold, int Order, double Velocity, double Acceleration) 
+int __stdcall PositionerAnalogTrackingVelocityParametersSet (int SocketIndex, const char * PositionerName, const char * GPIOName, double Offset, double Scale, double DeadBandThreshold, int Order, double Velocity, double Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4265,13 +4221,13 @@ int __stdcall PositionerAnalogTrackingVelocityParametersSet (int SocketIndex, ch
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *BacklashValue
  *            char *BacklaskStatus
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerBacklashGet (int SocketIndex, char * PositionerName, double * BacklashValue, char * BacklaskStatus) 
+int __stdcall PositionerBacklashGet (int SocketIndex, const char * PositionerName, double * BacklashValue, char * BacklaskStatus) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4315,12 +4271,12 @@ int __stdcall PositionerBacklashGet (int SocketIndex, char * PositionerName, dou
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double BacklashValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerBacklashSet (int SocketIndex, char * PositionerName, double BacklashValue) 
+int __stdcall PositionerBacklashSet (int SocketIndex, const char * PositionerName, double BacklashValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4348,11 +4304,11 @@ int __stdcall PositionerBacklashSet (int SocketIndex, char * PositionerName, dou
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerBacklashEnable (int SocketIndex, char * PositionerName) 
+int __stdcall PositionerBacklashEnable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4380,11 +4336,11 @@ int __stdcall PositionerBacklashEnable (int SocketIndex, char * PositionerName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerBacklashDisable (int SocketIndex, char * PositionerName) 
+int __stdcall PositionerBacklashDisable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4412,7 +4368,7 @@ int __stdcall PositionerBacklashDisable (int SocketIndex, char * PositionerName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double NotchFrequency1
  *            double NotchBandwith1
  *            double NotchGain1
@@ -4422,7 +4378,7 @@ int __stdcall PositionerBacklashDisable (int SocketIndex, char * PositionerName)
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorNotchFiltersSet (int SocketIndex, char * PositionerName, double NotchFrequency1, double NotchBandwith1, double NotchGain1, double NotchFrequency2, double NotchBandwith2, double NotchGain2) 
+int __stdcall PositionerCorrectorNotchFiltersSet (int SocketIndex, const char * PositionerName, double NotchFrequency1, double NotchBandwith1, double NotchGain1, double NotchFrequency2, double NotchBandwith2, double NotchGain2) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4450,7 +4406,7 @@ int __stdcall PositionerCorrectorNotchFiltersSet (int SocketIndex, char * Positi
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *NotchFrequency1
  *            double *NotchBandwith1
  *            double *NotchGain1
@@ -4460,7 +4416,7 @@ int __stdcall PositionerCorrectorNotchFiltersSet (int SocketIndex, char * Positi
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorNotchFiltersGet (int SocketIndex, char * PositionerName, double * NotchFrequency1, double * NotchBandwith1, double * NotchGain1, double * NotchFrequency2, double * NotchBandwith2, double * NotchGain2) 
+int __stdcall PositionerCorrectorNotchFiltersGet (int SocketIndex, const char * PositionerName, double * NotchFrequency1, double * NotchBandwith1, double * NotchGain1, double * NotchFrequency2, double * NotchBandwith2, double * NotchGain2) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4479,10 +4435,8 @@ int __stdcall PositionerCorrectorNotchFiltersGet (int SocketIndex, char * Positi
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", NotchFrequency1);
@@ -4514,7 +4468,7 @@ int __stdcall PositionerCorrectorNotchFiltersGet (int SocketIndex, char * Positi
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool ClosedLoopStatus
  *            double KP
  *            double KI
@@ -4530,7 +4484,7 @@ int __stdcall PositionerCorrectorNotchFiltersGet (int SocketIndex, char * Positi
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainAcceleration) 
+int __stdcall PositionerCorrectorPIDFFAccelerationSet (int SocketIndex, const char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4558,7 +4512,7 @@ int __stdcall PositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char * P
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool *ClosedLoopStatus
  *            double *KP
  *            double *KI
@@ -4574,7 +4528,7 @@ int __stdcall PositionerCorrectorPIDFFAccelerationSet (int SocketIndex, char * P
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainAcceleration) 
+int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, const char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4594,10 +4548,8 @@ int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * P
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4648,7 +4600,7 @@ int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * P
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool ClosedLoopStatus
  *            double KP
  *            double KI
@@ -4664,7 +4616,7 @@ int __stdcall PositionerCorrectorPIDFFAccelerationGet (int SocketIndex, char * P
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity) 
+int __stdcall PositionerCorrectorPIDFFVelocitySet (int SocketIndex, const char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4692,7 +4644,7 @@ int __stdcall PositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * Posit
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool *ClosedLoopStatus
  *            double *KP
  *            double *KI
@@ -4708,7 +4660,7 @@ int __stdcall PositionerCorrectorPIDFFVelocitySet (int SocketIndex, char * Posit
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity) 
+int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, const char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4728,10 +4680,8 @@ int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Posit
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4782,7 +4732,7 @@ int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Posit
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool ClosedLoopStatus
  *            double KP
  *            double KI
@@ -4800,7 +4750,7 @@ int __stdcall PositionerCorrectorPIDFFVelocityGet (int SocketIndex, char * Posit
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity, double FeedForwardGainAcceleration, double Friction) 
+int __stdcall PositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, const char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double KD, double KS, double IntegrationTime, double DerivativeFilterCutOffFrequency, double GKP, double GKI, double GKD, double KForm, double FeedForwardGainVelocity, double FeedForwardGainAcceleration, double Friction) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4828,7 +4778,7 @@ int __stdcall PositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char * Po
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool *ClosedLoopStatus
  *            double *KP
  *            double *KI
@@ -4846,7 +4796,7 @@ int __stdcall PositionerCorrectorPIDDualFFVoltageSet (int SocketIndex, char * Po
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity, double * FeedForwardGainAcceleration, double * Friction) 
+int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, const char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * KD, double * KS, double * IntegrationTime, double * DerivativeFilterCutOffFrequency, double * GKP, double * GKI, double * GKD, double * KForm, double * FeedForwardGainVelocity, double * FeedForwardGainAcceleration, double * Friction) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4866,10 +4816,8 @@ int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -4926,7 +4874,7 @@ int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * Po
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool ClosedLoopStatus
  *            double KP
  *            double KI
@@ -4934,7 +4882,7 @@ int __stdcall PositionerCorrectorPIDDualFFVoltageGet (int SocketIndex, char * Po
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorPIPositionSet (int SocketIndex, char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double IntegrationTime) 
+int __stdcall PositionerCorrectorPIPositionSet (int SocketIndex, const char * PositionerName, bool ClosedLoopStatus, double KP, double KI, double IntegrationTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4962,7 +4910,7 @@ int __stdcall PositionerCorrectorPIPositionSet (int SocketIndex, char * Position
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            bool *ClosedLoopStatus
  *            double *KP
  *            double *KI
@@ -4970,7 +4918,7 @@ int __stdcall PositionerCorrectorPIPositionSet (int SocketIndex, char * Position
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorPIPositionGet (int SocketIndex, char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * IntegrationTime) 
+int __stdcall PositionerCorrectorPIPositionGet (int SocketIndex, const char * PositionerName, bool * ClosedLoopStatus, double * KP, double * KI, double * IntegrationTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -4990,10 +4938,8 @@ int __stdcall PositionerCorrectorPIPositionGet (int SocketIndex, char * Position
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", &boolScanTmp);
@@ -5020,12 +4966,12 @@ int __stdcall PositionerCorrectorPIPositionGet (int SocketIndex, char * Position
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            char *CorrectorType
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorTypeGet (int SocketIndex, char * PositionerName, char * CorrectorType) 
+int __stdcall PositionerCorrectorTypeGet (int SocketIndex, const char * PositionerName, char * CorrectorType) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5066,13 +5012,13 @@ int __stdcall PositionerCorrectorTypeGet (int SocketIndex, char * PositionerName
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *CurrentVelocityCutOffFrequency
  *            double *CurrentAccelerationCutOffFrequency
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCurrentVelocityAccelerationFiltersGet (int SocketIndex, char * PositionerName, double * CurrentVelocityCutOffFrequency, double * CurrentAccelerationCutOffFrequency) 
+int __stdcall PositionerCurrentVelocityAccelerationFiltersGet (int SocketIndex, const char * PositionerName, double * CurrentVelocityCutOffFrequency, double * CurrentAccelerationCutOffFrequency) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5091,10 +5037,8 @@ int __stdcall PositionerCurrentVelocityAccelerationFiltersGet (int SocketIndex, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CurrentVelocityCutOffFrequency);
@@ -5114,13 +5058,13 @@ int __stdcall PositionerCurrentVelocityAccelerationFiltersGet (int SocketIndex, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double CurrentVelocityCutOffFrequency
  *            double CurrentAccelerationCutOffFrequency
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCurrentVelocityAccelerationFiltersSet (int SocketIndex, char * PositionerName, double CurrentVelocityCutOffFrequency, double CurrentAccelerationCutOffFrequency) 
+int __stdcall PositionerCurrentVelocityAccelerationFiltersSet (int SocketIndex, const char * PositionerName, double CurrentVelocityCutOffFrequency, double CurrentAccelerationCutOffFrequency) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5148,7 +5092,7 @@ int __stdcall PositionerCurrentVelocityAccelerationFiltersSet (int SocketIndex, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *KI
  *            double *NotchFrequency
  *            double *NotchBandwidth
@@ -5157,7 +5101,7 @@ int __stdcall PositionerCurrentVelocityAccelerationFiltersSet (int SocketIndex, 
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerDriverFiltersGet (int SocketIndex, char * PositionerName, double * KI, double * NotchFrequency, double * NotchBandwidth, double * NotchGain, double * LowpassFrequency) 
+int __stdcall PositionerDriverFiltersGet (int SocketIndex, const char * PositionerName, double * KI, double * NotchFrequency, double * NotchBandwidth, double * NotchGain, double * LowpassFrequency) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5176,10 +5120,8 @@ int __stdcall PositionerDriverFiltersGet (int SocketIndex, char * PositionerName
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", KI);
@@ -5208,7 +5150,7 @@ int __stdcall PositionerDriverFiltersGet (int SocketIndex, char * PositionerName
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double KI
  *            double NotchFrequency
  *            double NotchBandwidth
@@ -5217,7 +5159,7 @@ int __stdcall PositionerDriverFiltersGet (int SocketIndex, char * PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerDriverFiltersSet (int SocketIndex, char * PositionerName, double KI, double NotchFrequency, double NotchBandwidth, double NotchGain, double LowpassFrequency) 
+int __stdcall PositionerDriverFiltersSet (int SocketIndex, const char * PositionerName, double KI, double NotchFrequency, double NotchBandwidth, double NotchGain, double LowpassFrequency) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5245,13 +5187,13 @@ int __stdcall PositionerDriverFiltersSet (int SocketIndex, char * PositionerName
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *StagePositionOffset
  *            double *GagePositionOffset
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerDriverPositionOffsetsGet (int SocketIndex, char * PositionerName, double * StagePositionOffset, double * GagePositionOffset) 
+int __stdcall PositionerDriverPositionOffsetsGet (int SocketIndex, const char * PositionerName, double * StagePositionOffset, double * GagePositionOffset) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5270,10 +5212,8 @@ int __stdcall PositionerDriverPositionOffsetsGet (int SocketIndex, char * Positi
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", StagePositionOffset);
@@ -5293,12 +5233,12 @@ int __stdcall PositionerDriverPositionOffsetsGet (int SocketIndex, char * Positi
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *DriverStatus
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerDriverStatusGet (int SocketIndex, char * PositionerName, int * DriverStatus) 
+int __stdcall PositionerDriverStatusGet (int SocketIndex, const char * PositionerName, int * DriverStatus) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5317,10 +5257,8 @@ int __stdcall PositionerDriverStatusGet (int SocketIndex, char * PositionerName,
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", DriverStatus);
@@ -5383,7 +5321,7 @@ int __stdcall PositionerDriverStatusStringGet (int SocketIndex, int PositionerDr
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *CalibrationSinusAmplitude
  *            double *CurrentSinusAmplitude
  *            double *CalibrationCosinusAmplitude
@@ -5391,7 +5329,7 @@ int __stdcall PositionerDriverStatusStringGet (int SocketIndex, int PositionerDr
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerEncoderAmplitudeValuesGet (int SocketIndex, char * PositionerName, double * CalibrationSinusAmplitude, double * CurrentSinusAmplitude, double * CalibrationCosinusAmplitude, double * CurrentCosinusAmplitude) 
+int __stdcall PositionerEncoderAmplitudeValuesGet (int SocketIndex, const char * PositionerName, double * CalibrationSinusAmplitude, double * CurrentSinusAmplitude, double * CalibrationCosinusAmplitude, double * CurrentCosinusAmplitude) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5410,10 +5348,8 @@ int __stdcall PositionerEncoderAmplitudeValuesGet (int SocketIndex, char * Posit
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CalibrationSinusAmplitude);
@@ -5439,7 +5375,7 @@ int __stdcall PositionerEncoderAmplitudeValuesGet (int SocketIndex, char * Posit
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *SinusOffset
  *            double *CosinusOffset
  *            double *DifferentialGain
@@ -5447,7 +5383,7 @@ int __stdcall PositionerEncoderAmplitudeValuesGet (int SocketIndex, char * Posit
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerEncoderCalibrationParametersGet (int SocketIndex, char * PositionerName, double * SinusOffset, double * CosinusOffset, double * DifferentialGain, double * PhaseCompensation) 
+int __stdcall PositionerEncoderCalibrationParametersGet (int SocketIndex, const char * PositionerName, double * SinusOffset, double * CosinusOffset, double * DifferentialGain, double * PhaseCompensation) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5466,10 +5402,8 @@ int __stdcall PositionerEncoderCalibrationParametersGet (int SocketIndex, char *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", SinusOffset);
@@ -5495,12 +5429,12 @@ int __stdcall PositionerEncoderCalibrationParametersGet (int SocketIndex, char *
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *ErrorCode
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerErrorGet (int SocketIndex, char * PositionerName, int * ErrorCode) 
+int __stdcall PositionerErrorGet (int SocketIndex, const char * PositionerName, int * ErrorCode) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5519,10 +5453,8 @@ int __stdcall PositionerErrorGet (int SocketIndex, char * PositionerName, int * 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ErrorCode);
@@ -5539,12 +5471,12 @@ int __stdcall PositionerErrorGet (int SocketIndex, char * PositionerName, int * 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *ErrorCode
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerErrorRead (int SocketIndex, char * PositionerName, int * ErrorCode) 
+int __stdcall PositionerErrorRead (int SocketIndex, const char * PositionerName, int * ErrorCode) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5563,10 +5495,8 @@ int __stdcall PositionerErrorRead (int SocketIndex, char * PositionerName, int *
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", ErrorCode);
@@ -5629,7 +5559,7 @@ int __stdcall PositionerErrorStringGet (int SocketIndex, int PositionerErrorCode
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *Mode
  *            double *Frequency
  *            double *Amplitude
@@ -5637,7 +5567,7 @@ int __stdcall PositionerErrorStringGet (int SocketIndex, int PositionerErrorCode
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerExcitationSignalGet (int SocketIndex, char * PositionerName, int * Mode, double * Frequency, double * Amplitude, double * Time) 
+int __stdcall PositionerExcitationSignalGet (int SocketIndex, const char * PositionerName, int * Mode, double * Frequency, double * Amplitude, double * Time) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5656,10 +5586,8 @@ int __stdcall PositionerExcitationSignalGet (int SocketIndex, char * PositionerN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", Mode);
@@ -5685,7 +5613,7 @@ int __stdcall PositionerExcitationSignalGet (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int Mode
  *            double Frequency
  *            double Amplitude
@@ -5693,7 +5621,7 @@ int __stdcall PositionerExcitationSignalGet (int SocketIndex, char * PositionerN
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerExcitationSignalSet (int SocketIndex, char * PositionerName, int Mode, double Frequency, double Amplitude, double Time) 
+int __stdcall PositionerExcitationSignalSet (int SocketIndex, const char * PositionerName, int Mode, double Frequency, double Amplitude, double Time) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5721,12 +5649,12 @@ int __stdcall PositionerExcitationSignalSet (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *Position
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerExternalLatchPositionGet (int SocketIndex, char * PositionerName, double * Position) 
+int __stdcall PositionerExternalLatchPositionGet (int SocketIndex, const char * PositionerName, double * Position) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5745,10 +5673,8 @@ int __stdcall PositionerExternalLatchPositionGet (int SocketIndex, char * Positi
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Position);
@@ -5765,12 +5691,12 @@ int __stdcall PositionerExternalLatchPositionGet (int SocketIndex, char * Positi
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *HardwareStatus
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerHardwareStatusGet (int SocketIndex, char * PositionerName, int * HardwareStatus) 
+int __stdcall PositionerHardwareStatusGet (int SocketIndex, const char * PositionerName, int * HardwareStatus) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5789,10 +5715,8 @@ int __stdcall PositionerHardwareStatusGet (int SocketIndex, char * PositionerNam
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", HardwareStatus);
@@ -5855,12 +5779,12 @@ int __stdcall PositionerHardwareStatusStringGet (int SocketIndex, int Positioner
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int *InterpolationFactor
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerHardInterpolatorFactorGet (int SocketIndex, char * PositionerName, int * InterpolationFactor) 
+int __stdcall PositionerHardInterpolatorFactorGet (int SocketIndex, const char * PositionerName, int * InterpolationFactor) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5879,10 +5803,8 @@ int __stdcall PositionerHardInterpolatorFactorGet (int SocketIndex, char * Posit
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", InterpolationFactor);
@@ -5899,12 +5821,12 @@ int __stdcall PositionerHardInterpolatorFactorGet (int SocketIndex, char * Posit
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int InterpolationFactor
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerHardInterpolatorFactorSet (int SocketIndex, char * PositionerName, int InterpolationFactor) 
+int __stdcall PositionerHardInterpolatorFactorSet (int SocketIndex, const char * PositionerName, int InterpolationFactor) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5932,13 +5854,13 @@ int __stdcall PositionerHardInterpolatorFactorSet (int SocketIndex, char * Posit
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *MaximumVelocity
  *            double *MaximumAcceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerMaximumVelocityAndAccelerationGet (int SocketIndex, char * PositionerName, double * MaximumVelocity, double * MaximumAcceleration) 
+int __stdcall PositionerMaximumVelocityAndAccelerationGet (int SocketIndex, const char * PositionerName, double * MaximumVelocity, double * MaximumAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -5957,10 +5879,8 @@ int __stdcall PositionerMaximumVelocityAndAccelerationGet (int SocketIndex, char
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MaximumVelocity);
@@ -5980,7 +5900,7 @@ int __stdcall PositionerMaximumVelocityAndAccelerationGet (int SocketIndex, char
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *PositionWindow
  *            double *VelocityWindow
  *            double *CheckingTime
@@ -5989,7 +5909,7 @@ int __stdcall PositionerMaximumVelocityAndAccelerationGet (int SocketIndex, char
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerMotionDoneGet (int SocketIndex, char * PositionerName, double * PositionWindow, double * VelocityWindow, double * CheckingTime, double * MeanPeriod, double * TimeOut) 
+int __stdcall PositionerMotionDoneGet (int SocketIndex, const char * PositionerName, double * PositionWindow, double * VelocityWindow, double * CheckingTime, double * MeanPeriod, double * TimeOut) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6008,10 +5928,8 @@ int __stdcall PositionerMotionDoneGet (int SocketIndex, char * PositionerName, d
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", PositionWindow);
@@ -6040,7 +5958,7 @@ int __stdcall PositionerMotionDoneGet (int SocketIndex, char * PositionerName, d
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double PositionWindow
  *            double VelocityWindow
  *            double CheckingTime
@@ -6049,7 +5967,7 @@ int __stdcall PositionerMotionDoneGet (int SocketIndex, char * PositionerName, d
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerMotionDoneSet (int SocketIndex, char * PositionerName, double PositionWindow, double VelocityWindow, double CheckingTime, double MeanPeriod, double TimeOut) 
+int __stdcall PositionerMotionDoneSet (int SocketIndex, const char * PositionerName, double PositionWindow, double VelocityWindow, double CheckingTime, double MeanPeriod, double TimeOut) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6077,11 +5995,11 @@ int __stdcall PositionerMotionDoneSet (int SocketIndex, char * PositionerName, d
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionCompareAquadBAlwaysEnable (int SocketIndex, char * PositionerName) 
+int __stdcall PositionerPositionCompareAquadBAlwaysEnable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6109,14 +6027,14 @@ int __stdcall PositionerPositionCompareAquadBAlwaysEnable (int SocketIndex, char
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *MinimumPosition
  *            double *MaximumPosition
  *            bool *EnableState
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionCompareAquadBWindowedGet (int SocketIndex, char * PositionerName, double * MinimumPosition, double * MaximumPosition, bool * EnableState) 
+int __stdcall PositionerPositionCompareAquadBWindowedGet (int SocketIndex, const char * PositionerName, double * MinimumPosition, double * MaximumPosition, bool * EnableState) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6136,10 +6054,8 @@ int __stdcall PositionerPositionCompareAquadBWindowedGet (int SocketIndex, char 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumPosition);
@@ -6163,13 +6079,13 @@ int __stdcall PositionerPositionCompareAquadBWindowedGet (int SocketIndex, char 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double MinimumPosition
  *            double MaximumPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionCompareAquadBWindowedSet (int SocketIndex, char * PositionerName, double MinimumPosition, double MaximumPosition) 
+int __stdcall PositionerPositionCompareAquadBWindowedSet (int SocketIndex, const char * PositionerName, double MinimumPosition, double MaximumPosition) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6197,7 +6113,7 @@ int __stdcall PositionerPositionCompareAquadBWindowedSet (int SocketIndex, char 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *MinimumPosition
  *            double *MaximumPosition
  *            double *PositionStep
@@ -6205,7 +6121,7 @@ int __stdcall PositionerPositionCompareAquadBWindowedSet (int SocketIndex, char 
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionCompareGet (int SocketIndex, char * PositionerName, double * MinimumPosition, double * MaximumPosition, double * PositionStep, bool * EnableState) 
+int __stdcall PositionerPositionCompareGet (int SocketIndex, const char * PositionerName, double * MinimumPosition, double * MaximumPosition, double * PositionStep, bool * EnableState) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6225,10 +6141,8 @@ int __stdcall PositionerPositionCompareGet (int SocketIndex, char * PositionerNa
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumPosition);
@@ -6255,14 +6169,14 @@ int __stdcall PositionerPositionCompareGet (int SocketIndex, char * PositionerNa
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double MinimumPosition
  *            double MaximumPosition
  *            double PositionStep
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionCompareSet (int SocketIndex, char * PositionerName, double MinimumPosition, double MaximumPosition, double PositionStep) 
+int __stdcall PositionerPositionCompareSet (int SocketIndex, const char * PositionerName, double MinimumPosition, double MaximumPosition, double PositionStep) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6290,11 +6204,11 @@ int __stdcall PositionerPositionCompareSet (int SocketIndex, char * PositionerNa
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionCompareEnable (int SocketIndex, char * PositionerName) 
+int __stdcall PositionerPositionCompareEnable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6322,11 +6236,11 @@ int __stdcall PositionerPositionCompareEnable (int SocketIndex, char * Positione
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionCompareDisable (int SocketIndex, char * PositionerName) 
+int __stdcall PositionerPositionCompareDisable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6354,13 +6268,13 @@ int __stdcall PositionerPositionCompareDisable (int SocketIndex, char * Position
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *PCOPulseWidth
  *            double *EncoderSettlingTime
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionComparePulseParametersGet (int SocketIndex, char * PositionerName, double * PCOPulseWidth, double * EncoderSettlingTime) 
+int __stdcall PositionerPositionComparePulseParametersGet (int SocketIndex, const char * PositionerName, double * PCOPulseWidth, double * EncoderSettlingTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6379,10 +6293,8 @@ int __stdcall PositionerPositionComparePulseParametersGet (int SocketIndex, char
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", PCOPulseWidth);
@@ -6402,13 +6314,13 @@ int __stdcall PositionerPositionComparePulseParametersGet (int SocketIndex, char
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double PCOPulseWidth
  *            double EncoderSettlingTime
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerPositionComparePulseParametersSet (int SocketIndex, char * PositionerName, double PCOPulseWidth, double EncoderSettlingTime) 
+int __stdcall PositionerPositionComparePulseParametersSet (int SocketIndex, const char * PositionerName, double PCOPulseWidth, double EncoderSettlingTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6436,13 +6348,13 @@ int __stdcall PositionerPositionComparePulseParametersSet (int SocketIndex, char
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double UserEncoderPosition
  *            double *RawEncoderPosition
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerRawEncoderPositionGet (int SocketIndex, char * PositionerName, double UserEncoderPosition, double * RawEncoderPosition) 
+int __stdcall PositionerRawEncoderPositionGet (int SocketIndex, const char * PositionerName, double UserEncoderPosition, double * RawEncoderPosition) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6461,10 +6373,8 @@ int __stdcall PositionerRawEncoderPositionGet (int SocketIndex, char * Positione
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", RawEncoderPosition);
@@ -6481,12 +6391,12 @@ int __stdcall PositionerRawEncoderPositionGet (int SocketIndex, char * Positione
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *distance
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionersEncoderIndexDifferenceGet (int SocketIndex, char * PositionerName, double * distance) 
+int __stdcall PositionersEncoderIndexDifferenceGet (int SocketIndex, const char * PositionerName, double * distance) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6505,10 +6415,8 @@ int __stdcall PositionersEncoderIndexDifferenceGet (int SocketIndex, char * Posi
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", distance);
@@ -6525,13 +6433,13 @@ int __stdcall PositionersEncoderIndexDifferenceGet (int SocketIndex, char * Posi
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double DesiredDisplacement
  *            double *AdjustedDisplacement
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerSGammaExactVelocityAjustedDisplacementGet (int SocketIndex, char * PositionerName, double DesiredDisplacement, double * AdjustedDisplacement) 
+int __stdcall PositionerSGammaExactVelocityAjustedDisplacementGet (int SocketIndex, const char * PositionerName, double DesiredDisplacement, double * AdjustedDisplacement) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6550,10 +6458,8 @@ int __stdcall PositionerSGammaExactVelocityAjustedDisplacementGet (int SocketInd
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", AdjustedDisplacement);
@@ -6570,7 +6476,7 @@ int __stdcall PositionerSGammaExactVelocityAjustedDisplacementGet (int SocketInd
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *Velocity
  *            double *Acceleration
  *            double *MinimumTjerkTime
@@ -6578,7 +6484,7 @@ int __stdcall PositionerSGammaExactVelocityAjustedDisplacementGet (int SocketInd
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerSGammaParametersGet (int SocketIndex, char * PositionerName, double * Velocity, double * Acceleration, double * MinimumTjerkTime, double * MaximumTjerkTime) 
+int __stdcall PositionerSGammaParametersGet (int SocketIndex, const char * PositionerName, double * Velocity, double * Acceleration, double * MinimumTjerkTime, double * MaximumTjerkTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6597,10 +6503,8 @@ int __stdcall PositionerSGammaParametersGet (int SocketIndex, char * PositionerN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Velocity);
@@ -6626,7 +6530,7 @@ int __stdcall PositionerSGammaParametersGet (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double Velocity
  *            double Acceleration
  *            double MinimumTjerkTime
@@ -6634,7 +6538,7 @@ int __stdcall PositionerSGammaParametersGet (int SocketIndex, char * PositionerN
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerSGammaParametersSet (int SocketIndex, char * PositionerName, double Velocity, double Acceleration, double MinimumTjerkTime, double MaximumTjerkTime) 
+int __stdcall PositionerSGammaParametersSet (int SocketIndex, const char * PositionerName, double Velocity, double Acceleration, double MinimumTjerkTime, double MaximumTjerkTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6662,13 +6566,13 @@ int __stdcall PositionerSGammaParametersSet (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *SettingTime
  *            double *SettlingTime
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerSGammaPreviousMotionTimesGet (int SocketIndex, char * PositionerName, double * SettingTime, double * SettlingTime) 
+int __stdcall PositionerSGammaPreviousMotionTimesGet (int SocketIndex, const char * PositionerName, double * SettingTime, double * SettlingTime) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6687,10 +6591,8 @@ int __stdcall PositionerSGammaPreviousMotionTimesGet (int SocketIndex, char * Po
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", SettingTime);
@@ -6710,13 +6612,13 @@ int __stdcall PositionerSGammaPreviousMotionTimesGet (int SocketIndex, char * Po
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *ParameterName
- *            char *ParameterValue
+ *            const char *PositionerName
+ *            const char *ParameterName
+ *            const char *ParameterValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerStageParameterGet (int SocketIndex, char * PositionerName, char * ParameterName, char * ParameterValue) 
+int __stdcall PositionerStageParameterGet (int SocketIndex, const char * PositionerName, const char * ParameterName, char * ParameterValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6757,13 +6659,13 @@ int __stdcall PositionerStageParameterGet (int SocketIndex, char * PositionerNam
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
- *            char *ParameterName
- *            char *ParameterValue
+ *            const char *PositionerName
+ *            const char *ParameterName
+ *            const char *ParameterValue
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerStageParameterSet (int SocketIndex, char * PositionerName, char * ParameterName, char * ParameterValue) 
+int __stdcall PositionerStageParameterSet (int SocketIndex, const char * PositionerName, const char * ParameterName, const char * ParameterValue) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6791,7 +6693,7 @@ int __stdcall PositionerStageParameterSet (int SocketIndex, char * PositionerNam
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *MinimumPosition
  *            double *MaximumPosition
  *            double *PositionStep
@@ -6799,7 +6701,7 @@ int __stdcall PositionerStageParameterSet (int SocketIndex, char * PositionerNam
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerTimeFlasherGet (int SocketIndex, char * PositionerName, double * MinimumPosition, double * MaximumPosition, double * PositionStep, bool * EnableState) 
+int __stdcall PositionerTimeFlasherGet (int SocketIndex, const char * PositionerName, double * MinimumPosition, double * MaximumPosition, double * PositionStep, bool * EnableState) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6819,10 +6721,8 @@ int __stdcall PositionerTimeFlasherGet (int SocketIndex, char * PositionerName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumPosition);
@@ -6849,14 +6749,14 @@ int __stdcall PositionerTimeFlasherGet (int SocketIndex, char * PositionerName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double MinimumPosition
  *            double MaximumPosition
  *            double TimeInterval
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerTimeFlasherSet (int SocketIndex, char * PositionerName, double MinimumPosition, double MaximumPosition, double TimeInterval) 
+int __stdcall PositionerTimeFlasherSet (int SocketIndex, const char * PositionerName, double MinimumPosition, double MaximumPosition, double TimeInterval) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6884,11 +6784,11 @@ int __stdcall PositionerTimeFlasherSet (int SocketIndex, char * PositionerName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerTimeFlasherEnable (int SocketIndex, char * PositionerName) 
+int __stdcall PositionerTimeFlasherEnable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6916,11 +6816,11 @@ int __stdcall PositionerTimeFlasherEnable (int SocketIndex, char * PositionerNam
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerTimeFlasherDisable (int SocketIndex, char * PositionerName) 
+int __stdcall PositionerTimeFlasherDisable (int SocketIndex, const char * PositionerName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6948,13 +6848,13 @@ int __stdcall PositionerTimeFlasherDisable (int SocketIndex, char * PositionerNa
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *UserMinimumTarget
  *            double *UserMaximumTarget
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerUserTravelLimitsGet (int SocketIndex, char * PositionerName, double * UserMinimumTarget, double * UserMaximumTarget) 
+int __stdcall PositionerUserTravelLimitsGet (int SocketIndex, const char * PositionerName, double * UserMinimumTarget, double * UserMaximumTarget) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -6973,10 +6873,8 @@ int __stdcall PositionerUserTravelLimitsGet (int SocketIndex, char * PositionerN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", UserMinimumTarget);
@@ -6996,13 +6894,13 @@ int __stdcall PositionerUserTravelLimitsGet (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double UserMinimumTarget
  *            double UserMaximumTarget
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerUserTravelLimitsSet (int SocketIndex, char * PositionerName, double UserMinimumTarget, double UserMaximumTarget) 
+int __stdcall PositionerUserTravelLimitsSet (int SocketIndex, const char * PositionerName, double UserMinimumTarget, double UserMaximumTarget) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7030,13 +6928,13 @@ int __stdcall PositionerUserTravelLimitsSet (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            short *DACOffset1
  *            short *DACOffset2
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerDACOffsetGet (int SocketIndex, char * PositionerName, short * DACOffset1, short * DACOffset2) 
+int __stdcall PositionerDACOffsetGet (int SocketIndex, const char * PositionerName, short * DACOffset1, short * DACOffset2) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7055,10 +6953,8 @@ int __stdcall PositionerDACOffsetGet (int SocketIndex, char * PositionerName, sh
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%hd", DACOffset1);
@@ -7078,13 +6974,13 @@ int __stdcall PositionerDACOffsetGet (int SocketIndex, char * PositionerName, sh
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            short DACOffset1
  *            short DACOffset2
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerDACOffsetSet (int SocketIndex, char * PositionerName, short DACOffset1, short DACOffset2) 
+int __stdcall PositionerDACOffsetSet (int SocketIndex, const char * PositionerName, short DACOffset1, short DACOffset2) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7112,7 +7008,7 @@ int __stdcall PositionerDACOffsetSet (int SocketIndex, char * PositionerName, sh
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            short *PrimaryDACOffset1
  *            short *PrimaryDACOffset2
  *            short *SecondaryDACOffset1
@@ -7120,7 +7016,7 @@ int __stdcall PositionerDACOffsetSet (int SocketIndex, char * PositionerName, sh
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerDACOffsetDualGet (int SocketIndex, char * PositionerName, short * PrimaryDACOffset1, short * PrimaryDACOffset2, short * SecondaryDACOffset1, short * SecondaryDACOffset2) 
+int __stdcall PositionerDACOffsetDualGet (int SocketIndex, const char * PositionerName, short * PrimaryDACOffset1, short * PrimaryDACOffset2, short * SecondaryDACOffset1, short * SecondaryDACOffset2) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7139,10 +7035,8 @@ int __stdcall PositionerDACOffsetDualGet (int SocketIndex, char * PositionerName
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%hd", PrimaryDACOffset1);
@@ -7168,7 +7062,7 @@ int __stdcall PositionerDACOffsetDualGet (int SocketIndex, char * PositionerName
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            short PrimaryDACOffset1
  *            short PrimaryDACOffset2
  *            short SecondaryDACOffset1
@@ -7176,7 +7070,7 @@ int __stdcall PositionerDACOffsetDualGet (int SocketIndex, char * PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerDACOffsetDualSet (int SocketIndex, char * PositionerName, short PrimaryDACOffset1, short PrimaryDACOffset2, short SecondaryDACOffset1, short SecondaryDACOffset2) 
+int __stdcall PositionerDACOffsetDualSet (int SocketIndex, const char * PositionerName, short PrimaryDACOffset1, short PrimaryDACOffset2, short SecondaryDACOffset1, short SecondaryDACOffset2) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7204,7 +7098,7 @@ int __stdcall PositionerDACOffsetDualSet (int SocketIndex, char * PositionerName
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            int TuningMode
  *            double *KP
  *            double *KI
@@ -7212,7 +7106,7 @@ int __stdcall PositionerDACOffsetDualSet (int SocketIndex, char * PositionerName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerCorrectorAutoTuning (int SocketIndex, char * PositionerName, int TuningMode, double * KP, double * KI, double * KD) 
+int __stdcall PositionerCorrectorAutoTuning (int SocketIndex, const char * PositionerName, int TuningMode, double * KP, double * KI, double * KD) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7231,10 +7125,8 @@ int __stdcall PositionerCorrectorAutoTuning (int SocketIndex, char * PositionerN
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", KP);
@@ -7257,12 +7149,12 @@ int __stdcall PositionerCorrectorAutoTuning (int SocketIndex, char * PositionerN
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            double *Scaling
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall PositionerAccelerationAutoScaling (int SocketIndex, char * PositionerName, double * Scaling) 
+int __stdcall PositionerAccelerationAutoScaling (int SocketIndex, const char * PositionerName, double * Scaling) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7281,10 +7173,8 @@ int __stdcall PositionerAccelerationAutoScaling (int SocketIndex, char * Positio
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Scaling);
@@ -7301,12 +7191,12 @@ int __stdcall PositionerAccelerationAutoScaling (int SocketIndex, char * Positio
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *TrajectoryFileName
+ *            const char *GroupName
+ *            const char *TrajectoryFileName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall MultipleAxesPVTVerification (int SocketIndex, char * GroupName, char * TrajectoryFileName) 
+int __stdcall MultipleAxesPVTVerification (int SocketIndex, const char * GroupName, const char * TrajectoryFileName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7334,7 +7224,7 @@ int __stdcall MultipleAxesPVTVerification (int SocketIndex, char * GroupName, ch
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            char *FileName
  *            double *MinimumPosition
  *            double *MaximumPosition
@@ -7343,7 +7233,7 @@ int __stdcall MultipleAxesPVTVerification (int SocketIndex, char * GroupName, ch
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall MultipleAxesPVTVerificationResultGet (int SocketIndex, char * PositionerName, char * FileName, double * MinimumPosition, double * MaximumPosition, double * MaximumVelocity, double * MaximumAcceleration) 
+int __stdcall MultipleAxesPVTVerificationResultGet (int SocketIndex, const char * PositionerName, char * FileName, double * MinimumPosition, double * MaximumPosition, double * MaximumVelocity, double * MaximumAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7396,13 +7286,13 @@ int __stdcall MultipleAxesPVTVerificationResultGet (int SocketIndex, char * Posi
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *TrajectoryFileName
+ *            const char *GroupName
+ *            const char *TrajectoryFileName
  *            int ExecutionNumber
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall MultipleAxesPVTExecution (int SocketIndex, char * GroupName, char * TrajectoryFileName, int ExecutionNumber) 
+int __stdcall MultipleAxesPVTExecution (int SocketIndex, const char * GroupName, const char * TrajectoryFileName, int ExecutionNumber) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7430,13 +7320,13 @@ int __stdcall MultipleAxesPVTExecution (int SocketIndex, char * GroupName, char 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            char *FileName
  *            int *CurrentElementNumber
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall MultipleAxesPVTParametersGet (int SocketIndex, char * GroupName, char * FileName, int * CurrentElementNumber) 
+int __stdcall MultipleAxesPVTParametersGet (int SocketIndex, const char * GroupName, char * FileName, int * CurrentElementNumber) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7480,14 +7370,14 @@ int __stdcall MultipleAxesPVTParametersGet (int SocketIndex, char * GroupName, c
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int StartElement
  *            int EndElement
  *            double TimeInterval
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall MultipleAxesPVTPulseOutputSet (int SocketIndex, char * GroupName, int StartElement, int EndElement, double TimeInterval) 
+int __stdcall MultipleAxesPVTPulseOutputSet (int SocketIndex, const char * GroupName, int StartElement, int EndElement, double TimeInterval) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7515,14 +7405,14 @@ int __stdcall MultipleAxesPVTPulseOutputSet (int SocketIndex, char * GroupName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            int *StartElement
  *            int *EndElement
  *            double *TimeInterval
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall MultipleAxesPVTPulseOutputGet (int SocketIndex, char * GroupName, int * StartElement, int * EndElement, double * TimeInterval) 
+int __stdcall MultipleAxesPVTPulseOutputGet (int SocketIndex, const char * GroupName, int * StartElement, int * EndElement, double * TimeInterval) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7541,10 +7431,8 @@ int __stdcall MultipleAxesPVTPulseOutputGet (int SocketIndex, char * GroupName, 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%d", StartElement);
@@ -7567,11 +7455,11 @@ int __stdcall MultipleAxesPVTPulseOutputGet (int SocketIndex, char * GroupName, 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall SingleAxisSlaveModeEnable (int SocketIndex, char * GroupName) 
+int __stdcall SingleAxisSlaveModeEnable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7599,11 +7487,11 @@ int __stdcall SingleAxisSlaveModeEnable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall SingleAxisSlaveModeDisable (int SocketIndex, char * GroupName) 
+int __stdcall SingleAxisSlaveModeDisable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7631,13 +7519,13 @@ int __stdcall SingleAxisSlaveModeDisable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *PositionerName
+ *            const char *GroupName
+ *            const char *PositionerName
  *            double Ratio
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall SingleAxisSlaveParametersSet (int SocketIndex, char * GroupName, char * PositionerName, double Ratio) 
+int __stdcall SingleAxisSlaveParametersSet (int SocketIndex, const char * GroupName, const char * PositionerName, double Ratio) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7665,13 +7553,13 @@ int __stdcall SingleAxisSlaveParametersSet (int SocketIndex, char * GroupName, c
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *PositionerName
+ *            const char *GroupName
+ *            const char *PositionerName
  *            double *Ratio
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall SingleAxisSlaveParametersGet (int SocketIndex, char * GroupName, char * PositionerName, double * Ratio) 
+int __stdcall SingleAxisSlaveParametersGet (int SocketIndex, const char * GroupName, char * PositionerName, double * Ratio) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7715,11 +7603,11 @@ int __stdcall SingleAxisSlaveParametersGet (int SocketIndex, char * GroupName, c
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall SpindleSlaveModeEnable (int SocketIndex, char * GroupName) 
+int __stdcall SpindleSlaveModeEnable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7747,11 +7635,11 @@ int __stdcall SpindleSlaveModeEnable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall SpindleSlaveModeDisable (int SocketIndex, char * GroupName) 
+int __stdcall SpindleSlaveModeDisable (int SocketIndex, const char * GroupName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7779,13 +7667,13 @@ int __stdcall SpindleSlaveModeDisable (int SocketIndex, char * GroupName)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *PositionerName
+ *            const char *GroupName
+ *            const char *PositionerName
  *            double Ratio
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall SpindleSlaveParametersSet (int SocketIndex, char * GroupName, char * PositionerName, double Ratio) 
+int __stdcall SpindleSlaveParametersSet (int SocketIndex, const char * GroupName, const char * PositionerName, double Ratio) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7813,13 +7701,13 @@ int __stdcall SpindleSlaveParametersSet (int SocketIndex, char * GroupName, char
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            char *PositionerName
  *            double *Ratio
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall SpindleSlaveParametersGet (int SocketIndex, char * GroupName, char * PositionerName, double * Ratio) 
+int __stdcall SpindleSlaveParametersGet (int SocketIndex, const char * GroupName, char * PositionerName, double * Ratio) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7863,13 +7751,13 @@ int __stdcall SpindleSlaveParametersGet (int SocketIndex, char * GroupName, char
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double Velocity
  *            double Acceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupSpinParametersSet (int SocketIndex, char * GroupName, double Velocity, double Acceleration) 
+int __stdcall GroupSpinParametersSet (int SocketIndex, const char * GroupName, double Velocity, double Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7897,13 +7785,13 @@ int __stdcall GroupSpinParametersSet (int SocketIndex, char * GroupName, double 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double *Velocity
  *            double *Acceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupSpinParametersGet (int SocketIndex, char * GroupName, double * Velocity, double * Acceleration) 
+int __stdcall GroupSpinParametersGet (int SocketIndex, const char * GroupName, double * Velocity, double * Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7922,10 +7810,8 @@ int __stdcall GroupSpinParametersGet (int SocketIndex, char * GroupName, double 
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Velocity);
@@ -7945,13 +7831,13 @@ int __stdcall GroupSpinParametersGet (int SocketIndex, char * GroupName, double 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double *Velocity
  *            double *Acceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupSpinCurrentGet (int SocketIndex, char * GroupName, double * Velocity, double * Acceleration) 
+int __stdcall GroupSpinCurrentGet (int SocketIndex, const char * GroupName, double * Velocity, double * Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -7970,10 +7856,8 @@ int __stdcall GroupSpinCurrentGet (int SocketIndex, char * GroupName, double * V
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", Velocity);
@@ -7993,12 +7877,12 @@ int __stdcall GroupSpinCurrentGet (int SocketIndex, char * GroupName, double * V
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double Acceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall GroupSpinModeStop (int SocketIndex, char * GroupName, double Acceleration) 
+int __stdcall GroupSpinModeStop (int SocketIndex, const char * GroupName, double Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8026,12 +7910,12 @@ int __stdcall GroupSpinModeStop (int SocketIndex, char * GroupName, double Accel
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            char *TrajectoryFileName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYLineArcVerification (int SocketIndex, char * GroupName, char * TrajectoryFileName) 
+int __stdcall XYLineArcVerification (int SocketIndex, const char * GroupName, const char * TrajectoryFileName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8059,7 +7943,7 @@ int __stdcall XYLineArcVerification (int SocketIndex, char * GroupName, char * T
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            char *FileName
  *            double *MinimumPosition
  *            double *MaximumPosition
@@ -8068,7 +7952,7 @@ int __stdcall XYLineArcVerification (int SocketIndex, char * GroupName, char * T
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYLineArcVerificationResultGet (int SocketIndex, char * PositionerName, char * FileName, double * MinimumPosition, double * MaximumPosition, double * MaximumVelocity, double * MaximumAcceleration) 
+int __stdcall XYLineArcVerificationResultGet (int SocketIndex, const char * PositionerName, char * FileName, double * MinimumPosition, double * MaximumPosition, double * MaximumVelocity, double * MaximumAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8121,7 +8005,7 @@ int __stdcall XYLineArcVerificationResultGet (int SocketIndex, char * Positioner
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            char *TrajectoryFileName
  *            double Velocity
  *            double Acceleration
@@ -8129,7 +8013,7 @@ int __stdcall XYLineArcVerificationResultGet (int SocketIndex, char * Positioner
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYLineArcExecution (int SocketIndex, char * GroupName, char * TrajectoryFileName, double Velocity, double Acceleration, int ExecutionNumber) 
+int __stdcall XYLineArcExecution (int SocketIndex, const char * GroupName, const char * TrajectoryFileName, double Velocity, double Acceleration, int ExecutionNumber) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8157,7 +8041,7 @@ int __stdcall XYLineArcExecution (int SocketIndex, char * GroupName, char * Traj
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            char *FileName
  *            double *Velocity
  *            double *Acceleration
@@ -8165,7 +8049,7 @@ int __stdcall XYLineArcExecution (int SocketIndex, char * GroupName, char * Traj
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYLineArcParametersGet (int SocketIndex, char * GroupName, char * FileName, double * Velocity, double * Acceleration, int * CurrentElementNumber) 
+int __stdcall XYLineArcParametersGet (int SocketIndex, const char * GroupName, char * FileName, double * Velocity, double * Acceleration, int * CurrentElementNumber) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8215,14 +8099,14 @@ int __stdcall XYLineArcParametersGet (int SocketIndex, char * GroupName, char * 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double StartLength
  *            double EndLength
  *            double PathLengthInterval
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYLineArcPulseOutputSet (int SocketIndex, char * GroupName, double StartLength, double EndLength, double PathLengthInterval) 
+int __stdcall XYLineArcPulseOutputSet (int SocketIndex, const char * GroupName, double StartLength, double EndLength, double PathLengthInterval) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8250,14 +8134,14 @@ int __stdcall XYLineArcPulseOutputSet (int SocketIndex, char * GroupName, double
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double *StartLength
  *            double *EndLength
  *            double *PathLengthInterval
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYLineArcPulseOutputGet (int SocketIndex, char * GroupName, double * StartLength, double * EndLength, double * PathLengthInterval) 
+int __stdcall XYLineArcPulseOutputGet (int SocketIndex, const char * GroupName, double * StartLength, double * EndLength, double * PathLengthInterval) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8276,10 +8160,8 @@ int __stdcall XYLineArcPulseOutputGet (int SocketIndex, char * GroupName, double
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", StartLength);
@@ -8302,7 +8184,7 @@ int __stdcall XYLineArcPulseOutputGet (int SocketIndex, char * GroupName, double
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            double PositionX
  *            double PositionY
  *            double PositionZ
@@ -8312,7 +8194,7 @@ int __stdcall XYLineArcPulseOutputGet (int SocketIndex, char * GroupName, double
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYZGroupPositionCorrectedProfilerGet (int SocketIndex, char * GroupName, double PositionX, double PositionY, double PositionZ, double * CorrectedProfilerPositionX, double * CorrectedProfilerPositionY, double * CorrectedProfilerPositionZ) 
+int __stdcall XYZGroupPositionCorrectedProfilerGet (int SocketIndex, const char * GroupName, double PositionX, double PositionY, double PositionZ, double * CorrectedProfilerPositionX, double * CorrectedProfilerPositionY, double * CorrectedProfilerPositionZ) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8331,10 +8213,8 @@ int __stdcall XYZGroupPositionCorrectedProfilerGet (int SocketIndex, char * Grou
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CorrectedProfilerPositionX);
@@ -8357,12 +8237,12 @@ int __stdcall XYZGroupPositionCorrectedProfilerGet (int SocketIndex, char * Grou
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *TrajectoryFileName
+ *            const char *GroupName
+ *            const char *TrajectoryFileName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYZSplineVerification (int SocketIndex, char * GroupName, char * TrajectoryFileName) 
+int __stdcall XYZSplineVerification (int SocketIndex, const char * GroupName, const char * TrajectoryFileName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8390,7 +8270,7 @@ int __stdcall XYZSplineVerification (int SocketIndex, char * GroupName, char * T
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *PositionerName
+ *            const char *PositionerName
  *            char *FileName
  *            double *MinimumPosition
  *            double *MaximumPosition
@@ -8399,7 +8279,7 @@ int __stdcall XYZSplineVerification (int SocketIndex, char * GroupName, char * T
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYZSplineVerificationResultGet (int SocketIndex, char * PositionerName, char * FileName, double * MinimumPosition, double * MaximumPosition, double * MaximumVelocity, double * MaximumAcceleration) 
+int __stdcall XYZSplineVerificationResultGet (int SocketIndex, const char * PositionerName, char * FileName, double * MinimumPosition, double * MaximumPosition, double * MaximumVelocity, double * MaximumAcceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8452,14 +8332,14 @@ int __stdcall XYZSplineVerificationResultGet (int SocketIndex, char * Positioner
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
- *            char *TrajectoryFileName
+ *            const char *GroupName
+ *            const char *TrajectoryFileName
  *            double Velocity
  *            double Acceleration
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYZSplineExecution (int SocketIndex, char * GroupName, char * TrajectoryFileName, double Velocity, double Acceleration) 
+int __stdcall XYZSplineExecution (int SocketIndex, const char * GroupName, const char * TrajectoryFileName, double Velocity, double Acceleration) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8487,7 +8367,7 @@ int __stdcall XYZSplineExecution (int SocketIndex, char * GroupName, char * Traj
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *GroupName
+ *            const char *GroupName
  *            char *FileName
  *            double *Velocity
  *            double *Acceleration
@@ -8495,7 +8375,7 @@ int __stdcall XYZSplineExecution (int SocketIndex, char * GroupName, char * Traj
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall XYZSplineParametersGet (int SocketIndex, char * GroupName, char * FileName, double * Velocity, double * Acceleration, int * CurrentElementNumber) 
+int __stdcall XYZSplineParametersGet (int SocketIndex, const char * GroupName, char * FileName, double * Velocity, double * Acceleration, int * CurrentElementNumber) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8545,12 +8425,12 @@ int __stdcall XYZSplineParametersGet (int SocketIndex, char * GroupName, char * 
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *ModuleFileName
- *            char *TaskName
+ *            const char *ModuleFileName
+ *            const char *TaskName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall OptionalModuleExecute (int SocketIndex, char * ModuleFileName, char * TaskName) 
+int __stdcall OptionalModuleExecute (int SocketIndex, const char * ModuleFileName, const char * TaskName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8578,11 +8458,11 @@ int __stdcall OptionalModuleExecute (int SocketIndex, char * ModuleFileName, cha
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *TaskName
+ *            const char *TaskName
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall OptionalModuleKill (int SocketIndex, char * TaskName) 
+int __stdcall OptionalModuleKill (int SocketIndex, const char * TaskName) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8611,11 +8491,11 @@ int __stdcall OptionalModuleKill (int SocketIndex, char * TaskName)
  *     - Parameters :
  *            int SocketIndex
  *            int CardNumber
- *            char *ReferenceString
+ *            const char *ReferenceString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EEPROMCIESet (int SocketIndex, int CardNumber, char * ReferenceString) 
+int __stdcall EEPROMCIESet (int SocketIndex, int CardNumber, const char * ReferenceString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8678,11 +8558,11 @@ int __stdcall EEPROMDACOffsetCIESet (int SocketIndex, int PlugNumber, double DAC
  *     - Parameters :
  *            int SocketIndex
  *            int PlugNumber
- *            char *ReferenceString
+ *            const char *ReferenceString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EEPROMDriverSet (int SocketIndex, int PlugNumber, char * ReferenceString) 
+int __stdcall EEPROMDriverSet (int SocketIndex, int PlugNumber, const char * ReferenceString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8711,11 +8591,11 @@ int __stdcall EEPROMDriverSet (int SocketIndex, int PlugNumber, char * Reference
  *     - Parameters :
  *            int SocketIndex
  *            int CardNumber
- *            char *ReferenceString
+ *            const char *ReferenceString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall EEPROMINTSet (int SocketIndex, int CardNumber, char * ReferenceString) 
+int __stdcall EEPROMINTSet (int SocketIndex, int CardNumber, const char * ReferenceString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 
@@ -8773,10 +8653,8 @@ int __stdcall CPUCoreAndBoardSupplyVoltagesGet (int SocketIndex, double * Voltag
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", VoltageCPUCore);
@@ -8838,10 +8716,8 @@ int __stdcall CPUTemperatureAndFanSpeedGet (int SocketIndex, double * CPUTempera
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", CPUTemperature);
@@ -9753,10 +9629,8 @@ int __stdcall GatheringUserDatasGet (int SocketIndex, double * UserData1, double
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", UserData1);
@@ -9822,10 +9696,8 @@ int __stdcall ControllerMotionKernelPeriodMinMaxGet (int SocketIndex, double * M
 	if (ret == 0) 
 	{ 
 		char * pt;
-		char * ptNext;
 
 		pt = ReturnedValue;
-		ptNext = NULL;
 		if (pt != NULL) pt = strchr (pt, ',');
 		if (pt != NULL) pt++;
 		if (pt != NULL) sscanf (pt, "%lf", MinimumCorrectorPeriod);
@@ -9933,12 +9805,12 @@ int __stdcall SocketsStatusGet (int SocketIndex, char * SocketsStatus)
  *
  *     - Parameters :
  *            int SocketIndex
- *            char *InputString
+ *            const char *InputString
  *            char *ReturnString
  *     - Return :
  *            int errorCode
  ***********************************************************************/ 
-int __stdcall TestTCP (int SocketIndex, char * InputString, char * ReturnString) 
+int __stdcall TestTCP (int SocketIndex, const char * InputString, char * ReturnString) 
 { 
 	int ret = -1; 
 	char ExecuteMethod[SIZE_EXECUTE_METHOD]; 

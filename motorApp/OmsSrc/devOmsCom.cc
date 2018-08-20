@@ -257,14 +257,14 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
                 struct driver_table *tabptr = trans->tabptr;
                 int size = (end - &mr->init[0]) + 1;
                 strncpy(buffer, mr->init, size);
-                buffer[size] = (char) NULL;
+                buffer[size] = 0;
                 if (strcmp(buffer, "@DPM_ON@") == 0)
                 {
                     int response, bitselect;
                     char respbuf[10];
 
                     (*tabptr->getmsg)(card, respbuf, -1);
-                    (*tabptr->sendmsg)(card, "RB\r", (char*) NULL);
+                    (*tabptr->sendmsg)(card, "RB\r", NULL);
                     (*tabptr->getmsg)(card, respbuf, 1);
                     if (sscanf(respbuf, "%x", &response) == 0)
                         response = 0;   /* Force an error. */
@@ -357,7 +357,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
 
                             /* Copy device directive to prem_buff. */
                             strncpy(prem_buff, mr->prem, size);
-                            prem_buff[size] = (char) NULL;
+                            prem_buff[size] = 0;
 
                             if (strncmp(prem_buff, "@PUT(", 5) != 0)
                                 goto errorexit;

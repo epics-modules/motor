@@ -39,7 +39,6 @@ MMC200Controller::MMC200Controller(const char *portName, const char *MMC200PortN
 {
   int axis;
   asynStatus status;
-  MMC200Axis *pAxis;
   static const char *functionName = "MMC200Controller::MMC200Controller";
 
   /* Set flag to ignore limits */
@@ -56,7 +55,7 @@ MMC200Controller::MMC200Controller(const char *portName, const char *MMC200PortN
       functionName);
   }
   for (axis=0; axis<numAxes; axis++) {
-    pAxis = new MMC200Axis(this, axis);
+    new MMC200Axis(this, axis);
   }
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
@@ -74,9 +73,7 @@ MMC200Controller::MMC200Controller(const char *portName, const char *MMC200PortN
 extern "C" int MMC200CreateController(const char *portName, const char *MMC200PortName, int numAxes, 
                                    int movingPollPeriod, int idlePollPeriod, int ignoreLimits)
 {
-  MMC200Controller *pMMC200Controller
-    = new MMC200Controller(portName, MMC200PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000., ignoreLimits);
-  pMMC200Controller = NULL;
+  new MMC200Controller(portName, MMC200PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000., ignoreLimits);
   return(asynSuccess);
 }
 

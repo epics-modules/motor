@@ -2,7 +2,7 @@
 FILENAME...	drvPIJEDS.cc
 USAGE...	Motor record driver level support for piezosystem jena
 	        GmbH & Co. E-516 motor controller.
-
+*/
 
 /*
  *      Original Author: Joe Sullivan
@@ -71,7 +71,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int PIJEDS_num_cards = 0;
-static char *PIJEDS_axis[] = {"0", "1", "2", "3", "4", "5"};
+static const char *PIJEDS_axis[] = {"0", "1", "2", "3", "4", "5"};
 
 /* Command Information - used by set_status() */
 #define EDS_CMNDS_MAX 3
@@ -83,7 +83,7 @@ static char *PIJEDS_axis[] = {"0", "1", "2", "3", "4", "5"};
 #define READ_STATUS   "stat,#"   /* Read Motor Status */
 #define READ_SLEW     "sr,#"     /* Read Slew Velocity V/ms */
 
-static char *EDS_CMNDS[] = {READ_POS, READ_STATUS, READ_SLEW};
+static const char *EDS_CMNDS[] = {READ_POS, READ_STATUS, READ_SLEW};
 
 /* See fillCmndInfo() */
 static struct cmndInfo_struct {
@@ -100,7 +100,7 @@ static unsigned long fdbk_tolerance;       /* Divisor to shift position - for DO
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -232,7 +232,6 @@ static int set_status(int card, int signal)
     struct PIJEDScontroller *cntrl;
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
-    struct motorRecord *mr;
     /* Message parsing variables */
     struct cmndInfo_struct *pInfo;
     char buff[BUFF_SIZE];
@@ -248,10 +247,6 @@ static int set_status(int card, int signal)
     cntrl = (struct PIJEDScontroller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-	mr = (struct motorRecord *) nodeptr->mrecord;
-    else
-	mr = NULL;
     status.All = motor_info->status.All;
 
     recv_mess(card, buff, FLUSH);
@@ -390,7 +385,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char*) NULL);
+	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -404,7 +399,7 @@ exit:
 /* send a message to the PIJEDS board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     char *pbuff;
@@ -430,7 +425,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    local_buff[0] = (char) NULL;    /* Terminate local buffer. */
+    local_buff[0] = 0;    /* Terminate local buffer. */
 
     if (name == NULL)
 	strcat(local_buff, com);    /* Make a local copy of the string. */
@@ -519,7 +514,7 @@ PIJEDSSetup(int num_cards,  /* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < PIJEDS_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -584,7 +579,7 @@ static int motor_init()
 	    continue;
 
 	brdptr = motor_state[card_index];
-	brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
+	brdptr->ident[0] = 0;	/* No controller identification message. */
 	brdptr->cmnd_response = true;
 	total_cards = card_index + 1;
 	cntrl = (struct PIJEDScontroller *) brdptr->DevicePrivate;
@@ -612,7 +607,7 @@ static int motor_init()
 	    {
 	      online = false;
 	      /* Set Controller to ONLINE mode */
-	      send_mess(card_index, GET_IDENT, (char*) NULL);
+	      send_mess(card_index, GET_IDENT, NULL);
 	      if ((status = recv_mess(card_index, buff, 1)))
 		online = (strstr(buff,"DSM")) ? true : false;
 	      else
@@ -630,7 +625,7 @@ static int motor_init()
 	      version = 0;
 
 	    strcpy(brdptr->ident, buff);
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
 	    /* Check for supported EDS versions */
@@ -674,16 +669,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "PIJEDS_motor", epicsThreadPriorityMedium,
 		      epicsThreadGetStackSize(epicsThreadStackMedium),
@@ -697,7 +692,7 @@ static void fillCmndInfo()
 {
   int index;
   struct cmndInfo_struct *pInfo = cmndInfo;
-  char **pCmndStr = EDS_CMNDS;
+  const char **pCmndStr = EDS_CMNDS;
 
   for (index = 0; index < EDS_CMNDS_MAX; index++, pInfo++, pCmndStr++)
     {

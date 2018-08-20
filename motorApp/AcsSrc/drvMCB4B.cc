@@ -68,7 +68,7 @@ int MCB4B_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int, char *, int);
-STATIC RTN_STATUS send_mess(int, const char *, char *);
+STATIC RTN_STATUS send_mess(int, const char *, const char *);
 STATIC void start_status(int card);
 STATIC int set_status(int card, int signal);
 static long report(int level);
@@ -264,7 +264,7 @@ STATIC int set_status(int card, int signal)
     /* Test for post-move string. */
     if ((status.Bits.RA_DONE || ls_active == true) && nodeptr != 0 && nodeptr->postmsgptr != 0)
     {
-        send_mess(card, nodeptr->postmsgptr, (char*) NULL);
+        send_mess(card, nodeptr->postmsgptr, NULL);
         /* The MCB4B always sends back a response, read it and discard */
         recv_mess(card, buff, WAIT);
         nodeptr->postmsgptr = NULL;
@@ -279,7 +279,7 @@ STATIC int set_status(int card, int signal)
 /* send a message to the MCB4B board                 */
 /* send_mess()                                       */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
+STATIC RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MCB4Bcontroller *cntrl;
     size_t nwrite;
@@ -312,7 +312,6 @@ STATIC int recv_mess(int card, char *com, int flag)
 {
     double timeout;
     size_t nread=0;
-    asynStatus status;
     struct MCB4Bcontroller *cntrl;
     int flush;
     int eomReason;
@@ -335,8 +334,8 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
-    if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
-        status = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
+    if (flush) pasynOctetSyncIO->flush(cntrl->pasynUser);
+        pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
                                     timeout, &nread, &eomReason);
 
     if (nread < 1)
@@ -393,7 +392,7 @@ MCB4BSetup(int num_cards,       /* maximum number of controllers in system */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < MCB4B_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
     return (OK);
 }
 
@@ -479,7 +478,7 @@ STATIC int motor_init()
 
         if (success_rtn == 0 && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             brdptr->cmnd_response = true;
 
@@ -508,16 +507,16 @@ STATIC int motor_init()
 
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "motor_init: spawning motor task\n");
 

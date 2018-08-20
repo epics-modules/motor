@@ -90,14 +90,14 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int IM483PL_num_cards = 0;
-static char *IM483PL_axis[] = {"A", "B", "C", "D", "E", "F", "G", "H"};
+static const char *IM483PL_axis[] = {"A", "B", "C", "D", "E", "F", "G", "H"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include    "motordrvComCode.h"
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -375,7 +375,7 @@ exit:
 /* send a message to the IM483PL board           */
 /* send_mess()                               */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
@@ -480,7 +480,7 @@ IM483PLSetup(int num_cards, /* maximum number of controllers in system.  */
     motor_state = (struct controller **) malloc(IM483PL_num_cards * sizeof(struct controller *));
 
     for (itera = 0; itera < IM483PL_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -538,7 +538,7 @@ static int motor_init()
             continue;
 
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL; /* No controller identification message. */
+        brdptr->ident[0] = 0; /* No controller identification message. */
         brdptr->cmnd_response = true;
         total_cards = card_index + 1;
         cntrl = (struct IM483controller *) brdptr->DevicePrivate;
@@ -573,7 +573,7 @@ static int motor_init()
 
         if (success_rtn == asynSuccess && total_axis > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
 
             for (motor_index = 0; motor_index < total_axis; motor_index++)
@@ -602,16 +602,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "IM483PL_motor", epicsThreadPriorityMedium,
               epicsThreadGetStackSize(epicsThreadStackMedium),

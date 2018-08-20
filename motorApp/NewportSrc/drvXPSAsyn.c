@@ -1583,7 +1583,6 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     XPSController *pController;
     AXIS_HDL pAxis;
     char *index;
-    int status;
     double stepSize;
 
     if (numXPSControllers < 1) {
@@ -1614,7 +1613,7 @@ int XPSConfigAxis(int card,                   /* specify which controller 0-up*/
     stepSize = strtod(stepsPerUnit, NULL);
     pAxis->stepSize = 1./stepSize;
     /* Read some information from the controller for this axis */
-    status = PositionerSGammaParametersGet(pAxis->pollSocket,
+    PositionerSGammaParametersGet(pAxis->pollSocket,
                                            pAxis->positionerName,
                                            &pAxis->velocity,
                                            &pAxis->accel,
@@ -2308,7 +2307,7 @@ static const iocshArg XPSConfigArg5 = {"Idle poll rate", iocshArgInt};
 static const iocshArg * const XPSConfigArgs[6] = {&XPSConfigArg0,
                                                   &XPSConfigArg1,
                                                   &XPSConfigArg2,
-                                                  &XPSConfigArg2,
+                                                  &XPSConfigArg3,
                                                   &XPSConfigArg4,
                                                   &XPSConfigArg5};
 static const iocshFuncDef configXPS = {"XPSConfig", 6, XPSConfigArgs};

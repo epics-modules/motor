@@ -58,7 +58,6 @@ ImsMDrivePlusMotorController::ImsMDrivePlusMotorController(const char *motorPort
 {
 	static const char *functionName = "ImsMDrivePlusMotorController()";
 	asynStatus status;
-	ImsMDrivePlusMotorAxis *pAxis;
 	// asynMotorController constructor calloc's memory for array of axis pointers
 	pAxes_ = (ImsMDrivePlusMotorAxis **)(asynMotorController::pAxes_);
 
@@ -91,9 +90,8 @@ ImsMDrivePlusMotorController::ImsMDrivePlusMotorController(const char *motorPort
 
 	// Create axis
 	// Assuming single axis per controller the way drvAsynIPPortConfigure( "M06", "ts-b34-nw08:2101", 0, 0 0 ) is called in st.cmd script
-	pAxis = new ImsMDrivePlusMotorAxis(this, 0);
-	pAxis = NULL;  // asynMotorController constructor tracking array of axis pointers
-
+	// asynMotorController constructor tracking array of axis pointers
+	new ImsMDrivePlusMotorAxis(this, 0);
 	// read home and limit config from S1-S4
 	readHomeAndLimitConfig();
 
@@ -318,9 +316,7 @@ asynStatus ImsMDrivePlusMotorController::writeReadController(const char *output,
 ////////////////////////////////////////////////////////
 extern "C" int ImsMDrivePlusCreateController(const char *motorPortName, const char *IOPortName, char *devName, double movingPollPeriod, double idlePollPeriod)
 {
-	ImsMDrivePlusMotorController *pImsController;
-	pImsController = new ImsMDrivePlusMotorController(motorPortName, IOPortName, devName, movingPollPeriod/1000., idlePollPeriod/1000.);
-	pImsController = NULL; 
+	new ImsMDrivePlusMotorController(motorPortName, IOPortName, devName, movingPollPeriod/1000., idlePollPeriod/1000.);
 	return(asynSuccess);
 }
 

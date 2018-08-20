@@ -82,7 +82,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int MDT695_num_cards = 0;
-static char *MDT694_axis[] = {"X", "Y", "Z"};
+static const char *MDT694_axis[] = {"X", "Y", "Z"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include	"motordrvComCode.h"
@@ -95,7 +95,7 @@ volatile double drvMDT695ReadbackDelay = 0.;
 
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
-static RTN_STATUS send_mess(int card, char const *, char *name);
+static RTN_STATUS send_mess(int card, const char *, const char *name);
 static int set_status(int card, int signal);
 static long report(int level);
 static long init();
@@ -216,7 +216,6 @@ static int set_status(int card, int signal)
   int rtn_state;
   int recvCnt;
   int motorData;
-  int motor;
   bool recvRetry;
   bool ls_active = false;
   msta_field status;
@@ -224,8 +223,6 @@ static int set_status(int card, int signal)
   cntrl = (struct MDT695Controller *) motor_state[card]->DevicePrivate;
   motor_info = &(motor_state[card]->motor_info[signal]);
   status.All = motor_info->status.All;
-  motor = signal+1;
-
 
   recvRetry = true;
 
@@ -334,7 +331,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
         strncpy(send_buff, nodeptr->postmsgptr, 80);
-	send_mess(card, send_buff, (char*) NULL);
+	send_mess(card, send_buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -348,7 +345,7 @@ exit:
 /* send a message to the MDT695 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MDT695Controller *cntrl;
     char local_buff[MAX_MSG_SIZE];
@@ -373,7 +370,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    local_buff[0] = (char) NULL;    /* Terminate local buffer. */
+    local_buff[0] = 0;    /* Terminate local buffer. */
 
     if (name == NULL)
 	strcat(local_buff, com);    /* Make a local copy of the string. */
@@ -481,7 +478,7 @@ MDT695Setup(int num_cards,	/* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < MDT695_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -588,7 +585,7 @@ static int motor_init()
 	      total_axis = 3;
 
 	    /* Get controller ID info -- multi-line response */
-	    *brdptr->ident = (char)NULL;
+	    *brdptr->ident = 0;
 	    send_mess(card_index, CMD_ID, NULL);
 	    do 
 	      {
@@ -606,7 +603,7 @@ static int motor_init()
 	      } while(recvCnt >= 0);
 		    
 
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
 	    brdptr->total_axis = total_axis;
@@ -632,16 +629,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     // epicsThreadCreate((char *) "MDT695_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
     epicsThreadCreate((char *) "MDT695_motor", 

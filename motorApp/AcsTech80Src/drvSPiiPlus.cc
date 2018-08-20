@@ -86,12 +86,12 @@ static inline void Debug(int level, const char *format, ...) {
 /* --- Local data. --- */
 int SPiiPlus_num_cards = 0;
 
-static char *ACSPL_axis[] = {"X", "Y", "Z", "T", "A", "B", "C", "D"};
+static const char *ACSPL_axis[] = {"X", "Y", "Z", "T", "A", "B", "C", "D"};
 
 // Array dimensions are defined in drvSPiiPlusy.h
 // First dimension order must match (enum)CMND_MODES
 // Second dimension (command list) order must match (enum)QUERY_TYPES 
-static char *queryCmnds[MODE_CNT][QUERY_CNT] = {
+static const char *queryCmnds[MODE_CNT][QUERY_CNT] = {
   {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_CMND,QVEL_CMND,QHOME_CMND,QDONE_CMND},
   {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_KIN_CMND,QVEL_CMND,SKIP_THIS,SKIP_THIS},
   {QSTATUS_CMND,QFAULT_CMND,QPOS_CMND,QEA_POS_CMND,QVEL_CMND,SKIP_THIS,SKIP_THIS}
@@ -108,8 +108,8 @@ volatile double drvSPiiPlusReadbackDelay = 0.;
 
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
-static RTN_STATUS send_mess(int card, char const *, char *name);
-static int send_recv_mess(int card, char const *send_com, char *recv_com);
+static RTN_STATUS send_mess(int card, const char *, const char *name);
+static int send_recv_mess(int card, const char *send_com, char *recv_com);
 static int set_status(int card, int signal);
 static long report(int level);
 static long init();
@@ -226,7 +226,7 @@ static int set_status(int card, int signal)
     struct mess_node *nodeptr;
     register struct mess_info *motor_info;
     char send_buff[80];
-    char **cmndList;
+    const char **cmndList;
     int cmndID;
     int flags;
     double vel;
@@ -253,7 +253,7 @@ static int set_status(int card, int signal)
       {
 	// Check for SKIP_THIS flag 
 	if (*cmndList[0] == '#')
-	    cntrl->recv_string[cmndID][0] = (char)NULL;
+	    cntrl->recv_string[cmndID][0] = 0;
 	else
 	  {
 	    if (cmndID == QEA_POS && cntrl->cmndMode == CONNECT)
@@ -404,7 +404,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
         strncpy(send_buff, nodeptr->postmsgptr, 80);
-	send_mess(card, send_buff, (char*) NULL);
+	send_mess(card, send_buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -418,13 +418,12 @@ exit:
 /* send_receive a message to the SPiiPlus board	     */
 /* send_recv_mess()		                     */
 /*****************************************************/
-static int send_recv_mess(int card, char const *send_com, char *recv_com)
+static int send_recv_mess(int card, const char *send_com, char *recv_com)
 {
     struct SPiiPlusController *cntrl;
     int size;
     size_t nwrite;
     size_t nread = 0;
-    double timeout = 0.;
     asynStatus status;
     int eomReason;
 
@@ -449,7 +448,6 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com)
 
     cntrl = (struct SPiiPlusController *) motor_state[card]->DevicePrivate;
 
-    timeout = TIMEOUT;
     /* flush any junk at input port - should not be any data available */
     pasynOctetSyncIO->flush(cntrl->pasynUser);
 
@@ -472,7 +470,7 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com)
 /* send a message to the SPiiPlus board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct SPiiPlusController *cntrl;
     int size;
@@ -590,7 +588,7 @@ SPiiPlusSetup(int num_cards,	/* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < SPiiPlus_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -621,11 +619,11 @@ SPiiPlusConfig(int card,		/* card being configured */
 
     // Set controller command interface mode - BUFFER is the default 
     // Assure upper case argument - only check first 3 letters 
-    modeCas[0]= (char) NULL;
+    modeCas[0]= 0;
     if (modeStr != NULL) {
       for (modeIdx=0; modeIdx < 3; modeIdx++)
 	modeCas[modeIdx] = toupper(modeStr[modeIdx]);
-      modeCas[3]= (char) NULL;				
+      modeCas[3]= 0;				
     }
 				
     if (!strncmp(modeCas, DIRECT_STR,3))
@@ -701,7 +699,7 @@ static int motor_init()
 
 	if (success_rtn == asynSuccess && status > 0)
 	{
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
     	    status = send_recv_mess(card_index, STOP_ALL, buff);   /* Stop all motors */
 	    status = send_recv_mess(card_index, GET_IDENT, buff);  /* Read controller ID string */
@@ -750,16 +748,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     // epicsThreadCreate((char *) "SPiiPlus_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
     epicsThreadCreate((char *) "SPiiPlus_motor", 

@@ -74,7 +74,7 @@ volatile int Micos_num_axis = 0;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, const char *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static void start_status(int);
 static int set_status(int, int);
 static long report(int);
@@ -219,7 +219,7 @@ static int set_status(int card, int signal)
     for (i = 0; i < 7; i++) {
         temp[2] = response[j];
         temp[3] = response[j+1];
-        bytes[i] = strtol(temp, (char **)NULL, 0);
+        bytes[i] = strtol(temp, NULL, 0);
         j += 3;
     }
     /* check to see if motor is moving */
@@ -286,7 +286,7 @@ static int set_status(int card, int signal)
     nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
-        send_mess(card, buff, (char*) NULL);
+        send_mess(card, buff, NULL);
         /* The Micos will not send back a response for a 'set' command, don't need next line */
         /* recv_mess(card, buff, WAIT); */
         nodeptr->postmsgptr = NULL;
@@ -301,7 +301,7 @@ static int set_status(int card, int signal)
 /* send a message to the Micos board                 */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, const char *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MicosController *cntrl;
     int size;
@@ -411,7 +411,7 @@ MicosSetup(int num_cards,   /* maximum number of "controllers" in system */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < Micos_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
     return(OK);
 }
 
@@ -453,7 +453,6 @@ static int motor_init()
     char buff[BUFF_SIZE];
     int total_axis = 0;
     int status = 0;
-    bool errind;
     asynStatus success_rtn;
     static const char output_terminator[] = "\r";
     /* The response from the Micos is terminated with <CR><LF><ETX>. */
@@ -479,11 +478,10 @@ static int motor_init()
         cntrl = (struct MicosController *) brdptr->DevicePrivate;
 
         /* Initialize communications channel */
-        errind = false;
-    success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
+        success_rtn = pasynOctetSyncIO->connect(cntrl->asyn_port, 0,
                         &cntrl->pasynUser, NULL);
 
-    if (success_rtn == asynSuccess)
+        if (success_rtn == asynSuccess)
         {
             int retry = 0;
 
@@ -519,7 +517,7 @@ static int motor_init()
 
         if (success_rtn == asynSuccess && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             brdptr->cmnd_response = false;
 
@@ -532,7 +530,7 @@ static int motor_init()
                 sprintf(buff, "%c%def", CTLA, motor_index);
                 send_mess(card_index, buff, 0);
                 /* Don't turn on motor power, too dangerous */
-           /*sprintf(buff,"#%02dW=1", motor_index); */
+            /*sprintf(buff,"#%02dW=1", motor_index); */
                 /* send_mess(card_index, buff, 0); */
                 /* Stop motor */
                 sprintf(buff,"%c%dab1", CTLA, motor_index);
@@ -546,27 +544,27 @@ static int motor_init()
                 motor_info->position = 0;
 
                 motor_info->encoder_present = YES;
-        motor_info->status.Bits.EA_PRESENT = 1;
-        motor_info->pid_present = YES;
-        motor_info->status.Bits.GAIN_SUPPORT = 1;
+                motor_info->status.Bits.EA_PRESENT = 1;
+                motor_info->pid_present = YES;
+                motor_info->status.Bits.GAIN_SUPPORT = 1;
 
                 set_status(card_index, motor_index);  /* Read status of each motor */
             }
 
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     Debug(3, "motor_init: spawning motor task\n");
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "tMicos", epicsThreadPriorityMedium,
               epicsThreadGetStackSize(epicsThreadStackMedium),

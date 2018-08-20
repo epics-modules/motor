@@ -75,7 +75,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int PIC848_num_cards = 0;
-static char *PIC848_axis[4] = {"A", "B", "C", "D"};
+static const char *PIC848_axis[4] = {"A", "B", "C", "D"};
 static volatile int motionTO = 10;
 
 /* Local data required for every driver; see "motordrvComCode.h" */
@@ -84,7 +84,7 @@ static volatile int motionTO = 10;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -215,7 +215,6 @@ static int set_status(int card, int signal)
     struct PIC848controller *cntrl;
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
-    struct motorRecord *mr;
     /* Message parsing variables */
     char buff[BUFF_SIZE], axisID;
     C848_Status_Reg mstat;
@@ -227,10 +226,6 @@ static int set_status(int card, int signal)
     cntrl = (struct PIC848controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-	mr = (struct motorRecord *) nodeptr->mrecord;
-    else
-	mr = NULL;
     status.All = motor_info->status.All;
 
     if (cntrl->status != NORMAL)
@@ -341,7 +336,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char*) NULL);
+	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -355,7 +350,7 @@ exit:
 /* send a message to the PIC848 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct PIC848controller *cntrl;
@@ -379,7 +374,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    local_buff[0] = (char) NULL;    /* Terminate local buffer. */
+    local_buff[0] = 0;    /* Terminate local buffer. */
 
     if (name == NULL)
 	strcat(local_buff, com);    /* Make a local copy of the string. */
@@ -464,7 +459,7 @@ PIC848Setup(int num_cards,  /* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < PIC848_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -524,7 +519,7 @@ static int motor_init()
 	    continue;
 
 	brdptr = motor_state[card_index];
-	brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
+	brdptr->ident[0] = 0;	/* No controller identification message. */
 	brdptr->cmnd_response = false;
 	total_cards = card_index + 1;
 	cntrl = (struct PIC848controller *) brdptr->DevicePrivate;
@@ -548,7 +543,7 @@ static int motor_init()
 
 	    do
 	    {
-		send_mess(card_index, GET_IDENT, (char*) NULL);
+		send_mess(card_index, GET_IDENT, NULL);
 		status = recv_mess(card_index, buff, 1);
 		retry++;
 	    } while (status == 0 && retry < 3);
@@ -557,7 +552,7 @@ static int motor_init()
 	if (success_rtn == asynSuccess && status > 0)
 	{
 	    strcpy(brdptr->ident, &buff[0]);
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
             /* Determine # of axes. Request stage name.  See if it responds */
@@ -599,16 +594,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "PIC848_motor", epicsThreadPriorityMedium,
 		      epicsThreadGetStackSize(epicsThreadStackMedium),

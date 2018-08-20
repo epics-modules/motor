@@ -115,7 +115,7 @@ struct mess_node
     struct dbCommon *mrecord;	/* "Hidden" pointer to motor record. */
     struct mess_node *next;
     char *postmsgptr;
-    char const *termstring;	/* Termination string for STOP_AXIS command
+    const char *termstring;	/* Termination string for STOP_AXIS command
 				    (see process_messages()). */
 };
 
@@ -196,13 +196,13 @@ struct driver_table
     struct controller ***card_array;
     int *cardcnt_ptr;
     int *any_inmotion_ptr;
-    RTN_STATUS (*sendmsg) (int, char const *, char *);
+    RTN_STATUS (*sendmsg) (int, const char *, const char *);
     int (*getmsg) (int, char *, int);
     int (*setstat) (int, int);
     void (*query_done) (int, int, struct mess_node *);
     void (*strtstat) (int);			/* Optional; start status function or NULL. */
     const bool *const init_indicator;		/* Driver initialized indicator. */
-    char **axis_names;				/* Axis name array or NULL. */
+    const char **axis_names;				/* Axis name array or NULL. */
 };
 
 
