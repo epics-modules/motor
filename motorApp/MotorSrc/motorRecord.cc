@@ -3696,11 +3696,6 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
         if (ls_active == true || msta.Bits.RA_PROBLEM)
         {
             clear_buttons(pmr);
-            if (msta.Bits.RA_PROBLEM)
-            {
-                pmr->stop = 1;
-                MARK(M_STOP);
-            }
         }
     }
     else
