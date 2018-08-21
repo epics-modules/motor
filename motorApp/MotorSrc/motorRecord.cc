@@ -189,6 +189,7 @@ USAGE...        Motor Record Support.
  * .75 05-18-17 rls - Stop motor if URIP is Yes and RDBL read returns an error. 
  * .76 04-04-18 rls - If URIP is Yes and RDBL is inaccessible (e.g., CA server is down), do not start
  *                    a new target position move (sans Home search or Jog). 
+ * .78 08-21-18 kmp - Reverted .69 stop on RA_PROBLEM true.
  */                                                          
 
 #define VERSION 6.10
