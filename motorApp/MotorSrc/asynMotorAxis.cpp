@@ -436,7 +436,6 @@ void asynMotorAxis::updateMsgTxtField()
       setStringParam(pC_->motorMessageText_,"W: Raw low limit switch");
     else {
       int motorStatusProblem;
-      int motorLatestCommand;
       int motorStatusHomed;
       int motorNotHomedProblem;
       double motorHighLimit;
@@ -452,13 +451,11 @@ void asynMotorAxis::updateMsgTxtField()
         setStringParam(pC_->motorMessageText_,"E: Problem");
         return;
       }
-      pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
 
       if (!motorStatusHomed && motorNotHomedProblem) {
-	if (motorNotHomedProblem & MOTORNOTHOMEDPROBLEM_ERROR)
-	  setStringParam(pC_->motorMessageText_,"E: Axis not homed");
-	else
-	  setStringParam(pC_->motorMessageText_,"W: Axis not homed");
+        /* the "E: prefix should only be shown if the problem bit
+           is set. Otherwise it is a warning */
+        setStringParam(pC_->motorMessageText_,"W: Axis not homed");
         return;
       }
       /* If both soft limits are defined, and both are != 0,
@@ -479,6 +476,8 @@ void asynMotorAxis::updateMsgTxtField()
           return;
         }
       }
+      int motorLatestCommand;
+      pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
       if (motorLatestCommand == LATEST_COMMAND_STOP)
         setStringParam(pC_->motorMessageText_,"I: Stop");
       else
