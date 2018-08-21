@@ -517,7 +517,8 @@ LOGIC:
     Initialize Limit violation field false.
     IF (Software Travel limits are NOT disabled), AND,
             (Dial readback violates dial high limit), OR,
-            (Dial readback violates dial low limit)
+            (Dial readback violates dial low limit), OR,
+            (Dial low limit is greater than dial high limit)
         Set Limit violation field true.
     ENDIF
     ...
@@ -666,7 +667,8 @@ static long init_record(dbCommon* arg, int pass)
 
     if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
         ;
-    else if ((pmr->drbv > pmr->dhlm + pmr->mres) || (pmr->drbv < pmr->dllm - pmr->mres))
+    else if ((pmr->drbv > pmr->dhlm + pmr->mres) || (pmr->drbv < pmr->dllm - pmr->mres) ||
+             (pmr->dllm > pmr->dhlm))
     {
         pmr->lvio = 1;
         MARK(M_LVIO);
@@ -1149,7 +1151,7 @@ LOGIC:
         Clear Limit violation field.
     ELSE
         IF Jog indicator is true in MIP field.
-            Update Limit violation (LVIO) based on Jog direction (JOGF/JOGR) and velocity (JVEL).
+            Update Limit violation (LVIO) based on Jog direction (JOGF/JOGR) and velocity (JVEL) or DLLM > HLLM
         ELSE IF Homing indicator is true in MIP field.
             Set Limit violation (LVIO) FALSE.
         ENDIF
@@ -1389,7 +1391,8 @@ enter_do_work:
     {
         if (pmr->mip & MIP_JOG)
             pmr->lvio = (pmr->jogf && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
-                        (pmr->jogr && (pmr->rbv < pmr->llm + pmr->jvel));
+                        (pmr->jogr && (pmr->rbv < pmr->llm + pmr->jvel)) ||
+                        (pmr->dllm > pmr->dhlm);
         else if (pmr->mip & MIP_HOME)
             pmr->lvio = false;  /* Disable soft-limit error check during home search. */
     }
@@ -2007,7 +2010,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
                 ;
             else if ((pmr->jogf && (pmr->val > pmr->hlm - pmr->jvel)) ||
-                     (pmr->jogr && (pmr->val < pmr->llm + pmr->jvel)))
+                     (pmr->jogr && (pmr->val < pmr->llm + pmr->jvel)) ||
+                     (pmr->dllm > pmr->dhlm))
             {
                 pmr->lvio = 1;
                 MARK(M_LVIO);
@@ -2306,6 +2310,9 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             /* Check for soft-travel limit violation */
             if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
                 pmr->lvio = false;
+            /* At least one limit is violated when DLLM > DHLM */
+            else if (pmr->dllm > pmr->dhlm)
+                pmr->lvio = true;
             /* LVIO = TRUE, AND, Move request towards valid travel limit range. */
             else if (((pmr->dval > pmr->dhlm) && (pmr->dval < pmr->ldvl)) ||
                      ((pmr->dval < pmr->dllm) && (pmr->dval > pmr->ldvl)))
