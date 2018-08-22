@@ -477,8 +477,17 @@ void asynMotorAxis::updateMsgTxtField()
         }
       }
       int motorLatestCommand;
+      int motorShowPowerOff;
       pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
-      if (motorLatestCommand == LATEST_COMMAND_STOP)
+      pC_->getIntegerParam(axisNo_,pC_->motorShowPowerOff_,  &motorShowPowerOff);
+      if (motorShowPowerOff) {
+        int motorStatusPowerOn;
+        pC_->getIntegerParam(axisNo_,pC_->motorStatusPowerOn_,  &motorStatusPowerOn);
+        if (motorStatusPowerOn) motorShowPowerOff = 0;
+      }
+      if (motorShowPowerOff)
+        setStringParam(pC_->motorMessageText_,"I: PowerOff");
+      else if (motorLatestCommand == LATEST_COMMAND_STOP)
         setStringParam(pC_->motorMessageText_,"I: Stop");
       else
         setStringParam(pC_->motorMessageText_," ");

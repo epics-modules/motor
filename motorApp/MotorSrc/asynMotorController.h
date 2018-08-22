@@ -78,6 +78,7 @@
 
 /* Not homed is ignored, shown, problem */
 #define motorNotHomedProblemString    "MOTOR_NOT_HOMED_PROBLEM"
+#define motorShowPowerOffString       "MOTOR_SHOW_POWER_OFF"
 
 /* These are per-axis parameters for passing additional motor record information to the driver */
 #define motorRecResolutionString        "MOTOR_REC_RESOLUTION"
@@ -345,6 +346,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
 
   // Parameters from the controller to the driver and record
   int motorNotHomedProblem_;
+  int motorShowPowerOff_;
   int motorHighLimitRO_;
   int motorLowLimitRO_;
   int motorDefVelocityRO_;
