@@ -423,7 +423,10 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
            v & MIP_JOG_BL2   ? "J2 " : "",
            v & MIP_EXTERNAL  ? "Ex " : "");
   /* Remove trailing ' ', add a "'" */
-  if ((len > 1) && (len < (buflen-2)) && (buf[len-2] == ' '))
+  /* len is an unsigned int (printf() can return -1), but when comparing
+     it with an unsigned buflen, we need to cast -after-
+     we have checked > 1 */
+  if ((len > 1) && ((unsigned)len < (buflen-2)) && (buf[len-2] == ' '))
   {
     buf[len-2] = '\'';
     buf[len-1] = '\0';
