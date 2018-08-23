@@ -297,7 +297,7 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
                (fabs(mr->dval) > mr->rdbd && mr->mres != 0 && fabs(axis_query.position * mr->mres) < mr->rdbd)
               ) ? true : false;
     /* Test for command primitive initialization string. */
-    initString = (mr->init != NULL && strlen(mr->init)) ? true : false;
+    initString = ((void*)mr->init != NULL && strlen(mr->init)) ? true : false;
     /* Test for PID support. */
     initPID = (msta.Bits.GAIN_SUPPORT) ? true : false;
 
