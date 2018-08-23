@@ -107,7 +107,7 @@ static int paramSetInteger( PARAMS params, paramIndex index, int value )
     int status = PARAM_ERROR;
 
     index -= params->startVal;
-    if (index >= 0 && index < params->nvals)
+    if (index < params->nvals)
     {
         if ( params->vals[index].type != paramInt ||
              params->vals[index].data.ival != value )
@@ -165,7 +165,7 @@ static int paramGetInteger( PARAMS params, paramIndex index, int * value )
     int status = PARAM_OK;
 
     index -= params->startVal;
-    if (index >= 0 && index < params->nvals)
+    if (index < params->nvals)
     {
         switch (params->vals[index].type)
         {
@@ -194,7 +194,7 @@ static int paramGetDouble( PARAMS params, paramIndex index, double * value )
     int status = PARAM_OK;
 
     index -= params->startVal;
-    if (index >= 0 && index < params->nvals)
+    if (index < params->nvals)
     {
         switch (params->vals[index].type)
         {
