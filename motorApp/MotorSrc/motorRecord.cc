@@ -849,6 +849,8 @@ static long init_record(dbCommon* arg, int pass)
         case CALLBACK_DATA_SOFT_LIMITS:
         case CALLBACK_DATA:
             init_re_init(pmr);
+            /* force a process() including alarm_sub() */
+            devSupGetInfo(pmr);
             break;
         case CALLBACK_UDF:
             pmr->udf = TRUE;
