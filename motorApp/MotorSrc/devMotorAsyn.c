@@ -573,7 +573,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
              pmr->priv->last.motorLowLimitRaw))
         {
             re_init_update_soft_limits(pmr);
-            rc = CALLBACK_RE_INIT;
+            rc = CALLBACK_DATA_SOFT_LIMITS;
         }
 
         if (pmr->priv->lastReadBack.msta.All != pmr->msta)
@@ -587,7 +587,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
                 ((msta.Bits.CNTRL_COMM_ERR == 0) &&(prev_msta.Bits.CNTRL_COMM_ERR != 0)))
             {
                 re_init_update_MinRetryDeadband(pmr);
-                rc = CALLBACK_RE_INIT;
+                rc = CALLBACK_DATA_SOFT_LIMITS;
             }
             pmr->priv->lastReadBack.msta.All = pmr->msta;
         }

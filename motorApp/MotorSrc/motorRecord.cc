@@ -846,7 +846,7 @@ static long init_record(dbCommon* arg, int pass)
             if (pmr->dol.type == CONSTANT)
                  pmr->udf = TRUE;
             break;
-        case CALLBACK_RE_INIT:
+        case CALLBACK_DATA_SOFT_LIMITS:
         case CALLBACK_DATA:
             init_re_init(pmr);
             break;
@@ -1356,7 +1356,7 @@ static long process(dbCommon *arg)
     if (pmr->msta != old_msta)
         MARK(M_MSTA);
 
-    if (process_reason == CALLBACK_RE_INIT)
+    if (process_reason == CALLBACK_DATA_SOFT_LIMITS)
     {
         if (pmr->priv->softLimitRO.motorDialLimitsValid)
         {
