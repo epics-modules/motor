@@ -215,8 +215,10 @@ asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
     return status;
   }
   else if (autoPower == 2) {
+    int motorStatusPowerOn;
     pAxis->setDisableFlag(0);
-    if (pAxis->pollPowerIsOn()) {
+    getIntegerParam(axis, motorStatusPowerOn_, &motorStatusPowerOn);
+    if (motorStatusPowerOn || pAxis->pollPowerIsOn()) {
       /* Amplifier is on, we are done */
       return asynSuccess;
     }
