@@ -136,7 +136,7 @@ static int paramSetDouble( PARAMS params, paramIndex index, double value )
     int status = PARAM_ERROR;
 
     index -= params->startVal;
-    if (index >=0 && index < params->nvals)
+    if ((long)index >=0 && index < params->nvals)
     {
         if ( params->vals[index].type != paramDouble ||
              params->vals[index].data.dval != value )
