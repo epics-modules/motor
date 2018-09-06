@@ -429,11 +429,9 @@ void asynMotorAxis::updateMsgTxtField()
     pC_->getIntegerParam(axisNo_,pC_->motorStatusHighLimit_, &motorStatusHighLimit);
     pC_->getIntegerParam(axisNo_,pC_->motorStatusLowLimit_, &motorStatusLowLimit);
     if (motorStatusHighLimit && motorStatusLowLimit)
-      setStringParam(pC_->motorMessageText_,"I: Both limit switches");
-    else if (motorStatusHighLimit)
-      setStringParam(pC_->motorMessageText_,"I: Raw high limit switch");
-    else if (motorStatusLowLimit)
-      setStringParam(pC_->motorMessageText_,"I: Raw low limit switch");
+      setStringParam(pC_->motorMessageText_,"I: Limit switches");
+    else if (motorStatusHighLimit || motorStatusLowLimit)
+      setStringParam(pC_->motorMessageText_,"I: Limit switch");
     else {
       int motorStatusProblem;
       int motorStatusHomed;
@@ -470,8 +468,7 @@ void asynMotorAxis::updateMsgTxtField()
         if (motorPosition < motorLowLimit) {
           setStringParam(pC_->motorMessageText_,"I: Below soft limit");
           return;
-        }
-        else if (motorPosition > motorHighLimit) {
+        } else if (motorPosition > motorHighLimit) {
           setStringParam(pC_->motorMessageText_,"I: Above soft limit");
           return;
         }
@@ -504,7 +501,7 @@ void asynMotorAxis::updateMsgTxtField()
         setStringParam(pC_->motorMessageText_,"I: Homing");
         break;
     case LATEST_COMMAND_MOVE_TO_HOME:
-        setStringParam(pC_->motorMessageText_,"I: Moving to home");
+        setStringParam(pC_->motorMessageText_,"I: Moving home");
         break;
     case LATEST_COMMAND_MOVE_ABS:
         setStringParam(pC_->motorMessageText_,"I: Moving abs");
@@ -533,7 +530,7 @@ void asynMotorAxis::updateMsgTxtField()
         setStringParam(pC_->motorMessageText_,"I: Home");
         break;
     case LATEST_COMMAND_MOVE_TO_HOME:
-        setStringParam(pC_->motorMessageText_,"I: Move to home");
+        setStringParam(pC_->motorMessageText_,"I: Move home");
         break;
     case LATEST_COMMAND_MOVE_ABS:
         setStringParam(pC_->motorMessageText_,"I: Move abs");
