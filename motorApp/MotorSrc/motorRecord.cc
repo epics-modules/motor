@@ -189,7 +189,7 @@ USAGE...        Motor Record Support.
  * .75 05-18-17 rls - Stop motor if URIP is Yes and RDBL read returns an error. 
  */                                                          
 
-#define VERSION 6.941
+#define VERSION 6.95
 
 #include    <stdlib.h>
 #include    <string.h>
