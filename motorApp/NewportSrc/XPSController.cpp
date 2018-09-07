@@ -530,6 +530,7 @@ asynStatus XPSController::initializeProfile(size_t maxPoints, const char* ftpUse
 asynStatus XPSController::buildProfile()
 {
   FILE *trajFile;
+  char *trajectoryDirectory;
   int i, j; 
   int status;
   bool buildOK=true;
@@ -687,6 +688,7 @@ asynStatus XPSController::buildProfile()
     if (!inGroup[j]) continue;
     fprintf(trajFile,", %f, %f", pAxes_[j]->profilePostDistance_, 0.);
   }
+  fprintf(trajFile,"\n");
   fclose (trajFile);
   
   /* FTP the trajectory file from the local directory to the XPS */
@@ -696,7 +698,16 @@ asynStatus XPSController::buildProfile()
     sprintf(message, "Error calling ftpConnect, status=%d\n", status);
     goto done;
   }
-  status = ftpChangeDir(ftpSocket, TRAJECTORY_DIRECTORY);
+  if (strstr(firmwareVersion_, "C8")) {
+    trajectoryDirectory = XPS_C8_TRAJECTORY_DIRECTORY;
+  } else if (strstr(firmwareVersion_, "Q8")) {
+    trajectoryDirectory = XPS_Q8_TRAJECTORY_DIRECTORY;
+  } else {
+    buildOK = false;
+    sprintf(message, "Firmware version does not contain C8 or Q8=%s\n", firmwareVersion_);
+    goto done;
+  }
+  status = ftpChangeDir(ftpSocket, trajectoryDirectory);
   if (status) {
     buildOK = false;
     sprintf(message, "Error calling  ftpChangeDir, status=%d\n", status);
