@@ -52,6 +52,7 @@ NOTES...
 #include        <dbAccess.h>
 #include        <dbEvent.h>
 #include        <recSup.h>
+#include        <stdarg.h>
 
 #include        "motorRecord.h"
 #include        "motor.h"
