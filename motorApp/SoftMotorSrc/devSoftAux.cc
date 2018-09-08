@@ -74,7 +74,7 @@ STATIC void soft_rinp(struct event_handler_args args)
     soft_rinp_func((struct motorRecord *) args.usr, *((long *) args.dbr));
 }
 
-long soft_init(void *after)
+long soft_init(int after)
 {
     int before_after = (after == 0) ? 0 : 1;
 
