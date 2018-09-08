@@ -41,6 +41,7 @@ in the same file; each defines (redefines) the DBR's.
 #include <errlog.h>
 #include <epicsEvent.h>
 #include <ellLib.h>
+#include <dbLock.h>
 #include <callback.h>
 #include <epicsThread.h>
 
@@ -49,6 +50,20 @@ in the same file; each defines (redefines) the DBR's.
 #include "devSoft.h"
 
 #define STATIC  static
+
+extern volatile int devSoftdebug;
+static inline void Debug(int level, const char *format, ...)
+{
+#ifdef DEBUG
+    if (level < devSoftdebug)
+    {
+        va_list pVar;
+        va_start(pVar, format);
+        vprintf(format, pVar);
+        va_end(pVar);
+    }
+#endif
+}
 
 STATIC void soft_dinp(struct event_handler_args);
 STATIC void soft_rdbl(struct event_handler_args);
@@ -161,32 +176,51 @@ STATIC EPICSTHREADFUNC soft_motor_task(void *parm)
 
         mr = node->pmr;
         free(node);
+        dbScanLock((dbCommon *)mr);
 
         ptr = (struct soft_private *) mr->dpvt;
-        if (mr->dinp.value.constantStr == NULL)
-            ptr->default_done_behavior = true;
-        else
+        Debug(5, "devSoftAux::soft_motor_task: motor %s link type=%d\n", mr->name, mr->dinp.type);
+        Debug(5, "devSoftAux::soft_motor_task: motor %s constantStr=%s dinp link=%s\n", mr->name, mr->dinp.value.constantStr, mr->dinp.value.pv_link.pvname);
+        if (((mr->dinp.type == PV_LINK) || 
+             (mr->dinp.type == CA_LINK) ||
+             (mr->dinp.type == DB_LINK)) &&
+             (mr->dinp.value.pv_link.pvname != NULL)) 
         {
             ptr->default_done_behavior = false;
+            Debug(5, "devSoftAux::soft_motor_task: adding dinp link for motor %s link=%s\n", mr->name, mr->dinp.value.pv_link.pvname);
             SEVCHK(ca_search(mr->dinp.value.pv_link.pvname, &dinp),
                    "ca_search() failure");
             SEVCHK(ca_add_event(DBR_SHORT, dinp, soft_dinp, mr, NULL),"ca_add_event() failure");
             SEVCHK(ca_pend_io((float) 5.0), "DINP link failure");
         }
-    
-        if (mr->urip != 0)
+        else
         {
+            ptr->default_done_behavior = true;
+        }
+    
+        if ((mr->urip != 0) &&
+            ((mr->rdbl.type == PV_LINK) || 
+             (mr->rdbl.type == CA_LINK) ||
+             (mr->rdbl.type == DB_LINK)) &&
+             (mr->rdbl.value.pv_link.pvname != NULL)) 
+        {
+            Debug(5, "devSoftAux::soft_motor_task: adding rdbl link for motor %s link=%s\n", mr->name, mr->rdbl.value.pv_link.pvname);
             SEVCHK(ca_search(mr->rdbl.value.pv_link.pvname, &rdbl),"ca_search() failure");
             SEVCHK(ca_add_event(DBR_DOUBLE, rdbl, soft_rdbl, mr, NULL),"ca_add_event() failure");
             SEVCHK(ca_pend_io((float) 5.0), "RDBL link failure");
         }
 
-        if (mr->rinp.value.constantStr != NULL)
+        if (((mr->rinp.type == PV_LINK) || 
+             (mr->rinp.type == CA_LINK) ||
+             (mr->rinp.type == DB_LINK)) &&
+             (mr->rinp.value.pv_link.pvname != NULL))
         {
+            Debug(5, "devSoftAux::soft_motor_task: adding rinp link for motor %s link=%s\n", mr->name, mr->rinp.value.pv_link.pvname);
             SEVCHK(ca_search(mr->rinp.value.pv_link.pvname, &rinp),"ca_search() failure");
             SEVCHK(ca_add_event(DBR_LONG, rinp, soft_rinp, mr, NULL),"ca_add_event() failure");
             SEVCHK(ca_pend_io((float) 5.0), "RINP link failure");
         }
+        dbScanUnlock((dbCommon *)mr);
     }
 
     ellFree(&soft_motor_list);

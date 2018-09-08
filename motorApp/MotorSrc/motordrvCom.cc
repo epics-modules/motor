@@ -56,6 +56,7 @@ USAGE...        This file contains driver functions that are common
 #include        <callback.h>
 #include        <epicsThread.h>
 #include        <epicsExport.h>
+#include        <stdarg.h>
 
 #include        "motor.h"
 
