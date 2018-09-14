@@ -513,7 +513,7 @@ errorexit:                  errMessage(-1, "Invalid device directive");
                 if (MAXv == true && parms[0] == parms[1])
                     sprintf(buffer, " UF");
                 else
-                    sprintf(buffer, " UU%f;", parms[0]/parms[1]);
+                    sprintf(buffer, " UU%f;", fabs(parms[0]/parms[1]));
                 strcat(motor_call->message, buffer);
                 break;
 

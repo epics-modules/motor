@@ -69,6 +69,9 @@ endif
 ifndef NO_MOTOR_PHYTRONSRC
 COMMONDBDS += phytron.dbd
 endif
+ifdef LUA
+COMMONDBDS += ScriptMotorDriver.dbd
+endif
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -143,6 +146,10 @@ COMMONLIBS += phytronAxisMotor
 endif
 
 COMMONLIBS += motor
+ifdef LUA
+COMMONLIBS += ScriptMotor
+COMMONLIBS += lua
+endif
 
 # Needed for Newport SNL programs
 WithAsyn_LIBS += $(COMMONLIBS)

@@ -2,189 +2,133 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta content="Kevin Peterson" name="Author" />
+  <meta content="Ronald L. Sluiter" name="Author" />
   <meta content="Synopsis of modifications, fixes and new features for each motor record release."
     name="Description" />
-  <title>EPICS Motor Record Release R6-10 Notice</title>
+  <title>Unofficial EPICS Motor Record Release R6-9-2 Notice</title>
+  <meta content="Ronald L. Sluiter" name="author" />
   <meta content="Notification of bug fixes, functional changes and new features." name="description" />
   <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
 </head>
 <body>
   <div style="text-align: center">
     <h1>
-      <b>Motor Record Version 6-10-1 Release Notice</b></h1>
+      <b>Unofficial Motor Record Version 6-9-2 Release Notice</b></h1>
   </div>
-
   <div style="text-align: center">
     <h4>
       Modifications to Existing Features</h4>
   </div>
-
   <div style="text-align: left">
     <p>
-      See release notes on github: <a href="https://github.com/epics-modules/motor/releases/tag/R6-10-1">https://github.com/epics-modules/motor/releases/tag/R6-10-1</a>
+      <b>!WARNING!</b><br />
+      motorRecord.dbd has been modified.&nbsp; This requires rebuilding any and all user
+      trees (i.e., &lt;ioctop&gt;) that load the motor record.
+      Beside that, lots of code had been touched, intensive tests are needed.
     </p>
   </div>
-
-  <div style="text-align: center">
-    <h1>
-      <b>Motor Record Version 6-10 Release Notice</b></h1>
-  </div>
-
-  <div style="text-align: center">
-    <h4>
-      Modifications to Existing Features</h4>
-  </div>
-
   <div style="text-align: left">
     <p>
-      <b>OMS support</b>
+      <b>Encoder readback > 32 bit</b>
     </p>
     <p>
-      <a href="https://github.com/rsluiter">Ron Sluiter</a> added a check for an invalid MAXv interrupt level (IRQ=1)
-      (<a href="https://github.com/epics-modules/motor/commit/1196bbe4df5968ae4ac05c142a9f4be93827d06e">1196bbe4df5968ae4ac05c142a9f4be93827d06e</a>)
+      Some encoders need a wider range than what a 32 bit integer can provide.
+      Make it possible to forward a "double" value into the record.
     </p>
     <p>
-      <a href="https://github.com/rsluiter">Ron Sluiter</a> added a check for a new MAXv failure mode where the board reboots after the 1st command with response
-      (<a href="https://github.com/epics-modules/motor/commit/e604c9588a087228dc6c0333818e00113df841ea">e604c9588a087228dc6c0333818e00113df841ea</a>)
+      See even FeadbackDataflowModel3.ppt
     </p>
     <p>
-      <a href="https://github.com/rsluiter">Ron Sluiter</a> added an optional test for VME58 failure mode where the board reboots after the 1st motion related command
-      (<a href="https://github.com/epics-modules/motor/commit/4f54eb502bb1e4157db9a0587cfdbabd66de0c95">4f54eb502bb1e4157db9a0587cfdbabd66de0c95</a>)
+      <b>Improved connect for model 3 drivers</b>
+    </p>
+    <p>
+      When the IOC is started and the motorRecord is initialized,
+      the (TCP/IP) connection to the controller must have been established.
+      Introduce a initialPoll() which does the read out of axis values and keep
+      the record in UDF state. (This needs a better explanations, right?)
+    </p>
+    <p>
+      <b>Motor stops while jogging</b>
+    </p>
+    <p>
+      When the motor stopps while jogging (and the record did not request the stop)
+      the statemachine got confused. Handle the situation gracefully
+    </p>
+    <p>
+      <b>STOP while inside the DLY phase </b>
+    </p>
+    <p>
+      When the motor was stopped while in the delay phase, to record locked up.
+    </p>
+    <p>
+      <b>FRAC field functionality has changed</b>
+    </p>
+    <p>
+      The FRAC field is only used, when the record is configured to do retries with relative moments.
     </p>
   </div>
-
-  <div style="text-align: left">
-    <p>
-      <b>Aerotech A3200 support</b>
-    </p>
-    <p>
-      <a href="https://github.com/rsluiter">Ron Sluiter</a> Removed the "Task number" argument from A3200AsynConfig and switched to using Task #2 for the ASCII Interface
-      (<a href="https://github.com/epics-modules/motor/commit/a52ec2f62ff34b30597bccc7de9d70b4d2ed7f86">a52ec2f62ff34b30597bccc7de9d70b4d2ed7f86</a>)
-    </p>
-  </div>
-
-  <div style="text-align: left">
-    <p>
-      <b>Newport support</b>
-    </p>
-    <p>
-      <a href="https://github.com/MarkRivers">Mark Rivers</a> modified the ESP300 driver so that it correctly determines the resolution when open-loop steppers are used
-      (<a href="https://github.com/epics-modules/motor/commit/5245991323fb8c73cd6383e064da7b02c2629fea">5245991323fb8c73cd6383e064da7b02c2629fea</a>)
-    </p>
-    <p>
-      <a href="https://github.com/MarkRivers">Mark Rivers</a> changed the XPS PositionCompare API 
-      (<a href="https://github.com/epics-modules/motor/commit/44351c99d92837cbb283b21877a87ecc821875e0">44351c99d92837cbb283b21877a87ecc821875e0</a>) and made numerous improvements to the PositionCompare functionality.
-    </p>
-  </div>
-
-  <div style="text-align: left">
-    <p>
-      <b>Motor Record improvments</b>
-    </p>
-    <p>
-      <a href="https://github.com/jmdewart">jmdewart</a> &amp <a href="https://github.com/klauer">Ken Lauer</a> changed the acceleration calculation so that VBAS is ignored when VELO==VBAS
-      (<a href="https://github.com/epics-modules/motor/commit/4b89359e1cc1b411f974c0733bdf0b70df303aa8">4b89359e1cc1b411f974c0733bdf0b70df303aa8</a>)
-    </p>
-    <p>
-      <a href="https://github.com/rsluiter">Ron Sluiter</a> changed the motor record logic so that the motor is stopped if URIP=Yes and RDBL read returns an error
-      (<a href="https://github.com/epics-modules/motor/commit/220d18fcff89507a236152bd17aa48e5f13ca471">220d18fcff89507a236152bd17aa48e5f13ca471</a>)
-    </p>
-    <p>
-      <a href="https://github.com/timmmooney">Tim Mooney</a> added a field, IGSET, to allow the SET field to be ignored.  
-      More info on why this was desirable can be found in <a href="https://github.com/epics-modules/motor/pull/53">pull request #53</a>.
-      (<a href="https://github.com/epics-modules/motor/commit/5cad105357739d603218502eb38be20ee736b4ee">5cad105357739d603218502eb38be20ee736b4ee</a>)
-    </p>
-    <p>
-      <a href="https://github.com/timmmooney">Tim Mooney</a> modified the motor record's SYNC functionality so that it works when URIP=True
-      (<a href="https://github.com/epics-modules/motor/commit/ac900b90615ef650f13a9f21a5f1c145c0402408">ac900b90615ef650f13a9f21a5f1c145c0402408</a>)
-    </p>
-  </div>
-
   <div style="text-align: center">
     <h4>
       New Features</h4>
   </div>
-
   <div style="text-align: left">
     <p>
-      <b>AMCI ANG1 support</b>
+      <b>Set Point Deadband </b>
     </p>
     <p>
-      <a href="https://github.com/kurtgoetze">Kurt Goetze</a> added support for the AMCI ANG1 controller/driver
-      (<a href="https://github.com/epics-modules/motor/commit/8966aeabf292874de8c78754e95e14cde1f1c776">8966aeabf292874de8c78754e95e14cde1f1c776</a>) and made numerous improvements to the PositionCompare functionality.
+      The set point deadband (SDBD) field limits the smallest allowed move. The
+      size of a move is now no longer limited by the motor resolution (MRES).
+    </p>
+    <p>
+      <b>New flag field MFLG</b>
+    </p>
+    <p>
+      The driver of an advanced controler may switch off features in the record:
+      <ul>
+      <li> Bit 0: Homing ignores the limit switches. </li>
+      <li> Bit 1: Don't stop the motor when the PROBLEM bit is set. </li>
+      <li> Bit 2: The motor needs time to ramp down after a stop. </li>
+      </ul>
+    </p>
+    <p>
+      <b>Read only soft limits from controller</b>
+    </p>
+    <p>
+      For a model 1 and 2 driver the driver could limit the motorRecord softlimits
+      to stay inside the "read only" soft limits configured in the controller.
+      This was never implemented to model 3 drivers.
+    </p>
+      <b>Velocities and acceleration from controller</b>
+    </p>
+    <p>
+      A modern controller may have all values for velocities, acceleration (anf jerk)
+      configured inside the controller.
+      Make it possible for a model 3 driver to forward these values to the record
+      when the record is initialized.
+    </p>
+    </p>
+      <b>ASCII messages from controller</b>
+    </p>
+    <p>
+      Some controllers are able to give a human readable error string to the user.
+      Add a new parameter "motorMessageText_ ("MOTOR_MESSAGE_TEXT") where a model 3
+      driver can put information.
+      (This is not a field in the motorRecord, but an own PV)
     </p>
   </div>
-
+  <div style="text-align: center">
+    <h1>
+      <b>Motor Record Version 6-10 Release Notice</b></h1>
+  </div>
+  <div style="text-align: center">
+    <h4>
+      Modifications to Existing Features</h4>
+  </div>
   <div style="text-align: left">
     <p>
-      <b>Newport CONEX-PP support</b>
-    </p>
-    <p>
-      <a href="https://github.com/MarkRivers">Mark Rivers</a> added support for the CONEX-PP series to the AG_CONEX driver
-      (<a href="https://github.com/epics-modules/motor/commit/2b853366f48230356c869a46691acbd8c7391810">2b853366f48230356c869a46691acbd8c7391810</a>) and made numerous improvements to the PositionCompare functionality.
+      <b>TODO: Documentation</b>
     </p>
   </div>
-
-  <div style="text-align: left">
-    <p>
-      <b>iocsh scripts</b>
-    </p>
-    <p>
-      <a href="https://github.com/keenanlang">Keenan Lang</a> add iocsh setup scripts for many motor controllers
-      (<a href="https://github.com/epics-modules/motor/commit/17d10a8158ba5ca23bfc97133901d8d6e859f1ac">17d10a8158ba5ca23bfc97133901d8d6e859f1ac</a>
-      &amp
-      <a href="https://github.com/epics-modules/motor/commit/a87835c14a20a8e11745e16591d031fb674f0e14">a87835c14a20a8e11745e16591d031fb674f0e14</a>)
-    </p>
-  </div>
-
-  <div style="text-align: left">
-    <p>
-      <b>PI E-517 support</b>
-    </p>
-    <p>
-      <a href="https://github.com/Brudhu">Bruno Luvizotto</a> added files for supporting PIE517 piezo controller
-      (<a href="https://github.com/epics-modules/motor/commit/f31ed90b255a554a1930ac721d595ade0c8095a2">f31ed90b255a554a1930ac721d595ade0c8095a2</a>)
-    </p>
-  </div>
-
-  <div style="text-align: left">
-    <p>
-      <b>New Focus 874x support</b>
-    </p>
-    <p>
-      <a href="https://github.com/waynelewis">Wayne Lewis</a> added support for the NewFocus 874x series of controllers
-      (<a href="https://github.com/epics-modules/motor/commit/634e49d5076d87fefbd875cd0700e7feb6d062e3">634e49d5076d87fefbd875cd0700e7feb6d062e3</a>)
-    </p>
-  </div>
-
-  <div style="text-align: left">
-    <p>
-      <b>asynMotor support</b>
-    </p>
-    <p>
-      <a href="https://github.com/mp49">Matthew Pearson</a> added parameters to asynMotorController to deal with automatic amplifier control via setClosedLoop. 
-      (<a href="https://github.com/epics-modules/motor/commit/36dfab4a78725866fab5bd212c4c128a86e9f044">36dfab4a78725866fab5bd212c4c128a86e9f044</a>)
-    </p>
-  </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   <div style="text-align: center">
     <h1>
       <b>Motor Record Version 6-9 Release Notice</b></h1>

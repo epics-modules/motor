@@ -1,0 +1,1060 @@
+<!doctype html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
+  <title>Motor Module Known Problems</title>
+</head>
+<body>
+
+<center><h1>Motor Module: Known problems</h1></center>
+
+<h2>Known problems with Release 6-10 and later</h2>
+
+See issues on github: <a href="https://github.com/epics-modules/motor/issues">https://github.com/epics-modules/motor/issues</a>
+
+<h2>Known problems with Release 6-9</h2>
+
+
+<h2>Known problems with Release 6-8</h2>
+
+<ol>
+  <li>
+    <p>
+    <b>Soft-travel Limits</b>
+    </p>
+    <p>
+    <ul>
+      <li>
+        Although there are a number of improvements with R6-8's support of soft-travel 
+        limits (LVIO), there are also two problems that will remain "Known Problems".
+        These limitation are as follows:
+      </li>
+      <ul>
+        <li>
+          Tweaking (TWF/TWR) very small increments with UEIP = Yes while in the invalid 
+          range of the soft-travel limits may put the motor record in a state where the 
+          user cannot tweak in either direction. The solution is to either jog the motor 
+          towards the valid range or increase the tweak increment value (TWV field).
+        </li>
+        <li>
+          Tapping the Jog button can cause the motor to move past the soft-travel limit 
+          when backlash is nonzero.
+        </li>
+      </ul>
+    </ul>
+    </p>
+  </li>
+  <li>
+    <p>
+    <b>Newport ESP100/300/301</b>
+    </p>
+    <p>
+    The R6.8 ESP support changes made to "Use MRES rather than controller resolution 
+    to do EGUtoRAWbacktoEGU conversion." do not work. (Model 1 drivers do not always 
+    have access to motor record data.) The most obvious problem with R6.8 ESP 
+    support is the inability to "set" the controller's position.
+    </p>
+    <p>
+    <a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R6-8/ESPr68.patch">This 
+    patch file</a> rolls back the R6.8 ESP changes and adds one bug fix to 
+    the EPS100/300/301 driver; when a controller error occurs, the driver prints the 
+    error code to the console and sets the RA_PROBLEM bit of the MSTA field. The 
+    motor record patch unconditionally sends a "stop motor" command whenever a 
+    driver sets the RA_PROBLEM bit. Finally, the patch file updates ESP info in the 
+    README file.
+    </p>
+    <p>
+    R6-8-1 includes both the MRES related rollback and the STOP on RA_PROBLEM bug fix.
+    </p>
+  </li>
+</ol>
+
+<h2>Known problems with Release 6-7</h2>
+
+<ol>
+  <li>
+    <p>
+    <b>Aerotech Ensemble</b>
+    </p>
+    <p>
+    <ul>
+      <li>
+        Due to network broadcasting upgrades to Aerotech Ensemble Motion Composer, 
+        starting with motor module R6-7-1, the EPICS Ensemble driver only supports 
+        4.01.002 Ensemble version firmware 4.01.002 and above.
+      </li>
+      <li>
+        The home search from EPICS command was been restored with R6-7-1.  In order for 
+        an EPICS home search command to work, the Aerotech Ensemble example program, <i>HomeAsync.abx</i>, 
+        must be compiled and stored in the Ensemble.  In addition, the Parameters>System>TaskExecutionSetup 
+        parameter must be set to enable Auxiliary Task execution.
+      </li>
+    </ul>
+    </p>
+  </li>
+
+  <p>
+  <li>
+    <p>
+    <b>Schneider Electric (formally IMS) MDrive</b>
+    </p>
+    <p>
+      Joe Sullivan fixed several bugs in the Schneider Electric MDrive driver 
+      associated with input buffer overflows that arose with newer MDrive firmware (e.g., 
+      3.003).  These bug fixes were 1st released with motor module R6-7-1.
+    </p>
+  </li>
+  </p>
+
+</ol>
+
+<h2>Known problems with Release 6-5</h2>
+
+<ol>
+  <li>
+    <p>
+    <b>Aerotech Ensemble</b>
+    </p>
+    <p>
+    <ul>
+      <li>
+        With previous releases the Aerotech Ensemble asyn motor driver would crash the 
+        IOC at boot-up if the Ensemble was not powered up and able to communicate. Fixed 
+        with R6-5-1.
+      </li>
+      <li>
+        The EOT limit switch status was not available except via an Ensemble fault 
+        condition.  With release R6-5-1 the status of the EOT limit switches are always 
+        available.
+      </li>
+    </ul>
+    </p>
+  </li>
+
+  <p>
+  <li>
+    <p>
+    <b>OMS MAXv WatchDog Timeout Counter</b>
+    </p>
+    <p>
+    Beginning with R6-5-1 and OMS MAXv firmware ver:1.33, the EPICS MAXv driver reads 
+    the MAXv's Watchdog Timeout Counter at bootup, and with every motor status 
+    update. If the Counter is nonzero, an error message is sent to both the errlog 
+    task and the console.  Since a watchdog timer trip indicates that the MAXv has 
+    rebooted and no longer has valid motor positions, the driver disables the 
+    controller. That specific controller is no longer available to EPICS until after 
+    the VME crate has been power cycled. Other MAXv boards in the system are 
+    unaffected by this scenario.
+    </p>
+    <p>
+    To better communicate this problem to the user, several medm displays have been 
+    changed.  Small displays (motorx_tiny.adl, motorx.adl) will show a yellow border 
+    around their position readback values.  Larger displays (motorx_more.adl, 
+    motorx_all.adl) will display the message "Controller Error" in yellow.  The 
+    following error message at the console and/or in the errlog is definitive;
+    </p>
+    <p>
+    <center>
+      ***MAXv card #<i>(card#)</i> Disabled*** Watchdog Timeout CTR =<i>(count)</i>
+    </center>
+    </p>
+  </li>
+  </p>
+
+  <li>
+    <p>
+    <b>spec upgrade required</b>
+    </p>
+    <p>
+    The RES field was removed from the motor record with R6-5.  Since earlier 
+    versions of Certified Scientific Software's spec used the RES field, an upgrade 
+    to spec version 5.8.06-6 or above is required for spec to work with motor record 
+    R6-5 and above.  The problem of using earlier versions of spec with motor record 
+    R6-5 exhibits itself by spec setting the "responsive" parameter to zero and not 
+    allowing any motor motion.
+    </p>
+  </li>
+
+  <li>
+    <p>
+    <b>VxWorks 6.x compiler error</b>
+    </p>
+    <p>
+    The GNU preprocessor assertions in motor.h are deprecated with the VxWorks 6.x 
+    compiler.  Test for CPU macros that are compatible with VxWorks 6.x have been 
+    added.  This change prevents an "Error: unknown bit order!" compiler error with 
+    VxWorks 6.x.  This problem is fixed with R6-5-2 and above. Alternatively, you can 
+    replace &lt;motor&gt;/motorApp/MotorSrc/motor.h with the following copy:&nbsp;<a href="/bcda/synApps/motor/R6-5/motor.h">motor.h</a>
+    </p>
+  </li>
+  
+  <li>
+    <p>
+    <b>Aerotech Ensemble Home Search</b>
+    </p>
+    <p>
+    The EPICS Ensemble driver uses Aerotech's ASCII communication protocol.  That 
+    protocol blocks all communication on the ASCII comm. port during a home search. 
+    Consequently, once a home search is started from EPICS, it is unable to stop it. 
+    As a result, beginning with R6-5-2, the home search command has been commented 
+    out of the EPICS driver until an Ensemble firmware update resolves this problem.
+    </p>
+  </li>
+  
+</ol>
+
+<h2>Known problems with Release 6-4</h2>
+
+<ol>
+  <li>
+    R6-4 had 64-bit compile problems with the PI E816 and Aerotech Ensemble device 
+    drivers.  Fixed with R6-4-1 and above.
+  </li>
+  <p>
+  <li>
+    Dirk Zimoch (PSI) discovered and fixed a bug in the orginial OMS MAXv driver (R5-4) 
+    that caused the home switch status in the response string to be overwritten.  
+    Fixed with R6-4-2 and above.
+    <p>
+  </li>
+  <p>
+  <li>
+    A problem was introduced in R6-4 of the old motor record device drive 
+    architecture. If during the move of one or more motors the motor task did not 
+    issue an OS delay during status updates, it could potentially not respond to any 
+    further motor commands.  Fixed with R6-4-2 and above.
+  </li>
+  <p>
+  <li>
+    There is a bug in these motor record versions (R6-4, R6-4-1, R6-4-2)
+    that affects motors that have encoders and are configured to do closed-loop 
+    control via retries (i.e. UEIP=Yes and RTRY != 0). Retries are not done 
+    correctly and occasionally motors exceed their maximum retries and are left at 
+    their backlash position; i.e., command position - backlash distance. See the 
+    Release Notice for further error conditions. Fixed with R6-4-3 and above.
+  </li>
+  <p>
+  <LI>
+    The asynMotor device support in general, and the simulated motor, in particular, 
+    had save/restore related problems.  Fixed with R6-4-4 and above.
+  </LI>
+  <P>
+  <LI>
+    Previous releases of the Aerotech Ensemble device driver had incorrect Jog 
+    speeds, lacked support for a negative PosScaleFactor parameter and did not 
+    detect maximum travel limit switch faults correctly. Fixed with R6-4-4 and above.
+  </LI>
+  <P>
+</ol>
+
+<h2>Known problems with Release 6-3</h2>
+
+<OL>
+  <LI>
+    The OMS VME58 "stale data" problem is caused by the driver communicating via the 
+    ASCII commands while the DPRAM was updating.  The OMS VME58 driver was modified 
+    with R6-3 to eliminate this contention and the "stale data delay" was set to 
+    zero. Since then a problem with OMS VME58 2.24-8S version firmware and all 2.35 
+    firmware versions has arisen.  When the user sets the motor record's position, 
+    the previous target and readback positions are read from the controller on the 
+    next update.
+    <P>
+    With releases after R6-3 (e.g., R6-3-1 and R6-4) the driver searches all VME58 
+    board ID's for either 2.24-8S or any 2.35 version.  If any board is found, the "stale 
+    data delay" is set to a non-zero value.
+  </LI>
+  <P>
+  <LI>
+    A problem was reported by Emma Shepherd (Diamond) with R6-3 if the "Use RDBL 
+    Link" field (URIP) was set to "Yes".  The NTM logic was sending stop commands 
+    and issuing the "tdir=.." message to the console if the RDBL link was used. This 
+    error was the result of changing the NTM logic as described in item #11 under R6-3 
+    modifications.
+    <P>
+    With releases after R6-3 (e.g., R6-3-1 and R6-4), the NTM logic is restored to 
+    using feedback rather than reference positions.  In addition, with release R6-4 
+    and after, an "NTM deadband factor" field (NTMF) is added to allow the user to 
+    set the NTM deadband; NTM deadband = NTMF * (|BDST| + RDBD) NTMF must be >= 2. 
+    If properly configured, the NTM deadband prevents NTM logic from issuing a STOP 
+    command at the end of a DC motor move that overshoots its' target position.
+  </LI>
+  <P>
+  <LI>
+    The asyn motor device driver architecture does not support the motor record 
+    GET_INFO command. Hence, operations that require a status update (i.e., setting 
+    the position) were not working. This is fixed in R6-4.
+  </LI>
+  <P>
+  <LI>
+    In the process of fixing the OMS VME58 "stale data" problem described above, 
+    needless delays were added to the code that updated the VME58's DPRAM.  These 
+    needless delays can be calculated as follows;
+    <P>
+    delay = (n-1) * (1/sysClkRate)
+    <P>
+    where, n = # of VME58 boards in the IOC.<BR>
+    sysClkRate = 60 Hz, unless changed by a sysClkRateSet() from st.cmd.
+    <P>
+    These delays are eliminated with R6-4-2 and above.
+  </LI>
+  <P>
+</OL>
+
+<h2>Known problems with Release 6-2</h2>
+
+
+<OL>
+  <LI>
+    Link errors occurred when building "XPSGatheringMain" for the solaris-sparc-gnu 
+    target.  Newport users should upgrade to R6-2-1.
+  </LI>
+  <P>
+  <LI>
+    Errors occurred in various motorApp's when building for the solaris-sparc (SUNWspro) 
+    target.  SUNWspro users should upgrade to R6-2-1.
+  </LI>
+  <P>
+  <LI>
+    Mark River's found and fixed a bug in the motor record.  RDBD was being used in 
+    motor record initialization before the RDBD validation check.  This resulted in 
+    motor positions not being initialized from save/restore at boot-up if RDBD was 
+    not included in a save/restore save set.  This is fixed in R6-2-2.
+  </LI>
+  <P>
+  <LI>
+    A bug was introduced into the shell command <B>motorUtilInit</B> affecting these 
+    versions of the motor distribution; R6-2, R6-2-1 and R6-2-2.  This bug resulted 
+    in the erroneous error message; "motorUtilInit: Prefix %c: has more than 53 
+    characters. Exiting". Replace &lt;motor&gt;/motorApp/MotorSrc/motorUtil.cc with 
+    the following copy:&nbsp; <A href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R6-2/motorUtil.cc">motorUtil.cc</A>
+  </LI>
+  <P>
+  <LI>
+    The "alldone" PV in motorUtil.db defaulted to the "moving" state between "iocInit 
+    " and "motorUtilInit", giving the false indication that motors were moving 
+    during boot-up.  The "alldone" PV now defaults to the "done" state. Replace &lt;motor&gt;/motorApp/Db/motorUtil.db 
+    with the following copy:&nbsp; <A href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R6-2/motorUtil.db">motorUtil.db</A>
+  </LI>
+  <P>
+</OL>
+
+<h2>Known problems with Release 6-1</h2>
+
+<OL>
+  <LI>
+    The Newport PM500 driver was not issuing the correct command when it queried for 
+    the number of axes at boot up. This resulted in a "PM500 system error" message 
+    on the 1st axis; fixed in R6-2.
+  </LI>
+  <LI>
+    A bug was introduced with R6-0; the OMS device support was overwriting PID 
+    parameter fields during its' normalization calculation; fixed in R6-2.
+  </LI>
+  <LI>
+    There was a bug in the logic that determines the precedence between using the 
+    controller's or save/restore's motor position at boot-up. Negative controller 
+    positions were not handled correctly; fixed in R6-2
+  </LI>
+  <LI>
+    The home request (HOMF/HOMR) were not cleared when a soft-limit violation 
+    occurred; fixed in R6-2.
+  </LI>
+  <LI>
+    Due to releasing R6-1 during Newport development, R6-1 can result in linker 
+    errors on the symbol "xpsgathering".  Newport users should upgrade to R6-2.
+  </LI>
+</OL>
+
+<h2>Known problems with Release 6-0</h2>
+
+<OL>
+  <LI>
+    The R6-0-bugfix CVS repository branch has become corrupted. Hence, no further 
+    changes will be made (i.e., bug fixes) to the R6-0 branch.
+  </LI>
+  <LI>
+    A bug was introduced with this release.  The OMS device support overwrites PID 
+    parameter fields during its' normalization calculation.  This is fixed in R6-2.
+  </LI>
+</OL>
+
+<h2>Known problems with Release 5-9</h2>
+
+<OL>
+  <LI>
+    An undocumented change was made in R5-4 to two OMS setup functions.  Namely, the 
+    unused 2nd argument ("axes per card") was eliminated from omsSetup() and 
+    oms58Setup().
+  </LI>
+
+  <LI>
+    Since R4-5 the motor record has required that RDBD be >= MRES.  The test for 
+    this condition was done using floating point values.  This caused an occasional 
+    error that resulted in the record not always issuing a motor move command when 
+    RDBD = MRES and the user issued an incremental move request equal to MRES.  This 
+    is fixed with R5-9-1 and R6-0.
+  </LI>
+  
+  <LI>
+    A warning message was added with R5-6 when a user attempted to move an OMS motor 
+    with an invalid velocity (slew <= base).  Applications that manipulate the
+    velocity values are unaware of this restriction and create a torrent of
+    these messages.  With release R5-9-1 and R6-0 the OMS device driver will
+    only output this warning message once.
+  </LI>
+
+  <LI>
+    Added a work around for OMS PC68/78 firmware error.  PC68/78 controllers make an 
+    erroneous response after they are queried with the "?KP" command at boot-up. 
+    This resulted in 1st axis having same position (RP command) as last the axis.  
+    This is fixed with R5-9-1 and R6-0.
+  </LI>
+  
+  <LI>
+    GPIB under ASYN allows only one input EOS character; no output EOS is allowed.  
+    Adjustments were made to the Newport ESP300 driver to accomodate this 
+    restriction with R5-9-1 and R6-0.
+  </LI>
+  
+  <LI>
+    The CVS repository has become out of synch with the R5-9-1 tar file (motorR5-9-1.tar.gz). 
+    Hence, no further changes will be made (i.e., bug fixes) to the R5-9 branch.
+  </LI>
+</OL>
+
+<h2>Known problems with Release 5-8</h2>
+
+<h2>Known problems with Release 5-7</h2>
+
+<h2>Known problems with Release 5-6</h2>
+
+<h2>Known problems with Release 5-5</h2>
+
+<h2>Known problems with Release 5-4</h2>
+
+<ol>
+  <li>
+    An undocumented change was made to two OMS setup functions.  Namely, the unused 
+    2nd argument ("axes per card") was eliminated from omsSetup() and oms58Setup() 
+    in R5-4.
+  </li>
+</ol>
+
+<h2>Known problems with Release 5-3</h2>
+
+<ol>
+  <li>
+    "sorry, not implemented: `tree_list' not supported by dump_type" error when 
+    compiling drvOms.cc and drvOms58.cc under Tornado 2.2.  The Tornado 2.2 compiler 
+    (i.e., 2.96) creates errors in devLib.h.  The root cause of this "bug" is a 
+    problem with the gcc-2.96 compiler bundled with Tornado 2.2.  Unfortunately, to 
+    date, Wind River is only helping with workarounds; not fixing the compiler.  Hence,
+    the following patches are required.
+  </li>
+  <ul>
+    <li>
+      For R3.14.4-5, replace &lt;base&gt;src/libCom/osi/devLib.h with the following  
+      copy:&nbsp;<a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-3/devLib.h">devLib.h</a>
+    </li>
+    <LI>
+      Edit &lt;motor&gt;/motorApp/OmsSrc/drvOms.cc by uncommenting the lines with the <I>Tornado 
+      2.2</I> comment and commenting out the line with the <I>Tornado 2.0.2</I> 
+      comment.</A>
+    </LI>
+    <LI>
+      Edit &lt;motor&gt;/motorApp/OmsSrc/drvOms58.cc by uncommenting the lines with 
+      the <I>Tornado 2.2</I> comment and commenting out the line with the <I>Tornado 
+      2.0.2</I> comment.</A>
+    </LI>
+  </ul>
+</ol>
+
+<h2>Known problems with Release 5-2</h2>
+
+<ol>
+  <li>
+    "sorry, not implemented: `tree_list' not supported by dump_type" error when 
+    compiling drvOms.cc and drvOms58.cc under Tornado 2.2.  The Tornado 2.2 compiler 
+    (i.e., 2.96) creates errors in devLib.h.  The root cause of this "bug" is a 
+    problem with the gcc-2.96 compiler bundled with Tornado 2.2.  Unfortunately, to 
+    date, Wind River is only helping with workarounds; not fixing the compiler.  Hence,
+    the following patches are required.
+  </li>
+  <ul>
+    <li>
+      For R3.14.4-5, replace &lt;base&gt;src/libCom/osi/devLib.h with the following  
+      copy:&nbsp;<a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/devLib.h">devLib.h</a>
+    </li>
+    <li>
+      Replace &lt;motor&gt;/motorApp/OmsSrc/drvOms.cc with the following  
+      updated copy:&nbsp;<a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/drvOms.cc">drvOms.cc</a>
+    </li>
+    <li>
+      Replace &lt;motor&gt;/motorApp/OmsSrc/drvOms58.cc with the following  
+      updated copy:&nbsp;<a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R5-2/drvOms58.cc">drvOms58.cc</a>
+    </li>
+  </ul>
+</ol>
+
+<h2>Known problems with Release 4-9</h2>
+
+<ol>
+  <LI>
+    PID parameters (i.e., PCOF, ICOF and DCOF fields) were not initialized at boot-up. 
+    With R4.9.1, if the GAIN_SUPPORT bit in the MSTA is true, each nonzero, 
+    PID parameter will be initialized.  For backwards compatibility, zero valued PID 
+    parameters will not be initialized.
+  </LI>
+  
+  <LI>
+    Previous releases of the IMS MDrive device driver did not work.  Thanks to Kevin 
+    M. Peterson (UNI-CAT) for identifying and fixing the errors in previous releases.
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9-2.
+    </li>
+  </ul>
+
+  <LI>
+    Two bugs were found and fixed with the Newport MM3000 device support.  First, 
+    the enable/disable torque control field (CNEN) was not working.  Second, an 
+    error was introduced into the Newport MM3000 device driver with R4-8; the driver 
+    was confusing valid responses with the "system error" response from the 
+    controller
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9-3.
+    </li>
+  </ul>
+
+  <LI>
+    A retry on initial communication with the Physik Instrumente (PI) C-844 motor 
+    controller was added.  The controller was intermittently not responding after an 
+    IOC power-cycle.
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9-4.
+    </li>
+  </ul>
+
+  <LI>
+    Modifications were made to the motor record in order to allow a user to 
+    configure it for periodic status updates using the SCAN field.
+  </LI>
+  <ul>
+    <li>
+      Available with R4-9-4.
+    </li>
+  </ul>
+
+  <LI>
+    The motor record would get into an invalid state when it attempted to perform a 
+    backlash correction move in the direction of an activated limit switch.
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9-5.
+    </li>
+  </ul>
+
+  <LI>
+    Bug fix for home request re-activating after a limit switch error is cleared.  
+    This release clears the homing and jog request after a LS or travel limit error.  
+    Updated the motorx_all.adl MEDM screen (V2.5) to show the state of the jog 
+    request.
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9-5.
+    </li>
+  </ul>
+
+  <LI>
+    A bug was reported by David Maden (PSI) that occurred when a motor was jogged 
+    into a limit switch with the DIR field set to "Neg". Under these conditions, the 
+    motor record was not processing the limit error condition correctly.  This 
+    resulted in the motor record not setting either of the limit error indicator 
+    fields (HLS/LLS) and becoming stuck in the "Moving" state.
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9-6.
+    </li>
+  </ul>
+
+  <LI>
+    Kevin Peterson (UNI-CAT) and I diagnosed a bug that is in all R3.13 versions of 
+    the motor record distribution.  The bug is in the interface between motor record 
+    GPIB capable drivers (i.e., Newport MM4000/5/6, MM3000, PM500, ESP300/100) and 
+    the EPICS base GPIB driver; drvGpib.<BR>
+    Dynamic memory is allocated and shared with drvGpib by the motor task. The 
+    problem arises here, at the end of ibLinkTask in drvGpib.c;<BR>
+
+    plink->deviceStatus[pnode->device] = (*(pnode->workStart))(pnode);<BR>
+
+    pnode->workStart is a pointer to gpibIOCallback() in gpibIO.c.  When 
+    gpibIOCallback() is done processing it "gives" a semaphore that is "taken" by 
+    either gpibIOSend() and gpibIORecv().  Both gpibIOSend() and gpibIORecv() 
+    immediately free the shared memory.<BR>
+
+    This works almost all the time; but occasionally the memory is taken by some 
+    other task and trashed before the line above is executed resulting in a bus 
+    error on "pnode->device".<BR>
+
+    As a quick fix, the task priorities of the all GPIB capable controllers has been 
+    lowered below ibLinkTasks priority.  This allows ibLinkTask to finish processing 
+    and be waiting for the next GPIB request before the shared memory is de-allocated.
+    <BR>
+
+    All users of the R3.13.x version of the motor record distribution that use GPIB 
+    to communicate to Newport controllers (i.e., Newport MM4000/5/6, MM3000, PM500, 
+    ESP300/100), should upgrade to the R4-9-6 release.
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9-6.
+    </li>
+  </ul>
+</ol>
+
+<h2>Known problems with Release 4-8</h2>
+
+<OL>
+  <LI>
+    Previous releases of the IMS MDrive device driver did not work.  Thanks to Kevin 
+    M. Peterson (UNI-CAT) for identifying and fixing the errors in previous releases.
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9-1.
+    </li>
+  </ul>
+  <LI>
+    Users of the status update field (STUP) should use a later release.
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-9 and above.
+    </li>
+  </ul>
+  <LI>
+    Two bugs were found and fixed with the Newport MM3000 device support.  First, 
+    the enable/disable torque control field (CNEN) was not working.  Second, an 
+    error was introduced into the Newport MM3000 device driver with R4-8; the driver 
+    was confusing valid responses with the "system error" response from the 
+    controller
+  </LI>
+  <ul>
+    <li>
+      Fixed with R4-8-1 and above.
+    </li>
+  </ul>
+</OL>
+
+<h2>Known problems with Release 4-7</h2>
+
+<ol>
+  <li>
+    With release R4-5, DBE_LOG was omitted from the event select mask of all 
+    db_post_events() calls.&nbsp; This prevented archival clients from being 
+    notified of process variable changes.
+  </li>
+  <ul>
+    <li>
+      Fixed with R4-7-1.
+    </li>
+  </ul>
+  <LI>
+    Communication with the Newport MM3000 motor controller was getting out of 
+    synchronization whenever the MM3000 responded with an error message. This 
+    problem was resolved by having recv_mess() in drvMM3000.c detect an error 
+    message response, print the error message and then, recursively, call itself. 
+    This restored communication transmit/receive synchronization.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-7-2.
+    </li>
+  </UL>
+  <LI>
+    With release R4-7, there was a slight (undocumented) modification made to the 
+    way that backlash correction functioned. If a move is in the preferred direction 
+    and the backlash speed and acceleration are the same as the slew speed and 
+    acceleration, then the backlash move is skipped and the motor moves directly to 
+    the target position. Unfortunately, there was a bug in the logic that appeared 
+    only when MRES< 0. When MRES < 0, and the backlash speed and acceleration were 
+    the same as the slew speed and acceleration, the motor record did the opposite 
+    of the requirements; i.e., it did backlash correction when the move was in the 
+    preferred direction and did not do backlash correction when the move was not in 
+    the preferred direction.   
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-7-2.
+    </li>
+  </UL>
+  <LI>
+    The Newport ESP300 would randomly crash at boot-up because an internal parameter 
+    ("drive_resolution") was not always, under all configurations, initialized. With 
+    this release, the "drive_resolution" is set based on the response to the ESP300 
+    "SU?" command. In addition, the user is required to set MRES to the resolution 
+    of the controller as explained in the new document /motorApp/NewportSrc/README.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-7-2.
+    </li>
+  </UL>
+  <LI>
+    A bug was introduced in R4-6 while fixing another bug; see item#2 under 
+    Modification Log from R4-5 to R4-6 in the distribution README file. This error 
+    exhibited itself only under the following conditions; BDST != 0, DLY != 0 and a 
+    new target position is issued before the backlash correction move. Under these 
+    conditions the motor record became unresponsive; i.e., it locked up.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-7-3.
+    </li>
+  </UL>
+  <LI>
+    Although there is no explicit statement in the motor record documentation, most 
+    user's would expect the "Readback settle time" field (DLY) to update the 
+    readback after the delay timeout. It did not do this. With this release, the 
+    readback is updated one time after the timeout.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-7-3.
+    </li>
+  </UL>  
+  <LI>
+    There were problems with the tweak function (TWF/TWR) when the TWV was set to 
+    less than MRES. Under this condition, the following scenario would result. First, 
+    tweak forward (TWF).  Since DIFF < MRES, the motor is not moved. Next, tweak 
+    reverse (TWR).  Next TWF again.  The motor record does not respond; i.e., DVAL 
+    and RVAL are not updated; VAL is not posted. A single tweak, back and forth, 
+    confirms that the motor record is not responding.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-7-4.
+    </li>
+  </UL>  
+  <LI>
+    The motor record would lock-up when a user tried to move off an activated limit 
+    switch with the OMS VME58 servo motor controller board (i.e., model -8S).  See "Known 
+    Problems" item #4 in the motor record's distribution README file.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-7-4.
+    </li>
+  </UL>
+</ol>
+
+<h2>Known problems with Release 4-6</h2>
+
+<ol>
+  <li>
+    An  uninitialized pointer error check was omitted from ESP300_init_record() in 
+    the devESP300.c file. &nbsp;This resulted in a bus error at boot-up if there was 
+    a failure to connect to the controller. &nbsp;Choose one of the following 
+    methods to applying the bug fix:
+  </li>
+  <ul>
+    <li>
+      Replace &lt;motor&gt;/motorApp/NewportSrc/devESP300.c with the following  
+      updated copy:&nbsp;<a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-6/devESP300.c">devESP300.c</a>
+    </li>
+    <li>
+      Install motor record version R4-6-1 or above, which includes this bug fix.
+    </li>
+
+  </ul>
+  <li>
+    With release 4-5, DBE_LOG was omitted from the event select mask of all 
+    db_post_events() calls.&nbsp; This prevented archival clients from being 
+    notified of process variable changes.
+  </li>
+  <ul>
+    <li>
+      Fixed with R4-6-2.
+    </li>
+  </ul>
+  <LI>
+    Communication with the Newport MM3000 motor controller was getting out of 
+    synchronization whenever the MM3000 responded with an error message. This 
+    problem was resolved by having recv_mess() in drvMM3000.c detect an error 
+    message response, print the error message and then, recursively, call itself. 
+    This restored communication transmit/receive synchronization.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-6-3.
+    </li>
+  </UL>
+  <LI>
+    The Newport ESP300 would randomly crash at boot-up because an internal parameter 
+    ("drive_resolution") was not always, under all configurations, initialized. With 
+    this release, the "drive_resolution" is set based on the response to the ESP300 
+    "SU?" command. In addition, the user is required to set MRES to the resolution 
+    of the controller as explained in the new document /motorApp/NewportSrc/README.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-6-3.
+    </li>
+  </UL>
+  <LI>
+    A bug was introduced in R4-5-1 while fixing another bug; see item#2 under 
+    Modification Log from R4-5 to R4-5-1 in the distribution README file. This error 
+    exhibited itself only under the following conditions; BDST != 0, DLY != 0 and a 
+    new target position is issued before the backlash correction move. Under these 
+    conditions the motor record became unresponsive; i.e., it locked up.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-6-4.
+    </li>
+  </UL>
+  <LI>
+    Although there is no explicit statement in the motor record documentation, most 
+    user's would expect the "Readback settle time" field (DLY) to update the 
+    readback after the delay timeout. It did not do this. With this release, the 
+    readback is updated one time after the timeout.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-6-4.
+    </li>
+  </UL>  
+</ol>
+
+<h2>Known problems with Release 4-5</h2>
+
+<ol>
+  <li>
+    Soft Channel Device Support - see <a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-5/motor_release.html">Release 
+    Notice.</a>
+  </li>
+  <ul>
+    <li>
+      Fixed with R4-5-1.<br>
+    </li>
+  </ul>
+  <li>
+    Backlash Correction Bug Fixes -  see <a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-5/motor_release.html">Release 
+    Notice.</a>
+  </li>
+  <ul>
+    <li>
+      Fixed with R4-5-1<br>
+    </li>
+  </ul>
+  <li>
+    With release 4-5, DBE_LOG was omitted from the event select mask of all 
+    db_post_events() calls.&nbsp; This prevented archival clients from being 
+    notified of process variable changes.
+  </li>
+  <ul>
+    <li>
+      Fixed with R4-5-2<br>
+    </li>
+  </ul>
+
+  <LI>
+    Communication with the Newport MM3000 motor controller was getting out of 
+    synchronization whenever the MM3000 responded with an error message. This 
+    problem was resolved by having recv_mess() in drvMM3000.c detect an error 
+    message response, print the error message and then, recursively, call itself. 
+    This restored communication transmit/receive synchronization.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-5-3.
+    </li>
+  </UL>
+  <LI>
+    The Newport ESP300 would randomly crash at boot-up because an internal parameter 
+    ("drive_resolution") was not always, under all configurations, initialized. With 
+    this release, the "drive_resolution" is set based on the response to the ESP300 
+    "SU?" command. In addition, the user is required to set MRES to the resolution 
+    of the controller as explained in the new document /motorApp/NewportSrc/README.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-5-3.
+    </li>
+  </UL>
+  <LI>
+    A bug was introduced in R4-5-1 while fixing another bug; see item#2 under 
+    Modification Log from R4-5 to R4-5-1 in the distribution README file. This error 
+    exhibited itself only under the following conditions; BDST != 0, DLY != 0 and a 
+    new target position is issued before the backlash correction move. Under these 
+    conditions the motor record became unresponsive; i.e., it locked up.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-5-3.
+    </li>
+  </UL>
+  <LI>
+    Although there is no explicit statement in the motor record documentation, most 
+    user's would expect the "Readback settle time" field (DLY) to update the 
+    readback after the delay timeout. It did not do this. With this release, the 
+    readback is updated one time after the timeout.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-5-3.
+    </li>
+  </UL>
+
+  <LI>
+    An error occurred when the SET/USE field was in the SET mode and the FOFF field 
+    was in the FROZEN mode. Under these conditions, if the user entered a new RVAL, 
+    the record ignored every other new RVAL; with every other new DVAL that the user 
+    entered, RVAL was not updated. VAL always worked.
+  </LI>
+  <UL>
+    <li>
+      Fixed with R4-5-4.
+    </li>
+    <li>
+      Replace &lt;motor&gt;/motorApp/MotorSrc/motorRecord.c with the following updated 
+      copy:&nbsp;<A href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-5/motorRecord.c_R4-5-4">motorRecord.c</A>
+    </li>
+  </UL>  
+</ol>
+
+<h2>Known problems with Release 4-4</h2>
+          
+<ol>
+     <li> The "Driver Power Monitoring" feature (available only for OMS VME58
+  controllers)&nbsp; was erroneously and randomly being enabled.&nbsp; Choose
+  one of the following methods to applying the bug fix:</li>
+                     
+  <ul>
+     <li> Make the following modification to &lt;motor&gt;/motorApp/MotorSrc/motordevCom.c:</li>
+                               
+    <ul>
+    202a203 <br>
+    &gt;&nbsp;&nbsp;&nbsp;&nbsp; ptrans-&gt;dpm = OFF;                   
+    
+    </ul>
+      <li> Replace &lt;motor&gt;/motorApp/MotorSrc/motordevCom.c with the
+following  updated copy:&nbsp; <a
+ href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-4/motordevCom.c">
+    motordevCom.c</a>        </li>
+      <li> Install motor record version R4-4-1 or above, which includes this
+bug fix.</li>
+                    
+  </ul>
+      <li> &nbsp;Code around "safeDoubleToFloat conversion bug" in EPICS R3.13.5.&nbsp;
+  A bug was introduced into R3.13.5 with the "dbConvert and dbFastLinkConv"
+  fix (see EPICS base Release Notes for R3.13.5) that resulted in the inability
+  to set PV fields defined as DBF_FLOAT's to zero.&nbsp; One of the scenarios
+  where this has caused a problem is when a user tries to disable software
+ travel limits by setting DHLM = DLLM = 0.&nbsp; Choose the following methods
+ to applying the bug fix:</li>
+                     
+  <ul>
+     <li> Replace &lt;motor&gt;/motorApp/MotorSrc/motordevCom.c with the following
+  updated copy:&nbsp; <a
+ href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-4/motorRecord.c">
+    motorRecord.c</a>        </li>
+                    
+  </ul>
+      <li>The makeConfigAppInclude.pl perl script distibuted with R4-4 and
+ R4-4-1  does not support spaces between the macro and the "=" sign in the
+ config/RELEASE  file.</li>
+          
+  <ul>
+      <li>Replace &lt;motor&gt;/config/makeConfigAppInclude.pl with the following
+  updated copy:&nbsp;<a
+ href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-4/makeConfigAppInclude.pl">
+   makeConfigAppInclude.pl</a>     </li>
+     <li>Replace &lt;motor&gt;/config/makeIocCdCommands.pl with the following
+  updated copy: <a
+ href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-4/makeIocCdCommands.pl">
+ makeIocCdCommands.pl</a>&nbsp;</li>
+          
+  </ul>
+  <li>The following scenario would put the motor record into an invalid state.
+&nbsp;A new target position (i.e., VAL/DVAL/RVAL) is written to the motor
+record under the following conditions,<br>
+    <ul>
+      <li>motion is in progress (i.e., DMOV is false).</li>
+    </ul>
+    <ul>
+      <li>the new target position is different from the actual position by
+less than the retry deadband (|DIFF| &lt; RDBD).</li>
+    </ul>
+    <ul>
+      <li>backlash correction is enabled (i.e., BDST is non-zero) and the
+new move is NOT in the "preferred direction" (preferred direction is the
+direction in which the motor moves during the backlash-takeout part of a
+motor move).</li>
+    </ul>
+Install motor record version 4-4-2 or above to fix this problem.<br>
+  </li>
+</ol>
+
+<h2>Known problems with Release 4-3</h2>
+
+<ol>
+<li>
+The "Driver Power Monitoring" feature (available only for OMS VME58 controllers)&nbsp;
+was erroneously and randomly being enabled.&nbsp; Choose one of the following
+methods to applying the bug fix:</li>
+
+<ul>
+<li>
+Make the following modification to &lt;motor>/motorApp/MotorSrc/motordevCom.c:</li>
+
+<ul>202a203
+<br>>&nbsp;&nbsp;&nbsp;&nbsp; ptrans->dpm = OFF;</ul>
+
+<li>
+Replace &lt;motor>/motorApp/MotorSrc/motordevCom.c with the following updated
+copy:&nbsp; <a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R4-3/motordevCom.c">motordevCom.c</a></li>
+
+<li>
+Install motor record version R4-3-1, which includes this bug fix.</li>
+</ul>
+
+<li>
+Under certain conditions target positions entered through RVAL were ignored.&nbsp;
+If the difference between the current and the next target position (i.e.,
+RDIF, DIFF) was less than the retry deadband (RDBD), and the next target
+position was in the "preferred direction", then the new RVAL was ignored.&nbsp;
+Motor record version R4-3-2 includes the fix for this bug.</li>
+
+</ol>
+
+<h2>Known problems with Release 3-5</h2>
+  
+<ol>
+   <li> Under certain conditions target positions entered through RVAL were
+ignored.&nbsp; If the difference between the current and the next target
+position (i.e., RDIF, DIFF) was less than the retry deadband (RDBD), and
+the next target position was in the "preferred direction", then the new RVAL
+was ignored.</li>
+</ol>
+<ul>
+  <ul>
+    <li> Replace motorRecord.c with the following   updated copy:&nbsp;<a href="http://www.aps.anl.gov/upd/people/sluiter/epics/motor/R3-5/motorRecord.c">
+motorRecord.c</a>
+    </li>
+  </ul>
+</ul>
+
+<br>
+
+</body>
+</html>

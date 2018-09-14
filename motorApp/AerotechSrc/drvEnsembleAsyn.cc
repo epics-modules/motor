@@ -65,6 +65,8 @@ in file LICENSE that is included with this distribution.
 * .20 11-24-14 rls - Moved "WAIT MODE NOWAIT" from EnsembleAsynConfig to motorAxisSetInteger 
 *                    where torque is enabled/disabled. 
 * .21 10-14-15 rls - Use "ReverseDirec" parameter to set "HomeSetup" parameter.
+* .22 05-29-18 rls - To avoid EPICS IOC reboots after parameter file changes, update 
+*                    CountsPerUnit everytime torque is enabled.
 */
 
 
@@ -408,6 +410,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     int ret_status = MOTOR_AXIS_ERROR;
     int FaultStatus;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
+    static char getparamstr[] = "GETPARM(@%d, %d)";
 
     if (pAxis == NULL || pAxis->pController == NULL)
         return (MOTOR_AXIS_ERROR);
@@ -421,6 +424,16 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
             sprintf(outputBuff, "DISABLE @%d", pAxis->axis);
         else
         {
+            sprintf(outputBuff, getparamstr, pAxis->axis, PARAMETERID_CountsPerUnit);
+            sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+            if (inputBuff[0] == ASCII_ACK_CHAR)
+            {
+                double localstepsize;
+                localstepsize = 1 / atof(&inputBuff[1]);
+                if (localstepsize != pAxis->stepSize)
+                    pAxis->stepSize = localstepsize;    /* Update new stepsize. */
+            }
+
             sprintf(outputBuff, "AXISFAULT @%d", pAxis->axis);
             ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
 
