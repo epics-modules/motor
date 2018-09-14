@@ -23,8 +23,8 @@ in file LICENSE that is included with this distribution.
 * Verified with firmware:
 *      - 4.07.000
 * 
-* A3200 Task Usage - This driver uses Task #2 for the ASCII Interface. Task #3 is used to clear Task #2 errors and
-*                    ABORT axis moves issued by Task #2. 
+* A3200 Task Usage - This driver uses a user selectable Task #n for the ASCII Interface and 
+*                    Task #(n+1) to clear Task #n errors and ABORT axis moves issued by Task #n. 
 * 
 * Modification Log:
 * -----------------
@@ -38,6 +38,9 @@ in file LICENSE that is included with this distribution.
 *                    MoveDone false before the 1st status update.
 *                  - Added axis name to "RAMP RATE" command.
 * .03 10-14-15 rls - Use "ReverseDirec" parameter to set "HomeSetup" parameter.
+* .04 03-15-18 rls - Restored "Task number" argument to A3200AsynConfig. 
+* .05 05-01-18 rls - Do not check the limit switches of virtual axes. 
+*                  - Added "single-axis" (MOVE{ABS/INC} or "multi-axis" (LINEAR) user selectable move option. 
 */
 
 #include <stddef.h>
@@ -150,6 +153,8 @@ typedef struct
     epicsEventId pollEventId;
     epicsMutexId sendReceiveMutex;
     AXIS_HDL pAxis;  /* array of axes */
+    epicsUInt32 taskNumber; /* the task number to use for motion commands */
+    epicsUInt32 linear;
 } A3200Controller;
 
 typedef struct motorAxisHandle
@@ -393,32 +398,33 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 
 static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
 {
-    int task2state, task3state, ret_status = MOTOR_AXIS_ERROR;
+    int tasknum, taskNstate, taskN1state, ret_status = MOTOR_AXIS_ERROR;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
-    const char* TaskStateStr = "~STATUS (2, TaskState) (3, TaskState)";
 
     if (pAxis == NULL || pAxis->pController == NULL)
         return MOTOR_AXIS_ERROR;
+
+    tasknum = pAxis->pController->taskNumber;
 
     epicsMutexLock(pAxis->mutexId);
 
     switch (function)
     {
         case motorAxisClosedLoop:
-            ret_status = sendAndReceive(pAxis->pController, (char *) TaskStateStr, inputBuff, sizeof(inputBuff));
+            sprintf(outputBuff, "~STATUS (%u, TaskState) (%u, TaskState)", tasknum, tasknum + 1);
+            ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
             if (ret_status != asynSuccess || inputBuff[0] != ASCII_ACK_CHAR)
             {
                 motorParam->setInteger(pAxis->params, motorAxisCommError, 1);
                 break;
             }
 
-            sscanf(&inputBuff[1], "%d %d", &task2state, &task3state);
-            if (task2state == TASKSTATE_Idle)
-                sendAndReceive(pAxis->pController, "~INITQUEUE 2", inputBuff, sizeof(inputBuff));
-/*
-            if (task3state == TASKSTATE_Idle)
-                sendAndReceive(pController, "~INITQUEUE 3", inputBuff, sizeof(inputBuff));
-*/
+            sscanf(&inputBuff[1], "%d %d", &taskNstate, &taskN1state);
+            if (taskNstate == TASKSTATE_Idle)
+            {
+                sprintf(outputBuff, "~INITQUEUE %u", tasknum);
+                sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+            }
             if (value == 0)
                 sprintf(outputBuff, "DISABLE %s", pAxis->axisName);
             else
@@ -427,11 +433,13 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
                 {
                     if (pAxis->lastFault == 52 || pAxis->lastFault == 78)
                     {
-                        ret_status = sendAndReceive(pAxis->pController, (char *) "~TASK 3", inputBuff, sizeof(inputBuff));
+                        sprintf(outputBuff, "~TASK %u", tasknum + 1);
+                        ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
                         /* Prevent Task #3 from blocking during LINEAR commands. */
                         ret_status = sendAndReceive(pAxis->pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
                         ret_status = sendAndReceive(pAxis->pController, (char *) "ACKNOWLEDGEALL", inputBuff, sizeof(inputBuff));
-                        ret_status = sendAndReceive(pAxis->pController, (char *) "~TASK 2", inputBuff, sizeof(inputBuff));
+                        sprintf(outputBuff, "~TASK %u", tasknum);
+                        ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
                         sprintf(outputBuff, "~INITQUEUE");
                     }
                     else
@@ -481,24 +489,43 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
           pAxis->card, pAxis->axisName, position, min_velocity, max_velocity, acceleration);
 
     if (relative)
-    {
         posdir = position >= 0.0;
-        moveCommand = "MOVEIINC";
+    else
+        posdir = position >= pAxis->currentCmdPos;
+
+    if (pAxis->pController->linear == 1)
+    {
+        if (relative)
+            moveCommand = "INCREMENTAL";
+        else
+            moveCommand = "ABSOLUTE";
+        ret_status = sendAndReceive(pAxis->pController, moveCommand, inputBuff, sizeof(inputBuff));
+        if (ret_status)
+            return MOTOR_AXIS_ERROR;
     }
     else
     {
-        posdir = position >= pAxis->currentCmdPos;
-        moveCommand = "MOVEABS";
+        if (relative)
+            moveCommand = "MOVEIINC";
+        else
+            moveCommand = "MOVEABS";
     }
 
     if (acceleration > 0)
     { /* only use the acceleration if > 0 */
-        sprintf(outputBuff, "RAMP RATE %s %.*f", pAxis->axisName, pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
+        if (pAxis->pController->linear == 1)
+            sprintf(outputBuff, "RAMP RATE %.*f", pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
+        else
+            sprintf(outputBuff, "RAMP RATE %s %.*f", pAxis->axisName, pAxis->maxDigits, acceleration * fabs(pAxis->stepSize));
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     }
-
-    sprintf(outputBuff, "%s %s %.*f %.*f", moveCommand, pAxis->axisName, pAxis->maxDigits, position * fabs(pAxis->stepSize),
-            pAxis->maxDigits, max_velocity * fabs(pAxis->stepSize));
+	
+    if (pAxis->pController->linear == 1)
+        sprintf(outputBuff, "LINEAR %s %.*f F%.*f", pAxis->axisName, pAxis->maxDigits, position * fabs(pAxis->stepSize),
+                pAxis->maxDigits, max_velocity * fabs(pAxis->stepSize));
+    else
+        sprintf(outputBuff, "%s %s %.*f %.*f", moveCommand, pAxis->axisName, pAxis->maxDigits, position * fabs(pAxis->stepSize),
+                pAxis->maxDigits, max_velocity * fabs(pAxis->stepSize)); 
 
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     if (ret_status || inputBuff[0] != ASCII_ACK_CHAR)
@@ -508,7 +535,7 @@ static int motorAxisMove(AXIS_HDL pAxis, double position, int relative,
             int taskerr;
 
             motorParam->setInteger(pAxis->params, motorAxisProblem, 1);  /* Signal "Controller Error" to user. */
-            sprintf(outputBuff, "~STATUS(2, TaskErrorCode)");
+            sprintf(outputBuff, "~STATUS(%u, TaskErrorCode)", pAxis->pController->taskNumber);
             ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
             taskerr = atoi(&inputBuff[1]);
             if (taskerr != 0)
@@ -637,21 +664,23 @@ static int motorAxisTriggerProfile(AXIS_HDL pAxis)
 
 static int motorAxisStop(AXIS_HDL pAxis, double acceleration)
 {
-    int ret_status;
+    int tasknum, ret_status;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
 
     if (pAxis == NULL || pAxis->pController == NULL)
         return MOTOR_AXIS_ERROR;
 
+    tasknum = pAxis->pController->taskNumber;
+
     PRINT(pAxis->logParam, FLOW, "Abort on card %d, axis %d\n", pAxis->card, pAxis->axis);
 
     /* we can't accurately determine which type of motion is occurring on the controller,
     * so don't worry about the acceleration rate, just stop the motion on the axis */
-    sprintf(outputBuff, "~TASK 3");
+    sprintf(outputBuff, "~TASK %u", tasknum + 1);
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     sprintf(outputBuff, "ABORT %s", pAxis->axisName);
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
-    sprintf(outputBuff, "~TASK 2");
+    sprintf(outputBuff, "~TASK %u", tasknum);
     ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
     return ret_status;
 }
@@ -735,15 +764,18 @@ static void A3200Poller(A3200Controller *pController)
             motorParam->setInteger(pAxis->params, motorAxisPowerOn, (drive_status & DRIVESTATUS_Enabled) != 0);
             motorParam->setInteger(pAxis->params, motorAxisHomeSignal, (axis_status & AXISSTATUS_Homed) != 0);
 
-            if (pAxis->reverseDirec == false)
+            if ((axis_status & AXISSTATUS_NotVirtual) != 0)
             {
-                motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, !((drive_status & DRIVESTATUS_CwEndOfTravelLimitInput) ^ pAxis->swconfig.Bits.CWEOTSWstate));
-                motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  !((drive_status & DRIVESTATUS_CcwEndOfTravelLimitInput) ^ pAxis->swconfig.Bits.CCWEOTSWstate));
-            }
-            else
-            {
-                motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, !((drive_status & DRIVESTATUS_CcwEndOfTravelLimitInput) ^ pAxis->swconfig.Bits.CCWEOTSWstate));
-                motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  !((drive_status & DRIVESTATUS_CwEndOfTravelLimitInput) ^ pAxis->swconfig.Bits.CWEOTSWstate));
+                if (pAxis->reverseDirec == false)
+                {
+                    motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, !((drive_status & DRIVESTATUS_CwEndOfTravelLimitInput) ^ pAxis->swconfig.Bits.CWEOTSWstate));
+                    motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  !((drive_status & DRIVESTATUS_CcwEndOfTravelLimitInput) ^ pAxis->swconfig.Bits.CCWEOTSWstate));
+                }
+                else
+                {
+                    motorParam->setInteger(pAxis->params, motorAxisHighHardLimit, !((drive_status & DRIVESTATUS_CcwEndOfTravelLimitInput) ^ pAxis->swconfig.Bits.CCWEOTSWstate));
+                    motorParam->setInteger(pAxis->params, motorAxisLowHardLimit,  !((drive_status & DRIVESTATUS_CwEndOfTravelLimitInput) ^ pAxis->swconfig.Bits.CWEOTSWstate));
+                }
             }
             pAxis->axisStatus = axis_status;
 
@@ -807,10 +839,11 @@ int A3200AsynSetup(int num_controllers)   /* number of A3200 controllers in syst
 int A3200AsynConfig(int card,             /* Controller number */
                                         const char *portName, /* asyn port name of serial or GPIB port */
                                         int asynAddress,      /* asyn subaddress for GPIB */
-                                        int numAxes,         /* The number of axes that the driver controls */
+                                        int numAxes,          /* The number of axes that the driver controls */
                                         int movingPollPeriod, /* Time to poll (msec) when an axis is in motion */
-                                        int idlePollPeriod)   /* Time to poll (msec) when an axis is idle. 0 for no polling */
-
+                                        int idlePollPeriod,   /* Time to poll (msec) when an axis is idle. 0 for no polling */
+                                        int taskNumber,       /* the task number to use for motion commands */
+                                        int linear)           /* Use linear (1) or single-axis (0) move commands. */
 {
     A3200Controller *pController;
     char threadName[20];
@@ -838,6 +871,8 @@ int A3200AsynConfig(int card,             /* Controller number */
     pController = &pA3200Controller[card];
 
     pController->numAxes = numAxes;
+    pController->taskNumber = taskNumber;
+    pController->linear = linear;
     pController->movingPollPeriod = movingPollPeriod / 1000.;
     pController->idlePollPeriod = idlePollPeriod / 1000.;
 
@@ -866,7 +901,7 @@ int A3200AsynConfig(int card,             /* Controller number */
 
     do
     {
-        sprintf(outputBuff, "~TASK 2");
+        sprintf(outputBuff, "~TASK %u", pController->taskNumber);
         status = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
         retry++;
     } while(status != asynSuccess && retry < 3);
@@ -947,9 +982,11 @@ int A3200AsynConfig(int card,             /* Controller number */
 
     /* Prevent Task #2 and #3 from blocking during LINEAR commands. */
     sendAndReceive(pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
-    sendAndReceive(pController, (char *) "~TASK 3", inputBuff, sizeof(inputBuff));
+    sprintf(outputBuff, "~TASK %u", pController->taskNumber + 1);
+    sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
     sendAndReceive(pController, (char *) "WAIT MODE AUTO", inputBuff, sizeof(inputBuff));
-    sendAndReceive(pController, (char *) "~TASK 2", inputBuff, sizeof(inputBuff));
+    sprintf(outputBuff, "~TASK %u", pController->taskNumber);
+    sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
 
     pController->pollEventId = epicsEventMustCreate(epicsEventEmpty);
 

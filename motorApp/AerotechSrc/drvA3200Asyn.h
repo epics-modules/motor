@@ -50,8 +50,9 @@ extern "C" {
                 int asynAddress,      /* asyn subaddress for GPIB */
                 int numAxes,          /* The number of axes that the driver controls */
                 int movingPollPeriod, /* Time to poll (msec) when an axis is in motion */
-                int idlePollPeriod);  /* Time to poll (msec) when an axis is idle. 0 for no polling */
-
+                int idlePollPeriod,   /* Time to poll (msec) when an axis is idle. 0 for no polling */
+                int taskNumber,       /* the task number to use for motion commands */
+                int linear);          /* linear (1) or single-axis (0) move commands. */
 #ifdef __cplusplus
 }
 #endif

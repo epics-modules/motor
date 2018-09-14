@@ -32,6 +32,7 @@ COMMONDBDS += devNewport.dbd
 endif
 ifdef SNCSEQ
 COMMONDBDS += LdevNewportTS.dbd
+COMMONDBDS += devAerotechSeq.dbd
 endif
 ifndef NO_MOTOR_PISRC
 COMMONDBDS += devPIMotor.dbd
