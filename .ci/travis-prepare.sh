@@ -93,8 +93,8 @@ EOF
     3.14*)
         echo "Build MSI"
         install -d "$HOME/msi/extensions/src"
-        curl https://www.aps.anl.gov/epics/download/extensions/extensionsTop_20120904.tar.gz | tar -C "$HOME/msi" -xvz
-        curl https://www.aps.anl.gov/epics/download/extensions/msi1-7.tar.gz | tar -C "$HOME/msi/extensions/src" -xvz
+        curl https://epics.anl.gov/download/extensions/extensionsTop_20120904.tar.gz | tar -C "$HOME/msi" -xvz
+        curl https://epics.anl.gov/download/extensions/msi1-7.tar.gz | tar -C "$HOME/msi/extensions/src" -xvz
         mv "$HOME/msi/extensions/src/msi1-7" "$HOME/msi/extensions/src/msi"
 
         cat << EOF > "$HOME/msi/extensions/configure/RELEASE"
@@ -155,7 +155,7 @@ fi
 if [ ! -e "$SUPPORT/asyn/built" ]; then
     echo "Build asyn"
     install -d $SUPPORT/asyn
-    curl -L "https://www.aps.anl.gov/epics/download/modules/asyn${ASYN}.tar.gz" | tar -C $SUPPORT/asyn -xvz --strip-components=1
+    curl -L "https://epics.anl.gov/download/modules/asyn${ASYN}.tar.gz" | tar -C $SUPPORT/asyn -xvz --strip-components=1
     cp $RELEASE_PATH $SUPPORT/asyn/configure/RELEASE
     make -C "$SUPPORT/asyn" -j2
     touch $SUPPORT/asyn/built

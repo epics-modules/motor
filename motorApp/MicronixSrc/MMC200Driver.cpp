@@ -133,6 +133,9 @@ MMC200Axis::MMC200Axis(MMC200Controller *pC, int axisNo)
   // controller axes are numbered from 1
   axisIndex_ = axisNo + 1;
 
+  // Flush I/O in case there is lingering garbage
+  pC_->writeReadController();
+  
   // Read the version string to determine controller model (200/100)
   sprintf(pC_->outString_, "%dVER?", axisIndex_);
   status = pC_->writeReadController();
