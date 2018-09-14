@@ -70,7 +70,6 @@
 
 /* Addition flags which can be set by the specific driver */
 #define motorFlagsHomeOnLsString        "MOTOR_FLAGSS_HOME_ON_LS"
-#define motorFlagsNoStopProblemString   "MOTOR_FLAGS_NO_STOP_PROBLEM"
 #define motorFlagsLSrampDownString      "MOTOR_FLAGS_LS_RAMP_DOWN"
 #define motorFlagsNoStopOnLsString      "MOTOR_FLAGS_NO_STOP_ON_LS"
 
@@ -333,7 +332,6 @@ class epicsShareClass asynMotorController : public asynPortDriver {
    * Don't forget to update asynMotorMotor::setIntegerParam()
    */
   int motorFlagsHomeOnLs_;
-  int motorFlagsNoStopProblem_;
   int motorFlagsLSrampDown_;
   int motorFlagsNoStopOnLS_;
 

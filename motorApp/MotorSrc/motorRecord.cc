@@ -189,6 +189,7 @@ USAGE...        Motor Record Support.
  * .75 05-18-17 rls - Stop motor if URIP is Yes and RDBL read returns an error. 
  * .76 04-04-18 rls - If URIP is Yes and RDBL is inaccessible (e.g., CA server is down), do not start
  *                    a new target position move (sans Home search or Jog). 
+ * .78 08-21-18 kmp - Reverted .69 stop on RA_PROBLEM true.
  */                                                          
 
 #define VERSION 6.95
@@ -3743,27 +3744,21 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     if (pmr->lls != old_lls)
         MARK(M_LLS);
 
-    /* If the motor has a problem, stop it if needed */
-    if ((ls_active == true ||
-         (msta.Bits.RA_PROBLEM && (!(pmr->mflg & MF_NOSTOP_PROB)))))
+    /* If the motor runs into an LS, stop it if needed */
+    if (ls_active == true)
     {
 #ifdef DEBUG
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        fprintf(stdout, "%s:%d %s STOP ls_active=%d PROBLEM=%d MF_NOSTOP_PROB=%d mip=0x%0x(%s)\n",
+        fprintf(stdout, "%s:%d %s STOP ls_active=1 mip=0x%0x(%s)\n",
                 __FILE__, __LINE__,
-                pmr->name, ls_active ? 1 : 0,
-                msta.Bits.RA_PROBLEM ? 1 : 0,
-                pmr->mflg & MF_NOSTOP_PROB ? 1 : 0,
+                pmr->name,
                 pmr->mip, dbuf);
     }
 #else
-        fprintf(stdout, "%s:%d %s STOP ls_active=%d PROBLEM=%d MF_NOSTOP_PROB=%d\n",
-                __FILE__, __LINE__,
-                pmr->name, ls_active ? 1 : 0,
-                msta.Bits.RA_PROBLEM ? 1 : 0,
-                pmr->mflg & MF_NOSTOP_PROB ? 1 : 0);
+        fprintf(stdout, "%s:%d %s STOP ls_active=1\n",
+                __FILE__, __LINE__, pmr->name);
 #endif
 
         pmr->stop = 1;

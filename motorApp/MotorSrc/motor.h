@@ -209,9 +209,8 @@ typedef union
 
 /* Flag bits */
 #define MF_HOME_ON_LS      (1)
-#define MF_NOSTOP_PROB     (1<<1)
-#define MF_LS_RAMPDOWN     (1<<2)
-#define MF_NOSTOP_ONLS     (1<<3)
+#define MF_LS_RAMPDOWN     (1<<1)
+#define MF_NOSTOP_ONLS     (1<<2)
 
 
 /* device support entry table */
