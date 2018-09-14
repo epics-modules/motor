@@ -187,6 +187,8 @@ USAGE...        Motor Record Support.
  *                    processing was standard. If processing is needed on a DMOV false to true
  *                    transition, a new motor record field should be added.
  * .75 05-18-17 rls - Stop motor if URIP is Yes and RDBL read returns an error. 
+ * .76 04-04-18 rls - If URIP is Yes and RDBL is inaccessible (e.g., CA server is down), do not start
+ *                    a new target position move (sans Home search or Jog). 
  */                                                          
 
 #define VERSION 6.95
@@ -1810,6 +1812,7 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     double relpos = diff;
     double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv);
     double absdiff = fabs(diff);
+    long rtnstat;
 
 
     /*
@@ -1912,7 +1915,19 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
         }
     }
 
-    if (pmr->lvio)
+    if (pmr->urip == motorUEIP_Yes)
+    {
+        double test_drbv;
+        rtnstat = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &test_drbv, 0, 0 );
+        if (RTN_SUCCESS(rtnstat))
+            rtnstat = TRUE;
+        else
+            rtnstat = FALSE;
+    }
+    else
+        rtnstat = TRUE;
+
+    if (pmr->lvio || rtnstat == FALSE)
     {
         pmr->val = pmr->priv->last.val;
         MARK(M_VAL);
@@ -2148,6 +2163,8 @@ LOGIC:
 
             IF this is not a retry.
                 Reset retry counter and mark RCNT for dbposting.
+            ELSE
+                Process retry based on retry mode (RMOD).
             ENDIF
             
             IF (relative move indicator is OFF, AND, sign of absolute move
@@ -2159,16 +2176,23 @@ LOGIC:
                 Set preferred direction indicator OFF.
             ENDIF
             
-            IF the dial DIFF is within the retry deadband.
-                IF MIP state is DONE.
-                    Update last target positions.
-                    Terminate move. Set DMOV TRUE.
-                ENDIF               
-                NORMAL RETURN.
+            Process soft-travel limit.
+ 
+            IF URIP is set to Yes
+                Test and set indicator on RDBL access in case it is a CA link that is down.
+            ENDIF
+            IF soft-travel limit error, OR, RDBL CA server disconnect error.
+                Restore previous target positions.
+                IF MIP indicates this is a retry.
+                    Set MIP to Done.
+                ENDIF
+                IF MIP indicates Done Moving and DMOV is False
+                    Set DMOV true.
+                ENDIF
             ENDIF
             ....
             ....
-            IF motion in progress indicator is false.
+            IF motion in progress indicator (MIP) is Done or Retry.
                 Set MIP MOVE indicator ON and mark for posting.
                 IF DMOV is TRUE.
                     Set DMOV to FALSE and mark for posting.
