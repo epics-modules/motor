@@ -202,6 +202,7 @@ USAGE...        Motor Record Support.
 #else
 #define RECSUPFUN_CAST
 #define REC_TYPE motorRecord
+#define USE_TYPED_RSET
 #endif
 
 #include    <stdlib.h>
@@ -260,11 +261,11 @@ static void syncTargetPosition(motorRecord *);
 /*** Record Support Entry Table (RSET) functions. ***/
 
 extern "C" {
-static long init_record(motorRecord *, int);
-static long process(motorRecord *);
+static long init_record(struct dbCommon*, int);
+static long process(struct dbCommon*);
 static long special(DBADDR *, int);
 static long get_units(DBADDR *, char *);
-static long get_precision(DBADDR *, long *);
+static long get_precision(const struct dbAddr *, long *);
 static long get_graphic_double(DBADDR *, struct dbr_grDouble *);
 static long get_control_double(DBADDR *, struct dbr_ctrlDouble *);
 static long get_alarm_double(DBADDR  *, struct dbr_alDouble *);
@@ -3284,7 +3285,7 @@ static long
 /******************************************************************************
         get_precision()
 *******************************************************************************/
-static long get_precision(DBADDR *paddr, long *precision)
+static long get_precision(const DBADDR *paddr, long *precision)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int fieldIndex = dbGetFieldIndex(paddr);

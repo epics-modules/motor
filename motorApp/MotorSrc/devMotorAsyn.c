@@ -45,6 +45,17 @@
  * 
  */
 
+#include "epicsVersion.h"
+
+#define VERSION_INT_3_16 VERSION_INT(3,16,0,0)
+#if EPICS_VERSION_INT < VERSION_INT_3_16
+#define RECSUPFUN_CAST (RECSUPFUN)
+#else
+#define RECSUPFUN_CAST
+#define REC_TYPE motorRecord
+#define USE_TYPED_RSET
+#endif
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
