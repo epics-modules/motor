@@ -35,7 +35,7 @@ ss motor
   {
     when ()
     {
-      /* 0: Use motor home, 1: Constant velocity move, 2: Reverse home and s position to 0, 3: Constant veloctiy move and 0 all */
+      /* 0: Use motor home, 1: Constant velocity move, 2: Reverse home and s position to 0, 3: Constant veloctiy move and 0 */
       mode = atoi(macValueGet("MODE"));
       axis = atoi(macValueGet("AXIS"));
       debug = atoi(macValueGet("DEBUG"));
