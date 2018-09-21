@@ -1,0 +1,14 @@
+# If more fields need exposing to macros please update 
+# all substitution files which call this db file.
+#
+# Some IOCs using this file:
+# LINMOT
+# MCLEN
+#
+# Find all by running "grep -rl 'motor_init_extra.db'" from git bash in top level EPICS
+# Ignore results which say 'Device or resource busy'
+#
+
+record(motor, "$(P)$(M)") {
+  field(OFF, "$(OFF)")
+}
