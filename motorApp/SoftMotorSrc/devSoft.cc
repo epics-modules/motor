@@ -46,6 +46,8 @@ NOTES...
 - Can't call CA functions until after dbLockInitRecords() has been called and initialized lock sets.   
 */
 
+/* The following is needed to compile against Base R3.16.1 without a warning */
+#define USE_TYPED_RSET
 
 #include        <dbDefs.h>
 #include        <dbFldTypes.h>
