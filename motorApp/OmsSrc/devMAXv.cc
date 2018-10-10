@@ -52,7 +52,7 @@ static RTN_STATUS MAXv_end_trans(struct motorRecord *);
 
 struct motor_dset devMAXv =
 {
-    {8, NULL, MAXv_init, MAXv_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) MAXv_init, MAXv_init_record, NULL},
     motor_update_values,
     MAXv_start_trans,
     oms_build_trans,
