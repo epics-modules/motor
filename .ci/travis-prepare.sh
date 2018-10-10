@@ -90,7 +90,7 @@ EOF
     make -C "$EPICS_BASE" -j2
     # get MSI for 3.14
     case "$BASE" in
-    R3.14*)
+    3.14*)
         echo "Build MSI"
         install -d "$HOME/msi/extensions/src"
         curl https://epics.anl.gov/download/extensions/extensionsTop_20120904.tar.gz | tar -C "$HOME/msi" -xvz
