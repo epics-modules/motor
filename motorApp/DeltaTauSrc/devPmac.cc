@@ -58,7 +58,7 @@ static RTN_STATUS Pmac_end_trans(struct motorRecord *);
 
 struct motor_dset devPmac =
 {
-    {8, NULL, (DEVSUPFUN) Pmac_init, Pmac_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) Pmac_init, (DEVSUPFUN) Pmac_init_record, NULL},
     motor_update_values,
     Pmac_start_trans,
     Pmac_build_trans,

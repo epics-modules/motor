@@ -71,7 +71,7 @@ static RTN_STATUS oms_end_trans(struct motorRecord *);
 
 struct motor_dset devOMS =
 {
-    {8, NULL, (DEVSUPFUN) oms_init, oms_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) oms_init, (DEVSUPFUN) oms_init_record, NULL},
     motor_update_values,
     oms_start_trans,
     oms_build_trans,
