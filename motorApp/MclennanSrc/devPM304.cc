@@ -61,7 +61,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* ----------------Create the dsets for devPM304----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long PM304_init(void *);
+STATIC long PM304_init(int);
 STATIC long PM304_init_record(void *);
 STATIC long PM304_start_trans(struct motorRecord *);
 STATIC RTN_STATUS PM304_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -113,12 +113,11 @@ static struct board_stat **PM304_cards;
 
 
 /* initialize device support for PM304 stepper motor */
-STATIC long PM304_init(void *arg)
+STATIC long PM304_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PM304_access;
         (drvtabptr->init)();

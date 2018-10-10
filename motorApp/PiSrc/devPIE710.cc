@@ -49,7 +49,7 @@ extern struct driver_table PIE710_access;
 
 /* ----------------Create the dsets for devPIE710----------------- */
 static struct driver_table *drvtabptr;
-static long PIE710_init(void *);
+static long PIE710_init(int);
 static long PIE710_init_record(void *);
 static long PIE710_start_trans(struct motorRecord *);
 static RTN_STATUS PIE710_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -103,12 +103,11 @@ static struct board_stat **PIE710_cards;
 
 
 /* initialize device support for PIE710 stepper motor */
-static long PIE710_init(void *arg)
+static long PIE710_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIE710_access;
 	(drvtabptr->init)();

@@ -50,7 +50,7 @@ extern int Pmac_num_cards;
 extern struct driver_table Pmac_access;
 
 /* ----------------Create the dsets for devOMS----------------- */
-static long Pmac_init(void *);
+static long Pmac_init(int);
 static long Pmac_init_record(void *);
 static long Pmac_start_trans(struct motorRecord *);
 static RTN_STATUS Pmac_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -98,10 +98,8 @@ static msg_types Pmac_table[] = {
 static struct board_stat **Pmac_cards;
 static const char errmsg[] = {"\n\n!!!ERROR!!! - Oms driver uninitialized.\n"};
 
-static long Pmac_init(void *arg)
+static long Pmac_init(int after)
 {
-    int after = (arg == 0) ? 0 : 1;
-
     if (*(Pmac_access.init_indicator) == NO)
     {
 	errlogSevPrintf(errlogMinor, "%s", errmsg);

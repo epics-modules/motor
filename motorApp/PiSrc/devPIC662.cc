@@ -48,7 +48,7 @@ extern struct driver_table PIC662_access;
 
 /* ----------------Create the dsets for devPIC662----------------- */
 static struct driver_table *drvtabptr;
-static long PIC662_init(void *);
+static long PIC662_init(int);
 static long PIC662_init_record(void *);
 static long PIC662_start_trans(struct motorRecord *);
 static RTN_STATUS PIC662_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -102,12 +102,11 @@ static struct board_stat **PIC662_cards;
 
 
 /* initialize device support for PIC662 stepper motor */
-static long PIC662_init(void *arg)
+static long PIC662_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIC662_access;
 	(drvtabptr->init)();
