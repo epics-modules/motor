@@ -91,9 +91,7 @@ STATIC void soft_rinp(struct event_handler_args args)
 
 long soft_init(int after)
 {
-    int before_after = (after == 0) ? 0 : 1;
-
-    if (before_after == 0)
+    if (!after)
     {
         epicsThreadId dbCaTask_tid;
         unsigned int soft_motor_priority;

@@ -56,7 +56,7 @@ extern struct driver_table MM3000_access;
 /* ----------------Create the dsets for devMM3000----------------- */
 /* static long report(); */
 STATIC struct driver_table *drvtabptr;
-STATIC long MM3000_init(void *);
+STATIC long MM3000_init(int);
 STATIC long MM3000_init_record(void *);
 STATIC long MM3000_start_trans(struct motorRecord *);
 STATIC RTN_STATUS MM3000_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -110,12 +110,11 @@ static struct board_stat **MM3000_cards;
 
 
 /* initialize device support for MM3000 stepper motor */
-STATIC long MM3000_init(void *arg)
+STATIC long MM3000_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &MM3000_access;
 	(drvtabptr->init)();

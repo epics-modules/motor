@@ -64,14 +64,14 @@ extern int oms44_num_cards;
 extern struct driver_table oms_access;
 
 /* ----------------Create the dsets for devOMS----------------- */
-static long oms_init(void *);
+static long oms_init(int);
 static long oms_init_record(void *);
 static long oms_start_trans(struct motorRecord *);
 static RTN_STATUS oms_end_trans(struct motorRecord *);
 
 struct motor_dset devOMS =
 {
-    {8, NULL, oms_init, oms_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) oms_init, (DEVSUPFUN) oms_init_record, NULL},
     motor_update_values,
     oms_start_trans,
     oms_build_trans,
@@ -83,10 +83,8 @@ extern "C" {epicsExportAddress(dset,devOMS);}
 static struct board_stat **oms_cards;
 static const char errmsg[] = {"\n\n!!!ERROR!!! - Oms driver uninitialized.\n"};
 
-static long oms_init(void *arg)
+static long oms_init(int after)
 {
-    int after = (arg == 0) ? 0 : 1;
-
     if (*(oms_access.init_indicator) == NO)
     {
 	errlogSevPrintf(errlogMinor, "%s", errmsg);

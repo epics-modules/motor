@@ -50,7 +50,7 @@ extern struct driver_table ESP300_access;
 /* ----------------Create the dsets for devESP300----------------- */
 /* static long report(); */
 static struct driver_table *drvtabptr;
-static long ESP300_init(void *);
+static long ESP300_init(int);
 static long ESP300_init_record(void *);
 static long ESP300_start_trans(struct motorRecord *);
 static RTN_STATUS ESP300_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -104,12 +104,11 @@ static struct board_stat **ESP300_cards;
 
 
 /* initialize device support for ESP300 stepper motor */
-static long ESP300_init(void *arg)
+static long ESP300_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &ESP300_access;
 	(drvtabptr->init)();

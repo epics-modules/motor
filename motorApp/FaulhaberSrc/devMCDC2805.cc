@@ -50,7 +50,7 @@ extern struct driver_table MCDC2805_access;
 
 /* ----------------Create the dsets for devMCDC2805----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long MCDC2805_init(void *);
+STATIC long MCDC2805_init(int);
 STATIC long MCDC2805_init_record(void *);
 STATIC long MCDC2805_start_trans(struct motorRecord *);
 STATIC RTN_STATUS MCDC2805_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -104,12 +104,11 @@ static struct board_stat **MCDC2805_cards;
 
 
 /* initialize device support for MCDC2805 stepper motor */
-STATIC long MCDC2805_init(void *arg)
+STATIC long MCDC2805_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &MCDC2805_access;
 	(drvtabptr->init)();

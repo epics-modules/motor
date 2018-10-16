@@ -52,7 +52,7 @@ extern struct driver_table PIE816_access;
 
 /* ----------------Create the dsets for devPIE816----------------- */
 static struct driver_table *drvtabptr;
-static long PIE816_init(void *);
+static long PIE816_init(int);
 static long PIE816_init_record(void *);
 static long PIE816_start_trans(struct motorRecord *);
 static RTN_STATUS PIE816_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -106,12 +106,11 @@ static struct board_stat **PIE816_cards;
 
 
 /* initialize device support for PIE816 stepper motor */
-static long PIE816_init(void *arg)
+static long PIE816_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIE816_access;
 	(drvtabptr->init)();

@@ -104,7 +104,7 @@ extern struct driver_table MVP2001_access;
 
 /* ----------------Create the dsets for devMVP2001----------------- */
 static struct driver_table *drvtabptr;
-static long MVP2001_init(void *);
+static long MVP2001_init(int);
 static long MVP2001_init_record(void *);
 static long MVP2001_start_trans(struct motorRecord *);
 static RTN_STATUS MVP2001_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -158,10 +158,9 @@ static struct board_stat **MVP2001_cards;
 
 
 /* initialize device support for MVP2001 DC motor */
-static long MVP2001_init(void *arg)
+static long MVP2001_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
     drvtabptr = &MVP2001_access;
     rtnval = motor_init_com(after, *drvtabptr->cardcnt_ptr, drvtabptr, &MVP2001_cards);
