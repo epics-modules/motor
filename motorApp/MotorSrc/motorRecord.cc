@@ -682,6 +682,8 @@ static long init_re_init(motorRecord *pmr)
 {
     Debug(3, "%s:%d %s init_re_init udf=%d stat=%d nsta=%d\n",
           __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
+    check_speed(pmr);
+    enforceMinRetryDeadband(pmr);
     process_motor_info(pmr, true);
 
     /*
@@ -712,9 +714,6 @@ static long init_re_init(motorRecord *pmr)
     /* Reset limits in case database values are invalid. */
     set_dial_highlimit(pmr);
     set_dial_lowlimit(pmr);
-
-    check_speed(pmr);
-    enforceMinRetryDeadband(pmr);
 
     /* Initialize miscellaneous control fields. */
     pmr->dmov = TRUE;
