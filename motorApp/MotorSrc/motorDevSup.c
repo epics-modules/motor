@@ -1,4 +1,5 @@
 #include    <math.h>
+#include    <string.h>
 #include    "motorRecord.h"
 #include    "motor.h"
 #include    "motorDevSup.h"
@@ -94,6 +95,32 @@ RTN_STATUS devSupUpdateLimitFromDial(motorRecord *pmr, motor_cmnd command,
 
 
 /*****************************************************************************/
+void devSupMoveDialEgu(motorRecord *pmr, double vel, double accEGU, double pos, int relative)
+{
+  struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
+  if (pdset->base.number > 8)
+  {
+    motorExtMessage_type motorExtMessage;
+    memset(&motorExtMessage, 0, sizeof(motorExtMessage));
+    motorExtMessage.pos = pos;
+    motorExtMessage.mres = pmr->mres;
+    motorExtMessage.accEGU = accEGU;
+    motorExtMessage.vbas = pmr->vbas;
+    motorExtMessage.vel = vel;
+    motorExtMessage.extMsgType = relative ? EXT_MSG_TYPE_MOV_REL : EXT_MSG_TYPE_MOV_ABS;
+    (*pdset->move_EGU)(pmr, &motorExtMessage);
+  }
+  else
+  {
+    double amres = fabs(pmr->mres);
+    if (relative)
+      devSupMoveRelRaw(pmr, vel/amres, pmr->vbas/amres, accEGU/amres, pos/pmr->mres);
+    else
+      devSupMoveAbsRaw(pmr, vel/amres, pmr->vbas/amres, accEGU/amres, pos/pmr->mres);
+  }
+}
+
+/*****************************************************************************/
 void devSupMoveAbsRaw(motorRecord *pmr, double vel, double vbase,
                       double acc, double pos)
 {
@@ -134,14 +161,29 @@ void devSupJogDial(motorRecord *pmr, double jogv, double jacc)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
     double jogvRaw = jogv / pmr->mres;
-    double jaccRaw = jacc / fabs(pmr->mres);
-    double vbaseRaw = pmr->vbas / fabs(pmr->mres);
+    if (pdset->base.number > 8)
+    {
+        motorExtMessage_type motorExtMessage;
+        memset(&motorExtMessage, 0, sizeof(motorExtMessage));
+        motorExtMessage.pos = 0;
+        motorExtMessage.mres = pmr->mres;
+        motorExtMessage.accEGU = jacc;
+        motorExtMessage.vbas = pmr->vbas;
+        motorExtMessage.vel = jogv;
+        motorExtMessage.extMsgType = EXT_MSG_TYPE_MOV_VELO;
+        (*pdset->move_EGU)(pmr, &motorExtMessage);
+    }
+    else
+    {
+        double jaccRaw = jacc / fabs(pmr->mres);
+        double vbaseRaw = pmr->vbas / fabs(pmr->mres);
 
-    INIT_MSG();
-    WRITE_MSG(SET_VEL_BASE, &vbaseRaw);
-    WRITE_MSG(SET_ACCEL, &jaccRaw);
-    WRITE_MSG(JOG, &jogvRaw);
-    SEND_MSG();
+        INIT_MSG();
+        WRITE_MSG(SET_VEL_BASE, &vbaseRaw);
+        WRITE_MSG(SET_ACCEL, &jaccRaw);
+        WRITE_MSG(JOG, &jogvRaw);
+        SEND_MSG();
+    }
     setCDIRfromRawMove(pmr, jogvRaw > 0);
 }
 

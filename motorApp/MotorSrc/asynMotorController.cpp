@@ -601,6 +601,58 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
   return status;
 }  
 
+asynStatus asynMotorController::writeGenericPointer(asynUser *pasynUser, void *genericPointer)
+{
+  genericMessage_type *pMotorExtMessage = (genericMessage_type *)genericPointer;
+  asynStatus status = asynSuccess;
+  asynMotorAxis *pAxis;
+  int axis;
+  static const char *functionName = "GenericPointer";
+
+  pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
+  axis = pAxis->axisNo_;
+
+  asynPrint(pasynUser, ASYN_TRACE_FLOW,
+            "%s:%s: axis=%d  pos=%f mres=%f accEGU=%f vbas=%f vel=%f moveType=%d\n",
+            driverName, functionName, axis,
+            pMotorExtMessage->pos,
+            pMotorExtMessage->mres,
+            pMotorExtMessage->accEGU,
+            pMotorExtMessage->vbas,
+            pMotorExtMessage->vel,
+            pMotorExtMessage->moveType);
+  autoPowerOn(pAxis);
+  switch (pMotorExtMessage->moveType) {
+    case MOVE_TYPE_ABS:
+    case MOVE_TYPE_REL:
+      /* fall through */
+      {
+        int relative = (pMotorExtMessage->moveType == MOVE_TYPE_REL);
+        pAxis->setIntegerParam(motorLatestCommand_,
+                               relative ? LATEST_COMMAND_MOVE_REL : LATEST_COMMAND_MOVE_ABS);
+
+        status = pAxis->moveEGU(pMotorExtMessage->pos, pMotorExtMessage->mres, relative,
+                                pMotorExtMessage->vbas, pMotorExtMessage->vel,
+                                pMotorExtMessage->accEGU);
+        break;
+      }
+      case MOVE_TYPE_VELO:
+        pAxis->setIntegerParam(motorLatestCommand_,LATEST_COMMAND_MOVE_VEL);
+        status = pAxis->moveVeloEGU(pMotorExtMessage->mres,
+                                    pMotorExtMessage->vbas, pMotorExtMessage->vel,
+                                    pMotorExtMessage->accEGU);
+      break;
+  }
+  pAxis->setIntegerParam(motorStatusDone_, 0);
+  getIntegerParam(axis, motorWaitPollsBeforeReady_, &pAxis->waitNumPollsBeforeReady_);
+  pAxis->callParamCallbacks();
+  wakeupPoller();
+
+  return status;
+}
+
+
 /** Called when asyn clients call pasynOctetSyncIO->write().
   * Extracts the function and axis number from pasynUser.
   * Sets the value in the parameter library.

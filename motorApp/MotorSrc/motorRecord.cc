@@ -931,7 +931,7 @@ static void doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
     /* Use if encoder or ReadbackLink is in use. */
     bool use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
     double diff = (position - pmr->drbv) * pmr->frac;
-    double amres = fabs(pmr->mres);
+    double val = use_rel ? diff : position;
     double vbase = pmr->vbas;
     double vel, accEGU;
 
@@ -947,10 +947,7 @@ static void doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
     default:
       vel = accEGU = 0.0;
     }
-    if (use_rel)
-        devSupMoveRelRaw(pmr, vel/amres, vbase/amres, accEGU/amres, diff/pmr->mres);
-    else
-        devSupMoveAbsRaw(pmr, vel/amres, vbase/amres, accEGU/amres, position/pmr->mres);
+    devSupMoveDialEgu(pmr, vel, accEGU, val, use_rel);
     pmr->priv->last.commandedDval = position;
     setCDIRfromDialMove(pmr, diff < 0.0 ? 0 : 1);
 }

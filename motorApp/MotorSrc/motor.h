@@ -213,6 +213,20 @@ typedef union
 #define MF_NOSTOP_ONLS     (1<<2)
 
 
+#define EXT_MSG_TYPE_MOV_ABS 1
+#define EXT_MSG_TYPE_MOV_REL 2
+#define EXT_MSG_TYPE_MOV_VELO 3
+
+typedef struct {
+    double pos;
+    double mres;
+    double accEGU;
+    double vbas;
+    double vel;
+    int extMsgType;
+} motorExtMessage_type;
+
+
 /* device support entry table */
 struct motor_dset
 {
@@ -221,6 +235,7 @@ struct motor_dset
     long (*start_trans) (struct motorRecord *);
     RTN_STATUS (*build_trans) (motor_cmnd, double *, struct motorRecord *);
     RTN_STATUS (*end_trans) (struct motorRecord *);
+    RTN_STATUS (*move_EGU) (struct motorRecord *, motorExtMessage_type*);
 };
 
 

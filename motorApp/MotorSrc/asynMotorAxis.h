@@ -34,7 +34,10 @@ class epicsShareClass asynMotorAxis {
   virtual asynStatus callParamCallbacks();
 
   virtual asynStatus move(double position, int relative, double minVelocity, double maxVelocity, double acceleration);
+  virtual asynStatus moveEGU(double posEGU, double mres, int relative,
+                             double minVeloEGU, double maxVeloEGU, double accEGU);
   virtual asynStatus moveVelocity(double minVelocity, double maxVelocity, double acceleration);
+  virtual asynStatus moveVeloEGU(double mres, double minVeloEGU, double maxVeloEGU, double accEGU);
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
   virtual asynStatus stop(double acceleration);
   virtual asynStatus initialPoll(void);

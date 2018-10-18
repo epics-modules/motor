@@ -7,6 +7,7 @@
  */
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include <epicsThread.h>
 
@@ -80,6 +81,25 @@ asynStatus asynMotorAxis::move(double position, int relative, double minVelocity
   return asynSuccess;
 }
 
+/** Move the motor to an absolute location or by a relative amount.
+  * \param[in] posEGU  The absolute position to move to (if relative=0) or the relative distance to move
+  * by (if relative=1). Units=steps.
+  * \param[in] relative  Flag indicating relative move (1) or absolute move (0).
+  * \param[in] minVeloEGU The initial velocity, often called the base velocity. Units=EQU/sec.
+  * \param[in] maxVeloEGU The maximum velocity, often called the slew velocity. Units=EGU/sec.
+  * \param[in] accEGU  The acceleration value. Units=EGU/sec/sec. */
+asynStatus asynMotorAxis::moveEGU(double posEGU, double mres, int relative,
+                                  double minVeloEGU, double maxVeloEGU, double accEGU)
+{
+  double amres = fabs(mres);
+
+  pC_->setDoubleParam(axisNo_, pC_->motorVelBase_, minVeloEGU/amres);
+  pC_->setDoubleParam(axisNo_, pC_->motorVelocity_, maxVeloEGU/amres);
+  pC_->setDoubleParam(axisNo_, pC_->motorAccel_, accEGU/amres);
+
+  return move(posEGU/mres, relative, minVeloEGU/amres, maxVeloEGU/amres, accEGU/amres);
+}
+
 
 /** Move the motor at a fixed velocity until told to stop.
   * \param[in] minVelocity The initial velocity, often called the base velocity. Units=steps/sec.
@@ -88,6 +108,19 @@ asynStatus asynMotorAxis::move(double position, int relative, double minVelocity
 asynStatus asynMotorAxis::moveVelocity(double minVelocity, double maxVelocity, double acceleration)
 {
   return asynSuccess;
+}
+
+/** Move the motor at a fixed velocity until told to stop.
+  * \param[in] minVelocity The initial velocity, often called the base velocity. Units=EGU/sec.
+  * \param[in] maxVelocity The maximum velocity, often called the slew velocity. Units=EGU/sec.
+  * \param[in] acceleration The acceleration value. Units=EGU/sec/sec. */
+asynStatus asynMotorAxis::moveVeloEGU(double mres, double minVeloEGU, double maxVeloEGU, double accEGU)
+{
+  double amres = fabs(mres);
+  pC_->setDoubleParam(axisNo_, pC_->motorVelBase_, minVeloEGU/amres);
+  pC_->setDoubleParam(axisNo_, pC_->motorVelocity_, maxVeloEGU/amres);
+  pC_->setDoubleParam(axisNo_, pC_->motorAccel_, accEGU/amres);
+  return moveVelocity(minVeloEGU/mres, maxVeloEGU/mres, accEGU/amres);
 }
 
 

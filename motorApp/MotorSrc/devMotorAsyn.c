@@ -75,14 +75,15 @@ static CALLBACK_VALUE update_values(struct motorRecord *);
 static long start_trans(struct motorRecord *);
 static RTN_STATUS build_trans( motor_cmnd, double *, struct motorRecord *);
 static RTN_STATUS end_trans(struct motorRecord *);
+static RTN_STATUS move_EGU(struct motorRecord *, motorExtMessage_type *);
 static void asynCallback(asynUser *);
 static void statusCallback(void *, asynUser *, void *);
 
-typedef enum {int32Type, float64Type, float64ArrayType} interfaceType;
+typedef enum {int32Type, float64Type, float64ArrayType, genericPointerType} interfaceType;
 
 struct motor_dset devMotorAsyn={ 
     {
-         8,
+         9,
          NULL,
          (DEVSUPFUN) init,
          (DEVSUPFUN) init_record,
@@ -91,7 +92,8 @@ struct motor_dset devMotorAsyn={
     update_values,
     start_trans,
     build_trans,
-    end_trans
+    end_trans,
+    move_EGU
 };
 
 epicsExportAddress(dset,devMotorAsyn);
@@ -121,6 +123,7 @@ typedef enum motorCommand {
     motorSetClosedLoop,
     motorStatus,
     motorUpdateStatus,
+    motorMoveEGU,
     lastMotorCommand
 } motorCommand;
 #define NUM_MOTOR_COMMANDS lastMotorCommand
@@ -130,6 +133,7 @@ typedef struct {
     interfaceType interface;
     int ivalue;
     double dvalue;
+    motorExtMessage_type motorExtMessage;
 } motorAsynMessage;
 
 typedef struct
@@ -764,6 +768,60 @@ static RTN_STATUS end_trans(struct motorRecord * pmr )
   return(OK);
 }
 
+static RTN_STATUS move_EGU(struct motorRecord *pmr,
+                           motorExtMessage_type *pMotorExtMessage)
+{
+    RTN_STATUS rtnind = OK;
+    asynStatus status;
+    motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
+    asynUser *pasynUser = pPvt->pasynUser;
+    motorAsynMessage *pmsg;
+
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+              "devMotorAsyn::move_EGU: %s pos=%f mres=%f accEGU=%f vbas=%f vel=%f moveType=%d\n",
+              pmr->name,
+              pMotorExtMessage->pos,
+              pMotorExtMessage->mres,
+              pMotorExtMessage->accEGU,
+              pMotorExtMessage->vbas,
+              pMotorExtMessage->vel,
+              pMotorExtMessage->extMsgType);
+
+    /* If we are already in COMM_ALARM then this server is not reachable,
+     * return */
+    if ((pmr->nsta == COMM_ALARM) || (pmr->stat == COMM_ALARM))
+        return(ERROR);
+
+   /* Make a copy of asynUser.  This is needed because we can have multiple
+    * requests queued.  It will be freed in the callback */
+    pasynUser = pasynManager->duplicateAsynUser(pasynUser, asynCallback, 0);
+    pmsg = pasynManager->memMalloc(sizeof *pmsg);
+    memset(pmsg, 0, (sizeof *pmsg));
+    pmsg->interface = genericPointerType;
+    pasynUser->userData = pmsg;
+    memcpy(&pmsg->motorExtMessage, pMotorExtMessage, (sizeof *pmsg));
+    pPvt->move_cmd = -1;
+    pPvt->moveRequestPending++;
+    /* Do we need to set needUpdate and schedule a process here? */
+    /* or can we always guarantee to get at least one callback? */
+    /* Do we really need the callback? I assume so */
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+        "devAsynMotor::move_EGU: calling queueRequest, pmsg=%p, sizeof(*pmsg)=%d\n",
+              pmsg, (int)sizeof(*pmsg));
+
+    /* Queue asyn request, so we get a callback when driver is ready */
+    pasynUser->reason = pPvt->driverReasons[pmsg->command];
+    status = pasynManager->queueRequest(pasynUser, 0, 0);
+    if (status != asynSuccess) {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR,
+              "devMotorAsyn::move_EGU: %s error calling queueRequest, %s\n",
+              pmr->name, pasynUser->errorMessage);
+        rtnind = ERROR;
+    }
+    return(rtnind);
+}
+
+
 /**
  * Called once the request comes off the Asyn internal queue.
  *
@@ -774,7 +832,7 @@ static void asynCallback(asynUser *pasynUser)
     motorAsynPvt *pPvt = (motorAsynPvt *)pasynUser->userPvt;
     motorRecord *pmr = pPvt->pmr;
     motorAsynMessage *pmsg = pasynUser->userData;
-    int status;
+    int status = asynError;
     int commandIsMove = 0;
 
     pasynUser->reason = pPvt->driverReasons[pmsg->command];
@@ -807,15 +865,37 @@ static void asynCallback(asynUser *pasynUser)
         case motorHome:
         case motorPosition:
         case motorMoveVel:
+        case motorMoveEGU:
         commandIsMove = 1;
         /* Intentional fall-through */
         default:
             if (pmsg->interface == int32Type) {
                 status = pPvt->pasynInt32->write(pPvt->asynInt32Pvt, pasynUser,
                              pmsg->ivalue);
-            } else {
+            } else if (pmsg->interface == float64Type) {
                 status = pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser,
                                pmsg->dvalue);
+            } else if (pmsg->interface == genericPointerType){
+                genericMessage_type genericMessage;
+                memset(&genericMessage, 0, sizeof(genericMessage));
+                genericMessage.pos = pmsg->motorExtMessage.pos;
+                genericMessage.mres = pmsg->motorExtMessage.mres;
+                genericMessage.accEGU = pmsg->motorExtMessage.accEGU;
+                genericMessage.vbas = pmsg->motorExtMessage.vbas;
+                genericMessage.vel = pmsg->motorExtMessage.vel;
+                switch (pmsg->motorExtMessage.extMsgType) {
+                  case EXT_MSG_TYPE_MOV_ABS:
+                    genericMessage.moveType = MOVE_TYPE_ABS;
+                    break;
+                  case EXT_MSG_TYPE_MOV_REL:
+                    genericMessage.moveType = MOVE_TYPE_REL;
+                    break;
+                  case EXT_MSG_TYPE_MOV_VELO:
+                    genericMessage.moveType = MOVE_TYPE_VELO;
+                    break;
+                }
+                status = pPvt->pasynGenericPointer->write(pPvt->asynGenericPointerPvt, pasynUser,
+                                                          &genericMessage);
             }
             if (status != asynSuccess) {
                 asynPrint(pasynUser, ASYN_TRACE_ERROR,

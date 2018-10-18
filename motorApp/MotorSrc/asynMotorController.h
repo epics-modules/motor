@@ -169,6 +169,21 @@ typedef struct MotorStatus {
   struct MotorConfigRO MotorConfigRO;
 } MotorStatus;
 
+#define MOVE_TYPE_ABS 1
+#define MOVE_TYPE_REL 2
+#define MOVE_TYPE_VELO 3
+
+/* Same as in motor.h */
+typedef struct {
+    double pos;
+    double mres;
+    double accEGU;
+    double vbas;
+    double vel;
+    int moveType;
+} genericMessage_type;
+
+
 enum ProfileTimeMode{
   PROFILE_TIME_MODE_FIXED,
   PROFILE_TIME_MODE_ARRAY
@@ -243,6 +258,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   virtual asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements);
   virtual asynStatus readFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements, size_t *nRead);
   virtual asynStatus readGenericPointer(asynUser *pasynUser, void *pointer);
+  virtual asynStatus writeGenericPointer(asynUser *pasynUser, void *genericPointer);
   virtual asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
   virtual void report(FILE *fp, int details);
 

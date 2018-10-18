@@ -47,6 +47,7 @@ fields.  ('pmr' is a pointer to motorRecord.)
                         double acc, double pos);
   void devSupMoveRelRaw(motorRecord *pmr, double vel, double vbase,
                         double acc, double relpos);
+  void devSupMoveDialEgu(motorRecord *, double, double, double, int);
   void devSupJogDial(motorRecord *pmr, double jogv, double jacc);
   void devSupUpdateJogRaw(motorRecord *pmr, double jogv, double jacc);
   void devSupCNEN(motorRecord *pmr, double cnen);
