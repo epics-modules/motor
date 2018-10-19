@@ -51,15 +51,7 @@
 #include <string.h>
 #include <math.h>
 
-#include <dbAccess.h>
-#include <recGbl.h>
-#include <recSup.h>
-#include <errlog.h>
-#include <devSup.h>
-#include <alarm.h>
-#include <epicsEvent.h>
-#include <cantProceed.h> /* !! for callocMustSucceed() */
-#include <dbEvent.h>
+#include "motor_epics_inc.h"
 
 #include <asynDriver.h>
 #include <asynInt32.h>

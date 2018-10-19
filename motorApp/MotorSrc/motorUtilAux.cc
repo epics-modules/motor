@@ -29,6 +29,8 @@ USAGE...        Motor Record Utility Support.
 */
 
 #include <string.h>
+#include "motor_epics_inc.h"
+
 
 #include <cantProceed.h>
 #include <dbStaticLib.h>

@@ -198,15 +198,9 @@ USAGE...        Motor Record Support.
 #include    <string.h>
 #include    <stdarg.h>
 #include    <alarm.h>
-#include    <dbDefs.h>
-#include    <callback.h>
-#include    <dbAccess.h>
-#include    <dbScan.h>
-#include    <recGbl.h>
-#include    <recSup.h>
-#include    <dbEvent.h>
-#include    <devSup.h>
 #include    <math.h>
+
+#include    "motor_epics_inc.h"
 
 #define GEN_SIZE_OFFSET
 #include    "motorRecord.h"
@@ -249,38 +243,39 @@ static void syncTargetPosition(motorRecord *);
 
 /*** Record Support Entry Table (RSET) functions. ***/
 
-static long init_record(dbCommon *, int);
-static long process(dbCommon *);
+extern "C" {
+static long init_record(struct dbCommon*, int);
+static long process(struct dbCommon*);
 static long special(DBADDR *, int);
-static long get_units(const DBADDR *, char *);
-static long get_precision(const DBADDR *, long *);
-static long get_graphic_double(const DBADDR *, struct dbr_grDouble *);
-static long get_control_double(const DBADDR *, struct dbr_ctrlDouble *);
-static long get_alarm_double(const DBADDR  *, struct dbr_alDouble *);
-
+static long get_units(DBADDR *, char *);
+static long get_precision(const struct dbAddr *, long *);
+static long get_graphic_double(DBADDR *, struct dbr_grDouble *);
+static long get_control_double(DBADDR *, struct dbr_ctrlDouble *);
+static long get_alarm_double(DBADDR  *, struct dbr_alDouble *);
 
 rset motorRSET =
 {
     RSETNUMBER,
     NULL,
     NULL,
-    (RECSUPFUN) init_record,
-    (RECSUPFUN) process,
-    (RECSUPFUN) special,
+    RECSUPFUN_CAST init_record,
+    RECSUPFUN_CAST process,
+    RECSUPFUN_CAST special,
     NULL,
     NULL,
     NULL,
     NULL,
-    (RECSUPFUN) get_units,
-    (RECSUPFUN) get_precision,
+    RECSUPFUN_CAST get_units,
+    RECSUPFUN_CAST get_precision,
     NULL,
     NULL,
     NULL,
-    (RECSUPFUN) get_graphic_double,
-    (RECSUPFUN) get_control_double,
-    (RECSUPFUN) get_alarm_double
+    RECSUPFUN_CAST get_graphic_double,
+    RECSUPFUN_CAST get_control_double,
+    RECSUPFUN_CAST get_alarm_double
 };
-extern "C" {epicsExportAddress(rset, motorRSET);}
+epicsExportAddress(rset, motorRSET);
+}
 
 
 /*******************************************************************************
@@ -3116,7 +3111,7 @@ velcheckA:
 /******************************************************************************
         get_units()
 *******************************************************************************/
-static long get_units(const DBADDR *paddr, char *units)
+static long get_units(DBADDR *paddr, char *units)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int siz = dbr_units_size - 1;       /* "dbr_units_size" from dbAccess.h */
@@ -3173,7 +3168,7 @@ static long get_units(const DBADDR *paddr, char *units)
 /******************************************************************************
         get_graphic_double()
 *******************************************************************************/
-static long get_graphic_double(const DBADDR *paddr, struct dbr_grDouble * pgd)
+static long get_graphic_double(DBADDR *paddr, struct dbr_grDouble * pgd)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int fieldIndex = dbGetFieldIndex(paddr);
@@ -3224,7 +3219,7 @@ static long get_graphic_double(const DBADDR *paddr, struct dbr_grDouble * pgd)
         get_control_double()
 *******************************************************************************/
 static long
- get_control_double(const DBADDR *paddr, struct dbr_ctrlDouble * pcd)
+ get_control_double(DBADDR *paddr, struct dbr_ctrlDouble * pcd)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int fieldIndex = dbGetFieldIndex(paddr);
@@ -3304,7 +3299,7 @@ static long get_precision(const DBADDR *paddr, long *precision)
 /******************************************************************************
         get_alarm_double()
 *******************************************************************************/
-static long get_alarm_double(const DBADDR  *paddr, struct dbr_alDouble * pad)
+static long get_alarm_double(DBADDR  *paddr, struct dbr_alDouble * pad)
 {
     motorRecord *pmr = (motorRecord *) paddr->precord;
     int fieldIndex = dbGetFieldIndex(paddr);

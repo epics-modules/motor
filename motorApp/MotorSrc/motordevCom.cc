@@ -63,12 +63,7 @@ USAGE... This file contains device functions that are common to all motor
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <callback.h>
-#include <dbAccess.h>
-#include <recGbl.h>
-#include <recSup.h>
-#include <dbEvent.h>
-#include <devSup.h>
+#include "motor_epics_inc.h"
 
 #include "motorRecord.h"
 #include "motor.h"
