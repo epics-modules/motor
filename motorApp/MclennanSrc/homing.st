@@ -8,14 +8,15 @@ assign jog_forward_value to "{MOTPV}.JOGF";
 assign jog_reverse_value to "{MOTPV}.JOGR";
 
 int set, position, position_d;
-double offset, velocity;
+double offset, velocity, jogvelocity;
 assign set to "{MOTPV}.SET";
 assign position to "{MOTPV}.VAL";
 assign position_d to "{MOTPV}.DVAL";
 assign offset to "{MOTPV}.OFF";
 assign velocity to "{MOTPV}.VELO";
+assign jogvelocity to "{MOTPV}.JVEL";
 
-double offsetval, jogvelocity;
+double offsetval;
 
 int debug_flag;
 int debug;
@@ -76,6 +77,12 @@ ss motor
   {
     /* In modes 1 and 3 we need to wait for the home to be cancelled before requesting a jog */
     when (home_forward_pv==0 && (mode==1 || mode==3)) {
+    
+      /* Set the jog velocity */
+      pvGet(velocity);
+      jogvelocity = 0.1 * velocity;
+      pvPut(jogvelocity);
+    
       jog_forward_value = 1;
       pvPut(jog_forward_value);
       if (debug) {
@@ -94,7 +101,13 @@ ss motor
   state reverse_home_requested
   {
     /* In modes 1 and 3 we need to wait for the home to be cancelled before requesting a jog */
-    when ((mode==1 || mode==3) && home_reverse_pv==0) {
+    when (home_reverse_pv==0 && (mode==1 || mode==3 && home_forward_pv==0)) {
+    
+      /* Set the jog velocity */
+      pvGet(velocity);
+      jogvelocity = 0.1 * velocity;
+      pvPut(jogvelocity);
+    
       jog_reverse_value = 1;
       pvPut(jog_reverse_value);
       if (debug) {
