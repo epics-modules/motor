@@ -16,6 +16,9 @@ assign offset to "{MOTPV}.OFF";
 assign velocity to "{MOTPV}.VELO";
 assign jogvelocity to "{MOTPV}.JVEL";
 
+string egu;
+assign egu to "{MOTPV}.EGU";
+
 double offsetval;
 
 int debug_flag;
@@ -42,8 +45,16 @@ ss motor
       axis = atoi(macValueGet("AXIS"));
       debug = atoi(macValueGet("DEBUG"));
       printf("Sequencer: Homing mode for axis %i set to %i\n", axis, mode);
+      
+      /* Set the jog velocity */
+      pvGet(velocity);
+      jogvelocity = 0.1 * velocity;
+      pvPut(jogvelocity);
+      pvGet(egu);
+      printf("Sequencer: Setting jog and home velocity to %3.2f %s/s\n",jogvelocity, egu);   
+      
       if (debug) {
-        printf("Sequencer: Debug mode ON");
+        printf("Sequencer: Debug mode ON\n");
       }
     } state ready
   }
@@ -77,12 +88,7 @@ ss motor
   {
     /* In modes 1 and 3 we need to wait for the home to be cancelled before requesting a jog */
     when (home_forward_pv==0 && (mode==1 || mode==3)) {
-    
-      /* Set the jog velocity */
-      pvGet(velocity);
-      jogvelocity = 0.1 * velocity;
-      pvPut(jogvelocity);
-    
+
       jog_forward_value = 1;
       pvPut(jog_forward_value);
       if (debug) {
@@ -102,11 +108,6 @@ ss motor
   {
     /* In modes 1 and 3 we need to wait for the home to be cancelled before requesting a jog */
     when (home_reverse_pv==0 && (mode==1 || mode==3 && home_forward_pv==0)) {
-    
-      /* Set the jog velocity */
-      pvGet(velocity);
-      jogvelocity = 0.1 * velocity;
-      pvPut(jogvelocity);
     
       jog_reverse_value = 1;
       pvPut(jog_reverse_value);
