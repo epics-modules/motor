@@ -31,7 +31,7 @@ extern struct driver_table PIC862_access;
 
 /* ----------------Create the dsets for devPIC862----------------- */
 static struct driver_table *drvtabptr;
-static long PIC862_init(void *);
+static long PIC862_init(int);
 static long PIC862_init_record(void *);
 static long PIC862_start_trans(struct motorRecord *);
 static RTN_STATUS PIC862_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -85,12 +85,11 @@ static struct board_stat **PIC862_cards;
 
 
 /* initialize device support for PIC862 servo motor */
-static long PIC862_init(void *arg)
+static long PIC862_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIC862_access;
 	(drvtabptr->init)();

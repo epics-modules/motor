@@ -48,7 +48,7 @@ extern struct driver_table PIC844_access;
 
 /* ----------------Create the dsets for devPIC844----------------- */
 static struct driver_table *drvtabptr;
-static long PIC844_init(void *);
+static long PIC844_init(int);
 static long PIC844_init_record(void *);
 static long PIC844_start_trans(struct motorRecord *);
 static RTN_STATUS PIC844_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -102,12 +102,11 @@ static struct board_stat **PIC844_cards;
 
 
 /* initialize device support for PIC844 stepper motor */
-static long PIC844_init(void *arg)
+static long PIC844_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIC844_access;
 	(drvtabptr->init)();

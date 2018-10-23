@@ -54,7 +54,7 @@ extern struct driver_table IM483PL_access;
 
 /* ----------------Create the dsets for devIM483PL----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long IM483PL_init(void *);
+STATIC long IM483PL_init(int);
 STATIC long IM483PL_init_record(void *);
 STATIC long IM483PL_start_trans(struct motorRecord *);
 STATIC RTN_STATUS IM483PL_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -108,12 +108,11 @@ static struct board_stat **IM483PL_cards;
 
 
 /* initialize device support for IM483PL stepper motor */
-STATIC long IM483PL_init(void *arg)
+STATIC long IM483PL_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &IM483PL_access;
 	(drvtabptr->init)();

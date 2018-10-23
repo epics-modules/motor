@@ -46,7 +46,7 @@ extern struct driver_table Micos_access;
 
 /* ----------------Create the dsets for devMicos----------------- */
 static struct driver_table *drvtabptr;
-static long Micos_init(void *);
+static long Micos_init(int);
 static long Micos_init_record(void *);
 static long Micos_start_trans(struct motorRecord *);
 static RTN_STATUS Micos_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -97,13 +97,12 @@ static struct board_stat **Micos_cards;
 
 
 /* initialize device support for Micos DC motor */
-static long Micos_init(void *arg)
+static long Micos_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
     Debug(5, "Micos_init: entry\n");
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &Micos_access;
 	(drvtabptr->init)();

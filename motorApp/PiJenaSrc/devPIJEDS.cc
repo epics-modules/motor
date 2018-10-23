@@ -48,7 +48,7 @@ extern struct driver_table PIJEDS_access;
 
 /* ----------------Create the dsets for devPIJEDS----------------- */
 static struct driver_table *drvtabptr;
-static long PIJEDS_init(void *);
+static long PIJEDS_init(int);
 static long PIJEDS_init_record(void *);
 static long PIJEDS_start_trans(struct motorRecord *);
 static RTN_STATUS PIJEDS_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -102,12 +102,11 @@ static struct board_stat **PIJEDS_cards;
 
 
 /* initialize device support for PIJEDS stepper motor */
-static long PIJEDS_init(void *arg)
+static long PIJEDS_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIJEDS_access;
 	(drvtabptr->init)();

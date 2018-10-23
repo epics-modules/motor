@@ -59,7 +59,7 @@ extern struct driver_table PMNC87xx_access;
 /* ----------------Create the dsets for devPMNC87xx----------------- */
 /* static long report(); */
 STATIC struct driver_table *drvtabptr;
-STATIC long PMNC87xx_init(void *);
+STATIC long PMNC87xx_init(int);
 STATIC long PMNC87xx_init_record(void *);
 STATIC long PMNC87xx_start_trans(struct motorRecord *);
 STATIC RTN_STATUS PMNC87xx_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -113,12 +113,11 @@ static struct board_stat **PMNC87xx_cards;
 
 
 /* initialize device support for PMNC87xx stepper motor */
-STATIC long PMNC87xx_init(void *arg)
+STATIC long PMNC87xx_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PMNC87xx_access;
 	(drvtabptr->init)();

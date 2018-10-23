@@ -54,7 +54,7 @@ extern struct driver_table PIE517_access;
 
 /* ----------------Create the dsets for devPIE517----------------- */
 static struct driver_table *drvtabptr;
-static long PIE517_init(void *);
+static long PIE517_init(int);
 static long PIE517_init_record(void *);
 static long PIE517_start_trans(struct motorRecord *);
 static RTN_STATUS PIE517_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -108,12 +108,11 @@ static struct board_stat **PIE517_cards;
 
 
 /* initialize device support for PIE517 stepper motor */
-static long PIE517_init(void *arg)
+static long PIE517_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIE517_access;
 	(drvtabptr->init)();
