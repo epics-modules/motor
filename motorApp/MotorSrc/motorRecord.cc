@@ -250,6 +250,7 @@ static void set_user_lowlimit(motorRecord *);
 static void set_userlimits(motorRecord *);
 static void range_check(motorRecord *, double *, double, double);
 static void clear_buttons(motorRecord *);
+static long readBackPosition(motorRecord *, bool);
 static void syncTargetPosition(motorRecord *);
 
 /*** Record Support Entry Table (RSET) functions. ***/
@@ -3644,58 +3645,23 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     int dir = (pmr->dir == motorDIR_Pos) ? 1 : -1;
     bool ls_active;
     msta_field msta;
+    long status;
 
     /*** Process record fields. ***/
 
     /* Calculate raw and dial readback values. */
     msta.All = pmr->msta;
-    if (pmr->ueip == motorUEIP_Yes)
-    {
-        /* An encoder is present and the user wants us to use it. */
-        pmr->rrbv = pmr->rep;
-        /* device support gave us a double, use it */
-        if (pmr->priv->readBack.encoderPosition)
-            pmr->drbv = pmr->priv->readBack.encoderPosition * pmr->eres;
-        else
-            pmr->drbv = pmr->rrbv * pmr->eres;
-    }
-    else if (pmr->urip == motorUEIP_Yes && initcall == false)
-    {
-        double rdblvalue;
-        long rtnstat;
 
-        rtnstat = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &rdblvalue, 0, 0 );
-        if (!RTN_SUCCESS(rtnstat))
-        {
-            Debug(3, "%s:%d %s process_motor_info: error reading RDBL link\n",
-                  __FILE__, __LINE__, pmr->name);
-
-            if (pmr->mip != MIP_DONE)
-            {
-                /* Error reading RDBL - stop move. */
-                clear_buttons(pmr);
-                pmr->stop = 1;
-                MARK(M_STOP);
-            }
-        }
-        else
-        {
-            pmr->rrbv = NINT((rdblvalue * pmr->rres) / pmr->mres);
-#if AXIS_CRIPPLE_RDBL_TO_32BIT_INT
-            pmr->drbv = pmr->rrbv * pmr->mres;
-#else
-            pmr->drbv = rdblvalue * pmr->rres / pmr->mres;
-#endif
-        }
-    }
-    else /* UEIP = URIP = No */
+    status = readBackPosition(pmr, initcall);
+    if (!RTN_SUCCESS(status))
     {
-        pmr->rrbv = pmr->rmp;
-        /* if device support gave us a double, use it */
-        if (pmr->priv->readBack.position)
-            pmr->drbv = pmr->priv->readBack.position * pmr->mres;
-        else
-            pmr->drbv = pmr->rrbv * pmr->mres;
+        if (pmr->mip != MIP_DONE)
+        {
+            /* Error reading RDBL - stop move. */
+            clear_buttons(pmr);
+            pmr->stop = 1;
+            MARK(M_STOP);
+        }
     }
 
     if (pmr->rrbv != old_rrbv)
@@ -4163,6 +4129,54 @@ static void range_check(motorRecord *pmr, double *parm_ptr, double min, double m
 }
 
 
+/******************************************************************************
+        readBackPosition()
+*******************************************************************************/
+static long readBackPosition(motorRecord *pmr, bool initcall)
+{
+    long rtnstat = 0;
+    if (pmr->ueip == motorUEIP_Yes)
+    {
+        /* An encoder is present and the user wants us to use it. */
+        pmr->rrbv = pmr->rep;
+        /* device support gave us a double, use it */
+        if (pmr->priv->readBack.encoderPosition)
+            pmr->drbv = pmr->priv->readBack.encoderPosition * pmr->eres;
+        else
+            pmr->drbv = pmr->rrbv * pmr->eres;
+    }
+    else if (pmr->urip == motorUEIP_Yes && initcall == false)
+    {
+        double rdblvalue;
+        /* user wants us to use the readback link */
+        rtnstat = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &rdblvalue, 0, 0 );
+        if (!RTN_SUCCESS(rtnstat))
+        {
+            Debug(3, "%s:%d %s readBackPosition: error reading RDBL link\n",
+                  __FILE__, __LINE__, pmr->name);
+        }
+        else
+        {
+            pmr->rrbv = NINT((rdblvalue * pmr->rres) / pmr->mres);
+#if AXIS_CRIPPLE_RDBL_TO_32BIT_INT
+            pmr->drbv = pmr->rrbv * pmr->mres;
+#else
+            pmr->drbv = rdblvalue * pmr->rres / pmr->mres;
+#endif
+        }
+    }
+    else
+    {
+        pmr->rrbv = pmr->rmp;
+        /* if device support gave us a double, use it */
+        if (pmr->priv->readBack.position)
+            pmr->drbv = pmr->priv->readBack.position * pmr->mres;
+        else
+            pmr->drbv = pmr->rrbv * pmr->mres;
+    }
+    return rtnstat;
+}
+
 /*
 FUNCTION... void clear_buttons(motorRecord *)
 USAGE... Clear all motion request buttons.
@@ -4198,46 +4212,9 @@ USAGE... Synchronize target positions with readbacks.
 static void syncTargetPosition(motorRecord *pmr)
 {
     int dir = (pmr->dir == motorDIR_Pos) ? 1 : -1;
-    double rdblvalue;
-    long rtnstat;
+    bool initcall = false;
 
-
-    if (pmr->ueip)
-    {
-        /* An encoder is present and the user wants us to use it. */
-        pmr->rrbv = pmr->rep;
-        /* device support gave us a double, use it */
-        if (pmr->priv->readBack.encoderPosition)
-            pmr->drbv = pmr->priv->readBack.encoderPosition * pmr->eres;
-        else
-            pmr->drbv = pmr->rrbv * pmr->eres;
-    }
-    else if (pmr->urip)
-    {
-        /* user wants us to use the readback link */
-        rtnstat = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &rdblvalue, 0, 0 );
-        if (!RTN_SUCCESS(rtnstat))
-            fprintf(stdout, "%s:%d %s: syncTargetPosition: error reading RDBL link.\n",
-                    __FILE__, __LINE__, pmr->name);
-        else
-        {
-            pmr->rrbv = NINT((rdblvalue * pmr->rres) / pmr->mres);
-#if AXIS_CRIPPLE_RDBL_TO_32BIT_INT
-            pmr->drbv = pmr->rrbv * pmr->mres;
-#else
-            pmr->drbv = rdblvalue * pmr->rres / pmr->mres;
-#endif
-        }
-    }
-    else
-    {
-        pmr->rrbv = pmr->rmp;
-        /* if device support gave us a double, use it */
-        if (pmr->priv->readBack.position)
-            pmr->drbv = pmr->priv->readBack.position * pmr->mres;
-        else
-            pmr->drbv = pmr->rrbv * pmr->mres;
-    }
+    readBackPosition(pmr,initcall);
     MARK(M_RRBV);
     MARK(M_DRBV);
     pmr->rbv = pmr->drbv * dir + pmr->off;
