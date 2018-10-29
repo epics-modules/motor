@@ -250,8 +250,19 @@ static void re_init_update_soft_limits(struct motorRecord *pmr)
     /*  Raw high limit must be higher than raw low limit */
     if (rawHighLimitRO > rawLowLimitRO)
     {
-        double dialHighLimitRO = rawHighLimitRO * pmr->mres;
-        double dialLowLimitRO  = rawLowLimitRO * pmr->mres;
+        double dialHighLimitRO;
+        double dialLowLimitRO;
+        if (pmr->mflg & MF_READBACK_EGU)
+        {
+            dialHighLimitRO = rawHighLimitRO;
+            dialLowLimitRO  = rawLowLimitRO;
+        }
+        else
+        {
+            double mres = pmr->mres;
+            dialHighLimitRO = rawHighLimitRO * mres;
+            dialLowLimitRO  = rawLowLimitRO * mres;
+        }
         if (pmr->mres < 0) {
             pmr->priv->softLimitRO.motorDialLowLimitRO = dialHighLimitRO;
             pmr->priv->softLimitRO.motorDialHighLimitRO = dialLowLimitRO;
@@ -277,8 +288,15 @@ static void re_init_update_soft_limits(struct motorRecord *pmr)
 static void re_init_update_MinRetryDeadband(struct motorRecord *pmr)
 {
     motorAsynPvt * pPvt = (motorAsynPvt *) pmr->dpvt;
-    double amres = fabs(pmr->mres);
+    double amres = 1.0;
     double tmp;
+    /* If the controller does NOT use EGU, we need mres to convert
+       convert between raw from the controller and dial in the record */
+    if (!(pmr->mflg & MF_READBACK_EGU))
+    {
+        amres = fabs(pmr->mres);
+    }
+
     tmp = pPvt->status.MotorConfigRO.motorMaxVelocityRaw;
     if (tmp > 0.0) pmr->priv->configRO.motorMaxVelocityDial = amres * tmp;
     tmp = pPvt->status.MotorConfigRO.motorDefVelocityRaw;
@@ -530,21 +548,36 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         pmr->name, pPvt->needUpdate);
     if ( pPvt->needUpdate > 0)
     {
-        epicsInt32 rawvalue;
+        epicsFloat64 rawValueFloat;
+        epicsInt32 rawValueSteps;
 
+        /* motorRecord.cc will handle MRES */
         pmr->priv->readBack.position = pPvt->status.position;
         pmr->priv->readBack.encoderPosition = pPvt->status.encoderPosition;
-        rawvalue = (epicsInt32)floor(pPvt->status.position + 0.5);
-        if (pmr->rmp != rawvalue)
+        /* rmp */
+        rawValueFloat = pPvt->status.position;
+        if (pmr->mflg & MF_READBACK_EGU)
         {
-            pmr->rmp = rawvalue;
-            db_post_events(pmr, &pmr->rmp, DBE_VAL_LOG);
+            rawValueFloat = rawValueFloat / pmr->mres;
         }
 
-        rawvalue = (epicsInt32)floor(pPvt->status.encoderPosition + 0.5);
-        if (pmr->rep != rawvalue)
+        rawValueSteps = (epicsInt32)floor(rawValueFloat + 0.5);
+        if (pmr->rmp != rawValueSteps)
         {
-            pmr->rep = rawvalue;
+            pmr->rmp = rawValueSteps;
+            db_post_events(pmr, &pmr->rmp, DBE_VAL_LOG);
+        }
+        /* rep */
+        rawValueFloat = pPvt->status.encoderPosition;
+        if (pmr->mflg & MF_READBACK_EGU)
+        {
+            rawValueFloat = rawValueFloat / pmr->eres;
+        }
+        rawValueSteps = (epicsInt32)floor(rawValueFloat + 0.5);
+
+        if (pmr->rep != rawValueSteps)
+        {
+            pmr->rep = rawValueSteps;
             db_post_events(pmr, &pmr->rep, DBE_VAL_LOG);
         }
 
@@ -555,10 +588,10 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
             pmr->mflg = pPvt->status.flags;
             db_post_events(pmr, &pmr->mflg, DBE_VAL_LOG);
         }
-        rawvalue = (epicsInt32)floor(pPvt->status.velocity);
-        if (pmr->rvel != rawvalue)
+        rawValueSteps = (epicsInt32)floor(pPvt->status.velocity);
+        if (pmr->rvel != rawValueSteps)
         {
-            pmr->rvel = rawvalue;
+            pmr->rvel = rawValueSteps;
             db_post_events(pmr, &pmr->rvel, DBE_VAL_LOG);
         }
 
