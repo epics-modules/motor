@@ -316,6 +316,10 @@ static void re_init_update_MinRetryDeadband(struct motorRecord *pmr)
 
     tmp = pPvt->status.MotorConfigRO.motorERESRaw;
     if (tmp > 0.0) pmr->priv->configRO.motorERESDial = amres * tmp;
+    tmp = pPvt->status.MotorConfigRO.motorSREV;
+    if (tmp > 0.0) pmr->priv->configRO.motorSREV = tmp;
+    tmp = pPvt->status.MotorConfigRO.motorUREV;
+    if (tmp) pmr->priv->configRO.motorUREV = tmp;
 }
 
 static asynStatus config_controller(struct motorRecord *pmr, motorAsynPvt *pPvt)

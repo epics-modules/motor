@@ -134,6 +134,8 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorSDBDROString,                 asynParamFloat64,    &motorSDBDRO_);
   createParam(motorRDBDROString,                 asynParamFloat64,    &motorRDBDRO_);
   createParam(motorERESROString,                 asynParamFloat64,    &motorERESRO_);
+  createParam(motorSREVROString,                 asynParamFloat64,    &motorSREVRO_);
+  createParam(motorUREVROString,                 asynParamFloat64,    &motorUREVRO_);
 
   // These are the per-controller parameters for profile moves
   createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);

@@ -242,6 +242,7 @@ static void monitor(motorRecord *);
 static void process_motor_info(motorRecord *, bool);
 static void load_pos(motorRecord *);
 static void check_resolution(motorRecord *);
+static void check_SREV_UREV_from_controller(motorRecord *);
 static void check_speed(motorRecord *);
 static void set_dial_highlimit(motorRecord *);
 static void set_dial_lowlimit(motorRecord *);
@@ -683,6 +684,7 @@ static long init_re_init(motorRecord *pmr)
 {
     Debug(3, "%s:%d %s init_re_init udf=%d stat=%d nsta=%d\n",
           __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
+    check_SREV_UREV_from_controller(pmr);
     check_speed(pmr);
     enforceMinRetryDeadband(pmr);
     process_motor_info(pmr, true);
@@ -3833,6 +3835,39 @@ static void check_resolution(motorRecord * pmr)
         pmr->urev = pmr->mres * pmr->srev;
         MARK_AUX(M_UREV);
     }
+}
+
+
+static void check_SREV_UREV_from_controller(motorRecord *pmr)
+{
+    long old_srev = pmr->srev;
+    double old_urev = pmr->urev;
+    double old_mres = pmr->mres;
+    if ((pmr->priv->configRO.motorSREV > 0.0) &&
+        pmr->priv->configRO.motorUREV)
+    {
+        pmr->srev = pmr->priv->configRO.motorSREV;
+        pmr->urev = pmr->priv->configRO.motorUREV;
+
+        if (pmr->mres != pmr->urev / pmr->srev)
+            pmr->mres = pmr->urev / pmr->srev;
+
+        if (pmr->srev != old_srev)
+            db_post_events(pmr, &pmr->srev, DBE_VAL_LOG);
+
+        if (pmr->urev != old_urev)
+            db_post_events(pmr, &pmr->urev, DBE_VAL_LOG);
+
+        if (pmr->mres != old_mres)
+            db_post_events(pmr, &pmr->mres, DBE_VAL_LOG);
+    }
+    Debug(3, "%s:%d %s SREV_UREV_from_controller "
+          "old_srev=%ld old_urev=%f cfg_srev=%f cfg_urev=%f srev=%ld urev=%f mres=%f\n",
+          __FILE__, __LINE__, pmr->name,
+          (long)old_srev, old_urev,
+          pmr->priv->configRO.motorSREV,
+          pmr->priv->configRO.motorUREV,
+          (long)pmr->srev, pmr->urev, pmr->mres);
 }
 
 /*

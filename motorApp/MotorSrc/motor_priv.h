@@ -31,6 +31,8 @@ extern "C" {
       epicsFloat64 motorSDBDDial;        /**< Minimal movement */
       epicsFloat64 motorRDBDDial;        /**< "At target position" deadband */
       epicsFloat64 motorERESDial;        /**< ERES as configured in the controller */
+      epicsFloat64 motorSREV;            /**< SREV as configured in the controller */
+      epicsFloat64 motorUREV;            /**< UREV as configured in the controller */
     } configRO;
     struct {
       epicsFloat64 motorHighLimitRaw;  /* last from dev support in status */
