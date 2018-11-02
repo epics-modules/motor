@@ -211,7 +211,7 @@ typedef union
 #define MF_HOME_ON_LS      (1)
 #define MF_LS_RAMPDOWN     (1<<1)
 #define MF_NOSTOP_ONLS     (1<<2)
-#define MF_READBACK_EGU    (1<<3)
+#define MF_DRIVER_USES_EGU (1<<3)
 
 
 #define EXT_MSG_TYPE_MOV_ABS 1

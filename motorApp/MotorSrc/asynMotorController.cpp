@@ -112,7 +112,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorFlagsHomeOnLsString,          asynParamInt32,      &motorFlagsHomeOnLs_);
   createParam(motorFlagsLSrampDownString,        asynParamInt32,      &motorFlagsLSrampDown_);
   createParam(motorFlagsNoStopOnLsString,        asynParamInt32,      &motorFlagsNoStopOnLS_);
-  createParam(motorFlagsReadbackEGUString,       asynParamInt32,      &motorFlagsReadbackEGU_);
+  createParam(motorFlagsDriverUsesEGUString,     asynParamInt32,      &motorFlagsDriverUsesEGU_);
 
   createParam(motorWaitPollsBeforeReadyString,   asynParamInt32,      &motorWaitPollsBeforeReady_);
 

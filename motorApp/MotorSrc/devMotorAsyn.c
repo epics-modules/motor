@@ -252,7 +252,7 @@ static void re_init_update_soft_limits(struct motorRecord *pmr)
     {
         double dialHighLimitRO;
         double dialLowLimitRO;
-        if (pmr->mflg & MF_READBACK_EGU)
+        if (pmr->mflg & MF_DRIVER_USES_EGU)
         {
             dialHighLimitRO = rawHighLimitRO;
             dialLowLimitRO  = rawLowLimitRO;
@@ -292,7 +292,7 @@ static void re_init_update_MinRetryDeadband(struct motorRecord *pmr)
     double tmp;
     /* If the controller does NOT use EGU, we need mres to convert
        convert between raw from the controller and dial in the record */
-    if (!(pmr->mflg & MF_READBACK_EGU))
+    if (!(pmr->mflg & MF_DRIVER_USES_EGU))
     {
         amres = fabs(pmr->mres);
     }
@@ -560,7 +560,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         pmr->priv->readBack.encoderPosition = pPvt->status.encoderPosition;
         /* rmp */
         rawValueFloat = pPvt->status.position;
-        if (pmr->mflg & MF_READBACK_EGU)
+        if (pmr->mflg & MF_DRIVER_USES_EGU)
         {
             rawValueFloat = rawValueFloat / pmr->mres;
         }
@@ -573,7 +573,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         }
         /* rep */
         rawValueFloat = pPvt->status.encoderPosition;
-        if (pmr->mflg & MF_READBACK_EGU)
+        if (pmr->mflg & MF_DRIVER_USES_EGU)
         {
             rawValueFloat = rawValueFloat / pmr->eres;
         }

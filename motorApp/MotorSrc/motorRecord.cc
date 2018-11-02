@@ -4175,7 +4175,7 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
         /* An encoder is present and the user wants us to use it. */
         pmr->rrbv = pmr->rep;
         /* device support gave us a double, use it */
-        if (pmr->mflg & MF_READBACK_EGU)
+        if (pmr->mflg & MF_DRIVER_USES_EGU)
             pmr->drbv = pmr->priv->readBack.encoderPosition;
         else if (pmr->priv->readBack.encoderPosition)
             pmr->drbv = pmr->priv->readBack.encoderPosition * pmr->eres;
@@ -4206,7 +4206,7 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
     {
         pmr->rrbv = pmr->rmp;
         /* if device support gave us a double, use it */
-        if (pmr->mflg & MF_READBACK_EGU)
+        if (pmr->mflg & MF_DRIVER_USES_EGU)
             pmr->drbv = pmr->priv->readBack.position;
         else if (pmr->priv->readBack.position)
             pmr->drbv = pmr->priv->readBack.position * pmr->mres;

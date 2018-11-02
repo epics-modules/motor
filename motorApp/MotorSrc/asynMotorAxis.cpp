@@ -333,7 +333,7 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
       statusChanged_ = 1;
     }
   } else  if (function >= pC_->motorFlagsHomeOnLs_ &&
-              function <= pC_->motorFlagsReadbackEGU_) {
+              function <= pC_->motorFlagsDriverUsesEGU_) {
     flags = status_.flags;
     mask = 1 << (function - pC_->motorFlagsHomeOnLs_);
     if (value) flags |= mask;
