@@ -91,13 +91,19 @@ asynStatus asynMotorAxis::move(double position, int relative, double minVelocity
 asynStatus asynMotorAxis::moveEGU(double posEGU, double mres, int relative,
                                   double minVeloEGU, double maxVeloEGU, double accEGU)
 {
-  double amres = fabs(mres);
+  double amres = 1.0;
+  int motorFlagsDriverUsesEGU;
+  pC_->getIntegerParam(axisNo_,pC_->motorFlagsDriverUsesEGU_,
+                       &motorFlagsDriverUsesEGU);
+  if (!motorFlagsDriverUsesEGU)
+    amres = fabs(mres);
 
   pC_->setDoubleParam(axisNo_, pC_->motorVelBase_, minVeloEGU/amres);
   pC_->setDoubleParam(axisNo_, pC_->motorVelocity_, maxVeloEGU/amres);
   pC_->setDoubleParam(axisNo_, pC_->motorAccel_, accEGU/amres);
 
-  return move(posEGU/mres, relative, minVeloEGU/amres, maxVeloEGU/amres, accEGU/amres);
+  return move(mres < 0.0 ? 0 - posEGU/amres : posEGU/amres,
+              relative, minVeloEGU/amres, maxVeloEGU/amres, accEGU/amres);
 }
 
 
@@ -116,11 +122,19 @@ asynStatus asynMotorAxis::moveVelocity(double minVelocity, double maxVelocity, d
   * \param[in] acceleration The acceleration value. Units=EGU/sec/sec. */
 asynStatus asynMotorAxis::moveVeloEGU(double mres, double minVeloEGU, double maxVeloEGU, double accEGU)
 {
-  double amres = fabs(mres);
+  double amres = 1.0;
+  int motorFlagsDriverUsesEGU;
+  pC_->getIntegerParam(axisNo_,pC_->motorFlagsDriverUsesEGU_,
+                       &motorFlagsDriverUsesEGU);
+  if (!motorFlagsDriverUsesEGU)
+    amres = fabs(mres);
+
   pC_->setDoubleParam(axisNo_, pC_->motorVelBase_, minVeloEGU/amres);
   pC_->setDoubleParam(axisNo_, pC_->motorVelocity_, maxVeloEGU/amres);
   pC_->setDoubleParam(axisNo_, pC_->motorAccel_, accEGU/amres);
-  return moveVelocity(minVeloEGU/mres, maxVeloEGU/mres, accEGU/amres);
+  return moveVelocity(mres < 0.0 ? 0 - minVeloEGU/amres : minVeloEGU/amres,
+                      mres < 0.0 ? 0 - maxVeloEGU/amres : maxVeloEGU/amres,
+                      accEGU/amres);
 }
 
 
