@@ -36,6 +36,28 @@ calls.
 #define SEND_MSG()                              (*pdset->end_trans)(pmr)
 
 
+
+/*****************************************************************************
+  Helper to convert dial into raw
+*****************************************************************************/
+double devSupDielToRaw(motorRecord *pmr, double dialValue)
+{
+  double rawValue;
+  if (pmr->mflg & MF_DRIVER_USES_EGU)
+  {
+    /*The driver wants dial coordinates.
+      We need to preserve the sign ! */
+    rawValue = pmr->mres < 0 ? 0 - dialValue : dialValue;
+  }
+  else
+  {
+    /* Convert from dial into raw. Note:
+       mres can be < 0 to change the direction */
+    rawValue = dialValue / pmr->mres;
+  }
+  return rawValue;
+}
+
 /*****************************************************************************
   Calls to device support
   Wrappers that call device support.
@@ -80,10 +102,9 @@ RTN_STATUS devSupUpdateLimitFromDial(motorRecord *pmr, motor_cmnd command,
                                      double dialValue)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
-    double tmp_raw = dialValue / pmr->mres;
+    double tmp_raw = devSupDielToRaw(pmr, dialValue);
 
     RTN_STATUS status;
-
     INIT_MSG();
     status = WRITE_MSG(command, &tmp_raw);
     if (status == OK)
