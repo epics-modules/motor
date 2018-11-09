@@ -412,6 +412,11 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
       statusChanged_ = 1;
       status_.MotorConfigRO.motorDefJogAccRaw = value;
     }
+  } else if (function == pC_->motorDefHomeVeloRO_) {
+    if (value != status_.MotorConfigRO.motorDefHomeVeloRaw) {
+      statusChanged_ = 1;
+      status_.MotorConfigRO.motorDefHomeVeloRaw = value;
+    }
   } else if (function == pC_->motorSDBDRO_) {
     if (value != status_.MotorConfigRO.motorSDBDRaw) {
       statusChanged_ = 1;

@@ -3980,8 +3980,11 @@ static void check_speed(motorRecord * pmr)
             pmr->jar = pmr->velo / pmr->accl;
     }
 
+    /* Take HVEL from controller, if avaliable */
+    if (pmr->priv->configRO.motorDefHomeVeloDial > 0.0)
+        pmr->hvel = pmr->priv->configRO.motorDefHomeVeloDial;
     /* Sanity check on home velocity. */
-    if (pmr->hvel == 0.0)
+    else if (pmr->hvel == 0.0)
         pmr->hvel = pmr->vbas;
     else
         range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);

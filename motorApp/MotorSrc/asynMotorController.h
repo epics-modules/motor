@@ -92,6 +92,7 @@
 #define motorMaxVelocityROString        "MOTOR_MAX_VELO_RO"
 #define motorDefJogVeloROString         "MOTOR_DEF_JVEL_RO"
 #define motorDefJogAccROString          "MOTOR_DEF_JACC_RO"
+#define motorDefHomeVeloROString        "MOTOR_DEF_HVEL_RO"
 #define motorSDBDROString               "MOTOR_SDBD_RO"
 #define motorRDBDROString               "MOTOR_RDBD_RO"
 #define motorERESROString               "MOTOR_ERES_RO"
@@ -157,6 +158,7 @@ typedef struct MotorConfigRO {
   double motorMaxVelocityRaw; /**< Maximum velocity */
   double motorDefJogVeloRaw;  /**< Default velocity (for jogging) */
   double motorDefJogAccRaw;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
+  double motorDefHomeVeloRaw; /**< Default velocity (for jogging) */
   double motorSDBDRaw;        /**< Minimal movement */
   double motorRDBDRaw;        /**< "At target position" deadband */
   double motorERESRaw;        /**< ERES as configured in the controller */
@@ -373,6 +375,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorMaxVelocityRO_;
   int motorDefJogVeloRO_;
   int motorDefJogAccRO_;
+  int motorDefHomeVeloRO_;
   int motorSDBDRO_;
   int motorRDBDRO_;
   int motorERESRO_;

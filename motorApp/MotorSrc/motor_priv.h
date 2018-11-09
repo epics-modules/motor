@@ -28,6 +28,7 @@ extern "C" {
       epicsFloat64 motorDefVelocityDial; /**< Default velocity (moveAbs, moveRel) */
       epicsFloat64 motorDefJogVeloDial;  /**< Default velocity (for jogging) */
       epicsFloat64 motorDefJogAccDial;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
+      epicsFloat64 motorDefHomeVeloDial; /**< Default velocity (for homing) */
       epicsFloat64 motorSDBDDial;        /**< Minimal movement */
       epicsFloat64 motorRDBDDial;        /**< "At target position" deadband */
       epicsFloat64 motorERESDial;        /**< ERES as configured in the controller */

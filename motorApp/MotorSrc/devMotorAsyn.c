@@ -308,6 +308,9 @@ static void re_init_update_MinRetryDeadband(struct motorRecord *pmr)
     tmp = pPvt->status.MotorConfigRO.motorDefJogAccRaw;
     if (tmp > 0.0) pmr->priv->configRO.motorDefJogAccDial = amres * tmp;
 
+    tmp = pPvt->status.MotorConfigRO.motorDefHomeVeloRaw;
+    if (tmp > 0.0) pmr->priv->configRO.motorDefHomeVeloDial = amres * tmp;
+
     tmp = pPvt->status.MotorConfigRO.motorSDBDRaw;
     if (tmp > 0.0) pmr->priv->configRO.motorSDBDDial = amres * tmp;
 
