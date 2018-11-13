@@ -212,6 +212,7 @@ typedef union
 #define MF_LS_RAMPDOWN     (1<<1)
 #define MF_NOSTOP_ONLS     (1<<2)
 #define MF_DRIVER_USES_EGU (1<<3)
+#define MF_ADJ_AFTER_HOMED (1<<4)
 
 
 #define EXT_MSG_TYPE_MOV_ABS 1

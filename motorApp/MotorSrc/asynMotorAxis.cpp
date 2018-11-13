@@ -347,7 +347,7 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
       statusChanged_ = 1;
     }
   } else  if (function >= pC_->motorFlagsHomeOnLs_ &&
-              function <= pC_->motorFlagsDriverUsesEGU_) {
+              function <= pC_->motorFlagsAdjAfterHomed_) {
     flags = status_.flags;
     mask = 1 << (function - pC_->motorFlagsHomeOnLs_);
     if (value) flags |= mask;

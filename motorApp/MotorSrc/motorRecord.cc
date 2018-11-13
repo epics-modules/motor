@@ -1494,6 +1494,46 @@ static long process(dbCommon *arg)
                     MARK(M_MIP);
                     clear_buttons(pmr);
                     pmr->pp = TRUE;
+                } else if (((pmr->mip == MIP_HOMF ||
+                             pmr->mip == MIP_HOMR)) &&
+                           (pmr->mflg & MF_ADJ_AFTER_HOMED) &&
+                           softLimitsDefined(pmr) &&
+                           (pmr->drbv < pmr->dllm || pmr->drbv > pmr->dhlm))
+                {
+                    /*
+                     * After homing, we need to move outside the soft limit area
+                     * (and do a possible backlash)
+                     */
+                    msta_field msta;
+                    msta.All = pmr->msta;
+                    if (msta.Bits.RA_HOMED &&
+                        !msta.Bits.RA_PROBLEM &&
+                        !msta.Bits.CNTRL_COMM_ERR)
+                    {
+                        if (pmr->mip & MIP_HOMF)
+                        {
+                            pmr->homf = 0;
+                            MARK_AUX(M_HOMF);
+                        }
+                        else if (pmr->mip & MIP_HOMR)
+                        {
+                            pmr->homr = 0;
+                            MARK_AUX(M_HOMR);
+                        }
+                        // keep dmov=1 to enter do_work()
+                        UNMARK(M_DMOV);
+                        MIP_SET_VAL(MIP_DONE);
+                        pmr->priv->last.dval = pmr->drbv;
+                        if (pmr->drbv < pmr->dllm)
+                        {
+                            pmr->dval = pmr->dllm;
+                        }
+                        else if (pmr->drbv > pmr->dhlm)
+                        {
+                            pmr->dval = pmr->dhlm;
+                        }
+                        goto enter_do_work;
+                    }
                 }
             }
 
