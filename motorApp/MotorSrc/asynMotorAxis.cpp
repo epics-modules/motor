@@ -486,38 +486,54 @@ void asynMotorAxis::updateMsgTxtField()
   pC_->getIntegerParam(axisNo_,pC_->motorStatusDone_, &motorStatusDone);
 
   if (motorStatusDone) {
-    int motorStatusHighLimit;
-    int motorStatusLowLimit;
-    pC_->getIntegerParam(axisNo_,pC_->motorStatusHighLimit_, &motorStatusHighLimit);
-    pC_->getIntegerParam(axisNo_,pC_->motorStatusLowLimit_, &motorStatusLowLimit);
-    if (motorStatusHighLimit && motorStatusLowLimit)
-      setStringParam(pC_->motorMessageText_,"I: Limit switches");
-    else if (motorStatusHighLimit || motorStatusLowLimit)
-      setStringParam(pC_->motorMessageText_,"I: Limit switch");
-    else {
-      int motorStatusProblem;
-      int motorStatusHomed;
-      int motorNotHomedProblem;
-      double motorHighLimit;
-      double motorLowLimit;
-      pC_->getIntegerParam(axisNo_,pC_->motorStatusProblem_, &motorStatusProblem);
-      pC_->getIntegerParam(axisNo_,pC_->motorNotHomedProblem_, &motorNotHomedProblem);
-      pC_->getIntegerParam(axisNo_,pC_->motorStatusHomed_, &motorStatusHomed);
-      if (motorStatusProblem) {
-	if (!motorStatusHomed && (motorNotHomedProblem & MOTORNOTHOMEDPROBLEM_ERROR)) {
-	  setStringParam(pC_->motorMessageText_,"E: Axis not homed");
-	  return;
-	}
-        setStringParam(pC_->motorMessageText_,"E: Problem");
+    int motorShowPowerOff;
+    pC_->getIntegerParam(axisNo_,pC_->motorShowPowerOff_,  &motorShowPowerOff);
+    if (motorShowPowerOff) {
+      int motorStatusPowerOn;
+      pC_->getIntegerParam(axisNo_,pC_->motorStatusPowerOn_,
+                           &motorStatusPowerOn);
+      if (!motorStatusPowerOn) {
+        setStringParam(pC_->motorMessageText_,"I: PowerOff");
         return;
       }
+    }
+    int motorStatusProblem;
+    int motorStatusHomed;
+    int motorNotHomedProblem;
+    pC_->getIntegerParam(axisNo_,pC_->motorStatusProblem_, &motorStatusProblem);
+    pC_->getIntegerParam(axisNo_,pC_->motorNotHomedProblem_, &motorNotHomedProblem);
+    pC_->getIntegerParam(axisNo_,pC_->motorStatusHomed_, &motorStatusHomed);
+    if (motorStatusProblem) {
+      if (!motorStatusHomed && (motorNotHomedProblem & MOTORNOTHOMEDPROBLEM_ERROR)) {
+        setStringParam(pC_->motorMessageText_,"E: Axis not homed");
+        return;
+      }
+      setStringParam(pC_->motorMessageText_,"E: Problem");
+      return;
+    }
 
+    {
+      int motorStatusHighLimit;
+      int motorStatusLowLimit;
+      pC_->getIntegerParam(axisNo_,pC_->motorStatusHighLimit_, &motorStatusHighLimit);
+      pC_->getIntegerParam(axisNo_,pC_->motorStatusLowLimit_, &motorStatusLowLimit);
       if (!motorStatusHomed && motorNotHomedProblem) {
         /* the "E: prefix should only be shown if the problem bit
            is set. Otherwise it is an info */
         setStringParam(pC_->motorMessageText_,"I: Axis not homed");
         return;
       }
+      if (motorStatusHighLimit && motorStatusLowLimit) {
+        setStringParam(pC_->motorMessageText_,"I: Limit switches");
+        return;
+      }  else if (motorStatusHighLimit || motorStatusLowLimit) {
+        setStringParam(pC_->motorMessageText_,"I: Limit switch");
+        return;
+      }
+    }
+    {
+      double motorHighLimit;
+      double motorLowLimit;
       /* If both soft limits are defined, and both are != 0,
          check if the axis is below or above the range.
          motorLowLimit == motorHighLimit == 0 means "no limits"
@@ -536,17 +552,8 @@ void asynMotorAxis::updateMsgTxtField()
         }
       }
       int motorLatestCommand;
-      int motorShowPowerOff;
       pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
-      pC_->getIntegerParam(axisNo_,pC_->motorShowPowerOff_,  &motorShowPowerOff);
-      if (motorShowPowerOff) {
-        int motorStatusPowerOn;
-        pC_->getIntegerParam(axisNo_,pC_->motorStatusPowerOn_,  &motorStatusPowerOn);
-        if (motorStatusPowerOn) motorShowPowerOff = 0;
-      }
-      if (motorShowPowerOff)
-        setStringParam(pC_->motorMessageText_,"I: PowerOff");
-      else if (motorLatestCommand == LATEST_COMMAND_STOP)
+      if (motorLatestCommand == LATEST_COMMAND_STOP)
         setStringParam(pC_->motorMessageText_,"I: Stop");
       else
         setStringParam(pC_->motorMessageText_," ");
