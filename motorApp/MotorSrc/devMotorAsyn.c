@@ -555,8 +555,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         pmr->name, pPvt->needUpdate);
     if ( pPvt->needUpdate > 0)
     {
-        epicsFloat64 rawValueFloat;
-        epicsInt32 rawValueSteps;
+        epicsInt32 rawValue;
 
         /* Need to update mflg before using it further down */
         if (pmr->mflg != pPvt->status.flags)
@@ -568,39 +567,31 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         /* motorRecord.cc will handle MRES */
         pmr->priv->readBack.position = pPvt->status.position;
         pmr->priv->readBack.encoderPosition = pPvt->status.encoderPosition;
-        /* rmp */
-        rawValueFloat = pPvt->status.position;
-        if (pmr->mflg & MF_DRIVER_USES_EGU)
+        if (!(pmr->mflg & MF_DRIVER_USES_EGU))
         {
-            rawValueFloat = rawValueFloat / pmr->mres;
-        }
+            /* rmp */
+            rawValue = (epicsInt32)floor(pPvt->status.position + 0.5);
+            if (pmr->rmp != rawValue)
+            {
+                pmr->rmp = rawValue;
+                db_post_events(pmr, &pmr->rmp, DBE_VAL_LOG);
+            }
+            /* rep */
+            rawValue = (epicsInt32)floor(pPvt->status.encoderPosition + 0.5);
 
-        rawValueSteps = (epicsInt32)floor(rawValueFloat + 0.5);
-        if (pmr->rmp != rawValueSteps)
-        {
-            pmr->rmp = rawValueSteps;
-            db_post_events(pmr, &pmr->rmp, DBE_VAL_LOG);
-        }
-        /* rep */
-        rawValueFloat = pPvt->status.encoderPosition;
-        if (pmr->mflg & MF_DRIVER_USES_EGU)
-        {
-            rawValueFloat = rawValueFloat / pmr->eres;
-        }
-        rawValueSteps = (epicsInt32)floor(rawValueFloat + 0.5);
-
-        if (pmr->rep != rawValueSteps)
-        {
-            pmr->rep = rawValueSteps;
-            db_post_events(pmr, &pmr->rep, DBE_VAL_LOG);
+            if (pmr->rep != rawValue)
+            {
+                pmr->rep = rawValue;
+                db_post_events(pmr, &pmr->rep, DBE_VAL_LOG);
+            }
         }
 
         /* Don't post MSTA changes here; motor record's process() function does efficent MSTA posting. */
         pmr->msta = pPvt->status.status;
-        rawValueSteps = (epicsInt32)floor(pPvt->status.velocity);
-        if (pmr->rvel != rawValueSteps)
+        rawValue = (epicsInt32)floor(pPvt->status.velocity);
+        if (pmr->rvel != rawValue)
         {
-            pmr->rvel = rawValueSteps;
+            pmr->rvel = rawValue;
             db_post_events(pmr, &pmr->rvel, DBE_VAL_LOG);
         }
 
