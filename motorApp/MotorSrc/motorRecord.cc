@@ -705,14 +705,11 @@ static long init_re_init(motorRecord *pmr)
         MARK(M_RVAL);
     }
 
-    if (!softLimitsDefined(pmr))
+    /* The controller has soft limits */
+    if (pmr->priv->softLimitRO.motorDialLimitsValid)
     {
-        /* The record has no soft limits, but the controller may have */
-        if (pmr->priv->softLimitRO.motorDialLimitsValid)
-        {
-            pmr->dhlm = pmr->priv->softLimitRO.motorDialHighLimitRO;
-            pmr->dllm = pmr->priv->softLimitRO.motorDialLowLimitRO;
-        }
+        pmr->dhlm = pmr->priv->softLimitRO.motorDialHighLimitRO;
+        pmr->dllm = pmr->priv->softLimitRO.motorDialLowLimitRO;
     }
     /* Reset limits in case database values are invalid. */
     set_dial_highlimit(pmr);
@@ -1369,26 +1366,10 @@ static long process(dbCommon *arg)
                     pmr->dhlm, maxValue,
                     pmr->dllm, minValue);
             fflush(stdout);
-            if (!softLimitsDefined(pmr))
-            {
-                pmr->dllm = minValue;
-                pmr->dhlm = maxValue;
-                set_dial_highlimit(pmr);
-                set_dial_lowlimit(pmr);
-            }
-            else
-            {
-                if (pmr->dllm < minValue)
-                {
-                    pmr->dllm = minValue;
-                    set_dial_lowlimit(pmr);
-                }
-                if (pmr->dhlm > maxValue)
-                {
-                    pmr->dhlm = maxValue;
-                    set_dial_highlimit(pmr);
-                }
-            }
+            pmr->dhlm = maxValue;
+            pmr->dllm = minValue;
+            set_dial_highlimit(pmr);
+            set_dial_lowlimit(pmr);
         }
         enforceMinRetryDeadband(pmr);
         process_reason = CALLBACK_DATA;
