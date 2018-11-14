@@ -558,6 +558,13 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         epicsFloat64 rawValueFloat;
         epicsInt32 rawValueSteps;
 
+        /* Need to update mflg before using it further down */
+        if (pmr->mflg != pPvt->status.flags)
+        {
+            pmr->mflg = pPvt->status.flags;
+            db_post_events(pmr, &pmr->mflg, DBE_VAL_LOG);
+        }
+
         /* motorRecord.cc will handle MRES */
         pmr->priv->readBack.position = pPvt->status.position;
         pmr->priv->readBack.encoderPosition = pPvt->status.encoderPosition;
@@ -590,11 +597,6 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
 
         /* Don't post MSTA changes here; motor record's process() function does efficent MSTA posting. */
         pmr->msta = pPvt->status.status;
-        if (pmr->mflg != pPvt->status.flags)
-        {
-            pmr->mflg = pPvt->status.flags;
-            db_post_events(pmr, &pmr->mflg, DBE_VAL_LOG);
-        }
         rawValueSteps = (epicsInt32)floor(pPvt->status.velocity);
         if (pmr->rvel != rawValueSteps)
         {
