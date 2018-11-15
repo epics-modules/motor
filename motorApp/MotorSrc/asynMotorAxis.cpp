@@ -466,6 +466,7 @@ void asynMotorAxis::updateMsgTxtFromDriver(const char *value)
   } else {
     pC_->setIntegerParam(axisNo_,pC_->motorMessageIsFromDriver_, 0);
   }
+  statusChanged_ = 1; /* need a callback */
 }
 
 /** Update the MsgTxt field*/
