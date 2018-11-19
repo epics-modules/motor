@@ -522,6 +522,12 @@ static long init_record(struct motorRecord * pmr )
      * whether or not to write new position values to the controller.
      */
     init_controller_load_pos_if_needed(pmr, pasynUser);
+    /* Need to update mflg before using it further down */
+    if (pmr->mflg != pPvt->status.flags)
+    {
+	pmr->mflg = pPvt->status.flags;
+	db_post_events(pmr, &pmr->mflg, DBE_VAL_LOG);
+    }
 
     re_init_update_soft_limits(pmr);
 
