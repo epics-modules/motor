@@ -4202,7 +4202,7 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
         {
             /* We don't have any value in REP */
             pmr->drbv = pmr->priv->readBack.encoderPosition;
-            pmr->rrbv = NINT(pmr->drbv * pmr->eres);
+            pmr->rrbv = NINT(pmr->drbv / pmr->eres);
         }
         else
         {
@@ -4226,11 +4226,7 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
         else
         {
             pmr->rrbv = NINT((rdblvalue * pmr->rres) / pmr->mres);
-#if AXIS_CRIPPLE_RDBL_TO_32BIT_INT
-            pmr->drbv = pmr->rrbv * pmr->mres;
-#else
             pmr->drbv = rdblvalue * pmr->rres / pmr->mres;
-#endif
         }
     }
     else
@@ -4240,7 +4236,7 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
         {
             /* We don't have any value in RMP */
             pmr->drbv = pmr->priv->readBack.position;
-            pmr->rrbv = NINT(pmr->drbv * pmr->mres);
+            pmr->rrbv = NINT(pmr->drbv / pmr->mres);
         }
         else
         {
