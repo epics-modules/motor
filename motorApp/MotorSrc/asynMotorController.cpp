@@ -133,7 +133,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorDefJogVeloROString,           asynParamFloat64,    &motorDefJogVeloRO_);
   createParam(motorDefJogAccROString,            asynParamFloat64,    &motorDefJogAccRO_);
   createParam(motorDefHomeVeloROString,          asynParamFloat64,    &motorDefHomeVeloRO_);
-  createParam(motorSDBDROString,                 asynParamFloat64,    &motorSDBDRO_);
+  createParam(motorSPDBROString,                 asynParamFloat64,    &motorSPDBRO_);
   createParam(motorRDBDROString,                 asynParamFloat64,    &motorRDBDRO_);
   createParam(motorERESROString,                 asynParamFloat64,    &motorERESRO_);
   createParam(motorSREVROString,                 asynParamFloat64,    &motorSREVRO_);
@@ -587,7 +587,7 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
     memcpy(pStatus, &pAxis->status_, sizeof(*pStatus));
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
 	      "%s:%s: axis=%d status=0x%04x, position=%f, encoder position=%f, velocity=%f, "
-	      "highLimit=%f lowLimit=%f defVelo=%f maxVelo=%f defJogVelo=%f defJogAcc=%f sdbd=%f rdbd=%f\n",
+	      "highLimit=%f lowLimit=%f defVelo=%f maxVelo=%f defJogVelo=%f defJogAcc=%f spdb=%f rdbd=%f\n",
 	      driverName, functionName,  axis, pStatus->status, pStatus->position,
 	      pStatus->encoderPosition, pStatus->velocity,
 	      pStatus->MotorConfigRO.motorHighLimitRaw,
@@ -596,7 +596,7 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
 	      pStatus->MotorConfigRO.motorMaxVelocityRaw,
 	      pStatus->MotorConfigRO.motorDefJogVeloRaw,
 	      pStatus->MotorConfigRO.motorDefJogAccRaw,
-	      pStatus->MotorConfigRO.motorSDBDRaw,
+	      pStatus->MotorConfigRO.motorSPDBRaw,
 	      pStatus->MotorConfigRO.motorRDBDRaw);
   } else {
     asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,

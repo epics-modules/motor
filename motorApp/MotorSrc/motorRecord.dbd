@@ -422,7 +422,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
         }
-        field(SDBD,DBF_DOUBLE) {
+        field(SPDB,DBF_DOUBLE) {
                 prompt("Setpoint Deadband (EGU)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)

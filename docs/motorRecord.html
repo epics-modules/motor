@@ -868,6 +868,14 @@ below.
     </td>
   </tr>
   <tr>
+    <td><a href="#Fields_motion">SPBD</a></td>
+    <td>R/W</td>
+    <td>Set Point Deadband (EGU)</td>
+    <td>DOUBLE</td>
+    <td><br>
+    </td>
+  </tr>
+  <tr>
     <td><a href="#Fields_link">RDBL</a></td>
     <td>R</td>
     <td>Readback Location</td>
@@ -1830,6 +1838,16 @@ below.
     performed (see RTRY).&nbsp;</td>
   </tr>
   <tr valign="top">
+    <td>SPBD</td>
+    <td>R/W</td>
+    <td>Set Point Deadband (EGU)</td>
+    <td>DOUBLE</td>
+    <td>Before the motor is commanded a move, a check is done if the move is to small.
+    It is to small when the distance is less the the step size defined in MRES.
+    When a bigger deadband is wanted than MRES, set the value into SPDB.
+    </td>
+  </tr>
+   <tr valign="top">
     <td>RTRY</td>
     <td>R/W</td>
     <td>Max retry count</td>

@@ -590,7 +590,7 @@ Make RDBD >= MRES.
 ******************************************************************************/
 static void enforceMinRetryDeadband(motorRecord * pmr)
 {
-    double old_sdbd = pmr->sdbd;
+    double old_spdb = pmr->spdb;
     double old_rdbd = pmr->rdbd;
     if (pmr->priv->configRO.motorERESDial)
     {
@@ -603,24 +603,24 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
     if (pmr->priv->configRO.motorRDBDDial > 0.0)
         pmr->rdbd = pmr->priv->configRO.motorRDBDDial;
 
-    if (pmr->priv->configRO.motorSDBDDial > 0.0)
-        pmr->sdbd = pmr->priv->configRO.motorSDBDDial;
-    if (!pmr->sdbd)
-        pmr->sdbd = pmr->rdbd;
-    if (!pmr->sdbd)
-        pmr->sdbd = fabs(pmr->mres);
+    if (pmr->priv->configRO.motorSPDBDial > 0.0)
+        pmr->spdb = pmr->priv->configRO.motorSPDBDial;
+    if (!pmr->spdb)
+        pmr->spdb = pmr->rdbd;
+    if (!pmr->spdb)
+        pmr->spdb = fabs(pmr->mres);
 
-    range_check(pmr, &pmr->sdbd, 0.0, pmr->rdbd);
+    range_check(pmr, &pmr->spdb, 0.0, pmr->rdbd);
 
-    if (pmr->sdbd != old_sdbd)
-        db_post_events(pmr, &pmr->sdbd, DBE_VAL_LOG);
+    if (pmr->spdb != old_spdb)
+        db_post_events(pmr, &pmr->spdb, DBE_VAL_LOG);
     if (pmr->rdbd != old_rdbd)
         db_post_events(pmr, &pmr->rdbd, DBE_VAL_LOG);
     Debug(3, "%s:%d %s enforceMinRetryDeadband "
-          "old_sdbd=%f old_rdbd=%f cfg_sdbd=%f cfg_rdbd=%f sdbd=%f rdbd=%f mres=%f\n",
+          "old_spdb=%f old_rdbd=%f cfg_spdb=%f cfg_rdbd=%f spdb=%f rdbd=%f mres=%f\n",
           __FILE__, __LINE__, pmr->name,
-          old_sdbd, old_rdbd, pmr->priv->configRO.motorSDBDDial,
-          pmr->priv->configRO.motorRDBDDial, pmr->sdbd, pmr->rdbd, pmr->mres);
+          old_spdb, old_rdbd, pmr->priv->configRO.motorSPDBDial,
+          pmr->priv->configRO.motorRDBDDial, pmr->spdb, pmr->rdbd, pmr->mres);
 }
 
 
@@ -855,9 +855,9 @@ static long init_record(dbCommon* arg, int pass)
             pmr->udf = TRUE;
             break;
     }
-    Debug(3, "%s:%d %s init_record process_reason=%d dval=%f drbv=%f rdbd=%f sdbd=%f udf=%d stat=%d\n",
+    Debug(3, "%s:%d %s init_record process_reason=%d dval=%f drbv=%f rdbd=%f spdb=%f udf=%d stat=%d\n",
           __FILE__, __LINE__, pmr->name, (int)process_reason, pmr->dval, pmr->drbv,
-          pmr->rdbd, pmr->sdbd, pmr->udf, pmr->stat);
+          pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat);
     return OK;
 }
 
@@ -1074,7 +1074,7 @@ static long postProcess(motorRecord * pmr)
     }
     else if (pmr->mip & MIP_JOG_STOP || pmr->mip & MIP_MOVE)
     {
-        if (fabs(pmr->bdst) >=  fabs(pmr->sdbd))
+        if (fabs(pmr->bdst) >=  fabs(pmr->spdb))
         {
             doBackLash(pmr);
         }
@@ -1705,11 +1705,11 @@ static int homing_wanted_and_allowed(motorRecord *pmr)
 static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
                           double relpos, double relbpos)
 {
-    double rbdst1 = fabs(pmr->bdst) + pmr->sdbd;
+    double rbdst1 = fabs(pmr->bdst) + pmr->spdb;
     bool use_rel;
 
-    Debug(3, "%s:%d %s doRetryOrDone dval=%f rdbd=%f sdbd=%f udf=%d stat=%d rcnt=%d preferred_dir=%d relpos=%f relbpos=%f drbv=%f\n",
-          __FILE__, __LINE__, pmr->name, pmr->dval, pmr->rdbd, pmr->sdbd, pmr->udf, pmr->stat, pmr->rcnt, preferred_dir,
+    Debug(3, "%s:%d %s doRetryOrDone dval=%f rdbd=%f spdb=%f udf=%d stat=%d rcnt=%d preferred_dir=%d relpos=%f relbpos=%f drbv=%f\n",
+          __FILE__, __LINE__, pmr->name, pmr->dval, pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat, pmr->rcnt, preferred_dir,
           relpos, relbpos, pmr->drbv);
 
     if (pmr->udf || (pmr->stat == epicsAlarmLink) || (pmr->stat == epicsAlarmUDF))
@@ -1721,11 +1721,11 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     else
         use_rel = false;
 
-    if (fabs(relpos) < pmr->sdbd)
-        relpos = (relpos > 0.0) ? pmr->sdbd : -pmr->sdbd;
+    if (fabs(relpos) < pmr->spdb)
+        relpos = (relpos > 0.0) ? pmr->spdb : -pmr->spdb;
 
-    if (fabs(relbpos) < pmr->sdbd)
-        relbpos = (relbpos > 0.0) ? pmr->sdbd : -pmr->sdbd;
+    if (fabs(relbpos) < pmr->spdb)
+        relbpos = (relbpos > 0.0) ? pmr->spdb : -pmr->spdb;
 
 
     /* AJF fix for the bug where the retry count is not incremented when doing retries */
@@ -1746,7 +1746,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
      * since move is in preferred direction (preferred_dir==ON),
      * AND, backlash acceleration and velocity are the same as slew values
      * (BVEL == VELO, AND, BACC == ACCL). */
-    if ((fabs(pmr->bdst) < pmr->sdbd) ||
+    if ((fabs(pmr->bdst) < pmr->spdb) ||
         (preferred_dir == true && pmr->bvel == pmr->velo &&
          pmr->bacc == pmr->accl))
     {
@@ -1754,7 +1754,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     }
     /* IF move is in preferred direction, AND, current position is within backlash range. */
     else if ((preferred_dir == true) &&
-             ((use_rel == true  && relbpos <= pmr->sdbd) ||
+             ((use_rel == true  && relbpos <= pmr->spdb) ||
               (use_rel == false && (fabs(pmr->dval - pmr->drbv) <= rbdst1))
              )
             )
@@ -1852,8 +1852,21 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     too_small = false;
     if ((pmr->mip & MIP_RETRY) == 0)
     {
-        if (absdiff < pmr->sdbd)
+        /* Same as (abs(npos - rpos) < 1) */
+        if (NINT(absdiff < 1))
             too_small = true;
+        if (!too_small)
+        {
+            double spdb = pmr->spdb;
+            if (spdb > 0) {
+                /* Don't move if new setpoint is within SPDB of DRBV */
+                double drbv = pmr->drbv;
+                double dval = pmr->dval;
+                if (((dval - spdb) < drbv) && ((dval + spdb) > drbv)) {
+                    too_small = true;
+                }
+            }
+        }
     }
     else if (absdiff < fabs(pmr->rdbd))
         too_small = true;
@@ -2814,8 +2827,8 @@ static long special(DBADDR *paddr, int after)
         }
         break;
 
-        /* new sdbd ot rdbd */
-    case motorRecordSDBD:
+        /* new spdb ot rdbd */
+    case motorRecordSPDB:
     case motorRecordRDBD:
         enforceMinRetryDeadband(pmr);
         break;
