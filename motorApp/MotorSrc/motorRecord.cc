@@ -1502,14 +1502,16 @@ static long process(dbCommon *arg)
                             pmr->homr = 0;
                             MARK_AUX(M_HOMR);
                         }
-                        if (pmr->drbv < pmr->dllm - pmr->rdbd)
+                        if ((pmr->drbv < pmr->dllm - pmr->rdbd) &&
+                            (pmr->drbv < pmr->dllm - pmr->spdb))
                         {
-                            pmr->dval = pmr->dllm;
+                            pmr->dval = pmr->dllm + pmr->bdst;
                             need_enter_do_work = 1;
                         }
-                        else if (pmr->drbv > pmr->dhlm + pmr->rdbd)
+                        else if ((pmr->drbv > pmr->dhlm + pmr->rdbd) &&
+                                 (pmr->drbv > pmr->dhlm + pmr->spdb))
                         {
-                            pmr->dval = pmr->dhlm;
+                            pmr->dval = pmr->dhlm - pmr->bdst;
                             need_enter_do_work = 1;
                         }
                         if (need_enter_do_work)
