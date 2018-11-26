@@ -1491,6 +1491,7 @@ static long process(dbCommon *arg)
                         !msta.Bits.RA_PROBLEM &&
                         !msta.Bits.CNTRL_COMM_ERR)
                     {
+                        int need_enter_do_work = 0;
                         if (pmr->mip & MIP_HOMF)
                         {
                             pmr->homf = 0;
@@ -1501,19 +1502,24 @@ static long process(dbCommon *arg)
                             pmr->homr = 0;
                             MARK_AUX(M_HOMR);
                         }
-                        // keep dmov=1 to enter do_work()
-                        UNMARK(M_DMOV);
-                        MIP_SET_VAL(MIP_DONE);
-                        pmr->priv->last.dval = pmr->drbv;
-                        if (pmr->drbv < pmr->dllm)
+                        if (pmr->drbv < pmr->dllm - pmr->rdbd)
                         {
                             pmr->dval = pmr->dllm;
+                            need_enter_do_work = 1;
                         }
-                        else if (pmr->drbv > pmr->dhlm)
+                        else if (pmr->drbv > pmr->dhlm + pmr->rdbd)
                         {
                             pmr->dval = pmr->dhlm;
+                            need_enter_do_work = 1;
                         }
-                        goto enter_do_work;
+                        if (need_enter_do_work)
+                        {
+                            // keep dmov=1 to enter do_work()
+                            UNMARK(M_DMOV);
+                            MIP_SET_VAL(MIP_DONE);
+                            pmr->priv->last.dval = pmr->drbv;
+                            goto enter_do_work;
+                        }
                     }
                 }
             }
