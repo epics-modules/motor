@@ -4058,7 +4058,10 @@ static void set_dial_highlimit(motorRecord *pmr)
                 __FILE__, __LINE__, pmr->name,
                 pmr->dhlm, maxValue);
         fflush(stdout);
-        if (pmr->dhlm > maxValue) pmr->dhlm = maxValue;
+        if ((pmr->dhlm > maxValue) || !softLimitsDefined(pmr))
+        {
+            pmr->dhlm = maxValue;
+        }
     }
     devSupUpdateLimitFromDial(pmr, command, pmr->dhlm);
     if (dir_positive)
@@ -4120,7 +4123,10 @@ static void set_dial_lowlimit(motorRecord *pmr)
                 __FILE__, __LINE__, pmr->name,
                 pmr->dllm, minValue);
         fflush(stdout);
-        if (pmr->dllm < minValue) pmr->dllm = minValue;
+        if ((pmr->dllm < minValue) || !softLimitsDefined(pmr))
+        {
+            pmr->dllm = minValue;
+        }
     }
     devSupUpdateLimitFromDial(pmr, command, pmr->dllm);
 
