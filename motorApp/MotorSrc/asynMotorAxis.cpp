@@ -524,34 +524,8 @@ void asynMotorAxis::updateMsgTxtField()
         setStringParam(pC_->motorMessageText_,"I: Axis not homed");
         return;
       }
-      if (motorStatusHighLimit && motorStatusLowLimit) {
-        setStringParam(pC_->motorMessageText_,"I: Limit switches");
-        return;
-      }  else if (motorStatusHighLimit || motorStatusLowLimit) {
-        setStringParam(pC_->motorMessageText_,"I: Limit switch");
-        return;
-      }
     }
     {
-      double motorHighLimit;
-      double motorLowLimit;
-      /* If both soft limits are defined, and both are != 0,
-         check if the axis is below or above the range.
-         motorLowLimit == motorHighLimit == 0 means "no limits"
-         (e.g. a rotary axis) */
-      if (!pC_->getDoubleParam(axisNo_, pC_->motorLowLimit_, &motorLowLimit) &&
-          !pC_->getDoubleParam(axisNo_, pC_->motorHighLimit_, &motorHighLimit) &&
-          (motorLowLimit != 0.0 || motorHighLimit != 0.0)) {
-        double motorPosition;
-        pC_->getDoubleParam(axisNo_, pC_->motorPosition_, &motorPosition);
-        if (motorPosition < motorLowLimit) {
-          setStringParam(pC_->motorMessageText_,"I: Below soft limit");
-          return;
-        } else if (motorPosition > motorHighLimit) {
-          setStringParam(pC_->motorMessageText_,"I: Above soft limit");
-          return;
-        }
-      }
       int motorLatestCommand;
       pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
       if (motorLatestCommand == LATEST_COMMAND_STOP)
@@ -563,9 +537,9 @@ void asynMotorAxis::updateMsgTxtField()
   }
   int motorStatusMoving;
   pC_->getIntegerParam(axisNo_,pC_->motorStatusMoving_, &motorStatusMoving);
-  int motorLatestCommand;
-  pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
   if (motorStatusMoving) {
+    int motorLatestCommand;
+    pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
     switch (motorLatestCommand) {
     case LATEST_COMMAND_HOMING:
         setStringParam(pC_->motorMessageText_,"I: Homing");
@@ -589,33 +563,6 @@ void asynMotorAxis::updateMsgTxtField()
          /* fall through */
     default:
         setStringParam(pC_->motorMessageText_,"I: Moving");
-    }
-  } else {
-    /* Not done, not moving. Show the latest command */
-    switch (motorLatestCommand) {
-    case LATEST_COMMAND_STOP:
-        setStringParam(pC_->motorMessageText_,"I: Stop");
-        break;
-    case LATEST_COMMAND_HOMING:
-        setStringParam(pC_->motorMessageText_,"I: Home");
-        break;
-    case LATEST_COMMAND_MOVE_TO_HOME:
-        setStringParam(pC_->motorMessageText_,"I: Move home");
-        break;
-    case LATEST_COMMAND_MOVE_ABS:
-        setStringParam(pC_->motorMessageText_,"I: Move abs");
-        break;
-    case LATEST_COMMAND_MOVE_REL:
-        setStringParam(pC_->motorMessageText_,"I: Move rel");
-        break;
-    case LATEST_COMMAND_MOVE_VEL:
-        setStringParam(pC_->motorMessageText_,"I: Move vel");
-        break;
-    case LATEST_COMMAND_UNDEFINED:
-        setStringParam(pC_->motorMessageText_," ");
-        break;
-    default:
-        setStringParam(pC_->motorMessageText_,"I: Unkown");
     }
   }
 }
