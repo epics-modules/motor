@@ -3999,6 +3999,14 @@ static void check_speed_and_resolution(motorRecord * pmr)
     db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
 
+    if (pmr->accs && !pmr->accl)
+    {
+        /* ACCL == 0.0, ACCS is != 0.0 -> Use ACCS
+           This is a (possible) new way to configure a database.
+           Existing Db files will have ACCS == 0.0 and this
+           is backwards compatibleamd  behaves as before */
+        updateACCLfromACCS(pmr);
+    }
     /* Sanity check on acceleration time. */
     if (pmr->accl == 0.0)
     {
