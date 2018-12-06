@@ -1861,7 +1861,7 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     if ((pmr->mip & MIP_RETRY) == 0)
     {
         /* Same as (abs(npos - rpos) < 1) */
-        if (NINT(absdiff < 1))
+        if (absdiff < fabs(pmr->mres))
             too_small = true;
         if (!too_small)
         {
