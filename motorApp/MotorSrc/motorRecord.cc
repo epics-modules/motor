@@ -214,17 +214,27 @@ USAGE...        Motor Record Support.
 #include    "motorDevSup.h"
 
 #define DEBUG
-#ifdef DEBUG
-volatile int motorRecordDebug = 4;
-extern "C" {epicsExportAddress(int, motorRecordDebug);}
-#endif
-
 /*----------------debugging-----------------*/
+/* SPAM bits:
 
-static inline void Debug(int level, const char *format, ...) EPICS_PRINTF_STYLE(2,3);
-static inline void Debug(int level, const char *format, ...){
-  #ifdef DEBUG
-    if (level < motorRecordDebug) {
+    1 STOP record stops motor, motor reports stopped
+    2 MIP changes,  may be retry, doRetryOrDone, delayReq/Ack
+    3 Record init, UDF changes, values from controller
+    4 LVIO, recalcLVIO
+    5 postProcess
+    6 do_work()
+    7 special()
+    8 Process begin/end
+*/
+
+
+static inline void Debug(motorRecord*,unsigned,const char *, ...) EPICS_PRINTF_STYLE(3,4);
+
+static inline void Debug(motorRecord *pmr,
+                         unsigned level,
+                         const char *format, ...){
+#ifdef DEBUG
+    if ((1<<level) & pmr->spam) {
       va_list pVar;
       va_start(pVar, format);
       vfprintf(stdout, format, pVar);
@@ -448,11 +458,9 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
     dbgMipToString(v, dbuf, sizeof(dbuf));           \
     dbgMipToString(old, obuf, sizeof(obuf));         \
     dbgMipToString(pmr->mip, nbuf, sizeof(nbuf));    \
-    fprintf(stdout,                                  \
-            "%s:%d %s mipSetBit %s old=%s new=%s\n", \
-            __FILE__, __LINE__, pmr->name,           \
-            dbuf, obuf, nbuf);                       \
-    fflush(stdout);                                  \
+    Debug(pmr,2, "%s:%d %s mipSetBit %s old=%s new=%s\n",\
+          __FILE__, __LINE__, pmr->name,             \
+          dbuf, obuf, nbuf);                         \
   }                                                  \
   while(0)
 
@@ -467,11 +475,9 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
     dbgMipToString(v, dbuf, sizeof(dbuf));           \
     dbgMipToString(old, obuf, sizeof(obuf));         \
     dbgMipToString(pmr->mip, nbuf, sizeof(nbuf));    \
-    fprintf(stdout,                                  \
-            "%s:%d %s mipClrBit %s old=%s new=%s\n", \
+    Debug(pmr,2, "%s:%d %s mipClrBit %s old=%s new=%s\n",\
             __FILE__, __LINE__, pmr->name,           \
             dbuf, obuf, nbuf);                       \
-    fflush(stdout);                                  \
   }                                                  \
   while(0)
 
@@ -483,11 +489,9 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
     mipSetMip(pmr,(v));                              \
     dbgMipToString(old, obuf, sizeof(obuf));         \
     dbgMipToString(pmr->mip, nbuf, sizeof(nbuf));    \
-    fprintf(stdout,                                  \
-            "%s:%d %s mipSetVal old=%s new=%s\n",    \
-            __FILE__, __LINE__, pmr->name,           \
-            obuf, nbuf);                             \
-    fflush(stdout);                                  \
+    Debug(pmr,2, "%s:%d %s mipSetVal old=%s new=%s\n",   \
+          __FILE__, __LINE__, pmr->name,             \
+          obuf, nbuf);                               \
     }                                                \
   while(0)
 
@@ -501,11 +505,9 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
 #define SET_LVIO(value)                              \
   do {                                               \
     if (value || (pmr->lvio != value)) {             \
-      fprintf(stdout,                                \
-              "%s:%d %s setLvio old=%d new=%d\n",    \
+        Debug(pmr,4, "%s:%d %s setLvio old=%d new=%d\n", \
               __FILE__, __LINE__, pmr->name,         \
               pmr->lvio, value);                     \
-      fflush(stdout);                                \
     }                                                \
     if (pmr->lvio != value) {                        \
         pmr->lvio = value;                           \
@@ -616,7 +618,7 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
         db_post_events(pmr, &pmr->spdb, DBE_VAL_LOG);
     if (pmr->rdbd != old_rdbd)
         db_post_events(pmr, &pmr->rdbd, DBE_VAL_LOG);
-    Debug(3, "%s:%d %s enforceMinRetryDeadband "
+    Debug(pmr,3, "%s:%d %s enforceMinRetryDeadband "
           "old_spdb=%f old_rdbd=%f cfg_spdb=%f cfg_rdbd=%f spdb=%f rdbd=%f mres=%f\n",
           __FILE__, __LINE__, pmr->name,
           old_spdb, old_rdbd, pmr->priv->configRO.motorSPDBDial,
@@ -628,7 +630,7 @@ static void recalcLVIO(motorRecord *pmr)
 {
   if (pmr->udf || (pmr->stat == epicsAlarmLink) || (pmr->stat == epicsAlarmUDF))
   {
-      Debug(3, "%s:%d %s recalcLVIO udf=%d stat=%d nsta=%d\n",
+      Debug(pmr,4, "%s:%d %s recalcLVIO udf=%d stat=%d nsta=%d\n",
             __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
       return;
   }
@@ -648,7 +650,7 @@ static void recalcLVIO(motorRecord *pmr)
       SET_LVIO(lvio);
       MARK(M_LVIO);
   }
-  Debug(3,"%s:%d %s recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f udf=%d stat=%d nsta=%d\n",
+  Debug(pmr,4,"%s:%d %s recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f udf=%d stat=%d nsta=%d\n",
         __FILE__, __LINE__, pmr->name,
         lvio, pmr->drbv, pmr->rdbd, pmr->dhlm, pmr->dllm, pmr->udf, pmr->stat, pmr->nsta);
 }
@@ -682,7 +684,7 @@ LOGIC:
 
 static long init_re_init(motorRecord *pmr)
 {
-    Debug(3, "%s:%d %s init_re_init udf=%d stat=%d nsta=%d\n",
+    Debug(pmr,3, "%s:%d %s init_re_init udf=%d stat=%d nsta=%d\n",
           __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
     check_SREV_UREV_from_controller(pmr);
     check_speed(pmr);
@@ -749,6 +751,7 @@ static long init_record(dbCommon* arg, int pass)
     if (pass == 0)
     {
         pmr->vers = VERSION;
+        if (!pmr->spam) pmr->spam = 15; /* important logging on */
         return(OK);
     }
     /* Check that we have a device-support entry table. */
@@ -826,7 +829,7 @@ static long init_record(dbCommon* arg, int pass)
     if (pmr->dol.type == CONSTANT)
     {
         pmr->udf = FALSE;
-        Debug(3, "%s:%d %s init_record set UDF=FALSE\n",
+        Debug(pmr,3, "%s:%d %s init_record set UDF=FALSE\n",
               __FILE__, __LINE__, pmr->name);
 
         recGblInitConstantLink(&pmr->dol, DBF_DOUBLE, &pmr->val);
@@ -855,7 +858,7 @@ static long init_record(dbCommon* arg, int pass)
             pmr->udf = TRUE;
             break;
     }
-    Debug(3, "%s:%d %s init_record process_reason=%d dval=%f drbv=%f rdbd=%f spdb=%f udf=%d stat=%d\n",
+    Debug(pmr,3, "%s:%d %s init_record process_reason=%d dval=%f drbv=%f rdbd=%f spdb=%f udf=%d stat=%d\n",
           __FILE__, __LINE__, pmr->name, (int)process_reason, pmr->dval, pmr->drbv,
           pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat);
     return OK;
@@ -1000,7 +1003,7 @@ static long postProcess(motorRecord * pmr)
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        Debug(3, "%s:%d %s postProcess: entry udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+        Debug(pmr,5, "%s:%d %s postProcess: entry udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
               __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
     }
 #endif
@@ -1023,7 +1026,7 @@ static long postProcess(motorRecord * pmr)
         pmr->val = pmr->rbv;
         pmr->dval = pmr->drbv;
 #endif
-        Debug(3, "%s:%d %s postProcess oldval=%f olddval=%f val=%f dval=%f drbv=%f  rrbv=%ld\n",
+        Debug(pmr,5, "%s:%d %s postProcess oldval=%f olddval=%f val=%f dval=%f drbv=%f  rrbv=%ld\n",
               __FILE__, __LINE__, pmr->name,
               old_val, old_dval, pmr->val, pmr->dval, pmr->drbv, (long)pmr->rrbv);
 
@@ -1115,7 +1118,7 @@ static void maybeRetry(motorRecord * pmr)
         {
             char dbuf[MBLE];
             dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-            Debug(3, "%s:%d %s maybeRetry: not close enough rdbd=%f diff=%f rcnt=%d mip=0x%0x(%s)\n",
+            Debug(pmr,2, "%s:%d %s maybeRetry: not close enough rdbd=%f diff=%f rcnt=%d mip=0x%0x(%s)\n",
                   __FILE__, __LINE__, pmr->name, pmr->rdbd, diff, pmr->rcnt, pmr->mip, dbuf);
         }
 #endif
@@ -1157,7 +1160,7 @@ static void maybeRetry(motorRecord * pmr)
         {
             char dbuf[MBLE];
             dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-            Debug(1, "%s:%d %s maybeRetry: close enough; rdbd=%f diff=%f mip=0x%0x(%s)\n",
+            Debug(pmr,2, "%s:%d %s maybeRetry: close enough; rdbd=%f diff=%f mip=0x%0x(%s)\n",
                   __FILE__, __LINE__, pmr->name, pmr->rdbd, diff, pmr->mip, dbuf);
         }
 #endif
@@ -1341,7 +1344,7 @@ static long process(dbCommon *arg)
     if (pmr->pact)
         return(OK);
 
-    Debug(4, "%s:%d %s process:---------------------- begin\n",
+    Debug(pmr,8, "%s:%d %s process:---------------------- begin\n",
           __FILE__, __LINE__, pmr->name);
     pmr->pact = 1;
 
@@ -1360,12 +1363,11 @@ static long process(dbCommon *arg)
         {
             double maxValue = pmr->priv->softLimitRO.motorDialHighLimitRO;
             double minValue = pmr->priv->softLimitRO.motorDialLowLimitRO;
-            fprintf(stdout,
-                    "%s:%d %s pmr->dhlm=%g maxValue=%g pmr->dllm=%g minValue=%g\n",
-                    __FILE__, __LINE__, pmr->name,
-                    pmr->dhlm, maxValue,
-                    pmr->dllm, minValue);
-            fflush(stdout);
+            Debug(pmr,3,
+                  "%s:%d %s pmr->dhlm=%g maxVal=%g pmr->dllm=%g minVal=%g\n",
+                  __FILE__, __LINE__, pmr->name,
+                  pmr->dhlm, maxValue,
+                  pmr->dllm, minValue);
             pmr->dhlm = maxValue;
             pmr->dllm = minValue;
             set_dial_highlimit(pmr);
@@ -1378,7 +1380,7 @@ static long process(dbCommon *arg)
     {
       if ((pmr->dol.type == CONSTANT) && pmr->udf)
       {
-          Debug(3, "%s:%d %s process set UDF=FALSE\n",
+          Debug(pmr,3, "%s:%d %s process set UDF=FALSE\n",
                 __FILE__, __LINE__, pmr->name);
           pmr->udf = FALSE;
           init_re_init(pmr);
@@ -1439,8 +1441,8 @@ static long process(dbCommon *arg)
             {
 
                 /* We're going in the wrong direction. Readback problem? */
-                fprintf(stdout, "%s:%d %s STOP tdir=%d\n",
-                       __FILE__, __LINE__, pmr->name, pmr->tdir);
+                Debug(pmr,1, "%s:%d %s STOP tdir=%d\n",
+                      __FILE__, __LINE__, pmr->name, pmr->tdir);
 
                 devSupStop(pmr);
                 MIP_SET_BIT(MIP_STOP);
@@ -1461,7 +1463,7 @@ static long process(dbCommon *arg)
                 {
                     char dbuf[MBLE];
                     dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-                    Debug(3, "%s:%d %s motor has stopped drbv=%f pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+                    Debug(pmr,1, "%s:%d %s motor has stopped drbv=%f pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
                           __FILE__, __LINE__, pmr->name, pmr->drbv, pmr->pp, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
                 }
 #endif
@@ -1570,7 +1572,7 @@ static long process(dbCommon *arg)
                     {
                         char dbuf[MBLE];
                         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-                        Debug(3, "%s:%d %s (stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+                        Debug(pmr,1, "%s:%d %s (stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
                               __FILE__, __LINE__, pmr->name, pmr->pp, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
                     }
 #endif
@@ -1601,7 +1603,7 @@ static long process(dbCommon *arg)
                         {
                             MIP_SET_BIT(MIP_DELAY_REQ);
                             MARK(M_MIP);
-                            Debug(3, "%s:%d %s callbackRequestDelayed() called\n",
+                            Debug(pmr,2, "%s:%d %s callbackRequestDelayed() called\n",
                                   __FILE__, __LINE__, pmr->name);
                             callbackRequestDelayed(&pcallback->dly_callback, pmr->dly);
                         }
@@ -1613,7 +1615,7 @@ static long process(dbCommon *arg)
                     {
                         MIP_SET_BIT(MIP_DELAY_REQ);
                         MARK(M_MIP);
-                        Debug(3, "%s:%d %s callbackRequestDelayed() called\n",
+                        Debug(pmr,2, "%s:%d %s callbackRequestDelayed() called\n",
                               __FILE__, __LINE__, pmr->name);
                         callbackRequestDelayed(&pcallback->dly_callback, pmr->dly);
                     }
@@ -1649,8 +1651,8 @@ enter_do_work:
             pmr->stop = 1;
             MARK(M_STOP);
             clear_buttons(pmr);
-            fprintf(stdout, "%s:%d %s STOP lvio\n",
-                   __FILE__, __LINE__, pmr->name);
+            Debug(pmr,1, "%s:%d %s STOP lvio\n",
+                  __FILE__, __LINE__, pmr->name);
         }
     }
 
@@ -1681,8 +1683,9 @@ process_exit:
         recGblFwdLink(pmr);                 /* Process the forward-scan-link record. */
 
     pmr->pact = 0;
-    Debug(4, "%s:%d %s process:---------------------- end\n",
+    Debug(pmr,8, "%s:%d %s process:---------------------- end\n",
           __FILE__, __LINE__, pmr->name);
+    if (pmr->spam) fflush(stdout);                                  \
     return (status);
 }
 
@@ -1716,7 +1719,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     double rbdst1 = fabs(pmr->bdst) + pmr->spdb;
     bool use_rel;
 
-    Debug(3, "%s:%d %s doRetryOrDone dval=%f rdbd=%f spdb=%f udf=%d stat=%d rcnt=%d preferred_dir=%d relpos=%f relbpos=%f drbv=%f\n",
+    Debug(pmr,2, "%s:%d %s doRetryOrDone dval=%f rdbd=%f spdb=%f udf=%d stat=%d rcnt=%d preferred_dir=%d relpos=%f relbpos=%f drbv=%f\n",
           __FILE__, __LINE__, pmr->name, pmr->dval, pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat, pmr->rcnt, preferred_dir,
           relpos, relbpos, pmr->drbv);
 
@@ -2292,7 +2295,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        Debug(3, "%s:%d %s do_work: begin udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+        Debug(pmr,6, "%s:%d %s do_work: begin udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
               __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
     }
 #endif
@@ -2428,7 +2431,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             pmr->udf = TRUE;
             return(ERROR);
         }
-        Debug(3, "%s:%d %s udf=%d do_work set UDF=FALSE\n",
+        Debug(pmr,3, "%s:%d %s udf=%d do_work set UDF=FALSE\n",
               __FILE__, __LINE__, pmr->name, pmr->udf);
         pmr->udf = FALSE;
         /* Later, we'll act on this new value of .val. */
@@ -2531,8 +2534,8 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             pmr->pp = TRUE;
             MIP_SET_BIT(MIP_JOG_STOP);
             MIP_CLR_BIT(MIP_JOGF | MIP_JOGR);
-            fprintf(stdout, "%s:%d %s STOP jogging\n",
-                   __FILE__, __LINE__, pmr->name);
+            Debug(pmr,1, "%s:%d %s STOP jogging\n",
+                  __FILE__, __LINE__, pmr->name);
             devSupStop(pmr);
             return(OK);
         }
@@ -2669,7 +2672,7 @@ static long special(DBADDR *paddr, int after)
 
     msta.All = pmr->msta;
 
-    Debug(4, "%s:%d %s special fieldIndex=%s (%d)  after=%d\n",
+    Debug(pmr,7, "%s:%d %s special fieldIndex=%s (%d)  after=%d\n",
           __FILE__, __LINE__, pmr->name,
           ((dbFldDes*)paddr->pfldDes)->name, fieldIndex, after);
 
@@ -3752,10 +3755,10 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        fprintf(stdout, "%s:%d %s STOP ls_active=1 mip=0x%0x(%s)\n",
-                __FILE__, __LINE__,
-                pmr->name,
-                pmr->mip, dbuf);
+        Debug(pmr,1, "%s:%d %s STOP ls_active=1 mip=0x%0x(%s)\n",
+              __FILE__, __LINE__,
+              pmr->name,
+              pmr->mip, dbuf);
     }
 #else
         fprintf(stdout, "%s:%d %s STOP ls_active=1\n",
@@ -3903,7 +3906,7 @@ static void check_SREV_UREV_from_controller(motorRecord *pmr)
         if (pmr->mres != old_mres)
             db_post_events(pmr, &pmr->mres, DBE_VAL_LOG);
     }
-    Debug(3, "%s:%d %s SREV_UREV_from_controller "
+    Debug(pmr,3, "%s:%d %s SREV_UREV_from_controller "
           "old_srev=%ld old_urev=%f cfg_srev=%f cfg_urev=%f srev=%ld urev=%f mres=%f\n",
           __FILE__, __LINE__, pmr->name,
           (long)old_srev, old_urev,
@@ -4053,11 +4056,9 @@ static void set_dial_highlimit(motorRecord *pmr)
     if (pmr->priv->softLimitRO.motorDialLimitsValid)
     {
         double maxValue = pmr->priv->softLimitRO.motorDialHighLimitRO;
-        fprintf(stdout,
-                "%s:%d %s pmr->dhlm=%g maxValue=%g\n",
-                __FILE__, __LINE__, pmr->name,
-                pmr->dhlm, maxValue);
-        fflush(stdout);
+        Debug(pmr,3, "%s:%d %s pmr->dhlm=%g maxValue=%g\n",
+              __FILE__, __LINE__, pmr->name,
+              pmr->dhlm, maxValue);
         if ((pmr->dhlm > maxValue) || !softLimitsDefined(pmr))
         {
             pmr->dhlm = maxValue;
@@ -4118,11 +4119,9 @@ static void set_dial_lowlimit(motorRecord *pmr)
     if (pmr->priv->softLimitRO.motorDialLimitsValid)
     {
         double minValue = pmr->priv->softLimitRO.motorDialLowLimitRO;
-        fprintf(stdout,
-                "%s:%d %s pmr->dllm=%g minValue=%g\n",
-                __FILE__, __LINE__, pmr->name,
-                pmr->dllm, minValue);
-        fflush(stdout);
+        Debug(pmr,3, "%s:%d %s pmr->dllm=%g minValue=%g\n",
+              __FILE__, __LINE__, pmr->name,
+              pmr->dllm, minValue);
         if ((pmr->dllm < minValue) || !softLimitsDefined(pmr))
         {
             pmr->dllm = minValue;
@@ -4247,7 +4246,7 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
         rtnstat = dbGetLink(&(pmr->rdbl), DBR_DOUBLE, &rdblvalue, 0, 0 );
         if (!RTN_SUCCESS(rtnstat))
         {
-            Debug(3, "%s:%d %s readBackPosition: error reading RDBL link\n",
+            Debug(pmr,1, "%s:%d %s readBackPosition: error reading RDBL link\n",
                   __FILE__, __LINE__, pmr->name);
         }
         else
