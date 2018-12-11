@@ -415,6 +415,12 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
         }
+        field(SPDB,DBF_DOUBLE) {
+                prompt("Setpoint Deadband (EGU)")
+                promptgroup(GUI_COMMON)
+                special(SPC_MOD)
+                interest(1)
+        }
         field(RCNT,DBF_SHORT) {
                 prompt("Retry count")
                 special(SPC_NOMOD)

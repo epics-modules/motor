@@ -2234,6 +2234,18 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             {
                 if (abs(npos - rpos) < 1)
                     too_small = true;
+                if (!too_small)
+                {
+                    double spdb = pmr->spdb;
+                    if (spdb > 0) {
+                        /* Don't move if new setpoint is within SPDB of DRBV */
+                        double drbv = pmr->drbv;
+                        double dval = pmr->dval;
+                        if (((dval - spdb) < drbv) && ((dval + spdb) > drbv)) {
+                            too_small = true;
+                        }
+                    }
+                }
             }
             else if (abs(npos - rpos) < rdbdpos)
                 too_small = true;
