@@ -11,4 +11,5 @@
 
 record(motor, "$(P)$(M)") {
   field(OFF, "$(OFF)")
+  field(JVEL, "$(JVEL)")
 }

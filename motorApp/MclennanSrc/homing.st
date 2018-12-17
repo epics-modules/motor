@@ -8,16 +8,11 @@ assign jog_forward_value to "{MOTPV}.JOGF";
 assign jog_reverse_value to "{MOTPV}.JOGR";
 
 int set, position, position_d;
-double offset, velocity, jogvelocity;
+double offset;
 assign set to "{MOTPV}.SET";
 assign position to "{MOTPV}.VAL";
 assign position_d to "{MOTPV}.DVAL";
 assign offset to "{MOTPV}.OFF";
-assign velocity to "{MOTPV}.VELO";
-assign jogvelocity to "{MOTPV}.JVEL";
-
-string egu;
-assign egu to "{MOTPV}.EGU";
 
 double offsetval;
 
@@ -45,13 +40,6 @@ ss motor
       axis = atoi(macValueGet("AXIS"));
       debug = atoi(macValueGet("DEBUG"));
       printf("Sequencer: Homing mode for axis %i set to %i\n", axis, mode);
-      
-      /* Set the jog velocity */
-      pvGet(velocity);
-      jogvelocity = 0.1 * velocity;
-      pvPut(jogvelocity);
-      pvGet(egu);
-      printf("Sequencer: Setting jog and home velocity to %3.2f %s/s\n",jogvelocity, egu);   
       
       if (debug) {
         printf("Sequencer: Debug mode ON\n");
