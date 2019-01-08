@@ -4032,6 +4032,11 @@ static void check_speed_and_resolution(motorRecord * pmr)
         pmr->hvel = pmr->vbas;
     else
         range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
+    /* Make sure that ACCS/ACCU are initialized */
+    if (pmr->accu == motorACCSused_Undef)
+    {
+        updateACCSfromACCL(pmr);
+    }
 }
 
 /*
