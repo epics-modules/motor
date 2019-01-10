@@ -186,7 +186,6 @@ recordtype(motor) {
                 interest(1)
         }
         field(ACCU,DBF_MENU) {
-                initial("Default")
                 prompt("ACCS used")
                 special(SPC_NOMOD)
                 menu(motorACCSused)
