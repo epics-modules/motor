@@ -1941,20 +1941,23 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     too_small = false;
     if ((pmr->mip & MIP_RETRY) == 0)
     {
-        /* Same as (abs(npos - rpos) < 1) */
-        if (absdiff < fabs(pmr->mres))
-            too_small = true;
-        if (!too_small)
-        {
-            double spdb = pmr->spdb;
-            if (spdb > 0) {
-                /* Don't move if new setpoint is within SPDB of DRBV */
-                double drbv = pmr->drbv;
-                double dval = pmr->dval;
-                if (((dval - spdb) < drbv) && ((dval + spdb) > drbv)) {
-                    too_small = true;
-                }
+        double spdb = pmr->spdb;
+        /*
+         * SPDB overrides MRES.
+         * Example: MRES == 1.0 and SPDP == 0.1 checks for 0.1
+         */
+        if (spdb > 0) {
+            /* Don't move if new setpoint is within SPDB of DRBV */
+            double drbv = pmr->drbv;
+            double dval = pmr->dval;
+            if (((dval - spdb) < drbv) && ((dval + spdb) > drbv)) {
+                too_small = true;
             }
+        }
+        else if (absdiff < fabs(pmr->mres))
+        {
+            /* Same as (abs(npos - rpos) < 1) */
+            too_small = true;
         }
     }
     else if (absdiff < fabs(pmr->rdbd))
