@@ -44,7 +44,7 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
     return;
   }
   pC->pAxes_[axisNo] = this;
-  status_.status = 0;
+  memset(&status_, 0, sizeof(status_));
   profilePositions_       = NULL;
   profileReadbacks_       = NULL;
   profileFollowingErrors_ = NULL;
