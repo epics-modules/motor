@@ -364,6 +364,100 @@ void HXPController::postError(HXPAxis *pAxis, int status)
   return;
 }
 
+/** Polls the controller.
+  * This function reads the motor position, the limit status, the home status, the moving status, 
+  * and the drive power-on status. 
+  * It calls setIntegerParam() and setDoubleParam() for each item that it polls,
+  * and then calls callParamCallbacks() at the end.
+  * \param[out] moving A flag that is set indicating that the axis is moving (true) or done (false). */
+asynStatus HXPController::poll()
+{ 
+  int status;
+  //char readResponse[25];
+
+  static const char *functionName = "HXPController::poll";
+
+  status = HXPGroupStatusGet(pollSocket_, 
+                          GROUP, 
+                          &groupStatus_);
+  if (status) {
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s]: error calling GroupStatusGet status=%d; pollSocket=%d\n",
+              driverName, functionName, portName, status, pollSocket_);
+    goto done;
+  }
+
+  asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, 
+            "%s:%s: [%s]: %s groupStatus=%d\n",
+            driverName, functionName, portName, GROUP, groupStatus_);
+  /* Set the status */
+  setIntegerParam(HXPStatus_, groupStatus_);
+
+  /* If the group is not moving then the axis is not moving */
+  if ((groupStatus_ < 43) || (groupStatus_ > 48))
+    moving_ = false;
+  else
+    moving_ = true;
+
+  /* Set the motor done parameter */
+  setIntegerParam(motorStatusDone_, moving_?0:1);
+
+  /*Test for states that mean we cannot move an axis (disabled, uninitialised, etc.) 
+    and set problem bit in MSTA.*/
+  if ((groupStatus_ < 10) || ((groupStatus_ >= 20) && (groupStatus_ <= 42)) ||
+      (groupStatus_ == 50) || (groupStatus_ == 64)) 
+  {
+    /* Don't consider a normal disabled status to be a problem */
+    if ( groupStatus_==20 ) 
+    {
+      setIntegerParam(motorStatusProblem_, 0);             
+    }
+    else 
+    {
+      asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, 
+          "%s:%s: [%s]: in unintialised/disabled/not referenced. XPS State Code: %d\n",
+          driverName, functionName, portName, groupStatus_);
+      setIntegerParam(motorStatusProblem_, 1);
+    }
+    
+    /* Group status indicates power is off */
+    setIntegerParam(motorStatusPowerOn_, 0);
+  }
+  else 
+  {
+    setIntegerParam(motorStatusProblem_, 0);
+    setIntegerParam(motorStatusPowerOn_, 1);
+  }
+
+  status = HXPGroupPositionCurrentGet(pollSocket_,
+                                   GROUP,
+                                   MAX_HXP_AXES,
+                                   encoderPosition_);
+  if (status) {
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s]: error calling GroupPositionCurrentGet status=%d\n",
+              driverName, functionName, portName, status);
+    goto done;
+  }
+
+  status = HXPGroupPositionSetpointGet(pollSocket_,
+                                   GROUP,
+                                   MAX_HXP_AXES,
+                                   setpointPosition_);
+  if (status) {
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR, 
+              "%s:%s: [%s]: error calling GroupPositionSetpointGet status=%d\n",
+              driverName, functionName, portName, status);
+    goto done;
+  }
+
+  done:
+  setIntegerParam(motorStatusProblem_, status ? 1:0);
+  callParamCallbacks();
+  return status ? asynError : asynSuccess;
+}
+
+
 // These are the HXPAxis methods
 
 /** Creates a new HXPAxis object.
@@ -581,84 +675,19 @@ asynStatus HXPAxis::poll(bool *moving)
 
   static const char *functionName = "HXPAxis::poll";
 
-  status = HXPGroupStatusGet(pollSocket_, 
-                          GROUP, 
-                          &axisStatus_);
-  if (status) {
-    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-              "%s:%s: [%s,%d]: error calling GroupStatusGet status=%d; pollSocket=%d\n",
-              driverName, functionName, pC_->portName, axisNo_, status, pollSocket_);
-    goto done;
-  }
-
-  asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-            "%s:%s: [%s,%d]: %s axisStatus=%d\n",
-            driverName, functionName, pC_->portName, axisNo_, positionerName_, axisStatus_);
-  /* Set the status */
-  /* Note: there is only one status PV for the controller. Currently it reflects the status of axis 0.
-           It might be better to call pC_->setIntegerParam(pC_->HXPStatus_, axisStatus_); */
-  setIntegerParam(pC_->HXPStatus_, axisStatus_);
-
   /* If the group is not moving then the axis is not moving */
-  if ((axisStatus_ < 43) || (axisStatus_ > 48))
-    moving_ = false;
-  else
-    moving_ = true;
+  moving_ = pC_->moving_;
 
   /* Set the axis done parameter */
   *moving = moving_;
   setIntegerParam(pC_->motorStatusDone_, *moving?0:1);
 
-  /*Test for states that mean we cannot move an axis (disabled, uninitialised, etc.) 
-    and set problem bit in MSTA.*/
-  if ((axisStatus_ < 10) || ((axisStatus_ >= 20) && (axisStatus_ <= 42)) ||
-      (axisStatus_ == 50) || (axisStatus_ == 64)) 
-  {
-    /* Don't consider a normal disabled status to be a problem */
-    if ( axisStatus_==20 ) 
-    {
-      setIntegerParam(pC_->motorStatusProblem_, 0);             
-    }
-    else 
-    {
-      asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
-          "%s:%s: [%s,%d]: in unintialised/disabled/not referenced. XPS State Code: %d\n",
-          driverName, functionName, pC_->portName, axisNo_, axisStatus_);
-      setIntegerParam(pC_->motorStatusProblem_, 1);
-    }
-    
-    /* Group status indicates power is off */
-    setIntegerParam(pC_->motorStatusPowerOn_, 0);
-  }
-  else 
-  {
-    setIntegerParam(pC_->motorStatusProblem_, 0);
-    setIntegerParam(pC_->motorStatusPowerOn_, 1);
-  }
+  encoderPosition_ = pC_->encoderPosition_[axisNo_];
+  setpointPosition_ = pC_->setpointPosition_[axisNo_];
 
-  status = HXPGroupPositionCurrentGet(pollSocket_,
-                                   positionerName_,
-                                   1,
-                                   &encoderPosition_);
-  if (status) {
-    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-              "%s:%s: [%s,%d]: error calling GroupPositionCurrentGet status=%d\n",
-              driverName, functionName, pC_->portName, axisNo_, status);
-    goto done;
-  }
   //setDoubleParam(pC_->motorEncoderPosition_, (encoderPosition_/stepSize_));
   setDoubleParam(pC_->motorEncoderPosition_, encoderPosition_ / MRES);
 
-  status = HXPGroupPositionSetpointGet(pollSocket_,
-                                   positionerName_,
-                                   1,
-                                   &setpointPosition_);
-  if (status) {
-    asynPrint(pasynUser_, ASYN_TRACE_ERROR, 
-              "%s:%s: [%s,%d]: error calling GroupPositionSetpointGet status=%d\n",
-              driverName, functionName, pC_->portName, axisNo_, status);
-    goto done;
-  }
   //setDoubleParam(pC_->motorPosition_, (setpointPosition_/stepSize_));
   setDoubleParam(pC_->motorPosition_, setpointPosition_ / MRES);
 
@@ -666,10 +695,8 @@ asynStatus HXPAxis::poll(bool *moving)
   
   // dir flag?
 
-  done:
-  setIntegerParam(pC_->motorStatusProblem_, status ? 1:0);
   callParamCallbacks();
-  return status ? asynError : asynSuccess;
+  return asynSuccess;
 }
 
 /** Code for iocsh registration */
