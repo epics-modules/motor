@@ -682,7 +682,14 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
     }
     if (pmr->priv->configRO.motorRDBDDial > 0.0)
         pmr->rdbd = pmr->priv->configRO.motorRDBDDial;
-
+    else
+    {
+        double min_rdbd = fabs(pmr->mres);
+        if (pmr->rdbd < min_rdbd)
+        {
+            pmr->rdbd = min_rdbd;
+        }
+    }
     if (pmr->priv->configRO.motorSPDBDial > 0.0)
         pmr->spdb = pmr->priv->configRO.motorSPDBDial;
     if (!pmr->spdb)
