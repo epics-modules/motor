@@ -89,16 +89,6 @@
   /* Parameters from the controller to the driver and record */
 #define motorHighLimitROString          "MOTOR_HIGH_LIMIT_RO"
 #define motorLowLimitROString           "MOTOR_LOW_LIMIT_RO"
-#define motorDefVelocityROString        "MOTOR_DEF_VELO_RO"
-#define motorMaxVelocityROString        "MOTOR_MAX_VELO_RO"
-#define motorDefJogVeloROString         "MOTOR_DEF_JVEL_RO"
-#define motorDefJogAccROString          "MOTOR_DEF_JACC_RO"
-#define motorDefHomeVeloROString        "MOTOR_DEF_HVEL_RO"
-#define motorSPDBROString               "MOTOR_SPDB_RO"
-#define motorRDBDROString               "MOTOR_RDBD_RO"
-#define motorERESROString               "MOTOR_ERES_RO"
-#define motorSREVROString               "MOTOR_SREV_RO"
-#define motorUREVROString               "MOTOR_UREV_RO"
 
 /* These are the per-controller parameters for profile moves (coordinated motion) */
 #define profileNumAxesString            "PROFILE_NUM_AXES"
@@ -155,16 +145,6 @@
 typedef struct MotorConfigRO {
   double motorHighLimitRaw;   /**< Read only high soft limit from controller */
   double motorLowLimitRaw;    /**< Read only low soft limit from controller */
-  double motorDefVelocityRaw; /**< Default velocity (for movements) */
-  double motorMaxVelocityRaw; /**< Maximum velocity */
-  double motorDefJogVeloRaw;  /**< Default velocity (for jogging) */
-  double motorDefJogAccRaw;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
-  double motorDefHomeVeloRaw; /**< Default velocity (for jogging) */
-  double motorSPDBRaw;        /**< Minimal movement */
-  double motorRDBDRaw;        /**< "At target position" deadband */
-  double motorERESRaw;        /**< ERES as configured in the controller */
-  double motorSREV;           /**< SREV as configured in the controller */
-  double motorUREV;           /**< UREV as configured in the controller */
 } MotorConfigRO;
 
 /** The structure that is passed back to devMotorAsyn when the status changes. */
@@ -373,16 +353,6 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorShowPowerOff_;
   int motorHighLimitRO_;
   int motorLowLimitRO_;
-  int motorDefVelocityRO_;
-  int motorMaxVelocityRO_;
-  int motorDefJogVeloRO_;
-  int motorDefJogAccRO_;
-  int motorDefHomeVeloRO_;
-  int motorSPDBRO_;
-  int motorRDBDRO_;
-  int motorERESRO_;
-  int motorSREVRO_;
-  int motorUREVRO_;
   // These are the per-controller parameters for profile moves
   int profileNumAxes_;
   int profileNumPoints_;

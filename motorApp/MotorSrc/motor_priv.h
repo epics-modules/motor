@@ -24,18 +24,6 @@ extern "C" {
       msta_field msta;
     } lastReadBack;
     struct {
-      epicsFloat64 motorMaxVelocityDial; /**< Maximum velocity */
-      epicsFloat64 motorDefVelocityDial; /**< Default velocity (moveAbs, moveRel) */
-      epicsFloat64 motorDefJogVeloDial;  /**< Default velocity (for jogging) */
-      epicsFloat64 motorDefJogAccDial;   /**< Default accelation (steps/sec2 or motorUnits/sec2) */
-      epicsFloat64 motorDefHomeVeloDial; /**< Default velocity (for homing) */
-      epicsFloat64 motorSPDBDial;        /**< Minimal movement */
-      epicsFloat64 motorRDBDDial;        /**< "At target position" deadband */
-      epicsFloat64 motorERESDial;        /**< ERES as configured in the controller */
-      epicsFloat64 motorSREV;            /**< SREV as configured in the controller */
-      epicsFloat64 motorUREV;            /**< UREV as configured in the controller */
-    } configRO;
-    struct {
       epicsFloat64 motorHighLimitRaw;  /* last from dev support in status */
       epicsFloat64 motorLowLimitRaw;   /* last from dev support in status */
       epicsFloat64 val;               /* last .VAL */

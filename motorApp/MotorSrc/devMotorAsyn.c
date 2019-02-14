@@ -285,46 +285,6 @@ static void re_init_update_soft_limits(struct motorRecord *pmr)
     pmr->priv->last.motorLowLimitRaw = rawLowLimitRO;
 }
 
-static void re_init_update_MinRetryDeadband(struct motorRecord *pmr)
-{
-    motorAsynPvt * pPvt = (motorAsynPvt *) pmr->dpvt;
-    double amres = 1.0;
-    double tmp;
-    /* If the controller does NOT use EGU, we need mres to convert
-       convert between raw from the controller and dial in the record */
-    if (!(pmr->mflg & MF_DRIVER_USES_EGU))
-    {
-        amres = fabs(pmr->mres);
-    }
-
-    tmp = pPvt->status.MotorConfigRO.motorMaxVelocityRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorMaxVelocityDial = amres * tmp;
-    tmp = pPvt->status.MotorConfigRO.motorDefVelocityRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorDefVelocityDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorDefJogVeloRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorDefJogVeloDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorDefJogAccRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorDefJogAccDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorDefHomeVeloRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorDefHomeVeloDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorSPDBRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorSPDBDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorRDBDRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorRDBDDial = amres * tmp;
-
-    tmp = pPvt->status.MotorConfigRO.motorERESRaw;
-    if (tmp > 0.0) pmr->priv->configRO.motorERESDial = amres * tmp;
-    tmp = pPvt->status.MotorConfigRO.motorSREV;
-    if (tmp > 0.0) pmr->priv->configRO.motorSREV = tmp;
-    tmp = pPvt->status.MotorConfigRO.motorUREV;
-    if (tmp) pmr->priv->configRO.motorUREV = tmp;
-}
-
 static asynStatus config_controller(struct motorRecord *pmr, motorAsynPvt *pPvt)
 {
     asynUser *pasynUser;
@@ -531,8 +491,6 @@ static long init_record(struct motorRecord * pmr )
 
     re_init_update_soft_limits(pmr);
 
-    re_init_update_MinRetryDeadband(pmr);
-
     /* Do not need to manually retrieve the new status values, as if they are
      * set, a callback will be generated
      */
@@ -621,7 +579,6 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
             if (!prev_msta.All ||
                 ((msta.Bits.CNTRL_COMM_ERR == 0) &&(prev_msta.Bits.CNTRL_COMM_ERR != 0)))
             {
-                re_init_update_MinRetryDeadband(pmr);
                 rc = CALLBACK_DATA_SOFT_LIMITS;
             }
             pmr->priv->lastReadBack.msta.All = pmr->msta;

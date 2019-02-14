@@ -392,56 +392,6 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
       statusChanged_ = 1;
       status_.MotorConfigRO.motorLowLimitRaw = value;
     }
-  } else if (function == pC_->motorDefVelocityRO_) {
-    if (value != status_.MotorConfigRO.motorDefVelocityRaw) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorDefVelocityRaw = value;
-    }
-  } else if (function == pC_->motorMaxVelocityRO_) {
-    if (value != status_.MotorConfigRO.motorMaxVelocityRaw) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorMaxVelocityRaw = value;
-    }
-  } else if (function == pC_->motorDefJogVeloRO_) {
-    if (value != status_.MotorConfigRO.motorDefJogVeloRaw) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorDefJogVeloRaw = value;
-    }
-  } else if (function == pC_->motorDefJogAccRO_) {
-    if (value != status_.MotorConfigRO.motorDefJogAccRaw) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorDefJogAccRaw = value;
-    }
-  } else if (function == pC_->motorDefHomeVeloRO_) {
-    if (value != status_.MotorConfigRO.motorDefHomeVeloRaw) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorDefHomeVeloRaw = value;
-    }
-  } else if (function == pC_->motorSPDBRO_) {
-    if (value != status_.MotorConfigRO.motorSPDBRaw) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorSPDBRaw = value;
-    }
-  } else if (function == pC_->motorRDBDRO_) {
-    if (value != status_.MotorConfigRO.motorRDBDRaw) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorRDBDRaw = value;
-    }
-  } else if (function == pC_->motorERESRO_) {
-    if (value != status_.MotorConfigRO.motorERESRaw) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorERESRaw = value;
-    }
-  } else if (function == pC_->motorSREVRO_) {
-    if (value != status_.MotorConfigRO.motorSREV) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorSREV = value;
-    }
-  } else if (function == pC_->motorUREVRO_) {
-    if (value != status_.MotorConfigRO.motorUREV) {
-      statusChanged_ = 1;
-      status_.MotorConfigRO.motorUREV = value;
-    }
   }
   // Call the base class method
   return pC_->setDoubleParam(axisNo_, function, value);

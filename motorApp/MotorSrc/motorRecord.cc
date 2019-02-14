@@ -252,7 +252,6 @@ static void monitor(motorRecord *);
 static void process_motor_info(motorRecord *, bool);
 static void load_pos(motorRecord *);
 static void check_resolution(motorRecord *);
-static void check_SREV_UREV_from_controller(motorRecord *);
 static void check_speed(motorRecord *);
 static void set_dial_highlimit(motorRecord *);
 static void set_dial_lowlimit(motorRecord *);
@@ -672,26 +671,6 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
 {
     double old_spdb = pmr->spdb;
     double old_rdbd = pmr->rdbd;
-    if (pmr->priv->configRO.motorERESDial)
-    {
-      if (pmr->priv->configRO.motorERESDial != pmr->eres)
-      {
-        pmr->eres = pmr->priv->configRO.motorERESDial;
-        MARK(M_ERES);
-      }
-    }
-    if (pmr->priv->configRO.motorRDBDDial > 0.0)
-        pmr->rdbd = pmr->priv->configRO.motorRDBDDial;
-    else
-    {
-        double min_rdbd = fabs(pmr->mres);
-        if (pmr->rdbd < min_rdbd)
-        {
-            pmr->rdbd = min_rdbd;
-        }
-    }
-    if (pmr->priv->configRO.motorSPDBDial > 0.0)
-        pmr->spdb = pmr->priv->configRO.motorSPDBDial;
     if (!pmr->spdb)
         pmr->spdb = pmr->rdbd;
     if (!pmr->spdb)
@@ -703,11 +682,11 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
         db_post_events(pmr, &pmr->spdb, DBE_VAL_LOG);
     if (pmr->rdbd != old_rdbd)
         db_post_events(pmr, &pmr->rdbd, DBE_VAL_LOG);
-    Debug(pmr,3, "%s:%d %s enforceMinRetryDeadband "
-          "old_spdb=%f old_rdbd=%f cfg_spdb=%f cfg_rdbd=%f spdb=%f rdbd=%f mres=%f\n",
-          __FILE__, __LINE__, pmr->name,
-          old_spdb, old_rdbd, pmr->priv->configRO.motorSPDBDial,
-          pmr->priv->configRO.motorRDBDDial, pmr->spdb, pmr->rdbd, pmr->mres);
+    if ((pmr->rdbd != old_rdbd) || (pmr->spdb != old_spdb))
+        Debug(pmr,3, "%s:%d %s enforceMinRetryDeadband "
+              "old_spdb=%f old_rdbd=%f spdb=%f rdbd=%f mres=%f\n",
+              __FILE__, __LINE__, pmr->name,
+              old_spdb, old_rdbd, pmr->spdb, pmr->rdbd, pmr->mres);
 }
 
 
@@ -771,7 +750,6 @@ static long init_re_init(motorRecord *pmr)
 {
     Debug(pmr,3, "%s:%d %s init_re_init udf=%d stat=%d nsta=%d\n",
           __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
-    check_SREV_UREV_from_controller(pmr);
     check_speed(pmr);
     enforceMinRetryDeadband(pmr);
     process_motor_info(pmr, true);
@@ -2834,14 +2812,6 @@ static long special(DBADDR *paddr, int after)
 
         /* new vmax: check against controller value and make smax agree */
     case motorRecordVMAX:
-        if (pmr->vmax < 0.0)
-        {
-            pmr->vmax = pmr->priv->configRO.motorMaxVelocityDial;
-            db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
-        }
-
-        range_check(pmr, &pmr->vmax, 0.0, pmr->priv->configRO.motorMaxVelocityDial);
-
         if ((pmr->urev != 0.0) && (pmr->smax != (temp_dbl = pmr->vmax / fabs_urev)))
         {
             pmr->smax = temp_dbl;
@@ -3979,39 +3949,6 @@ static void check_resolution(motorRecord * pmr)
     }
 }
 
-
-static void check_SREV_UREV_from_controller(motorRecord *pmr)
-{
-    long old_srev = pmr->srev;
-    double old_urev = pmr->urev;
-    double old_mres = pmr->mres;
-    if ((pmr->priv->configRO.motorSREV > 0.0) &&
-        pmr->priv->configRO.motorUREV)
-    {
-        pmr->srev = pmr->priv->configRO.motorSREV;
-        pmr->urev = pmr->priv->configRO.motorUREV;
-
-        if (pmr->mres != pmr->urev / pmr->srev)
-            pmr->mres = pmr->urev / pmr->srev;
-
-        if (pmr->srev != old_srev)
-            db_post_events(pmr, &pmr->srev, DBE_VAL_LOG);
-
-        if (pmr->urev != old_urev)
-            db_post_events(pmr, &pmr->urev, DBE_VAL_LOG);
-
-        if (pmr->mres != old_mres)
-            db_post_events(pmr, &pmr->mres, DBE_VAL_LOG);
-    }
-    Debug(pmr,3, "%s:%d %s SREV_UREV_from_controller "
-          "old_srev=%ld old_urev=%f cfg_srev=%f cfg_urev=%f srev=%ld urev=%f mres=%f\n",
-          __FILE__, __LINE__, pmr->name,
-          (long)old_srev, old_urev,
-          pmr->priv->configRO.motorSREV,
-          pmr->priv->configRO.motorUREV,
-          (long)pmr->srev, pmr->urev, pmr->mres);
-}
-
 /*
  * FUNCTION... static void check_resolution(motorRecord *)
  *
@@ -4033,14 +3970,7 @@ static void check_speed(motorRecord * pmr)
     else
         pmr->smax = pmr->vmax = 0.0;
 
-    if (pmr->priv->configRO.motorMaxVelocityDial > 0.0)
-    {
-        if (pmr->vmax == 0.0)
-            pmr->vmax = pmr->priv->configRO.motorMaxVelocityDial;
-        else
-            range_check(pmr, &pmr->vmax, 0.0, pmr->priv->configRO.motorMaxVelocityDial);
-        pmr->smax = pmr->vmax / fabs_urev;
-    }
+    pmr->smax = pmr->vmax / fabs_urev;
     db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->smax, DBE_VAL_LOG);
 
@@ -4057,9 +3987,6 @@ static void check_speed(motorRecord * pmr)
     }
     db_post_events(pmr, &pmr->vbas, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->sbas, DBE_VAL_LOG);
-
-    if (pmr->priv->configRO.motorDefVelocityDial > 0.0)
-        pmr->velo = pmr->priv->configRO.motorDefVelocityDial;
 
     /* S (revolutions/sec) <--> VELO (EGU/sec) */
     if (pmr->s != 0.0)
@@ -4100,10 +4027,7 @@ static void check_speed(motorRecord * pmr)
     /* Sanity check on acceleration time. */
     if (pmr->accl == 0.0)
     {
-        if (pmr->priv->configRO.motorDefJogAccDial > 0.0 && pmr->velo > 0.0)
-            pmr->accl = pmr->velo / pmr->priv->configRO.motorDefJogAccDial;
-        else
-            pmr->accl = 0.1;
+        pmr->accl = 0.1;
         db_post_events(pmr, &pmr->accl, DBE_VAL_LOG);
     }
     if (pmr->bacc == 0.0)
@@ -4114,27 +4038,18 @@ static void check_speed(motorRecord * pmr)
     /* Sanity check on jog velocity and acceleration rate. */
     if (pmr->jvel == 0.0)
     {
-        if (pmr->priv->configRO.motorDefJogVeloDial > 0.0)
-            pmr->jvel = pmr->priv->configRO.motorDefJogVeloDial;
-        else
-            pmr->jvel = pmr->velo;
+        pmr->jvel = pmr->velo;
     }
     else
         range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
 
     if (pmr->jar == 0.0)
     {
-        if (pmr->priv->configRO.motorDefJogAccDial > 0.0)
-            pmr->jar = pmr->priv->configRO.motorDefJogAccDial;
-        else
-            pmr->jar = pmr->velo / pmr->accl;
+        pmr->jar = pmr->velo / pmr->accl;
     }
 
-    /* Take HVEL from controller, if avaliable */
-    if (pmr->priv->configRO.motorDefHomeVeloDial > 0.0)
-        pmr->hvel = pmr->priv->configRO.motorDefHomeVeloDial;
     /* Sanity check on home velocity. */
-    else if (pmr->hvel == 0.0)
+    if (pmr->hvel == 0.0)
         pmr->hvel = pmr->vbas;
     else
         range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
