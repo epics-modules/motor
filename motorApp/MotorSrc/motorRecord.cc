@@ -1635,7 +1635,7 @@ static long process(dbCommon *arg)
                     {
                         char dbuf[MBLE];
                         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-                        Debug(pmr,1, "%s:%d %s (stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
+                        Debug(pmr,8, "%s:%d %s (stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
                               __FILE__, __LINE__, pmr->name, pmr->pp, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
                     }
 #endif
