@@ -30,7 +30,7 @@
   </auto_scale_widgets>
   <actions hook="false" hook_all="false" />
   <y>25</y>
-  <x>301</x>
+  <x>126</x>
   <widget typeId="org.csstudio.opibuilder.widgets.groupingContainer" version="1.0">
     <macros>
       <include_parent_macros>true</include_parent_macros>
