@@ -974,7 +974,7 @@ static void maybeRetry(motorRecord * pmr)
     /* Commanded direction in user coordinates. */
     user_cdir = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->cdir : !pmr->cdir;
 
-    if ((fabs(pmr->diff) >= pmr->rdbd) && !(pmr->hls && user_cdir) && !(pmr->lls && !user_cdir))
+    if ((fabs(pmr->diff) > pmr->rdbd) && !(pmr->hls && user_cdir) && !(pmr->lls && !user_cdir))
     {
         /* No, we're not close enough.  Try again. */
         Debug(1, "maybeRetry: not close enough; diff = %f\n", pmr->diff);
