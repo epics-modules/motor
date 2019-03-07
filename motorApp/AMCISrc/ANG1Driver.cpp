@@ -71,7 +71,6 @@ ANG1Controller::ANG1Controller(const char *portName, const char *ANG1InPortName,
 {
   int axis, i;
   asynStatus status;
-  ANG1Axis *pAxis;
   static const char *functionName = "ANG1Controller::ANG1Controller";
   
   inputDriver_ = epicsStrDup(ANG1InPortName);    // Set this before calls to create Axis objects
@@ -92,7 +91,7 @@ ANG1Controller::ANG1Controller(const char *portName, const char *ANG1InPortName,
       functionName);
   }
   for (axis=0; axis<numAxes; axis++) {
-    pAxis = new ANG1Axis(this, axis);
+    new ANG1Axis(this, axis);
   }
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
@@ -111,9 +110,7 @@ ANG1Controller::ANG1Controller(const char *portName, const char *ANG1InPortName,
 extern "C" int ANG1CreateController(const char *portName, const char *ANG1InPortName, const char *ANG1OutPortName, int numAxes, 
                                    int movingPollPeriod, int idlePollPeriod)
 {
-  ANG1Controller *pANG1Controller
-    = new ANG1Controller(portName, ANG1InPortName, ANG1OutPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
-  pANG1Controller = NULL;
+  new ANG1Controller(portName, ANG1InPortName, ANG1OutPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   return(asynSuccess);
 }
 
@@ -355,14 +352,15 @@ asynStatus ANG1Axis::sendAccelAndVelocity(double acceleration, double velocity)
 asynStatus ANG1Axis::move(double position, int relative, double minVelocity, double maxVelocity, double acceleration)
 {
   asynStatus status;
-  int velo, distance, move_bit;
+  //int velo;
+  int distance, move_bit;
   
   printf(" ** ANG1Axis::move called, relative = %d\n", relative);
 
   status = sendAccelAndVelocity(acceleration, maxVelocity);
   
   //velo = maxVelocity * SOME_SCALE_FACTOR
-  velo = NINT(maxVelocity);
+  //velo = NINT(maxVelocity);
   if (relative) {
     printf(" ** relative move called\n");
     //status = pC_->writeReg32(SPD_UPR, velo, DEFAULT_CONTROLLER_TIMEOUT);

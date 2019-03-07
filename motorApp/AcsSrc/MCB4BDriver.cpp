@@ -41,7 +41,6 @@ MCB4BController::MCB4BController(const char *portName, const char *MCB4BPortName
 {
   int axis;
   asynStatus status;
-  MCB4BAxis *pAxis;
   static const char *functionName = "MCB4BController::MCB4BController";
 
   /* Connect to MCB4B controller */
@@ -52,7 +51,7 @@ MCB4BController::MCB4BController(const char *portName, const char *MCB4BPortName
       functionName);
   }
   for (axis=0; axis<numAxes; axis++) {
-    pAxis = new MCB4BAxis(this, axis);
+    new MCB4BAxis(this, axis);
   }
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
@@ -70,9 +69,7 @@ MCB4BController::MCB4BController(const char *portName, const char *MCB4BPortName
 extern "C" int MCB4BCreateController(const char *portName, const char *MCB4BPortName, int numAxes, 
                                    int movingPollPeriod, int idlePollPeriod)
 {
-  MCB4BController *pMCB4BController
-    = new MCB4BController(portName, MCB4BPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
-  pMCB4BController = NULL;
+  new MCB4BController(portName, MCB4BPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   return(asynSuccess);
 }
 

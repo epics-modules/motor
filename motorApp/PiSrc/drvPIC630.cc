@@ -63,7 +63,7 @@ volatile int PIC630_current[9];  /* current settings per axis */
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static void start_status(int);
 static int set_status(int, int);
 static long report(int);
@@ -172,7 +172,6 @@ static void start_status(int card)
 
 static int set_status(int card, int signal)
 {
-    struct PIC630Controller *cntrl;
     struct mess_node *nodeptr;
     register struct mess_info *motor_info;
     char command[BUFF_SIZE];
@@ -184,7 +183,6 @@ static int set_status(int card, int signal)
     bool plusdir, ls_active = false;
     msta_field status;
 
-    cntrl = (struct PIC630Controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
     status.All = motor_info->status.All;
@@ -287,11 +285,10 @@ static int set_status(int card, int signal)
 /* send a message to the PIC630 board                 */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, const char *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char buff[BUFF_SIZE];
     char inp_buff[BUFF_SIZE];
-    int status = 0;
     size_t nwrite;
     struct PIC630Controller *cntrl;
 
@@ -311,7 +308,7 @@ static RTN_STATUS send_mess(int card, const char *com, char *name)
 	pasynOctetSyncIO->write(cntrl->pasynUser, buff, strlen(buff), COMM_TIMEOUT, &nwrite);
 
     /* This thing always echos everything sent to it. Read this response. */
-    status = recv_mess(card, inp_buff, WAIT); 
+    recv_mess(card, inp_buff, WAIT); 
 
     return (OK);
 }
@@ -328,7 +325,6 @@ static int recv_mess(int card, char *com, int flag)
     int eomReason;
     int flush;
     struct PIC630Controller *cntrl;
-    asynStatus status;
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -350,8 +346,8 @@ static int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = COMM_TIMEOUT;
     }
-	if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
-    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
+    if (flush) pasynOctetSyncIO->flush(cntrl->pasynUser);
+    pasynOctetSyncIO->read(cntrl->pasynUser, com, MAX_MSG_SIZE,
                                     timeout, &nread, &eomReason);
 
     if (nread < 1) com[0] = '\0';
@@ -407,7 +403,7 @@ PIC630Setup(int num_cards,      /* maximum number of "controllers" in system */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < PIC630_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
     return (OK);
 }
 
@@ -479,7 +475,7 @@ static int motor_init()
         if (!motor_state[card_index])
             continue;
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
+        brdptr->ident[0] = 0;	/* No controller identification message. */
         /* device echos? then set to true. else false */
         brdptr->cmnd_response = false;
         total_cards = card_index + 1;
@@ -524,7 +520,7 @@ static int motor_init()
 
         if (success_rtn == asynSuccess && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             /* how did this get here? brdptr->cmnd_response = true; */
 
@@ -554,15 +550,15 @@ static int motor_init()
 
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     Debug(3, "motor_init: spawning motor task\n");
 

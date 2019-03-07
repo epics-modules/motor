@@ -100,9 +100,9 @@ volatile double drvEMC18011ReadbackDelay = 0.;
 /*----------------functions-----------------*/
 static int recv_mess(int card, char *com, int flag);
 static int recv_mess(int card, char *com, int flag, int recv_len);
-static RTN_STATUS send_mess(int card, char const *, char *name);
-static int send_recv_mess(int card, char const *send_com, char *recv_com);
-static int send_recv_mess(int card, char const *send_com, char *recv_com, 
+static RTN_STATUS send_mess(int card, const char *, const char *name);
+static int send_recv_mess(int card, const char *send_com, char *recv_com);
+static int send_recv_mess(int card, const char *send_com, char *recv_com, 
 			  int recv_len);
 static int set_status(int card, int signal);
 static long report(int level);
@@ -226,7 +226,6 @@ static int set_status(int card, int signal)
   int rtn_state;
   int recvCnt;
   int motorData;
-  int motor;
   double datad;
   bool recvRetry;
   bool plusdir, ls_active = false;
@@ -235,8 +234,6 @@ static int set_status(int card, int signal)
   cntrl = (struct EMC18011Controller *) motor_state[card]->DevicePrivate;
   motor_info = &(motor_state[card]->motor_info[signal]);
   status.All = motor_info->status.All;
-  motor = signal+1;
-
 
   recvRetry = true;
 
@@ -381,7 +378,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
         strncpy(send_buff, nodeptr->postmsgptr, 80);
-	send_mess(card, send_buff, (char*) NULL);
+	send_mess(card, send_buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -395,19 +392,18 @@ exit:
 /* send_receive a message to the EMC18011 board	     */
 /* send_recv_mess()		                     */
 /*****************************************************/
-static int send_recv_mess(int card, char const *send_com, char *recv_com)
+static int send_recv_mess(int card, const char *send_com, char *recv_com)
 {
   return(send_recv_mess(card, send_com, recv_com, 0));
 }
 
-static int send_recv_mess(int card, char const *send_com, char *recv_com,
+static int send_recv_mess(int card, const char *send_com, char *recv_com,
 			  int recv_len)
 {
     struct EMC18011Controller *cntrl;
     int sendLen, recvLen;
     size_t nwrite;
     size_t nread = 0;
-    double timeout = 0.;
     asynStatus status;
     int eomReason;
 
@@ -435,7 +431,6 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com,
 
     cntrl = (struct EMC18011Controller *) motor_state[card]->DevicePrivate;
 
-    timeout = TIMEOUT;
     /* flush any junk at input port - should not be any data available */
     // pasynOctetSyncIO->flush(cntrl->pasynUser); 
 
@@ -459,7 +454,7 @@ static int send_recv_mess(int card, char const *send_com, char *recv_com,
 /* send a message to the EMC18011 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct EMC18011Controller *cntrl;
     int size;
@@ -591,7 +586,7 @@ EMC18011Setup(int num_cards,	/* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < EMC18011_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -691,7 +686,7 @@ static int motor_init()
 	    strcpy(brdptr->ident, "Oriel Encoder Mike 18011");  /* Save Controller ID  */
 
 
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
 	    /* Make sure that motion is stopped - cannot change motor selection */
@@ -731,16 +726,16 @@ static int motor_init()
 	    }
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     // epicsThreadCreate((char *) "EMC18011_motor", 64, 5000, (EPICSTHREADFUNC) motor_task, (void *) &targs);
     epicsThreadCreate((char *) "EMC18011_motor", 

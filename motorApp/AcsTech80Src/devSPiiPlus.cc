@@ -148,12 +148,12 @@ STATIC RTN_STATUS SPiiPlus_build_trans(motor_cmnd command, double *parms, struct
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct mess_info *motor_info;
+//    struct mess_info *motor_info;
     struct SPiiPlusController *cntrl;
     char buff[110];
     int axis, card;
     int intval;
-    double dval;
+//    double dval;
     unsigned int size;
     RTN_STATUS rtnval;
 
@@ -162,7 +162,7 @@ STATIC RTN_STATUS SPiiPlus_build_trans(motor_cmnd command, double *parms, struct
 
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     intval = (parms == NULL) ? 0 : NINT(parms[0]);
-    dval = (parms == NULL) ? 0 : *parms;
+//    dval = (parms == NULL) ? 0 : *parms;
 
     motor_call = &(trans->motor_call);
     card = motor_call->card;
@@ -324,7 +324,7 @@ STATIC RTN_STATUS SPiiPlus_build_trans(motor_cmnd command, double *parms, struct
 	    break;
 	
 	case SET_HIGH_LIMIT:
-	    motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
+	    // motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
 	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
 
 	    // if (intval > motor_info->high_limit)
@@ -335,7 +335,7 @@ STATIC RTN_STATUS SPiiPlus_build_trans(motor_cmnd command, double *parms, struct
 	    break;
 	
 	case SET_LOW_LIMIT:
-	    motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
+	    // motor_info = &(*trans->tabptr->card_array)[card]->motor_info[axis];
 	    trans->state = IDLE_STATE;	/* No command sent to the controller. */
 
 	    // if (intval < motor_info->low_limit)

@@ -166,7 +166,7 @@ void SendAndReceive(int socketID, char sSendString[], char sReturnString[], int 
 				FD_SET(m_sConnectSocket[socketID].m_hSocket, &readFds);
 				cTimeout.tv_sec = (long)dTimeout;
 				cTimeout.tv_usec = (long)((dTimeout - (long)dTimeout) * 1e6);
-				iSelectStatus = select(FD_SETSIZE, (fd_set *)&readFds, (fd_set *) NULL, (fd_set *) NULL, &cTimeout);
+				iSelectStatus = select(FD_SETSIZE, (fd_set *)&readFds, NULL, NULL, &cTimeout);
 				if ((iSelectStatus > 0) && (FD_ISSET(m_sConnectSocket[socketID].m_hSocket, &readFds)))
 					iReceiveByteNumber = m_sConnectSocket[socketID].Receive(sSocketBuffer,SMALL_BUFFER_SIZE);
 				else

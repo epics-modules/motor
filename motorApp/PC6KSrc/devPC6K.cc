@@ -148,12 +148,13 @@ STATIC RTN_STATUS PC6K_build_trans(motor_cmnd command, double *parms, struct mot
     struct mess_node *motor_call;
     struct controller *brdptr;
     struct mess_info *motor_info;
-    struct PC6KController *cntrl;
+//    struct PC6KController *cntrl;
     char buff[110];
     int signal, axis, card, intval;
-    int maxdigits;
+//    int maxdigits;
     int cmndArg;
-    double dval, cntrl_units;
+    double dval;
+//    double cntrl_units;
     unsigned int size;
     bool sendMsg;
     RTN_STATUS rtnval;
@@ -179,10 +180,10 @@ STATIC RTN_STATUS PC6K_build_trans(motor_cmnd command, double *parms, struct mot
       if (brdptr == NULL)
 	return(rtnval = ERROR);
 
-    cntrl = (struct PC6KController *) brdptr->DevicePrivate;
+//    cntrl = (struct PC6KController *) brdptr->DevicePrivate;
     /* 6K Controllers expect Velocity and Acceleration settings in Revs/sec/sec */
-    cntrl_units = dval * cntrl->drive_resolution[signal]; 
-    maxdigits = cntrl->res_decpts[signal];
+//    cntrl_units = dval * cntrl->drive_resolution[signal]; 
+//    maxdigits = cntrl->res_decpts[signal];
 
     
     if (PC6K_table[command] > motor_call->type)

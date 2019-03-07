@@ -147,14 +147,12 @@ STATIC RTN_STATUS MCDC2805_build_trans(motor_cmnd command, double *parms, struct
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct MCDC2805controller *cntrl;
     char buff[110];
-    int axis, card, intval;
+    int card, intval;
     int rpm;
     unsigned int size;
     RTN_STATUS rtnval;
     bool send;
-    msta_field msta;
 
     send = true;		/* Default to send motor command. */
     rtnval = OK;
@@ -163,18 +161,13 @@ STATIC RTN_STATUS MCDC2805_build_trans(motor_cmnd command, double *parms, struct
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     intval = (parms == NULL) ? 0 : NINT(parms[0]);
 
-    msta.All = mr->msta;
-
     motor_start_trans_com(mr, MCDC2805_cards);
     
     motor_call = &(trans->motor_call);
     card = motor_call->card;
-    axis = motor_call->signal + 1;
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
 	return(rtnval = ERROR);
-
-    cntrl = (struct MCDC2805controller *) brdptr->DevicePrivate;
     
     if (MCDC2805_table[command] > motor_call->type)
 	motor_call->type = MCDC2805_table[command];

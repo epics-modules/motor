@@ -364,7 +364,6 @@ static int motorAxisSetDouble(AXIS_HDL pAxis, motorAxisParam_t function, double 
 static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int value)
 {
     int ret_status = MOTOR_AXIS_ERROR;
-    int status;
     char buff[20];
 
     if (pAxis == NULL)
@@ -387,7 +386,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
         break;
     }
     if (ret_status != MOTOR_AXIS_ERROR)
-        status = motorParam->setInteger(pAxis->params, function, value);
+        motorParam->setInteger(pAxis->params, function, value);
     return(ret_status);
 }
 
@@ -899,7 +898,6 @@ static asynStatus getFreq(ANC150Controller *pController, int axis)
         
 static bool stpMode(ANC150Controller *pController, int axis)
 {
-    asynStatus status;
     char inputBuff[BUFFER_SIZE];
     char outputBuff[BUFFER_SIZE];
     size_t nRead;
@@ -907,7 +905,7 @@ static bool stpMode(ANC150Controller *pController, int axis)
     bool rtnstatus;
 
     sprintf(outputBuff, "getm %d", axis + 1);
-    status = sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
+    sendAndReceive(pController, outputBuff, inputBuff, sizeof(inputBuff));
 
     if (strncmp(inputBuff, "mode = stp", 11) == 0)
         rtnstatus = true;
@@ -916,7 +914,7 @@ static bool stpMode(ANC150Controller *pController, int axis)
     else if (strncmp(inputBuff, "Axis not in computer control mode", 34) == 0)
     {
         /* Eat the ERROR msg. */
-        status = pasynOctetSyncIO->read(pController->pasynUser, inputBuff,
+        pasynOctetSyncIO->read(pController->pasynUser, inputBuff,
                                         sizeof(inputBuff), TIMEOUT, &nRead, &eomReason);
         rtnstatus = false;
     }

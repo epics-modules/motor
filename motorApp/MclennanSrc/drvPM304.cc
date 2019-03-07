@@ -91,7 +91,7 @@ int PM304_num_cards = 0;
 
 /*----------------functions-----------------*/
 STATIC int recv_mess(int card, char *buff, int len);
-STATIC RTN_STATUS send_mess(int, const char *, char *);
+STATIC RTN_STATUS send_mess(int, const char *, const char *);
 STATIC int send_recv_mess(int card, const char *out, char *in);
 STATIC void start_status(int card);
 STATIC int set_status(int card, int signal);
@@ -333,7 +333,7 @@ STATIC int set_status(int card, int signal)
     {
         strcpy(buff, nodeptr->postmsgptr);
         strcat(buff, "\r");
-        send_mess(card, buff, (char*) NULL);
+        send_mess(card, buff, NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -354,7 +354,7 @@ STATIC int set_status(int card, int signal)
 /* ring buffer                                       */
 /* send_mess()                                       */
 /*****************************************************/
-STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
+STATIC RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char *p, *tok_save;
     char response[BUFF_SIZE];
@@ -404,7 +404,6 @@ STATIC int recv_mess(int card, char *com, int flag)
     char *pos;
     char temp[BUFF_SIZE];
     int flush;
-    asynStatus status;
     size_t nread=0;
     int eomReason;
     struct PM304controller *cntrl;
@@ -426,8 +425,8 @@ STATIC int recv_mess(int card, char *com, int flag)
         flush = 0;
         timeout = TIMEOUT;
     }
-    if (flush) status = pasynOctetSyncIO->flush(cntrl->pasynUser);
-    status = pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
+    if (flush) pasynOctetSyncIO->flush(cntrl->pasynUser);
+    pasynOctetSyncIO->read(cntrl->pasynUser, com, BUFF_SIZE,
                                     timeout, &nread, &eomReason);
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
@@ -472,7 +471,6 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     char *p, *tok_save;
     struct PM304controller *cntrl;
     char *pos;
-    asynStatus status;
     size_t nwrite=0, nread=0;
     int eomReason;
     char temp[BUFF_SIZE];
@@ -496,7 +494,7 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
                 ((p != NULL) && (strlen(p) != 0));
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, p);
-    status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
+        pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
                          response, BUFF_SIZE, TIMEOUT,
                          &nwrite, &nread, &eomReason);
     }
@@ -556,7 +554,7 @@ PM304Setup(int num_cards,       /* maximum number of controllers in system */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < PM304_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
     return(OK);
 }
 
@@ -650,7 +648,7 @@ STATIC int motor_init()
 
         if (success_rtn == true && strlen(buff) > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             /* Leave bdptr->cmnd_response false because we read each response */
             /* in send_mess and send_recv_mess. */
@@ -702,18 +700,18 @@ STATIC int motor_init()
 
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
     Debug(3, "motor_init: spawning motor task\n");
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "tPM304", epicsThreadPriorityMedium,
               epicsThreadGetStackSize(epicsThreadStackMedium),

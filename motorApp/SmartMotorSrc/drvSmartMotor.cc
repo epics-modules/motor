@@ -74,7 +74,7 @@ static inline void Debug(int level, const char *format, ...) {
 /* --- Local data. --- */
 int SmartMotor_num_cards = 0;
 
-static char *SmartMotor_addr[] = {"129", "130", "131", "132", "133", "134",
+static const char *SmartMotor_addr[] = {"129", "130", "131", "132", "133", "134",
     "135", "136", "137", "138", "139", "140",
     "141", "142", "143", "144", "145", "146",
     "147", "148", "149", "150", "151", "152",
@@ -86,7 +86,7 @@ static char *SmartMotor_addr[] = {"129", "130", "131", "132", "133", "134",
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -395,7 +395,7 @@ exit:
 /* send_mess()                                      */
 /****************************************************/
 
-static RTN_STATUS send_mess(int card, char const * com, char *name)
+static RTN_STATUS send_mess(int card, const char * com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     char echo_buff[BUFF_SIZE];
@@ -528,7 +528,7 @@ RTN_STATUS SmartMotorSetup(int num_cards, int scan_rate)    /* maximum number of
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < SmartMotor_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -583,7 +583,7 @@ static int motor_init()
             continue;
 
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL; /* No controller identification message. */
+        brdptr->ident[0] = 0; /* No controller identification message. */
         brdptr->total_axis = 0;         /* Default to zero motors. */
         brdptr->cmnd_response = false;
         total_cards = card_index + 1;
@@ -639,7 +639,7 @@ static int motor_init()
         if (success_rtn == asynSuccess && total_motors > 0)
         {
             cntrl->num_motors = brdptr->total_axis = total_motors;
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
 
             for (motor_index = 0; motor_index < brdptr->total_axis; motor_index++)
@@ -661,15 +661,15 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "SmartMotor_motor", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),

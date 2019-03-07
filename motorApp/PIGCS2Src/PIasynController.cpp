@@ -501,9 +501,7 @@ asynStatus PIasynController::poll()
 /** Configuration command, called directly or from iocsh */
 extern "C" int PI_GCS2_CreateController(const char *portName, const char* asynPort, int numAxes, int priority, int stackSize, int movingPollingRate, int idlePollingRate)
 {
-    PIasynController *pasynController
-        = new PIasynController(portName, asynPort, numAxes, priority, stackSize, movingPollingRate, idlePollingRate);
-    pasynController = NULL;
+    new PIasynController(portName, asynPort, numAxes, priority, stackSize, movingPollingRate, idlePollingRate);
     return(asynSuccess);
 }
 

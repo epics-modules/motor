@@ -69,9 +69,7 @@ MVP2001Controller::MVP2001Controller(const char *portName, const char *MVP2001Po
 extern "C" int MVP2001CreateController(const char *portName, const char *MVP2001PortName, int numAxes, 
                                    int movingPollPeriod, int idlePollPeriod)
 {
-  MVP2001Controller *pMVP2001Controller
-    = new MVP2001Controller(portName, MVP2001PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
-  pMVP2001Controller = NULL;
+  new MVP2001Controller(portName, MVP2001PortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   return(asynSuccess);
 }
 

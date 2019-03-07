@@ -58,7 +58,7 @@ int PIC663_num_cards = 0;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -189,32 +189,26 @@ static int set_status(int card, int signal)
     struct PIC663controller *cntrl;
     struct mess_node *nodeptr;
     struct mess_info *motor_info;
-    struct motorRecord *mr;
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     C663_Status_Reg1 mstat1;
     C663_Status_Reg2 mstat2;
-    C663_Status_Reg3 mstat3;
     epicsUInt16 dev_sts1, dev_sts2, dev_sts3;
     
     int rtn_state, convert_cnt, charcnt;
     epicsInt32 motorData;
-    bool plusdir, ls_active = false, plusLS, minusLS, LSactiveH;
+    bool plusdir, ls_active = false, plusLS, minusLS;
     msta_field status;
 
     cntrl = (struct PIC663controller *) motor_state[card]->DevicePrivate;
     motor_info = &(motor_state[card]->motor_info[signal]);
     nodeptr = motor_info->motor_motion;
-    if (nodeptr != NULL)
-	mr = (struct motorRecord *) nodeptr->mrecord;
-    else
-	mr = NULL;
     status.All = motor_info->status.All;
 
     if (cntrl->status != NORMAL)
 	charcnt = recv_mess(card, buff, FLUSH);
 
-    send_mess(card, "TS", (char*) NULL);		/*  Tell Status */
+    send_mess(card, "TS", NULL);		/*  Tell Status */
     charcnt = recv_mess(card, buff, 1);
     if (charcnt > 9)
 	convert_cnt = sscanf(buff, "S:%2hx %2hx %2hx\n", 
@@ -245,7 +239,6 @@ static int set_status(int card, int signal)
 
     mstat1.All = dev_sts1;
     mstat2.All = dev_sts2;
-    mstat3.All = dev_sts3;
    
     status.Bits.RA_DONE = (mstat1.Bits.on_target) ? 1 : 0;
     status.Bits.EA_POSITION = (mstat1.Bits.drv_cur_act) ? 0 : 1;
@@ -255,7 +248,7 @@ static int set_status(int card, int signal)
     minusLS = mstat2.Bits.lo_limit ? 0 : 1;
 
    /* Parse motor position */
-    send_mess(card, "TP", (char*) NULL);  /*  Tell Position */
+    send_mess(card, "TP", NULL);  /*  Tell Position */
     recv_mess(card, buff, 1);
     motorData = NINT(atof(&buff[2]));
      
@@ -309,7 +302,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char*) NULL);
+	send_mess(card, buff, NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -323,7 +316,7 @@ exit:
 /* send a message to the PIC663 board		     */
 /* send_mess()			                     */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct PIC663controller *cntrl;
@@ -347,7 +340,7 @@ static RTN_STATUS send_mess(int card, char const *com, char *name)
 	return(ERROR);
     }
 
-    local_buff[0] = (char) NULL;    /* Terminate local buffer. */
+    local_buff[0] = 0;    /* Terminate local buffer. */
 
     /*  this device deos not have axis info and so name is ignored!  */
 
@@ -429,7 +422,7 @@ PIC663Setup(int num_cards,  /* maximum number of controllers in system.  */
 						sizeof(struct controller *));
 
     for (itera = 0; itera < PIC663_num_cards; itera++)
-	motor_state[itera] = (struct controller *) NULL;
+	motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -488,7 +481,7 @@ static int motor_init()
 	    continue;
 
 	brdptr = motor_state[card_index];
-	brdptr->ident[0] = (char) NULL;	/* No controller identification message. */
+	brdptr->ident[0] = 0;	/* No controller identification message. */
 	brdptr->cmnd_response = false;
 	total_cards = card_index + 1;
 	cntrl = (struct PIC663controller *) brdptr->DevicePrivate;
@@ -521,7 +514,7 @@ static int motor_init()
 	    do
 	    {
                 sprintf(buff,"\001%1XVE", cntrl->asyn_address);
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
 		status = recv_mess(card_index, buff, 1);
 		retry++;
 	    } while (status == 0 && retry < 3);
@@ -530,7 +523,7 @@ static int motor_init()
 	if (success_rtn == asynSuccess && status > 0)
 	{
 	    strcpy(brdptr->ident, &buff[0]);
-	    brdptr->localaddr = (char *) NULL;
+	    brdptr->localaddr = NULL;
 	    brdptr->motor_in_motion = 0;
 
             /* number of axes is always one.*/
@@ -554,16 +547,16 @@ static int motor_init()
 		set_status(card_index, motor_index);  /* Read status of each motor */
 	}
 	else
-	    motor_state[card_index] = (struct controller *) NULL;
+	    motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "PIC663_motor", epicsThreadPriorityMedium,
 		      epicsThreadGetStackSize(epicsThreadStackMedium),

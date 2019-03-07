@@ -155,7 +155,6 @@ static RTN_STATUS SC800_build_trans(motor_cmnd command, double *parms, struct mo
     struct SC800Controller *cntrl;
     char buff[110], polarity, *pbuff;
     int signal, card, intval, axis;
-    double dval, cntrl_units;
     unsigned int size;
     RTN_STATUS rtnval;
     bool send;
@@ -167,7 +166,6 @@ static RTN_STATUS SC800_build_trans(motor_cmnd command, double *parms, struct mo
 
     /* Protect against NULL pointer with WRTITE_MSG(GO/STOP_AXIS/GET_INFO, NULL). */
     intval = (parms == NULL) ? 0 : NINT(parms[0]);
-    dval = (parms == NULL) ? 0 : *parms;
 
     motor_start_trans_com(mr, SC800_cards);
 
@@ -181,8 +179,6 @@ static RTN_STATUS SC800_build_trans(motor_cmnd command, double *parms, struct mo
         return(rtnval = ERROR);
 
     cntrl = (struct SC800Controller *) brdptr->DevicePrivate;
-    cntrl_units = dval;
-
 
     if (SC800_table[command] > motor_call->type)
         motor_call->type = SC800_table[command];

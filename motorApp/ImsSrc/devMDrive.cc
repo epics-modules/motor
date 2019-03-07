@@ -154,9 +154,8 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
     struct motor_trans *trans = (struct motor_trans *) mr->dpvt;
     struct mess_node *motor_call;
     struct controller *brdptr;
-    struct IM483controller *cntrl;
     char buff[110];
-    int axis, card, intval;
+    int card, intval;
     unsigned int size;
     RTN_STATUS rtnval;
     bool send;
@@ -175,12 +174,9 @@ STATIC RTN_STATUS MDrive_build_trans(motor_cmnd command, double *parms, struct m
     
     motor_call = &(trans->motor_call);
     card = motor_call->card;
-    axis = motor_call->signal + 1;
     brdptr = (*trans->tabptr->card_array)[card];
     if (brdptr == NULL)
 	return(rtnval = ERROR);
-
-    cntrl = (struct IM483controller *) brdptr->DevicePrivate;
     
     if (MDrive_table[command] > motor_call->type)
 	motor_call->type = MDrive_table[command];

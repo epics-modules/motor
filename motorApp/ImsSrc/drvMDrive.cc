@@ -104,14 +104,14 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int MDrive_num_cards = 0;
-static const char* const MDrive_axis[] = {"1", "2", "3", "4", "5", "6", "7", "8"};
+static const char* MDrive_axis[] = {"1", "2", "3", "4", "5", "6", "7", "8"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include    "motordrvComCode.h"
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, const char *const);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -135,13 +135,13 @@ struct driver_table MDrive_access =
     &motor_state,
     &total_cards,
     &any_motor_in_motion,
-    (RTN_STATUS (*)(int, const char*, char*)) send_mess,
+    send_mess,
     recv_mess,
     set_status,
     query_done,
     NULL,
     &initialized,
-    (char **) MDrive_axis
+    MDrive_axis
 };
 
 struct drvMDrive_drvet
@@ -415,7 +415,7 @@ exit:
 /* send a message to the MDrive board                */
 /* send_mess()                                       */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, const char *const name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct IM483controller *cntrl;
@@ -524,7 +524,7 @@ MDriveSetup(int num_cards,  /* maximum number of chains in system.  */
                    malloc(MDrive_num_cards * sizeof(struct controller *));
 
     for (itera = 0; itera < MDrive_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -582,7 +582,7 @@ static int motor_init()
             continue;
 
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL; /* No controller ID message. */
+        brdptr->ident[0] = 0; /* No controller ID message. */
         brdptr->cmnd_response = false;
         total_cards = card_index + 1;
         cntrl = (struct IM483controller *) brdptr->DevicePrivate;
@@ -627,7 +627,7 @@ static int motor_init()
         {
             input_config *confptr = cntrl->inconfig;
 
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
 
             for (motor_index = 0; motor_index < total_axis; motor_index++)
@@ -726,16 +726,16 @@ static int motor_init()
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "MDrive_motor", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),

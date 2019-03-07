@@ -49,7 +49,6 @@ SMC100Controller::SMC100Controller(const char *portName, const char *SMC100PortN
 {
   int axis;
   asynStatus status;
-  SMC100Axis *pAxis;
   static const char *functionName = "SMC100Controller::SMC100Controller";
   
   /* Connect to SMC100 controller */
@@ -61,7 +60,7 @@ SMC100Controller::SMC100Controller(const char *portName, const char *SMC100PortN
   }
   for (axis=0; axis<numAxes; axis++) {
   //for (axis=1; axis < (numAxes + 1); axis++) {
-    pAxis = new SMC100Axis(this, axis, stepSize);
+    new SMC100Axis(this, axis, stepSize);
   }
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);

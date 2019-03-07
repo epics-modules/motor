@@ -73,14 +73,14 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* --- Local data. --- */
 int MCDC2805_num_cards = 0;
-static char *MCDC2805_axis[] = {"0", "1", "2", "3", "4", "5", "6", "7"};
+static const char *MCDC2805_axis[] = {"0", "1", "2", "3", "4", "5", "6", "7"};
 
 /* Local data required for every driver; see "motordrvComCode.h" */
 #include    "motordrvComCode.h"
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -215,7 +215,8 @@ static int set_status(int card, int signal)
     /* Message parsing variables */
     char buff[BUFF_SIZE];
     char status_buff[BUFF_SIZE];
-    int rtnval, rtn_state;
+    /* int rtnval; */
+    int rtn_state;
     double motorData;
     epicsUInt8 Lswitch;
     bool plusdir, ls_active = false;
@@ -251,7 +252,7 @@ static int set_status(int card, int signal)
        }
     }
 
-    rtnval = status_buff[4] == '1';
+    /* rtnval = status_buff[4] == '1';*/
 
     /* We can't use this logic for done, because it won't work in jog mode or when
      * a move is stopped by setting velocity=0. */
@@ -375,7 +376,7 @@ exit:
 /* send a message to the MCDC2805 board            */
 /* send_mess()                               */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     char local_buff[MAX_MSG_SIZE];
     struct MCDC2805controller *cntrl;
@@ -484,7 +485,7 @@ MCDC2805Setup(int num_cards,  /* maximum number of chains in system.  */
                         sizeof(struct controller *));
 
     for (itera = 0; itera < MCDC2805_num_cards; itera++)
-    motor_state[itera] = (struct controller *) NULL;
+    motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -542,7 +543,7 @@ static int motor_init()
         continue;
 
     brdptr = motor_state[card_index];
-    brdptr->ident[0] = (char) NULL; /* No controller identification message. */
+    brdptr->ident[0] = 0; /* No controller identification message. */
     brdptr->cmnd_response = false;
     total_cards = card_index + 1;
     cntrl = (struct MCDC2805controller *) brdptr->DevicePrivate;
@@ -579,7 +580,7 @@ static int motor_init()
 
     if (success_rtn == asynSuccess && total_axis > 0)
     {
-        brdptr->localaddr = (char *) NULL;
+        brdptr->localaddr = NULL;
         brdptr->motor_in_motion = 0;
 
         for (motor_index = 0; motor_index < total_axis; motor_index++)
@@ -624,16 +625,16 @@ static int motor_init()
         }
     }
     else
-        motor_state[card_index] = (struct controller *) NULL;
+        motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "MCDC2805_motor", epicsThreadPriorityMedium,
     epicsThreadGetStackSize(epicsThreadStackMedium),

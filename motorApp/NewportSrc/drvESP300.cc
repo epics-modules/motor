@@ -97,7 +97,7 @@ int ESP300_num_cards = 0;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -225,7 +225,7 @@ static int set_status(int card, int signal)
     status.All = motor_info->status.All;
 
     sprintf(outbuff, "%.2dMD", signal + 1);
-    send_mess(card, outbuff, (char*) NULL);
+    send_mess(card, outbuff, NULL);
     charcnt = recv_mess(card, inbuff, 1);
 
     if (charcnt == 1 && (inbuff[0] == '0' || inbuff[0] == '1'))
@@ -255,7 +255,7 @@ static int set_status(int card, int signal)
 
     /* Get motor position. */
     sprintf(outbuff, READ_POSITION, signal + 1);
-    send_mess(card, outbuff, (char*) NULL);
+    send_mess(card, outbuff, NULL);
     charcnt = recv_mess(card, inbuff, 1);
 
     motorData = atof(inbuff) / cntrl->drive_resolution[signal];
@@ -279,7 +279,7 @@ static int set_status(int card, int signal)
 
     /* Get travel limit switch status. */
     sprintf(outbuff, "%.2dPH", signal + 1);
-    send_mess(card, outbuff, (char*) NULL);
+    send_mess(card, outbuff, NULL);
     charcnt = recv_mess(card, inbuff, 1);
     cptr = strchr(inbuff, 'H');
     if (cptr == NULL)
@@ -318,7 +318,7 @@ static int set_status(int card, int signal)
 
     /* Get motor power on/off status. */
     sprintf(outbuff, "%.2dMO?", signal + 1);
-    send_mess(card, outbuff, (char*) NULL);
+    send_mess(card, outbuff, NULL);
     charcnt = recv_mess(card, inbuff, 1);
     power = atoi(inbuff) ? true : false;
 
@@ -331,7 +331,7 @@ static int set_status(int card, int signal)
 
     /* Get error code. */
     sprintf(outbuff, "%.2dTE?", signal + 1);
-    send_mess(card, outbuff, (char*) NULL);
+    send_mess(card, outbuff, NULL);
     charcnt = recv_mess(card, inbuff, 1);
     errcode = atoi(inbuff);
     if (errcode != 0)
@@ -358,7 +358,7 @@ static int set_status(int card, int signal)
         nodeptr->postmsgptr != 0)
     {
         strcpy(outbuff, nodeptr->postmsgptr);
-        send_mess(card, outbuff, (char*) NULL);
+        send_mess(card, outbuff, NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -372,7 +372,7 @@ exit:
 /* send a message to the ESP300 board            */
 /* send_mess()                               */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MMcontroller *cntrl;
     size_t size;
@@ -542,7 +542,7 @@ ESP300Setup(int num_cards,  /* maximum number of controllers in system.  */
                                                 sizeof(struct controller *));
 
     for (itera = 0; itera < ESP300_num_cards; itera++)
-        motor_state[itera] = (struct controller *) NULL;
+        motor_state[itera] = NULL;
 
     return(OK);
 }
@@ -638,7 +638,7 @@ static int motor_init()
 
             do
             {
-                send_mess(card_index, GET_IDENT, (char*) NULL);
+                send_mess(card_index, GET_IDENT, NULL);
                 status = recv_mess(card_index, buff, 1);
                 retry++;
                 /* Return value is length of response string */
@@ -648,11 +648,11 @@ static int motor_init()
 errexit:
         if (success_rtn == asynSuccess && status > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
             strcpy(brdptr->ident, &buff[1]);  /* Skip "\n" */
 
-            send_mess(card_index, "ZU", (char*) NULL);
+            send_mess(card_index, "ZU", NULL);
             recv_mess(card_index, buff, 1);
             total_axis = buff[0] >> 4;
             if (total_axis > 4)
@@ -664,7 +664,7 @@ errexit:
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 sprintf(buff, STOP_AXIS, motor_index + 1);  /* Stop motor */
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
                 /* Initialize. */
                 brdptr->motor_info[motor_index].motor_motion = NULL;
             }
@@ -725,16 +725,16 @@ errexit:
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "ESP300_motor", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),

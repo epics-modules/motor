@@ -726,7 +726,6 @@ smarActMCSCreateAxis(
 void *rval = 0;
 
 SmarActMCSController *pC;
-SmarActMCSAxis *pAxis;
 asynMotorAxis *pAsynAxis;
 
 	// the asyn stuff doesn't seem to be prepared for exceptions. I get segfaults
@@ -753,8 +752,7 @@ asynMotorAxis *pAsynAxis;
 			return rval;
 		}
 		pC->lock();
-		pAxis = new SmarActMCSAxis(pC, axisNumber, channel);
-		pAxis = NULL;
+		new SmarActMCSAxis(pC, axisNumber, channel);
 		pC->unlock();
 
 #ifdef ASYN_CANDO_EXCEPTIONS

@@ -2,7 +2,7 @@
 extern "C" {
 #endif  /* __cplusplus */
 
-epicsShareFunc void tclcall(char const *name,char const *taskName,char const *args);
+epicsShareFunc void tclcall(const char *name,const char *taskName,const char *args);
 
 #ifdef __cplusplus
 }

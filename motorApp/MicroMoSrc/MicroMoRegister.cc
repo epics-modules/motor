@@ -57,6 +57,7 @@ static void configMicroMoCallFunc(const iocshArgBuf *args)
 static void MicroMomotorRegister(void)
 {
     iocshRegister(&setupMicroMo, setupMicroMoCallFunc);
+    iocshRegister(&configMicroMo, configMicroMoCallFunc);
 }
 
 epicsExportRegistrar(MicroMomotorRegister);

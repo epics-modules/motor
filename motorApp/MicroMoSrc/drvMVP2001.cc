@@ -157,7 +157,7 @@ int MVP2001_num_cards = 0;
 
 /*----------------functions-----------------*/
 static int recv_mess(int, char *, int);
-static RTN_STATUS send_mess(int, char const *, char *);
+static RTN_STATUS send_mess(int, const char *, const char *);
 static int set_status(int, int);
 static long report(int);
 static long init();
@@ -306,7 +306,7 @@ static int set_status(int card, int signal)
     statusStr[0] = positionStr[0] = buff[0] = '\0';
 
     sprintf(buff, "%d ST", (signal + 1));
-    send_mess(card, buff, (char*) NULL);
+    send_mess(card, buff, NULL);
     rtn_state = recv_mess(card, buff, 1);
     if (rtn_state > 0)
     {
@@ -342,7 +342,7 @@ static int set_status(int card, int signal)
     status.Bits.RA_DONE = !mstat.Bits.inMotion;
 
     sprintf(buff, "%d POS", (signal + 1));
-    send_mess(card, buff, (char*) NULL);
+    send_mess(card, buff, NULL);
     recv_mess(card, buff, 1);
 
     /*
@@ -433,7 +433,7 @@ static int set_status(int card, int signal)
         nodeptr->postmsgptr != 0)
     {
         strcpy(buff, nodeptr->postmsgptr);
-        send_mess(card, buff, (char*) NULL);
+        send_mess(card, buff, NULL);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -447,7 +447,7 @@ exit:
 /* send a message to the MVP2001 board           */
 /* send_mess()                               */
 /*****************************************************/
-static RTN_STATUS send_mess(int card, char const *com, char *name)
+static RTN_STATUS send_mess(int card, const char *com, const char *name)
 {
     struct MVPcontroller *cntrl;
     int size;
@@ -488,7 +488,6 @@ static int recv_mess(int card, char *com, int flag)
     char temp[BUFF_SIZE];
     size_t nread = 0, lenTemp = 0;
     asynStatus status = asynError;
-    int timeout;
     int eomReason;
 
     /* Check that card exists */
@@ -496,11 +495,6 @@ static int recv_mess(int card, char *com, int flag)
         return(-1);
 
     cntrl = (struct MVPcontroller *) motor_state[card]->DevicePrivate;
-
-    if (flag == FLUSH)
-        timeout = 0;
-    else
-        timeout = COMM_TIMEOUT;
 
     status = pasynOctetSyncIO->read(cntrl->pasynUser, temp, BUFF_SIZE,
                                     COMM_TIMEOUT, &lenTemp, &eomReason);
@@ -610,7 +604,7 @@ static int motor_init()
             continue;
 
         brdptr = motor_state[card_index];
-        brdptr->ident[0] = (char) NULL; /* No controller identification
+        brdptr->ident[0] = 0; /* No controller identification
                          * message. */
         brdptr->cmnd_response = false;  /* The MVP doesn't respond to every
                          * command */
@@ -644,7 +638,7 @@ static int motor_init()
                 do
                 {
                     sprintf(buff, "%d ST", (total_axis + 1));
-                    send_mess(card_index, buff, (char*) NULL);
+                    send_mess(card_index, buff, NULL);
                     status = recv_mess(card_index, buff, 1);
                     retry++;
                 } while (status <= 0 && retry < 3);
@@ -657,7 +651,7 @@ static int motor_init()
 
         if (success_rtn == asynSuccess && total_axis > 0)
         {
-            brdptr->localaddr = (char *) NULL;
+            brdptr->localaddr = NULL;
             brdptr->motor_in_motion = 0;
 
             for (motor_index = 0; motor_index < total_axis; motor_index++)
@@ -666,11 +660,11 @@ static int motor_init()
 
                 /* stop and initialize the controller */
                 sprintf(buff, "%d V 0", (motor_index + 1));
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
                 sprintf(buff, "%d HO", (motor_index + 1));
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
                 sprintf(buff, "%d EN", (motor_index + 1));
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
 
                 motor_info->status.All = 0;
                 motor_info->no_motion_count = 0;
@@ -689,7 +683,7 @@ static int motor_init()
                 limitStr[0] = '\0';
                 /* Determine low limit */
                 sprintf(buff, "%d LL -", (motor_index + 1));
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
                 recv_mess(card_index, buff, 1);
                 strncat(limitStr, &buff[5], 8);
                 motor_info->low_limit = (epicsInt32) strtoul(limitStr, NULL, 16);
@@ -697,7 +691,7 @@ static int motor_init()
                 limitStr[0] = '\0';
                 /* Determine high limit */
                 sprintf(buff, "%d LL", (motor_index + 1));
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
                 recv_mess(card_index, buff, 1);
                 strncat(limitStr, &buff[5], 8);
                 motor_info->high_limit = (epicsInt32) strtoul(limitStr, NULL, 16);
@@ -715,23 +709,23 @@ static int motor_init()
                 epicsThreadSleep(0.2);
 
                 sprintf(buff, "%d HO", (motor_index + 1));
-                send_mess(card_index, buff, (char*) NULL);
+                send_mess(card_index, buff, NULL);
 
                 set_status(card_index, motor_index);    /* Read status of each
                                      * motor */
             }
         }
         else
-            motor_state[card_index] = (struct controller *) NULL;
+            motor_state[card_index] = NULL;
     }
 
     any_motor_in_motion = 0;
 
-    mess_queue.head = (struct mess_node *) NULL;
-    mess_queue.tail = (struct mess_node *) NULL;
+    mess_queue.head = NULL;
+    mess_queue.tail = NULL;
 
-    free_list.head = (struct mess_node *) NULL;
-    free_list.tail = (struct mess_node *) NULL;
+    free_list.head = NULL;
+    free_list.tail = NULL;
 
     epicsThreadCreate((char *) "MVP2001_motor", epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),

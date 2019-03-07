@@ -44,7 +44,6 @@ SMChydraController::SMChydraController(const char *portName, const char *SMChydr
 {
   int axis;
   asynStatus status;
-  SMChydraAxis *pAxis;
   static const char *functionName = "SMChydraController::SMChydraController";
 
   /* Connect to SMC hydra controller */
@@ -55,7 +54,7 @@ SMChydraController::SMChydraController(const char *portName, const char *SMChydr
       functionName);
   }
   for (axis=0; axis<numAxes; axis++) {
-    pAxis = new SMChydraAxis(this, axis);
+    new SMChydraAxis(this, axis);
   }
 
   startPoller(movingPollPeriod, idlePollPeriod, 2);
@@ -73,9 +72,7 @@ SMChydraController::SMChydraController(const char *portName, const char *SMChydr
 extern "C" int SMChydraCreateController(const char *portName, const char *SMChydraPortName, int numAxes, 
                                    int movingPollPeriod, int idlePollPeriod)
 {
-  SMChydraController *pSMChydraController
-    = new SMChydraController(portName, SMChydraPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
-  pSMChydraController = NULL;
+  new SMChydraController(portName, SMChydraPortName, numAxes, movingPollPeriod/1000., idlePollPeriod/1000.);
   return(asynSuccess);
 }
 
