@@ -77,7 +77,7 @@ private:
   double setpointPosition_;
   int axisStatus_;
   double mres_;
-  int moving_;
+  bool moving_;
   
 friend class HXPController;
 };
@@ -91,6 +91,7 @@ public:
   void report(FILE *fp, int level);
   HXPAxis* getAxis(asynUser *pasynUser);
   HXPAxis* getAxis(int axisNo);
+  asynStatus poll();
 
   /* These are the methods that are new to this class */
   int moveAll(HXPAxis* pAxis);
@@ -150,6 +151,10 @@ private:
   //int moveSocket_;
   char firmwareVersion_[100];
   char *axisNames_;
+  int groupStatus_;
+  double encoderPosition_[MAX_HXP_AXES];
+  double setpointPosition_[MAX_HXP_AXES];
+  bool moving_;
 
 friend class HXPAxis;
 };
