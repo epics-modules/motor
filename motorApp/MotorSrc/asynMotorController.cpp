@@ -279,11 +279,6 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
     bool moving;
     /* Do a poll, and then force a callback */
     poll();
-    if (!pAxis->initialPollDone_) {
-      asynStatus asynstatus;
-      asynstatus = pAxis->initialPoll();
-      if (asynstatus == asynSuccess) pAxis->initialPollDone_ = 1;
-    }
     status = pAxis->poll(&moving);
     pAxis->statusChanged_ = 1;
 
@@ -571,7 +566,6 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
   getAddress(pasynUser, &axis);
   /*  We need to make sure that the most important member had been retrieved
       from the controller */
-  if (!pAxis->initialPollDone_) status = asynError;
   if (status == asynSuccess) status = getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
   if (status == asynSuccess) {
     memcpy(pStatus, &pAxis->status_, sizeof(*pStatus));
@@ -751,7 +745,7 @@ static void asynMotorPollerC(void *drvPvt)
 
 /** Poller helper function
   */
-double asynMotorController::pollAll(int forcedFastPolls)
+double asynMotorController::pollAll(void)
 {
   double timeout = idlePollPeriod_;
   asynMotorAxis *pAxis;
@@ -769,14 +763,6 @@ double asynMotorController::pollAll(int forcedFastPolls)
     pAxis=getAxis(i);
     if (!pAxis) continue;
 
-    if (!pAxis->initialPollDone_) {
-      asynstatus = pAxis->initialPoll();
-      if (asynstatus) {
-        asynStatusConnected_ = asynstatus;
-        return timeout;
-      }
-      pAxis->initialPollDone_ = 1;
-    }
     getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
     getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
 
@@ -814,9 +800,9 @@ double asynMotorController::pollAll(int forcedFastPolls)
     }
 
   }
-  if (forcedFastPolls > 0) {
+  if (forcedFastPolls_ > 0) {
     timeout = movingPollPeriod_;
-    forcedFastPolls--;
+    forcedFastPolls_--;
   } else if (anyMoving) {
     timeout = movingPollPeriod_;
   }
@@ -872,7 +858,7 @@ void asynMotorController::asynMotorPoller()
       }
     }
     lock();
-    timeout = pollAll(forcedFastPolls_);
+    timeout = pollAll();
     unlock();
   }
 }
@@ -980,18 +966,12 @@ asynStatus asynMotorController::writeReadController(const char *output, char *in
     asynStatusConnected_ = status;
   } else if ((status != asynSuccess) ||
 	     ((*nread == 0) && (eomReason & ASYN_EOM_END))) {
-    int  i;
     asynPrint(pasynUserController_, ASYN_TRACE_ERROR,
 	      "%s:%s nread=%u out=%s status=%s (%d)\n",
 	      driverName, functionName,
 	      (unsigned)*nread, output ? output : "NULL",
               pasynManager->strStatus(status), (int)status);
     asynStatusConnected_ = asynDisconnected;
-    for (i=0; i<numAxes_; i++) {
-      asynMotorAxis *pAxis = getAxis(i);
-      if (!pAxis) continue;
-      pAxis->handleDisconnect(asynDisconnected);
-    }
   }
   return status;
 }

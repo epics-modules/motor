@@ -40,9 +40,7 @@ class epicsShareClass asynMotorAxis {
   virtual asynStatus moveVeloEGU(double mres, double minVeloEGU, double maxVeloEGU, double accEGU);
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
   virtual asynStatus stop(double acceleration);
-  virtual asynStatus initialPoll(void);
   virtual bool       pollPowerIsOn(void);
-  virtual void       handleDisconnect(asynStatus);
   virtual asynStatus poll(bool *moving);
   virtual asynStatus setPosition(double position);
   virtual asynStatus setEncoderPosition(double position);
@@ -86,7 +84,6 @@ class epicsShareClass asynMotorAxis {
   MotorStatus status_;
   int statusChanged_;
   int waitNumPollsBeforeReady_;
-  int initialPollDone_;
 
   private:
   void updateMsgTxtField(void);

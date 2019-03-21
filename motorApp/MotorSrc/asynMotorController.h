@@ -257,7 +257,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   virtual asynStatus wakeupPoller();
   virtual asynStatus poll();
   virtual asynStatus setDeferredMoves(bool defer);
-  double pollAll(int);
+  double pollAll(void);
   void asynMotorPoller();  // This should be private but is called from C function
   
   /* Functions to deal with moveToHome.*/
