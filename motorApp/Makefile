@@ -12,9 +12,6 @@ DIRS += MotorSrc
 DIRS += DeltaTauSrc
 DeltaTauSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += OmsSrc
-OmsSrc_DEPEND_DIRS   = MotorSrc
-
 DIRS += SoftMotorSrc
 SoftMotorSrc_DEPEND_DIRS = MotorSrc
 
