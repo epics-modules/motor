@@ -7,6 +7,9 @@ include $(TOP)/configure/CONFIG
 DIRS += configure motorApp
 motorApp_DEPEND_DIRS   = configure
 
+DIRS += modules
+modules_DEPEND_DIRS = motorApp
+
 # To build motor examples;
 # 1st - uncomment lines below.
 # 2nd - uncomment required support module lines at the bottom of
