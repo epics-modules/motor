@@ -21,7 +21,6 @@ ifdef SNCSEQ
 COMMONDBDS += devAerotechSeq.dbd
 endif
 COMMONDBDS += devPIMotor.dbd
-COMMONDBDS += devOms.dbd
 COMMONDBDS += devSoftMotor.dbd
 COMMONDBDS += motorSimSupport.dbd
 COMMONDBDS += devSmartMotorMotor.dbd
@@ -69,7 +68,6 @@ WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 COMMONLIBS += Aerotech
 COMMONLIBS += Attocube
-COMMONLIBS += oms
 COMMONLIBS += Mclennan
 COMMONLIBS += Micos
 COMMONLIBS += MicroMo

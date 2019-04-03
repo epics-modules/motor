@@ -1,3 +1,6 @@
 [submodule "modules/motorNewport"]
 	path = modules/motorNewport
 	url = https://github.com/epics-motor/motorNewport.git
+[submodule "modules/motorOms"]
+	path = modules/motorOms
+	url = https://github.com/epics-motor/motorOms.git

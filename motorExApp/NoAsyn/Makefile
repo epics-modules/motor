@@ -35,7 +35,6 @@ NoAsynVx_SRCS += NoAsynVx_registerRecordDeviceDriver.cpp
 #!COMMONLIBS += MXmotor
 COMMONLIBS += softMotor
 ifeq ($(OS_CLASS), vxWorks)
-COMMONLIBS += oms
 COMMONLIBS += DeltaTau
 endif
 COMMONLIBS += motor
