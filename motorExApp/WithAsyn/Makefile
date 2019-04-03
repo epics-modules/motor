@@ -17,9 +17,7 @@ COMMONDBDS += devImsMotor.dbd
 COMMONDBDS += devMclennanMotor.dbd
 COMMONDBDS += devMicos.dbd
 COMMONDBDS += devMicroMo.dbd
-COMMONDBDS += devNewport.dbd
 ifdef SNCSEQ
-COMMONDBDS += LdevNewportTS.dbd
 COMMONDBDS += devAerotechSeq.dbd
 endif
 COMMONDBDS += devPIMotor.dbd
@@ -78,7 +76,6 @@ COMMONLIBS += MicroMo
 COMMONLIBS += PI
 COMMONLIBS += Acs
 COMMONLIBS += Ims
-COMMONLIBS += Newport
 COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
 COMMONLIBS += SmartMotor
@@ -92,7 +89,7 @@ COMMONLIBS += ScriptMotor
 COMMONLIBS += lua
 endif
 
-# Needed for Newport SNL programs
+# Needed for SNL programs
 WithAsyn_LIBS += $(COMMONLIBS)
 WithAsyn_LIBS += asyn
 ifdef SNCSEQ
@@ -113,7 +110,7 @@ ifdef IPAC
 WithAsynVx_LIBS += Ipac TyGSOctal
 endif
 WithAsynVx_LIBS += asyn
-# Needed for Newport SNL programs
+# Needed for SNL programs
 ifdef SNCSEQ
 	ifeq (seq-2-1, $(findstring seq-2-1, $(SNCSEQ)))
 		WithAsynVx_LIBS += seqDev seq pv

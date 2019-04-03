@@ -3,6 +3,7 @@ include $(TOP)/configure/CONFIG
 
 # Submodules
 #SUBMODULES += motorVendor
+SUBMODULES += motorNewport
 
 # Allow sites to add extra submodules
 -include Makefile.local

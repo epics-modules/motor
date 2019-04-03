@@ -1,4 +1,4 @@
-# The is the ASYN example for communication to a Newport MM4000/5/6.
+# The is the ASYN example for communication
 # "#!" marks lines that can be uncommented.
 
 < envPaths
@@ -9,33 +9,6 @@ dbLoadTemplate("motor.substitutions")
 dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 
 # This is for WIN32, local serial ports not supported.  Must use IP terminal server.
-
-# Newport MM3000 and MM4000/5/6 driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!MM3000Setup(1, 10)
-MM4000Setup(1, 10)
-
-# Newport MM3000 and MM4000/5/6 driver configuration parameters: 
-#     (1) controller# being configured
-#     (2) ASYN port name
-#     (3) address (GPIB only)
-#!MM3000Config(0, "a-Serial[0]")
-#!drvMM3000debug=4
-MM4000Config(0, "L0")
-#!var drvMM4000debug 4
-
-# Newport PM500 driver setup parameters:
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!PM500Setup(1, 10)
-
-# Newport PM500 configuration parameters:
-#     (1) controller# being configured,
-#     (2) ASYN port name
-#     (3) address (GPIB only)
-#!PM500Config(0, "L0")
-#!var drvPM500debug 4
 
 # IMS IM483 driver setup parameters:
 #     (1) maximum number of controllers in system
@@ -65,18 +38,6 @@ MM4000Config(0, "L0")
 #!asynOctetSetInputEos("L0",0,"\r")
 #!asynOctetSetOutputEos("L0",0,"\r")
 #!var drvMCB4BDebug 4
-
-# Newport ESP300 driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!ESP300Setup(1, 10)
-
-# Newport ESP300 driver configuration parameters: 
-#     (1) controller# being configured,
-#     (2) ASYN port name
-#     (3) address (GPIB only)
-#!ESP300Config(0, "L0")
-#!var drvESP300debug 4
 
 # MicroMo MVP2001 driver setup parameters: 
 #

@@ -13,7 +13,7 @@ To build the iocWithAsyn example;
           
 Finally, cd <motor>; gnumake clean uninstall; gnumake
 
-To run this Newport MM4000/5, "asyn" example on a Unix OS;
+To run this "asyn" example on a Unix OS;
 - Set the EPICS_HOST_ARCH environment variable correctly.
 - Edit the st.cmd.unix file for either sun or linux.
 - Start the ioc from this directory by executing the following command.

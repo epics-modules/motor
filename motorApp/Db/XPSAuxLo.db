@@ -1,5 +1,0 @@
-grecord(longout,"$(P)$(R)")
-{
-        field(DTYP,"asynUInt32Digital")
-        field(OUT,"@asynMask($(PORT) $(CHAN) 0xffffffff)BINARY_OUTPUT")
-}

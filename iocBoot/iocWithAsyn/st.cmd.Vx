@@ -1,4 +1,4 @@
-# The is the "ASYN" example for communication to either a Newport MM4000/5 or an
+# The is the "ASYN" example for communication to an 
 # IMS483 controller.  The examples must be configured by including or omitting
 # comment characters (i.e., #'s) from this file.
 
@@ -28,42 +28,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 # Configure the ASYN server code. This MUST be configured too!
 < st_asynserver.cmd.Vx
 
-# Newport MM3000 and MM4000/5/6 driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!MM3000Setup(1, 10)
-#!MM4000Setup(1, 10)
-
-# Newport MM3000 and MM4000/5/6 driver configuration parameters: 
-#     (1) controller# being configured
-#     (2) ASYN port name
-#     (3) address (GPIB only)
-#!MM3000Config(0, "a-Serial[0]")
-#!drvMM3000debug=4
-#!MM4000Config(0, "a-Serial[0]")
-#!drvMM4000debug=4
-
-# The MM4000 driver does not set end of string (EOS).
-#  for RS232 serial,
-#!asynOctetSetInputEos( "a-Serial[0]",0,"\r")
-#!asynOctetSetOutputEos("a-Serial[0]",0,"\r")
-#  for GPIB,
-#!asynInterposeEosConfig("L0", 10, 1, 1)
-#!asynOctetSetInputEos( "L0",10,"\r")
-#!asynOctetSetOutputEos("L0",10,"\r")
-
-# Newport PM500 driver setup parameters:
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!PM500Setup(1, 10)
-
-# Newport PM500 configuration parameters:
-#     (1) controller# being configured
-#     (2) ASYN port name
-#     (3) address (GPIB only)
-#!PM500Config(0, "a-Serial[0]")
-#!drvPM500debug=4
-
 # IMS IM483 driver setup parameters:
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz,max=60Hz)
@@ -92,18 +56,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!asynOctetSetInputEos("a-Serial[0]",0,"\r")
 #!asynOctetSetOutputEos("a-Serial[0]",0,"\r")
 #!drvMCB4BDebug=4
-
-# Newport ESP300 driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!ESP300Setup(1, 10)
-
-# Newport ESP300 driver configuration parameters: 
-#     (1) controller# being configured
-#     (2) ASYN port name
-#     (3) address (GPIB only)
-#!ESP300Config(0, "a-Serial[0]")
-#!drvESP300debug = 4
 
 # MicroMo MVP2001 driver setup parameters: 
 #
@@ -209,34 +161,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!MDriveConfig(0, "a-Serial[0]")
 #!drvMDrivedebug = 4
 
-# Newport XPS driver setup parameters: 
-#     (1) maximum number of controllers in system
-#!XPSSetup(2)
-
-# Newport XPS driver configuration parameters: 
-#     (1) Controller # being configured
-#     (2) IP address or IP name
-#     (3) IP port number that XPS is listening on
-#     (4) Number of axes this controller supports
-#     (5) Time to poll (msec) when an axis is in motion
-#     (6) Time to poll (msec) when an axis is idle. 0 for no polling
-#!XPSConfig(0, "xxx.xx.xxx.1", 5001, 5, 100, 500)
-#!XPSConfig(1, "xxx.xx.xxx.2", 5001, 4, 100, 500)
-
-# Newport XPS group and positioner name configuration:
-#     (1) Controller # being configured
-#     (2) axis number 0-7
-#     (3) groupName.positionerName e.g. Diffractometer.Phi
-#     (4) steps per user unit
-
-#!XPSConfigAxis(0, 0, "GROUP1.PHI",   10000)
-#!XPSConfigAxis(0, 1, "GROUP1.KAPPA", 10000)
-
-#!XPSConfigAxis(1, 0, "GROUP1.Y1_BASE", 1000)
-#!XPSConfigAxis(1, 1, "GROUP2.Y2_BASE", 1000)
-#!XPSConfigAxis(1, 2, "GROUP3.Y3_BASE", 1000)
-
-
 # OMS PC68/78 stand-alone serial driver setup parameters: 
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz,max=60Hz)
@@ -317,28 +241,12 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #     (6) Time to poll (msec) when an axis is idle. 0 for no polling
 #!EnsembleAsynConfig(0, EnsemblePort, 0, 1, 100, 1000)
 
-
-# Newport MM4000/5/6 asyn motor driver setup parameter.
-#!MM4000AsynSetup(1)   /* number of MM4000 controllers in system.  */
-
-# Newport MM4000/5/6 asyn motor driver configure parameters.
-#     (1) Controller number being configured
-#     (2) ASYN port name
-#     (3) ASYN address (GPIB only)
-#     (4) Number of axes this controller supports
-#     (5) Time to poll (msec) when an axis is in motion
-#     (6) Time to poll (msec) when an axis is idle. 0 for no polling
-#!MM4000AsynConfig(0, "a-Serial[1]", 0, 1, 100, 250)
-
 # Asyn-based Motor Record support
 #   (1) Asyn port
 #   (2) Driver name
 #   (3) Controller index
 #   (4) Max. number of axes
-#!drvAsynMotorConfigure("MM4",   "motorMM4000",   0, 4)
 #!drvAsynMotorConfigure("ANC150","motorANC150",   0, 2 )
-#!drvAsynMotorConfigure("XPS1",  "motorXPS",      0, 5)
-#!drvAsynMotorConfigure("XPS2",  "motorXPS",      1, 5)
 #!drvAsynMotorConfigure("AeroE1","motorEnsemble", 0, 1)
 #!drvAsynMotorConfigure("AeroE2","motorEnsemble", 1, 1)
 
