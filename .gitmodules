@@ -10,3 +10,6 @@
 [submodule "modules/motorAttocube"]
 	path = modules/motorAttocube
 	url = https://github.com/epics-motor/motorAttocube.git
+[submodule "modules/motorDeltaTau"]
+	path = modules/motorDeltaTau
+	url = https://github.com/epics-motor/motorDeltaTau.git

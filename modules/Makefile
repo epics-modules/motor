@@ -7,6 +7,7 @@ SUBMODULES += motorOms
 SUBMODULES += motorNewport
 SUBMODULES += motorAcsTech80
 SUBMODULES += motorAttocube
+SUBMODULES += motorDeltaTau
 
 # Allow sites to add extra submodules
 -include Makefile.local

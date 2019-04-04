@@ -9,9 +9,6 @@ DIRS += MotorSrc
 # Select/deselect individual device driver modules by removing/adding a
 # "#" comment.
 
-DIRS += DeltaTauSrc
-DeltaTauSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += SoftMotorSrc
 SoftMotorSrc_DEPEND_DIRS = MotorSrc
 

@@ -1,4 +1,0 @@
-# Oregon Micro Systems VME8/44 and VME58 Driver support.
-device(motor,VME_IO,devPmac,"PMAC")
-driver(drvPmac)
-

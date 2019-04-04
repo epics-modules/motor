@@ -25,7 +25,6 @@ NoAsyn_DBD += Misc.dbd
 
 DBD += NoAsynVx.dbd
 NoAsynVx_DBD += $(COMMONDBDS)
-NoAsynVx_DBD += devDeltaTau.dbd
 NoAsynVx_DBD += MiscVx.dbd
 
 NoAsyn_SRCS += NoAsyn_registerRecordDeviceDriver.cpp
@@ -34,9 +33,6 @@ NoAsynVx_SRCS += NoAsynVx_registerRecordDeviceDriver.cpp
 
 #!COMMONLIBS += MXmotor
 COMMONLIBS += softMotor
-ifeq ($(OS_CLASS), vxWorks)
-COMMONLIBS += DeltaTau
-endif
 COMMONLIBS += motor
 
 NoAsyn_LIBS += $(COMMONLIBS)
