@@ -42,9 +42,6 @@ MicroMoSrc_DEPEND_DIRS = MotorSrc
 DIRS += MicosSrc
 MicosSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += FaulhaberSrc
-FaulhaberSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += PC6KSrc
 PC6KSrc_DEPEND_DIRS = MotorSrc
 
