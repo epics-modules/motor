@@ -4,3 +4,6 @@
 [submodule "modules/motorOms"]
 	path = modules/motorOms
 	url = https://github.com/epics-motor/motorOms.git
+[submodule "modules/motorAcsTech80"]
+	path = modules/motorAcsTech80
+	url = https://github.com/epics-motor/motorAcsTech80.git

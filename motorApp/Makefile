@@ -54,9 +54,6 @@ PC6KSrc_DEPEND_DIRS = MotorSrc
 DIRS += NewFocusSrc
 NewFocusSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += AcsTech80Src
-AcsTech80Src_DEPEND_DIRS = MotorSrc
-
 DIRS += OrielSrc
 OrielSrc_DEPEND_DIRS = MotorSrc
 
