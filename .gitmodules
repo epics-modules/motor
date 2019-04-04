@@ -16,3 +16,6 @@
 [submodule "modules/motorFaulhaber"]
 	path = modules/motorFaulhaber
 	url = https://github.com/epics-motor/motorFaulhaber.git
+[submodule "modules/motorHytec"]
+	path = modules/motorHytec
+	url = https://github.com/epics-motor/motorHytec.git

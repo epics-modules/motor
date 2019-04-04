@@ -66,12 +66,6 @@ KohzuSrc_DEPEND_DIRS = MotorSrc
 DIRS += AerotechSrc
 AerotechSrc_DEPEND_DIRS = MotorSrc
 
-# The Hytec support requires ipac
-ifdef IPAC
-DIRS += HytecSrc
-HytecSrc_DEPEND_DIRS = MotorSrc
-endif
-
 DIRS += ACRSrc
 ACRSrc_DEPEND_DIRS = MotorSrc
 

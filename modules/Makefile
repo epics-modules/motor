@@ -9,6 +9,9 @@ SUBMODULES += motorAcsTech80
 SUBMODULES += motorAttocube
 SUBMODULES += motorDeltaTau
 SUBMODULES += motorFaulhaber
+ifdef IPAC
+SUBMODULES += motorHytec
+endif
 
 # Allow sites to add extra submodules
 -include Makefile.local
