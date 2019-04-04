@@ -25,7 +25,6 @@ COMMONDBDS += devSoftMotor.dbd
 COMMONDBDS += motorSimSupport.dbd
 COMMONDBDS += devSmartMotorMotor.dbd
 COMMONDBDS += devKohzuMotor.dbd
-COMMONDBDS += devAttocube.dbd
 COMMONDBDS += devAerotech.dbd
 COMMONDBDS += ACRMotorSupport.dbd
 COMMONDBDS += asyn.dbd
@@ -67,7 +66,6 @@ WithAsynVx_SRCS += WithAsynVx_registerRecordDeviceDriver.cpp
 WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 COMMONLIBS += Aerotech
-COMMONLIBS += Attocube
 COMMONLIBS += Mclennan
 COMMONLIBS += Micos
 COMMONLIBS += MicroMo

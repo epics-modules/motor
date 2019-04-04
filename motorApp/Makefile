@@ -69,9 +69,6 @@ PiJenaSrc_DEPEND_DIRS = MotorSrc
 DIRS += KohzuSrc
 KohzuSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += AttocubeSrc
-AttocubeSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += AerotechSrc
 AerotechSrc_DEPEND_DIRS = MotorSrc
 

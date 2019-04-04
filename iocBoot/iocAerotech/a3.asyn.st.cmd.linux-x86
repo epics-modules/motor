@@ -33,7 +33,6 @@ A3200AsynConfig(0, "L0", 0, 2, 1, 1000, 2500)
 #   (3) Controller index
 #   (4) Max. number of axes
 #!drvAsynMotorConfigure("MM4",   "motorMM4000", 0, 4)
-#!drvAsynMotorConfigure("ANC150","motorANC150", 0, 1)
 drvAsynMotorConfigure("L1","motorA3200", 0, 2)
 
 iocInit

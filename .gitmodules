@@ -7,3 +7,6 @@
 [submodule "modules/motorAcsTech80"]
 	path = modules/motorAcsTech80
 	url = https://github.com/epics-motor/motorAcsTech80.git
+[submodule "modules/motorAttocube"]
+	path = modules/motorAttocube
+	url = https://github.com/epics-motor/motorAttocube.git

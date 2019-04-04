@@ -190,18 +190,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!asynOctetSetOutputEos("L0",0,"\r")
 
 
-# attocube ANC 150 asyn motor driver setup parameter.
-#!ANC150AsynSetup(1)  /* number of ANC150 controllers in system.  */
-
-# attocube ANC 150 asyn motor driver configure parameters.
-#     (1) Controller number being configured
-#     (2) ASYN port name
-#     (3) Number of axes this controller supports
-#     (4) Time to poll (msec) when an axis is in motion
-#     (5) Time to poll (msec) when an axis is idle. 0 for no polling
-#!ANC150AsynConfig(0, "a-Serial[1]", 3, 250, 2000)
-
-
 # Aerotech Ensemble digital servo controller Setup
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz,max=60Hz)
@@ -235,7 +223,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #   (2) Driver name
 #   (3) Controller index
 #   (4) Max. number of axes
-#!drvAsynMotorConfigure("ANC150","motorANC150",   0, 2 )
 #!drvAsynMotorConfigure("AeroE1","motorEnsemble", 0, 1)
 #!drvAsynMotorConfigure("AeroE2","motorEnsemble", 1, 1)
 
