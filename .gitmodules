@@ -25,3 +25,6 @@
 [submodule "modules/motorMclennan"]
 	path = modules/motorMclennan
 	url = https://github.com/epics-motor/motorMclennan.git
+[submodule "modules/motorMicroMo"]
+	path = modules/motorMicroMo
+	url = https://github.com/epics-motor/motorMicroMo.git

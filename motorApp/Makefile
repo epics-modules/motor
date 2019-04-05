@@ -33,9 +33,6 @@ PiSrc_DEPEND_DIRS = MotorSrc
 DIRS += PIGCS2Src
 PIGCS2Src_DEPEND_DIRS = MotorSrc
 
-DIRS += MicroMoSrc
-MicroMoSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += MicosSrc
 MicosSrc_DEPEND_DIRS = MotorSrc
 

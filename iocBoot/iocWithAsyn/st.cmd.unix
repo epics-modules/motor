@@ -50,21 +50,6 @@ asynSetOption("L0", -1, "crtscts", "N")
 #!asynOctetSetOutputEos("L0",0,"\r")
 #!var drvMCB4BDebug 4
 
-# MicroMo MVP2001 driver setup parameters: 
-#
-# NOTE: The 1st controller on each chain should have it's address = 1.
-#       The rest of the controllers on a chain should follow sequentially.
-#
-#
-# int MVP2001Setup(int num_cards, /* number of CHAINS of controllers */
-#      int scan_rate)             /* polling rate  (Min=1Hz, max=60Hz) */
-#!MVP2001Setup(1, 10)
-
-# int MVP2001Config(int card,     /* CHAIN being configured */
-#     (2) ASYN port name
-#!MVP2001Config(0, "L0")
-#!drvMVP2001debug=4
-
 # PI C-844 driver setup parameters: 
 #     (1) maximum number of controllers in system
 #     (2) motor task polling rate (min=1Hz,max=60Hz)
