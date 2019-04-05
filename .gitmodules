@@ -19,3 +19,6 @@
 [submodule "modules/motorHytec"]
 	path = modules/motorHytec
 	url = https://github.com/epics-motor/motorHytec.git
+[submodule "modules/motorKohzu"]
+	path = modules/motorKohzu
+	url = https://github.com/epics-motor/motorKohzu.git

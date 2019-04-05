@@ -60,9 +60,6 @@ SmartMotorSrc_DEPEND_DIRS = MotorSrc
 DIRS += PiJenaSrc
 PiJenaSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += KohzuSrc
-KohzuSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += AerotechSrc
 AerotechSrc_DEPEND_DIRS = MotorSrc
 

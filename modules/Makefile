@@ -12,6 +12,7 @@ SUBMODULES += motorFaulhaber
 ifdef IPAC
 SUBMODULES += motorHytec
 endif
+SUBMODULES += motorKohzu
 
 # Allow sites to add extra submodules
 -include Makefile.local
