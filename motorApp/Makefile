@@ -42,9 +42,6 @@ PC6KSrc_DEPEND_DIRS = MotorSrc
 DIRS += NewFocusSrc
 NewFocusSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += OrielSrc
-OrielSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += ThorLabsSrc
 ThorLabsSrc_DEPEND_DIRS = MotorSrc
 
