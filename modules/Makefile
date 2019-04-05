@@ -15,6 +15,7 @@ endif
 SUBMODULES += motorKohzu
 SUBMODULES += motorMclennan
 SUBMODULES += motorMicroMo
+SUBMODULES += motorNPoint
 
 # Allow sites to add extra submodules
 -include Makefile.local

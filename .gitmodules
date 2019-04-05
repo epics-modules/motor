@@ -28,3 +28,6 @@
 [submodule "modules/motorMicroMo"]
 	path = modules/motorMicroMo
 	url = https://github.com/epics-motor/motorMicroMo.git
+[submodule "motorNPoint"]
+	path = motorNPoint
+	url = https://github.com/epics-motor/motorNPoint.git
