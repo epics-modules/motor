@@ -22,3 +22,6 @@
 [submodule "modules/motorKohzu"]
 	path = modules/motorKohzu
 	url = https://github.com/epics-motor/motorKohzu.git
+[submodule "modules/motorMclennan"]
+	path = modules/motorMclennan
+	url = https://github.com/epics-motor/motorMclennan.git

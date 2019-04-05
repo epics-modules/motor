@@ -14,7 +14,6 @@ COMMONDBDS  = base.dbd
 COMMONDBDS += motorSupport.dbd
 COMMONDBDS += devAcsMotor.dbd
 COMMONDBDS += devImsMotor.dbd
-COMMONDBDS += devMclennanMotor.dbd
 COMMONDBDS += devMicos.dbd
 COMMONDBDS += devMicroMo.dbd
 ifdef SNCSEQ
@@ -65,7 +64,6 @@ WithAsynVx_SRCS += WithAsynVx_registerRecordDeviceDriver.cpp
 WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 COMMONLIBS += Aerotech
-COMMONLIBS += Mclennan
 COMMONLIBS += Micos
 COMMONLIBS += MicroMo
 COMMONLIBS += PI
