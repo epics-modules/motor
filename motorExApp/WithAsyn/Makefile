@@ -46,9 +46,6 @@ COMMONDBDS += phytron.dbd
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
-ifdef SNCSEQ
-WithAsyn_DBD += devSequencer.dbd
-endif
 
 DBD += WithAsynVx.dbd
 WithAsynVx_DBD += $(COMMONDBDS)
