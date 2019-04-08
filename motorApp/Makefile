@@ -42,9 +42,6 @@ NewFocusSrc_DEPEND_DIRS = MotorSrc
 DIRS += ThorLabsSrc
 ThorLabsSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += SmartMotorSrc
-SmartMotorSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += AerotechSrc
 AerotechSrc_DEPEND_DIRS = MotorSrc
 

@@ -21,7 +21,6 @@ endif
 COMMONDBDS += devPIMotor.dbd
 COMMONDBDS += devSoftMotor.dbd
 COMMONDBDS += motorSimSupport.dbd
-COMMONDBDS += devSmartMotorMotor.dbd
 COMMONDBDS += devAerotech.dbd
 COMMONDBDS += ACRMotorSupport.dbd
 COMMONDBDS += asyn.dbd
@@ -69,7 +68,6 @@ COMMONLIBS += Acs
 COMMONLIBS += Ims
 COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
-COMMONLIBS += SmartMotor
 COMMONLIBS += ACRMotor
 COMMONLIBS += PI_GCS2Support
 COMMONLIBS += phytronAxisMotor
