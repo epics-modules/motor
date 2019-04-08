@@ -15,6 +15,7 @@ endif
 SUBMODULES += motorKohzu
 SUBMODULES += motorMclennan
 SUBMODULES += motorMicroMo
+SUBMODULES += motorMicronix
 SUBMODULES += motorNPoint
 SUBMODULES += motorOriel
 

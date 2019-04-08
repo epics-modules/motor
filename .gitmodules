@@ -34,3 +34,6 @@
 [submodule "modules/motorOriel"]
 	path = modules/motorOriel
 	url = https://github.com/epics-motor/motorOriel.git
+[submodule "modules/motorMicronix"]
+	path = modules/motorMicronix
+	url = https://github.com/epics-motor/motorMicronix.git
