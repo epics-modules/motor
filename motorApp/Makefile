@@ -48,9 +48,6 @@ ThorLabsSrc_DEPEND_DIRS = MotorSrc
 DIRS += SmartMotorSrc
 SmartMotorSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += PiJenaSrc
-PiJenaSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += AerotechSrc
 AerotechSrc_DEPEND_DIRS = MotorSrc
 

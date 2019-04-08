@@ -18,6 +18,7 @@ SUBMODULES += motorMicroMo
 SUBMODULES += motorMicronix
 SUBMODULES += motorNPoint
 SUBMODULES += motorOriel
+SUBMODULES += motorPiJena
 
 # Allow sites to add extra submodules
 -include Makefile.local
