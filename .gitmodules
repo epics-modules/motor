@@ -40,3 +40,6 @@
 [submodule "modules/motorPiJena"]
 	path = modules/motorPiJena
 	url = https://github.com/epics-motor/motorPiJena.git
+[submodule "modules/motorPi"]
+	path = modules/motorPi
+	url = https://github.com/epics-motor/motorPi.git

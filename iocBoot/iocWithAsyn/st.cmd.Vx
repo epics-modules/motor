@@ -57,51 +57,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!asynOctetSetOutputEos("a-Serial[0]",0,"\r")
 #!drvMCB4BDebug=4
 
-# PI C-844 driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!PIC844Setup(1, 10)
-
-# PI C-844 driver configuration parameters: 
-#     (1) controller# being configured
-#     (2) ASYN port name
-#     (3) address (GPIB only)
-#!PIC844Config(0, "a-Serial[0]")
-#!drvPIC844debug = 4
-
-# PI C-848 driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!PIC848Setup(1, 2)
-
-# PI C-848 driver configuration parameters: 
-#     (1) controller# being configured,
-#     (2) ASYN port name
-#!PIC848Config(0, "a-Serial[0]")
-#!drvPIC848debug = 4
-
-# PI E-662 Piezo driver setup parameters:
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz, max=60Hz)
-#!PIC662Setup(1, 60)
-                                                                                
-# PI E-662 Piezo driver configuration parameters:
-#     (1) controller being configured
-#     (2) asyn port name (string)
-#!PIC662Config(0, "serial1")
-#!drvPIC662debug = 4
-
-# PI C-862 DC-motor driver setup parameters:
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz, max=60Hz)
-#!PIC862Setup(1, 60)
-                                                                                
-# PI C-862 DC-motor driver configuration parameters:
-#     (1) controller being configured
-#     (2) asyn port name (string)
-#!PIC862Config(0, "serial1")
-#!drvPIC862debug = 4
-                                                                                
 # New Focus Picomotor Network Controller (model 8750/2) (setup parameters:  
 #     (1) maximum number of controllers in system 
 #     (2) maximum number of drivers per controller (1 - 3)  

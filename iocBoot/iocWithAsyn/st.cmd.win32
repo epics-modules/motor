@@ -39,18 +39,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!asynOctetSetOutputEos("L0",0,"\r")
 #!var drvMCB4BDebug 4
 
-# PI C-844 driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!PIC844Setup(1, 10)
-
-# PI C-844 driver configuration parameters: 
-#     (1) controller# being configured,
-#     (2) ASYN port name
-#     (3) address (GPIB only)
-#!PIC844Config(0, "L0")
-#!var drvPIC844debug 4
-
 # Micos MoCo driver setup parameters:
 # Load MicosSetup once.
 #     (1) max # of controller groups.  Controller groups are per serial
