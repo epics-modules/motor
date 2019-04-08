@@ -21,6 +21,7 @@ SUBMODULES += motorOriel
 SUBMODULES += motorPiJena
 SUBMODULES += motorPi
 SUBMODULES += motorSmartMotor
+SUBMODULES += motorThorLabs
 
 # Allow sites to add extra submodules
 -include Makefile.local

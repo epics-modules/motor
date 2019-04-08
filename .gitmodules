@@ -46,3 +46,6 @@
 [submodule "modules/motorSmartMotor"]
 	path = modules/motorSmartMotor
 	url = https://github.com/epics-motor/motorSmartMotor.git
+[submodule "modules/motorThorLabs"]
+	path = modules/motorThorLabs
+	url = https://github.com/epics-motor/motorThorLabs.git
