@@ -5,6 +5,7 @@ include $(TOP)/configure/CONFIG
 #SUBMODULES += motorVendor
 SUBMODULES += motorOms
 SUBMODULES += motorNewport
+SUBMODULES += motorAcs
 SUBMODULES += motorAcsTech80
 SUBMODULES += motorAttocube
 SUBMODULES += motorDeltaTau

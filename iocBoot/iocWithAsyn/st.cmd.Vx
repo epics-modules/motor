@@ -44,19 +44,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!IM483PLConfig(0, "a-Serial[0]")
 #!drvIM483PLdebug=4
 
-# MCB-4B driver setup parameters:
-#     (1) maximum # of controllers,
-#     (2) motor task polling rate (min=1Hz, max=60Hz)
-#!MCB4BSetup(1, 10)
-
-# MCB-4B driver configuration parameters:
-#     (1) controller
-#     (2) ASYN port name
-#!MCB4BConfig(0, "a-Serial[0]")
-#!asynOctetSetInputEos("a-Serial[0]",0,"\r")
-#!asynOctetSetOutputEos("a-Serial[0]",0,"\r")
-#!drvMCB4BDebug=4
-
 # New Focus Picomotor Network Controller (model 8750/2) (setup parameters:  
 #     (1) maximum number of controllers in system 
 #     (2) maximum number of drivers per controller (1 - 3)  

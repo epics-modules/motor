@@ -26,19 +26,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 #!IM483PLConfig(0, "L0")
 #!var drvIM483PLdebug 4
 
-# MCB-4B driver setup parameters:
-#     (1) maximum # of controllers,
-#     (2) motor task polling rate (min=1Hz, max=60Hz)
-#!MCB4BSetup(1, 10)
-
-# MCB-4B driver configuration parameters:
-#     (1) controller
-#     (2) ASYN port name
-#!MCB4BConfig(0, "L0")
-#!asynOctetSetInputEos("L0",0,"\r")
-#!asynOctetSetOutputEos("L0",0,"\r")
-#!var drvMCB4BDebug 4
-
 # Micos MoCo driver setup parameters:
 # Load MicosSetup once.
 #     (1) max # of controller groups.  Controller groups are per serial
