@@ -13,7 +13,6 @@ PROD_IOC_vxWorks = WithAsynVx
 COMMONDBDS  = base.dbd
 COMMONDBDS += motorSupport.dbd
 COMMONDBDS += devImsMotor.dbd
-COMMONDBDS += devMicos.dbd
 ifdef SNCSEQ
 COMMONDBDS += devAerotechSeq.dbd
 endif
@@ -61,7 +60,6 @@ WithAsynVx_SRCS += WithAsynVx_registerRecordDeviceDriver.cpp
 WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 COMMONLIBS += Aerotech
-COMMONLIBS += Micos
 COMMONLIBS += PI
 COMMONLIBS += Ims
 COMMONLIBS += softMotor

@@ -52,3 +52,6 @@
 [submodule "modules/motorAcs"]
 	path = modules/motorAcs
 	url = https://github.com/epics-motor/motorAcs.git
+[submodule "modules/motorMicos"]
+	path = modules/motorMicos
+	url = https://github.com/epics-motor/motorMicos.git

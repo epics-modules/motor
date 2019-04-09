@@ -15,6 +15,7 @@ SUBMODULES += motorHytec
 endif
 SUBMODULES += motorKohzu
 SUBMODULES += motorMclennan
+SUBMODULES += motorMicos
 SUBMODULES += motorMicroMo
 SUBMODULES += motorMicronix
 SUBMODULES += motorNPoint

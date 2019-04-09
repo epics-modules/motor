@@ -27,9 +27,6 @@ ImsSrc_DEPEND_DIRS = MotorSrc
 DIRS += PIGCS2Src
 PIGCS2Src_DEPEND_DIRS = MotorSrc
 
-DIRS += MicosSrc
-MicosSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += PC6KSrc
 PC6KSrc_DEPEND_DIRS = MotorSrc
 
