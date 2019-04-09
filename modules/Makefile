@@ -18,6 +18,7 @@ SUBMODULES += motorMclennan
 SUBMODULES += motorMicos
 SUBMODULES += motorMicroMo
 SUBMODULES += motorMicronix
+SUBMODULES += motorNewFocus
 SUBMODULES += motorNPoint
 SUBMODULES += motorOriel
 SUBMODULES += motorPiJena

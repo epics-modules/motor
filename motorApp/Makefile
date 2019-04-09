@@ -30,9 +30,6 @@ PIGCS2Src_DEPEND_DIRS = MotorSrc
 DIRS += PC6KSrc
 PC6KSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += NewFocusSrc
-NewFocusSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += AerotechSrc
 AerotechSrc_DEPEND_DIRS = MotorSrc
 
