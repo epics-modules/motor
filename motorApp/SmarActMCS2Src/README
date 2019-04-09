@@ -1,0 +1,17 @@
+asyn model 3 driver
+-------------------
+MCS2MotorDriver.cpp
+MCS2MotorDriver.h
+MCS2MotorSupport.dbd
+
+MCS2 uses 1 step=1pm. Due to limitation in motor record of 32 bit int for RMP
+this driver scales 1 step=1nm. See discription in header file.
+
+Velocity and Acceration - I suggest to use zero (0) for both unless you really
+need to set it. The MCS2 will drive at the default values.
+
+Positioner types. This driver does not attempt to set the positioner type. I
+have only type 300 stages and it works without configuration on my part. I'm
+not sure if that's true for every positioner/sensor combination.
+
+Only linear stages are supported right now (I have no rotary to test).
