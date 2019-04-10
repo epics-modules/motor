@@ -33,9 +33,6 @@ ACRSrc_DEPEND_DIRS = MotorSrc
 DIRS += SmarActMCSSrc
 SmarActMCSSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += PhytronSrc
-PhytronSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += AMCISrc
 AMCISrc_DEPEND_DIRS = MotorSrc
 

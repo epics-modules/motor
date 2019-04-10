@@ -29,7 +29,6 @@ ifdef BUSY
 	COMMONLIBS := busy $(COMMONLIBS)
 endif
 COMMONDBDS += PI_GCS2Support.dbd
-COMMONDBDS += phytron.dbd
 ifdef LUA
 COMMONDBDS += ScriptMotorDriver.dbd
 endif
@@ -66,7 +65,6 @@ COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
 COMMONLIBS += ACRMotor
 COMMONLIBS += PI_GCS2Support
-COMMONLIBS += phytronAxisMotor
 COMMONLIBS += motor
 ifdef LUA
 COMMONLIBS += ScriptMotor

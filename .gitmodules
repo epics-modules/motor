@@ -64,3 +64,6 @@
 [submodule "modules/motorOmsAsyn"]
 	path = modules/motorOmsAsyn
 	url = https://github.com/epics-motor/motorOmsAsyn.git
+[submodule "modules/motorPhytron"]
+	path = modules/motorPhytron
+	url = https://github.com/epics-motor/motorPhytron.git
