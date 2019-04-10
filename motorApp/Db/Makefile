@@ -18,7 +18,6 @@ include $(TOP)/configure/CONFIG
 DB += motor.db
 DB += basic_motor.db
 DB += basic_asyn_motor.db
-DB += IMS_extra.db
 DB += ACRAux.template
 DB += ACRAuxRead.template
 DB += ACRAuxLi.template
