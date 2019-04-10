@@ -13,6 +13,7 @@ SUBMODULES += motorFaulhaber
 ifdef IPAC
 SUBMODULES += motorHytec
 endif
+SUBMODULES += motorIms
 SUBMODULES += motorKohzu
 SUBMODULES += motorMclennan
 SUBMODULES += motorMicos

@@ -21,9 +21,6 @@ OmsAsynSrc_DEPEND_DIRS   = MotorSrc
 DIRS += MotorSimSrc
 MotorSimSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += ImsSrc
-ImsSrc_DEPEND_DIRS = MotorSrc
-
 DIRS += PIGCS2Src
 PIGCS2Src_DEPEND_DIRS = MotorSrc
 

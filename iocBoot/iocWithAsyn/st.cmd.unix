@@ -21,33 +21,6 @@ asynSetOption("L0", -1, "stop", "1")
 asynSetOption("L0", -1, "clocal", "Y")
 asynSetOption("L0", -1, "crtscts", "N")
 
-# IMS IM483 driver setup parameters:
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#  SM - single mode     PL - party mode
-#!IM483SMSetup(1, 10)
-#!IM483PLSetup(1, 10)
-
-# IMS IM483 configuration parameters:
-#     (1) controller# (chain#) being configured,
-#     (2) ASYN port name
-#  SM - single mode     PL - party mode
-#!IM483SMConfig(0, "L0")
-#!var drvIM483SMdebug 4
-#!IM483PLConfig(0, "L0")
-#!var drvIM483PLdebug 4
-
-# IMS MDrive driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!MDriveSetup(1, 10)
-
-# IMS MDrive driver configuration parameters: 
-#     (1) controller# being configured,
-#     (2) ASYN port name
-#!MDriveConfig(0, "L0")
-#!var drvMDrivedebug 4
-
 
 # Aerotech Ensemble digital servo controller Setup
 #     (1) maximum number of controllers in system

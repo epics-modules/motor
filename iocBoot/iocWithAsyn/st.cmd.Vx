@@ -1,5 +1,5 @@
-# The is the "ASYN" example for communication to an 
-# IMS483 controller.  The examples must be configured by including or omitting
+# The is the "ASYN" example for communication to a controller
+# The examples must be configured by including or omitting
 # comment characters (i.e., #'s) from this file.
 
 # "#!" marks lines that can be uncommented.
@@ -27,33 +27,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 
 # Configure the ASYN server code. This MUST be configured too!
 < st_asynserver.cmd.Vx
-
-# IMS IM483 driver setup parameters:
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#  SM - single mode     PL - party mode
-#!IM483SMSetup(1, 10)
-#!IM483PLSetup(1, 10)
-
-# IMS IM483 configuration parameters:
-#     (1) controller# (chain#) being configured,
-#     (2) ASYN port name
-#  SM - single mode     PL - party mode
-#!IM483SMConfig(0, "a-Serial[0]")
-#!drvIM483SMdebug=4
-#!IM483PLConfig(0, "a-Serial[0]")
-#!drvIM483PLdebug=4
-
-
-# IMS MDrive driver setup parameters: 
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!MDriveSetup(1, 10)
-
-# IMS MDrive driver configuration parameters: 
-#     (1) controller# being configured
-#!MDriveConfig(0, "a-Serial[0]")
-#!drvMDrivedebug = 4
 
 
 # Aerotech Ensemble digital servo controller Setup
