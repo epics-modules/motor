@@ -61,3 +61,6 @@
 [submodule "modules/motorIms"]
 	path = modules/motorIms
 	url = https://github.com/epics-motor/motorIms.git
+[submodule "modules/motorOmsAsyn"]
+	path = modules/motorOmsAsyn
+	url = https://github.com/epics-motor/motorOmsAsyn.git

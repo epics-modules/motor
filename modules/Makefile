@@ -21,6 +21,7 @@ SUBMODULES += motorMicroMo
 SUBMODULES += motorMicronix
 SUBMODULES += motorNewFocus
 SUBMODULES += motorNPoint
+SUBMODULES += motorOmsAsyn
 SUBMODULES += motorOriel
 SUBMODULES += motorPiJena
 SUBMODULES += motorPi
