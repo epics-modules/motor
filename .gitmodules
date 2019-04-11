@@ -73,3 +73,6 @@
 [submodule "modules/motorScriptMotor"]
 	path = modules/motorScriptMotor
 	url = https://github.com/epics-motor/motorScriptMotor.git
+[submodule "modules/motorACR"]
+	path = modules/motorACR
+	url = https://github.com/epics-motor/motorACR.git

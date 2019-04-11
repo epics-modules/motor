@@ -16,7 +16,6 @@ COMMONDBDS += devImsMotor.dbd
 COMMONDBDS += devPIMotor.dbd
 COMMONDBDS += devSoftMotor.dbd
 COMMONDBDS += motorSimSupport.dbd
-COMMONDBDS += ACRMotorSupport.dbd
 COMMONDBDS += asyn.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
 COMMONDBDS += drvAsynIPPort.dbd
@@ -55,7 +54,6 @@ COMMONLIBS += PI
 COMMONLIBS += Ims
 COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
-COMMONLIBS += ACRMotor
 COMMONLIBS += PI_GCS2Support
 COMMONLIBS += motor
 
