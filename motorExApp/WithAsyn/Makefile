@@ -25,9 +25,6 @@ ifdef BUSY
 	COMMONLIBS := busy $(COMMONLIBS)
 endif
 COMMONDBDS += PI_GCS2Support.dbd
-ifdef LUA
-COMMONDBDS += ScriptMotorDriver.dbd
-endif
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -61,10 +58,6 @@ COMMONLIBS += motorSimSupport
 COMMONLIBS += ACRMotor
 COMMONLIBS += PI_GCS2Support
 COMMONLIBS += motor
-ifdef LUA
-COMMONLIBS += ScriptMotor
-COMMONLIBS += lua
-endif
 
 # Needed for SNL programs
 WithAsyn_LIBS += $(COMMONLIBS)

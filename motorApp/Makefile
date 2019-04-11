@@ -33,12 +33,6 @@ SmarActMCSSrc_DEPEND_DIRS = MotorSrc
 DIRS += AMCISrc
 AMCISrc_DEPEND_DIRS = MotorSrc
 
-# The Script motor support requires the lua scripting module
-ifdef LUA
-DIRS += ScriptMotorSrc
-ScriptMotorSrc_DEPEND_DIRS = MotorSrc
-endif
-
 endif
 
 # Install the edl files

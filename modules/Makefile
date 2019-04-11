@@ -27,6 +27,9 @@ SUBMODULES += motorOriel
 SUBMODULES += motorPhytron
 SUBMODULES += motorPiJena
 SUBMODULES += motorPi
+ifdef LUA
+SUBMODULES += motorScriptMotor
+endif
 SUBMODULES += motorSmartMotor
 SUBMODULES += motorThorLabs
 
