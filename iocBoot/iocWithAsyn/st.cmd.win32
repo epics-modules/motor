@@ -10,17 +10,6 @@ dbLoadRecords("$(MOTOR)/db/motorUtil.db", "P=IOC:")
 
 # This is for WIN32, local serial ports not supported.  Must use IP terminal server.
 
-# Aerotech Ensemble digital servo controller Setup
-#     (1) maximum number of controllers in system
-#     (2) motor task polling rate (min=1Hz,max=60Hz)
-#!EnsembleSetup(1, 10)
-
-# Aerotech Ensemble digital servo controller Configure
-#     (1) controller# being configured, 
-#     (2) asyn port name (string)
-#!EnsembleConfig(0, "a-Serial[0]")
-
-
 iocInit
 
 # motorUtil (allstop & alldone)

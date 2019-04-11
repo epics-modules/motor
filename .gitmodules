@@ -67,3 +67,6 @@
 [submodule "modules/motorPhytron"]
 	path = modules/motorPhytron
 	url = https://github.com/epics-motor/motorPhytron.git
+[submodule "modules/motorAerotech"]
+	path = modules/motorAerotech
+	url = https://github.com/epics-motor/motorAerotech.git

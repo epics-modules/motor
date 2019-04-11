@@ -7,6 +7,7 @@ SUBMODULES += motorOms
 SUBMODULES += motorNewport
 SUBMODULES += motorAcs
 SUBMODULES += motorAcsTech80
+SUBMODULES += motorAerotech
 SUBMODULES += motorAttocube
 SUBMODULES += motorDeltaTau
 SUBMODULES += motorFaulhaber
