@@ -27,7 +27,7 @@ SUBMODULES += motorOmsAsyn
 SUBMODULES += motorOriel
 SUBMODULES += motorPhytron
 SUBMODULES += motorPiJena
-SUBMODULES += motorPi
+SUBMODULES += motorPI
 ifdef LUA
 SUBMODULES += motorScriptMotor
 endif
