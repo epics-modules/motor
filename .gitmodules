@@ -73,3 +73,6 @@
 [submodule "modules/motorACR"]
 	path = modules/motorACR
 	url = https://github.com/epics-motor/motorACR.git
+[submodule "modules/motorNPoint"]
+	path = modules/motorNPoint
+	url = https://github.com/epics-motor/motorNPoint.git
