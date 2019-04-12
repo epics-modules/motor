@@ -79,3 +79,6 @@
 [submodule "modules/motorAMCI"]
 	path = modules/motorAMCI
 	url = https://github.com/epics-motor/motorAMCI.git
+[submodule "modules/motorPIGCS2"]
+	path = modules/motorPIGCS2
+	url = https://github.com/epics-motor/motorPIGCS2.git

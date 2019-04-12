@@ -23,7 +23,6 @@ DB += motorUtil.db
 DB += asyn_motor.db
 DB += profileMoveController.template
 DB += profileMoveAxis.template
-DB += PI_Support.db PI_SupportCtrl.db
 DB += asyn_auto_power.db
 
 #----------------------------------------------------

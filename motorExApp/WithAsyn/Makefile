@@ -23,7 +23,6 @@ ifdef BUSY
 	COMMONDBDS += busySupport.dbd
 	COMMONLIBS := busy $(COMMONLIBS)
 endif
-COMMONDBDS += PI_GCS2Support.dbd
 
 DBD += WithAsyn.dbd
 WithAsyn_DBD += $(COMMONDBDS)
@@ -54,7 +53,6 @@ COMMONLIBS += PI
 COMMONLIBS += Ims
 COMMONLIBS += softMotor
 COMMONLIBS += motorSimSupport
-COMMONLIBS += PI_GCS2Support
 COMMONLIBS += motor
 
 # Needed for SNL programs
