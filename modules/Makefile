@@ -33,6 +33,7 @@ SUBMODULES += motorPIGCS2
 ifdef LUA
 SUBMODULES += motorScriptMotor
 endif
+SUBMODULES += motorSmarAct
 SUBMODULES += motorSmartMotor
 SUBMODULES += motorThorLabs
 
