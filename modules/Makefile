@@ -78,6 +78,10 @@ ifdef LUA
 	$(ECHO) Creating $@, LUA = $(LUA)
 	@echo LUA = $(LUA)>> $@
 endif
+ifdef MODBUS
+	$(ECHO) Creating $@, MODBUS = $(MODBUS)
+	@echo MODBUS = $(MODBUS)>> $@
+endif
 	$(ECHO) Creating $@, EPICS_BASE = $(EPICS_BASE)
 	@echo EPICS_BASE = $(EPICS_BASE)>> $@
 	

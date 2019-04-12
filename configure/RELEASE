@@ -40,6 +40,9 @@ IPAC=$(SUPPORT)/ipac/R2-12
 # Script module needed to build ScriptMotorController
 #!LUA=$(SUPPORT)/lua
 
+# Modbus module needed to build AMCI example IOC
+#!MODBUS=$(SUPPORT)/modbus
+
 # The following is only needed for the motor examples in iocBoot.
 #!MOTOR=$(TOP)
 
