@@ -85,3 +85,6 @@
 [submodule "modules/motorSmarAct"]
 	path = modules/motorSmarAct
 	url = https://github.com/epics-motor/motorSmarAct.git
+[submodule "modules/motorPC"]
+	path = modules/motorPC
+	url = https://github.com/epics-motor/motorPC.git

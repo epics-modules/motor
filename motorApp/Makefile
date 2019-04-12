@@ -18,9 +18,6 @@ ifdef ASYN
 DIRS += MotorSimSrc
 MotorSimSrc_DEPEND_DIRS = MotorSrc
 
-DIRS += PC6KSrc
-PC6KSrc_DEPEND_DIRS = MotorSrc
-
 endif
 
 # Install the edl files
