@@ -921,9 +921,10 @@ static long init_record(dbCommon* arg, int pass)
             pmr->udf = TRUE;
             break;
     }
-    Debug(pmr,3, "%s:%d %s init_record process_reason=%d dval=%f drbv=%f rdbd=%f spdb=%f udf=%d stat=%d\n",
+    Debug(pmr,3,
+          "%s:%d %s init_record process_reason=%d dval=%f drbv=%f rdbd=%f spdb=%f udf=%d stat=%d msta=0x%x\n",
           __FILE__, __LINE__, pmr->name, (int)process_reason, pmr->dval, pmr->drbv,
-          pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat);
+          pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat, pmr->msta);
     return OK;
 }
 
@@ -1526,8 +1527,10 @@ static long process(dbCommon *arg)
                 {
                     char dbuf[MBLE];
                     dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-                    Debug(pmr,1, "%s:%d %s motor has stopped drbv=%f pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
-                          __FILE__, __LINE__, pmr->name, pmr->drbv, pmr->pp, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
+                    Debug(pmr,1,
+                          "%s:%d %s motor has stopped drbv=%f pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s) msta=0x%x\n",
+                          __FILE__, __LINE__, pmr->name, pmr->drbv, pmr->pp,
+                          pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf, pmr->msta);
                 }
 #endif
                 pmr->dmov = TRUE;
