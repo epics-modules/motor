@@ -91,3 +91,6 @@
 [submodule "modules/motorMotorSim"]
 	path = modules/motorMotorSim
 	url = https://github.com/epics-motor/motorMotorSim.git
+[submodule "modules/motorMXmotor"]
+	path = modules/motorMXmotor
+	url = https://github.com/epics-motor/motorMXmotor.git

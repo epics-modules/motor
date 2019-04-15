@@ -23,6 +23,9 @@ SUBMODULES += motorMicos
 SUBMODULES += motorMicroMo
 SUBMODULES += motorMicronix
 SUBMODULES += motorMotorSim
+ifdef MX
+SUBMODULES += motorMXmotor
+endif
 SUBMODULES += motorNewFocus
 SUBMODULES += motorNPoint
 SUBMODULES += motorOmsAsyn

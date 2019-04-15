@@ -17,7 +17,6 @@ PROD_IOC_vxWorks = NoAsynVx
 COMMONDBDS  = base.dbd
 COMMONDBDS += motorRecord.dbd
 COMMONDBDS += devSoftMotor.dbd
-#!COMMONDBDS += devMXmotor.dbd
 
 DBD += NoAsyn.dbd
 NoAsyn_DBD += $(COMMONDBDS)
@@ -31,7 +30,6 @@ NoAsyn_SRCS += NoAsyn_registerRecordDeviceDriver.cpp
 NoAsyn_SRCS_DEFAULT += NoAsynMain.cpp
 NoAsynVx_SRCS += NoAsynVx_registerRecordDeviceDriver.cpp
 
-#!COMMONLIBS += MXmotor
 COMMONLIBS += softMotor
 COMMONLIBS += motor
 

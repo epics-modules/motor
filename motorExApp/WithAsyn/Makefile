@@ -13,7 +13,6 @@ PROD_IOC_vxWorks = WithAsynVx
 COMMONDBDS  = base.dbd
 COMMONDBDS += motorSupport.dbd
 COMMONDBDS += devSoftMotor.dbd
-COMMONDBDS += motorSimSupport.dbd
 COMMONDBDS += asyn.dbd
 COMMONDBDS += drvAsynSerialPort.dbd
 COMMONDBDS += drvAsynIPPort.dbd
@@ -48,7 +47,6 @@ WithAsynVx_SRCS += WithAsynVx_registerRecordDeviceDriver.cpp
 WithAsyn_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 COMMONLIBS += softMotor
-COMMONLIBS += motorSimSupport
 COMMONLIBS += motor
 
 # Needed for SNL programs
