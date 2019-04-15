@@ -22,6 +22,7 @@ SUBMODULES += motorMclennan
 SUBMODULES += motorMicos
 SUBMODULES += motorMicroMo
 SUBMODULES += motorMicronix
+SUBMODULES += motorMotorSim
 SUBMODULES += motorNewFocus
 SUBMODULES += motorNPoint
 SUBMODULES += motorOmsAsyn

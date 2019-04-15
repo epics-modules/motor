@@ -12,14 +12,6 @@ DIRS += MotorSrc
 DIRS += SoftMotorSrc
 SoftMotorSrc_DEPEND_DIRS = MotorSrc
 
-# All the following modules require ASYN.
-ifdef ASYN
-
-DIRS += MotorSimSrc
-MotorSimSrc_DEPEND_DIRS = MotorSrc
-
-endif
-
 # Install the edl files
 #DIRS += opi
 
