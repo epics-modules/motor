@@ -16,9 +16,9 @@ R6-11 is a release based on the master branch.
 * Pull request [#103](https://github.com/epics-modules/motor/pull/103) Aerotech Ensemble: If disabling torque due to a fault, clear motorAxisProblem so that user can jog off limit switch
 * Commit [74a8ced](https://github.com/epics-modules/motor/commit/74a8cedc283c6f53042dea867b4e6a1363c74479) Aerotech Ensemble: update CountsPerUnit every time torque is enabled to reduce the need for a reboot after parameter file change
 * Commit [c0c5b5b](https://github.com/epics-modules/motor/commit/c0c5b5b351c33549437cffbd4233edb15a9361c2) Multiple changes to Aerotech A3200 driver: 
-  1. restored "task number" argument
-  2. don't check limit switches of virtual axes
-  3. added single/multi axis move argument 
+  * restored "task number" argument
+  * don't check limit switches of virtual axes
+  * added single/multi axis move argument 
 
 #### New features
 * Pull request [#114](https://github.com/epics-modules/motor/pull/114) motorRecord: Added Set Point Deadband field (SPDB) enabling deadbands greater than the MRES
