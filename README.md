@@ -5,7 +5,9 @@ This module contains motor support for the Experimental Physics and Industrial C
 
 The core motor functionality resides in this respository.  Starting with R7-0 the drivers have been moved from motor to standalone github repositories, which have been added to motor as submodules.  The driver repositories can be found here: https://github.com/epics-motor
 
-## Updating clones created before 2019-04-02
+## Getting started
+
+### Updating clones created before 2019-04-02
 Use the following procedure to update clones that were created before the beginning of the motor split:
 ```bash
 $ cd motor
@@ -21,13 +23,13 @@ $ git submodule update
 ```
 Failure to 'make distclean' before rebasing will result in many driver source directories in motorApp with "O.*" directories that need to be removed manually.
 
-## Cloning motor with support for all motor controllers
+### Cloning motor with support for all motor controllers
 The following command results in a motor directory that contains all of the driver submodules:
 ```bash
 $ git clone --recursive https://github.com/epics-modules/motor.git
 ```
 
-## Cloning motor with support for a single motor controller
+### Cloning motor with support for a single motor controller
 The following procedure allows only required drivers to be built, which can significantly reduce build times:
 ```bash
 $ git clone https://github.com/epics-modules/motor.git
