@@ -67,9 +67,6 @@
 [submodule "modules/motorScriptMotor"]
 	path = modules/motorScriptMotor
 	url = https://github.com/epics-motor/motorScriptMotor.git
-[submodule "modules/motorACR"]
-	path = modules/motorACR
-	url = https://github.com/epics-motor/motorACR.git
 [submodule "modules/motorNPoint"]
 	path = modules/motorNPoint
 	url = https://github.com/epics-motor/motorNPoint.git
@@ -85,9 +82,6 @@
 [submodule "modules/motorSmarAct"]
 	path = modules/motorSmarAct
 	url = https://github.com/epics-motor/motorSmarAct.git
-[submodule "modules/motorPC"]
-	path = modules/motorPC
-	url = https://github.com/epics-motor/motorPC.git
 [submodule "modules/motorMotorSim"]
 	path = modules/motorMotorSim
 	url = https://github.com/epics-motor/motorMotorSim.git

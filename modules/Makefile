@@ -6,7 +6,6 @@ include $(TOP)/configure/CONFIG
 SUBMODULES += motorOms
 SUBMODULES += motorNewport
 SUBMODULES += motorAMCI
-SUBMODULES += motorACR
 SUBMODULES += motorAcs
 SUBMODULES += motorAcsTech80
 SUBMODULES += motorAerotech
@@ -30,7 +29,6 @@ SUBMODULES += motorNewFocus
 SUBMODULES += motorNPoint
 SUBMODULES += motorOmsAsyn
 SUBMODULES += motorOriel
-SUBMODULES += motorPC
 SUBMODULES += motorPhytron
 SUBMODULES += motorPiJena
 SUBMODULES += motorPI
