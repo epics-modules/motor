@@ -29,6 +29,7 @@ SUBMODULES += motorNewFocus
 SUBMODULES += motorNPoint
 SUBMODULES += motorOmsAsyn
 SUBMODULES += motorOriel
+SUBMODULES += motorParker
 SUBMODULES += motorPhytron
 SUBMODULES += motorPiJena
 SUBMODULES += motorPI
