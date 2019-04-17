@@ -35,92 +35,113 @@
 </ul>
 <a name="Overview"></a>
 
-<h2>Overview</h2> This documentation describes version R6-11 of the EPICS motor
+<h2>Overview</h2> This documentation describes version R7-0 of the EPICS motor
 record, and related EPICS software required to build and use it.&nbsp; Version
-R6-11 of the motor record is compatible with EPICS base R3.14.12.2 and above.
+R7-0 of the motor record is compatible with EPICS base R3.15.6 and above.
 <p>
 The motor record is intended to support positioning motors of all kinds, but currently 
-supports only the following variety of motor controllers (in addition to Soft 
+supports motor controllers from the following manufacturers:
+</p>
+
+<ul>
+  <li>
+    Oregon Micro Systems: <a href="https://github.com/epics-motor/motorOms">motorOms</a> &amp; <a href="https://github.com/epics-motor/motorOmsAsyn">motorOmsAsyn</a>
+  </li>
+  <li>
+    Newport: <a href="https://github.com/epics-motor/motorNewport">motorNewport</a>
+  </li>
+  <li>
+    Schneider Electric (formally IMS): <a href="https://github.com/epics-motor/motorIms">motorIms</a>
+  </li>
+  <li>
+    Advanced Control Systems, Corp: <a href="https://github.com/epics-motor/motorAcs">motorAcs</a>
+  </li>
+  <li>
+    Mclennan: <a href="https://github.com/epics-motor/motorMclennan">motorMclennan</a>
+  </li>
+  <LI>
+    Physik Instrumente (PI) GmbH &amp; Co. models: <a href="https://github.com/epics-motor/motorPI">motorPI</a> &amp; <a href="https://github.com/epics-motor/motorPIGCS2">motorPIGCS2</a>
+  </LI>
+  <li>
+    MicroMo: <a href="https://github.com/epics-motor/motorMicroMo">motorMicroMo</a>
+  </li>
+  <li>
+    Micos: <a href="https://github.com/epics-motor/motorMicos">motorMicos</a>
+  </li>
+  <li>
+    Faulhaber: <a href="https://github.com/epics-motor/motorFaulhaber">motorFaulhaber</a>
+  </li>
+  <li>
+    Parker Hannifin: <a href="https://github.com/epics-motor/motorParker">motorParker</a>
+  </li>
+  <li>
+    New Focus: <a href="https://github.com/epics-motor/motorNewFocus">motorNewFocus</a>
+  </li>
+  <li>
+    ACS Motion Control: <a href="https://github.com/epics-motor/motorAcsTech80">motorAcsTech80</a>
+  </li>
+  <li>
+    Spectra-Physics: <a href="https://github.com/epics-motor/motorOriel">motorOriel</a>
+  </li>
+  <li>
+    Thorlabs: <a href="https://github.com/epics-motor/motorThorLabs">motorThorLabs</a>
+  </li>
+  <li>
+    Animatics Corporation: <a href="https://github.com/epics-motor/motorSmartMotor">motorSmartMotor</a>
+  </li>
+  <li>
+    piezosystem jena GmbH: <a href="https://github.com/epics-motor/motorPiJena">motorPiJena</a>
+  </li>
+  <li>
+    Kohzu: <a href="https://github.com/epics-motor/motorKohzu">motorKohzu</a>
+  </li>
+  <li>
+    attocube systems: <a href="https://github.com/epics-motor/motorAttocube">motorAttocube</a>
+  </li>
+  <li>
+    Aerotech: <a href="https://github.com/epics-motor/motorAerotech">motorAerotech</a>
+  </li>
+  <li>
+    Hytec: <a href="https://github.com/epics-motor/motorHytec">motorHytec</a>
+  </li>
+  <li>
+    nPoint: <a href="https://github.com/epics-motor/motorNPoint">motorNPoint</a>
+  </li>
+  <li>
+    Micronix: <a href="https://github.com/epics-motor/motorMicronix">motorMicronix</a>
+  </li>
+  <li>
+    SmarAct GmbH: <a href="https://github.com/epics-motor/motorSmarAct">motorSmarAct</a>
+  </li>
+  <li>
+    Phytron: <a href="https://github.com/epics-motor/motorPhytron">motorPhytron</a>
+  </li>
+  <li>
+    AMCI: <a href="https://github.com/epics-motor/motorAMCI">motorAMCI</a>
+  </li>
+  <li>
+    Delta Tau: <a href="https://github.com/epics-motor/motorDeltaTau">motorDeltaTau</a>
+  </li>
+</ul>
+
+<p>
+The motor record also supports the following software-based motor drivers (in addition to Soft 
 Channel support):
 </p>
 
 <ul>
   <li>
-    Pro-Dex, Inc. (Oregon Micro Systems) models; VME8/44/58, VS4, VX2, PC68/78, MAXv and MAXnet.
+    Simulated: <a href="https://github.com/epics-motor/motorMotorSim">motorMotorSim</a>
   </li>
   <li>
-    Newport models MM3000, MM4000/5/6, PM500, ESP300/301/100, XPSC8, HXP100-ELEC, AG_CONEX and AG_UC.
+    Lua Script: <a href="https://github.com/epics-motor/motorScriptMotor">motorScriptMotor</a>
   </li>
   <li>
-    Schneider Electric (formally IMS) models IM483, MDrive and MForce.
-  </li>
-  <li>
-    Advanced Control Systems, Corp. model MCB-4B.
-  </li>
-  <li>
-    Mclennan models PM304 and PM600.
-  </li>
-  <LI>
-    Physik Instrumente (PI) GmbH & Co. models; C-630/662/663/844/848/862/863, E-516/517/710/816, micos SMC hydra and all GCS2 (General Command Set) compatible controllers.
-  </LI>
-  <li>
-    MicroMo model MVP 2001 B02.
-  </li>
-  <li>
-    Micos model MoCo dc controller, SMC hydra controller.
-  </li>
-  <li>
-    Faulhaber MCDC2805 servo controller.
-  </li>
-  <li>
-    Parker Hannifin, Compumotor Division, 6K Series controllers.
-  </li>
-  <li>
-    New Focus, models; 8750, 8752, &amp 874x.
-  </li>
-  <li>
-    ACS Motion Control, SPiiPlus model.
-  </li>
-  <li>
-    Spectra-Physics, Encoder Mike Controller, Model 18011.
-  </li>
-  <li>
-    Thorlabs, Piezo Controller, Model MDT695.
-  </li>
-  <li>
-    Animatics Corporation SmartMotor.
-  </li>
-  <li>
-    piezosystem jena GmbH EDS data interface module.
-  </li>
-  <li>
-    Kohzu SC-200, SC-400, SC-800 stepper motor controllers.
-  </li>
-  <li>
-    attocube systems AG ANC150 Piezo Step Controller.
-  </li>
-  <li>
-    Aerotech A3200, Ensemble and Soloist controllers.
-  </li>
-  <li>
-    Hytec 8601 Industry Pack based 4-channel Stepper Motor Controller.
-  </li>
-  <li>
-    nPoint C300 piezo controller
-  </li>
-  <li>
-    Micronix MMC-100 and MMC-200 
-  </li>
-  <li>
-    SmarAct GmbH Modular Control System (MCS) Controller.
-  </li>
-  <li>
-    Phytron I1AM01 Stepper Motor Controller.
-  </li>
-  <li>
-    AMCI ANG1 Stepper Motor Controller/Driver, ANF1E/ANF1/ANF2E/ANF2 Stepper Motor Controllers.
+    MX: <a href="https://github.com/epics-motor/motorMXmotor">motorMXmotor</a>
   </li>
 </ul>
+
+<p>
 The record maintains two coordinate systems for motor position ("user" and "dial 
 " coordinates); displays drive and readback values; enforces limits to motor 
 motion and maintains those limits in both coordinate systems; displays the 
@@ -131,6 +152,7 @@ system. The record also supports "tweak", "jog", and "home" motions, and
 supports both absolute and relative motions in user coordinates. Two "stop" 
 switches are provided: a simple one for use by other records and by channel-access 
 clients, and a more versatile one for interactive use.
+</p>
 <p>
 Except where specified otherwise, fields associated with the motor position and 
 its derivatives take values in user-specified "engineering units", such as 
