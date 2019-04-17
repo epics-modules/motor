@@ -21,7 +21,7 @@
     <a href="#Fields">Field Descriptions</a>
   </li>
   <li>
-    <a href="#Files">Files, device-support</a>
+    <a href="#Files">Files</a>
   </li>
   <li>
     <a href="#Restrictions">Restrictions</a>
@@ -3235,20 +3235,14 @@ below.
 <a name="Files"></a>
 </p>
 
-<h2>Files, device support</h2> The following table briefly describes all of the 
-files required to implement and use the motor record. The reader is assumed to 
-be familiar with the <a href="http://www.aps.anl.gov/asd/controls/epics/EpicsDocumentation/WWWPages/EpicsDocs/AppDevManuals/AppSrcRelControl/AppSRControl.html">EPICS 
-Application Source/Release Control document</a> which describes how to build an 
-EPICS application tree into which these files are to be placed, and how to run
-"makesdr" and "gnumake" to build the record support. These files can all be
-obtained from the <a href="http://www.aps.anl.gov/xfd/WWW/xfd/SoftDist/Welcome.html">EPICS 
-Software Distribution</a> (in the <a href="http://www.aps.anl.gov/xfd/WWW/xfd/SoftDist/Welcome.html#Custom_EPICS">custom-software 
-section</a> ).
+<h2>Files</h2>
+<p>
+	The following tables briefly describe some of the files in the motor module.<br>
+</p>
 <table border="1" cellpadding="5">
   <tbody>
   <tr>
-    <th colspan="2">SOURCE CODE <br>
-      files to be placed in <tt>&amp;lttop&gt;/&amp;ltapp&amp;gtApp/src/</tt></th>
+    <th colspan="2">SOURCE CODE</th>
   </tr>
   <tr valign="top">
     <td>motorRecord.dbd</td>
@@ -3301,134 +3295,6 @@ section</a> ).
     </td>
   </tr>
   <tr>
-    <td>devOmsCom.c</td>
-    <td>Device support common to all Oregon Micro Systems device drivers.</td>
-  </tr>
-  <tr>
-    <td>devOmsCom.h</td>
-    <td>Device support header file common to all Oregon Micro Systems device drivers.</td>
-  </tr>
-  <tr>
-    <td>drvOmsCom.h</td>
-    <td>Driver support header file common to all Oregon Micro Systems device drivers.</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td>NOTE: The above files are required for any and all Oregon Micro Systems 
-    device drivers.</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td>devOms.c</td>
-    <td>Device support for Oregon Micro Systems VME8 and VME44 series boards</td>
-  </tr>
-  <tr valign="top">
-    <td>drvOms.c</td>
-    <td>Driver for Oregon Micro Systems VME8 and VME44 series boards</td>
-  </tr>
-  <tr valign="top">
-    <td>drvOms.h</td>
-    <td>Header included by devOms.c and drvOms.c</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td>devOms58.c</td>
-    <td>Device support for Oregon Micro Systems VME58 series boards</td>
-  </tr>
-  <tr valign="top">
-    <td>drvOms58.c</td>
-    <td>Driver for Oregon Micro Systems VME58 series boards</td>
-  </tr>
-  <tr valign="top">
-    <td>drvOms58.h</td>
-    <td>Header included by devOms58.c and drvOms58.c</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td>devV544.c</td>
-    <td>Device support for Highland Technology boards.</td>
-  </tr>
-  <tr valign="top">
-    <td>drvV544.c</td>
-    <td>Driver for Highland Technology boards.</td>
-  </tr>
-  <tr valign="top">
-    <td>drvV544.h</td>
-    <td>Header included by devV544.c and drvV544.c</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
-  <tr>
-    <td>drvMMCom.h</td>
-    <td>Common header included by all Newport Motion Master device drivers.</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td>NOTE: The above files are required for any and all Newport Motion Master
-    device drivers.</td>
-  </tr>
-  <tr>
-    <td>devMM3000.c</td>
-    <td>Device support for Newport MM3000.</td>
-  </tr>
-  <tr>
-    <td>drvMM3000.c</td>
-    <td>Driver for Newport MM3000.</td>
-  </tr>
-  <tr>
-    <td>devMM4000.c</td>
-    <td>Device support for Newport MM4000/40005.</td>
-  </tr>
-  <tr>
-    <td>drvMM4000.c</td>
-    <td>Driver for Newport MM4000/40005.</td>
-  </tr>
-  <tr>
-    <td>devPM500.c</td>
-    <td>Device support for Newport PM500.</td>
-  </tr>
-  <tr>
-    <td>drvPM500.c</td>
-    <td>Driver for Newport PM500.</td>
-  </tr>
-  <tr>
-    <td>devESP300.c<br>
-    </td>
-    <td>Device support for Newport ESP300.</td>
-  </tr>
-  <tr>
-    <td valign="top">drvESP300.c<br>
-    </td>
-    <td>Driver for Newport ESP300.</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
-  <tr>
     <td>devSoft.c</td>
     <td>Soft Channel device support.</td>
   </tr>
@@ -3443,68 +3309,13 @@ section</a> ).
     <td>devSoft.h</td>
     <td>Header included by devSoft.c and devSoftAux.c</td>
   </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
-  <tr>
-    <td>gpibIO.h</td>
-    <td>GPIB communication include file.</td>
-  </tr>
-  <tr>
-    <td>gpibIO.c</td>
-    <td>GPIB interface via Hideos.</td>
-  </tr>
-  <tr>
-    <td>serialIO.h</td>
-    <td>Serial communication include file.</td>
-  </tr>
-  <tr>
-    <td>serialIOMPF.cc</td>
-    <td>Serial communication interface via MPF.</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
-  <tr>
-    <td>drvIM483.h</td>
-    <td>Common header included by all IMS device drivers.</td>
-  </tr>
-  <tr>
-    <td>devIM483PL.c</td>
-    <td>Device support for IM483 in <i>party line</i> communication mode.</td>
-  </tr>
-  <tr>
-    <td>devIM483SM.c</td>
-    <td>Device support for IM483 in <i>single mode</i> communication mode.</td>
-  </tr>
-  <tr>
-    <td>drvIM483PL.c</td>
-    <td>Driver for IM483 in <i>party line</i> communication mode.</td>
-  </tr>
-  <tr>
-    <td>drvIM483SM.c</td>
-    <td>Driver for IM483 in <i>single mode </i>communication mode.</td>
-  </tr>
-  <tr>
-    <td><br>
-    </td>
-    <td><br>
-    </td>
-  </tr>
   </tbody>
 </table>
 
 <table border="1" cellpadding="5">
   <tbody>
   <tr>
-    <th colspan="2">MEDM DISPLAY SCREENS <br>
-      files to be placed in <tt>&amp;lttop&gt;/&amp;ltapp&amp;gtApp/op/adl/</tt></th>
+    <th colspan="2">MEDM DISPLAY SCREENS</th>
   </tr>
   <tr valign="top">
     <td>motorx.adl</td>
@@ -3547,151 +3358,10 @@ section</a> ).
   <tbody>
   <tr>
     <th colspan="2"><br>
-      EPICS STARTUP FILES <br>
-      files to be placed in <tt>&amp;lttop&gt;/ioc/ioc&amp;ltname&gt;/</tt></th>
-  </tr>
-  <tr valign="top">
-    <td>st.cmdmv167&nbsp;</td>
-    <td>Startup script</td>
+      EPICS STARTUP FILES</th>
   </tr>
   <tr>
-    <td colspan="2">A sample startup script, containing excerpts relevant to motors, 
-    is included in the distribution. Here is an annotated copy:
-
-      <pre>#######################################################################<br>
-      # vxWorks startup script to load and execute system (iocCore) software.</pre>
-      <b><font color="#ffffff">Load standard EPICS software</font></b>
-
-      <pre># the following should be loaded first - BEGIN<br>ld &lt; targetmv167/
-      iocCore<br>ld &lt; targetmv167/drvSup<br>ld &lt; targetmv167/devSup<br>ld &lt;
-      targetmv167/recSup<br># the following should be loaded first - END</pre>
-      <b><font color="#ffffff">Load custom EPICS software (including motor support)</font></b>
-
-      <pre>ld &lt; ../../stdApp/src/O.mv167/stdlib.o</pre>
-      <b><font color="#ffffff">Motor-related debug switches&nbsp;</font></b>
-
-      <pre>recMotordebug = 0<br><br>#OMS vme8/vme44 debug switches<br>devOMSdebug = 0<br>
-      drvOMSdebug = 0<br><br>#OMS vme58 debug switches<br>devOms58debug = 0<br>
-      drvOms58debug = 0<br><br>#Highland Technology V544 debug switches<br>devV544ebug
-      = 0<br>drvV544debug = 0</pre>
-      <b><font color="#ffffff">Motor-related databases&nbsp;</font></b>
-
-      <pre># load this before loading any databases<br>dbLoad "../../default.dctsdr"<br><br>
-      #allstop<br>dbLoadRecords("../../stdApp/gDb/allstop.db","P=tmm:")<br>#motors<br>
-      dbLoadRecords("../../stdApp/gDb/m16.db","P=tmm:")</pre>
-      <b><font color="#ffffff">Specify motor-controller board address, interrupt 
-      vector, etc.</font></b>
-      <table border="1" cellpadding="5">
-	<tbody>
-	<TR>
-	  <TD colspan="2"><TT>&nbsp; omsSetup(nCards, baseAddress, intVectBase, 
-	  intLevel, pollRate)</TT> <BR>
-	    <TT>oms58Setup(nCards, baseAddress, intVectBase, intLevel, pollRate)</TT> <BR>
-	    <P>
-	    <TT>MM3000Setup(nCards, pollRate)</TT> <BR>
-	    <TT>MM3000Config(card#, portName, GPIB#)</TT>
-	    </P>
-
-	    <P>
-	    <TT>MM4000Setup(nCards, pollRate)</TT> <BR>
-	    <TT>MM4000Config(card#, portName, GPIB#)</TT>
-	    </P>
-
-	    <P>
-	    <TT>IM483SMSetup(nCards, pollRate)&nbsp;</TT> <BR>
-	    <TT>IM483SMConfig(card#, portName)&nbsp;</TT>
-
-	    </P>
-
-	    <P>
-	    <TT>IM483PLSetup(nCommNet, pollRate)&nbsp;</TT> <BR>
-	    <TT>IM483PLConfig(CommNet#, portName)&nbsp;</TT> <BR>
-	    </P>
-
-	    <P>
-	    ESP300Setup(<TT>nCards, pollRate</TT>)<BR>
-	    ESP300Config(<TT>card#, portName, GPIB#</TT>)<BR>
-	    <BR>
-	    <BR>
-	    </P>
-	  </TD>
-	</TR>
-	<tr valign="top">
-	  <td>nCards</td>
-	  <td>the number of cards or controllers; may be less, but not greater than this 
-	  value.</td>
-	</tr>
-	<tr>
-	  <td>nCommNet</td>
-	  <td>the number of Communication networks&nbsp; (e.g., the number of RS-422 
-	  networks for a IM483PL device).</td>
-	</tr>
-	<tr valign="top">
-	  <td>baseAddress</td>
-	  <td>the base address of the first card of a series. This must agree with address 
-	  jumpers on the actual card(s).
-
-	    <p>
-	    OMS VME8, VME44, and VMEX cards are all of one series,  with a base address in 
-	    the short address space, on a 16-byte (0x10) boundary. (I.e., these cards 
-	    require 16 bytes each, and must all be addressed contiguously as, e.g., 0xFC00, 
-	    0xFC10). 
-	    </p>
-
-	    <p>
-	    OMS VME58-x cards are in their own series, also in the  short address space, on 
-	    a 4k-byte (0x1000) boundary. 
-	    </p>
-
-	    <p>
-	    Highland Technology V544 cards are in their own series,  in the short address 
-	    space, on a 128-byte (0x80) boundary.
-	    </p>
-	  </td>
-	</tr>
-	<tr valign="top">
-	  <td>intVectBase</td>
-	  <td>the interrupt vector that will be loaded into the first card of a series.  
-	  Succeeding cards will be loaded with intVectBase+1, intVectBase+2, etc. Set to "0 
-	  " to disable interrupt generation; otherwise, stay in the range [64..255].</td>
-	</tr>
-	<tr valign="top">
-	  <td>intLevel</td>
-	  <td>the VME-interrupt level (in [1..6]) the cards will use. This must agree  
-	  with jumper settings on the cards.</td>
-	</tr>
-	<tr valign="top">
-	  <td>pollRate</td>
-	  <td>the rate (in Hz.) at which the driver will interrogate a card when one of 
-	  its motors is moving. This is also the rate at which channel-access monitors 
-	  will be posted; to avoid saturating the network with motor-readback information, 
-	  don't set pollRate much higher than 10 Hz. pollRate must be in the range [1..60].</td>
-	</tr>
-	<tr>
-	  <td>portName</td>
-	  <td>ASYN port name.</td>
-	</tr>
-	<tr>
-	  <td valign="top">link<br>
-	  </td>
-	  <td valign="top">GPIB link or MPF server CPU location<br>
-	  </td>
-	</tr>
-	<tr>
-	  <td valign="top">GPIB#<br>
-	  </td>
-	  <td valign="top">GPIB address.<br>
-	  </td>
-	</tr>
-        </tbody>
-      </table>
-
-      <P>
-	# OMS VME8, VME44, VMEX driver setup parameters:<BR>omsSetup(5, 0xFC00, 180, 5, 
-	10)<BR><BR># OMS VME58 driver setup parameters:<BR>oms58Setup(5, 0x2000, 190, 5, 
-	10)
-      </P>
-      <P>#Start EPICS<BR>iocInit</P>
+    <td colspan="2">Example startup scripts can be found in the example IOCs in the <a href="https://github.com/epics-motor">driver modules</a>
     </td>
   </tr>
 
@@ -3701,15 +3371,11 @@ section</a> ).
 <table border="1" cellpadding="5">
   <tbody>
   <tr>
-    <th colspan="2">BACKUP/RESTORE (BURT) REQUEST FILES <br>
-      files to be placed in <tt>&amp;lttop&gt;/&amp;ltapp&amp;gtApp/op/burt/</tt></th>
+    <th colspan="2">BACKUP/RESTORE (BURT) REQUEST FILES</th>
   </tr>
   <tr valign="top">
     <td>settings.req</td>
-    <td>sample request file to save settings of all motors. Edit this file, 
-    supplying names of the motor records whose settings you want saved. (The sample 
-    file also saves the states of other records in the sample database, m16.db, that 
-    enable or disable the motor records.)</td>
+    <td>A file that could be created to save settings from multiple motors.</td>
   </tr>
   <tr valign="top">
     <td>yyMotorSettings.req&nbsp;</td>
@@ -3718,8 +3384,7 @@ section</a> ).
   </tr>
   <tr valign="top">
     <td>positions.req&nbsp;</td>
-    <td>sample request file to save positions of all motors. Edit this file, 
-    supplying names of the motor records whose positions you want saved.</td>
+    <td>A file that could be created to save positions from multiple motors.</td>
   </tr>
   <tr valign="top">
     <td>yyMotorPositions.req&nbsp;</td>
