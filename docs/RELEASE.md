@@ -1,5 +1,53 @@
 # Motor Releases
 
+## __R7-0 (2019-04-18)__
+R7-0 is a release based on the master branch.  
+
+### Changes since R6-11
+
+Stand-alone repositories have been created for most of the support that previously resided in ``motorApp``.  These new respositories can be found in [epics-motor](https://github.com/epics-motor).  The core motor functionality remains in this module.
+
+The new driver repositories have been added to motor as submodules, which reside in the ``modules`` subdirectory.  When the driver modules are built as submodules of motor, their build products get installed into motor's top-level directories (db, dbd, lib).  The paths to vendor-specific files that aren't installed (iocsh scripts, user displays) will reside in the vendor's submodule, which differs from previous versions of motor.
+
+The new driver modules can be built outside of the motor module, which results in the installation of the build products into the top-level directory of the driver module.
+
+#### Bug fixes
+* Multiple fixes for motor displays
+
+#### Driver submodules (and noteworthy changes)
+| Module           | Release | Changes |
+| motorAcs         | R1-0    |         |
+| motorAcsTech80   | R1-0    |         |
+| motorAerotech    | R1-0    |         |
+| motorAMCI        | R1-0    |         |
+| motorAttocube    | R1-0    |         |
+| motorDeltaTau    | R1-0    |         |
+| motorFaulhaber   | R1-0    |         |
+| motorHytec       | R1-0    |         |
+| motorIms         | R1-0    |         |
+| motorKohzu       | R1-0    |         |
+| motorMclennan    | R1-0    |         |
+| motorMicos       | R1-0    |         |
+| motorMicroMo     | R1-0    |         |
+| motorMicronix    | R1-0    |         |
+| motorMotorSim    | R1-0    |         |
+| motorMXmotor     | R1-0    |         |
+| motorNewFocus    | R1-0    |         |
+| motorNewport     | R1-0    | [HXP driver updated](https://github.com/epics-motor/motorNewport/releases/tag/R1-0) |
+| motorNPoint      | R1-0    |         |
+| motorOms         | R1-0    |         |
+| motorOmsAsyn     | R1-0    |         |
+| motorOriel       | R1-0    |         |
+| motorParker      | R1-0    |         |
+| motorPhytron     | R1-0    | [phytron.dbd renamed](https://github.com/epics-motor/motorPhytron/releases/tag/R1-0) |
+| motorPI          | R1-0    |         |
+| motorPIGCS2      | R1-0    |         |
+| motorPiJena      | R1-0    |         |
+| motorScriptMotor | R1-0    |         |
+| motorSmarAct     | R1-0    |         |
+| motorSmartMotor  | R1-0    |         |
+| motorThorLabs    | R1-0    |         |
+
 ## __R6-11 (2018-12-12)__
 R6-11 is a release based on the master branch.  
 
