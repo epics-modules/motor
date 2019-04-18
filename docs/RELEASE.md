@@ -7,7 +7,7 @@ R7-0 is a release based on the master branch.
 
 Stand-alone repositories have been created for most of the support that previously resided in ``motorApp``.  These new respositories can be found in [epics-motor](https://github.com/epics-motor).  The core motor functionality remains in this module.
 
-The new driver repositories have been added to motor as submodules, which reside in the ``modules`` subdirectory.  When the driver modules are built as submodules of motor, their build products get installed into motor's top-level directories (db, dbd, lib).  The paths to vendor-specific files that aren't installed (iocsh scripts, user displays) will reside in the vendor's submodule, which differs from previous versions of motor.
+The new driver repositories have been added to motor as submodules, which reside in the ``modules`` subdirectory.  When the driver modules are built as submodules, their build products are installed into motor's top-level directories: ``db``, ``dbd``, ``lib``.  **The locations of vendor-specific files that aren't installed (iocsh scripts, user displays) will differ from previous versions of motor.** These files will remain in the vendor's submodule.
 
 The new driver modules can be built outside of the motor module, which results in the installation of the build products into the top-level directory of the driver module.
 
