@@ -16,6 +16,7 @@ The new driver modules can be built outside of the motor module, which results i
 
 #### Driver submodules (and noteworthy changes)
 | Module           | Release | Changes |
+| ---------------- | ------- | ------- |
 | motorAcs         | R1-0    |         |
 | motorAcsTech80   | R1-0    |         |
 | motorAerotech    | R1-0    |         |
