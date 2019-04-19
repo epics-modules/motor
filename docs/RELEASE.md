@@ -11,6 +11,8 @@ The new driver repositories have been added to motor as submodules, which reside
 
 The new driver modules can be built outside of the motor module, which results in the installation of the build products into the top-level directory of the driver module.
 
+The recommended EPICS base version is 3.15.6 or later.  Submodules that install template files will fail to build against EPICS base 3.14.
+
 #### Bug fixes
 * Multiple fixes for motor displays
 
