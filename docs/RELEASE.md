@@ -1,6 +1,6 @@
 # Motor Releases
 
-## __R7-0 (2019-04-18)__
+## __R7-0 (2019-04-19)__
 R7-0 is a release based on the master branch.  
 
 ### Changes since R6-11
