@@ -155,7 +155,7 @@ fi
 if [ ! -e "$SUPPORT/asyn/built" ]; then
     echo "Build asyn"
     install -d $SUPPORT/asyn
-    curl -L "https://epics.anl.gov/download/modules/asyn${ASYN}.tar.gz" | tar -C $SUPPORT/asyn -xvz --strip-components=1
+    git clone --depth 10 --branch $ASYN https://github.com/epics-modules/asyn.git $SUPPORT/asyn
     cp $RELEASE_PATH $SUPPORT/asyn/configure/RELEASE
     make -C "$SUPPORT/asyn" -j2
     touch $SUPPORT/asyn/built

@@ -1,0 +1,2 @@
+# Uncomment the following line to build iocs in motor/modules/motorVendor/iocs
+BUILD_IOCS = YES

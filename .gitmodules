@@ -1,0 +1,93 @@
+[submodule "modules/motorNewport"]
+	path = modules/motorNewport
+	url = https://github.com/epics-motor/motorNewport.git
+[submodule "modules/motorOms"]
+	path = modules/motorOms
+	url = https://github.com/epics-motor/motorOms.git
+[submodule "modules/motorAcsTech80"]
+	path = modules/motorAcsTech80
+	url = https://github.com/epics-motor/motorAcsTech80.git
+[submodule "modules/motorAttocube"]
+	path = modules/motorAttocube
+	url = https://github.com/epics-motor/motorAttocube.git
+[submodule "modules/motorDeltaTau"]
+	path = modules/motorDeltaTau
+	url = https://github.com/epics-motor/motorDeltaTau.git
+[submodule "modules/motorFaulhaber"]
+	path = modules/motorFaulhaber
+	url = https://github.com/epics-motor/motorFaulhaber.git
+[submodule "modules/motorHytec"]
+	path = modules/motorHytec
+	url = https://github.com/epics-motor/motorHytec.git
+[submodule "modules/motorKohzu"]
+	path = modules/motorKohzu
+	url = https://github.com/epics-motor/motorKohzu.git
+[submodule "modules/motorMclennan"]
+	path = modules/motorMclennan
+	url = https://github.com/epics-motor/motorMclennan.git
+[submodule "modules/motorMicroMo"]
+	path = modules/motorMicroMo
+	url = https://github.com/epics-motor/motorMicroMo.git
+[submodule "modules/motorOriel"]
+	path = modules/motorOriel
+	url = https://github.com/epics-motor/motorOriel.git
+[submodule "modules/motorMicronix"]
+	path = modules/motorMicronix
+	url = https://github.com/epics-motor/motorMicronix.git
+[submodule "modules/motorPiJena"]
+	path = modules/motorPiJena
+	url = https://github.com/epics-motor/motorPiJena.git
+[submodule "modules/motorSmartMotor"]
+	path = modules/motorSmartMotor
+	url = https://github.com/epics-motor/motorSmartMotor.git
+[submodule "modules/motorThorLabs"]
+	path = modules/motorThorLabs
+	url = https://github.com/epics-motor/motorThorLabs.git
+[submodule "modules/motorAcs"]
+	path = modules/motorAcs
+	url = https://github.com/epics-motor/motorAcs.git
+[submodule "modules/motorMicos"]
+	path = modules/motorMicos
+	url = https://github.com/epics-motor/motorMicos.git
+[submodule "modules/motorNewFocus"]
+	path = modules/motorNewFocus
+	url = https://github.com/epics-motor/motorNewFocus.git
+[submodule "modules/motorIms"]
+	path = modules/motorIms
+	url = https://github.com/epics-motor/motorIms.git
+[submodule "modules/motorOmsAsyn"]
+	path = modules/motorOmsAsyn
+	url = https://github.com/epics-motor/motorOmsAsyn.git
+[submodule "modules/motorPhytron"]
+	path = modules/motorPhytron
+	url = https://github.com/epics-motor/motorPhytron.git
+[submodule "modules/motorAerotech"]
+	path = modules/motorAerotech
+	url = https://github.com/epics-motor/motorAerotech.git
+[submodule "modules/motorScriptMotor"]
+	path = modules/motorScriptMotor
+	url = https://github.com/epics-motor/motorScriptMotor.git
+[submodule "modules/motorNPoint"]
+	path = modules/motorNPoint
+	url = https://github.com/epics-motor/motorNPoint.git
+[submodule "modules/motorPI"]
+	path = modules/motorPI
+	url = https://github.com/epics-motor/motorPI.git
+[submodule "modules/motorAMCI"]
+	path = modules/motorAMCI
+	url = https://github.com/epics-motor/motorAMCI.git
+[submodule "modules/motorPIGCS2"]
+	path = modules/motorPIGCS2
+	url = https://github.com/epics-motor/motorPIGCS2.git
+[submodule "modules/motorSmarAct"]
+	path = modules/motorSmarAct
+	url = https://github.com/epics-motor/motorSmarAct.git
+[submodule "modules/motorMotorSim"]
+	path = modules/motorMotorSim
+	url = https://github.com/epics-motor/motorMotorSim.git
+[submodule "modules/motorMXmotor"]
+	path = modules/motorMXmotor
+	url = https://github.com/epics-motor/motorMXmotor.git
+[submodule "modules/motorParker"]
+	path = modules/motorParker
+	url = https://github.com/epics-motor/motorParker.git

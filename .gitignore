@@ -18,3 +18,4 @@ dllPath.bat
 auto_settings.sav*
 auto_positions.sav*
 .ccfxprepdir/
+*.local

@@ -18,35 +18,12 @@ include $(TOP)/configure/CONFIG
 DB += motor.db
 DB += basic_motor.db
 DB += basic_asyn_motor.db
-DB += IMS_extra.db
-DB += XPSAuxAi.db
-DB += XPSAuxAo.db
-DB += XPSAuxBi.db
-DB += XPSAuxBo.db
-DB += XPSAuxLi.db
-DB += XPSAuxLo.db
-DB += XPS_extra.db
-DB += XPSPositionCompare.db
-DB += XPSTclScript.template
-DB += HXP_extra.db
-DB += HXP_coords.db
-DB += ACRAux.template
-DB += ACRAuxRead.template
-DB += ACRAuxLi.template
-DB += ACRAuxBi.template
-DB += ACRAuxBo.template
-DB += ACRAuxBoRBV.template
 DB += TransPos.db
 DB += motorUtil.db
 DB += asyn_motor.db
 DB += profileMoveController.template
 DB += profileMoveAxis.template
-DB += profileMoveControllerXPS.template
-DB += profileMoveAxisXPS.template
-DB += PI_Support.db PI_SupportCtrl.db
-DB += Phytron_motor.db Phytron_I1AM01.db Phytron_MCM01.db
 DB += asyn_auto_power.db
-DB += ScriptMotorReload.db
 
 #----------------------------------------------------
 # Declare template files which do not show up in DB
