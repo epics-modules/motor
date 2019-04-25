@@ -15,15 +15,30 @@ include $(TOP)/configure/CONFIG
 #----------------------------------------------------
 # Create and install (or just install)
 # databases, templates, substitutions like this
-DB += motor.db
-DB += basic_motor.db
-DB += basic_asyn_motor.db
-DB += TransPos.db
-DB += motorUtil.db
-DB += asyn_motor.db
-DB += profileMoveController.template
-DB += profileMoveAxis.template
 DB += asyn_auto_power.db
+DB += asyn_motor.db
+DB += asyn_motor_positions.req
+DB += asyn_motor_settings.req
+DB += basic_asyn_motor.db
+DB += basic_motor.db
+DB += basic_motor_settings.req
+DB += coordTrans2D.db
+DB += motor.db
+DB += motor_positions.req
+DB += motor_settings.req
+DB += motorUtil.db
+DB += profileMoveAxis.template
+DB += profileMoveAxis_settings.req
+DB += profileMoveController.template
+DB += profileMoveController_settings.req
+DB += pseudoMotor.db
+DB += pseudoMotor_settings.req
+DB += SoftMotorEx.db
+DB += softMotorTest.db
+DB += sumDiff2D.db
+DB += trajectoryScan.db
+DB += trajectoryScan_settings.req
+DB += TransPos.db
 
 #----------------------------------------------------
 # Declare template files which do not show up in DB
@@ -32,3 +47,8 @@ DB += asyn_auto_power.db
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
+
+ifeq ($(BASE_3_14),YES)
+# Only needed for 3.14 build rules:
+vpath %.req $(USR_VPATH) $(GENERIC_SRC_DIRS)
+endif
