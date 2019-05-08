@@ -1958,6 +1958,8 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     }
     if (too_small == true)
     {
+        Debug(pmr,2, "%s:%d %s too_small dval=%f spdb=%f mres=%f drbv=%f\n",
+              __FILE__, __LINE__, pmr->name, pmr->dval, pmr->spdb, pmr->mres, pmr->drbv);
         if (pmr->dmov == FALSE && (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY))
         {
             pmr->dmov = TRUE;
