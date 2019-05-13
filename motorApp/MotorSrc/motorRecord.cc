@@ -2912,6 +2912,12 @@ static long special(DBADDR *paddr, int after)
 
         /* new spdb ot rdbd */
     case motorRecordSPDB:
+        /* Tweak at least outside the range of SPDB */
+        range_check(pmr, &pmr->twv, pmr->spdb, 0.0);
+        Debug(pmr,3, "%s:%d %s special SPDB spbd=%f twv=%f\n",
+              __FILE__, __LINE__, pmr->name,  pmr->spdb, pmr->twv);
+        break;
+
     case motorRecordRDBD:
         enforceMinRetryDeadband(pmr);
         break;
