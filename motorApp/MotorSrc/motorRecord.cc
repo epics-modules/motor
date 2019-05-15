@@ -670,7 +670,6 @@ Make RDBD >= MRES.
 static void enforceMinRetryDeadband(motorRecord * pmr)
 {
     double old_spdb = pmr->spdb;
-    double old_rdbd = pmr->rdbd;
     if (!pmr->spdb)
         pmr->spdb = pmr->rdbd;
     if (!pmr->spdb)
@@ -680,13 +679,10 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
 
     if (pmr->spdb != old_spdb)
         db_post_events(pmr, &pmr->spdb, DBE_VAL_LOG);
-    if (pmr->rdbd != old_rdbd)
-        db_post_events(pmr, &pmr->rdbd, DBE_VAL_LOG);
-    if ((pmr->rdbd != old_rdbd) || (pmr->spdb != old_spdb))
-        Debug(pmr,3, "%s:%d %s enforceMinRetryDeadband "
-              "old_spdb=%f old_rdbd=%f spdb=%f rdbd=%f mres=%f\n",
-              __FILE__, __LINE__, pmr->name,
-              old_spdb, old_rdbd, pmr->spdb, pmr->rdbd, pmr->mres);
+    Debug(pmr,3, "%s:%d %s enforceMinRetryDeadband "
+          "spdb=%f rdbd=%f mres=%f\n",
+          __FILE__, __LINE__, pmr->name,
+          pmr->spdb, pmr->rdbd, pmr->mres);
 }
 
 
