@@ -1,5 +1,6 @@
 # motor
 [![Build Status](https://travis-ci.org/epics-modules/motor.png)](https://travis-ci.org/epics-modules/motor)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/epics-modules/motor.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/epics-modules/motor/alerts/)
 
 This module contains motor support for the Experimental Physics and Industrial Control System (EPICS).
 
