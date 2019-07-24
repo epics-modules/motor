@@ -53,6 +53,10 @@ motorSim_LIBS += motor
 motorSim_LIBS += asyn
 motorSim_LIBS += autosave
 motorSim_LIBS += calc sscan
+ifdef SNCSEQ
+motorSim_LIBS += seq pv
+endif
+
 
 motorSim_LIBS += $(EPICS_BASE_IOC_LIBS)
 
