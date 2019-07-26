@@ -67,6 +67,8 @@ motorSimAxis::motorSimAxis(motorSimController *pController, int axis, double low
   nextpoint_.axis[0].p = start;
   route_ = routeNew( &(this->endpoint_), &pars );
   deferred_move_ = 0;
+  delayedDone_ = 0;
+  lastDone_ = 1;
 }
 
 
@@ -98,6 +100,7 @@ motorSimController::motorSimController(const char *portName, int numAxes, int pr
   for (axis=0; axis<numAxes; axis++) {
     new motorSimAxis(this, axis, DEFAULT_LOW_LIMIT, DEFAULT_HI_LIMIT, DEFAULT_HOME, DEFAULT_START);
     setDoubleParam(axis, this->motorPosition_, DEFAULT_START);
+	setDoubleParam(axis, this->motorPostMoveDelay_, 0.0);
   }
 
   this->motorThread_ = epicsThreadCreate("motorSimThread", 
