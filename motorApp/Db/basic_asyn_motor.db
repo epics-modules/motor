@@ -60,3 +60,25 @@ record(ao,"$(P)$(M)Resolution") {
     field(PREC, "$(PREC)")
 }
 
+record(ao,"$(P)$(M)_MRESMON")
+{
+    field(OMSL, "closed_loop")
+    field(DOL, "$(P)$(M).MRES CP")
+    field(DTYP, "asynFloat64")
+    field(OUT, "@asyn($(PORT),$(ADDR))MOTOR_RESOLUTION")
+}
+
+record(calcout,"$(P)$(M)_MERATMON")
+{
+    field(INPA, "$(P)$(M).MRES CP")
+    field(INPB, "$(P)$(M).ERES CP")
+	field(CALC, "(A != 0 && B != 0) ? A / B : 0")
+	field(OOPT, "When Non-zero")
+    field(OUT, "$(P)$(M)_MERAT PP")
+}
+
+record(ao,"$(P)$(M)_MERAT")
+{
+    field(DTYP, "asynFloat64")
+    field(OUT, "@asyn($(PORT),$(ADDR))MOTOR_ENCODER_RATIO")
+}
