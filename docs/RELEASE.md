@@ -1,5 +1,49 @@
 # Motor Releases
 
+## __R7-1 (2019-08-13)__
+R7-1 is a release based on the master branch.  
+
+### Changes since R7-0
+
+#### Bug fixes
+* Req files are now installed to motor's top-level db directory when building against EPICS base 3.14
+* RELEASE now allows RELEASE.local files to override settings
+
+#### Driver submodules (and noteworthy changes)
+| Module           | Release | Changes |
+| ---------------- | ------- | ------- |
+| motorAcs         | R1-0    |         |
+| motorAcsTech80   | R1-0    |         |
+| **motorAerotech** | **R1-0-1** | [Improvements to EnsembleTrajectoryScan](https://github.com/epics-motor/motorAerotech/releases/tag/R1-0-1) |
+| motorAMCI        | R1-0    |         |
+| motorAttocube    | R1-0    |         |
+| motorDeltaTau    | R1-0    |         |
+| motorFaulhaber   | R1-0    |         |
+| motorHytec       | R1-0    |         |
+| motorIms         | R1-0    |         |
+| motorKohzu       | R1-0    |         |
+| motorMclennan    | R1-0    |         |
+| **motorMicos**   | **R1-1** | [Improvements to SMC Hydra driver](https://github.com/epics-motor/motorMicos/releases/tag/R1-1) |
+| motorMicroMo     | R1-0    |         |
+| motorMicronix    | R1-0    |         |
+| motorMotorSim    | R1-0    |         |
+| motorMXmotor     | R1-0    |         |
+| **motorNewFocus** | **R1-1** | [Improvements to 874xMotorDriver](https://github.com/epics-motor/motorNewFocus/releases/tag/R1-1) |
+| **motorNewport**  | **R1-0-1**    | [Corrected typo that prevented template installation](https://github.com/epics-motor/motorNewport/releases/tag/R1-0-1) |
+| motorNPoint      | R1-0    |         |
+| motorOms         | R1-0    |         |
+| motorOmsAsyn     | R1-0    |         |
+| motorOriel       | R1-0    |         |
+| motorParker      | R1-0    |         |
+| motorPhytron     | R1-0    |         |
+| motorPI          | R1-0    |         |
+| motorPIGCS2      | R1-0    |         |
+| motorPiJena      | R1-0    |         |
+| motorScriptMotor | R1-0    |         |
+| **motorSmarAct** | **R1-1** | [Added support for MCS2 controller](https://github.com/epics-motor/motorSmarAct/releases/tag/R1-1) |
+| motorSmartMotor  | R1-0    |         |
+| motorThorLabs    | R1-0    |         |
+
 ## __R7-0 (2019-04-19)__
 R7-0 is a release based on the master branch.  
 
