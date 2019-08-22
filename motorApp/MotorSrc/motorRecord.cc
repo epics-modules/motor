@@ -1621,8 +1621,11 @@ static long process(dbCommon *arg)
             /* Should we test for a retry? Consider limit only if in direction of move.*/
             if (((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)) || (pmr->mip == MIP_LOAD_P))
             {
-                MIP_SET_VAL(MIP_DONE);
-                MARK(M_MIP);
+	        if (pmr->mip != MIP_DONE)
+		{
+                    MIP_SET_VAL(MIP_DONE);
+                    MARK(M_MIP);
+	        }
             }
             else if (pmr->dmov == TRUE)
             {
