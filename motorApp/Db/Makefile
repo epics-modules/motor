@@ -19,7 +19,7 @@ DB += $(patsubst ../%, %, $(wildcard ../*.template))
 DB += $(patsubst ../%, %, $(wildcard ../*.db))
 DB += $(patsubst ../%, %, $(wildcard ../*.vdb))
 
-REQ += $(patsubst ../%, %, $(wildcard ../*.req))
+DB += $(patsubst ../%, %, $(wildcard ../*.req))
 
 #----------------------------------------------------
 # Declare template files which do not show up in DB
