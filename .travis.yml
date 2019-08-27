@@ -24,4 +24,6 @@ env:
  - BASE=7.0 STATIC=shared CMPLR=clang WINE=32 SEQ=2.2.4 ASYN=R4-35 IPAC=
  - BASE=7.0 STATIC=static WINE=32 SEQ=2.2.6 ASYN=R4-35 IPAC=
 install: ./.ci/travis-prepare.sh
+before_script:
+  - cp ./configure/EXAMPLE_CONFIG_SITE.local ./configure/CONFIG_SITE.local
 script: make
