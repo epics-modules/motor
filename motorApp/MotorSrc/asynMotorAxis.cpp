@@ -426,7 +426,7 @@ void asynMotorAxis::updateMsgTxtField()
       pC_->getIntegerParam(axisNo_,pC_->motorStatusPowerOn_,
                            &motorStatusPowerOn);
       if (!motorStatusPowerOn) {
-        setStringParam(pC_->motorMessageText_,"I: PowerOff");
+        setStringParam(pC_->motorMessageText_,"PowerOff");
         return;
       }
     }
@@ -453,7 +453,7 @@ void asynMotorAxis::updateMsgTxtField()
       if (!motorStatusHomed && motorNotHomedProblem) {
         /* the "E: prefix should only be shown if the problem bit
            is set. Otherwise it is an info */
-        setStringParam(pC_->motorMessageText_,"I: Axis not homed");
+        setStringParam(pC_->motorMessageText_,"Axis not homed");
         return;
       }
     }
@@ -461,7 +461,7 @@ void asynMotorAxis::updateMsgTxtField()
       int motorLatestCommand;
       pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
       if (motorLatestCommand == LATEST_COMMAND_STOP)
-        setStringParam(pC_->motorMessageText_,"I: Stop");
+        setStringParam(pC_->motorMessageText_,"Stopped");
       else
         setStringParam(pC_->motorMessageText_," ");
     }
@@ -474,19 +474,19 @@ void asynMotorAxis::updateMsgTxtField()
     pC_->getIntegerParam(axisNo_,pC_->motorLatestCommand_, &motorLatestCommand);
     switch (motorLatestCommand) {
     case LATEST_COMMAND_HOMING:
-        setStringParam(pC_->motorMessageText_,"I: Homing");
+        setStringParam(pC_->motorMessageText_,"Homing");
         break;
     case LATEST_COMMAND_MOVE_TO_HOME:
-        setStringParam(pC_->motorMessageText_,"I: Moving home");
+        setStringParam(pC_->motorMessageText_,"Moving home");
         break;
     case LATEST_COMMAND_MOVE_ABS:
-        setStringParam(pC_->motorMessageText_,"I: Moving abs");
+        setStringParam(pC_->motorMessageText_,"Moving abs");
         break;
     case LATEST_COMMAND_MOVE_REL:
-        setStringParam(pC_->motorMessageText_,"I: Moving rel");
+        setStringParam(pC_->motorMessageText_,"Moving rel");
         break;
     case LATEST_COMMAND_MOVE_VEL:
-        setStringParam(pC_->motorMessageText_,"I: Moving vel");
+        setStringParam(pC_->motorMessageText_,"Moving vel");
         break;
     case LATEST_COMMAND_STOP:
         /* Stopped, but moving */
@@ -494,7 +494,7 @@ void asynMotorAxis::updateMsgTxtField()
                               LATEST_COMMAND_UNDEFINED);
          /* fall through */
     default:
-        setStringParam(pC_->motorMessageText_,"I: Moving");
+        setStringParam(pC_->motorMessageText_,"Moving");
     }
   }
 }
