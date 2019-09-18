@@ -19,6 +19,7 @@ cat << EOF > $RELEASE_PATH
 IPAC=$IPAC_PATH
 SNCSEQ=$SUPPORT/seq
 ASYN=$SUPPORT/asyn
+MODBUS=$SUPPORT/modbus
 EPICS_BASE=$SUPPORT/epics-base
 EOF
 
@@ -161,4 +162,16 @@ if [ ! -e "$SUPPORT/asyn/built" ]; then
     touch $SUPPORT/asyn/built
 else
     echo "Using cached asyn"
+fi
+
+# modbus
+if [ ! -e "$SUPPORT/modbus/built" ]; then
+    echo "Build modbus"
+    install -d $SUPPORT/modbus
+    git clone --depth 10 --branch $MODBUS https://github.com/epics-modules/modbus.git $SUPPORT/modbus
+    cp $RELEASE_PATH $SUPPORT/modbus/configure/RELEASE
+    make -C "$SUPPORT/modbus" -j2
+    touch $SUPPORT/modbus/built
+else
+    echo "Using cached modbus"
 fi
