@@ -219,6 +219,19 @@ Modification Log for R6-10
 
 	File modified:	OmsSrc/drvMAXv.cc
 
+8) Changed axis names from 'char *' to 'const char*' to avoid compiler warnings.
+        (Assigning literal string to char* is deprecated).
+        This affects driver_table.axis_names and driver_table.sendmsg used in
+        every motor driver.
+        *** THIS CHANGE BREAKS BACKWARD COMPATIBILITY! ***
+        All external motor drivers need to change their send_mess() function
+        to use 'const char*' as the last argument:
+            RTN_STATUS send_mess(int, const char *, const char *);
+
+        Files modified: motorApp/MotorSrc/motordrvCom.h
+                        motorApp/MotorSrc/motordrvCom.cc
+                        motorApp/*Src/drv*.cc
+
 
 Modification Log for R6-9
 =========================
