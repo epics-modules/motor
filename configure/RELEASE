@@ -10,7 +10,6 @@
 # Add your declarations here
 
 SUPPORT=
--include $(TOP)/../configure/SUPPORT.$(EPICS_HOST_ARCH)
 
 # If any motor controller communication mechanism besides 
 # the VME backplane is required, then ASYN must be defined.
@@ -25,7 +24,6 @@ BUSY=$(SUPPORT)/busy-R1-7-1
 
 # Recommended EPICS release: R3.15.6
 EPICS_BASE=
--include $(TOP)/../configure/EPICS_BASE.$(EPICS_HOST_ARCH)
 
 # The following must be defined for motorMXmotor
 #!MX=$(SUPPORT)/mx/mx
