@@ -16,6 +16,9 @@
 
 #include "asynMotorController.h"
 
+/* Auto-Power, needed in driver */
+#define POWERAUTOONOFFMODE2 2
+
 /** Class from which motor axis objects are derived. */
 class epicsShareClass asynMotorAxis {
 
@@ -31,9 +34,13 @@ class epicsShareClass asynMotorAxis {
   virtual asynStatus callParamCallbacks();
 
   virtual asynStatus move(double position, int relative, double minVelocity, double maxVelocity, double acceleration);
+  virtual asynStatus moveEGU(double posEGU, double mres, int relative,
+                             double minVeloEGU, double maxVeloEGU, double accEGU);
   virtual asynStatus moveVelocity(double minVelocity, double maxVelocity, double acceleration);
+  virtual asynStatus moveVeloEGU(double mres, double minVeloEGU, double maxVeloEGU, double accEGU);
   virtual asynStatus home(double minVelocity, double maxVelocity, double acceleration, int forwards);
   virtual asynStatus stop(double acceleration);
+  virtual bool       pollPowerIsOn(void);
   virtual asynStatus poll(bool *moving);
   virtual asynStatus setPosition(double position);
   virtual asynStatus setEncoderPosition(double position);
@@ -62,6 +69,7 @@ class epicsShareClass asynMotorAxis {
   void setDisableFlag(int disableFlag);
   double getLastEndOfMoveTime();
   void setLastEndOfMoveTime(double time);
+  void updateMsgTxtFromDriver(const char *value);
 
   protected:
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
@@ -75,8 +83,10 @@ class epicsShareClass asynMotorAxis {
 
   MotorStatus status_;
   int statusChanged_;
+  int waitNumPollsBeforeReady_;
 
   private:
+  void updateMsgTxtField(void);
   int referencingModeMove_;
   int wasMovingFlag_;
   int disableFlag_;

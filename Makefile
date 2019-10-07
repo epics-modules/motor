@@ -1,13 +1,13 @@
-#Makefile at top of application tree
-# "#!" marks lines that can be uncommented.
-
-TOP = .
-include $(TOP)/configure/CONFIG
-
-DIRS += configure motorApp
-motorApp_DEPEND_DIRS   = configure
-
-DIRS += modules
-modules_DEPEND_DIRS = motorApp
-
-include $(TOP)/configure/RULES_TOP
+ifdef EPICS_ENV_PATH
+ifeq ($(EPICS_MODULES_PATH),/opt/epics/modules)
+ifeq ($(EPICS_BASES_PATH),/opt/epics/bases)
+include Makefile.EEE
+else
+include Makefile.epics
+endif
+else
+include Makefile.epics
+endif
+else
+include Makefile.epics
+endif

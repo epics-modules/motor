@@ -69,6 +69,12 @@ menu(motorRMOD) {
         choice(motorRMOD_I,"In-Position")
 }
 
+menu(motorACCSused) {
+        choice(motorACCSused_Undef,"Undef")
+        choice(motorACCSused_Accl, "Accl")
+        choice(motorACCSused_Accs, "Accs")
+}
+
 include "menuOmsl.dbd"
 
 recordtype(motor) {
@@ -172,6 +178,17 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
                 initial("0.2")
+        }
+        field(ACCS,DBF_DOUBLE) {
+                prompt("Move Accel. (EGU/s^2)")
+                promptgroup(GUI_COMMON)
+                special(SPC_MOD)
+                interest(1)
+        }
+        field(ACCU,DBF_MENU) {
+                prompt("ACCS used")
+                special(SPC_NOMOD)
+                menu(motorACCSused)
         }
         field(BDST,DBF_DOUBLE) {
                 prompt("BL Distance (EGU)")
@@ -409,6 +426,13 @@ recordtype(motor) {
                 interest(2)
                 menu(menuAlarmSevr)
         }
+        field(MISV,DBF_MENU) {
+                prompt("MISS Severity")
+                promptgroup(GUI_COMMON)
+                pp(TRUE)
+                interest(2)
+                menu(menuAlarmSevr)
+        }
         field(RDBD,DBF_DOUBLE) {
                 prompt("Retry Deadband (EGU)")
                 promptgroup(GUI_COMMON)
@@ -510,21 +534,11 @@ recordtype(motor) {
                 special(SPC_MOD)
                 pp(TRUE)
         }
-        field(LVAL,DBF_DOUBLE) {
-                prompt("Last User Des Val (EGU)")
-                special(SPC_NOMOD)
-                interest(1)
-        }
         field(DVAL,DBF_DOUBLE) {
                 asl(ASL0)
                 prompt("Dial Desired Value (EGU")
                 special(SPC_MOD)
                 pp(TRUE)
-        }
-        field(LDVL,DBF_DOUBLE) {
-                prompt("Last Dial Des Val (EGU)")
-                special(SPC_NOMOD)
-                interest(1)
         }
         field(RVAL,DBF_LONG) {
                 asl(ASL0)
@@ -532,21 +546,11 @@ recordtype(motor) {
                 special(SPC_MOD)
                 pp(TRUE)
         }
-        field(LRVL,DBF_LONG) {
-                prompt("Last Raw Des Val (steps")
-                special(SPC_NOMOD)
-                interest(1)
-        }
         field(RLV,DBF_DOUBLE) {
                 asl(ASL0)
                 prompt("Relative Value (EGU)")
                 special(SPC_MOD)
                 pp(TRUE)
-        }
-        field(LRLV,DBF_DOUBLE) {
-                prompt("Last Rel Value (EGU)")
-                special(SPC_NOMOD)
-                interest(1)
         }
         field(RBV,DBF_DOUBLE) {
                 prompt("User Readback Value")
@@ -601,6 +605,11 @@ recordtype(motor) {
                 special(SPC_NOMOD)
                 interest(3)
         }
+        field(MFLG,DBF_ULONG) {
+                prompt("Motor Flags")
+                special(SPC_NOMOD)
+                interest(3)
+        }
         field(LVIO,DBF_SHORT) {
                 prompt("Limit violation")
                 special(SPC_NOMOD)
@@ -647,6 +656,13 @@ recordtype(motor) {
                 interest(4)
                 size(4)
                 extra("void             *cbak")
+        }
+        field(priv,DBF_NOACCESS) {
+                prompt("Private data")
+                special(SPC_NOMOD)
+                interest(4)
+                size(4)
+                extra("struct motor_priv *priv")
         }
         field(PCOF,DBF_DOUBLE) {
                 promptgroup(GUI_COMMON)
@@ -779,16 +795,6 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 interest(1)
         }
-	field(ALST,DBF_DOUBLE) {
-                prompt("Last Value Archived")
-                special(SPC_NOMOD)
-                interest(3)
-        }
-        field(MLST,DBF_DOUBLE) {
-                prompt("Last Val Monitored")
-                special(SPC_NOMOD)
-                interest(3)
-        }
 	field(SYNC,DBF_SHORT) {
 		prompt("Sync position")
 		pp(TRUE)
@@ -796,6 +802,10 @@ recordtype(motor) {
 	}
 	field(IGSET,DBF_SHORT) {
 		prompt("Ignore SET field")
+		interest(2)
+	}
+	field(SPAM,DBF_SHORT) {
+		prompt("Debug print bit mask")
 		interest(2)
 	}
 }

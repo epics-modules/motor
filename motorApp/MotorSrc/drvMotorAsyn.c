@@ -436,7 +436,7 @@ static asynStatus readInt32(void *drvPvt, asynUser *pasynUser,
     drvmotorPvt *pPvt = (drvmotorPvt *)drvPvt;
     drvmotorAxisPvt *pAxis;
     int channel;
-    motorCommand command = pasynUser->reason;
+    int command = pasynUser->reason;
 
     pasynManager->getAddr(pasynUser, &channel);
     if (channel >= pPvt->numAxes) {
@@ -479,7 +479,7 @@ static asynStatus readUInt32Digital(void *drvPvt, asynUser *pasynUser,
     drvmotorPvt *pPvt = (drvmotorPvt *)drvPvt;
     drvmotorAxisPvt *pAxis;
     int channel;
-    motorCommand command = pasynUser->reason;
+    int command = pasynUser->reason;
 
     pasynManager->getAddr(pasynUser, &channel);
     if (channel >= pPvt->numAxes) {
@@ -519,7 +519,7 @@ static asynStatus readFloat64(void *drvPvt, asynUser *pasynUser,
     drvmotorPvt *pPvt = (drvmotorPvt *)drvPvt;
     drvmotorAxisPvt *pAxis;
     int channel;
-    motorCommand command = pasynUser->reason;
+    int command = pasynUser->reason;
     asynStatus status = asynSuccess;
 
     pasynManager->getAddr(pasynUser, &channel);
@@ -579,7 +579,7 @@ static asynStatus writeInt32(void *drvPvt, asynUser *pasynUser,
     drvmotorPvt *pPvt = (drvmotorPvt *)drvPvt;
     drvmotorAxisPvt *pAxis;
     int channel;
-    motorCommand command = pasynUser->reason;
+    int command = pasynUser->reason;
     asynStatus status=asynSuccess;
 
     pasynManager->getAddr(pasynUser, &channel);
@@ -634,7 +634,7 @@ static asynStatus writeUInt32Digital(void *drvPvt, asynUser *pasynUser,
     drvmotorPvt *pPvt = (drvmotorPvt *)drvPvt;
     drvmotorAxisPvt *pAxis;
     int channel;
-    motorCommand command = pasynUser->reason;
+    int command = pasynUser->reason;
     asynStatus status;
     epicsUInt32 temp = 0;
 
@@ -677,7 +677,7 @@ static asynStatus writeFloat64(void *drvPvt, asynUser *pasynUser,
     drvmotorPvt *pPvt = (drvmotorPvt *)drvPvt;
     drvmotorAxisPvt *pAxis;
     int channel;
-    motorCommand command = pasynUser->reason;
+    int command = pasynUser->reason;
     asynStatus status = asynError;
 
     pasynManager->getAddr(pasynUser, &channel);
@@ -775,11 +775,11 @@ static asynStatus readGenericPointer(void *drvPvt, asynUser *pasynUser,
 
     if (value) {
         value->status = pAxis->status.status;
-        (*pPvt->drvset->getDouble)(pAxis->axis, motorPosition,
+        (*pPvt->drvset->getDouble)(pAxis->axis, (int)motorPosition,
                        &(value->position));
-        (*pPvt->drvset->getDouble)(pAxis->axis, motorEncoderPosition,
+        (*pPvt->drvset->getDouble)(pAxis->axis, (int)motorEncoderPosition,
                        &(value->encoderPosition));
-        (*pPvt->drvset->getDouble)(pAxis->axis, motorVelocity,
+        (*pPvt->drvset->getDouble)(pAxis->axis, (int)motorVelocity,
                        &(value->velocity));
     }
                              
@@ -985,7 +985,7 @@ static asynStatus drvUserCreate(void *drvPvt, asynUser *pasynUser,
 static asynStatus drvUserGetType(void *drvPvt, asynUser *pasynUser,
                                  const char **pptypeName, size_t *psize)
 {
-    motorCommand command = pasynUser->reason;
+    int command = pasynUser->reason;
 
     asynPrint(pasynUser, ASYN_TRACE_FLOW,
               "drvMotorAsyn::drvUserGetType entered");

@@ -83,7 +83,7 @@ message size for each device. */
 
 typedef enum RTN_VALUES {OK = 0, ERROR = 1} RTN_STATUS;
 
-typedef enum CALLBACK_VALUES {NOTHING_DONE = 0, CALLBACK_DATA = 1} CALLBACK_VALUE;
+typedef enum CALLBACK_VALUES {NOTHING_DONE = 0, CALLBACK_DATA = 1, CALLBACK_DATA_SOFT_LIMITS, CALLBACK_UDF} CALLBACK_VALUE;
 
 #define NINT(f) (long)((f)>0 ? (f)+0.5 : (f)-0.5)       /* Nearest integer. */
 
@@ -207,6 +207,27 @@ typedef union
    RA_DONE.
 */
 
+/* Flag bits */
+#define MF_HOME_ON_LS      (1)
+#define MF_LS_RAMPDOWN     (1<<1)
+#define MF_NOSTOP_ONLS     (1<<2)
+#define MF_DRIVER_USES_EGU (1<<3)
+#define MF_ADJ_AFTER_HOMED (1<<4)
+
+
+#define EXT_MSG_TYPE_MOV_ABS 1
+#define EXT_MSG_TYPE_MOV_REL 2
+#define EXT_MSG_TYPE_MOV_VELO 3
+
+typedef struct {
+    double pos;
+    double mres;
+    double accEGU;
+    double vbas;
+    double vel;
+    int extMsgType;
+} motorExtMessage_type;
+
 
 /* device support entry table */
 struct motor_dset
@@ -216,6 +237,7 @@ struct motor_dset
     long (*start_trans) (struct motorRecord *);
     RTN_STATUS (*build_trans) (motor_cmnd, double *, struct motorRecord *);
     RTN_STATUS (*end_trans) (struct motorRecord *);
+    RTN_STATUS (*move_EGU) (struct motorRecord *, motorExtMessage_type*);
 };
 
 

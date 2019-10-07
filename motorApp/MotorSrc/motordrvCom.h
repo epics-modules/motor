@@ -115,7 +115,7 @@ struct mess_node
     struct dbCommon *mrecord;	/* "Hidden" pointer to motor record. */
     struct mess_node *next;
     char *postmsgptr;
-    char const *termstring;	/* Termination string for STOP_AXIS command
+    const char *termstring;	/* Termination string for STOP_AXIS command
 				    (see process_messages()). */
 };
 
