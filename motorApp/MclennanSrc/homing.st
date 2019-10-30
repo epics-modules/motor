@@ -4,6 +4,7 @@ program homing("MOTPV=xxx,MODE,AXIS,DEBUG")
 
 %% #include "string.h"
 %% #include "errlog.h"
+%% #include "float.h"
 
 char* SNLtaskName;
 int jog_forward_value, jog_reverse_value;
@@ -24,8 +25,8 @@ int debug;
 int mode;
 int axis;
 
-double cached_soft_high_limit = 0.0;
-double cached_soft_low_limit = 0.0;
+double cached_soft_high_limit;
+double cached_soft_low_limit;
 
 /* Turn on run-time debug messages */
 option +d;
@@ -69,7 +70,7 @@ ss motor
     when (home_reverse_pv==1)
     {
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM ready TO reverse_home_requested\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM ready TO reverse_home_requested\n", axis);
       }
     } state reverse_home_requested
     
@@ -77,14 +78,14 @@ ss motor
     when ((home_forward_pv==1) && (mode==3))
     {
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM ready TO reverse_home_requested\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM ready TO reverse_home_requested\n", axis);
       }
     } state reverse_home_requested
     
     when ((home_forward_pv==1) && (mode!=3))
     {
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM ready TO forward_home_requested\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM ready TO forward_home_requested\n", axis);
       }
     } state forward_home_requested
     
@@ -93,8 +94,11 @@ ss motor
       cached_soft_high_limit = hlm;
       cached_soft_low_limit = llm;
       
-      PVPUT(hlm, 999999999);
-      PVPUT(llm, -999999999);
+      if (debug) {
+          errlogSevPrintf(errlogInfo, "Sequencer: axis %i: Caching limits (high=%f, low=%f)\n", axis, cached_soft_high_limit, cached_soft_low_limit);
+      }
+      PVPUT(hlm, DBL_MAX);
+      PVPUT(llm, -DBL_MAX);
     }
   }
   
@@ -106,14 +110,14 @@ ss motor
       jog_forward_value = 1;
       pvPut(jog_forward_value);
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM forward_home_requested TO processing_move_request (constant velocity move)\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM forward_home_requested TO processing_move_request (constant velocity move)\n", axis);
       }
     } state processing_move_request
     
     /* No delay needed for modes other than 1 */
     when (!(mode==1 || mode==3)) {
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM forward_home_requested TO processing_move_request\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM forward_home_requested TO processing_move_request\n", axis);
       }
     } state processing_move_request
   }
@@ -126,14 +130,14 @@ ss motor
       jog_reverse_value = 1;
       pvPut(jog_reverse_value);
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM reverse_home_requested TO processing_move_request (constant velocity move)\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM reverse_home_requested TO processing_move_request (constant velocity move)\n", axis);
       }
     } state processing_move_request
     
     /* No delay needed for modes other than 1 and 3 */
     when (!(mode==1 || mode==3)) {
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM reverse_home_requested TO processing_move_request\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM reverse_home_requested TO processing_move_request\n", axis);
       }
     } state processing_move_request
   }
@@ -142,9 +146,15 @@ ss motor
   {
     when (movable==0) {
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM processing_move_request TO moving\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM processing_move_request TO moving\n", axis);
       }
     } state moving
+    
+    /* If move doesn't start within 10 seconds, cancel home (we may be in a state where we can't move) */
+    when(delay(10)){
+      errlogSevPrintf(errlogMajor, "Sequencer: axis %i: Unable to start homing move. Cancelling home.\n", axis);
+      errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM processing_move_request TO done\n", axis);
+    } state done
   }
 
   state moving
@@ -153,7 +163,7 @@ ss motor
     { 
       if (mode==2 || mode==3) {
         if (debug) {
-            errlogSevPrintf(errlogInfo, "Sequencer: Setting position to zero (modes 2 and 3)\n");
+            errlogSevPrintf(errlogInfo, "Sequencer: axis %i: Setting position to zero (modes 2 and 3)\n", axis);
         }
 
         pvGet(offset);
@@ -170,7 +180,7 @@ ss motor
         PVPUT(set, 0);
       }
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM moving TO done\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM moving TO done\n", axis);
       }
     } state done
   }
@@ -184,12 +194,15 @@ ss motor
         pvPut(jog_forward_value);
       }
       
+      if (debug) {
+          errlogSevPrintf(errlogInfo, "Sequencer: axis %i: Reapplying cached limits (high=%f, low=%f)\n", axis, cached_soft_high_limit, cached_soft_low_limit);
+      }
       /* Re-apply cached soft limits */
       PVPUT(hlm, cached_soft_high_limit);
       PVPUT(llm, cached_soft_low_limit);
       
       if (debug) {
-        errlogSevPrintf(errlogInfo, "Sequencer: FROM done TO ready\n");
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM done TO ready\n", axis);
       }
     } state ready
   } 
