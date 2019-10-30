@@ -39,8 +39,8 @@ PV(int, home_reverse_pv, "{MOTPV}.HOMR", Monitor);
 PV(int, movable, "{MOTPV}.DMOV", Monitor);
 
 // Soft limits
-PV(int, hlm, "{MOTPV}.HLM", Monitor);
-PV(int, llm, "{MOTPV}.LLM", Monitor);
+PV(double, hlm, "{MOTPV}.HLM", Monitor);
+PV(double, llm, "{MOTPV}.LLM", Monitor);
 
 // Physical limit switches
 PV(int, hls, "{MOTPV}.HLS", Monitor);
@@ -156,23 +156,18 @@ ss motor
             errlogSevPrintf(errlogInfo, "Sequencer: Setting position to zero (modes 2 and 3)\n");
         }
 
-        if (mode==3 && (!hls) && (!lls)) {
-            errlogSevPrintf(errlogMajor, "Sequencer: Home mode 3 move complete but hardware limit not engaged. Not defining motor position.\n");
-        } else {
-            pvGet(offset);
-            offsetval = offset;
+        pvGet(offset);
+        offsetval = offset;
 
-            PVPUT(set, 1);
+        PVPUT(set, 1);
 
-            PVPUT(position, 0.0);
-            PVPUT(position_d, 0.0);
+        PVPUT(position, 0.0);
+        PVPUT(position_d, 0.0);
 
-            /* Reapply the offset */
-            PVPUT(offset, offsetval);
-            
-            PVPUT(set, 0);
-        }
-
+        /* Reapply the offset */
+        PVPUT(offset, offsetval);
+        
+        PVPUT(set, 0);
       }
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: FROM moving TO done\n");
