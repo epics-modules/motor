@@ -9,7 +9,7 @@
 #
 # Add your declarations here
 
-SUPPORT=
+SUPPORT=/path/to/support
 
 # If any motor controller communication mechanism besides 
 # the VME backplane is required, then ASYN must be defined.
@@ -23,7 +23,7 @@ SNCSEQ=$(SUPPORT)/seq-2-2-6
 BUSY=$(SUPPORT)/busy-R1-7-1
 
 # Recommended EPICS release: R3.15.6
-EPICS_BASE=
+EPICS_BASE=/path/to/base
 
 # The following must be defined for motorMXmotor
 #!MX=$(SUPPORT)/mx/mx
