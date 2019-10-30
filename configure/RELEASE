@@ -44,6 +44,6 @@ IPAC=$(SUPPORT)/ipac-R2-15
 
 # These lines allow developers to override these RELEASE settings
 # without having to modify this file directly.
--include $(or $(MOTOR),$(TOP))/../RELEASE.local
--include $(or $(MOTOR),$(TOP))/../RELEASE.$(EPICS_HOST_ARCH).local
--include $(or $(MOTOR),$(TOP))/configure/RELEASE.local
+-include $(TOP)/../RELEASE.local
+-include $(TOP)/../RELEASE.$(EPICS_HOST_ARCH).local
+-include $(TOP)/configure/RELEASE.local
