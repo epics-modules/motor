@@ -38,6 +38,10 @@ option +r;
 PV(int, home_forward_pv, "{MOTPV}.HOMF", Monitor);
 PV(int, home_reverse_pv, "{MOTPV}.HOMR", Monitor);
 PV(int, movable, "{MOTPV}.DMOV", Monitor);
+PV(int, user_stop, "{MOTPV}.STOP", Monitor);
+
+/* Need to use SNL queue synchronization to get all events here. */
+syncq user_stop 100;
 
 // Soft limits
 PV(double, hlm, "{MOTPV}.HLM", Monitor);
@@ -129,6 +133,7 @@ ss motor
     
       jog_reverse_value = 1;
       pvPut(jog_reverse_value);
+      
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM reverse_home_requested TO processing_move_request (constant velocity move)\n", axis);
       }
@@ -159,6 +164,16 @@ ss motor
 
   state moving
   { 
+    /* Slightly funny syntax - check if variable was updated, if it was, 
+       update user_stop with it's latest value and then check stop condition. */
+    when (pvGetQ(user_stop) && user_stop == 1)
+    {
+      errlogSevPrintf(errlogMajor, "Sequencer: axis %i: User stop detected during home - will not define position.\n", axis);
+      if (debug) {
+        errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM moving TO done\n", axis);
+      }
+    } state done
+  
     when (movable==1)
     { 
       if (mode==2 || mode==3) {
