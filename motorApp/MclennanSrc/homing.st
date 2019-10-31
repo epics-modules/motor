@@ -47,10 +47,6 @@ syncq user_stop 100;
 PV(double, hlm, "{MOTPV}.HLM", Monitor);
 PV(double, llm, "{MOTPV}.LLM", Monitor);
 
-// Physical limit switches
-PV(int, hls, "{MOTPV}.HLS", Monitor);
-PV(int, lls, "{MOTPV}.LLS", Monitor);
-
 ss motor
 {
   state init
