@@ -171,7 +171,7 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     double position = pPvt->status.position;
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
     double encRatio[2] = {pmr->mres, pmr->eres};
-    int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
+    int use_rel = 0; /*(pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));*/
 
     /*Before setting position, set the correct encoder ratio.*/
     start_trans(pmr);
