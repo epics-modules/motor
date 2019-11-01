@@ -149,6 +149,9 @@ ss motor
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM processing_move_request TO moving\n", axis);
       }
+
+      pvFlushQ(user_stop);
+      
     } state moving
     
     /* If move doesn't start within 10 seconds, cancel home (we may be in a state where we can't move) */
