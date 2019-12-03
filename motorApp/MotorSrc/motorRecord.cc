@@ -694,7 +694,7 @@ static void recalcLVIO(motorRecord *pmr)
             __FILE__, __LINE__, pmr->name, pmr->udf, pmr->stat, pmr->nsta);
       return;
   }
-  
+
   int old_lvio = pmr->lvio;
   int lvio = 0;
   if (!softLimitsDefined(pmr))
@@ -1621,11 +1621,11 @@ static long process(dbCommon *arg)
             /* Should we test for a retry? Consider limit only if in direction of move.*/
             if (((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)) || (pmr->mip == MIP_LOAD_P))
             {
-	        if (pmr->mip != MIP_DONE)
-		{
+                if (pmr->mip != MIP_DONE)
+                {
                     MIP_SET_VAL(MIP_DONE);
                     MARK(M_MIP);
-	        }
+                }
             }
             else if (pmr->dmov == TRUE)
             {
