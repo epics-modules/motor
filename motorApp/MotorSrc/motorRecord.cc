@@ -1609,7 +1609,10 @@ static long process(dbCommon *arg)
                    !(pmr->mip & MIP_STOP)   &&
                    !(pmr->mip & MIP_JOG_STOP))
                 {
-                    MIP_SET_VAL(MIP_DONE);
+                    if (pmr->mip != MIP_DONE)
+                    {
+                        MIP_SET_VAL(MIP_DONE);
+                    }
                     /* Bug fix, record locks-up when BDST != 0, DLY != 0 and
                      * new target position before backlash correction move.*/
                     goto enter_do_work;
