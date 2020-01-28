@@ -1,0 +1,586 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 1342
+y 250
+w 116
+h 180
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor rgb 0 0 0
+bgColor rgb 51200 51200 51200
+textColor rgb 0 0 0
+ctlFgColor1 rgb 64256 62208 18944
+ctlFgColor2 rgb 60928 46592 11008
+ctlBgColor1 rgb 52480 24832 0
+ctlBgColor2 rgb 65280 45056 65280
+topShadowColor rgb 44544 19968 48128
+botShadowColor rgb 13312 13056 34304
+showGrid
+snapToGrid
+gridSize 4
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 1
+y 139
+w 49
+h 16
+font "helvetica-medium-r-14.0"
+fgColor rgb 0 0 0
+bgColor index 3
+useDisplayBg
+value {
+  "Calib:"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 138
+w 49
+h 16
+font "helvetica-medium-r-14.0"
+fgColor rgb 64256 62208 18944
+bgColor index 3
+useDisplayBg
+value {
+  "Calib:"
+}
+visPv "CALC\\\{(A)\}($(P)$(M).SET)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 0
+y 0
+w 116
+h 20
+controlPv "$(P)$(M).DESC"
+format "decimal"
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 2560 0 47104
+bgColor rgb 65280 65280 65280
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 67
+w 101
+h 28
+lineColor rgb 29440 65280 27392
+fill
+fillColor rgb 29440 65280 27392
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)$(M).DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 67
+w 101
+h 28
+lineColor rgb 64256 62208 18944
+fill
+fillColor rgb 64256 62208 18944
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)$(M).LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 1
+y 98
+w 112
+h 36
+lineColor rgb 0 0 0
+fill
+fillColor rgb 0 0 0
+lineWidth 3
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 28
+y 121
+w 60
+h 15
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor rgb 29440 65280 27392
+bgColor index 3
+useDisplayBg
+value {
+  "Moving"
+}
+visPv "CALC\\\{(A)\}($(P)$(M).DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 28
+y 127
+w 60
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb 64256 62208 18944
+bgColor index 3
+useDisplayBg
+value {
+  "Calibrate"
+}
+visPv "CALC\\\{(A)\}($(P)$(M).SET)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 28
+y 99
+w 60
+h 20
+controlPv "$(P)$(M).TWV"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "left"
+fgColor rgb 0 0 0
+bgColor rgb 29440 57088 65280
+editable
+motifWidget
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 9
+y 69
+w 98
+h 25
+controlPv "$(P)$(M).VAL"
+format "decimal"
+font "helvetica-medium-r-14.0"
+fontAlign "left"
+fgColor rgb 0 0 0
+bgColor rgb 29440 57088 65280
+editable
+motifWidget
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 45
+w 5
+h 49
+lineColor rgb 64768 0 0
+fill
+fillColor rgb 64768 0 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)$(M).LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 110
+y 45
+w 5
+h 49
+lineColor rgb 64768 0 0
+fill
+fillColor rgb 64768 0 0
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)$(M).HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 0
+y 32
+w 116
+h 12
+controlPv "$(P)$(M).EGU"
+format "decimal"
+font "helvetica-medium-r-10.0"
+fontAlign "center"
+fgColor rgb 2560 0 47104
+bgColor rgb 51200 51200 51200
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 1
+y 21
+w 113
+h 9
+lineColor rgb 2560 0 47104
+fill
+fillColor rgb 2560 0 47104
+lineWidth 2
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 21
+w 116
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb 65280 65280 65280
+bgColor index 3
+useDisplayBg
+value {
+  "($(P)$(M))"
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 8
+y 42
+w 100
+h 24
+lineColor rgb 0 0 0
+fillColor rgb 0 0 0
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)$(M).SET)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 44
+w 96
+h 19
+lineColor rgb 64256 62208 18944
+fillColor rgb 64256 62208 18944
+lineWidth 2
+visPv "CALC\\\{(A!=0||B==7)\}($(P)$(M).SET, $(P)$(M).STAT)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 11
+y 45
+w 94
+h 17
+controlPv "$(P)$(M).RBV"
+format "decimal"
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor rgb 2560 0 47104
+bgColor rgb 51200 51200 51200
+limitsFromDb
+nullColor rgb 60928 46592 11008
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 28
+y 119
+w 60
+h 10
+font "helvetica-medium-r-8.0"
+fontAlign "center"
+fgColor rgb 64256 62208 18944
+bgColor index 3
+useDisplayBg
+value {
+  "Soft limit"
+}
+visPv "CALC\\\{(A)\}($(P)$(M).LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 60
+y 156
+w 53
+h 20
+fgColor rgb 63744 55808 15360
+onColor rgb 64768 0 0
+offColor rgb 64768 0 0
+topShadowColor rgb 65280 65280 65280
+botShadowColor rgb 0 0 0
+controlPv "$(P)$(M).STOP"
+pressValue "1"
+releaseValue 
+onLabel "STOP"
+offLabel "STOP"
+3d
+useEnumNumeric
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 156
+w 40
+h 20
+fgColor rgb 65280 65280 65280
+bgColor rgb 13056 39168 0
+topShadowColor rgb 55808 55808 55808
+botShadowColor rgb 17920 17920 17920
+font "helvetica-medium-r-12.0"
+buttonLabel "More"
+numPvs 12
+numDsps 6
+displayFileName {
+  0 "motorx_tiny.edl"
+  1 "motorx_help.edl"
+  2 "motorx_more.edl"
+  3 "motorx_setup.edl"
+  4 "scanParms.edl"
+  5 "motorx_all.edl"
+}
+menuLabel {
+  0 "$(M) (Tiny)"
+  1 "$(M) (Help)"
+  2 "$(M) (Medium)"
+  3 "$(M) (Setup)"
+  4 "Scan Parameters"
+  5 "$(M) (Debug)"
+}
+symbols {
+  0 "P=$(P),M=$(M)"
+  1 "P=$(P),M=$(M)"
+  2 "P=$(P),M=$(M)"
+  3 "P=$(P),M=$(M)"
+  4 "P=$(P),Q=$(M),PV=$(M)"
+  5 "P=$(P),M=$(M)"
+}
+closeAction {
+  0 1
+}
+replaceSymbols {
+  0 1
+  1 1
+  2 1
+  3 1
+  4 1
+  5 1
+}
+closeDisplay {
+  0 1
+}
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 2
+y 99
+w 25
+h 36
+fgColor rgb 0 0 0
+onColor rgb 29440 57088 65280
+offColor rgb 29440 57088 65280
+topShadowColor rgb 65280 65280 65280
+botShadowColor rgb 0 0 0
+controlPv "$(P)$(M).TWR"
+pressValue "1"
+releaseValue 
+onLabel "<"
+offLabel "<"
+3d
+useEnumNumeric
+font "helvetica-medium-r-18.0"
+endObjectProperties
+
+# (Message Button)
+object activeMessageButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 89
+y 99
+w 25
+h 36
+fgColor rgb 0 0 0
+onColor rgb 29440 57088 65280
+offColor rgb 29440 57088 65280
+topShadowColor rgb 65280 65280 65280
+botShadowColor rgb 0 0 0
+controlPv "$(P)$(M).TWF"
+pressValue "1"
+releaseValue 
+onLabel ">"
+offLabel ">"
+3d
+useEnumNumeric
+font "helvetica-medium-r-18.0"
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 45
+y 137
+w 71
+h 20
+fgColor rgb 0 0 0
+bgColor rgb 29440 57088 65280
+selectColor rgb 29440 57088 65280
+inconsistentColor rgb 0 0 0
+topShadowColor rgb 65280 65280 65280
+botShadowColor rgb 0 0 0
+controlPv "$(P)$(M).SET"
+font "helvetica-medium-r-10.0"
+orientation "horizontal"
+endObjectProperties
+
