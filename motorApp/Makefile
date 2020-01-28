@@ -12,9 +12,7 @@ DIRS += MotorSrc
 DIRS += SoftMotorSrc
 SoftMotorSrc_DEPEND_DIRS = MotorSrc
 
-# Install the edl files
-#DIRS += opi
-
+DIRS += op
 DIRS += Db
 
 include $(TOP)/configure/RULES_DIRS
