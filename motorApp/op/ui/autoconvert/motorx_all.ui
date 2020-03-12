@@ -15,6 +15,94 @@
 
 QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
 
+caTable {
+       font: 10pt;
+       background: cornsilk;
+       alternate-background-color: wheat;
+}
+
+caLineEdit {
+     border-radius: 1px;
+     background: lightyellow;
+     color: black;
+ }
+
+caTextEntry {
+    color: rgb(127, 0, 63);
+    background-color: cornsilk;
+    selection-color: #0a214c;
+    selection-background-color: wheat;
+    border: 1px groove black;
+    border-radius: 1px;
+    padding: 1px;
+}
+
+caTextEntry:focus {
+    padding: 0px;
+    border: 2px groove darkred;
+    border-radius: 1px;
+}
+
+QPushButton {
+      border-color: #00b;
+      border-radius: 2px;
+      padding: 3px;
+      border-width: 1px;
+
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+						   stop:0   rgba(224, 239, 255, 255),
+						   stop:0.5 rgba(199, 215, 230, 255),
+						   stop:1   rgba(184, 214, 236, 255));
+}
+QPushButton:hover {
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+						stop:0   rgba(201, 226, 255, 255),
+						stop:0.5 rgba(177, 204, 230, 255),
+						stop:1   rgba(163, 205, 236, 255));
+}
+QPushButton:pressed {
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+						stop:0   rgba(174, 219, 255, 255),
+						stop:0.5 rgba(165, 199, 230, 255),
+						stop:1   rgba(134, 188, 236, 255));
+}
+
+QPushButton:disabled {
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+						stop:0   rgba(174, 219, 255, 255),
+						stop:0.5 rgba(165, 199, 230, 255),
+						stop:1   rgba(134, 188, 236, 255));
+}
+
+caChoice {
+      background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                  stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
+                                  stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
+}
+
+caChoice &gt; QPushButton {
+      text-align: left;
+      padding: 1px;
+}
+
+caSlider::groove:horizontal {
+border: 1px solid #bbb;
+background: lightgrey;
+height: 20px;
+border-radius: 4px;
+}
+
+caSlider::handle:horizontal {
+background: red;
+border: 1px solid #777;
+width: 13px;
+margin-top: -2px;
+margin-bottom: -2px;
+border-radius: 2px;
+}
+
+
+
 </string>
     </property>
     <widget class="QWidget" name="centralWidget">
@@ -232,7 +320,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>2</x>
                     <y>286</y>
-                    <width>96</width>
+                    <width>85</width>
                     <height>20</height>
                 </rect>
             </property>
@@ -274,7 +362,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;448,1;</string>
+                <string>448,1;</string>
             </property>
         </widget>
         <widget class="caTextEntry" name="caTextEntry_0">
@@ -443,7 +531,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>372</y>
-                    <width>102</width>
+                    <width>80</width>
                     <height>17</height>
                 </rect>
             </property>
@@ -896,7 +984,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>6</x>
                     <y>256</y>
-                    <width>32</width>
+                    <width>31</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -965,7 +1053,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>150</x>
                     <y>256</y>
-                    <width>32</width>
+                    <width>31</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -1092,7 +1180,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>301</x>
                     <y>256</y>
-                    <width>32</width>
+                    <width>31</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -1232,16 +1320,6 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>decimal</enum>
             </property>
         </widget>
-        <widget class="caFrame" name="caFrame_1">
-            <property name="geometry">
-                <rect>
-                    <x>-2147483647</x>
-                    <y>2147483496</y>
-                    <width>3</width>
-                    <height>3</height>
-                </rect>
-            </property>
-        </widget>
         <widget class="caPolyLine" name="caPolyLine_1">
             <property name="geometry">
                 <rect>
@@ -1279,7 +1357,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;448,1;</string>
+                <string>448,1;</string>
             </property>
         </widget>
         <widget class="caGraphics" name="caRectangle_2">
@@ -1343,7 +1421,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>4</x>
                     <y>227</y>
-                    <width>132</width>
+                    <width>110</width>
                     <height>20</height>
                 </rect>
             </property>
@@ -1379,7 +1457,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>320</y>
-                    <width>112</width>
+                    <width>73</width>
                     <height>17</height>
                 </rect>
             </property>
@@ -1592,7 +1670,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>285</x>
                     <y>32</y>
-                    <width>53</width>
+                    <width>30</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -2140,7 +2218,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>285</x>
                     <y>32</y>
-                    <width>53</width>
+                    <width>30</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -2679,7 +2757,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 </rect>
             </property>
         </widget>
-        <widget class="caFrame" name="caFrame_2">
+        <widget class="caFrame" name="caFrame_1">
             <property name="geometry">
                 <rect>
                     <x>79</x>
@@ -2781,7 +2859,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 </property>
             </widget>
         </widget>
-        <widget class="caFrame" name="caFrame_3">
+        <widget class="caFrame" name="caFrame_2">
             <property name="geometry">
                 <rect>
                     <x>5</x>
@@ -2890,7 +2968,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <rect>
                         <x>0</x>
                         <y>82</y>
-                        <width>86</width>
+                        <width>75</width>
                         <height>18</height>
                     </rect>
                 </property>
@@ -2962,7 +3040,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <rect>
                         <x>0</x>
                         <y>25</y>
-                        <width>86</width>
+                        <width>75</width>
                         <height>18</height>
                     </rect>
                 </property>
@@ -2998,7 +3076,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <rect>
                         <x>0</x>
                         <y>0</y>
-                        <width>86</width>
+                        <width>75</width>
                         <height>18</height>
                     </rect>
                 </property>
@@ -3257,7 +3335,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>60</x>
                     <y>93</y>
-                    <width>23</width>
+                    <width>20</width>
                     <height>13</height>
                 </rect>
             </property>
@@ -3383,7 +3461,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;447,1;</string>
+                <string>447,1;</string>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_29">
@@ -3570,7 +3648,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>315</x>
                     <y>52</y>
-                    <width>156</width>
+                    <width>130</width>
                     <height>20</height>
                 </rect>
             </property>
@@ -3717,7 +3795,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>0,0;0,187;</string>
+                <string>0,187;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_4">
@@ -3754,10 +3832,10 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>0,0;0,187;</string>
+                <string>0,187;</string>
             </property>
         </widget>
-        <widget class="caFrame" name="caFrame_4">
+        <widget class="caFrame" name="caFrame_3">
             <property name="geometry">
                 <rect>
                     <x>423</x>
@@ -3868,11 +3946,11 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
-        <widget class="caFrame" name="caFrame_5">
+        <widget class="caFrame" name="caFrame_4">
             <property name="geometry">
                 <rect>
                     <x>423</x>
@@ -3983,11 +4061,11 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
-        <widget class="caFrame" name="caFrame_6">
+        <widget class="caFrame" name="caFrame_5">
             <property name="geometry">
                 <rect>
                     <x>423</x>
@@ -4098,7 +4176,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -4130,7 +4208,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>424</x>
                     <y>425</y>
-                    <width>21</width>
+                    <width>20</width>
                     <height>12</height>
                 </rect>
             </property>
@@ -4166,7 +4244,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>58</x>
                     <y>401</y>
-                    <width>23</width>
+                    <width>20</width>
                     <height>13</height>
                 </rect>
             </property>
@@ -4202,7 +4280,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>321</x>
                     <y>7</y>
-                    <width>31</width>
+                    <width>20</width>
                     <height>13</height>
                 </rect>
             </property>
@@ -4210,7 +4288,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <set>Qt::AlignAbsolute|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="caFrame" name="caFrame_7">
+        <widget class="caFrame" name="caFrame_6">
             <property name="geometry">
                 <rect>
                     <x>420</x>
@@ -4283,7 +4361,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <rect>
                         <x>0</x>
                         <y>12</y>
-                        <width>30</width>
+                        <width>28</width>
                         <height>10</height>
                     </rect>
                 </property>
@@ -4321,7 +4399,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -4454,7 +4532,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>2,1;1,345;</string>
+                <string>1,345;</string>
             </property>
         </widget>
         <widget class="caGraphics" name="caRectangle_12">
@@ -4518,7 +4596,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>561</y>
-                    <width>172</width>
+                    <width>130</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -4590,7 +4668,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>611</y>
-                    <width>140</width>
+                    <width>130</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -4626,7 +4704,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>636</y>
-                    <width>151</width>
+                    <width>130</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -4662,7 +4740,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>661</y>
-                    <width>75</width>
+                    <width>60</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -4734,7 +4812,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>736</y>
-                    <width>151</width>
+                    <width>130</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -4770,7 +4848,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>761</y>
-                    <width>107</width>
+                    <width>80</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -5100,7 +5178,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>268</x>
                     <y>578</y>
-                    <width>75</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -5334,7 +5412,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>268</x>
                     <y>558</y>
-                    <width>97</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -5370,7 +5448,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>268</x>
                     <y>618</y>
-                    <width>75</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -5406,7 +5484,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>268</x>
                     <y>658</y>
-                    <width>75</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -5442,7 +5520,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>268</x>
                     <y>638</y>
-                    <width>86</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -5478,7 +5556,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>268</x>
                     <y>678</y>
-                    <width>97</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -5937,7 +6015,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>267</x>
                     <y>738</y>
-                    <width>97</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -6027,7 +6105,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>267</x>
                     <y>718</y>
-                    <width>75</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -6114,7 +6192,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>267</x>
                     <y>761</y>
-                    <width>97</width>
+                    <width>73</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -6306,7 +6384,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>267</x>
                     <y>783</y>
-                    <width>64</width>
+                    <width>50</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -6414,12 +6492,12 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>-1</x>
                     <y>532</y>
-                    <width>120</width>
+                    <width>110</width>
                     <height>20</height>
                 </rect>
             </property>
         </widget>
-        <widget class="caFrame" name="caFrame_8">
+        <widget class="caFrame" name="caFrame_7">
             <property name="geometry">
                 <rect>
                     <x>231</x>
@@ -6492,7 +6570,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <rect>
                         <x>0</x>
                         <y>10</y>
-                        <width>24</width>
+                        <width>20</width>
                         <height>10</height>
                     </rect>
                 </property>
@@ -6530,11 +6608,11 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
-        <widget class="caFrame" name="caFrame_9">
+        <widget class="caFrame" name="caFrame_8">
             <property name="geometry">
                 <rect>
                     <x>231</x>
@@ -6607,7 +6685,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <rect>
                         <x>0</x>
                         <y>10</y>
-                        <width>24</width>
+                        <width>20</width>
                         <height>10</height>
                     </rect>
                 </property>
@@ -6645,11 +6723,11 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
-        <widget class="caFrame" name="caFrame_10">
+        <widget class="caFrame" name="caFrame_9">
             <property name="geometry">
                 <rect>
                     <x>231</x>
@@ -6722,7 +6800,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <rect>
                         <x>0</x>
                         <y>10</y>
-                        <width>24</width>
+                        <width>20</width>
                         <height>10</height>
                     </rect>
                 </property>
@@ -6760,7 +6838,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -6792,7 +6870,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>232</x>
                     <y>639</y>
-                    <width>23</width>
+                    <width>20</width>
                     <height>13</height>
                 </rect>
             </property>
@@ -6828,7 +6906,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>232</x>
                     <y>739</y>
-                    <width>23</width>
+                    <width>20</width>
                     <height>13</height>
                 </rect>
             </property>
@@ -6929,7 +7007,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>caLineEdit::Alarm_Static</enum>
             </property>
         </widget>
-        <widget class="caFrame" name="caFrame_11">
+        <widget class="caFrame" name="caFrame_10">
             <property name="geometry">
                 <rect>
                     <x>267</x>
@@ -7099,7 +7177,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;448,1;</string>
+                <string>448,1;</string>
             </property>
         </widget>
         <widget class="caGraphics" name="caRectangle_13">
@@ -7172,7 +7250,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;448,1;</string>
+                <string>448,1;</string>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_77">
@@ -7206,7 +7284,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>4</x>
                     <y>474</y>
-                    <width>60</width>
+                    <width>50</width>
                     <height>20</height>
                 </rect>
             </property>
@@ -7242,7 +7320,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>94</x>
                     <y>478</y>
-                    <width>136</width>
+                    <width>100</width>
                     <height>19</height>
                 </rect>
             </property>
@@ -7314,7 +7392,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>318</x>
                     <y>478</y>
-                    <width>114</width>
+                    <width>100</width>
                     <height>19</height>
                 </rect>
             </property>
@@ -7353,7 +7431,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>0,0;0,55;</string>
+                <string>0,55;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_16">
@@ -7390,7 +7468,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>0,0;0,55;</string>
+                <string>0,55;</string>
             </property>
         </widget>
         <widget class="caTextEntry" name="caTextEntry_31">
@@ -7616,7 +7694,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,2;259,1;</string>
+                <string>259,1;</string>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_81">
@@ -7647,7 +7725,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>786</y>
-                    <width>161</width>
+                    <width>130</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -7734,7 +7812,7 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
                 <rect>
                     <x>3</x>
                     <y>811</y>
-                    <width>172</width>
+                    <width>130</width>
                     <height>18</height>
                 </rect>
             </property>
@@ -8254,7 +8332,6 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
         <zorder>caLabel_10</zorder>
         <zorder>caFrame_0</zorder>
         <zorder>caLabel_11</zorder>
-        <zorder>caFrame_1</zorder>
         <zorder>caPolyLine_1</zorder>
         <zorder>caRectangle_2</zorder>
         <zorder>caLabel_12</zorder>
@@ -8273,14 +8350,14 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
         <zorder>caLabel_20</zorder>
         <zorder>caRectangle_6</zorder>
         <zorder>caRectangle_7</zorder>
-        <zorder>caFrame_2</zorder>
+        <zorder>caFrame_1</zorder>
         <zorder>caLabel_21</zorder>
         <zorder>caLabel_22</zorder>
         <zorder>caLabel_23</zorder>
         <zorder>caLabel_24</zorder>
         <zorder>caLabel_25</zorder>
         <zorder>caLabel_26</zorder>
-        <zorder>caFrame_3</zorder>
+        <zorder>caFrame_2</zorder>
         <zorder>caLabel_27</zorder>
         <zorder>caRectangle_8</zorder>
         <zorder>caLabel_28</zorder>
@@ -8295,22 +8372,22 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
         <zorder>caLabel_33</zorder>
         <zorder>caLabel_34</zorder>
         <zorder>caPolyLine_5</zorder>
-        <zorder>caFrame_4</zorder>
+        <zorder>caFrame_3</zorder>
         <zorder>caLabel_35</zorder>
         <zorder>caLabel_36</zorder>
         <zorder>caPolyLine_6</zorder>
-        <zorder>caFrame_5</zorder>
+        <zorder>caFrame_4</zorder>
         <zorder>caLabel_37</zorder>
         <zorder>caLabel_38</zorder>
         <zorder>caPolyLine_7</zorder>
-        <zorder>caFrame_6</zorder>
+        <zorder>caFrame_5</zorder>
         <zorder>caLabel_39</zorder>
         <zorder>caLabel_40</zorder>
         <zorder>caLabel_41</zorder>
         <zorder>caLabel_42</zorder>
         <zorder>caLabel_43</zorder>
         <zorder>caPolyLine_8</zorder>
-        <zorder>caFrame_7</zorder>
+        <zorder>caFrame_6</zorder>
         <zorder>caRectangle_10</zorder>
         <zorder>caRectangle_11</zorder>
         <zorder>caPolyLine_9</zorder>
@@ -8341,20 +8418,20 @@ QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
         <zorder>caLabel_67</zorder>
         <zorder>caLabel_68</zorder>
         <zorder>caPolyLine_10</zorder>
-        <zorder>caFrame_8</zorder>
+        <zorder>caFrame_7</zorder>
         <zorder>caLabel_69</zorder>
         <zorder>caLabel_70</zorder>
         <zorder>caPolyLine_11</zorder>
-        <zorder>caFrame_9</zorder>
+        <zorder>caFrame_8</zorder>
         <zorder>caLabel_71</zorder>
         <zorder>caLabel_72</zorder>
         <zorder>caPolyLine_12</zorder>
-        <zorder>caFrame_10</zorder>
+        <zorder>caFrame_9</zorder>
         <zorder>caLabel_73</zorder>
         <zorder>caLabel_74</zorder>
         <zorder>caLabel_75</zorder>
         <zorder>caLabel_76</zorder>
-        <zorder>caFrame_11</zorder>
+        <zorder>caFrame_10</zorder>
         <zorder>caPolyLine_13</zorder>
         <zorder>caRectangle_13</zorder>
         <zorder>caPolyLine_14</zorder>

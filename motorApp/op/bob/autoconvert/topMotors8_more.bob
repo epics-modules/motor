@@ -1,0 +1,1941 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>topMotors8_more</name>
+  <x>864</x>
+  <y>385</y>
+  <width>245</width>
+  <height>205</height>
+  <background_color>
+    <color red="200" green="200" blue="200">
+    </color>
+  </background_color>
+  <grid_visible>false</grid_visible>
+  <grid_step_x>5</grid_step_x>
+  <widget type="label" version="2.0.0">
+    <name>text #6</name>
+    <text>Card</text>
+    <width>30</width>
+    <height>14</height>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #9</name>
+    <pv_name>$(P)$(M1).CARD</pv_name>
+    <x>35</x>
+    <width>20</width>
+    <height>14</height>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #13</name>
+    <text>($(M1)..$(M8))</text>
+    <x>60</x>
+    <width>75</width>
+    <height>14</height>
+    <auto_size>true</auto_size>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #16</name>
+    <pv_name>$(P)$(M1).DTYP</pv_name>
+    <x>20</x>
+    <y>14</y>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #20</name>
+    <actions>
+      <action type="open_display">
+        <file>topMotors8.opi</file>
+        <target>replace</target>
+        <description>motor-parameter table</description>
+      </action>
+    </actions>
+    <text>Less</text>
+    <x>95</x>
+    <y>185</y>
+    <width>50</width>
+    <height>20</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #23</name>
+    <x>140</x>
+    <y>166</y>
+    <width>5</width>
+    <height>18</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M8)_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #27</name>
+    <x>140</x>
+    <y>146</y>
+    <width>5</width>
+    <height>18</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M7)_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #31</name>
+    <x>140</x>
+    <y>126</y>
+    <width>5</width>
+    <height>18</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M6)_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #35</name>
+    <x>140</x>
+    <y>26</y>
+    <width>5</width>
+    <height>18</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M1)_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #39</name>
+    <x>140</x>
+    <y>46</y>
+    <width>5</width>
+    <height>18</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M2)_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #43</name>
+    <x>140</x>
+    <y>66</y>
+    <width>5</width>
+    <height>18</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M3)_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #47</name>
+    <x>140</x>
+    <y>86</y>
+    <width>5</width>
+    <height>18</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M4)_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #51</name>
+    <x>140</x>
+    <y>106</y>
+    <width>5</width>
+    <height>18</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M5)_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #55</name>
+    <x>130</x>
+    <y>71</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M3).DMOV</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #59</name>
+    <x>130</x>
+    <y>179</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M8).LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #63</name>
+    <x>135</x>
+    <y>171</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M8).LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #67</name>
+    <x>130</x>
+    <y>171</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M8).DMOV</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #71</name>
+    <x>130</x>
+    <y>166</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M8).HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #75</name>
+    <x>130</x>
+    <y>159</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M7).LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #79</name>
+    <x>135</x>
+    <y>151</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M7).LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #83</name>
+    <x>130</x>
+    <y>151</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M7).DMOV</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #87</name>
+    <x>130</x>
+    <y>146</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M7).HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #91</name>
+    <x>130</x>
+    <y>139</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M6).LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #95</name>
+    <x>135</x>
+    <y>131</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M6).LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #99</name>
+    <x>130</x>
+    <y>131</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M6).DMOV</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #103</name>
+    <x>130</x>
+    <y>126</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M6).HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #107</name>
+    <x>130</x>
+    <y>39</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M1).LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #111</name>
+    <x>130</x>
+    <y>59</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M2).LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #115</name>
+    <x>130</x>
+    <y>79</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M3).LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #119</name>
+    <x>130</x>
+    <y>99</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M4).LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #123</name>
+    <x>130</x>
+    <y>119</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M5).LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #127</name>
+    <x>135</x>
+    <y>111</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M5).LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #131</name>
+    <x>130</x>
+    <y>111</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M5).DMOV</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #135</name>
+    <x>130</x>
+    <y>106</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M5).HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #139</name>
+    <x>135</x>
+    <y>91</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M4).LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #143</name>
+    <x>130</x>
+    <y>91</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M4).DMOV</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #147</name>
+    <x>130</x>
+    <y>86</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M4).HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #151</name>
+    <x>135</x>
+    <y>71</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M3).LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #155</name>
+    <x>130</x>
+    <y>66</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M3).HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #159</name>
+    <x>135</x>
+    <y>51</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M2).LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #163</name>
+    <x>130</x>
+    <y>51</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M2).DMOV</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #167</name>
+    <x>130</x>
+    <y>46</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M2).HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #171</name>
+    <x>135</x>
+    <y>31</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M1).LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #175</name>
+    <x>130</x>
+    <y>31</y>
+    <width>5</width>
+    <height>8</height>
+    <line_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="115" green="255" blue="107">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0==0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M1).DMOV</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #179</name>
+    <x>130</x>
+    <y>26</y>
+    <width>10</width>
+    <height>5</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)$(M1).HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>text entry #183</name>
+    <pv_name>$(P)$(M7).DESC</pv_name>
+    <x>30</x>
+    <y>145</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="115" green="223" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>text entry #187</name>
+    <pv_name>$(P)$(M6).DESC</pv_name>
+    <x>30</x>
+    <y>125</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="115" green="223" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>text entry #191</name>
+    <pv_name>$(P)$(M5).DESC</pv_name>
+    <x>30</x>
+    <y>105</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="115" green="223" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>text entry #195</name>
+    <pv_name>$(P)$(M4).DESC</pv_name>
+    <x>30</x>
+    <y>85</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="115" green="223" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>text entry #199</name>
+    <pv_name>$(P)$(M3).DESC</pv_name>
+    <x>30</x>
+    <y>65</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="115" green="223" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>text entry #203</name>
+    <pv_name>$(P)$(M2).DESC</pv_name>
+    <x>30</x>
+    <y>45</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="115" green="223" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>text entry #207</name>
+    <pv_name>$(P)$(M1).DESC</pv_name>
+    <x>30</x>
+    <y>25</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="115" green="223" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>text entry #211</name>
+    <pv_name>$(P)$(M8).DESC</pv_name>
+    <x>30</x>
+    <y>165</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="115" green="223" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #215</name>
+    <actions>
+      <action type="open_display">
+        <file>motorx_tiny.opi</file>
+        <macros>
+          <M>$(M1)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M1) (Tiny)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx.opi</file>
+        <macros>
+          <M>$(M1)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M1) (Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorxU.opi</file>
+        <macros>
+          <M>$(M1)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M1) (Alt-Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_more.opi</file>
+        <macros>
+          <M>$(M1)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M1) (Medium)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_setup.opi</file>
+        <macros>
+          <M>$(M1)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M1) (Setup)</description>
+      </action>
+      <action type="open_display">
+        <file>scanParms.opi</file>
+        <macros>
+          <PV>$(M1)</PV>
+          <Q>$(M1)</Q>
+        </macros>
+        <target>tab</target>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_all.opi</file>
+        <macros>
+          <M>$(M1)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M1) (Debug)</description>
+      </action>
+    </actions>
+    <text>$(M1)</text>
+    <y>25</y>
+    <width>30</width>
+    <height>20</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #224</name>
+    <actions>
+      <action type="open_display">
+        <file>motorx_tiny.opi</file>
+        <macros>
+          <M>$(M5)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M5) (Tiny)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx.opi</file>
+        <macros>
+          <M>$(M5)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M5) (Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorxU.opi</file>
+        <macros>
+          <M>$(M5)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M5) (Alt-Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_more.opi</file>
+        <macros>
+          <M>$(M5)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M5) (Medium)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_setup.opi</file>
+        <macros>
+          <M>$(M5)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M5) (Setup)</description>
+      </action>
+      <action type="open_display">
+        <file>scanParms.opi</file>
+        <macros>
+          <PV>$(M5)</PV>
+          <Q>$(M5)</Q>
+        </macros>
+        <target>tab</target>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_all.opi</file>
+        <macros>
+          <M>$(M5)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M5) (Debug)</description>
+      </action>
+    </actions>
+    <text>$(M5)</text>
+    <y>105</y>
+    <width>30</width>
+    <height>20</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #233</name>
+    <actions>
+      <action type="open_display">
+        <file>motorx_tiny.opi</file>
+        <macros>
+          <M>$(M6)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M6) (Tiny)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx.opi</file>
+        <macros>
+          <M>$(M6)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M6) (Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorxU.opi</file>
+        <macros>
+          <M>$(M6)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M6) (Alt-Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_more.opi</file>
+        <macros>
+          <M>$(M6)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M6) (Medium)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_setup.opi</file>
+        <macros>
+          <M>$(M6)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M6) (Setup)</description>
+      </action>
+      <action type="open_display">
+        <file>scanParms.opi</file>
+        <macros>
+          <PV>$(M6)</PV>
+          <Q>$(M6)</Q>
+        </macros>
+        <target>tab</target>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_all.opi</file>
+        <macros>
+          <M>$(M6)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M6) (Debug)</description>
+      </action>
+    </actions>
+    <text>$(M6)</text>
+    <y>125</y>
+    <width>30</width>
+    <height>20</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #242</name>
+    <actions>
+      <action type="open_display">
+        <file>motorx_tiny.opi</file>
+        <macros>
+          <M>$(M7)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M7) (Tiny)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx.opi</file>
+        <macros>
+          <M>$(M7)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M7) (Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorxU.opi</file>
+        <macros>
+          <M>$(M7)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M7) (Alt-Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_more.opi</file>
+        <macros>
+          <M>$(M7)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M7) (Medium)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_setup.opi</file>
+        <macros>
+          <M>$(M7)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M7) (Setup)</description>
+      </action>
+      <action type="open_display">
+        <file>scanParms.opi</file>
+        <macros>
+          <PV>$(M7)</PV>
+          <Q>$(M7)</Q>
+        </macros>
+        <target>tab</target>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_all.opi</file>
+        <macros>
+          <M>$(M7)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M7) (Debug)</description>
+      </action>
+    </actions>
+    <text>$(M7)</text>
+    <y>145</y>
+    <width>30</width>
+    <height>19</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #251</name>
+    <actions>
+      <action type="open_display">
+        <file>motorx_tiny.opi</file>
+        <macros>
+          <M>$(M8)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M8) (Tiny)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx.opi</file>
+        <macros>
+          <M>$(M8)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M8) (Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorxU.opi</file>
+        <macros>
+          <M>$(M8)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M8) (Alt-Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_more.opi</file>
+        <macros>
+          <M>$(M8)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M8) (Medium)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_setup.opi</file>
+        <macros>
+          <M>$(M8)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M8) (Setup)</description>
+      </action>
+      <action type="open_display">
+        <file>scanParms.opi</file>
+        <macros>
+          <PV>$(M8)</PV>
+          <Q>$(M8)</Q>
+        </macros>
+        <target>tab</target>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_all.opi</file>
+        <macros>
+          <M>$(M8)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M8) (Debug)</description>
+      </action>
+    </actions>
+    <text>$(M8)</text>
+    <y>165</y>
+    <width>30</width>
+    <height>19</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #260</name>
+    <actions>
+      <action type="open_display">
+        <file>motorx_tiny.opi</file>
+        <macros>
+          <M>$(M4)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M4) (Tiny)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx.opi</file>
+        <macros>
+          <M>$(M4)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M4) (Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorxU.opi</file>
+        <macros>
+          <M>$(M4)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M4) (Alt-Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_more.opi</file>
+        <macros>
+          <M>$(M4)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M4) (Medium)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_setup.opi</file>
+        <macros>
+          <M>$(M4)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M4) (Setup)</description>
+      </action>
+      <action type="open_display">
+        <file>scanParms.opi</file>
+        <macros>
+          <PV>$(M4)</PV>
+          <Q>$(M4)</Q>
+        </macros>
+        <target>tab</target>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_all.opi</file>
+        <macros>
+          <M>$(M4)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M4) (Debug)</description>
+      </action>
+    </actions>
+    <text>$(M4)</text>
+    <y>85</y>
+    <width>30</width>
+    <height>20</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #269</name>
+    <actions>
+      <action type="open_display">
+        <file>motorx_tiny.opi</file>
+        <macros>
+          <M>$(M2)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M2) (Tiny)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx.opi</file>
+        <macros>
+          <M>$(M2)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M2) (Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorxU.opi</file>
+        <macros>
+          <M>$(M2)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M2) (Alt-Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_more.opi</file>
+        <macros>
+          <M>$(M2)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M2) (Medium)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_setup.opi</file>
+        <macros>
+          <M>$(M2)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M2) (Setup)</description>
+      </action>
+      <action type="open_display">
+        <file>scanParms.opi</file>
+        <macros>
+          <PV>$(M2)</PV>
+          <Q>$(M2)</Q>
+        </macros>
+        <target>tab</target>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_all.opi</file>
+        <macros>
+          <M>$(M2)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M2) (Debug)</description>
+      </action>
+    </actions>
+    <text>$(M2)</text>
+    <y>45</y>
+    <width>30</width>
+    <height>20</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #278</name>
+    <actions>
+      <action type="open_display">
+        <file>motorx_tiny.opi</file>
+        <macros>
+          <M>$(M3)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M3) (Tiny)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx.opi</file>
+        <macros>
+          <M>$(M3)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M3) (Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorxU.opi</file>
+        <macros>
+          <M>$(M3)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M3) (Alt-Small)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_more.opi</file>
+        <macros>
+          <M>$(M3)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M3) (Medium)</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_setup.opi</file>
+        <macros>
+          <M>$(M3)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M3) (Setup)</description>
+      </action>
+      <action type="open_display">
+        <file>scanParms.opi</file>
+        <macros>
+          <PV>$(M3)</PV>
+          <Q>$(M3)</Q>
+        </macros>
+        <target>tab</target>
+        <description>Scan Parameters</description>
+      </action>
+      <action type="open_display">
+        <file>motorx_all.opi</file>
+        <macros>
+          <M>$(M3)</M>
+        </macros>
+        <target>tab</target>
+        <description>$(M3) (Debug)</description>
+      </action>
+    </actions>
+    <text>$(M3)</text>
+    <y>65</y>
+    <width>30</width>
+    <height>20</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #287</name>
+    <pv_name>$(P)$(M1).VAL</pv_name>
+    <x>150</x>
+    <y>25</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #291</name>
+    <pv_name>$(P)$(M2).VAL</pv_name>
+    <x>150</x>
+    <y>45</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #295</name>
+    <pv_name>$(P)$(M3).VAL</pv_name>
+    <x>150</x>
+    <y>65</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #299</name>
+    <pv_name>$(P)$(M4).VAL</pv_name>
+    <x>150</x>
+    <y>85</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #303</name>
+    <pv_name>$(P)$(M5).VAL</pv_name>
+    <x>150</x>
+    <y>105</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #307</name>
+    <pv_name>$(P)$(M6).VAL</pv_name>
+    <x>150</x>
+    <y>125</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #311</name>
+    <pv_name>$(P)$(M7).VAL</pv_name>
+    <x>150</x>
+    <y>145</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #315</name>
+    <pv_name>$(P)$(M8).VAL</pv_name>
+    <x>150</x>
+    <y>165</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="200" green="200" blue="200">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>related display #319</name>
+    <actions>
+      <action type="open_display">
+        <file>8motor_form.opi</file>
+        <target>tab</target>
+        <description>motor-parameter table</description>
+      </action>
+    </actions>
+    <text>More</text>
+    <x>145</x>
+    <y>185</y>
+    <width>50</width>
+    <height>20</height>
+    <foreground_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="40" green="147" blue="21">
+      </color>
+    </background_color>
+  </widget>
+</display>
