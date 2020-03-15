@@ -1,7 +1,7 @@
 
 file {
-	name="/home/oxygen6/SLUITER/local/epics/Vx_5-5_R3-14-12/support/motor/svn/motorApp/op/adl/motorxU.adl"
-	version=030105
+	name="/tmp/motor/motorApp/op/adl/motorxU.adl"
+	version=030114
 }
 display {
 	object {
@@ -85,6 +85,18 @@ display {
 		3cb420,
 		289315,
 		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=4
+		y=130
+		width=165
+		height=40
+	}
+	"basic attribute" {
+		clr=14
+		width=3
 	}
 }
 "message button" {
@@ -346,18 +358,6 @@ rectangle {
 	}
 	label="+"
 	press_msg="1"
-}
-rectangle {
-	object {
-		x=4
-		y=130
-		width=165
-		height=40
-	}
-	"basic attribute" {
-		clr=14
-		width=3
-	}
 }
 text {
 	object {
