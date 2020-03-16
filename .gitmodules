@@ -91,3 +91,6 @@
 [submodule "modules/motorParker"]
 	path = modules/motorParker
 	url = https://github.com/epics-motor/motorParker.git
+[submodule ".ci"]
+	path = .ci
+	url = https://github.com/epics-base/ci-scripts
