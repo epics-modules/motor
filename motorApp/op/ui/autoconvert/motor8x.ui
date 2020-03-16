@@ -14,6 +14,7 @@
         <string>
 
 QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
+QPushButton::menu-indicator {image: url(none.png); width: 0}
 
 caTable {
        font: 10pt;
@@ -9287,7 +9288,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,181;</string>
+                <string>1,1;1,181;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_1">
@@ -9327,7 +9328,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,181;</string>
+                <string>1,1;1,181;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_2">
@@ -9367,7 +9368,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,181;</string>
+                <string>1,1;1,181;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_3">
@@ -9407,7 +9408,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,181;</string>
+                <string>1,1;1,181;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_4">
@@ -9447,7 +9448,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,181;</string>
+                <string>1,1;1,181;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_5">
@@ -9487,7 +9488,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,181;</string>
+                <string>1,1;1,181;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_6">
@@ -9527,7 +9528,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,181;</string>
+                <string>1,1;1,181;</string>
             </property>
         </widget>
         <zorder>caRectangle_0</zorder>

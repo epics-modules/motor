@@ -14,6 +14,7 @@
         <string>
 
 QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
+QPushButton::menu-indicator {image: url(none.png); width: 0}
 
 caTable {
        font: 10pt;
@@ -682,7 +683,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>125,1;</string>
+                <string>1,1;125,1;</string>
             </property>
         </widget>
         <widget class="caLineEdit" name="caLineEdit_2">

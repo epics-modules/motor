@@ -10,15 +10,15 @@ h 175
 font "helvetica-medium-r-18.0"
 ctlFont "helvetica-bold-r-10.0"
 btnFont "helvetica-medium-r-18.0"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
-textColor rgb 0 0 0
-ctlFgColor1 rgb 64256 62208 18944
-ctlFgColor2 rgb 60928 46592 11008
-ctlBgColor1 rgb 52480 24832 0
-ctlBgColor2 rgb 65280 45056 65280
-topShadowColor rgb 44544 19968 48128
-botShadowColor rgb 13312 13056 34304
+fgColor index 14
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 25
+ctlFgColor2 index 15
+ctlBgColor1 index 5
+ctlBgColor2 index 12
+topShadowColor index 1
+botShadowColor index 13
 showGrid
 snapToGrid
 gridSize 4
@@ -32,10 +32,10 @@ minor 1
 release 1
 x 0
 y 51
-w 70
+w 60
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -51,10 +51,10 @@ minor 1
 release 1
 x 0
 y 66
-w 70
+w 60
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -70,10 +70,10 @@ minor 1
 release 1
 x 0
 y 81
-w 70
+w 60
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -89,10 +89,10 @@ minor 1
 release 1
 x 0
 y 96
-w 70
+w 60
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -108,10 +108,10 @@ minor 1
 release 1
 x 0
 y 114
-w 70
+w 60
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -127,10 +127,10 @@ minor 1
 release 1
 x 0
 y 129
-w 70
+w 60
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -146,10 +146,10 @@ minor 1
 release 1
 x 0
 y 144
-w 70
+w 60
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -165,10 +165,10 @@ minor 1
 release 1
 x 0
 y 159
-w 70
+w 60
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -186,9 +186,9 @@ x 950
 y 0
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -204,11 +204,11 @@ minor 1
 release 1
 x 1000
 y 0
-w 51
+w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -228,14 +228,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).ACCL"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -254,14 +254,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).ACCL"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -280,14 +280,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).ACCL"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -306,14 +306,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).ACCL"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -332,14 +332,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).ACCL"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -358,14 +358,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).ACCL"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -384,14 +384,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).ACCL"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -410,14 +410,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).ACCL"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -434,9 +434,9 @@ x 950
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -450,13 +450,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 947
+x 950
 y 35
-w 56
+w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -476,14 +476,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).BACC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -502,14 +502,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).BACC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -528,14 +528,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).BACC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -554,14 +554,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).BACC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -580,14 +580,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).BACC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -606,14 +606,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).BACC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -632,14 +632,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).BACC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -658,14 +658,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).BACC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -682,9 +682,9 @@ x 1000
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -698,13 +698,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 997
+x 1000
 y 35
-w 56
+w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -724,14 +724,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).S"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -750,14 +750,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).S"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -776,14 +776,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).S"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -802,14 +802,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).S"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -828,14 +828,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).S"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -854,14 +854,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).S"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -880,14 +880,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).S"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -906,14 +906,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).S"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -932,14 +932,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).SBAS"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -958,14 +958,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).SBAS"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -984,14 +984,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).SBAS"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1010,14 +1010,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).SBAS"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1036,14 +1036,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).SBAS"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1062,14 +1062,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).SBAS"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1088,14 +1088,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).SBAS"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1114,14 +1114,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).SBAS"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1136,11 +1136,11 @@ minor 1
 release 1
 x 840
 y 0
-w 51
+w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1160,14 +1160,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).SBAK"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1186,14 +1186,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).SBAK"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1212,14 +1212,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).SBAK"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1238,14 +1238,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).SBAK"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1264,14 +1264,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).SBAK"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1290,14 +1290,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).SBAK"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1316,14 +1316,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).SBAK"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1342,14 +1342,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).SBAK"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1366,9 +1366,9 @@ x 840
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1386,9 +1386,9 @@ x 840
 y 35
 w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1408,14 +1408,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).BDST"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1434,14 +1434,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).BDST"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1460,14 +1460,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).BDST"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1486,14 +1486,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).BDST"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1512,14 +1512,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).BDST"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1538,14 +1538,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).BDST"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1564,14 +1564,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).BDST"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1590,14 +1590,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).BDST"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1614,9 +1614,9 @@ x 895
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1632,11 +1632,11 @@ minor 1
 release 1
 x 895
 y 0
-w 51
+w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1654,9 +1654,9 @@ x 895
 y 35
 w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1674,9 +1674,9 @@ x 740
 y 8
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1694,9 +1694,9 @@ x 740
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1714,9 +1714,9 @@ x 790
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1734,9 +1734,9 @@ x 790
 y 0
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1754,9 +1754,9 @@ x 740
 y 35
 w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1774,9 +1774,9 @@ x 790
 y 35
 w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1796,14 +1796,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).UREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1822,14 +1822,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).UREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1848,14 +1848,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).UREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1874,14 +1874,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).UREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1900,14 +1900,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).UREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1926,14 +1926,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).UREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1952,14 +1952,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).UREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1978,14 +1978,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).UREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2004,14 +2004,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).RDBD"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2030,14 +2030,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).RDBD"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2056,14 +2056,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).RDBD"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2082,14 +2082,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).RDBD"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2108,14 +2108,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).RDBD"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2134,14 +2134,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).RDBD"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2160,14 +2160,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).RDBD"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2186,14 +2186,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).RDBD"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2210,9 +2210,9 @@ x 535
 y 8
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2230,9 +2230,9 @@ x 585
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2250,9 +2250,9 @@ x 535
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2270,9 +2270,9 @@ x 635
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2290,9 +2290,9 @@ x 685
 y 15
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2310,9 +2310,9 @@ x 585
 y 0
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2332,14 +2332,14 @@ w 50
 h 16
 controlPv "$(P)$(M5).SREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2358,14 +2358,14 @@ w 50
 h 16
 controlPv "$(P)$(M6).SREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2384,14 +2384,14 @@ w 50
 h 16
 controlPv "$(P)$(M7).SREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2410,14 +2410,14 @@ w 50
 h 16
 controlPv "$(P)$(M8).SREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2436,14 +2436,14 @@ w 50
 h 16
 controlPv "$(P)$(M2).SREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2462,14 +2462,14 @@ w 50
 h 16
 controlPv "$(P)$(M1).SREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2488,14 +2488,14 @@ w 50
 h 16
 controlPv "$(P)$(M3).SREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2514,14 +2514,14 @@ w 50
 h 16
 controlPv "$(P)$(M4).SREV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2538,9 +2538,9 @@ x 635
 y 0
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2558,9 +2558,9 @@ x 685
 y 0
 w 50
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2578,9 +2578,9 @@ x 635
 y 35
 w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2598,9 +2598,9 @@ x 685
 y 35
 w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2618,9 +2618,9 @@ x 585
 y 35
 w 50
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2640,14 +2640,14 @@ w 75
 h 16
 controlPv "$(P)$(M5).DLLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2666,14 +2666,14 @@ w 75
 h 16
 controlPv "$(P)$(M5).DHLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2692,14 +2692,14 @@ w 75
 h 16
 controlPv "$(P)$(M6).DLLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2718,14 +2718,14 @@ w 75
 h 16
 controlPv "$(P)$(M6).DHLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2744,14 +2744,14 @@ w 75
 h 16
 controlPv "$(P)$(M7).DLLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2770,14 +2770,14 @@ w 75
 h 16
 controlPv "$(P)$(M7).DHLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2796,14 +2796,14 @@ w 75
 h 16
 controlPv "$(P)$(M8).DLLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2822,14 +2822,14 @@ w 75
 h 16
 controlPv "$(P)$(M8).DHLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2848,14 +2848,14 @@ w 75
 h 16
 controlPv "$(P)$(M2).DLLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2874,14 +2874,14 @@ w 75
 h 16
 controlPv "$(P)$(M2).DHLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2900,14 +2900,14 @@ w 75
 h 16
 controlPv "$(P)$(M1).DHLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2926,14 +2926,14 @@ w 75
 h 16
 controlPv "$(P)$(M1).DLLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2952,14 +2952,14 @@ w 75
 h 16
 controlPv "$(P)$(M3).DLLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2978,14 +2978,14 @@ w 75
 h 16
 controlPv "$(P)$(M3).DHLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3004,14 +3004,14 @@ w 75
 h 16
 controlPv "$(P)$(M4).DLLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3030,14 +3030,14 @@ w 75
 h 16
 controlPv "$(P)$(M4).DHLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3056,14 +3056,14 @@ w 75
 h 16
 controlPv "$(P)$(M5).HLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3082,14 +3082,14 @@ w 75
 h 16
 controlPv "$(P)$(M5).LLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3108,14 +3108,14 @@ w 75
 h 16
 controlPv "$(P)$(M6).HLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3134,14 +3134,14 @@ w 75
 h 16
 controlPv "$(P)$(M6).LLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3160,14 +3160,14 @@ w 75
 h 16
 controlPv "$(P)$(M7).HLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3186,14 +3186,14 @@ w 75
 h 16
 controlPv "$(P)$(M7).LLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3212,14 +3212,14 @@ w 75
 h 16
 controlPv "$(P)$(M8).HLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3238,14 +3238,14 @@ w 75
 h 16
 controlPv "$(P)$(M8).LLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3264,14 +3264,14 @@ w 75
 h 16
 controlPv "$(P)$(M2).HLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3290,14 +3290,14 @@ w 75
 h 16
 controlPv "$(P)$(M1).LLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3316,14 +3316,14 @@ w 75
 h 16
 controlPv "$(P)$(M2).LLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3342,14 +3342,14 @@ w 75
 h 16
 controlPv "$(P)$(M1).HLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3368,14 +3368,14 @@ w 75
 h 16
 controlPv "$(P)$(M3).HLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3394,14 +3394,14 @@ w 75
 h 16
 controlPv "$(P)$(M3).LLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3420,14 +3420,14 @@ w 75
 h 16
 controlPv "$(P)$(M4).HLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3446,14 +3446,14 @@ w 75
 h 16
 controlPv "$(P)$(M4).LLM"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3470,9 +3470,9 @@ x 455
 y 15
 w 75
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3490,9 +3490,9 @@ x 380
 y 15
 w 75
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3510,9 +3510,9 @@ x 230
 y 15
 w 75
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3530,9 +3530,9 @@ x 305
 y 15
 w 75
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3550,9 +3550,9 @@ x 455
 y 0
 w 75
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3570,9 +3570,9 @@ x 380
 y 0
 w 75
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3590,9 +3590,9 @@ x 230
 y 0
 w 75
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3610,9 +3610,9 @@ x 305
 y 0
 w 75
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3630,9 +3630,9 @@ x 230
 y 35
 w 75
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3650,9 +3650,9 @@ x 305
 y 35
 w 75
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3670,9 +3670,9 @@ x 380
 y 35
 w 75
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3690,9 +3690,9 @@ x 455
 y 35
 w 75
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3712,14 +3712,14 @@ w 65
 h 16
 controlPv "$(P)$(M5).EGU"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3738,14 +3738,14 @@ w 65
 h 16
 controlPv "$(P)$(M6).EGU"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3764,14 +3764,14 @@ w 65
 h 16
 controlPv "$(P)$(M7).EGU"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3790,14 +3790,14 @@ w 65
 h 16
 controlPv "$(P)$(M8).EGU"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3816,14 +3816,14 @@ w 65
 h 16
 controlPv "$(P)$(M2).EGU"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3842,14 +3842,14 @@ w 65
 h 16
 controlPv "$(P)$(M1).EGU"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3868,14 +3868,14 @@ w 65
 h 16
 controlPv "$(P)$(M3).EGU"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3894,14 +3894,14 @@ w 65
 h 16
 controlPv "$(P)$(M4).EGU"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3920,14 +3920,14 @@ w 100
 h 16
 controlPv "$(P)$(M5).DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3946,14 +3946,14 @@ w 100
 h 16
 controlPv "$(P)$(M6).DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3972,14 +3972,14 @@ w 100
 h 16
 controlPv "$(P)$(M7).DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3998,14 +3998,14 @@ w 100
 h 16
 controlPv "$(P)$(M8).DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -4024,14 +4024,14 @@ w 100
 h 16
 controlPv "$(P)$(M2).DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -4050,14 +4050,14 @@ w 100
 h 16
 controlPv "$(P)$(M1).DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -4076,14 +4076,14 @@ w 100
 h 16
 controlPv "$(P)$(M3).DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -4102,14 +4102,14 @@ w 100
 h 16
 controlPv "$(P)$(M4).DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 55808 55808 55808
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -4126,9 +4126,9 @@ x 160
 y 8
 w 65
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -4146,9 +4146,9 @@ x 60
 y 8
 w 100
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -4162,13 +4162,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x -3
+x 0
 y 8
-w 67
+w 60
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -4186,9 +4186,9 @@ x 160
 y 35
 w 65
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -4206,9 +4206,9 @@ x 60
 y 35
 w 100
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -4226,8 +4226,8 @@ x 0
 y 32
 w 1050
 h 0
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 numPoints 2 {
 xPoints  {
@@ -4250,14 +4250,14 @@ x 535
 y 113
 w 50
 h 16
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M5).DIR"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -4271,14 +4271,14 @@ x 535
 y 128
 w 50
 h 16
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M6).DIR"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -4292,14 +4292,14 @@ x 535
 y 143
 w 50
 h 16
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M7).DIR"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -4313,14 +4313,14 @@ x 535
 y 158
 w 50
 h 16
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M8).DIR"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -4334,14 +4334,14 @@ x 535
 y 50
 w 50
 h 16
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M1).DIR"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -4355,14 +4355,14 @@ x 535
 y 65
 w 50
 h 16
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M2).DIR"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -4376,14 +4376,14 @@ x 535
 y 80
 w 50
 h 16
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M3).DIR"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -4397,14 +4397,14 @@ x 535
 y 95
 w 50
 h 16
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M4).DIR"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
