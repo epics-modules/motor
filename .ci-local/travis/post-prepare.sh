@@ -6,8 +6,11 @@ set -e
 
 CACHEDIR=${CACHEDIR:-${HOME}/.cache}
 
+# sanity check
+pwd
+
 # source functions
-. ${HOME}/.ci/travis/utils.sh
+. ./.ci/travis/utils.sh
 
 # Add SUPPORT to RELEASE.local
 update_release_local SUPPORT ${CACHEDIR}
