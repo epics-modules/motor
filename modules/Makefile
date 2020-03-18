@@ -56,6 +56,7 @@ RELEASE_LOCAL := RELEASE.$(EPICS_HOST_ARCH).local
 all host $(DIRS) $(ARCHS) $(ACTIONS) $(dirActionTargets) $(dirArchTargets) \
     $(dirActionArchTargets) $(actionArchTargets): | $(RELEASE_LOCAL)
 
+.PHONY: $(RELEASE_LOCAL)
 $(RELEASE_LOCAL):
 	$(ECHO) Creating $@, MOTOR = $(INSTALL_LOCATION_ABS)
 	@echo MOTOR = $(INSTALL_LOCATION_ABS)> $@
