@@ -22,6 +22,12 @@ pwd
 
 # Comment out SUPPORT from motor's RELEASE file
 sed -i -e "s|^\(SUPPORT=.*\)$|#\1|g" ./configure/RELEASE
-
+#
 echo -e "${ANSI_BLUE}Updated motor/configure/RELEASE${ANSI_RESET}"
 grep SUPPORT ./configure/RELEASE
+
+# Comment out SUPPORT from motorOms's RELEASE file
+sed -i -e "s|^\(SUPPORT=.*\)$|#\1|g" ./modules/motorOms/configure/RELEASE
+#
+echo -e "${ANSI_BLUE}Updated motor/modules/motorOms/configure/RELEASE${ANSI_RESET}"
+grep SUPPORT ./modules/motorOms/configure/RELEASE
