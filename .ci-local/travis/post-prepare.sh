@@ -21,7 +21,7 @@ pwd
 #!cat ${CACHEDIR}/RELEASE.local
 
 # Comment out SUPPORT from motor's RELEASE file
-sedi "s|^(SUPPORT=.*)$|#\1|g" ./configure/RELEASE
+sed -i -e "s|^\(SUPPORT=.*\)$|#\1|g" ./configure/RELEASE
 
 echo -e "${ANSI_BLUE}Updated motor/configure/RELEASE${ANSI_RESET}"
 grep SUPPORT ./configure/RELEASE
