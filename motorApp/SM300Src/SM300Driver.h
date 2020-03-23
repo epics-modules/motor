@@ -66,10 +66,10 @@ private:
 	static const int REFRESH_ERROR_FOR_POLL_COUNTS = 10;
 
 	#define FIRST_SM300_PARAM reset_
-	int reset_;
-	int reset_and_home_;
-	int disconnect_;
-	int error_code_;
+	int reset_; // int param
+	int reset_and_home_; // int param
+	int disconnect_; // int param
+	int error_code_; // int param
 	#define LAST_SM300_PARAM error_code_
 	
 

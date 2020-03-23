@@ -118,6 +118,7 @@ asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 	}
 	else if (function == disconnect_) {
 		setIntegerParam(disconnect_, 1);
+		callParamCallbacks();
 		setTerminationChars("\x06", 1, "\x04", 1);
 		sprintf(this->outString_, "\x06\x02%s", "M77");
 		status = writeController();
@@ -127,7 +128,7 @@ asynStatus SM300Controller::writeInt32(asynUser *pasynUser, epicsInt32 value) {
 	else if (function == reset_and_home_) {
 		setIntegerParam(reset_and_home_, 1);
 		callParamCallbacks();
-		perform_reset();
+		status = perform_reset();
 		for (int i = 0; i < numAxes_; i++) {
 			getAxis(i)->home(0, 0, 0, 0);
 		}
@@ -151,11 +152,12 @@ asynStatus SM300Controller::perform_reset() {
 
 	//send empty string with ACK to clear the buffer		
 	asynStatus status = this->writeController();
+	if (status) return status;
 
 	//set termination character is EOT without check sum *
 	// when sending send <CR> incase this mode is switched on
 	setTerminationChars("\x06", 1, "\x04\x0D", 2);
-	if (sendCommand("PEK0")) return status;
+	if ( (status = sendCommand("PEK0")) ) return status;
 
 	setTerminationChars("\x06", 1, "\x04", 1);
 	const char * commands[] = {
@@ -221,7 +223,7 @@ asynStatus SM300Controller::perform_reset() {
 
 	int n_array = (sizeof(commands) / sizeof(const char *));
 	for (int i = 0; i < n_array; i++) {
-		if (sendCommand(commands[i])) return status;
+		if ( (status = sendCommand(commands[i])) ) return status;
 	}
 
 	setIntegerParam(reset_, 0);
