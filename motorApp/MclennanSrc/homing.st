@@ -5,6 +5,8 @@ program homing("MOTPV=xxx,MODE,AXIS,DEBUG")
 %% #include "string.h"
 %% #include "errlog.h"
 %% #include "float.h"
+%% #include "stdlib.h"
+%% #include "math.h"
 
 char* SNLtaskName;
 int jog_forward_value, jog_reverse_value;
