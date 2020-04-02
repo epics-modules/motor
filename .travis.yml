@@ -18,6 +18,7 @@ env:
     - ASYN=R4-38
     - AUTOSAVE=R5-9
     - BUSY=R1-7-1
+    - VV=1
 
 addons:
   apt:
