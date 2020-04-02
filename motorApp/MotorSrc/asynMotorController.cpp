@@ -306,14 +306,18 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
 
   /* Do callbacks so higher layers see any changes */
   pAxis->callParamCallbacks();
-  if (status) 
-    asynPrint(pasynUser, ASYN_TRACE_ERROR, 
-      "%s:%s error, status=%d axis=%d, function=%d, value=%d\n", 
-      driverName, functionName, status, axis, function, value);
-  else    
-    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-      "%s:%s:: axis=%d, function=%d, value=%d\n", 
-      driverName, functionName, axis, function, value);
+  {
+    const char *paramName = NULL;
+    if (getParamName(function, &paramName)) paramName = "";
+    if (status)
+      asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                "%s:%s error, status=%d axis=%d, function=%s (%d), value=%d\n",
+                driverName, functionName, status, axis, paramName, function, value);
+    else
+      asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
+                "%s:%s:: axis=%d, function=%s (%d), value=%d\n",
+                driverName, functionName, axis, paramName, function, value);
+  }
   return status;
 }    
   
@@ -466,14 +470,18 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   /* Do callbacks so higher layers see any changes */
   pAxis->callParamCallbacks();
   
-  if (status) 
-    asynPrint(pasynUser, ASYN_TRACE_ERROR, 
-      "%s:%s error, status=%d axis=%d, function=%d, value=%f\n", 
-      driverName, functionName, status, axis, function, value);
-  else    
-    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-      "%s:%s:: axis=%d, function=%d, value=%f\n", 
-      driverName, functionName, axis, function, value);
+  {
+    const char *paramName = NULL;
+    if (getParamName(function, &paramName)) paramName = "";
+    if (status)
+      asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                "%s:%s error, status=%d axis=%d, function=%s (%d), value=%f\n",
+                driverName, functionName, status, axis, paramName, function, value);
+    else
+      asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
+              "%s:%s:: axis=%d, function=%s (%d), value=%f\n",
+                driverName, functionName, axis, paramName, function, value);
+  }
   return status;
     
 }
