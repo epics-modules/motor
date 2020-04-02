@@ -10,15 +10,15 @@ h 400
 font "helvetica-medium-r-18.0"
 ctlFont "helvetica-bold-r-10.0"
 btnFont "helvetica-medium-r-18.0"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
-textColor rgb 0 0 0
-ctlFgColor1 rgb 64256 62208 18944
-ctlFgColor2 rgb 60928 46592 11008
-ctlBgColor1 rgb 52480 24832 0
-ctlBgColor2 rgb 65280 45056 65280
-topShadowColor rgb 44544 19968 48128
-botShadowColor rgb 13312 13056 34304
+fgColor index 14
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 25
+ctlFgColor2 index 15
+ctlBgColor1 index 5
+ctlBgColor2 index 12
+topShadowColor index 1
+botShadowColor index 13
 showGrid
 snapToGrid
 gridSize 4
@@ -34,9 +34,9 @@ x 0
 y 31
 w 99
 h 24
-lineColor rgb 2560 0 47104
+lineColor index 54
 fill
-fillColor rgb 2560 0 47104
+fillColor index 54
 lineWidth 0
 endObjectProperties
 
@@ -50,9 +50,9 @@ x 0
 y 0
 w 397
 h 29
-lineColor rgb 65280 65280 65280
+lineColor index 0
 fill
-fillColor rgb 65280 65280 65280
+fillColor index 0
 lineWidth 0
 endObjectProperties
 
@@ -66,8 +66,8 @@ x 0
 y 30
 w 402
 h 3
-lineColor rgb 2560 0 47104
-fillColor rgb 2560 0 47104
+lineColor index 54
+fillColor index 54
 lineWidth 3
 numPoints 2 {
 xPoints  {
@@ -92,12 +92,12 @@ w 153
 h 20
 controlPv "$(P)$(M).DESC"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -116,12 +116,12 @@ w 100
 h 20
 controlPv "$(P)$(M).DTYP"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -136,10 +136,10 @@ minor 1
 release 1
 x 171
 y 5
-w 72
+w 51
 h 20
-font "helvetica-medium-r-14.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -157,8 +157,8 @@ x 2
 y 34
 w 95
 h 20
-font "helvetica-medium-r-14.0"
-fgColor rgb 65280 65280 65280
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -177,9 +177,9 @@ y 62
 w 37
 h 320
 controlPv "$(P)$(M).MSTA"
-lineColor rgb 0 0 0
-onColor rgb 7680 47872 0
-offColor rgb 51200 51200 51200
+lineColor index 14
+onColor index 16
+offColor index 3
 endian "little"
 numBits 16
 shift 0
@@ -195,8 +195,8 @@ x 50
 y 365
 w 171
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -214,8 +214,8 @@ x 50
 y 345
 w 171
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -233,8 +233,8 @@ x 50
 y 325
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -252,8 +252,8 @@ x 50
 y 305
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -269,10 +269,10 @@ minor 1
 release 1
 x 50
 y 285
-w 355
+w 345
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -290,8 +290,8 @@ x 50
 y 265
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -309,8 +309,8 @@ x 50
 y 245
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -328,8 +328,8 @@ x 50
 y 225
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -347,8 +347,8 @@ x 50
 y 205
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -366,8 +366,8 @@ x 50
 y 185
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -385,8 +385,8 @@ x 50
 y 165
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -404,8 +404,8 @@ x 50
 y 145
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -423,8 +423,8 @@ x 50
 y 125
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -442,8 +442,8 @@ x 50
 y 105
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -461,8 +461,8 @@ x 50
 y 85
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -480,8 +480,8 @@ x 50
 y 65
 w 350
 h 15
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {

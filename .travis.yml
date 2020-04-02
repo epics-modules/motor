@@ -43,6 +43,8 @@ addons:
 
 install:
   - ./.ci/travis/prepare.sh
+  # ugly hacks go here:
+  - ./.ci-local/travis/post-prepare.sh
 
 script:
   - ./.ci/travis/build.sh

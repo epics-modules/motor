@@ -14,6 +14,7 @@
         <string>
 
 QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
+QPushButton::menu-indicator {image: url(none.png); width: 0}
 
 caTable {
        font: 10pt;
@@ -320,7 +321,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>399,1;</string>
+                <string>1,1;399,1;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_1">
@@ -360,7 +361,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,217;</string>
+                <string>1,1;1,217;</string>
             </property>
         </widget>
         <widget class="caTextEntry" name="caTextEntry_0">
@@ -541,7 +542,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>399,1;</string>
+                <string>1,1;399,1;</string>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_5">
@@ -3644,7 +3645,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>399,1;</string>
+                <string>1,1;399,1;</string>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_42">
@@ -3771,7 +3772,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,166;</string>
+                <string>1,1;1,166;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_5">
@@ -3811,7 +3812,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>399,1;</string>
+                <string>1,1;399,1;</string>
             </property>
         </widget>
         <widget class="caLineEdit" name="caLineEdit_7">

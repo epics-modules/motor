@@ -47,13 +47,13 @@
     <axis_0_maximum>100.0</axis_0_maximum>
     <axis_0_minimum>0.0</axis_0_minimum>
     <axis_0_scale_font>
-      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="0" pixels="true">Default</opifont.name>
     </axis_0_scale_font>
     <axis_0_scale_format></axis_0_scale_format>
     <axis_0_show_grid>true</axis_0_show_grid>
     <axis_0_time_format>0</axis_0_time_format>
     <axis_0_title_font>
-      <opifont.name fontName="Sans" height="10" style="1" pixels="false">Default Bold</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="1" pixels="true">Default Bold</opifont.name>
     </axis_0_title_font>
     <axis_0_visible>true</axis_0_visible>
     <axis_1_auto_scale>true</axis_1_auto_scale>
@@ -70,13 +70,13 @@
     <axis_1_maximum>100.0</axis_1_maximum>
     <axis_1_minimum>0.0</axis_1_minimum>
     <axis_1_scale_font>
-      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="0" pixels="true">Default</opifont.name>
     </axis_1_scale_font>
     <axis_1_scale_format></axis_1_scale_format>
     <axis_1_show_grid>true</axis_1_show_grid>
     <axis_1_time_format>0</axis_1_time_format>
     <axis_1_title_font>
-      <opifont.name fontName="Sans" height="10" style="1" pixels="false">Default Bold</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="1" pixels="true">Default Bold</opifont.name>
     </axis_1_title_font>
     <axis_1_visible>true</axis_1_visible>
     <axis_2_auto_scale>true</axis_2_auto_scale>
@@ -94,13 +94,13 @@
     <axis_2_maximum>100.0</axis_2_maximum>
     <axis_2_minimum>0.0</axis_2_minimum>
     <axis_2_scale_font>
-      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="0" pixels="true">Default</opifont.name>
     </axis_2_scale_font>
     <axis_2_scale_format></axis_2_scale_format>
     <axis_2_show_grid>true</axis_2_show_grid>
     <axis_2_time_format>0</axis_2_time_format>
     <axis_2_title_font>
-      <opifont.name fontName="Sans" height="10" style="1" pixels="false">Default Bold</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="1" pixels="true">Default Bold</opifont.name>
     </axis_2_title_font>
     <axis_2_visible>true</axis_2_visible>
     <axis_2_y_axis>true</axis_2_y_axis>
@@ -119,13 +119,13 @@
     <axis_3_maximum>100.0</axis_3_maximum>
     <axis_3_minimum>0.0</axis_3_minimum>
     <axis_3_scale_font>
-      <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="0" pixels="true">Default</opifont.name>
     </axis_3_scale_font>
     <axis_3_scale_format></axis_3_scale_format>
     <axis_3_show_grid>true</axis_3_show_grid>
     <axis_3_time_format>0</axis_3_time_format>
     <axis_3_title_font>
-      <opifont.name fontName="Sans" height="10" style="1" pixels="false">Default Bold</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="1" pixels="true">Default Bold</opifont.name>
     </axis_3_title_font>
     <axis_3_visible>true</axis_3_visible>
     <axis_3_y_axis>true</axis_3_y_axis>
@@ -164,7 +164,7 @@
     <show_toolbar>true</show_toolbar>
     <title></title>
     <title_font>
-      <opifont.name fontName="Sans" height="10" style="1" pixels="false">Default Bold</opifont.name>
+      <opifont.name fontName="Cantarell" height="11" style="1" pixels="true">Default Bold</opifont.name>
     </title_font>
     <tooltip>$(trace_0_y_pv)
 $(trace_0_y_pv_value)</tooltip>
@@ -614,7 +614,7 @@ $(trace_0_y_pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
+      <fontdata fontName="Cantarell" height="11" style="0" pixels="true" />
     </font>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <foreground_color>
@@ -662,7 +662,7 @@ $(pv_value)</tooltip>
     <border_width>1</border_width>
     <enabled>true</enabled>
     <font>
-      <fontdata fontName="Sans" height="11" style="0" pixels="false" />
+      <fontdata fontName="Cantarell" height="11" style="0" pixels="true" />
     </font>
     <foreground_color>
       <color red="0" green="0" blue="0" />

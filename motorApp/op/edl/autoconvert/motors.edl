@@ -10,15 +10,15 @@ h 190
 font "helvetica-medium-r-18.0"
 ctlFont "helvetica-bold-r-10.0"
 btnFont "helvetica-medium-r-18.0"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
-textColor rgb 0 0 0
-ctlFgColor1 rgb 64256 62208 18944
-ctlFgColor2 rgb 60928 46592 11008
-ctlBgColor1 rgb 52480 24832 0
-ctlBgColor2 rgb 65280 45056 65280
-topShadowColor rgb 44544 19968 48128
-botShadowColor rgb 13312 13056 34304
+fgColor index 14
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 25
+ctlFgColor2 index 15
+ctlBgColor1 index 5
+ctlBgColor2 index 12
+topShadowColor index 1
+botShadowColor index 13
 showGrid
 snapToGrid
 gridSize 4
@@ -36,14 +36,14 @@ w 76
 h 19
 controlPv "$(P)$(M3).TWV"
 format "decimal"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -62,14 +62,14 @@ w 76
 h 19
 controlPv "$(P)$(M2).TWV"
 format "decimal"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -99,9 +99,9 @@ x 35
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 39168 65280 65280
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -123,9 +123,9 @@ x 155
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 39168 65280 65280
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -147,9 +147,9 @@ x 275
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 39168 65280 65280
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -171,9 +171,9 @@ x 395
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 39168 65280 65280
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -195,9 +195,9 @@ x 516
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 39168 65280 65280
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -219,9 +219,9 @@ x 636
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 39168 65280 65280
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -243,9 +243,9 @@ x 756
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 39168 65280 65280
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -267,9 +267,9 @@ x 876
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 39168 65280 65280
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -296,9 +296,9 @@ x 35
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -320,9 +320,9 @@ x 155
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -344,9 +344,9 @@ x 275
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -368,9 +368,9 @@ x 395
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -392,9 +392,9 @@ x 516
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -416,9 +416,9 @@ x 636
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -440,9 +440,9 @@ x 756
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -464,9 +464,9 @@ x 876
 y 104
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -488,9 +488,9 @@ x 0
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M1).LLS)"
 visInvert
@@ -508,9 +508,9 @@ x 951
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M8).HLS)"
 visInvert
@@ -528,9 +528,9 @@ x 841
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M8).LLS)"
 visInvert
@@ -548,9 +548,9 @@ x 831
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M7).HLS)"
 visInvert
@@ -568,9 +568,9 @@ x 721
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M7).LLS)"
 visInvert
@@ -588,9 +588,9 @@ x 711
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M6).HLS)"
 visInvert
@@ -608,9 +608,9 @@ x 601
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M6).LLS)"
 visInvert
@@ -628,9 +628,9 @@ x 591
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M5).HLS)"
 visInvert
@@ -648,9 +648,9 @@ x 481
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M5).LLS)"
 visInvert
@@ -668,9 +668,9 @@ x 470
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M4).HLS)"
 visInvert
@@ -688,9 +688,9 @@ x 360
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M4).LLS)"
 visInvert
@@ -708,9 +708,9 @@ x 350
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M3).HLS)"
 visInvert
@@ -741,9 +741,9 @@ x 230
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M2).HLS)"
 visInvert
@@ -761,9 +761,9 @@ x 240
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M3).LLS)"
 visInvert
@@ -786,9 +786,9 @@ x 120
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M2).LLS)"
 visInvert
@@ -806,9 +806,9 @@ x 110
 y 40
 w 6
 h 42
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M1).HLS)"
 visInvert
@@ -828,12 +828,12 @@ w 100
 h 19
 controlPv "$(P)$(M1).RBV"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -852,14 +852,14 @@ w 100
 h 24
 controlPv "$(P)$(M1).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -878,14 +878,14 @@ w 100
 h 24
 controlPv "$(P)$(M2).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -904,14 +904,14 @@ w 100
 h 24
 controlPv "$(P)$(M3).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -930,14 +930,14 @@ w 100
 h 24
 controlPv "$(P)$(M4).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -956,14 +956,14 @@ w 100
 h 24
 controlPv "$(P)$(M5).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -982,14 +982,14 @@ w 100
 h 24
 controlPv "$(P)$(M6).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1008,14 +1008,14 @@ w 100
 h 24
 controlPv "$(P)$(M7).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1034,14 +1034,14 @@ w 100
 h 24
 controlPv "$(P)$(M8).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1060,14 +1060,14 @@ w 76
 h 19
 controlPv "$(P)$(M1).TWV"
 format "decimal"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1086,14 +1086,14 @@ w 76
 h 19
 controlPv "$(P)$(M4).TWV"
 format "decimal"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1112,14 +1112,14 @@ w 76
 h 19
 controlPv "$(P)$(M5).TWV"
 format "decimal"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1138,14 +1138,14 @@ w 76
 h 19
 controlPv "$(P)$(M6).TWV"
 format "decimal"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1164,14 +1164,14 @@ w 76
 h 19
 controlPv "$(P)$(M7).TWV"
 format "decimal"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1190,14 +1190,14 @@ w 76
 h 19
 controlPv "$(P)$(M8).TWV"
 format "decimal"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1216,12 +1216,12 @@ w 100
 h 19
 controlPv "$(P)$(M2).RBV"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1240,12 +1240,12 @@ w 100
 h 19
 controlPv "$(P)$(M3).RBV"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1264,12 +1264,12 @@ w 100
 h 19
 controlPv "$(P)$(M4).RBV"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1288,12 +1288,12 @@ w 100
 h 19
 controlPv "$(P)$(M5).RBV"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1312,12 +1312,12 @@ w 100
 h 19
 controlPv "$(P)$(M6).RBV"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1336,12 +1336,12 @@ w 100
 h 19
 controlPv "$(P)$(M7).RBV"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1360,12 +1360,12 @@ w 100
 h 19
 controlPv "$(P)$(M8).RBV"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1384,12 +1384,12 @@ w 115
 h 15
 controlPv "$(P)$(M1).EGU"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1408,12 +1408,12 @@ w 115
 h 15
 controlPv "$(P)$(M2).EGU"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1432,12 +1432,12 @@ w 115
 h 15
 controlPv "$(P)$(M3).EGU"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1456,12 +1456,12 @@ w 115
 h 15
 controlPv "$(P)$(M4).EGU"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1480,12 +1480,12 @@ w 115
 h 15
 controlPv "$(P)$(M5).EGU"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1504,12 +1504,12 @@ w 115
 h 15
 controlPv "$(P)$(M6).EGU"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1528,12 +1528,12 @@ w 115
 h 15
 controlPv "$(P)$(M7).EGU"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1552,12 +1552,12 @@ w 115
 h 15
 controlPv "$(P)$(M8).EGU"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1574,9 +1574,9 @@ x 35
 y 113
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 64256 62208 18944
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1598,9 +1598,9 @@ x 155
 y 113
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 64256 62208 18944
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1622,9 +1622,9 @@ x 275
 y 113
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 64256 62208 18944
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1646,9 +1646,9 @@ x 395
 y 113
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 64256 62208 18944
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1670,9 +1670,9 @@ x 516
 y 113
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 64256 62208 18944
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1694,9 +1694,9 @@ x 636
 y 113
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 64256 62208 18944
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1718,9 +1718,9 @@ x 756
 y 113
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 64256 62208 18944
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1742,9 +1742,9 @@ x 876
 y 113
 w 48
 h 10
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 64256 62208 18944
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1768,14 +1768,14 @@ w 115
 h 20
 controlPv "$(P)$(M2).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1794,14 +1794,14 @@ w 115
 h 20
 controlPv "$(P)$(M1).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1820,14 +1820,14 @@ w 115
 h 20
 controlPv "$(P)$(M4).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1846,14 +1846,14 @@ w 115
 h 20
 controlPv "$(P)$(M3).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1872,14 +1872,14 @@ w 115
 h 20
 controlPv "$(P)$(M6).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1898,14 +1898,14 @@ w 115
 h 20
 controlPv "$(P)$(M5).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1924,14 +1924,14 @@ w 115
 h 20
 controlPv "$(P)$(M8).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1950,14 +1950,14 @@ w 115
 h 20
 controlPv "$(P)$(M7).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 51200 51200 51200
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1974,8 +1974,8 @@ x 8
 y 37
 w 100
 h 20
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M1).SET)"
 visInvert
@@ -1993,8 +1993,8 @@ x 128
 y 37
 w 100
 h 20
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M2).SET)"
 visInvert
@@ -2012,8 +2012,8 @@ x 130
 y 39
 w 96
 h 16
-lineColor rgb 64256 62208 18944
-fillColor rgb 64256 62208 18944
+lineColor index 30
+fillColor index 30
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M2).SET)"
 visInvert
@@ -2031,8 +2031,8 @@ x 248
 y 37
 w 100
 h 20
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M3).SET)"
 visInvert
@@ -2050,8 +2050,8 @@ x 250
 y 39
 w 96
 h 16
-lineColor rgb 64256 62208 18944
-fillColor rgb 64256 62208 18944
+lineColor index 30
+fillColor index 30
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M3).SET)"
 visInvert
@@ -2069,8 +2069,8 @@ x 368
 y 37
 w 100
 h 20
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M4).SET)"
 visInvert
@@ -2088,8 +2088,8 @@ x 370
 y 39
 w 96
 h 16
-lineColor rgb 64256 62208 18944
-fillColor rgb 64256 62208 18944
+lineColor index 30
+fillColor index 30
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M4).SET)"
 visInvert
@@ -2107,8 +2107,8 @@ x 488
 y 37
 w 100
 h 20
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M5).SET)"
 visInvert
@@ -2126,8 +2126,8 @@ x 490
 y 39
 w 96
 h 16
-lineColor rgb 64256 62208 18944
-fillColor rgb 64256 62208 18944
+lineColor index 30
+fillColor index 30
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M5).SET)"
 visInvert
@@ -2145,8 +2145,8 @@ x 608
 y 37
 w 100
 h 20
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M6).SET)"
 visInvert
@@ -2164,8 +2164,8 @@ x 610
 y 39
 w 96
 h 16
-lineColor rgb 64256 62208 18944
-fillColor rgb 64256 62208 18944
+lineColor index 30
+fillColor index 30
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M6).SET)"
 visInvert
@@ -2183,8 +2183,8 @@ x 728
 y 37
 w 100
 h 20
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M7).SET)"
 visInvert
@@ -2202,8 +2202,8 @@ x 730
 y 39
 w 96
 h 16
-lineColor rgb 64256 62208 18944
-fillColor rgb 64256 62208 18944
+lineColor index 30
+fillColor index 30
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M7).SET)"
 visInvert
@@ -2221,8 +2221,8 @@ x 848
 y 37
 w 100
 h 20
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M8).SET)"
 visInvert
@@ -2240,8 +2240,8 @@ x 850
 y 39
 w 96
 h 16
-lineColor rgb 64256 62208 18944
-fillColor rgb 64256 62208 18944
+lineColor index 30
+fillColor index 30
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M8).SET)"
 visInvert
@@ -2259,8 +2259,8 @@ x 10
 y 39
 w 96
 h 16
-lineColor rgb 64256 62208 18944
-fillColor rgb 64256 62208 18944
+lineColor index 30
+fillColor index 30
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)$(M1).SET)"
 visInvert
@@ -2278,11 +2278,11 @@ x 245
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M3).TWR"
 pressValue "1"
 releaseValue 
@@ -2290,7 +2290,7 @@ onLabel "<"
 offLabel "<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 # (Group)
 object activeGroupClass
@@ -2320,11 +2320,11 @@ x 4
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M1).JOGR"
 pressValue "1"
 releaseValue "0"
@@ -2332,7 +2332,7 @@ onLabel "<<<"
 offLabel "<<<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2345,11 +2345,11 @@ x 90
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M1).JOGF"
 pressValue "1"
 releaseValue "0"
@@ -2357,7 +2357,7 @@ onLabel ">>>"
 offLabel ">>>"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2370,11 +2370,11 @@ x 124
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M2).JOGR"
 pressValue "1"
 releaseValue "0"
@@ -2382,7 +2382,7 @@ onLabel "<<<"
 offLabel "<<<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2395,11 +2395,11 @@ x 210
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M2).JOGF"
 pressValue "1"
 releaseValue "0"
@@ -2407,7 +2407,7 @@ onLabel ">>>"
 offLabel ">>>"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2420,11 +2420,11 @@ x 244
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M3).JOGR"
 pressValue "1"
 releaseValue "0"
@@ -2432,7 +2432,7 @@ onLabel "<<<"
 offLabel "<<<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2445,11 +2445,11 @@ x 330
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M3).JOGF"
 pressValue "1"
 releaseValue "0"
@@ -2457,7 +2457,7 @@ onLabel ">>>"
 offLabel ">>>"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2470,11 +2470,11 @@ x 364
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M4).JOGR"
 pressValue "1"
 releaseValue "0"
@@ -2482,7 +2482,7 @@ onLabel "<<<"
 offLabel "<<<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2495,11 +2495,11 @@ x 450
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M4).JOGF"
 pressValue "1"
 releaseValue "0"
@@ -2507,7 +2507,7 @@ onLabel ">>>"
 offLabel ">>>"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2520,11 +2520,11 @@ x 485
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M5).JOGR"
 pressValue "1"
 releaseValue "0"
@@ -2532,7 +2532,7 @@ onLabel "<<<"
 offLabel "<<<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2545,11 +2545,11 @@ x 571
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M5).JOGF"
 pressValue "1"
 releaseValue "0"
@@ -2557,7 +2557,7 @@ onLabel ">>>"
 offLabel ">>>"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2570,11 +2570,11 @@ x 605
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M6).JOGR"
 pressValue "1"
 releaseValue "0"
@@ -2582,7 +2582,7 @@ onLabel "<<<"
 offLabel "<<<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2595,11 +2595,11 @@ x 691
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M6).JOGF"
 pressValue "1"
 releaseValue "0"
@@ -2607,7 +2607,7 @@ onLabel ">>>"
 offLabel ">>>"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2620,11 +2620,11 @@ x 725
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M7).JOGR"
 pressValue "1"
 releaseValue "0"
@@ -2632,7 +2632,7 @@ onLabel "<<<"
 offLabel "<<<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2645,11 +2645,11 @@ x 811
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M7).JOGF"
 pressValue "1"
 releaseValue "0"
@@ -2657,7 +2657,7 @@ onLabel ">>>"
 offLabel ">>>"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2670,11 +2670,11 @@ x 845
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M8).JOGR"
 pressValue "1"
 releaseValue "0"
@@ -2682,7 +2682,7 @@ onLabel "<<<"
 offLabel "<<<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2695,11 +2695,11 @@ x 931
 y 104
 w 25
 h 18
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M8).JOGF"
 pressValue "1"
 releaseValue "0"
@@ -2707,7 +2707,7 @@ onLabel ">>>"
 offLabel ">>>"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 # (Group)
 object activeGroupClass
@@ -2737,11 +2737,11 @@ x 98
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M1).TWF"
 pressValue "1"
 releaseValue 
@@ -2749,7 +2749,7 @@ onLabel ">"
 offLabel ">"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2762,11 +2762,11 @@ x 218
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M2).TWF"
 pressValue "1"
 releaseValue 
@@ -2774,7 +2774,7 @@ onLabel ">"
 offLabel ">"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2787,11 +2787,11 @@ x 125
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M2).TWR"
 pressValue "1"
 releaseValue 
@@ -2799,7 +2799,7 @@ onLabel "<"
 offLabel "<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2812,11 +2812,11 @@ x 338
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M3).TWF"
 pressValue "1"
 releaseValue 
@@ -2824,7 +2824,7 @@ onLabel ">"
 offLabel ">"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2837,11 +2837,11 @@ x 458
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M4).TWF"
 pressValue "1"
 releaseValue 
@@ -2849,7 +2849,7 @@ onLabel ">"
 offLabel ">"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2862,11 +2862,11 @@ x 365
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M4).TWR"
 pressValue "1"
 releaseValue 
@@ -2874,7 +2874,7 @@ onLabel "<"
 offLabel "<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2887,11 +2887,11 @@ x 579
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M5).TWF"
 pressValue "1"
 releaseValue 
@@ -2899,7 +2899,7 @@ onLabel ">"
 offLabel ">"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2912,11 +2912,11 @@ x 486
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M5).TWR"
 pressValue "1"
 releaseValue 
@@ -2924,7 +2924,7 @@ onLabel "<"
 offLabel "<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2937,11 +2937,11 @@ x 699
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M6).TWF"
 pressValue "1"
 releaseValue 
@@ -2949,7 +2949,7 @@ onLabel ">"
 offLabel ">"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2962,11 +2962,11 @@ x 606
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M6).TWR"
 pressValue "1"
 releaseValue 
@@ -2974,7 +2974,7 @@ onLabel "<"
 offLabel "<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -2987,11 +2987,11 @@ x 819
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M7).TWF"
 pressValue "1"
 releaseValue 
@@ -2999,7 +2999,7 @@ onLabel ">"
 offLabel ">"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -3012,11 +3012,11 @@ x 726
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M7).TWR"
 pressValue "1"
 releaseValue 
@@ -3024,7 +3024,7 @@ onLabel "<"
 offLabel "<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -3037,11 +3037,11 @@ x 939
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M8).TWF"
 pressValue "1"
 releaseValue 
@@ -3049,7 +3049,7 @@ onLabel ">"
 offLabel ">"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -3062,11 +3062,11 @@ x 846
 y 83
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M8).TWR"
 pressValue "1"
 releaseValue 
@@ -3074,7 +3074,7 @@ onLabel "<"
 offLabel "<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -3087,11 +3087,11 @@ x 5
 y 82
 w 15
 h 19
-fgColor rgb 0 0 0
-onColor rgb 29440 57088 65280
-offColor rgb 29440 57088 65280
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+onColor index 51
+offColor index 51
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M1).TWR"
 pressValue "1"
 releaseValue 
@@ -3099,7 +3099,7 @@ onLabel "<"
 offLabel "<"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Message Button)
@@ -3112,11 +3112,11 @@ x 60
 y 147
 w 53
 h 19
-fgColor rgb 63744 55808 15360
-onColor rgb 64768 0 0
-offColor rgb 64768 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 31
+onColor index 20
+offColor index 20
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M1).STOP"
 pressValue "1"
 releaseValue 
@@ -3124,7 +3124,7 @@ onLabel "STOP"
 offLabel "STOP"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Related Display)
@@ -3137,10 +3137,10 @@ x 3
 y 147
 w 53
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 numPvs 4
@@ -3173,11 +3173,11 @@ x 180
 y 147
 w 53
 h 19
-fgColor rgb 63744 55808 15360
-onColor rgb 64768 0 0
-offColor rgb 64768 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 31
+onColor index 20
+offColor index 20
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M2).STOP"
 pressValue "1"
 releaseValue 
@@ -3185,7 +3185,7 @@ onLabel "STOP"
 offLabel "STOP"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Related Display)
@@ -3198,10 +3198,10 @@ x 123
 y 147
 w 53
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 numPvs 4
@@ -3234,11 +3234,11 @@ x 300
 y 147
 w 53
 h 19
-fgColor rgb 63744 55808 15360
-onColor rgb 64768 0 0
-offColor rgb 64768 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 31
+onColor index 20
+offColor index 20
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M3).STOP"
 pressValue "1"
 releaseValue 
@@ -3246,7 +3246,7 @@ onLabel "STOP"
 offLabel "STOP"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Related Display)
@@ -3259,10 +3259,10 @@ x 243
 y 147
 w 53
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 numPvs 4
@@ -3295,11 +3295,11 @@ x 420
 y 147
 w 53
 h 19
-fgColor rgb 63744 55808 15360
-onColor rgb 64768 0 0
-offColor rgb 64768 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 31
+onColor index 20
+offColor index 20
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M4).STOP"
 pressValue "1"
 releaseValue 
@@ -3307,7 +3307,7 @@ onLabel "STOP"
 offLabel "STOP"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Related Display)
@@ -3320,10 +3320,10 @@ x 363
 y 147
 w 53
 h 19
-fgColor rgb 35584 6656 38400
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 38
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 numPvs 4
@@ -3356,11 +3356,11 @@ x 541
 y 147
 w 53
 h 19
-fgColor rgb 63744 55808 15360
-onColor rgb 64768 0 0
-offColor rgb 64768 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 31
+onColor index 20
+offColor index 20
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M5).STOP"
 pressValue "1"
 releaseValue 
@@ -3368,7 +3368,7 @@ onLabel "STOP"
 offLabel "STOP"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Related Display)
@@ -3381,10 +3381,10 @@ x 484
 y 147
 w 53
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 numPvs 4
@@ -3417,11 +3417,11 @@ x 661
 y 147
 w 53
 h 19
-fgColor rgb 63744 55808 15360
-onColor rgb 64768 0 0
-offColor rgb 64768 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 31
+onColor index 20
+offColor index 20
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M6).STOP"
 pressValue "1"
 releaseValue 
@@ -3429,7 +3429,7 @@ onLabel "STOP"
 offLabel "STOP"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Related Display)
@@ -3442,10 +3442,10 @@ x 604
 y 147
 w 53
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 numPvs 4
@@ -3478,11 +3478,11 @@ x 781
 y 147
 w 53
 h 19
-fgColor rgb 63744 55808 15360
-onColor rgb 64768 0 0
-offColor rgb 64768 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 31
+onColor index 20
+offColor index 20
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M7).STOP"
 pressValue "1"
 releaseValue 
@@ -3490,7 +3490,7 @@ onLabel "STOP"
 offLabel "STOP"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Related Display)
@@ -3503,10 +3503,10 @@ x 724
 y 147
 w 53
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 numPvs 4
@@ -3539,11 +3539,11 @@ x 901
 y 147
 w 53
 h 19
-fgColor rgb 63744 55808 15360
-onColor rgb 64768 0 0
-offColor rgb 64768 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 31
+onColor index 20
+offColor index 20
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M8).STOP"
 pressValue "1"
 releaseValue 
@@ -3551,7 +3551,7 @@ onLabel "STOP"
 offLabel "STOP"
 3d
 useEnumNumeric
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 endObjectProperties
 
 # (Related Display)
@@ -3564,10 +3564,10 @@ x 844
 y 147
 w 53
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 numPvs 4
@@ -3600,14 +3600,14 @@ x 3
 y 169
 w 115
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M1)_able.VAL"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3621,14 +3621,14 @@ x 123
 y 169
 w 115
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M2)_able.VAL"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3642,14 +3642,14 @@ x 243
 y 169
 w 115
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M3)_able.VAL"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3663,14 +3663,14 @@ x 363
 y 169
 w 115
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M4)_able.VAL"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3684,14 +3684,14 @@ x 483
 y 169
 w 115
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M5)_able.VAL"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3705,14 +3705,14 @@ x 603
 y 169
 w 115
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M6)_able.VAL"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3726,14 +3726,14 @@ x 723
 y 169
 w 115
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M7)_able.VAL"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3747,14 +3747,14 @@ x 843
 y 169
 w 115
 h 19
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M8)_able.VAL"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3768,14 +3768,14 @@ x 9
 y 123
 w 98
 h 20
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M1).SET"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3789,14 +3789,14 @@ x 129
 y 123
 w 98
 h 20
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M2).SET"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3810,14 +3810,14 @@ x 249
 y 123
 w 98
 h 20
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M3).SET"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3831,14 +3831,14 @@ x 369
 y 123
 w 98
 h 20
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M4).SET"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3852,14 +3852,14 @@ x 490
 y 123
 w 98
 h 20
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M5).SET"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3873,14 +3873,14 @@ x 610
 y 123
 w 98
 h 20
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M6).SET"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3894,14 +3894,14 @@ x 730
 y 123
 w 98
 h 20
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M7).SET"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 
@@ -3915,14 +3915,14 @@ x 850
 y 123
 w 98
 h 20
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-selectColor rgb 29440 57088 65280
-inconsistentColor rgb 0 0 0
-topShadowColor rgb 65280 65280 65280
-botShadowColor rgb 0 0 0
+fgColor index 14
+bgColor index 51
+selectColor index 51
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
 controlPv "$(P)$(M8).SET"
-font "helvetica-medium-r-10.0"
+font "helvetica-bold-r-12.0"
 orientation "horizontal"
 endObjectProperties
 

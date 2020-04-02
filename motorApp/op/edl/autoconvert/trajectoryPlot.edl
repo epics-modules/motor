@@ -10,15 +10,15 @@ h 230
 font "helvetica-medium-r-18.0"
 ctlFont "helvetica-bold-r-10.0"
 btnFont "helvetica-medium-r-18.0"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
-textColor rgb 0 0 0
-ctlFgColor1 rgb 64256 62208 18944
-ctlFgColor2 rgb 60928 46592 11008
-ctlBgColor1 rgb 52480 24832 0
-ctlBgColor2 rgb 65280 45056 65280
-topShadowColor rgb 44544 19968 48128
-botShadowColor rgb 13312 13056 34304
+fgColor index 14
+bgColor index 0
+textColor index 14
+ctlFgColor1 index 25
+ctlFgColor2 index 15
+ctlBgColor1 index 5
+ctlBgColor2 index 12
+topShadowColor index 1
+botShadowColor index 13
 showGrid
 snapToGrid
 gridSize 4
@@ -39,10 +39,10 @@ border
 graphTitle 
 xLabel "Point"
 yLabel "Position"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
-gridColor rgb 0 0 0
-font "helvetica-medium-r-10.0"
+fgColor index 14
+bgColor index 0
+gridColor index 14
+font "helvetica-bold-r-12.0"
 # Operating Modes
 plotMode "plotLastNPts"
 nPts 2000
@@ -68,7 +68,7 @@ plotSymbolType {
   0 "circle"
 }
 plotColor {
-  0 rgb 64768 0 0
+  0 index 20
 }
 endObjectProperties
 
@@ -84,12 +84,12 @@ w 85
 h 20
 controlPv "$(M).DESC"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "right"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -106,8 +106,8 @@ x 161
 y 11
 w 80
 h 20
-font "helvetica-medium-r-14.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {

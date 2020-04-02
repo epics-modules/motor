@@ -10,15 +10,15 @@ h 328
 font "helvetica-medium-r-18.0"
 ctlFont "helvetica-bold-r-10.0"
 btnFont "helvetica-medium-r-18.0"
-fgColor rgb 37120 37120 37120
-bgColor rgb 55808 55808 55808
-textColor rgb 0 0 0
-ctlFgColor1 rgb 64256 62208 18944
-ctlFgColor2 rgb 60928 46592 11008
-ctlBgColor1 rgb 52480 24832 0
-ctlBgColor2 rgb 65280 45056 65280
-topShadowColor rgb 44544 19968 48128
-botShadowColor rgb 13312 13056 34304
+fgColor index 7
+bgColor index 2
+textColor index 14
+ctlFgColor1 index 25
+ctlFgColor2 index 15
+ctlBgColor1 index 5
+ctlBgColor2 index 12
+topShadowColor index 1
+botShadowColor index 13
 showGrid
 snapToGrid
 gridSize 4
@@ -34,9 +34,9 @@ x 0
 y 0
 w 95
 h 20
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -67,8 +67,8 @@ x 50
 y 40
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -84,12 +84,12 @@ w 38
 h 10
 controlPv "$(P)m9.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -106,9 +106,9 @@ x 85
 y 51
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m9_able.VAL)"
 visInvert
@@ -126,9 +126,9 @@ x 75
 y 59
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m9.LLS)"
 visInvert
@@ -146,9 +146,9 @@ x 75
 y 55
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m9.LVIO)"
 visInvert
@@ -166,9 +166,9 @@ x 75
 y 51
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m9.HLS)"
 visInvert
@@ -199,8 +199,8 @@ x 52
 y 52
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m9.DMOV)"
 visMin 0
@@ -217,9 +217,9 @@ x 51
 y 51
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -233,9 +233,9 @@ x 51
 y 50
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -260,12 +260,12 @@ w 38
 h 10
 controlPv "$(P)m9.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -300,8 +300,8 @@ x 50
 y 76
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -317,12 +317,12 @@ w 38
 h 10
 controlPv "$(P)m10.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -339,9 +339,9 @@ x 85
 y 87
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m10_able.VAL)"
 visInvert
@@ -359,9 +359,9 @@ x 75
 y 95
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m10.LLS)"
 visInvert
@@ -379,9 +379,9 @@ x 75
 y 91
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m10.LVIO)"
 visInvert
@@ -399,9 +399,9 @@ x 75
 y 87
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m10.HLS)"
 visInvert
@@ -432,8 +432,8 @@ x 52
 y 88
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m10.DMOV)"
 visMin 0
@@ -450,9 +450,9 @@ x 51
 y 87
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -462,13 +462,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 49
+x 51
 y 86
-w 28
+w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -493,12 +493,12 @@ w 38
 h 10
 controlPv "$(P)m10.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -533,8 +533,8 @@ x 50
 y 112
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -550,12 +550,12 @@ w 38
 h 10
 controlPv "$(P)m11.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -572,9 +572,9 @@ x 85
 y 123
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m11_able.VAL)"
 visInvert
@@ -592,9 +592,9 @@ x 75
 y 131
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m11.LLS)"
 visInvert
@@ -612,9 +612,9 @@ x 75
 y 127
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m11.LVIO)"
 visInvert
@@ -632,9 +632,9 @@ x 75
 y 123
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m11.HLS)"
 visInvert
@@ -665,8 +665,8 @@ x 52
 y 124
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m11.DMOV)"
 visMin 0
@@ -683,9 +683,9 @@ x 51
 y 123
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -695,13 +695,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 49
+x 51
 y 122
-w 28
+w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -726,12 +726,12 @@ w 38
 h 10
 controlPv "$(P)m11.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -766,8 +766,8 @@ x 50
 y 148
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -783,12 +783,12 @@ w 38
 h 10
 controlPv "$(P)m12.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -805,9 +805,9 @@ x 85
 y 159
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m12_able.VAL)"
 visInvert
@@ -825,9 +825,9 @@ x 75
 y 167
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m12.LLS)"
 visInvert
@@ -845,9 +845,9 @@ x 75
 y 163
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m12.LVIO)"
 visInvert
@@ -865,9 +865,9 @@ x 75
 y 159
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m12.HLS)"
 visInvert
@@ -898,8 +898,8 @@ x 52
 y 160
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m12.DMOV)"
 visMin 0
@@ -916,9 +916,9 @@ x 51
 y 159
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -928,13 +928,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 49
+x 51
 y 158
-w 28
+w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -959,12 +959,12 @@ w 38
 h 10
 controlPv "$(P)m12.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -999,8 +999,8 @@ x 50
 y 184
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -1016,12 +1016,12 @@ w 38
 h 10
 controlPv "$(P)m13.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1038,9 +1038,9 @@ x 85
 y 195
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m13_able.VAL)"
 visInvert
@@ -1058,9 +1058,9 @@ x 75
 y 203
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m13.LLS)"
 visInvert
@@ -1078,9 +1078,9 @@ x 75
 y 199
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m13.LVIO)"
 visInvert
@@ -1098,9 +1098,9 @@ x 75
 y 195
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m13.HLS)"
 visInvert
@@ -1131,8 +1131,8 @@ x 52
 y 196
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m13.DMOV)"
 visMin 0
@@ -1149,9 +1149,9 @@ x 51
 y 195
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -1161,13 +1161,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 49
+x 51
 y 194
-w 28
+w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1192,12 +1192,12 @@ w 38
 h 10
 controlPv "$(P)m13.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1232,8 +1232,8 @@ x 50
 y 220
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -1249,12 +1249,12 @@ w 38
 h 10
 controlPv "$(P)m14.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1271,9 +1271,9 @@ x 85
 y 231
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m14_able.VAL)"
 visInvert
@@ -1291,9 +1291,9 @@ x 75
 y 239
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m14.LLS)"
 visInvert
@@ -1311,9 +1311,9 @@ x 75
 y 235
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m14.LVIO)"
 visInvert
@@ -1331,9 +1331,9 @@ x 75
 y 231
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m14.HLS)"
 visInvert
@@ -1364,8 +1364,8 @@ x 52
 y 232
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m14.DMOV)"
 visMin 0
@@ -1382,9 +1382,9 @@ x 51
 y 231
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -1394,13 +1394,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 49
+x 51
 y 230
-w 28
+w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1425,12 +1425,12 @@ w 38
 h 10
 controlPv "$(P)m14.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1465,8 +1465,8 @@ x 50
 y 256
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -1482,12 +1482,12 @@ w 38
 h 10
 controlPv "$(P)m15.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1504,9 +1504,9 @@ x 85
 y 267
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m15_able.VAL)"
 visInvert
@@ -1524,9 +1524,9 @@ x 75
 y 275
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m15.LLS)"
 visInvert
@@ -1544,9 +1544,9 @@ x 75
 y 271
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m15.LVIO)"
 visInvert
@@ -1564,9 +1564,9 @@ x 75
 y 267
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m15.HLS)"
 visInvert
@@ -1597,8 +1597,8 @@ x 52
 y 268
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m15.DMOV)"
 visMin 0
@@ -1615,9 +1615,9 @@ x 51
 y 267
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -1627,13 +1627,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 49
+x 51
 y 266
-w 28
+w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1658,12 +1658,12 @@ w 38
 h 10
 controlPv "$(P)m15.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1685,8 +1685,8 @@ x 50
 y 292
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -1702,12 +1702,12 @@ w 38
 h 10
 controlPv "$(P)m16.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1724,9 +1724,9 @@ x 85
 y 303
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m16_able.VAL)"
 visInvert
@@ -1744,9 +1744,9 @@ x 75
 y 311
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m16.LLS)"
 visInvert
@@ -1764,9 +1764,9 @@ x 75
 y 307
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m16.LVIO)"
 visInvert
@@ -1784,9 +1784,9 @@ x 75
 y 303
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m16.HLS)"
 visInvert
@@ -1817,8 +1817,8 @@ x 52
 y 304
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m16.DMOV)"
 visMin 0
@@ -1835,9 +1835,9 @@ x 51
 y 303
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -1847,13 +1847,13 @@ beginObjectProperties
 major 4
 minor 1
 release 1
-x 49
+x 51
 y 302
-w 28
+w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -1878,12 +1878,12 @@ w 38
 h 10
 controlPv "$(P)m16.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1913,8 +1913,8 @@ x 5
 y 40
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -1930,12 +1930,12 @@ w 38
 h 10
 controlPv "$(P)m1.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1952,9 +1952,9 @@ x 40
 y 51
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m1_able.VAL)"
 visInvert
@@ -1972,9 +1972,9 @@ x 30
 y 59
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m1.LLS)"
 visInvert
@@ -1992,9 +1992,9 @@ x 30
 y 55
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m1.LVIO)"
 visInvert
@@ -2012,9 +2012,9 @@ x 30
 y 51
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m1.HLS)"
 visInvert
@@ -2045,8 +2045,8 @@ x 7
 y 52
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m1.DMOV)"
 visMin 0
@@ -2063,9 +2063,9 @@ x 6
 y 51
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -2079,9 +2079,9 @@ x 6
 y 50
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2106,12 +2106,12 @@ w 38
 h 10
 controlPv "$(P)m1.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2146,8 +2146,8 @@ x 5
 y 76
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -2163,12 +2163,12 @@ w 38
 h 10
 controlPv "$(P)m2.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2185,9 +2185,9 @@ x 40
 y 87
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m2_able.VAL)"
 visInvert
@@ -2205,9 +2205,9 @@ x 30
 y 95
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m2.LLS)"
 visInvert
@@ -2225,9 +2225,9 @@ x 30
 y 91
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m2.LVIO)"
 visInvert
@@ -2245,9 +2245,9 @@ x 30
 y 87
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m2.HLS)"
 visInvert
@@ -2278,8 +2278,8 @@ x 7
 y 88
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m2.DMOV)"
 visMin 0
@@ -2296,9 +2296,9 @@ x 6
 y 87
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -2312,9 +2312,9 @@ x 6
 y 86
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2339,12 +2339,12 @@ w 38
 h 10
 controlPv "$(P)m2.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2379,8 +2379,8 @@ x 5
 y 112
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -2396,12 +2396,12 @@ w 38
 h 10
 controlPv "$(P)m3.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2418,9 +2418,9 @@ x 40
 y 123
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m3_able.VAL)"
 visInvert
@@ -2438,9 +2438,9 @@ x 30
 y 131
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m3.LLS)"
 visInvert
@@ -2458,9 +2458,9 @@ x 30
 y 127
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m3.LVIO)"
 visInvert
@@ -2478,9 +2478,9 @@ x 30
 y 123
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m3.HLS)"
 visInvert
@@ -2511,8 +2511,8 @@ x 7
 y 124
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m3.DMOV)"
 visMin 0
@@ -2529,9 +2529,9 @@ x 6
 y 123
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -2545,9 +2545,9 @@ x 6
 y 122
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2572,12 +2572,12 @@ w 38
 h 10
 controlPv "$(P)m3.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2612,8 +2612,8 @@ x 5
 y 148
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -2629,12 +2629,12 @@ w 38
 h 10
 controlPv "$(P)m4.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2651,9 +2651,9 @@ x 40
 y 159
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m4_able.VAL)"
 visInvert
@@ -2671,9 +2671,9 @@ x 30
 y 167
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m4.LLS)"
 visInvert
@@ -2691,9 +2691,9 @@ x 30
 y 163
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m4.LVIO)"
 visInvert
@@ -2711,9 +2711,9 @@ x 30
 y 159
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m4.HLS)"
 visInvert
@@ -2744,8 +2744,8 @@ x 7
 y 160
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m4.DMOV)"
 visMin 0
@@ -2762,9 +2762,9 @@ x 6
 y 159
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -2778,9 +2778,9 @@ x 6
 y 158
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -2805,12 +2805,12 @@ w 38
 h 10
 controlPv "$(P)m4.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2845,8 +2845,8 @@ x 5
 y 184
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -2862,12 +2862,12 @@ w 38
 h 10
 controlPv "$(P)m5.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -2884,9 +2884,9 @@ x 40
 y 195
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m5_able.VAL)"
 visInvert
@@ -2904,9 +2904,9 @@ x 30
 y 203
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m5.LLS)"
 visInvert
@@ -2924,9 +2924,9 @@ x 30
 y 199
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m5.LVIO)"
 visInvert
@@ -2944,9 +2944,9 @@ x 30
 y 195
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m5.HLS)"
 visInvert
@@ -2977,8 +2977,8 @@ x 7
 y 196
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m5.DMOV)"
 visMin 0
@@ -2995,9 +2995,9 @@ x 6
 y 195
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -3011,9 +3011,9 @@ x 6
 y 194
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3038,12 +3038,12 @@ w 38
 h 10
 controlPv "$(P)m5.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3078,8 +3078,8 @@ x 5
 y 220
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -3095,12 +3095,12 @@ w 38
 h 10
 controlPv "$(P)m6.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3117,9 +3117,9 @@ x 40
 y 231
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m6_able.VAL)"
 visInvert
@@ -3137,9 +3137,9 @@ x 30
 y 239
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m6.LLS)"
 visInvert
@@ -3157,9 +3157,9 @@ x 30
 y 235
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m6.LVIO)"
 visInvert
@@ -3177,9 +3177,9 @@ x 30
 y 231
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m6.HLS)"
 visInvert
@@ -3210,8 +3210,8 @@ x 7
 y 232
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m6.DMOV)"
 visMin 0
@@ -3228,9 +3228,9 @@ x 6
 y 231
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -3244,9 +3244,9 @@ x 6
 y 230
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3271,12 +3271,12 @@ w 38
 h 10
 controlPv "$(P)m6.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3311,8 +3311,8 @@ x 5
 y 256
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -3328,12 +3328,12 @@ w 38
 h 10
 controlPv "$(P)m7.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3350,9 +3350,9 @@ x 40
 y 267
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m7_able.VAL)"
 visInvert
@@ -3370,9 +3370,9 @@ x 30
 y 275
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m7.LLS)"
 visInvert
@@ -3390,9 +3390,9 @@ x 30
 y 271
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m7.LVIO)"
 visInvert
@@ -3410,9 +3410,9 @@ x 30
 y 267
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m7.HLS)"
 visInvert
@@ -3443,8 +3443,8 @@ x 7
 y 268
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m7.DMOV)"
 visMin 0
@@ -3461,9 +3461,9 @@ x 6
 y 267
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -3477,9 +3477,9 @@ x 6
 y 266
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3504,12 +3504,12 @@ w 38
 h 10
 controlPv "$(P)m7.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3544,8 +3544,8 @@ x 5
 y 292
 w 40
 h 33
-lineColor rgb 0 0 0
-fillColor rgb 0 0 0
+lineColor index 14
+fillColor index 14
 lineWidth 0
 endObjectProperties
 
@@ -3561,12 +3561,12 @@ w 38
 h 10
 controlPv "$(P)m8.DESC"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3583,9 +3583,9 @@ x 40
 y 303
 w 4
 h 11
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m8_able.VAL)"
 visInvert
@@ -3603,9 +3603,9 @@ x 30
 y 311
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m8.LLS)"
 visInvert
@@ -3623,9 +3623,9 @@ x 30
 y 307
 w 9
 h 3
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m8.LVIO)"
 visInvert
@@ -3643,9 +3643,9 @@ x 30
 y 303
 w 9
 h 3
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)m8.HLS)"
 visInvert
@@ -3676,8 +3676,8 @@ x 7
 y 304
 w 22
 h 10
-lineColor rgb 29440 65280 27392
-fillColor rgb 29440 65280 27392
+lineColor index 60
+fillColor index 60
 lineWidth 2
 visPv "CALC\\\{(A)\}($(P)m8.DMOV)"
 visMin 0
@@ -3694,9 +3694,9 @@ x 6
 y 303
 w 23
 h 11
-lineColor rgb 44544 44544 44544
+lineColor index 5
 fill
-fillColor rgb 44544 44544 44544
+fillColor index 5
 lineWidth 0
 endObjectProperties
 
@@ -3710,9 +3710,9 @@ x 6
 y 302
 w 24
 h 14
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3737,12 +3737,12 @@ w 38
 h 10
 controlPv "$(P)m7.RBV"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -3764,9 +3764,9 @@ x 0
 y 20
 w 95
 h 20
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 0 0 0
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -3808,10 +3808,10 @@ x 51
 y 51
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -3875,10 +3875,10 @@ x 51
 y 87
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -3942,10 +3942,10 @@ x 51
 y 123
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4009,10 +4009,10 @@ x 51
 y 159
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4076,10 +4076,10 @@ x 51
 y 195
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4143,10 +4143,10 @@ x 51
 y 231
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4210,10 +4210,10 @@ x 51
 y 267
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4265,10 +4265,10 @@ x 51
 y 303
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4327,10 +4327,10 @@ x 6
 y 51
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4394,10 +4394,10 @@ x 6
 y 87
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4461,10 +4461,10 @@ x 6
 y 123
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4528,10 +4528,10 @@ x 6
 y 159
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4595,10 +4595,10 @@ x 6
 y 195
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4662,10 +4662,10 @@ x 6
 y 231
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4729,10 +4729,10 @@ x 6
 y 267
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible
@@ -4796,10 +4796,10 @@ x 6
 y 303
 w 24
 h 12
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
 font "helvetica-bold-r-12.0"
 icon
 invisible

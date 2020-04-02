@@ -14,6 +14,7 @@
         <string>
 
 QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
+QPushButton::menu-indicator {image: url(none.png); width: 0}
 
 caTable {
        font: 10pt;
@@ -106,6 +107,42 @@ border-radius: 2px;
 </string>
     </property>
     <widget class="QWidget" name="centralWidget">
+        <widget class="caGraphics" name="caRectangle_0">
+            <property name="form">
+                <enum>caGraphics::Rectangle</enum>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>4</x>
+                    <y>130</y>
+                    <width>165</width>
+                    <height>40</height>
+                </rect>
+            </property>
+            <property name="lineSize">
+                <number>3</number>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="fillstyle">
+                <enum>Filled</enum>
+            </property>
+            <property name="lineColor">
+                <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                </color>
+            </property>
+            <property name="linestyle">
+                <enum>Solid</enum>
+            </property>
+        </widget>
         <widget class="caMessageButton" name="caMessageButton_0">
             <property name="geometry">
                 <rect>
@@ -265,7 +302,7 @@ border-radius: 2px;
                 <enum>caMessageButton::Static</enum>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_0">
+        <widget class="caGraphics" name="caRectangle_1">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -311,7 +348,7 @@ border-radius: 2px;
                 <string>$(P)$(M).SET</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_1">
+        <widget class="caGraphics" name="caRectangle_2">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -566,7 +603,7 @@ border-radius: 2px;
                 <enum>caLineEdit::Static</enum>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_2">
+        <widget class="caGraphics" name="caRectangle_3">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -753,42 +790,6 @@ border-radius: 2px;
             </property>
             <property name="colorMode">
                 <enum>caMessageButton::Static</enum>
-            </property>
-        </widget>
-        <widget class="caGraphics" name="caRectangle_3">
-            <property name="form">
-                <enum>caGraphics::Rectangle</enum>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>4</x>
-                    <y>130</y>
-                    <width>165</width>
-                    <height>40</height>
-                </rect>
-            </property>
-            <property name="lineSize">
-                <number>3</number>
-            </property>
-            <property name="foreground">
-                <color alpha="255">
-                    <red>0</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                </color>
-            </property>
-            <property name="fillstyle">
-                <enum>Filled</enum>
-            </property>
-            <property name="lineColor">
-                <color alpha="255">
-                    <red>0</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                </color>
-            </property>
-            <property name="linestyle">
-                <enum>Solid</enum>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_1">
@@ -1801,8 +1802,8 @@ border-radius: 2px;
         </widget>
         <zorder>caRectangle_0</zorder>
         <zorder>caRectangle_1</zorder>
-        <zorder>caLabel_0</zorder>
         <zorder>caRectangle_2</zorder>
+        <zorder>caLabel_0</zorder>
         <zorder>caRectangle_3</zorder>
         <zorder>caLabel_1</zorder>
         <zorder>caLabel_2</zorder>

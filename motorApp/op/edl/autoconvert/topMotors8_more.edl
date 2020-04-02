@@ -10,15 +10,15 @@ h 205
 font "helvetica-medium-r-18.0"
 ctlFont "helvetica-bold-r-10.0"
 btnFont "helvetica-medium-r-18.0"
-fgColor rgb 6656 29440 2304
-bgColor rgb 51200 51200 51200
-textColor rgb 0 0 0
-ctlFgColor1 rgb 64256 62208 18944
-ctlFgColor2 rgb 60928 46592 11008
-ctlBgColor1 rgb 52480 24832 0
-ctlBgColor2 rgb 65280 45056 65280
-topShadowColor rgb 44544 19968 48128
-botShadowColor rgb 13312 13056 34304
+fgColor index 64
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 25
+ctlFgColor2 index 15
+ctlBgColor1 index 5
+ctlBgColor2 index 12
+topShadowColor index 1
+botShadowColor index 13
 showGrid
 snapToGrid
 gridSize 4
@@ -32,10 +32,10 @@ minor 1
 release 1
 x 0
 y 0
-w 41
+w 30
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -55,12 +55,12 @@ w 20
 h 14
 controlPv "$(P)$(M1).CARD"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 65280 65280 65280
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -75,10 +75,10 @@ minor 1
 release 1
 x 60
 y 0
-w 94
+w 75
 h 14
-font "helvetica-medium-r-12.0"
-fgColor rgb 0 0 0
+font "helvetica-bold-r-12.0"
+fgColor index 14
 bgColor index 3
 useDisplayBg
 value {
@@ -98,12 +98,12 @@ w 100
 h 10
 controlPv "$(P)$(M1).DTYP"
 format "decimal"
-font "helvetica-medium-r-8.0"
+font "helvetica-bold-r-12.0"
 fontAlign "center"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -120,9 +120,9 @@ x 140
 y 166
 w 4
 h 17
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M8)_able.VAL)"
 visInvert
@@ -140,9 +140,9 @@ x 140
 y 146
 w 4
 h 17
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M7)_able.VAL)"
 visInvert
@@ -160,9 +160,9 @@ x 140
 y 126
 w 4
 h 17
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M6)_able.VAL)"
 visInvert
@@ -180,9 +180,9 @@ x 140
 y 26
 w 4
 h 17
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M1)_able.VAL)"
 visInvert
@@ -200,9 +200,9 @@ x 140
 y 46
 w 4
 h 17
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M2)_able.VAL)"
 visInvert
@@ -220,9 +220,9 @@ x 140
 y 66
 w 4
 h 17
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M3)_able.VAL)"
 visInvert
@@ -240,9 +240,9 @@ x 140
 y 86
 w 4
 h 17
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M4)_able.VAL)"
 visInvert
@@ -260,9 +260,9 @@ x 140
 y 106
 w 4
 h 17
-lineColor rgb 0 0 0
+lineColor index 14
 fill
-fillColor rgb 0 0 0
+fillColor index 14
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M5)_able.VAL)"
 visInvert
@@ -280,9 +280,9 @@ x 130
 y 71
 w 4
 h 7
-lineColor rgb 29440 65280 27392
+lineColor index 60
 fill
-fillColor rgb 29440 65280 27392
+fillColor index 60
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M3).DMOV)"
 visMin 0
@@ -299,9 +299,9 @@ x 130
 y 179
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M8).LLS)"
 visInvert
@@ -319,9 +319,9 @@ x 135
 y 171
 w 4
 h 7
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M8).LVIO)"
 visInvert
@@ -339,9 +339,9 @@ x 130
 y 171
 w 4
 h 7
-lineColor rgb 29440 65280 27392
+lineColor index 60
 fill
-fillColor rgb 29440 65280 27392
+fillColor index 60
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M8).DMOV)"
 visMin 0
@@ -358,9 +358,9 @@ x 130
 y 166
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M8).HLS)"
 visInvert
@@ -378,9 +378,9 @@ x 130
 y 159
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M7).LLS)"
 visInvert
@@ -398,9 +398,9 @@ x 135
 y 151
 w 4
 h 7
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M7).LVIO)"
 visInvert
@@ -418,9 +418,9 @@ x 130
 y 151
 w 4
 h 7
-lineColor rgb 29440 65280 27392
+lineColor index 60
 fill
-fillColor rgb 29440 65280 27392
+fillColor index 60
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M7).DMOV)"
 visMin 0
@@ -437,9 +437,9 @@ x 130
 y 146
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M7).HLS)"
 visInvert
@@ -457,9 +457,9 @@ x 130
 y 139
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M6).LLS)"
 visInvert
@@ -477,9 +477,9 @@ x 135
 y 131
 w 4
 h 7
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M6).LVIO)"
 visInvert
@@ -497,9 +497,9 @@ x 130
 y 131
 w 4
 h 7
-lineColor rgb 29440 65280 27392
+lineColor index 60
 fill
-fillColor rgb 29440 65280 27392
+fillColor index 60
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M6).DMOV)"
 visMin 0
@@ -516,9 +516,9 @@ x 130
 y 126
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M6).HLS)"
 visInvert
@@ -536,9 +536,9 @@ x 130
 y 39
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M1).LLS)"
 visInvert
@@ -556,9 +556,9 @@ x 130
 y 59
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M2).LLS)"
 visInvert
@@ -576,9 +576,9 @@ x 130
 y 79
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M3).LLS)"
 visInvert
@@ -596,9 +596,9 @@ x 130
 y 99
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M4).LLS)"
 visInvert
@@ -616,9 +616,9 @@ x 130
 y 119
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M5).LLS)"
 visInvert
@@ -636,9 +636,9 @@ x 135
 y 111
 w 4
 h 7
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M5).LVIO)"
 visInvert
@@ -656,9 +656,9 @@ x 130
 y 111
 w 4
 h 7
-lineColor rgb 29440 65280 27392
+lineColor index 60
 fill
-fillColor rgb 29440 65280 27392
+fillColor index 60
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M5).DMOV)"
 visMin 0
@@ -675,9 +675,9 @@ x 130
 y 106
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M5).HLS)"
 visInvert
@@ -695,9 +695,9 @@ x 135
 y 91
 w 4
 h 7
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M4).LVIO)"
 visInvert
@@ -715,9 +715,9 @@ x 130
 y 91
 w 4
 h 7
-lineColor rgb 29440 65280 27392
+lineColor index 60
 fill
-fillColor rgb 29440 65280 27392
+fillColor index 60
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M4).DMOV)"
 visMin 0
@@ -734,9 +734,9 @@ x 130
 y 86
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M4).HLS)"
 visInvert
@@ -754,9 +754,9 @@ x 135
 y 71
 w 4
 h 7
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M3).LVIO)"
 visInvert
@@ -774,9 +774,9 @@ x 130
 y 66
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M3).HLS)"
 visInvert
@@ -794,9 +794,9 @@ x 135
 y 51
 w 4
 h 7
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M2).LVIO)"
 visInvert
@@ -814,9 +814,9 @@ x 130
 y 51
 w 4
 h 7
-lineColor rgb 29440 65280 27392
+lineColor index 60
 fill
-fillColor rgb 29440 65280 27392
+fillColor index 60
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M2).DMOV)"
 visMin 0
@@ -833,9 +833,9 @@ x 130
 y 46
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M2).HLS)"
 visInvert
@@ -853,9 +853,9 @@ x 135
 y 31
 w 4
 h 7
-lineColor rgb 64256 62208 18944
+lineColor index 30
 fill
-fillColor rgb 64256 62208 18944
+fillColor index 30
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M1).LVIO)"
 visInvert
@@ -873,9 +873,9 @@ x 130
 y 31
 w 4
 h 7
-lineColor rgb 29440 65280 27392
+lineColor index 60
 fill
-fillColor rgb 29440 65280 27392
+fillColor index 60
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M1).DMOV)"
 visMin 0
@@ -892,9 +892,9 @@ x 130
 y 26
 w 9
 h 4
-lineColor rgb 64768 0 0
+lineColor index 20
 fill
-fillColor rgb 64768 0 0
+fillColor index 20
 lineWidth 0
 visPv "CALC\\\{(A)\}($(P)$(M1).HLS)"
 visInvert
@@ -914,14 +914,14 @@ w 100
 h 20
 controlPv "$(P)$(M7).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -940,14 +940,14 @@ w 100
 h 20
 controlPv "$(P)$(M6).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -966,14 +966,14 @@ w 100
 h 20
 controlPv "$(P)$(M5).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -992,14 +992,14 @@ w 100
 h 20
 controlPv "$(P)$(M4).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1018,14 +1018,14 @@ w 100
 h 20
 controlPv "$(P)$(M3).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1044,14 +1044,14 @@ w 100
 h 20
 controlPv "$(P)$(M2).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1070,14 +1070,14 @@ w 100
 h 20
 controlPv "$(P)$(M1).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1096,14 +1096,14 @@ w 100
 h 20
 controlPv "$(P)$(M8).DESC"
 format "decimal"
-font "helvetica-medium-r-12.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 0 0 0
-bgColor rgb 29440 57088 65280
+fgColor index 25
+bgColor index 5
 editable
 motifWidget
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1122,12 +1122,12 @@ w 90
 h 20
 controlPv "$(P)$(M1).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1146,12 +1146,12 @@ w 90
 h 20
 controlPv "$(P)$(M2).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1170,12 +1170,12 @@ w 90
 h 20
 controlPv "$(P)$(M3).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1194,12 +1194,12 @@ w 90
 h 20
 controlPv "$(P)$(M4).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1218,12 +1218,12 @@ w 90
 h 20
 controlPv "$(P)$(M5).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1242,12 +1242,12 @@ w 90
 h 20
 controlPv "$(P)$(M6).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1266,12 +1266,12 @@ w 90
 h 20
 controlPv "$(P)$(M7).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1290,12 +1290,12 @@ w 90
 h 20
 controlPv "$(P)$(M8).VAL"
 format "decimal"
-font "helvetica-medium-r-14.0"
+font "helvetica-bold-r-12.0"
 fontAlign "left"
-fgColor rgb 2560 0 47104
-bgColor rgb 51200 51200 51200
+fgColor index 15
+bgColor index 12
 limitsFromDb
-nullColor rgb 60928 46592 11008
+nullColor index 32
 smartRefresh
 fastUpdate
 newPos
@@ -1312,11 +1312,11 @@ x 95
 y 185
 w 50
 h 20
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-12.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "Less"
 numPvs 2
 numDsps 1
@@ -1350,11 +1350,11 @@ x 0
 y 25
 w 30
 h 20
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-12.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "$(M1)"
 numPvs 14
 numDsps 7
@@ -1406,11 +1406,11 @@ x 0
 y 105
 w 30
 h 20
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-12.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "$(M5)"
 numPvs 14
 numDsps 7
@@ -1462,11 +1462,11 @@ x 0
 y 125
 w 30
 h 20
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-12.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "$(M6)"
 numPvs 14
 numDsps 7
@@ -1518,11 +1518,11 @@ x 0
 y 145
 w 30
 h 19
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-10.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "$(M7)"
 numPvs 14
 numDsps 7
@@ -1574,11 +1574,11 @@ x 0
 y 165
 w 30
 h 19
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-10.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "$(M8)"
 numPvs 14
 numDsps 7
@@ -1630,11 +1630,11 @@ x 0
 y 85
 w 30
 h 20
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-12.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "$(M4)"
 numPvs 14
 numDsps 7
@@ -1686,11 +1686,11 @@ x 0
 y 45
 w 30
 h 20
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-12.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "$(M2)"
 numPvs 14
 numDsps 7
@@ -1742,11 +1742,11 @@ x 0
 y 65
 w 30
 h 20
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-12.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "$(M3)"
 numPvs 14
 numDsps 7
@@ -1798,11 +1798,11 @@ x 145
 y 185
 w 50
 h 20
-fgColor rgb 65280 65280 65280
-bgColor rgb 10240 37632 5376
-topShadowColor rgb 55808 55808 55808
-botShadowColor rgb 17920 17920 17920
-font "helvetica-medium-r-12.0"
+fgColor index 0
+bgColor index 63
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
 buttonLabel "More"
 numPvs 2
 numDsps 1
