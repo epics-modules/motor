@@ -217,8 +217,9 @@ USAGE...        Motor Record Support.
 /*----------------debugging-----------------*/
 /* SPAM bits:
 
-    1 STOP record stops motor, motor reports stopped
-    2 MIP changes,  may be retry, doRetryOrDone, delayReq/Ack
+    0 Process begin and PACT is true
+    1 record stops motor, motor reports stopped
+    2 MIP or MSTA changes,  may be retry, doRetryOrDone, delayReq/Ack
     3 Record init, UDF changes, values from controller
     4 LVIO, recalcLVIO
     5 postProcess
@@ -1409,7 +1410,10 @@ static long process(dbCommon *arg)
     struct callback *pcallback = (struct callback *) pmr->cbak; /* v3.2 */
 
     if (pmr->pact)
+    {
+        Debug(pmr,0, "process:---------------------- %s\n", "begin; pact=1");
         return(OK);
+    }
 
     Debug(pmr,8, "process:---------------------- %s\n", "begin");
     pmr->pact = 1;
@@ -1421,7 +1425,47 @@ static long process(dbCommon *arg)
      */
     process_reason = (*pdset->update_values) (pmr);
     if (pmr->msta != old_msta)
-        MARK(M_MSTA);
+    {
+      msta_field old_msta_field;
+      msta_field new_msta_field;
+      old_msta_field.All = old_msta;
+      new_msta_field.All = pmr->msta;
+
+      if (new_msta_field.Bits.RA_HOMED != old_msta_field.Bits.RA_HOMED)
+	Debug(pmr,2, "msta.Bits.RA_HOMED=%d\n", new_msta_field.Bits.RA_HOMED ? 1 : 0);
+      if (new_msta_field.Bits.RA_MINUS_LS != old_msta_field.Bits.RA_MINUS_LS)
+	Debug(pmr,2, "msta.Bits.RA_MINUS_LS=%d\n", new_msta_field.Bits.RA_MINUS_LS ? 1 : 0);
+      if (new_msta_field.Bits.CNTRL_COMM_ERR != old_msta_field.Bits.CNTRL_COMM_ERR)
+	Debug(pmr,2, "msta.Bits.CNTRL_COMM_ERR=%d\n", new_msta_field.Bits.CNTRL_COMM_ERR ? 1 : 0);
+      if (new_msta_field.Bits.GAIN_SUPPORT != old_msta_field.Bits.GAIN_SUPPORT)
+	Debug(pmr,2, "msta.Bits.GAIN_SUPPORT=%d\n", new_msta_field.Bits.GAIN_SUPPORT ? 1 : 0);
+      if (new_msta_field.Bits.RA_MOVING != old_msta_field.Bits.RA_MOVING)
+	Debug(pmr,2, "msta.Bits.RA_MOVING=%d\n", new_msta_field.Bits.RA_MOVING ? 1 : 0);
+      if (new_msta_field.Bits.RA_PROBLEM != old_msta_field.Bits.RA_PROBLEM)
+	Debug(pmr,2, "msta.Bits.RA_PROBLEM=%d\n", new_msta_field.Bits.RA_PROBLEM ? 1 : 0);
+      if (new_msta_field.Bits.EA_PRESENT != old_msta_field.Bits.EA_PRESENT)
+	Debug(pmr,2, "msta.Bits.EA_PRESENT=%d\n", new_msta_field.Bits.EA_PRESENT ? 1 : 0);
+      if (new_msta_field.Bits.EA_HOME != old_msta_field.Bits.EA_HOME)
+	Debug(pmr,2, "msta.Bits.EA_HOME=%d\n", new_msta_field.Bits.EA_HOME ? 1 : 0);
+      if (new_msta_field.Bits.EA_HOME != old_msta_field.Bits.EA_HOME)
+	Debug(pmr,2, "msta.Bits.EA_HOME encoder home=%d\n", new_msta_field.Bits.EA_HOME ? 1 : 0);
+      if (new_msta_field.Bits.EA_SLIP_STALL != old_msta_field.Bits.EA_SLIP_STALL)
+	Debug(pmr,2, "msta.Bits.EA_SLIP_STALL following error=%d\n", new_msta_field.Bits.EA_SLIP_STALL ? 1 : 0);
+      if (new_msta_field.Bits.EA_POSITION != old_msta_field.Bits.EA_POSITION)
+	Debug(pmr,2, "msta.Bits.EA_POSITION power on=%d\n", new_msta_field.Bits.EA_POSITION ? 1 : 0);
+      if (new_msta_field.Bits.EA_SLIP != old_msta_field.Bits.EA_SLIP)
+	Debug(pmr,2, "msta.Bits.EA_SLIP enabled=%d\n", new_msta_field.Bits.EA_SLIP ? 1 : 0);
+      if (new_msta_field.Bits.RA_HOME != old_msta_field.Bits.RA_HOME)
+	Debug(pmr,2, "msta.Bits.RA_HOME home signal=%d\n", new_msta_field.Bits.RA_HOME ? 1 : 0);
+      if (new_msta_field.Bits.RA_PLUS_LS != old_msta_field.Bits.RA_PLUS_LS)
+	Debug(pmr,2, "msta.Bits.RA_PLUS_LS=%d\n", new_msta_field.Bits.RA_PLUS_LS ? 1 : 0);
+      if (new_msta_field.Bits.RA_DONE != old_msta_field.Bits.RA_DONE)
+	Debug(pmr,2, "msta.Bits.RA_DONE=%d\n", new_msta_field.Bits.RA_DONE ? 1 : 0);
+      if (new_msta_field.Bits.RA_DIRECTION != old_msta_field.Bits.RA_DIRECTION)
+	Debug(pmr,2, "msta.Bits.RA_DIRECTION=%d\n", new_msta_field.Bits.RA_DIRECTION ? 1 : 0);
+
+      MARK(M_MSTA);
+    }
 
     if (process_reason == CALLBACK_DATA_SOFT_LIMITS)
     {
