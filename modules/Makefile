@@ -91,5 +91,8 @@ endif
 	$(ECHO) Creating $@, EPICS_BASE = $(EPICS_BASE)
 	@echo EPICS_BASE = $(EPICS_BASE)>> $@
 	
+	$(ECHO) Creating $@, SUPPORT = $(SUPPORT)
+	@echo SUPPORT = $(SUPPORT)>> $@
+	
 realclean:
 	$(RM) $(RELEASE_LOCAL)
