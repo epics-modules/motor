@@ -14,5 +14,6 @@ SoftMotorSrc_DEPEND_DIRS = MotorSrc
 
 DIRS += op
 DIRS += Db
+DIRS += iocsh
 
 include $(TOP)/configure/RULES_DIRS
