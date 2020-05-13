@@ -7,19 +7,19 @@ R7-2 is a release based on the master branch.
 
 #### Modifications to existing features
 * ``CONFIG_SITE`` now includes ``$(SUPPORT)/configure/CONFIG_SITE``, which overrides ``CONFIG_SITE.local``
-* ``modules/RELEASE.$(EPICS_HOST_ARCH).local`` is now rebuilt every time the build get into the ``modules`` directory.
+* ``modules/RELEASE.$(EPICS_HOST_ARCH).local`` is now rebuilt every time the build get into the ``modules`` directory
 * User displays have been autoconverted
 
 #### Bug fixes
 * asynMotorAxis parameters (``motorPowerAutoOnOff_``, ``motorPowerOffDelay_``, ``motorPowerOnDelay_``) are now initialized to avoid errors
-* The layout of motorxU.adl has been improved
+* The layout of ``motorxU.adl`` has been improved
 
 #### Driver submodules (and noteworthy changes)
 | Module           | Release | Changes |
 | ---------------- | ------- | ------- |
-| **motorAcs**     | [R1-1](https://github.com/epics-motor/motorAcs/releases/tag/R1-1) | **iocsh files are now installed at build time** |
+| **motorAcs**     | [R1-1](https://github.com/epics-motor/motorAcs/releases/tag/R1-1) | iocsh files are now installed at build time |
 | **motorAcsTech80** | [R1-0-1](https://github.com/epics-motor/motorAcsTech80/releases/tag/R1-0-1) |         |
-| **motorAerotech** | [R1-1](https://github.com/epics-motor/motorAerotech/releases/tag/R1-1) | **motorAxisHomed bit is now set in the Ensemble poller** |
+| **motorAerotech** | [R1-1](https://github.com/epics-motor/motorAerotech/releases/tag/R1-1) | motorAxisHomed bit is now set in the Ensemble poller |
 | **motorAMCI** | [R1-0-1](https://github.com/epics-motor/motorAMCI/releases/tag/R1-0-1) |         |
 | **motorAttocube** | [R1-0-1](https://github.com/epics-motor/motorAttocube/releases/tag/R1-0-1) |         |
 | **motorDeltaTau** | [R1-0-1](https://github.com/epics-motor/motorDeltaTau/releases/tag/R1-0-1) |         |
@@ -27,25 +27,25 @@ R7-2 is a release based on the master branch.
 | **motorHytec**   | [R1-0-1](https://github.com/epics-motor/motorHytec/releases/tag/R1-0-1) |         |
 | **motorIms**     | [R1-0-1](https://github.com/epics-motor/motorIms/releases/tag/R1-0-1) |         |
 | **motorKohzu**   | [R1-0-1](https://github.com/epics-motor/motorKohzu/releases/tag/R1-0-1) |         |
-| **motorMclennan** | [R1-1](https://github.com/epics-motor/motorMclennan/releases/tag/R1-1) | **iocsh files are now installed at build time** |
-| **motorMicos**   | [R2-0](https://github.com/epics-motor/motorMicos/releases/tag/R2-0) | **Added support for the SMC Corvus Eco** |
+| **motorMclennan** | [R1-1](https://github.com/epics-motor/motorMclennan/releases/tag/R1-1) | iocsh files are now installed at build time |
+| **motorMicos**   | [R2-0](https://github.com/epics-motor/motorMicos/releases/tag/R2-0) | Added support for the SMC Corvus Eco |
 | **motorMicroMo** | [R1-0-1](https://github.com/epics-motor/motorMicroMo/releases/tag/R1-0-1) |         |
 | **motorMicronix** | [R1-0-1](https://github.com/epics-motor/motorMicronix/releases/tag/R1-0-1) |         |
-| **motorMotorSim** | [R1-1](https://github.com/epics-motor/motorMotorSim/releases/tag/R1-1) | **iocsh files are now installed at build time** |
+| **motorMotorSim** | [R1-1](https://github.com/epics-motor/motorMotorSim/releases/tag/R1-1) | iocsh files are now installed at build time |
 | **motorMXmotor** | [R1-0-1](https://github.com/epics-motor/motorMXmotor/releases/tag/R1-0-1) |         |
 | **motorNewFocus** | [R1-1-1](https://github.com/epics-motor/motorNewFocus/releases/tag/R1-1-1) |         |
-| **motorNewport**  | [R1-1](https://github.com/epics-motor/motorNewport/releases/tag/R1-1) | **Added support for the XPS-D** |
+| **motorNewport**  | [R1-1](https://github.com/epics-motor/motorNewport/releases/tag/R1-1) | Added support for the XPS-D |
 | **motorNPoint**  | [R1-0-1](https://github.com/epics-motor/motorNPoint/releases/tag/R1-0-1) |         |
-| **motorOms**     | [R1-1](https://github.com/epics-motor/motorOms/releases/tag/R1-1)  | **User displays can now be autoconverted at build time** |
+| **motorOms**     | [R1-1](https://github.com/epics-motor/motorOms/releases/tag/R1-1)  | User displays can now be autoconverted at build time |
 | **motorOmsAsyn** | [R1-0-1](https://github.com/epics-motor/motorOmsAsyn/releases/tag/R1-0-1) |         |
 | **motorOriel**   | [R1-0-1](https://github.com/epics-motor/motorOriel/releases/tag/R1-0-1) |         |
-| **motorParker**  | [R1-1](https://github.com/epics-motor/motorParker/releases/tag/R1-1) | **User displays can now be autoconverted at build time** |
-| **motorPhytron** | [R1-1](https://github.com/epics-motor/motorPhytron/releases/tag/R1-1) | **Error messages are now only printed on status changes** |
+| **motorParker**  | [R1-1](https://github.com/epics-motor/motorParker/releases/tag/R1-1) | User displays can now be autoconverted at build time |
+| **motorPhytron** | [R1-1](https://github.com/epics-motor/motorPhytron/releases/tag/R1-1) | Error messages are now only printed on status changes |
 | **motorPI**      | [R1-0-1](https://github.com/epics-motor/motorPI/releases/tag/R1-0-1) |         |
-| **motorPIGCS2**  | [R1-1](https://github.com/epics-motor/motorPIGCS2/releases/tag/R1-1) | **Added support for the E-754 and C-885 controllers** |
+| **motorPIGCS2**  | [R1-1](https://github.com/epics-motor/motorPIGCS2/releases/tag/R1-1) | Added support for the E-754 and C-885 controllers |
 | **motorPiJena**  | [R1-0-1](https://github.com/epics-motor/motorPiJena/releases/tag/R1-0-1) |         |
-| **motorScriptMotor** | [R1-1](https://github.com/epics-motor/motorScriptMotor/releases/tag/R1-1) | **User displays can now be autoconverted at build time** |
-| **motorSmarAct** | [R1-2](https://github.com/epics-motor/motorSmarAct/releases/tag/R1-2) | **Added support for the SCU controllers** |
+| **motorScriptMotor** | [R1-1](https://github.com/epics-motor/motorScriptMotor/releases/tag/R1-1) | User displays can now be autoconverted at build time |
+| **motorSmarAct** | [R1-2](https://github.com/epics-motor/motorSmarAct/releases/tag/R1-2) | Added support for the SCU controllers |
 | **motorSmartMotor** | [R1-0-1](https://github.com/epics-motor/motorSmartMotor/releases/tag/R1-0-1) |         |
 | **motorThorLabs** | [R1-0-1](https://github.com/epics-motor/motorThorLabs/releases/tag/R1-0-1) |         |
 
