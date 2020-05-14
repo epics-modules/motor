@@ -1,5 +1,48 @@
 # Motor Releases
 
+## __R7-2-1 (2020-05-14)__
+R7-2-1 is a release based on the master branch.  
+
+### Changes since R7-2
+
+#### Bug fixes
+* Motor drivers have been updated to resolve build problems for Windows and VxWorks
+
+#### Driver submodules (and noteworthy changes)
+| Module           | Release | Changes |
+| ---------------- | ------- | ------- |
+| motorAcs         | [R1-1](https://github.com/epics-motor/motorAcs/releases/tag/R1-1) |         |
+| motorAcsTech80   | [R1-0-1](https://github.com/epics-motor/motorAcsTech80/releases/tag/R1-0-1) |         |
+| motorAerotech    | [R1-1](https://github.com/epics-motor/motorAerotech/releases/tag/R1-1) |         |
+| motorAMCI        | [R1-0-1](https://github.com/epics-motor/motorAMCI/releases/tag/R1-0-1) |         |
+| motorAttocube    | [R1-0-1](https://github.com/epics-motor/motorAttocube/releases/tag/R1-0-1) |         |
+| motorDeltaTau    | [R1-0-1](https://github.com/epics-motor/motorDeltaTau/releases/tag/R1-0-1) |         |
+| motorFaulhaber   | [R1-0-1](https://github.com/epics-motor/motorFaulhaber/releases/tag/R1-0-1) |         |
+| **motorHytec**   | [R1-0-2](https://github.com/epics-motor/motorHytec/releases/tag/R1-0-2) | Only build the example IOC on Linux and VxWorks |
+| motorIms         | [R1-0-1](https://github.com/epics-motor/motorIms/releases/tag/R1-0-1) |         |
+| motorKohzu       | [R1-0-1](https://github.com/epics-motor/motorKohzu/releases/tag/R1-0-1) |         |
+| motorMclennan    | [R1-1](https://github.com/epics-motor/motorMclennan/releases/tag/R1-1) |         |
+| motorMicos       | [R2-0](https://github.com/epics-motor/motorMicos/releases/tag/R2-0) |         |
+| motorMicroMo     | [R1-0-1](https://github.com/epics-motor/motorMicroMo/releases/tag/R1-0-1) |         |
+| motorMicronix    | [R1-0-1](https://github.com/epics-motor/motorMicronix/releases/tag/R1-0-1) |         |
+| motorMotorSim    | [R1-1](https://github.com/epics-motor/motorMotorSim/releases/tag/R1-1) |         |
+| motorMXmotor     | [R1-0-1](https://github.com/epics-motor/motorMXmotor/releases/tag/R1-0-1) |         |
+| motorNewFocus    | [R1-1-1](https://github.com/epics-motor/motorNewFocus/releases/tag/R1-1-1) |         |
+| motorNewport     | [R1-1](https://github.com/epics-motor/motorNewport/releases/tag/R1-1) |         |
+| motorNPoint      | [R1-0-1](https://github.com/epics-motor/motorNPoint/releases/tag/R1-0-1) |         |
+| motorOms         | [R1-1](https://github.com/epics-motor/motorOms/releases/tag/R1-1)  |         |
+| **motorOmsAsyn** | [R1-0-2](https://github.com/epics-motor/motorOmsAsyn/releases/tag/R1-0-2) | Exclude MAXv support when building example IOC on Windows |
+| motorOriel       | [R1-0-1](https://github.com/epics-motor/motorOriel/releases/tag/R1-0-1) |         |
+| motorParker      | [R1-1](https://github.com/epics-motor/motorParker/releases/tag/R1-1) |         |
+| motorPhytron     | [R1-1](https://github.com/epics-motor/motorPhytron/releases/tag/R1-1) |         |
+| motorPI          | [R1-0-1](https://github.com/epics-motor/motorPI/releases/tag/R1-0-1) |         |
+| motorPIGCS2      | [R1-1](https://github.com/epics-motor/motorPIGCS2/releases/tag/R1-1) |         |
+| motorPiJena      | [R1-0-1](https://github.com/epics-motor/motorPiJena/releases/tag/R1-0-1) |         |
+| motorScriptMotor | [R1-1](https://github.com/epics-motor/motorScriptMotor/releases/tag/R1-1) |         |
+| **motorSmarAct** | [R1-2-1](https://github.com/epics-motor/motorSmarAct/releases/tag/R1-2-1) | Include a local definition of rint on fewer platforms |
+| motorSmartMotor  | [R1-0-1](https://github.com/epics-motor/motorSmartMotor/releases/tag/R1-0-1) |         |
+| motorThorLabs    | [R1-0-1](https://github.com/epics-motor/motorThorLabs/releases/tag/R1-0-1) |         |
+
 ## __R7-2 (2020-05-13)__
 R7-2 is a release based on the master branch.  
 
