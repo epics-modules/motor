@@ -192,7 +192,7 @@ USAGE...        Motor Record Support.
  * .78 08-21-18 kmp - Reverted .69 stop on RA_PROBLEM true.
  */                                                          
 
-#define VERSION 7.01
+#define VERSION 7.02
 
 #include    <stdlib.h>
 #include    <string.h>

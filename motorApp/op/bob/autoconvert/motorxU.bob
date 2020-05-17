@@ -11,8 +11,23 @@
   </background_color>
   <grid_visible>false</grid_visible>
   <grid_step_x>5</grid_step_x>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #6</name>
+    <x>4</x>
+    <y>130</y>
+    <width>165</width>
+    <height>40</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+  </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #6</name>
+    <name>message button #9</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).STOP</pv_name>
@@ -36,7 +51,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>related display #9</name>
+    <name>related display #12</name>
     <actions>
       <action type="open_display">
         <file>motorx_tiny.opi</file>
@@ -84,7 +99,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #17</name>
+    <name>message button #20</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).SSET</pv_name>
@@ -104,7 +119,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #20</name>
+    <name>message button #23</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).SUSE</pv_name>
@@ -124,7 +139,7 @@
     </background_color>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #23</name>
+    <name>rectangle #26</name>
     <x>60</x>
     <y>234</y>
     <width>115</width>
@@ -149,7 +164,7 @@
     </rules>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #27</name>
+    <name>rectangle #30</name>
     <y>198</y>
     <width>174</width>
     <height>34</height>
@@ -163,7 +178,7 @@
     </background_color>
   </widget>
   <widget type="textupdate" version="2.0.0">
-    <name>text update #30</name>
+    <name>text update #33</name>
     <pv_name>$(P)$(M).VELO</pv_name>
     <x>4</x>
     <y>202</y>
@@ -187,7 +202,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #34</name>
+    <name>text #37</name>
     <text>/s</text>
     <x>148</x>
     <y>202</y>
@@ -204,7 +219,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #37</name>
+    <name>message button #40</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M)_vCh.A</pv_name>
@@ -228,7 +243,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #40</name>
+    <name>message button #43</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M)_vCh.A</pv_name>
@@ -252,7 +267,7 @@
     </background_color>
   </widget>
   <widget type="textupdate" version="2.0.0">
-    <name>text update #43</name>
+    <name>text update #46</name>
     <pv_name>$(P)$(M).EGU</pv_name>
     <x>83</x>
     <y>202</y>
@@ -276,7 +291,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #47</name>
+    <name>rectangle #50</name>
     <y>126</y>
     <width>174</width>
     <height>70</height>
@@ -290,7 +305,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #50</name>
+    <name>message button #53</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M)_twCh.A</pv_name>
@@ -310,7 +325,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #53</name>
+    <name>message button #56</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M)_twCh.A</pv_name>
@@ -330,7 +345,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #56</name>
+    <name>message button #59</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).TWR</pv_name>
@@ -350,7 +365,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #59</name>
+    <name>message button #62</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).TWF</pv_name>
@@ -366,21 +381,6 @@
     <height>36</height>
     <background_color>
       <color red="115" green="223" blue="255">
-      </color>
-    </background_color>
-  </widget>
-  <widget type="rectangle" version="2.0.0">
-    <name>rectangle #62</name>
-    <x>4</x>
-    <y>130</y>
-    <width>165</width>
-    <height>40</height>
-    <line_color>
-      <color red="0" green="0" blue="0">
-      </color>
-    </line_color>
-    <background_color>
-      <color red="0" green="0" blue="0">
       </color>
     </background_color>
   </widget>
