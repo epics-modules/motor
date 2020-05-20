@@ -265,6 +265,14 @@ below.
     <td>acceleration time</td>
   </tr>
   <tr>
+    <td><a href="#Fields_motion">ACCS</a></td>
+    <td>R/W</td>
+    <td>Acceleration (EGU/s^2)</td>
+    <td>DOUBLE</td>
+    <td><br>
+    </td>
+  </tr>
+  <tr>
     <td><a href="#Fields_status">ADEL</a></td>
     <td>R/W</td>
     <td>Archive Deadband</td>
@@ -1705,7 +1713,8 @@ below.
     <td colspan="5">The motor record expects the hardware to produce a trapezoidal 
     speed profile. That is, the motor speed is expected to increase linearly with 
     time from the base speed, VBAS, to the full speed, VELO, in ACCL seconds. At the 
-    end of a motion, the speed is expected to decrease similarly to VBAS.&nbsp;</td>
+    end of a motion, the speed is expected to decrease similarly to VBAS.
+    Note that the ACCS field can be use to specify the acceleration in EGU/s^2.&nbsp;</td>
   </tr>
   <tr>
     <td>JVEL</td>
@@ -2369,7 +2378,7 @@ below.
     <td colspan="5">When one of these fields is set to 1, the record will 
     immediately reset it to 0, and the motor will move (with backlash takeout if 
     BDST is nonzero) by a distance TWV (in user coordinates) at the acceleration 
-    specified by ACCL and at speed VELO.</td>
+    specified by ACCL/ACCS and at speed VELO.</td>
   </tr>
   <tr valign="top">
     <td>TWV</td>
