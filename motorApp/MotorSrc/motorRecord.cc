@@ -4130,11 +4130,11 @@ static void set_dial_highlimit(motorRecord *pmr)
     }
     if (pmr->priv->softLimitRO.motorDialLimitsValid)
     {
-        double maxValue = pmr->priv->softLimitRO.motorDialHighLimitRO;
-        Debug(pmr,3, "pmr->dhlm=%g maxValue=%g\n", pmr->dhlm, maxValue);
-        if ((pmr->dhlm > maxValue) || !softLimitsDefined(pmr))
+        double softLimitRO = pmr->priv->softLimitRO.motorDialHighLimitRO;
+        Debug(pmr,3, "pmr->dhlm=%g softLimitRO=%g\n", pmr->dhlm, softLimitRO);
+        if ((pmr->dhlm > softLimitRO) || !softLimitsDefined(pmr))
         {
-            pmr->dhlm = maxValue;
+            pmr->dhlm = softLimitRO;
         }
     }
     devSupUpdateLimitFromDial(pmr, command, pmr->dhlm);
@@ -4191,11 +4191,11 @@ static void set_dial_lowlimit(motorRecord *pmr)
     }
     if (pmr->priv->softLimitRO.motorDialLimitsValid)
     {
-        double minValue = pmr->priv->softLimitRO.motorDialLowLimitRO;
-        Debug(pmr,3, "pmr->dllm=%g minValue=%g\n", pmr->dllm, minValue);
-        if ((pmr->dllm < minValue) || !softLimitsDefined(pmr))
+        double softLimitRO = pmr->priv->softLimitRO.motorDialLowLimitRO;
+        Debug(pmr,3, "pmr->dllm=%g softLimitRO=%g\n", pmr->dllm, softLimitRO);
+        if ((pmr->dllm < softLimitRO) || !softLimitsDefined(pmr))
         {
-            pmr->dllm = minValue;
+            pmr->dllm = softLimitRO;
         }
     }
     devSupUpdateLimitFromDial(pmr, command, pmr->dllm);
