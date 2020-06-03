@@ -820,7 +820,6 @@ static long init_record(dbCommon* arg, int pass)
     if (pass == 0)
     {
         pmr->vers = VERSION;
-        if (!pmr->spam) pmr->spam = 15; /* important logging on */
         return(OK);
     }
     /* Check that we have a device-support entry table. */

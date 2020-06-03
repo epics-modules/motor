@@ -804,8 +804,9 @@ recordtype(motor) {
 		prompt("Ignore SET field")
 		interest(2)
 	}
-	field(SPAM,DBF_SHORT) {
-		prompt("Debug print bit mask")
-		interest(2)
-	}
+        field(SPAM,DBF_SHORT) {
+                prompt("Debug print bit mask")
+                interest(2)
+                initial("15")
+        }
 }
