@@ -75,6 +75,13 @@ menu(motorACCSused) {
         choice(motorACCSused_Accs, "Accs")
 }
 
+menu(motorRSTM) {
+        choice(motorRSTM_Never,       "Never")
+        choice(motorRSTM_Always,      "Always")
+        choice(motorRSTM_NearZero,    "NearZero")
+        choice(motorRSTM_Conditional, "Conditional")
+}
+
 include "menuOmsl.dbd"
 
 recordtype(motor) {
@@ -808,5 +815,12 @@ recordtype(motor) {
                 prompt("Debug print bit mask")
                 interest(2)
                 initial("15")
+        }
+        field(RSTM,DBF_MENU) {
+                initial("NearZero")
+                prompt("Restore Mode")
+                promptgroup(GUI_COMMON)
+                interest(2)
+                menu(motorRSTM)
         }
 }
