@@ -4,6 +4,16 @@ import os
 import sys
 import subprocess
 
+# Setup ANSI Colors
+ANSI_RED = "\033[31;1m"
+ANSI_GREEN = "\033[32;1m"
+ANSI_YELLOW = "\033[33;1m"
+ANSI_BLUE = "\033[34;1m"
+ANSI_MAGENTA = "\033[35;1m"
+ANSI_CYAN = "\033[36;1m"
+ANSI_RESET = "\033[0m"
+ANSI_CLEAR = "\033[0K"
+
 # Comment out SUPPORT from motor's RELEASE file
 if sys.version_info >= (3, 5):
   status = subprocess.run(['sed', '-i', '-e', "s|^\(SUPPORT=.*\)$|#\1|g", './configure/RELEASE'])
