@@ -1,0 +1,7 @@
+MODULES="sncseq ipac asyn autosave busy"
+
+SNCSEQ=R2-2-8
+IPAC=master
+ASYN=R4-38
+AUTOSAVE=R5-9
+BUSY=R1-7-1
