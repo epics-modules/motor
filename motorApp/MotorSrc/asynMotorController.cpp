@@ -562,35 +562,46 @@ asynStatus asynMotorController::readFloat64Array(asynUser *pasynUser, epicsFloat
 asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *pointer)
 {
   MotorStatus *pStatus = (MotorStatus *)pointer;
-  int axis;
+  int axisNo;
   asynStatus status = asynSuccess;
   asynMotorAxis *pAxis;
   static const char *functionName = "readGenericPointer";
 
   pAxis = getAxis(pasynUser);
-  if (!pAxis) return asynError;
-  axis = pAxis->axisNo_;
- 
-  getAddress(pasynUser, &axis);
-  /*  We need to make sure that the most important member had been retrieved
-      from the controller */
-  if (status == asynSuccess) status = getIntegerParam(axis, motorStatus_, (int *)&pStatus->status);
-  if (status == asynSuccess) {
-    memcpy(pStatus, &pAxis->status_, sizeof(*pStatus));
-    asynPrint(pasynUser, ASYN_TRACE_FLOW,
-	      "%s:%s: axis=%d status=0x%04x, position=%f, encoder position=%f, velocity=%f, "
-	      "highLimit=%f lowLimit=%f\n",
-	      driverName, functionName,  axis, pStatus->status, pStatus->position,
-	      pStatus->encoderPosition, pStatus->velocity,
-	      pStatus->MotorConfigRO.motorHighLimitRaw,
-	      pStatus->MotorConfigRO.motorLowLimitRaw);
-  } else {
-    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-	      "%s:%s: axis=%d return asynStatus=%d \n",
-	      driverName, functionName, axis, (int)status);
+  if (!pAxis) {
+    epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                  "%s: axisNo=%d no axis found\n",
+                  functionName, axisNo);
+    return asynError;
   }
+  axisNo = pAxis->axisNo_;
+  getAddress(pasynUser, &axisNo);
+  /*  We need to make sure that the most important members had been retrieved
+      from the controller */
+  status = getIntegerParam(axisNo, motorStatus_, (int *)&pStatus->status);
+  if (status != asynSuccess) {
+    epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                  "Error: axisNo=%d status(getIntegerParam(motorStatus_)) returned %d",
+                  axisNo, (int)status);
+    return status;
+  }
+  status = getDoubleParam(axisNo, motorPosition_, &pStatus->position);
+  if (status != asynSuccess) {
+    epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                  "Error: axisNo=%d status(getDoubleParam(motorPosition_)) returned %d",
+                  axisNo, (int)status);
+    return status;
+  }
+  memcpy(pStatus, &pAxis->status_, sizeof(*pStatus));
+  asynPrint(pasynUser, ASYN_TRACE_FLOW,
+            "%s:%s: axisNo=%d status=0x%04x, position=%f, encoder position=%f, velocity=%f, "
+            "highLimit=%f lowLimit=%f\n",
+            driverName, functionName,  axisNo, pStatus->status, pStatus->position,
+            pStatus->encoderPosition, pStatus->velocity,
+            pStatus->MotorConfigRO.motorHighLimitRaw,
+            pStatus->MotorConfigRO.motorLowLimitRaw);
   return status;
-}  
+}
 
 asynStatus asynMotorController::writeGenericPointer(asynUser *pasynUser, void *genericPointer)
 {
