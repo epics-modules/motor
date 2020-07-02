@@ -699,10 +699,10 @@ static void enforceMinRetryDeadband(motorRecord * pmr)
 
 static void recalcLVIO(motorRecord *pmr)
 {
-  if (pmr->udf || (pmr->stat == epicsAlarmLink) || (pmr->stat == epicsAlarmUDF))
+  if (pmr->priv->neverPolled)
   {
-      Debug(pmr,4, "recalcLVIO udf=%d stat=%d nsta=%d\n",
-            pmr->udf, pmr->stat, pmr->nsta);
+      Debug(pmr,4, "recalcLVIO neverPolled=%d stat=%d nsta=%d\n",
+            pmr->priv->neverPolled, pmr->stat, pmr->nsta);
       return;
   }
 
@@ -721,8 +721,8 @@ static void recalcLVIO(motorRecord *pmr)
       SET_LVIO(lvio);
       MARK(M_LVIO);
   }
-  Debug(pmr,4,"recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f udf=%d stat=%d nsta=%d\n",
-        lvio, pmr->drbv, pmr->rdbd, pmr->dhlm, pmr->dllm, pmr->udf, pmr->stat, pmr->nsta);
+  Debug(pmr,4,"recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f neverPolled=%d\n",
+        lvio, pmr->drbv, pmr->rdbd, pmr->dhlm, pmr->dllm, pmr->priv->neverPolled);
 }
 
 /******************************************************************************
@@ -754,8 +754,8 @@ LOGIC:
 
 static long init_re_init(motorRecord *pmr)
 {
-    Debug(pmr,3, "init_re_init udf=%d stat=%d nsta=%d\n",
-           pmr->udf, pmr->stat, pmr->nsta);
+    Debug(pmr,3, "init_re_init neverPolled=%d stat=%d nsta=%d\n",
+           pmr->priv->neverPolled, pmr->stat, pmr->nsta);
     check_speed(pmr);
     enforceMinRetryDeadband(pmr);
     process_motor_info(pmr, true);
@@ -814,6 +814,7 @@ static long init_record(dbCommon* arg, int pass)
     struct motor_dset *pdset;
     long status;
     CALLBACK_VALUE process_reason;
+    const char *reason_txt = "";
     struct callback *pcallback; /* v3.2 */
     const char errmsg[] = "motor:init_record()";
 
@@ -912,8 +913,7 @@ static long init_record(dbCommon* arg, int pass)
     process_reason = (*pdset->update_values) (pmr);
     switch (process_reason) {
         case NOTHING_DONE:
-            if (pmr->dol.type == CONSTANT)
-                 pmr->udf = TRUE;
+            pmr->priv->neverPolled = 1;
             break;
         case CALLBACK_DATA_SOFT_LIMITS:
         case CALLBACK_DATA:
@@ -921,14 +921,24 @@ static long init_record(dbCommon* arg, int pass)
             /* force a process() including alarm_sub() */
             devSupGetInfo(pmr);
             break;
-        case CALLBACK_UDF:
-            pmr->udf = TRUE;
+    }
+    switch (process_reason) {
+        case NOTHING_DONE:
+            reason_txt = "nothing done";
+            break;
+        case CALLBACK_DATA_SOFT_LIMITS:
+            reason_txt = "callbackdata + soft limits";
+            break;
+        case CALLBACK_DATA:
+            reason_txt = "callbackdata";
             break;
     }
     Debug(pmr,3,
-          "init_record process_reason=%d dval=%f drbv=%f rdbd=%f spdb=%f udf=%d stat=%d msta=0x%x\n",
-          (int)process_reason, pmr->dval, pmr->drbv,
-          pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat, pmr->msta);
+          "init_record process_reason=\"%s\""
+          " dval=%f drbv=%f rdbd=%f spdb=%f"
+          " stat=%d msta=0x%x neverPolled=%d\n",
+          reason_txt, pmr->dval, pmr->drbv, pmr->rdbd, pmr->spdb,
+          pmr->stat, pmr->msta, pmr->priv->neverPolled);
     return OK;
 }
 
@@ -1483,14 +1493,11 @@ static long process(dbCommon *arg)
         enforceMinRetryDeadband(pmr);
         process_reason = CALLBACK_DATA;
     }
-    if (process_reason == CALLBACK_DATA)
+    if ((process_reason == CALLBACK_DATA) && (pmr->priv->neverPolled))
     {
-      if ((pmr->dol.type == CONSTANT) && pmr->udf)
-      {
-          Debug(pmr,3, "process %s\n", "set UDF=FALSE");
-          pmr->udf = FALSE;
+          Debug(pmr,3, "process %s\n", "set pmr->priv->neverPolled=0");
+          pmr->priv->neverPolled = 0;
           init_re_init(pmr);
-      }
     }
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
     {
@@ -3515,6 +3522,11 @@ static void alarm_sub(motorRecord * pmr)
 {
     msta_field msta;
 
+    if (pmr->priv->neverPolled)
+    {
+        recGblSetSevr((dbCommon *) pmr, COMM_ALARM, INVALID_ALARM);
+        return;
+    }
     if (pmr->udf == TRUE)
     {
         recGblSetSevr((dbCommon *) pmr, UDF_ALARM, INVALID_ALARM);

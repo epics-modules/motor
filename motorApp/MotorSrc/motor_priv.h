@@ -34,6 +34,7 @@ extern "C" {
       epicsFloat64 alst;               /* Last Value Archived */
       epicsFloat64 mlst;               /* Last Val Monitored */
     } last;
+    int          neverPolled;        /**< Controller was never online */
   };
 
 #ifdef __cplusplus

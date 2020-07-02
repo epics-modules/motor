@@ -609,8 +609,6 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
             pmr->priv->lastReadBack.msta.All = pmr->msta;
         }
         pPvt->needUpdate = 0;
-    } else if ( pPvt->needUpdate < 0) {
-        rc = CALLBACK_UDF;
     }
     return (rc);
 }
