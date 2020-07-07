@@ -570,8 +570,8 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
   pAxis = getAxis(pasynUser);
   if (!pAxis) {
     epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                  "%s: axisNo=%d no axis found\n",
-                  functionName, axisNo);
+                  "%s: no axis found\n",
+                  functionName);
     return asynError;
   }
   axisNo = pAxis->axisNo_;
