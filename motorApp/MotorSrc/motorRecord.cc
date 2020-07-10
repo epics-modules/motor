@@ -3216,12 +3216,11 @@ pidcof:
 
         if ((pmr->mip & MIP_JOGF) || (pmr->mip & MIP_JOGR))
         {
-            double jogv = (pmr->jvel * dir) / pmr->mres;
-            double jacc = pmr->jar / fabs(pmr->mres);
+            double jogv = pmr->jvel * dir;
             if (pmr->jogr)
                 jogv = -jogv;
 
-            devSupUpdateJogRaw(pmr, jogv, jacc);
+            devSupUpdateJogDial(pmr, jogv, pmr->jar);
         }
         break;
 

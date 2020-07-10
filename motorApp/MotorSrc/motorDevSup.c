@@ -210,12 +210,24 @@ void devSupJogDial(motorRecord *pmr, double jogv, double jacc)
 
 
 /*****************************************************************************/
-void devSupUpdateJogRaw(motorRecord *pmr, double jogv, double jacc)
+void devSupUpdateJogDial(motorRecord *pmr, double jogv, double jacc)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
+    double jogvRaw = jogv;
+    double jaccRaw = jacc;
+    if (pmr->mflg & MF_DRIVER_USES_EGU)
+    {
+        if (pmr->mres < 0.0)
+          jogvRaw = - jogvRaw; /* Keep the sign */
+    }
+    else
+    {
+        jogvRaw = jogv / pmr->mres;
+        jaccRaw = jacc / fabs(pmr->mres);
+    }
     INIT_MSG();
-    WRITE_MSG(SET_ACCEL, &jacc);
-    WRITE_MSG(JOG_VELOCITY, &jogv);
+    WRITE_MSG(SET_ACCEL, &jaccRaw);
+    WRITE_MSG(JOG_VELOCITY, &jogvRaw);
     SEND_MSG();
 }
 
