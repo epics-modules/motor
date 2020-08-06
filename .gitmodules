@@ -94,3 +94,6 @@
 [submodule ".ci"]
 	path = .ci
 	url = https://github.com/epics-base/ci-scripts
+[submodule "modules/motorAcsMotion"]
+	path = modules/motorAcsMotion
+	url = https://github.com/epics-motor/motorAcsMotion.git
