@@ -4,7 +4,25 @@
 This is a fork of
 https://github.com/epics-modules/motor/
 
-# Changes done by ESS, the most important ones
+# Changes to upstream motor, the most important ones
+
+## v7.0.2-ESS
+
+###  Update to the latest motor/master, 2020-08-06, Includes upstream R7-2-1
+
+###  Bug fixes
+
+####  7546277f: JVEL while jogging, MF_DRIVER_USES_EGU is used
+
+### Improvements
+
+####  RSTM field (Restore mode)
+    The RSTM field is in upstram master,
+    but today not part of an official release
+
+####  b64af248: .SPAM field: Initialize it in motorRecord.dbd
+
+#### d7b19882: motorRecord.cc: Print the date and time in Debug()
 
 ## v6.9.7-ESS
 
