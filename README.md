@@ -6,6 +6,16 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.0.3-ESS
+
+###  Bug fixes
+
+####  54c4286b: LOAD_POS: Ignore MRES when driver uses EGU
+
+### Improvements
+
+#### 19dc53c1: devMotorAsyn: Introduce Debug prints
+
 ## v7.0.2-ESS
 
 ###  Update to the latest motor/master, 2020-08-06, Includes upstream R7-2-1
