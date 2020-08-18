@@ -523,6 +523,13 @@ static long init_record(struct motorRecord * pmr )
     pasynUser->reason = pPvt->driverReasons[motorStatus];
     status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt, pasynUser,
                       (void *)&pPvt->status);
+    Debug(pmr,3, "init_record status=%d position=%f encoderPos=%f velocity=%f MSTAstatus=0x%04x flags=0x%x\n",
+          status,
+          pPvt->status.position,
+          pPvt->status.encoderPosition,
+          pPvt->status.velocity,
+          pPvt->status.status,
+          pPvt->status.flags);
     if (status != asynSuccess) {
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
                   "devMotorAsyn::init_record: %s pasynGenericPointer->read \"%s\"\n",
