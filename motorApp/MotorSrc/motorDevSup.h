@@ -38,6 +38,7 @@ fields.  ('pmr' is a pointer to motorRecord.)
 #define MIP_EXTERNAL    0x8000  /* Move started by external source */
 
 
+  double devSupDialToRaw(motorRecord *pmr, double dialValue);
   void devSupStop(motorRecord *pmr);
   void devSupLoadPos(motorRecord *pmr, double newpos);
   RTN_STATUS devSupGetInfo(motorRecord *pmr);

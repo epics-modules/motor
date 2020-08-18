@@ -40,7 +40,7 @@ calls.
 /*****************************************************************************
   Helper to convert dial into raw
 *****************************************************************************/
-double devSupDielToRaw(motorRecord *pmr, double dialValue)
+double devSupDialToRaw(motorRecord *pmr, double dialValue)
 {
   double rawValue;
   if (pmr->mflg & MF_DRIVER_USES_EGU)
@@ -102,7 +102,7 @@ RTN_STATUS devSupUpdateLimitFromDial(motorRecord *pmr, motor_cmnd command,
                                      double dialValue)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
-    double tmp_raw = devSupDielToRaw(pmr, dialValue);
+    double tmp_raw = devSupDialToRaw(pmr, dialValue);
 
     RTN_STATUS status;
     INIT_MSG();
