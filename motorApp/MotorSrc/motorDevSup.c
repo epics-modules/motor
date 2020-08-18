@@ -75,9 +75,9 @@ void devSupStop(motorRecord *pmr)
 void devSupLoadPos(motorRecord *pmr, double newpos)
 {
     struct motor_dset *pdset = (struct motor_dset *) (pmr->dset);
-    double tmp = newpos;
+    double newPosDial = devSupDialToRaw(pmr, newpos);
     INIT_MSG();
-    WRITE_MSG(LOAD_POS, &tmp);
+    WRITE_MSG(LOAD_POS, &newPosDial);
     SEND_MSG();
 }
 
