@@ -539,18 +539,18 @@ static long init_record(struct motorRecord * pmr )
         pPvt->needUpdate = - 1;
         return 0;
     }
+    /* Need to update mflg before using it further down */
+    if (pmr->mflg != pPvt->status.flags)
+    {
+        pmr->mflg = pPvt->status.flags;
+        db_post_events(pmr, &pmr->mflg, DBE_VAL_LOG);
+    }
 
     /* We must get the first set of status values from the controller before
      * the initial setting of position. Otherwise we won't be able to decide
      * whether or not to write new position values to the controller.
      */
     init_controller_load_pos_if_needed(pmr, pasynUser);
-    /* Need to update mflg before using it further down */
-    if (pmr->mflg != pPvt->status.flags)
-    {
-	pmr->mflg = pPvt->status.flags;
-	db_post_events(pmr, &pmr->mflg, DBE_VAL_LOG);
-    }
 
     re_init_update_soft_limits(pmr);
 
