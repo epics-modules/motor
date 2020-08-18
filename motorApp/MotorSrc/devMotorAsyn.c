@@ -301,7 +301,6 @@ static long findDrvInfo(motorRecord *pmotor, asynUser *pasynUser, char *drvInfoS
 static void re_init_update_soft_limits(struct motorRecord *pmr)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
-    asynUser *pasynUser = pPvt->pasynUser;
     double rawHighLimitRO = pPvt->status.MotorConfigRO.motorHighLimitRaw;
     double rawLowLimitRO  = pPvt->status.MotorConfigRO.motorLowLimitRaw;
     memset(&pmr->priv->softLimitRO, 0, sizeof(pmr->priv->softLimitRO));
@@ -330,15 +329,14 @@ static void re_init_update_soft_limits(struct motorRecord *pmr)
         }
         pmr->priv->softLimitRO.motorDialLimitsValid = 1;
     }
-    asynPrint(pasynUser, ASYN_TRACE_ERROR,
-              "devMotorAsyn::update_soft_limits %s RawHLM_RO=%f RawLLM_RO=%f valid=%d "
-              "DHLM_RO=%f DLLM_RO=%f\n",
-              pmr->name,
-              pPvt->status.MotorConfigRO.motorHighLimitRaw,
-              pPvt->status.MotorConfigRO.motorLowLimitRaw,
-              pmr->priv->softLimitRO.motorDialLimitsValid,
-              pmr->priv->softLimitRO.motorDialHighLimitRO,
-              pmr->priv->softLimitRO.motorDialLowLimitRO);
+    Debug(pmr,3, "update_soft_limits %s RawHLM_RO=%f RawLLM_RO=%f valid=%d "
+          "DHLM_RO=%f DLLM_RO=%f\n",
+          pmr->name,
+          pPvt->status.MotorConfigRO.motorHighLimitRaw,
+          pPvt->status.MotorConfigRO.motorLowLimitRaw,
+          pmr->priv->softLimitRO.motorDialLimitsValid,
+          pmr->priv->softLimitRO.motorDialHighLimitRO,
+          pmr->priv->softLimitRO.motorDialLowLimitRO);
     pmr->priv->last.motorHighLimitRaw = rawHighLimitRO;
     pmr->priv->last.motorLowLimitRaw = rawLowLimitRO;
 }
