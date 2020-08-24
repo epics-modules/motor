@@ -5,6 +5,9 @@
 #ifndef INC_motorDevSup_H
 #define INC_motorDevSup_H
 
+#include    <epicsStdio.h>
+#include    <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -57,6 +60,45 @@ fields.  ('pmr' is a pointer to motorRecord.)
   void setCDIRfromRawMove(motorRecord *pmr, int directionRaw);
   void setCDIRfromDialMove(motorRecord *pmr, int directionDial);
   void doHomeSetcdir(motorRecord *pmr);
+
+  static inline const char *mrStripPath(const char *file)
+  {
+    const char *ret = strrchr(file, '/');
+    if (ret) return ret + 1;
+#if (defined(CYGWIN32) || defined(_WIN32))
+    ret = strrchr(file, '\\');
+    if (ret) return ret + 1;
+#endif
+    return file;
+  }
+  static inline void mrPrint(motorRecord*,unsigned,const char *, ...) EPICS_PRINTF_STYLE(3,4);
+  static inline void mrPrint(motorRecord *mr, unsigned lvl, const char *format, ...)
+  {
+    va_list pVar;
+    va_start(pVar, format);
+    vfprintf(stdout, format, pVar);
+    va_end(pVar);
+}
+
+#define Debug(pmr, lvl, fmt, ...)                         \
+{                                                         \
+    if ((1<<lvl) & pmr->spam) {                           \
+       epicsTimeStamp now;                                \
+       char nowText[25];                                  \
+       size_t rtn;                                        \
+                                                          \
+       nowText[0] = 0;                                    \
+       rtn = epicsTimeGetCurrent(&now);                   \
+       if (!rtn) {                                        \
+         epicsTimeToStrftime(nowText,sizeof(nowText),     \
+                          "%Y/%m/%d %H:%M:%S.%03f ",&now);\
+       }                                                  \
+       mrPrint(pmr, lvl, "%s[%s:%-4d %s] " fmt,           \
+               nowText,                                   \
+               mrStripPath(__FILE__), __LINE__,           \
+               pmr->name,  __VA_ARGS__);                  \
+    }                                                     \
+}
 
 #ifdef __cplusplus
 }

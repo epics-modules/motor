@@ -80,38 +80,6 @@ static RTN_STATUS move_EGU(struct motorRecord *, motorExtMessage_type *);
 static void asynCallback(asynUser *);
 static void statusCallback(void *, asynUser *, void *);
 
-#define DEBUG
-static inline void mrPrint(motorRecord*,unsigned,const char *, ...) EPICS_PRINTF_STYLE(3,4);
-
-static inline void mrPrint(motorRecord *mr, unsigned lvl, const char *format, ...)
-{
-#ifdef DEBUG
-    va_list pVar;
-    va_start(pVar, format);
-    vfprintf(stdout, format, pVar);
-    va_end(pVar);
-#endif
-}
-
-#define Debug(pmr, lvl, fmt, ...)                         \
-{                                                         \
-    if ((1<<lvl) & pmr->spam) {                           \
-       epicsTimeStamp now;                                \
-       char nowText[25];                                  \
-       size_t rtn;                                        \
-                                                          \
-       nowText[0] = 0;                                    \
-       rtn = epicsTimeGetCurrent(&now);                   \
-       if (!rtn) {                                        \
-         epicsTimeToStrftime(nowText,sizeof(nowText),     \
-                          "%Y/%m/%d %H:%M:%S.%03f ",&now);\
-       }                                                  \
-       mrPrint(pmr, lvl, "%s[%s:%-4d %s] " fmt,           \
-               nowText, "devMotorAsyn.c", __LINE__,       \
-               pmr->name,  __VA_ARGS__);                  \
-    }                                                     \
-}
-
 typedef enum {int32Type, float64Type, float64ArrayType, genericPointerType} interfaceType;
 
 struct motor_dset devMotorAsyn={ 
