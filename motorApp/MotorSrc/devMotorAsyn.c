@@ -63,10 +63,10 @@
 
 #include "motorRecord.h"
 #include "motor.h"
-#include "motor_priv.h"
 #include "epicsExport.h"
 #include "asynMotorController.h"
 #include "motor_interface.h"
+#include "motor_priv.h"
 #include "motorDevSup.h"
 
 /*Create the dset for devMotor */
@@ -111,9 +111,6 @@ typedef enum motorCommand {
     motorVelBase,
     motorAccel,
     motorPosition,
-    motorRecResolution,
-    motorRecDirection,
-    motorRecOffset,
     motorResolution,
     motorEncRatio,
     motorPGain,
@@ -125,6 +122,9 @@ typedef enum motorCommand {
     motorStatus,
     motorUpdateStatus,
     motorMoveEGU,
+    motorRecResolution,
+    motorRecDirection,
+    motorRecOffset,
     lastMotorCommand
 } motorCommand;
 #define NUM_MOTOR_COMMANDS lastMotorCommand
