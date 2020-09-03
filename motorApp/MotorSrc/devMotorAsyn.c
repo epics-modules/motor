@@ -122,9 +122,6 @@ typedef enum motorCommand {
     motorStatus,
     motorUpdateStatus,
     motorMoveEGU,
-    motorRecResolution,
-    motorRecDirection,
-    motorRecOffset,
     lastMotorCommand
 } motorCommand;
 #define NUM_MOTOR_COMMANDS lastMotorCommand
@@ -171,7 +168,7 @@ static long init( int after )
     return 0;
 }
 
-static int load_pos_needed(struct motorRecord *pmr, asynUser *pasynUser)
+static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
 {
     /* This routine is copied out of the old motordevCom and initialises the controller
        based on the record values. I think most of it should be transferred to init_record
@@ -179,12 +176,17 @@ static int load_pos_needed(struct motorRecord *pmr, asynUser *pasynUser)
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     double position = pPvt->status.position;
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
+    double encRatio[2] = {pmr->mres, pmr->eres};
     int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
     int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) &&
                                       (pmr->mres != 0) && (fabs(position * pmr->mres) < rdbd);
     int initPos = 0;
 
-    /* the encoder ratio has been set in config_controller() */
+    /*Before setting position, set the correct encoder ratio.*/
+    start_trans(pmr);
+    build_trans(SET_ENC_RATIO, encRatio, pmr);
+    end_trans(pmr);
+
     switch (pmr->rstm) {
         case motorRSTM_NearZero:
             {
@@ -205,24 +207,6 @@ static int load_pos_needed(struct motorRecord *pmr, asynUser *pasynUser)
     }
     if (initPos)
     {
-      return 1;
-    }
-    asynPrint(pasynUser, ASYN_TRACE_FLOW,
-	      "devMotorAsyn::init_controller_load_pos_if_needed, %s setting of position not required, position=%f, mres=%f, dval=%f, rdbd=%f",
-	      pmr->name, position, pmr->mres, pmr->dval, rdbd );
-    return 0;
-}
-
-static void init_controller_load_pos_if_needed(struct motorRecord *pmr, asynUser *pasynUser )
-{
-    /* This routine is copied out of the old motordevCom and initialises the controller
-       based on the record values. I think most of it should be transferred to init_record
-       which is one reason why I have separated it into another routine */
-    motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
-
-    /* the encoder ratio has been set in config_controller() */
-    if (load_pos_needed(pmr, pasynUser))
-    {
         double setPos = devSupDialToRaw(pmr, pmr->dval);
         epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );
         RTN_STATUS rtnval;
@@ -238,7 +222,7 @@ static void init_controller_load_pos_if_needed(struct motorRecord *pmr, asynUser
                       pmr->name, setPos );
         } else {
             asynPrint(pasynUser, ASYN_TRACE_FLOW,
-                  "devMotorAsyn::init_controller, %s set position to %f\n",
+                      "devMotorAsyn::init_controller, %s set position to %f\n",
                       pmr->name, setPos );
         }
 
@@ -249,6 +233,11 @@ static void init_controller_load_pos_if_needed(struct motorRecord *pmr, asynUser
             pPvt->initEvent = 0;
         }
     }
+    else
+        asynPrint(pasynUser, ASYN_TRACE_FLOW,
+                  "devMotorAsyn::init_controller, %s setting of position not required, position=%f, mres=%f, dval=%f, rdbd=%f",
+                  pmr->name, position, pmr->mres, pmr->dval, rdbd );
+
 }
 
 static long findDrvInfo(motorRecord *pmotor, asynUser *pasynUser, char *drvInfoString, int command)
@@ -266,7 +255,7 @@ static long findDrvInfo(motorRecord *pmotor, asynUser *pasynUser, char *drvInfoS
     return(0);
 }
 
-static void re_init_update_soft_limits(struct motorRecord *pmr)
+static void new_RO_soft_limits(struct motorRecord *pmr)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     double rawHighLimitRO = pPvt->status.MotorConfigRO.motorHighLimitRaw;
@@ -309,38 +298,6 @@ static void re_init_update_soft_limits(struct motorRecord *pmr)
     pmr->priv->last.motorLowLimitRaw = rawLowLimitRO;
 }
 
-static asynStatus config_controller(struct motorRecord *pmr, motorAsynPvt *pPvt)
-{
-    asynUser *pasynUser;
-    asynStatus status;
-
-    pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, NULL, NULL);
-    /* Encoder ratio */
-    pasynUser->reason = pPvt->driverReasons[motorEncRatio];
-    pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser, pmr->mres / pmr->eres);
-
-    /* DIR */
-    pasynUser->reason = pPvt->driverReasons[motorRecDirection];
-    pPvt->pasynInt32->write(pPvt->asynFloat64Pvt, pasynUser, pmr->dir);
-
-    /* OFF */
-    pasynUser->reason = pPvt->driverReasons[motorRecOffset];
-    pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser, pmr->off);
-
-    /* MRES, always last */
-    pasynUser->reason = pPvt->driverReasons[motorRecResolution];
-    status = pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser, pmr->mres);
-
-    /* force a poll() in the driver */
-    pasynUser->reason = pPvt->driverReasons[motorUpdateStatus];
-    pPvt->pasynInt32->write(pPvt->asynFloat64Pvt, pasynUser, 1);
-
-    pasynManager->freeAsynUser(pasynUser);
-    return status;
-}
-
-
-
 static long init_record(struct motorRecord * pmr )
 {
     asynUser *pasynUser;
@@ -349,6 +306,7 @@ static long init_record(struct motorRecord * pmr )
     asynStatus status;
     asynInterface *pasynInterface;
     motorAsynPvt *pPvt;
+    /*    double resolution;*/
 
     /* Allocate motorAsynPvt private structure */
     pPvt = callocMustSucceed(1, sizeof(motorAsynPvt), "devMotorAsyn init_record()");
@@ -418,9 +376,6 @@ static long init_record(struct motorRecord * pmr )
     if (findDrvInfo(pmr, pasynUser, motorVelBaseString,                motorVelBase)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorAccelString,                  motorAccel)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorPositionString,               motorPosition)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorRecResolutionString,          motorRecResolution)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorRecDirectionString,           motorRecDirection)) goto bad;
-    if (findDrvInfo(pmr, pasynUser, motorRecOffsetString,              motorRecOffset)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorResolutionString,             motorResolution)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorEncoderRatioString,           motorEncRatio)) goto bad;
     if (findDrvInfo(pmr, pasynUser, motorPGainString,                  motorPGain)) goto bad;
@@ -456,16 +411,6 @@ static long init_record(struct motorRecord * pmr )
     pPvt->pasynGenericPointer = (asynGenericPointer *)pasynInterface->pinterface;
     pPvt->asynGenericPointerPvt = pasynInterface->drvPvt;
 
-    /* Send MRES, offset, direction and encoder ratio to the driver as soon as
-       possible */
-
-    status = config_controller(pmr, pPvt);
-    if(status!=asynSuccess) {
-        asynPrint(pasynUser, ASYN_TRACE_ERROR,
-                  "devMotorAsyn::init_record %s config_controller() failed, error=%s\n",
-                  pmr->name, pasynUser->errorMessage);
-    }
-
     /* Now connect the callback, to the Generic Pointer interface, which passes MotorStatus structure */
     pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
     pasynUser->reason = pPvt->driverReasons[motorStatus];
@@ -486,6 +431,14 @@ static long init_record(struct motorRecord * pmr )
        dbScanLock() etc will fail. */
     pasynUser = pasynManager->duplicateAsynUser(pPvt->pasynUser, asynCallback, 0);
 
+    /* Send the motor resolution to the driver.  This should be done in the record
+     * in the future ? */
+/*  DON'T DO THIS FOR NOW.  THE NUMBER CAN COME TOO LATE TO BE OF USE TO THE DRIVER
+    resolution = pmr->mres;
+    pasynUser->reason = pPvt->driverReasons[motorResolution];
+    pPvt->pasynFloat64->write(pPvt->asynFloat64Pvt, pasynUser,
+                  resolution);
+*/
     pasynUser->reason = pPvt->driverReasons[motorStatus];
     status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt, pasynUser,
                       (void *)&pPvt->status);
@@ -500,35 +453,24 @@ static long init_record(struct motorRecord * pmr )
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
                   "devMotorAsyn::init_record: %s pasynGenericPointer->read \"%s\"\n",
                   pmr->name, pasynUser->errorMessage);
-        if (load_pos_needed(pmr, pasynUser)) {
-            pmr->pact=1;
-            return(1);
-        }
-        pPvt->needUpdate = - 1;
-        return 0;
-    }
-    /* Need to update mflg before using it further down */
-    if (pmr->mflg != pPvt->status.flags)
-    {
-        pmr->mflg = pPvt->status.flags;
-        db_post_events(pmr, &pmr->mflg, DBE_VAL_LOG);
+    } else {
+        pPvt->needUpdate = 1;
     }
 
     /* We must get the first set of status values from the controller before
      * the initial setting of position. Otherwise we won't be able to decide
      * whether or not to write new position values to the controller.
      */
-    init_controller_load_pos_if_needed(pmr, pasynUser);
-
-    re_init_update_soft_limits(pmr);
-
+    init_controller(pmr, pasynUser);
+    if (pPvt->needUpdate) {
+        new_RO_soft_limits(pmr);
+    }
     /* Do not need to manually retrieve the new status values, as if they are
      * set, a callback will be generated
      */
 
     /* Finally, indicate to the motor record that these values can be used. */
     pasynManager->freeAsynUser(pasynUser);
-    pPvt->needUpdate = 1;
     
     return(0);
 bad:
@@ -548,7 +490,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
     asynPrint(pPvt->pasynUser, ASYN_TRACEIO_DEVICE,
         "%s devMotorAsyn::update_values, needUpdate=%d\n",
         pmr->name, pPvt->needUpdate);
-    if ( pPvt->needUpdate > 0)
+    if ( pPvt->needUpdate )
     {
         epicsInt32 rawValue;
 
@@ -596,7 +538,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
             (pPvt->status.MotorConfigRO.motorLowLimitRaw !=
              pmr->priv->last.motorLowLimitRaw))
         {
-            re_init_update_soft_limits(pmr);
+            new_RO_soft_limits(pmr);
             rc = CALLBACK_DATA_SOFT_LIMITS;
         }
 

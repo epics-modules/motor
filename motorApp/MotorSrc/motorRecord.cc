@@ -398,8 +398,42 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
 {
   int len;
   memset(buf, 0, buflen);
-  len = epicsSnprintf(buf, buflen-1,
-           "'%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s'",
+  switch (v) {
+      case MIP_JOGF:      epicsSnprintf(buf, buflen-1, "%s",
+                                        "JOGF(Jf)"); break;
+      case MIP_JOGR:      epicsSnprintf(buf, buflen-1, "%s",
+                                        "JOGR(Jr)"); break;
+      case MIP_JOG_BL1:   epicsSnprintf(buf, buflen-1, "%s",
+                                        "JOG_BL1(J1)"); break;
+      case MIP_HOMF:      epicsSnprintf(buf, buflen-1, "%s",
+                                        "HOMF(Hf)"); break;
+      case MIP_HOMR:      epicsSnprintf(buf, buflen-1, "%s",
+                                        "HOMR(Hr)"); break;
+      case MIP_MOVE:      epicsSnprintf(buf, buflen-1, "%s",
+                                        "MOVE(Mo)"); break;
+      case MIP_RETRY:     epicsSnprintf(buf, buflen-1, "%s",
+                                        "RETRY(Ry)"); break;
+      case MIP_LOAD_P:    epicsSnprintf(buf, buflen-1, "%s",
+                                        "LOAD_POS(Lp)"); break;
+      case MIP_MOVE_BL:   epicsSnprintf(buf, buflen-1, "%s",
+                                        "MOVE_BL(Mb)"); break;
+      case MIP_STOP:      epicsSnprintf(buf, buflen-1, "%s",
+                                        "STOP(St)"); break;
+      case MIP_DELAY_REQ: epicsSnprintf(buf, buflen-1, "%s",
+                                        "DELAY_REQUEST(Dr)"); break;
+      case MIP_DELAY_ACK: epicsSnprintf(buf, buflen-1, "%s",
+                                        "DELAY_ACK(Da)"); break;
+      case MIP_JOG_REQ:   epicsSnprintf(buf, buflen-1, "%s",
+                                        "JOG_REQ(jR)"); break;
+      case MIP_JOG_STOP:  epicsSnprintf(buf, buflen-1, "%s",
+                                        "JOG_STOP(jS)"); break;
+      case MIP_JOG_BL2:   epicsSnprintf(buf, buflen-1, "%s",
+                                        "JOG_BL2(J2)"); break;
+      case MIP_EXTERNAL:  epicsSnprintf(buf, buflen-1, "%s",
+                                        "EXTERNAL(Ex)"); break;
+      default:
+          len = epicsSnprintf(buf, buflen-1,
+          "'%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s'",
            v & MIP_JOGF      ? "Jf " : "",
            v & MIP_JOGR      ? "Jr " : "",
            v & MIP_JOG_BL1   ? "J1 " : "",
@@ -416,14 +450,15 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
            v & MIP_JOG_STOP  ? "jS " : "",
            v & MIP_JOG_BL2   ? "J2 " : "",
            v & MIP_EXTERNAL  ? "Ex " : "");
-  /* Remove trailing ' ', add a "'" */
-  /* len is an unsigned int (printf() can return -1), but when comparing
-     it with an unsigned buflen, we need to cast -after-
-     we have checked > 1 */
-  if ((len > 1) && ((unsigned)len < (buflen-2)) && (buf[len-2] == ' '))
-  {
-    buf[len-2] = '\'';
-    buf[len-1] = '\0';
+          /* Remove trailing ' ', add a "'" */
+          /* len is an unsigned int (printf() can return -1), but when comparing
+             it with an unsigned buflen, we need to cast -after-
+             we have checked > 1 */
+          if ((len > 1) && ((unsigned)len < (buflen-2)) && (buf[len-2] == ' '))
+          {
+                  buf[len-2] = '\'';
+                  buf[len-1] = '\0';
+          }
   }
 }
 
