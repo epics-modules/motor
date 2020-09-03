@@ -1049,6 +1049,14 @@ static void doBackLash(motorRecord *pmr)
     pmr->dmov = FALSE;
     UNMARK(M_DMOV);
 
+#ifdef DEBUG
+    {
+        char dbuf[MBLE];
+        dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+        Debug(pmr,2, "doBackLash dval=%f drbv=%f bdst=%f mip=0x%0x(%s)\n",
+              pmr->dval, pmr->drbv, pmr->bdst, pmr->mip, dbuf);
+    }
+#endif
     if (pmr->mip & MIP_JOG_STOP)
     {
         doMoveDialPosition(pmr, moveModePosition, pmr->dval - pmr->bdst);
@@ -1202,8 +1210,8 @@ static void maybeRetry(motorRecord * pmr)
         {
             char dbuf[MBLE];
             dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-            Debug(pmr,2, "maybeRetry: not close enough rdbd=%f diff=%f rcnt=%d mip=0x%0x(%s)\n",
-                  pmr->rdbd, diff, pmr->rcnt, pmr->mip, dbuf);
+            Debug(pmr,2, "maybeRetry: not close enough rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
+                  pmr->rdbd, diff, pmr->rcnt, pmr->rtry, pmr->mip, dbuf);
         }
 #endif
         /* If max retry count is zero, retry is disabled */
