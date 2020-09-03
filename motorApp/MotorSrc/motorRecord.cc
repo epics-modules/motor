@@ -210,6 +210,10 @@ USAGE...        Motor Record Support.
 
 #include    "motor.h"
 #include    "epicsExport.h"
+
+#define db_accessHFORdb_accessC
+#include    "db_access.h"
+
 #include    "errlog.h"
 #include    "motorDevSup.h"
 
@@ -2791,12 +2795,58 @@ static long special(DBADDR *paddr, int after)
     double temp_dbl;
     double *pcoeff;
     msta_field msta;
+    const static int DebugLvl = 7;
 
     msta.All = pmr->msta;
 
-    Debug(pmr,7, "special fieldIndex=%s (%d)  after=%d\n",
-          ((dbFldDes*)paddr->pfldDes)->name, fieldIndex, after);
-
+    if ((1<<DebugLvl) & pmr->spam) {
+        double value = 0;
+        int isString = 0;
+        switch ((int)paddr->dbr_field_type) {
+        case DBF_ENUM:
+            value = (double)*(dbr_enum_t*)paddr->pfield;
+            break;
+        case DBF_SHORT:
+            value = (double)*(dbr_short_t*)paddr->pfield;
+            break;
+        case DBF_USHORT:
+            value = (double)*(dbr_ushort_t*)paddr->pfield;
+            break;
+        case DBF_LONG:
+            value = (double)*(dbr_long_t*)paddr->pfield;
+            break;
+        case DBF_ULONG:
+            value = (double)*(dbr_ulong_t*)paddr->pfield;
+            break;
+        case DBF_FLOAT:
+            value = (double)*(dbr_float_t*)paddr->pfield;
+            break;
+        case DBF_DOUBLE:
+            value = (double)*(dbr_double_t*)paddr->pfield;
+            break;
+        case DBF_OUTLINK:
+            isString = 1;
+            break;
+        case DBF_INLINK:
+            isString = 1;
+            break;
+        case DBF_STRING:
+            isString = 1;
+            break;
+        }
+        if (isString)
+        {
+            Debug(pmr,DebugLvl,
+                  "special fieldIdx=%s value=%s after=%d\n",
+                  ((dbFldDes*)paddr->pfldDes)->name, paddr->pfield, after);
+        }
+        else
+        {
+            Debug(pmr,DebugLvl,
+                  "special fieldIdx=%s value=%g after=%d\n",
+                  ((dbFldDes*)paddr->pfldDes)->name, value, after);
+        }
+    }
     /*
      * Someone wrote to drive field.  Blink .dmov unless record is disabled.
      */
