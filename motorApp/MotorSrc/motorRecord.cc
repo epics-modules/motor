@@ -1456,38 +1456,40 @@ static long process(dbCommon *arg)
       new_msta_field.All = pmr->msta;
 
       if (new_msta_field.Bits.RA_HOMED != old_msta_field.Bits.RA_HOMED)
-	Debug(pmr,2, "msta.Bits.RA_HOMED=%d\n", new_msta_field.Bits.RA_HOMED ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.RA_HOMED=%d\n", new_msta_field.Bits.RA_HOMED ? 1 : 0);
       if (new_msta_field.Bits.RA_MINUS_LS != old_msta_field.Bits.RA_MINUS_LS)
-	Debug(pmr,2, "msta.Bits.RA_MINUS_LS=%d\n", new_msta_field.Bits.RA_MINUS_LS ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.RA_MINUS_LS=%d\n", new_msta_field.Bits.RA_MINUS_LS ? 1 : 0);
       if (new_msta_field.Bits.CNTRL_COMM_ERR != old_msta_field.Bits.CNTRL_COMM_ERR)
-	Debug(pmr,2, "msta.Bits.CNTRL_COMM_ERR=%d\n", new_msta_field.Bits.CNTRL_COMM_ERR ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.CNTRL_COMM_ERR=%d\n", new_msta_field.Bits.CNTRL_COMM_ERR ? 1 : 0);
       if (new_msta_field.Bits.GAIN_SUPPORT != old_msta_field.Bits.GAIN_SUPPORT)
-	Debug(pmr,2, "msta.Bits.GAIN_SUPPORT=%d\n", new_msta_field.Bits.GAIN_SUPPORT ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.GAIN_SUPPORT=%d\n", new_msta_field.Bits.GAIN_SUPPORT ? 1 : 0);
       if (new_msta_field.Bits.RA_MOVING != old_msta_field.Bits.RA_MOVING)
-	Debug(pmr,2, "msta.Bits.RA_MOVING=%d\n", new_msta_field.Bits.RA_MOVING ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.RA_MOVING=%d\n", new_msta_field.Bits.RA_MOVING ? 1 : 0);
       if (new_msta_field.Bits.RA_PROBLEM != old_msta_field.Bits.RA_PROBLEM)
-	Debug(pmr,2, "msta.Bits.RA_PROBLEM=%d\n", new_msta_field.Bits.RA_PROBLEM ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.RA_PROBLEM=%d\n", new_msta_field.Bits.RA_PROBLEM ? 1 : 0);
       if (new_msta_field.Bits.EA_PRESENT != old_msta_field.Bits.EA_PRESENT)
-	Debug(pmr,2, "msta.Bits.EA_PRESENT=%d\n", new_msta_field.Bits.EA_PRESENT ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.EA_PRESENT=%d\n", new_msta_field.Bits.EA_PRESENT ? 1 : 0);
       if (new_msta_field.Bits.EA_HOME != old_msta_field.Bits.EA_HOME)
-	Debug(pmr,2, "msta.Bits.EA_HOME=%d\n", new_msta_field.Bits.EA_HOME ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.EA_HOME=%d\n", new_msta_field.Bits.EA_HOME ? 1 : 0);
       if (new_msta_field.Bits.EA_HOME != old_msta_field.Bits.EA_HOME)
-	Debug(pmr,2, "msta.Bits.EA_HOME encoder home=%d\n", new_msta_field.Bits.EA_HOME ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.EA_HOME encoder home=%d\n", new_msta_field.Bits.EA_HOME ? 1 : 0);
       if (new_msta_field.Bits.EA_SLIP_STALL != old_msta_field.Bits.EA_SLIP_STALL)
-	Debug(pmr,2, "msta.Bits.EA_SLIP_STALL following error=%d\n", new_msta_field.Bits.EA_SLIP_STALL ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.EA_SLIP_STALL following error=%d\n", new_msta_field.Bits.EA_SLIP_STALL ? 1 : 0);
       if (new_msta_field.Bits.EA_POSITION != old_msta_field.Bits.EA_POSITION)
-	Debug(pmr,2, "msta.Bits.EA_POSITION power on=%d\n", new_msta_field.Bits.EA_POSITION ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.EA_POSITION power on=%d\n", new_msta_field.Bits.EA_POSITION ? 1 : 0);
       if (new_msta_field.Bits.EA_SLIP != old_msta_field.Bits.EA_SLIP)
-	Debug(pmr,2, "msta.Bits.EA_SLIP enabled=%d\n", new_msta_field.Bits.EA_SLIP ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.EA_SLIP enabled=%d\n", new_msta_field.Bits.EA_SLIP ? 1 : 0);
       if (new_msta_field.Bits.RA_HOME != old_msta_field.Bits.RA_HOME)
-	Debug(pmr,2, "msta.Bits.RA_HOME home signal=%d\n", new_msta_field.Bits.RA_HOME ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.RA_HOME home signal=%d\n", new_msta_field.Bits.RA_HOME ? 1 : 0);
       if (new_msta_field.Bits.RA_PLUS_LS != old_msta_field.Bits.RA_PLUS_LS)
-	Debug(pmr,2, "msta.Bits.RA_PLUS_LS=%d\n", new_msta_field.Bits.RA_PLUS_LS ? 1 : 0);
+          Debug(pmr,2, "msta.Bits.RA_PLUS_LS=%d\n", new_msta_field.Bits.RA_PLUS_LS ? 1 : 0);
       if (new_msta_field.Bits.RA_DONE != old_msta_field.Bits.RA_DONE)
-	Debug(pmr,2, "msta.Bits.RA_DONE=%d\n", new_msta_field.Bits.RA_DONE ? 1 : 0);
-      if (new_msta_field.Bits.RA_DIRECTION != old_msta_field.Bits.RA_DIRECTION)
-	Debug(pmr,2, "msta.Bits.RA_DIRECTION=%d\n", new_msta_field.Bits.RA_DIRECTION ? 1 : 0);
-
+          Debug(pmr,2, "msta.Bits.RA_DONE=%d\n", new_msta_field.Bits.RA_DONE ? 1 : 0);
+      if (new_msta_field.Bits.RA_DIRECTION != old_msta_field.Bits.RA_DIRECTION) {
+          Debug(pmr,2, "msta.Bits.RA_DIRECTION=%d drbv=%f\n",
+                new_msta_field.Bits.RA_DIRECTION ? 1 : 0,
+                pmr->drbv);
+      }
       MARK(M_MSTA);
     }
 
@@ -1592,8 +1594,8 @@ static long process(dbCommon *arg)
                     dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
                     Debug(pmr,1,
                           "motor has stopped drbv=%f pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s) msta=0x%x\n",
-                          pmr->drbv, pmr->pp, pmr->udf, pmr->stat, pmr->nsta,
-			  pmr->mip, dbuf, pmr->msta);
+                          pmr->drbv, pmr->pp, pmr->udf, pmr->stat,
+                          pmr->nsta, pmr->mip, dbuf, pmr->msta);
                 }
 #endif
                 pmr->dmov = TRUE;
