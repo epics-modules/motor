@@ -10,6 +10,7 @@
 
 #include <epicsEvent.h>
 #include <epicsTypes.h>
+#include <shareLib.h>
 
 #define MAX_CONTROLLER_STRING_SIZE 1024
 #define DEFAULT_CONTROLLER_TIMEOUT 2.0
