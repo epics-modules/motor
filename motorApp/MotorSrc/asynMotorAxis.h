@@ -10,6 +10,7 @@
 
 #include <epicsEvent.h>
 #include <epicsTypes.h>
+#include <shareLib.h>
 
 #ifdef __cplusplus
 #include <asynPortDriver.h>
