@@ -2848,7 +2848,7 @@ static long special(DBADDR *paddr, int after)
         {
             Debug(pmr,DebugLvl,
                   "special fieldIdx=%s value=%s after=%d\n",
-                  ((dbFldDes*)paddr->pfldDes)->name, paddr->pfield, after);
+                  ((dbFldDes*)paddr->pfldDes)->name, (const char*)paddr->pfield, after);
         }
         else
         {
