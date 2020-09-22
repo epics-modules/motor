@@ -3012,15 +3012,31 @@ pidcof:
     case motorRecordJOGF:
         if (pmr->jogf == 0)
             pmr->mip &= ~MIP_JOG_REQ;
-        else if (pmr->mip == MIP_DONE && !pmr->hls)
-            pmr->mip |= MIP_JOG_REQ;
+        else
+        {
+            if (pmr->jogr)
+            {
+                pmr->jogr = 0;
+                MARK_AUX(M_JOGR);
+            }
+            if (pmr->mip == MIP_DONE && !pmr->hls)
+                pmr->mip |= MIP_JOG_REQ;
+        }
         break;
 
     case motorRecordJOGR:
         if (pmr->jogr == 0)
             pmr->mip &= ~MIP_JOG_REQ;
-        else if (pmr->mip == MIP_DONE && !pmr->lls)
-            pmr->mip |= MIP_JOG_REQ;
+        else
+        {
+            if (pmr->jogf)
+            {
+                pmr->jogf = 0;
+                MARK_AUX(M_JOGF);
+            }
+            if (pmr->mip == MIP_DONE && !pmr->lls)
+               pmr->mip |= MIP_JOG_REQ;
+        }
         break;
 
     case motorRecordJVEL:
