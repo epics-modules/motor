@@ -11,6 +11,9 @@ https://github.com/epics-modules/motor/
 ###  Bug fixes
 
 ####  54c4286b: LOAD_POS: Ignore MRES when driver uses EGU
+####  146f43ee: Improve handling of ramp-down after stop
+####  146f43ee: Record recognizes motor stop while jogging
+
 
 ### Improvements
 
@@ -23,6 +26,7 @@ https://github.com/epics-modules/motor/
 ###  Bug fixes
 
 ####  7546277f: JVEL while jogging, MF_DRIVER_USES_EGU is used
+####  c92efe25: Late connect: Don't mis-use UDF, use neverPolled
 
 ### Improvements
 
@@ -31,6 +35,23 @@ https://github.com/epics-modules/motor/
     but today not part of an official release
 
 ####  b64af248: .SPAM field: Initialize it in motorRecord.dbd
+    The motorRecord state machine is sometimes hard to follow.
+    In order to make sure that we can follow all the transitions
+    (especially when the driver reports "DONE") there is a new logging
+    from inside the motorRecord itself.
+    A simplified version of a move triggered by writing to the .VAL field
+    of the PV "IOC:m1" looks like this:
+    2020/06/26 13:29:15.370 [motorRecord.cc:1833 IOC:m1] doRetryOrDone dval=158.9 rdbd=0.1
+    2020/06/26 13:29:15.370 [motorRecord.cc:1853 IOC:m1] mipSetBit 'Mo' old='' new='Mo'
+    2020/06/26 13:29:15.375 [motorRecord.cc:1462 IOC:m1] msta.Bits.RA_DONE=0
+    2020/06/26 13:29:15.487 [motorRecord.cc:1442 IOC:m1] msta.Bits.RA_MOVING=1
+    2020/06/26 13:29:18.119 [motorRecord.cc:1442 IOC:m1] msta.Bits.RA_MOVING=0
+    2020/06/26 13:29:18.119 [motorRecord.cc:1462 IOC:m1] msta.Bits.RA_DONE=1
+    2020/06/26 13:29:18.119 [motorRecord.cc:1574 IOC:m1] motor has stopped drbv=158.970
+    2020/06/26 13:29:18.119 [motorRecord.cc:1231 IOC:m1] maybeRetry: close enough; rdbd=0.1diff=-0.07 mip=0x20('Mo')
+    2020/06/26 13:29:18.119 [motorRecord.cc:1234 IOC:m1] mipClrBit '...' old='Mo' new=''
+
+    If you don't want these printouts, set the .SPAM field to produce less loggings
 
 #### d7b19882: motorRecord.cc: Print the date and time in Debug()
 
@@ -174,3 +195,75 @@ Beside many bugfixes and improvements, here some high lights:
     When the communication with an asyn motor has not be established when the
     record is iniitialized, keep the record in UDF.
     (The record processing can not wait here)
+
+#### Controller uses EGU
+    Modern controller use engineering units, so that the IOC uses e.g.
+    "mm" instead of "steps" when communicating positions.
+    The motorRecord insists somewhat to use steps.
+    As a result, both MRES must be set to some value, and then
+    the controller must have a "scale factor", "stepsPerUnit" or the like.
+    Solution:
+      setIntegerParam(pC_->motorFlagsDriverUsesEGU_,1);
+    Note that there is still a need to set either MRES or SPDB to a useful
+    value, otherwise the motorRecord will refuse to move distances below
+    1.0 mm.
+
+#### Read-only soft limits from controller
+    The model 1 and model 2 drivers can refuse to accept soft-limits.
+    The soft limits in the motorRecord stay always inside the physical
+    driving range of the axis.
+    Example: The controller has a driving range 0..175 mm
+    The user tries to set the DHLM field to 180mm.
+    The device support in the driver is allowed to refuse the change,
+    so that the DHLM field stays ar 175.
+    Similar for DLLM, and the user coordinate-ish LLH and LLM
+    This has never been implemented for model 3 drivers.
+    If available, the "read only softlimits" can be written
+    into the parameter library like this:
+      pAxis->setDoubleParam(motorHighLimitRO_, limitHigh);
+      pAxis->setDoubleParam(motorLowLimitRO_,  limitLow);
+    And device support will forward them to the motorRecord.
+
+#### Homing ignores limit switches
+    The motorRecord assumes that there is a "home switch",
+    which needs to be activated.
+    The user must know, where the motor is, and decide if she wants
+    to use HOMF or HOMR to initiate the homing.
+    This does not work well if
+    - (a) The limit switch itself is the "home switch"
+    - (b) The homing sequence is like this
+          "go to the low limit switch, activate it, stop, reverse the
+          direction and search for the home switch.
+    In case of (a) will the motorRecord send a stop to the controller,
+    which may abort the homeing and leaves the axis in an unusable state.
+    In case of (b) the same problem occurs.
+    Solution:
+      setIntegerParam(pC_->motorFlagsNoStopOnLS_, 1);
+    There is another, sometime annoying, thing:
+    When we have a controller, that can do a homing even when a limit
+    switch is active, the motorRecord will ignore HOMF when HLS set.
+    It silently ignores HOMR when LLS is active.
+    So again, the user must choose between HOMR/HOMF.
+    Solution:
+      setIntegerParam(pC_->motorFlagsHomeOnLs_, 1);
+
+#### Enhanced auto-power-on
+    There are 2 improvements in the new "auto power on mode 2"
+    The old auto power on had 0 (=off) and 1 (=on).
+    The new mode "2" has two more features:
+    - setting a power off timout < 0.0 will leave the axis
+      powered on.
+    - The fixed power on delay can be shortened, if the axis
+      reports "power on achieved" earlier.
+      A better documentation of this feature is needed.
+
+#### All MRES related calculation are in motorDevSup.c
+    The code in the motorRecord was full of DVAL/RVAL calculations,
+    dividing by MRES was needed everywhere.
+    This version uses dial coordinates in the motorRecord.cc
+    and let motorDevSup.c convert them into "raw" values. 
+
+#### Compiler warnings removed
+    Removed all compiler warnings in the motor module.
+    (Those that my compilers showed)
+
