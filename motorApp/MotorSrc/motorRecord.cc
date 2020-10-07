@@ -248,6 +248,7 @@ static void set_user_highlimit(motorRecord *);
 static void set_user_lowlimit(motorRecord *);
 static void set_userlimits(motorRecord *);
 static void range_check(motorRecord *, double *, double, double);
+static void clear_jog_buttons(motorRecord *pmr);
 static void clear_buttons(motorRecord *);
 static long readBackPosition(motorRecord *, bool);
 static void syncTargetPosition(motorRecord *);
@@ -4425,16 +4426,7 @@ USAGE... Clear all motion request buttons.
 */
 static void clear_buttons(motorRecord *pmr)
 {
-    if (pmr->jogf)
-    {
-        pmr->jogf = 0;
-        MARK_AUX(M_JOGF);
-    }
-    if (pmr->jogr)
-    {
-        pmr->jogr = 0;
-        MARK_AUX(M_JOGR);
-    }
+    clear_jog_buttons(pmr);
     if (pmr->homf)
     {
         pmr->homf = 0;
@@ -4444,6 +4436,24 @@ static void clear_buttons(motorRecord *pmr)
     {
         pmr->homr = 0;
         MARK_AUX(M_HOMR);
+    }
+}
+
+/*
+FUNCTION... void clear_jog_buttons(motorRecord *)
+USAGE... Clear JOG request buttons.
+*/
+static void clear_jog_buttons(motorRecord *pmr)
+{
+    if (pmr->jogf)
+    {
+        pmr->jogf = 0;
+        MARK_AUX(M_JOGF);
+    }
+    if (pmr->jogr)
+    {
+        pmr->jogr = 0;
+        MARK_AUX(M_JOGR);
     }
 }
 
