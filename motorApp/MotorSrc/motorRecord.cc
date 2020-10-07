@@ -1601,6 +1601,10 @@ static long process(dbCommon *arg)
 #endif
                 pmr->dmov = TRUE;
                 MARK(M_DMOV);
+                if (pmr->mip & (MIP_JOG_BL1 | MIP_JOG_STOP | MIP_JOG_BL2))
+                {
+                    clear_jog_buttons(pmr);
+                }
                 if ((pmr->mip & ~MIP_JOG_REQ) == MIP_JOGF ||
                     (pmr->mip & ~MIP_JOG_REQ) == MIP_JOGR)
                 {
