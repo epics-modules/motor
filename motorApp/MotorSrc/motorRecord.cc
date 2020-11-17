@@ -1594,9 +1594,9 @@ static long process(dbCommon *arg)
                     char dbuf[MBLE];
                     dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
                     Debug(pmr,1,
-                          "motor has stopped drbv=%f pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s) msta=0x%x\n",
+                          "motor has stopped drbv=%f pp=%d udf=%d stat=%d cdir=%d mip=0x%0x(%s) msta=0x%x\n",
                           pmr->drbv, pmr->pp, pmr->udf, pmr->stat,
-                          pmr->nsta, pmr->mip, dbuf, pmr->msta);
+                          pmr->cdir, pmr->mip, dbuf, pmr->msta);
                 }
 #endif
                 pmr->dmov = TRUE;
@@ -1667,6 +1667,8 @@ static long process(dbCommon *arg)
             /* Do another update after LS error. */
             if (pmr->mip != MIP_DONE && ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)))
             {
+                clear_buttons(pmr);
+
                 /* Restore DMOV to false and UNMARK it so it is not posted. */
                 pmr->dmov = FALSE;
                 UNMARK(M_DMOV);
