@@ -4401,8 +4401,10 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
         }
         else
         {
-            pmr->rrbv = NINT((rdblvalue * pmr->rres) / pmr->mres);
-            pmr->drbv = rdblvalue * pmr->rres / pmr->mres;
+            double rres = pmr->rres;
+            if (!rres) rres = 1.0;
+            pmr->drbv = rdblvalue * rres;
+            pmr->rrbv = NINT(pmr->drbv / pmr->mres);
         }
     }
     else
