@@ -771,9 +771,12 @@ double asynMotorController::pollAll(void)
   asynStatus asynstatus;
   bool anyMoving = false;
   int i;
-  /* Do we need lock() here ? */
-  poll(); /* Do we need to look at the status */
-  /* Do we need unlock() here ? */
+  asynstatus = poll();
+  if (asynstatus) {
+    asynStatusConnected_ = asynstatus;
+    return timeout;
+  }
+
   for (i=0; i<numAxes_; i++) {
     double autoPowerOffDelay = 0.0;
     double nowTimeSecs = 0.0;
