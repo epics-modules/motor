@@ -230,6 +230,7 @@ USAGE...        Motor Record Support.
     6 do_work()
     7 special()
     8 Process begin/end
+    9 External readback
 */
 
 /*** Forward references ***/
@@ -4405,6 +4406,8 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
             if (!rres) rres = 1.0;
             pmr->drbv = rdblvalue * rres;
             pmr->rrbv = NINT(pmr->drbv / pmr->mres);
+            Debug(pmr,9, "readBackPosition: rdblvalue=%f rres=%f drbv=%f rrbv=%ld\n",
+                  rdblvalue, rres, pmr->drbv, (long)pmr->rrbv);
         }
     }
     else
