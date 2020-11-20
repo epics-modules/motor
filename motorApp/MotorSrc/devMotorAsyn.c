@@ -463,6 +463,7 @@ static long init_record(struct motorRecord * pmr )
      */
     init_controller(pmr, pasynUser);
     if (pPvt->needUpdate) {
+        pmr->mflg = pPvt->status.flags;
         new_RO_soft_limits(pmr);
     }
     /* Do not need to manually retrieve the new status values, as if they are
