@@ -1441,7 +1441,6 @@ static long process(dbCommon *arg)
         return(OK);
     }
 
-    Debug(pmr,8, "process:---------------------- %s\n", "begin");
     pmr->pact = 1;
 
     /*** Who called us? ***/
@@ -1450,6 +1449,7 @@ static long process(dbCommon *arg)
      * this is a callback.
      */
     process_reason = (*pdset->update_values) (pmr);
+    Debug(pmr,8, "process:---------------------- begin reason=%d\n", (int)process_reason);
     if (pmr->msta != old_msta)
     {
       msta_field old_msta_field;
