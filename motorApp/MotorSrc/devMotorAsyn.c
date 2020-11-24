@@ -487,6 +487,8 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
     CALLBACK_VALUE rc;
 
     rc = NOTHING_DONE;
+    //Debug(pmr,10, "update_values %s needUpdate=%d\n",
+    //      pmr->name, pPvt->needUpdate);
 
     asynPrint(pPvt->pasynUser, ASYN_TRACEIO_DEVICE,
         "%s devMotorAsyn::update_values, needUpdate=%d\n",
@@ -879,6 +881,7 @@ static void asynCallback(asynUser *pasynUser)
             pPvt->moveRequestPending--;
             if (!pPvt->moveRequestPending) {
                 pPvt->needUpdate = 1;
+                // Debug(pmr,10, "asynCallback %s needUpdate:=1\n", pmr->name);
                 dbProcess((dbCommon*)pmr);
             }
         }
@@ -920,14 +923,16 @@ static void statusCallback(void *drvPvt, asynUser *pasynUser,
         dbScanLock((dbCommon *)pmr);
         memcpy(&pPvt->status, value, sizeof(struct MotorStatus));
         if (!pPvt->moveRequestPending) {
-        pPvt->needUpdate = 1;
-        /* pmr->rset->process((dbCommon*)pmr); */
+            //Debug(pmr,10, "statusCallback %s needUpdate:=1\n", pmr->name);
+            pPvt->needUpdate = 1;
+            /* pmr->rset->process((dbCommon*)pmr); */
             dbProcess((dbCommon*)pmr);
         }
         dbScanUnlock((dbCommon*)pmr);
     } else {
         memcpy(&pPvt->status, value, sizeof(struct MotorStatus));
         pPvt->needUpdate = 1;
+        //Debug(pmr,10, "statusCallback %s needUpdate:=1\n", pmr->name);
     }
 }
 

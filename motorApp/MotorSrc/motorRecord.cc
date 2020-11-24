@@ -231,6 +231,8 @@ USAGE...        Motor Record Support.
     7 special()
     8 Process begin/end
     9 External readback
+   10 devMotorAsyn.c
+   11 devSupGetInfo
 */
 
 /*** Forward references ***/
@@ -928,6 +930,7 @@ static long init_record(dbCommon* arg, int pass)
         case CALLBACK_DATA:
             init_re_init(pmr);
             /* force a process() including alarm_sub() */
+            Debug(pmr, 11, "devSupGetInfo%s\n", "");
             devSupGetInfo(pmr);
             break;
     }
@@ -1673,6 +1676,7 @@ static long process(dbCommon *arg)
                 /* Restore DMOV to false and UNMARK it so it is not posted. */
                 pmr->dmov = FALSE;
                 UNMARK(M_DMOV);
+                Debug(pmr, 11, "devSupGetInfo%s\n", "");
                 devSupGetInfo(pmr);
                 pmr->pp = TRUE;
                 MIP_SET_VAL(MIP_DONE);
@@ -1729,6 +1733,7 @@ static long process(dbCommon *arg)
                     if (pmr->mip & MIP_DELAY_ACK && !(pmr->mip & MIP_DELAY_REQ))
                     {
                         MIP_SET_BIT(MIP_DELAY);
+                        Debug(pmr, 11, "devSupGetInfo%s\n", "");
                         devSupGetInfo(pmr);
                         /* Restore DMOV to false and UNMARK it so it is not posted. */
                         pmr->dmov = FALSE;
@@ -1965,6 +1970,7 @@ static void newMRES_ERES_UEIP(motorRecord *pmr)
     if (pmr->set)
     {
         pmr->pp = TRUE;
+        Debug(pmr, 11, "devSupGetInfo%s\n", "");
         devSupGetInfo(pmr);
     }
     else if ((pmr->mip & MIP_LOAD_P) == 0) /* Test for LOAD_POS completion. */
@@ -2452,6 +2458,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
         pmr->stup = motorSTUP_BUSY;
         MARK_AUX(M_STUP);
+        Debug(pmr, 11, "devSupGetInfo%s\n", "");
         status = devSupGetInfo(pmr);
         /* Avoid errors from devices that do not have "GET_INFO" (e.g. Soft
            Channel). */
@@ -2789,6 +2796,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
         
         pmr->stup = motorSTUP_BUSY;
         MARK_AUX(M_STUP);
+        Debug(pmr, 11, "devSupGetInfo%s\n", "");
         status = devSupGetInfo(pmr);
         if (status == ERROR)
             pmr->stup = motorSTUP_OFF;
@@ -4035,6 +4043,7 @@ static void load_pos(motorRecord * pmr)
 
     /* Load pos. into motor controller.  Get new readback vals. */
     devSupLoadPos(pmr, newpos);
+    Debug(pmr, 11, "devSupGetInfo%s\n", "");
     devSupGetInfo(pmr);
 }
 
