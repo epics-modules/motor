@@ -1969,20 +1969,19 @@ static void newMRES_ERES_UEIP(motorRecord *pmr)
     {
         devSupSetEncRatio(pmr,ep_mp);
     }
+    load_pos_new_rval(pmr);
     if (pmr->set)
     {
         pmr->pp = TRUE;
-        Debug(pmr, 11, "devSupGetInfo%s\n", "");
-        devSupGetInfo(pmr);
     }
-    else if ((pmr->mip & MIP_LOAD_P) == 0) /* Test for LOAD_POS completion. */
+    else if (((pmr->mip & MIP_LOAD_P) == 0) &&
+             !(pmr->mflg & MF_DRIVER_USES_EGU))
     {
-        load_pos_new_rval(pmr);
-        if (!(pmr->mflg & MF_DRIVER_USES_EGU))
-        {
             load_pos_load_pos(pmr);
-        }
     }
+    /* In any case, update all readbacks */
+    Debug(pmr, 11, "devSupGetInfo%s\n", "");
+    devSupGetInfo(pmr);
 
 }
 
