@@ -6,10 +6,24 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.0.4-ESS
+
+###  Bug fixes
+####  ca0747aa: Fixes around load_pos related to MRES
+####  7a25fed5: devMotorAsyn.c: Initialize pmr->flags early 
+####  46dfadb1: motorRecord.cc: Correct handling of RRES
+####  5d825112: motorRecord.cc: clear_buttons() when hitting a limit switch
+####  44a1ad3a: motorRecord.cc: Reset JOGF/JOGR in motor-has-stopped
+
+### Improvements
+####  ff79e4c5: motorRecord.cc: More printout levels; devSupGetInfo()
+####  8d6e0da0: asynMotorController.cpp: Handle status of poll()
+####  d8a43e9b: motorRecord.cc: Debug backlash and retry count
+####  153b8616: motorRecord.cc: print value in special()
+####  54f86b90: Improve printing of MIP
 ## v7.0.3-ESS
 
 ###  Bug fixes
-
 ####  54c4286b: LOAD_POS: Ignore MRES when driver uses EGU
 ####  146f43ee: Improve handling of ramp-down after stop
 ####  146f43ee: Record recognizes motor stop while jogging
