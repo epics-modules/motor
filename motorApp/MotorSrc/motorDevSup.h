@@ -43,7 +43,7 @@ fields.  ('pmr' is a pointer to motorRecord.)
 
   double devSupDialToRaw(motorRecord *pmr, double dialValue);
   void devSupStop(motorRecord *pmr);
-  void devSupLoadPos(motorRecord *pmr, double newpos);
+  void devSupLoadPosDial(motorRecord *pmr, double dialNewpos);
   RTN_STATUS devSupGetInfo(motorRecord *pmr);
   RTN_STATUS devSupUpdateLimitFromDial(motorRecord *pmr, motor_cmnd command,
                                        double dialValue);

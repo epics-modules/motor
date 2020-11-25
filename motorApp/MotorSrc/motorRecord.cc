@@ -242,7 +242,9 @@ static RTN_STATUS do_work(motorRecord *, CALLBACK_VALUE);
 static void alarm_sub(motorRecord *);
 static void monitor(motorRecord *);
 static void process_motor_info(motorRecord *, bool);
-static void load_pos(motorRecord *);
+static void load_pos_new_rval(motorRecord *);
+static void load_pos_new_softlimits(motorRecord *);
+static void load_pos_load_pos(motorRecord *);
 static void check_resolution(motorRecord *);
 static void check_speed(motorRecord *);
 static void set_dial_highlimit(motorRecord *);
@@ -1974,7 +1976,13 @@ static void newMRES_ERES_UEIP(motorRecord *pmr)
         devSupGetInfo(pmr);
     }
     else if ((pmr->mip & MIP_LOAD_P) == 0) /* Test for LOAD_POS completion. */
-        load_pos(pmr);
+    {
+        load_pos_new_rval(pmr);
+        if (!(pmr->mflg & MF_DRIVER_USES_EGU))
+        {
+            load_pos_load_pos(pmr);
+        }
+    }
 
 }
 
@@ -2778,7 +2786,11 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
         if (pmr->set)
         {
             if ((pmr->mip & MIP_LOAD_P) == 0) /* Test for LOAD_POS completion. */
-                load_pos(pmr);
+            {
+                load_pos_new_rval(pmr);
+                load_pos_new_softlimits(pmr);
+                load_pos_load_pos(pmr);
+            }
             /* device support will call us back when load is done. */
             return(OK);
         }
@@ -4003,16 +4015,19 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
 }
 
 /* Calc and load new raw position into motor w/out moving it. */
-static void load_pos(motorRecord * pmr)
+static void load_pos_new_rval(motorRecord * pmr)
 {
-    double newpos = pmr->dval / pmr->mres;
+    double newRval = pmr->dval / pmr->mres;
 
     pmr->priv->last.dval = pmr->dval;
     pmr->priv->last.val = pmr->val;
-    if (pmr->rval != (epicsInt32) NINT(newpos))
+    if (pmr->rval != (epicsInt32) NINT(newRval))
         MARK(M_RVAL);
-    pmr->priv->last.rval = pmr->rval = (epicsInt32) NINT(newpos);
+    pmr->priv->last.rval = pmr->rval = (epicsInt32) NINT(newRval);
+}
 
+static void load_pos_new_softlimits(motorRecord * pmr)
+{
     if (pmr->foff)
     {
         /* Translate dial value to user value. */
@@ -4033,6 +4048,10 @@ static void load_pos(motorRecord * pmr)
         MARK(M_OFF);
         set_userlimits(pmr);    /* Translate dial limits to user limits. */
     }
+}
+
+static void load_pos_load_pos(motorRecord * pmr)
+{
     MIP_SET_VAL(MIP_LOAD_P);
     MARK(M_MIP);
     if (pmr->dmov == TRUE)
@@ -4042,7 +4061,7 @@ static void load_pos(motorRecord * pmr)
     }
 
     /* Load pos. into motor controller.  Get new readback vals. */
-    devSupLoadPos(pmr, newpos);
+    devSupLoadPosDial(pmr, pmr->dval);
     Debug(pmr, 11, "devSupGetInfo%s\n", "");
     devSupGetInfo(pmr);
 }
