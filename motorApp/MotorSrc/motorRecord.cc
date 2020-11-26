@@ -253,6 +253,7 @@ static void set_user_highlimit(motorRecord *);
 static void set_user_lowlimit(motorRecord *);
 static void set_userlimits(motorRecord *);
 static void range_check(motorRecord *, double *, double, double);
+static void clear_home_buttons(motorRecord *pmr);
 static void clear_jog_buttons(motorRecord *pmr);
 static void clear_buttons(motorRecord *);
 static long readBackPosition(motorRecord *, bool);
@@ -1607,6 +1608,10 @@ static long process(dbCommon *arg)
 #endif
                 pmr->dmov = TRUE;
                 MARK(M_DMOV);
+                if (pmr->mip & (MIP_HOMF | MIP_HOMR))
+                {
+                    clear_home_buttons(pmr);
+                }
                 if (pmr->mip & (MIP_JOG_BL1 | MIP_JOG_STOP | MIP_JOG_BL2))
                 {
                     clear_jog_buttons(pmr);
@@ -4465,6 +4470,18 @@ USAGE... Clear all motion request buttons.
 static void clear_buttons(motorRecord *pmr)
 {
     clear_jog_buttons(pmr);
+    clear_home_buttons(pmr);
+}
+
+/*
+FUNCTION... void clear_home_buttons(motorRecord *)
+USAGE... Clear HOME request buttons.
+*/
+static void clear_home_buttons(motorRecord *pmr)
+{
+    Debug(pmr,2, "clear_home_buttons homf=%d homr=%d\n",
+          pmr->homf, pmr->homr);
+
     if (pmr->homf)
     {
         pmr->homf = 0;
@@ -4483,6 +4500,8 @@ USAGE... Clear JOG request buttons.
 */
 static void clear_jog_buttons(motorRecord *pmr)
 {
+    Debug(pmr,2, "clear_jog_buttons jogf=%d jogr=%d\n",
+          pmr->jogf, pmr->jogr);
     if (pmr->jogf)
     {
         pmr->jogf = 0;
