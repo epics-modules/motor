@@ -1730,8 +1730,8 @@ static long process(dbCommon *arg)
                     {
                         char dbuf[MBLE];
                         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-                        Debug(pmr,8, "(stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
-                              pmr->pp, pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
+                        Debug(pmr,8, "(stopped) dmov==TRUE; no DLY; pp=%d udf=%d stat=%d sevr=%d mip=0x%0x(%s)\n",
+                              pmr->pp, pmr->udf, pmr->stat, pmr->sevr, pmr->mip, dbuf);
                     }
 #endif
                     if ((pmr->mip & MIP_DELAY) == MIP_DELAY)
@@ -4437,11 +4437,24 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
         else
         {
             double rres = pmr->rres;
+            epicsEnum16 stat;
+            epicsEnum16 sevr;
+
+            rtnstat = dbGetAlarm(&(pmr->rdbl), &stat, &sevr);
+            if (!RTN_SUCCESS(rtnstat))
+            {
+                Debug(pmr,1, "readBackPosition: %s\n", "error reading RDBL Alarm");
+                return rtnstat;
+            }
+
             if (!rres) rres = 1.0;
             pmr->drbv = rdblvalue * rres;
             pmr->rrbv = NINT(pmr->drbv / pmr->mres);
-            Debug(pmr,9, "readBackPosition: rdblvalue=%f rres=%f drbv=%f rrbv=%ld\n",
-                  rdblvalue, rres, pmr->drbv, (long)pmr->rrbv);
+            Debug(pmr,9, "readBackPosition: rdblvalue=%f rres=%f drbv=%f rrbv=%ld stat=%d sevr=%d\n",
+                  rdblvalue, rres, pmr->drbv, (long)pmr->rrbv,
+                  (int)stat, (int)sevr);
+            if (sevr == MAJOR_ALARM || sevr == INVALID_ALARM)
+                return -1;
         }
     }
     else
