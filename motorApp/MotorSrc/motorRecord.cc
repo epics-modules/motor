@@ -1611,10 +1611,12 @@ static long process(dbCommon *arg)
                 if (pmr->mip & (MIP_HOMF | MIP_HOMR))
                 {
                     clear_home_buttons(pmr);
+                    pmr->pp = TRUE;
                 }
                 if (pmr->mip & (MIP_JOG_BL1 | MIP_JOG_STOP | MIP_JOG_BL2))
                 {
                     clear_jog_buttons(pmr);
+                    pmr->pp = TRUE;
                 }
                 if ((pmr->mip & ~MIP_JOG_REQ) == MIP_JOGF ||
                     (pmr->mip & ~MIP_JOG_REQ) == MIP_JOGR)
