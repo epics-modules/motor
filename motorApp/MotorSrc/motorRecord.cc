@@ -1878,9 +1878,6 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
           pmr->dval, pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat, pmr->rcnt, preferred_dir,
           relpos, relbpos, pmr->drbv);
 
-    if (pmr->udf || (pmr->stat == epicsAlarmLink) || (pmr->stat == epicsAlarmUDF))
-        return;
-
     /*** Use if encoder or ReadbackLink is in use. ***/
     if (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip))
         use_rel = true;
