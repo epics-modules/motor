@@ -2841,9 +2841,9 @@ static long special(DBADDR *paddr, int after)
     msta.All = pmr->msta;
 
     if ((1<<DebugLvl) & pmr->spam) {
+        const char *pString = NULL;
         double value = 0;
-        int isString = 0;
-        switch ((int)paddr->dbr_field_type) {
+        switch ((int)paddr->field_type) {
         case DBF_ENUM:
             value = (double)*(dbr_enum_t*)paddr->pfield;
             break;
@@ -2866,25 +2866,24 @@ static long special(DBADDR *paddr, int after)
             value = (double)*(dbr_double_t*)paddr->pfield;
             break;
         case DBF_OUTLINK:
-            isString = 1;
-            break;
         case DBF_INLINK:
-            isString = 1;
+            {
+                struct link *plink = (struct link *)paddr->pfield;
+                pString = plink->value.pv_link.pvname;
+            }
             break;
         case DBF_STRING:
-            isString = 1;
+            pString = (const char*)paddr->pfield;
             break;
         }
-        if (isString)
+        if (pString)
         {
-            Debug(pmr,DebugLvl,
-                  "special fieldIdx=%s value=%s after=%d\n",
-                  ((dbFldDes*)paddr->pfldDes)->name, (const char*)paddr->pfield, after);
+            Debug(pmr,DebugLvl, "special fieldIdx=%s value=%s after=%d\n",
+                  ((dbFldDes*)paddr->pfldDes)->name, pString, after);
         }
         else
         {
-            Debug(pmr,DebugLvl,
-                  "special fieldIdx=%s value=%g after=%d\n",
+            Debug(pmr,DebugLvl, "special fieldIdx=%s value=%g after=%d\n",
                   ((dbFldDes*)paddr->pfldDes)->name, value, after);
         }
     }
