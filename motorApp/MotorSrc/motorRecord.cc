@@ -1624,7 +1624,7 @@ static long process(dbCommon *arg)
                     /* Motor stopped while jogging and we didn't stop it */
                     MIP_SET_VAL(MIP_DONE);
                     MARK(M_MIP);
-                    clear_buttons(pmr);
+                    clear_jog_buttons(pmr);
                     pmr->pp = TRUE;
                 } else if (((pmr->mip == MIP_HOMF ||
                              pmr->mip == MIP_HOMR)) &&
@@ -1643,15 +1643,9 @@ static long process(dbCommon *arg)
                         !msta.Bits.CNTRL_COMM_ERR)
                     {
                         int need_enter_do_work = 0;
-                        if (pmr->mip & MIP_HOMF)
+                        if (pmr->mip & (MIP_HOMF | MIP_HOMR))
                         {
-                            pmr->homf = 0;
-                            MARK_AUX(M_HOMF);
-                        }
-                        else if (pmr->mip & MIP_HOMR)
-                        {
-                            pmr->homr = 0;
-                            MARK_AUX(M_HOMR);
+                            clear_home_buttons(pmr);
                         }
                         if ((pmr->drbv < pmr->dllm - pmr->rdbd) &&
                             (pmr->drbv < pmr->dllm - pmr->spdb))
