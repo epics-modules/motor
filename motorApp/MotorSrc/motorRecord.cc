@@ -1670,7 +1670,8 @@ static long process(dbCommon *arg)
                     }
                 }
             }
-
+#ifdef MOTORRECORD_SPECIAL_LS_HANDLING
+            /* TB: Another update may confuse the state machine */
             /* Do another update after LS error. */
             if (pmr->mip != MIP_DONE && ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)))
             {
@@ -1686,7 +1687,7 @@ static long process(dbCommon *arg)
                 MARK(M_MIP);
                 goto process_exit;
             }
-            
+#endif
             if (pmr->pp)
             {
                 if ((pmr->val != pmr->priv->last.val) &&
@@ -1706,7 +1707,7 @@ static long process(dbCommon *arg)
             }
 
             /* Should we test for a retry? Consider limit only if in direction of move.*/
-            if (((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)) || (pmr->mip == MIP_LOAD_P))
+            if (pmr->mip == MIP_LOAD_P)
             {
                 if (pmr->mip != MIP_DONE)
                 {
@@ -1714,6 +1715,16 @@ static long process(dbCommon *arg)
                     MARK(M_MIP);
                 }
             }
+#ifdef MOTORRECORD_SPECIAL_LS_HANDLING
+            else if ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir))
+            {
+                if (pmr->mip != MIP_DONE)
+                {
+                    MIP_SET_VAL(MIP_DONE);
+                    MARK(M_MIP);
+                }
+            }
+#endif
             else if (pmr->dmov == TRUE)
             {
                 mmap_bits.All = pmr->mmap; /* Initialize for MARKED. */
