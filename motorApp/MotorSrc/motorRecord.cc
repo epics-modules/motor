@@ -238,6 +238,7 @@ USAGE...        Motor Record Support.
 /*** Forward references ***/
 
 static int homing_wanted_and_allowed(motorRecord *pmr);
+static bool mr_stops_on_ls_activated(motorRecord *pmr, bool ls_active);
 static RTN_STATUS do_work(motorRecord *, CALLBACK_VALUE);
 static void alarm_sub(motorRecord *);
 static void monitor(motorRecord *);
@@ -1670,24 +1671,27 @@ static long process(dbCommon *arg)
                     }
                 }
             }
-#ifdef MOTORRECORD_SPECIAL_LS_HANDLING
-            /* TB: Another update may confuse the state machine */
             /* Do another update after LS error. */
             if (pmr->mip != MIP_DONE && ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)))
             {
-                clear_buttons(pmr);
+                /* TB: Another update may confuse the state machine */
+                bool ls_active = true;
+                ls_active = mr_stops_on_ls_activated(pmr, ls_active);
+                if (ls_active)
+                {
+                    clear_buttons(pmr);
 
-                /* Restore DMOV to false and UNMARK it so it is not posted. */
-                pmr->dmov = FALSE;
-                UNMARK(M_DMOV);
-                Debug(pmr, 11, "devSupGetInfo%s\n", "");
-                devSupGetInfo(pmr);
-                pmr->pp = TRUE;
-                MIP_SET_VAL(MIP_DONE);
-                MARK(M_MIP);
-                goto process_exit;
+                    /* Restore DMOV to false and UNMARK it so it is not posted. */
+                    pmr->dmov = FALSE;
+                    UNMARK(M_DMOV);
+                    Debug(pmr, 11, "devSupGetInfo%s\n", "");
+                    devSupGetInfo(pmr);
+                    pmr->pp = TRUE;
+                    MIP_SET_VAL(MIP_DONE);
+                    MARK(M_MIP);
+                    goto process_exit;
+                }
             }
-#endif
             if (pmr->pp)
             {
                 if ((pmr->val != pmr->priv->last.val) &&
@@ -1871,6 +1875,24 @@ static int homing_wanted_and_allowed(motorRecord *pmr)
     return ret;
 }
 
+/*************************************************************************
+ * motorRecord may (or may not) stop the motor, 
+   when a limit switch is activated:
+   When homing against a limit switch we don't want the homig to be stopped
+   When the controller stops itself, and another stop may confuse
+   the controller
+*/
+static bool mr_stops_on_ls_activated(motorRecord *pmr, bool ls_active)
+{
+    if (pmr->mflg & MF_NOSTOP_ONLS)
+        ls_active = false;    /*Suppress stop on LS if configured  */
+    if ((pmr->mip & MIP_HOMF) || (pmr->mip & MIP_HOMR))
+    {
+        if (pmr->mflg & MF_HOME_ON_LS)
+            ls_active = false;    /*Suppress stop on LS if homing on LS is allowed */
+    }
+    return ls_active;
+}
 
 /*************************************************************************/
 static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
@@ -3961,14 +3983,9 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     /* Treat limit switch active only when it is pressed and in direction of movement. */
     ls_active = ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)) ? true : false;
 
-    if (pmr->mflg & MF_NOSTOP_ONLS)
-        ls_active = false;    /*Suppress stop on LS if configured  */
-    if ((pmr->mip & MIP_HOMF) || (pmr->mip & MIP_HOMR))
-    {
-        if (pmr->mflg & MF_HOME_ON_LS)
-            ls_active = false;    /*Suppress stop on LS if homing on LS is allowed */
-    }
-    
+    /* motorRecord may (or may not) stop the motor,
+       when a limit switch is activated. */
+    ls_active = mr_stops_on_ls_activated(pmr, ls_active);
     pmr->hls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rhls : pmr->rlls;
     pmr->lls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rlls : pmr->rhls;
     if (pmr->hls != old_hls)
