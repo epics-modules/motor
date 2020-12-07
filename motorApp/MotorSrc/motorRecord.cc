@@ -1494,20 +1494,6 @@ static long process(dbCommon *arg)
           Debug(pmr,2, "msta.Bits.RA_PLUS_LS=%d\n", new_msta_field.Bits.RA_PLUS_LS ? 1 : 0);
       if (new_msta_field.Bits.RA_DONE != old_msta_field.Bits.RA_DONE)
           Debug(pmr,2, "msta.Bits.RA_DONE=%d\n", new_msta_field.Bits.RA_DONE ? 1 : 0);
-      if (new_msta_field.Bits.RA_DIRECTION != old_msta_field.Bits.RA_DIRECTION) {
-          /* Reduce printing, when "standing still" but the encoder flickers
-             forth and back */
-          if (new_msta_field.Bits.RA_MOVING ||
-              old_msta_field.Bits.RA_MOVING ||
-              (!new_msta_field.Bits.RA_DONE) ||
-              (!old_msta_field.Bits.RA_DONE) ||
-              (pmr->mip != MIP_DONE))
-          {
-             Debug(pmr,2, "msta.Bits.RA_DIRECTION=%d drbv=%f\n",
-                   new_msta_field.Bits.RA_DIRECTION ? 1 : 0,
-                   pmr->drbv);
-          }
-      }
       MARK(M_MSTA);
     }
 
