@@ -261,7 +261,7 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   axis = pAxis->axisNo_;
 
   /* Set the parameter and readback in the parameter library. */
-  pAxis->setIntegerParam(function, value);
+  status = pAxis->setIntegerParam(function, value);
 
   if (function == motorStop_) {
     double accel;
