@@ -1,5 +1,19 @@
 # Motor Releases
 
+## __R7-2-2 (2021-02-02)__
+R7-2-2 is a release based on the R7-2-1-bugfix branch.  
+
+### Changes since R7-2-1
+
+#### Bug fixes
+* Added shareLib.h to asynMotorController.h and asynMotorAxis.h to allow building against asyn R4-41
+
+#### Driver submodules (and noteworthy changes)
+| Module           | Release | Changes |
+| ---------------- | ------- | ------- |
+| **motorNewport** | [070c93e](https://github.com/epics-motor/motorNewport/commits/070c93e1aa1a4dea39829f7dcb21489cfde582a1) | Added epicsExport.h to testSFTPUpload.cpp |
+| **motorOms**     | [5219f8c](https://github.com/epics-motor/motorOms/commit/5219f8ceee352ec2a459f1bde316621af9c293a4)  | Fixed epicsMutexTryLock problem described [here](https://github.com/epics-modules/motor/issues/172#issuecomment-758139901) |
+
 ## __R7-2-1 (2020-05-14)__
 R7-2-1 is a release based on the master branch.  
 
