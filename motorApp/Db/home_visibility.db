@@ -1,0 +1,38 @@
+#################################################
+#
+# Template to control the visibility of the home
+# buttons on motor_detail.opi.
+#
+# Matthew Pearson
+# July 2012
+#
+# Macros:
+# P - base part of PV name
+# M - motor name
+# HOMEVIS - Set to 0 to make the home button invisible (default=1)
+# HOMEVISSTR - If the home button is invisible this will be the message
+#              displayed on the screen in its place.
+#
+#################################################
+
+# ///
+# ///Record to determin HOME button visibility on the motor.edl screen.
+# ///
+record(bo, "$(P)$(M):HOMEVIS")
+{
+        field(DESC,"Home button visibility")
+        field(DTYP,"Soft Channel")
+        field(VAL, "$(HOMEVIS=1)")
+        field(ZNAM, "Invisible")
+        field(ONAM, "Visible")
+}        
+
+# ///
+# /// Record to display a message if the HOME buttons are not visible (if HOMEVIS=0).
+# ///
+record(stringout, "$(P)$(M):HOMEVISSTR")
+{
+        field(DESC, "Home visibility string")
+        field(DTYP,"Soft Channel")
+        field(VAL, "$(HOMEVISSTR=Use Home Screen)")
+}

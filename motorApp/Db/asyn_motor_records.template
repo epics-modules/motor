@@ -1,0 +1,84 @@
+
+################################################################
+# Template to read asynMotor driver parameters into records.
+# This bypasses the motor record which has advantages in some 
+# situations. For example we can still motor position even if
+# we disable the motor record, and we can read both limit switches
+# independant on which direction we last moved.
+# 
+# Macros:
+# P, M - base PV name
+# PORT, ADDR - asyn port and address
+# PREC - precision
+# EGU - units
+# ADEL - archive deadband
+# MDEL - monitor deadband
+#
+
+record(ai, "$(P)$(M):DMotorRaw")
+{
+        field(DESC, "Motor Pos Driver")
+        field(DTYP, "asynFloat64")
+        field(INP,  "@asyn($(PORT),$(ADDR))MOTOR_POSITION")
+        field(PREC, "$(PREC)")
+        field(EGU,  "$(EGU)")
+        field(SCAN, "I/O Intr")
+}
+record(ai, "$(P)$(M):DEncoderRaw")
+{
+        field(DESC, "Encoder Pos Driver")
+        field(DTYP, "asynFloat64")
+        field(INP,  "@asyn($(PORT),$(ADDR))MOTOR_ENCODER_POSITION")
+        field(PREC, "$(PREC)")
+        field(EGU,  "$(EGU)")
+        field(SCAN, "I/O Intr")
+}
+record(calc, "$(P)$(M):DMotorPos")
+{
+        field(DESC,"Motor Position")
+        field(INPA,"$(P)$(M):DMotorRaw CP")
+	field(INPB,"$(P)$(M).MRES NPP")
+	field(CALC,"(A*B)")
+	field(PREC,"$(PREC)")
+	field(EGU, "$(EGU)")
+        field(ADEL, "$(ADEL=0)")
+	field(MDEL, "$(MDEL=0)")
+	info(archive, "Monitor, 00:00:01, VAL")
+}
+record(calc, "$(P)$(M):DEncoderPos")
+{
+        field(DESC,"Encoder Position")
+        field(INPA,"$(P)$(M):DEncoderRaw CP")
+	field(INPB,"$(P)$(M).ERES NPP")
+	field(CALC,"(A*B)")
+	field(PREC,"$(PREC)")
+	field(EGU, "$(EGU)")
+        field(ADEL, "$(ADEL=0)")
+	field(MDEL, "$(MDEL=0)")
+	info(archive, "Monitor, 00:00:01, VAL")	
+}
+
+record(bi, "$(P)$(M):DHighLimit")
+{
+        field(DESC, "High Limit Switch")
+        field(DTYP, "asynInt32")
+        field(INP,  "@asyn($(PORT),$(ADDR))MOTOR_STATUS_HIGH_LIMIT")
+        field(ZNAM, "Off")
+        field(ONAM, "On")
+        field(OSV, "MAJOR")
+        field(SCAN, "I/O Intr")
+	info(archive, "Monitor, 00:00:01, VAL")	
+}
+record(bi, "$(P)$(M):DLowLimit")
+{
+        field(DESC, "Low Limit Switch")
+        field(DTYP, "asynInt32")
+        field(INP,  "@asyn($(PORT),$(ADDR))MOTOR_STATUS_LOW_LIMIT")
+        field(ZNAM, "Off")
+        field(ONAM, "On")
+        field(OSV, "MAJOR")
+        field(SCAN, "I/O Intr")
+	info(archive, "Monitor, 00:00:01, VAL")	
+}
+
+################################################################
