@@ -11,12 +11,18 @@ record(motor,"$(P)$(M)")
 	field(BACC,"$(BACC)")
 	field(OUT,"@asyn($(PORT),$(ADDR))")
 	field(MRES,"$(MRES)")
+	field(ERES,"$(ERES)")
+    field(RDBD,"$(RDBD)")
 	field(PREC,"$(PREC)")
 	field(EGU,"$(EGU)")
 	field(DHLM,"$(DHLM)")
 	field(DLLM,"$(DLLM)")
 	field(INIT,"$(INIT)")
+    field(RTRY, "$(RTRY=10)")
+    field(UEIP, "$(UEIP=0)")
 	field(TWV,"1")
+    info(autosaveFields, "DIR DHLM DLLM TWV VELO ACCL BDST BVEL BACC EGU RTRY PREC MRES ERES RDBD DESC UEIP")
+	info(archive, "Monitor, 00:00:01, VAL OFF RBV DMOV MISS MSTA STAT LVIO HLS LLS RCNT MOVN CNEN")
 }
 
 # These records make the motor resolution, offset and direction available to the driver
