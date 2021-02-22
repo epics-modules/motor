@@ -20,7 +20,7 @@ record(motor,"$(P)$(M)")
 	field(INIT,"$(INIT)")
     field(RTRY, "$(RTRY=10)")
     field(UEIP, "$(UEIP=0)")
-	field(TWV,"1")
+	field(TWV,"$(TWV=1)")
     info(autosaveFields, "DIR DHLM DLLM TWV VELO ACCL BDST BVEL BACC EGU RTRY PREC MRES ERES RDBD DESC UEIP")
 	info(archive, "Monitor, 00:00:01, VAL OFF RBV DMOV MISS MSTA STAT LVIO HLS LLS RCNT MOVN CNEN")
 }

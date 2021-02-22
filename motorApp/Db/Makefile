@@ -18,7 +18,6 @@ include $(TOP)/configure/CONFIG
 DB += $(patsubst ../%, %, $(wildcard ../*.template))
 DB += $(patsubst ../%, %, $(wildcard ../*.db))
 DB += $(patsubst ../%, %, $(wildcard ../*.vdb))
-DB += basic_asyn_motor_clf.db
 DB += home_visibility.db
 DB += error_calc.db
 
