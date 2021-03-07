@@ -69,6 +69,7 @@ motorSimAxis::motorSimAxis(motorSimController *pController, int axis, double low
   deferred_move_ = 0;
   delayedDone_ = 0;
   lastDone_ = 1;
+  setIntegerParam(pC_->motorStatusHasEncoder_, 1);
 }
 
 
@@ -364,6 +365,12 @@ asynStatus motorSimAxis::setPosition(double position)
   return asynSuccess;
 }
 
+asynStatus motorSimAxis::setEncoderPosition(double position)
+{
+  // currently we do not track encoder separately but just keep in syn with motor
+  return asynMotorAxis::setEncoderPosition(position);
+}
+
 asynStatus motorSimAxis::config(int hiHardLimit, int lowHardLimit, int home, int start)
 {
   hiHardLimit_ = hiHardLimit;
@@ -481,9 +488,11 @@ void motorSimAxis::process(double delta )
   }
 
   lastDone_ = done;
+  double encRatio;
+  pC_->getDoubleParam(axisNo_, pC_->motorEncoderRatio_, &encRatio);
 
   setDoubleParam (pC_->motorPosition_,         (nextpoint_.axis[0].p+enc_offset_));
-  setDoubleParam (pC_->motorEncoderPosition_,  (nextpoint_.axis[0].p+enc_offset_));
+  setDoubleParam (pC_->motorEncoderPosition_,  (nextpoint_.axis[0].p+enc_offset_) * encRatio);
   setIntegerParam(pC_->motorStatusDirection_,  (nextpoint_.axis[0].v >  0));
   setIntegerParam(pC_->motorStatusDone_,       done);
   setIntegerParam(pC_->motorStatusHighLimit_,  (nextpoint_.axis[0].p >= hiHardLimit_));

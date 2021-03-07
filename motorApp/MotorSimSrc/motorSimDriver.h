@@ -31,6 +31,7 @@ public:
   asynStatus stop(double acceleration);
   asynStatus poll(bool *moving);
   asynStatus setPosition(double position);
+  asynStatus setEncoderPosition(double position);
   asynStatus setHighLimit(double highLimit);
   asynStatus setLowLimit(double lowLimit);
 
