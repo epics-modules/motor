@@ -11,8 +11,7 @@ O.*/
 /templates/
 cdCommands
 envPaths
-cdCommands
-dllPath.bat
+dllPath*.bat
 runIOC.bat
 runIOC.sh
 relPaths.sh
