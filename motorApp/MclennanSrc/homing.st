@@ -49,13 +49,20 @@ syncq user_stop 100;
 PV(double, hlm, "{MOTPV}.HLM", Monitor);
 PV(double, llm, "{MOTPV}.LLM", Monitor);
 
+
+#define HOME_MODE_BUILTIN 0
+#define HOME_MODE_CONST_VELOCITY_MOVE 1
+#define HOME_MODE_REVERSE_HOME_AND_ZERO 2
+#define HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO 3
+#define HOME_MODE_FORWARD_HOME_AND_ZERO 4
+
 ss motor
 {
   state init
   {
     when ()
     {
-      /* 0: Use motor home, 1: Constant velocity move, 2: Reverse home and s position to 0, 3: Constant veloctiy move and 0 */
+      /* See definitions of home modes above. */
       mode = atoi(macValueGet("MODE"));
       axis = atoi(macValueGet("AXIS"));
       debug = atoi(macValueGet("DEBUG"));
@@ -77,14 +84,14 @@ ss motor
     } state reverse_home_requested
     
     /* Mode 3 always reverse homes */
-    when ((home_forward_pv==1) && (mode==3))
+    when ((home_forward_pv==1) && (mode==HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO))
     {
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM ready TO reverse_home_requested\n", axis);
       }
     } state reverse_home_requested
     
-    when ((home_forward_pv==1) && (mode!=3))
+    when ((home_forward_pv==1) && (mode!=HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO))
     {
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM ready TO forward_home_requested\n", axis);
@@ -107,7 +114,7 @@ ss motor
   state forward_home_requested
   {
     /* In modes 1 and 3 we need to wait for the home to be cancelled before requesting a jog */
-    when (home_forward_pv==0 && (mode==1 || mode==3)) {
+    when (home_forward_pv==0 && (mode==HOME_MODE_CONST_VELOCITY_MOVE || mode==HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO)) {
 
       jog_forward_value = 1;
       pvPut(jog_forward_value);
@@ -117,7 +124,7 @@ ss motor
     } state processing_move_request
     
     /* No delay needed for modes other than 1 */
-    when (!(mode==1 || mode==3)) {
+    when (!(mode==HOME_MODE_CONST_VELOCITY_MOVE || mode==HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO)) {
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM forward_home_requested TO processing_move_request\n", axis);
       }
@@ -127,7 +134,7 @@ ss motor
   state reverse_home_requested
   {
     /* In modes 1 and 3 we need to wait for the home to be cancelled before requesting a jog */
-    when (home_reverse_pv==0 && (mode==1 || mode==3 && home_forward_pv==0)) {
+    when (home_reverse_pv==0 && (mode==HOME_MODE_CONST_VELOCITY_MOVE || mode==HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO && home_forward_pv==0)) {
     
       jog_reverse_value = 1;
       pvPut(jog_reverse_value);
@@ -138,7 +145,7 @@ ss motor
     } state processing_move_request
     
     /* No delay needed for modes other than 1 and 3 */
-    when (!(mode==1 || mode==3)) {
+    when (!(mode==HOME_MODE_CONST_VELOCITY_MOVE || mode==HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO)) {
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM reverse_home_requested TO processing_move_request\n", axis);
       }
@@ -177,7 +184,7 @@ ss motor
   
     when (movable==1)
     { 
-      if (mode==2 || mode==3) {
+      if (mode==HOME_MODE_REVERSE_HOME_AND_ZERO || mode==HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO || mode==HOME_MODE_FORWARD_HOME_AND_ZERO) {
         if (debug) {
             errlogSevPrintf(errlogInfo, "Sequencer: axis %i: Setting position to zero (modes 2 and 3)\n", axis);
         }
@@ -203,7 +210,7 @@ ss motor
   
   state done {
     when () {
-      if (mode==1 || mode==3) {
+      if (mode==HOME_MODE_CONST_VELOCITY_MOVE || mode==HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO) {
         jog_reverse_value = 0;
         pvPut(jog_reverse_value);
         jog_forward_value = 0;

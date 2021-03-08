@@ -164,10 +164,12 @@ STATIC void request_home(char* buff, int model, int axis, int home_direction, in
     if (model == MODEL_PM304){
         sprintf(buff, "%dIX%d;", axis, home_direction);
     } else {
-        int motor_default=0, constant_velocity=1, reverse_and_zero=2;
+        int motor_default=0, constant_velocity=1, reverse_and_zero=2, constant_velocity_move_and_zero=3, forward_and_zero=4;
         if ( home_mode==motor_default || home_mode==reverse_and_zero ) {
             if ( home_mode==reverse_and_zero ) {
                 home_direction = -1;
+            } else if ( home_mode==forward_and_zero ) {
+                home_direction = 1;
             }
             sprintf(buff, "%dHD%d;", axis, home_direction);
         } else {
