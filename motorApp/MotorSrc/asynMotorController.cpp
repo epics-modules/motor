@@ -19,6 +19,10 @@
 #include "asynMotorController.h"
 #include "asynMotorAxis.h"
 
+#ifndef ASYN_TRACE_INFO
+#define ASYN_TRACE_INFO      0x0040
+#endif
+
 #ifndef VERSION_INT
 #  define VERSION_INT(V,R,M,P) ( ((V)<<24) | ((R)<<16) | ((M)<<8) | (P))
 #endif
@@ -215,6 +219,7 @@ asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
   getDoubleParam(axis, motorPowerOnDelay_, &autoPowerOnDelay);
   if (autoPower == 1) {
     status = pAxis->setClosedLoop(true);
+    pAxis->setWasMovingFlag(1);
     epicsThreadSleep(autoPowerOnDelay);
     return status;
   }
@@ -227,6 +232,7 @@ asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
       return asynSuccess;
     }
     status = pAxis->setClosedLoop(true);
+    pAxis->setWasMovingFlag(1);
     while (autoPowerOnDelay > 0.0) {
       if (pAxis->pollPowerIsOn())
         return asynSuccess;
@@ -770,28 +776,38 @@ double asynMotorController::pollAll(void)
   asynMotorAxis *pAxis;
   asynStatus asynstatus;
   bool anyMoving = false;
-  int i;
+  int axisNo;
   asynstatus = poll();
   if (asynstatus) {
     asynStatusConnected_ = asynstatus;
     return timeout;
   }
 
-  for (i=0; i<numAxes_; i++) {
+  for (axisNo=0; axisNo<numAxes_; axisNo++) {
     double autoPowerOffDelay = 0.0;
     double nowTimeSecs = 0.0;
     int autoPower = 0;
     bool moving;
-    pAxis=getAxis(i);
+    pAxis=getAxis(axisNo);
     if (!pAxis) continue;
 
-    getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
-    getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
+    getIntegerParam(axisNo, motorPowerAutoOnOff_, &autoPower);
+    getDoubleParam(axisNo, motorPowerOffDelay_, &autoPowerOffDelay);
 
     asynstatus = pAxis->poll(&moving);
     if (asynstatus) {
       asynStatusConnected_ = asynstatus;
       return timeout;
+    }
+    if (autoPower) {
+      int wasMovingFlag = pAxis->getWasMovingFlag();
+      int disableFlag = pAxis->getDisableFlag();
+      if ((moving && !wasMovingFlag) || (!moving && wasMovingFlag))  {
+        asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
+                  "%s:%s: axis=%d autoPower=%d moving=%d getWasMovingFlag=%d getDisableFlag()=%d\n",
+                  driverName, __FUNCTION__, axisNo,
+                  autoPower, (int)moving, wasMovingFlag, disableFlag);
+      }
     }
     if (moving) {
       anyMoving = true;
@@ -814,8 +830,15 @@ double asynMotorController::pollAll(void)
     //  Auto power off is enabled
     //  Auto power off delay timer has expired
     if ((!moving) && (autoPower == 1) && (pAxis->getDisableFlag() == 1)) {
+      double lastMoveSecs = pAxis->getLastEndOfMoveTime();
       nowTimeSecs = getNowTimeSecs();
-      if ((nowTimeSecs - pAxis->getLastEndOfMoveTime()) >= autoPowerOffDelay) {
+      double diffTime = nowTimeSecs - lastMoveSecs;
+      asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
+                "%s:%s: axis=%d moving=%d lastMoveSecs=%f nowTimeSecs=%f diffTime=%f\n",
+                driverName, __FUNCTION__, axisNo,
+                (int)moving,
+                lastMoveSecs, nowTimeSecs, diffTime);
+      if (diffTime >= autoPowerOffDelay) {
         pAxis->setClosedLoop(0);
         pAxis->setDisableFlag(0);
       }
