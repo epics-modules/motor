@@ -769,7 +769,7 @@ LOGIC:
 
 static long init_re_init(motorRecord *pmr)
 {
-    Debug(pmr,3, "init_re_init neverPolled=%d stat=%d nsta=%d\n",
+    Debug(pmr,3, "init_re_init start neverPolled=%d stat=%d nsta=%d\n",
            pmr->priv->neverPolled, pmr->stat, pmr->nsta);
     check_speed(pmr);
     enforceMinRetryDeadband(pmr);
@@ -819,6 +819,9 @@ static long init_re_init(motorRecord *pmr)
     MARK(M_MSTA);   /* MSTA incorrect at boot-up; force posting. */
 
     monitor(pmr);
+    Debug(pmr,3,
+          "init_re_init  end dval=%f drbv=%f rdbd=%f spdb=%f\n",
+          pmr->dval, pmr->drbv, pmr->rdbd, pmr->spdb);
     return(OK);
 }
 
