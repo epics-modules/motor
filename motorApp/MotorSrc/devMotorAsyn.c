@@ -174,12 +174,12 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
        based on the record values. I think most of it should be transferred to init_record
        which is one reason why I have separated it into another routine */
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
-    double position = pPvt->status.position;
+    double rawPos = pPvt->status.position;
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
     double encRatio[2] = {pmr->mres, pmr->eres};
     int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
     int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) &&
-                                      (pmr->mres != 0) && (fabs(position * pmr->mres) < rdbd);
+                                      (pmr->mres != 0) && (fabs(rawPos * pmr->mres) < rdbd);
     int initPos = 0;
 
     /*Before setting position, set the correct encoder ratio.*/
@@ -205,6 +205,10 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
             initPos = 1;
             break;
     }
+    Debug(pmr,3, "init_controller %s rstm=%d pmr->dval=%f rawPos=%f pmr->rdbd=%f rdbd=%f pmr->mres=%f dval_non_zero_pos_near_zero=%d initPos=%d\n",
+          pmr->name,
+          (int)pmr->rstm, pmr->dval, rawPos, pmr->rdbd, rdbd, pmr->mres, dval_non_zero_pos_near_zero, initPos);
+
     if (initPos)
     {
         double setPos = devSupDialToRaw(pmr, pmr->dval);
@@ -233,11 +237,6 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
             pPvt->initEvent = 0;
         }
     }
-    else
-        asynPrint(pasynUser, ASYN_TRACE_FLOW,
-                  "devMotorAsyn::init_controller, %s setting of position not required, position=%f, mres=%f, dval=%f, rdbd=%f",
-                  pmr->name, position, pmr->mres, pmr->dval, rdbd );
-
 }
 
 static long findDrvInfo(motorRecord *pmotor, asynUser *pasynUser, char *drvInfoString, int command)
