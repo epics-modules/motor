@@ -868,17 +868,17 @@ static long init_record(dbCommon* arg, int pass)
     pcallback->precord = pmr;
     pmr->priv = (struct motor_priv*)calloc(1, sizeof(struct motor_priv));
 
-    if (pmr->eres == 0.0)
-    {
-        pmr->eres = pmr->mres;
-        //MARK(M_ERES);
-    }
-
     /*
      * Reconcile two different ways of specifying speed and resolution; make
      * sure things are sane.
      */
     check_resolution(pmr);
+    /* Now MRES should be != 0.0. Sanitize ERES, if needed */
+    if (pmr->eres == 0.0)
+    {
+        pmr->eres = pmr->mres;
+        //MARK(M_ERES);
+    }
 
     /* Call device support to initialize itself and the driver */
     if (pdset->base.init_record)
