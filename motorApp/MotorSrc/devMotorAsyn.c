@@ -441,13 +441,15 @@ static long init_record(struct motorRecord * pmr )
     pasynUser->reason = pPvt->driverReasons[motorStatus];
     status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt, pasynUser,
                       (void *)&pPvt->status);
-    Debug(pmr,3, "init_record status=%d position=%f encoderPos=%f velocity=%f MSTAstatus=0x%04x flags=0x%x\n",
+    Debug(pmr,3, "init_record status=%d position=%f encoderPos=%f velocity=%f MSTAstatus=0x%04x flagsValue=0x%x flagsWritten=0x%x pmr->mflg=0x%x\n",
           status,
           pPvt->status.position,
           pPvt->status.encoderPosition,
           pPvt->status.velocity,
           pPvt->status.status,
-          pPvt->status.flags);
+          pPvt->status.flagsValue,
+          pPvt->status.flagsWritten,
+          pmr->mflg);
     if (status != asynSuccess) {
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
                   "devMotorAsyn::init_record: %s pasynGenericPointer->read \"%s\"\n",
@@ -462,7 +464,9 @@ static long init_record(struct motorRecord * pmr )
      */
     init_controller(pmr, pasynUser);
     if (pPvt->needUpdate) {
-        pmr->mflg = pPvt->status.flags;
+        /* Put in the bits that had been written by the controller */
+        pmr->mflg &= (~ pPvt->status.flagsWritten);
+        pmr->mflg |= pPvt->status.flagsValue;
         new_RO_soft_limits(pmr);
     }
     /* Do not need to manually retrieve the new status values, as if they are
@@ -495,11 +499,13 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
     if ( pPvt->needUpdate )
     {
         epicsInt32 rawValue;
+        epicsUInt32 oldMFLG = pmr->mflg;
 
+        pmr->mflg &= (~ pPvt->status.flagsWritten);
+        pmr->mflg |= pPvt->status.flagsValue;
         /* Need to update mflg before using it further down */
-        if (pmr->mflg != pPvt->status.flags)
+        if (pmr->mflg != oldMFLG)
         {
-            pmr->mflg = pPvt->status.flags;
             db_post_events(pmr, &pmr->mflg, DBE_VAL_LOG);
         }
 

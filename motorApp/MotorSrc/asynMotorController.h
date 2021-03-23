@@ -70,7 +70,7 @@
 #define motorStatusHomedString          "MOTOR_STATUS_HOMED"
 
 /* Addition flags which can be set by the specific driver */
-#define motorFlagsHomeOnLsString        "MOTOR_FLAGSS_HOME_ON_LS"
+#define motorFlagsHomeOnLsString        "MOTOR_FLAGS_HOME_ON_LS"
 #define motorFlagsLSrampDownString      "MOTOR_FLAGS_LS_RAMP_DOWN"
 #define motorFlagsNoStopOnLsString      "MOTOR_FLAGS_NO_STOP_ON_LS"
 #define motorFlagsDriverUsesEGUString   "MOTOR_FLAGS_DRIVER_USES_EGU"
@@ -154,7 +154,8 @@ typedef struct MotorStatus {
   double encoderPosition;    /**< Actual encoder position */
   double velocity;           /**< Actual velocity */
   epicsUInt32 status;        /**< Word containing status bits (motion done, limits, etc.) */
-  epicsUInt32 flags;         /**< Word containing flag bits  */
+  epicsUInt32 flagsValue;    /**< Word containing flag bits: The Value  */
+  epicsUInt32 flagsWritten;  /**< Word containing flag bits: Which bits had been written by the controller  */
   struct MotorConfigRO MotorConfigRO;
 } MotorStatus;
 

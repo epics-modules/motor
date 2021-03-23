@@ -192,7 +192,7 @@ USAGE...        Motor Record Support.
  * .78 08-21-18 kmp - Reverted .69 stop on RA_PROBLEM true.
  */                                                          
 
-#define VERSION 7.04
+#define VERSION 7.05
 
 #include    <stdlib.h>
 #include    <string.h>
@@ -1882,7 +1882,7 @@ static int homing_wanted_and_allowed(motorRecord *pmr)
 */
 static bool mr_stops_on_ls_activated(motorRecord *pmr, bool ls_active)
 {
-    if (pmr->mflg & MF_NOSTOP_ONLS)
+    if (pmr->mflg & MF_NO_STOP_ONLS)
         ls_active = false;    /*Suppress stop on LS if configured  */
     if ((pmr->mip & MIP_HOMF) || (pmr->mip & MIP_HOMR))
     {

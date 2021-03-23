@@ -2627,6 +2627,34 @@ below.
     </td>
   </tr>
   <tr valign="top">
+    <td>MFLG</td>
+    <td>R</td>
+    <td>Motor Flags</td>
+    <td>ULONG</td>
+    <td>The motor flags. Bits may be set in the db file and/or set/overwritten by the driver.&nbsp;
+      The MFLG bits are defined as follows:
+      <blockquote>
+	<ol>
+	  <li>
+	    HOME_ON_LS (Bit 0): HOMF is allowed when HLS is active (and HOMR on LLS).
+	  </li>
+	  <li>
+	    LS_RAMPDOWN (Bit 1): When the controller reports that a limit switch is hit, it doesn't mean that the motor yet fully stopped.
+	  </li>
+	  <li>
+	    NO_STOP_ONLS (Bit 2): The motorRecord does not stop when a limit switch is hit - the controller must do it.
+	  </li>
+	  <li>
+	    DRIVER_USES_EGU (Bit 3): Driver uses the same EGU as motorRecord. Dial and Raw-coordinates have the same unit.
+	  </li>
+	  <li>
+	    ADJ_AFTER_HOMED (Bit 4): If needed, move the motor into the soft limit range after succesfull homing.
+	  </li>
+	</ol>
+      </blockquote>
+    </td>
+  </tr>
+  <tr valign="top">
     <td>TDIR</td>
     <td>R</td>
     <td>Direction of Travel</td>
