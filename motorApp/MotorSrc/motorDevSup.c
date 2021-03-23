@@ -59,6 +59,27 @@ double devSupDialToRaw(motorRecord *pmr, double dialValue)
 }
 
 /*****************************************************************************
+  Helper to convert raw into dial
+*****************************************************************************/
+double devSupRawToDial(motorRecord *pmr, double rawValue)
+{
+  double dialValue;
+  if (pmr->mflg & MF_DRIVER_USES_EGU)
+  {
+    /*The driver wants dial coordinates.
+      We need to preserve the sign ! */
+     dialValue = pmr->mres < 0 ? 0 - rawValue : rawValue;
+  }
+  else
+  {
+    /* Convert from dial into raw. Note:
+       mres can be < 0 to change the direction */
+    dialValue = rawValue * pmr->mres;
+  }
+  return dialValue;
+}
+
+/*****************************************************************************
   Calls to device support
   Wrappers that call device support.
 *****************************************************************************/

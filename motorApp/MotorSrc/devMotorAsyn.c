@@ -174,13 +174,17 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
        based on the record values. I think most of it should be transferred to init_record
        which is one reason why I have separated it into another routine */
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
-    double rawPos = pPvt->status.position;
+    double dialPos = devSupRawToDial(pmr, pPvt->status.position);
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
     double encRatio[2] = {pmr->mres, pmr->eres};
     int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
-    int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) &&
-                                      (pmr->mres != 0) && (fabs(rawPos * pmr->mres) < rdbd);
     int initPos = 0;
+    int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) && (fabs(dialPos) < rdbd);
+    if (!(pmr->mflg & MF_DRIVER_USES_EGU))
+    {
+        /* protect against dividing by 0.0 */
+        if (pmr->mres == 0.0) dval_non_zero_pos_near_zero = 0;
+    }
 
     /*Before setting position, set the correct encoder ratio.*/
     start_trans(pmr);
@@ -205,9 +209,9 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
             initPos = 1;
             break;
     }
-    Debug(pmr,3, "init_controller %s rstm=%d pmr->dval=%f rawPos=%f pmr->rdbd=%f rdbd=%f pmr->mres=%f dval_non_zero_pos_near_zero=%d initPos=%d\n",
+    Debug(pmr,3, "init_controller %s rstm=%d pmr->dval=%f dialPos=%f pmr->rdbd=%f rdbd=%f pmr->mres=%f pmr->mflg=0x%x dval_non_zero_pos_near_zero=%d initPos=%d\n",
           pmr->name,
-          (int)pmr->rstm, pmr->dval, rawPos, pmr->rdbd, rdbd, pmr->mres, dval_non_zero_pos_near_zero, initPos);
+          (int)pmr->rstm, pmr->dval, dialPos, pmr->rdbd, rdbd, pmr->mres, pmr->mflg, dval_non_zero_pos_near_zero, initPos);
 
     if (initPos)
     {
