@@ -916,7 +916,6 @@ static long init_record(dbCommon* arg, int pass)
     if (pmr->dol.type == CONSTANT)
     {
         pmr->udf = FALSE;
-        Debug(pmr,3, "init_record %s\n", "set UDF=FALSE");
 
         recGblInitConstantLink(&pmr->dol, DBF_DOUBLE, &pmr->val);
     }
@@ -1519,9 +1518,9 @@ static long process(dbCommon *arg)
     }
     if ((process_reason == CALLBACK_DATA) && (pmr->priv->neverPolled))
     {
-          Debug(pmr,3, "process %s\n", "set pmr->priv->neverPolled=0");
-          pmr->priv->neverPolled = 0;
           init_re_init(pmr);
+          Debug(pmr,3, "%s\n", "set pmr->priv->neverPolled=0");
+          pmr->priv->neverPolled = 0;
     }
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
     {
@@ -2620,7 +2619,6 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             pmr->udf = TRUE;
             return(ERROR);
         }
-        Debug(pmr,3, "udf=%d do_work set UDF=FALSE\n", pmr->udf);
         pmr->udf = FALSE;
         /* Later, we'll act on this new value of .val. */
     }
