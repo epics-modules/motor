@@ -144,7 +144,7 @@ typedef struct
     double param;
     int needUpdate;
     asynUser *pasynUser;
-    asynUser *pasynUserSync;
+    asynUser *pasynUserSyncFloat64;
     asynInt32 *pasynInt32;
     void *asynInt32Pvt;
     asynFloat64 *pasynFloat64;
@@ -180,8 +180,8 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     int status;
 
     /* Write encoder ratio to the driver.*/
-    pPvt->pasynUserSync->reason = pPvt->driverReasons[motorEncRatio];
-    status = pasynFloat64SyncIO->write(pPvt->pasynUserSync, eratio, pasynUser->timeout);
+    pPvt->pasynUserSyncFloat64->reason = pPvt->driverReasons[motorEncRatio];
+    status = pasynFloat64SyncIO->write(pPvt->pasynUserSyncFloat64, eratio, pasynUser->timeout);
     if (status) {
        asynPrint(pasynUser, ASYN_TRACE_ERROR,
                  "devMotorAsyn::init_controller, %s failed to set encoder ratio to %f\n", pmr->name, eratio );
@@ -194,8 +194,8 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     {
         double setPos = devSupDialToRaw(pmr, pmr->dval);
         /* Write setPos to the driver */
-        pPvt->pasynUserSync->reason = pPvt->driverReasons[motorPosition];
-        status = pasynFloat64SyncIO->write(pPvt->pasynUserSync, setPos, pasynUser->timeout);
+        pPvt->pasynUserSyncFloat64->reason = pPvt->driverReasons[motorPosition];
+        status = pasynFloat64SyncIO->write(pPvt->pasynUserSyncFloat64, setPos, pasynUser->timeout);
         Debug(pmr,3, "init_controller %s setPos=%f status=%d\n",
               pmr->name, setPos, (int)status);
     }
@@ -318,7 +318,7 @@ static long init_record(struct motorRecord * pmr )
     pPvt->asynFloat64Pvt = pasynInterface->drvPvt;
 
     /* Initialize Float64 synchronous interface */
-    status = pasynFloat64SyncIO->connect(port, signal, &pPvt->pasynUserSync, userParam);
+    status = pasynFloat64SyncIO->connect(port, signal, &pPvt->pasynUserSyncFloat64, userParam);
     if (status != asynSuccess) {
        asynPrint(pasynUser, ASYN_TRACE_ERROR,
                  "devMotorAsyn::init_record, %s connect Float64SyncIO interface failed\n", pmr->name);
@@ -444,7 +444,7 @@ static long init_record(struct motorRecord * pmr )
      */
 
     /* Finished using the Float64 SyncIO interface */
-    pasynFloat64SyncIO->disconnect(pPvt->pasynUserSync);
+    pasynFloat64SyncIO->disconnect(pPvt->pasynUserSyncFloat64);
     /* Finally, indicate to the motor record that these values can be used. */
     pasynManager->freeAsynUser(pasynUser);
     
