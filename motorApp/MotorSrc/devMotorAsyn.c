@@ -175,45 +175,14 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
        which is one reason why I have separated it into another routine */
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     double dialPos = devSupRawToDial(pmr, pPvt->status.position);
-    double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
     double encRatio[2] = {pmr->mres, pmr->eres};
-    int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
-    int initPos = 0;
-    int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) && (fabs(dialPos) < rdbd);
-    if (!(pmr->mflg & MF_DRIVER_USES_EGU))
-    {
-        /* protect against dividing by 0.0 */
-        if (pmr->mres == 0.0) dval_non_zero_pos_near_zero = 0;
-    }
 
     /*Before setting position, set the correct encoder ratio.*/
     start_trans(pmr);
     build_trans(SET_ENC_RATIO, encRatio, pmr);
     end_trans(pmr);
 
-    switch (pmr->rstm) {
-        case motorRSTM_NearZero:
-            {
-                if (dval_non_zero_pos_near_zero)
-                    initPos = 1;
-
-            }
-            break;
-        case motorRSTM_Conditional:
-            {
-                if (use_rel || dval_non_zero_pos_near_zero)
-                    initPos = 1;
-            }
-            break;
-        case motorRSTM_Always:
-            initPos = 1;
-            break;
-    }
-    Debug(pmr,3, "init_controller %s rstm=%d pmr->dval=%f dialPos=%f pmr->rdbd=%f rdbd=%f pmr->mres=%f pmr->mflg=0x%x dval_non_zero_pos_near_zero=%d initPos=%d\n",
-          pmr->name,
-          (int)pmr->rstm, pmr->dval, dialPos, pmr->rdbd, rdbd, pmr->mres, pmr->mflg, dval_non_zero_pos_near_zero, initPos);
-
-    if (initPos)
+    if (devPositionRestoreNeeded(pmr, dialPos))
     {
         double setPos = devSupDialToRaw(pmr, pmr->dval);
         epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );
@@ -224,15 +193,8 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
         start_trans(pmr);
         rtnval = build_trans(LOAD_POS, &setPos, pmr);
         end_trans(pmr);
-        if (rtnval != OK)  {
-            asynPrint(pasynUser, ASYN_TRACE_ERROR,
-                      "devMotorAsyn::init_controller, %s failed to set position to %f\n",
-                      pmr->name, setPos );
-        } else {
-            asynPrint(pasynUser, ASYN_TRACE_FLOW,
-                      "devMotorAsyn::init_controller, %s set position to %f\n",
-                      pmr->name, setPos );
-        }
+        Debug(pmr,3, "init_controller %s setPos=%f rtnval=%ld\n",
+              pmr->name, setPos, (long)rtnval);
 
         if ( initEvent )
         {
