@@ -156,6 +156,7 @@ typedef struct MotorStatus {
   epicsUInt32 status;        /**< Word containing status bits (motion done, limits, etc.) */
   epicsUInt32 flagsValue;    /**< Word containing flag bits: The Value  */
   epicsUInt32 flagsWritten;  /**< Word containing flag bits: Which bits had been written by the controller  */
+  int         positionWritten; /**< Commanded motor position is valid == has been written by the driver */
   struct MotorConfigRO MotorConfigRO;
 } MotorStatus;
 

@@ -366,6 +366,12 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
         statusChanged_ = 1;
         status_.position = value;
     }
+    if (!status_.positionWritten) {;
+      /* Even if the position was 0.0 and is still 0.0,
+         we want to have a callback */
+        statusChanged_ = 1;
+        status_.positionWritten = 1;
+    }
   } else if (function == pC_->motorEncoderPosition_) {
     if (value != status_.encoderPosition) {
         statusChanged_ = 1;
@@ -512,9 +518,12 @@ void asynMotorAxis::updateMsgTxtField()
 asynStatus asynMotorAxis::callParamCallbacks()
 {
   if (statusChanged_) {
-    statusChanged_ = 0;
     updateMsgTxtField();
-    pC_->doCallbacksGenericPointer((void *)&status_, pC_->motorStatus_, axisNo_);
+    if (status_.positionWritten) {
+      /* Don't do callbacks to devMotorAsyn if the position is unknown */
+      pC_->doCallbacksGenericPointer((void *)&status_, pC_->motorStatus_, axisNo_);
+      statusChanged_ = 0;
+    }
   }
   return pC_->callParamCallbacks(axisNo_);
 }
