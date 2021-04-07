@@ -35,6 +35,11 @@ extern "C" {
       epicsFloat64 mlst;               /* Last Val Monitored */
     } last;
     int          neverPolled;        /**< Controller was never online */
+    struct {
+      epicsFloat64 dval_from_save_restore;
+      int          restore_done_or_no_needed;
+    } saveRestore;
+
   };
 
 #ifdef __cplusplus

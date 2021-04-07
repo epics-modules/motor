@@ -293,12 +293,12 @@ void devSupSetEncRatio(motorRecord *pmr, double ep_mp[2])
 }
 
 /*****************************************************************************/
-int devPositionRestoreNeeded(motorRecord *pmr, double dialPos)
+int devPositionRestoreNeeded(motorRecord *pmr, double dval, double drbv)
 {
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
     int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
     int ret = 0;
-    int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) && (fabs(dialPos) < rdbd);
+    int dval_non_zero_pos_near_zero = (fabs(dval) > rdbd) && (fabs(drbv) < rdbd);
     if (!(pmr->mflg & MF_DRIVER_USES_EGU))
     {
         /* protect against dividing by 0.0 */
@@ -322,9 +322,9 @@ int devPositionRestoreNeeded(motorRecord *pmr, double dialPos)
             ret = 1;
             break;
     }
-    Debug(pmr,3, "PositionRestoreNeeded %s rstm=%d pmr->dval=%f dialPos=%f pmr->rdbd=%f rdbd=%f pmr->mres=%f pmr->mflg=0x%x dval_non_zero_pos_near_zero=%d ret=%d\n",
+    Debug(pmr,3, "PositionRestoreNeeded %s rstm=%d dval=%f drbv=%f pmr->rdbd=%f rdbd=%f pmr->mres=%f pmr->mflg=0x%x dval_non_zero_pos_near_zero=%d ret=%d\n",
           pmr->name,
-          (int)pmr->rstm, pmr->dval, dialPos, pmr->rdbd, rdbd, pmr->mres, pmr->mflg, dval_non_zero_pos_near_zero, ret);
+          (int)pmr->rstm, dval, drbv, pmr->rdbd, rdbd, pmr->mres, pmr->mflg, dval_non_zero_pos_near_zero, ret);
 
     return ret;
 }

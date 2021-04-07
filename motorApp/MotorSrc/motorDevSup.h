@@ -58,7 +58,7 @@ fields.  ('pmr' is a pointer to motorRecord.)
   void devSupCNEN(motorRecord *pmr, double cnen);
   int  devSupSetPID(motorRecord *pmr, motor_cmnd command, double *pcoeff);
   void devSupSetEncRatio(motorRecord *pmr, double ep_mp[2]);
-  int  devPositionRestoreNeeded(motorRecord *pmr, double dialPos);
+  int  devPositionRestoreNeeded(motorRecord *pmr, double dval, double drbv);
   void setCDIRfromRawMove(motorRecord *pmr, int directionRaw);
   void setCDIRfromDialMove(motorRecord *pmr, int directionDial);
   void doHomeSetcdir(motorRecord *pmr);

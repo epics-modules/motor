@@ -175,29 +175,33 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
        based on the record values. I think most of it should be transferred to init_record
        which is one reason why I have separated it into another routine */
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
-    double dialPos = devSupRawToDial(pmr, pPvt->status.position);
+    double drbv = devSupRawToDial(pmr, pPvt->status.position);
     epicsFloat64 eratio = pmr->mres / pmr->eres;
     int status;
 
     /* Write encoder ratio to the driver.*/
     pPvt->pasynUserSyncFloat64->reason = pPvt->driverReasons[motorEncRatio];
     status = pasynFloat64SyncIO->write(pPvt->pasynUserSyncFloat64, eratio, pasynUser->timeout);
-    if (status) {
-       asynPrint(pasynUser, ASYN_TRACE_ERROR,
-                 "devMotorAsyn::init_controller, %s failed to set encoder ratio to %f\n", pmr->name, eratio );
-    } else {
-       asynPrint(pasynUser, ASYN_TRACE_FLOW,
-                 "devMotorAsyn::init_controller, %s set encoder ratio to %f\n", pmr->name, eratio );
-    }
+    Debug(pmr,3, "init_controller %s set encoder ratio=%f status=%d\n",
+          pmr->name, eratio, (int)status);
 
-    if (devPositionRestoreNeeded(pmr, dialPos))
+    if (devPositionRestoreNeeded(pmr,
+                                 pmr->priv->saveRestore.dval_from_save_restore,
+                                 drbv))
     {
-        double setPos = devSupDialToRaw(pmr, pmr->dval);
+        double setPos = devSupDialToRaw(pmr, pmr->priv->saveRestore.dval_from_save_restore);
         /* Write setPos to the driver */
         pPvt->pasynUserSyncFloat64->reason = pPvt->driverReasons[motorPosition];
         status = pasynFloat64SyncIO->write(pPvt->pasynUserSyncFloat64, setPos, pasynUser->timeout);
         Debug(pmr,3, "init_controller %s setPos=%f status=%d\n",
               pmr->name, setPos, (int)status);
+        if (status == asynSuccess) {
+            pmr->priv->saveRestore.dval_from_save_restore = 0.0;
+            pmr->priv->saveRestore.restore_done_or_no_needed = 1;
+        }
+    } else {
+        pmr->priv->saveRestore.dval_from_save_restore = 0.0;
+        pmr->priv->saveRestore.restore_done_or_no_needed = 1;
     }
 }
 
@@ -271,6 +275,9 @@ static long init_record(struct motorRecord * pmr )
 
     /* Allocate motorAsynPvt private structure */
     pPvt = callocMustSucceed(1, sizeof(motorAsynPvt), "devMotorAsyn init_record()");
+
+    pmr->priv->saveRestore.dval_from_save_restore = pmr->dval;
+    pmr->dval = 0;
 
     /* Create asynUser */
     pasynUser = pasynManager->createAsynUser(asynCallback, 0);
@@ -411,8 +418,12 @@ static long init_record(struct motorRecord * pmr )
     pasynUser->reason = pPvt->driverReasons[motorStatus];
     status = pPvt->pasynGenericPointer->read(pPvt->asynGenericPointerPvt, pasynUser,
                       (void *)&pPvt->status);
-    Debug(pmr,3, "init_record status=%d position=%f encoderPos=%f velocity=%f MSTAstatus=0x%04x flagsValue=0x%x flagsWritten=0x%x pmr->mflg=0x%x\n",
-          status,
+    if (status != asynSuccess) {
+        Debug(pmr,3, "init_record: %s pasynGenericPointer->read \"%s\"\n",
+              pmr->name, pasynUser->errorMessage);
+    } else {
+        Debug(pmr,3, "init_record %s position=%f encoderPos=%f velocity=%f MSTAstatus=0x%04x flagsValue=0x%x flagsWritten=0x%x pmr->mflg=0x%x\n",
+              pmr->name,
           pPvt->status.position,
           pPvt->status.encoderPosition,
           pPvt->status.velocity,
@@ -420,11 +431,6 @@ static long init_record(struct motorRecord * pmr )
           pPvt->status.flagsValue,
           pPvt->status.flagsWritten,
           pmr->mflg);
-    if (status != asynSuccess) {
-        asynPrint(pasynUser, ASYN_TRACE_ERROR,
-                  "devMotorAsyn::init_record: %s pasynGenericPointer->read \"%s\"\n",
-                  pmr->name, pasynUser->errorMessage);
-    } else {
         pPvt->needUpdate = 1;
     }
 
