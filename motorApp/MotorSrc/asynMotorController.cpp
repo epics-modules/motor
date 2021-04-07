@@ -586,16 +586,18 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
       from the controller */
   status = getIntegerParam(axisNo, motorStatus_, (int *)&pStatus->status);
   if (status != asynSuccess) {
-    epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                  "Error: axisNo=%d status(getIntegerParam(motorStatus_)) returned %d",
-                  axisNo, (int)status);
+    if (status == asynParamUndefined) {
+      epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                    "Error: axisNo=%d motorStatus is undefined", axisNo);
+    }
     return status;
   }
   status = getDoubleParam(axisNo, motorPosition_, &pStatus->position);
   if (status != asynSuccess) {
-    epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
-                  "Error: axisNo=%d status(getDoubleParam(motorPosition_)) returned %d",
-                  axisNo, (int)status);
+    if (status == asynParamUndefined) {
+      epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                    "Error: axisNo=%d motorPosition is undefined", axisNo);
+    }
     return status;
   }
   memcpy(pStatus, &pAxis->status_, sizeof(*pStatus));
