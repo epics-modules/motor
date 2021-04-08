@@ -1458,7 +1458,17 @@ static long process(dbCommon *arg)
      * this is a callback.
      */
     process_reason = (*pdset->update_values) (pmr);
+#ifdef DEBUG
+    {
+      char dbuf[MBLE];
+      dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+      Debug(pmr,8, "process:---------------------- begin reason=%d mip=0x%0x(%s)\n",
+            (int)process_reason, pmr->mip, dbuf);
+    }
+#else
     Debug(pmr,8, "process:---------------------- begin reason=%d\n", (int)process_reason);
+#endif
+
     if (pmr->msta != old_msta)
     {
       msta_field old_msta_field;
@@ -1498,7 +1508,7 @@ static long process(dbCommon *arg)
           Debug(pmr,2, "msta.Bits.RA_DONE=%d\n", new_msta_field.Bits.RA_DONE ? 1 : 0);
       MARK(M_MSTA);
     }
-
+    /* Handle soft read only limits */
     if (process_reason == CALLBACK_DATA_SOFT_LIMITS)
     {
         if (pmr->priv->softLimitRO.motorDialLimitsValid)
@@ -1516,11 +1526,44 @@ static long process(dbCommon *arg)
         enforceMinRetryDeadband(pmr);
         process_reason = CALLBACK_DATA;
     }
-    if ((process_reason == CALLBACK_DATA) && (pmr->priv->neverPolled))
+    /* postion-restore is needed. When the Record was initializied,
+       we couldn't read the motor position from the controller.
+       But new have have it. Handle a position-restore here, if needed */
+    if (process_reason == CALLBACK_DATA)
     {
-          init_re_init(pmr);
-          Debug(pmr,3, "%s\n", "set pmr->priv->neverPolled=0");
-          pmr->priv->neverPolled = 0;
+        if (pmr->priv->saveRestore.restore_needed)
+        {
+            if (pmr->mip == MIP_LOAD_P)
+            {
+                MIP_SET_VAL(MIP_DONE);
+                pmr->priv->saveRestore.restore_needed = 0;
+            }
+            else
+            {
+                double newDval = pmr->priv->saveRestore.dval_from_save_restore;
+                /* Encoder ratio */
+                double ep_mp[2];
+                ep_mp[0] = pmr->mres;
+                ep_mp[1] = pmr->eres;
+                devSupSetEncRatio(pmr,ep_mp);
+                if (devPositionRestoreNeeded(pmr, newDval, pmr->drbv))
+                {
+                    pmr->dval = newDval;
+                    load_pos_load_pos(pmr);
+                    goto process_exit;
+                }
+                else
+                {
+                    pmr->priv->saveRestore.restore_needed = 0;
+                }
+            }
+        }
+        if (pmr->priv->neverPolled)
+        {
+            init_re_init(pmr);
+            Debug(pmr,3, "%s\n", "set pmr->priv->neverPolled=0");
+            pmr->priv->neverPolled = 0;
+        }
     }
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
     {

@@ -175,7 +175,6 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
        based on the record values. I think most of it should be transferred to init_record
        which is one reason why I have separated it into another routine */
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
-    double drbv = devSupRawToDial(pmr, pPvt->status.position);
     epicsFloat64 eratio = pmr->mres / pmr->eres;
     int status;
 
@@ -184,6 +183,16 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     status = pasynFloat64SyncIO->write(pPvt->pasynUserSyncFloat64, eratio, pasynUser->timeout);
     Debug(pmr,3, "init_controller %s set encoder ratio=%f status=%d\n",
           pmr->name, eratio, (int)status);
+}
+
+static void load_pos_if_needed(struct motorRecord *pmr, asynUser *pasynUser )
+{
+    /* This routine is copied out of the old motordevCom and initialises the controller
+       based on the record values. I think most of it should be transferred to init_record
+       which is one reason why I have separated it into another routine */
+    motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
+    double drbv = devSupRawToDial(pmr, pPvt->status.position);
+    int status;
 
     if (devPositionRestoreNeeded(pmr,
                                  pmr->priv->saveRestore.dval_from_save_restore,
@@ -193,15 +202,11 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
         /* Write setPos to the driver */
         pPvt->pasynUserSyncFloat64->reason = pPvt->driverReasons[motorPosition];
         status = pasynFloat64SyncIO->write(pPvt->pasynUserSyncFloat64, setPos, pasynUser->timeout);
-        Debug(pmr,3, "init_controller %s setPos=%f status=%d\n",
+        Debug(pmr,3, "load_pos_if_needed %s setPos=%f status=%d\n",
               pmr->name, setPos, (int)status);
-        if (status == asynSuccess) {
-            pmr->priv->saveRestore.dval_from_save_restore = 0.0;
-            pmr->priv->saveRestore.restore_done_or_no_needed = 1;
+        if (status != asynSuccess) {
+            pmr->priv->saveRestore.restore_needed = 1;
         }
-    } else {
-        pmr->priv->saveRestore.dval_from_save_restore = 0.0;
-        pmr->priv->saveRestore.restore_done_or_no_needed = 1;
     }
 }
 
@@ -421,6 +426,7 @@ static long init_record(struct motorRecord * pmr )
     if (status != asynSuccess) {
         Debug(pmr,3, "init_record: %s pasynGenericPointer->read \"%s\"\n",
               pmr->name, pasynUser->errorMessage);
+        pmr->priv->saveRestore.restore_needed = 1;
     } else {
         Debug(pmr,3, "init_record %s position=%f encoderPos=%f velocity=%f MSTAstatus=0x%04x flagsValue=0x%x flagsWritten=0x%x pmr->mflg=0x%x\n",
               pmr->name,
@@ -444,6 +450,7 @@ static long init_record(struct motorRecord * pmr )
         pmr->mflg &= (~ pPvt->status.flagsWritten);
         pmr->mflg |= pPvt->status.flagsValue;
         new_RO_soft_limits(pmr);
+        load_pos_if_needed(pmr, pasynUser);
     }
     /* Do not need to manually retrieve the new status values, as if they are
      * set, a callback will be generated
