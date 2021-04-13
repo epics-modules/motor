@@ -308,11 +308,11 @@ int  asynMotorAxis::getReferencingModeMove()
   * \param[in] value Value to set */
 asynStatus asynMotorAxis::setIntegerParam(int function, int value)
 {
-  epicsUInt32 status = 0;
   // This assumes the parameters defined above are in the same order as the bits the motor record expects!
   if (function >= pC_->motorStatusDirection_ && 
       function <= pC_->motorStatusHomed_) {
     int mask;
+    epicsUInt32 status = status_.status;
     if ((function == pC_->motorStatusDone_) &&
         waitNumPollsBeforeReady_) {
       /* Work around the ready before started problem */
@@ -325,7 +325,6 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
       statusChanged_ = 1;
     }
 
-    status = status_.status;
     mask = 1 << (function - pC_->motorStatusDirection_);
     if (value) status |= mask;
     else       status &= ~mask;
@@ -333,6 +332,7 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
       status_.status = status;
       statusChanged_ = 1;
     }
+    pC_->setIntegerParam(axisNo_, pC_->motorStatus_, status);
   } else  if (function >= pC_->motorFlagsHomeOnLs_ &&
               function <= pC_->motorFlagsAdjAfterHomed_) {
     epicsUInt32 flagsValue = status_.flagsValue;
@@ -347,7 +347,6 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
     }
   }
   // Call the base class method
-  pC_->setIntegerParam(axisNo_, pC_->motorStatus_, status);
   return pC_->setIntegerParam(axisNo_, function, value);
 }
 
