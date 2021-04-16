@@ -6,6 +6,35 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.0.5-ESS
+###  Bug fixes
+####  8e1047d1: motorRecord: JOGF=1 and writing to e.g. LLM stopped
+####  380b35b0: asynMotorAxis.cpp: Only update motorStatus_ if needed
+####  0bb7c2a3: devMotorAsyn.c: Handle MF_DRIVER_USES_EGU in position restore
+####  e0db111f: motorRecord.cc: Fix printing in special() for links
+####  173355c5: Add shareLib.h
+### Improvements
+####  c7b58b60: Save-Restore: Add restore_needed
+####  1ac030da: devMotorAsyn.c: Introduce priv.saveRestore
+####  4e67cc7a: asynMotorController::readGenericPointer: Improve asynError
+####  c4eb8bc0: asynMotorAxis.cpp: Add positionWritten
+####  afa150b6: devMotorAsyn.c: Rename pasynUserSync into pasynUserSyncFloat64
+####  c3d59ab8: Merge 'github/asynMotor-remove-initEvent' into ess-master
+####  c966d921: Add devPositionRestoreNeeded() and use it
+####  49da10eb: motorRecord.cc: Improve prints about neverPolled   
+####  6b982fe0: Make flags in MFLG field more usable 
+####  855f0678: motorRecord.cc: Sanitize ERES after MRES
+####  1764b559: motorRecord.cc: Add one more debug in init_re_init() 
+####  74e65c7d: devMotorAsyn.c: Add debug print around RSTM
+####  debba9e2: asynMotorController.cpp: autopwerOff and no jog
+####  5bea53be: asynMotorController.cpp: Handle status in writeInt32()
+####  6c7ef0cb: motorRecord.cc: Remove printing of RA_DIRECTION
+####  166d19ae: motorRecord.cc: Reduce spam printing of RA_DIRECTION
+####  0e87222a: motorRecord.cc: Introduce mr_stops_on_ls_activated()
+####  f213c1d5: motorRecord.cc: Less LS special handling with cdir
+####  b81edb83: motorRecord.cc: Cleanup around clear_xx_buttons
+####  90643807: devMotorAsyn: remove initEvent in init_record()
+
 ## v7.0.4-ESS
 
 ###  Bug fixes
