@@ -2759,13 +2759,38 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
         if (((pmr->mip & MIP_JOG_REQ) == 0) && 
             ((pmr->mip & MIP_JOGF) || (pmr->mip & MIP_JOGR)))
         {
-            /* Stop motor.  When stopped, process() will correct backlash. */
-            pmr->pp = TRUE;
-            MIP_SET_BIT(MIP_JOG_STOP);
-            MIP_CLR_BIT(MIP_JOGF | MIP_JOGR);
-            Debug(pmr,1, "%s\n", "STOP jogging");
-            devSupStop(pmr);
-            return(OK);
+            /*
+             * Need to check if the buttons are in sync with
+             * the MIP.
+             * jogf == 1 and MIP == JOGF is good
+             * jogf == 0 and MIP == JOGF means stop
+             * jogf == 1 and MIP == JOGR means both JOG buttons active: stop
+             */
+            int buttons_state = 0, mip_state = 0;
+            if (pmr->jogr) buttons_state += 1;
+            if (pmr->jogf) buttons_state += 2;
+            if (pmr->mip & MIP_JOGR) mip_state += 1;
+            if (pmr->mip & MIP_JOGF) mip_state += 2;
+            if (buttons_state != mip_state)
+            {
+                /* Stop motor.  When stopped, process() will correct backlash. */
+                pmr->pp = TRUE;
+                MIP_SET_BIT(MIP_JOG_STOP);
+                MIP_CLR_BIT(MIP_JOGF | MIP_JOGR);
+#ifdef DEBUG
+                {
+                    char dbuf[MBLE];
+                    dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+                    Debug(pmr,1, "STOP jogging pmr->jogf=%d pmr->jogr=%dmip=0x%0x(%s)\n",
+                          pmr->jogf, pmr->jogr, pmr->mip, dbuf);
+                }
+#else
+                Debug(pmr,1, "STOP jogging pmr->jogf=%d pmr->jogr=%d\n",
+                      pmr->jogf, pmr->jogr);
+#endif
+                devSupStop(pmr);
+                return(OK);
+            }
         }
         else if (pmr->mip & (MIP_JOG_STOP | MIP_JOG_BL1 | MIP_JOG_BL2))
             return(OK); /* Normal return if process jog stop or backlash. */
