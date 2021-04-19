@@ -45,6 +45,7 @@ USAGE...	This file contains definitions and structures that
 #ifndef	INCmotordrvComh
 #define	INCmotordrvComh 1
 
+#include <shareLib.h>
 #include <callback.h>
 #include <epicsTypes.h>
 #include <epicsEvent.h>
