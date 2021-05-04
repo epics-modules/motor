@@ -1210,21 +1210,26 @@ that it will happen when we return.
 static void maybeRetry(motorRecord * pmr)
 {
     bool user_cdir;
+    bool close_enough;
     double diff = pmr->priv->last.commandedDval - pmr->drbv;
 
     /* Commanded direction in user coordinates. */
     user_cdir = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->cdir : !pmr->cdir;
-    if ((fabs(diff) >= pmr->rdbd) && !(pmr->hls && user_cdir) && !(pmr->lls && !user_cdir))
+    close_enough = (fabs(diff) <= pmr->rdbd) || (pmr->hls && user_cdir) || (pmr->lls && !user_cdir);
+#ifdef DEBUG
+    {
+      char dbuf[MBLE];
+      dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+      Debug(pmr,2,
+            "maybeRetry: %sclose enough commandedDval=%f dval=%f drbv=%f rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
+            close_enough ? "" : "not ",
+            pmr->priv->last.commandedDval, pmr->dval, pmr->drbv,
+            pmr->rdbd, diff, pmr->rcnt, pmr->rtry, pmr->mip, dbuf);
+    }
+#endif
+    if (!close_enough)
     {
         /* No, we're not close enough.  Try again. */
-#ifdef DEBUG
-        {
-            char dbuf[MBLE];
-            dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-            Debug(pmr,2, "maybeRetry: not close enough rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
-                  pmr->rdbd, diff, pmr->rcnt, pmr->rtry, pmr->mip, dbuf);
-        }
-#endif
         /* If max retry count is zero, retry is disabled */
         if (pmr->rtry == 0)
             MIP_CLR_BIT(~MIP_JOG_REQ); /* Clear everything, except jog request;
@@ -1259,14 +1264,6 @@ static void maybeRetry(motorRecord * pmr)
     else
     {
         /* Yes, we're close enough to the desired value. */
-#ifdef DEBUG
-        {
-            char dbuf[MBLE];
-            dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-            Debug(pmr,2, "maybeRetry: close enough; rdbd=%f diff=%f mip=0x%0x(%s)\n",
-                  pmr->rdbd, diff, pmr->mip, dbuf);
-        }
-#endif
         MIP_CLR_BIT(~MIP_JOG_REQ);/* Clear everything, except jog request; for
                                  * jog reactivation in postProcess(). */
         if (pmr->miss)
@@ -1620,7 +1617,8 @@ static long process(dbCommon *arg)
             {
 
                 /* We're going in the wrong direction. Readback problem? */
-                Debug(pmr,1, "STOP tdir=%d\n", pmr->tdir);
+                Debug(pmr,1, "STOP commandedDval=%f dval=%f drbv=%f tdir=%d\n",
+                      pmr->priv->last.commandedDval, pmr->dval, pmr->drbv, pmr->tdir);
 
                 devSupStop(pmr);
                 MIP_SET_BIT(MIP_STOP);
@@ -1642,9 +1640,9 @@ static long process(dbCommon *arg)
                     char dbuf[MBLE];
                     dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
                     Debug(pmr,1,
-                          "motor has stopped drbv=%f pp=%d udf=%d stat=%d cdir=%d mip=0x%0x(%s) msta=0x%x\n",
-                          pmr->drbv, pmr->pp, pmr->udf, pmr->stat,
-                          pmr->cdir, pmr->mip, dbuf, pmr->msta);
+                          "motor is stopped dval=%f drbv=%f pp=%d udf=%d stat=%d stop=%d mip=0x%0x(%s) msta=0x%x\n",
+                          pmr->dval, pmr->drbv, pmr->pp, pmr->udf, pmr->stat,
+                          pmr->stop, pmr->mip, dbuf, pmr->msta);
                 }
 #endif
                 pmr->dmov = TRUE;
