@@ -229,7 +229,7 @@ USAGE...        Motor Record Support.
     5 postProcess
     6 do_work()
     7 special()
-    8 Process begin/end
+    8 Process begin/end, SET_LAST_VAL_FROM_VAL
     9 External readback
    10 devMotorAsyn.c
    11 devSupGetInfo
@@ -543,6 +543,14 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
   }                                                  \
   while(0)
 
+#define SET_LAST_VAL_FROM_VAL                               \
+  do {                                                      \
+    Debug(pmr,8, "set last.val: pmr->val=%f last.val=%f\n", \
+          pmr->val, pmr->priv->last.val);                   \
+     pmr->priv->last.val = pmr->val;                        \
+  }                                                         \
+  while(0)
+
 
 #define MARK(FIELD) {mmap_field temp; temp.All = pmr->mmap; \
                     temp.Bits.FIELD = 1; pmr->mmap = temp.All;}
@@ -810,7 +818,7 @@ static long init_re_init(motorRecord *pmr)
     MARK(M_SPMG);
     pmr->diff = pmr->dval - pmr->drbv;
     MARK(M_DIFF);
-    pmr->priv->last.val = pmr->val;
+    SET_LAST_VAL_FROM_VAL;
     pmr->priv->last.dval = pmr->dval;
     pmr->priv->last.rval = pmr->rval;
     SET_LVIO(0);              /* init limit-violation field */
@@ -1192,7 +1200,7 @@ static long postProcess(motorRecord * pmr)
         doBackLash(pmr);
     }
     /* Save old values for next call. */
-    pmr->priv->last.val = pmr->val;
+    SET_LAST_VAL_FROM_VAL;
     pmr->priv->last.dval = pmr->dval;
     pmr->priv->last.rval = pmr->rval;
     MIP_CLR_BIT(MIP_STOP);
@@ -1221,9 +1229,9 @@ static void maybeRetry(motorRecord * pmr)
       char dbuf[MBLE];
       dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
       Debug(pmr,2,
-            "maybeRetry: %sclose enough commandedDval=%f dval=%f drbv=%f rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
+            "maybeRetry: %sclose enough commandedDval=%f last.dval=%f dval=%f drbv=%f rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
             close_enough ? "" : "not ",
-            pmr->priv->last.commandedDval, pmr->dval, pmr->drbv,
+            pmr->priv->last.commandedDval, pmr->priv->last.dval, pmr->dval, pmr->drbv,
             pmr->rdbd, diff, pmr->rcnt, pmr->rtry, pmr->mip, dbuf);
     }
 #endif
@@ -1244,7 +1252,7 @@ static void maybeRetry(motorRecord * pmr)
                 if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
                     MIP_SET_BIT(MIP_JOG_REQ);
 
-                pmr->priv->last.val = pmr->val;
+                SET_LAST_VAL_FROM_VAL;
                 pmr->priv->last.dval = pmr->dval;
                 pmr->priv->last.rval = pmr->rval;
 
@@ -1966,7 +1974,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
         pmr->dmov = FALSE;
         MARK(M_DMOV);
     }
-    pmr->priv->last.dval = pmr->dval;
+    SET_LAST_VAL_FROM_VAL;
     pmr->priv->last.val = pmr->val;
     pmr->priv->last.rval = pmr->rval;
 
@@ -2129,7 +2137,7 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
         }
         /* Update previous target positions. */
         pmr->priv->last.dval = pmr->dval;
-        pmr->priv->last.val = pmr->val;
+        SET_LAST_VAL_FROM_VAL;
         pmr->priv->last.rval = pmr->rval;
         return(OK);
     }
@@ -2852,7 +2860,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
 
             set_userlimits(pmr);        /* Translate dial limits to user limits. */
 
-            pmr->priv->last.val = pmr->val;
+            SET_LAST_VAL_FROM_VAL;
             MIP_SET_VAL(MIP_DONE);
             MARK(M_MIP);
             pmr->dmov = TRUE;
@@ -4106,7 +4114,7 @@ static void load_pos_new_rval(motorRecord * pmr)
     double newRval = pmr->dval / pmr->mres;
 
     pmr->priv->last.dval = pmr->dval;
-    pmr->priv->last.val = pmr->val;
+    SET_LAST_VAL_FROM_VAL;
     if (pmr->rval != (epicsInt32) NINT(newRval))
         MARK(M_RVAL);
     pmr->priv->last.rval = pmr->rval = (epicsInt32) NINT(newRval);
