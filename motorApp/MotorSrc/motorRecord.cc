@@ -227,7 +227,7 @@ USAGE...        Motor Record Support.
     3 Record init, UDF changes, values from controller
     4 LVIO, recalcLVIO
     5 postProcess
-    6 do_work()
+    6 do_work(), doDVALchangedOrNOTdoneMoving()
     7 special()
     8 Process begin/end, SET_LAST_VAL_FROM_VAL
     9 External readback
@@ -2075,6 +2075,14 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     double absdiff = fabs(diff);
     long rtnstat;
 
+#ifdef DEBUG
+    {
+        char dbuf[MBLE];
+        dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+        Debug(pmr,6, "doDVALchangedOrNOTdoneMoving: begin dval=%f drbv=%f mip=0x%0x(%s)\n",
+              pmr->dval, pmr->drbv, pmr->mip, dbuf);
+    }
+#endif
 
     /*
      * Post new values, recalc .val to reflect the change in .dval. (We
