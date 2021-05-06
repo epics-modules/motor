@@ -1812,7 +1812,14 @@ static long process(dbCommon *arg)
                             pmr->pp = TRUE;
                             goto process_exit;
                         }
-                        maybeRetry(pmr);
+                        if (pmr->mip == (MIP_STOP | MIP_MOVE))
+                        {
+                            MIP_CLR_BIT(MIP_STOP | MIP_MOVE);
+                        }
+                        else
+                        {
+                            maybeRetry(pmr);
+                        }
                         if (pmr->mip == MIP_RETRY && pmr->rmod == motorRMOD_I)
                         {
                             MIP_SET_BIT(MIP_DELAY_REQ);
