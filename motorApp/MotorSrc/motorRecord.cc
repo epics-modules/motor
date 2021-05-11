@@ -1032,7 +1032,7 @@ LOGIC:
     
     
 ******************************************************************************/
-static void doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
+static bool doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
                                double position)
 {
     /* Use if encoder or ReadbackLink is in use. */
@@ -1054,9 +1054,14 @@ static void doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
     default:
       vel = accEGU = 0.0;
     }
-    devSupMoveDialEgu(pmr, vel, accEGU, val, use_rel);
-    pmr->priv->last.commandedDval = position;
     setCDIRfromDialMove(pmr, diff < 0.0 ? 0 : 1);
+    bool ls_active = ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir));
+    if (!ls_active)
+    {
+        devSupMoveDialEgu(pmr, vel, accEGU, val, use_rel);
+        pmr->priv->last.commandedDval = position;
+    }
+    return !ls_active;
 }
 
 /*****************************************************************************
@@ -1078,22 +1083,22 @@ static void doBackLash(motorRecord *pmr)
 #endif
     if (pmr->mip & MIP_JOG_STOP)
     {
-        doMoveDialPosition(pmr, moveModePosition, pmr->dval - pmr->bdst);
-        MIP_SET_VAL(MIP_JOG_BL1);
+        if (doMoveDialPosition(pmr, moveModePosition, pmr->dval - pmr->bdst))
+            MIP_SET_VAL(MIP_JOG_BL1);
     }
     else if(pmr->mip & MIP_MOVE)
     {
         /* First part of move done. Do backlash correction. */
-        doMoveDialPosition(pmr, moveModeBacklash, pmr->dval);
         pmr->rval = NINT(pmr->dval);
-        MIP_SET_VAL(MIP_MOVE_BL);
+        if (doMoveDialPosition(pmr, moveModeBacklash, pmr->dval))
+            MIP_SET_VAL(MIP_MOVE_BL);
     }
     else if (pmr->mip & MIP_JOG_BL1)
     {
         /* First part of jog done. Do backlash correction. */
-        doMoveDialPosition(pmr, moveModeBacklash, pmr->dval);
         pmr->rval = NINT(pmr->dval);
-        MIP_SET_VAL(MIP_JOG_BL2);
+        if (doMoveDialPosition(pmr, moveModeBacklash, pmr->dval))
+            MIP_SET_VAL(MIP_JOG_BL2);
     }
     pmr->pp = TRUE;
 }
@@ -1964,6 +1969,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
 {
     double rbdst1 = fabs(pmr->bdst) + pmr->spdb;
     bool use_rel;
+    bool moving_started = false;
 
     Debug(pmr,2, "doRetryOrDone dval=%f rdbd=%f spdb=%f udf=%d stat=%d rcnt=%d pref_dir=%d relpos=%f relbpos=%f drbv=%f\n",
           pmr->dval, pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat, pmr->rcnt, preferred_dir,
@@ -2004,7 +2010,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
         (preferred_dir == true && pmr->bvel == pmr->velo &&
          pmr->bacc == pmr->accl))
     {
-        doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relpos);
+        moving_started = doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relpos);
     }
     /* IF move is in preferred direction, AND, current position is within backlash range. */
     else if ((preferred_dir == true) &&
@@ -2013,12 +2019,16 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
              )
             )
     {
-        doMoveDialPosition(pmr, moveModeBacklash, pmr->drbv + relpos);
+        moving_started = doMoveDialPosition(pmr, moveModeBacklash, pmr->drbv + relpos);
     }
     else
     {
-        doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relbpos);
+        moving_started = doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relbpos);
         pmr->pp = TRUE;              /* do backlash from posprocess(). */
+    }
+    if (!moving_started)
+    {
+        MIP_SET_VAL(MIP_DONE);
     }
 }
 
