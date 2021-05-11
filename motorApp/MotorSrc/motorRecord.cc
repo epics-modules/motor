@@ -1218,28 +1218,39 @@ that it will happen when we return.
 static void maybeRetry(motorRecord * pmr)
 {
     bool user_cdir;
-    bool close_enough;
+    bool close_enough, ls_active;
     double diff = pmr->priv->last.commandedDval - pmr->drbv;
 
     /* Commanded direction in user coordinates. */
     user_cdir = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->cdir : !pmr->cdir;
-    close_enough = (fabs(diff) <= pmr->rdbd) || (pmr->hls && user_cdir) || (pmr->lls && !user_cdir);
+    close_enough = fabs(diff) <= pmr->rdbd;
+    ls_active = (pmr->hls && user_cdir) || (pmr->lls && !user_cdir);
 #ifdef DEBUG
     {
       char dbuf[MBLE];
       dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
       Debug(pmr,2,
-            "maybeRetry: %sclose enough commandedDval=%f last.dval=%f dval=%f drbv=%f rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
-            close_enough ? "" : "not ",
+            "maybeRetry: %s%scommandedDval=%f last.dval=%f dval=%f drbv=%f rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
+            ls_active ? "" : close_enough ? "close enough " : "not close enough ",
+            ls_active ? "ls_active " :"",
             pmr->priv->last.commandedDval, pmr->priv->last.dval, pmr->dval, pmr->drbv,
             pmr->rdbd, diff, pmr->rcnt, pmr->rtry, pmr->mip, dbuf);
     }
 #endif
     if (!close_enough)
     {
+        if (ls_active)
+        {
+            MIP_SET_VAL(MIP_DONE);
+            SET_LAST_VAL_FROM_VAL;
+            pmr->priv->last.dval = pmr->dval;
+            pmr->priv->last.rval = pmr->rval;
+            pmr->miss = 1;
+            MARK_AUX(M_MISS);
+        }
         /* No, we're not close enough.  Try again. */
         /* If max retry count is zero, retry is disabled */
-        if (pmr->rtry == 0)
+        else if (pmr->rtry == 0)
             MIP_CLR_BIT(~MIP_JOG_REQ); /* Clear everything, except jog request;
                                       * for jog reactivation in postProcess(). */
         else
