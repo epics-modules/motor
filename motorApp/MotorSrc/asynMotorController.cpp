@@ -65,6 +65,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
 {
   static const char *functionName = "asynMotorController";
 
+  pasynUserController_ = NULL;
   /* Create the base set of motor parameters */
   createParam(motorMoveRelString,                asynParamFloat64,    &motorMoveRel_);
   createParam(motorMoveAbsString,                asynParamFloat64,    &motorMoveAbs_);
@@ -805,10 +806,12 @@ double asynMotorController::pollAll(void)
       int wasMovingFlag = pAxis->getWasMovingFlag();
       int disableFlag = pAxis->getDisableFlag();
       if ((moving && !wasMovingFlag) || (!moving && wasMovingFlag))  {
-        asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
-                  "%s:%s: axis=%d autoPower=%d moving=%d getWasMovingFlag=%d getDisableFlag()=%d\n",
-                  driverName, __FUNCTION__, axisNo,
-                  autoPower, (int)moving, wasMovingFlag, disableFlag);
+        if (pasynUserController_) {
+          asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
+                    "%s:%s: axis=%d autoPower=%d moving=%d getWasMovingFlag=%d getDisableFlag()=%d\n",
+                    driverName, __FUNCTION__, axisNo,
+                    autoPower, (int)moving, wasMovingFlag, disableFlag);
+        }
       }
     }
     if (moving) {
@@ -835,11 +838,13 @@ double asynMotorController::pollAll(void)
       double lastMoveSecs = pAxis->getLastEndOfMoveTime();
       nowTimeSecs = getNowTimeSecs();
       double diffTime = nowTimeSecs - lastMoveSecs;
-      asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
-                "%s:%s: axis=%d moving=%d lastMoveSecs=%f nowTimeSecs=%f diffTime=%f\n",
-                driverName, __FUNCTION__, axisNo,
-                (int)moving,
-                lastMoveSecs, nowTimeSecs, diffTime);
+      if (pasynUserController_) {
+        asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
+                  "%s:%s: axis=%d moving=%d lastMoveSecs=%f nowTimeSecs=%f diffTime=%f\n",
+                  driverName, __FUNCTION__, axisNo,
+                  (int)moving,
+                  lastMoveSecs, nowTimeSecs, diffTime);
+      }
       if (diffTime >= autoPowerOffDelay) {
         pAxis->setClosedLoop(0);
         pAxis->setDisableFlag(0);
