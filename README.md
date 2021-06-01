@@ -6,6 +6,17 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.0.6-ESS, based on R7-2-2
+###  Bug fixes
+#### fb6027cbb: asynMotorController.cpp: NULL pointer check for pasynUserController_
+#### b47408f37: motorRecord.cc: Do not move further on limit switch
+#### ab535ead6: motorRecord/maybeRetry(): Do not retry if limit swicth is active
+#### 41c2bc5cc: Fix NTM=1 RTRY=1 bug: Motor stopped, but never moved
+#### fc1bda9c0: motordrvCom.h needs shareLib.h
+### Improvements
+#### 8bfdd9d50: motorRecord.cc: More printing in doDVALchangedOrNOTdoneMoving()
+#### 6c7833aac: motorRecord.cc: More printing around last VAL
+#### ef91f0a0f: motorRecord.cc: More printing around commandedDval
 ## v7.0.5-ESS
 ###  Bug fixes
 ####  8e1047d1: motorRecord: JOGF=1 and writing to e.g. LLM stopped
