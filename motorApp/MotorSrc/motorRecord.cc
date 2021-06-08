@@ -3273,8 +3273,6 @@ static long special(DBADDR *paddr, int after)
         }
         goto velcheckB;
 
-        /* new urev: make mres agree, and change (velo,bvel,vbas) to leave */
-        /* (s,sbak,sbas) constant */
 
     case motorRecordUREV:
         if (pmr->mres != (temp_dbl = pmr->urev / pmr->srev))
@@ -3284,25 +3282,55 @@ static long special(DBADDR *paddr, int after)
         }
 
 velcheckB:
-        if (pmr->velo != (temp_dbl = fabs_urev * pmr->s))
+        if ((pmr->mflg & MF_DRIVER_USES_EGU))
         {
-            pmr->velo = temp_dbl;
-            MARK_AUX(M_VELO);
+            /* new urev: make mres agree, and change s,sbas. sbak, smax */
+            /*  to leave velo, vbas, bvel, vmax constant */
+            if ((pmr->urev != 0.0) && (pmr->s != (temp_dbl = pmr->velo / fabs_urev)))
+            {
+                pmr->s = temp_dbl;
+                db_post_events(pmr, &pmr->s, DBE_VAL_LOG);
+            }
+            if ((pmr->urev != 0.0) && (pmr->sbas != (temp_dbl = pmr->vbas / fabs_urev)))
+            {
+                pmr->sbas = temp_dbl;
+                db_post_events(pmr, &pmr->sbas, DBE_VAL_LOG);
+            }
+            if ((pmr->urev != 0.0) && (pmr->sbak != (temp_dbl = pmr->bvel / fabs_urev)))
+            {
+                pmr->sbak = temp_dbl;
+                db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
+            }
+            if ((pmr->urev != 0.0) && (pmr->smax != (temp_dbl = pmr->vmax / fabs_urev)))
+            {
+                pmr->smax = temp_dbl;
+                db_post_events(pmr, &pmr->smax, DBE_VAL_LOG);
+            }
         }
-        if (pmr->vbas != (temp_dbl = fabs_urev * pmr->sbas))
+        else
         {
-            pmr->vbas = temp_dbl;
-            MARK_AUX(M_VBAS);
-        }
-        if (pmr->bvel != (temp_dbl = fabs_urev * pmr->sbak))
-        {
-            pmr->bvel = temp_dbl;
-            db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
-        }
-        if (pmr->vmax != (temp_dbl = fabs_urev * pmr->smax))
-        {
-            pmr->vmax = temp_dbl;
-            db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
+            /* new urev: make mres agree, and change (s, sbak sbas,smax) to leave */
+            /* (velo, vbas, bvel, vmax) constant */
+            if (pmr->velo != (temp_dbl = fabs_urev * pmr->s))
+            {
+                pmr->velo = temp_dbl;
+                MARK_AUX(M_VELO);
+            }
+            if (pmr->vbas != (temp_dbl = fabs_urev * pmr->sbas))
+            {
+                pmr->vbas = temp_dbl;
+                MARK_AUX(M_VBAS);
+            }
+            if (pmr->bvel != (temp_dbl = fabs_urev * pmr->sbak))
+            {
+                pmr->bvel = temp_dbl;
+                db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
+            }
+            if (pmr->vmax != (temp_dbl = fabs_urev * pmr->smax))
+            {
+                pmr->vmax = temp_dbl;
+                db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
+            }
         }
         break;
 
