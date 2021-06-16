@@ -39,6 +39,7 @@ struct PM304controller
 	int home_mode[PM304_MAX_CHANNELS]; /* The combined home modes for all axes */
     char port[80];          /* Asyn port name */
 	int reset_before_move;  /* Reset the controller before any move command */
+	int creep_speeds[PM304_MAX_CHANNELS]; /* Creep speed for each axis */
 };
 
 RTN_STATUS PM304Setup(int, int);

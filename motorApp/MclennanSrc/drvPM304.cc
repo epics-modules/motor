@@ -719,6 +719,18 @@ STATIC int motor_init()
                         cntrl->use_encoder[motor_index] = 1;
                     }
                 }
+                /* Querying speeds for this axis */
+                sprintf(command, "%dQS", motor_index+1);
+                send_recv_mess(card_index, command ,buff);
+                /* splice creep speed - split up spaces then parse second integer as creep speed */
+                const char s[2] = " ";
+                char *token;
+                token = strtok(buff, s);
+                for (int i=0;i<2;i++) {
+                    token = strtok(NULL, s);
+                }
+                int creep_speed = atoi(token);
+                cntrl->creep_speeds[motor_index] = creep_speed;
 
                 Debug(3, "PM304 motor_init(), cntrl->model=%d, cntrl->use_encoder[%d]=%d.\n", cntrl->model, motor_index, cntrl->use_encoder[motor_index]);
 
