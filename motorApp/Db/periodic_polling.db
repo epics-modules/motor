@@ -4,5 +4,6 @@ record(ao, "$(P)$(M):SCAN") {
   field(DESC, "Polls the motor position")
   field(OUT, "$(P)$(M).STUP PP")
   field(OVAL, "1")
+  field(VAL, "1")
   field(SDIS, "$(P)$(M).MOVN")
 }
