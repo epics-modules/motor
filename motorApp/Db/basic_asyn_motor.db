@@ -40,7 +40,6 @@ record(longout,"$(P)$(M)Direction") {
     field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_REC_DIRECTION")
 }
 
-
 # Motor offset for this axis
 record(ao,"$(P)$(M)Offset") {
     field(DESC, "$(M) offset")
@@ -50,7 +49,6 @@ record(ao,"$(P)$(M)Offset") {
     field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_REC_OFFSET")
     field(PREC, "$(PREC)")
 }
-
 
 # Motor resolution for this axis
 record(ao,"$(P)$(M)Resolution") {
