@@ -719,11 +719,17 @@ STATIC int motor_init()
                         cntrl->use_encoder[motor_index] = 1;
                     }
                 }
+
                 /* Querying speeds for this axis */
                 sprintf(command, "%dQS", motor_index+1);
                 send_recv_mess(card_index, command ,buff);
+                char* s;
+                if (cntrl->model == MODEL_PM304) {
+                    s = "=";
+                } else {
+                    s = " ";                    
+                }
                 /* splice creep speed - split up spaces then parse second integer as creep speed */
-                const char s[2] = " ";
                 char *token;
                 token = strtok(buff, s);
                 for (int i=0;i<2;i++) {
