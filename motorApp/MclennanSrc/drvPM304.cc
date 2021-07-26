@@ -723,13 +723,13 @@ STATIC int motor_init()
                 /* Querying speeds for this axis */
                 sprintf(command, "%dQS", motor_index+1);
                 send_recv_mess(card_index, command ,buff);
+                /* splice creep speed - split up spaces then parse second integer as creep speed */
                 char* s;
                 if (cntrl->model == MODEL_PM304) {
                     s = "=";
                 } else {
                     s = " ";                    
                 }
-                /* splice creep speed - split up spaces then parse second integer as creep speed */
                 char *token;
                 token = strtok(buff, s);
                 for (int i=0;i<2;i++) {
