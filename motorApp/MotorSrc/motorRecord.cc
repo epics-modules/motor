@@ -1609,8 +1609,6 @@ static long process(dbCommon *arg)
 
         if (pmr->movn)
         {
-            int sign_rdif = (pmr->rdif < 0) ? 0 : 1;
-            double ntm_deadband =  pmr->ntmf * (fabs(pmr->bdst) + pmr->rdbd);
             bool move_or_retry;
 
             if ((pmr->mip & MIP_RETRY) != 0 || (pmr->mip & MIP_MOVE) != 0)
@@ -1632,22 +1630,30 @@ static long process(dbCommon *arg)
 
             /* Test for new target position in opposite direction of current
                motion. TB: This code needs review
+               The original code uses rdif (in steps) , but we use diff (in EGU)
              */
-            if (pmr->ntm == menuYesNoYES &&
-                (sign_rdif != pmr->cdir) &&
-                (fabs(pmr->diff) > ntm_deadband) &&
-                (move_or_retry == true) &&
-                (pmr->mip & MIP_STOP) == 0)
+            if (pmr->ntm == menuYesNoYES)
             {
-
-                /* We're going in the wrong direction. Readback problem? */
-                Debug(pmr,1, "STOP commandedDval=%f dval=%f drbv=%f tdir=%d\n",
-                      pmr->priv->last.commandedDval, pmr->dval, pmr->drbv, pmr->tdir);
-
-                devSupStop(pmr);
-                MIP_SET_BIT(MIP_STOP);
-                MARK(M_MIP);
-                pmr->pp = FALSE; /* Don't post process the previous move. */
+                int sign_diff = (pmr->diff < 0) ? 0 : 1;
+                double ntm_deadband =  pmr->ntmf * (fabs(pmr->bdst) + pmr->rdbd);
+                if ((sign_diff != pmr->cdir) &&
+                    (fabs(pmr->diff) > ntm_deadband) &&
+                    (move_or_retry == true) &&
+                    (pmr->mip & MIP_STOP) == 0)
+                {
+                    /* We're going in the wrong direction. Readback problem? */
+                    Debug(pmr,1, "STOP NTM setting last.dval=drbv; commandedDval=%f dval=%f last.dval=%f drbv=%f "
+                          "pmr->diff=%f sign_diff=%d cdir=%d ntm_deadband=%f\n",
+                          pmr->priv->last.commandedDval, pmr->dval,
+                          pmr->priv->last.dval,
+                          pmr->drbv, pmr->diff, sign_diff,
+                          pmr->cdir, ntm_deadband);
+                    pmr->priv->last.dval = pmr->drbv; /* to pick up last.dval == "first DVAL" */
+                    devSupStop(pmr);
+                    MIP_SET_BIT(MIP_STOP);
+                    MARK(M_MIP);
+                    pmr->pp = FALSE; /* Don't post process the previous move. */
+                }
             }
             status = 0;
         }
@@ -2107,8 +2113,9 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        Debug(pmr,6, "doDVALchangedOrNOTdoneMoving: begin dval=%f drbv=%f mip=0x%0x(%s)\n",
-              pmr->dval, pmr->drbv, pmr->mip, dbuf);
+        Debug(pmr,6, "doDVALchangedOrNOTdoneMoving: begin commandedDval=%f dval=%f last.dval=%f drbv=%f mip=0x%0x(%s)\n",
+              pmr->priv->last.commandedDval, pmr->dval, pmr->priv->last.dval,
+              pmr->drbv, pmr->mip, dbuf);
     }
 #endif
 
@@ -2567,8 +2574,10 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        Debug(pmr,6, "do_work: begin udf=%d stat=%d nsta=%d mip=0x%0x(%s)\n",
-              pmr->udf, pmr->stat, pmr->nsta, pmr->mip, dbuf);
+        Debug(pmr,6, "do_work: begin udf=%d stat=%d nsta=%d commandedDval=%f dval=%f last.dval=%f drbv=%f mip=0x%0x(%s)\n",
+              pmr->udf, pmr->stat, pmr->nsta,
+              pmr->priv->last.commandedDval, pmr->dval, pmr->priv->last.dval,
+              pmr->drbv, pmr->mip, dbuf);
     }
 #endif
     
@@ -3039,6 +3048,11 @@ static long special(DBADDR *paddr, int after)
                 {
                     pmr->dmov = FALSE;
                     db_post_events(pmr, &pmr->dmov, DBE_VAL_LOG);
+                }
+                else
+                {
+                    /* to pick up last.dval == "first DVAL" */
+                    pmr->priv->last.dval = pmr->drbv;
                 }
                 return(OK);
 
