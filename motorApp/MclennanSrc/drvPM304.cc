@@ -722,21 +722,29 @@ STATIC int motor_init()
 
                 /* Querying speeds for this axis */
                 sprintf(command, "%dQS", motor_index+1);
-                send_recv_mess(card_index, command ,buff);
+                send_recv_mess(card_index, command, buff);
                 /* splice creep speed - split up spaces then parse second integer as creep speed */
-                char* s;
-                if (cntrl->model == MODEL_PM304) {
-                    s = "=";
-                } else {
-                    s = " ";                    
-                }
-                char *token;
-                token = strtok(buff, s);
-                for (int i=0;i<2;i++) {
-                    token = strtok(NULL, s);
-                }
-                int creep_speed = atoi(token);
+                /* P600 returns 01:SC = 700 SV = 16200 SA = 50000 SD = 100000 LD = 200000
+                   PM304 returns SV=16200,SC=1000,SA=100000,SD=100000 */
+                const char* delim = (cntrl->model == MODEL_PM304 ? "=," : "=: ");
+                char *token, *tok_save = NULL;
+                int creep_speed = 0;
+                token = epicsStrtok_r(buff, delim, &tok_save);
+                do
+                {
+                    if (!strcmp(token, "SC")) {
+                        token = epicsStrtok_r(NULL, delim, &tok_save);
+                        if (token != NULL) {
+                            creep_speed = atoi(token);
+                        }
+                    } else {
+                        token = epicsStrtok_r(NULL, delim, &tok_save);
+                    }
+                } while(token != NULL);
                 cntrl->creep_speeds[motor_index] = creep_speed;
+                if (creep_speed == 0) {
+                    printf("WARNING: unable to determine creep speed for axis %d\n", motor_index);
+                }
 
                 Debug(3, "PM304 motor_init(), cntrl->model=%d, cntrl->use_encoder[%d]=%d.\n", cntrl->model, motor_index, cntrl->use_encoder[motor_index]);
 
