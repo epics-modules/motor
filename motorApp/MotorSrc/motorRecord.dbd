@@ -471,6 +471,7 @@ recordtype(motor) {
         field(SPMG,DBF_MENU) {
                 asl(ASL0)
                 prompt("Stop/Pause/Move/Go")
+                special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
                 menu(motorSPMG)
