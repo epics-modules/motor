@@ -1665,14 +1665,34 @@ static long process(dbCommon *arg)
             /* Assume we're done moving until we find out otherwise. */
             if (pmr->dmov == FALSE)
             {
+                if (process_reason == CALLBACK_DATA &&
+                    pmr->spmg == motorSPMG_Pause &&
+                    pmr->mip == MIP_STOP)
+                {
+                    /*
+                     * update because of a flickering encoder ?
+                     * We don't want to touch the state machine
+                     */
+#ifdef DEBUG
+                    {
+                        char dbuf[MBLE];
+                        dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+                        Debug(pmr,9,
+                              "motor is paused dval=%f drbv=%f pp=%d udf=%d stat=%d stop=%d pmr->spmg=%d mip=0x%0x(%s) msta=0x%x\n",
+                              pmr->dval, pmr->drbv, pmr->pp, pmr->udf, pmr->stat,
+                              pmr->stop, (int)pmr->spmg, pmr->mip, dbuf, pmr->msta);
+                    }
+#endif
+                    goto process_exit;
+                }
 #ifdef DEBUG
                 {
                     char dbuf[MBLE];
                     dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
                     Debug(pmr,1,
-                          "motor is stopped dval=%f drbv=%f pp=%d udf=%d stat=%d stop=%d mip=0x%0x(%s) msta=0x%x\n",
+                          "motor is stopped dval=%f drbv=%f pp=%d udf=%d stat=%d stop=%d pmr->spmg=%d mip=0x%0x(%s) msta=0x%x\n",
                           pmr->dval, pmr->drbv, pmr->pp, pmr->udf, pmr->stat,
-                          pmr->stop, pmr->mip, dbuf, pmr->msta);
+                          pmr->stop, (int)pmr->spmg, pmr->mip, dbuf, pmr->msta);
                 }
 #endif
                 pmr->dmov = TRUE;
