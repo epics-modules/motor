@@ -167,9 +167,11 @@ STATIC RTN_STATUS PM304_end_trans(struct motorRecord *mr)
 
 /* request homing move */
 STATIC void request_home(struct mess_node *motor_call, int model, int axis, int home_direction, int home_mode) {
+    // Max creep speed is 800  - set to velo if under 800
+    int creep_speed = (VELO>800) ? 800 : VELO;
     char buff[30];
     if (model == MODEL_PM304){
-        sprintf(buff, "%dSC%d;", axis, VELO);
+        sprintf(buff, "%dSC%d;", axis, creep_speed);
         strcat(motor_call->message, buff);
         sprintf(buff, "%dIX%d;", axis, home_direction);
     } else {
@@ -179,7 +181,7 @@ STATIC void request_home(struct mess_node *motor_call, int model, int axis, int 
             } else if ( home_mode==HOME_MODE_FORWARD_HOME_AND_ZERO ) {
                 home_direction = 1;
             }
-            sprintf(buff, "%dSC%d;", axis, VELO);
+            sprintf(buff, "%dSC%d;", axis, creep_speed);
             strcat(motor_call->message, buff);
             sprintf(buff, "%dHD%d;", axis, home_direction);
         } else {
