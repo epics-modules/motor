@@ -192,7 +192,7 @@ USAGE...        Motor Record Support.
  * .78 08-21-18 kmp - Reverted .69 stop on RA_PROBLEM true.
  */                                                          
 
-#define VERSION 7.06
+#define VERSION 7.07
 
 #include    <stdlib.h>
 #include    <string.h>
@@ -2302,8 +2302,28 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     }
 
     if (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY)
+    {
         doRetryOrDone(pmr, preferred_dir, relpos, relbpos);
-
+    }
+    else if (pmr->mip & MIP_MOVE && pmr->ntm == motorNTM_UPDATE)
+    {
+        int mf_ntm_update_bit = (pmr->mflg & MF_NTM_UPDATE);
+        Debug(pmr,6, "doDVALchangedOrNOTdoneMoving: ntm=%d\n mf_ntm_update_bit=%d%s\n",
+              (int)pmr->ntm, mf_ntm_update_bit,
+              mf_ntm_update_bit ? "" : " ignored");
+        pmr->priv->last.dval = pmr->drbv; /* to pick up last.dval == "first DVAL" */
+        if (mf_ntm_update_bit)
+        {
+            doRetryOrDone(pmr, preferred_dir, relpos, relbpos);
+            /*
+             * Once the motor has stopped, it should start a new motion,
+             * and not go through retry
+             * Therefore we set the MIP to STOP | MOVE
+             */
+            if (pmr->mip == MIP_MOVE)
+                MIP_SET_BIT(MIP_STOP);
+        }
+    }
     return(OK);
 }
 

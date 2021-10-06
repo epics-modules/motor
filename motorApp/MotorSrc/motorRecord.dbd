@@ -82,6 +82,13 @@ menu(motorRSTM) {
         choice(motorRSTM_Conditional, "Conditional")
 }
 
+# NO and YES must have the same values as menuNO/YES
+menu(motorNTM) {
+        choice(motorNTM_NO,"NO")
+        choice(motorNTM_YES,"YES")
+        choice(motorNTM_UPDATE,"UPDATE")
+}
+
 include "menuOmsl.dbd"
 
 recordtype(motor) {
@@ -760,7 +767,8 @@ recordtype(motor) {
                 prompt("New Target Monitor")
                 promptgroup(GUI_COMMON)
                 interest(1)
-                menu(menuYesNo)
+                menu(motorNTM)
+                special(SPC_MOD)
                 initial("YES")
         }
         field(NTMF,DBF_USHORT) {
