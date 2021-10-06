@@ -3027,6 +3027,7 @@ static long special(DBADDR *paddr, int after)
         double value = 0;
         switch ((int)paddr->field_type) {
         case DBF_ENUM:
+        case DBF_MENU:
             value = (double)*(dbr_enum_t*)paddr->pfield;
             break;
         case DBF_SHORT:
@@ -3057,6 +3058,8 @@ static long special(DBADDR *paddr, int after)
         case DBF_STRING:
             pString = (const char*)paddr->pfield;
             break;
+        default:
+            pString = "??";
         }
         switch (fieldIndex)
         {
