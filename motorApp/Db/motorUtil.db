@@ -116,6 +116,11 @@ record(waveform, "$(P)movingDiff") {
   field(FTVL, "CHAR")
 }
 
+record(ai, "$(PVPREFIX)MOT:MTR$(MTRCTRL):AXES_NUM") {
+  field(DESC, "The num of axes on the controller")
+  field(VAL, "$(AXES_NUM=8)")
+}
+
 #! Further lines contain data used by VisualDCT
 #! View(50,124,1.3)
 #! Record("$(P)allstop",100,343,0,0,"$(P)allstop")
