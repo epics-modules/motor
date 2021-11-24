@@ -189,7 +189,7 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
     struct motor_dset *pdset = (struct motor_dset *) (mr->dset);
     struct board_stat *brdptr;
     int card, signal;
-    bool initEncoder, initPos, initString, initPID;
+    bool initEncoder, initPos = false, initString, initPID;
     struct motor_trans *ptrans;
     MOTOR_AXIS_QUERY axis_query;
     struct mess_node *motor_call;
@@ -288,9 +288,10 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
     else
         ep_mp[0] = ep_mp[1] = 1.0;
 
-    initPos = ((use_rel == true) ||
-               (fabs(mr->dval) > mr->rdbd && mr->mres != 0 && fabs(axis_query.position * mr->mres) < mr->rdbd)
-              ) ? true : false;
+    initPos = false;
+//    initPos = ((use_rel == true) ||
+//               (fabs(mr->dval) > mr->rdbd && mr->mres != 0 && fabs(axis_query.position * mr->mres) < mr->rdbd)
+//              ) ? true : false;
     /* Test for command primitive initialization string. */
     initString = (mr->init != NULL && strlen(mr->init)) ? true : false;
     /* Test for PID support. */

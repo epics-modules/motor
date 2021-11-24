@@ -171,29 +171,36 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     double position = pPvt->status.position;
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
     double encRatio[2] = {pmr->mres, pmr->eres};
-    int use_rel = 0; /*(pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));*/
-
+    int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
+    int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) &&
+                                      (pmr->mres != 0) && (fabs(position * pmr->mres) < rdbd);
+    int initPos = 0;
     /*Before setting position, set the correct encoder ratio.*/
     start_trans(pmr);
     build_trans(SET_ENC_RATIO, encRatio, pmr);
     end_trans(pmr);
 
-    if ((use_rel != 0) ||
-        ((fabs(pmr->dval) > rdbd) && (pmr->mres != 0) && (fabs(position * pmr->mres) < rdbd))
-       )
+    if (initPos)
     {
         double setPos = pmr->dval / pmr->mres;
         epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );
-
+        RTN_STATUS rtnval;
+        
         pPvt->initEvent = initEvent;
 
         start_trans(pmr);
-        build_trans(LOAD_POS, &setPos, pmr);
+        rtnval = build_trans(LOAD_POS, &setPos, pmr);
         end_trans(pmr);
 
-        asynPrint(pasynUser, ASYN_TRACE_FLOW,
-                  "devMotorAsyn::init_controller, %s set position to %f\n",
-                  pmr->name, setPos );
+       if (rtnval != OK)  {
+            asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                      "devMotorAsyn::init_controller, %s failed to set position to %f\n",
+                      pmr->name, setPos );
+        } else {
+            asynPrint(pasynUser, ASYN_TRACE_FLOW,
+                      "devMotorAsyn::init_controller, %s set position to %f\n",
+                      pmr->name, setPos );
+        }
 
         if ( initEvent )
         {
