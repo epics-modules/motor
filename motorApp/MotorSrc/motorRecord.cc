@@ -2410,7 +2410,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 }
                 /* IF move is in preferred direction, AND, current position is within backlash range. */
                 else if ((preferred_dir == true) &&
-                         ((use_rel == true  && relbpos <= 1.0) ||
+                         ((use_rel == true  && ((pmr->bdst >= 0 && relbpos <= 1.0) || (pmr->bdst < 0 && relbpos >= 1.0))) ||
                           (use_rel == false && (fabs(newpos - currpos) <= rbdst1))
                          )
                         )
