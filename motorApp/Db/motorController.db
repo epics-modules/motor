@@ -1,0 +1,7 @@
+## pvs that should be available per controller
+## Q is normally MOT:MTRxx:
+
+record(longin, "$(P)$(Q)AXES_NUM") {
+  field(DESC, "number of axes on controller")
+  field(VAL, "$(AXES_NUM=8)")
+}
