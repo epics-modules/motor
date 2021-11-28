@@ -39,6 +39,7 @@ DB += ACRAuxBoRBV.template
 DB += TransPos.db
 DB += motorUtil.db
 DB += motorStatus.db
+DB += motorController.db
 DB += asyn_motor.db
 DB += profileMoveController.template
 DB += profileMoveAxis.template
