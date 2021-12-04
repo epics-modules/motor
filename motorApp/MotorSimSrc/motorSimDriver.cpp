@@ -14,6 +14,7 @@ December 13, 2009
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include <epicsTime.h>
 #include <epicsThread.h>
@@ -277,12 +278,17 @@ asynStatus motorSimAxis::move(double position, int relative, double minVelocity,
 {
   route_pars_t pars;
   static const char *functionName = "move";
+  std::cerr << "motorSimAxis::move axis " << axisNo_ << " position " << position << (relative ? " (relative)" : "(absoute)") << " speed min/max " << minVelocity << "/" << maxVelocity << " acceleration " << acceleration << std::endl;
 
   if (relative) position += endpoint_.axis[0].p + enc_offset_;
 
   /* Check to see if in hard limits */
   if ((nextpoint_.axis[0].p >= hiHardLimit_  &&  position > nextpoint_.axis[0].p) ||
-    (nextpoint_.axis[0].p <= lowHardLimit_ &&  position < nextpoint_.axis[0].p)  ) return asynError;
+    (nextpoint_.axis[0].p <= lowHardLimit_ &&  position < nextpoint_.axis[0].p)  )
+  {
+      std::cerr << "motorSimAxis::move failed (hard limits)" << std::endl;
+      return asynError;
+  }
 
   if (pC_->movesDeferred_ == 0) { /*Normal move.*/
     endpoint_.axis[0].p = position - enc_offset_;
@@ -326,6 +332,7 @@ asynStatus motorSimAxis::setVelocity(double velocity, double acceleration )
   this->endpoint_.axis[0].p = (this->nextpoint_.axis[0].p +
                               time * ( this->nextpoint_.axis[0].v + 0.5 * deltaV));
   this->reroute_ = ROUTE_NEW_ROUTE;
+  std::cerr << "motorSimAxis::setVelocity axis " << axisNo_ << " velocity " << velocity << " acceleration " << acceleration << std::endl;
   return asynSuccess;
 }
 
@@ -335,6 +342,7 @@ asynStatus motorSimAxis::home(double minVelocity, double maxVelocity, double acc
   asynStatus status = asynError;
   // static const char *functionName = "home";
 
+  std::cerr << "motorSimAxis::home axis " << axisNo_ << " direction " << (forwards ? "forwards" : "backwards") << std::endl;
   status = setVelocity((forwards? maxVelocity: -maxVelocity), acceleration );
   homing_ = 1;
   return status;
@@ -344,6 +352,7 @@ asynStatus motorSimAxis::home(double minVelocity, double maxVelocity, double acc
 asynStatus motorSimAxis::moveVelocity(double minVelocity, double velocity, double acceleration )
 {
   asynStatus status = asynError;
+  std::cerr << "motorSimAxis::moveVelocity axis " << axisNo_ << " velocity " << velocity << " acceleration " << acceleration << std::endl;   
   // static const char *functionName = "moveVelocity";
 
   status = setVelocity(velocity, acceleration );
@@ -354,6 +363,7 @@ asynStatus motorSimAxis::stop(double acceleration )
 {
   // static const char *functionName = "moveVelocityAxis";
 
+  std::cerr << "motorSimAxis::stop axis " << axisNo_ << " acceleration " << acceleration << std::endl;   
   setVelocity(0.0, acceleration );
   deferred_move_ = 0;
   return asynSuccess;
@@ -361,12 +371,14 @@ asynStatus motorSimAxis::stop(double acceleration )
 
 asynStatus motorSimAxis::setPosition(double position)
 {
+  std::cerr << "motorSimAxis::setPosition axis " << axisNo_ << " position " << position << std::endl;
   enc_offset_ = position - nextpoint_.axis[0].p;
   return asynSuccess;
 }
 
 asynStatus motorSimAxis::setEncoderPosition(double position)
 {
+  std::cerr << "motorSimAxis::setEncoderPosition axis " << axisNo_ << " position " << position << std::endl;
   // currently we do not track encoder separately but just keep in syn with motor
   return asynMotorAxis::setEncoderPosition(position);
 }
