@@ -233,6 +233,7 @@ USAGE...        Motor Record Support.
     9 External readback
    10 devMotorAsyn.c
    11 devSupGetInfo
+   12 doMoveDialPosition
 */
 
 /*** Forward references ***/
@@ -1033,8 +1034,8 @@ LOGIC:
     
     
 ******************************************************************************/
-static bool doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
-                               double position)
+static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode moveMode,
+                                double position)
 {
     /* Use if encoder or ReadbackLink is in use. */
     bool use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
@@ -1042,6 +1043,10 @@ static bool doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
     double val = use_rel ? diff : position;
     double vbase = pmr->vbas;
     double vel, accEGU;
+    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f pmr->frac=%f use_rel=%d val=%f\n",
+          lineNo,
+          moveMode == moveModePosition ? "Position" : "Backlash",
+          position, pmr->frac, (int)use_rel, val);
 
     switch (moveMode) {
     case moveModePosition:
@@ -1064,6 +1069,7 @@ static bool doMoveDialPosition(motorRecord *pmr, enum moveMode moveMode,
     }
     return !ls_active;
 }
+#define doMoveDialPosition(a,b,c)  doMoveDialPositionL(__LINE__,a,b,c)
 
 /*****************************************************************************
   High level functions which are used by the state machine
