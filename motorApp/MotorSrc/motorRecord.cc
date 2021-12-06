@@ -971,6 +971,11 @@ static long init_record(dbCommon* arg, int pass)
 }
 
 
+static bool useRel(motorRecord *pmr)
+{
+    return (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
+}
+
 /******************************************************************************
         postProcess()
 
@@ -1035,18 +1040,18 @@ LOGIC:
     
 ******************************************************************************/
 static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode moveMode,
-                                double position)
+                                double position, double frac)
 {
     /* Use if encoder or ReadbackLink is in use. */
-    bool use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
-    double diff = (position - pmr->drbv) * pmr->frac;
-    double val = use_rel ? diff : position;
+    bool use_rel = useRel(pmr);
     double vbase = pmr->vbas;
-    double vel, accEGU;
-    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f pmr->frac=%f use_rel=%d val=%f\n",
+    double diff = (position - pmr->drbv) * frac;
+    double val, vel, accEGU;
+    val = use_rel ? diff : position;
+    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f\n",
           lineNo,
           moveMode == moveModePosition ? "Position" : "Backlash",
-          position, pmr->frac, (int)use_rel, val);
+          position, frac, (int)use_rel, val);
 
     switch (moveMode) {
     case moveModePosition:
@@ -1069,7 +1074,7 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
     }
     return !ls_active;
 }
-#define doMoveDialPosition(a,b,c)  doMoveDialPositionL(__LINE__,a,b,c)
+#define doMoveDialPosition(a,b,c,d)  doMoveDialPositionL(__LINE__,a,b,c,d)
 
 /*****************************************************************************
   High level functions which are used by the state machine
@@ -1090,21 +1095,21 @@ static void doBackLash(motorRecord *pmr)
 #endif
     if (pmr->mip & MIP_JOG_STOP)
     {
-        if (doMoveDialPosition(pmr, moveModePosition, pmr->dval - pmr->bdst))
+        if (doMoveDialPosition(pmr, moveModePosition, pmr->dval - pmr->bdst, 1.0))
             MIP_SET_VAL(MIP_JOG_BL1);
     }
     else if(pmr->mip & MIP_MOVE)
     {
         /* First part of move done. Do backlash correction. */
         pmr->rval = NINT(pmr->dval);
-        if (doMoveDialPosition(pmr, moveModeBacklash, pmr->dval))
+        if (doMoveDialPosition(pmr, moveModeBacklash, pmr->dval, pmr->frac))
             MIP_SET_VAL(MIP_MOVE_BL);
     }
     else if (pmr->mip & MIP_JOG_BL1)
     {
         /* First part of jog done. Do backlash correction. */
         pmr->rval = NINT(pmr->dval);
-        if (doMoveDialPosition(pmr, moveModeBacklash, pmr->dval))
+        if (doMoveDialPosition(pmr, moveModeBacklash, pmr->dval, pmr->frac))
             MIP_SET_VAL(MIP_JOG_BL2);
     }
     pmr->pp = TRUE;
@@ -2014,8 +2019,8 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     bool use_rel;
     bool moving_started = false;
 
-    Debug(pmr,2, "doRetryOrDone dval=%f rdbd=%f spdb=%f udf=%d stat=%d rcnt=%d pref_dir=%d relpos=%f relbpos=%f drbv=%f\n",
-          pmr->dval, pmr->rdbd, pmr->spdb, pmr->udf, pmr->stat, pmr->rcnt, preferred_dir,
+    Debug(pmr,2, "doRetryOrDone dval=%f rdbd=%f spdb=%f bdst=%f stat=%d rcnt=%d pref_dir=%d relpos=%f relbpos=%f drbv=%f\n",
+          pmr->dval, pmr->rdbd, pmr->spdb, pmr->bdst, pmr->stat, pmr->rcnt, preferred_dir,
           relpos, relbpos, pmr->drbv);
 
     /*** Use if encoder or ReadbackLink is in use. ***/
@@ -2053,20 +2058,20 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
         (preferred_dir == true && pmr->bvel == pmr->velo &&
          pmr->bacc == pmr->accl))
     {
-        moving_started = doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relpos);
+        moving_started = doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relpos, 1.0);
     }
     /* IF move is in preferred direction, AND, current position is within backlash range. */
     else if ((preferred_dir == true) &&
-             ((use_rel == true  && relbpos <= pmr->spdb) ||
-              (use_rel == false && (fabs(pmr->dval - pmr->drbv) <= rbdst1))
+             ((use_rel == true  && fabs(relbpos) <= pmr->spdb) ||
+              (use_rel == false && (fabs(pmr->dval - pmr->drbv) < rbdst1))
              )
             )
     {
-        moving_started = doMoveDialPosition(pmr, moveModeBacklash, pmr->drbv + relpos);
+        moving_started = doMoveDialPosition(pmr, moveModeBacklash, pmr->drbv + relpos, pmr->frac);
     }
     else
     {
-        moving_started = doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relbpos);
+        moving_started = doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relbpos, 1.0);
         pmr->pp = TRUE;              /* do backlash from posprocess(). */
     }
     if (!moving_started)
@@ -2231,17 +2236,22 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     }
     else if (pmr->rmod == motorRMOD_A) /* Do arthmetic sequence retries. */
     {
-        double factor = (pmr->rtry - pmr->rcnt + 1.0) / pmr->rtry;
-        relpos *= factor;
-        relbpos *= factor;
+        if (useRel(pmr))
+        {
+            double factor = (pmr->rtry - pmr->rcnt + 1.0) / pmr->rtry;
+            relpos *= factor;
+            relbpos *= factor;
+        }
     }
     else if (pmr->rmod == motorRMOD_G) /* Do geometric sequence retries. */
     {
-        double factor;
-
-        factor = 1 / pow(2.0, (pmr->rcnt - 1));
-        relpos *= factor;
-        relbpos *= factor;
+        if (useRel(pmr))
+        {
+            double factor;
+            factor = 1 / pow(2.0, (pmr->rcnt - 1));
+            relpos *= factor;
+            relbpos *= factor;
+        }
     }
     else if (pmr->rmod == motorRMOD_I) /* DC motor like In-position retries. */
         return(OK);
