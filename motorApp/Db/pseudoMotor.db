@@ -42,6 +42,20 @@ grecord(motor,"$(P)$(M)")
 alias("$(P)$(M)", "$(P)$(M):SP")
 alias("$(P)$(M)", "$(P)$(M):SP:RBV")
 
+# allow splitting out of MSTA
+record(mbbiDirect, "$(P)$(M):_MSTABITS")
+{
+    field(INP, "$(P)$(M).MSTA CP")
+}
+
+record(bi, "$(P)$(M)_HOMED")
+{
+    field(DESC, "Motor Homed")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(INP, "$(P)$(M):_MSTABITS.BE CP")
+}
+
 grecord(transform,"$(P)$(M)_ableput")
 {
 	field(CLCB,"a")

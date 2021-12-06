@@ -93,6 +93,20 @@ record(ao,"$(P)$(M)Resolution") {
     field(PREC, "$(PREC)")
 }
 
+# allow splitting out of MSTA
+record(mbbiDirect, "$(P)$(M):_MSTABITS")
+{
+    field(INP, "$(P)$(M).MSTA CP")
+}
+
+record(bi, "$(P)$(M)_HOMED")
+{
+    field(DESC, "Motor Homed")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(INP, "$(P)$(M):_MSTABITS.BE CP")
+}
+
 #! Further lines contain data used by VisualDCT
 #! View(405,484,0.9)
 #! Record("$(P)$(M)",840,675,0,0,"$(P)$(M)")

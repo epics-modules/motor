@@ -91,3 +91,17 @@ record(ao,"$(P)$(M)_MERAT")
     field(DTYP, "asynFloat64")
     field(OUT, "@asyn($(PORT),$(ADDR))MOTOR_ENCODER_RATIO")
 }
+
+# allow splitting out of MSTA
+record(mbbiDirect, "$(P)$(M):_MSTABITS")
+{
+    field(INP, "$(P)$(M).MSTA CP")
+}
+
+record(bi, "$(P)$(M)_HOMED")
+{
+    field(DESC, "Motor Homed")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(INP, "$(P)$(M):_MSTABITS.BE CP")
+}
