@@ -6,6 +6,18 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.0.7-ESS, based on R7-2-2
+###  Bug fixes
+#### 50d99515e: motorRecord: Correct printing of special(DBF_MENU)
+#### 240d12c9d: motorRecord.cc: Fix for SPMG=Pause and CALLBACK_DATA
+#### fc8d9e956: motorRecord.cc: Fixes for NTM
+#### 1f5666358: mototRecord.cc: Fixes for NTM
+#### 1557ee7f6: motorRecord.cc: If controller uses EGU, keep VELO when UREV changes
+### Improvements
+#### 8cb38dbba: Remove non-up-to-date motor_release-ESS.html
+#### 982ef46ee: MotorRecord: Add NTM UPDATE
+#### d1a597ffa: motorRecord.cc: More debug logs around SPMG
+#### 8efb77707: motorRecord.dbd: .SPMG is special SPC_MOD
 ## v7.0.6-ESS, based on R7-2-2
 ###  Bug fixes
 #### fb6027cbb: asynMotorController.cpp: NULL pointer check for pasynUserController_
