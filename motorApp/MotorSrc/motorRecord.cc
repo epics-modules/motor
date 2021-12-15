@@ -1205,7 +1205,7 @@ static long postProcess(motorRecord * pmr)
     }
     else if (pmr->mip & MIP_JOG_STOP || pmr->mip & MIP_MOVE)
     {
-        if (fabs(pmr->bdst) >=  fabs(pmr->spdb))
+        if (fabs(pmr->bdst) > fabs(pmr->spdb))
         {
             doBackLash(pmr);
         }
@@ -2188,7 +2188,7 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
             /* Don't move if new setpoint is within SPDB of DRBV */
             double drbv = pmr->drbv;
             double dval = pmr->dval;
-            if (((dval - spdb) < drbv) && ((dval + spdb) > drbv)) {
+            if (((dval - spdb) <= drbv) && ((dval + spdb) >= drbv)) {
                 too_small = true;
             }
         }
@@ -2198,7 +2198,7 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
             too_small = true;
         }
     }
-    else if (absdiff < fabs(pmr->rdbd))
+    else if (absdiff <= fabs(pmr->rdbd))
         too_small = true;
 
     if (pmr->miss)
