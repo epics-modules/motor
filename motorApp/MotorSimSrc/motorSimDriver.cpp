@@ -278,7 +278,7 @@ asynStatus motorSimAxis::move(double position, int relative, double minVelocity,
 {
   route_pars_t pars;
   static const char *functionName = "move";
-  std::cerr << "motorSimAxis::move axis " << axisNo_ << " position " << position << (relative ? " (relative)" : "(absoute)") << " speed min/max " << minVelocity << "/" << maxVelocity << " acceleration " << acceleration << std::endl;
+  std::cerr << "motorSimAxis::move axis " << axisNo_ << " position " << position << (relative ? " (relative)" : " (absolute)") << " speed min/max " << minVelocity << "/" << maxVelocity << " acceleration " << acceleration << std::endl;
 
   if (relative) position += endpoint_.axis[0].p + enc_offset_;
 
@@ -499,9 +499,15 @@ void motorSimAxis::process(double delta )
     }
   }
 
-  lastDone_ = done;
   double encRatio;
   pC_->getDoubleParam(axisNo_, pC_->motorEncoderRatio_, &encRatio);
+  if (!lastDone_ && done) {
+      std::cerr << "motorSimAxis::process axis " << axisNo_ << " has stopped moving: motor=" << nextpoint_.axis[0].p+enc_offset_ << " encoder=" << (nextpoint_.axis[0].p+enc_offset_) * encRatio << std::endl;
+  }
+  if (lastDone_ && !done) {
+      std::cerr << "motorSimAxis::process axis " << axisNo_ << " has started moving" << std::endl;
+  }
+  lastDone_ = done;
 
   setDoubleParam (pC_->motorPosition_,         (nextpoint_.axis[0].p+enc_offset_));
   setDoubleParam (pC_->motorEncoderPosition_,  (nextpoint_.axis[0].p+enc_offset_) * encRatio);
