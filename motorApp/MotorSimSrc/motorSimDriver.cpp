@@ -280,9 +280,16 @@ asynStatus motorSimAxis::move(double position, int relative, double minVelocity,
   double currentPos;
   static const char *functionName = "move";
   pC_->getDoubleParam(axisNo_, pC_->motorPosition_, &currentPos);
-  std::cerr << "motorSimAxis::move axis " << axisNo_ << " from " << currentPos << "|" << endpoint_.axis[0].p + enc_offset_ << " to " << position << (relative ? " (relative)" : " (absolute)") << " speed min/max " << minVelocity << "/" << maxVelocity << " acceleration " << acceleration << std::endl;
+  if ( currentPos != (endpoint_.axis[0].p + enc_offset_) ) { // unsure if check is really needed
+      std::cerr << "motorSimAxis::move axis " << axisNo_ << " unsure of initial position: " << currentPos << " or " << endpoint_.axis[0].p + enc_offset_ << std::endl;
+  }
+  std::cerr << "motorSimAxis::move axis " << axisNo_ << " from " << currentPos << " to " << position << (relative ? " (relative)" : " (absolute)") << " speed min/max " << minVelocity << "/" << maxVelocity << " acceleration " << acceleration << std::endl;
 
   if (relative) position += endpoint_.axis[0].p + enc_offset_;
+
+  if (maxVelocity != 0.0) {
+      std::cerr << "motorSimAxis::move axis " << axisNo_ << " excluding acceleration/backlash this would take approximately " << fabs((position - currentPos) / maxVelocity) << " seconds" << std::endl;
+  }
 
   /* Check to see if in hard limits */
   if ((nextpoint_.axis[0].p >= hiHardLimit_  &&  position > nextpoint_.axis[0].p) ||
