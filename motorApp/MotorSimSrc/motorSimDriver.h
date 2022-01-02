@@ -59,6 +59,7 @@ private:
   double lastTimeSecs_;
   int delayedDone_;
   int lastDone_;
+  epicsTimeStamp tStart_;
   
 friend class motorSimController;
 };

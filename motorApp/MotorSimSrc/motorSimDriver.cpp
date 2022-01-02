@@ -71,6 +71,7 @@ motorSimAxis::motorSimAxis(motorSimController *pController, int axis, double low
   delayedDone_ = 0;
   lastDone_ = 1;
   setIntegerParam(pC_->motorStatusHasEncoder_, 1);
+  epicsTimeGetCurrent(&tStart_);
 }
 
 
@@ -314,7 +315,6 @@ asynStatus motorSimAxis::move(double position, int relative, double minVelocity,
 
   setIntegerParam(pC_->motorStatusDone_, 0);
   callParamCallbacks();
-
   asynPrint(pasynUser_, ASYN_TRACE_FLOW, 
             "%s:%s: Set driver %s, axis %d move to %f, min vel=%f, maxVel=%f, accel=%f\n",
             driverName, functionName, pC_->portName, axisNo_, position, minVelocity, maxVelocity, acceleration );
@@ -511,10 +511,13 @@ void motorSimAxis::process(double delta )
   double encRatio;
   pC_->getDoubleParam(axisNo_, pC_->motorEncoderRatio_, &encRatio);
   if (!lastDone_ && done) {
-      std::cerr << "motorSimAxis::process axis " << axisNo_ << " has stopped moving: motor=" << nextpoint_.axis[0].p+enc_offset_ << " encoder=" << (nextpoint_.axis[0].p+enc_offset_) * encRatio << std::endl;
+      epicsTimeStamp tNow;
+      epicsTimeGetCurrent(&tNow);
+      std::cerr << "motorSimAxis::process axis " << axisNo_ << " has stopped moving after " << epicsTimeDiffInSeconds(&tNow, &tStart_) << " seconds: motor=" << nextpoint_.axis[0].p+enc_offset_ << " encoder=" << (nextpoint_.axis[0].p+enc_offset_) * encRatio << std::endl;
   }
   if (lastDone_ && !done) {
       std::cerr << "motorSimAxis::process axis " << axisNo_ << " has started moving: motor=" << nextpoint_.axis[0].p+enc_offset_ << " encoder=" << (nextpoint_.axis[0].p+enc_offset_) * encRatio << std::endl;
+      epicsTimeGetCurrent(&tStart_);
   }
   lastDone_ = done;
 
