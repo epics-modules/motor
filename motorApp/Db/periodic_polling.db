@@ -1,9 +1,12 @@
-record(ao, "$(P)$(M):SCAN") {
-  field(SCAN, "$(POLL_RATE=10) second")
+record(calcout, "$(P)$(M):SCAN") {
   field(DTYP, "Soft Channel")
   field(DESC, "Polls the motor position")
+  field(INPA, "$(P)$(M).MOVN")
+  field(INPB, "$(P)$(M).DMOV")
+  field(INPC, "$(P)$(M).HOMF")
+  field(INPD, "$(P)$(M).HOMR")
+  field(CALC, "(A==0)&&(B==1)&&(C==0)&&(D==0)")
+  field(SCAN, "$(POLL_RATE=10) second")
+  field(OOPT, "When Non-zero")
   field(OUT, "$(P)$(M).STUP PP")
-  field(OVAL, "1")
-  field(VAL, "1")
-  field(SDIS, "$(P)$(M).MOVN")
 }
