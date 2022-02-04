@@ -2888,7 +2888,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 {
                     jogv = -jogv;
                 }
-                devSupJogDial(pmr, jogv, pmr->jar);
+                devSupJogDial(pmr, jogv, pmr->jar ? pmr->jar : pmr->accs);
             }
             return(OK);
         }
@@ -3583,13 +3583,15 @@ pidcof:
             if (pmr->jogr)
                 jogv = -jogv;
 
-            devSupUpdateJogDial(pmr, jogv, pmr->jar);
+            devSupUpdateJogDial(pmr, jogv, pmr->jar ? pmr->jar : pmr->accs);
         }
         break;
 
     case motorRecordJAR:
         // Valid JAR; 0 < JAR < JVEL [egu / sec] / 0.1 [sec]
-        if (pmr->jar <= 0.0)
+        if (pmr->jar == 0.0 && pmr->accs != 0.0)
+            ; // fall back to the current value of ACCS when jogging starts
+        else if (pmr->jar < 0.0)
             pmr->jar = pmr->jvel / 0.1;
         break;
 
