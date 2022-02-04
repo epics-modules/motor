@@ -2060,9 +2060,19 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     {
         moving_started = doMoveDialPosition(pmr, moveModePosition, pmr->drbv + relpos, 1.0);
     }
+
+    /* motor/master uses this code, based on STEP count
+       We use fabs() and a comparison of the sign
+       
+      else if ((preferred_dir == true) &&
+      ((use_rel == true  && ((pmr->bdst >= 0 && relbpos <= 1.0) || (pmr->bdst < 0 && relbpos >= 1.0))) ||
+      (use_rel == false && (fabs(newpos - currpos) <= rbdst1))
+    */
+
     /* IF move is in preferred direction, AND, current position is within backlash range. */
     else if ((preferred_dir == true) &&
-             ((use_rel == true  && fabs(relbpos) <= pmr->spdb) ||
+             ((use_rel == true  && fabs(relbpos) <= pmr->spdb &&
+               ((pmr->bdst > 0 && relbpos < 0.0) || (pmr->bdst < 0 && relbpos > 0.0))) ||
               (use_rel == false && (fabs(pmr->dval - pmr->drbv) < rbdst1))
              )
             )
