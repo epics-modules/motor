@@ -4657,6 +4657,14 @@ static void range_check(motorRecord *pmr, double *parm_ptr, double min, double m
 static long readBackPosition(motorRecord *pmr, bool initcall)
 {
     long rtnstat = 0;
+    msta_field msta;
+    msta.All = pmr->msta;
+    /* reset-ueip-if-no-encoder-present */
+    if ((pmr->ueip == motorUEIP_Yes) && (!(msta.Bits.EA_PRESENT)))
+    {
+        pmr->ueip = motorUEIP_No;
+        db_post_events(pmr, &pmr->urip, DBE_VAL_LOG);
+    }
     if (pmr->ueip == motorUEIP_Yes)
     {
         /* An encoder is present and the user wants us to use it. */
