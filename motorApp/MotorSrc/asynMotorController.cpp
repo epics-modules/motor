@@ -265,7 +265,14 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
   static const char *functionName = "writeInt32";
 
   pAxis = getAxis(pasynUser);
-  if (!pAxis) return asynError;
+  if (!pAxis) {
+    const char *paramName = NULL;
+    if (getParamName(function, &paramName)) paramName = "";
+    asynPrint(pasynUser, ASYN_TRACE_ERROR,
+              "%s:%s error, axis=null function=%s (%d), value=%d\n",
+              driverName, functionName, paramName, function, value);
+    return asynError;
+  }
   axis = pAxis->axisNo_;
 
   /* Set the parameter and readback in the parameter library. */
@@ -351,7 +358,14 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   static const char *functionName = "writeFloat64";
 
   pAxis = getAxis(pasynUser);
-  if (!pAxis) return asynError;
+  if (!pAxis) {
+    const char *paramName = NULL;
+    if (getParamName(function, &paramName)) paramName = "";
+    asynPrint(pasynUser, ASYN_TRACE_ERROR,
+              "%s:%s error, axis=null function=%s (%d), value=%f\n",
+              driverName, functionName, paramName, function, value);
+    return asynError;
+  }
   axis = pAxis->axisNo_;
 
   /* Set the parameter and readback in the parameter library. */
