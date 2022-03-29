@@ -2024,11 +2024,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
           relpos, relbpos, pmr->drbv);
 
     /*** Use if encoder or ReadbackLink is in use. ***/
-    if (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip))
-        use_rel = true;
-    else
-        use_rel = false;
-
+    use_rel = useRel(pmr);
     if (fabs(relpos) < pmr->spdb)
         relpos = (relpos > 0.0) ? pmr->spdb : -pmr->spdb;
 
