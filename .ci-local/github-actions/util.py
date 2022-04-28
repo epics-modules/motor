@@ -22,7 +22,7 @@ def create_file(filename):
     dirname = os.path.dirname(filename)
     print(dirname)
     if not os.path.exists(dirname):
-        os.makedirs(dirname, 0755)
+        os.makedirs(dirname, 0o0755)
     if not os.path.exists(filename):
         fh = open(filename, 'w')
         fh.close()
