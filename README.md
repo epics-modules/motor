@@ -1,5 +1,6 @@
 # motor
-[![Build Status](https://travis-ci.org/epics-modules/motor.png)](https://travis-ci.org/epics-modules/motor)
+[![Build Status](https://github.com/epics-modules/motor/actions/workflows/ci-scripts-build.yml/badge.svg)](https://github.com/epics-modules/motor/actions/workflows/ci-scripts-build.yml)
+<!--[![Build Status](https://travis-ci.org/epics-modules/motor.png)](https://travis-ci.org/epics-modules/motor)-->
 
 This module contains motor support for the Experimental Physics and Industrial Control System (EPICS).
 
