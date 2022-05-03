@@ -82,24 +82,31 @@ fields.  ('pmr' is a pointer to motorRecord.)
     va_end(pVar);
 }
 
-#define Debug(pmr, lvl, fmt, ...)                         \
-{                                                         \
-    if ((1<<lvl) & pmr->spam) {                           \
-       epicsTimeStamp now;                                \
-       char nowText[25];                                  \
-       size_t rtn;                                        \
-                                                          \
-       nowText[0] = 0;                                    \
-       rtn = epicsTimeGetCurrent(&now);                   \
-       if (!rtn) {                                        \
-         epicsTimeToStrftime(nowText,sizeof(nowText),     \
-                          "%Y/%m/%d %H:%M:%S.%03f ",&now);\
-       }                                                  \
-       mrPrint(pmr, lvl, "%s[%s:%-4d %s] " fmt,           \
-               nowText,                                   \
-               mrStripPath(__FILE__), __LINE__,           \
-               pmr->name,  __VA_ARGS__);                  \
-    }                                                     \
+#define Debug(pmr, lvl, fmt, ...)                             \
+{                                                             \
+  if ((1<<lvl) & pmr->spam) {                                 \
+    epicsTimeStamp now;                                       \
+    char nowText[25];                                         \
+    size_t rtn;                                               \
+                                                              \
+    nowText[0] = 0;                                           \
+    rtn = epicsTimeGetCurrent(&now);                          \
+    if (!rtn) {                                               \
+      epicsTimeToStrftime(nowText,sizeof(nowText),            \
+                          "%Y/%m/%d %H:%M:%S.%03f ",&now);    \
+    }                                                         \
+    if (pmr->card >= 0) {                                     \
+      mrPrint(pmr, lvl, "%s[%s:%-4d %s %02d] " fmt,           \
+              nowText,                                        \
+              mrStripPath(__FILE__), __LINE__,                \
+              pmr->name, pmr->card,  __VA_ARGS__);            \
+    } else {                                                  \
+      mrPrint(pmr, lvl, "%s[%s:%-4d %s] " fmt,                \
+              nowText,                                        \
+              mrStripPath(__FILE__), __LINE__,                \
+              pmr->name,  __VA_ARGS__);                       \
+    }                                                         \
+  }                                                           \
 }
 
 #ifdef __cplusplus

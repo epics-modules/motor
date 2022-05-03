@@ -911,7 +911,11 @@ static long init_record(dbCommon* arg, int pass)
                 pmr->card = -1;
                 break;
             case (INST_IO):
-                pmr->card = 0;
+                // card is typically 0, but allow card to be set
+                // to a different value in the template/Db file
+                // E.g connect the axis number to the record for an asyn
+                // motor driver
+                //pmr->card = 0;
                 break;
             default:
                 recGblRecordError(S_db_badField, (void *) pmr, (char *) errmsg);
