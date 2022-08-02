@@ -439,15 +439,24 @@ asynStatus asynMotorController::writeFloat64Array(asynUser *pasynUser, epicsFloa
   asynMotorAxis *pAxis;
   static const char *functionName = "writeFloat64Array";
 
-  pAxis = getAxis(pasynUser);
-  if (!pAxis) return asynError;
-  
-  if (nElements > maxProfilePoints_) nElements = maxProfilePoints_;
-   
+  if (nElements > maxProfilePoints_) nElements = maxProfilePoints_;  
+
   if (function == profileTimeArray_) {
     memcpy(profileTimes_, value, nElements*sizeof(double));
+    return asynSuccess;
   } 
-  else if (function == profilePositions_) {
+
+  pAxis = getAxis(pasynUser);
+  if (!pAxis){
+    int axisNo;
+    getAddress(pasynUser, &axisNo);
+    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+      "%s:%s: unknown axis %d number",
+      driverName, functionName, axisNo);
+    return asynError;
+  }
+   
+  if (function == profilePositions_) {
     pAxis->defineProfile(value, nElements);
   } 
   else {
