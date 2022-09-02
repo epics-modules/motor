@@ -1240,27 +1240,32 @@ static void maybeRetry(motorRecord * pmr)
 {
     bool user_cdir;
     bool close_enough, ls_active;
+    int has_problem;
     double diff = pmr->priv->last.commandedDval - pmr->drbv;
 
     /* Commanded direction in user coordinates. */
     user_cdir = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->cdir : !pmr->cdir;
     close_enough = fabs(diff) <= pmr->rdbd;
     ls_active = (pmr->hls && user_cdir) || (pmr->lls && !user_cdir);
+    msta_field msta;
+    msta.All = pmr->msta;
+    has_problem = msta.Bits.RA_PROBLEM;
 #ifdef DEBUG
     {
       char dbuf[MBLE];
       dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
       Debug(pmr,2,
-            "maybeRetry: %s%scommandedDval=%f last.dval=%f dval=%f drbv=%f rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
-            ls_active ? "" : close_enough ? "close enough " : "not close enough ",
+            "maybeRetry: %s%s%scommandedDval=%f last.dval=%f dval=%f drbv=%f rdbd=%f diff=%f rcnt=%d pmr->rtry=%d mip=0x%0x(%s)\n",
+            (ls_active || has_problem  ) ? "" : close_enough ? "close enough " : "not close enough ",
             ls_active ? "ls_active " :"",
+            has_problem ? "has_problem " : "",
             pmr->priv->last.commandedDval, pmr->priv->last.dval, pmr->dval, pmr->drbv,
             pmr->rdbd, diff, pmr->rcnt, pmr->rtry, pmr->mip, dbuf);
     }
 #endif
     if (!close_enough)
     {
-        if (ls_active)
+        if (ls_active || has_problem)
         {
             MIP_SET_VAL(MIP_DONE);
             SET_LAST_VAL_FROM_VAL;
