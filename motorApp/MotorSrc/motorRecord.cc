@@ -1242,10 +1242,9 @@ static void maybeRetry(motorRecord * pmr)
     bool close_enough, ls_active;
     int has_problem;
     double diff = pmr->priv->last.commandedDval - pmr->drbv;
-
     /* Commanded direction in user coordinates. */
     user_cdir = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->cdir : !pmr->cdir;
-    close_enough = fabs(diff) <= pmr->rdbd;
+    close_enough = (fabs(diff) <= pmr->rdbd * 1.01); // allow 1% for rounding of floating point
     ls_active = (pmr->hls && user_cdir) || (pmr->lls && !user_cdir);
     msta_field msta;
     msta.All = pmr->msta;
