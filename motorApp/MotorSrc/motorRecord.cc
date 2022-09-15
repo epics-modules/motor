@@ -240,7 +240,7 @@ USAGE...        Motor Record Support.
 
 static const char *spmgToAscii(int);
 static int homing_wanted_and_allowed(motorRecord *pmr);
-static bool mr_stops_on_ls_activated(motorRecord *pmr, bool ls_active);
+static bool motor_fully_stopped_on_ls_activated(motorRecord *pmr, bool ls_active);
 static RTN_STATUS do_work(motorRecord *, CALLBACK_VALUE);
 static void alarm_sub(motorRecord *);
 static void monitor(motorRecord *);
@@ -1784,7 +1784,7 @@ static long process(dbCommon *arg)
             {
                 /* TB: Another update may confuse the state machine */
                 bool ls_active = true;
-                ls_active = mr_stops_on_ls_activated(pmr, ls_active);
+                ls_active = motor_fully_stopped_on_ls_activated(pmr, ls_active);
                 if (ls_active)
                 {
                     clear_buttons(pmr);
@@ -2001,14 +2001,14 @@ static int homing_wanted_and_allowed(motorRecord *pmr)
 }
 
 /*************************************************************************
- * motorRecord may (or may not) stop the motor, 
-   when a limit switch is activated:
-   When homing against a limit switch we don't want the homig to be stopped
-   When the controller stops itself, and another stop may confuse
-   the controller
+ * when a limit switch is activated:
+   The controller may initiate a rampdown (wait for done)
+   When homing against a limit switch the homig may continue (wait for done)
 */
-static bool mr_stops_on_ls_activated(motorRecord *pmr, bool ls_active)
+static bool motor_fully_stopped_on_ls_activated(motorRecord *pmr, bool ls_active)
 {
+    if (pmr->mflg & MF_LS_RAMPDOWN)
+        ls_active = false;
     if (pmr->mflg & MF_NO_STOP_ONLS)
         ls_active = false;    /*Suppress stop on LS if configured  */
     if ((pmr->mip & MIP_HOMF) || (pmr->mip & MIP_HOMR))
@@ -4232,9 +4232,6 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     /* Treat limit switch active only when it is pressed and in direction of movement. */
     ls_active = ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)) ? true : false;
 
-    /* motorRecord may (or may not) stop the motor,
-       when a limit switch is activated. */
-    ls_active = mr_stops_on_ls_activated(pmr, ls_active);
     pmr->hls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rhls : pmr->rlls;
     pmr->lls = ((pmr->dir == motorDIR_Pos) == (pmr->mres >= 0)) ? pmr->rlls : pmr->rhls;
     if (pmr->hls != old_hls)
@@ -4242,29 +4239,10 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     if (pmr->lls != old_lls)
         MARK(M_LLS);
 
-    /* If the motor runs into an LS, stop it if needed */
-    if (ls_active == true)
-    {
-#ifdef DEBUG
-    {
-        char dbuf[MBLE];
-        dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        Debug(pmr,1, "STOP ls_active=1 mip=0x%0x(%s)\n", pmr->mip, dbuf);
-    }
-#else
-        fprintf(stdout, "%s:%d %s STOP ls_active=1\n",
-                __FILE__, __LINE__, pmr->name);
-#endif
-
-        pmr->stop = 1;
-        MARK(M_STOP);
-        clear_buttons(pmr);
-    }
-
     /* Get motor-now-moving indicator. */
     if (msta.Bits.RA_DONE)
         pmr->movn = 0;
-    else if (ls_active && (!(pmr->mflg & MF_LS_RAMPDOWN)))
+    else if (motor_fully_stopped_on_ls_activated(pmr, ls_active))
         pmr->movn = 0;
     else
         pmr->movn = 1;
