@@ -457,17 +457,11 @@ void asynMotorAxis::updateMsgTxtField()
       return;
     }
 
-    {
-      int motorStatusHighLimit;
-      int motorStatusLowLimit;
-      pC_->getIntegerParam(axisNo_,pC_->motorStatusHighLimit_, &motorStatusHighLimit);
-      pC_->getIntegerParam(axisNo_,pC_->motorStatusLowLimit_, &motorStatusLowLimit);
-      if (!motorStatusHomed && motorNotHomedProblem) {
-        /* the "E: prefix should only be shown if the problem bit
-           is set. Otherwise it is an info */
-        setStringParam(pC_->motorMessageText_,"Axis not homed");
-        return;
-      }
+    if (!motorStatusHomed && motorNotHomedProblem) {
+      /* the "E: prefix should only be shown if the problem bit
+         is set. Otherwise it is an info */
+      setStringParam(pC_->motorMessageText_,"Axis not homed");
+      return;
     }
     {
       int motorLatestCommand;
