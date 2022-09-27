@@ -76,11 +76,10 @@
 #define motorFlagsDriverUsesEGUString   "MOTOR_FLAGS_DRIVER_USES_EGU"
 #define motorFlagsAdjAfterHomedString   "MOTOR_FLAGS_ADJ_AFTER_HOMED"
 #define motorFlagsNtmUpdateString       "MOTOR_FLAGS_NTM_UPDATE"
+#define motorFlagsNotHomedProblemString "MOTOR_FLAGS_NOT_HOMED_PROBLEM"
 
 #define motorWaitPollsBeforeReadyString "MOTOR_WAIT_POLLS_BEFORE_READY"
 
-/* Not homed is ignored, shown, problem */
-#define motorNotHomedProblemString    "MOTOR_NOT_HOMED_PROBLEM"
 #define motorShowPowerOffString       "MOTOR_SHOW_POWER_OFF"
 
 /* These are per-axis parameters for passing additional motor record information to the driver */
@@ -345,7 +344,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorFlagsDriverUsesEGU_;
   int motorFlagsAdjAfterHomed_;
   int motorFlagsNtmUpdate_;
-
+  int motorFlagsNotHomedProblem_;
   // These are per-motor parameters for passing additional motor record information to the driver
   int motorRecResolution_;
   int motorRecDirection_;
@@ -354,7 +353,6 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorWaitPollsBeforeReady_;
 
   // Parameters from the controller to the driver and record
-  int motorNotHomedProblem_;
   int motorShowPowerOff_;
   int motorHighLimitRO_;
   int motorLowLimitRO_;

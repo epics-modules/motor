@@ -120,10 +120,10 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorFlagsDriverUsesEGUString,     asynParamInt32,      &motorFlagsDriverUsesEGU_);
   createParam(motorFlagsAdjAfterHomedString,     asynParamInt32,      &motorFlagsAdjAfterHomed_);
   createParam(motorFlagsNtmUpdateString,         asynParamInt32,      &motorFlagsNtmUpdate_);
+  createParam(motorFlagsNotHomedProblemString,   asynParamInt32,      &motorFlagsNotHomedProblem_);
 
   createParam(motorWaitPollsBeforeReadyString,   asynParamInt32,      &motorWaitPollsBeforeReady_);
 
-  createParam(motorNotHomedProblemString,        asynParamInt32,      &motorNotHomedProblem_);
   createParam(motorShowPowerOffString,           asynParamInt32,      &motorShowPowerOff_);
 
   // These are per-axis parameters for passing additional motor record information to the driver

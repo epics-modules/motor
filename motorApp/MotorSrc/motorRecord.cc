@@ -3921,11 +3921,18 @@ static void alarm_sub(motorRecord * pmr)
         pmr->msta = msta.All;
         MARK(M_MSTA);
         recGblSetSevr((dbCommon *) pmr, COMM_ALARM, INVALID_ALARM);
+        return;
     }
 
     if ((msta.Bits.EA_SLIP_STALL != 0) || (msta.Bits.RA_PROBLEM != 0))
     {
       recGblSetSevr((dbCommon *) pmr, STATE_ALARM, MAJOR_ALARM);
+      return;
+    }
+    if (!(msta.Bits.RA_HOMED) && pmr->mflg & MF_NOT_HOMED_PROBLEM)
+    {
+        recGblSetSevr((dbCommon *) pmr, STATE_ALARM, MAJOR_ALARM);
+        return;
     }
     if (pmr->misv && pmr->miss)
     {

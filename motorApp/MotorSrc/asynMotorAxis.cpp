@@ -334,7 +334,7 @@ asynStatus asynMotorAxis::setIntegerParam(int function, int value)
     }
     pC_->setIntegerParam(axisNo_, pC_->motorStatus_, status);
   } else  if (function >= pC_->motorFlagsHomeOnLs_ &&
-              function <= pC_->motorFlagsNtmUpdate_) {
+              function <= pC_->motorFlagsNotHomedProblem_) {
     epicsUInt32 flagsValue = status_.flagsValue;
     epicsUInt32 mask = 1 << (function - pC_->motorFlagsHomeOnLs_);
 
@@ -442,22 +442,21 @@ void asynMotorAxis::updateMsgTxtField()
         return;
       }
     }
-    int motorStatusProblem;
     int motorStatusHomed;
-    int motorNotHomedProblem;
-    pC_->getIntegerParam(axisNo_,pC_->motorStatusProblem_, &motorStatusProblem);
-    pC_->getIntegerParam(axisNo_,pC_->motorNotHomedProblem_, &motorNotHomedProblem);
+    int flagsMotorNotHomedProblem;
+    pC_->getIntegerParam(axisNo_,pC_->motorFlagsNotHomedProblem_, &flagsMotorNotHomedProblem);
     pC_->getIntegerParam(axisNo_,pC_->motorStatusHomed_, &motorStatusHomed);
+    if (!motorStatusHomed && (flagsMotorNotHomedProblem & MOTORNOTHOMEDPROBLEM_ERROR)) {
+      setStringParam(pC_->motorMessageText_,"E: Axis not homed");
+      return;
+    }
+    int motorStatusProblem;
+    pC_->getIntegerParam(axisNo_,pC_->motorStatusProblem_, &motorStatusProblem);
     if (motorStatusProblem) {
-      if (!motorStatusHomed && (motorNotHomedProblem & MOTORNOTHOMEDPROBLEM_ERROR)) {
-        setStringParam(pC_->motorMessageText_,"E: Axis not homed");
-        return;
-      }
       setStringParam(pC_->motorMessageText_,"E: Problem");
       return;
     }
-
-    if (!motorStatusHomed && motorNotHomedProblem) {
+    if (!motorStatusHomed && flagsMotorNotHomedProblem) {
       /* the "E: prefix should only be shown if the problem bit
          is set. Otherwise it is an info */
       setStringParam(pC_->motorMessageText_,"Axis not homed");

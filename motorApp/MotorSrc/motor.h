@@ -214,6 +214,7 @@ typedef union
 #define MF_DRIVER_USES_EGU (1<<3)
 #define MF_ADJ_AFTER_HOMED (1<<4)
 #define MF_NTM_UPDATE      (1<<5)
+#define MF_NOT_HOMED_PROBLEM (1<<6)
 
 
 #define EXT_MSG_TYPE_MOV_ABS 1
