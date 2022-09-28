@@ -4247,7 +4247,7 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
         MARK(M_LLS);
 
     /* Get motor-now-moving indicator. */
-    if (msta.Bits.RA_DONE)
+    if (msta.Bits.RA_DONE || msta.Bits.RA_PROBLEM)
         pmr->movn = 0;
     else if (motor_fully_stopped_on_ls_activated(pmr, ls_active))
         pmr->movn = 0;
