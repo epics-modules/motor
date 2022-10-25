@@ -438,7 +438,11 @@ void asynMotorAxis::updateMsgTxtField()
       pC_->getIntegerParam(axisNo_,pC_->motorStatusPowerOn_,
                            &motorStatusPowerOn);
       if (!motorStatusPowerOn) {
-        setStringParam(pC_->motorMessageText_,"PowerOff");
+        int motorPowerAutoOnOff;
+        pC_->getIntegerParam(axisNo_,pC_->motorPowerAutoOnOff_,
+                             &motorPowerAutoOnOff);
+        setStringParam(pC_->motorMessageText_,
+                       motorPowerAutoOnOff ? "PowerOff(Auto)" : "PowerOff");
         return;
       }
     }
