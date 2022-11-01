@@ -1983,6 +1983,9 @@ static const char *spmgToAscii(int spmg)
 static int homing_wanted_and_allowed(motorRecord *pmr)
 {
     int ret = 0;
+    if ((pmr->mflg & MF_HOME_ON_LS) && pmr->lls && pmr->hls) {
+        return 0;
+    }
     if (pmr->homf && !(pmr->mip & MIP_HOMF)) {
         ret = 1;
         if (pmr->mflg & MF_HOME_ON_LS)
