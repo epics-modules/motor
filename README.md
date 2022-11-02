@@ -6,6 +6,22 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.0.8-ESS, based on R7-2-2 + latest master
+###  Bug fixes
+#### 3358621ef: motorRecord: Do not do a retry when RA_PROBLEM is set
+#### 41183c9c8: motorRecord.cc: Do not move if VAL - RBV == RDBD
+#### 524696a8d: Fix negative backlash with relative moves in a negative direction
+#### f149e8d7a: motorRecord: retry-relative follows motor/master (mostly)
+#### c90d6a780: motorRecord.cc: Fix for SPMG=Pause and CALLBACK_DATA
+#### 24ef7b207: motorRecord.cc: Fixes for NTM
+### Improvements
+#### 4c7949067: motorRecord: Do not home when both limit switches are active
+#### bd7e007e8: asynMotorAxis.cpp: Distinguish PowerOff vs PowerOff Auto
+#### 47bbd9354: motorRecord: loosen the close enough calculation
+#### 7d181592d: asynMotorController.cpp: make autoPowerOn() more rebust
+#### 6cc882fc3: motorRecord.cc/motorDevSup.h: Use CARD as axis number in printing
+#### 700d424f4: motorRecord: fall back to ACCS if JAR is 0.0
+#### 073ae178e: MotorRecord: Add NTM UPDATE
 ## v7.0.7-ESS, based on R7-2-2
 ###  Bug fixes
 #### 50d99515e: motorRecord: Correct printing of special(DBF_MENU)
