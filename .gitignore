@@ -6,7 +6,7 @@ bin/
 builddir/
 configure/RELEASE_LIBS.local
 configure/RELEASE_PATHS.local
-db/
+/db/
 dbd/
 html/
 include/

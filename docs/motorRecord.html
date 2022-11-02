@@ -463,7 +463,7 @@ below.
     <td><a href="#Fields_motion">FRAC</a></td>
     <td>R/W</td>
     <td>Move Fraction</td>
-    <td>DOUBLE</td>
+    <td>FLOAT</td>
     <td><br>
     </td>
   </tr>
@@ -684,7 +684,7 @@ below.
     <td><a href="#Fields_private">LRVL</a></td>
     <td>R</td>
     <td>Last Raw Des Val</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td><br>
     </td>
   </tr>
@@ -933,7 +933,7 @@ below.
     <td><a href="#Fields_status">REP</a></td>
     <td>R</td>
     <td>Raw Encoder Position</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td><br>
     </td>
   </tr>
@@ -989,7 +989,7 @@ below.
     <td><a href="#Fields_status">RMP</a></td>
     <td>R</td>
     <td>Raw Motor Position</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td><br>
     </td>
   </tr>
@@ -997,7 +997,7 @@ below.
     <td><a href="#Fields_status">RRBV</a></td>
     <td>R</td>
     <td>Raw Readback Value</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td><br>
     </td>
   </tr>
@@ -1021,7 +1021,7 @@ below.
     <td><a href="#Fields_drive">RVAL</a></td>
     <td>R/W*</td>
     <td>Raw Desired Value</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td><br>
     </td>
   </tr>
@@ -1217,7 +1217,7 @@ below.
     <td><a href="#Fields_misc">VERS</a></td>
     <td>R</td>
     <td>Code Version</td>
-    <td>DOUBLE</td>
+    <td>FLOAT</td>
     <td>e.g., "1.95"</td>
   </tr>
   <tr>
@@ -1836,7 +1836,7 @@ below.
     <td>FRAC</td>
     <td>R/W</td>
     <td>Move Fraction</td>
-    <td>DOUBLE</td>
+    <td>FLOAT</td>
   </tr>
   <tr>
     <td colspan="5">This field supports closed-loop control of pathological devices 
@@ -2435,7 +2435,7 @@ below.
     <td>RVAL</td>
     <td>R/W*</td>
     <td>Raw Desired Value</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td>This is the desired position in raw coordinates. When this field is written 
     to, VAL and DVAL will be changed correspondingly, and the motor will move (with 
     backlash takeout if BDST is nonzero) to the newly written position.&nbsp;</td>
@@ -2542,7 +2542,7 @@ below.
     <td>RRBV</td>
     <td>R</td>
     <td>Raw Readback Value</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td>The current position of the motor, encoder, or readback link, as received 
     from whatever source has been selected to provide position information. The 
     units associated with this field depend on the source.&nbsp;</td>
@@ -2551,7 +2551,7 @@ below.
     <td>RMP</td>
     <td>R</td>
     <td>Raw Motor Position</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td>The contents of the hardware's step-count register. This field contains the 
     same information as the dial value, but in steps, rather than in engineering 
     units.&nbsp;</td>
@@ -2560,7 +2560,7 @@ below.
     <td>REP</td>
     <td>R</td>
     <td>Raw Encoder Position</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
     <td>The contents of the hardware's encoder-count register. Ideally, this field 
     contains the same information as the dial value, but in encoder counts, rather 
     than in engineering units.&nbsp;</td>
@@ -2992,7 +2992,7 @@ below.
     <td>VERS</td>
     <td>R</td>
     <td>Code Version</td>
-    <td>DOUBLE</td>
+    <td>FLOAT</td>
     <td>Version number of the recMotor.c code.</td>
   </tr>
   <tr valign="top">
@@ -3226,7 +3226,7 @@ below.
     <td>LRVL</td>
     <td>R</td>
     <td>Last Raw Des Val</td>
-    <td>DOUBLE</td>
+    <td>LONG</td>
   </tr>
   <tr valign="top">
     <td>LRLV</td>
