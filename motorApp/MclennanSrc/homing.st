@@ -13,15 +13,13 @@ int jog_forward_value, jog_reverse_value;
 assign jog_forward_value to "{MOTPV}.JOGF";
 assign jog_reverse_value to "{MOTPV}.JOGR";
 
-int set, position, position_d;
-double offset;
+int set, foff;
+double position_d;
 assign set to "{MOTPV}.SET";
-assign position to "{MOTPV}.VAL";
 assign position_d to "{MOTPV}.DVAL";
-assign offset to "{MOTPV}.OFF";
+assign foff to "{MOTPV}.FOFF";
 
-double offsetval;
-
+int foff_value;
 int debug_flag;
 int debug;
 int mode;
@@ -189,18 +187,15 @@ ss motor
             errlogSevPrintf(errlogInfo, "Sequencer: axis %i: Setting position to zero (modes 2 and 3)\n", axis);
         }
 
-        pvGet(offset);
-        offsetval = offset;
-
+        pvGet(foff);
+		foff_value = foff;
+        PVPUT(foff, 1); /* frozen offset for applying home position */
         PVPUT(set, 1);
 
-        PVPUT(position, 0.0);
         PVPUT(position_d, 0.0);
 
-        /* Reapply the offset */
-        PVPUT(offset, offsetval);
-        
         PVPUT(set, 0);
+        PVPUT(foff, foff_value); /* restore previous offset mode */
       }
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM moving TO done\n", axis);
