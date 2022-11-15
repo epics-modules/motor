@@ -188,7 +188,7 @@ ss motor
         }
 
         pvGet(foff);
-		foff_value = foff;
+        foff_value = foff;
         PVPUT(foff, 1); /* frozen offset for applying home position */
         PVPUT(set, 1);
 
