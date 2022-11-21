@@ -309,6 +309,18 @@ recordtype(motor) {
                 interest(1)
                 size(16)
         }
+        field(RHLM,DBF_DOUBLE) {
+                prompt("Raw High Limit")
+                promptgroup(GUI_COMMON)
+                special(SPC_NOMOD)
+                interest(1)
+        }
+        field(RLLM,DBF_DOUBLE) {
+                prompt("Raw Low Limit")
+                promptgroup(GUI_COMMON)
+                special(SPC_NOMOD)
+                interest(1)
+        }
         field(HLM,DBF_DOUBLE) {
                 prompt("User High Limit")
                 special(SPC_MOD)
