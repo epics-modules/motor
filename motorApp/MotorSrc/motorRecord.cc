@@ -190,6 +190,7 @@ USAGE...        Motor Record Support.
  * .76 04-04-18 rls - If URIP is Yes and RDBL is inaccessible (e.g., CA server is down), do not start
  *                    a new target position move (sans Home search or Jog). 
  * .78 08-21-18 kmp - Reverted .69 stop on RA_PROBLEM true.
+ * .79 21-11-22 jrh - Added raw limits, sync limits on motor resolution change
  */                                                          
 
 #define VERSION 7.2
