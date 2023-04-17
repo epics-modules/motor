@@ -150,20 +150,43 @@ STATIC struct thread_args targs = {SCAN_RATE, &PM304_access, 0.0};
  *********************************************************/
 static long report(int level)
 {
-  int card;
+  int card, motor_index;
+  struct PM304controller *cntrl;
+  char command[BUFF_SIZE];
+  char buff[1024]; /* need bigger than usual as QA can return a lot */
 
   if (PM304_num_cards <=0)
-    printf("    NO PM304 controllers found\n");
+    printf("    NO PM304/PM600 controllers found\n");
   else
     {
       for (card = 0; card < PM304_num_cards; card++)
-          if (motor_state[card])
-             printf("    PM304 controller %d, id: %s \n",
+          if (motor_state[card]) {
+             cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
+             printf("    %s controller %d, id: %s \n          num axes %d\n",
+                   (cntrl->model == MODEL_PM304 ? "PM304" : "PM600"),
                    card,
-                   motor_state[card]->ident);
+                   motor_state[card]->ident,
+                   cntrl->n_axes);
+             for(motor_index = 0; motor_index < cntrl->n_axes; motor_index++) {
+                sprintf(command, "%dQA", motor_index+1);
+                send_recv_mess(card, command, buff);
+                printf("%s\n", buff);
+                sprintf(command, "%dQM", motor_index+1);
+                send_recv_mess(card, command, buff);
+                printf("%s\n", buff);
+                sprintf(command, "%dQS", motor_index+1);
+                send_recv_mess(card, command, buff);
+                printf("%s\n", buff);
+                sprintf(command, "%dQP", motor_index+1);
+                send_recv_mess(card, command, buff);
+                printf("%s\n", buff);
+             }
+          }
     }
   return (0);
 }
+
+
 
 
 static long init()
@@ -278,15 +301,29 @@ STATIC int set_status(int card, int signal)
         }
 
         status.Bits.RA_PROBLEM = (response[1] == '1') ? 1 : 0;
-
+         
         if (response[2] == '1') {
-        status.Bits.RA_PLUS_LS = 1;
+        status.Bits.RA_PLUS_LS = 1; /* need to set ls_active = true; ? */
         }
         if (response[3] == '1') {
-        status.Bits.RA_MINUS_LS = 1;
+        status.Bits.RA_MINUS_LS = 1;  /* need to set ls_active = true; ? */
         }
     }
 
+    if (cntrl->model != MODEL_PM304) {
+        char *op; 
+        sprintf(command, "%dCO", signal+1);
+        send_recv_mess(card, command, response);
+        Debug(2, "set_status, operation query, card %d, response=%s\n", card, response);
+        /* returns Mode = XXX */
+        op = strchr(response, '=');
+        if (op != NULL) {
+            if (strncmp(cntrl->current_op[signal], op + 1, sizeof(cntrl->current_op[0]))) {
+                Debug(1, "set_status: card %d axis %d: %s\n", card, signal + 1, op + 1);
+                strncpy(cntrl->current_op[signal], op + 1, sizeof(cntrl->current_op[0]));
+            }
+        }
+    }
 
     /* encoder status */
     status.Bits.EA_SLIP       = 0;
@@ -398,6 +435,9 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 			level = 2;
 			controller_error = 0;
 		}
+        if (strchr(response, '!')) { /* an error contains an ! */
+            level = 1;
+        }
         Debug(level, "send_mess: card %d, response=...\n%s\n", card, response);
     }
 
@@ -420,6 +460,7 @@ STATIC int recv_mess(int card, char *com, int flag)
     char *pos;
     char temp[BUFF_SIZE];
     int flush;
+    int level = 2;
     asynStatus status;
     size_t nread=0;
     int eomReason;
@@ -449,7 +490,10 @@ STATIC int recv_mess(int card, char *com, int flag)
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
     if (nread == 0) com[0] = '\0';
     if (nread > 0) {
-        Debug(2, "recv_mess: card %d, flag=%d, message = \"%s\"\n", card, flag, com);
+        if (strchr(com, '!')) { /* errors contain ! */
+            level = 1;
+        }
+        Debug(level, "recv_mess: card %d, flag=%d, message = \"%s\"\n", card, flag, com);
     }
     if (nread == 0) {
         if (flag != FLUSH)  {
@@ -492,6 +536,7 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     size_t nwrite=0, nread=0;
     int eomReason;
     char temp[BUFF_SIZE];
+    int level = 2;
 
     response[0] = '\0';
 
@@ -518,9 +563,12 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     }
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
-    if (nread == 0) response[0] = '\0';;
+    if (nread == 0) response[0] = '\0';
+    if (strchr(response, '!')) {
+        level = 1;
+    }
     if (nread > 0) {
-        Debug(2, "send_recv_mess: card %d, response = \"%s\"\n", card, response);
+        Debug(level, "send_recv_mess: card %d, response = \"%s\"\n", card, response);
     }
     if (nread == 0) {
         Debug(1, "send_recv_mess: card %d ERROR: no response\n", card);
@@ -595,7 +643,7 @@ PM304Config(int card,             /* card being configured */
 
     if (n_axes == 0) n_axes=1;  /* This is a new parameter, some startup files don't have it yet */
     motor_state[card] = (struct controller *) malloc(sizeof(struct controller));
-    motor_state[card]->DevicePrivate = malloc(sizeof(struct PM304controller));
+    motor_state[card]->DevicePrivate = calloc(1, sizeof(struct PM304controller));
     cntrl = (struct PM304controller *) motor_state[card]->DevicePrivate;
     cntrl->n_axes = n_axes;
 	for (int i=0; i<n_axes; i++) {
@@ -719,7 +767,13 @@ STATIC int motor_init()
                         cntrl->use_encoder[motor_index] = 1;
                     }
                 }
-
+                if (cntrl->model == MODEL_PM600) {
+                    sprintf(command, "%dQM", motor_index+1);
+                    send_recv_mess(card_index, command, buff);    /* 01:CM = 1 AM = 00000000 DM = 00010000 JM = 11000000 */
+                    if (strchr(buff, '=') != NULL) {
+                        cntrl->control_mode[motor_index] = atoi(strchr(buff, '=') + 1);
+                    }
+                }
                 /* Querying speeds for this axis */
                 sprintf(command, "%dQS", motor_index+1);
                 send_recv_mess(card_index, command, buff);
