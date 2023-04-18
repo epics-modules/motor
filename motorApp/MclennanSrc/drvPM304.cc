@@ -421,25 +421,31 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
     for (p = epicsStrtok_r(temp, ";", &tok_save);		 
                 ((p != NULL) && (strlen(p) != 0));
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
-		
+
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, p);
-	    pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
+        pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
                 BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
-		/* Set the debug level for most responses to be 2. Flag reset messages
-		 * to 1 so we can spot them more easily */
-		int level = 2;
+        /* Set the debug level for most responses to be 2. Flag reset messages
+         * to 1 so we can spot them more easily */
+        int level = 2;
         if (strchr(response, '!')) { /* an error contains an ! */
             level = 1;
         }
-		if (strcmp(&p[1],"RS")==0) {
+        if (strcmp(&p[1],"RS")==0) {
             if (strstr(response, "NOT ABORTED") == NULL && strstr(response, "RESET") == NULL) { // actual string is !NOT ABORTED
-			    level = 1;
-			    controller_error = 1;
+                level = 1;
+                controller_error = 1;
             } else {
-			    level = 2;
-			    controller_error = 0;
+                level = 2;
+                controller_error = 0;
             }
+        } else {
+            // this is to maintain previous behaviour, but should we always clear? Because this loop splits
+            // commands a reset before move will not see a controller_error as it will get cleared when the move
+            // command is executed. So only a reset on its own that fails will show. Is that intended?
+            controller_error = 0;
         }
+        
         Debug(level, "send_mess: card %d, response=...\n%s\n", card, response);
     }
 
