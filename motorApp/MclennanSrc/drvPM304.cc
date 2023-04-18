@@ -67,7 +67,7 @@ extern "C" {epicsExportAddress(int, drvPM304Debug);}
 
 static inline void Debug(int level, const char *format, ...) {
   #ifdef DEBUG
-    if (level < drvPM304Debug) {
+    if (level <= drvPM304Debug) {
       va_list pVar;
       va_start(pVar, format);
       vprintf(format, pVar);
@@ -427,16 +427,18 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
                 BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
 		/* Set the debug level for most responses to be 2. Flag reset messages
 		 * to 1 so we can spot them more easily */
-		int level;
-		if (strcmp(&p[1],"RS")==0 && strstr(response, "NOT ABORTED") == NULL) {
-			level = 1;
-			controller_error = 1;
-		} else {
-			level = 2;
-			controller_error = 0;
-		}
+		int level = 2;
         if (strchr(response, '!')) { /* an error contains an ! */
             level = 1;
+        }
+		if (strcmp(&p[1],"RS")==0) {
+            if (strstr(response, "NOT ABORTED") == NULL && strstr(response, "RESET") == NULL) { // actual string is !NOT ABORTED
+			    level = 1;
+			    controller_error = 1;
+            } else {
+			    level = 2;
+			    controller_error = 0;
+            }
         }
         Debug(level, "send_mess: card %d, response=...\n%s\n", card, response);
     }

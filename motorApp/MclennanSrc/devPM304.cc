@@ -49,7 +49,7 @@ extern "C" {epicsExportAddress(int, devPM304Debug);}
 
 static inline void Debug(int level, const char *format, ...) {
   #ifdef DEBUG
-    if (level < devPM304Debug) {
+    if (level <= devPM304Debug) {
       va_list pVar;
       va_start(pVar, format);
       vprintf(format, pVar);
@@ -170,6 +170,7 @@ STATIC void request_home(struct mess_node *motor_call, int model, int axis, int 
     // Max creep speed is 800  - set to velo if under 800
     int creep_speed = (VELO>800) ? 800 : VELO;
     char buff[30];
+    buff[0] = '\0';
     if (model == MODEL_PM304){
         sprintf(buff, "%dSC%d;", axis, creep_speed);
         strcat(motor_call->message, buff);
@@ -245,6 +246,7 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
             if (cntrl->reset_before_move==1) {
                 sprintf(buff, "%dRS;", axis);
                 strcat(motor_call->message, buff);
+                buff[0] = '\0';
 			}
             break;
         default:
