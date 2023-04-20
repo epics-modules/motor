@@ -74,7 +74,7 @@ ss motor
 
   state ready
   { 
-    when (home_reverse_pv==1 && mode != HOME_MODE_BUILTIN)
+    when (home_reverse_pv==1 && (mode==HOME_MODE_CONST_VELOCITY_MOVE||mode==HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO))
     {
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM ready TO reverse_home_requested\n", axis);
@@ -89,7 +89,7 @@ ss motor
       }
     } state reverse_home_requested
     
-    when ((home_forward_pv==1) && (mode!=HOME_MODE_CONST_VELOCITY_MOVE_AND_ZERO) && (mode != HOME_MODE_BUILTIN))
+    when ((home_forward_pv==1) && (mode==HOME_MODE_CONST_VELOCITY_MOVE))
     {
       if (debug) {
         errlogSevPrintf(errlogInfo, "Sequencer: axis %i: FROM ready TO forward_home_requested\n", axis);

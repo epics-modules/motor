@@ -166,7 +166,7 @@ STATIC RTN_STATUS PM304_end_trans(struct motorRecord *mr)
 }
 
 /* request homing move */
-STATIC void request_home(struct mess_node *motor_call, int model, int axis, int home_direction, int home_mode) {
+STATIC void request_home(struct mess_node *motor_call, int model, int axis, int home_direction, int home_mode, char* datum_mode) {
     // Max creep speed is 800  - set to velo if under 800
     int creep_speed = (VELO>800) ? 800 : VELO;
     char buff[30];
@@ -176,7 +176,21 @@ STATIC void request_home(struct mess_node *motor_call, int model, int axis, int 
         strcat(motor_call->message, buff);
         sprintf(buff, "%dIX%d;", axis, home_direction);
     } else {
-        if ( home_mode == HOME_MODE_BUILTIN ) {
+        // datum mode: [0] = encoder index input polarity, [3] automatic direction search, [4] automatic opposite limit search
+        if ( home_mode==HOME_MODE_BUILTIN || home_mode==HOME_MODE_REVERSE_HOME_AND_ZERO || home_mode==HOME_MODE_FORWARD_HOME_AND_ZERO) {
+            datum_mode[1] = '0'; // set datum mode to capture only on HD command
+            if ( home_mode==HOME_MODE_REVERSE_HOME_AND_ZERO ) {
+                sprintf(buff, "%dSH0;", axis); // define home position as 0
+                datum_mode[2] = '1'; // set datum mode to apply home position
+                home_direction = -1;
+            } else if ( home_mode==HOME_MODE_FORWARD_HOME_AND_ZERO ) {
+                sprintf(buff, "%dSH0;", axis); // define home position as 0
+                datum_mode[2] = '1'; // set datum mode to apply home position
+                home_direction = 1;
+            }
+            strcat(motor_call->message, buff);
+            sprintf(buff, "%dDM%s;", axis, datum_mode);
+            strcat(motor_call->message, buff);
             sprintf(buff, "%dSC%d;", axis, creep_speed);
             strcat(motor_call->message, buff);
             sprintf(buff, "%dHD%d;", axis, home_direction);
@@ -262,10 +276,10 @@ STATIC RTN_STATUS PM304_build_trans(motor_cmnd command, double *parms, struct mo
         sprintf(buff, "%dMR%ld;", axis, ival);
         break;
     case HOME_REV:
-        request_home(motor_call, cntrl->model, axis, -1, cntrl->home_mode[axis-1]);
+        request_home(motor_call, cntrl->model, axis, -1, cntrl->home_mode[axis-1], cntrl->datum_mode[axis-1]);
         break;
     case HOME_FOR:
-        request_home(motor_call, cntrl->model, axis, 1, cntrl->home_mode[axis-1]);
+        request_home(motor_call, cntrl->model, axis, 1, cntrl->home_mode[axis-1], cntrl->datum_mode[axis-1]);
         break;
     case LOAD_POS:
         sprintf(buff, "%dCP%ld;", axis, ival); /* check if need to scale by encoder ratio, think not ? */

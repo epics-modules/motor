@@ -128,6 +128,27 @@ struct driver_table PM304_access =
     NULL
 };
 
+void printDatumMode(const char* mode)
+{
+    printf("Datum Mode (DM) is %s\n", mode);
+    printf("  Encoder index input polarity is %s\n", (mode[0] == '0' ? "normal" : "inverted"));
+    printf("  Datum point is captured %s\n", (mode[1] == '0' ? "only once (i.e. after HD command) " : "each time it happens"));
+    printf("  Datum position is %s\n", (mode[2] == '0' ? "captured but not changed" : "set to Home Position (SH) after datum search (HD)"));
+    printf("  Automatic direction search %s\n", (mode[3] == '0' ? "disabled" : "enabled"));
+    printf("  Automatic opposite limit search %s\n", (mode[4] == '0' ? "disabled" : "enabled"));
+}
+
+void printAbortMode(const char* mode)
+{
+    printf("Abort Mode (AM) is %s\n", mode);
+    printf("  Abort Stop Input %s\n", (mode[0] == '0' ? "disables control loop" : "stops all moves only"));
+    printf("  Abort Stop Input is %s\n", (mode[1] == '0' ? "latched requiring RS command to reset" : "only momentary"));
+    printf("  Stall Error %s\n", (mode[2] == '0' ? "disables control loop" : "is indicated but control loop remains active"));
+    printf("  Tracking Error %s\n", (mode[3] == '0' ? "disables control loop" : "is indicated but control loop remains active"));
+    printf("  TimeOut Error %s\n", (mode[4] == '0' ? "disables control loop" : "is indicated but control loop remains active"));
+    printf("  Enable output %s\n", (mode[7] == '0' ? "switched OFF during a disabled control loop" : "left ON during a control loop abort"));
+}
+
 struct drvPM304_drvet
 {
     long number;
@@ -168,25 +189,32 @@ static long report(int level)
                    motor_state[card]->ident,
                    cntrl->n_axes);
              for(motor_index = 0; motor_index < cntrl->n_axes; motor_index++) {
-                sprintf(command, "%dQA", motor_index+1);
-                send_recv_mess(card, command, buff);
-                printf("%s\n", buff);
-                sprintf(command, "%dQM", motor_index+1);
-                send_recv_mess(card, command, buff);
-                printf("%s\n", buff);
-                sprintf(command, "%dQS", motor_index+1);
-                send_recv_mess(card, command, buff);
-                printf("%s\n", buff);
-                sprintf(command, "%dQP", motor_index+1);
-                send_recv_mess(card, command, buff);
-                printf("%s\n", buff);
+                 printf("** Axis %d **\n", motor_index+1);
+                 printf("  reset before move %s\n", (cntrl->reset_before_move ? "YES" : "NO"));
+                 printf("  creep speed %d\n", cntrl->creep_speeds[motor_index]);
+                 printf("  use encoder %s\n", (cntrl->use_encoder[motor_index] ? "YES" : "NO"));
+                 printf("  home mode %d\n", cntrl->home_mode[motor_index]);
+                 printf("  control mode %d\n", cntrl->control_mode[motor_index]);
+                 printf("  current op %s\n", cntrl->current_op[motor_index]);
+                 printDatumMode(cntrl->datum_mode[motor_index]);
+                 printAbortMode(cntrl->abort_mode[motor_index]);
+                 sprintf(command, "%dQM", motor_index+1);
+                 send_recv_mess(card, command, buff);
+                 printf("%s\n", buff);
+                 sprintf(command, "%dQS", motor_index+1);
+                 send_recv_mess(card, command, buff);
+                 printf("%s\n", buff);
+                 sprintf(command, "%dQP", motor_index+1);
+                 send_recv_mess(card, command, buff);
+                 printf("%s\n", buff);
+                 sprintf(command, "%dQA", motor_index+1);
+                 send_recv_mess(card, command, buff);
+                 printf("%s\n", buff);
              }
           }
     }
   return (0);
 }
-
-
 
 
 static long init()
@@ -308,6 +336,7 @@ STATIC int set_status(int card, int signal)
         if (response[3] == '1') {
         status.Bits.RA_MINUS_LS = 1;  /* need to set ls_active = true; ? */
         }
+        status.Bits.RA_HOME = (response[5] == '1') ? 1 : 0;
     }
 
     if (cntrl->model != MODEL_PM304) {
@@ -775,11 +804,19 @@ STATIC int motor_init()
                         cntrl->use_encoder[motor_index] = 1;
                     }
                 }
-                if (cntrl->model == MODEL_PM600) {
+                if (cntrl->model != MODEL_PM304) {
                     sprintf(command, "%dQM", motor_index+1);
                     send_recv_mess(card_index, command, buff);    /* 01:CM = 1 AM = 00000000 DM = 00010000 JM = 11000000 */
                     if (strchr(buff, '=') != NULL) {
                         cntrl->control_mode[motor_index] = atoi(strchr(buff, '=') + 1);
+                    }
+                    if (strstr(buff, "DM =") != NULL) {
+                        int dm = atoi(strstr(buff, "DM =") + 1);
+                        epicsSnprintf(cntrl->datum_mode[motor_index], sizeof(cntrl->datum_mode[motor_index]), "%08d", dm);
+                    }
+                    if (strstr(buff, "AM =") != NULL) {
+                        int am = atoi(strstr(buff, "AM =") + 1);
+                        epicsSnprintf(cntrl->abort_mode[motor_index], sizeof(cntrl->abort_mode[motor_index]), "%08d", am);
                     }
                 }
                 /* Querying speeds for this axis */
