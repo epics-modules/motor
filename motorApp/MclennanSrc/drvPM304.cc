@@ -344,8 +344,8 @@ STATIC int set_status(int card, int signal)
         sprintf(command, "%dCO", signal+1);
         send_recv_mess(card, command, response);
         Debug(2, "set_status, operation query, card %d, response=%s\n", card, response);
-        /* returns Mode = XXX */
-        op = strchr(response, '=');
+        /* returns 01:XXX */
+        op = strchr(response, ':');
         if (op != NULL) {
             if (strncmp(cntrl->current_op[signal], op + 1, sizeof(cntrl->current_op[0]))) {
                 Debug(1, "set_status: card %d axis %d: %s\n", card, signal + 1, op + 1);
@@ -475,7 +475,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
             controller_error = 0;
         }
         
-        Debug(level, "send_mess: card %d, response=...\n%s\n", card, response);
+        Debug(level, "send_mess: card %d, message=%s response=...\n%s\n", card, p, response);
     }
 
     return(OK);
