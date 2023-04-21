@@ -207,9 +207,10 @@ static long report(int level)
                  sprintf(command, "%dQP", motor_index+1);
                  send_recv_mess(card, command, buff);
                  printf("%s\n", buff);
-                 sprintf(command, "%dQA", motor_index+1);
-                 send_recv_mess(card, command, buff);
-                 printf("%s\n", buff);
+                 //disable QA for moment
+                 //sprintf(command, "%dQA", motor_index+1);
+                 //send_recv_mess(card, command, buff);
+                 //printf("%s\n", buff);
              }
           }
     }
@@ -430,7 +431,7 @@ STATIC int set_status(int card, int signal)
 /*****************************************************/
 STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
 {
-    char *p, *tok_save;
+    char *p, *tok_save = NULL;
     char response[BUFF_SIZE];
     char temp[BUFF_SIZE];
     struct PM304controller *cntrl;
@@ -455,11 +456,17 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
 
         Debug(2, "send_mess: sending message to card %d, message=%s\n", card, p);
+        nread = 0;
+        response[0] = '\0';
         pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p), response,
                 BUFF_SIZE, TIMEOUT, &nwrite, &nread, &eomReason);
         /* Set the debug level for most responses to be 2. Flag reset messages
          * to 1 so we can spot them more easily */
         int level = 2;
+        if (nread == 0) {
+            response[0] = '\0';
+            Debug(1, "send_mess: card %d message=%s read ERROR: no response\n", card, p);
+        }
         if (strchr(response, '!')) { /* an error contains an ! */
             level = 1;
         }
@@ -574,7 +581,7 @@ STATIC int recv_mess(int card, char *com, int flag)
 /*****************************************************/
 STATIC int send_recv_mess(int card, const char *out, char *response)
 {
-    char *p, *tok_save;
+    char *p, *tok_save = NULL;
     struct PM304controller *cntrl;
     char *pos;
     asynStatus status;
@@ -582,8 +589,6 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
     int eomReason;
     char temp[BUFF_SIZE];
     int level = 2;
-
-    response[0] = '\0';
 
     /* Check that card exists */
     if (!motor_state[card])
@@ -599,34 +604,36 @@ STATIC int send_recv_mess(int card, const char *out, char *response)
      * so send them separately */
     strcpy(temp, out);
     for (p = epicsStrtok_r(temp, ";", &tok_save);
-                ((p != NULL) && (strlen(p) != 0));
-                p = epicsStrtok_r(NULL, ";", &tok_save)) {
+        ((p != NULL) && (strlen(p) != 0));
+        p = epicsStrtok_r(NULL, ";", &tok_save)) {
+        nread = 0;
+        response[0] = '\0';
         Debug(2, "send_recv_mess: sending message to card %d, message=%s\n", card, p);
-    status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
-                         response, BUFF_SIZE, TIMEOUT,
-                         &nwrite, &nread, &eomReason);
-    }
+        status = pasynOctetSyncIO->writeRead(cntrl->pasynUser, p, strlen(p),
+            response, BUFF_SIZE, TIMEOUT,
+            &nwrite, &nread, &eomReason);
 
-    /* The response from the PM304 is terminated with CR/LF.  Remove these */
-    if (nread == 0) response[0] = '\0';
-    if (strchr(response, '!')) {
-        level = 1;
-    }
-    if (nread > 0) {
-        Debug(level, "send_recv_mess: card %d, response = \"%s\"\n", card, response);
-    }
-    if (nread == 0) {
-        Debug(1, "send_recv_mess: card %d ERROR: no response\n", card);
-    }
-    /* The PM600 always echoes the command sent to it, before sending the response.  It is terminated
-       with a carriage return.  So we need to delete all characters up to and including the first
-       carriage return */
-    if (cntrl->model == MODEL_PM600) {
-       pos = strchr(response, '\r');
-       if (pos != NULL) {
-           strcpy(temp, pos+1);
-           strcpy(response, temp);
-       }
+        /* The response from the PM304 is terminated with CR/LF.  Remove these */
+        if (nread == 0) response[0] = '\0';
+        if (strchr(response, '!')) {
+            level = 1;
+        }
+        if (nread > 0) {
+            Debug(level, "send_recv_mess: card %d, message = %s, response = \"%s\"\n", card, p, response);
+        }
+        if (nread == 0) {
+            Debug(1, "send_recv_mess: card %d, message = %s, ERROR: no response\n", card, p);
+        }
+        /* The PM600 always echoes the command sent to it, before sending the response.  It is terminated
+           with a carriage return.  So we need to delete all characters up to and including the first
+           carriage return */
+        if (cntrl->model == MODEL_PM600) {
+            pos = strchr(response, '\r');
+            if (pos != NULL) {
+                strcpy(temp, pos + 1);
+                strcpy(response, temp);
+            }
+        }
     }
     return(strlen(response));
 }
@@ -798,20 +805,6 @@ STATIC int motor_init()
                 motor_info->no_motion_count = 0;
                 motor_info->encoder_position = 0;
                 motor_info->position = 0;
-                /* Figure out if we have an encoder or not.  If so use 0A, else use OC for readback. */
-                sprintf(command, "%dID", motor_index+1);
-                send_recv_mess(card_index, command, buff);    /* Read controller ID string for this axis */
-                if (cntrl->model == MODEL_PM304) {
-                    /* For now always assume encoder if PM304 - needs work */
-                    cntrl->use_encoder[motor_index] = 1;
-                } else {
-                    /* PM600 ident string identifies open loop stepper motors */
-                    if (strstr(buff, "Open loop stepper mode") != NULL) {
-                        cntrl->use_encoder[motor_index] = 0;
-                    } else {
-                        cntrl->use_encoder[motor_index] = 1;
-                    }
-                }
                 if (cntrl->model != MODEL_PM304) {
                     sprintf(command, "%dQM", motor_index+1);
                     send_recv_mess(card_index, command, buff);    /* 01:CM = 1 AM = 00000000 DM = 00010000 JM = 11000000 */
@@ -825,6 +818,19 @@ STATIC int motor_init()
                     if (strstr(buff, "AM =") != NULL) {
                         int am = atoi(strstr(buff, "AM =") + 1);
                         epicsSnprintf(cntrl->abort_mode[motor_index], sizeof(cntrl->abort_mode[motor_index]), "%08d", am);
+                    }
+                }
+                /* Figure out if we have an encoder or not.  If so use 0A, else use OC for readback. */
+                sprintf(command, "%dID", motor_index+1);
+                send_recv_mess(card_index, command, buff);    /* Read controller ID string for this axis */
+                if (cntrl->model == MODEL_PM304) {
+                    /* For now always assume encoder if PM304 - needs work */
+                    cntrl->use_encoder[motor_index] = 1;
+                } else {
+                    if (cntrl->control_mode[motor_index] == 11) { // CM11 Open loop stepper mode
+                        cntrl->use_encoder[motor_index] = 0;
+                    } else {
+                        cntrl->use_encoder[motor_index] = 1;
                     }
                 }
                 /* Querying speeds for this axis */
