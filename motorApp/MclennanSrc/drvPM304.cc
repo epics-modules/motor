@@ -317,6 +317,7 @@ STATIC int set_status(int card, int signal)
         status.Bits.RA_DIRECTION = 0;
         ls_active = true;
         }
+        status.Bits.EA_HOME = 0;
     } else {
         /* The response string is 01: followed by an eight character string of ones and zeroes */
         strcpy(response, &response[3]);
@@ -336,7 +337,9 @@ STATIC int set_status(int card, int signal)
         if (response[3] == '1') {
         status.Bits.RA_MINUS_LS = 1;  /* need to set ls_active = true; ? */
         }
-        status.Bits.RA_HOME = (response[5] == '1') ? 1 : 0;
+        // [5] seems to be on most of the time
+//        status.Bits.RA_HOME = (response[5] == '1') ? 1 : 0;
+//        status.Bits.EA_HOME = (response[5] == '1') ? 1 : 0;
     }
 
     if (cntrl->model != MODEL_PM304) {
@@ -355,10 +358,10 @@ STATIC int set_status(int card, int signal)
     }
 
     /* encoder status */
+    status.Bits.EA_HOME       = 0;
     status.Bits.EA_SLIP       = 0;
     status.Bits.EA_POSITION   = 0;
     status.Bits.EA_SLIP_STALL = 0;
-    status.Bits.EA_HOME       = 0;
 
     /* Request the position of this motor */
     if (cntrl->use_encoder[signal]) {
@@ -474,7 +477,12 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
             // command is executed. So only a reset on its own that fails will show. Is that intended?
             controller_error = 0;
         }
-        
+        if (strcmp(&p[1], "ST") == 0) {
+            // ignore error expected if device is not moving
+            if (strstr(response, "NOT ALLOWED IN THIS MODE") != NULL) {
+                level = 2;
+            }
+        }
         Debug(level, "send_mess: card %d, message=%s response=...\n%s\n", card, p, response);
     }
 
