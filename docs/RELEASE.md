@@ -1,5 +1,59 @@
 # Motor Releases
 
+## __R7-3 (2023-05-XX)__
+R7-3 is a release based on the master branch.  
+
+### Changes since R7-2-2
+
+#### New features
+* Added motorAcsMotion as a submodule
+* TBD
+
+#### Modifications to existing features
+* TBD
+
+#### Bug fixes
+* TBD
+
+#### Driver submodules (and noteworthy changes)
+
+All driver modules now use Github Actions for CI builds.
+
+| Module           | Release | Changes |
+| ---------------- | ------- | ------- |
+| **motorAcs**     | [R1-1-1](https://github.com/epics-motor/motorAcs/releases/tag/R1-1-1) |         |
+| **motorAcsMotion** | [R2-1](https://github.com/epics-motor/motorAcsMotion/releases/tag/R2-1) | Added as a motor submodule |
+| **motorAcsTech80** | [R1-0-2](https://github.com/epics-motor/motorAcsTech80/releases/tag/R1-0-2) |         |
+| **motorAerotech** | [R1-1-1](https://github.com/epics-motor/motorAerotech/releases/tag/R1-1-1) | Ensemble driver and doCommand.ab bug fixes |
+| **motorAMCI** | [R1-0-2](https://github.com/epics-motor/motorAMCI/releases/tag/R1-0-2) | Replaced printf calls with asynPrint calls in ANG1Driver.cpp |
+| **motorAttocube** | [R1-0-2](https://github.com/epics-motor/motorAttocube/releases/tag/R1-0-2) |         |
+| **motorDeltaTau** | [R1-0-2](https://github.com/epics-motor/motorDeltaTau/releases/tag/R1-0-2) |         |
+| **motorFaulhaber** | [R1-0-2](https://github.com/epics-motor/motorFaulhaber/releases/tag/R1-0-2) |         |
+| **motorHytec**   | [R1-0-3](https://github.com/epics-motor/motorHytec/releases/tag/R1-0-3) |         |
+| **motorIms**     | [R1-0-2](https://github.com/epics-motor/motorIms/releases/tag/R1-0-2) |         |
+| **motorKohzu**   | [R1-0-2](https://github.com/epics-motor/motorKohzu/releases/tag/R1-0-2) |         |
+| **motorMclennan** | [R1-1-1](https://github.com/epics-motor/motorMclennan/releases/tag/R1-1-1) |         |
+| **motorMicos**   | [R2-1](https://github.com/epics-motor/motorMicos/releases/tag/R2-1) | Added support for the SMC Taurus |
+| **motorMicroMo** | [R1-0-2](https://github.com/epics-motor/motorMicroMo/releases/tag/R1-0-2) |         |
+| **motorMicronix** | [R1-1](https://github.com/epics-motor/motorMicronix/releases/tag/R1-1) |         |
+| **motorMotorSim** | [R1-2](https://github.com/epics-motor/motorMotorSim/releases/tag/R1-2) | Added motorSim8x.iocsh. Multiple improvements to example IOC. |
+| **motorMXmotor** | [R1-0-2](https://github.com/epics-motor/motorMXmotor/releases/tag/R1-0-2) |         |
+| **motorNewFocus** | [R1-2](https://github.com/epics-motor/motorNewFocus/releases/tag/R1-2) | Improved example newfocus8742 configuration |
+| **motorNewport**  | [R1-2](https://github.com/epics-motor/motorNewport/releases/tag/R1-2) | Added support for the FCL200. ESP300 driver now supports UEIP=Yes. |
+| **motorNPoint**  | [R1-1](https://github.com/epics-motor/motorNPoint/releases/tag/R1-1) |         |
+| **motorOms**     | [R1-2](https://github.com/epics-motor/motorOms/releases/tag/R1-2)  | Enabled non-VxWorks IOCs & epicsMutexTryLock bug fix |
+| **motorOmsAsyn** | [R1-0-3](https://github.com/epics-motor/motorOmsAsyn/releases/tag/R1-0-3) | Type fixes |
+| **motorOriel**   | [R1-0-2](https://github.com/epics-motor/motorOriel/releases/tag/R1-0-2) |         |
+| **motorParker**  | [R1-1-1](https://github.com/epics-motor/motorParker/releases/tag/R1-1-1) |         |
+| **motorPhytron** | [R1-2](https://github.com/epics-motor/motorPhytron/releases/tag/R1-2) | Added encoder options. Bug fixes for deceleration and homing to limts. |
+| **motorPI**      | [R1-1](https://github.com/epics-motor/motorPI/releases/tag/R1-1) | Added E-816 example configuration |
+| **motorPIGCS2**  | [R1-2](https://github.com/epics-motor/motorPIGCS2/releases/tag/R1-2) | Added support for E-518 & E-873.3QTU controllers. Added closed loop commands for the E-727. Bug fixes. |
+| **motorPiJena**  | [R1-0-2](https://github.com/epics-motor/motorPiJena/releases/tag/R1-0-2) |         |
+| **motorScriptMotor** | [R1-2](https://github.com/epics-motor/motorScriptMotor/releases/tag/R1-2) | Added Attocube AMC support |
+| **motorSmarAct** | [R2-0](https://github.com/epics-motor/motorSmarAct/releases/tag/R2-0) | Too many new features to list here; see [motorSmarAct release notes](https://github.com/epics-motor/motorSmarAct/releases/tag/R2-0) |
+| **motorSmartMotor** | [R1-0-2](https://github.com/epics-motor/motorSmartMotor/releases/tag/R1-0-2) |         |
+| **motorThorLabs** | [R1-0-2](https://github.com/epics-motor/motorThorLabs/releases/tag/R1-0-2) | Added support for Kinesis KDC101 and KST101 |
+
 ## __R7-2-2 (2021-02-02)__
 R7-2-2 is a release based on the R7-2-1-bugfix branch.  
 
