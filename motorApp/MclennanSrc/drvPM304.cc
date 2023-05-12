@@ -339,9 +339,10 @@ STATIC int set_status(int card, int signal)
         if (response[3] == '1') {
         status.Bits.RA_MINUS_LS = 1;  /* need to set ls_active = true; ? */
         }
-        // [5] seems to be on most of the time
-//        status.Bits.RA_HOME = (response[5] == '1') ? 1 : 0;
-//        status.Bits.EA_HOME = (response[5] == '1') ? 1 : 0;
+        
+        // response[5] seems to be 1 all the time. Feels like you should be able 
+        // to set the ATHOME bits based on it, but seems not. Maybe it refers to
+        // which side iof the signal you are on etc. as opposed to the transition        
     }
 
     if (cntrl->model != MODEL_PM304) {
