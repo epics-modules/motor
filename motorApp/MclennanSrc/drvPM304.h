@@ -44,6 +44,7 @@ struct PM304controller
     int control_mode[PM304_MAX_CHANNELS];  /* PM600: datum mode as per CM command */
     char datum_mode[PM304_MAX_CHANNELS][9];  /* PM600: datum mode as per DM command */
     char abort_mode[PM304_MAX_CHANNELS][9];  /* PM600: abort mode as per AM command */
+    int velo[PM304_MAX_CHANNELS]; /* last set velocity, used in homing to set creep speed */
 };
 
 RTN_STATUS PM304Setup(int, int);
