@@ -3527,6 +3527,10 @@ static void monitor(motorRecord * pmr)
         db_post_events(pmr, &pmr->homf, local_mask);
     if ((local_mask = monitor_mask | (MARKED_AUX(M_HOMR) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->homr, local_mask);
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_RHLM) ? DBE_VAL_LOG : 0)))
+        db_post_events(pmr, &pmr->rhlm, local_mask);
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_RLLM) ? DBE_VAL_LOG : 0)))
+        db_post_events(pmr, &pmr->rllm, local_mask);
 
     UNMARK_ALL;
 }
@@ -3982,11 +3986,13 @@ static void set_user_highlimit(motorRecord* pmr, struct motor_dset* pdset)
         {
             pmr->dhlm = tmp_limit;
             pmr->rhlm = tmp_raw;
+            MARK_AUX(M_RHLM);
         }
         else
         {
             pmr->dllm = tmp_limit;
-            pmr->rllm = tmp_limit;
+            pmr->rllm = tmp_raw;
+            MARK_AUX(M_RLLM);
         }
     }
     MARK(M_HLM);
@@ -4052,11 +4058,13 @@ static void set_user_lowlimit(motorRecord* pmr, struct motor_dset* pdset)
         if (dir_positive) {
             pmr->dllm = tmp_limit;
             pmr->rllm = tmp_raw;
+            MARK_AUX(M_RLLM);
         }
         else
         {
             pmr->dhlm = tmp_limit;
             pmr->rhlm = tmp_raw;
+            MARK_AUX(M_RHLM);
         }
 
     }
@@ -4082,6 +4090,7 @@ static void set_dial_highlimit(motorRecord *pmr, struct motor_dset *pdset)
     tmp_raw = pmr->dhlm / pmr->mres;
     // set the raw high limit
     pmr->rhlm = tmp_raw;
+    MARK_AUX(M_RHLM);
 
     INIT_MSG();
     if (pmr->mres < 0) {
@@ -4125,7 +4134,7 @@ static void set_dial_lowlimit(motorRecord *pmr, struct motor_dset *pdset)
     tmp_raw = pmr->dllm / pmr->mres;
     // set the raw low limit
     pmr->rllm = tmp_raw;
-
+    MARK_AUX(M_RLLM);
 
     INIT_MSG();
     if (pmr->mres < 0) {
