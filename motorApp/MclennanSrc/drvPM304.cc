@@ -619,7 +619,9 @@ STATIC int send_recv_mess(int card, const char *out, char *response, size_t resp
         
         if (nread < response_maxsize) {
             response[nread] = '\0';
-        }
+        } else {
+            response[response_maxsize-1] = '\0';
+	}
         if (strchr(response, '!')) {
             level = 1;
         }
