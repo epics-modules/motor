@@ -452,7 +452,7 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
     /* Device support can send us multiple commands separated with ';'
      * characters.  The PM304 cannot handle more than 1 command on a line
      * so send them separately */
-    strcpy(temp, com);
+    strncpy(temp, com, sizeof(temp));
     for (p = epicsStrtok_r(temp, ";", &tok_save);		 
                 ((p != NULL) && (strlen(p) != 0));
                 p = epicsStrtok_r(NULL, ";", &tok_save)) {
@@ -465,8 +465,12 @@ STATIC RTN_STATUS send_mess(int card, const char *com, char *name)
         /* Set the debug level for most responses to be 2. Flag reset messages
          * to 1 so we can spot them more easily */
         int level = 2;
+        if (nread < BUFF_SIZE) {
+            response[nread] = '\0';
+        } else {
+            response[BUFF_SIZE-1] = '\0';
+        }
         if (nread == 0) {
-            response[0] = '\0';
             Debug(1, "send_mess: card %d message=%s read ERROR: no response\n", card, p);
         }
         if (strchr(response, '!')) { /* an error contains an ! */
@@ -542,7 +546,11 @@ STATIC int recv_mess(int card, char *com, int flag)
                                     timeout, &nread, &eomReason);
 
     /* The response from the PM304 is terminated with CR/LF.  Remove these */
-    if (nread == 0) com[0] = '\0';
+    if (nread < BUFF_SIZE) {
+        com[nread] = '\0';
+    } else {
+        com[BUFF_SIZE-1] = '\0';
+    }
     if (nread > 0) {
         if (strchr(com, '!')) { /* errors contain ! */
             level = 1;
