@@ -68,12 +68,15 @@ menu(motorRMOD) {
         choice(motorRMOD_G,"Geometric")
         choice(motorRMOD_I,"In-Position")
 }
-
 menu(motorRSTM) {
         choice(motorRSTM_Never,       "Never")
         choice(motorRSTM_Always,      "Always")
         choice(motorRSTM_NearZero,    "NearZero")
         choice(motorRSTM_Conditional, "Conditional")
+menu(motorACCSused) {
+        choice(motorACCSused_Undef,"Undef")
+        choice(motorACCSused_Accl, "Accl")
+        choice(motorACCSused_Accs, "Accs")
 }
 
 include "menuOmsl.dbd"
@@ -179,6 +182,17 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
                 initial("0.2")
+        }
+        field(ACCS,DBF_DOUBLE) {
+                prompt("Move Accel. (EGU/s^2)")
+                promptgroup(GUI_COMMON)
+                special(SPC_MOD)
+                interest(1)
+        }
+        field(ACCU,DBF_MENU) {
+                prompt("ACCS used")
+                special(SPC_NOMOD)
+                menu(motorACCSused)
         }
         field(BDST,DBF_DOUBLE) {
                 prompt("BL Distance (EGU)")
