@@ -941,7 +941,7 @@ static long postProcess(motorRecord * pmr)
 
             if (pmr->mip & MIP_JOG_STOP)
             {
-                double acc = accEGUfromVelo(pmr, pmr->velo);
+                double acc = accEGUfromVelo(pmr, pmr->velo) / fabs(pmr->mres);
 
                 if (vel <= vbase)
                     vel = vbase + 1;
@@ -2272,7 +2272,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             double newpos = pmr->dval / pmr->mres;      /* where to go     */
             double vbase = pmr->vbas / fabs(pmr->mres); /* base speed      */
             double vel = pmr->velo / fabs(pmr->mres);   /* normal speed    */
-            double acc = accEGUfromVelo(pmr, pmr->velo);
+            double acc = accEGUfromVelo(pmr, pmr->velo) / fabs(pmr->mres);
             /*
              * 'bpos' is one backlash distance away from 'newpos'.
              */
@@ -3989,7 +3989,7 @@ static void check_speed_and_resolution(motorRecord * pmr)
         /* ACCL == 0.0, ACCS is != 0.0 -> Use ACCS
            This is a (possible) new way to configure a database.
            Existing Db files will have ACCS == 0.0 and this
-           is backwards compatibleamd  behaves as before */
+           is backwards compatible and behaves as before */
         updateACCLfromACCS(pmr);
     }
     /* Sanity check on acceleration time. */
