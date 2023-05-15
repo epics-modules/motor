@@ -73,6 +73,7 @@ menu(motorRSTM) {
         choice(motorRSTM_Always,      "Always")
         choice(motorRSTM_NearZero,    "NearZero")
         choice(motorRSTM_Conditional, "Conditional")
+}
 menu(motorACCSused) {
         choice(motorACCSused_Undef,"Undef")
         choice(motorACCSused_Accl, "Accl")

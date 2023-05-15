@@ -85,6 +85,10 @@ ifdef LUA
 	$(ECHO) Creating $@, LUA = $(LUA)
 	@echo LUA = $(LUA)>> $@
 endif
+ifdef AUTOSAVE
+	$(ECHO) Creating $@, AUTOSAVE = $(AUTOSAVE)
+	@echo AUTOSAVE = $(AUTOSAVE)>> $@
+endif
 ifdef MODBUS
 	$(ECHO) Creating $@, MODBUS = $(MODBUS)
 	@echo MODBUS = $(MODBUS)>> $@
