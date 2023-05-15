@@ -1,0 +1,3 @@
+BASE=7.0
+
+include modules

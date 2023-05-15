@@ -9,37 +9,41 @@
 #
 # Add your declarations here
 
-SUPPORT=
--include $(TOP)/../configure/SUPPORT.$(EPICS_HOST_ARCH)
+SUPPORT=/path/to/support
 
-# If any motor controller communication mechanism besides the VME backplane is
-# required, then ASYN must be defined.
-# Recommended ASYN release: R4-23
-ASYN=$(SUPPORT)/asyn/R4-23
+# If any motor controller communication mechanism besides 
+# the VME backplane is required, then ASYN must be defined.
+# Recommended ASYN release: R4-35
+ASYN=$(SUPPORT)/asyn-R4-35
 
-# Need the sequencer and the busy record for the MM4005 and XPS trajectory scanning
-# Recommended SNCSEQ release: R2.1.16
-SNCSEQ=$(SUPPORT)/seq/seq-2-1-16
-# Recommended BUSY release: R1-6
-BUSY=$(SUPPORT)/busy/R1-6
+# Need the sequencer and the busy record for trajectory scanning
+# Recommended SNCSEQ release: R2.2.6
+SNCSEQ=$(SUPPORT)/seq-2-2-6
+# Recommended BUSY release: R1-7-1
+BUSY=$(SUPPORT)/busy-R1-7-1
 
-# Recommended EPICS release: R3.14.12.4
-EPICS_BASE=
--include $(TOP)/../configure/EPICS_BASE.$(EPICS_HOST_ARCH)
+# Recommended EPICS release: R3.15.6
+EPICS_BASE=/path/to/base
 
-# The following must be defined for the MXmotor device driver.
+# The following must be defined for motorMXmotor
 #!MX=$(SUPPORT)/mx/mx
 
-# The following support modules are required for the Hytec driver and for the examples in
-# <motor>/motorExApp.  To build examples, the top Makefile,
-# <motor>/Makefile must also be edited.
+# IPAC is required to build motorHytec
+# Recommended IPAC release: R2-15
+IPAC=$(SUPPORT)/ipac-R2-15
 
-# Recommended IPAC release: R2-12
-IPAC=$(SUPPORT)/ipac/R2-12
+# Script module needed to build motorScriptMotor
+#!LUA=$(SUPPORT)/lua-R1-3
 
-# Script module needed to build ScriptMotorController
-#!LUA=$(SUPPORT)/lua
+# Modbus module needed to build motorAMCI's example IOC
+# Required MODBUS release: R2-11 or later
+#!MODBUS=$(SUPPORT)/modbus-R2-11
 
 # The following is only needed for the motor examples in iocBoot.
 #!MOTOR=$(TOP)
 
+# These lines allow developers to override these RELEASE settings
+# without having to modify this file directly.
+-include $(TOP)/../RELEASE.local
+-include $(TOP)/../RELEASE.$(EPICS_HOST_ARCH).local
+-include $(TOP)/configure/RELEASE.local

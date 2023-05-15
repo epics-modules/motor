@@ -511,17 +511,6 @@ text {
 	limits {
 	}
 }
-composite {
-	object {
-		x=-2147483647
-		y=2147483496
-		width=1
-		height=1
-	}
-	"composite name"=""
-	children {
-	}
-}
 polyline {
 	object {
 		x=2

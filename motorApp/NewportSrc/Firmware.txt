@@ -1,6 +1,0 @@
-Version 1.4.1 http://www.newport.com/file_store/Software_Drivers/XPS_Firmware-V1_4_1.zip
-
-Version 1.5.x ftp://mail.newport-fr.com/FTP_SUPPORT/XPS Controller/XPS-C8_Updates/XPS-C8 V1.5.x/
-
-Version 2.0.x ftp://webmail.newport-fr.com/FTP_SUPPORT/XPS Controller/XPS-C8_Updates/XPS-C8 V2.0.x/
-

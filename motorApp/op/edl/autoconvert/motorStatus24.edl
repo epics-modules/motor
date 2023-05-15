@@ -1,0 +1,7196 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 559
+y 170
+w 140
+h 328
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 7
+bgColor index 2
+textColor index 14
+ctlFgColor1 index 25
+ctlFgColor2 index 15
+ctlBgColor1 index 5
+ctlBgColor2 index 12
+topShadowColor index 1
+botShadowColor index 13
+showGrid
+snapToGrid
+gridSize 4
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 0
+w 140
+h 20
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  " $(P) motor"
+}
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 40
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 40
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 41
+w 38
+h 10
+controlPv "$(P)m17.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 51
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m17_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 59
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m17.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 55
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m17.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 51
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m17.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 50
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 97
+y 52
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m17.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 51
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 96
+y 50
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "17"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 63
+w 38
+h 10
+controlPv "$(P)m17.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 76
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 76
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 77
+w 38
+h 10
+controlPv "$(P)m18.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 87
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m18_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 95
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m18.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 91
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m18.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 87
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m18.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 86
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 97
+y 88
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m18.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 87
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 96
+y 86
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "18"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 99
+w 38
+h 10
+controlPv "$(P)m18.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 112
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 112
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 113
+w 38
+h 10
+controlPv "$(P)m19.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 123
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m19_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 131
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m19.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 127
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m19.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 123
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m19.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 122
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 97
+y 124
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m19.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 123
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 96
+y 122
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "19"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 135
+w 38
+h 10
+controlPv "$(P)m19.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 148
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 148
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 149
+w 38
+h 10
+controlPv "$(P)m20.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 159
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m20_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 167
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m20.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 163
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m20.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 159
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m20.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 158
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 97
+y 160
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m20.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 159
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 96
+y 158
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "20"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 171
+w 38
+h 10
+controlPv "$(P)m20.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 184
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 184
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 185
+w 38
+h 10
+controlPv "$(P)m21.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 195
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m21_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 203
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m21.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 199
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m21.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 195
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m21.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 194
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 97
+y 196
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m21.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 195
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 96
+y 194
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "21"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 207
+w 38
+h 10
+controlPv "$(P)m21.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 220
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 220
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 221
+w 38
+h 10
+controlPv "$(P)m22.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 231
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m22_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 239
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m22.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 235
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m22.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 231
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m22.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 230
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 97
+y 232
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m22.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 231
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 96
+y 230
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "22"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 243
+w 38
+h 10
+controlPv "$(P)m22.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 256
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 256
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 257
+w 38
+h 10
+controlPv "$(P)m23.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 267
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m23_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 275
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m23.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 271
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m23.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 267
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m23.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 266
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 97
+y 268
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m23.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 267
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 96
+y 266
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "23"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 279
+w 38
+h 10
+controlPv "$(P)m23.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 292
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 293
+w 38
+h 10
+controlPv "$(P)m24.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 130
+y 303
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m24_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 311
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m24.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 307
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m24.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 120
+y 303
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m24.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 302
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 97
+y 304
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m24.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 303
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 96
+y 302
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "24"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 96
+y 315
+w 38
+h 10
+controlPv "$(P)m24.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 40
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 40
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 41
+w 38
+h 10
+controlPv "$(P)m9.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 85
+y 51
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m9_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 59
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m9.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 55
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m9.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 51
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m9.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 50
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 52
+y 52
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m9.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 51
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 50
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "9"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 63
+w 38
+h 10
+controlPv "$(P)m9.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 76
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 76
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 77
+w 38
+h 10
+controlPv "$(P)m10.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 85
+y 87
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m10_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 95
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m10.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 91
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m10.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 87
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m10.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 86
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 52
+y 88
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m10.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 87
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 86
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "10"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 99
+w 38
+h 10
+controlPv "$(P)m10.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 112
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 112
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 113
+w 38
+h 10
+controlPv "$(P)m11.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 85
+y 123
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m11_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 131
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m11.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 127
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m11.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 123
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m11.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 122
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 52
+y 124
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m11.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 123
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 122
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "11"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 135
+w 38
+h 10
+controlPv "$(P)m11.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 148
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 148
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 149
+w 38
+h 10
+controlPv "$(P)m12.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 85
+y 159
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m12_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 167
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m12.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 163
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m12.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 159
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m12.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 158
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 52
+y 160
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m12.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 159
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 158
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "12"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 171
+w 38
+h 10
+controlPv "$(P)m12.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 184
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 184
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 185
+w 38
+h 10
+controlPv "$(P)m13.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 85
+y 195
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m13_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 203
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m13.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 199
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m13.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 195
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m13.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 194
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 52
+y 196
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m13.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 195
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 194
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "13"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 207
+w 38
+h 10
+controlPv "$(P)m13.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 220
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 220
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 221
+w 38
+h 10
+controlPv "$(P)m14.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 85
+y 231
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m14_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 239
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m14.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 235
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m14.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 231
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m14.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 230
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 52
+y 232
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m14.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 231
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 230
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "14"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 243
+w 38
+h 10
+controlPv "$(P)m14.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 256
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 256
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 257
+w 38
+h 10
+controlPv "$(P)m15.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 85
+y 267
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m15_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 275
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m15.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 271
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m15.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 267
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m15.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 266
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 52
+y 268
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m15.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 267
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 266
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "15"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 279
+w 38
+h 10
+controlPv "$(P)m15.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 292
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 293
+w 38
+h 10
+controlPv "$(P)m16.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 85
+y 303
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m16_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 311
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m16.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 307
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m16.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 75
+y 303
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m16.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 302
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 52
+y 304
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m16.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 303
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 51
+y 302
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "16"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 51
+y 315
+w 38
+h 10
+controlPv "$(P)m16.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 40
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 40
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 41
+w 38
+h 10
+controlPv "$(P)m1.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 40
+y 51
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m1_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 59
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m1.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 55
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m1.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 51
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m1.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 50
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 52
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m1.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 51
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 6
+y 50
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "1"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 63
+w 38
+h 10
+controlPv "$(P)m1.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 76
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 76
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 77
+w 38
+h 10
+controlPv "$(P)m2.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 40
+y 87
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m2_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 95
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m2.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 91
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m2.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 87
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m2.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 86
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 88
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m2.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 87
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 6
+y 86
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "2"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 99
+w 38
+h 10
+controlPv "$(P)m2.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 112
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 112
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 113
+w 38
+h 10
+controlPv "$(P)m3.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 40
+y 123
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m3_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 131
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m3.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 127
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m3.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 123
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m3.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 122
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 124
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m3.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 123
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 6
+y 122
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "3"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 135
+w 38
+h 10
+controlPv "$(P)m3.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 148
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 148
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 149
+w 38
+h 10
+controlPv "$(P)m4.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 40
+y 159
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m4_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 167
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m4.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 163
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m4.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 159
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m4.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 158
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 160
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m4.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 159
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 6
+y 158
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "4"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 171
+w 38
+h 10
+controlPv "$(P)m4.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 184
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 184
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 185
+w 38
+h 10
+controlPv "$(P)m5.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 40
+y 195
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m5_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 203
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m5.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 199
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m5.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 195
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m5.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 194
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 196
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m5.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 195
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 6
+y 194
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "5"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 207
+w 38
+h 10
+controlPv "$(P)m5.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 220
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 220
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 221
+w 38
+h 10
+controlPv "$(P)m6.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 40
+y 231
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m6_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 239
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m6.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 235
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m6.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 231
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m6.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 230
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 232
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m6.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 231
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 6
+y 230
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "6"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 243
+w 38
+h 10
+controlPv "$(P)m6.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 256
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 256
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 257
+w 38
+h 10
+controlPv "$(P)m7.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 40
+y 267
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m7_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 275
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m7.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 271
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m7.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 267
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m7.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 266
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 268
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m7.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 267
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 6
+y 266
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "7"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 279
+w 38
+h 10
+controlPv "$(P)m7.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 292
+w 40
+h 33
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 292
+w 40
+h 33
+lineColor index 14
+fillColor index 14
+lineWidth 0
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 293
+w 38
+h 10
+controlPv "$(P)m8.DESC"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 40
+y 303
+w 4
+h 11
+lineColor index 14
+fill
+fillColor index 14
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m8_able.VAL)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 311
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m8.LLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 307
+w 9
+h 3
+lineColor index 30
+fill
+fillColor index 30
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m8.LVIO)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 30
+y 303
+w 9
+h 3
+lineColor index 20
+fill
+fillColor index 20
+lineWidth 0
+visPv "CALC\\\{(A)\}($(P)m8.HLS)"
+visInvert
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 302
+w 24
+h 14
+
+beginGroup
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 7
+y 304
+w 22
+h 10
+lineColor index 60
+fillColor index 60
+lineWidth 2
+visPv "CALC\\\{(A)\}($(P)m8.DMOV)"
+visMin 0
+visMax 1
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 303
+w 23
+h 11
+lineColor index 5
+fill
+fillColor index 5
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 6
+y 302
+w 24
+h 14
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "8"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 6
+y 315
+w 38
+h 10
+controlPv "$(P)m7.RBV"
+format "decimal"
+font "helvetica-bold-r-12.0"
+fontAlign "left"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 32
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 20
+w 140
+h 20
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 3
+useDisplayBg
+value {
+  "status"
+}
+endObjectProperties
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 40
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 50
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 51
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m17"
+}
+symbols {
+  0 "P=$(P),M=m17"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 76
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 86
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 87
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m18"
+}
+symbols {
+  0 "P=$(P),M=m18"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 112
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 122
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 123
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m19"
+}
+symbols {
+  0 "P=$(P),M=m19"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 148
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 158
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 159
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m20"
+}
+symbols {
+  0 "P=$(P),M=m20"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 184
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 194
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 195
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m21"
+}
+symbols {
+  0 "P=$(P),M=m21"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 220
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 230
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 231
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m22"
+}
+symbols {
+  0 "P=$(P),M=m22"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 256
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 266
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 267
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m23"
+}
+symbols {
+  0 "P=$(P),M=m23"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 302
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 96
+y 303
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m24"
+}
+symbols {
+  0 "P=$(P),M=m24"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 40
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 50
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 51
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m9"
+}
+symbols {
+  0 "P=$(P),M=m9"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 76
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 86
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 87
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m10"
+}
+symbols {
+  0 "P=$(P),M=m10"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 112
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 122
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 123
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m11"
+}
+symbols {
+  0 "P=$(P),M=m11"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 148
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 158
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 159
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m12"
+}
+symbols {
+  0 "P=$(P),M=m12"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 184
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 194
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 195
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m13"
+}
+symbols {
+  0 "P=$(P),M=m13"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 220
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 230
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 231
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m14"
+}
+symbols {
+  0 "P=$(P),M=m14"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 50
+y 256
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 266
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 267
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m15"
+}
+symbols {
+  0 "P=$(P),M=m15"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 302
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 303
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m16"
+}
+symbols {
+  0 "P=$(P),M=m16"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 40
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 50
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 51
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m1"
+}
+symbols {
+  0 "P=$(P),M=m1"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 76
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 86
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 87
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m2"
+}
+symbols {
+  0 "P=$(P),M=m2"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 112
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 122
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 123
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m3"
+}
+symbols {
+  0 "P=$(P),M=m3"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 148
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 158
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 159
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m4"
+}
+symbols {
+  0 "P=$(P),M=m4"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 184
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 194
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 195
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m5"
+}
+symbols {
+  0 "P=$(P),M=m5"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 220
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 230
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 231
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m6"
+}
+symbols {
+  0 "P=$(P),M=m6"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 256
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 266
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 267
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m7"
+}
+symbols {
+  0 "P=$(P),M=m7"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 5
+y 292
+w 40
+h 33
+
+beginGroup
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 302
+w 24
+h 14
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 6
+y 303
+w 24
+h 12
+fgColor index 14
+bgColor index 51
+topShadowColor index 2
+botShadowColor index 12
+font "helvetica-bold-r-12.0"
+icon
+invisible
+numPvs 2
+numDsps 1
+displayFileName {
+  0 "motorx_more.edl"
+}
+menuLabel {
+  0 "m8"
+}
+symbols {
+  0 "P=$(P),M=m8"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+
+endGroup
+
+endObjectProperties
+
+

@@ -20,6 +20,7 @@ record(motor, "$(P)$(M)") {
   field(DHLM, "$(DHLM)")
   field(DLLM, "$(DLLM)")
   field(INIT, "$(INIT)")
+  field(RSTM, "$(RSTM=NearZero)")
   field(TWV, "1")
   field(SDIS, "$(P)$(M)_able.VAL")
 }

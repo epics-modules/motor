@@ -55,6 +55,7 @@
 
 #include <asynDriver.h>
 #include <asynInt32.h>
+#include <asynFloat64SyncIO.h>
 #include <asynFloat64.h>
 #include <asynDrvUser.h>
 #include <asynFloat64Array.h>
@@ -137,6 +138,7 @@ typedef struct
     double param;
     int needUpdate;
     asynUser *pasynUser;
+    asynUser *pasynUserSync;
     asynInt32 *pasynInt32;
     void *asynInt32Pvt;
     asynFloat64 *pasynFloat64;
@@ -148,7 +150,6 @@ typedef struct
     asynGenericPointer *pasynGenericPointer;
     void *asynGenericPointerPvt;
     void *registrarPvt;
-    epicsEventId initEvent;
     int driverReasons[NUM_MOTOR_COMMANDS];
 } motorAsynPvt;
 
@@ -170,36 +171,57 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     double position = pPvt->status.position;
     double rdbd = (fabs(pmr->rdbd) < fabs(pmr->mres) ? fabs(pmr->mres) : fabs(pmr->rdbd) );
-    double encRatio[2] = {pmr->mres, pmr->eres};
     int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
+    int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) &&
+                                      (pmr->mres != 0) && (fabs(position * pmr->mres) < rdbd);
+    epicsFloat64 eratio = pmr->mres / pmr->eres;
+    int initPos = 0;
+    int status;
 
-    /*Before setting position, set the correct encoder ratio.*/
-    start_trans(pmr);
-    build_trans(SET_ENC_RATIO, encRatio, pmr);
-    end_trans(pmr);
+    /* Write encoder ratio to the driver.*/
+    pPvt->pasynUserSync->reason = pPvt->driverReasons[motorEncRatio];
+    status = pasynFloat64SyncIO->write(pPvt->pasynUserSync, eratio, pasynUser->timeout);
+    if (status) {
+       asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                 "devMotorAsyn::init_controller, %s failed to set encoder ratio to %f\n", pmr->name, eratio );
+    } else {
+       asynPrint(pasynUser, ASYN_TRACE_FLOW,
+                 "devMotorAsyn::init_controller, %s set encoder ratio to %f\n", pmr->name, eratio );
+    }
 
-    if ((use_rel != 0) ||
-        ((fabs(pmr->dval) > rdbd) && (pmr->mres != 0) && (fabs(position * pmr->mres) < rdbd))
-       )
+    switch (pmr->rstm) {
+        case motorRSTM_NearZero:
+            {
+                if (dval_non_zero_pos_near_zero)
+                    initPos = 1;
+
+            }
+            break;
+        case motorRSTM_Conditional:
+            {
+                if (use_rel || dval_non_zero_pos_near_zero)
+                    initPos = 1;
+            }
+            break;
+        case motorRSTM_Always:
+            initPos = 1;
+            break;
+    }
+    if (initPos)
     {
         double setPos = pmr->dval / pmr->mres;
-        epicsEventId initEvent = epicsEventCreate( epicsEventEmpty );
 
-        pPvt->initEvent = initEvent;
-
-        start_trans(pmr);
-        build_trans(LOAD_POS, &setPos, pmr);
-        end_trans(pmr);
-
-        asynPrint(pasynUser, ASYN_TRACE_FLOW,
-                  "devMotorAsyn::init_controller, %s set position to %f\n",
-                  pmr->name, setPos );
-
-        if ( initEvent )
-        {
-            epicsEventMustWait(initEvent);
-            epicsEventDestroy(initEvent);
-            pPvt->initEvent = 0;
+        /* Write setPos to the driver */
+        pPvt->pasynUserSync->reason = pPvt->driverReasons[motorPosition];
+        status = pasynFloat64SyncIO->write(pPvt->pasynUserSync, setPos, pasynUser->timeout);
+        if (status) {
+            asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                      "devMotorAsyn::init_controller, %s failed to set position to %f\n",
+                      pmr->name, setPos );
+        } else {
+            asynPrint(pasynUser, ASYN_TRACE_FLOW,
+                      "devMotorAsyn::init_controller, %s set position to %f\n",
+                      pmr->name, setPos );
         }
     }
     else
@@ -281,6 +303,14 @@ static long init_record(struct motorRecord * pmr )
     }
     pPvt->pasynFloat64 = (asynFloat64 *)pasynInterface->pinterface;
     pPvt->asynFloat64Pvt = pasynInterface->drvPvt;
+
+    /* Initialize Float64 synchronous interface */
+    status = pasynFloat64SyncIO->connect(port, signal, &pPvt->pasynUserSync, userParam);
+    if (status != asynSuccess) {
+       asynPrint(pasynUser, ASYN_TRACE_ERROR,
+                 "devMotorAsyn::init_record, %s connect Float64SyncIO interface failed\n", pmr->name);
+       goto bad;
+    }
 
     /* Get the asynDrvUser interface */
     pasynInterface = pasynManager->findInterface(pasynUser, asynDrvUserType, 1);    if (!pasynInterface) {
@@ -382,6 +412,9 @@ static long init_record(struct motorRecord * pmr )
     /* Do not need to manually retrieve the new status values, as if they are
      * set, a callback will be generated
      */
+
+    /* Finished using the Float64 SyncIO interface */
+    pasynFloat64SyncIO->disconnect(pPvt->pasynUserSync);
 
     /* Finally, indicate to the motor record that these values can be used. */
     pasynManager->freeAsynUser(pasynUser);
@@ -694,10 +727,6 @@ static void asynCallback(asynUser *pasynUser)
         asynPrint(pasynUser, ASYN_TRACE_ERROR,
                   "devMotorAsyn::asynCallback: %s error in freeAsynUser, %s\n",
                   pmr->name, pasynUser->errorMessage);
-    }
-
-    if ( pPvt->initEvent && pmsg->command == motorPosition) {
-        epicsEventSignal( pPvt->initEvent );
     }
 }
 

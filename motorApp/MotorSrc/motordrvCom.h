@@ -45,6 +45,7 @@ USAGE...	This file contains definitions and structures that
 #ifndef	INCmotordrvComh
 #define	INCmotordrvComh 1
 
+#include <shareLib.h>
 #include <callback.h>
 #include <epicsTypes.h>
 #include <epicsEvent.h>
@@ -196,13 +197,13 @@ struct driver_table
     struct controller ***card_array;
     int *cardcnt_ptr;
     int *any_inmotion_ptr;
-    RTN_STATUS (*sendmsg) (int, char const *, char *);
+    RTN_STATUS (*sendmsg) (int, const char *, const char *);
     int (*getmsg) (int, char *, int);
     int (*setstat) (int, int);
     void (*query_done) (int, int, struct mess_node *);
     void (*strtstat) (int);			/* Optional; start status function or NULL. */
     const bool *const init_indicator;		/* Driver initialized indicator. */
-    char **axis_names;				/* Axis name array or NULL. */
+    const char **axis_names;				/* Axis name array or NULL. */
 };
 
 

@@ -312,7 +312,7 @@ static void process_messages(struct driver_table *tabptr, epicsTime tick,
             struct mess_info *motor_info;
             struct controller *brdptr;
             char inbuf[MAX_MSG_SIZE];
-            char *axis_name;
+            const char *axis_name;
 
             if (tabptr->axis_names == NULL)
                 axis_name = (char *) NULL;

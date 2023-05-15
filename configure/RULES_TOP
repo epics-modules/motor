@@ -1,3 +1,6 @@
 #RULES_TOP
+ifeq ($(INSTALL_LOCATION),$(MOTOR))
+  INSTALL_CONFIG =
+endif
 include $(CONFIG)/RULES_TOP
 

@@ -69,6 +69,13 @@ menu(motorRMOD) {
         choice(motorRMOD_I,"In-Position")
 }
 
+menu(motorRSTM) {
+        choice(motorRSTM_Never,       "Never")
+        choice(motorRSTM_Always,      "Always")
+        choice(motorRSTM_NearZero,    "NearZero")
+        choice(motorRSTM_Conditional, "Conditional")
+}
+
 menu(motorACCSused) {
         choice(motorACCSused_Undef,"Undef")
         choice(motorACCSused_Accl, "Accl")
@@ -319,6 +326,18 @@ recordtype(motor) {
                 interest(1)
                 size(16)
         }
+        field(RHLM,DBF_DOUBLE) {
+                prompt("Raw High Limit")
+                promptgroup(GUI_COMMON)
+                special(SPC_NOMOD)
+                interest(1)
+        }
+        field(RLLM,DBF_DOUBLE) {
+                prompt("Raw Low Limit")
+                promptgroup(GUI_COMMON)
+                special(SPC_NOMOD)
+                interest(1)
+        }
         field(HLM,DBF_DOUBLE) {
                 prompt("User High Limit")
                 special(SPC_MOD)
@@ -428,6 +447,12 @@ recordtype(motor) {
         }
         field(RDBD,DBF_DOUBLE) {
                 prompt("Retry Deadband (EGU)")
+                promptgroup(GUI_COMMON)
+                special(SPC_MOD)
+                interest(1)
+        }
+        field(SPDB,DBF_DOUBLE) {
+                prompt("Setpoint Deadband (EGU)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
@@ -809,4 +834,11 @@ recordtype(motor) {
 		prompt("Ignore SET field")
 		interest(2)
 	}
+        field(RSTM,DBF_MENU) {
+                initial("NearZero")
+                prompt("Restore Mode")
+                promptgroup(GUI_COMMON)
+                interest(2)
+                menu(motorRSTM)
+        }
 }

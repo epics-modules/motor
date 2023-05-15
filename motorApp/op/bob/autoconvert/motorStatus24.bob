@@ -1,0 +1,5517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>motorStatus24</name>
+  <x>559</x>
+  <y>170</y>
+  <width>140</width>
+  <height>328</height>
+  <background_color>
+    <color red="218" green="218" blue="218">
+    </color>
+  </background_color>
+  <grid_visible>false</grid_visible>
+  <grid_step_x>5</grid_step_x>
+  <widget type="label" version="2.0.0">
+    <name>text #6</name>
+    <text>$(P) motor</text>
+    <width>140</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #9</name>
+    <x>95</x>
+    <y>40</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #12</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #15</name>
+      <pv_name>$(P)m17.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #19</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m17_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #23</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m17.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #27</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m17.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #31</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m17.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #35</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #38</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m17</M>
+            </macros>
+            <target>tab</target>
+            <description>m17</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #41</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m17.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #45</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #48</name>
+        <text>17</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #51</name>
+      <pv_name>$(P)m17.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #55</name>
+    <x>95</x>
+    <y>76</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #58</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #61</name>
+      <pv_name>$(P)m18.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #65</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m18_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #69</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m18.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #73</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m18.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #77</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m18.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #81</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #84</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m18</M>
+            </macros>
+            <target>tab</target>
+            <description>m18</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #87</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m18.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #91</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #94</name>
+        <text>18</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #97</name>
+      <pv_name>$(P)m18.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #101</name>
+    <x>95</x>
+    <y>112</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #104</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #107</name>
+      <pv_name>$(P)m19.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #111</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m19_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #115</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m19.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #119</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m19.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #123</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m19.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #127</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #130</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m19</M>
+            </macros>
+            <target>tab</target>
+            <description>m19</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #133</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m19.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #137</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #140</name>
+        <text>19</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #143</name>
+      <pv_name>$(P)m19.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #147</name>
+    <x>95</x>
+    <y>148</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #150</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #153</name>
+      <pv_name>$(P)m20.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #157</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m20_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #161</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m20.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #165</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m20.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #169</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m20.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #173</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #176</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m20</M>
+            </macros>
+            <target>tab</target>
+            <description>m20</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #179</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m20.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #183</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #186</name>
+        <text>20</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #189</name>
+      <pv_name>$(P)m20.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #193</name>
+    <x>95</x>
+    <y>184</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #196</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #199</name>
+      <pv_name>$(P)m21.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #203</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m21_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #207</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m21.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #211</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m21.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #215</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m21.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #219</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #222</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m21</M>
+            </macros>
+            <target>tab</target>
+            <description>m21</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #225</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m21.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #229</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #232</name>
+        <text>21</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #235</name>
+      <pv_name>$(P)m21.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #239</name>
+    <x>95</x>
+    <y>220</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #242</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #245</name>
+      <pv_name>$(P)m22.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #249</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m22_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #253</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m22.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #257</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m22.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #261</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m22.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #265</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #268</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m22</M>
+            </macros>
+            <target>tab</target>
+            <description>m22</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #271</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m22.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #275</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #278</name>
+        <text>22</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #281</name>
+      <pv_name>$(P)m22.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #285</name>
+    <x>95</x>
+    <y>256</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #288</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #291</name>
+      <pv_name>$(P)m23.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #295</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m23_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #299</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m23.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #303</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m23.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #307</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m23.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #311</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #314</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m23</M>
+            </macros>
+            <target>tab</target>
+            <description>m23</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #317</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m23.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #321</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #324</name>
+        <text>23</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #327</name>
+      <pv_name>$(P)m23.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #331</name>
+    <x>95</x>
+    <y>292</y>
+    <width>40</width>
+    <height>33</height>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <transparent>true</transparent>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #334</name>
+    <pv_name>$(P)m24.DESC</pv_name>
+    <x>96</x>
+    <y>293</y>
+    <width>38</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #338</name>
+    <x>130</x>
+    <y>303</y>
+    <width>5</width>
+    <height>12</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)m24_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #342</name>
+    <x>120</x>
+    <y>311</y>
+    <width>10</width>
+    <height>4</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)m24.LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #346</name>
+    <x>120</x>
+    <y>307</y>
+    <width>10</width>
+    <height>4</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)m24.LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #350</name>
+    <x>120</x>
+    <y>303</y>
+    <width>10</width>
+    <height>4</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)m24.HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #354</name>
+    <x>96</x>
+    <y>302</y>
+    <width>24</width>
+    <height>14</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="action_button" version="3.0.0">
+      <name>related display #357</name>
+      <actions>
+        <action type="open_display">
+          <file>motorx_more.opi</file>
+          <macros>
+            <M>m24</M>
+          </macros>
+          <target>tab</target>
+          <description>m24</description>
+        </action>
+      </actions>
+      <text></text>
+      <y>1</y>
+      <width>24</width>
+      <height>12</height>
+      <background_color>
+        <color red="115" green="223" blue="255">
+        </color>
+      </background_color>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #360</name>
+      <y>1</y>
+      <width>24</width>
+      <height>12</height>
+      <line_width>2</line_width>
+      <line_color>
+        <color red="115" green="255" blue="107">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="115" green="255" blue="107">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+      <rules>
+        <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0==0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m24.DMOV</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #364</name>
+      <y>1</y>
+      <width>24</width>
+      <height>12</height>
+      <line_color>
+        <color red="174" green="174" blue="174">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="174" green="174" blue="174">
+        </color>
+      </background_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>text #367</name>
+      <text>24</text>
+      <width>24</width>
+      <height>14</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #370</name>
+    <pv_name>$(P)m24.RBV</pv_name>
+    <x>96</x>
+    <y>315</y>
+    <width>38</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #374</name>
+    <x>50</x>
+    <y>40</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #377</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #380</name>
+      <pv_name>$(P)m9.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #384</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m9_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #388</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m9.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #392</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m9.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #396</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m9.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #400</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #403</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m9</M>
+            </macros>
+            <target>tab</target>
+            <description>m9</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #406</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m9.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #410</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #413</name>
+        <text>9</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #416</name>
+      <pv_name>$(P)m9.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #420</name>
+    <x>50</x>
+    <y>76</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #423</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #426</name>
+      <pv_name>$(P)m10.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #430</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m10_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #434</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m10.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #438</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m10.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #442</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m10.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #446</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #449</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m10</M>
+            </macros>
+            <target>tab</target>
+            <description>m10</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #452</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m10.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #456</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #459</name>
+        <text>10</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #462</name>
+      <pv_name>$(P)m10.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #466</name>
+    <x>50</x>
+    <y>112</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #469</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #472</name>
+      <pv_name>$(P)m11.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #476</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m11_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #480</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m11.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #484</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m11.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #488</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m11.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #492</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #495</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m11</M>
+            </macros>
+            <target>tab</target>
+            <description>m11</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #498</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m11.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #502</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #505</name>
+        <text>11</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #508</name>
+      <pv_name>$(P)m11.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #512</name>
+    <x>50</x>
+    <y>148</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #515</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #518</name>
+      <pv_name>$(P)m12.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #522</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m12_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #526</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m12.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #530</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m12.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #534</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m12.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #538</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #541</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m12</M>
+            </macros>
+            <target>tab</target>
+            <description>m12</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #544</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m12.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #548</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #551</name>
+        <text>12</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #554</name>
+      <pv_name>$(P)m12.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #558</name>
+    <x>50</x>
+    <y>184</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #561</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #564</name>
+      <pv_name>$(P)m13.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #568</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m13_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #572</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m13.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #576</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m13.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #580</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m13.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #584</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #587</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m13</M>
+            </macros>
+            <target>tab</target>
+            <description>m13</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #590</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m13.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #594</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #597</name>
+        <text>13</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #600</name>
+      <pv_name>$(P)m13.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #604</name>
+    <x>50</x>
+    <y>220</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #607</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #610</name>
+      <pv_name>$(P)m14.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #614</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m14_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #618</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m14.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #622</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m14.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #626</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m14.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #630</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #633</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m14</M>
+            </macros>
+            <target>tab</target>
+            <description>m14</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #636</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m14.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #640</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #643</name>
+        <text>14</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #646</name>
+      <pv_name>$(P)m14.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #650</name>
+    <x>50</x>
+    <y>256</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #653</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #656</name>
+      <pv_name>$(P)m15.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #660</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m15_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #664</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m15.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #668</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m15.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #672</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m15.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #676</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #679</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m15</M>
+            </macros>
+            <target>tab</target>
+            <description>m15</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #682</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m15.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #686</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #689</name>
+        <text>15</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #692</name>
+      <pv_name>$(P)m15.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #696</name>
+    <x>50</x>
+    <y>292</y>
+    <width>40</width>
+    <height>33</height>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <transparent>true</transparent>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #699</name>
+    <pv_name>$(P)m16.DESC</pv_name>
+    <x>51</x>
+    <y>293</y>
+    <width>38</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #703</name>
+    <x>85</x>
+    <y>303</y>
+    <width>5</width>
+    <height>12</height>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)m16_able.VAL</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #707</name>
+    <x>75</x>
+    <y>311</y>
+    <width>10</width>
+    <height>4</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)m16.LLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #711</name>
+    <x>75</x>
+    <y>307</y>
+    <width>10</width>
+    <height>4</height>
+    <line_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="251" green="243" blue="74">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)m16.LVIO</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #715</name>
+    <x>75</x>
+    <y>303</y>
+    <width>10</width>
+    <height>4</height>
+    <line_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="253" green="0" blue="0">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+        <exp bool_exp="!(pv0!=0)">
+          <value>false</value>
+        </exp>
+        <pv_name>$(P)m16.HLS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #719</name>
+    <x>51</x>
+    <y>302</y>
+    <width>24</width>
+    <height>14</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="action_button" version="3.0.0">
+      <name>related display #722</name>
+      <actions>
+        <action type="open_display">
+          <file>motorx_more.opi</file>
+          <macros>
+            <M>m16</M>
+          </macros>
+          <target>tab</target>
+          <description>m16</description>
+        </action>
+      </actions>
+      <text></text>
+      <y>1</y>
+      <width>24</width>
+      <height>12</height>
+      <background_color>
+        <color red="115" green="223" blue="255">
+        </color>
+      </background_color>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #725</name>
+      <y>1</y>
+      <width>24</width>
+      <height>12</height>
+      <line_width>2</line_width>
+      <line_color>
+        <color red="115" green="255" blue="107">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="115" green="255" blue="107">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+      <rules>
+        <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0==0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m16.DMOV</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #729</name>
+      <y>1</y>
+      <width>24</width>
+      <height>12</height>
+      <line_color>
+        <color red="174" green="174" blue="174">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="174" green="174" blue="174">
+        </color>
+      </background_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>text #732</name>
+      <text>16</text>
+      <width>24</width>
+      <height>14</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>text update #735</name>
+    <pv_name>$(P)m16.RBV</pv_name>
+    <x>51</x>
+    <y>315</y>
+    <width>38</width>
+    <height>10</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="10.0">
+      </font>
+    </font>
+    <background_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </background_color>
+    <format>1</format>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #739</name>
+    <x>5</x>
+    <y>40</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #742</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #745</name>
+      <pv_name>$(P)m1.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #749</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m1_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #753</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m1.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #757</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m1.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #761</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m1.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #765</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #768</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m1</M>
+            </macros>
+            <target>tab</target>
+            <description>m1</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #771</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m1.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #775</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #778</name>
+        <text>1</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #781</name>
+      <pv_name>$(P)m1.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #785</name>
+    <x>5</x>
+    <y>76</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #788</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #791</name>
+      <pv_name>$(P)m2.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #795</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m2_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #799</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m2.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #803</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m2.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #807</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m2.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #811</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #814</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m2</M>
+            </macros>
+            <target>tab</target>
+            <description>m2</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #817</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m2.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #821</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #824</name>
+        <text>2</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #827</name>
+      <pv_name>$(P)m2.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #831</name>
+    <x>5</x>
+    <y>112</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #834</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #837</name>
+      <pv_name>$(P)m3.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #841</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m3_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #845</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m3.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #849</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m3.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #853</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m3.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #857</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #860</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m3</M>
+            </macros>
+            <target>tab</target>
+            <description>m3</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #863</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m3.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #867</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #870</name>
+        <text>3</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #873</name>
+      <pv_name>$(P)m3.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #877</name>
+    <x>5</x>
+    <y>148</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #880</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #883</name>
+      <pv_name>$(P)m4.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #887</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m4_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #891</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m4.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #895</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m4.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #899</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m4.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #903</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #906</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m4</M>
+            </macros>
+            <target>tab</target>
+            <description>m4</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #909</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m4.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #913</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #916</name>
+        <text>4</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #919</name>
+      <pv_name>$(P)m4.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #923</name>
+    <x>5</x>
+    <y>184</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #926</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #929</name>
+      <pv_name>$(P)m5.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #933</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m5_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #937</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m5.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #941</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m5.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #945</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m5.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #949</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #952</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m5</M>
+            </macros>
+            <target>tab</target>
+            <description>m5</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #955</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m5.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #959</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #962</name>
+        <text>5</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #965</name>
+      <pv_name>$(P)m5.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #969</name>
+    <x>5</x>
+    <y>220</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #972</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #975</name>
+      <pv_name>$(P)m6.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #979</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m6_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #983</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m6.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #987</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m6.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #991</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m6.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #995</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #998</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m6</M>
+            </macros>
+            <target>tab</target>
+            <description>m6</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #1001</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m6.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #1005</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #1008</name>
+        <text>6</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #1011</name>
+      <pv_name>$(P)m6.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #1015</name>
+    <x>5</x>
+    <y>256</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1018</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #1021</name>
+      <pv_name>$(P)m7.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1025</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m7_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1029</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m7.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1033</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m7.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1037</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m7.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #1041</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #1044</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m7</M>
+            </macros>
+            <target>tab</target>
+            <description>m7</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #1047</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m7.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #1051</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #1054</name>
+        <text>7</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #1057</name>
+      <pv_name>$(P)m7.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #1061</name>
+    <x>5</x>
+    <y>292</y>
+    <width>40</width>
+    <height>33</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1064</name>
+      <width>40</width>
+      <height>33</height>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <transparent>true</transparent>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #1067</name>
+      <pv_name>$(P)m8.DESC</pv_name>
+      <x>1</x>
+      <y>1</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1071</name>
+      <x>35</x>
+      <y>11</y>
+      <width>5</width>
+      <height>12</height>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m8_able.VAL</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1075</name>
+      <x>25</x>
+      <y>19</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m8.LLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1079</name>
+      <x>25</x>
+      <y>15</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="251" green="243" blue="74">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m8.LVIO</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="rectangle" version="2.0.0">
+      <name>rectangle #1083</name>
+      <x>25</x>
+      <y>11</y>
+      <width>10</width>
+      <height>4</height>
+      <line_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </line_color>
+      <background_color>
+        <color red="253" green="0" blue="0">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="vis_if_not_zero" prop_id="visible" out_exp="false">
+          <exp bool_exp="!(pv0!=0)">
+            <value>false</value>
+          </exp>
+          <pv_name>$(P)m8.HLS</pv_name>
+        </rule>
+      </rules>
+    </widget>
+    <widget type="group" version="2.0.0">
+      <name>composite #1087</name>
+      <x>1</x>
+      <y>10</y>
+      <width>24</width>
+      <height>14</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="action_button" version="3.0.0">
+        <name>related display #1090</name>
+        <actions>
+          <action type="open_display">
+            <file>motorx_more.opi</file>
+            <macros>
+              <M>m8</M>
+            </macros>
+            <target>tab</target>
+            <description>m8</description>
+          </action>
+        </actions>
+        <text></text>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #1093</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_width>2</line_width>
+        <line_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="115" green="255" blue="107">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+        <rules>
+          <rule name="vis_if_zero" prop_id="visible" out_exp="false">
+            <exp bool_exp="!(pv0==0)">
+              <value>false</value>
+            </exp>
+            <pv_name>$(P)m8.DMOV</pv_name>
+          </rule>
+        </rules>
+      </widget>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #1097</name>
+        <y>1</y>
+        <width>24</width>
+        <height>12</height>
+        <line_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="174" green="174" blue="174">
+          </color>
+        </background_color>
+      </widget>
+      <widget type="label" version="2.0.0">
+        <name>text #1100</name>
+        <text>8</text>
+        <width>24</width>
+        <height>14</height>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>text update #1103</name>
+      <pv_name>$(P)m7.RBV</pv_name>
+      <x>1</x>
+      <y>23</y>
+      <width>38</width>
+      <height>10</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="10.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <show_units>false</show_units>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #1107</name>
+    <text>status</text>
+    <y>20</y>
+    <width>140</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+</display>
