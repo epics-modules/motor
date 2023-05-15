@@ -38,15 +38,15 @@ All driver modules now use Github Actions for CI builds.
 | **motorMicronix** | [R1-1](https://github.com/epics-motor/motorMicronix/releases/tag/R1-1) |         |
 | **motorMotorSim** | [R1-2](https://github.com/epics-motor/motorMotorSim/releases/tag/R1-2) | Added motorSim8x.iocsh. Multiple improvements to example IOC. |
 | **motorMXmotor** | [R1-0-2](https://github.com/epics-motor/motorMXmotor/releases/tag/R1-0-2) |         |
-| **motorNewFocus** | [R1-2](https://github.com/epics-motor/motorNewFocus/releases/tag/R1-2) | Improved example newfocus8742 configuration |
-| **motorNewport**  | [R1-2](https://github.com/epics-motor/motorNewport/releases/tag/R1-2) | Added support for the FCL200. ESP300 driver now supports UEIP=Yes. |
+| **motorNewFocus** | [R1-2-1](https://github.com/epics-motor/motorNewFocus/releases/tag/R1-2-1) | Improved example newfocus8742 configuration. iocsh files now installed. |
+| **motorNewport**  | [R1-2-1](https://github.com/epics-motor/motorNewport/releases/tag/R1-2-1) | Added support for the FCL200. ESP300 driver now supports UEIP=Yes. iocsh files now installed. |
 | **motorNPoint**  | [R1-1](https://github.com/epics-motor/motorNPoint/releases/tag/R1-1) |         |
 | **motorOms**     | [R1-2](https://github.com/epics-motor/motorOms/releases/tag/R1-2)  | Enabled non-VxWorks IOCs & epicsMutexTryLock bug fix |
 | **motorOmsAsyn** | [R1-0-3](https://github.com/epics-motor/motorOmsAsyn/releases/tag/R1-0-3) | Type fixes |
 | **motorOriel**   | [R1-0-2](https://github.com/epics-motor/motorOriel/releases/tag/R1-0-2) |         |
 | **motorParker**  | [R1-1-1](https://github.com/epics-motor/motorParker/releases/tag/R1-1-1) |         |
 | **motorPhytron** | [R1-2](https://github.com/epics-motor/motorPhytron/releases/tag/R1-2) | Added encoder options. Bug fixes for deceleration and homing to limts. |
-| **motorPI**      | [R1-1](https://github.com/epics-motor/motorPI/releases/tag/R1-1) | Added E-816 example configuration |
+| **motorPI**      | [R1-1-1](https://github.com/epics-motor/motorPI/releases/tag/R1-1-1) | Added E-816 example configuration. iocsh files now installed. |
 | **motorPIGCS2**  | [R1-2](https://github.com/epics-motor/motorPIGCS2/releases/tag/R1-2) | Added support for E-518 & E-873.3QTU controllers. Added closed loop commands for the E-727. Bug fixes. |
 | **motorPiJena**  | [R1-0-2](https://github.com/epics-motor/motorPiJena/releases/tag/R1-0-2) |         |
 | **motorScriptMotor** | [R1-2](https://github.com/epics-motor/motorScriptMotor/releases/tag/R1-2) | Added Attocube AMC support |
