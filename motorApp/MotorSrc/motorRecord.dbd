@@ -90,6 +90,7 @@ recordtype(motor) {
                 prompt("User Offset (EGU)")
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)
         }
         field(FOFF,DBF_MENU) {
                 asl(ASL0)
@@ -142,36 +143,42 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(VBAS,DBF_DOUBLE) {
                 prompt("Base Velocity (EGU/s)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(VMAX,DBF_DOUBLE) {
                 prompt("Max. Velocity (EGU/s)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(S,DBF_DOUBLE) {
                 prompt("Speed (revolutions/sec)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(SBAS,DBF_DOUBLE) {
                 prompt("Base Speed (RPS)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(SMAX,DBF_DOUBLE) {
                 prompt("Max. Speed (RPS)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(ACCL,DBF_DOUBLE) {
                 prompt("Seconds to Velocity")
@@ -179,6 +186,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
                 initial("0.2")
+                prop(YES)
         }
         field(BDST,DBF_DOUBLE) {
                 prompt("BL Distance (EGU)")
@@ -186,18 +194,21 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(BVEL,DBF_DOUBLE) {
                 prompt("BL Velocity (EGU/s)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(SBAK,DBF_DOUBLE) {
                 prompt("BL Speed (RPS)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(BACC,DBF_DOUBLE) {
                 prompt("BL Seconds to Velocity")
@@ -205,6 +216,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
                 initial("0.5")
+                prop(YES)
         }
         field(FRAC,DBF_FLOAT) {
                 prompt("Move Fraction")
@@ -212,6 +224,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
                 initial("1")
+                prop(YES)
         }
         field(OUT,DBF_OUTLINK) {
                 prompt("Output Specification")
@@ -262,6 +275,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
+                prop(YES)
         }
         field(MRES,DBF_DOUBLE) {
                 prompt("Motor Step Size (EGU)")
@@ -269,6 +283,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
+                prop(YES)
         }
         field(ERES,DBF_DOUBLE) {
                 prompt("Encoder Step Size (EGU)")
@@ -276,11 +291,13 @@ recordtype(motor) {
                 special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
+                prop(YES)
         }
         field(RRES,DBF_DOUBLE) {
                 prompt("Readback Step Size (EGU")
                 promptgroup(GUI_COMMON)
                 interest(1)
+                prop(YES)
         }
         field(UEIP,DBF_MENU) {
                 prompt("Use Encoder If Present")
@@ -302,6 +319,7 @@ recordtype(motor) {
                 prompt("Display Precision")
                 promptgroup(GUI_COMMON)
                 interest(1)
+                prop(YES)
         }
         field(EGU,DBF_STRING) {
                 prompt("Engineering Units")
@@ -325,33 +343,39 @@ recordtype(motor) {
                 prompt("User High Limit")
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)
         }
         field(LLM,DBF_DOUBLE) {
                 prompt("User Low Limit")
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)
         }
         field(DHLM,DBF_DOUBLE) {
                 prompt("Dial High Limit")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)
         }
         field(DLLM,DBF_DOUBLE) {
                 prompt("Dial Low Limit")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)
         }
         field(HOPR,DBF_DOUBLE) {
                 prompt("High Operating Range")
                 promptgroup(GUI_COMMON)
                 interest(1)
+                prop(YES)
         }
         field(LOPR,DBF_DOUBLE) {
                 prompt("Low Operating Range")
                 promptgroup(GUI_COMMON)
                 interest(1)
+                prop(YES)
         }
         field(HLS,DBF_SHORT) {
                 prompt("User High Limit Switch")
@@ -374,24 +398,28 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 pp(TRUE)
                 interest(2)
+                prop(YES)
         }
         field(LOLO,DBF_DOUBLE) {
                 prompt("Lolo Alarm Limit (EGU)")
                 promptgroup(GUI_COMMON)
                 pp(TRUE)
                 interest(2)
+                prop(YES)
         }
         field(HIGH,DBF_DOUBLE) {
                 prompt("High Alarm Limit (EGU)")
                 promptgroup(GUI_COMMON)
                 pp(TRUE)
                 interest(2)
+                prop(YES)
         }
         field(LOW,DBF_DOUBLE) {
                 prompt("Low Alarm Limit (EGU)")
                 promptgroup(GUI_COMMON)
                 pp(TRUE)
                 interest(2)
+                prop(YES)
         }
         field(HHSV,DBF_MENU) {
                 prompt("Hihi Severity")
@@ -433,12 +461,14 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(SPDB,DBF_DOUBLE) {
                 prompt("Setpoint Deadband (EGU)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(RCNT,DBF_SHORT) {
                 prompt("Retry count")
@@ -522,28 +552,33 @@ recordtype(motor) {
                 prompt("Tweak Step Size (EGU)")
                 promptgroup(GUI_COMMON)
                 interest(1)
+                prop(YES)
         }
         field(VAL,DBF_DOUBLE) {
                 asl(ASL0)
                 prompt("User Desired Value (EGU")
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)
         }
         field(LVAL,DBF_DOUBLE) {
                 prompt("Last User Des Val (EGU)")
                 special(SPC_NOMOD)
                 interest(1)
+                prop(YES)
         }
         field(DVAL,DBF_DOUBLE) {
                 asl(ASL0)
                 prompt("Dial Desired Value (EGU")
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)
         }
         field(LDVL,DBF_DOUBLE) {
                 prompt("Last Dial Des Val (EGU)")
                 special(SPC_NOMOD)
                 interest(1)
+                prop(YES)
         }
         field(RVAL,DBF_LONG) {
                 asl(ASL0)
@@ -561,23 +596,28 @@ recordtype(motor) {
                 prompt("Relative Value (EGU)")
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)
         }
         field(LRLV,DBF_DOUBLE) {
                 prompt("Last Rel Value (EGU)")
                 special(SPC_NOMOD)
                 interest(1)
+                prop(YES)
         }
         field(RBV,DBF_DOUBLE) {
                 prompt("User Readback Value")
                 special(SPC_NOMOD)
+                prop(YES)
         }
         field(DRBV,DBF_DOUBLE) {
                 prompt("Dial Readback Value")
                 special(SPC_NOMOD)
+                prop(YES)
         }
         field(DIFF,DBF_DOUBLE) {
                 prompt("Difference dval-drbv")
                 special(SPC_NOMOD)
+                prop(YES)
         }
         field(RDIF,DBF_LONG) {
                 prompt("Difference rval-rrbv")
@@ -659,6 +699,7 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(CBAK,DBF_NOACCESS) {
                 prompt("Callback structure")
@@ -673,6 +714,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
                 initial("0")
+                prop(YES)
         }
         field(ICOF,DBF_DOUBLE) {
                 promptgroup(GUI_COMMON)
@@ -680,6 +722,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
                 initial("0")
+                prop(YES)
         }
         field(DCOF,DBF_DOUBLE) {
                 promptgroup(GUI_COMMON)
@@ -687,6 +730,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
                 initial("0")
+                prop(YES)
         }
         field(CNEN,DBF_MENU) {
                 asl(ASL0)
@@ -737,12 +781,14 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(JAR,DBF_DOUBLE) {
                 prompt("Jog Accel. (EGU/s^2)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(LOCK,DBF_MENU) {
                 prompt("Soft Channel Position Lock")
@@ -770,6 +816,7 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)
         }
         field(STUP,DBF_MENU) {
                 asl(ASL0)
@@ -792,21 +839,25 @@ recordtype(motor) {
                 prompt("Archive Deadband")
                 promptgroup(GUI_COMMON)
                 interest(1)
+                prop(YES)
         }
         field(MDEL,DBF_DOUBLE) {
                 prompt("Monitor Deadband")
                 promptgroup(GUI_COMMON)
                 interest(1)
+                prop(YES)
         }
 	field(ALST,DBF_DOUBLE) {
                 prompt("Last Value Archived")
                 special(SPC_NOMOD)
                 interest(3)
+                prop(YES)
         }
         field(MLST,DBF_DOUBLE) {
                 prompt("Last Val Monitored")
                 special(SPC_NOMOD)
                 interest(3)
+                prop(YES)
         }
 	field(SYNC,DBF_SHORT) {
 		prompt("Sync position")
