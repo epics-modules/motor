@@ -273,6 +273,13 @@ below.
     </td>
   </tr>
   <tr>
+    <td><a href="#Fields_motion">ACCU</a></td>
+    <td>R/W</td>
+    <td>Acceleration used</td>
+    <td>RECCHOICE</td>
+    <td>(0:"Use ACCL", 1:"Use ACCS")</td>
+  </tr>
+  <tr>
     <td><a href="#Fields_status">ADEL</a></td>
     <td>R/W</td>
     <td>Archive Deadband</td>
@@ -1718,11 +1725,30 @@ below.
     motor motion.</td>
   </tr>
   <tr>
-    <td colspan="5">The motor record expects the hardware to produce a trapezoidal 
+    <td>ACCS</td>
+    <td>R/W</td>
+    <td>Acceleration (EGU/s^2)</td>
+    <td>DOUBLE</td>
+    <td>Valid range; 0 &lt;= ACCS</td>
+  </tr>
+  <tr>
+    <td>ACCU</td>
+    <td>R/W</td>
+    <td>Acceleration used</td>
+    <td>RECCHOICE</td>
+    <td>(0:"Use ACCL", 1:"Use ACCS")&nbsp; This field determines whether the ACCL or ACCS field 
+    is used in the calculation of the acceleration that is sent to device support. The field 
+    that is not used changes with VELO. The default value is "Use ACCL"&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="5">
+     The motor record expects the hardware to produce a trapezoidal 
     speed profile. That is, the motor speed is expected to increase linearly with 
     time from the base speed, VBAS, to the full speed, VELO, in ACCL seconds. At the 
     end of a motion, the speed is expected to decrease similarly to VBAS.
-    Note that the ACCS field can be use to specify the acceleration in EGU/s^2.&nbsp;</td>
+    <p>Note that the ACCS field can be use to specify the acceleration in EGU/s^2.</p>
+    <p>Velocity and acceleration are related by the following equation: <br>
+    VELO - VBAS = ACCL * ACCS &nbsp;</p></td>
   </tr>
   <tr>
     <td>JVEL</td>

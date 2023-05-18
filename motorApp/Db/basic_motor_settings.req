@@ -11,6 +11,7 @@ $(P)$(M).RRES
 $(P)$(M).VBAS
 $(P)$(M).VELO
 $(P)$(M).ACCL
+$(P)$(M).ACCU
 $(P)$(M).BDST
 $(P)$(M).BVEL
 $(P)$(M).BACC

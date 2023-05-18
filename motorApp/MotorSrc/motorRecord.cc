@@ -486,7 +486,7 @@ static double accEGUfromVelo(motorRecord *pmr, double veloEGU)
     double vmax = fabs(veloEGU);
     double acc;
     /* ACCL or ACCS */
-    if (pmr->accu == motorACCSused_Accs)
+    if (pmr->accu == motorACCU_Accs)
         acc = pmr->accs;
     else if (vmax > vmin)
         acc = (vmax - vmin) / pmr->accl;
@@ -498,14 +498,9 @@ static double accEGUfromVelo(motorRecord *pmr, double veloEGU)
 
 static void updateACCLfromACCS(motorRecord *pmr)
 {
-    if (pmr->accu != motorACCSused_Accs)
-    {
-        pmr->accu = motorACCSused_Accs;
-        db_post_events(pmr, &pmr->accu, DBE_VAL_LOG);
-    }
     if (pmr->accs > 0.0)
     {
-        double temp_dbl = pmr->velo / pmr->accs;
+        double temp_dbl = (pmr->velo > pmr->vbas) ? (pmr->velo - pmr->vbas) / pmr->accs : pmr->velo / pmr->accs;
         if (pmr->accl != temp_dbl)
         {
             pmr->accl = temp_dbl;
@@ -517,12 +512,7 @@ static void updateACCLfromACCS(motorRecord *pmr)
 static void updateACCSfromACCL(motorRecord *pmr)
 {
     double temp_dbl;
-    if (pmr->accu != motorACCSused_Accl)
-    {
-        pmr->accu = motorACCSused_Accl;
-        db_post_events(pmr, &pmr->accu, DBE_VAL_LOG);
-    }
-    temp_dbl = pmr->velo / pmr->accl;
+    temp_dbl = (pmr->velo > pmr->vbas) ? (pmr->velo - pmr->vbas) / pmr->accl : pmr->velo / pmr->accl;
     if (pmr->accs != temp_dbl)
     {
         pmr->accs = temp_dbl;
@@ -532,11 +522,11 @@ static void updateACCSfromACCL(motorRecord *pmr)
 
 static void updateACCL_ACCSfromVELO(motorRecord *pmr)
 {
-    if (pmr->accu == motorACCSused_Accs)
+    if (pmr->accu == motorACCU_Accs)
     {
         if (pmr->accs > 0.0)
         {
-            double temp_dbl = pmr->velo / pmr->accs;
+            double temp_dbl = (pmr->velo > pmr->vbas) ? (pmr->velo - pmr->vbas) / pmr->accs : pmr->velo / pmr->accs;
             if (pmr->accl != temp_dbl)
             {
                 pmr->accl = temp_dbl;
@@ -546,7 +536,7 @@ static void updateACCL_ACCSfromVELO(motorRecord *pmr)
     }
     else
     {
-        double temp_dbl = pmr->velo / pmr->accl;
+        double temp_dbl = (pmr->velo > pmr->vbas) ? (pmr->velo - pmr->vbas) / pmr->accl : pmr->velo / pmr->accl;
         if (pmr->accs != temp_dbl)
         {
             pmr->accs = temp_dbl;
@@ -3984,14 +3974,6 @@ static void check_speed_and_resolution(motorRecord * pmr)
     db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
 
-    if (pmr->accs && !pmr->accl)
-    {
-        /* ACCL == 0.0, ACCS is != 0.0 -> Use ACCS
-           This is a (possible) new way to configure a database.
-           Existing Db files will have ACCS == 0.0 and this
-           is backwards compatible and behaves as before */
-        updateACCLfromACCS(pmr);
-    }
     /* Sanity check on acceleration time. */
     if (pmr->accl == 0.0)
     {
@@ -4017,8 +3999,9 @@ static void check_speed_and_resolution(motorRecord * pmr)
         pmr->hvel = pmr->vbas;
     else
         range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
-    /* Make sure that ACCS/ACCU are initialized */
-    if (pmr->accu == motorACCSused_Undef)
+    
+    /* Make sure that ACCS is initialized */
+    if (pmr->accs == 0.0)
     {
         updateACCSfromACCL(pmr);
     }
