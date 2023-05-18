@@ -5,7 +5,7 @@
     <property name="geometry">
         <rect>
             <x>188</x>
-            <y>29</y>
+            <y>31</y>
             <width>450</width>
             <height>875</height>
         </rect>
@@ -14,7 +14,6 @@
         <string>
 
 QWidget#centralWidget {background: rgba(200, 200, 200, 255);}
-QPushButton::menu-indicator {image: url(none.png); width: 0}
 
 caTable {
        font: 10pt;
@@ -113,6 +112,39 @@ border-radius: 2px;
             </property>
             <property name="geometry">
                 <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>450</width>
+                    <height>26</height>
+                </rect>
+            </property>
+            <property name="foreground">
+                <color alpha="255">
+                    <red>236</red>
+                    <green>236</green>
+                    <blue>236</blue>
+                </color>
+            </property>
+            <property name="fillstyle">
+                <enum>Filled</enum>
+            </property>
+            <property name="lineColor">
+                <color alpha="255">
+                    <red>236</red>
+                    <green>236</green>
+                    <blue>236</blue>
+                </color>
+            </property>
+            <property name="linestyle">
+                <enum>Solid</enum>
+            </property>
+        </widget>
+        <widget class="caGraphics" name="caRectangle_1">
+            <property name="form">
+                <enum>caGraphics::Rectangle</enum>
+            </property>
+            <property name="geometry">
+                <rect>
                     <x>80</x>
                     <y>99</y>
                     <width>210</width>
@@ -149,7 +181,7 @@ border-radius: 2px;
                 <string>$(P)$(M)_able.VAL</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_1">
+        <widget class="caGraphics" name="caRectangle_2">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -363,7 +395,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;448,1;</string>
+                <string>448,1;</string>
             </property>
         </widget>
         <widget class="caTextEntry" name="caTextEntry_0">
@@ -1358,10 +1390,10 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;448,1;</string>
+                <string>448,1;</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_2">
+        <widget class="caGraphics" name="caRectangle_3">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -1562,10 +1594,10 @@ border-radius: 2px;
                 <enum>caLineEdit::Static</enum>
             </property>
             <property name="formatType">
-                <enum>decimal</enum>
+                <enum>string</enum>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_3">
+        <widget class="caGraphics" name="caRectangle_4">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -1676,7 +1708,7 @@ border-radius: 2px;
                 </rect>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_4">
+        <widget class="caGraphics" name="caRectangle_5">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -1722,7 +1754,7 @@ border-radius: 2px;
                 <string>$(P)$(M).HOMF</string>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_5">
+        <widget class="caGraphics" name="caRectangle_6">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -2767,7 +2799,7 @@ border-radius: 2px;
                     <height>24</height>
                 </rect>
             </property>
-            <widget class="caGraphics" name="caRectangle_6">
+            <widget class="caGraphics" name="caRectangle_7">
                 <property name="form">
                     <enum>caGraphics::Rectangle</enum>
                 </property>
@@ -2813,7 +2845,7 @@ border-radius: 2px;
                     <string>$(P)$(M).SET</string>
                 </property>
             </widget>
-            <widget class="caGraphics" name="caRectangle_7">
+            <widget class="caGraphics" name="caRectangle_8">
                 <property name="form">
                     <enum>caGraphics::Rectangle</enum>
                 </property>
@@ -3206,7 +3238,7 @@ border-radius: 2px;
                 <enum>caChoice::Static</enum>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_8">
+        <widget class="caGraphics" name="caRectangle_9">
             <property name="form">
                 <enum>caGraphics::Rectangle</enum>
             </property>
@@ -3341,39 +3373,6 @@ border-radius: 2px;
                 </rect>
             </property>
         </widget>
-        <widget class="caGraphics" name="caRectangle_9">
-            <property name="form">
-                <enum>caGraphics::Rectangle</enum>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>0</x>
-                    <y>0</y>
-                    <width>450</width>
-                    <height>26</height>
-                </rect>
-            </property>
-            <property name="foreground">
-                <color alpha="255">
-                    <red>236</red>
-                    <green>236</green>
-                    <blue>236</blue>
-                </color>
-            </property>
-            <property name="fillstyle">
-                <enum>Filled</enum>
-            </property>
-            <property name="lineColor">
-                <color alpha="255">
-                    <red>236</red>
-                    <green>236</green>
-                    <blue>236</blue>
-                </color>
-            </property>
-            <property name="linestyle">
-                <enum>Solid</enum>
-            </property>
-        </widget>
         <widget class="caTextEntry" name="caTextEntry_21">
             <property name="geometry">
                 <rect>
@@ -3422,7 +3421,7 @@ border-radius: 2px;
                 <enum>caLineEdit::Static</enum>
             </property>
             <property name="formatType">
-                <enum>decimal</enum>
+                <enum>string</enum>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_2">
@@ -3462,7 +3461,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;447,1;</string>
+                <string>447,1;</string>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_29">
@@ -3549,7 +3548,7 @@ border-radius: 2px;
                 <double>1.0</double>
             </property>
             <property name="formatType">
-                <enum>decimal</enum>
+                <enum>string</enum>
             </property>
             <property name="colorMode">
                 <enum>caLineEdit::Static</enum>
@@ -3796,7 +3795,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>0,0;0,187;</string>
+                <string>0,187;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_4">
@@ -3833,7 +3832,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>0,0;0,187;</string>
+                <string>0,187;</string>
             </property>
         </widget>
         <widget class="caFrame" name="caFrame_3">
@@ -3947,7 +3946,7 @@ border-radius: 2px;
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -4062,7 +4061,7 @@ border-radius: 2px;
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -4177,7 +4176,7 @@ border-radius: 2px;
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -4400,7 +4399,7 @@ border-radius: 2px;
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -4533,7 +4532,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>2,1;1,345;</string>
+                <string>1,345;</string>
             </property>
         </widget>
         <widget class="caGraphics" name="caRectangle_12">
@@ -6609,7 +6608,7 @@ border-radius: 2px;
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -6724,7 +6723,7 @@ border-radius: 2px;
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -6839,7 +6838,7 @@ border-radius: 2px;
                     <enum>Solid</enum>
                 </property>
                 <property name="xyPairs">
-                    <string>0,0;22,0;</string>
+                    <string>22,0;</string>
                 </property>
             </widget>
         </widget>
@@ -7178,7 +7177,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;448,1;</string>
+                <string>448,1;</string>
             </property>
         </widget>
         <widget class="caGraphics" name="caRectangle_13">
@@ -7251,7 +7250,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,1;448,1;</string>
+                <string>448,1;</string>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_77">
@@ -7432,7 +7431,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>0,0;0,55;</string>
+                <string>0,55;</string>
             </property>
         </widget>
         <widget class="caPolyLine" name="caPolyLine_16">
@@ -7469,7 +7468,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>0,0;0,55;</string>
+                <string>0,55;</string>
             </property>
         </widget>
         <widget class="caTextEntry" name="caTextEntry_31">
@@ -7695,7 +7694,7 @@ border-radius: 2px;
                 <enum>Solid</enum>
             </property>
             <property name="xyPairs">
-                <string>1,2;259,1;</string>
+                <string>259,1;</string>
             </property>
         </widget>
         <widget class="caLabel" name="caLabel_81">
@@ -8319,6 +8318,7 @@ border-radius: 2px;
         </widget>
         <zorder>caRectangle_0</zorder>
         <zorder>caRectangle_1</zorder>
+        <zorder>caRectangle_2</zorder>
         <zorder>caLabel_0</zorder>
         <zorder>caLabel_1</zorder>
         <zorder>caLabel_2</zorder>
@@ -8334,23 +8334,23 @@ border-radius: 2px;
         <zorder>caFrame_0</zorder>
         <zorder>caLabel_11</zorder>
         <zorder>caPolyLine_1</zorder>
-        <zorder>caRectangle_2</zorder>
+        <zorder>caRectangle_3</zorder>
         <zorder>caLabel_12</zorder>
         <zorder>caLabel_13</zorder>
         <zorder>caLabel_14</zorder>
-        <zorder>caRectangle_3</zorder>
+        <zorder>caRectangle_4</zorder>
         <zorder>caLabel_15</zorder>
         <zorder>caLabel_16</zorder>
-        <zorder>caRectangle_4</zorder>
         <zorder>caRectangle_5</zorder>
+        <zorder>caRectangle_6</zorder>
         <zorder>caLabel_17</zorder>
         <zorder>caLabel_18</zorder>
         <zorder>caLabel_19</zorder>
         <zorder>caGraphics_0</zorder>
         <zorder>caGraphics_1</zorder>
         <zorder>caLabel_20</zorder>
-        <zorder>caRectangle_6</zorder>
         <zorder>caRectangle_7</zorder>
+        <zorder>caRectangle_8</zorder>
         <zorder>caFrame_1</zorder>
         <zorder>caLabel_21</zorder>
         <zorder>caLabel_22</zorder>
@@ -8360,9 +8360,8 @@ border-radius: 2px;
         <zorder>caLabel_26</zorder>
         <zorder>caFrame_2</zorder>
         <zorder>caLabel_27</zorder>
-        <zorder>caRectangle_8</zorder>
-        <zorder>caLabel_28</zorder>
         <zorder>caRectangle_9</zorder>
+        <zorder>caLabel_28</zorder>
         <zorder>caPolyLine_2</zorder>
         <zorder>caLabel_29</zorder>
         <zorder>caLabel_30</zorder>

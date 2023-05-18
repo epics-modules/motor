@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Saved on 2023-05-18 16:39:09 by epics-->
 <display version="2.0.0">
   <name>motorx_all</name>
   <x>188</x>
-  <y>29</y>
+  <y>31</y>
   <width>450</width>
   <height>875</height>
   <background_color>
@@ -13,6 +14,19 @@
   <grid_step_x>5</grid_step_x>
   <widget type="rectangle" version="2.0.0">
     <name>rectangle #6</name>
+    <width>450</width>
+    <height>26</height>
+    <line_color>
+      <color red="236" green="236" blue="236">
+      </color>
+    </line_color>
+    <background_color>
+      <color red="236" green="236" blue="236">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>rectangle #9</name>
     <x>80</x>
     <y>99</y>
     <width>210</width>
@@ -35,7 +49,7 @@
     </rules>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #10</name>
+    <name>rectangle #13</name>
     <y>285</y>
     <width>90</width>
     <height>21</height>
@@ -49,7 +63,7 @@
     </background_color>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #13</name>
+    <name>text #16</name>
     <text>Jog</text>
     <x>318</x>
     <y>290</y>
@@ -61,7 +75,7 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #16</name>
+    <name>text #19</name>
     <text>Backlash</text>
     <x>206</x>
     <y>290</y>
@@ -73,7 +87,7 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #19</name>
+    <name>text #22</name>
     <text>Normal</text>
     <x>94</x>
     <y>290</y>
@@ -85,7 +99,7 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #22</name>
+    <name>text #25</name>
     <text>Dynamics</text>
     <x>2</x>
     <y>286</y>
@@ -101,24 +115,24 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="polyline" version="2.0.0">
-    <name>polyline #25</name>
+    <name>polyline #28</name>
     <y>285</y>
     <width>449</width>
     <height>2</height>
-    <line_width>2</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="1.0" y="1.0">
       </point>
       <point x="448.0" y="1.0">
       </point>
     </points>
+    <line_width>2</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #29</name>
+    <name>text entry #32</name>
     <pv_name>$(P)$(M).FRAC</pv_name>
     <x>207</x>
     <y>446</y>
@@ -136,7 +150,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #33</name>
+    <name>text entry #36</name>
     <pv_name>$(P)$(M).VMAX</pv_name>
     <x>95</x>
     <y>317</y>
@@ -154,7 +168,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #37</name>
+    <name>text #40</name>
     <text>Speed</text>
     <x>3</x>
     <y>346</y>
@@ -167,7 +181,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #40</name>
+    <name>text #43</name>
     <text>Base Speed</text>
     <x>3</x>
     <y>372</y>
@@ -180,7 +194,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #43</name>
+    <name>text #46</name>
     <text>Accel.</text>
     <x>3</x>
     <y>398</y>
@@ -193,7 +207,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #46</name>
+    <name>text #49</name>
     <text>Backlash distance</text>
     <x>3</x>
     <y>423</y>
@@ -206,7 +220,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #49</name>
+    <name>text #52</name>
     <text>Move Fraction</text>
     <x>3</x>
     <y>449</y>
@@ -219,7 +233,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #52</name>
+    <name>text entry #55</name>
     <pv_name>$(P)$(M).BACC</pv_name>
     <x>207</x>
     <y>395</y>
@@ -237,7 +251,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #56</name>
+    <name>text entry #59</name>
     <pv_name>$(P)$(M).ACCL</pv_name>
     <x>95</x>
     <y>395</y>
@@ -255,7 +269,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #60</name>
+    <name>text entry #63</name>
     <pv_name>$(P)$(M).BDST</pv_name>
     <x>207</x>
     <y>420</y>
@@ -273,7 +287,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #64</name>
+    <name>text entry #67</name>
     <pv_name>$(P)$(M).VELO</pv_name>
     <x>95</x>
     <y>343</y>
@@ -291,7 +305,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #68</name>
+    <name>text entry #71</name>
     <pv_name>$(P)$(M).BVEL</pv_name>
     <x>207</x>
     <y>343</y>
@@ -309,7 +323,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #72</name>
+    <name>text entry #75</name>
     <pv_name>$(P)$(M).VBAS</pv_name>
     <x>95</x>
     <y>369</y>
@@ -327,7 +341,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #76</name>
+    <name>text #79</name>
     <text>Cal</text>
     <x>6</x>
     <y>256</y>
@@ -340,7 +354,7 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="choice" version="2.0.0">
-    <name>choice button #79</name>
+    <name>choice button #82</name>
     <pv_name>$(P)$(M).SET</pv_name>
     <x>37</x>
     <y>253</y>
@@ -356,7 +370,7 @@
     </items>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #82</name>
+    <name>text #85</name>
     <text>Off</text>
     <x>150</x>
     <y>256</y>
@@ -369,7 +383,7 @@
     <horizontal_alignment>2</horizontal_alignment>
   </widget>
   <widget type="group" version="2.0.0">
-    <name>composite #85</name>
+    <name>composite #88</name>
     <x>186</x>
     <y>232</y>
     <width>100</width>
@@ -377,7 +391,7 @@
     <style>3</style>
     <transparent>true</transparent>
     <widget type="combo" version="2.0.0">
-      <name>menu #88</name>
+      <name>menu #91</name>
       <pv_name>$(P)$(M).FOFF</pv_name>
       <height>18</height>
       <background_color>
@@ -387,7 +401,7 @@
       <border_alarm_sensitive>false</border_alarm_sensitive>
     </widget>
     <widget type="textentry" version="3.0.0">
-      <name>text entry #91</name>
+      <name>text entry #94</name>
       <pv_name>$(P)$(M).OFF</pv_name>
       <y>17</y>
       <height>25</height>
@@ -405,7 +419,7 @@
     </widget>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #95</name>
+    <name>text #98</name>
     <text>Dir</text>
     <x>301</x>
     <y>256</y>
@@ -418,7 +432,7 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="choice" version="2.0.0">
-    <name>choice button #98</name>
+    <name>choice button #101</name>
     <pv_name>$(P)$(M).DIR</pv_name>
     <x>332</x>
     <y>253</y>
@@ -434,7 +448,7 @@
     </items>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #101</name>
+    <name>text entry #104</name>
     <pv_name>$(P)$(M).JVEL</pv_name>
     <x>319</x>
     <y>343</y>
@@ -452,7 +466,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #105</name>
+    <name>text entry #108</name>
     <pv_name>$(P)$(M).JAR</pv_name>
     <x>319</x>
     <y>395</y>
@@ -470,25 +484,25 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="polyline" version="2.0.0">
-    <name>polyline #109</name>
+    <name>polyline #112</name>
     <x>2</x>
     <y>225</y>
     <width>449</width>
     <height>2</height>
-    <line_width>2</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="1.0" y="1.0">
       </point>
       <point x="448.0" y="1.0">
       </point>
     </points>
+    <line_width>2</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #113</name>
+    <name>rectangle #116</name>
     <y>225</y>
     <width>120</width>
     <height>22</height>
@@ -502,7 +516,7 @@
     </background_color>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #116</name>
+    <name>text #119</name>
     <text>Calibration</text>
     <x>4</x>
     <y>227</y>
@@ -518,7 +532,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #119</name>
+    <name>text #122</name>
     <text>Maximum Spd</text>
     <x>3</x>
     <y>320</y>
@@ -531,7 +545,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #122</name>
+    <name>text #125</name>
     <text>Moving</text>
     <x>337</x>
     <y>51</y>
@@ -557,7 +571,7 @@
     </rules>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #126</name>
+    <name>text entry #129</name>
     <pv_name>$(P)$(M).EGU</pv_name>
     <x>350</x>
     <y>3</y>
@@ -570,12 +584,12 @@
       <color red="236" green="236" blue="236">
       </color>
     </background_color>
-    <format>1</format>
+    <format>6</format>
     <show_units>false</show_units>
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #130</name>
+    <name>rectangle #133</name>
     <y>30</y>
     <width>70</width>
     <height>22</height>
@@ -589,7 +603,7 @@
     </background_color>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #133</name>
+    <name>text #136</name>
     <text>Drive</text>
     <x>4</x>
     <y>31</y>
@@ -605,7 +619,7 @@
     <auto_size>true</auto_size>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #136</name>
+    <name>text #139</name>
     <text>Limit</text>
     <x>285</x>
     <y>32</y>
@@ -630,7 +644,7 @@
     </rules>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #140</name>
+    <name>rectangle #143</name>
     <x>240</x>
     <y>189</y>
     <width>49</width>
@@ -655,7 +669,7 @@
     </rules>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #144</name>
+    <name>rectangle #147</name>
     <x>189</x>
     <y>189</y>
     <width>49</width>
@@ -680,7 +694,7 @@
     </rules>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #148</name>
+    <name>message button #151</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).TWF</pv_name>
@@ -700,7 +714,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #151</name>
+    <name>message button #154</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).TWR</pv_name>
@@ -720,7 +734,7 @@
     </background_color>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #154</name>
+    <name>text entry #157</name>
     <pv_name>$(P)$(M).TWV</pv_name>
     <x>103</x>
     <y>193</y>
@@ -739,7 +753,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="bool_button" version="2.0.0">
-    <name>message button #158</name>
+    <name>message button #161</name>
     <pv_name>$(P)$(M).JOGR</pv_name>
     <x>192</x>
     <y>166</y>
@@ -763,7 +777,7 @@
     <mode>1</mode>
   </widget>
   <widget type="bool_button" version="2.0.0">
-    <name>message button #161</name>
+    <name>message button #164</name>
     <pv_name>$(P)$(M).JOGF</pv_name>
     <x>242</x>
     <y>166</y>
@@ -787,7 +801,7 @@
     <mode>1</mode>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #164</name>
+    <name>text entry #167</name>
     <pv_name>$(P)$(M).RLV</pv_name>
     <x>83</x>
     <y>166</y>
@@ -805,7 +819,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #168</name>
+    <name>message button #171</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).HOMF</pv_name>
@@ -825,7 +839,7 @@
     </background_color>
   </widget>
   <widget type="action_button" version="3.0.0">
-    <name>message button #171</name>
+    <name>message button #174</name>
     <actions>
       <action type="write_pv">
         <pv_name>$(P)$(M).HOMR</pv_name>
@@ -845,7 +859,7 @@
     </background_color>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #174</name>
+    <name>text #177</name>
     <text>User</text>
     <x>83</x>
     <y>32</y>
@@ -856,7 +870,7 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #177</name>
+    <name>text #180</name>
     <text>Dial</text>
     <x>187</x>
     <y>32</y>
@@ -867,7 +881,7 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #180</name>
+    <name>text #183</name>
     <text>Limit</text>
     <x>285</x>
     <y>32</y>
@@ -892,7 +906,7 @@
     </rules>
   </widget>
   <widget type="textupdate" version="2.0.0">
-    <name>text update #184</name>
+    <name>text update #187</name>
     <pv_name>$(P)$(M).RBV</pv_name>
     <x>83</x>
     <y>78</y>
@@ -914,7 +928,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textupdate" version="2.0.0">
-    <name>text update #188</name>
+    <name>text update #191</name>
     <pv_name>$(P)$(M).DRBV</pv_name>
     <x>187</x>
     <y>78</y>
@@ -936,7 +950,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #192</name>
+    <name>text entry #195</name>
     <pv_name>$(P)$(M).VAL</pv_name>
     <x>83</x>
     <y>102</y>
@@ -954,7 +968,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #196</name>
+    <name>text entry #199</name>
     <pv_name>$(P)$(M).LLM</pv_name>
     <x>83</x>
     <y>132</y>
@@ -972,7 +986,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #200</name>
+    <name>text entry #203</name>
     <pv_name>$(P)$(M).DHLM</pv_name>
     <x>187</x>
     <y>50</y>
@@ -990,7 +1004,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #204</name>
+    <name>text entry #207</name>
     <pv_name>$(P)$(M).HLM</pv_name>
     <x>83</x>
     <y>50</y>
@@ -1008,7 +1022,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #208</name>
+    <name>text entry #211</name>
     <pv_name>$(P)$(M).DVAL</pv_name>
     <x>187</x>
     <y>102</y>
@@ -1026,7 +1040,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #212</name>
+    <name>text entry #215</name>
     <pv_name>$(P)$(M).DLLM</pv_name>
     <x>187</x>
     <y>132</y>
@@ -1044,7 +1058,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="ellipse" version="2.0.0">
-    <name>oval #216</name>
+    <name>oval #219</name>
     <x>290</x>
     <y>50</y>
     <width>21</width>
@@ -1067,7 +1081,7 @@
     </rules>
   </widget>
   <widget type="ellipse" version="2.0.0">
-    <name>oval #220</name>
+    <name>oval #223</name>
     <x>290</x>
     <y>132</y>
     <width>21</width>
@@ -1090,7 +1104,7 @@
     </rules>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #224</name>
+    <name>text #227</name>
     <text>Soft-Limit Violation</text>
     <x>83</x>
     <y>153</y>
@@ -1111,7 +1125,7 @@
     </rules>
   </widget>
   <widget type="group" version="2.0.0">
-    <name>composite #228</name>
+    <name>composite #231</name>
     <x>79</x>
     <y>75</y>
     <width>210</width>
@@ -1119,7 +1133,7 @@
     <style>3</style>
     <transparent>true</transparent>
     <widget type="rectangle" version="2.0.0">
-      <name>rectangle #231</name>
+      <name>rectangle #234</name>
       <x>2</x>
       <y>2</y>
       <width>206</width>
@@ -1144,7 +1158,7 @@
       </rules>
     </widget>
     <widget type="rectangle" version="2.0.0">
-      <name>rectangle #235</name>
+      <name>rectangle #238</name>
       <width>210</width>
       <height>22</height>
       <line_width>2</line_width>
@@ -1168,7 +1182,7 @@
     </widget>
   </widget>
   <widget type="group" version="2.0.0">
-    <name>composite #239</name>
+    <name>composite #242</name>
     <x>5</x>
     <y>53</y>
     <width>75</width>
@@ -1176,7 +1190,7 @@
     <style>3</style>
     <transparent>true</transparent>
     <widget type="label" version="2.0.0">
-      <name>text #242</name>
+      <name>text #245</name>
       <text>Tweak</text>
       <y>143</y>
       <width>75</width>
@@ -1188,7 +1202,7 @@
       <auto_size>true</auto_size>
     </widget>
     <widget type="label" version="2.0.0">
-      <name>text #245</name>
+      <name>text #248</name>
       <text>MoveRel</text>
       <y>116</y>
       <width>75</width>
@@ -1200,7 +1214,7 @@
       <auto_size>true</auto_size>
     </widget>
     <widget type="label" version="2.0.0">
-      <name>text #248</name>
+      <name>text #251</name>
       <text>Lo limit</text>
       <y>82</y>
       <width>75</width>
@@ -1212,7 +1226,7 @@
       <auto_size>true</auto_size>
     </widget>
     <widget type="label" version="2.0.0">
-      <name>text #251</name>
+      <name>text #254</name>
       <text>MoveAbs</text>
       <y>52</y>
       <width>75</width>
@@ -1224,7 +1238,7 @@
       <auto_size>true</auto_size>
     </widget>
     <widget type="label" version="2.0.0">
-      <name>text #254</name>
+      <name>text #257</name>
       <text>Readback</text>
       <y>25</y>
       <width>75</width>
@@ -1236,7 +1250,7 @@
       <auto_size>true</auto_size>
     </widget>
     <widget type="label" version="2.0.0">
-      <name>text #257</name>
+      <name>text #260</name>
       <text>Hi limit</text>
       <width>75</width>
       <height>18</height>
@@ -1248,7 +1262,7 @@
     </widget>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #260</name>
+    <name>text #263</name>
     <text>Raw</text>
     <x>340</x>
     <y>32</y>
@@ -1261,7 +1275,7 @@
     <horizontal_alignment>1</horizontal_alignment>
   </widget>
   <widget type="textupdate" version="2.0.0">
-    <name>text update #263</name>
+    <name>text update #266</name>
     <pv_name>$(P)$(M).RRBV</pv_name>
     <x>335</x>
     <y>77</y>
@@ -1283,7 +1297,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="choice" version="2.0.0">
-    <name>choice button #267</name>
+    <name>choice button #270</name>
     <pv_name>$(P)$(M)_able.VAL</pv_name>
     <x>299</x>
     <y>171</y>
@@ -1301,7 +1315,7 @@
     </items>
   </widget>
   <widget type="rectangle" version="2.0.0">
-    <name>rectangle #270</name>
+    <name>rectangle #273</name>
     <x>81</x>
     <y>100</y>
     <width>356</width>
@@ -1324,7 +1338,7 @@
     </rules>
   </widget>
   <widget type="textentry" version="3.0.0">
-    <name>text entry #274</name>
+    <name>text entry #277</name>
     <pv_name>$(P)$(M).RVAL</pv_name>
     <x>335</x>
     <y>102</y>
@@ -1342,7 +1356,7 @@
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
   <widget type="label" version="2.0.0">
-    <name>text #278</name>
+    <name>text #281</name>
     <text>SET</text>
     <x>60</x>
     <y>93</y>
@@ -1362,19 +1376,6 @@
       </rule>
     </rules>
   </widget>
-  <widget type="rectangle" version="2.0.0">
-    <name>rectangle #282</name>
-    <width>450</width>
-    <height>26</height>
-    <line_color>
-      <color red="236" green="236" blue="236">
-      </color>
-    </line_color>
-    <background_color>
-      <color red="236" green="236" blue="236">
-      </color>
-    </background_color>
-  </widget>
   <widget type="textentry" version="3.0.0">
     <name>text entry #285</name>
     <pv_name>$(P)$(M).DESC</pv_name>
@@ -1392,7 +1393,7 @@
       <color red="236" green="236" blue="236">
       </color>
     </background_color>
-    <format>1</format>
+    <format>6</format>
     <show_units>false</show_units>
     <border_alarm_sensitive>false</border_alarm_sensitive>
   </widget>
@@ -1401,16 +1402,16 @@
     <y>27</y>
     <width>449</width>
     <height>3</height>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="1.0" y="1.0">
       </point>
       <point x="447.0" y="1.0">
       </point>
     </points>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="label" version="2.0.0">
     <name>text #293</name>
@@ -1433,7 +1434,7 @@
       <color red="236" green="236" blue="236">
       </color>
     </background_color>
-    <format>1</format>
+    <format>6</format>
     <show_units>false</show_units>
     <horizontal_alignment>1</horizontal_alignment>
     <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -1555,17 +1556,17 @@
     <y>285</y>
     <width>0</width>
     <height>187</height>
-    <line_width>1</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="0.0" y="0.0">
       </point>
       <point x="0.0" y="187.0">
       </point>
     </points>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="polyline" version="2.0.0">
     <name>polyline #322</name>
@@ -1573,17 +1574,17 @@
     <y>285</y>
     <width>0</width>
     <height>187</height>
-    <line_width>1</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="0.0" y="0.0">
       </point>
       <point x="0.0" y="187.0">
       </point>
     </points>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="group" version="2.0.0">
     <name>composite #326</name>
@@ -1623,17 +1624,17 @@
       <y>10</y>
       <width>22</width>
       <height>0</height>
-      <line_width>1</line_width>
-      <line_color>
-        <color red="0" green="0" blue="0">
-        </color>
-      </line_color>
       <points>
         <point x="0.0" y="0.0">
         </point>
         <point x="22.0" y="0.0">
         </point>
       </points>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
     </widget>
   </widget>
   <widget type="group" version="2.0.0">
@@ -1674,17 +1675,17 @@
       <y>10</y>
       <width>22</width>
       <height>0</height>
-      <line_width>1</line_width>
-      <line_color>
-        <color red="0" green="0" blue="0">
-        </color>
-      </line_color>
       <points>
         <point x="0.0" y="0.0">
         </point>
         <point x="22.0" y="0.0">
         </point>
       </points>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
     </widget>
   </widget>
   <widget type="group" version="2.0.0">
@@ -1725,17 +1726,17 @@
       <y>10</y>
       <width>22</width>
       <height>0</height>
-      <line_width>1</line_width>
-      <line_color>
-        <color red="0" green="0" blue="0">
-        </color>
-      </line_color>
       <points>
         <point x="0.0" y="0.0">
         </point>
         <point x="22.0" y="0.0">
         </point>
       </points>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
     </widget>
   </widget>
   <widget type="label" version="2.0.0">
@@ -1807,17 +1808,17 @@
       <y>10</y>
       <width>22</width>
       <height>0</height>
-      <line_width>1</line_width>
-      <line_color>
-        <color red="0" green="0" blue="0">
-        </color>
-      </line_color>
       <points>
         <point x="0.0" y="0.0">
         </point>
         <point x="22.0" y="0.0">
         </point>
       </points>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
     </widget>
   </widget>
   <widget type="rectangle" version="2.0.0">
@@ -1876,17 +1877,17 @@
     <y>528</y>
     <width>3</width>
     <height>346</height>
-    <line_width>2</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="2.0" y="1.0">
       </point>
       <point x="1.0" y="345.0">
       </point>
     </points>
+    <line_width>2</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="rectangle" version="2.0.0">
     <name>rectangle #399</name>
@@ -2686,17 +2687,17 @@
       <y>10</y>
       <width>22</width>
       <height>0</height>
-      <line_width>1</line_width>
-      <line_color>
-        <color red="0" green="0" blue="0">
-        </color>
-      </line_color>
       <points>
         <point x="0.0" y="0.0">
         </point>
         <point x="22.0" y="0.0">
         </point>
       </points>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
     </widget>
   </widget>
   <widget type="group" version="2.0.0">
@@ -2737,17 +2738,17 @@
       <y>10</y>
       <width>22</width>
       <height>0</height>
-      <line_width>1</line_width>
-      <line_color>
-        <color red="0" green="0" blue="0">
-        </color>
-      </line_color>
       <points>
         <point x="0.0" y="0.0">
         </point>
         <point x="22.0" y="0.0">
         </point>
       </points>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
     </widget>
   </widget>
   <widget type="group" version="2.0.0">
@@ -2788,17 +2789,17 @@
       <y>10</y>
       <width>22</width>
       <height>0</height>
-      <line_width>1</line_width>
-      <line_color>
-        <color red="0" green="0" blue="0">
-        </color>
-      </line_color>
       <points>
         <point x="0.0" y="0.0">
         </point>
         <point x="22.0" y="0.0">
         </point>
       </points>
+      <line_width>1</line_width>
+      <line_color>
+        <color red="0" green="0" blue="0">
+        </color>
+      </line_color>
     </widget>
   </widget>
   <widget type="label" version="2.0.0">
@@ -2920,17 +2921,17 @@
     <y>529</y>
     <width>449</width>
     <height>2</height>
-    <line_width>2</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="1.0" y="1.0">
       </point>
       <point x="448.0" y="1.0">
       </point>
     </points>
+    <line_width>2</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="rectangle" version="2.0.0">
     <name>rectangle #625</name>
@@ -2952,17 +2953,17 @@
     <y>473</y>
     <width>449</width>
     <height>2</height>
-    <line_width>2</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="1.0" y="1.0">
       </point>
       <point x="448.0" y="1.0">
       </point>
     </points>
+    <line_width>2</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="label" version="2.0.0">
     <name>text #632</name>
@@ -3022,17 +3023,17 @@
     <y>473</y>
     <width>0</width>
     <height>55</height>
-    <line_width>1</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="0.0" y="0.0">
       </point>
       <point x="0.0" y="55.0">
       </point>
     </points>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="polyline" version="2.0.0">
     <name>polyline #648</name>
@@ -3040,17 +3041,17 @@
     <y>473</y>
     <width>0</width>
     <height>55</height>
-    <line_width>1</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="0.0" y="0.0">
       </point>
       <point x="0.0" y="55.0">
       </point>
     </points>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="textentry" version="3.0.0">
     <name>text entry #652</name>
@@ -3126,17 +3127,17 @@
     <y>842</y>
     <width>260</width>
     <height>3</height>
-    <line_width>2</line_width>
-    <line_color>
-      <color red="10" green="0" blue="184">
-      </color>
-    </line_color>
     <points>
       <point x="1.0" y="2.0">
       </point>
       <point x="259.0" y="1.0">
       </point>
     </points>
+    <line_width>2</line_width>
+    <line_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </line_color>
   </widget>
   <widget type="label" version="2.0.0">
     <name>text #671</name>
@@ -3449,6 +3450,7 @@
       <color red="253" green="0" blue="0">
       </color>
     </line_color>
+    <line_style>1</line_style>
     <background_color>
       <color red="253" green="0" blue="0">
       </color>
