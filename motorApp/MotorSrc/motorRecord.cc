@@ -2629,6 +2629,7 @@ static long special(DBADDR *paddr, int after)
             pmr->sbas = temp_dbl;
             db_post_events(pmr, &pmr->sbas, DBE_VAL_LOG);
         }
+        updateACCL_ACCSfromVELO(pmr);
         break;
 
         /* new sbas: make vbas agree */
@@ -2644,6 +2645,7 @@ static long special(DBADDR *paddr, int after)
             pmr->vbas = temp_dbl;
             db_post_events(pmr, &pmr->vbas, DBE_VAL_LOG);
         }
+        updateACCL_ACCSfromVELO(pmr);
         break;
 
         /* new vmax: make smax agree */
@@ -2734,7 +2736,11 @@ static long special(DBADDR *paddr, int after)
 
         /* new accs */
     case motorRecordACCS:
-        db_post_events(pmr, &pmr->accs, DBE_VAL_LOG);
+        if (pmr->accs <= 0.0)
+        {
+            updateACCSfromACCL(pmr);
+        }
+        //db_post_events(pmr, &pmr->accs, DBE_VAL_LOG);
         updateACCLfromACCS(pmr);
         break;
 
@@ -3974,12 +3980,22 @@ static void check_speed_and_resolution(motorRecord * pmr)
     db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
 
-    /* Sanity check on acceleration time. */
-    if (pmr->accl == 0.0)
+    /* ACCS (EGU/sec^2) <--> ACCL (sec) */
+    if (pmr->accs > 0.0)
     {
-        pmr->accl = 0.1;
-        db_post_events(pmr, &pmr->accl, DBE_VAL_LOG);
+        updateACCLfromACCS(pmr);
     }
+    else
+    {
+        /* Sanity check on acceleration time. */
+        if (pmr->accl == 0.0)
+        {
+            pmr->accl = 0.1;
+            db_post_events(pmr, &pmr->accl, DBE_VAL_LOG);
+        }
+        updateACCSfromACCL(pmr);
+    }
+    /* Sanity check on backlash acceleration time. */
     if (pmr->bacc == 0.0)
     {
         pmr->bacc = 0.1;
@@ -3999,12 +4015,6 @@ static void check_speed_and_resolution(motorRecord * pmr)
         pmr->hvel = pmr->vbas;
     else
         range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
-    
-    /* Make sure that ACCS is initialized */
-    if (pmr->accs == 0.0)
-    {
-        updateACCSfromACCL(pmr);
-    }
 }
 
 /*
