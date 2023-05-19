@@ -208,10 +208,18 @@ static long report(int level)
                  send_recv_mess(card, command, buff, sizeof(buff));
                  printf("%s\n", buff);
                  if (level > 0) {
+                     // output from QA is many line, so temporarily disable \r\n termination checking and rely on TIMEOUT
                      sprintf(command, "%dQA", motor_index+1);
-                     send_recv_mess(card, command, buff, sizeof(buff));
-                     printf("%s\n", buff);
-                 }                    
+                     printf("Gathering output from %s command - this may cause a short pause...\n", command);
+                     char eosSave[4];
+                     int eoslen = 0;
+                     if (pasynOctetSyncIO->getInputEos(cntrl->pasynUser, eosSave, sizeof(eosSave), &eoslen) == asynSuccess) {
+                         pasynOctetSyncIO->setInputEos(cntrl->pasynUser, "", 0);
+                         send_recv_mess(card, command, buff, sizeof(buff));
+                         pasynOctetSyncIO->setInputEos(cntrl->pasynUser, eosSave, eoslen);
+                         printf("%s\n", buff);
+                     }
+                 }
              }
           }
     }
