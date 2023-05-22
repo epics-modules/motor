@@ -2784,15 +2784,36 @@ velcheckB:
             pmr->vmax = temp_dbl;
             db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
         }
-        if (pmr->dllm != (temp_dbl = pmr->rllm * pmr->mres)) 
+        /* We may have new MRES */
+        if (pmr->mres > 0)
         {
-            pmr->dllm = temp_dbl;
-            db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
+            if (pmr->dllm != (temp_dbl = pmr->rllm * pmr->mres))
+            {
+                pmr->dllm = temp_dbl;
+                db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
+            }
+            if (pmr->dhlm != (temp_dbl = pmr->rhlm * pmr->mres))
+            {
+                pmr->dhlm = temp_dbl;
+                db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
+            }
         }
-        if (pmr->dhlm != (temp_dbl = pmr->rhlm * pmr->mres))
+        else
         {
-            pmr->dhlm = temp_dbl;
-            db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
+            // MRES < 0 swaps DHLM DLLM
+            if (pmr->dhlm != (temp_dbl = pmr->rllm * pmr->mres))
+            {
+                pmr->dhlm = temp_dbl;
+                db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
+            }
+            if (pmr->dllm != (temp_dbl = pmr->rhlm * pmr->mres))
+            {
+                pmr->dllm = temp_dbl;
+                db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
+            }
+            set_userlimits(pmr);
+            db_post_events(pmr, &pmr->hlm, DBE_VAL_LOG);
+            db_post_events(pmr, &pmr->llm, DBE_VAL_LOG);
         }
         set_userlimits(pmr);
         db_post_events(pmr, &pmr->hlm, DBE_VAL_LOG);
@@ -3855,34 +3876,56 @@ static void check_speed_and_resolution(motorRecord * pmr)
     db_post_events(pmr, &pmr->velo, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->s, DBE_VAL_LOG);
 
-    /* RLLM <--> DLLM */
-    if (pmr->rllm != 0.0)
+    if (pmr->mres > 0)
     {
-        pmr->dllm = pmr->rllm * pmr->mres;
-        MARK(M_DLLM);
+        /* RLLM <--> DLLM */
+        if (pmr->rllm != 0.0)
+        {
+            pmr->dllm = pmr->rllm * pmr->mres;
+            MARK(M_DLLM);
+        }
+        if (pmr->rllm != pmr->dllm / pmr->mres)
+        {
+            pmr->rllm = pmr->dllm / pmr->mres;
+            MARK_AUX(M_RLLM);
+        }
+        /* RHLM <--> DHLM */
+        if (pmr->rhlm != 0.0)
+        {
+            pmr->dhlm = pmr->rhlm * pmr->mres;
+            MARK(M_DHLM);
+        }
+        if (pmr->rhlm != pmr->dhlm / pmr->mres)
+        {
+            pmr->rhlm = pmr->dhlm / pmr->mres;
+            MARK_AUX(M_RHLM);
+        }
     }
-    if (pmr->rllm != pmr->dllm / pmr->mres)
+    else
     {
-        pmr->rllm = pmr->dllm / pmr->mres;
-        MARK_AUX(M_RLLM);
+        /* RLLM <--> DHLM */
+        if (pmr->rllm != 0.0)
+        {
+            pmr->dhlm = pmr->rllm * fabs(pmr->mres);
+            MARK(M_DHLM);
+        }
+        if (pmr->rllm != pmr->dhlm / fabs(pmr->mres))
+        {
+            pmr->rllm = pmr->dhlm / fabs(pmr->mres);
+            MARK_AUX(M_RLLM);
+        }
+        /* RHLM <--> DLLM */
+        if (pmr->rhlm != 0.0)
+        {
+            pmr->dllm = pmr->rhlm * fabs(pmr->mres);
+            MARK(M_DLLM);
+        }
+        if (pmr->rhlm != pmr->dllm / fabs(pmr->mres))
+        {
+            pmr->rhlm = pmr->dllm / fabs(pmr->mres);
+            MARK_AUX(M_RHLM);
+        }
     }
-    db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
-    db_post_events(pmr, &pmr->rllm, DBE_VAL_LOG);
-
-
-    /* RHLM <--> DHLM */
-    if (pmr->rhlm != 0.0)
-    {
-        pmr->dhlm = pmr->rhlm * pmr->mres;
-        MARK(M_DHLM);
-    }
-    if (pmr->rhlm != pmr->dhlm / pmr->mres)
-    {
-        pmr->rhlm = pmr->dhlm / pmr->mres;
-        MARK_AUX(M_RHLM);
-    }
-    db_post_events(pmr, &pmr->rhlm, DBE_VAL_LOG);
-    db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
 
     /* SBAK (revolutions/sec) <--> BVEL (EGU/sec) */
     if (pmr->sbak != 0.0)
@@ -3985,12 +4028,18 @@ static void set_user_highlimit(motorRecord* pmr, struct motor_dset* pdset)
         if (dir_positive)
         {
             pmr->dhlm = tmp_limit;
+        }
+        else
+        {
+            pmr->dllm = tmp_limit;
+        }
+        if (command == SET_HIGH_LIMIT)
+        {
             pmr->rhlm = tmp_raw;
             MARK_AUX(M_RHLM);
         }
         else
         {
-            pmr->dllm = tmp_limit;
             pmr->rllm = tmp_raw;
             MARK_AUX(M_RLLM);
         }
@@ -4057,16 +4106,21 @@ static void set_user_lowlimit(motorRecord* pmr, struct motor_dset* pdset)
         SEND_MSG();
         if (dir_positive) {
             pmr->dllm = tmp_limit;
-            pmr->rllm = tmp_raw;
-            MARK_AUX(M_RLLM);
         }
         else
         {
             pmr->dhlm = tmp_limit;
+        }
+        if (command == SET_HIGH_LIMIT)
+        {
             pmr->rhlm = tmp_raw;
             MARK_AUX(M_RHLM);
         }
-
+        else
+        {
+            pmr->rllm = tmp_raw;
+            MARK_AUX(M_RLLM);
+        }
     }
     MARK(M_LLM);
 }
@@ -4088,9 +4142,6 @@ static void set_dial_highlimit(motorRecord *pmr, struct motor_dset *pdset)
     RTN_STATUS rtnval;
 
     tmp_raw = pmr->dhlm / pmr->mres;
-    // set the raw high limit
-    pmr->rhlm = tmp_raw;
-    MARK_AUX(M_RHLM);
 
     INIT_MSG();
     if (pmr->mres < 0) {
@@ -4113,6 +4164,16 @@ static void set_dial_highlimit(motorRecord *pmr, struct motor_dset *pdset)
         pmr->llm = -(pmr->dhlm) + offset;
         MARK(M_LLM);
     }
+    if (command == SET_HIGH_LIMIT)
+    {
+        pmr->rhlm = tmp_raw;
+        MARK_AUX(M_RHLM);
+    }
+    else
+    {
+        pmr->rllm = tmp_raw;
+        MARK_AUX(M_RLLM);
+    }
     MARK(M_DHLM);
 }
 
@@ -4132,9 +4193,6 @@ static void set_dial_lowlimit(motorRecord *pmr, struct motor_dset *pdset)
     RTN_STATUS rtnval;
 
     tmp_raw = pmr->dllm / pmr->mres;
-    // set the raw low limit
-    pmr->rllm = tmp_raw;
-    MARK_AUX(M_RLLM);
 
     INIT_MSG();
     if (pmr->mres < 0) {
@@ -4156,6 +4214,16 @@ static void set_dial_lowlimit(motorRecord *pmr, struct motor_dset *pdset)
     {
         pmr->hlm = -(pmr->dllm) + offset;
         MARK(M_HLM);
+    }
+    if (command == SET_HIGH_LIMIT)
+    {
+        pmr->rhlm = tmp_raw;
+        MARK_AUX(M_RHLM);
+    }
+    else
+    {
+        pmr->rllm = tmp_raw;
+        MARK_AUX(M_RLLM);
     }
     MARK(M_DLLM);
 }
