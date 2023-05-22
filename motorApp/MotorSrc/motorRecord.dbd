@@ -68,18 +68,15 @@ menu(motorRMOD) {
         choice(motorRMOD_G,"Geometric")
         choice(motorRMOD_I,"In-Position")
 }
-
 menu(motorRSTM) {
         choice(motorRSTM_Never,       "Never")
         choice(motorRSTM_Always,      "Always")
         choice(motorRSTM_NearZero,    "NearZero")
         choice(motorRSTM_Conditional, "Conditional")
 }
-
-menu(motorACCSused) {
-        choice(motorACCSused_Undef,"Undef")
-        choice(motorACCSused_Accl, "Accl")
-        choice(motorACCSused_Accs, "Accs")
+menu(motorACCU) {
+        choice(motorACCU_Accl, "Use ACCL")
+        choice(motorACCU_Accs, "Use ACCS")
 }
 
 include "menuOmsl.dbd"
@@ -195,9 +192,10 @@ recordtype(motor) {
                 interest(1)
         }
         field(ACCU,DBF_MENU) {
-                prompt("ACCS used")
-                special(SPC_NOMOD)
-                menu(motorACCSused)
+                prompt("Acceleration used")
+                special(SPC_MOD)
+                menu(motorACCU)
+                initial("0")
         }
         field(BDST,DBF_DOUBLE) {
                 prompt("BL Distance (EGU)")
