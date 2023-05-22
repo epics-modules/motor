@@ -459,12 +459,14 @@ recordtype(motor) {
                 interest(1)
         }
         field(HOMF,DBF_SHORT) {
+                asl(ASL0)
                 prompt("Home Forward")
                 special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
         }
         field(HOMR,DBF_SHORT) {
+                asl(ASL0)
                 prompt("Home Reverse")
                 special(SPC_MOD)
                 pp(TRUE)
