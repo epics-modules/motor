@@ -7,6 +7,7 @@ bin/
 dbd/
 html/
 include/
+/iocsh/
 lib/
 templates/
 cdCommands
