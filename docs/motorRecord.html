@@ -929,6 +929,14 @@ below.
     </td>
   </tr>
   <tr>
+    <td><a href="#Fields_limit">RHLM</a></td>
+    <td>R</td>
+    <td>Raw High Limit</td>
+    <td>DOUBLE</td>
+    <td><br>
+    </td>
+  </tr>
+  <tr>
     <td><a href="#Fields_limit">RHLS</a></td>
     <td>R</td>
     <td>Raw High Limit Switch</td>
@@ -941,6 +949,14 @@ below.
     <td>R/W</td>
     <td>RMP Input Link</td>
     <td>INLINK</td>
+    <td><br>
+    </td>
+  </tr>
+  <tr>
+    <td><a href="#Fields_limit">RLLM</a></td>
+    <td>R</td>
+    <td>Raw Low Limit</td>
+    <td>DOUBLE</td>
     <td><br>
     </td>
   </tr>
@@ -2122,6 +2138,24 @@ below.
     no longer greater than DLLM, then the record will set the field LVIO to 1. If 
     the DIR field has the value "Pos", then DLLM will always be consistent with LLM, 
     otherwise DLLM will always be consistent with HLM.&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>RHLM</td>
+    <td>R</td>
+    <td>Raw High Limit</td>
+    <td>DOUBLE</td>
+    <td>The maximum allowed value of the RVAL field.  If the MRES field is negative,
+    then RHLM will always be consistent with DLLM, otherwise RHLM will always be
+    consistent with DHLM.&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>RLLM</td>
+    <td>R</td>
+    <td>Raw Low Limit</td>
+    <td>DOUBLE</td>
+    <td>The minimum allowed value of the RVAL field. If the MRES field is negative,
+    then RLLM will always be consistent with DHLM, otherwise RLLM will always be
+    consistent with DLLM.&nbsp;</td>
   </tr>
   <tr valign="top">
     <td>LVIO</td>
