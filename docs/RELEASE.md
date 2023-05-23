@@ -1,19 +1,36 @@
 # Motor Releases
 
-## __R7-3 (2023-05-XX)__
+## __R7-3 (2023-05-23)__
 R7-3 is a release based on the master branch.  
 
 ### Changes since R7-2-2
 
 #### New features
-* Added motorAcsMotion as a submodule
-* TBD
+* Commit [c764bd6](https://github.com/epics-modules/motor/commit/c764bd6426c3939bded75df2909b76d148c2f8c9): Added motorAcsMotion as a submodule
+* Pull request [#160](https://github.com/epics-modules/motor/pull/160) from [Torsten Bögershausen](https://github.com/tboegi): Added the Restore Mode (**RSTM**) field
+* Pull request [#163](https://github.com/epics-modules/motor/pull/163): Autosave the RSTM field and allow it to be specified when motor databases are loaded
+* Pull request [#197](https://github.com/epics-modules/motor/pull/197): Added model-2-specific databases to work around MOTOR_REC_{OFFSET,RESOLUTION,DIRECTION} errors at iocInit
+* Pull request [#193](https://github.com/epics-modules/motor/pull/193) from [Jack Harper](https://github.com/rerpha): Added raw limit (**RHLM**, **RLLM**) fields
+* Pull request [#202](https://github.com/epics-modules/motor/pull/202) and [#204](https://github.com/epics-modules/motor/pull/204): Added prop(YES) to fields in motorRecord.dbd that should generate DBE_PROPERTY callbacks
+* Pull request [#122](https://github.com/epics-modules/motor/pull/122) from [Torsten Bögershausen](https://github.com/tboegi): Addded Acceleration (**ACCS**) and Acceleration Used (**ACCU**) fields
+* Pull request [#203](https://github.com/epics-modules/motor/pull/203): Changed the Acceleration Used (ACCU) field from a readback to a control
 
 #### Modifications to existing features
-* TBD
+* Pull request [#180](https://github.com/epics-modules/motor/pull/180) from [Torsten Bögershausen](https://github.com/tboegi): Reset UEIP to 'No' if no encoder is present
+* Pull request [#193](https://github.com/epics-modules/motor/pull/193) from [Jack Harper](https://github.com/rerpha): Soft limits are synced on MRES changes
 
 #### Bug fixes
-* TBD
+* Pull request [#176](https://github.com/epics-modules/motor/pull/176) from [Torsten Bögershausen](https://github.com/tboegi): Added shareLib.h to motordrvCom.h for compatibility with base 7.0.4
+* Pull request [#182](https://github.com/epics-modules/motor/pull/182) from [Freddie Akeroyd](https://github.com/FreddieAkeroyd): Bug fix for negative backlash distance when relative moves are used 
+* Pull request [#167](https://github.com/epics-modules/motor/pull/167) from [Torsten Bögershausen](https://github.com/tboegi): devMotorAsyn: remove initEvent in init_record()
+* Commit [c3d6c6e](https://github.com/epics-modules/motor/commit/c3d6c6ee439e4d46fd2d4c2790091f7c76e31120) from [Mark Rivers](https://github.com/MarkRivers): Fixes for DTYP and EGU not displaying correctly in Phoebus
+* Pull request [#206](https://github.com/epics-modules/motor/pull/206) from [Torsten Bögershausen](https://github.com/tboegi): Bug fix for RHLM, RLLM when MRES is negative
+
+#### Documentation
+* Commit [382c832](https://github.com/epics-modules/motor/commit/382c8324e5176ce769a09302bf829beca5a9cbea) from [Mark Rivers](https://github.com/MarkRivers): Added "Model 3 EPICS Motor Driver Support" slides
+
+#### Continuous Integration
+* Configured to build with GitHub Actions using ci-scripts v3.0.1
 
 #### Driver submodules (and noteworthy changes)
 
