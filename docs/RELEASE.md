@@ -25,9 +25,12 @@ R7-3 is a release based on the master branch.
 * Pull request [#167](https://github.com/epics-modules/motor/pull/167) from [Torsten Bögershausen](https://github.com/tboegi): devMotorAsyn: remove initEvent in init_record()
 * Commit [c3d6c6e](https://github.com/epics-modules/motor/commit/c3d6c6ee439e4d46fd2d4c2790091f7c76e31120) from [Mark Rivers](https://github.com/MarkRivers): Fixes for DTYP and EGU not displaying correctly in Phoebus
 * Pull request [#206](https://github.com/epics-modules/motor/pull/206) from [Torsten Bögershausen](https://github.com/tboegi): Bug fix for RHLM, RLLM when MRES is negative
+* Pull request [#186](https://github.com/epics-modules/motor/pull/186) from [justincslac](https://github.com/justincslac): Bug fix for .gitignore that caused the Db dir to be ignored on case-insensitive file systems
+* Commit [96509ca](https://github.com/epics-modules/motor/commit/96509caba2ea1995bfeca3a0e8f11e1f273d2e05) from [Keenan Lang](https://github.com/keenanlang): Added basic_asyn_motor_settings.req which allows autosaveBuild to work with basic_asyn_motor.db
 
 #### Documentation
 * Commit [382c832](https://github.com/epics-modules/motor/commit/382c8324e5176ce769a09302bf829beca5a9cbea) from [Mark Rivers](https://github.com/MarkRivers): Added "Model 3 EPICS Motor Driver Support" slides
+* Pull request [#190](https://github.com/epics-modules/motor/pull/190) from [Xiaoqiang Wang](https://github.com/xiaoqiangwang): Corrected field types in motorRecord.html
 
 #### Continuous Integration
 * Configured to build with GitHub Actions using ci-scripts v3.0.1
