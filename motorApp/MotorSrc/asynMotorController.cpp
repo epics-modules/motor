@@ -764,6 +764,30 @@ asynStatus asynMotorController::writeController(const char *output, double timeo
   return status ;
 }
 
+/** Reads a string from the controller.
+  * Calls deadController() with default locations of the input string and default timeout. */ 
+asynStatus asynMotorController::readController()
+{
+  size_t nread;
+  return readController(inString_, sizeof(inString_), &nread, DEFAULT_CONTROLLER_TIMEOUT);
+}
+
+/** Reads a string from the controller
+  * \param[out] input Pointer to the input string location.
+  * \param[in] maxChars Size of the input buffer.
+  * \param[out] nread Number of characters read.
+  * \param[out] timeout Timeout before returning an error.*/
+asynStatus asynMotorController::readController(char *input, size_t maxChars, size_t *nread, double timeout)
+{
+  asynStatus status;
+  int eomReason;
+  // const char *functionName="readController";
+  
+  status = pasynOctetSyncIO->read(pasynUserController_, input, maxChars, timeout, nread, &eomReason);
+                        
+  return status;
+}
+
 /** Writes a string to the controller and reads the response.
   * Calls writeReadController() with default locations of the input and output strings
   * and default timeout. */ 
