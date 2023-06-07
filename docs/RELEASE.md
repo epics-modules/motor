@@ -1,5 +1,19 @@
 # Motor Releases
 
+## __R7-3-1 (2023-06-07)__
+R7-3-1 is a release based on the master branch.
+
+### Changes since R7-3
+
+#### Modifications to existing features
+* Commit [5eb994d](https://github.com/epics-modules/motor/commit/5eb994dc5e0f8a809382b300ad13f8c83e7da33b) from [Mark Rivers](https://github.com/MarkRivers): Added readController() functions to asynMotorController
+
+#### Driver submodules (and noteworthy changes)
+
+| Module           | Release | Changes |
+| ---------------- | ------- | ------- |
+| **motorAcsMotion** | [R2-2](https://github.com/epics-motor/motorAcsMotion/releases/tag/R2-2) | Improved homing and workaround for vxWorks build error |
+
 ## __R7-3 (2023-05-23)__
 R7-3 is a release based on the master branch.  
 
