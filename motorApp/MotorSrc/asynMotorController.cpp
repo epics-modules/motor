@@ -765,7 +765,7 @@ asynStatus asynMotorController::writeController(const char *output, double timeo
 }
 
 /** Reads a string from the controller.
-  * Calls deadController() with default locations of the input string and default timeout. */ 
+  * Calls readController() with default locations of the input string and default timeout. */
 asynStatus asynMotorController::readController()
 {
   size_t nread;
