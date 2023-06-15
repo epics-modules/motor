@@ -68,6 +68,7 @@ record(bo, "$(P)$(M)_able") {
   field(OUT, "$(P)$(M).DISP")
   field(ZNAM, "Enable")
   field(ONAM, "Disable")
+  field(UDFS, "NO_ALARM")
 }
 
 record(ao,"$(P)$(M)_MRESMON")

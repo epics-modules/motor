@@ -5,6 +5,7 @@ grecord(bo,"$(P)$(M)_able")
 	field(OUT,"$(P)$(M)_ableput.A PP MS")
 	field(ZNAM,"Enable")
 	field(ONAM,"Disable")
+	field(UDFS, "NO_ALARM")
 }
 grecord(motor,"$(P)$(M)")
 {
