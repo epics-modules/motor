@@ -1,0 +1,100 @@
+
+############################################################
+#
+# Old ERROR PV - I kept this so I don't break screens while
+# I update IOCs. Once the screens have been updated to use new
+# Status PV below, we can remove this.
+#
+###########################################################
+
+record(calc, "$(P)$(M):ERROR")
+{
+        field(DESC, "Combined Error Flag")
+        field(PINI, "YES")
+        field(VAL, "0")
+        field(INPA, "$(P)$(M).STAT CP MS")
+        field(INPB, "$(P)$(M).LVIO CP MS")
+        field(INPC, "$(P)$(M).MISS CP MS")
+        field(CALC, "(A||B||C)?1:0")
+}
+
+
+############################################################
+#
+# Set of records to define a status record for a motor.
+# This works well with CSS and archiving.
+# There are two records, one for the OPI and one for the database logic
+# where we ignore the Disabled state (if we are Disabled then we set Status to Idle)
+#
+###########################################################
+
+#Record to calculate what the Status PV should b
+#We set the Status to 0 (Idle) if we are Disabled
+record(calcout, "$(P)$(M):StatusCalc")
+{
+   field(DESC, "Calc Motor Status")
+   field(PINI, "YES")
+   field(VAL, "0")
+   field(INPA, "$(P)$(M).DMOV CP MS")
+   field(INPB, "$(P)$(M).STAT CP MS")
+   field(INPC, "$(P)$(M).LVIO CP MS")
+   field(INPD, "$(P)$(M).MISS CP MS")
+   field(INPE, "$(P)$(M):Disable CP MS")
+   field(CALC, "E?0:((B||C||D)?2:!A)")
+   field(OOPT, "Every Time")
+   field(DOPT, "Use CALC")
+   field(OUT, "$(P)$(M):Status.VAL PP")
+}
+
+#Database status record, where:
+# 0 = Idle (DMOV=1 and no alarm)
+# 1 = Moving (DMOV=0 and no alarm)
+# 2 = Error (One of the error fields is on)
+record(mbbi, "$(P)$(M):Status")
+{
+   field(DESC, "Motor Status")
+   field(ZRVL, "0")
+   field(ONVL, "1")
+   field(TWVL, "2")
+   field(ZRST, "Idle")
+   field(ONST, "Moving")
+   field(TWST, "Error")
+   info(archive, "Monitor, 00:00:01, VAL")
+}
+
+#Record to calculate what the Status PV should be for the motor OPI
+#We set the StatusOPI to 3 if we are Disabled
+record(calcout, "$(P)$(M):StatusCalcOPI")
+{
+   field(DESC, "Calc Motor Status OPI")
+   field(PINI, "YES")
+   field(VAL, "0")
+   field(INPA, "$(P)$(M).DMOV CP MS")
+   field(INPB, "$(P)$(M).STAT CP MS")
+   field(INPC, "$(P)$(M).LVIO CP MS")
+   field(INPD, "$(P)$(M).MISS CP MS")
+   field(INPE, "$(P)$(M):Disable CP MS")
+   field(CALC, "E?3:((B||C||D)?2:!A)")
+   field(OOPT, "Every Time")
+   field(DOPT, "Use CALC")
+   field(OUT, "$(P)$(M):StatusOPI.VAL PP")
+}
+
+#Record to work with a quad-state LED, where:
+# 0 = Idle (DMOV=1 and no alarm)
+# 1 = Moving (DMOV=0 and no alarm)
+# 2 = Error (One of the error fields is on)
+# 3 = Disabled (Motor has been disabled in software)
+record(mbbi, "$(P)$(M):StatusOPI")
+{
+   field(DESC, "Motor Status")
+   field(ZRVL, "0")
+   field(ONVL, "1")
+   field(TWVL, "2")
+   field(THVL, "3")
+   field(ZRST, "Idle")
+   field(ONST, "Moving")
+   field(TWST, "Error")
+   field(THST, "Disabled")
+   info(archive, "Monitor, 00:00:01, VAL")
+}
