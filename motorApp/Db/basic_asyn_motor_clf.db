@@ -214,5 +214,24 @@ menu(menuLOOP) {
     choice(menuLoopclosed_loop, "activeclosed_loop")
 }
 
+#Instructive User input value without actuation 
+record(ao, "$(P)$(M):TargetVal") 
+{ 
+  field(DESC,"Input without move") 
+  field(DTYP,"Soft Channel") 
+  field(LOPR,"$(P)$(M).LLM") 
+  field(HOPR,"$(P)$(M).HLM")   
+} 
+
+#Instructive move command 
+record(calcout, "$(P)$(M):DoMove") 
+{ 
+   field(INPA, "$(P)$(M):TargetVal") 
+   field(CALC, "A") 
+   field(OOPT, "Every Time") 
+   field(DOPT, "Use CALC") 
+   field(OUT, "$(P)$(M).DVAL PP") 
+} 
+
 #Load the records that extract some driver parameters directly
 include "asyn_motor_records.template"
