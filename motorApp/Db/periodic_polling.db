@@ -1,6 +1,10 @@
-record(calcout, "$(P)$(M):SAFE_STUP") {
+record(bo, "$(P)$(M):SAFE_STUP") {
+  field(FLNK, "$(P)$(M):_SAFE_STUP.PROC")
+}
+
+record(calcout, "$(P)$(M):_SAFE_STUP") {
   field(DTYP, "Soft Channel")
-  field(DESC, "Polls the motor position")
+  field(DESC, "Force Poll of motor position")
   field(INPA, "$(P)$(M).MOVN")
   field(INPB, "$(P)$(M).DMOV")
   field(INPC, "$(P)$(M).HOMF")
