@@ -215,23 +215,41 @@ menu(menuLOOP) {
 }
 
 #Instructive User input value without actuation 
-record(ao, "$(P)$(M):TargetVal") 
+record(longout, "$(P)$(M):TargetVal") 
 { 
-  field(DESC,"Input without move") 
-  field(DTYP,"Soft Channel") 
-  field(LOPR,"$(P)$(M).LLM") 
-  field(HOPR,"$(P)$(M).HLM")   
-} 
+  field(DESC,"Input without move")
+  field(DTYP,"Soft Channel")
+}
+
+#LOPR for TargetVal from motor record
+record(calcout,"$(P):$(M):LowLim")
+{
+   field(PINI, "YES")
+   field(DESC,"Low limit Motor value")
+   field(CALC,"A")
+   field(INPA,"$(P)$(M).LLM CP MS")
+   field(OUT,"$(P)$(M):TargetVal.LOPR")
+}
+
+#HOPR for TargetVal from motor record
+record(calcout,"$(P):$(M):HighLim")
+{
+   field(PINI, "YES")
+   field(DESC,"High limit Motor value")
+   field(CALC,"A")
+   field(INPA,"$(P)$(M).HLM CP MS")
+   field(OUT,"$(P)$(M):TargetVal.LOPR")
+}
 
 #Instructive move command 
-record(calcout, "$(P)$(M):DoMove") 
-{ 
-   field(INPA, "$(P)$(M):TargetVal") 
-   field(CALC, "A") 
-   field(OOPT, "Every Time") 
-   field(DOPT, "Use CALC") 
-   field(OUT, "$(P)$(M).DVAL PP") 
-} 
+record(calcout, "$(P)$(M):DoMove")
+{
+   field(INPA, "$(P)$(M):TargetVal")
+   field(CALC, "A")
+   field(OOPT, "Every Time")
+   field(DOPT, "Use CALC")
+   field(OUT, "$(P)$(M).DVAL PP")
+}
 
 #Load the records that extract some driver parameters directly
 include "asyn_motor_records.template"
