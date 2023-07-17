@@ -20,6 +20,8 @@ record(motor,"$(P)$(M)")
 	field(EGU,"$(EGU)")
 	field(DHLM,"$(DHLM)")
 	field(DLLM,"$(DLLM)")
+        field(HIHI,"$(HIHI)")
+	field(LOLO,"$(LOLO)")
 	field(INIT,"$(INIT=)")
 	field(RTRY,"$(RTRY=0)")
         field(DLY,"$(DLY=0)")   
@@ -205,7 +207,7 @@ record(mbbo, "$(P)$(M):LOOP") {
 #Record describing the loop status 
 record(stringout, "$(P)$(M):STAGE_TYPE") {
   field(DESC, "Stage or Load type")
-  field(VAL, "$(STAGE_TYPE=)")
+  field(VAL, "$(STAGE_TYPE=  )")
 }
 
 menu(menuLOOP) {
@@ -240,7 +242,6 @@ record(calcout,"$(P):$(M):HighLim")
    field(INPA,"$(P)$(M).HLM CP MS")
    field(OUT,"$(P)$(M):TargetVal.LOPR")
 }
-
 #Instructive move command 
 record(calcout, "$(P)$(M):DoMove")
 {
