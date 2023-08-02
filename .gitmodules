@@ -23,3 +23,5 @@
 [submodule "modules/motorAcsMotion"]
 	path = modules/motorAcsMotion
 	url = https://github.com/epics-motor/motorAcsMotion.git
+	branch = master
+

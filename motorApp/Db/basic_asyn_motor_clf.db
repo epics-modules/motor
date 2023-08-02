@@ -224,7 +224,7 @@ record(longout, "$(P)$(M):TargetVal")
 }
 
 #LOPR for TargetVal from motor record
-record(calcout,"$(P):$(M):LowLim")
+record(calcout,"$(P)$(M):LowLim")
 {
    field(PINI, "YES")
    field(DESC,"Low limit Motor value")
@@ -234,7 +234,7 @@ record(calcout,"$(P):$(M):LowLim")
 }
 
 #HOPR for TargetVal from motor record
-record(calcout,"$(P):$(M):HighLim")
+record(calcout,"$(P)$(M):HighLim")
 {
    field(PINI, "YES")
    field(DESC,"High limit Motor value")
