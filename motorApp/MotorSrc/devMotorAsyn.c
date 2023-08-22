@@ -207,7 +207,12 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
             initPos = 1;
             break;
     }
-    initPos = 0; /* never set position */
+
+    /*
+     * STFC ISIS: force off, but we should now change our dbs and use RSTM = Never (0)
+     */
+    initPos = 0;
+
     if (initPos)
     {
         double setPos = pmr->dval / pmr->mres;
