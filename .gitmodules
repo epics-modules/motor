@@ -21,3 +21,7 @@
 	path = modules/motorAcsMotion
 	url = https://github.com/epics-motor/motorAcsMotion.git
 	branch = master
+[submodule "modules/motorNewFocus"]
+	path = modules/motorNewFocus
+	url = git@github.com:CentralLaserFacility/motorNewFocus.git
+	branch = development
