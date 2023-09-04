@@ -6,7 +6,7 @@
 	url = https://github.com/epics-motor/motorDeltaTau.git
 [submodule "modules/motorNewFocus"]
 	path = modules/motorNewFocus
-	url = https://github.com/epics-motor/motorNewFocus.git
+	url = https://github.com/CentralLaserFacility/motorNewFocus/motorNewFocus.git
 [submodule "modules/motorAerotech"]
 	path = modules/motorAerotech
 	url = https://github.com/epics-motor/motorAerotech.git
