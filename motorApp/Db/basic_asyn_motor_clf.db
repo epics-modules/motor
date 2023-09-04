@@ -252,5 +252,12 @@ record(calcout, "$(P)$(M):DoMove")
    field(OUT, "$(P)$(M).DVAL PP")
 }
 
+record(longin, "$(P)$(M):MotorConnection") 
+{ 
+   field(DESC, "Motor Connection Status") 
+   field(DTYP, "asynInt32") 
+   field(INP,  "@asyn($(PORT),$(ADDR))MOTOR_CONNECTION_STATUS") 
+   field(SCAN, "I/O Intr") 
+}
 #Load the records that extract some driver parameters directly
 include "asyn_motor_records.template"
