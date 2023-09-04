@@ -90,7 +90,7 @@ typedef enum {
     motorMoveToHome = motorAxisMoveToHome,
     /* Status bits split out */
     motorStatusDirection=motorAxisDirection,
-    motorStatusDone, motorStatusHighLimit, motorStatusAtHome,
+    motorStatusDone, motorConnectionStatus, motorStatusHighLimit, motorStatusAtHome,
     motorStatusSlip, motorStatusPowerOn, motorStatusFollowingError,
     motorStatusHome, motorStatusHasEncoder, motorStatusProblem,
     motorStatusMoving, motorStatusGainSupport, motorStatusCommsError,
@@ -140,6 +140,7 @@ static motorCommandStruct motorCommands[] = {
     {motorStatusPowerOn,        motorStatusPowerOnString},
     {motorStatusFollowingError, motorStatusFollowingErrorString},
     {motorStatusHome,           motorStatusHomeString},
+    {motorConnectionStatus,     motorConnectionStatusString},
     {motorStatusHasEncoder,     motorStatusHasEncoderString},
     {motorStatusProblem,        motorStatusProblemString},
     {motorStatusMoving,         motorStatusMovingString},

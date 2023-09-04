@@ -100,6 +100,7 @@
 #define profilePositionsString          "PROFILE_POSITIONS"
 #define profileReadbacksString          "PROFILE_READBACKS"
 #define profileFollowingErrorsString    "PROFILE_FOLLOWING_ERRORS"
+#define motorConnectionStatusString     "MOTOR_CONNECTION_STATUS"
 
 /** The structure that is passed back to devMotorAsyn when the status changes. */
 typedef struct MotorStatus {
@@ -250,6 +251,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorRecResolution_;
   int motorRecDirection_;
   int motorRecOffset_;
+  int motorConnectionStatus_;
 
   // These are the per-controller parameters for profile moves
   int profileNumAxes_;
