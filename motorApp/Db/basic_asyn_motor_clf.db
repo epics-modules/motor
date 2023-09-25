@@ -217,7 +217,7 @@ menu(menuLOOP) {
 }
 
 #Instructive User input value without actuation 
-record(longout, "$(P)$(M):TargetVal") 
+record(ao, "$(P)$(M):TargetVal") 
 { 
   field(DESC,"Input without move")
   field(DTYP,"Soft Channel")
