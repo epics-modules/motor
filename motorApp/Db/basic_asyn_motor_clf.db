@@ -221,6 +221,7 @@ record(ao, "$(P)$(M):TargetVal")
 { 
   field(DESC,"Input without move")
   field(DTYP,"Soft Channel")
+  field(VAL, "0")
 }
 
 #LOPR for TargetVal from motor record
