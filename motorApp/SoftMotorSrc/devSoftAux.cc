@@ -66,6 +66,7 @@ static inline void Debug(int level, const char *format, ...)
 }
 
 STATIC void soft_dinp(struct event_handler_args);
+STATIC void soft_minp(struct event_handler_args);
 STATIC void soft_rdbl(struct event_handler_args);
 STATIC void soft_rinp(struct event_handler_args);
 STATIC EPICSTHREADFUNC soft_motor_task(void *);
@@ -76,6 +77,11 @@ STATIC ELLLIST soft_motor_list;
 STATIC void soft_dinp(struct event_handler_args args)
 {
     soft_dinp_func((struct motorRecord *) args.usr, *((short *) args.dbr));
+}
+
+STATIC void soft_minp(struct event_handler_args args)
+{
+    soft_minp_func((struct motorRecord *) args.usr, *((short *) args.dbr));
 }
 
 
@@ -162,7 +168,7 @@ STATIC EPICSTHREADFUNC soft_motor_task(void *parm)
 {
     struct motorRecord *mr;
     struct motor_node *node;
-    chid dinp, rdbl, rinp;
+    chid dinp, minp, rdbl, rinp;
     epicsEventId wait_forever;
 
     epicsEventWait(soft_motor_sem);     /* Wait for dbLockInitRecords() to execute. */
@@ -195,7 +201,17 @@ STATIC EPICSTHREADFUNC soft_motor_task(void *parm)
         {
             ptr->default_done_behavior = true;
         }
-    
+        if (((mr->minp.type == PV_LINK) ||
+             (mr->minp.type == CA_LINK) ||
+             (mr->minp.type == DB_LINK)) &&
+             (mr->minp.value.pv_link.pvname != NULL))
+        {
+            Debug(5, "devSoftAux::soft_motor_task: adding minp link for motor %s link=%s\n", mr->name, mr->minp.value.pv_link.pvname);
+            SEVCHK(ca_search(mr->minp.value.pv_link.pvname, &minp),"ca_search() failure");
+            SEVCHK(ca_add_event(DBR_SHORT, minp, soft_minp, mr, NULL),"ca_add_event() failure");
+            SEVCHK(ca_pend_io((float) 5.0), "MINP link failure");
+        }
+
         if ((mr->urip != 0) &&
             ((mr->rdbl.type == PV_LINK) || 
              (mr->rdbl.type == CA_LINK) ||

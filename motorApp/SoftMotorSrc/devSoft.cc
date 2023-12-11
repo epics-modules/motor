@@ -254,6 +254,23 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
     }
 }
 
+void soft_minp_func(struct motorRecord *mr, short newminp)
+{
+    msta_field status;
+    unsigned int old_RA_DONE;
+    if (interruptAccept != TRUE)
+        return;
+
+    status.All = mr->msta;
+    old_RA_DONE = status.Bits.RA_DONE;
+    Debug(5, "update(): old msta=0x%04x newminp=0x%04x for %s.\n",
+          mr->msta, (unsigned)newminp, mr->name);
+
+    status.All = newminp;
+    status.Bits.RA_DONE = old_RA_DONE;
+    mr->msta = status.All;
+    soft_process(mr);
+}
 
 void soft_rinp_func(struct motorRecord *mr, long newrinp)
 {
