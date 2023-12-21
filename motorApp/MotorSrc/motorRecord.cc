@@ -2850,17 +2850,27 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
          * Jog motor.  Move continuously until we hit a software limit or a
          * limit switch, or until user releases button.
          */
-        if (!(pmr->mip & MIP_JOG) && stop_or_pause == false &&
-            (pmr->mip & MIP_JOG_REQ))
+        int start_jog = (!(pmr->mip & MIP_JOG) && stop_or_pause == false &&
+                         (pmr->mip & MIP_JOG_REQ));
+        if (start_jog)
         {
+            /* check for limit switches */
+            if (pmr->jogf && pmr->hls)
+                start_jog = 0;
+            else if (pmr->jogr && pmr->lls)
+                start_jog = 0;
             /* check for limit violation */
-            if (!softLimitsDefined(pmr))
+            else if (!softLimitsDefined(pmr))
                 ;
             else if ((pmr->jogf && (pmr->val > pmr->hlm - pmr->jvel)) ||
                      (pmr->jogr && (pmr->val < pmr->llm + pmr->jvel)) ||
                      (pmr->dllm > pmr->dhlm))
             {
                 SET_LVIO(1);
+                start_jog = 0;
+            }
+            if (!start_jog)
+            {
                 MIP_CLR_BIT(MIP_JOG_REQ);
                 if (pmr->jogf)
                 {
@@ -3570,14 +3580,14 @@ pidcof:
     case motorRecordJOGF:
         if (pmr->jogf == 0)
             MIP_CLR_BIT(MIP_JOG_REQ);
-        else if (pmr->mip == MIP_DONE && !pmr->hls)
+        else if (pmr->mip == MIP_DONE)
             MIP_SET_BIT(MIP_JOG_REQ);
         break;
 
     case motorRecordJOGR:
         if (pmr->jogr == 0)
             MIP_CLR_BIT(MIP_JOG_REQ);
-        else if (pmr->mip == MIP_DONE && !pmr->lls)
+        else if (pmr->mip == MIP_DONE)
             MIP_SET_BIT(MIP_JOG_REQ);
         break;
 
