@@ -44,3 +44,52 @@ record(stringin, "$(P)$(M)_IOCNAME"){
     field(DESC, "IOC name eg GALIL_01")
     field(VAL, "$(IOCNAME=UNKNOWN)")
 }
+
+
+# Fallback tolerance used if neither retry deadband not setpoint deadband is set.
+record(calc, "$(P)$(M):IN_POSITION:_FALLBACK")  {
+    field(ASG, "READONLY")
+    field(INPA, "$(P)$(M).ERES CP MS")
+    field(INPB, "$(P)$(M).MRES CP MS")
+    field(CALC, "10*MAX(ABS(A),ABS(B))")
+}
+
+record(calc, "$(P)$(M):IN_POSITION:TOLERANCE") {
+    field(ASG, "READONLY")
+    field(INPA, "$(P)$(M).RTRY CP MS")  # Max retries
+    field(INPB, "$(P)$(M).RDBD CP MS")  # Retry deadbands
+    field(INPC, "$(P)$(M).SPDB CP MS")  # Setpoint deadband    
+    field(INPD, "$(P)$(M).MRES CP MS")  # motor resolution   
+    field(INPE, "$(P)$(M):IN_POSITION:_FALLBACK CP MS")  # fallback tolerance 
+    
+    # If retry deadband > MRES or max retries > 0, use retry deadband
+    # Otherwise, if setpoint deadband is non-zero use it, else fall back to 10*MAX(ERES, MRES)
+    field(CALC, "(A>0||B>D)?B:((C>0)?C:E)")    
+}
+
+record(calc, "$(P)$(M):DIFF_WITHIN_TOL") {
+    field(ASG, "READONLY")
+    field(INPA, "$(P)$(M):IN_POSITION:TOLERANCE CP MS")
+    field(INPB, "$(P)$(M).DIFF CP MS")
+    
+    # If moving assume in position, otherwise check that 
+    field(CALC, "ABS(B)<=ABS(A)")
+}
+
+record(calc, "$(P)$(M):IN_POSITION") {
+    field(ASG, "READONLY")
+    field(INPA, "$(P)$(M):DIFF_WITHIN_TOL CP MS")
+    field(INPB, "$(P)$(M).MOVN CP MS")
+    
+    # If moving assume in position, otherwise check that 
+    field(CALC, "B||A")
+}
+
+record(calc, "$(P)$(M):USING_ENCODER") {
+    field(ASG, "READONLY")
+    field(INPA, "$(P)$(M).MSTA CP MS")
+    field(INPB, "$(P)$(M).UEIP CP MS")
+    
+    # Bitwise AND on MSTA to select the "encoder present" flag.
+    field(CALC, "((A&256)=256)&&B")
+}
