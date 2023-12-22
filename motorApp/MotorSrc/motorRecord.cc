@@ -1052,10 +1052,19 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
     double diff = (position - pmr->drbv) * frac;
     double val, vel, accEGU;
     val = use_rel ? diff : position;
-    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f\n",
+    int cdirRaw = diff > 0 ? 1 : 0;
+    if (pmr->mres < 0.0)       /* mres < 0 means invert direction dial <-> raw */
+        cdirRaw = !cdirRaw; /* If needed, 1 -> 0; 0 -> 1 */
+
+    bool ls_active = ((pmr->rhls && cdirRaw) || (pmr->rlls && !cdirRaw));
+    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f ls_active=%d%s\n",
           lineNo,
           moveMode == moveModePosition ? "Position" : "Backlash",
-          position, frac, (int)use_rel, val);
+          position, frac, (int)use_rel, val, ls_active, ls_active ? " ls_active: moving-not-started" : "" );
+    if (ls_active)
+    {
+        return false;
+    }
 
     switch (moveMode) {
     case moveModePosition:
@@ -1069,14 +1078,10 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
     default:
       vel = accEGU = 0.0;
     }
-    setCDIRfromDialMove(pmr, diff < 0.0 ? 0 : 1);
-    bool ls_active = ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir));
-    if (!ls_active)
-    {
-        devSupMoveDialEgu(pmr, vel, accEGU, val, use_rel);
-        pmr->priv->last.commandedDval = position;
-    }
-    return !ls_active;
+    setCDIRfromRawMove(pmr, cdirRaw);
+    devSupMoveDialEgu(pmr, vel, accEGU, val, use_rel);
+    pmr->priv->last.commandedDval = position;
+    return true;
 }
 #define doMoveDialPosition(a,b,c,d)  doMoveDialPositionL(__LINE__,a,b,c,d)
 
@@ -1220,12 +1225,16 @@ static long postProcess(motorRecord * pmr)
     {
         doBackLash(pmr);
     }
+    else if (pmr->mip & MIP_STOP)
+    {
+        MIP_CLR_BIT(MIP_STOP);
+        MARK(M_MIP);
+    }
+
     /* Save old values for next call. */
     SET_LAST_VAL_FROM_VAL;
     pmr->priv->last.dval = pmr->dval;
     pmr->priv->last.rval = pmr->rval;
-    MIP_CLR_BIT(MIP_STOP);
-    MARK(M_MIP);
     return(OK);
 }
 
@@ -2093,6 +2102,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     }
     if (!moving_started)
     {
+        Debug(pmr,2, "doRetryOrDone %s\n", "moving-not-started");
         MIP_SET_VAL(MIP_DONE);
     }
 }
