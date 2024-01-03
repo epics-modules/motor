@@ -1057,10 +1057,12 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
         cdirRaw = !cdirRaw; /* If needed, 1 -> 0; 0 -> 1 */
 
     bool ls_active = ((pmr->rhls && cdirRaw) || (pmr->rlls && !cdirRaw));
-    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f ls_active=%d%s\n",
+    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f diff=%f rhls=%d rlls=%d ls_active=%d%s\n",
           lineNo,
           moveMode == moveModePosition ? "Position" : "Backlash",
-          position, frac, (int)use_rel, val, ls_active, ls_active ? " ls_active: moving-not-started" : "" );
+          position, frac, (int)use_rel, val, diff,
+          pmr->rhls, pmr->rlls,
+          ls_active, ls_active ? " ls_active: moving-not-started" : "" );
     if (ls_active)
     {
         return false;
@@ -1090,37 +1092,51 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
 *****************************************************************************/
 static void doBackLash(motorRecord *pmr)
 {
-    /* Restore DMOV to false and UNMARK it so it is not posted. */
-    pmr->dmov = FALSE;
-    UNMARK(M_DMOV);
-
+    bool moving_started = false;
 #ifdef DEBUG
     {
         char dbuf[MBLE];
         dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-        Debug(pmr,2, "doBackLash dval=%f drbv=%f bdst=%f mip=0x%0x(%s)\n",
+        Debug(pmr,2, "doBackLash begin dval=%f drbv=%f bdst=%f mip=0x%0x(%s)\n",
               pmr->dval, pmr->drbv, pmr->bdst, pmr->mip, dbuf);
     }
 #endif
     if (pmr->mip & MIP_JOG_STOP)
     {
-        if (doMoveDialPosition(pmr, moveModePosition, pmr->dval - pmr->bdst, 1.0))
+        moving_started = doMoveDialPosition(pmr, moveModePosition, pmr->dval - pmr->bdst, 1.0);
+        if (moving_started)
             MIP_SET_VAL(MIP_JOG_BL1);
     }
     else if(pmr->mip & MIP_MOVE)
     {
         /* First part of move done. Do backlash correction. */
         pmr->rval = NINT(pmr->dval);
-        if (doMoveDialPosition(pmr, moveModeBacklash, pmr->dval, pmr->frac))
+        moving_started = doMoveDialPosition(pmr, moveModeBacklash, pmr->dval, pmr->frac);
+        if (moving_started)
             MIP_SET_VAL(MIP_MOVE_BL);
     }
     else if (pmr->mip & MIP_JOG_BL1)
     {
         /* First part of jog done. Do backlash correction. */
         pmr->rval = NINT(pmr->dval);
-        if (doMoveDialPosition(pmr, moveModeBacklash, pmr->dval, pmr->frac))
+        moving_started = doMoveDialPosition(pmr, moveModeBacklash, pmr->dval, pmr->frac);
+        if (moving_started)
             MIP_SET_VAL(MIP_JOG_BL2);
     }
+    if (moving_started)
+    {
+        /* Restore DMOV to false and UNMARK it so it is not posted. */
+        pmr->dmov = FALSE;
+        UNMARK(M_DMOV);
+    }
+#ifdef DEBUG
+    {
+        char dbuf[MBLE];
+        dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+        Debug(pmr,2, "doBackLash end moving_started=%d mip=0x%0x(%s)\n",
+              (int)moving_started, pmr->mip, dbuf);
+    }
+#endif
     pmr->pp = TRUE;
 }
 
@@ -1218,12 +1234,16 @@ static long postProcess(motorRecord * pmr)
         {
             doBackLash(pmr);
         }
-        MIP_CLR_BIT(MIP_JOG_STOP);
-        MIP_CLR_BIT(MIP_MOVE);
+        if (pmr->mip & MIP_JOG_STOP)
+            MIP_CLR_BIT(MIP_JOG_STOP);
+        if (pmr->mip & MIP_MOVE)
+            MIP_CLR_BIT(MIP_MOVE);
+        MARK(M_MIP);
     }
     else if (pmr->mip & MIP_JOG_BL1)
     {
         doBackLash(pmr);
+        MARK(M_MIP);
     }
     else if (pmr->mip & MIP_STOP)
     {
@@ -2881,6 +2901,10 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             }
             if (!start_jog)
             {
+#ifdef DEBUG
+                Debug(pmr,6, "do_work: start-jogging-refused lvio=%d hls=%d lls=%d\n",
+                      pmr->lvio, pmr->hls, pmr->lls);
+#endif
                 MIP_CLR_BIT(MIP_JOG_REQ);
                 if (pmr->jogf)
                 {
