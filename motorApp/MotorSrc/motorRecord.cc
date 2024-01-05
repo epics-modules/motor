@@ -2136,6 +2136,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     {
         Debug(pmr,2, "doRetryOrDone %s\n", "moving-not-started");
         MIP_SET_VAL(MIP_DONE);
+        SET_DMOV_MARK(TRUE);
     }
 }
 
