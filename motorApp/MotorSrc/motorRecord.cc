@@ -1074,19 +1074,37 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
     double val, vel, accEGU;
     val = use_rel ? diff : position;
     int cdirRaw = diff > 0 ? 1 : 0;
+#if 0
     if (pmr->mres < 0.0)       /* mres < 0 means invert direction dial <-> raw */
         cdirRaw = !cdirRaw; /* If needed, 1 -> 0; 0 -> 1 */
-
-    bool ls_active = ((pmr->rhls && cdirRaw) || (pmr->rlls && !cdirRaw));
-    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f diff=%f rhls=%d rlls=%d ls_active=%d%s\n",
+#endif
+    int too_small = 0;
+    int ls_active = ((pmr->hls && cdirRaw) || (pmr->lls && !cdirRaw)) ? 1 : 0;
+    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f diff=%f\n",
           lineNo,
           moveMode == moveModePosition ? "Position" : "Backlash",
-          position, frac, (int)use_rel, val, diff,
-          pmr->rhls, pmr->rlls,
-          ls_active, ls_active ? " ls_active: moving-not-started" : "" );
-    if (ls_active)
+          position, frac, (int)use_rel, val, diff);
     {
-        return false;
+        double spdb = pmr->spdb;
+        double absdiff = fabs(diff);
+        if (spdb > 0.0) /* When SPDB is defined, use it to make a decision */
+        {
+            if (absdiff < spdb)
+                too_small |= 1;
+        }
+        else if (absdiff < fabs(pmr->mres))
+        {
+            /* Same as (abs(npos - rpos) < 1) */
+            too_small |= 2;
+        }
+        if (ls_active || too_small)
+        {
+            Debug(pmr,2, "doMoveDialPosition(%d) diff=%f spdb=%f mres=%f hls=%d lls=%d ls_active=%d too_small=%d moving-not-started\n",
+                  lineNo, diff, spdb, pmr->mres,
+                  pmr->hls, pmr->lls,
+                  ls_active, too_small);
+            return false;
+        }
     }
 
     switch (moveMode) {
