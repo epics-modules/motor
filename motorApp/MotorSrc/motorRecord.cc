@@ -2373,7 +2373,8 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     else
         rtnstat = TRUE;
 
-    if (pmr->lvio || rtnstat == FALSE)
+    if (pmr->lvio || rtnstat == FALSE ||
+        (diff > 0.0 && pmr->hls) || (diff < 0.0 && pmr->lls))
     {
         pmr->val = pmr->priv->last.val;
         MARK(M_VAL);
