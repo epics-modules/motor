@@ -753,9 +753,18 @@ static void recalcLVIO(motorRecord *pmr)
   }
 
   int old_lvio = pmr->lvio;
-  int lvio = 0;
+  int lvio = old_lvio;
+  int homed;
+  {
+      msta_field msta;
+      msta.All = pmr->msta;
+      homed = msta.Bits.RA_HOMED ? 1 : 0;
+  }
+
   if (!softLimitsDefined(pmr))
-      SET_LVIO(0);
+      lvio = 0;
+  else if (!homed)
+      lvio = 0;
   else if ((pmr->drbv > pmr->dhlm + pmr->rdbd) ||
            (pmr->drbv < pmr->dllm - pmr->rdbd) ||
            (pmr->dllm > pmr->dhlm))
@@ -767,8 +776,8 @@ static void recalcLVIO(motorRecord *pmr)
       SET_LVIO(lvio);
       MARK(M_LVIO);
   }
-  Debug(pmr,4,"recalcLVIO lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f neverPolled=%d\n",
-        lvio, pmr->drbv, pmr->rdbd, pmr->dhlm, pmr->dllm, pmr->priv->neverPolled);
+  Debug(pmr,4,"recalcLVIO homed=%d lvio=%d drbv=%f rdbd=%f dhlm=%f dllm=%f\n",
+        homed, lvio, pmr->drbv, pmr->rdbd, pmr->dhlm, pmr->dllm);
 }
 
 /******************************************************************************
