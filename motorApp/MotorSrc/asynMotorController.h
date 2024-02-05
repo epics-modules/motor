@@ -77,6 +77,7 @@
 #define motorFlagsAdjAfterHomedString   "MOTOR_FLAGS_ADJ_AFTER_HOMED"
 #define motorFlagsNtmUpdateString       "MOTOR_FLAGS_NTM_UPDATE"
 #define motorFlagsNotHomedProblemString "MOTOR_FLAGS_NOT_HOMED_PROBLEM"
+#define motorFlagsNoTweakOnLsString     "MOTOR_FLAGS_NO_TWEAK_ON_LS"
 
 #define motorWaitPollsBeforeReadyString "MOTOR_WAIT_POLLS_BEFORE_READY"
 
@@ -345,6 +346,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorFlagsAdjAfterHomed_;
   int motorFlagsNtmUpdate_;
   int motorFlagsNotHomedProblem_;
+  int motorFlagsNoTweakOnLs_;
   // These are per-motor parameters for passing additional motor record information to the driver
   int motorRecResolution_;
   int motorRecDirection_;

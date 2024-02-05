@@ -1083,10 +1083,6 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
     double val, vel, accEGU;
     val = use_rel ? diff : position;
     int cdirRaw = diff > 0 ? 1 : 0;
-#if 0
-    if (pmr->mres < 0.0)       /* mres < 0 means invert direction dial <-> raw */
-        cdirRaw = !cdirRaw; /* If needed, 1 -> 0; 0 -> 1 */
-#endif
     int too_small = 0;
     int ls_active = ((pmr->hls && cdirRaw) || (pmr->lls && !cdirRaw)) ? 1 : 0;
     Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f diff=%f\n",
@@ -1106,7 +1102,7 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
             /* Same as (abs(npos - rpos) < 1) */
             too_small |= 2;
         }
-        if (ls_active || too_small)
+        if ((ls_active && pmr->mflg & MF_NO_TWEAK_ONLS) || too_small)
         {
             Debug(pmr,2, "doMoveDialPosition(%d) diff=%f spdb=%f mres=%f hls=%d lls=%d ls_active=%d too_small=%d moving-not-started\n",
                   lineNo, diff, spdb, pmr->mres,
@@ -2383,7 +2379,8 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
         rtnstat = TRUE;
 
     if (pmr->lvio || rtnstat == FALSE ||
-        (diff > 0.0 && pmr->hls) || (diff < 0.0 && pmr->lls))
+        ((pmr->mflg & MF_NO_TWEAK_ONLS) &&
+         ((diff > 0.0 && pmr->hls) || (diff < 0.0 && pmr->lls))))
     {
         pmr->val = pmr->priv->last.val;
         MARK(M_VAL);

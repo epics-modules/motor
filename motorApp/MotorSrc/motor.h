@@ -215,6 +215,7 @@ typedef union
 #define MF_ADJ_AFTER_HOMED (1<<4)
 #define MF_NTM_UPDATE      (1<<5)
 #define MF_NOT_HOMED_PROBLEM (1<<6)
+#define MF_NO_TWEAK_ONLS   (1<<7)
 
 
 #define EXT_MSG_TYPE_MOV_ABS 1
