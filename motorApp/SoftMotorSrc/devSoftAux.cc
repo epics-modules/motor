@@ -81,7 +81,7 @@ STATIC void soft_dinp(struct event_handler_args args)
 
 STATIC void soft_minp(struct event_handler_args args)
 {
-    soft_minp_func((struct motorRecord *) args.usr, *((short *) args.dbr));
+    soft_minp_func((struct motorRecord *) args.usr, *((long *) args.dbr));
 }
 
 

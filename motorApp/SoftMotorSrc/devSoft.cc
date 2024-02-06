@@ -254,7 +254,7 @@ void soft_dinp_func(struct motorRecord *mr, short newdinp)
     }
 }
 
-void soft_minp_func(struct motorRecord *mr, short newminp)
+void soft_minp_func(struct motorRecord *mr, long newminp)
 {
     msta_field status;
     unsigned int old_RA_DONE;

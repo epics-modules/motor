@@ -57,7 +57,7 @@ struct motor_node {
 extern long soft_init(int);
 extern long soft_init_record(void *);
 extern void soft_dinp_func(struct motorRecord *, short);
-extern void soft_minp_func(struct motorRecord *, short);
+extern void soft_minp_func(struct motorRecord *, long);
 extern void soft_rdbl_func(struct motorRecord *, double);
 extern void soft_rinp_func(struct motorRecord *, long);
 extern void soft_motor_callback(CALLBACK *);
