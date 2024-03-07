@@ -221,6 +221,7 @@ asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
   double autoPowerOnDelay = 0.0;
   getDoubleParam(axis, motorPowerOnDelay_, &autoPowerOnDelay);
   status = pAxis->setClosedLoop(true);
+  if (status) return status;
   pAxis->setWasMovingFlag(1);
   pAxis->setDisableFlag(0);
   if (autoPower == 1) {
@@ -365,27 +366,28 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   status = pAxis->setDoubleParam(function, value);
 
   if (function == motorMoveRel_) {
-    autoPowerOn(pAxis);
-    getDoubleParam(axis, motorVelBase_, &baseVelocity);
-    getDoubleParam(axis, motorVelocity_, &velocity);
-    getDoubleParam(axis, motorAccel_, &acceleration);
-    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_REL);
-    status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
+    if (autoPowerOn(pAxis) == asynSuccess) {
+      getDoubleParam(axis, motorVelBase_, &baseVelocity);
+      getDoubleParam(axis, motorVelocity_, &velocity);
+      getDoubleParam(axis, motorAccel_, &acceleration);
+      pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_REL);
+      status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
+    }
     pAxis->setIntegerParam(motorStatusDone_, 0);
     getIntegerParam(axis, motorWaitPollsBeforeReady_, &pAxis->waitNumPollsBeforeReady_);
     pAxis->callParamCallbacks();
     wakeupPoller();
-    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
-      "%s:%s: Set driver %s, axis %d move relative by %f, base velocity=%f, velocity=%f, acceleration=%f\n",
-      driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
-  
+    asynPrint(pasynUser, ASYN_TRACE_FLOW,
+              "%s:%s: Set driver %s, axis %d move relative by %f, base velocity=%f, velocity=%f, acceleration=%f\n",
+              driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
   } else if (function == motorMoveAbs_) {
-    autoPowerOn(pAxis);
-    getDoubleParam(axis, motorVelBase_, &baseVelocity);
-    getDoubleParam(axis, motorVelocity_, &velocity);
-    getDoubleParam(axis, motorAccel_, &acceleration);
-    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_ABS);
-    status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
+    if (autoPowerOn(pAxis) == asynSuccess) {
+      getDoubleParam(axis, motorVelBase_, &baseVelocity);
+      getDoubleParam(axis, motorVelocity_, &velocity);
+      getDoubleParam(axis, motorAccel_, &acceleration);
+      pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_ABS);
+      status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
+    }
     pAxis->setIntegerParam(motorStatusDone_, 0);
     getIntegerParam(axis, motorWaitPollsBeforeReady_, &pAxis->waitNumPollsBeforeReady_);
     pAxis->callParamCallbacks();
@@ -395,11 +397,12 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
 
   } else if (function == motorMoveVel_) {
-    autoPowerOn(pAxis);
-    getDoubleParam(axis, motorVelBase_, &baseVelocity);
-    getDoubleParam(axis, motorAccel_, &acceleration);
-    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_VEL);
-    status = pAxis->moveVelocity(baseVelocity, value, acceleration);
+    if (autoPowerOn(pAxis) == asynSuccess) {
+      getDoubleParam(axis, motorVelBase_, &baseVelocity);
+      getDoubleParam(axis, motorAccel_, &acceleration);
+      pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_MOVE_VEL);
+      status = pAxis->moveVelocity(baseVelocity, value, acceleration);
+    }
     pAxis->setIntegerParam(motorStatusDone_, 0);
     getIntegerParam(axis, motorWaitPollsBeforeReady_, &pAxis->waitNumPollsBeforeReady_);
     pAxis->callParamCallbacks();
@@ -410,13 +413,14 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   // Note, the motorHome command happens on the asynFloat64 interface, even though the value (direction) is really integer 
   } else if (function == motorHome_) {
-    autoPowerOn(pAxis);
-    getDoubleParam(axis, motorVelBase_, &baseVelocity);
-    getDoubleParam(axis, motorVelocity_, &velocity);
-    getDoubleParam(axis, motorAccel_, &acceleration);
-    forwards = (value == 0) ? 0 : 1;
-    pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_HOMING);
-    status = pAxis->home(baseVelocity, velocity, acceleration, forwards);
+    if (autoPowerOn(pAxis) == asynSuccess) {
+      getDoubleParam(axis, motorVelBase_, &baseVelocity);
+      getDoubleParam(axis, motorVelocity_, &velocity);
+      getDoubleParam(axis, motorAccel_, &acceleration);
+      forwards = (value == 0) ? 0 : 1;
+      pAxis->setIntegerParam(motorLatestCommand_, LATEST_COMMAND_HOMING);
+      status = pAxis->home(baseVelocity, velocity, acceleration, forwards);
+    }
     pAxis->setIntegerParam(motorStatusDone_, 0);
     getIntegerParam(axis, motorWaitPollsBeforeReady_, &pAxis->waitNumPollsBeforeReady_);
     pAxis->callParamCallbacks();
@@ -641,28 +645,30 @@ asynStatus asynMotorController::writeGenericPointer(asynUser *pasynUser, void *g
             pMotorExtMessage->vbas,
             pMotorExtMessage->vel,
             pMotorExtMessage->moveType);
-  autoPowerOn(pAxis);
-  switch (pMotorExtMessage->moveType) {
-    case MOVE_TYPE_ABS:
-    case MOVE_TYPE_REL:
-      /* fall through */
-      {
-        int relative = (pMotorExtMessage->moveType == MOVE_TYPE_REL);
-        pAxis->setIntegerParam(motorLatestCommand_,
-                               relative ? LATEST_COMMAND_MOVE_REL : LATEST_COMMAND_MOVE_ABS);
+  if (autoPowerOn(pAxis) == asynSuccess) {
+    switch (pMotorExtMessage->moveType) {
+      case MOVE_TYPE_ABS:
+      case MOVE_TYPE_REL:
+        /* fall through */
+        {
+          int relative = (pMotorExtMessage->moveType == MOVE_TYPE_REL);
+          pAxis->setIntegerParam(motorLatestCommand_,
+                                 relative ? LATEST_COMMAND_MOVE_REL : LATEST_COMMAND_MOVE_ABS);
 
-        status = pAxis->moveEGU(pMotorExtMessage->pos, pMotorExtMessage->mres, relative,
-                                pMotorExtMessage->vbas, pMotorExtMessage->vel,
-                                pMotorExtMessage->accEGU);
+          status = pAxis->moveEGU(pMotorExtMessage->pos, pMotorExtMessage->mres, relative,
+                                  pMotorExtMessage->vbas, pMotorExtMessage->vel,
+                                  pMotorExtMessage->accEGU);
+          break;
+        }
+        case MOVE_TYPE_VELO:
+          pAxis->setIntegerParam(motorLatestCommand_,LATEST_COMMAND_MOVE_VEL);
+          status = pAxis->moveVeloEGU(pMotorExtMessage->mres,
+                                      pMotorExtMessage->vbas, pMotorExtMessage->vel,
+                                      pMotorExtMessage->accEGU);
         break;
-      }
-      case MOVE_TYPE_VELO:
-        pAxis->setIntegerParam(motorLatestCommand_,LATEST_COMMAND_MOVE_VEL);
-        status = pAxis->moveVeloEGU(pMotorExtMessage->mres,
-                                    pMotorExtMessage->vbas, pMotorExtMessage->vel,
-                                    pMotorExtMessage->accEGU);
-      break;
+    }
   }
+  /* Need to run this code to have let DMOV blink once */
   pAxis->setIntegerParam(motorStatusDone_, 0);
   getIntegerParam(axis, motorWaitPollsBeforeReady_, &pAxis->waitNumPollsBeforeReady_);
   pAxis->callParamCallbacks();
