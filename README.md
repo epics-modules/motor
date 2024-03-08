@@ -8,6 +8,14 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.0.9-ESS, based on R7-2-2
+###  Bug fixes
+#### 2420d29d2: motorRecord: Reset JOGR/JOGF when LLS/HLS is active
+#### f3f8b3b27: motorRecord.cc: doBackLash may hung up when on LS
+###  Improvements
+#### 40537595b: Add MOTOR_FLAGS_NO_TWEAK_ON_LS
+#### 738314c57: asynMotorController: Do not move, when power on fails
+####  1c6e4884: motorRecord.cc: Suppress LVIO if not homed
 ## v7.0.8-ESS, based on R7-2-2 + latest master
 ###  Bug fixes
 #### 3358621ef: motorRecord: Do not do a retry when RA_PROBLEM is set
