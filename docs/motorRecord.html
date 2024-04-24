@@ -726,6 +726,13 @@ below.
     <td><br>
     </td>
   </tr>
+    <td><a href="#Fields_link">MINP</a></td>
+    <td>R/W</td>
+    <td>MSTA Input Link</td>
+    <td>INLINK</td>
+    <td><br>
+    </td>
+  </tr>
   <tr>
     <td><a href="#Fields_status">MDEL</a></td>
     <td>R/W</td>
@@ -2048,6 +2055,14 @@ below.
     field.</td>
   </tr>
   <tr>
+    <td>MINP</td>
+    <td>R/W</td>
+    <td>MSTA Input Link</td>
+    <td>INLINK</td>
+    <td>If Soft Channel device support is specified, the value specified by this 
+    link is used to set most bits of the MSTA field - all except the DONE bit, which comes through DINP</td>
+  </tr>
+  <tr>
     <td>RINP</td>
     <td>R/W</td>
     <td>RMP Input Link</td>
@@ -2065,11 +2080,11 @@ below.
   </tr>
   <TR nosave="">
     <TD colspan="5" nosave=""><H4>Soft Channel Device Driver</H4>
-      The Soft Channel database links (i.e., DINP, RINP and STOO) are only processed 
+      The Soft Channel database links (i.e., DINP, MINP, RINP and STOO) are only processed 
       when the Soft Channel device driver is selected.&nbsp; These links are ignored 
       when using any other Motor Record device driver. <BR>
       <BR>
-      The input links (i.e., DINP, RDBL and RINP) are monitored for value changes by a 
+      The input links (i.e., DINP, MINP, RDBL and RINP) are monitored for value changes by a 
       CA event task.&nbsp; Users must choose either a dial input link (RDBL) or a raw 
       input link (RINP), but not both. At this time, the above links are <B>not</B> 
       dynamically retargetable.&nbsp; <BR>
