@@ -1079,33 +1079,45 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
     /* Use if encoder or ReadbackLink is in use. */
     bool use_rel = useRel(pmr);
     double vbase = pmr->vbas;
-    double diff = (position - pmr->drbv) * frac;
+    double diffDial = (position - pmr->drbv) * frac;
     double val, vel, accEGU;
-    val = use_rel ? diff : position;
-    int cdirRaw = diff > 0 ? 1 : 0;
+    val = use_rel ? diffDial : position;
+    int cdirDial = diffDial > 0 ? 1 : 0;
+    int hlsDial = 1, llsDial = 1; /* limit switch in dial coordinates */
+    /* We have all 3 coordinate systems here: User, Dial, Raw. limit switches are in User */
+    if (pmr->dir == motorDIR_Pos)
+    {
+        hlsDial = pmr->hls;
+        llsDial = pmr->lls;
+    }
+    else
+    {
+        hlsDial = pmr->lls;
+        llsDial = pmr->hls;
+    }
     int too_small = 0;
-    int ls_active = ((pmr->hls && cdirRaw) || (pmr->lls && !cdirRaw)) ? 1 : 0;
-    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f diff=%f\n",
+    int ls_active = ((hlsDial && cdirDial) || (llsDial && !cdirDial)) ? 1 : 0;
+    Debug(pmr,12, "doMoveDialPosition(%d) mode=%s position=%f frac=%f use_rel=%d val=%f diffDial=%f\n",
           lineNo,
           moveMode == moveModePosition ? "Position" : "Backlash",
-          position, frac, (int)use_rel, val, diff);
+          position, frac, (int)use_rel, val, diffDial);
     {
         double spdb = pmr->spdb;
-        double absdiff = fabs(diff);
+        double absdiffDial = fabs(diffDial);
         if (spdb > 0.0) /* When SPDB is defined, use it to make a decision */
         {
-            if (absdiff < spdb)
+            if (absdiffDial < spdb)
                 too_small |= 1;
         }
-        else if (absdiff < fabs(pmr->mres))
+        else if (absdiffDial < fabs(pmr->mres))
         {
             /* Same as (abs(npos - rpos) < 1) */
             too_small |= 2;
         }
         if ((ls_active && pmr->mflg & MF_NO_TWEAK_ONLS) || too_small)
         {
-            Debug(pmr,2, "doMoveDialPosition(%d) diff=%f spdb=%f mres=%f hls=%d lls=%d ls_active=%d too_small=%d moving-not-started\n",
-                  lineNo, diff, spdb, pmr->mres,
+            Debug(pmr,2, "doMoveDialPosition(%d) diffDial=%f spdb=%f mres=%f hls=%d lls=%d ls_active=%d too_small=%d moving-not-started\n",
+                  lineNo, diffDial, spdb, pmr->mres,
                   pmr->hls, pmr->lls,
                   ls_active, too_small);
             return false;
@@ -1124,7 +1136,8 @@ static bool doMoveDialPositionL(int lineNo, motorRecord *pmr, enum moveMode move
     default:
       vel = accEGU = 0.0;
     }
-    setCDIRfromRawMove(pmr, cdirRaw);
+    /* mres < 0 means invert direction dial <-> raw */
+    setCDIRfromRawMove(pmr, pmr->mres < 0.0 ? !cdirDial : cdirDial);
     devSupMoveDialEgu(pmr, vel, accEGU, val, use_rel);
     pmr->priv->last.commandedDval = position;
     return true;
@@ -2228,10 +2241,10 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     int dir = dir_positive ? 1 : -1;
     bool too_small;
     bool preferred_dir = true;
-    double diff = pmr->dval - pmr->drbv;
-    double relpos = diff;
+    double diffDial = pmr->dval - pmr->drbv;
+    double relpos = diffDial;
     double relbpos = ((pmr->dval - pmr->bdst) - pmr->drbv);
-    double absdiff = fabs(diff);
+    double absdiffDial = fabs(diffDial);
     long rtnstat;
 
 #ifdef DEBUG
@@ -2275,13 +2288,13 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
                 too_small = true;
             }
         }
-        else if (absdiff < fabs(pmr->mres))
+        else if (absdiffDial < fabs(pmr->mres))
         {
             /* Same as (abs(npos - rpos) < 1) */
             too_small = true;
         }
     }
-    else if (absdiff <= fabs(pmr->rdbd))
+    else if (absdiffDial <= fabs(pmr->rdbd))
         too_small = true;
 
     if (pmr->miss)
@@ -2344,7 +2357,7 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
 
     /* No backlash distance: always preferred */
     if (pmr->bdst) {
-        int newDir = diff > 0;
+        int newDir = diffDial > 0;
         if (newDir != (pmr->bdst > 0))
             preferred_dir = false;
     }
@@ -2378,28 +2391,48 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
     else
         rtnstat = TRUE;
 
-    if (pmr->lvio || rtnstat == FALSE ||
-        ((pmr->mflg & MF_NO_TWEAK_ONLS) &&
-         ((diff > 0.0 && pmr->hls) || (diff < 0.0 && pmr->lls))))
     {
-        pmr->val = pmr->priv->last.val;
-        MARK(M_VAL);
-        pmr->dval = pmr->priv->last.dval;
-        MARK(M_DVAL);
-        pmr->rval = pmr->priv->last.rval;
-        MARK(M_RVAL);
-        if ((pmr->mip & MIP_RETRY) != 0)
+        int abort_move = 0;
+        if (pmr->lvio || rtnstat == FALSE)
+            abort_move = 1;
+        else if (pmr->mflg & MF_NO_TWEAK_ONLS)
         {
-            MIP_SET_VAL(MIP_DONE);
-            MARK(M_MIP);
+            int dhls = pmr->hls;
+            int dlls = pmr->lls;
+            if (pmr->dir != motorDIR_Pos)
+            {
+                /* Need to swap high- and low- limit switch */
+                dhls = pmr->lls;
+                dlls = pmr->hls;
+            }
+            if ((diffDial > 0.0 && dhls) || (diffDial < 0.0 && dlls))
+                abort_move = 1;
         }
-        if (pmr->mip == MIP_DONE && pmr->dmov == FALSE)
+        if (abort_move)
         {
-            SET_DMOV_MARK(TRUE);
+            Debug(pmr,6, "doDVALchangedOrNOTdoneMoving: abort lvio=%d rtnstat=%d noTweakOnLS=%d pmr.dir=%d diffDial=%f hls=%d lls=%d\n",
+                  (int)pmr->lvio, (int)rtnstat,
+                  (pmr->mflg & MF_NO_TWEAK_ONLS) ? 1 : 0,
+                  pmr->dir,
+                  diffDial, pmr->hls, pmr->lls);
+            pmr->val = pmr->priv->last.val;
+            MARK(M_VAL);
+            pmr->dval = pmr->priv->last.dval;
+            MARK(M_DVAL);
+            pmr->rval = pmr->priv->last.rval;
+            MARK(M_RVAL);
+            if ((pmr->mip & MIP_RETRY) != 0)
+            {
+                MIP_SET_VAL(MIP_DONE);
+                MARK(M_MIP);
+            }
+            if (pmr->mip == MIP_DONE && pmr->dmov == FALSE)
+            {
+                SET_DMOV_MARK(TRUE);
+            }
+            return(OK);
         }
-        return(OK);
     }
-
     if (pmr->mip == MIP_DONE || pmr->mip == MIP_RETRY)
     {
         doRetryOrDone(pmr, preferred_dir, relpos, relbpos);
@@ -4802,7 +4835,7 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
         if (pmr->mflg & MF_DRIVER_USES_EGU)
         {
             /* We don't have any value in RMP */
-            pmr->drbv = pmr->priv->readBack.position;
+            pmr->drbv = devSupRawToDial(pmr, pmr->priv->readBack.position);
             pmr->rrbv = NINT(pmr->drbv / pmr->mres);
         }
         else
