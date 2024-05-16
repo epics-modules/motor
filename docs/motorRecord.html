@@ -2639,7 +2639,7 @@ below.
 	    HOME_ON_LS (Bit 0): HOMF is allowed when HLS is active (and HOMR on LLS).
 	  </li>
 	  <li>
-	    LS_RAMPDOWN (Bit 1): When the controller reports that a limit switch is hit, it doesn't mean that the motor yet fully stopped.
+	    LS_RAMPDOWN (Bit 1): When the controller reports that a limit switch is hit, it does not mean that the motor yet fully stopped.
 	  </li>
 	  <li>
 	    NO_STOP_ONLS (Bit 2): The motorRecord does not stop when a limit switch is hit - the controller must do it.
@@ -2652,6 +2652,12 @@ below.
 	  </li>
 	  <li>
 	    NTM_UPDATE (Bit 5): The driver supports NTM_UPDATE
+	  </li>
+	  <li>
+	    NOT_HOMED_PROBLEM (Bit 6): A not homed motor is put into alarm state
+	  </li>
+	  <li>
+	    NO_TWEAK_ONLS (Bit 7): When sitting on a limit switch, further tweaks are suppressed
 	  </li>
 	</ol>
       </blockquote>
