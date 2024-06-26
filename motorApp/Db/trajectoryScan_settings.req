@@ -1,4 +1,4 @@
-ed $(P)$(R)Nelements
+$(P)$(R)Nelements
 $(P)$(R)MoveMode
 $(P)$(R)Npulses
 $(P)$(R)StartPulses

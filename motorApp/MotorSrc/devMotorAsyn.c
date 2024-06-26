@@ -175,8 +175,15 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
        based on the record values. I think most of it should be transferred to init_record
        which is one reason why I have separated it into another routine */
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
-    epicsFloat64 eratio = pmr->mres / pmr->eres;
+    epicsFloat64 eratio;
     int status;
+
+    /* Don't let the encoder ratio be infinite */
+    if (pmr->eres == 0.0) {
+        eratio = 1.0;
+    } else {
+        eratio = pmr->mres / pmr->eres;
+    }
 
     /* Write encoder ratio to the driver.*/
     pPvt->pasynUserSyncFloat64->reason = pPvt->driverReasons[motorEncRatio];

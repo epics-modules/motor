@@ -10,6 +10,7 @@ configure/RELEASE_PATHS.local
 dbd/
 html/
 include/
+/iocsh/
 lib/
 templates/
 cdCommands

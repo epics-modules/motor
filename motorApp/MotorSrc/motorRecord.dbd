@@ -31,6 +31,11 @@ menu(motorDIR) {
         choice(motorDIR_Pos,"Pos")
         choice(motorDIR_Neg,"Neg")
 }
+menu(motorNTM) {
+        choice(motorNTM_NO,"NO")
+        choice(motorNTM_YES,"YES")
+        choice(motorNTM_UPDATE,"UPDATE")
+}
 menu(motorSET) {
         choice(motorSET_Use,"Use")
         choice(motorSET_Set,"Set")
@@ -68,25 +73,15 @@ menu(motorRMOD) {
         choice(motorRMOD_G,"Geometric")
         choice(motorRMOD_I,"In-Position")
 }
-
-menu(motorACCSused) {
-        choice(motorACCSused_Undef,"Undef")
-        choice(motorACCSused_Accl, "Accl")
-        choice(motorACCSused_Accs, "Accs")
-}
-
 menu(motorRSTM) {
         choice(motorRSTM_Never,       "Never")
         choice(motorRSTM_Always,      "Always")
         choice(motorRSTM_NearZero,    "NearZero")
         choice(motorRSTM_Conditional, "Conditional")
 }
-
-# NO and YES must have the same values as menuNO/YES
-menu(motorNTM) {
-        choice(motorNTM_NO,"NO")
-        choice(motorNTM_YES,"YES")
-        choice(motorNTM_UPDATE,"UPDATE")
+menu(motorACCU) {
+        choice(motorACCU_Accl, "Use ACCL")
+        choice(motorACCU_Accs, "Use ACCS")
 }
 
 include "menuOmsl.dbd"
@@ -161,12 +156,14 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)	# get_graphic_double, get_control_double
         }
         field(VMAX,DBF_DOUBLE) {
                 prompt("Max. Velocity (EGU/s)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
+                prop(YES)	# get_graphic_double, get_control_double
         }
         field(S,DBF_DOUBLE) {
                 prompt("Speed (revolutions/sec)")
@@ -200,9 +197,10 @@ recordtype(motor) {
                 interest(1)
         }
         field(ACCU,DBF_MENU) {
-                prompt("ACCS used")
-                special(SPC_NOMOD)
-                menu(motorACCSused)
+                prompt("Acceleration used")
+                special(SPC_MOD)
+                menu(motorACCU)
+                initial("0")
         }
         field(BDST,DBF_DOUBLE) {
                 prompt("BL Distance (EGU)")
@@ -293,6 +291,7 @@ recordtype(motor) {
                 special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
+                prop(YES)	# get_graphic_double, get_control_double
         }
         field(ERES,DBF_DOUBLE) {
                 prompt("Encoder Step Size (EGU)")
@@ -326,34 +325,52 @@ recordtype(motor) {
                 prompt("Display Precision")
                 promptgroup(GUI_COMMON)
                 interest(1)
+                prop(YES)	# get_precision
         }
         field(EGU,DBF_STRING) {
                 prompt("Engineering Units")
                 promptgroup(GUI_COMMON)
                 interest(1)
                 size(16)
+                prop(YES)	# get_units
+        }
+        field(RHLM,DBF_DOUBLE) {
+                prompt("Raw High Limit")
+                promptgroup(GUI_COMMON)
+                special(SPC_NOMOD)
+                interest(1)
+        }
+        field(RLLM,DBF_DOUBLE) {
+                prompt("Raw Low Limit")
+                promptgroup(GUI_COMMON)
+                special(SPC_NOMOD)
+                interest(1)
         }
         field(HLM,DBF_DOUBLE) {
                 prompt("User High Limit")
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)	# get_graphic_double, get_control_double
         }
         field(LLM,DBF_DOUBLE) {
                 prompt("User Low Limit")
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)	# get_graphic_double, get_control_double
         }
         field(DHLM,DBF_DOUBLE) {
                 prompt("Dial High Limit")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)	# get_graphic_double, get_control_double
         }
         field(DLLM,DBF_DOUBLE) {
                 prompt("Dial Low Limit")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 pp(TRUE)
+                prop(YES)	# get_graphic_double, get_control_double
         }
         field(HOPR,DBF_DOUBLE) {
                 prompt("High Operating Range")
@@ -386,24 +403,28 @@ recordtype(motor) {
                 promptgroup(GUI_COMMON)
                 pp(TRUE)
                 interest(2)
+                prop(YES)	# get_alarm_double
         }
         field(LOLO,DBF_DOUBLE) {
                 prompt("Lolo Alarm Limit (EGU)")
                 promptgroup(GUI_COMMON)
                 pp(TRUE)
                 interest(2)
+                prop(YES)	# get_alarm_double
         }
         field(HIGH,DBF_DOUBLE) {
                 prompt("High Alarm Limit (EGU)")
                 promptgroup(GUI_COMMON)
                 pp(TRUE)
                 interest(2)
+                prop(YES)	# get_alarm_double
         }
         field(LOW,DBF_DOUBLE) {
                 prompt("Low Alarm Limit (EGU)")
                 promptgroup(GUI_COMMON)
                 pp(TRUE)
                 interest(2)
+                prop(YES)	# get_alarm_double
         }
         field(HHSV,DBF_MENU) {
                 prompt("Hihi Severity")
@@ -478,7 +499,6 @@ recordtype(motor) {
         field(SPMG,DBF_MENU) {
                 asl(ASL0)
                 prompt("Stop/Pause/Move/Go")
-                special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
                 menu(motorSPMG)

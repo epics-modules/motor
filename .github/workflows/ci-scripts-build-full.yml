@@ -26,6 +26,7 @@ jobs:
     env:
       CMP: ${{ matrix.cmp }}
       BCFG: ${{ matrix.configuration }}
+      BASE: ${{ matrix.base }}
       WINE: ${{ matrix.wine }}
       RTEMS: ${{ matrix.rtems }}
       RTEMS_TARGET: ${{ matrix.rtems_target }}

@@ -190,9 +190,11 @@ USAGE...        Motor Record Support.
  * .76 04-04-18 rls - If URIP is Yes and RDBL is inaccessible (e.g., CA server is down), do not start
  *                    a new target position move (sans Home search or Jog). 
  * .78 08-21-18 kmp - Reverted .69 stop on RA_PROBLEM true.
+ * .79 21-11-22 jrh - Added raw limits, sync limits on motor resolution change
  */                                                          
 
-#define VERSION 7.09
+/* ess version. both R7-2-2 and R7-3 are upstream */
+#define VERSION 7.23
 
 #include    <stdlib.h>
 #include    <string.h>
@@ -248,8 +250,7 @@ static void process_motor_info(motorRecord *, bool);
 static void load_pos_new_rval(motorRecord *);
 static void load_pos_new_softlimits(motorRecord *);
 static void load_pos_load_pos(motorRecord *);
-static void check_resolution(motorRecord *);
-static void check_speed(motorRecord *);
+static void check_speed_and_resolution(motorRecord *);
 static void set_dial_highlimit(motorRecord *);
 static void set_dial_lowlimit(motorRecord *);
 static void set_user_highlimit(motorRecord *);
@@ -376,6 +377,8 @@ typedef union
         unsigned int M_HOMF     :1;
         unsigned int M_HOMR     :1;
         unsigned int M_CDIR     :1;
+        unsigned int M_RHLM     :1;
+        unsigned int M_RLLM     :1;
     } Bits;
 } nmap_field;
 
@@ -648,7 +651,7 @@ static double accEGUfromVelo(motorRecord *pmr, double veloEGU)
     double vmax = fabs(veloEGU);
     double acc;
     /* ACCL or ACCS */
-    if (pmr->accu == motorACCSused_Accs)
+    if (pmr->accu == motorACCU_Accs)
         acc = pmr->accs;
     else if (vmax > vmin)
         acc = (vmax - vmin) / pmr->accl;
@@ -660,14 +663,9 @@ static double accEGUfromVelo(motorRecord *pmr, double veloEGU)
 
 static void updateACCLfromACCS(motorRecord *pmr)
 {
-    if (pmr->accu != motorACCSused_Accs)
-    {
-        pmr->accu = motorACCSused_Accs;
-        db_post_events(pmr, &pmr->accu, DBE_VAL_LOG);
-    }
     if (pmr->accs > 0.0)
     {
-        double temp_dbl = pmr->velo / pmr->accs;
+        double temp_dbl = (pmr->velo > pmr->vbas) ? (pmr->velo - pmr->vbas) / pmr->accs : pmr->velo / pmr->accs;
         if (pmr->accl != temp_dbl)
         {
             pmr->accl = temp_dbl;
@@ -679,12 +677,7 @@ static void updateACCLfromACCS(motorRecord *pmr)
 static void updateACCSfromACCL(motorRecord *pmr)
 {
     double temp_dbl;
-    if (pmr->accu != motorACCSused_Accl)
-    {
-        pmr->accu = motorACCSused_Accl;
-        db_post_events(pmr, &pmr->accu, DBE_VAL_LOG);
-    }
-    temp_dbl = pmr->velo / pmr->accl;
+    temp_dbl = (pmr->velo > pmr->vbas) ? (pmr->velo - pmr->vbas) / pmr->accl : pmr->velo / pmr->accl;
     if (pmr->accs != temp_dbl)
     {
         pmr->accs = temp_dbl;
@@ -694,11 +687,11 @@ static void updateACCSfromACCL(motorRecord *pmr)
 
 static void updateACCL_ACCSfromVELO(motorRecord *pmr)
 {
-    if (pmr->accu == motorACCSused_Accs)
+    if (pmr->accu == motorACCU_Accs)
     {
         if (pmr->accs > 0.0)
         {
-            double temp_dbl = pmr->velo / pmr->accs;
+            double temp_dbl = (pmr->velo > pmr->vbas) ? (pmr->velo - pmr->vbas) / pmr->accs : pmr->velo / pmr->accs;
             if (pmr->accl != temp_dbl)
             {
                 pmr->accl = temp_dbl;
@@ -708,7 +701,7 @@ static void updateACCL_ACCSfromVELO(motorRecord *pmr)
     }
     else
     {
-        double temp_dbl = pmr->velo / pmr->accl;
+        double temp_dbl = (pmr->velo > pmr->vbas) ? (pmr->velo - pmr->vbas) / pmr->accl : pmr->velo / pmr->accl;
         if (pmr->accs != temp_dbl)
         {
             pmr->accs = temp_dbl;
@@ -811,7 +804,7 @@ static long init_re_init(motorRecord *pmr)
 {
     Debug(pmr,3, "init_re_init start neverPolled=%d stat=%d nsta=%d\n",
            pmr->priv->neverPolled, pmr->stat, pmr->nsta);
-    check_speed(pmr);
+    check_speed_and_resolution(pmr);
     enforceMinRetryDeadband(pmr);
     process_motor_info(pmr, true);
 
@@ -912,7 +905,7 @@ static long init_record(dbCommon* arg, int pass)
      * Reconcile two different ways of specifying speed and resolution; make
      * sure things are sane.
      */
-    check_resolution(pmr);
+    check_speed_and_resolution(pmr);
     /* Now MRES should be != 0.0. Sanitize ERES, if needed */
     if (pmr->eres == 0.0)
     {
@@ -3297,6 +3290,7 @@ static long special(DBADDR *paddr, int after)
             pmr->sbas = temp_dbl;
             db_post_events(pmr, &pmr->sbas, DBE_VAL_LOG);
         }
+        updateACCL_ACCSfromVELO(pmr);
         break;
 
         /* new sbas: make vbas agree */
@@ -3312,10 +3306,17 @@ static long special(DBADDR *paddr, int after)
             pmr->vbas = temp_dbl;
             db_post_events(pmr, &pmr->vbas, DBE_VAL_LOG);
         }
+        updateACCL_ACCSfromVELO(pmr);
         break;
 
         /* new vmax: check against controller value and make smax agree */
     case motorRecordVMAX:
+        if (pmr->vmax < 0.0)
+        {
+            pmr->vmax = 0.0;
+            db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
+        }
+
         if ((pmr->urev != 0.0) && (pmr->smax != (temp_dbl = pmr->vmax / fabs_urev)))
         {
             pmr->smax = temp_dbl;
@@ -3386,6 +3387,12 @@ static long special(DBADDR *paddr, int after)
 
         /* new accl */
     case motorRecordACCL:
+        /* ESS special: When a user writes to ACCL, it shoud be used */
+        if (pmr->accu != motorACCU_Accl)
+        {
+            pmr->accu = motorACCU_Accl;
+            db_post_events(pmr, &pmr->accu, DBE_VAL_LOG);
+        }
         if (pmr->accl <= 0.0)
         {
             pmr->accl = 0.1;
@@ -3396,7 +3403,17 @@ static long special(DBADDR *paddr, int after)
 
         /* new accs */
     case motorRecordACCS:
-        db_post_events(pmr, &pmr->accs, DBE_VAL_LOG);
+        /* ESS special: When a user writes to ACCS, it shoud be used */
+        if (pmr->accu != motorACCU_Accs)
+        {
+            pmr->accu = motorACCU_Accs;
+            db_post_events(pmr, &pmr->accu, DBE_VAL_LOG);
+        }
+        if (pmr->accs <= 0.0)
+        {
+            updateACCSfromACCL(pmr);
+        }
+        //db_post_events(pmr, &pmr->accs, DBE_VAL_LOG);
         updateACCLfromACCS(pmr);
         break;
 
@@ -3499,6 +3516,8 @@ static long special(DBADDR *paddr, int after)
         }
         goto velcheckB;
 
+        /* new urev: make mres agree, and change (velo,bvel,vbas) to leave */
+        /* (s,sbak,sbas) constant */
 
     case motorRecordUREV:
         if (pmr->mres != (temp_dbl = pmr->urev / pmr->srev))
@@ -3557,6 +3576,40 @@ velcheckB:
                 pmr->vmax = temp_dbl;
                 db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
             }
+            /* We may have new MRES */
+            if (pmr->mres > 0)
+            {
+                if (pmr->dllm != (temp_dbl = devSupRawToDial(pmr, pmr->rllm)))
+                {
+                    pmr->dllm = temp_dbl;
+                    db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
+                }
+                if (pmr->dhlm != (temp_dbl = devSupRawToDial(pmr, pmr->rhlm)))
+                {
+                    pmr->dhlm = temp_dbl;
+                    db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
+                }
+            }
+            else
+            {
+                // MRES < 0 swaps DHLM DLLM
+                if (pmr->dhlm != (temp_dbl = devSupRawToDial(pmr, pmr->rllm)))
+                {
+                    pmr->dhlm = temp_dbl;
+                    db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
+                }
+                if (pmr->dllm != (temp_dbl = devSupRawToDial(pmr, pmr->rhlm)))
+                {
+                    pmr->dllm = temp_dbl;
+                    db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
+                }
+                // done below set_userlimits(pmr);
+                // done below db_post_events(pmr, &pmr->hlm, DBE_VAL_LOG);
+                // done below db_post_events(pmr, &pmr->llm, DBE_VAL_LOG);
+            }
+            set_userlimits(pmr);
+            db_post_events(pmr, &pmr->hlm, DBE_VAL_LOG);
+            db_post_events(pmr, &pmr->llm, DBE_VAL_LOG);
         }
         break;
 
@@ -4288,6 +4341,10 @@ static void monitor(motorRecord * pmr)
         db_post_events(pmr, &pmr->homf, local_mask);
     if ((local_mask = monitor_mask | (MARKED_AUX(M_HOMR) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->homr, local_mask);
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_RHLM) ? DBE_VAL_LOG : 0)))
+        db_post_events(pmr, &pmr->rhlm, local_mask);
+    if ((local_mask = monitor_mask | (MARKED_AUX(M_RLLM) ? DBE_VAL_LOG : 0)))
+        db_post_events(pmr, &pmr->rllm, local_mask);
     if ((local_mask = monitor_mask | (MARKED_AUX(M_CDIR) ? DBE_VAL_LOG : 0)))
         db_post_events(pmr, &pmr->cdir, local_mask);
 
@@ -4437,17 +4494,85 @@ static void load_pos_load_pos(motorRecord * pmr)
 }
 
 /*
- * FUNCTION... static void check_resolution(motorRecord *)
+ * FUNCTION... static void check_speed_and_resolution(motorRecord *)
  *
  * INPUT ARGUMENTS...
  *      1 - motor record pointer
  *
  * RETRUN ARGUMENTS... None.
  *
+ * LOGIC...
+ *
+ *  IF SREV negative.
+ *      Set SREV <- 200.
+ *  ENDIF
+ *  IF UREV nonzero.
+ *      Set MRES < - |UREV| / SREV.
+ *  ENDIF
+ *  IF MRES zero.
+ *      Set MRES <- 1.0
+ *  ENDIF
+ *  IF UREV does not match MRES.
+ *      Set UREV <- MRES * SREV.
+ *  ENDIF
+ *
+ *  IF SMAX > 0.
+ *      Set VMAX <- SMAX * |UREV|.
+ *  ELSE IF VMAX > 0.
+ *      Set SMAX <- VMAX / |UREV|.
+ *  ELSE
+ *      Set both SMAX and VMAX to zero.
+ *  ENDIF
+ *
+ *  IF SBAS is nonzero.
+ *      Range check; 0 < SBAS < SMAX.
+ *      Set VBAS <- SBAS * |UREV|.
+ *  ELSE
+ *      Range check; 0 < VBAS < VMAX.
+ *      Set SBAS <- VBAS / |UREV|.
+ *  ENDIF
+ *
+ *  IF S is nonzero.
+ *      Range check; SBAS < S < SMAX.
+ *      VELO <- S * |UREV|.
+ *  ELSE
+ *      Range check; VBAS < VELO < VMAX.
+ *      S < - VELO / |UREV|.
+ *  ENDIF
+ * 
+ *  IF RLLM is nonzero.
+ *      DLLM < - RLLM * MRES.
+ *  ENDIF
+ *  IF RLLM is not DLLM / MRES.
+ *      RLLM < - DLLM / MRES.
+ *  ENDIF
+ * 
+ *  IF RHLM is nonzero.
+ *      DHLM < - RHLM * MRES.
+ *  ENDIF
+ *  IF RHLM is not DHLM / MRES.
+ *      RHLM < - DHLM / MRES.
+ *  ENDIF
+ *
+ *  IF SBAK is nonzero.
+ *      Range check; SBAS < SBAK < SMAX.
+ *      BVEL <- SBAK * |UREV|.
+ *  ELSE
+ *      Range check; VBAS < BVEL < VMAX.
+ *      SBAK <- BVEL / |UREV|.
+ *  ENDIF
+ *
+ *  IF ACCL or BACC is zero.
+ *      Set ACCL/BACC to 0.1
+ *  ENDIF
+ *
+ *  NORMAL RETURN.
  */
 
-static void check_resolution(motorRecord * pmr)
+static void check_speed_and_resolution(motorRecord * pmr)
 {
+    double fabs_urev = fabs(pmr->urev);
+
     /*
      * Reconcile two different ways of specifying speed, resolution, and make
      * sure things are sane.
@@ -4474,22 +4599,9 @@ static void check_resolution(motorRecord * pmr)
     if (pmr->urev != pmr->mres * pmr->srev)
     {
         pmr->urev = pmr->mres * pmr->srev;
+        fabs_urev = fabs(pmr->urev);    /* Update local |UREV|. */
         MARK_AUX(M_UREV);
     }
-}
-
-/*
- * FUNCTION... static void check_resolution(motorRecord *)
- *
- * INPUT ARGUMENTS...
- *      1 - motor record pointer
- *
- *  NORMAL RETURN.
- */
-
-static void check_speed(motorRecord * pmr)
-{
-    double fabs_urev = fabs(pmr->urev);
 
     /* SMAX (revolutions/sec) <--> VMAX (EGU/sec) */
     if (pmr->smax > 0.0)
@@ -4498,8 +4610,6 @@ static void check_speed(motorRecord * pmr)
         pmr->smax = pmr->vmax / fabs_urev;
     else
         pmr->smax = pmr->vmax = 0.0;
-
-    pmr->smax = pmr->vmax / fabs_urev;
     db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->smax, DBE_VAL_LOG);
 
@@ -4531,6 +4641,57 @@ static void check_speed(motorRecord * pmr)
     db_post_events(pmr, &pmr->velo, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->s, DBE_VAL_LOG);
 
+    if (pmr->mres > 0)
+    {
+        /* RLLM <--> DLLM */
+        if (pmr->rllm != 0.0)
+        {
+            pmr->dllm = devSupRawToDial(pmr, pmr->rllm);
+            MARK(M_DLLM);
+        }
+        if (pmr->rllm != devSupDialToRaw(pmr, pmr->dllm))
+        {
+            pmr->rllm = devSupDialToRaw(pmr, pmr->dllm);
+            MARK_AUX(M_RLLM);
+        }
+        /* RHLM <--> DHLM */
+        if (pmr->rhlm != 0.0)
+        {
+            pmr->dhlm = devSupRawToDial(pmr, pmr->rhlm);
+            MARK(M_DHLM);
+        }
+        if (pmr->rhlm != devSupDialToRaw(pmr, pmr->dhlm))
+        {
+            pmr->rhlm = devSupDialToRaw(pmr, pmr->dhlm);
+            MARK_AUX(M_RHLM);
+        }
+    }
+    else
+    {
+        /* RLLM <--> DHLM */
+        if (pmr->rllm != 0.0)
+        {
+            pmr->dhlm = pmr->rllm * fabs(pmr->mres);
+            MARK(M_DHLM);
+        }
+        if (pmr->rllm != pmr->dhlm / fabs(pmr->mres))
+        {
+            pmr->rllm = pmr->dhlm / fabs(pmr->mres);
+            MARK_AUX(M_RLLM);
+        }
+        /* RHLM <--> DLLM */
+        if (pmr->rhlm != 0.0)
+        {
+            pmr->dllm = pmr->rhlm * fabs(pmr->mres);
+            MARK(M_DLLM);
+        }
+        if (pmr->rhlm != pmr->dllm / fabs(pmr->mres))
+        {
+            pmr->rhlm = pmr->dllm / fabs(pmr->mres);
+            MARK_AUX(M_RHLM);
+        }
+    }
+
     /* SBAK (revolutions/sec) <--> BVEL (EGU/sec) */
     if (pmr->sbak != 0.0)
     {
@@ -4545,20 +4706,22 @@ static void check_speed(motorRecord * pmr)
     db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
     db_post_events(pmr, &pmr->bvel, DBE_VAL_LOG);
 
-    if (pmr->accs && !pmr->accl)
+    /* ACCS (EGU/sec^2) <--> ACCL (sec) */
+    if (pmr->accs > 0.0)
     {
-        /* ACCL == 0.0, ACCS is != 0.0 -> Use ACCS
-           This is a (possible) new way to configure a database.
-           Existing Db files will have ACCS == 0.0 and this
-           is backwards compatibleamd  behaves as before */
         updateACCLfromACCS(pmr);
     }
-    /* Sanity check on acceleration time. */
-    if (pmr->accl == 0.0)
+    else
     {
-        pmr->accl = 0.1;
-        db_post_events(pmr, &pmr->accl, DBE_VAL_LOG);
+        /* Sanity check on acceleration time. */
+        if (pmr->accl == 0.0)
+        {
+            pmr->accl = 0.1;
+            db_post_events(pmr, &pmr->accl, DBE_VAL_LOG);
+        }
+        updateACCSfromACCL(pmr);
     }
+    /* Sanity check on backlash acceleration time. */
     if (pmr->bacc == 0.0)
     {
         pmr->bacc = 0.1;
@@ -4566,73 +4729,26 @@ static void check_speed(motorRecord * pmr)
     }
     /* Sanity check on jog velocity and acceleration rate. */
     if (pmr->jvel == 0.0)
-    {
         pmr->jvel = pmr->velo;
-    }
     else
         range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
 
     if (pmr->jar == 0.0)
-    {
         pmr->jar = pmr->velo / pmr->accl;
-    }
 
     /* Sanity check on home velocity. */
     if (pmr->hvel == 0.0)
         pmr->hvel = pmr->vbas;
     else
         range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
-    /* Make sure that ACCS/ACCU are initialized */
-    if (pmr->accu == motorACCSused_Undef)
-    {
-        updateACCSfromACCL(pmr);
-    }
 }
 
 /*
-FUNCTION... void set_dial_highlimit(motorRecord *)
-USAGE... Set dial-coordinate high limit.
-NOTES... This function sends a command to the device to set the raw dial high
-limit.  This is done so that a device level function may do an error check on
-the validity of the limit.  This is to support those devices (e.g., MM4000)
-that have their own, read-only, travel limits.
+FUNCTION... void set_user_highlimit(motorRecord *)
+USAGE... Set user high limit.
+NOTES... This function sends a command to the device to set the user high
+limit.  This is respective to the direction of the motor.
 */
-static void set_dial_highlimit(motorRecord *pmr)
-{
-    int dir_positive = (pmr->dir == motorDIR_Pos);
-    motor_cmnd command;
-
-    if (pmr->mres < 0) {
-        command = SET_LOW_LIMIT;
-    } else {
-        command = SET_HIGH_LIMIT;
-    }
-    if (pmr->priv->softLimitRO.motorDialLimitsValid)
-    {
-        double softLimitRO = pmr->priv->softLimitRO.motorDialHighLimitRO;
-        Debug(pmr,3, "pmr->dhlm=%g softLimitRO=%g\n", pmr->dhlm, softLimitRO);
-        if ((pmr->dhlm > softLimitRO) || !softLimitsDefined(pmr))
-        {
-            pmr->dhlm = softLimitRO;
-        }
-    }
-    devSupUpdateLimitFromDial(pmr, command, pmr->dhlm);
-    if (dir_positive)
-    {
-        pmr->hlm = pmr->dhlm + pmr->off;
-        MARK(M_HLM);
-    }
-    else
-    {
-        pmr->llm = -(pmr->dhlm) + pmr->off;
-        MARK(M_LLM);
-    }
-    MARK(M_DHLM);
-    recalcLVIO(pmr);
-}
-
-
-
 static void set_user_highlimit(motorRecord *pmr)
 {
     double offset = pmr->off;
@@ -4649,6 +4765,82 @@ static void set_user_highlimit(motorRecord *pmr)
     MARK(M_HLM);
 }
 
+/*
+FUNCTION... void set_user_lowlimit(motorRecord *)
+USAGE... Set user low limit.
+NOTES... This function sends a command to the device to set the user low
+limit.  This is respective to the direction of the motor.
+*/
+static void set_user_lowlimit(motorRecord *pmr)
+{
+    double offset = pmr->off;
+    if (pmr->dir == motorDIR_Pos)
+    {
+        pmr->dllm = pmr->llm - offset;
+        set_dial_lowlimit(pmr);
+    }
+    else
+    {
+        pmr->dhlm = -(pmr->llm) + offset;
+        set_dial_highlimit(pmr);
+    }
+    MARK(M_LLM);
+}
+
+
+/*
+FUNCTION... void set_dial_highlimit(motorRecord *)
+USAGE... Set dial-coordinate high limit.
+NOTES... This function sends a command to the device to set the raw dial high
+limit.  This is done so that a device level function may do an error check on
+the validity of the limit.  This is to support those devices (e.g., MM4000)
+that have their own, read-only, travel limits.
+*/
+static void set_dial_highlimit(motorRecord *pmr)
+{
+    int dir_positive = (pmr->dir == motorDIR_Pos);
+    double tmp_raw;
+    motor_cmnd command;
+
+    if (pmr->mres < 0) {
+        command = SET_LOW_LIMIT;
+    } else {
+        command = SET_HIGH_LIMIT;
+    }
+    if (pmr->priv->softLimitRO.motorDialLimitsValid)
+    {
+        double softLimitRO = pmr->priv->softLimitRO.motorDialHighLimitRO;
+        Debug(pmr,3, "pmr->dhlm=%g softLimitRO=%g\n", pmr->dhlm, softLimitRO);
+        if ((pmr->dhlm > softLimitRO) || !softLimitsDefined(pmr))
+        {
+            pmr->dhlm = softLimitRO;
+        }
+    }
+    tmp_raw = devSupDialToRaw(pmr, pmr->dhlm);
+    devSupUpdateLimitFromDial(pmr, command, pmr->dhlm);
+    if (dir_positive)
+    {
+        pmr->hlm = pmr->dhlm + pmr->off;
+        MARK(M_HLM);
+    }
+    else
+    {
+        pmr->llm = -(pmr->dhlm) + pmr->off;
+        MARK(M_LLM);
+    }
+    if (command == SET_HIGH_LIMIT)
+    {
+        pmr->rhlm = tmp_raw;
+        MARK_AUX(M_RHLM);
+    }
+    else
+    {
+        pmr->rllm = tmp_raw;
+        MARK_AUX(M_RLLM);
+    }
+    MARK(M_DHLM);
+    recalcLVIO(pmr);
+}
 
 /*
 FUNCTION... void set_dial_lowlimit(motorRecord *)
@@ -4661,6 +4853,7 @@ that have their own, read-only, travel limits.
 static void set_dial_lowlimit(motorRecord *pmr)
 {
     int dir_positive = (pmr->dir == motorDIR_Pos);
+    double tmp_raw;
     motor_cmnd command;
 
     if (pmr->mres < 0) {
@@ -4677,6 +4870,7 @@ static void set_dial_lowlimit(motorRecord *pmr)
             pmr->dllm = softLimitRO;
         }
     }
+    tmp_raw = devSupDialToRaw(pmr, pmr->dllm);
     devSupUpdateLimitFromDial(pmr, command, pmr->dllm);
 
     if (dir_positive)
@@ -4689,25 +4883,20 @@ static void set_dial_lowlimit(motorRecord *pmr)
         pmr->hlm = -(pmr->dllm) + pmr->off;
         MARK(M_HLM);
     }
+    if (command == SET_HIGH_LIMIT)
+    {
+        pmr->rhlm = tmp_raw;
+        MARK_AUX(M_RHLM);
+    }
+    else
+    {
+        pmr->rllm = tmp_raw;
+        MARK_AUX(M_RLLM);
+    }
     MARK(M_DLLM);
     recalcLVIO(pmr);
 }
 
-static void set_user_lowlimit(motorRecord *pmr)
-{
-    double offset = pmr->off;
-    if (pmr->dir == motorDIR_Pos)
-    {
-        pmr->dllm = pmr->llm - offset;
-        set_dial_lowlimit(pmr);
-    }
-    else
-    {
-        pmr->dhlm = -(pmr->llm) + offset;
-        set_dial_highlimit(pmr);
-    }
-    MARK(M_LLM);
-}
 /*
 FUNCTION... void set_userlimits(motorRecord *)
 USAGE... Translate dial-coordinate limits to user-coordinate limits.

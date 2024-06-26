@@ -10,6 +10,7 @@ record(motor, "$(P)$(M)") {
   field(VELO, "$(VELO)")
   field(VBAS, "$(VBAS)")
   field(ACCL, "$(ACCL)")
+  field(ACCU, "$(ACCU=0)")
   field(BDST, "$(BDST)")
   field(BVEL, "$(BVEL)")
   field(BACC, "$(BACC)")

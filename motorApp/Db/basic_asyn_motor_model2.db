@@ -1,4 +1,4 @@
-grecord(motor,"$(P)$(M)")
+record(motor,"$(P)$(M)")
 {
 	field(DESC,"$(DESC)")
 	field(DTYP,"$(DTYP)")
@@ -10,7 +10,7 @@ grecord(motor,"$(P)$(M)")
 	field(BDST,"$(BDST)")
 	field(BVEL,"$(BVEL)")
 	field(BACC,"$(BACC)")
-	field(OUT,"#C$(C) S$(S) @")
+	field(OUT,"@asyn($(PORT),$(ADDR))")
 	field(MRES,"$(MRES)")
 	field(PREC,"$(PREC)")
 	field(EGU,"$(EGU)")
@@ -19,4 +19,3 @@ grecord(motor,"$(P)$(M)")
 	field(INIT,"$(INIT)")
 	field(TWV,"1")
 }
-

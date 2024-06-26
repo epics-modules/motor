@@ -1,5 +1,93 @@
 # Motor Releases
 
+## __R7-3-1 (2023-06-07)__
+R7-3-1 is a release based on the master branch.
+
+### Changes since R7-3
+
+#### Modifications to existing features
+* Commit [5eb994d](https://github.com/epics-modules/motor/commit/5eb994dc5e0f8a809382b300ad13f8c83e7da33b) from [Mark Rivers](https://github.com/MarkRivers): Added readController() functions to asynMotorController
+
+#### Driver submodules (and noteworthy changes)
+
+| Module           | Release | Changes |
+| ---------------- | ------- | ------- |
+| **motorAcsMotion** | [R2-2](https://github.com/epics-motor/motorAcsMotion/releases/tag/R2-2) | Improved homing and workaround for vxWorks build error |
+
+## __R7-3 (2023-05-23)__
+R7-3 is a release based on the master branch.  
+
+### Changes since R7-2-2
+
+#### New features
+* Commit [c764bd6](https://github.com/epics-modules/motor/commit/c764bd6426c3939bded75df2909b76d148c2f8c9): Added motorAcsMotion as a submodule
+* Pull request [#160](https://github.com/epics-modules/motor/pull/160) from [Torsten Bögershausen](https://github.com/tboegi): Added the Restore Mode (**RSTM**) field
+* Pull request [#163](https://github.com/epics-modules/motor/pull/163): Autosave the RSTM field and allow it to be specified when motor databases are loaded
+* Pull request [#197](https://github.com/epics-modules/motor/pull/197): Added model-2-specific databases to work around MOTOR_REC_{OFFSET,RESOLUTION,DIRECTION} errors at iocInit
+* Pull request [#193](https://github.com/epics-modules/motor/pull/193) from [Jack Harper](https://github.com/rerpha): Added raw limit (**RHLM**, **RLLM**) fields
+* Pull request [#202](https://github.com/epics-modules/motor/pull/202) and [#204](https://github.com/epics-modules/motor/pull/204): Added prop(YES) to fields in motorRecord.dbd that should generate DBE_PROPERTY callbacks
+* Pull request [#122](https://github.com/epics-modules/motor/pull/122) from [Torsten Bögershausen](https://github.com/tboegi): Addded Acceleration (**ACCS**) and Acceleration Used (**ACCU**) fields
+* Pull request [#203](https://github.com/epics-modules/motor/pull/203): Changed the Acceleration Used (ACCU) field from a readback to a control
+
+#### Modifications to existing features
+* Pull request [#180](https://github.com/epics-modules/motor/pull/180) from [Torsten Bögershausen](https://github.com/tboegi): Reset UEIP to 'No' if no encoder is present
+* Pull request [#193](https://github.com/epics-modules/motor/pull/193) from [Jack Harper](https://github.com/rerpha): Soft limits are synced on MRES changes
+
+#### Bug fixes
+* Pull request [#176](https://github.com/epics-modules/motor/pull/176) from [Torsten Bögershausen](https://github.com/tboegi): Added shareLib.h to motordrvCom.h for compatibility with base 7.0.4
+* Pull request [#182](https://github.com/epics-modules/motor/pull/182) from [Freddie Akeroyd](https://github.com/FreddieAkeroyd): Bug fix for negative backlash distance when relative moves are used 
+* Pull request [#167](https://github.com/epics-modules/motor/pull/167) from [Torsten Bögershausen](https://github.com/tboegi): devMotorAsyn: remove initEvent in init_record()
+* Commit [c3d6c6e](https://github.com/epics-modules/motor/commit/c3d6c6ee439e4d46fd2d4c2790091f7c76e31120) from [Mark Rivers](https://github.com/MarkRivers): Fixes for DTYP and EGU not displaying correctly in Phoebus
+* Pull request [#206](https://github.com/epics-modules/motor/pull/206) from [Torsten Bögershausen](https://github.com/tboegi): Bug fix for RHLM, RLLM when MRES is negative
+* Pull request [#186](https://github.com/epics-modules/motor/pull/186) from [justincslac](https://github.com/justincslac): Bug fix for .gitignore that caused the Db dir to be ignored on case-insensitive file systems
+* Commit [96509ca](https://github.com/epics-modules/motor/commit/96509caba2ea1995bfeca3a0e8f11e1f273d2e05) from [Keenan Lang](https://github.com/keenanlang): Added basic_asyn_motor_settings.req which allows autosaveBuild to work with basic_asyn_motor.db
+
+#### Documentation
+* Commit [382c832](https://github.com/epics-modules/motor/commit/382c8324e5176ce769a09302bf829beca5a9cbea) from [Mark Rivers](https://github.com/MarkRivers): Added "Model 3 EPICS Motor Driver Support" slides
+* Pull request [#190](https://github.com/epics-modules/motor/pull/190) from [Xiaoqiang Wang](https://github.com/xiaoqiangwang): Corrected field types in motorRecord.html
+
+#### Continuous Integration
+* Configured to build with GitHub Actions using ci-scripts v3.0.1
+
+#### Driver submodules (and noteworthy changes)
+
+All driver modules now use Github Actions for CI builds.
+
+| Module           | Release | Changes |
+| ---------------- | ------- | ------- |
+| **motorAcs**     | [R1-1-1](https://github.com/epics-motor/motorAcs/releases/tag/R1-1-1) |         |
+| **motorAcsMotion** | [R2-1](https://github.com/epics-motor/motorAcsMotion/releases/tag/R2-1) | Added as a motor submodule |
+| **motorAcsTech80** | [R1-0-2](https://github.com/epics-motor/motorAcsTech80/releases/tag/R1-0-2) |         |
+| **motorAerotech** | [R1-1-1](https://github.com/epics-motor/motorAerotech/releases/tag/R1-1-1) | Ensemble driver and doCommand.ab bug fixes |
+| **motorAMCI** | [R1-0-2](https://github.com/epics-motor/motorAMCI/releases/tag/R1-0-2) | Replaced printf calls with asynPrint calls in ANG1Driver.cpp |
+| **motorAttocube** | [R1-0-2](https://github.com/epics-motor/motorAttocube/releases/tag/R1-0-2) |         |
+| **motorDeltaTau** | [R1-0-2](https://github.com/epics-motor/motorDeltaTau/releases/tag/R1-0-2) |         |
+| **motorFaulhaber** | [R1-0-2](https://github.com/epics-motor/motorFaulhaber/releases/tag/R1-0-2) |         |
+| **motorHytec**   | [R1-0-3](https://github.com/epics-motor/motorHytec/releases/tag/R1-0-3) |         |
+| **motorIms**     | [R1-0-2](https://github.com/epics-motor/motorIms/releases/tag/R1-0-2) |         |
+| **motorKohzu**   | [R1-0-2](https://github.com/epics-motor/motorKohzu/releases/tag/R1-0-2) |         |
+| **motorMclennan** | [R1-1-1](https://github.com/epics-motor/motorMclennan/releases/tag/R1-1-1) |         |
+| **motorMicos**   | [R2-1](https://github.com/epics-motor/motorMicos/releases/tag/R2-1) | Added support for the SMC Taurus |
+| **motorMicroMo** | [R1-0-2](https://github.com/epics-motor/motorMicroMo/releases/tag/R1-0-2) |         |
+| **motorMicronix** | [R1-1](https://github.com/epics-motor/motorMicronix/releases/tag/R1-1) |         |
+| **motorMotorSim** | [R1-2](https://github.com/epics-motor/motorMotorSim/releases/tag/R1-2) | Added motorSim8x.iocsh. Multiple improvements to example IOC. |
+| **motorMXmotor** | [R1-0-2](https://github.com/epics-motor/motorMXmotor/releases/tag/R1-0-2) |         |
+| **motorNewFocus** | [R1-2-1](https://github.com/epics-motor/motorNewFocus/releases/tag/R1-2-1) | Improved example newfocus8742 configuration. iocsh files now installed. |
+| **motorNewport**  | [R1-2-1](https://github.com/epics-motor/motorNewport/releases/tag/R1-2-1) | Added support for the FCL200. ESP300 driver now supports UEIP=Yes. iocsh files now installed. |
+| **motorNPoint**  | [R1-1](https://github.com/epics-motor/motorNPoint/releases/tag/R1-1) |         |
+| **motorOms**     | [R1-2](https://github.com/epics-motor/motorOms/releases/tag/R1-2)  | Enabled non-VxWorks IOCs & epicsMutexTryLock bug fix |
+| **motorOmsAsyn** | [R1-0-3](https://github.com/epics-motor/motorOmsAsyn/releases/tag/R1-0-3) | Type fixes |
+| **motorOriel**   | [R1-0-2](https://github.com/epics-motor/motorOriel/releases/tag/R1-0-2) |         |
+| **motorParker**  | [R1-1-1](https://github.com/epics-motor/motorParker/releases/tag/R1-1-1) |         |
+| **motorPhytron** | [R1-2](https://github.com/epics-motor/motorPhytron/releases/tag/R1-2) | Added encoder options. Bug fixes for deceleration and homing to limts. |
+| **motorPI**      | [R1-1-1](https://github.com/epics-motor/motorPI/releases/tag/R1-1-1) | Added E-816 example configuration. iocsh files now installed. |
+| **motorPIGCS2**  | [R1-2](https://github.com/epics-motor/motorPIGCS2/releases/tag/R1-2) | Added support for E-518 & E-873.3QTU controllers. Added closed loop commands for the E-727. Bug fixes. |
+| **motorPiJena**  | [R1-0-2](https://github.com/epics-motor/motorPiJena/releases/tag/R1-0-2) |         |
+| **motorScriptMotor** | [R1-2](https://github.com/epics-motor/motorScriptMotor/releases/tag/R1-2) | Added Attocube AMC support |
+| **motorSmarAct** | [R2-0](https://github.com/epics-motor/motorSmarAct/releases/tag/R2-0) | Too many new features to list here; see [motorSmarAct release notes](https://github.com/epics-motor/motorSmarAct/releases/tag/R2-0) |
+| **motorSmartMotor** | [R1-0-2](https://github.com/epics-motor/motorSmartMotor/releases/tag/R1-0-2) |         |
+| **motorThorLabs** | [R1-0-2](https://github.com/epics-motor/motorThorLabs/releases/tag/R1-0-2) | Added support for Kinesis KDC101 and KST101 |
+
 ## __R7-2-2 (2021-02-02)__
 R7-2-2 is a release based on the R7-2-1-bugfix branch.  
 

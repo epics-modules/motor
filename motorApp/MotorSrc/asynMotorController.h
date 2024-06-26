@@ -409,6 +409,8 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   /* These are convenience functions for controllers that use asynOctet interfaces to the hardware */
   asynStatus writeController();
   asynStatus writeController(const char *output, double timeout);
+  asynStatus readController();
+  asynStatus readController(char *response, size_t maxResponseLen, size_t *responseLen, double timeout);
   asynStatus writeReadController();
   asynStatus writeReadController(const char *output, char *response, size_t maxResponseLen, size_t *responseLen, double timeout);
   asynUser *pasynUserController_;
