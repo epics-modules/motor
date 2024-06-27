@@ -8,6 +8,12 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.2.3-ESS, based on R7-3-1, see release notes from there
+###  Bug fixes
+#### ff7ad73fc:motorRecord.html: Document bit 6 and 7 of .MFLG field
+###  Improvements
+#### 2dc310171: (and some more commits) Add MINP for soft motors
+#### 2e89b5527: (and some more from upstream) ...add raw softlimts RLLM, RHLM needed when MRES changes
 ## v7.0.9-ESS, based on R7-2-2
 ###  Bug fixes
 #### 2420d29d2: motorRecord: Reset JOGR/JOGF when LLS/HLS is active
