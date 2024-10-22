@@ -246,7 +246,7 @@ static bool motor_fully_stopped_on_ls_activated(motorRecord *pmr, bool ls_active
 static RTN_STATUS do_work(motorRecord *, CALLBACK_VALUE);
 static void alarm_sub(motorRecord *);
 static void monitor(motorRecord *);
-static void process_motor_info(motorRecord *, bool);
+static long process_motor_info(motorRecord *, bool);
 static void load_pos_new_rval(motorRecord *);
 static void load_pos_new_softlimits(motorRecord *);
 static void load_pos_load_pos(motorRecord *);
@@ -802,11 +802,12 @@ LOGIC:
 
 static long init_re_init(motorRecord *pmr)
 {
+    long rtnstat;
     Debug(pmr,3, "init_re_init start neverPolled=%d stat=%d nsta=%d\n",
            pmr->priv->neverPolled, pmr->stat, pmr->nsta);
     check_speed_and_resolution(pmr);
     enforceMinRetryDeadband(pmr);
-    process_motor_info(pmr, true);
+    rtnstat = process_motor_info(pmr, true);
 
     /*
      * If we're in closed-loop mode, initializing the user- and dial-coordinate
@@ -1677,9 +1678,10 @@ static long process(dbCommon *arg)
         }
         if (pmr->priv->neverPolled)
         {
-            init_re_init(pmr);
-            Debug(pmr,3, "%s\n", "set pmr->priv->neverPolled=0");
-            pmr->priv->neverPolled = 0;
+            long rtnstat = init_re_init(pmr);
+            Debug(pmr,3, "set pmr->priv->neverPolled=0 rtnstat=%ld\n", rtnstat);
+            if (RTN_SUCCESS(rtnstat))
+                pmr->priv->neverPolled = 0;
         }
     }
     if ((process_reason == CALLBACK_DATA) || (pmr->mip & MIP_DELAY_ACK))
@@ -4355,7 +4357,7 @@ static void monitor(motorRecord * pmr)
 /******************************************************************************
         process_motor_info()
 *******************************************************************************/
-static void process_motor_info(motorRecord * pmr, bool initcall)
+static long process_motor_info(motorRecord * pmr, bool initcall)
 {
     double old_drbv = pmr->drbv;
     double old_rbv = pmr->rbv;
@@ -4440,6 +4442,7 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     MARK(M_DIFF);
     pmr->rdif = NINT(pmr->diff / pmr->mres);
     MARK(M_RDIF);
+    return status;
 }
 
 /* Calc and load new raw position into motor w/out moving it. */
