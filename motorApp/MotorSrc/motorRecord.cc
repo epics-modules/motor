@@ -4989,6 +4989,11 @@ static long readBackPosition(motorRecord *pmr, bool initcall)
                 pmr->drbv = pmr->rrbv * pmr->eres;
         }
     }
+    else if (pmr->urip == motorUEIP_Yes && initcall)
+    {
+        // need to wait, until all records and links are up
+        rtnstat = S_db_notInit;
+    }
     else if (pmr->urip == motorUEIP_Yes && initcall == false)
     {
         double rdblvalue;
