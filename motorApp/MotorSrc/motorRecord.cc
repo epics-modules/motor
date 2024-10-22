@@ -989,12 +989,16 @@ static long init_record(dbCommon* arg, int pass)
             reason_txt = "callbackdata";
             break;
     }
+    if (pmr->urip == motorUEIP_Yes)
+    {
+        pmr->priv->neverPolled = 1;
+    }
     Debug(pmr,3,
           "init_record process_reason=\"%s\""
           " dval=%f drbv=%f rdbd=%f spdb=%f"
-          " stat=%d msta=0x%x neverPolled=%d\n",
+          " stat=%d msta=0x%x urip=%d neverPolled=%d\n",
           reason_txt, pmr->dval, pmr->drbv, pmr->rdbd, pmr->spdb,
-          pmr->stat, pmr->msta, pmr->priv->neverPolled);
+          pmr->stat, pmr->msta, (int)pmr->urip, pmr->priv->neverPolled);
     return OK;
 }
 
