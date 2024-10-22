@@ -68,7 +68,7 @@ jobs:
             name: "3.15 Win VS2019, static"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - name: Automatic core dumper analysis
