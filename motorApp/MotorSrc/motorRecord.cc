@@ -537,9 +537,12 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
 #define SET_DMOV_MARK(value)                         \
   do {                                               \
     if (pmr->dmov != value)            {             \
-        Debug(pmr,2, "setDmov old=%d new=%d\n",      \
+        Debug(pmr,2, "setDmov MARK old=%d new=%d\n", \
               pmr->dmov, value);                     \
         pmr->dmov = value;                           \
+    } else {                                         \
+        Debug(pmr,2, "setDmov MARK value=%d\n",      \
+              value);                                \
     }                                                \
     MARK(M_DMOV);                                    \
   }                                                  \
@@ -548,9 +551,12 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
 #define SET_DMOV_UNMARK(value)                       \
   do {                                               \
     if (pmr->dmov != value)            {             \
-        Debug(pmr,2, "setDmov old=%d new=%d\n",      \
+        Debug(pmr,2,"setDmov UNMARK old=%d new=%d\n",\
               pmr->dmov, value);                     \
         pmr->dmov = value;                           \
+    } else {                                         \
+        Debug(pmr,2, "setDmov UNMARK value=%d\n",    \
+              value);                                \
     }                                                \
     UNMARK(M_DMOV);                                  \
   }                                                  \
@@ -1582,10 +1588,17 @@ static long process(dbCommon *arg)
     process_reason = (*pdset->update_values) (pmr);
 #ifdef DEBUG
     {
+      const char *reason_txt = "";
+      switch (process_reason) {
+        case NOTHING_DONE: reason_txt = "nothing done";  break;
+        case CALLBACK_DATA_SOFT_LIMITS: reason_txt = "callbackdata + soft limits"; break;
+        case CALLBACK_DATA: reason_txt = "callbackdata"; break;
+        default: reason_txt = "??"; break;
+      }
       char dbuf[MBLE];
       dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-      Debug(pmr,8, "process:---------------------- begin reason=%d mip=0x%0x(%s)\n",
-            (int)process_reason, pmr->mip, dbuf);
+      Debug(pmr,8, "process:---------------------- begin mip=0x%0x(%s) reason=%d,'%s'\n",
+            pmr->mip, dbuf, (int)process_reason, reason_txt);
     }
 #else
     Debug(pmr,8, "process:---------------------- begin reason=%d\n", (int)process_reason);
@@ -2971,6 +2984,10 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                       pmr->lvio, pmr->hls, pmr->lls);
 #endif
                 MIP_CLR_BIT(MIP_JOG_REQ);
+                /* blink DMOV and post a monitor */
+                pmr->dmov = FALSE;
+                db_post_events(pmr, &pmr->dmov, DBE_VAL_LOG);
+                SET_DMOV_MARK(TRUE);
                 if (pmr->jogf)
                 {
                    pmr->jogf = 0;
