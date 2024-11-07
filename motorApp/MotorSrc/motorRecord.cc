@@ -3664,7 +3664,7 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     if ((pmr->ueip == motorUEIP_Yes) && (!(msta.Bits.EA_PRESENT)))
     {
         pmr->ueip = motorUEIP_No;
-        db_post_events(pmr, &pmr->urip, DBE_VAL_LOG);
+        db_post_events(pmr, &pmr->ueip, DBE_VAL_LOG);
     }
     if (pmr->ueip == motorUEIP_Yes)
     {
