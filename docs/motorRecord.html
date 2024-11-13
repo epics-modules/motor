@@ -2875,11 +2875,18 @@ below.
     <td>R/W</td>
     <td>Enable control</td>
     <td>RECCHOICE</td>
-    <td>(0:"Disable", 1:"Enable")&nbsp; Enable/Disable closed-loop position control.&nbsp; 
-    This field is active only if the GAIN_SUPPORT bit in the MSTA is true.&nbsp; 
-    This field is set by both the user and device support.&nbsp; CNEN is set to <i>Disable</i> 
-    by device support when it detects a motion controller error; e.g. maximum 
-    following error exceeded.</td>
+    <td>This field is active only if the GAIN_SUPPORT bit in the MSTA is true.
+     The function of this field is depending on the motion controller.
+     This field is set by both the user and device support.
+    <li>
+     Some (older?) controllers can switch between open- and closed-loop. (0: open loop, 1: closed loop)
+    </li>
+    <li>
+     Some controllers use this field to enable torque control
+    </li>
+    <li>
+     Most modern controllers  use this field to enable/disable the motor (amplifier/driver)
+    </li>
   </tr>
   <tr valign="top">
     <td>PCOF</td>
