@@ -806,14 +806,14 @@ LOGIC:
 
 *******************************************************************************/
 
-static long init_re_init(motorRecord *pmr)
+static long init_re_init(motorRecord *pmr, bool initcall)
 {
     long rtnstat;
     Debug(pmr,3, "init_re_init start neverPolled=%d stat=%d nsta=%d\n",
            pmr->priv->neverPolled, pmr->stat, pmr->nsta);
     check_speed_and_resolution(pmr);
     enforceMinRetryDeadband(pmr);
-    rtnstat = process_motor_info(pmr, true);
+    rtnstat = process_motor_info(pmr, initcall);
 
     /*
      * If we're in closed-loop mode, initializing the user- and dial-coordinate
@@ -862,7 +862,7 @@ static long init_re_init(motorRecord *pmr)
     Debug(pmr,3,
           "init_re_init  end dval=%f drbv=%f rdbd=%f spdb=%f\n",
           pmr->dval, pmr->drbv, pmr->rdbd, pmr->spdb);
-    return(OK);
+    return rtnstat;
 }
 
 
@@ -978,7 +978,7 @@ static long init_record(dbCommon* arg, int pass)
             break;
         case CALLBACK_DATA_SOFT_LIMITS:
         case CALLBACK_DATA:
-            init_re_init(pmr);
+            init_re_init(pmr, true);
             /* force a process() including alarm_sub() */
             Debug(pmr, 11, "devSupGetInfo%s\n", "");
             devSupGetInfo(pmr);
@@ -1695,7 +1695,7 @@ static long process(dbCommon *arg)
         }
         if (pmr->priv->neverPolled)
         {
-            long rtnstat = init_re_init(pmr);
+            long rtnstat = init_re_init(pmr, false);
             Debug(pmr,3, "set pmr->priv->neverPolled=0 rtnstat=%ld\n", rtnstat);
             if (RTN_SUCCESS(rtnstat))
                 pmr->priv->neverPolled = 0;
