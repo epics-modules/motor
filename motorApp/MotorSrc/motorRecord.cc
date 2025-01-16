@@ -583,6 +583,16 @@ static void dbgMipToString(unsigned v, char *buf, size_t buflen)
   }                                                         \
   while(0)
 
+#define SET_LAST_VALS_FROM_VALS                                       \
+  do {                                                                \
+        Debug(pmr,8, "set lastvals: val=%f last.val=%f dval=%f last.dval=%f\n", \
+              pmr->val, pmr->priv->last.val, pmr->dval, pmr->priv->last.dval); \
+        pmr->priv->last.val = pmr->val;                                 \
+        pmr->priv->last.dval = pmr->dval;                               \
+        pmr->priv->last.rval = pmr->rval;                               \
+    }                                                                   \
+  while(0)
+
 
 #define MARK(FIELD) {mmap_field temp; temp.All = pmr->mmap; \
                     temp.Bits.FIELD = 1; pmr->mmap = temp.All;}
@@ -850,9 +860,7 @@ static long init_re_init(motorRecord *pmr, bool initcall)
     MARK(M_SPMG);
     pmr->diff = pmr->dval - pmr->drbv;
     MARK(M_DIFF);
-    SET_LAST_VAL_FROM_VAL;
-    pmr->priv->last.dval = pmr->dval;
-    pmr->priv->last.rval = pmr->rval;
+    SET_LAST_VALS_FROM_VALS;
     SET_LVIO(0);              /* init limit-violation field */
 
     recalcLVIO(pmr);
@@ -1311,9 +1319,7 @@ static long postProcess(motorRecord * pmr)
     }
 
     /* Save old values for next call. */
-    SET_LAST_VAL_FROM_VAL;
-    pmr->priv->last.dval = pmr->dval;
-    pmr->priv->last.rval = pmr->rval;
+    SET_LAST_VALS_FROM_VALS;
     return(OK);
 }
 
@@ -1355,9 +1361,7 @@ static void maybeRetry(motorRecord * pmr)
         if (ls_active || has_problem)
         {
             MIP_SET_VAL(MIP_DONE);
-            SET_LAST_VAL_FROM_VAL;
-            pmr->priv->last.dval = pmr->dval;
-            pmr->priv->last.rval = pmr->rval;
+            SET_LAST_VALS_FROM_VALS;
             pmr->miss = 1;
             MARK_AUX(M_MISS);
         }
@@ -1376,9 +1380,7 @@ static void maybeRetry(motorRecord * pmr)
                 if ((pmr->jogf && !pmr->hls) || (pmr->jogr && !pmr->lls))
                     MIP_SET_BIT(MIP_JOG_REQ);
 
-                SET_LAST_VAL_FROM_VAL;
-                pmr->priv->last.dval = pmr->dval;
-                pmr->priv->last.rval = pmr->rval;
+                SET_LAST_VALS_FROM_VALS;
 
                 /* Alarms, if configured in MISV, are done in alarm_sub() */
                 pmr->miss = 1;
@@ -2142,9 +2144,7 @@ static void doRetryOrDone(motorRecord *pmr, bool preferred_dir,
     {
         SET_DMOV_MARK(FALSE);
     }
-    SET_LAST_VAL_FROM_VAL;
-    pmr->priv->last.val = pmr->val;
-    pmr->priv->last.rval = pmr->rval;
+    SET_LAST_VALS_FROM_VALS;
 
     /* Backlash disabled, OR, no need for seperate backlash move
      * since move is in preferred direction (preferred_dir==ON),
@@ -2328,9 +2328,7 @@ static RTN_STATUS doDVALchangedOrNOTdoneMoving(motorRecord *pmr)
             }
         }
         /* Update previous target positions. */
-        pmr->priv->last.dval = pmr->dval;
-        SET_LAST_VAL_FROM_VAL;
-        pmr->priv->last.rval = pmr->rval;
+        SET_LAST_VALS_FROM_VALS;
         return(OK);
     }
 
