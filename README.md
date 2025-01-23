@@ -8,6 +8,9 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.2.4-ESS, based on R7-3-1, see release notes from there
+###  Bug fixes
+#### c1a1d794b: motorRecord:Fix hang when RTRY == 0: SET_LAST_VALS_FROM_VALS
 ## v7.2.3-ESS, based on R7-3-1, see release notes from there
 ###  Bug fixes
 #### ff7ad73fc:motorRecord.html: Document bit 6 and 7 of .MFLG field
