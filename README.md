@@ -8,8 +8,18 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.2.5-ESS, based on R7-3-1, see release notes from there
+###  Bug fix
+#### c1a1d794b: motorRecord:Fix hang when RTRY == 0: SET_LAST_VALS_FROM_VALS
 ## v7.2.4-ESS, based on R7-3-1, see release notes from there
 ###  Bug fixes
+#### Update ci-scripts
+#### a4a6dbddf: motorRecord.cc: Post ueip if reset to false when encoder missing
+#### 7fbdf4b99: docs/motorRecord.html: CNEN is implementation specific
+#### df0132e73: docs/motorRecord.html: Document HOMF and HOMR better
+#### ea594ed6e: motorRecord: Fix init_re_init and neverPolled when URIP is used
+#### 85f370eda: docs/index.html: Use ESS specific information
+#### 8938b6146: motorRecord.cc: blink DMOV when jogging does not start
 #### c1a1d794b: motorRecord:Fix hang when RTRY == 0: SET_LAST_VALS_FROM_VALS
 ## v7.2.3-ESS, based on R7-3-1, see release notes from there
 ###  Bug fixes
