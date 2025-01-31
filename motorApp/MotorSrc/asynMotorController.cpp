@@ -239,6 +239,61 @@ asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
   return status;
 }
 
+void asynMotorController::pollAutoPowerMayBeOff(asynMotorAxis *pAxis, bool moving)
+{
+  int axisNo = pAxis->axisNo_;
+  int autoPower = 0;
+  int wasMovingFlag = pAxis->getWasMovingFlag();
+  double autoPowerOffDelay = 0.0;
+  getIntegerParam(axisNo, motorPowerAutoOnOff_, &autoPower);
+  getDoubleParam(axisNo, motorPowerOffDelay_, &autoPowerOffDelay);
+  if ((moving && !wasMovingFlag) || (!moving && wasMovingFlag))  {
+    if (pasynUserController_) {
+      int disableFlag = pAxis->getDisableFlag();
+      asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
+                "%s:%s: axis=%d autoPower=%d moving=%d getWasMovingFlag=%d getDisableFlag()=%d\n",
+                driverName, __FUNCTION__, axisNo,
+                autoPower, (int)moving, wasMovingFlag, disableFlag);
+    }
+  }
+  if (moving) {
+    pAxis->setWasMovingFlag(1);
+  } else {
+    /* autoPower mode 2 does allow to keep power on
+       forever, if autoPowerOffDelay < 0.0 */
+    if ((autoPower == 2) && (autoPowerOffDelay >= 0.0))
+      autoPower = 1;
+    if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
+      pAxis->setDisableFlag(1);
+      pAxis->setWasMovingFlag(0);
+      pAxis->setLastEndOfMoveTime(getNowTimeSecs());
+    }
+  }
+
+  //Auto power off drive, if:
+  //  We have detected an end of move
+  //  We are not moving again
+  //  Auto power off is enabled
+  //  Auto power off delay timer has expired
+  if ((!moving) && (autoPower == 1) && (pAxis->getDisableFlag() == 1)) {
+    double lastMoveSecs = pAxis->getLastEndOfMoveTime();
+    double nowTimeSecs = getNowTimeSecs();
+    double diffTime = nowTimeSecs - lastMoveSecs;
+    if (pasynUserController_) {
+      asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
+                "%s:%s: axis=%d moving=%d lastMoveSecs=%f nowTimeSecs=%f diffTime=%f\n",
+                driverName, __FUNCTION__, axisNo,
+                (int)moving,
+                lastMoveSecs, nowTimeSecs, diffTime);
+    }
+    if (diffTime >= autoPowerOffDelay) {
+      pAxis->setClosedLoop(0);
+      pAxis->setDisableFlag(0);
+    }
+  }
+}
+
+
 /** Called when asyn clients call pasynInt32->write().
   * Extracts the function and axis number from pasynUser.
   * Sets the value in the parameter library.
@@ -781,7 +836,7 @@ static void asynMotorPollerC(void *drvPvt)
   asynMotorController *pController = (asynMotorController*)drvPvt;
   pController->asynMotorPoller();
 }
-  
+
 
 
 
@@ -801,70 +856,18 @@ double asynMotorController::pollAll(void)
   }
 
   for (axisNo=0; axisNo<numAxes_; axisNo++) {
-    double autoPowerOffDelay = 0.0;
-    double nowTimeSecs = 0.0;
-    int autoPower = 0;
-    bool moving;
+    bool moving = false;
     pAxis=getAxis(axisNo);
     if (!pAxis) continue;
-
-    getIntegerParam(axisNo, motorPowerAutoOnOff_, &autoPower);
-    getDoubleParam(axisNo, motorPowerOffDelay_, &autoPowerOffDelay);
 
     asynstatus = pAxis->poll(&moving);
     if (asynstatus) {
       asynStatusConnected_ = asynstatus;
       return timeout;
+    } else{
+      if (moving) anyMoving = true;
     }
-    if (autoPower) {
-      int wasMovingFlag = pAxis->getWasMovingFlag();
-      int disableFlag = pAxis->getDisableFlag();
-      if ((moving && !wasMovingFlag) || (!moving && wasMovingFlag))  {
-        if (pasynUserController_) {
-          asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
-                    "%s:%s: axis=%d autoPower=%d moving=%d getWasMovingFlag=%d getDisableFlag()=%d\n",
-                    driverName, __FUNCTION__, axisNo,
-                    autoPower, (int)moving, wasMovingFlag, disableFlag);
-        }
-      }
-    }
-    if (moving) {
-      anyMoving = true;
-      pAxis->setWasMovingFlag(1);
-    } else {
-      /* autoPower mode 2 does allow to keep power on
-         forever, if autoPowerOffDelay < 0.0 */
-      if ((autoPower == 2) && (autoPowerOffDelay >= 0.0))
-        autoPower = 1;
-      if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
-        pAxis->setDisableFlag(1);
-        pAxis->setWasMovingFlag(0);
-        pAxis->setLastEndOfMoveTime(getNowTimeSecs());
-      }
-    }
-
-    //Auto power off drive, if:
-    //  We have detected an end of move
-    //  We are not moving again
-    //  Auto power off is enabled
-    //  Auto power off delay timer has expired
-    if ((!moving) && (autoPower == 1) && (pAxis->getDisableFlag() == 1)) {
-      double lastMoveSecs = pAxis->getLastEndOfMoveTime();
-      nowTimeSecs = getNowTimeSecs();
-      double diffTime = nowTimeSecs - lastMoveSecs;
-      if (pasynUserController_) {
-        asynPrint(pasynUserController_, ASYN_TRACE_FLOW,
-                  "%s:%s: axis=%d moving=%d lastMoveSecs=%f nowTimeSecs=%f diffTime=%f\n",
-                  driverName, __FUNCTION__, axisNo,
-                  (int)moving,
-                  lastMoveSecs, nowTimeSecs, diffTime);
-      }
-      if (diffTime >= autoPowerOffDelay) {
-        pAxis->setClosedLoop(0);
-        pAxis->setDisableFlag(0);
-      }
-    }
-
+    pollAutoPowerMayBeOff(pAxis, moving);
   }
   if (forcedFastPolls_ > 0) {
     timeout = movingPollPeriod_;
