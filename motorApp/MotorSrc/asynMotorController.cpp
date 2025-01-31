@@ -852,7 +852,6 @@ double asynMotorController::pollAll(void)
   asynstatus = poll();
   if (asynstatus) {
     asynStatusConnected_ = asynstatus;
-    return timeout;
   }
 
   for (axisNo=0; axisNo<numAxes_; axisNo++) {
@@ -863,13 +862,16 @@ double asynMotorController::pollAll(void)
     asynstatus = pAxis->poll(&moving);
     if (asynstatus) {
       asynStatusConnected_ = asynstatus;
-      return timeout;
     } else{
       if (moving) anyMoving = true;
     }
     pollAutoPowerMayBeOff(pAxis, moving);
   }
-  if (forcedFastPolls_ > 0) {
+  if (asynStatusConnected_) {
+    // Wait 1 second when there is a network problem
+    // Note: asyn auto connect typically waits 5 seconds
+    timeout = 1.0;
+  } else if (forcedFastPolls_ > 0) {
     timeout = movingPollPeriod_;
     forcedFastPolls_--;
   } else if (anyMoving) {
