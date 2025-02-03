@@ -660,6 +660,21 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
     }
     return status;
   }
+
+  {
+    /*
+       Some drivers put in CommsError, some do not.
+       For those who do, check if the value is != 0
+       For those who do not, value stays 0 after getIntegerParam()
+    */
+    epicsInt32 value = 0;
+    (void)getIntegerParam(axisNo, motorStatusCommsError_, &value);
+    if (value) {
+      epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize,
+                    "Error: axisNo=%d motorStatusCommsError is set", axisNo);
+      return asynError;
+    }
+  }
   status = getDoubleParam(axisNo, motorPosition_, &pStatus->position);
   if (status != asynSuccess) {
     if (status == asynParamUndefined) {
