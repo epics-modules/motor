@@ -1590,17 +1590,21 @@ static long process(dbCommon *arg)
     process_reason = (*pdset->update_values) (pmr);
 #ifdef DEBUG
     {
-      const char *reason_txt = "";
+      const char *reason_txt = "??";
+      char dbuf[MBLE];
+      dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
       switch (process_reason) {
         case NOTHING_DONE: reason_txt = "nothing done";  break;
         case CALLBACK_DATA_SOFT_LIMITS: reason_txt = "callbackdata + soft limits"; break;
         case CALLBACK_DATA: reason_txt = "callbackdata"; break;
-        default: reason_txt = "??"; break;
       }
-      char dbuf[MBLE];
-      dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
-      Debug(pmr,8, "process:---------------------- begin mip=0x%0x(%s) reason=%d,'%s'\n",
-            pmr->mip, dbuf, (int)process_reason, reason_txt);
+      if (pmr->mflg & MF_DRIVER_USES_EGU) {
+          Debug(pmr,8, "process:---------------------- begin mip=0x%0x(%s) reason=%d,'%s' position=%f\n",
+                pmr->mip, dbuf, (int)process_reason, reason_txt, pmr->priv->readBack.position);
+      } else {
+          Debug(pmr,8, "process:---------------------- begin mip=0x%0x(%s) reason=%d,'%s' rmp=%d\n",
+                pmr->mip, dbuf, (int)process_reason, reason_txt, (int)pmr->rmp);
+      }
     }
 #else
     Debug(pmr,8, "process:---------------------- begin reason=%d\n", (int)process_reason);
