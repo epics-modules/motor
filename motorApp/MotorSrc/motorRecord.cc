@@ -1385,6 +1385,13 @@ static long process(dbCommon *arg)
                    !(pmr->mip & MIP_STOP)   &&
                    !(pmr->mip & MIP_JOG_STOP))
                 {
+                    if (pmr->mip == MIP_HOMF || pmr->mip == MIP_HOMR)
+                    {
+                        /* Bug fix: motor enters an infinite HOME loop
+                           in a sequence where VAL HOMF VAL is written */
+                        clear_buttons(pmr);
+                    }
+
                     pmr->mip = MIP_DONE;
                     /* Bug fix, record locks-up when BDST != 0, DLY != 0 and
                      * new target position before backlash correction move.*/
