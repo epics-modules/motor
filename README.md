@@ -8,6 +8,13 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.2.6-ESS, based on R7-3-1, and latest master.
+###  Bug fixes
+#### 34cb92d68: asynMotorController: Handle CommsError in readGenericPointer()
+#### 781661d64: asynMotorController: failure of poll() polls axes
+###  Improvements
+#### 3c1e9b569: motorRecord.cc: Enhance debug in process(begin)
+#### 4128dc16e: asynMotorController: Factor out pollAutoPowerMayBeOff()
 ## v7.2.5-ESS, based on R7-3-1, see release notes from there
 ###  Bug fix
 #### c1a1d794b: motorRecord:Fix hang when RTRY == 0: SET_LAST_VALS_FROM_VALS
