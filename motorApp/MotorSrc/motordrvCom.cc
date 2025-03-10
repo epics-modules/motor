@@ -211,8 +211,8 @@ static double query_axis(int card, struct driver_table *tabptr, epicsTime tick,
 
     for (index = 0; index < brdptr->total_axis; index++)
     {
-        register struct mess_info *motor_info;
-        register struct mess_node *motor_motion;
+        struct mess_info *motor_info;
+        struct mess_node *motor_motion;
         double delay = 0.0;
 
         motor_info = &(brdptr->motor_info[index]);
