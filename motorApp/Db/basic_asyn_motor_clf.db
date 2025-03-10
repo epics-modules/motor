@@ -46,7 +46,7 @@ record(motor,"$(P)$(M)")
         field(SDIS, "$(P)$(M):SDIS.VAL") 
         #info(autosaveFields_pass0, "DVAL OFF MRES ERES")
 	#info(autosaveFields, "DIR DHLM DLLM TWV VBAS VELO ACCL BDST BVEL BACC RDBD EGU RTRY UEIP URIP DLY PREC DISA DISP FOFF OFF FRAC OMSL JVEL JAR ADEL MDEL HVEL DESC SPDB")
-	info(archive, "Monitor, 00:00:01, VAL OFF RBV DMOV MISS MSTA STAT LVIO HLS LLS RCNT MOVN CNEN SPDB DVAL")
+	info(archive, "Monitor, 00:00:01, VAL OFF RBV DMOV MISS MSTA STAT LVIO HLS LLS RCNT MOVN CNEN SPDB DVAL RLV")
 }
 
 #Enable/Disable channel access for the motor record
