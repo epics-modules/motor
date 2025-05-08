@@ -1601,11 +1601,14 @@ static long process(dbCommon *arg)
         case CALLBACK_DATA: reason_txt = "callbackdata"; break;
       }
       if (pmr->mflg & MF_DRIVER_USES_EGU) {
-          Debug(pmr,8, "process:---------------------- begin mip=0x%0x(%s) reason=%d,'%s' position=%f\n",
-                pmr->mip, dbuf, (int)process_reason, reason_txt, pmr->priv->readBack.position);
+          Debug(pmr,8, "process:---------------------- begin [%s] mip=0x%0x(%s) reason=%d,'%s' motorpos=%f encpos=%f \n",
+                epicsThreadGetNameSelf(),
+                pmr->mip, dbuf, (int)process_reason, reason_txt,
+                pmr->priv->readBack.position, pmr->priv->readBack.encoderPosition);
       } else {
-          Debug(pmr,8, "process:---------------------- begin mip=0x%0x(%s) reason=%d,'%s' rmp=%d\n",
-                pmr->mip, dbuf, (int)process_reason, reason_txt, (int)pmr->rmp);
+          Debug(pmr,8, "process:---------------------- begin [%s] mip=0x%0x(%s) reason=%d,'%s' rmp=%d rep=%d\n",
+                epicsThreadGetNameSelf(),
+                pmr->mip, dbuf, (int)process_reason, reason_txt, (int)pmr->rmp, (int)pmr->rep);
       }
     }
 #else
@@ -1880,8 +1883,21 @@ static long process(dbCommon *arg)
                     }
                 }
             }
-            /* Do another update after LS error. */
+#ifdef DEBUG
+            {
+                char dbuf[MBLE];
+                dbgMipToString(pmr->mip, dbuf, sizeof(dbuf));
+                bool ls_active = true;
+                ls_active = motor_fully_stopped_on_ls_activated(pmr, ls_active);
+                Debug(pmr,11,
+                      "update after LS ? dmov=%d dly=%f pmr->mflg=0x%x cdir=%d rhls=%d rlls=%d ls_active=%d mip=0x%0x(%s) msta=0x%x\n",
+                      pmr->dmov, pmr->dly, pmr->mflg, pmr->cdir, pmr->rhls, pmr->rlls,  (int)ls_active,
+                      pmr->mip, dbuf, pmr->msta);
+            }
+#endif
+
             if (pmr->mip != MIP_DONE && ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)))
+            /* Do another update after LS error. */
             {
                 /* TB: Another update may confuse the state machine */
                 bool ls_active = true;
