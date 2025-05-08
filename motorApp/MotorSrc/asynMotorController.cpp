@@ -220,8 +220,10 @@ asynStatus asynMotorController::autoPowerOn(asynMotorAxis *pAxis)
 
   double autoPowerOnDelay = 0.0;
   getDoubleParam(axis, motorPowerOnDelay_, &autoPowerOnDelay);
-  status = pAxis->setClosedLoop(true);
-  if (status) return status;
+  if (!pAxis->pollPowerIsOn()) {
+    status = pAxis->setClosedLoop(true);
+    if (status) return status;
+  }
   pAxis->setWasMovingFlag(1);
   pAxis->setDisableFlag(0);
   if (autoPower == 1) {
