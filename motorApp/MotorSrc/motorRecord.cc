@@ -1895,11 +1895,10 @@ static long process(dbCommon *arg)
                       pmr->mip, dbuf, pmr->msta);
             }
 #endif
-
-            if (pmr->mip != MIP_DONE && ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)))
             /* Do another update after LS error. */
+            /* TB: skip this if we have delay enabled. The record hangs up in an endless loop */
+            if (pmr->mip != MIP_DONE && pmr->dly <= 0.0 && ((pmr->rhls && pmr->cdir) || (pmr->rlls && !pmr->cdir)))
             {
-                /* TB: Another update may confuse the state machine */
                 bool ls_active = true;
                 ls_active = motor_fully_stopped_on_ls_activated(pmr, ls_active);
                 if (ls_active)
