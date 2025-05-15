@@ -194,7 +194,7 @@ USAGE...        Motor Record Support.
  */                                                          
 
 /* ess version. both R7-2-2 and R7-3 are upstream */
-#define VERSION 7.26
+#define VERSION 7.27
 
 #include    <stdlib.h>
 #include    <string.h>

@@ -8,6 +8,13 @@ https://github.com/epics-modules/motor/
 
 # Changes to upstream motor, the most important ones
 
+## v7.2.7-ESS, based on R7-3-1, and latest master.
+###  Bug fixes
+#### 7f5aa6177: motorRecord: another update after LS error: Endless loop
+###  Improvements
+#### 31b2549ed: asynMotorController.cpp: Avoid useless power on
+#### 1b2a4e42b: motorRecord: another update after LS error: Better debug
+#### 144773d22: motorRecord: Do not do retries after slipstall
 ## v7.2.6-ESS, based on R7-3-1, and latest master.
 ###  Bug fixes
 #### 34cb92d68: asynMotorController: Handle CommsError in readGenericPointer()
