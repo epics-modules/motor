@@ -1,0 +1,4 @@
+# Newport SNL programs
+registrar(MM4005_trajectoryScanRegistrar)
+registrar(XPS_trajectoryScanRegistrar)
+registrar(xpsSlaveRegistrar)

@@ -3,9 +3,6 @@ FILENAME...	devPIE516.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. E-516 motor controller.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:21:37 $
 */
 
 /*
@@ -41,6 +38,7 @@ Last Modified:	$Date: 2008-03-14 20:21:37 $
 
 
 #include <string.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -51,7 +49,7 @@ extern struct driver_table PIE516_access;
 
 /* ----------------Create the dsets for devPIE516----------------- */
 static struct driver_table *drvtabptr;
-static long PIE516_init(void *);
+static long PIE516_init(int);
 static long PIE516_init_record(void *);
 static long PIE516_start_trans(struct motorRecord *);
 static RTN_STATUS PIE516_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -105,12 +103,11 @@ static struct board_stat **PIE516_cards;
 
 
 /* initialize device support for PIE516 stepper motor */
-static long PIE516_init(void *arg)
+static long PIE516_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIE516_access;
 	(drvtabptr->init)();

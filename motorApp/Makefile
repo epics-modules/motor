@@ -87,8 +87,11 @@ AttocubeSrc_DEPEND_DIRS = MotorSrc
 DIRS += AerotechSrc
 AerotechSrc_DEPEND_DIRS = MotorSrc
 
+# The Hytec support requires ipac
+ifdef IPAC
 DIRS += HytecSrc
 HytecSrc_DEPEND_DIRS = MotorSrc
+endif
 
 DIRS += ACRSrc
 ACRSrc_DEPEND_DIRS = MotorSrc
@@ -107,6 +110,15 @@ PhytronSrc_DEPEND_DIRS = MotorSrc
 
 DIRS += SM300Src
 SM300Src_DEPEND_DIRS = MotorSrc
+
+DIRS += AMCISrc
+AMCISrc_DEPEND_DIRS = MotorSrc
+
+# The Script motor support requires the lua scripting module
+ifdef LUA
+DIRS += ScriptMotorSrc
+ScriptMotorSrc_DEPEND_DIRS = MotorSrc
+endif
 
 endif
 

@@ -2,9 +2,6 @@
 FILENAME...	devMM3000.cc
 USAGE...	Motor record device level support for Newport MM3000.
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:17:14 $
 */
 
 /*
@@ -43,6 +40,9 @@ Last Modified:	$Date: 2008-03-14 20:17:14 $
 
 
 #include <string.h>
+#include <stdlib.h>
+#include <errlog.h>
+#include <math.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -56,7 +56,7 @@ extern struct driver_table MM3000_access;
 /* ----------------Create the dsets for devMM3000----------------- */
 /* static long report(); */
 STATIC struct driver_table *drvtabptr;
-STATIC long MM3000_init(void *);
+STATIC long MM3000_init(int);
 STATIC long MM3000_init_record(void *);
 STATIC long MM3000_start_trans(struct motorRecord *);
 STATIC RTN_STATUS MM3000_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -110,12 +110,11 @@ static struct board_stat **MM3000_cards;
 
 
 /* initialize device support for MM3000 stepper motor */
-STATIC long MM3000_init(void *arg)
+STATIC long MM3000_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &MM3000_access;
 	(drvtabptr->init)();
@@ -277,6 +276,10 @@ STATIC RTN_STATUS MM3000_build_trans(motor_cmnd command, double *parms, struct m
 	     */
 	    break;
 	case SET_ENC_RATIO:
+            /* The motor record no longer passes unsigned values */
+            parms[0] = fabs(parms[0]);
+            parms[1] = fabs(parms[1]);
+
 	    /* MM3000 valid encoder ratio values < 10,000. */
 	    while (parms[0] > 10000.0 || parms[1] > 10000.0)
 	    {

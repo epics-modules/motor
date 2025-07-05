@@ -1,0 +1,67 @@
+#!../../bin/linux-x86_64/picoctl
+
+## You may have to change picoctl to something else 
+## everywhere it appears in this file
+
+< envPaths
+
+epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST", "NO")
+epicsEnvSet("EPICS_CA_ADDR_LIST", "10.28.0.255")
+
+epicsEnvSet("Sys",    "Sys")
+epicsEnvSet("Port",   "P0")
+epicsEnvSet("ControllerPort", "M0")
+epicsEnvSet("MC",   "MC:10")
+epicsEnvSet("CT",   "CT")
+epicsEnvSet("IOC_PREFIX", "$(CT){IOC:MC10}")
+epicsEnvSet("MC_PREFIX", "$(CT){$(MC)}")
+
+cd ${TOP}
+
+## Register all support components
+dbLoadDatabase "dbd/picoctl.dbd"
+picoctl_registerRecordDeviceDriver pdbbase
+
+# Setup IP port for 8742 
+drvAsynIPPortConfigure("$(Port)", "10.28.2.111:23")
+asynOctetSetInputEos("$(Port)",0,"\r\n")
+asynOctetSetOutputEos("$(Port)",0,"\r")
+
+#db asyn debug traces
+asynSetTraceMask("$(Port)",-1,0x1)
+asynSetTraceIOMask("$(Port)",-1,0x1)
+
+
+# New Focus Picomotor Network Controller (model 87xx) configuration parameters:  
+#     (1) IP asyn port name (string)
+#     (2) Controller asyn port name (string)	
+#     (3) Number of axes
+#     (4) Moving poll period (ms)
+#     (5) Idle poll period (ms)
+nf874xCreateController("$(ControllerPort)", "$(Port)", 4, 200, 1000)
+
+## Load record instances
+dbLoadTemplate("iocBoot/iocNewFocus874x/newfocus8742.asyn.motor.substitutions")
+
+dbLoadRecords("${ASYN}/db/asynRecord.db", "P=$(MC_PREFIX),R=Asyn,PORT=$(Port),ADDR=,OMAX=80,IMAX=80")
+
+## autosave/restore machinery
+save_restoreSet_Debug(0)
+save_restoreSet_IncompleteSetsOk(1)
+save_restoreSet_DatedBackupFiles(1)
+
+set_savefile_path("${TOP}/as","/save")
+set_requestfile_path("${TOP}/as","/req")
+
+set_pass0_restoreFile("info_positions.sav")
+set_pass0_restoreFile("info_settings.sav")
+set_pass1_restoreFile("info_settings.sav")
+
+iocInit()
+
+## more autosave/restore machinery
+cd ${TOP}/as/req
+makeAutosaveFiles()
+create_monitor_set("info_positions.req", 5 , "")
+create_monitor_set("info_settings.req", 15 , "")
+

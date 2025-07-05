@@ -4,9 +4,6 @@ USAGE...	Motor record driver level support for ThorLabs
                 Piezo Control Module (Model: MDT695)
 		Compatable with MDT694, MDT693
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-09-08 18:36:20 $
 
 */
 
@@ -47,6 +44,8 @@ Last Modified:	$Date: 2009-09-08 18:36:20 $
 #include <stdio.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "ThorLabsRegister.h"
 #include "drvMDT695.h"

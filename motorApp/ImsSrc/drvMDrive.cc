@@ -3,10 +3,6 @@ FILENAME... drvMDrive.cc
 USAGE...    Motor record driver level support for Intelligent Motion
             Systems, Inc. MDrive series; M17, M23, M34.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -80,6 +76,8 @@ DESIGN LIMITATIONS...
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "drvIM483.h"
 #include "asynOctetSyncIO.h"

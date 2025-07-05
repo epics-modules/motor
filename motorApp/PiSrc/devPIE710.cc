@@ -3,9 +3,6 @@ FILENAME...	devPIE710.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. E-710 motor controller.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:21:36 $
 */
 
 /*
@@ -41,6 +38,7 @@ Last Modified:	$Date: 2008-03-14 20:21:36 $
 
 
 #include <string.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -51,7 +49,7 @@ extern struct driver_table PIE710_access;
 
 /* ----------------Create the dsets for devPIE710----------------- */
 static struct driver_table *drvtabptr;
-static long PIE710_init(void *);
+static long PIE710_init(int);
 static long PIE710_init_record(void *);
 static long PIE710_start_trans(struct motorRecord *);
 static RTN_STATUS PIE710_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -105,12 +103,11 @@ static struct board_stat **PIE710_cards;
 
 
 /* initialize device support for PIE710 stepper motor */
-static long PIE710_init(void *arg)
+static long PIE710_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIE710_access;
 	(drvtabptr->init)();

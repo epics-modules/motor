@@ -8,10 +8,6 @@ USAGE...
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision: 4$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 25.10.2013 10:43:08$
-HeadURL:        $URL$
 
 Original Author: Steffen Rau 
 
@@ -86,7 +82,7 @@ void PIasynAxis::Init(const char *portName)
 	}
 	m_pGCSController->m_pInterface->m_pCurrentLogSink = logSink;
 
-	setIntegerParam(motorAxisHasClosedLoop, 1);
+	setIntegerParam(pController_->motorStatusGainSupport_, 1);
 
 	m_pGCSController->initAxis(this);
 	double resolution;

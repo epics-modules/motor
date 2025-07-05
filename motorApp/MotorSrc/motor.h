@@ -3,9 +3,6 @@ FILENAME...     motor.h
 USAGE...        Definitions and structures common to all levels of motorRecord
                 support (i.e., record, device and driver).
 
-Version:        $Revision: 1.21 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-04-27 14:28:42 $
 */
 
 /*
@@ -66,7 +63,11 @@ Last Modified:  $Date: 2009-04-27 14:28:42 $
 #include <epicsEndian.h>
 
 /* Less than EPICS base version test.*/
-#define LT_EPICSBASE(v,r,l) ((EPICS_VERSION<=(v)) && (EPICS_REVISION<=(r)) && (EPICS_MODIFICATION<(l)))
+#ifndef EPICS_VERSION_INT
+#define VERSION_INT(V,R,M,P) ( ((V)<<24) | ((R)<<16) | ((M)<<8) | (P))
+#define EPICS_VERSION_INT VERSION_INT(EPICS_VERSION, EPICS_REVISION, EPICS_MODIFICATION, EPICS_PATCH_LEVEL)
+#endif
+#define LT_EPICSBASE(V,R,M,P) (EPICS_VERSION_INT < VERSION_INT((V),(R),(M),(P)))
 
 /* Maximum message size of all supported devices; see drv[device].h for maximum
 message size for each device. */

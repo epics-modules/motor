@@ -1,0 +1,30 @@
+# ### Newport_PM500.iocsh ###
+
+#- ###################################################
+#- PORT             - Serial port for communications
+#- CONTROLLER       - Optional: Which controller is being configured
+#-                    Default: 0
+#-
+#- MAX_CONTROLLERS  - Optional: Max number of controllers that will be configured
+#-                    Default: 1
+#-
+#- POLL_RATE        - Optional: Controller poll rate in hertz
+#-                    Default: 10
+#- ###################################################
+
+#- Newport PM500 driver setup parameters:
+#-     (1) maximum number of controllers in system
+#-     (2) motor task polling rate (min=1Hz,max=60Hz)
+$(PM500_INIT_COMPLETE="") PM500Setup($(MAX_CONTROLLERS=1), $(POLL_RATE=10))
+
+#- Newport PM500 serial connection settings
+iocshLoad("$(IP)/iocsh/setSerialParams.iocsh", "PORT=$(PORT), BAUD=9600, BITS=7, STOP=2, PARITY=even, HANDSHAKE=hardware")
+asynOctetSetInputEos( "$(PORT)", -1, "\r")
+asynOctetSetOutputEos("$(PORT)", -1, "\r")
+
+#- Newport PM500 configuration parameters:
+#-     (1) controller
+#-     (2) asyn port name (e.g. serial0 or gpib1)
+PM500Config($(CONTROLLER=0), "$(PORT)")
+
+epicsEnvSet("PM500_INIT_COMPLETE", "#")

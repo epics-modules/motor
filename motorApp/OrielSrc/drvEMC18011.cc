@@ -3,10 +3,6 @@ FILENAME...	drvEMC18011.cc
 USAGE...	Motor record driver level support for Spectra-Physics
                 Encoder Mike Controller (Model: 18011)
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -47,6 +43,8 @@ HeadURL:        $URL$
 #include <stdio.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <errlog.h>
+#include <stdlib.h>
 #include "motor.h"
 #include "OrielRegister.h"
 #include "drvEMC18011.h"

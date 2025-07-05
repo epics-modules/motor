@@ -2,9 +2,6 @@
 FILENAME...	devPC6K.cc
 USAGE...	Motor record device level support for Parker Compumotor drivers
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:19:43 $
 */
 
 /*
@@ -40,6 +37,7 @@ Last Modified:	$Date: 2008-03-14 20:19:43 $
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -52,7 +50,7 @@ extern struct driver_table PC6K_access;
 
 /* ----------------Create the dsets for devPC6K----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long PC6K_init(void *);
+STATIC long PC6K_init(int);
 STATIC long PC6K_init_record(void *);
 STATIC long PC6K_start_trans(struct motorRecord *);
 STATIC RTN_STATUS PC6K_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -106,12 +104,11 @@ static struct board_stat **PC6K_cards;
 
 
 /* initialize device support for PC6K stepper motor */
-STATIC long PC6K_init(void *arg)
+STATIC long PC6K_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PC6K_access;
 	(drvtabptr->init)();

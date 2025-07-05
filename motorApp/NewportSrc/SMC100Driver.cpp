@@ -23,8 +23,8 @@ K. Goetze 2012-03-23  Initial version
 
 #include <asynOctetSyncIO.h>
 
-#include "asynMotorController.h"
-#include "asynMotorAxis.h"
+#include <asynMotorController.h>
+#include <asynMotorAxis.h>
 
 #include <epicsExport.h>
 #include "SMC100Driver.h"

@@ -2,10 +2,6 @@
 * FILENAME... drvSoloist.cc
 * USAGE...    Motor record driver level support for Aerotech Soloist.
 *
-* Version:        $Revision$
-* Modified By:    $Author$
-* Last Modified:  $Date$
-* HeadURL:        $URL$
 */
 
 /*
@@ -47,6 +43,8 @@
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "drvSoloist.h"
 #include "asynOctetSyncIO.h"

@@ -2,10 +2,6 @@
 * FILENAME... devSoloist.cc
 * USAGE... Motor record device level support for Aerotech Soloist.
 *
-* Version:        $Revision$
-* Modified By:    $Author$
-* Last Modified:  $Date$
-* HeadURL:        $URL$
 *
 */
 
@@ -44,6 +40,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -54,7 +51,7 @@ extern struct driver_table Soloist_access;
 
 /* ----------------Create the dsets for devSoloist----------------- */
 static struct driver_table *drvtabptr;
-static long Soloist_init (void *);
+static long Soloist_init (int);
 static long Soloist_init_record (void *);
 static long Soloist_start_trans (struct motorRecord *);
 static RTN_STATUS Soloist_build_trans (motor_cmnd, double *,
@@ -111,12 +108,11 @@ static struct board_stat **Soloist_cards;
 
 
 // initialize device support for Soloist
-static long Soloist_init (void *arg)
+static long Soloist_init (int after)
 {
 	long rtnval;
-	int after = (arg == 0) ? 0 : 1;
 
-	if (after == 0)
+	if (!after)
 	{
 		drvtabptr = &Soloist_access;
 		(drvtabptr->init)();

@@ -3,10 +3,6 @@ FILENAME...	devMDrive.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MDrive series of controllers.
 
-Version:	$Revision$
-Modified By:	$Author$
-Last Modified:	$Date$
-HeadURL:	$URL$
 */
 
 /*
@@ -47,6 +43,7 @@ HeadURL:	$URL$
  */
 
 #include <string.h>
+#include <errlog.h>
 
 #include "motorRecord.h"
 #include "motor.h"
@@ -60,7 +57,7 @@ extern struct driver_table MDrive_access;
 
 /* ----------------Create the dsets for devMDrive----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long MDrive_init(void *);
+STATIC long MDrive_init(int);
 STATIC long MDrive_init_record(void *);
 STATIC long MDrive_start_trans(struct motorRecord *);
 STATIC RTN_STATUS MDrive_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -114,12 +111,11 @@ static struct board_stat **MDrive_cards;
 
 
 /* initialize device support for MDrive stepper motor */
-STATIC long MDrive_init(void *arg)
+STATIC long MDrive_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &MDrive_access;
 	(drvtabptr->init)();

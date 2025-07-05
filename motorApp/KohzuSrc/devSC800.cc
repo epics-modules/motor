@@ -2,10 +2,6 @@
 FILENAME...     devSC800.cc
 USAGE...        Motor record device level support for Kohzu SC800 motor controller.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 
 */
 
@@ -42,6 +38,8 @@ HeadURL:        $URL$
 
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -52,7 +50,7 @@ extern struct driver_table SC800_access;
 
 /* ----------------Create the dsets for devSC800----------------- */
 static struct driver_table *drvtabptr;
-static long SC800_init(void *);
+static long SC800_init(int);
 static long SC800_init_record(void *);
 static long SC800_start_trans(struct motorRecord *);
 static RTN_STATUS SC800_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -110,12 +108,11 @@ static struct board_stat **SC800_cards;
 
 
 /* initialize device support for SC800 stepper motor */
-static long SC800_init(void *arg)
+static long SC800_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
         drvtabptr = &SC800_access;
         (drvtabptr->init)();

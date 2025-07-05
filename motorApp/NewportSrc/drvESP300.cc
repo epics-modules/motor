@@ -2,10 +2,6 @@
 FILENAME... drvESP300.cc
 USAGE...    Motor record driver level support for Newport ESP300/100.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -60,6 +56,8 @@ HeadURL:        $URL$
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <errlog.h>
+#include <stdlib.h>
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"
@@ -676,6 +674,9 @@ errexit:
             for (motor_index = 0; motor_index < total_axis; motor_index++)
             {
                 struct mess_info *motor_info = &brdptr->motor_info[motor_index];
+                int feedback;
+                double fullStep;
+                int microStep;
 
                 /* Get controller's EGU for the user (see README). */
                 sprintf(buff, "%.2dSN?", motor_index + 1);
@@ -683,11 +684,30 @@ errexit:
                 recv_mess(card_index, buff, 1);
 
                 /* Set axis resolution. */
-                sprintf(buff, "%.2dSU?", motor_index + 1);
+                /* Read the feedback status */
+                sprintf(buff, "%.2dZB?", motor_index + 1);
                 send_mess(card_index, buff, 0);
                 recv_mess(card_index, buff, 1);
-                cntrl->drive_resolution[motor_index] = atof(&buff[0]);
-
+                feedback = strtol(buff,0,16);
+                /* If stepper closed loop positioning is enabled (bit 9=1) and encoder feedback is disabled (bit 8=0) 
+                 * then use the full-step resolution (FR) and microstepping (QS) to determine drive_resolution.
+                 * If not then use SU (encoder resolution) for drive_resolution. */
+                if ((feedback & 0x300) == 0x200) {
+                    sprintf(buff, "%.2dFR?", motor_index + 1);
+                    send_mess(card_index, buff, 0);
+                    recv_mess(card_index, buff, 1);
+                    fullStep = atof(buff);
+                    sprintf(buff, "%.2dQS?", motor_index + 1);
+                    send_mess(card_index, buff, 0);
+                    recv_mess(card_index, buff, 1);
+                    microStep = strtol(buff, 0, 10);
+                    cntrl->drive_resolution[motor_index] = fullStep / microStep;
+                } else {
+                    sprintf(buff, "%.2dSU?", motor_index + 1);
+                    send_mess(card_index, buff, 0);
+                    recv_mess(card_index, buff, 1);
+                    cntrl->drive_resolution[motor_index] = atof(&buff[0]);
+                }
                 motor_info->status.All = 0;
                 motor_info->no_motion_count = 0;
                 motor_info->encoder_position = 0;

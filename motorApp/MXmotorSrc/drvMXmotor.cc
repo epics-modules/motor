@@ -2,10 +2,6 @@
 FILENAME...	drvMXmotor.cc
 USAGE...	Motor record driver level support for MX device driver.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

@@ -3,9 +3,6 @@ FILENAME...	devPM500.cc
 USAGE...	Motor record device level support for the Newport PM500 motor
 		controller.
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-08-25 18:24:24 $
 */
 
 /*
@@ -45,6 +42,7 @@ Last Modified:	$Date: 2009-08-25 18:24:24 $
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -57,7 +55,7 @@ extern struct driver_table PM500_access;
 
 /* ----------------Create the dsets for devPM500----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long PM500_init(void *);
+STATIC long PM500_init(int);
 STATIC long PM500_init_record(void *);
 STATIC long PM500_start_trans(struct motorRecord *);
 STATIC RTN_STATUS PM500_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -113,12 +111,11 @@ static struct board_stat **PM500_cards;
 
 
 /* Initialize device support for PM500 controller. */
-STATIC long PM500_init(void *arg)
+STATIC long PM500_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PM500_access;
 	(drvtabptr->init)();

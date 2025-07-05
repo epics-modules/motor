@@ -3,9 +3,6 @@ FILENAME...	drvPIE710.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 	        GmbH & Co. E-710 motor controller.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-10-06 18:18:22 $
 */
 
 /*
@@ -48,6 +45,8 @@ DESIGN LIMITATIONS...
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "drvPIE710.h"

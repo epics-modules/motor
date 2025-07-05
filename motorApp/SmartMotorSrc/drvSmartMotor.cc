@@ -2,9 +2,6 @@
 FILENAME... drvSmartMotor.cc
 USAGE...    Motor record driver level support for Animatics Corporation SmartMotors.
 
-Version:        $Revision: 1.3 $
-Modified By:    $Author: rivers $
-Last Modified:  $Date: 2007-09-13 16:36:38 $
 */
 
 /*
@@ -47,6 +44,8 @@ Last Modified:  $Date: 2007-09-13 16:36:38 $
 #include <epicsThread.h>
 #include <drvSup.h>
 #include <iocsh.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "motorRecord.h"
 #include "drvSmartMotor.h"

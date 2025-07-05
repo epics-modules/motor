@@ -2,10 +2,6 @@
 FILENAME... drvPM500.cc
 USAGE...    Motor record driver level support for Newport PM500.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /* Device Driver Support routines for PM500 motor controller */
@@ -59,6 +55,8 @@ HeadURL:        $URL$
 #include <math.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "NewportRegister.h"
 #include "drvMMCom.h"

@@ -12,7 +12,8 @@ April 11, 2013
 
 typedef enum {
   ModelConexAGP,
-  ModelConexCC
+  ModelConexCC,
+  ModelConexPP
 } ConexModel_t;
 
 // No controller-specific parameters yet
@@ -40,10 +41,11 @@ private:
                                    *   Abbreviated because it is used very frequently */
   asynStatus getClosedLoop(bool *closedLoop);
   double currentPosition_;
-  double positionOffset_;
   double encoderIncrement_;
   double interpolationFactor_;
   double stepSize_;
+  double fullStepSize_;
+  int    microStepsPerFullStep_;
   double highLimit_;
   double lowLimit_;
   double KP_;

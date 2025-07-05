@@ -3,10 +3,6 @@ FILENAME...	drvSPiiPlus.cc
 USAGE...	Motor record driver level support for ACS Tech80 
                 SPiiPlus
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 
 */
 
@@ -51,6 +47,8 @@ HeadURL:        $URL$
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <drvSup.h>
+#include <errlog.h>
+#include <stdlib.h>
 #include "motor.h"
 #include "ACSTech80Register.h"
 #include "drvSPiiPlus.h"

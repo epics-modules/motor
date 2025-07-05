@@ -1,4 +1,6 @@
+*~
 O.*/
+*.swp
 /db
 /bin
 /dbd
@@ -13,3 +15,6 @@ runIOC.sh
 relPaths.sh
 iocBoot/iocmotorSim/motor.substitutions.local
 .project
+auto_settings.sav*
+auto_positions.sav*
+.ccfxprepdir/

@@ -2,10 +2,6 @@
 FILENAME...     drvMAXv.cc
 USAGE...        Motor record driver level support for OMS model MAXv.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -97,6 +93,8 @@ HeadURL:        $URL$
  *                    command into two commands.
  *                  - Fix for intermittent wrong command displayed from Command Error message. motorIsr() saves the
  *                    message in a separate static buffer.
+ * 26  02-08-16 rls - Valid IRQ levels are 2 thru 6.
+ * 27  04-04-17 rls - Added error check for new failure mode where board reboots after 1st command with response.
  *
  */
 
@@ -114,6 +112,7 @@ HeadURL:        $URL$
 #include <iocsh.h>
 #include <epicsExit.h>
 #include <cantProceed.h>
+#include <errlog.h>
 
 #include "motorRecord.h" /* For Driver Power Monitor feature only. */
 #include "motor.h"
@@ -169,7 +168,7 @@ static epicsAddressType MAXv_ADDRS_TYPE;
 static volatile unsigned MAXvInterruptVector = 0;
 static volatile epicsUInt8 omsInterruptLevel = OMS_INT_LEVEL;
 static volatile int motionTO = 10;
-static char *MAXv_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
+static const char *MAXv_axis[] = {"X", "Y", "Z", "T", "U", "V", "R", "S"};
 static double quantum;
 static char **initstring = 0;
 static epicsUInt32 MAXv_brd_size;  /* card address boundary */
@@ -256,7 +255,7 @@ struct driver_table MAXv_access =
     query_done,
     NULL,
     &initialized,
-    MAXv_axis
+    (char **) MAXv_axis
 };
 
 struct drvMAXv_drvet
@@ -310,10 +309,10 @@ static void query_done(int card, int axis, struct mess_node *nodeptr)
 {
     char buffer[MAX_IDENT_LEN];
 
-    send_recv_mess(card, DONE_QUERY, MAXv_axis[axis], buffer, 1);
+    send_recv_mess(card, DONE_QUERY, (char *) MAXv_axis[axis], buffer, 1);
 
     if (nodeptr->status.Bits.RA_PROBLEM)
-        send_mess(card, AXIS_STOP, MAXv_axis[axis]);
+        send_mess(card, AXIS_STOP, (char *) MAXv_axis[axis]);
 }
 
 
@@ -374,7 +373,6 @@ static int set_status(int card, int signal)
     char q_buf[MAX_IDENT_LEN], outbuf[50];
     int index;
     bool ls_active = false;
-    bool got_encoder;
     msta_field status;
 
     int absoluteAxis = (configurationFlags[card] & (1 << signal));
@@ -392,7 +390,7 @@ static int set_status(int card, int signal)
     MAXvCntrl = (struct MAXvController *) brdptr->DevicePrivate;
     if (MAXvCntrl->fwver >= 1.33)
     {
-        send_recv_mess(card, "#WS", (char*) NULL, q_buf, 1);
+        send_recv_mess(card, "#WS", (char *) NULL, q_buf, 1);
         if (strcmp(q_buf, "=0") != 0)
         {
             errlogPrintf(wdctrmsg, card, q_buf);
@@ -408,16 +406,14 @@ static int set_status(int card, int signal)
     if (motor_info->encoder_present == YES)
     {
         /* get 4 pieces of info from axis */
-        send_recv_mess(card, "QA", MAXv_axis[signal], &q_buf[0], 1);
+        send_recv_mess(card, "QA", (char *) MAXv_axis[signal], &q_buf[0], 1);
         q_buf[4] = ',';
-        send_recv_mess(card, "EA", MAXv_axis[signal], &q_buf[5], 1);
-        got_encoder = true;
+        send_recv_mess(card, "EA", (char *) MAXv_axis[signal], &q_buf[5], 1);
     }
     else
     {
         /* get 2 pieces of info from axis */
-        send_recv_mess(card, AXIS_INFO, MAXv_axis[signal], q_buf, 1);
-        got_encoder = false;
+        send_recv_mess(card, AXIS_INFO, (char *) MAXv_axis[signal], q_buf, 1);
     }
 
     for (index = 0, p = epicsStrtok_r(q_buf, ",", &tok_save); p;
@@ -479,7 +475,7 @@ static int set_status(int card, int signal)
     if (motor_info->no_motion_count > motionTO)
     {
         status.Bits.RA_PROBLEM = 1;
-        send_mess(card, AXIS_STOP, MAXv_axis[signal]);
+        send_mess(card, AXIS_STOP, (char *) MAXv_axis[signal]);
         motor_info->no_motion_count = 0;
         errlogSevPrintf(errlogMinor, "Motor motion timeout ERROR on card: %d, signal: %d\n",
             card, signal);
@@ -493,7 +489,7 @@ static int set_status(int card, int signal)
         status.Bits.RA_PROBLEM = 0;
 
     /* get command velocity */
-    send_recv_mess(card, "RV", MAXv_axis[signal], q_buf, 1);
+    send_recv_mess(card, "RV", (char *) MAXv_axis[signal], q_buf, 1);
     motor_info->velocity = atoi(q_buf);
 
     /* Get encoder position */
@@ -586,7 +582,7 @@ errorexit:      errMessage(-1, "Invalid device directive");
             strcpy(buffer, nodeptr->postmsgptr);
 
         strcpy(outbuf, buffer);
-        send_mess(card, outbuf, MAXv_axis[signal]);
+        send_mess(card, outbuf, (char *) MAXv_axis[signal]);
         nodeptr->postmsgptr = NULL;
     }
 
@@ -895,7 +891,7 @@ MAXvSetup(int num_cards,        /* maximum number of cards in rack */
           int addrs_type,       /* VME address type; 16 - A16, 24 - A24 or 32 - A32. */
           unsigned int addrs,   /* Base Address. */
           unsigned int vector,  /* noninterrupting(0), valid vectors(64-255) */
-          int int_level,        /* interrupt level (1-6) */
+          int int_level,        /* interrupt level (2-6) */
           int scan_rate)        /* 1 <= polling rate <= (1/epicsThreadSleepQuantum) */
 {
     int itera;
@@ -995,9 +991,9 @@ MAXvSetup(int num_cards,        /* maximum number of cards in rack */
         }
     }
 
-    if (int_level < 1 || int_level > 6)
+    if (int_level < 2 || int_level > 6)
     {
-        char format[] = "%sinterrupt level = %d ***\n";
+        char format[] = "%sinterrupt level = %d *** default = 5\n";
         omsInterruptLevel = OMS_INT_LEVEL;
         errlogPrintf(format, errbase, int_level);
         epicsThreadSleep(5.0);
@@ -1119,7 +1115,7 @@ static int motorIsrSetup(int card)
 
     status = pdevLibVirtualOS->pDevConnectInterruptVME(
         MAXvInterruptVector + card,
-#if LT_EPICSBASE(3,14,8)
+#if LT_EPICSBASE(3,14,8,0)
         (void (*)()) motorIsr,
 #else
         (void (*)(void *)) motorIsr,
@@ -1195,6 +1191,7 @@ static int motor_init()
         epicsInt8 *startAddr;
         epicsInt8 *endAddr;
         bool wdtrip;
+        int rtn_code;
 
         Debug(2, "motor_init: card %d\n", card_index);
 
@@ -1267,7 +1264,13 @@ static int motor_init()
         send_mess(card_index, ERROR_CLEAR, (char*) NULL);
         send_mess(card_index, STOP_ALL, (char*) NULL);
 
-        send_recv_mess(card_index, GET_IDENT, (char*) NULL, (char *) pmotorState->ident, 1);
+        rtn_code = send_recv_mess(card_index, GET_IDENT, (char* ) NULL, (char *) pmotorState->ident, 1);
+        if (rtn_code != 0)
+        {
+            errlogPrintf("\n***MAXv card #%d Disabled*** not responding to commands!\n\n", card_index);
+            motor_state[card_index] = (struct controller *) NULL;
+            goto loopend;
+        }
         Debug(3, "Identification = %s\n", pmotorState->ident);
 
         /* Save firmware version. */
@@ -1278,7 +1281,7 @@ static int motor_init()
 
         if (pvtdata->fwver >= 1.33)
         {
-            send_recv_mess(card_index, "#WS", (char*) NULL, axis_pos, 1);
+            send_recv_mess(card_index, "#WS", (char *) NULL, axis_pos, 1);
             if (strcmp(axis_pos, "=0") != 0)
             {
                 errlogPrintf(wdctrmsg, card_index, axis_pos);
@@ -1292,7 +1295,7 @@ static int motor_init()
         {
             send_mess(card_index, initstring[card_index], (char*) NULL);
 
-            send_recv_mess(card_index, ALL_POS, (char*) NULL, axis_pos, 1);
+            send_recv_mess(card_index, ALL_POS, (char *) NULL, axis_pos, 1);
 
             for (total_axis = 0, pos_ptr = epicsStrtok_r(axis_pos, ",", &tok_save);
                  pos_ptr; pos_ptr = epicsStrtok_r(NULL, ",", &tok_save), total_axis++)
@@ -1310,7 +1313,7 @@ static int motor_init()
                 STATUS1 flag1;
 
                 /* Test if motor has an encoder. */
-                send_mess(card_index, ENCODER_QUERY, MAXv_axis[motor_index]);
+                send_mess(card_index, ENCODER_QUERY, (char *) MAXv_axis[motor_index]);
                 while (!pmotor->status1_flag.Bits.done) /* Wait for command to complete. */
                     epicsThreadSleep(quantum);
 
@@ -1329,7 +1332,7 @@ static int motor_init()
                 }
                 
                 /* Test if motor has PID parameters. */
-                send_mess(card_index, PID_QUERY, MAXv_axis[motor_index]);
+                send_mess(card_index, PID_QUERY, (char *) MAXv_axis[motor_index]);
                 while (!pmotor->status1_flag.Bits.done) /* Wait for command to complete. */
                     epicsThreadSleep(quantum);
                 if (pmotor->status1_flag.Bits.cmndError)
@@ -1356,9 +1359,9 @@ static int motor_init()
 
                 if (pvtdata->fwver >= 1.30)
                 {
-                    send_recv_mess(card_index, "LM?", MAXv_axis[motor_index], axis_pos, 1);
+                    send_recv_mess(card_index, "LM?", (char *) MAXv_axis[motor_index], axis_pos, 1);
                     if (strcmp(axis_pos, "=f") == 0) /* If limit mode is set to "Off". */
-                        send_mess(card_index, "LMH", MAXv_axis[motor_index]); /* Set limit mode to "Hard". */
+                        send_mess(card_index, "LMH", (char *) MAXv_axis[motor_index]); /* Set limit mode to "Hard". */
                 }
             }
 
@@ -1385,7 +1388,7 @@ static int motor_init()
 
                 set_status(card_index, motor_index);
                 /* Is this needed??? */
-                send_recv_mess(card_index, DONE_QUERY, MAXv_axis[motor_index], axis_pos, 1);
+                send_recv_mess(card_index, DONE_QUERY, (char *) MAXv_axis[motor_index], axis_pos, 1);
             }
 
             Debug(2, "motor_init: Init Address=%p\n", localaddr);

@@ -3,9 +3,6 @@ FILENAME... MicroMoRegister.cc
 USAGE...    Register MicroMo MVP 2001 B02 motor controller device driver shell
 	    commands.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2004-07-16 19:25:09 $
 */
 
 /*****************************************************************

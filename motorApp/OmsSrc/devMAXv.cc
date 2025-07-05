@@ -2,10 +2,6 @@
 FILENAME...	devMAXV.cc
 USAGE... Device level support for OMS MAXv model.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -39,6 +35,8 @@ HeadURL:        $URL$
  * .01  04-05-05 rls Copied from devOms58.cc
  */
 
+#include <errlog.h>
+
 #include "motorRecord.h"
 #include "devOmsCom.h"
 #include "epicsExport.h"
@@ -47,14 +45,14 @@ extern int MAXv_num_cards;
 extern struct driver_table MAXv_access;
 
 /* ----------------Create the dsets for devMAXv----------------- */
-static long MAXv_init(void *);
+static long MAXv_init(int);
 static long MAXv_init_record(void *);
 static long MAXv_start_trans(struct motorRecord *);
 static RTN_STATUS MAXv_end_trans(struct motorRecord *);
 
 struct motor_dset devMAXv =
 {
-    {8, NULL, MAXv_init, MAXv_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) MAXv_init, (DEVSUPFUN) MAXv_init_record, NULL},
     motor_update_values,
     MAXv_start_trans,
     oms_build_trans,
@@ -66,10 +64,8 @@ extern "C" {epicsExportAddress(dset,devMAXv);}
 static struct board_stat **MAXv_cards;
 static const char errmsg[] = {"\n\n!!!ERROR!!! - Oms MAXv driver uninitialized.\n"};
 
-static long MAXv_init(void *arg)
+static long MAXv_init(int after)
 {
-    int after = (arg == 0) ? 0 : 1;
-
     if (*(MAXv_access.init_indicator) == NO)
     {
 	errlogSevPrintf(errlogMinor, "%s", errmsg);

@@ -3,10 +3,6 @@ FILENAME...	drvPIJEDS.cc
 USAGE...	Motor record driver level support for piezosystem jena
 	        GmbH & Co. E-516 motor controller.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$*/
 
 /*
  *      Original Author: Joe Sullivan
@@ -48,6 +44,8 @@ DESIGN LIMITATIONS...
 #include <math.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "drvPIJEDS.h"

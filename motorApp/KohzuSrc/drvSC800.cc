@@ -2,10 +2,6 @@
 FILENAME...     drvSC800.cc
 USAGE...        Motor record driver level support for Kohzu SC800                
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 
 */
 
@@ -49,6 +45,8 @@ HeadURL:        $URL$
 #include <epicsThread.h>
 #include <drvSup.h>
 #include <iocsh.h>
+#include <errlog.h>
+#include <stdlib.h>
 #include "motor.h"
 #include "motorRecord.h"
 #include "drvSC800.h"

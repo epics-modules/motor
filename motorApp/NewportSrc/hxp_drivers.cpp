@@ -9,16 +9,12 @@
 #include <string.h> 
 #include "Socket.h" 
 
+#define epicsExportSharedSymbols
+#include <shareLib.h>
+#include "XPS_C8_drivers.h" 
 #ifdef _WIN32
-	#define DLL _declspec(dllexport)
-	#include "strtok_r.h"
-#else
-	#define DLL 
+#include "strtok_r.h"
 #endif
-
-#include "hxp_drivers.h" 
-
-
 
 #define SIZE_SMALL 1024
 #define SIZE_NOMINAL 1024
@@ -34,7 +30,6 @@ extern "C"
 #else
 #typedef int bool;  /* C does not know bool, only C++ */
 #endif
-
 
 
 #define DLL_VERSION "Library version for HXP Firmware V1.3.x"

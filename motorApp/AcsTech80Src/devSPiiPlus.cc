@@ -2,9 +2,6 @@
 FILENAME...	devSPiiPlus.cc
 USAGE...	Motor record device level support for ACS Tech80 SPiiPlus
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2008-05-21 21:18:52 $
 */
 
 /*
@@ -40,6 +37,7 @@ Last Modified:	$Date: 2008-05-21 21:18:52 $
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -52,7 +50,7 @@ extern struct driver_table SPiiPlus_access;
 
 /* ----------------Create the dsets for devSPiiPlus----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long SPiiPlus_init(void *);
+STATIC long SPiiPlus_init(int);
 STATIC long SPiiPlus_init_record(void *);
 STATIC long SPiiPlus_start_trans(struct motorRecord *);
 STATIC RTN_STATUS SPiiPlus_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -106,12 +104,11 @@ static struct board_stat **SPiiPlus_cards;
 
 
 /* initialize device support for SPiiPlus stepper motor */
-STATIC long SPiiPlus_init(void *arg)
+STATIC long SPiiPlus_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &SPiiPlus_access;
 	(drvtabptr->init)();

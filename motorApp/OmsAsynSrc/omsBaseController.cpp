@@ -2,10 +2,6 @@
 FILENAME...     omsBaseController.cpp
 USAGE...        Pro-Dex OMS asyn motor base controller support
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*

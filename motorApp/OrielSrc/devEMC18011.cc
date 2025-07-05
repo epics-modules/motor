@@ -2,9 +2,6 @@
 FILENAME...	devEMC18011.cc
 USAGE...	Motor record device level support for Parker Compumotor drivers
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:19:25 $
 */
 
 /*
@@ -40,6 +37,7 @@ Last Modified:	$Date: 2008-03-14 20:19:25 $
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -53,7 +51,7 @@ extern struct driver_table EMC18011_access;
 
 /* ----------------Create the dsets for devEMC18011----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long EMC18011_init(void *);
+STATIC long EMC18011_init(int);
 STATIC long EMC18011_init_record(void *);
 STATIC long EMC18011_start_trans(struct motorRecord *);
 STATIC RTN_STATUS EMC18011_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -107,12 +105,11 @@ static struct board_stat **EMC18011_cards;
 
 
 /* initialize device support for EMC18011 stepper motor */
-STATIC long EMC18011_init(void *arg)
+STATIC long EMC18011_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &EMC18011_access;
 	(drvtabptr->init)();

@@ -3,9 +3,6 @@ FILENAME...	devPIC848.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. C-848 motor controller.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:21:37 $
 */
 
 /*
@@ -44,6 +41,7 @@ Last Modified:	$Date: 2008-03-14 20:21:37 $
 
 
 #include <string.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -54,7 +52,7 @@ extern struct driver_table PIC848_access;
 
 /* ----------------Create the dsets for devPIC848----------------- */
 static struct driver_table *drvtabptr;
-static long PIC848_init(void *);
+static long PIC848_init(int);
 static long PIC848_init_record(void *);
 static long PIC848_start_trans(struct motorRecord *);
 static RTN_STATUS PIC848_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -108,12 +106,11 @@ static struct board_stat **PIC848_cards;
 
 
 /* initialize device support for PIC848 stepper motor */
-static long PIC848_init(void *arg)
+static long PIC848_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIC848_access;
 	(drvtabptr->init)();

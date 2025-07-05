@@ -2,7 +2,7 @@
  * 
  * Mark Rivers
  *
- * This file defines the base class for an asynMotoAxis.  It is the class
+ * This file defines the base class for an asynMotorAxis.  It is the class
  * from which real motor axes are derived.
  */
 #ifndef asynMotorAxis_H
@@ -56,6 +56,13 @@ class epicsShareClass asynMotorAxis {
   void setReferencingModeMove(int distance);
   int getReferencingModeMove();
 
+  int getWasMovingFlag();
+  void setWasMovingFlag(int wasMoving);
+  int getDisableFlag();
+  void setDisableFlag(int disableFlag);
+  double getLastEndOfMoveTime();
+  void setLastEndOfMoveTime(double time);
+
   protected:
   class asynMotorController *pC_;    /**< Pointer to the asynMotorController to which this axis belongs.
                                       *   Abbreviated because it is used very frequently */
@@ -66,10 +73,14 @@ class epicsShareClass asynMotorAxis {
   double *profileFollowingErrors_;   /**< Array of following errors for profile moves */   
   int referencingMode_;
 
-  private:
   MotorStatus status_;
   int statusChanged_;
+
+  private:
   int referencingModeMove_;
+  int wasMovingFlag_;
+  int disableFlag_;
+  double lastEndOfMoveTime_;
   
   friend class asynMotorController;
 };

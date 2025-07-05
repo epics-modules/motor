@@ -3,9 +3,6 @@ FILENAME...     drvANC150Asyn.cc
 USAGE...        asyn motor driver support for attocube systems AG ANC150
                 Piezo Step Controller.
 
-Version:        $Revision: 1.9 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-08-13 20:05:24 $
 
 */
 

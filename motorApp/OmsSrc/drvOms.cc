@@ -2,10 +2,6 @@
 FILENAME...     drvOms.cc
 USAGE...        Driver level support for OMS models VME8, VME44, VS4 and VX2.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -114,6 +110,8 @@ HeadURL:        $URL$
 #include        <epicsInterrupt.h>
 #include        <epicsExit.h>
 #include        <epicsEvent.h>
+#include        <errlog.h>
+#include        <stdlib.h>
 
 #include        "motor.h"
 #include        "drvOms.h"
@@ -924,7 +922,7 @@ static int motorIsrEnable(int card)
         long status;
         status = pdevLibVirtualOS->pDevConnectInterruptVME(
                                                           omsInterruptVector + card,
-#if LT_EPICSBASE(3,14,8)
+#if LT_EPICSBASE(3,14,8,0)
                                                           (void (*)()) motorIsr,
 #else
                                                           (void (*)(void *)) motorIsr,
@@ -1013,7 +1011,7 @@ static void motorIsrDisable(int card)
 /*****************************************************/
 RTN_STATUS
 omsSetup(int num_cards,  /* maximum number of cards in rack */
-         void *addrs,    /* Base Address(0x0-0xb000 on 4K boundary) */
+         void *addrs,    /* Base Address(see README for details) */
          unsigned vector,/* noninterrupting(0), valid vectors(64-255) */
          int int_level,  /* interrupt level (1-6) */
          int scan_rate)  /* polling rate - 1-60 Hz */

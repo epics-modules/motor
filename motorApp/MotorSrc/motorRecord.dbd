@@ -1,9 +1,5 @@
 # FILENAME...   motorRecord.dbd
 
-# Version:       $Revision$
-# Modified By:   $Author$
-# Last Modified: $Date$
-# HeadURL:       $URL$
 
 # Experimental Physics and Industrial Control System (EPICS)
 
@@ -290,6 +286,7 @@ recordtype(motor) {
         field(URIP,DBF_MENU) {
                 prompt("Use RDBL Link If Presen")
                 promptgroup(GUI_COMMON)
+                special(SPC_MOD)
                 pp(TRUE)
                 interest(1)
                 menu(motorUEIP)
@@ -414,6 +411,12 @@ recordtype(motor) {
         }
         field(RDBD,DBF_DOUBLE) {
                 prompt("Retry Deadband (EGU)")
+                promptgroup(GUI_COMMON)
+                special(SPC_MOD)
+                interest(1)
+        }
+        field(SPDB,DBF_DOUBLE) {
+                prompt("Setpoint Deadband (EGU)")
                 promptgroup(GUI_COMMON)
                 special(SPC_MOD)
                 interest(1)
@@ -790,5 +793,9 @@ recordtype(motor) {
 		prompt("Sync position")
 		pp(TRUE)
 		interest(1)
+	}
+	field(IGSET,DBF_SHORT) {
+		prompt("Ignore SET field")
+		interest(2)
 	}
 }

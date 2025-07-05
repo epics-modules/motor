@@ -7,10 +7,6 @@ FILENAME...     PIGCSController.cpp
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision: 6$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 05.11.2013 17:38:32$
-HeadURL:        $URL$
 
 Original Author: Steffen Rau 
 Created: 15.12.2010
@@ -48,6 +44,10 @@ PIGCSController* PIGCSController::CreateGCSController(PIInterface* pInterface, c
 	if ( 		strstr(szIDN, "C-663") != NULL
 			||	strstr(szIDN, "C-863") != NULL
 			||	strstr(szIDN, "C-867") != NULL
+			||	strstr(szIDN, "C-884") != NULL
+			||	strstr(szIDN, "E-861") != NULL
+			||	strstr(szIDN, "E-871") != NULL
+			||	strstr(szIDN, "E-873") != NULL
 		)
 	{
 		return new PIGCSMotorController(pInterface, szIDN);
@@ -58,7 +58,10 @@ PIGCSController* PIGCSController::CreateGCSController(PIInterface* pInterface, c
 	}
 	else if ( 		strstr(szIDN, "E-753") != NULL
 				||	strstr(szIDN, "E-709") != NULL
-			)
+				||	strstr(szIDN, "E-712") != NULL
+				||	strstr(szIDN, "E-725") != NULL
+				||	strstr(szIDN, "E-727") != NULL
+				)
 	{
 		return new PIGCSPiezoController(pInterface, szIDN);
 	}
@@ -110,6 +113,10 @@ bool PIGCSController::IsGCS2(PIInterface* pInterface)
 
 asynStatus PIGCSController::setVelocityCts( PIasynAxis* pAxis, double velocity )
 {
+    if (!m_KnowsVELcommand)
+    {
+        return asynSuccess;
+    }
 	char cmd[100];
 	velocity = fabs(velocity) * pAxis->m_CPUdenominator / pAxis->m_CPUnumerator;
     sprintf(cmd,"VEL %s %f", pAxis->m_szAxisName, velocity);
@@ -246,17 +253,21 @@ int PIGCSController::getGCSError()
 	if (0 != errorCode)
 	{
 		m_LastError = errorCode;
-        asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
-               "PIGCSController::getGCSError() GCS error code = %d\n",
-                  errorCode);
-		char szErrorMsg[1024];
-		if (TranslatePIError(errorCode, szErrorMsg, 1024))
-		{
-	        asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
-	                  "PIGCSController::getGCSError() GCS error, %s\n",
-	                  szErrorMsg);
+        if (m_pInterface->m_pCurrentLogSink)
+        {
+            asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
+                   "PIGCSController::getGCSError() GCS error code = %d\n",
+                      errorCode);
+        
+		    char szErrorMsg[1024];
+		    if (TranslatePIError(errorCode, szErrorMsg, 1024))
+		    {
+	            asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_ERROR|ASYN_TRACE_FLOW,
+	                      "PIGCSController::getGCSError() GCS error, %s\n",
+	                      szErrorMsg);
 
-		}
+		    }
+        }
 	}
 	return errorCode;
 }
@@ -307,6 +318,10 @@ asynStatus PIGCSController::getAxisPosition(PIasynAxis* pAxis, double& position)
  */
 asynStatus PIGCSController::getAxisVelocity(PIasynAxis* pAxis)
 {
+    if (!m_KnowsVELcommand)
+    {
+        return asynSuccess;
+    }
 	char cmd[100];
 	char buf[255];
 	sprintf(cmd, "VEL? %s", pAxis->m_szAxisName);
@@ -442,7 +457,7 @@ asynStatus PIGCSController::getAxisPositionCts(PIasynAxis* pAxis)
     pAxis->m_position = pos;
     if (pAxis->m_CPUdenominator==0 || pAxis->m_CPUnumerator==0)
     {
-    	pAxis->m_positionCts = pos;
+    	pAxis->m_positionCts = int(pos);
     	return status;
     }
 
@@ -576,7 +591,7 @@ asynStatus PIGCSController::initAxis(PIasynAxis* pAxis)
     	asynPrint(m_pInterface->m_pCurrentLogSink, ASYN_TRACE_FLOW,
    		 "PIGCSController::initAxis() stage configuration: %s\n", buf);
     }
-    pAxis->m_movingStateMask = pow(2.0, pAxis->getAxisNo());
+    pAxis->m_movingStateMask = int (pow(2.0, pAxis->getAxisNo()) );
 
 	return setServo(pAxis, 1);
 }
@@ -584,6 +599,15 @@ asynStatus PIGCSController::initAxis(PIasynAxis* pAxis)
 asynStatus PIGCSController::init(void)
 {
 	asynStatus status;
+    char buffer [1024];
+	status = m_pInterface->sendAndReceive("VEL?", buffer, 1023);
+    m_KnowsVELcommand = ( asynSuccess == status);
+    if (!m_KnowsVELcommand)
+    {
+        (void) getGCSError ();
+    }
+
+
 	status = findConnectedAxes();
 	return status;
 }

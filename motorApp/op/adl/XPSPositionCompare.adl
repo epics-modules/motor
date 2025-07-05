@@ -1,0 +1,522 @@
+
+file {
+	name="/home/epics/devel/motor/motorApp/op/adl/XPSPositionCompare.adl"
+	version=030107
+}
+display {
+	object {
+		x=428
+		y=115
+		width=880
+		height=140
+	}
+	clr=14
+	bclr=4
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+text {
+	object {
+		x=33
+		y=56
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=54
+		fill="outline"
+	}
+	textix="Description"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=38
+		y=40
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=54
+		fill="outline"
+	}
+	textix="Motor"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=282
+		y=5
+		width=286
+		height=26
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+	textix="XPS Position Compare"
+	align="horiz. centered"
+}
+polyline {
+	object {
+		x=2
+		y=34
+		width=880
+		height=0
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+	points {
+		(2,34)
+		(882,34)
+	}
+}
+text {
+	object {
+		x=215
+		y=56
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=54
+		fill="outline"
+	}
+	textix="Enable"
+	align="horiz. centered"
+}
+rectangle {
+	object {
+		x=5
+		y=80
+		width=870
+		height=55
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+}
+"text update" {
+	object {
+		x=10
+		y=110
+		width=200
+		height=20
+	}
+	monitor {
+		chan="$(P)$(M1).DESC"
+		clr=14
+		bclr=45
+	}
+	limits {
+	}
+}
+menu {
+	object {
+		x=215
+		y=110
+		width=130
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareMode"
+		clr=14
+		bclr=51
+	}
+}
+"text update" {
+	object {
+		x=215
+		y=88
+		width=130
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareMode_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=560
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareStepSize"
+		clr=14
+		bclr=51
+	}
+	clrmod="discrete"
+	limits {
+	}
+}
+menu {
+	object {
+		x=665
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionComparePulseWidth"
+		clr=14
+		bclr=51
+	}
+}
+menu {
+	object {
+		x=770
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareSettlingTime"
+		clr=14
+		bclr=51
+	}
+}
+"text update" {
+	object {
+		x=560
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareStepSize_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=665
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionComparePulseWidth_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=770
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareSettlingTime_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=350
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareMinPosition"
+		clr=14
+		bclr=51
+	}
+	clrmod="discrete"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=350
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareMinPosition_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=455
+		y=110
+		width=100
+		height=20
+	}
+	control {
+		chan="$(P)$(M1)PositionCompareMaxPosition"
+		clr=14
+		bclr=51
+	}
+	clrmod="discrete"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=455
+		y=88
+		width=100
+		height=18
+	}
+	monitor {
+		chan="$(P)$(M1)PositionCompareMaxPosition_RBV"
+		clr=54
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+composite {
+	object {
+		x=350
+		y=40
+		width=520
+		height=36
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=350
+				y=56
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Mode"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=455
+				y=56
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Position"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=560
+				y=56
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Size"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=350
+				y=40
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Minimum"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=455
+				y=40
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Maximum"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=560
+				y=40
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Step"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=665
+				y=56
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Width (us)"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=665
+				y=40
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Pulse"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=770
+				y=56
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Time (us)"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=770
+				y=40
+				width=100
+				height=20
+			}
+			"basic attribute" {
+				clr=54
+				fill="outline"
+			}
+			textix="Settling"
+			align="horiz. centered"
+		}
+	}
+}

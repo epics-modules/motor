@@ -3,8 +3,9 @@
 //!         MDrivePlus series; M17, M23, M34.
 //!         Use "model 3" asyn motor, asynMotorController and asynMotorAxis classes.
 //!
-//! Author : Nia Fong
+//! Original Author : Nia Fong
 //! Date : 11-21-2011
+//! Current Author : Mitch D'Ewart (SLAC)
 //
 //  Revision History
 //  ----------------

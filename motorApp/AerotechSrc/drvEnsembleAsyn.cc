@@ -2,10 +2,6 @@
 FILENAME... drvEnsembleAsyn.cc
 USAGE...    Motor record asyn driver level support for Aerotech Ensemble.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -68,6 +64,11 @@ in file LICENSE that is included with this distribution.
 * .19 09-11-14 rls - sendAndReceive() diagnostic message added when controller returns NAK. 
 * .20 11-24-14 rls - Moved "WAIT MODE NOWAIT" from EnsembleAsynConfig to motorAxisSetInteger 
 *                    where torque is enabled/disabled. 
+* .21 10-14-15 rls - Use "ReverseDirec" parameter to set "HomeSetup" parameter.
+* .22 05-29-18 rls - To avoid EPICS IOC reboots after parameter file changes, update 
+*                    CountsPerUnit everytime torque is enabled. 
+* .23 06-28-18 rls - If disabling torque due to a fault, clear motorAxisProblem so that 
+*                    user can Jog off limit switch. 
 */
 
 
@@ -96,8 +97,12 @@ in file LICENSE that is included with this distribution.
 
 #include "paramLib.h"
 #include "drvEnsembleAsyn.h"
-#include "ParameterId.h"
 #include "epicsExport.h"
+
+/* NOTE: The following two files are copied from the Ensemble C library include files.
+* If changing the driver to target a different version of the Ensemble, copy the following two files from that version's C library include files */
+#include "EnsembleCommonStructures.h"
+#include "EnsembleParameterId.h"
 
 motorAxisDrvSET_t motorEnsemble = 
 {
@@ -208,9 +213,6 @@ static motorEnsemble_t drv = {NULL, NULL, motorEnsembleLogMsg, 0, {0, 0}};
 static int numEnsembleControllers;
 /* Pointer to array of controller structures */
 static EnsembleController *pEnsembleController=NULL;
-
-#define MAX(a,b) ((a)>(b)? (a): (b))
-#define MIN(a,b) ((a)<(b)? (a): (b))
 
 static void motorAxisReportAxis(AXIS_HDL pAxis, int level)
 {
@@ -414,6 +416,7 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     int ret_status = MOTOR_AXIS_ERROR;
     int status, FaultStatus;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
+    static char getparamstr[] = "GETPARM(@%d, %d)";
 
     if (pAxis == NULL || pAxis->pController == NULL)
         return (MOTOR_AXIS_ERROR);
@@ -424,9 +427,24 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
     {
     case motorAxisClosedLoop:
         if (value == 0)
+        {
+            int TravelLimitFaultMask = (1 << AXISFAULTBITS_CwEndOfTravelLimitFaultBit) | (1 << AXISFAULTBITS_CcwEndOfTravelLimitFaultBit);
             sprintf(outputBuff, "DISABLE @%d", pAxis->axis);
+            if ((pAxis->lastFault & TravelLimitFaultMask) != 0 )  /* If disabled due to a Travel Limit fault, clear motorAxisProblem. */
+                motorParam->setInteger(pAxis->params, motorAxisProblem, 0);
+        }
         else
         {
+            sprintf(outputBuff, getparamstr, pAxis->axis, PARAMETERID_CountsPerUnit);
+            sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+            if (inputBuff[0] == ASCII_ACK_CHAR)
+            {
+                double localstepsize;
+                localstepsize = 1 / atof(&inputBuff[1]);
+                if (localstepsize != pAxis->stepSize)
+                    pAxis->stepSize = localstepsize;    /* Update new stepsize. */
+            }
+
             sprintf(outputBuff, "AXISFAULT @%d", pAxis->axis);
             ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
 
@@ -439,6 +457,8 @@ static int motorAxisSetInteger(AXIS_HDL pAxis, motorAxisParam_t function, int va
             sprintf(outputBuff, "ENABLE @%d", pAxis->axis);
         }
         ret_status = sendAndReceive(pAxis->pController, outputBuff, inputBuff, sizeof(inputBuff));
+        /* Set indicator to force status update when Enable does not work. */
+        motorParam->setInteger(pAxis->params, motorAxisPowerOn, value);
 
         /* Prevent ASCII interpreter from blocking during MOVEABS/INC commands. */
         ret_status = sendAndReceive(pAxis->pController, (char *) "WAIT MODE NOWAIT", inputBuff, sizeof(inputBuff));
@@ -531,7 +551,7 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
     int ret_status;
     char inputBuff[BUFFER_SIZE], outputBuff[BUFFER_SIZE];
     epicsUInt32 hparam;
-    int axis;
+    int axis, posdir;
 
     if (pAxis == NULL || pAxis->pController == NULL)
         return (MOTOR_AXIS_ERROR);
@@ -552,8 +572,9 @@ static int motorAxisHome(AXIS_HDL pAxis, double min_velocity, double max_velocit
         sprintf(outputBuff, "SETPARM @%d, %d, %.*f", axis, PARAMETERID_HomeRampRate, pAxis->maxDigits,
                 acceleration * fabs(pAxis->stepSize)); /* HomeAccelDecelRate */
 
+    posdir = (forwards == (int) pAxis->ReverseDirec); /* Adjust home direction for Reverse Direction paramter. */
     hparam = pAxis->homeDirection;
-    if (forwards == 1)
+    if (posdir == 1)
         hparam |= 0x00000001;
     else
         hparam &= 0xFFFFFFFE;
@@ -820,7 +841,7 @@ static void EnsemblePoller(EnsembleController *pController)
             }
             else
             {
-                double actvelocity = atof(&inputBuff[1]) * 1000.;
+                double actvelocity = atof(&inputBuff[1]) / fabs(pAxis->stepSize);
                 motorParam->setDouble(pAxis->params, motorAxisActualVel, actvelocity);
             }
             motorParam->callCallback(pAxis->params);

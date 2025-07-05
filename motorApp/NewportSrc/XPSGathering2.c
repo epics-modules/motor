@@ -2,11 +2,11 @@
 /**/
 #include <stdio.h>
 #include <time.h>
+#define epicsExportSharedSymbols
+#include <shareLib.h>
 #include "XPS_C8_drivers.h"
 #include "Socket.h"
 #include "xps_ftp.h"
-#define epicsExportSharedSymbols
-#include <shareLib.h>
 
 #define XPS_ADDRESS "164.54.160.124"
 #define NUM_TRAJECTORY_ELEMENTS 6

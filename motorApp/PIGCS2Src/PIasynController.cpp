@@ -8,10 +8,6 @@ USAGE...        PI GCS2 Motor Support.
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
  
-Version:        $Revision: 4$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 25.10.2013 10:43:08$
-HeadURL:        $URL$
  
 Original Author: Steffen Rau
 Created: January 2011
@@ -402,7 +398,7 @@ asynStatus PIasynController::configAxis(PIasynAxis *pAxis)
 	}
 	m_pGCSController->m_pInterface->m_pCurrentLogSink = logSink;
     
-    pAxis->setIntegerParam(motorAxisHasClosedLoop, 1);
+    pAxis->setIntegerParam(this->motorStatusGainSupport_, 1);
     pAxis->callParamCallbacks();
 
     m_pGCSController->initAxis(pAxis);

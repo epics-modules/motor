@@ -3,10 +3,6 @@ FILENAME: motordevCom.cc
 USAGE... This file contains device functions that are common to all motor
     record device support modules.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -59,18 +55,15 @@ HeadURL:        $URL$
  * .13  06/09/10 rls Set RA_PROBLEM instead of CNTRL_COMM_ERR when a NULL
  *                   motor_state[] ptr is detected in motor_end_trans_com().
  * .14  08/19/14 rls Moved RMP and REP posting from record to here.
+ * .15  07/29/15 rls Added "Use Relative" (use_rel) indicator to "init_pos" logic in
+ *                   motor_init_record_com(). See README R6-10 item #6 for details.
  */
 
 
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <callback.h>
-#include <dbAccess.h>
-#include <recGbl.h>
-#include <recSup.h>
-#include <dbEvent.h>
-#include <devSup.h>
+#include "motor_epics_inc.h"
 
 #include "motorRecord.h"
 #include "motor.h"
@@ -159,9 +152,9 @@ LOGIC...
         Set local encoder ratio to unity.
     ENDIF
 
-    Set Initialize position indicator based on (|DVAL| > RDBD, AND, MRES != 0,
-        AND, the above |"get_axis_info()" position| < RDBD) [NOTE: |controller
-        position| >= RDBD takes precedence over save/restore position].
+    Set Initialize position indicator based on (Use Relative Moves indicator == TRUE, OR,
+        [|DVAL| > RDBD, AND, MRES != 0, AND, the above |"get_axis_info()" position| < RDBD)]
+        [NOTE: |controller position| >= RDBD takes precedence over save/restore position].
     Set Command Primitive Initialization string indicator based on (non-NULL "init"
         pointer, AND, non-zero string length.
 
@@ -203,6 +196,7 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
     double ep_mp[2];            /* encoder pulses, motor pulses */
     int rtnStat;
     msta_field msta;
+    bool use_rel = (mr->rtry != 0 && mr->rmod != motorRMOD_I && (mr->ueip || mr->urip));
 
     /* allocate space for private field - an motor_trans structure */
     mr->dpvt = (struct motor_trans *) malloc(sizeof(struct motor_trans));
@@ -294,9 +288,9 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
     else
         ep_mp[0] = ep_mp[1] = 1.0;
 
-    initPos = (fabs(mr->dval) > mr->rdbd && mr->mres != 0 &&
-               fabs(axis_query.position * mr->mres) < mr->rdbd)
-               ? true : false;
+    initPos = ((use_rel == true) ||
+               (fabs(mr->dval) > mr->rdbd && mr->mres != 0 && fabs(axis_query.position * mr->mres) < mr->rdbd)
+              ) ? true : false;
     /* Test for command primitive initialization string. */
     initString = (mr->init != NULL && strlen(mr->init)) ? true : false;
     /* Test for PID support. */
@@ -463,7 +457,7 @@ epicsShareFunc long motor_start_trans_com(struct motorRecord *mr, struct board_s
     motor_call->signal = axis;
     motor_call->type = UNDEFINED;
     motor_call->mrecord = (struct dbCommon *) mr;
-    motor_call->message[0] = (char) NULL;
+    motor_call->message[0] = (char)  NULL;
     motor_call->postmsgptr = (char*) NULL;
     motor_call->termstring = (char*) NULL;
     

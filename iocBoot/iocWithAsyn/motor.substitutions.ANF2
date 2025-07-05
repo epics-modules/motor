@@ -1,0 +1,54 @@
+file "$(MOTOR)/motorApp/Db/asyn_motor.db"
+{
+pattern
+{P,        M,         DTYP,      PORT,   ADDR,   DESC,          EGU,    DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC,  DHLM,  DLLM,  INIT, RTRY}
+
+{IOC:,  "m1",  "asynMotor",  "ANF2_C1",  0,  "ANF2 C1 M1",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  "m2",  "asynMotor",  "ANF2_C1",  1,  "ANF2 C1 M2",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  "m3",  "asynMotor",  "ANF2_C1",  2,  "ANF2 C1 M3",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  "m4",  "asynMotor",  "ANF2_C1",  3,  "ANF2 C1 M4",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  "m5",  "asynMotor",  "ANF2_C1",  4,  "ANF2 C1 M5",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  "m6",  "asynMotor",  "ANF2_C1",  5,  "ANF2 C1 M6",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  "m7",  "asynMotor",  "ANF2_C1",  6,  "ANF2 C1 M7",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  "m8",  "asynMotor",  "ANF2_C1",  7,  "ANF2 C1 M8",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:,  "m9",  "asynMotor",  "ANF2_C1",  8,  "ANF2 C1 M9",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:, "m10",  "asynMotor",  "ANF2_C1",  9,  "ANF2 C1 M10",  steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:, "m11",  "asynMotor",  "ANF2_C1", 10,  "ANF2 C1 M11",  steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:, "m12",  "asynMotor",  "ANF2_C1", 11,  "ANF2 C1 M12",  steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+
+{IOC:, "m13",  "asynMotor",  "ANF2_C2",  0,  "ANF2 C2 M1",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:, "m14",  "asynMotor",  "ANF2_C2",  1,  "ANF2 C2 M2",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:, "m15",  "asynMotor",  "ANF2_C2",  2,  "ANF2 C2 M3",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:, "m16",  "asynMotor",  "ANF2_C2",  3,  "ANF2 C2 M4",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:, "m17",  "asynMotor",  "ANF2_C2",  4,  "ANF2 C2 M5",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+{IOC:, "m18",  "asynMotor",  "ANF2_C2",  5,  "ANF2 C2 M6",   steps,  Pos,  100,     0,    .2,    0,     50,     .2,  1,  5,     1e9,   -1e9,  ""}
+
+}
+
+file "$(MOTOR)/motorApp/Db/ANF2Aux.template"
+{
+pattern
+{P,     R,        PORT,    ADDR}
+
+{IOC:,  m1:,   "ANF2_C1",  0}
+{IOC:,  m2:,   "ANF2_C1",  1}
+{IOC:,  m3:,   "ANF2_C1",  2}
+{IOC:,  m4:,   "ANF2_C1",  3}
+{IOC:,  m5:,   "ANF2_C1",  4}
+{IOC:,  m6:,   "ANF2_C1",  5}
+{IOC:,  m7:,   "ANF2_C1",  6}
+{IOC:,  m8:,   "ANF2_C1",  7}
+{IOC:,  m9:,   "ANF2_C1",  8}
+{IOC:,  m10:,  "ANF2_C1",  9}
+{IOC:,  m11:,  "ANF2_C1",  10}
+{IOC:,  m12:,  "ANF2_C1",  11}
+
+{IOC:,  m13:,  "ANF2_C2",  0}
+{IOC:,  m14:,  "ANF2_C2",  1}
+{IOC:,  m15:,  "ANF2_C2",  2}
+{IOC:,  m16:,  "ANF2_C2",  3}
+{IOC:,  m17:,  "ANF2_C2",  4}
+{IOC:,  m18:,  "ANF2_C2",  5}
+
+}
+

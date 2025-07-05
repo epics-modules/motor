@@ -52,7 +52,7 @@ static inline void Debug(int level, const char *format, ...) {
 
 /* ----------------Create the dsets for devMCB4B----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long MCB4B_init(void *);
+STATIC long MCB4B_init(int);
 STATIC long MCB4B_init_record(void *);
 STATIC long MCB4B_start_trans(struct motorRecord *);
 STATIC RTN_STATUS MCB4B_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -105,13 +105,12 @@ static struct board_stat **MCB4B_cards;
 
 
 /* initialize device support for MCB4B stepper motor */
-STATIC long MCB4B_init(void *arg)
+STATIC long MCB4B_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
     Debug(5, "MCB4B_init: entry\n");
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &MCB4B_access;
         (drvtabptr->init)();

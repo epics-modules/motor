@@ -35,8 +35,9 @@
 #define FAR_AWAY     1000000000 /*nm*/
 #define UDEG_PER_REV 360000000
 
-// Windows does not have rint()
-#ifdef _WIN32
+// Windows and vxWorks do not have rint(), but minGW does
+#if defined __MINGW32__ || defined __MINGW64__
+#elif defined _WIN32 || defined vxWorks
 double rint(double x)
 {
   //middle value point test

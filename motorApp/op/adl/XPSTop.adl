@@ -1,14 +1,14 @@
 
 file {
 	name="/home/epics/devel/motor/motorApp/op/adl/XPSTop.adl"
-	version=030102
+	version=030107
 }
 display {
 	object {
 		x=833
 		y=53
 		width=200
-		height=175
+		height=205
 	}
 	clr=14
 	bclr=4
@@ -167,4 +167,20 @@ text {
 	clr=14
 	bclr=4
 	label="Motors"
+}
+"related display" {
+	object {
+		x=25
+		y=164
+		width=150
+		height=25
+	}
+	display[0] {
+		label="XPS Position Compare"
+		name="XPSPositionCompare8.adl"
+		args="P=IOC:, R=PC1:, TITLE=XPSProfileMove, M1=m1,M2=m2,M3=m3,M4=m4,M5=m5,M6=m6,M7=m7,M8=m8"
+	}
+	clr=14
+	bclr=4
+	label="Position compare"
 }

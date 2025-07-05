@@ -2,10 +2,6 @@
 FILENAME...     motorUtilAux.cc
 USAGE...        Motor Record Utility Support.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -33,6 +29,8 @@ HeadURL:        $URL$
 */
 
 #include <string.h>
+#include "motor_epics_inc.h"
+
 
 #include <cantProceed.h>
 #include <dbStaticLib.h>

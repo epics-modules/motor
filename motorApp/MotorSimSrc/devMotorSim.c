@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 
+/* The following is needed to compile against Base R3.16.1 without a warning */
+#define USE_TYPED_RSET
+
 #include "epicsFindSymbol.h"
 #include "dbAccess.h"
 #include "recGbl.h"

@@ -7,10 +7,6 @@ FILENAME...     PIGCScontroller.h
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision: 5$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 05.11.2013 17:38:32$
-HeadURL:        $URL$
 
 Original Author: Steffen Rau 
 Created: 15.12.2010
@@ -113,6 +109,8 @@ protected:
 	size_t m_nrFoundAxes;
 	char m_allAxesIDs[255];
 	int m_LastError;
+
+    bool m_KnowsVELcommand;
 };
 
 #endif /* PIGCSCONTROLLER_H_ */

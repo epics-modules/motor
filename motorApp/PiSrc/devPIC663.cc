@@ -15,6 +15,8 @@ USAGE...	Motor record device level support for Physik Instrumente (PI)
 
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -25,7 +27,7 @@ extern struct driver_table PIC663_access;
 
 /* ----------------Create the dsets for devPIC663----------------- */
 static struct driver_table *drvtabptr;
-static long PIC663_init(void *);
+static long PIC663_init(int);
 static long PIC663_init_record(void *);
 static long PIC663_start_trans(struct motorRecord *);
 static RTN_STATUS PIC663_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -79,12 +81,11 @@ static struct board_stat **PIC663_cards;
 
 
 /* initialize device support for PIC663 servo motor */
-static long PIC663_init(void *arg)
+static long PIC663_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIC663_access;
 	(drvtabptr->init)();

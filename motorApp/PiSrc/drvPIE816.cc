@@ -53,6 +53,8 @@ DESIGN LIMITATIONS...
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "drvPIE816.h"
@@ -250,14 +252,14 @@ static int set_status(int card, int signal)
     recv_mess(card, buff, FLUSH);
 
     readOK = false;   
-    //send_mess(card, READ_ONLINE, (char) NULL);
+    //send_mess(card, READ_ONLINE, (char*) NULL);
 /*    if (recv_mess(card, buff, 1) && sscanf(buff, "%d", &online_status))
       {
 	if (!online_status)
 	  {
 	    *//* Assume Controller Reboot - Set ONLINE and Velocity Control ON */
-	    /*send_mess(card, SET_ONLINE, (char) NULL);
-	    send_mess(card, SET_VELCTRL, (char) NULL);
+	    /*send_mess(card, SET_ONLINE, (char*) NULL);
+	    send_mess(card, SET_VELCTRL, (char*) NULL);
 	  }
 */
 	send_mess(card, READ_ONTARGET, PIE816_axis[signal]);
@@ -595,8 +597,8 @@ static int motor_init()
 	      online = false;
 */
 	      /* Set Controller to ONLINE mode */
-/*	      send_mess(card_index, SET_ONLINE, (char) NULL);
-	      send_mess(card_index, READ_ONLINE, (char) NULL);
+/*	      send_mess(card_index, SET_ONLINE, (char*) NULL);
+	      send_mess(card_index, READ_ONLINE, (char*) NULL);
 	      if ((status = recv_mess(card_index, buff, 1)))
 		online = (atoi(buff)==1) ? true : false;
 	      else
@@ -637,7 +639,7 @@ static int motor_init()
 	    brdptr->total_axis = total_axis;
 
 	    /* Turn ON velocity control mode  - All axis */
-	    /*send_mess(card_index, SET_VELCTRL, (char) NULL);*/
+	    /*send_mess(card_index, SET_VELCTRL, (char*) NULL);*/
 
 	    for (motor_index = 0; motor_index < total_axis; motor_index++)
 	    {

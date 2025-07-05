@@ -52,7 +52,7 @@ record(calcout, "$(P)$(M)_vCh") {
 
 record(calcout, "$(P)$(M)_twCh") {
   field(DESC, "change TWV")
-  field(CALC, "min(max(a*b,c),d-e)")
+  field(CALC, "min(max(a*b,abs(c)),d-e)")
   field(INPB, "$(P)$(M).TWV")
   field(INPC, "$(P)$(M).MRES")
   field(INPD, "$(P)$(M).HLM")

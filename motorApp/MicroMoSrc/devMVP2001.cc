@@ -3,9 +3,6 @@ FILENAME...	devMVP2001.cc
 USAGE...	Motor record device level support for MicroMo
                 MVP 2001 B02 (Linear, RS-485).
 
-Version:	$Revision: 1.4 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-06-06 17:16:51 $
 */
 
 /*
@@ -92,6 +89,8 @@ Last Modified:	$Date: 2008-06-06 17:16:51 $
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -105,7 +104,7 @@ extern struct driver_table MVP2001_access;
 
 /* ----------------Create the dsets for devMVP2001----------------- */
 static struct driver_table *drvtabptr;
-static long MVP2001_init(void *);
+static long MVP2001_init(int);
 static long MVP2001_init_record(void *);
 static long MVP2001_start_trans(struct motorRecord *);
 static RTN_STATUS MVP2001_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -159,10 +158,9 @@ static struct board_stat **MVP2001_cards;
 
 
 /* initialize device support for MVP2001 DC motor */
-static long MVP2001_init(void *arg)
+static long MVP2001_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
     drvtabptr = &MVP2001_access;
     rtnval = motor_init_com(after, *drvtabptr->cardcnt_ptr, drvtabptr, &MVP2001_cards);

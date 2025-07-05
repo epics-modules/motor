@@ -3,9 +3,6 @@ FILENAME...	devPIC662.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:21:36 $
 */
 
 /*
@@ -40,6 +37,7 @@ Last Modified:	$Date: 2008-03-14 20:21:36 $
 
 
 #include <string.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -50,7 +48,7 @@ extern struct driver_table PIC662_access;
 
 /* ----------------Create the dsets for devPIC662----------------- */
 static struct driver_table *drvtabptr;
-static long PIC662_init(void *);
+static long PIC662_init(int);
 static long PIC662_init_record(void *);
 static long PIC662_start_trans(struct motorRecord *);
 static RTN_STATUS PIC662_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -104,12 +102,11 @@ static struct board_stat **PIC662_cards;
 
 
 /* initialize device support for PIC662 stepper motor */
-static long PIC662_init(void *arg)
+static long PIC662_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIC662_access;
 	(drvtabptr->init)();

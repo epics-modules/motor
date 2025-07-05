@@ -3,9 +3,6 @@ FILENAME...	devMDT695.cc
 USAGE...	Motor record device level support for ThorLabs Piezo Control
                 Module (MDT695)
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:23:45 $
 */
 
 /*
@@ -41,6 +38,7 @@ Last Modified:	$Date: 2008-03-14 20:23:45 $
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -53,7 +51,7 @@ extern struct driver_table MDT695_access;
 
 /* ----------------Create the dsets for devMDT695----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long MDT695_init(void *);
+STATIC long MDT695_init(int);
 STATIC long MDT695_init_record(void *);
 STATIC long MDT695_start_trans(struct motorRecord *);
 STATIC RTN_STATUS MDT695_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -107,12 +105,11 @@ static struct board_stat **MDT695_cards;
 
 
 /* initialize device support for MDT695 stepper motor */
-STATIC long MDT695_init(void *arg)
+STATIC long MDT695_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &MDT695_access;
 	(drvtabptr->init)();

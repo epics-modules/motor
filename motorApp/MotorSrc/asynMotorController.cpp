@@ -19,6 +19,14 @@
 #include "asynMotorController.h"
 #include "asynMotorAxis.h"
 
+#ifndef VERSION_INT
+#  define VERSION_INT(V,R,M,P) ( ((V)<<24) | ((R)<<16) | ((M)<<8) | (P))
+#endif
+
+#define MOTOR_ASYN_VERSION_INT VERSION_INT(ASYN_VERSION,ASYN_REVISION,ASYN_MODIFICATION,0)
+
+#define VERSION_INT_4_32 VERSION_INT(4,32,0,0)
+
 static const char *driverName = "asynMotorController";
 static void asynMotorPollerC(void *drvPvt);
 static void asynMotorMoveToHomeC(void *drvPvt);
@@ -34,12 +42,14 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
                                          int interfaceMask, int interruptMask,
                                          int asynFlags, int autoConnect, int priority, int stackSize)
 
-  : asynPortDriver(portName, numAxes, NUM_MOTOR_DRIVER_PARAMS+numParams,
+  : asynPortDriver(portName, numAxes,
+#if MOTOR_ASYN_VERSION_INT < VERSION_INT_4_32
+                   NUM_MOTOR_DRIVER_PARAMS+numParams,
+#endif
       interfaceMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask | asynDrvUserMask,
       interruptMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask,
       asynFlags, autoConnect, priority, stackSize),
     shuttingDown_(0), numAxes_(numAxes)
-
 {
   static const char *functionName = "asynMotorController";
 
@@ -64,6 +74,11 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorHighLimitString,              asynParamFloat64,    &motorHighLimit_);
   createParam(motorLowLimitString,               asynParamFloat64,    &motorLowLimit_);
   createParam(motorClosedLoopString,             asynParamInt32,      &motorClosedLoop_);
+  createParam(motorPowerAutoOnOffString,         asynParamInt32,      &motorPowerAutoOnOff_);
+  createParam(motorPowerOnDelayString,           asynParamFloat64,    &motorPowerOnDelay_);
+  createParam(motorPowerOffDelayString,          asynParamFloat64,    &motorPowerOffDelay_);
+  createParam(motorPowerOffFractionString,       asynParamInt32,      &motorPowerOffFraction_);
+  createParam(motorPostMoveDelayString,          asynParamFloat64,    &motorPostMoveDelay_);
   createParam(motorStatusString,                 asynParamInt32,      &motorStatus_);
   createParam(motorUpdateStatusString,           asynParamInt32,      &motorUpdateStatus_);
   createParam(motorStatusDirectionString,        asynParamInt32,      &motorStatusDirection_);
@@ -81,6 +96,11 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorStatusCommsErrorString,       asynParamInt32,      &motorStatusCommsError_);
   createParam(motorStatusLowLimitString,         asynParamInt32,      &motorStatusLowLimit_);
   createParam(motorStatusHomedString,            asynParamInt32,      &motorStatusHomed_);
+
+  // These are per-axis parameters for passing additional motor record information to the driver
+  createParam(motorRecResolutionString,        asynParamFloat64,      &motorRecResolution_);
+  createParam(motorRecDirectionString,           asynParamInt32,      &motorRecDirection_);
+  createParam(motorRecOffsetString,            asynParamFloat64,      &motorRecOffset_);
 
   // These are the per-controller parameters for profile moves
   createParam(profileNumAxesString,              asynParamInt32,      &profileNumAxes_);
@@ -115,9 +135,6 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(profilePositionsString,     asynParamFloat64Array,      &profilePositions_);
   createParam(profileReadbacksString,     asynParamFloat64Array,      &profileReadbacks_);
   createParam(profileFollowingErrorsString, asynParamFloat64Array,    &profileFollowingErrors_);
-  createParam(profileMotorResolutionString,    asynParamFloat64,      &profileMotorResolution_);
-  createParam(profileMotorDirectionString,       asynParamInt32,      &profileMotorDirection_);
-  createParam(profileMotorOffsetString,        asynParamFloat64,      &profileMotorOffset_);
 
   pAxes_ = (asynMotorAxis**) calloc(numAxes, sizeof(asynMotorAxis*));
   pollEventId_ = epicsEventMustCreate(epicsEventEmpty);
@@ -255,6 +272,8 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   asynMotorAxis *pAxis;
   int axis;
   int forwards;
+  int autoPower = 0;
+  double autoPowerOnDelay = 0.0;
   asynStatus status = asynError;
   static const char *functionName = "writeFloat64";
 
@@ -262,14 +281,21 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
   if (!pAxis) return asynError;
   axis = pAxis->axisNo_;
 
+  getIntegerParam(axis, motorPowerAutoOnOff_, &autoPower);
+  getDoubleParam(axis, motorPowerOnDelay_, &autoPowerOnDelay);
+
   /* Set the parameter and readback in the parameter library. */
   status = pAxis->setDoubleParam(function, value);
 
-  getDoubleParam(axis, motorVelBase_, &baseVelocity);
-  getDoubleParam(axis, motorVelocity_, &velocity);
-  getDoubleParam(axis, motorAccel_, &acceleration);
-
   if (function == motorMoveRel_) {
+    if (autoPower == 1) {
+      status = pAxis->setClosedLoop(true);
+      pAxis->setWasMovingFlag(1);
+      epicsThreadSleep(autoPowerOnDelay);
+    }
+    getDoubleParam(axis, motorVelBase_, &baseVelocity);
+    getDoubleParam(axis, motorVelocity_, &velocity);
+    getDoubleParam(axis, motorAccel_, &acceleration);
     status = pAxis->move(value, 1, baseVelocity, velocity, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
@@ -279,6 +305,14 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
   
   } else if (function == motorMoveAbs_) {
+    if (autoPower == 1) {
+      status = pAxis->setClosedLoop(true);
+      pAxis->setWasMovingFlag(1);
+      epicsThreadSleep(autoPowerOnDelay);
+    }
+    getDoubleParam(axis, motorVelBase_, &baseVelocity);
+    getDoubleParam(axis, motorVelocity_, &velocity);
+    getDoubleParam(axis, motorAccel_, &acceleration);
     status = pAxis->move(value, 0, baseVelocity, velocity, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
@@ -288,6 +322,13 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
       driverName, functionName, portName, pAxis->axisNo_, value, baseVelocity, velocity, acceleration );
 
   } else if (function == motorMoveVel_) {
+    if (autoPower == 1) {
+      status = pAxis->setClosedLoop(true);
+      pAxis->setWasMovingFlag(1);
+      epicsThreadSleep(autoPowerOnDelay);
+    }
+    getDoubleParam(axis, motorVelBase_, &baseVelocity);
+    getDoubleParam(axis, motorAccel_, &acceleration);
     status = pAxis->moveVelocity(baseVelocity, value, acceleration);
     pAxis->setIntegerParam(motorStatusDone_, 0);
     pAxis->callParamCallbacks();
@@ -298,6 +339,14 @@ asynStatus asynMotorController::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
   // Note, the motorHome command happens on the asynFloat64 interface, even though the value (direction) is really integer 
   } else if (function == motorHome_) {
+    if (autoPower == 1) {
+      status = pAxis->setClosedLoop(true);
+      pAxis->setWasMovingFlag(1);
+      epicsThreadSleep(autoPowerOnDelay);
+    }
+    getDoubleParam(axis, motorVelBase_, &baseVelocity);
+    getDoubleParam(axis, motorVelocity_, &velocity);
+    getDoubleParam(axis, motorAccel_, &acceleration);
     forwards = (value == 0) ? 0 : 1;
     status = pAxis->home(baseVelocity, velocity, acceleration, forwards);
     pAxis->setIntegerParam(motorStatusDone_, 0);
@@ -569,7 +618,11 @@ void asynMotorController::asynMotorPoller()
   int forcedFastPolls=0;
   bool anyMoving;
   bool moving;
+  epicsTimeStamp nowTime;
+  double nowTimeSecs = 0.0;
   asynMotorAxis *pAxis;
+  int autoPower = 0;
+  double autoPowerOffDelay = 0.0;
   int status;
 
   timeout = idlePollPeriod_;
@@ -592,12 +645,42 @@ void asynMotorController::asynMotorPoller()
       unlock();
       break;
     }
+
     poll();
     for (i=0; i<numAxes_; i++) {
-        pAxis=getAxis(i);
-        if (!pAxis) continue;
-        pAxis->poll(&moving);
-        if (moving) anyMoving = true;;
+      pAxis=getAxis(i);
+      if (!pAxis) continue;
+      
+      getIntegerParam(i, motorPowerAutoOnOff_, &autoPower);
+      getDoubleParam(i, motorPowerOffDelay_, &autoPowerOffDelay);
+      
+      pAxis->poll(&moving);
+      if (moving) {
+	anyMoving = true;
+	pAxis->setWasMovingFlag(1);
+      } else {
+	if ((pAxis->getWasMovingFlag() == 1) && (autoPower == 1)) {
+	  pAxis->setDisableFlag(1);
+          pAxis->setWasMovingFlag(0);
+          epicsTimeGetCurrent(&nowTime);
+          pAxis->setLastEndOfMoveTime(nowTime.secPastEpoch + (nowTime.nsec / 1.e9));
+	}
+      }
+
+      //Auto power off drive, if:
+      //  We have detected an end of move
+      //  We are not moving again
+      //  Auto power off is enabled
+      //  Auto power off delay timer has expired
+      if ((!moving) && (autoPower == 1) && (pAxis->getDisableFlag() == 1)) {
+	epicsTimeGetCurrent(&nowTime);
+	nowTimeSecs = nowTime.secPastEpoch + (nowTime.nsec / 1.e9);
+	if ((nowTimeSecs - pAxis->getLastEndOfMoveTime()) >= autoPowerOffDelay) {
+	  pAxis->setClosedLoop(0);
+	  pAxis->setDisableFlag(0);
+	}
+      }
+
     }
     if (forcedFastPolls > 0) {
       timeout = movingPollPeriod_;

@@ -3,9 +3,6 @@ FILENAME...	drvPIE516.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 	        GmbH & Co. E-516 motor controller.
 
-Version:	$Revision: 1.1 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2007-03-30 20:01:05 $
 */
 
 /*
@@ -48,6 +45,8 @@ DESIGN LIMITATIONS...
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "drvPIE516.h"

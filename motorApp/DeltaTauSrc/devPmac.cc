@@ -2,9 +2,6 @@
 FILENAME...	devPmac.cc
 USAGE... Device level support for Delta Tau PMAC.
 
-Version:	$Revision: 1.5 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:09:01 $
 */
 
 /*
@@ -41,6 +38,7 @@ Last Modified:	$Date: 2008-03-14 20:09:01 $
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -52,7 +50,7 @@ extern int Pmac_num_cards;
 extern struct driver_table Pmac_access;
 
 /* ----------------Create the dsets for devOMS----------------- */
-static long Pmac_init(void *);
+static long Pmac_init(int);
 static long Pmac_init_record(void *);
 static long Pmac_start_trans(struct motorRecord *);
 static RTN_STATUS Pmac_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -60,7 +58,7 @@ static RTN_STATUS Pmac_end_trans(struct motorRecord *);
 
 struct motor_dset devPmac =
 {
-    {8, NULL, Pmac_init, Pmac_init_record, NULL},
+    {8, NULL, (DEVSUPFUN) Pmac_init, (DEVSUPFUN) Pmac_init_record, NULL},
     motor_update_values,
     Pmac_start_trans,
     Pmac_build_trans,
@@ -100,10 +98,8 @@ static msg_types Pmac_table[] = {
 static struct board_stat **Pmac_cards;
 static const char errmsg[] = {"\n\n!!!ERROR!!! - Oms driver uninitialized.\n"};
 
-static long Pmac_init(void *arg)
+static long Pmac_init(int after)
 {
-    int after = (arg == 0) ? 0 : 1;
-
     if (*(Pmac_access.init_indicator) == NO)
     {
 	errlogSevPrintf(errlogMinor, "%s", errmsg);

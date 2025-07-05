@@ -2,10 +2,6 @@
 FILENAME...     devMM4000.cc
 USAGE...        Motor record device level support for Newport MM4000.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -48,6 +44,7 @@ HeadURL:        $URL$
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -60,7 +57,7 @@ extern struct driver_table MM4000_access;
 
 /* ----------------Create the dsets for devMM4000----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long MM4000_init(void *);
+STATIC long MM4000_init(int);
 STATIC long MM4000_init_record(void *);
 STATIC long MM4000_start_trans(struct motorRecord *);
 STATIC RTN_STATUS MM4000_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -114,12 +111,11 @@ static struct board_stat **MM4000_cards;
 
 
 /* initialize device support for MM4000 stepper motor */
-STATIC long MM4000_init(void *arg)
+STATIC long MM4000_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
         drvtabptr = &MM4000_access;
         (drvtabptr->init)();

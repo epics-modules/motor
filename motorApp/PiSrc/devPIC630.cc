@@ -50,7 +50,7 @@ extern struct driver_table PIC630_access;
 
 /* ----------------Create the dsets for devPIC630----------------- */
 static struct driver_table *drvtabptr;
-static long PIC630_init(void *);
+static long PIC630_init(int);
 static long PIC630_init_record(void *);
 static long PIC630_start_trans(struct motorRecord *);
 static RTN_STATUS PIC630_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -102,13 +102,12 @@ static struct board_stat **PIC630_cards;
 
 
 /* initialize device support for PIC630 stepper motor */
-static long PIC630_init(void *arg)
+static long PIC630_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
     Debug(5, "PIC630_init: entry\n");
-    if (after == 0)
+    if (!after)
     {
         drvtabptr = &PIC630_access;
         (drvtabptr->init)();

@@ -1,0 +1,131 @@
+# Database for PositionerPositionCompare functions in Newport XPS
+# Mark Rivers
+# March 10, 2015
+
+record(mbbo,"$(P)$(R)PositionCompareMode") {
+    field(DTYP, "asynInt32")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Disable")
+    field(ONVL, "1")
+    field(ONST, "Position compare")
+    field(TWVL, "2")
+    field(TWST, "AquadB windowed")
+    field(THVL, "3")
+    field(THST, "AquadB always")
+}
+
+record(mbbi,"$(P)$(R)PositionCompareMode_RBV") {
+    field(DTYP, "asynInt32")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Disable")
+    field(ONVL, "1")
+    field(ONST, "Position compare")
+    field(TWVL, "2")
+    field(TWST, "AquadB windowed")
+    field(THVL, "3")
+    field(THST, "AquadB always")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao,"$(P)$(R)PositionCompareMinPosition") {
+    field(PINI, "YES")
+    field(PREC,"$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MIN_POSITION")
+}
+
+record(ai,"$(P)$(R)PositionCompareMinPosition_RBV") {
+    field(PREC,"$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MIN_POSITION")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao,"$(P)$(R)PositionCompareMaxPosition") {
+    field(PINI, "YES")
+    field(PREC,"$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MAX_POSITION")
+}
+
+record(ai,"$(P)$(R)PositionCompareMaxPosition_RBV") {
+    field(PREC,"$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_MAX_POSITION")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao,"$(P)$(R)PositionCompareStepSize") {
+    field(PINI, "YES")
+    field(PREC,"$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_STEP_SIZE")
+}
+
+record(ai,"$(P)$(R)PositionCompareStepSize_RBV") {
+    field(PREC,"$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_STEP_SIZE")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo,"$(P)$(R)PositionComparePulseWidth") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_PULSE_WIDTH")
+    field(ZRVL, "0")
+    field(ZRST, "0.2")
+    field(ONVL, "1")
+    field(ONST, "1.0")
+    field(TWVL, "2")
+    field(TWST, "2.5")
+    field(THVL, "3")
+    field(THST, "10.0")
+}
+
+record(mbbi,"$(P)$(R)PositionComparePulseWidth_RBV") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_PULSE_WIDTH")
+    field(ZRVL, "0")
+    field(ZRST, "0.2")
+    field(ONVL, "1")
+    field(ONST, "1.0")
+    field(TWVL, "2")
+    field(TWST, "2.5")
+    field(THVL, "3")
+    field(THST, "10.0")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo,"$(P)$(R)PositionCompareSettlingTime") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_SETTLING_TIME")
+    field(ZRVL, "0")
+    field(ZRST, "0.075")
+    field(ONVL, "1")
+    field(ONST, "1.0")
+    field(TWVL, "2")
+    field(TWST, "4.0")
+    field(THVL, "3")
+    field(THST, "12.0")
+}
+
+record(mbbi,"$(P)$(R)PositionCompareSettlingTime_RBV") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,"@asyn($(PORT),$(ADDR))XPS_POSITION_COMPARE_SETTLING_TIME")
+    field(ZRVL, "0")
+    field(ZRST, "0.075")
+    field(ONVL, "1")
+    field(ONST, "1.0")
+    field(TWVL, "2")
+    field(TWST, "4.0")
+    field(THVL, "3")
+    field(THST, "12.0")
+    field(SCAN, "I/O Intr")
+}
+

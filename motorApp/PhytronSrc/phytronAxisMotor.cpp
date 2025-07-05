@@ -5,10 +5,6 @@ USAGE...    Motor driver support for Phytron Axis controller.
 Tom Slejko & Bor Marolt
 Cosylab d.d. 2014
  
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 #include <stdio.h>
@@ -21,7 +17,7 @@ HeadURL:        $URL$
 #include <math.h>
 #ifndef _WIN32
 #include <unistd.h>
-#endif /* _WIN32 */
+#endif
 
 #include <drvAsynIPPort.h>
 #include <iocsh.h>

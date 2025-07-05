@@ -6,7 +6,7 @@ IPAC=$(SUPPORT)/ipac/master
 SNCSEQ=$(SUPPORT)/seq/master
 SSCAN=$(SUPPORT)/sscan/master
 ONCRPC=$(SUPPORT)/oncrpc/master
-
+LUA=$(SUPPORT)/lua/master
 # optional extra local definitions here
 -include $(TOP)/configure/RELEASE.private
 

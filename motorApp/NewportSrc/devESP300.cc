@@ -2,10 +2,6 @@
 FILENAME...	devESP300.cc
 USAGE...	Motor record device level support for Newport ESP300.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -42,6 +38,7 @@ HeadURL:        $URL$
 
 #include <string.h>
 #include <math.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -53,7 +50,7 @@ extern struct driver_table ESP300_access;
 /* ----------------Create the dsets for devESP300----------------- */
 /* static long report(); */
 static struct driver_table *drvtabptr;
-static long ESP300_init(void *);
+static long ESP300_init(int);
 static long ESP300_init_record(void *);
 static long ESP300_start_trans(struct motorRecord *);
 static RTN_STATUS ESP300_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -107,12 +104,11 @@ static struct board_stat **ESP300_cards;
 
 
 /* initialize device support for ESP300 stepper motor */
-static long ESP300_init(void *arg)
+static long ESP300_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &ESP300_access;
 	(drvtabptr->init)();
@@ -243,7 +239,7 @@ static RTN_STATUS ESP300_build_trans(motor_cmnd command, double *parms, struct m
 	    sprintf(buff, "%.2dVA%f;", axis, cntrl_units);
 	    break;
 	case SET_ACCEL:
-	    sprintf(buff, "%.2dAC%f;", axis, cntrl_units);
+	    sprintf(buff, "%.2dAC%f;%.2dAG%f;", axis, cntrl_units, axis, cntrl_units);
 	    break;
 	case GO:
 	    /* 

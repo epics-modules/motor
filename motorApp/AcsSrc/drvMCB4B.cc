@@ -21,6 +21,8 @@
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "AcsRegister.h"
 #include "drvMCB4B.h"

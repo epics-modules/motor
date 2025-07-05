@@ -3,9 +3,6 @@ FILENAME...	drvPIC844.cc
 USAGE...	Motor record driver level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.15 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2006-01-31 22:10:04 $
 */
 
 /*
@@ -61,6 +58,8 @@ DESIGN LIMITATIONS...
 #include <string.h>
 #include <epicsThread.h>
 #include <drvSup.h>
+#include <stdlib.h>
+#include <errlog.h>
 #include "motor.h"
 #include "drvPI.h"
 #include "epicsExport.h"

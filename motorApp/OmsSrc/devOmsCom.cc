@@ -2,10 +2,6 @@
 FILENAME...     devOmsCom.cc
 USAGE...        Data and functions common to all OMS device level support.
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -70,6 +66,8 @@ HeadURL:        $URL$
  *                   different polarity (signs).
  * .24  11-29-12 rls Terminate UU command argument with a ';' character.
  *                   Fixes "Command error" with MAXv ver:1.41 firmware.
+ * .25  03-13-15 rls Bug fix for incorrect deceleration calculation at end of
+ *                   JOG command.
  *
  */
 
@@ -80,6 +78,7 @@ HeadURL:        $URL$
 #include <epicsThread.h>
 #include <epicsString.h>
 #include <dbAccess.h>
+#include <stdlib.h>
 
 #include "motorRecord.h"
 #include "motor.h"
@@ -311,7 +310,7 @@ RTN_STATUS oms_build_trans(motor_cmnd command, double *parms, struct motorRecord
 
                 /* Use MIP to determine which acc. rate to use. */
                 if (mr->mip & MIP_JOG_STOP)
-                    acc = ((mr->jar) / fabs(mr->mres)) / mr->accl;
+                    acc = mr->jar / fabs(mr->mres);
                 else
                     acc = ((mr->velo - mr->vbas) / fabs(mr->mres)) / mr->accl;
 
@@ -514,7 +513,7 @@ errorexit:                  errMessage(-1, "Invalid device directive");
                 if (MAXv == true && parms[0] == parms[1])
                     sprintf(buffer, " UF");
                 else
-                    sprintf(buffer, " UU%f;", parms[0]/parms[1]);
+                    sprintf(buffer, " UU%f;", fabs(parms[0]/parms[1]));
                 strcat(motor_call->message, buffer);
                 break;
 

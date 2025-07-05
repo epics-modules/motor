@@ -1,4 +1,4 @@
-$(P)$(R)Nelements
+ed $(P)$(R)Nelements
 $(P)$(R)MoveMode
 $(P)$(R)Npulses
 $(P)$(R)StartPulses
@@ -56,3 +56,4 @@ $(P)$(R)PulseLenUS
 $(P)$(R)PulseSrc
 $(P)$(R)PulseMode
 $(P)$(R)PulsePositions
+$(P)$(R)NumPulsePositions

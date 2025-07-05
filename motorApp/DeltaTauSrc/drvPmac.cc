@@ -2,9 +2,6 @@
 FILENAME...	drvPmac.cc
 USAGE...	Driver level support for Delta Tau PMAC model.
 
-Version:	$Revision: 1.11 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2009-09-08 18:25:19 $
 */
 
 /*
@@ -51,10 +48,12 @@ Last Modified:	$Date: 2009-09-08 18:25:19 $
 #include	<vxLib.h>
 #include	<sysLib.h>
 #include	<string.h>
+#include 	<stdlib.h>
 #include	<rebootLib.h>
 #include	<logLib.h>
 #include	<drvSup.h>
 #include	<epicsVersion.h>
+#include	<errlog.h>
 #include	<devLib.h>
 #include	<dbAccess.h>
 #include	<epicsThread.h>
@@ -222,7 +221,7 @@ static int set_status(int card, int signal)
     status.Bits.EA_POSITION = (motorstat.word1.Bits.amp_enabled == YES) ? 1 : 0;
 
     sprintf(outbuf, "M%.2d61", (signal + 1));	// Get Commanded Position.
-    send_mess(card, outbuf, (char) NULL);
+    send_mess(card, outbuf, (char*) NULL);
     recv_mess(card, buff, 1);
 
     motorData = atof(buff);
@@ -272,7 +271,7 @@ static int set_status(int card, int signal)
     status.Bits.EA_HOME	      = 0;
 
     sprintf(outbuf, "M%.2d62", (signal + 1));
-    send_mess(card, outbuf, (char) NULL);	// Get Actual Position.
+    send_mess(card, outbuf, (char*) NULL);	// Get Actual Position.
     recv_mess(card, buff, 1);
     motorData = atof(buff);
     motor_info->encoder_position = (int32_t) motorData;
@@ -295,7 +294,7 @@ static int set_status(int card, int signal)
 	nodeptr->postmsgptr != 0)
     {
 	strcpy(buff, nodeptr->postmsgptr);
-	send_mess(card, buff, (char) NULL);
+	send_mess(card, buff, (char*) NULL);
 	nodeptr->postmsgptr = NULL;
     }
 
@@ -588,7 +587,7 @@ static int motorIsrEnable(int card)
     
     status = pdevLibVirtualOS->pDevConnectInterruptVME(
 	PmacInterruptVector + card,
-#if LT_EPICSBASE(3,14,8)
+#if LT_EPICSBASE(3,14,8,0)
         (void (*)()) motorIsr,
 #else
         (void (*)(void *)) motorIsr,
@@ -836,10 +835,10 @@ static int motor_init()
                 count = pmotor->response[0];
             }
 
-	    send_mess(card_index, "TYPE", (char) NULL);
+	    send_mess(card_index, "TYPE", (char*) NULL);
 	    recv_mess(card_index, (char *) pmotorState->ident, 1);
 
-	    send_mess(card_index, "VERSION", (char) NULL);
+	    send_mess(card_index, "VERSION", (char*) NULL);
 	    recv_mess(card_index, axis_pos, 1);
 	    strcat((char *) &pmotorState->ident, ", ");
 	    strcat((char *) &pmotorState->ident, axis_pos);
@@ -852,7 +851,7 @@ static int motor_init()
 		char outbuf[10];
 
 		sprintf(outbuf, "I%.2d00", (total_axis + 1));
-		send_mess(card_index, outbuf, (char) NULL);
+		send_mess(card_index, outbuf, (char*) NULL);
 		recv_mess(card_index, axis_pos, 1);
 		if (strcmp(axis_pos, "0") == 0)
 		    errind = true;
@@ -863,12 +862,12 @@ static int motor_init()
 
 		    // Set Ixx20=1 and Ixx21=0; control acceleration via Ixx19.
 		    sprintf(outbuf, "I%.2d20=1", (total_axis + 1));
-		    send_mess(card_index, outbuf, (char) NULL);
+		    send_mess(card_index, outbuf, (char*) NULL);
 		    sprintf(outbuf, "I%.2d21=0", (total_axis + 1));
-		    send_mess(card_index, outbuf, (char) NULL);
+		    send_mess(card_index, outbuf, (char*) NULL);
 
 		    sprintf(outbuf, "I%.2d08", (total_axis + 1));
-		    send_mess(card_index, outbuf, (char) NULL);
+		    send_mess(card_index, outbuf, (char*) NULL);
 		    recv_mess(card_index, axis_pos, 1);
 		    cntrl->pos_scaleFac[total_axis] = atof(axis_pos) * 32.0;
 		}

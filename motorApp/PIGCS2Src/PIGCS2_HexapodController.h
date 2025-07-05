@@ -7,10 +7,6 @@ FILENAME...     PIHexapodController.h
 * found in the file LICENSE that is included with this distribution.
 *************************************************************************
 
-Version:        $Revision: 1$
-Modified By:    $Author: Steffen Rau$
-Last Modified:  $Date: 05.11.2013 17:38:06$
-HeadURL:        $URL$
 
 Original Author: Steffen Rau 
 */

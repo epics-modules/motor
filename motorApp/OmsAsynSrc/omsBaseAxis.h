@@ -2,10 +2,6 @@
 FILENAME...     omsBaseAxis.h
 USAGE...        Pro-Dex OMS asyn motor base axes support
 
-Version:        $Revision$
-Modified By:    $Author$
-Last Modified:  $Date$
-HeadURL:        $URL$
 */
 
 /*
@@ -33,11 +29,12 @@ public:
     virtual asynStatus setPosition(double position);
     virtual asynStatus poll(bool *moving);
 
-    int getAxis(){return axisNo_;};
-    int isStepper(){return stepper;};
-    void setStepper(int val){stepper=val;};
-    int getLimitInvert(){return invertLimit;};
-    void setLimitInvert(int val){invertLimit=val;};
+    int getAxis(){return axisNo_;}
+    int isStepper(){return stepper;}
+    void setStepper(int val){stepper=val;}
+    int getLimitInvert(){return invertLimit;}
+    void setLimitInvert(int val){invertLimit=val;}
+    virtual asynStatus setEncoderRatio(double ratio){encoderRatio=ratio; return asynSuccess;}
     int card;
     int moveDelay;
     char axisChar;
@@ -49,6 +46,7 @@ private:
     int stepper;
     int invertLimit;
     epicsInt32 lastminvelo;
+    double encoderRatio;
 
 friend class omsBaseController;
 };

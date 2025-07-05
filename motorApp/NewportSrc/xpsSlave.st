@@ -8,6 +8,8 @@ option +r;
 /*option -w;*/
 
 #include "seqPVmacros.h"
+%%#define epicsExportSharedSymbols
+%%#include <shareLib.h>
 %%#include "XPS_C8_drivers.h"
 
 #define PORT 5001

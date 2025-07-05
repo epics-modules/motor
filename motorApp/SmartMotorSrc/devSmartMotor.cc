@@ -2,9 +2,6 @@
 FILENAME... devSmartMotor.cc
 USAGE...    Motor record driver level support for Animatics Corporation SmartMotors.
 
-Version:        $Revision: 1.2 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2008-03-14 20:21:56 $
 */
 
 /*
@@ -44,6 +41,7 @@ Last Modified:  $Date: 2008-03-14 20:21:56 $
  */
 
 #include <string.h>
+#include <errlog.h>
 
 #include "motorRecord.h"
 #include "motor.h"
@@ -72,7 +70,7 @@ extern struct driver_table SmartMotor_access;
 
 /* ----------------Create the dsets for devSmartMotor----------------- */
 static struct driver_table *drvtabptr;
-static long SmartMotor_init(void *);
+static long SmartMotor_init(int);
 static long SmartMotor_init_record(void *);
 static long SmartMotor_start_trans(struct motorRecord *);
 static RTN_STATUS SmartMotor_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -129,12 +127,11 @@ static struct board_stat **SmartMotor_cards;
 
 
 /* initialize device support for SmartMotor stepper motor */
-static long SmartMotor_init(void *arg)
+static long SmartMotor_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
         drvtabptr = &SmartMotor_access;
         (drvtabptr->init) ();

@@ -2,10 +2,6 @@
 FILENAME...     XPSMotorDriver.cpp
 USAGE...        Newport XPS EPICS asyn motor device driver
 
-Version:        $Revision: 19717 $
-Modified By:    $Author: sluiter $
-Last Modified:  $Date: 2009-12-09 10:21:24 -0600 (Wed, 09 Dec 2009) $
-HeadURL:        $URL: https://subversion.xor.aps.anl.gov/synApps/trunk/support/motor/vstub/motorApp/NewportSrc/XPSMotorDriver.cpp $
 */
  
 /*
@@ -99,6 +95,9 @@ Versions: Release 4-5 and higher.
 #include "xps_ftp.h"
 #include "XPSAxis.h"
 #include "XPSController.h"
+#include "XPS_C8_drivers.h"
+#include "xps_ftp.h"
+#include "XPSAxis.h"
 
 static const char *driverName = "XPSController";
 
@@ -159,18 +158,24 @@ XPSController::XPSController(const char *portName, const char *IPAddress, int IP
   movesDeferred_ = false;
 
   // Create controller-specific parameters
-  createParam(XPSMinJerkString,                asynParamFloat64, &XPSMinJerk_);
-  createParam(XPSMaxJerkString,                asynParamFloat64, &XPSMaxJerk_);
-  createParam(XPSProfileMaxVelocityString,     asynParamFloat64, &XPSProfileMaxVelocity_);
-  createParam(XPSProfileMaxAccelerationString, asynParamFloat64, &XPSProfileMaxAcceleration_);
-  createParam(XPSProfileMinPositionString,     asynParamFloat64, &XPSProfileMinPosition_);
-  createParam(XPSProfileMaxPositionString,     asynParamFloat64, &XPSProfileMaxPosition_);
-  createParam(XPSProfileGroupNameString,         asynParamOctet, &XPSProfileGroupName_);
-  createParam(XPSTrajectoryFileString,           asynParamOctet, &XPSTrajectoryFile_);
-  createParam(XPSStatusString,                   asynParamInt32, &XPSStatus_);
-  createParam(XPSStatusStringString,             asynParamOctet, &XPSStatusString_);
-  createParam(XPSTclScriptString,                asynParamOctet, &XPSTclScript_);
-  createParam(XPSTclScriptExecuteString,         asynParamInt32, &XPSTclScriptExecute_);
+  createParam(XPSMinJerkString,                       asynParamFloat64, &XPSMinJerk_);
+  createParam(XPSMaxJerkString,                       asynParamFloat64, &XPSMaxJerk_);
+  createParam(XPSPositionCompareModeString,           asynParamInt32,   &XPSPositionCompareMode_);
+  createParam(XPSPositionCompareMinPositionString,    asynParamFloat64, &XPSPositionCompareMinPosition_);
+  createParam(XPSPositionCompareMaxPositionString,    asynParamFloat64, &XPSPositionCompareMaxPosition_);
+  createParam(XPSPositionCompareStepSizeString,       asynParamFloat64, &XPSPositionCompareStepSize_);
+  createParam(XPSPositionComparePulseWidthString,     asynParamInt32,   &XPSPositionComparePulseWidth_);
+  createParam(XPSPositionCompareSettlingTimeString,   asynParamInt32,   &XPSPositionCompareSettlingTime_);
+  createParam(XPSProfileMaxVelocityString,            asynParamFloat64, &XPSProfileMaxVelocity_);
+  createParam(XPSProfileMaxAccelerationString,        asynParamFloat64, &XPSProfileMaxAcceleration_);
+  createParam(XPSProfileMinPositionString,            asynParamFloat64, &XPSProfileMinPosition_);
+  createParam(XPSProfileMaxPositionString,            asynParamFloat64, &XPSProfileMaxPosition_);
+  createParam(XPSProfileGroupNameString,              asynParamOctet,   &XPSProfileGroupName_);
+  createParam(XPSTrajectoryFileString,                asynParamOctet,   &XPSTrajectoryFile_);
+  createParam(XPSStatusString,                        asynParamInt32,   &XPSStatus_);
+  createParam(XPSStatusStringString,                  asynParamOctet,   &XPSStatusString_);
+  createParam(XPSTclScriptString,                     asynParamOctet,   &XPSTclScript_);
+  createParam(XPSTclScriptExecuteString,              asynParamInt32,   &XPSTclScriptExecute_);
 
   // This socket is used for polling by the controller and all axes
   pollSocket_ = TCP_ConnectToServer((char *)IPAddress, IPPort, XPS_POLL_TIMEOUT);
@@ -261,29 +266,73 @@ asynStatus XPSController::writeInt32(asynUser *pasynUser, epicsInt32 value)
     getStringParam(XPSTclScript_, (int)sizeof(fileName), fileName);
     if (fileName != NULL) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"Executing TCL script %s on XPS: %s\n", 
-		fileName, this->portName);
+                "Executing TCL script %s on XPS: %s\n", 
+                fileName, this->portName);
       status = TCLScriptExecute(pAxis->moveSocket_,
-				fileName,"0","0");
+                                fileName,"0","0");
       if (status != 0) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		  "TCLScriptExecute returned error %d, on XPS: %s\n", 
-		  status, this->portName);
-	status = asynError;
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+                  "TCLScriptExecute returned error %d, on XPS: %s\n", 
+                  status, this->portName);
+        status = asynError;
       }
     } else {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-              "TCL script name has not been set on XPS: %s\n", 
-              this->portName);
+                "TCL script name has not been set on XPS: %s\n", 
+                this->portName);
       status = asynError;
     }
+
+  } else if ((function == XPSPositionCompareMode_) ||
+             (function == XPSPositionComparePulseWidth_) ||
+             (function == XPSPositionCompareStepSize_)) {
+    status = pAxis->setPositionCompare();
+    status = pAxis->getPositionCompare();
+
   } else {
     /* Call base class method */
     status = asynMotorController::writeInt32(pasynUser, value);
   }
 
+  /* Do callbacks so higher layers see any changes */
+  pAxis->callParamCallbacks();
+
   return (asynStatus)status;
 
+}
+
+/** Called when asyn clients call pasynFloat64->write().
+  * \param[in] pasynUser asynUser structure that encodes the reason and address.
+  * \param[in] value Value to write. */
+asynStatus XPSController::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
+{
+  int function = pasynUser->reason;
+  XPSAxis *pAxis;
+  asynStatus status = asynError;
+  //static const char *functionName = "writeFloat64";
+
+  pAxis = getAxis(pasynUser);
+  if (!pAxis) return asynError;
+
+  /* Set the parameter and readback in the parameter library. */
+  status = pAxis->setDoubleParam(function, value);
+
+  if ((function == XPSPositionCompareMinPosition_) ||
+      (function == XPSPositionCompareMaxPosition_) ||
+      (function == XPSPositionCompareStepSize_)) {
+    status = pAxis->setPositionCompare();
+    status = pAxis->getPositionCompare();
+
+  } else {
+    /* Call base class method */
+    status = asynMotorController::writeFloat64(pasynUser, value);
+
+  }
+  /* Do callbacks so higher layers see any changes */
+  pAxis->callParamCallbacks();
+  
+  return status;
+    
 }
 
 /**
@@ -484,6 +533,7 @@ asynStatus XPSController::initializeProfile(size_t maxPoints, const char* ftpUse
 asynStatus XPSController::buildProfile()
 {
   FILE *trajFile;
+  char *trajectoryDirectory;
   int i, j; 
   int status;
   bool buildOK=true;
@@ -641,6 +691,7 @@ asynStatus XPSController::buildProfile()
     if (!inGroup[j]) continue;
     fprintf(trajFile,", %f, %f", pAxes_[j]->profilePostDistance_, 0.);
   }
+  fprintf(trajFile,"\n");
   fclose (trajFile);
   
   /* FTP the trajectory file from the local directory to the XPS */
@@ -650,7 +701,16 @@ asynStatus XPSController::buildProfile()
     sprintf(message, "Error calling ftpConnect, status=%d\n", status);
     goto done;
   }
-  status = ftpChangeDir(ftpSocket, TRAJECTORY_DIRECTORY);
+  if (strstr(firmwareVersion_, "C8")) {
+    trajectoryDirectory = XPS_C8_TRAJECTORY_DIRECTORY;
+  } else if (strstr(firmwareVersion_, "Q8")) {
+    trajectoryDirectory = XPS_Q8_TRAJECTORY_DIRECTORY;
+  } else {
+    buildOK = false;
+    sprintf(message, "Firmware version does not contain C8 or Q8=%s\n", firmwareVersion_);
+    goto done;
+  }
+  status = ftpChangeDir(ftpSocket, trajectoryDirectory);
   if (status) {
     buildOK = false;
     sprintf(message, "Error calling  ftpChangeDir, status=%d\n", status);

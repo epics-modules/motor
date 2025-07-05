@@ -3,9 +3,6 @@ FILENAME...	devMCDC2805.cc
 USAGE...	Motor record device level support for Intelligent Motion
 		Systems, Inc. MCDC2805 series of controllers.
 
-Version:	$Revision: 1.3 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:09:24 $
 */
 
 /*
@@ -39,6 +36,7 @@ Last Modified:	$Date: 2008-03-14 20:09:24 $
  */
 
 #include <string.h>
+#include <errlog.h>
 
 #include "motorRecord.h"
 #include "motor.h"
@@ -52,7 +50,7 @@ extern struct driver_table MCDC2805_access;
 
 /* ----------------Create the dsets for devMCDC2805----------------- */
 STATIC struct driver_table *drvtabptr;
-STATIC long MCDC2805_init(void *);
+STATIC long MCDC2805_init(int);
 STATIC long MCDC2805_init_record(void *);
 STATIC long MCDC2805_start_trans(struct motorRecord *);
 STATIC RTN_STATUS MCDC2805_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -106,12 +104,11 @@ static struct board_stat **MCDC2805_cards;
 
 
 /* initialize device support for MCDC2805 stepper motor */
-STATIC long MCDC2805_init(void *arg)
+STATIC long MCDC2805_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &MCDC2805_access;
 	(drvtabptr->init)();

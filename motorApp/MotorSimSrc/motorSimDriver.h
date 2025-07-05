@@ -55,6 +55,9 @@ private:
   double deferred_position_;
   int deferred_move_;
   int deferred_relative_;
+  double lastTimeSecs_;
+  int delayedDone_;
+  int lastDone_;
   
 friend class motorSimController;
 };

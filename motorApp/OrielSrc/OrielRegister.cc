@@ -2,9 +2,6 @@
 FILENAME...	OrielRegister.cc
 USAGE...	Register Oriel Encoder/Motor Mike motor device driver shell commands.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sullivan $
-Last Modified:	$Date: 2006-09-07 21:19:43 $
 */
 
 /*****************************************************************

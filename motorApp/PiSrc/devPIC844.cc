@@ -3,9 +3,6 @@ FILENAME...	devPIC844.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. C-844 motor controller.
 
-Version:	$Revision: 1.6 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:21:36 $
 */
 
 /*
@@ -41,6 +38,7 @@ Last Modified:	$Date: 2008-03-14 20:21:36 $
 
 
 #include <string.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -50,7 +48,7 @@ extern struct driver_table PIC844_access;
 
 /* ----------------Create the dsets for devPIC844----------------- */
 static struct driver_table *drvtabptr;
-static long PIC844_init(void *);
+static long PIC844_init(int);
 static long PIC844_init_record(void *);
 static long PIC844_start_trans(struct motorRecord *);
 static RTN_STATUS PIC844_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -104,12 +102,11 @@ static struct board_stat **PIC844_cards;
 
 
 /* initialize device support for PIC844 stepper motor */
-static long PIC844_init(void *arg)
+static long PIC844_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIC844_access;
 	(drvtabptr->init)();

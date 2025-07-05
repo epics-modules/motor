@@ -3,9 +3,6 @@ FILENAME...	devPIJEDS.cc
 USAGE...	Motor record device level support for Physik Instrumente (PI)
 		GmbH & Co. E-516 motor controller.
 
-Version:	$Revision: 1.2 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:20:03 $
 */
 
 /*
@@ -40,6 +37,7 @@ Last Modified:	$Date: 2008-03-14 20:20:03 $
 
 
 #include <string.h>
+#include <errlog.h>
 #include "motorRecord.h"
 #include "motor.h"
 #include "motordevCom.h"
@@ -50,7 +48,7 @@ extern struct driver_table PIJEDS_access;
 
 /* ----------------Create the dsets for devPIJEDS----------------- */
 static struct driver_table *drvtabptr;
-static long PIJEDS_init(void *);
+static long PIJEDS_init(int);
 static long PIJEDS_init_record(void *);
 static long PIJEDS_start_trans(struct motorRecord *);
 static RTN_STATUS PIJEDS_build_trans(motor_cmnd, double *, struct motorRecord *);
@@ -104,12 +102,11 @@ static struct board_stat **PIJEDS_cards;
 
 
 /* initialize device support for PIJEDS stepper motor */
-static long PIJEDS_init(void *arg)
+static long PIJEDS_init(int after)
 {
     long rtnval;
-    int after = (arg == 0) ? 0 : 1;
 
-    if (after == 0)
+    if (!after)
     {
 	drvtabptr = &PIJEDS_access;
 	(drvtabptr->init)();

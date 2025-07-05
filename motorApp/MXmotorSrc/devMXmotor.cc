@@ -2,9 +2,6 @@
 FILENAME...	devMXmotor.cc
 USAGE...	Motor record device level support for MX device driver.
 
-Version:	$Revision: 1.6 $
-Modified By:	$Author: sluiter $
-Last Modified:	$Date: 2008-03-14 20:12:06 $
 */
 
 /*
@@ -39,7 +36,7 @@ extern int MXmotor_num_cards;
 extern struct driver_table MXmotor_access;
 
 /* ----------------Create the dsets for devMXmotor----------------- */
-static long MXmotor_init(void *);
+static long MXmotor_init(int);
 static long MXmotor_init_record(void *);
 static long MXmotor_start_trans(struct motorRecord *);
 static RTN_STATUS MXmotor_build(motor_cmnd, double *, struct motorRecord *);
@@ -89,17 +86,15 @@ static struct board_stat **MXmotor_cards;
 static const char errmsg[] = {"\n\n!!!ERROR!!! - MX driver uninitialized.\n"};
 
 /* initialize device support for MX motor */
-static long MXmotor_init(void *after)
+static long MXmotor_init(int after)
 {
-    int before_after = (after == 0) ? 0 : 1;
-
     if (*(MXmotor_access.init_indicator) == NO)
     {
 	errlogSevPrintf(errlogMinor, "%s", errmsg);
     	return(ERROR);
     }
     else
-	return(motor_init_com(before_after, MXmotor_num_cards, &MXmotor_access,
+	return(motor_init_com(after, MXmotor_num_cards, &MXmotor_access,
 			      &MXmotor_cards));
 }
 

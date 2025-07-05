@@ -3,10 +3,6 @@ FILENAME...	motordevCom.h
 USAGE...	This file contains definitions and structures that
 		are common to all motor record device support modules.
 
-Version:	$Revision$
-Modified By:	$Author$
-Last Modified:	$Date$
-HeadURL:        $URL$
 */
 
 /*
