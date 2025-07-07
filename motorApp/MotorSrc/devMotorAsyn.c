@@ -174,9 +174,16 @@ static void init_controller(struct motorRecord *pmr, asynUser *pasynUser )
     int use_rel = (pmr->rtry != 0 && pmr->rmod != motorRMOD_I && (pmr->ueip || pmr->urip));
     int dval_non_zero_pos_near_zero = (fabs(pmr->dval) > rdbd) &&
                                       (pmr->mres != 0) && (fabs(position * pmr->mres) < rdbd);
-    epicsFloat64 eratio = pmr->mres / pmr->eres;
+    epicsFloat64 eratio;
     int initPos = 0;
     int status;
+
+    /* Don't let the encoder ratio be infinite */
+    if (pmr->eres == 0.0) {
+        eratio = 1.0;
+    } else {
+        eratio = pmr->mres / pmr->eres;
+    }
 
     /* Write encoder ratio to the driver.*/
     pPvt->pasynUserSync->reason = pPvt->driverReasons[motorEncRatio];

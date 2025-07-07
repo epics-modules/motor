@@ -47,13 +47,13 @@
     for new motor drivers.</p>
   <p>
     The APIs described here are mainly intended to be used with the EPICS motor record.
-    However the Model 2 and Model 3 drivers are actually independent of the motor record.
+    However, the Model 2 and Model 3 drivers are actually independent of the motor record.
     They implement standard EPICS asyn interfaces, and can in principle be used with
     any EPICS records, and do not require the motor record. However, the motor record
     currently provides the only "state machine" logic that keeps track of backlash,
-    enforcing soft limits, etc. Model 2 and 3 drivers to permit access to controller-specific
-    features that the motor record does not support, and this is typicaly implemented
-    using standard EPICS records (ao, ai, bo, bi, etc.)</p>
+    enforcing soft limits, etc. Model 2 and 3 drivers permit access to controller-specific
+    features that the motor record does not support, and this is typically implemented
+    using standard EPICS records (ao, ai, bo, bi, etc.).</p>
   <h2 id="Model1" style="text-align: left">
     Model 1 device and driver support</h2>
   <p>
@@ -65,13 +65,13 @@
     <li>The communication channel between device support and driver is custom for the
       motor record, and is very limited.</li>
     <li>The communication between device support and the driver is assumed to be via device-dependent
-      strings. Thus, it not suited to register-based controllers, or controllers where
-      the driver calls a vendor-library, rather than just sending strings to the controller.</li>
-    <li>Cannot use other records to with the driver, only the motor record. Cannot take
+      strings. Thus, it is not suited to register-based controllers, or controllers where
+      the driver calls a vendor library rather than just sending strings to the controller.</li>
+    <li>Cannot use other records with the driver, only the motor record. Cannot take
       advantage of controller-specific features not supported by the motor record.</li>
     <li>There is no provision for multi-axis coordination.</li>
     <li>There is only a single thread per controller <i>type</i>. This means that if a
-      system has, for example, many controllers of a given type then there is only one
+      system has, for example, many controllers of a given type, then there is only one
       polling thread for all of these controllers. This is because the poller must wait
       for each response before sending the next query. This can lead to significantly
       poorer performance compared to the Model 2 and Model 3 drivers, which have a separate
@@ -89,7 +89,7 @@
   <ul>
     <li>Uses standard asyn interfaces to communicate between device support and driver.</li>
     <li>There is only a single device-independent device support file (devMotorAsyn.c).</li>
-    <li>There is a single device-independent driver support file for asyn interfaces (drvMotorAsyn.).</li>
+    <li>There is a single device-independent driver support file for asyn interfaces (drvMotorAsyn.c).</li>
     <li>There is a device-dependent driver file below the asyn one. This driver must implement
       a set of functions that the device-independent driver file calls.</li>
     <li>Can use other records to talk to driver via asyn interfaces. This allows support
@@ -131,24 +131,24 @@
   </ul>
   <p>
     The Model 3 C++ API is based on the concept of two types of objects: a motor controller
-    and one or motor motor axes. The controller object supports the functions that apply
+    and one or more motor axes. The controller object supports the functions that apply
     to the entire controller. The controller supports one or more axes. The axis objects
     support the functions for a specific axis. These objects are implemented in the
-    device-dependent driver. There is a base class for each of these objects, asynMotorControlller
+    device-dependent driver. There is a base class for each of these objects, asynMotorController
     and asynMotorAxis.
   </p>
   <p>
     The asynMotorController base class has methods that handle much of the work in writing
     a driver, including implementing the asyn interfaces and calling the appropriate
     methods in the axis classes. A basic motor driver derived class will often only
-    need to implement only the constructor for the controller class, and can just use
+    need to implement the constructor for the controller class, and can just use
     the base class implementation of all other methods in the asynMotorController class.</p>
   <p>
     The asynMotorAxis base class on the other hand mainly provides dummy methods (asynMotorAxis::move(),
     asynMotorAxis::stop(), etc.). The main work in writing a Model 3 driver consists
     of implementing these methods in the derived class.</p>
   <p>
-    There are Model 3 drivers in the motor module for the simulation motor, Hytec XXXX,
+    There are Model 3 drivers in the motor module for the simulation motor, Hytec 8601,
     Newport XPS, Parker ACR series controllers (e.g. Aires), and the ACS MCB-4B.</p>
   <p>
     The ACS MCB-4B is the simplest Model 3 driver, consisting of only 336 lines of well-commented
@@ -172,7 +172,7 @@
           The number of axes on this controller.</li>
         <li><code>numParams</code><br />
           The number of controller-specific parameters for this controller.&nbsp; If the driver
-          only implements the standard motor record parameters then this is set to 0.</li>
+          only implements the standard motor record parameters, then this is set to 0.</li>
         <li><code>interfaceMask</code><br />
           A bit mask for extra asyn interfaces supported by this controller. It is not necessary
           to specify the interfaces that the base class implements, which includes asynOctet,
@@ -181,11 +181,11 @@
         <li><code>interruptMask</code><br />
           A bit mask for extra asyn interfaces supported by this controller that will do callbacks
           to device support. It is not necessary to specify the interfaces that the base class
-          implements, which includes asynOctet, asynInt32, asynFloat64, asynFloat64Array,
+          implements, which include asynOctet, asynInt32, asynFloat64, asynFloat64Array,
           and asynGenericPointer. Normally set to 0.</li>
         <li><code>asynFlags</code><br />
           asyn flags to use when creating the asyn port. This is normally (ASYN_CANBLOCK |
-          ASYN_MULTIDEVICE). ASYN_CANBLOCK means that the driver is "slow" and asynchonous
+          ASYN_MULTIDEVICE). ASYN_CANBLOCK means that the driver is "slow" and asynchronous
           device support must be used. ASYN_MULTIDEVICE means that the device supports more
           than one asyn address, i.e. more than one motor axis.</li>
         <li><code>autoConnect</code><br />
