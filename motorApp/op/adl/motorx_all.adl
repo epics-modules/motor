@@ -1,12 +1,12 @@
 
 file {
-	name="/home/oxygen/MOONEY/epics/synApps/support/motor/motorApp/op/adl/motorx_all.adl"
-	version=030107
+	name="/home/epics/support/motor/motorApp/op/adl/motorx_all.adl"
+	version=030117
 }
 display {
 	object {
 		x=188
-		y=29
+		y=31
 		width=450
 		height=875
 	}
@@ -85,6 +85,17 @@ display {
 		3cb420,
 		289315,
 		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=0
+		width=450
+		height=26
+	}
+	"basic attribute" {
+		clr=1
 	}
 }
 rectangle {
@@ -511,17 +522,6 @@ text {
 	limits {
 	}
 }
-composite {
-	object {
-		x=-2147483647
-		y=2147483496
-		width=1
-		height=1
-	}
-	"composite name"=""
-	children {
-	}
-}
 polyline {
 	object {
 		x=2
@@ -608,6 +608,7 @@ text {
 		clr=14
 		bclr=1
 	}
+	format="string"
 	limits {
 	}
 }
@@ -1248,17 +1249,6 @@ text {
 	textix="SET"
 	align="horiz. centered"
 }
-rectangle {
-	object {
-		x=0
-		y=0
-		width=450
-		height=26
-	}
-	"basic attribute" {
-		clr=1
-	}
-}
 "text entry" {
 	object {
 		x=0
@@ -1271,6 +1261,7 @@ rectangle {
 		clr=54
 		bclr=1
 	}
+	format="string"
 	limits {
 	}
 }
@@ -1317,6 +1308,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }

@@ -1,9 +1,0 @@
-# NewFocus PicoMotor Network Controller (PMNC) Device Driver support.
-device(motor,VME_IO,devPMNC87xx,"PMNC87xx")
-driver(drvPMNC87xx)
-registrar(NewFocusRegister)
-variable(drvPMNC87xxdebug)
-
-# NewFocus 874x controller support
-registrar(nf874xMotorRegister)
-

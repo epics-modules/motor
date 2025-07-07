@@ -1,4 +1,0 @@
-driver(drvIpac)
-registrar(tvme200Registrar)
-registrar(vipc616Registrar)
-registrar(tyGSOctalRegistrar)

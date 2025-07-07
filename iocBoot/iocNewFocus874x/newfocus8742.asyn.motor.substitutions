@@ -1,8 +1,0 @@
-file "$(MOTOR)/db/basic_asyn_motor.db"
-{
-pattern
-{P,	N,	M,	DTYP,		PORT,	ADDR,	C,	S,	DESC,	EGU,	DIR,	VELO,	VBAS,	ACCL,	BDST,	BVEL,	BACC,	MRES,	PREC,	DHLM,	DLLM,	INIT}
-{IOC:,	1,	"X",	"asynMotor",	M0, 	1,	0,	0,	"X", counts,	Pos,	100,	25,	1,	0,	0,	50,	1,	0,	0,	0,	""}
-{IOC:,	2,	"Y",	"asynMotor",	M0, 	2,	0,	0,	"Y", counts,	Pos,	100,	25,	1,	0,	0,	50,	1,	0,	0,	0,	""}
-}
-

@@ -2,13 +2,14 @@
 O.*/
 *.swp
 *BAK.adl
-/bin/
+bin/
 /db/
-/dbd/
-/html/
-/include/
-/lib/
-/templates/
+dbd/
+html/
+include/
+/iocsh/
+lib/
+templates/
 cdCommands
 envPaths
 dllPath*.bat
@@ -20,3 +21,4 @@ iocBoot/iocmotorSim/motor.substitutions.local
 auto_settings.sav*
 auto_positions.sav*
 .ccfxprepdir/
+*.local

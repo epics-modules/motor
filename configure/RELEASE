@@ -1,3 +1,53 @@
+# RELEASE - Location of external products
+#
+# Note: This file will be scanned to automatically generate
+#       include path definitions etc.
+#       The order of the following declarations will be retained
+#       within those definitions.
+#
+# Note that "#!" marks lines that can be uncommented.
+#
+# Add your declarations here
+
+SUPPORT=/path/to/support
+
+# If any motor controller communication mechanism besides 
+# the VME backplane is required, then ASYN must be defined.
+# Recommended ASYN release: R4-35
+ASYN=$(SUPPORT)/asyn-R4-35
+
+# Need the sequencer and the busy record for trajectory scanning
+# Recommended SNCSEQ release: R2.2.6
+SNCSEQ=$(SUPPORT)/seq-2-2-6
+# Recommended BUSY release: R1-7-1
+BUSY=$(SUPPORT)/busy-R1-7-1
+
+# Recommended EPICS release: R3.15.6
+EPICS_BASE=/path/to/base
+
+# The following must be defined for motorMXmotor
+#!MX=$(SUPPORT)/mx/mx
+
+# IPAC is required to build motorHytec
+# Recommended IPAC release: R2-15
+IPAC=$(SUPPORT)/ipac-R2-15
+
+# Script module needed to build motorScriptMotor
+#!LUA=$(SUPPORT)/lua-R1-3
+
+# Modbus module needed to build motorAMCI's example IOC
+# Required MODBUS release: R2-11 or later
+#!MODBUS=$(SUPPORT)/modbus-R2-11
+
+# The following is only needed for the motor examples in iocBoot.
+#!MOTOR=$(TOP)
+
+# These lines allow developers to override these RELEASE settings
+# without having to modify this file directly.
+-include $(TOP)/../RELEASE.local
+-include $(TOP)/../RELEASE.$(EPICS_HOST_ARCH).local
+-include $(TOP)/configure/RELEASE.local
+
 ASYN=$(SUPPORT)/asyn/master
 AUTOSAVE=$(SUPPORT)/autosave/master
 BUSY=$(SUPPORT)/busy/master
@@ -12,3 +62,8 @@ LUA=$(SUPPORT)/lua/master
 
 include $(TOP)/../../../ISIS_CONFIG
 -include $(TOP)/../../../ISIS_CONFIG.$(EPICS_HOST_ARCH)
+
+
+
+
+>>>>>>> R7-3

@@ -60,7 +60,6 @@ asynMotorAxis::asynMotorAxis(class asynMotorController *pC, int axisNo)
   // Create the asynUser, connect to this axis
   pasynUser_ = pasynManager->createAsynUser(NULL, NULL);
   pasynManager->connectDevice(pasynUser_, pC->portName, axisNo);
-
   // Initialize some parameters
   setIntegerParam(pC_->motorPowerAutoOnOff_, 0);
   setDoubleParam(pC_->motorPowerOffDelay_, 0.);

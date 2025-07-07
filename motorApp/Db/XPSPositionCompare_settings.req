@@ -1,6 +1,0 @@
-$(P)$(R)PositionCompareMode
-$(p)$(r)pOSITIONcompareMinPosition
-$(P)$(R)PositionCompareMaxPosition
-$(P)$(R)PositionCompareStepSize
-$(P)$(R)PositionComparePulseWidth
-$(P)$(R)PositionCompareSettlingTime

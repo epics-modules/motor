@@ -1,6 +1,0 @@
-# ThorLabs Piezo Device Driver support.
-device(motor,VME_IO,devMDT695,"MDT695")
-driver(drvMDT695)
-registrar(ThorLabsRegister)
-variable(drvMDT695debug)
-

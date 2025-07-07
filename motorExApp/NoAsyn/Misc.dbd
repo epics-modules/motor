@@ -1,5 +1,0 @@
-registrar(motorUtilRegister)
-variable(motorRecordDebug)
-#variable(motordrvComdebug)
-#variable(motorUtil_debug)
-

@@ -1,7 +1,0 @@
-record(bo,"$(P)$(R)") {
-    field(DTYP,"asynInt32")
-    field(OUT,"@asyn($(PORT) 0)ACR_READ_BINARY_IO")
-    field(ZNAM, "Done")
-    field(ONAM, "Read")
-    field(SCAN, "$(SCAN)")
-}

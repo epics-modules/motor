@@ -1,0 +1,3 @@
+# FILE... motor_settings.req
+
+file basic_motor_settings.req P=$(P),M=$(M)

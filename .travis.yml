@@ -1,27 +1,143 @@
-sudo: false
-dist: trusty
-language: c
-compiler:
-  - gcc
+# .travis.xml for use with EPICS Base ci-scripts
+# (see: https://github.com/epics-base/ci-scripts)
+
+language: cpp
+compiler: gcc
+dist: xenial
+
 cache:
   directories:
-    - $HOME/.cache
+  - $HOME/.cache
+
+env:
+  global:
+    - SETUP_PATH=.ci-local:.ci
+    # for the sequencer on Windows
+    - CHOCO=re2c
+
 addons:
   apt:
     packages:
+    # for all EPICS builds
     - libreadline6-dev
     - libncurses5-dev
     - perl
+    # for clang compiler
     - clang
+    # for mingw builds (32bit and 64bit)
     - g++-mingw-w64-i686
+    - g++-mingw-w64-x86-64
+    # for RTEMS cross builds
+    - qemu-system-x86
+  homebrew:
+    packages:
+    # for the sequencer
     - re2c
-env:
- - BASE=3.14 STATIC=shared SEQ=2.2.4 ASYN=4-31 IPAC=2.14
- - BASE=3.14 STATIC=static SEQ=2.2.4 ASYN=4-31 IPAC=2.14
- - BASE=R3.15.5 STATIC=shared SEQ=2.2.4 ASYN=4-31 IPAC=2.14
- - BASE=R3.15.5 STATIC=static SEQ=2.2.4 ASYN=4-31 IPAC=2.14
- - BASE=3.16 STATIC=shared RTEMS=4.10 SEQ=2.2.4 ASYN=4-31 IPAC=2.14
- - BASE=3.16 STATIC=shared CMPLR=clang WINE=32 SEQ=2.2.4 ASYN=4-31 IPAC=
- - BASE=3.16 STATIC=static WINE=32 SEQ=2.2.4 ASYN=4-31 IPAC=
-install: ./.ci/travis-prepare.sh
-script: make
+    update: true
+
+install:
+  - python .ci/cue.py prepare
+  # ugly hacks go here:
+  - python .ci-local/travis/post-prepare.py
+
+script:
+  - python .ci/cue.py build
+  - python .ci/cue.py test
+  - python .ci/cue.py test-results
+
+# If you need to do more during install and build,
+# add a local directory to your module and do e.g.
+#  - ./.ci-local/travis/install-extras.sh
+
+# Define build jobs
+
+# Well-known variables to use
+# SET      source setup file
+# EXTRA    content will be added to make command line
+# STATIC   set to YES for static build (default: NO)
+# TEST     set to NO to skip running the tests (default: YES)
+# VV       set to make build scripts verbose (default: unset)
+
+# Usually from setup files, but may be specified or overridden
+#  on a job line
+# MODULES  list of dependency modules
+# BASE     branch or release tag name of the EPICS Base to use
+# <MODULE> branch or release tag for a specific module
+# ...      see README for setup file syntax description
+
+jobs:
+  include:
+
+# Older Base releases
+
+  - env: SET=base3-14
+
+  - env: SET=base3-14 BCFG=static
+
+  - env: SET=base3-15
+
+  - env: SET=base3-15 BCFG=static
+
+# Default gcc, static build
+
+  - env: SET=base7-0
+
+  - env: SET=base7-0 BCFG=static
+
+# Default clang build
+
+  - env: SET=base7-0
+    compiler: clang
+
+  - env: SET=base7-0 EXTRA="CMD_CXXFLAGS=-std=c++11"
+    compiler: clang
+
+# Trusty: compiler versions very close to RHEL 7
+
+  - env: SET=base7-0
+    dist: trusty
+
+  - env: SET=base7-0 BCFG=debug
+    dist: trusty
+
+# Other gcc versions (added as an extra package)
+
+  - env: SET=base7-0
+    compiler: gcc-6
+    addons: { apt: { packages: ["g++-6"], sources: ["ubuntu-toolchain-r-test"] } }
+
+  - env: SET=base7-0
+    compiler: gcc-7
+    addons: { apt: { packages: ["g++-7"], sources: ["ubuntu-toolchain-r-test"] } }
+
+# Cross-compilations to Windows using MinGW and WINE
+    
+  - env: SET=base7-0 WINE=32 TEST=NO BCFG=static
+
+  - env: SET=base7-0 WINE=64 TEST=NO
+
+# Windows builds
+
+  - env: SET=base7-0 
+    os: windows
+    compiler: vs2017
+
+  - env: SET=base7-0 BCFG=static
+    os: windows
+    compiler: vs2017
+
+  - env: SET=base7-0 BCFG=debug
+    os: windows
+    compiler: vs2017
+
+# MacOS build
+
+  - env: SET=base7-0
+    os: osx
+    compiler: clang
+
+# Cross-compilation to RTEMS
+
+  - env: SET=base7-0 RTEMS=4.9
+
+  - env: SET=base7-0 RTEMS=4.10

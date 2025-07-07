@@ -1,9 +1,0 @@
-file "$(MOTOR)/db/basic_motor.db"
-{
-pattern
-{P,     N,  M,        DTYP,      C,  S,  DESC,          EGU,      DIR,  VELO,  VBAS,  ACCL,  BDST,  BVEL,  BACC,  MRES,  PREC,  DHLM,  DLLM,  INIT}
-{IOC:,  1,  "m$(N)",  "MM4000",  0,  0,  "motor $(N)",  degrees,  Pos,  1,     .1,    .2,    0,     1,     .2,    0.01,  5,     100,   -100,  ""}
-{IOC:,  2,  "m$(N)",  "MM4000",  0,  1,  "motor $(N)",  degrees,  Pos,  1,     .1,    .2,    0,     1,     .2,    0.01,  5,     100,   -100,  ""}
-{IOC:,  3,  "m$(N)",  "MM4000",  0,  2,  "motor $(N)",  degrees,  Pos,  1,     .1,    .2,    0,     1,     .2,    0.01,  5,     100,   -100,  ""}
-{IOC:,  4,  "m$(N)",  "MM4000",  0,  3,  "motor $(N)",  degrees,  Pos,  1,     .1,    .2,    0,     1,     .2,    0.01,  5,     100,   -100,  ""}
-}

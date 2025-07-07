@@ -10,6 +10,7 @@ record(motor, "$(P)$(M)") {
   field(VELO, "$(VELO)")
   field(VBAS, "$(VBAS)")
   field(ACCL, "$(ACCL)")
+  field(ACCU, "$(ACCU=0)")
   field(BDST, "$(BDST)")
   field(BVEL, "$(BVEL)")
   field(BACC, "$(BACC)")
@@ -21,6 +22,7 @@ record(motor, "$(P)$(M)") {
   field(DLLM, "$(DLLM)")
   field(INIT, "$(INIT)")
   field(RTRY, "$(RTRY=10)")
+  field(RSTM, "$(RSTM=NearZero)")
   field(TWV, "1")
   field(SDIS, "$(P)$(M)_able.VAL")
   # ISIS local archiving and alarm

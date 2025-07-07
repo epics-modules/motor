@@ -1,8 +1,0 @@
-file "$(TOP)/db/basic_asyn_motor.db"
-{
-  pattern
-  {P,       M,  DTYP,        PORT,   ADDR,  DESC,	EGU,  DIR,  VMAX,  VELO,  VBAS,  ACCL,  BDST,     BVEL,  BACC,  MRES,   PREC,  DHLM,       DLLM,   INIT}
-  {IOC:,    m1, "asynMotor", Hydra1,  0,    "m1",   degrees,  Pos,  15.,   3.,    .05,    .5,    0,       1.0,    2,	0.01,     2,   175,       -175,     ""}
-  {IOC:,    m2, "asynMotor", Hydra1,  1,    "m2",   degrees,  Pos,  15.,   3.,    .05,    .5,    0,       1.0,    2,	0.01,     2,   175,       -175,     ""}
-}
-
