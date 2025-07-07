@@ -1,6 +1,6 @@
 [submodule "modules/motorNewport"]
 	path = modules/motorNewport
-	url = https://github.com/epics-motor/motorNewport.git
+	url = https://github.com/ISISComputingGroup/motorNewport.git
 [submodule "modules/motorOms"]
 	path = modules/motorOms
 	url = https://github.com/epics-motor/motorOms.git
@@ -24,7 +24,7 @@
 	url = https://github.com/epics-motor/motorKohzu.git
 [submodule "modules/motorMclennan"]
 	path = modules/motorMclennan
-	url = https://github.com/epics-motor/motorMclennan.git
+	url = https://github.com/ISISComputingGroup/motorMclennan.git
 [submodule "modules/motorMicroMo"]
 	path = modules/motorMicroMo
 	url = https://github.com/epics-motor/motorMicroMo.git
@@ -78,13 +78,13 @@
 	url = https://github.com/epics-motor/motorAMCI.git
 [submodule "modules/motorPIGCS2"]
 	path = modules/motorPIGCS2
-	url = https://github.com/epics-motor/motorPIGCS2.git
+	url = https://github.com/ISISComputingGroup/motorPIGCS2.git
 [submodule "modules/motorSmarAct"]
 	path = modules/motorSmarAct
 	url = https://github.com/epics-motor/motorSmarAct.git
 [submodule "modules/motorMotorSim"]
 	path = modules/motorMotorSim
-	url = https://github.com/epics-motor/motorMotorSim.git
+	url = https://github.com/ISISComputingGroup/motorMotorSim.git
 [submodule "modules/motorMXmotor"]
 	path = modules/motorMXmotor
 	url = https://github.com/epics-motor/motorMXmotor.git
