@@ -103,6 +103,8 @@
 [submodule "modules/motorSM300"]
 	path = modules/motorSM300
 	url = https://github.com/ISISComputingGroup/motorSM300.git
+        branch = main
 [submodule "modules/motorLinMot"]
 	path = modules/motorLinMot
 	url = https://github.com/ISISComputingGroup/motorLinMot.git
+        branch = main
