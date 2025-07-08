@@ -1,5 +1,0 @@
-# LinMot motor controller support.
-device(motor,VME_IO, devLinMot, "LinMot")
-driver(drvLinMot)
-registrar(LinMotRegister)
-variable(drvLinMotDebug)
