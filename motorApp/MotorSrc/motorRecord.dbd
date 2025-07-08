@@ -848,7 +848,7 @@ recordtype(motor) {
 		interest(2)
 	}
         field(RSTM,DBF_MENU) {
-                initial("NearZero")
+                initial("Never")
                 prompt("Restore Mode")
                 promptgroup(GUI_COMMON)
                 interest(2)

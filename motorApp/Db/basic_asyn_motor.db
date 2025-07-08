@@ -18,6 +18,7 @@ record(motor,"$(P)$(M)")
 	field(DLLM,"$(DLLM)")
 	field(INIT,"$(INIT)")
 	field(RTRY,"$(RTRY=10)")
+	field(RSTM,"$(RSTM=Never)")
 	field(TWV,"1")
 	# ISIS local archiving and alarm
 	info(archive, "0.02 VAL RBV DVAL OFF MSTA DIR CNEN MOVN DMOV MISS RCNT")
@@ -60,6 +61,7 @@ record(ao,"$(P)$(M)Resolution") {
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT),$(ADDR))MOTOR_REC_RESOLUTION")
     field(PREC, "$(PREC)")
+}
 
 # ISIS enable/disable
 record(bo, "$(P)$(M)_able") {

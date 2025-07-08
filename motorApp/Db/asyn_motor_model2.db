@@ -22,7 +22,7 @@ record(motor, "$(P)$(M)") {
   field(DLLM, "$(DLLM)")
   field(INIT, "$(INIT)")
   field(RTRY, "$(RTRY=10)")
-  field(RSTM, "$(RSTM=NearZero)")
+  field(RSTM, "$(RSTM=Never)")
   field(TWV, "1")
   field(SDIS, "$(P)$(M)_able.VAL")
 }

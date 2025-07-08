@@ -194,7 +194,7 @@ motor_init_record_com(struct motorRecord *mr, int brdcnt, struct driver_table *t
     double ep_mp[2];            /* encoder pulses, motor pulses */
     int rtnStat;
     msta_field msta;
-    bool use_rel = false; //(mr->rtry != 0 && mr->rmod != motorRMOD_I && (mr->ueip || mr->urip));
+    bool use_rel = (mr->rtry != 0 && mr->rmod != motorRMOD_I && (mr->ueip || mr->urip));
 
     /* allocate space for private field - an motor_trans structure */
     mr->dpvt = (struct motor_trans *) malloc(sizeof(struct motor_trans));

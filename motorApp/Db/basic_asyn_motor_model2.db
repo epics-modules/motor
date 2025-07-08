@@ -18,4 +18,5 @@ record(motor,"$(P)$(M)")
 	field(DLLM,"$(DLLM)")
 	field(INIT,"$(INIT)")
 	field(TWV,"1")
+	field(RSTM,"$(RSTM=Never)")
 }

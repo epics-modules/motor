@@ -17,6 +17,7 @@ grecord(motor,"$(P)$(M)")
 	field(DHLM,"$(DHLM)")
 	field(DLLM,"$(DLLM)")
 	field(INIT,"$(INIT)")
+    field(RSTM,"$(RSTM=Never)")
 	field(TWV,"1")
 	# ISIS local archiving and alarm
 	info(archive, "0.02 VAL RBV DVAL OFF MSTA DIR CNEN MOVN DMOV MISS RCNT")
