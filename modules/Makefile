@@ -43,7 +43,6 @@ SUBMODULES += motorSmartMotor
 SUBMODULES += motorThorLabs
 
 ## isis facility extras
-SUBMODULES += motorSM300
 SUBMODULES += motorLinMot
 
 # Allow sites to add extra submodules

@@ -100,9 +100,6 @@
 [submodule ".ci"]
 	path = .ci
 	url = https://github.com/epics-base/ci-scripts
-[submodule "modules/motorSM300"]
-	path = modules/motorSM300
-	url = https://github.com/ISISComputingGroup/motorSM300.git
 [submodule "modules/motorLinMot"]
 	path = modules/motorLinMot
 	url = https://github.com/ISISComputingGroup/motorLinMot.git
