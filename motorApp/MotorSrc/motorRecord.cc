@@ -251,6 +251,7 @@ static void load_pos_new_rval(motorRecord *);
 static void load_pos_new_softlimits(motorRecord *);
 static void load_pos_load_pos(motorRecord *);
 static void check_speed_and_resolution(motorRecord *);
+static void new_mres_rhlm_rllm(motorRecord * pmr);
 static void set_dial_highlimit(motorRecord *);
 static void set_dial_lowlimit(motorRecord *);
 static void set_user_highlimit(motorRecord *);
@@ -3618,41 +3619,8 @@ velcheckB:
                 pmr->vmax = temp_dbl;
                 db_post_events(pmr, &pmr->vmax, DBE_VAL_LOG);
             }
-            /* We may have new MRES */
-            if (pmr->mres > 0)
-            {
-                if (pmr->dllm != (temp_dbl = devSupRawToDial(pmr, pmr->rllm)))
-                {
-                    pmr->dllm = temp_dbl;
-                    db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
-                }
-                if (pmr->dhlm != (temp_dbl = devSupRawToDial(pmr, pmr->rhlm)))
-                {
-                    pmr->dhlm = temp_dbl;
-                    db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
-                }
-            }
-            else
-            {
-                // MRES < 0 swaps DHLM DLLM
-                if (pmr->dhlm != (temp_dbl = devSupRawToDial(pmr, pmr->rllm)))
-                {
-                    pmr->dhlm = temp_dbl;
-                    db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
-                }
-                if (pmr->dllm != (temp_dbl = devSupRawToDial(pmr, pmr->rhlm)))
-                {
-                    pmr->dllm = temp_dbl;
-                    db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
-                }
-                // done below set_userlimits(pmr);
-                // done below db_post_events(pmr, &pmr->hlm, DBE_VAL_LOG);
-                // done below db_post_events(pmr, &pmr->llm, DBE_VAL_LOG);
-            }
-            set_userlimits(pmr);
-            db_post_events(pmr, &pmr->hlm, DBE_VAL_LOG);
-            db_post_events(pmr, &pmr->llm, DBE_VAL_LOG);
         }
+        new_mres_rhlm_rllm(pmr);
         break;
 
         /* new srev: make mres agree */
@@ -4784,6 +4752,41 @@ static void check_speed_and_resolution(motorRecord * pmr)
         pmr->hvel = pmr->vbas;
     else
         range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
+}
+
+static void new_mres_rhlm_rllm(motorRecord * pmr)
+{
+    double temp_dbl;
+    if (pmr->mres > 0)
+    {
+        if (pmr->dllm != (temp_dbl = devSupRawToDial(pmr, pmr->rllm)))
+        {
+            pmr->dllm = temp_dbl;
+            db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
+        }
+        if (pmr->dhlm != (temp_dbl = devSupRawToDial(pmr, pmr->rhlm)))
+        {
+            pmr->dhlm = temp_dbl;
+            db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
+        }
+    }
+    else
+    {
+        // MRES < 0 swaps DHLM DLLM
+        if (pmr->dhlm != (temp_dbl = devSupRawToDial(pmr, pmr->rllm)))
+        {
+            pmr->dhlm = temp_dbl;
+            db_post_events(pmr, &pmr->dhlm, DBE_VAL_LOG);
+        }
+        if (pmr->dllm != (temp_dbl = devSupRawToDial(pmr, pmr->rhlm)))
+        {
+            pmr->dllm = temp_dbl;
+            db_post_events(pmr, &pmr->dllm, DBE_VAL_LOG);
+        }
+    }
+    set_userlimits(pmr);
+    db_post_events(pmr, &pmr->hlm, DBE_VAL_LOG);
+    db_post_events(pmr, &pmr->llm, DBE_VAL_LOG);
 }
 
 /*
