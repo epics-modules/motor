@@ -377,14 +377,14 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
         status_.encoderPosition = value;
     }
   } else if (function == pC_->motorHighLimitRO_) {
-    if (value != status_.MotorConfigRO.motorHighLimitRaw) {
+    if (value != status_.MotorSoftLimits.motorHighLimitRaw) {
       statusChanged_ = 1;
-      status_.MotorConfigRO.motorHighLimitRaw = value;
+      status_.MotorSoftLimits.motorHighLimitRaw = value;
     }
   } else if (function == pC_->motorLowLimitRO_) {
-    if (value != status_.MotorConfigRO.motorLowLimitRaw) {
+    if (value != status_.MotorSoftLimits.motorLowLimitRaw) {
       statusChanged_ = 1;
-      status_.MotorConfigRO.motorLowLimitRaw = value;
+      status_.MotorSoftLimits.motorLowLimitRaw = value;
     }
   }
   // Call the base class method

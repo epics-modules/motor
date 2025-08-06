@@ -691,8 +691,8 @@ asynStatus asynMotorController::readGenericPointer(asynUser *pasynUser, void *po
             "highLimit=%f lowLimit=%f\n",
             driverName, functionName,  axisNo, pStatus->status, pStatus->position,
             pStatus->encoderPosition, pStatus->velocity,
-            pStatus->MotorConfigRO.motorHighLimitRaw,
-            pStatus->MotorConfigRO.motorLowLimitRaw);
+            pStatus->MotorSoftLimits.motorHighLimitRaw,
+            pStatus->MotorSoftLimits.motorLowLimitRaw);
   return status;
 }
 

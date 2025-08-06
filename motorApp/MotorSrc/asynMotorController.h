@@ -144,10 +144,10 @@
 #define STATUS_BIT_HOMED           (1<<14)
 
 
-typedef struct MotorConfigRO {
+typedef struct MotorSoftLimits {
   double motorHighLimitRaw;   /**< Read only high soft limit from controller */
   double motorLowLimitRaw;    /**< Read only low soft limit from controller */
-} MotorConfigRO;
+} MotorSoftLimits;
 
 /** The structure that is passed back to devMotorAsyn when the status changes. */
 typedef struct MotorStatus {
@@ -158,7 +158,7 @@ typedef struct MotorStatus {
   epicsUInt32 flagsValue;    /**< Word containing flag bits: The Value  */
   epicsUInt32 flagsWritten;  /**< Word containing flag bits: Which bits had been written by the controller  */
   int         positionWritten; /**< Commanded motor position is valid == has been written by the driver */
-  struct MotorConfigRO MotorConfigRO;
+  struct MotorSoftLimits MotorSoftLimits;
 } MotorStatus;
 
 #define MOVE_TYPE_ABS 1

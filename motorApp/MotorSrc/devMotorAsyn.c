@@ -235,8 +235,8 @@ static long findDrvInfo(motorRecord *pmotor, asynUser *pasynUser, char *drvInfoS
 static void new_RO_soft_limits(struct motorRecord *pmr)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
-    double rawHighLimitRO = pPvt->status.MotorConfigRO.motorHighLimitRaw;
-    double rawLowLimitRO  = pPvt->status.MotorConfigRO.motorLowLimitRaw;
+    double rawHighLimitRO = pPvt->status.MotorSoftLimits.motorHighLimitRaw;
+    double rawLowLimitRO  = pPvt->status.MotorSoftLimits.motorLowLimitRaw;
     memset(&pmr->priv->softLimitRO, 0, sizeof(pmr->priv->softLimitRO));
     /*  Raw high limit must be higher than raw low limit */
     if (rawHighLimitRO > rawLowLimitRO)
@@ -266,8 +266,8 @@ static void new_RO_soft_limits(struct motorRecord *pmr)
     Debug(pmr,3, "update_soft_limits %s RawHLM_RO=%f RawLLM_RO=%f valid=%d "
           "DHLM_RO=%f DLLM_RO=%f\n",
           pmr->name,
-          pPvt->status.MotorConfigRO.motorHighLimitRaw,
-          pPvt->status.MotorConfigRO.motorLowLimitRaw,
+          pPvt->status.MotorSoftLimits.motorHighLimitRaw,
+          pPvt->status.MotorSoftLimits.motorLowLimitRaw,
           pmr->priv->softLimitRO.motorDialLimitsValid,
           pmr->priv->softLimitRO.motorDialHighLimitRO,
           pmr->priv->softLimitRO.motorDialLowLimitRO);
@@ -533,9 +533,9 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
         }
 
         rc = CALLBACK_DATA;
-        if ((pPvt->status.MotorConfigRO.motorHighLimitRaw !=
+        if ((pPvt->status.MotorSoftLimits.motorHighLimitRaw !=
              pmr->priv->last.motorHighLimitRaw) ||
-            (pPvt->status.MotorConfigRO.motorLowLimitRaw !=
+            (pPvt->status.MotorSoftLimits.motorLowLimitRaw !=
              pmr->priv->last.motorLowLimitRaw))
         {
             new_RO_soft_limits(pmr);
