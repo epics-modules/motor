@@ -232,12 +232,12 @@ static long findDrvInfo(motorRecord *pmotor, asynUser *pasynUser, char *drvInfoS
     return(0);
 }
 
-static void new_RO_soft_limits(struct motorRecord *pmr)
+static void new_motor_soft_limits(struct motorRecord *pmr, int isRW)
 {
     motorAsynPvt *pPvt = (motorAsynPvt *)pmr->dpvt;
     double rawHighLimitRO = pPvt->status.MotorSoftLimits.motorHighLimitRaw;
     double rawLowLimitRO  = pPvt->status.MotorSoftLimits.motorLowLimitRaw;
-    memset(&pmr->priv->softLimitRO, 0, sizeof(pmr->priv->softLimitRO));
+    memset(&pmr->priv->motorSoftLimits, 0, sizeof(pmr->priv->motorSoftLimits));
     /*  Raw high limit must be higher than raw low limit */
     if (rawHighLimitRO > rawLowLimitRO)
     {
@@ -255,22 +255,28 @@ static void new_RO_soft_limits(struct motorRecord *pmr)
             dialLowLimitRO  = rawLowLimitRO * mres;
         }
         if (pmr->mres < 0) {
-            pmr->priv->softLimitRO.motorDialLowLimitRO = dialHighLimitRO;
-            pmr->priv->softLimitRO.motorDialHighLimitRO = dialLowLimitRO;
+            pmr->priv->motorSoftLimits.motorDialLowLimit = dialHighLimitRO;
+            pmr->priv->motorSoftLimits.motorDialHighLimit = dialLowLimitRO;
         } else {
-            pmr->priv->softLimitRO.motorDialHighLimitRO = dialHighLimitRO;
-            pmr->priv->softLimitRO.motorDialLowLimitRO = dialLowLimitRO;
+            pmr->priv->motorSoftLimits.motorDialHighLimit = dialHighLimitRO;
+            pmr->priv->motorSoftLimits.motorDialLowLimit = dialLowLimitRO;
         }
-        pmr->priv->softLimitRO.motorDialLimitsValid = 1;
+        if (isRW)
+          pmr->priv->motorSoftLimits.motorRWdialLimitsValid = 1;
+        else
+          pmr->priv->motorSoftLimits.motorROdialLimitsValid = 1;
+    } else if (!rawHighLimitRO && !rawLowLimitRO && isRW) {
+        pmr->priv->motorSoftLimits.motorRWdialLimitsValid = 1;
     }
-    Debug(pmr,3, "update_soft_limits %s RawHLM_RO=%f RawLLM_RO=%f valid=%d "
-          "DHLM_RO=%f DLLM_RO=%f\n",
+    Debug(pmr,3, "new_soft_limits %s RawHLM_RO=%f RawLLM_RO=%f ROvalid=%d "
+          "RWvalid=%d DHLM_RO=%f DLLM_RO=%f\n",
           pmr->name,
           pPvt->status.MotorSoftLimits.motorHighLimitRaw,
           pPvt->status.MotorSoftLimits.motorLowLimitRaw,
-          pmr->priv->softLimitRO.motorDialLimitsValid,
-          pmr->priv->softLimitRO.motorDialHighLimitRO,
-          pmr->priv->softLimitRO.motorDialLowLimitRO);
+          pmr->priv->motorSoftLimits.motorROdialLimitsValid,
+          pmr->priv->motorSoftLimits.motorRWdialLimitsValid,
+          pmr->priv->motorSoftLimits.motorDialHighLimit,
+          pmr->priv->motorSoftLimits.motorDialLowLimit);
     pmr->priv->last.motorHighLimitRaw = rawHighLimitRO;
     pmr->priv->last.motorLowLimitRaw = rawLowLimitRO;
 }
@@ -456,7 +462,7 @@ static long init_record(struct motorRecord * pmr )
         /* Put in the bits that had been written by the controller */
         pmr->mflg &= (~ pPvt->status.flagsWritten);
         pmr->mflg |= pPvt->status.flagsValue;
-        new_RO_soft_limits(pmr);
+        new_motor_soft_limits(pmr, pmr->mflg & MF_RW_SOFT_LIMITS);
         load_pos_if_needed(pmr, pasynUser);
     }
     /* Do not need to manually retrieve the new status values, as if they are
@@ -538,7 +544,7 @@ CALLBACK_VALUE update_values(struct motorRecord * pmr)
             (pPvt->status.MotorSoftLimits.motorLowLimitRaw !=
              pmr->priv->last.motorLowLimitRaw))
         {
-            new_RO_soft_limits(pmr);
+            new_motor_soft_limits(pmr, pmr->mflg & MF_RW_SOFT_LIMITS);
             rc = CALLBACK_DATA_SOFT_LIMITS;
         }
 

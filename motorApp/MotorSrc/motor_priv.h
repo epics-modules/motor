@@ -16,10 +16,11 @@ extern "C" {
       epicsFloat64 encoderPosition;    /**< Actual encoder position */
     } readBack;
     struct {
-      epicsFloat64 motorDialHighLimitRO;   /**< read only high limit from controller. */
-      epicsFloat64 motorDialLowLimitRO;    /**< read only low limit from controller. */
-      int motorDialLimitsValid;
-    } softLimitRO;
+      epicsFloat64 motorDialHighLimit;   /**< high limit from controller. */
+      epicsFloat64 motorDialLowLimit;    /**< low limit from controller. */
+      int motorROdialLimitsValid;
+      int motorRWdialLimitsValid;
+    } motorSoftLimits;
     struct {
       msta_field msta;
     } lastReadBack;

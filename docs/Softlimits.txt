@@ -1,0 +1,73 @@
+Handling of soft limits in the motor module
+
+Traditionally soft limits have been defined inside the motorRecord:
+DHLM and DLLM
+(or HLM and DLM, we focus on the dial coordinate system here)
+
+The motorRecord itself makes sure that no movement is allowed that
+violates the soft limits.
+This works well for the movements that are commanded
+through the motorRecord and e.g. "simple" stepper motor cards.
+
+Modern motion controllers maintain their own soft limits,
+which are often configured through a vendor-specific tool.
+
+Having the soft limits in the motorRecord defined "wider" than
+the values inside the motion controller leads to problems:
+The controller refuses or restricts motion, goes into an error state
+and the end user has a hard time to understand why.
+Experiments may fail and what is going on may be hard to understand
+for users.
+
+To improve the situation, the motorRecord forwards changes of softlimits
+into the driver.
+See WRITE_MSG(SET_HIGH_LIMIT) and  WRITE_MSG(SET_LOW_LIMIT).
+
+For a model 1 driver it is possible to "reject" those changes, when the soft
+limits inside the controller are more restrictive than what the user wants.
+This feature has never been implemented for a model 3 driver and the
+asyn-ish handling makes this impossible, too.
+
+As a replacement the "read only soft limits" have been introduced:
+The driver can report soft limits from the controller and the
+motorRecord will not allow a user to widen the driving range.
+
+
+Recently the need arised for a different handling:
+The controller calculates soft limits depending on the machine state,
+and these should progress into the motorRecord, so that a user can see them.
+(This is already possible)
+
+Independent of this, the user should be able to overwrite the
+"read only soft limits" inside the controller. (This was not possible)
+
+A new "read write softlimits" feature is now in place, which has 2 functions:
+- The driver can disable the soft limits inside the motorRecord
+  (DHLM==DLLM==0.0)
+  (The handling of read only soft limits is not changed:
+   When the driver reports "no soft limits" the motorRecord
+   values stay as they are. A user is then allowed to change them)
+ - The user is allowed to change the softlimits in the motorRecord
+   and extent the driving range or disable them.
+   These values are then forwarded into the driver (as before) and
+   the driver can update the motion controller.
+   Note: The motion controller will then use them for e.g. trajectory scans.
+
+In order to enable the read write soft limis a configuration bit
+in the MFLG has been defined: MF_RW_SOFT_LIMITS
+There are 2 ways to change the "read only soft limits" into
+"read write soft limits":
+a) The bit MF_RW_SOFT_LIMITS  in MFLG is set inside the db or template file.
+b) The driver calls
+setIntegerParam(pC_->motorFlagsRwSoftLimits_, 1);
+which will set the bit inside the MFLG field.
+
+Implementation notes:
+  Soft limits from the controller into the motorRecord:
+       setDoubleParam(pC_->motorHighLimitRO_, fValueHighRaw);
+       setDoubleParam(pC_->motorLowLimitRO_, fValueLowRaw);
+       Note that invalid combinations are ignored.
+  Soft limits from the motorRecord into the controller:
+      In the axis class: overload the setHighLimit() and setLowLimit()
+      methods. Make sure to handle the combination of
+      high == low == 0.0, it means "disable soft limits"
