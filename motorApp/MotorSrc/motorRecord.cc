@@ -1385,6 +1385,13 @@ static long process(dbCommon *arg)
                    !(pmr->mip & MIP_STOP)   &&
                    !(pmr->mip & MIP_JOG_STOP))
                 {
+                    if (pmr->mip == MIP_HOMF || pmr->mip == MIP_HOMR)
+                    {
+                        /* Bug fix: motor enters an infinite HOME loop
+                           in a sequence where VAL HOMF VAL is written */
+                        clear_buttons(pmr);
+                    }
+
                     pmr->mip = MIP_DONE;
                     /* Bug fix, record locks-up when BDST != 0, DLY != 0 and
                      * new target position before backlash correction move.*/
@@ -3664,7 +3671,7 @@ static void process_motor_info(motorRecord * pmr, bool initcall)
     if ((pmr->ueip == motorUEIP_Yes) && (!(msta.Bits.EA_PRESENT)))
     {
         pmr->ueip = motorUEIP_No;
-        db_post_events(pmr, &pmr->urip, DBE_VAL_LOG);
+        db_post_events(pmr, &pmr->ueip, DBE_VAL_LOG);
     }
     if (pmr->ueip == motorUEIP_Yes)
     {
