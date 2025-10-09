@@ -1,27 +1,31 @@
-[submodule "modules/motorNewport"]
-	path = modules/motorNewport
-	url = https://github.com/epics-motor/motorNewport.git
-[submodule "modules/motorDeltaTau"]
-	path = modules/motorDeltaTau
-	url = https://github.com/epics-motor/motorDeltaTau.git
-[submodule "modules/motorAerotech"]
-	path = modules/motorAerotech
-	url = https://github.com/epics-motor/motorAerotech.git
-[submodule "modules/motorSmarAct"]
-	path = modules/motorSmarAct
-	url = https://github.com/epics-motor/motorSmarAct.git
-[submodule "modules/motorParker6K"]
-	path = modules/motorParker6K
-	url = git@github.com:CentralLaserFacility/motorParker6K.git
-	branch = development
-[submodule ".ci"]
-	path = .ci
-	url = https://github.com/epics-base/ci-scripts
 [submodule "modules/motorAcsMotion"]
 	path = modules/motorAcsMotion
 	url = https://github.com/epics-motor/motorAcsMotion.git
-	branch = master
+	branch = ee68ab7
+[submodule "modules/motorAerotech"]
+	path = modules/motorAerotech
+	url = https://github.com/epics-motor/motorAerotech.git
+        branch = 8d1bc26
+[submodule "modules/motorDeltaTau"]
+	path = modules/motorDeltaTau
+	url = https://github.com/epics-motor/motorDeltaTau.git
+        branch = 43ab394
 [submodule "modules/motorNewFocus"]
 	path = modules/motorNewFocus
 	url = git@github.com:CentralLaserFacility/motorNewFocus.git
 	branch = development
+[submodule "modules/motorNewport"]
+	path = modules/motorNewport
+	url = https://github.com/epics-motor/motorNewport.git
+	branch = d84cfe2
+[submodule "modules/motorParker6K"]
+	path = modules/motorParker6K
+	url = git@github.com:CentralLaserFacility/motorParker6K.git
+	branch = development
+[submodule "modules/motorSmarAct"]
+	path = modules/motorSmarAct
+	url = https://github.com/epics-motor/motorSmarAct.git
+        branch = fb9faa6
+[submodule ".ci"]
+	path = .ci
+	url = https://github.com/epics-base/ci-scripts
