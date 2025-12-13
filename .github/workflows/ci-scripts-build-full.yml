@@ -108,22 +108,6 @@ jobs:
           #!  set: modules
           #!  name: "Ub-20 gcc-9 + RT-5.1 beatnik"
 
-          - os: ubuntu-18.04
-            cmp: gcc
-            configuration: default
-            base: "7.0"
-            set: modules
-            name: "Ub-18 gcc-7"
-
-          ### g++-8 not found
-          #!- os: ubuntu-18.04
-          #!  cmp: gcc-8
-          #!  utoolchain: true
-          #!  configuration: default
-          #!  base: "7.0"
-          #!  set: modules
-          #!  name: "Ub-18 gcc-8"
-
           #!- os: ubuntu-20.04
           #!  cmp: gcc-8
           #!  utoolchain: true
@@ -203,7 +187,7 @@ jobs:
     - name: Run main module tests
       run: python .ci/cue.py test
     - name: Upload tapfiles Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: tapfiles ${{ matrix.name }}
         path: '**/O.*/*.tap'

@@ -1541,8 +1541,9 @@ below.
       </p>
 
       <p>
-      Currently, changes to motor-resolution fields have no effect on the values of 
-      limit fields (although they should).&nbsp;
+      Changes to motor-resolution fields change the values of
+      limit fields since commit 3b5c71c412fd46 from May 2022.
+      This is included in R7-3.&nbsp;
       </p>
 
       <p>
@@ -1930,9 +1931,9 @@ below.
     <td>R/W</td>
     <td>Set Point Deadband (EGU)</td>
     <td>DOUBLE</td>
-    <td>Before the motor is commanded a move, a check is done if the move is to small.
-    It is to small when the distance is less the the step size defined in MRES.
-    When a bigger deadband is wanted than MRES, set the value into SPDB.
+    <td>Before the motor is commanded to move, a check is done to see if the move is
+    too small. It is too small when the distance is less than the step size defined in
+    MRES. When a bigger deadband is wanted than MRES, set the value of SPDB.
     </td>
   </tr>
    <tr valign="top">
@@ -2392,7 +2393,13 @@ below.
     motor stops, the VAL field will be set equal to the RBV field, and the DVAL 
     field will be set equal to the DRBV field.&nbsp; These fields can be set to 1, 
     but setting either field to 0 results in an error.&nbsp; The record sets HOM[F/R] 
-    to zero when the homing procedure is either completed or aborted.</td>
+    to zero when the homing procedure is either completed or aborted.
+    Note that modern controllers, depending on their firmware and configuration,
+    may do different things. Examples are home into the limit switch, move
+    into a limit switch, return and search for a home switch or other sequences.
+    Often HOMF and HOMR then yield the same functionality. 
+    And the controller may choose to do nothing, if a motor is not homable.
+</td>
   </tr>
   <tr valign="top">
     <td><br>
@@ -2890,11 +2897,18 @@ below.
     <td>R/W</td>
     <td>Enable control</td>
     <td>RECCHOICE</td>
-    <td>(0:"Disable", 1:"Enable")&nbsp; Enable/Disable closed-loop position control.&nbsp; 
-    This field is active only if the GAIN_SUPPORT bit in the MSTA is true.&nbsp; 
-    This field is set by both the user and device support.&nbsp; CNEN is set to <i>Disable</i> 
-    by device support when it detects a motion controller error; e.g. maximum 
-    following error exceeded.</td>
+    <td>This field is active only if the GAIN_SUPPORT bit in the MSTA is true.
+     The function of this field is depending on the motion controller.
+     This field is set by both the user and device support.
+    <li>
+     Some (older?) controllers can switch between open- and closed-loop. (0: open loop, 1: closed loop)
+    </li>
+    <li>
+     Some controllers use this field to enable torque control
+    </li>
+    <li>
+     Most modern controllers  use this field to enable/disable the motor (amplifier/driver)
+    </li>
   </tr>
   <tr valign="top">
     <td>PCOF</td>
