@@ -22,7 +22,7 @@ on:
 env:
   SETUP_PATH: .ci-local:.ci
   # For the sequencer on Linux/Windows/MacOS
-  APT: re2c
+  APT: re2c libtirpc-dev libreadline-dev
   CHOCO: re2c
   BREW: re2c
 
@@ -46,12 +46,12 @@ jobs:
       matrix:
         # Job names also name artifacts, character limitations apply
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             cmp: gcc
             configuration: default
             base: "7.0"
             set: modules
-            name: "7.0 Ub-20 gcc-9"
+            name: "7.0 Ub-24 gcc-13"
         
           - os: macos-latest
             cmp: clang
@@ -60,12 +60,12 @@ jobs:
             set: modules
             name: "3.15 MacOS clang-12"
 
-          - os: windows-2019
-            cmp: vs2019
+          - os: windows-2022
+            cmp: vs2022
             configuration: static
             base: "3.15"
             set: modules
-            name: "3.15 Win VS2019, static"
+            name: "3.15 Win VS2022, static"
 
     steps:
     - uses: actions/checkout@v2
