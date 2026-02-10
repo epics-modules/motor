@@ -22,7 +22,7 @@ on:
 env:
   SETUP_PATH: .ci-local:.ci
   # For the sequencer on Linux/Windows/MacOS
-  APT: re2c
+  APT: re2c libtirpc-dev libreadline-dev
   CHOCO: re2c
   BREW: re2c
 
