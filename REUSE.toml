@@ -1,0 +1,9 @@
+version = 1
+SPDX-PackageName = "motor"
+SPDX-PackageDownloadLocation = "https://github.com/epics-modules/motor"
+
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "UChicago Argonne LLC."
+SPDX-License-Identifier = "EPICS"
+
