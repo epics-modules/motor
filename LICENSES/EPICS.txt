@@ -5,7 +5,7 @@ MOTOR is distributed subject to the following license conditions:
  SOFTWARE LICENSE AGREEMENT
  Software: MOTOR
 
- 1. The "Software", below, refers to <PRODUCT> (in either source code, or
+ 1. The "Software", below, refers to MOTOR (in either source code, or
     binary form and accompanying documentation). Each licensee is
     addressed as "you" or "Licensee."
 
