@@ -56,6 +56,10 @@ USAGE...        This file contains driver functions that are common
 #include        <callback.h>
 #include        <epicsThread.h>
 #include        <epicsExport.h>
+#include        <epicsAtomic.h>
+#include        <epicsExit.h>
+#include        <epicsMutex.h>
+#include        <ellLib.h>
 #include        <stdarg.h>
 
 #include        "motor.h"
@@ -85,6 +89,48 @@ static void process_messages(struct driver_table *, epicsTime, double);
 static struct mess_node *get_head_node(struct driver_table *);
 static struct mess_node *motor_malloc(struct circ_queue *, epicsEvent *);
 
+static epicsInt32 motorShutdown = 0;
+static epicsThreadOnceId motorShutdownOnce = EPICS_THREAD_ONCE_INIT;
+static epicsMutexId motorShutdownLock = 0;
+static ELLLIST motorShutdownWakeList;
+
+typedef struct motorWakeNode {
+    ELLNODE node;
+    epicsEvent *ev;
+} motorWakeNode;
+
+static void motorAtExit(void *arg)
+{
+    epicsAtomicSetIntT(&motorShutdown, 1u);
+
+    /* Wake all motor_task() instances so they can see motorShutdown and exit. */
+    if (!motorShutdownLock)
+    {
+        return;
+    }
+    epicsMutexLock(motorShutdownLock);
+    for (ELLNODE *n = ellFirst(&motorShutdownWakeList); n; n = ellNext(n))
+    {
+        motorWakeNode *wn = (motorWakeNode*)n;
+        if (wn->ev)
+        {
+            wn->ev->signal();
+        }
+    }
+    epicsMutexUnlock(motorShutdownLock);
+}
+
+static void motorShutdownInitOnce(void *arg)
+{
+    ellInit(&motorShutdownWakeList);
+    motorShutdownLock = epicsMutexCreate();
+    epicsAtExit(motorAtExit, NULL);
+}
+
+static void motorShutdownEnsureInit(void)
+{
+    epicsThreadOnce(&motorShutdownOnce, motorShutdownInitOnce, NULL);
+}
 
 /*
  * FUNCION...   motor_task()
@@ -141,7 +187,23 @@ epicsShareFunc int motor_task(struct thread_args *args)
     tabptr = args->table;    
     previous_time = epicsTime::getCurrent();
     scan_sec = 1 / (double) args->motor_scan_rate;      /* Convert HZ to seconds. */
-
+    
+    /* One-time registration of IOC shutdown hook + list init (reentrant-safe). */
+    motorShutdownEnsureInit();
+    
+    /* Register this task's wake event so IOC shutdown can wake the wait(). */
+    if (motorShutdownLock && tabptr && tabptr->semptr)
+    {
+        motorWakeNode *wn = (motorWakeNode*)calloc(1, sizeof(*wn));
+        if (wn)
+        {
+            wn->ev = tabptr->semptr;
+            epicsMutexLock(motorShutdownLock);
+            ellAdd(&motorShutdownWakeList, &wn->node);
+            epicsMutexUnlock(motorShutdownLock);
+        }
+    }
+    
     if (args->update_delay == 0.0)
         stale_data_max_delay = 0.0;
     else if (args->update_delay < quantum * 2.0)
@@ -180,6 +242,12 @@ epicsShareFunc int motor_task(struct thread_args *args)
             sem_ret = tabptr->semptr->wait(wait_time);
         previous_time = epicsTime::getCurrent();
 
+        /* IOC shutdown: motorAtExit() will signal semptr to wake us. */
+        if (epicsAtomicGetIntT(&motorShutdown))
+        {
+            break;
+        }
+        
         if (*tabptr->any_inmotion_ptr)
         {
             if (tabptr->strtstat != NULL)
