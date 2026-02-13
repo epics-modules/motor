@@ -24,6 +24,7 @@
 #define motorMoveVelString              "MOTOR_MOVE_VEL"
 #define motorHomeString                 "MOTOR_HOME"
 #define motorStopString                 "MOTOR_STOP_AXIS"
+#define motorActVelocityString          "MOTOR_ACT_VELOCITY"
 #define motorVelocityString             "MOTOR_VELOCITY"
 #define motorVelBaseString              "MOTOR_VEL_BASE"
 #define motorAccelString                "MOTOR_ACCEL"
@@ -207,6 +208,7 @@ class epicsShareClass asynMotorController : public asynPortDriver {
   int motorHome_;
   int motorStop_;
   int motorVelocity_;
+  int motorActVelocity_;
   int motorVelBase_;
   int motorAccel_;
   int motorPosition_;
