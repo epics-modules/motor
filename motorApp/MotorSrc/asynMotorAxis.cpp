@@ -288,7 +288,7 @@ asynStatus asynMotorAxis::setDoubleParam(int function, double value)
         statusChanged_ = 1;
         status_.encoderPosition = value;
     }
-  } else if (function == pC_->motorVelocity_) {
+  } else if (function == pC_->motorActVelocity_) {
     if (value != status_.velocity) {
         statusChanged_ = 1;
         status_.velocity = value;

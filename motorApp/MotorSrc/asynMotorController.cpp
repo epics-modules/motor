@@ -60,6 +60,7 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(motorHomeString,                   asynParamFloat64,    &motorHome_);
   createParam(motorStopString,                   asynParamInt32,      &motorStop_);
   createParam(motorVelocityString,               asynParamFloat64,    &motorVelocity_);
+  createParam(motorActVelocityString,            asynParamFloat64,    &motorActVelocity_);
   createParam(motorVelBaseString,                asynParamFloat64,    &motorVelBase_);
   createParam(motorAccelString,                  asynParamFloat64,    &motorAccel_);
   createParam(motorPositionString,               asynParamFloat64,    &motorPosition_);
