@@ -15,7 +15,7 @@ on:
       - '**/*.html'
       - '**/*.md'
       - '.github/workflows/ci-scripts-build-full.yml'
-      - 'LICENSES/*'
+      - 'LICENSE'
     branches:
       - master
   pull_request:
@@ -24,7 +24,7 @@ on:
       - '**/*.html'
       - '**/*.md'
       - '.github/workflows/ci-scripts-build-full.yml'
-      - 'LICENSES/*'
+      - 'LICENSE'
 
 env:
   SETUP_PATH: .ci-local:.ci
