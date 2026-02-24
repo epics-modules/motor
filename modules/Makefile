@@ -89,6 +89,10 @@ ifdef AUTOSAVE
 	$(ECHO) Creating $@, AUTOSAVE = $(AUTOSAVE)
 	@echo AUTOSAVE = $(AUTOSAVE)>> $@
 endif
+ifdef STD
+	$(ECHO) Creating $@, STD = $(STD)
+	@echo STD = $(STD)>> $@
+endif
 ifdef MODBUS
 	$(ECHO) Creating $@, MODBUS = $(MODBUS)
 	@echo MODBUS = $(MODBUS)>> $@
