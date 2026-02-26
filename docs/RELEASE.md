@@ -49,13 +49,13 @@ R7-4 is a release based on the master branch.
 | **motorOms**       | [R1-2-1](https://github.com/epics-motor/motorOms/releases/tag/R1-2-1)  | Allow encoder ratio to be negative when motor and encoder have opposite senses of direction |
 | **motorOmsAsyn**   | [R1-1](https://github.com/epics-motor/motorOmsAsyn/releases/tag/R1-1) | Added support for the MXA-21 controller |
 | motorOriel         | [R1-0-2](https://github.com/epics-motor/motorOriel/releases/tag/R1-0-2) |         |
-| **motorParker**    | [R1-2](https://github.com/epics-motor/motorParker/releases/tag/R1-2) | Added support for OEM series controllers |
-| **motorPhytron**   | [R1-3](https://github.com/epics-motor/motorPhytron/releases/tag/R1-3) | Added support for MCC-1/MCC-2 controllers and I/O support for all Phytron controllers |
+| **motorParker**    | [R1-2-1](https://github.com/epics-motor/motorParker/releases/tag/R1-2-1) | Added support for OEM series controllers |
+| **motorPhytron**   | [R1-3-1](https://github.com/epics-motor/motorPhytron/releases/tag/R1-3-1) | Added support for MCC-1/MCC-2 controllers and I/O support for all Phytron controllers |
 | **motorPI**        | [R1-1-2](https://github.com/epics-motor/motorPI/releases/tag/R1-1-2) | Fix for clang 16 build errors caused by use of deprecated keyword |
-| **motorPIGCS2**    | [R1-3](https://github.com/epics-motor/motorPIGCS2/releases/tag/R1-3) | Added coordinate-system support for C-887 hexapod controller; print fewer debug messages by default |
+| **motorPIGCS2**    | [R1-3-1](https://github.com/epics-motor/motorPIGCS2/releases/tag/R1-3-1) | Added coordinate-system support for C-887 hexapod controller; print fewer debug messages by default |
 | motorPiJena        | [R1-0-2](https://github.com/epics-motor/motorPiJena/releases/tag/R1-0-2) |         |
 | motorScriptMotor   | [R1-2](https://github.com/epics-motor/motorScriptMotor/releases/tag/R1-2) |         |
-| **motorSmarAct**   | [R2-1-1](https://github.com/epics-motor/motorSmarAct/releases/tag/R2-1-1) | Added support for sensorless positioners; eliminated compiler warnings |
+| **motorSmarAct**   | [R2-1-2](https://github.com/epics-motor/motorSmarAct/releases/tag/R2-1-2) | Added support for sensorless positioners; eliminated compiler warnings |
 | motorSmartMotor    | [R1-0-2](https://github.com/epics-motor/motorSmartMotor/releases/tag/R1-0-2) |         |
 | **motorThorLabs** | [R1-0-3](https://github.com/epics-motor/motorThorLabs/releases/tag/R1-0-3) | Kinesis support now sends velo and accel to controller; fix for windows-x64-mingw compile errors |
 
