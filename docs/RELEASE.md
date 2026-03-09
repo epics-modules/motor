@@ -13,7 +13,7 @@ R7-4 is a release based on the master branch.
 * None
 
 #### Bug fixes
-* Commit [d1ed86f](https://github.com/epics-modules/motor/commit/d1ed86f128733070ec720286d1e1fad05e8e8156) Fixed typo in trajectoryScan_settings.req that prevented Nelements from being saved
+* Commit [d1ed86f](https://github.com/epics-modules/motor/commit/d1ed86f128733070ec720286d1e1fad05e8e8156): Fixed typo in trajectoryScan_settings.req that prevented Nelements from being saved
 * Pull request [#214](https://github.com/epics-modules/motor/pull/214): devMotorAsyn.c: Set encoder ratio to 1 if ERES is 0 to avoid dividing by 0
 * Pull request [#220](https://github.com/epics-modules/motor/pull/220): Fix for motorRecord.cc from [Torsten Bögershausen](https://github.com/tboegi): Post ueip if reset to false when encoder missing
 * Pull request [#224](https://github.com/epics-modules/motor/pull/224): Fix for motorRecord.cc from [Torsten Bögershausen](https://github.com/tboegi): Fix for endless loop caused by a specific sequence of changes to the VAL and HOMF fields
