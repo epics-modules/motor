@@ -1,21 +1,34 @@
 # Motor Releases
 
-## __R7-4 (2026-02-TBD)__
+## __R7-4 (2026-03-09)__
 R7-4 is a release based on the master branch.
 
 ### Changes since R7-3-1
 
 #### New features
-* TBD
+* Pull request [#238](https://github.com/epics-modules/motor/pull/238): [Torsten Bögershausen](https://github.com/tboegi) added motorActVelocity asyn parameter to model-3 asyn motor base classes for velocity feedback
+* Pull request [#242](https://github.com/epics-modules/motor/pull/242): Added STD to the modules/Makefile (for driver submodules with example IOCs that use doAfterIocInit)
 
 #### Modifications to existing features
-* TBD
+* None
 
 #### Bug fixes
-* TBD
+* Commit [d1ed86f](https://github.com/epics-modules/motor/commit/d1ed86f128733070ec720286d1e1fad05e8e8156) Fixed typo in trajectoryScan_settings.req that prevented Nelements from being saved
+* Pull request [#214](https://github.com/epics-modules/motor/pull/214): devMotorAsyn.c: Set encoder ratio to 1 if ERES is 0 to avoid dividing by 0
+* Pull request [#220](https://github.com/epics-modules/motor/pull/220): Fix for motorRecord.cc from [Torsten Bögershausen](https://github.com/tboegi): Post ueip if reset to false when encoder missing
+* Pull request [#224](https://github.com/epics-modules/motor/pull/224): Fix for motorRecord.cc from [Torsten Bögershausen](https://github.com/tboegi): Fix for endless loop caused by a specific sequence of changes to the VAL and HOMF fields
+* Pull request [#236](https://github.com/epics-modules/motor/pull/236): [Stefan Mathis](https://github.com/StefanMathis) fixed a bug in asynMotorAxis that prevented the motor record's RVEL field from updating with the feedback velocity
+* Pull request [#240](https://github.com/epics-modules/motor/pull/240): Fix for infinite loop in motordrvCom.cc that prevented graceful shutdown of IOCs with model-1 motor drivers.
+* Pull request [#243](https://github.com/epics-modules/motor/pull/243): Updated driver submodules for VxWorks fixes
+* Pull request [#208](https://github.com/epics-modules/motor/pull/208): [Jeremy Lorelli](https://github.com/JJL772) removed the deprecated "register" keyword from motordrvCom.cc
 
 #### Documentation
-* TBD
+* Pull request [#221](https://github.com/epics-modules/motor/pull/221): [Torsten Bögershausen](https://github.com/tboegi) improved the documentation for the CNEN, HOMF and HOMR fields
+* Pull request [#223](https://github.com/epics-modules/motor/pull/223): [J. Lewis Muir](https://github.com/jlmuir) fixed typos in motorDeviceDriver.html
+* Pull request [#225](https://github.com/epics-modules/motor/pull/225): [J. Lewis Muir](https://github.com/jlmuir) fixed typos in motorRecord.html
+* Pull request [#235](https://github.com/epics-modules/motor/pull/235) as well as commits [26efd2f](https://github.com/epics-modules/motor/commit/26efd2f044f6281b5c5889d604cd43f84b4bf615) and [3228061](https://github.com/epics-modules/motor/commit/3228061a602a799794f80bdfd88e7e96b52224fe): Added EPICS license
+* Pull request [#227](https://github.com/epics-modules/motor/pull/227): [Torsten Bögershausen](https://github.com/tboegi) updated motorRecord.html: document MRES changes soft limits
+* Pull request [#237](https://github.com/epics-modules/motor/pull/237): Updated OMS PID info in motorRecord.html
 
 #### Continuous Integration
 * Upgraded ci-scripts to v3.4.1
