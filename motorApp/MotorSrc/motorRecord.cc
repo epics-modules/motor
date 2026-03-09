@@ -193,7 +193,7 @@ USAGE...        Motor Record Support.
  * .79 21-11-22 jrh - Added raw limits, sync limits on motor resolution change
  */                                                          
 
-#define VERSION 7.3
+#define VERSION 7.4
 
 #include    <stdlib.h>
 #include    <string.h>
