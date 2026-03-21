@@ -43,9 +43,6 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
                                          int asynFlags, int autoConnect, int priority, int stackSize)
 
   : asynPortDriver(portName, numAxes,
-#if MOTOR_ASYN_VERSION_INT < VERSION_INT_4_32
-                   NUM_MOTOR_DRIVER_PARAMS+numParams,
-#endif
       interfaceMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask | asynDrvUserMask,
       interruptMask | asynOctetMask | asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynGenericPointerMask,
       asynFlags, autoConnect, priority, stackSize),
@@ -136,6 +133,14 @@ asynMotorController::asynMotorController(const char *portName, int numAxes, int 
   createParam(profilePositionsString,     asynParamFloat64Array,      &profilePositions_);
   createParam(profileReadbacksString,     asynParamFloat64Array,      &profileReadbacks_);
   createParam(profileFollowingErrorsString, asynParamFloat64Array,    &profileFollowingErrors_);
+
+
+  // These are the per-axis parameters for position compare output
+  createParam(PCOStartPositionString,          asynParamFloat64,      &PCOStartPosition_);
+  createParam(PCOEndPositionString,            asynParamFloat64,      &PCOEndPosition_);
+  createParam(PCOIncrementString,              asynParamFloat64,      &PCOIncrement_);
+  createParam(PCOPulseWidthString,             asynParamFloat64,      &PCOPulseWidth_);
+  createParam(PCOEnableString,                   asynParamInt32,      &PCOEnable_);
 
   pAxes_ = (asynMotorAxis**) calloc(numAxes, sizeof(asynMotorAxis*));
   pollEventId_ = epicsEventMustCreate(epicsEventEmpty);
@@ -240,6 +245,8 @@ asynStatus asynMotorController::writeInt32(asynUser *pasynUser, epicsInt32 value
       moveToHomeAxis_ = axis;
       epicsEventSignal(moveToHomeId_);
     }
+  } else if (function == PCOEnable_) {
+    status = pAxis->enablePCO(value);
   }
 
   /* Do callbacks so higher layers see any changes */
