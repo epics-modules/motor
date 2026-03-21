@@ -1,0 +1,81 @@
+# Database for position compare (PCO) settings)
+# Mark Rivers
+# March 21, 2026
+
+record(ao,"$(P)$(M)PCOStartPosition") {
+    field(PINI, "YES")
+    field(PREC, "$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),$(ADDR))PCO_START_POSITION")
+}
+
+record(ai,"$(P)$(M)PCOStartPosition_RBV") {
+    field(PREC, "$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR))PCO_START_POSITION")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao,"$(P)$(M)PCOEndPosition") {
+    field(PINI, "YES")
+    field(PREC, "$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),$(ADDR))PCO_END_POSITION")
+}
+
+record(ai,"$(P)$(M)PCOEndPosition_RBV") {
+    field(PREC, "$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR))PCO_END_POSITION")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao,"$(P)$(M)PCOIncrement") {
+    field(PINI, "YES")
+    field(PREC,  "$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),$(ADDR))PCO_INCREMENT")
+}
+
+record(ai,"$(P)$(M)PCOIncrement_RBV") {
+    field(PREC, "$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR))PCO_INCREMENT")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao,"$(P)$(M)PCOPulseWidth") {
+    field(PINI, "YES")
+    field(PREC, "$(PREC)")
+    field(EGU,  "sec")
+    field(DTYP, "asynFloat64")
+    field(VAL,  "1e-6")    
+    field(OUT,  "@asyn($(PORT),$(ADDR))PCO_PULSE_WIDTH")
+}
+
+record(ai,"$(P)$(M)PCOPulseWidth_RBV") {
+    field(PREC, "$(PREC)")
+    field(DTYP, "asynFloat64")
+    field(EGU,  "sec")
+    field(INP,  "@asyn($(PORT),$(ADDR))PCO_PULSE_WIDTH")
+    field(SCAN, "I/O Intr")
+}
+
+record(bo,"$(P)$(M)PCOEnable") {
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR))PCO_ENABLE")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+}
+
+record(bi,"$(P)$(M)PCOEnable_RBV") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR))PCO_ENABLE")
+    field(ZNAM, "Disable")
+    field(ZSV,  "NO_ALARM")
+    field(ONAM, "Enable")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MINOR")
+    field(SCAN, "I/O Intr")
+
+}
