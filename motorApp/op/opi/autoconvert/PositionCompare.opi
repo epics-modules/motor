@@ -312,7 +312,7 @@ $(pv_value)</tooltip>
       <foreground_color>
         <color red="10" green="0" blue="184" />
       </foreground_color>
-      <format_type>2</format_type>
+      <format_type>1</format_type>
       <height>20</height>
       <horizontal_alignment>1</horizontal_alignment>
       <name>Text Update</name>
@@ -590,7 +590,7 @@ $(pv_value)</tooltip>
       <foreground_color>
         <color red="0" green="0" blue="0" />
       </foreground_color>
-      <format_type>2</format_type>
+      <format_type>1</format_type>
       <height>20</height>
       <horizontal_alignment>0</horizontal_alignment>
       <limits_from_pv>false</limits_from_pv>
@@ -1135,13 +1135,13 @@ $(pv_value)</tooltip>
     </scale_options>
     <scripts />
     <show_scrollbar>false</show_scrollbar>
-    <text>Width (s)</text>
+    <text>Width (us)</text>
     <tooltip></tooltip>
     <transparent>true</transparent>
     <vertical_alignment>1</vertical_alignment>
     <visible>true</visible>
     <widget_type>Label</widget_type>
-    <width>90</width>
+    <width>100</width>
     <wrap_words>false</wrap_words>
     <x>535</x>
     <y>56</y>

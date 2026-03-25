@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Saved on 2026-03-21 16:21:09 by epics-->
+<!--Saved on 2026-03-25 13:13:22 by epics-->
 <display version="2.0.0">
   <name>PositionCompare8</name>
   <x>429</x>
@@ -156,10 +156,9 @@
   </widget>
   <widget type="label" version="2.0.0">
     <name>text #34</name>
-    <text>Width (s)</text>
+    <text>Width (us)</text>
     <x>535</x>
     <y>56</y>
-    <width>90</width>
     <font>
       <font family="Liberation Sans" style="REGULAR" size="16.0">
       </font>
@@ -305,7 +304,7 @@
           <color red="187" green="187" blue="187">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <horizontal_alignment>1</horizontal_alignment>
         <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -401,7 +400,7 @@
           <color red="115" green="223" blue="255">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <border_alarm_sensitive>false</border_alarm_sensitive>
       </widget>
@@ -553,7 +552,7 @@
           <color red="187" green="187" blue="187">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <horizontal_alignment>1</horizontal_alignment>
         <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -649,7 +648,7 @@
           <color red="115" green="223" blue="255">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <border_alarm_sensitive>false</border_alarm_sensitive>
       </widget>
@@ -801,7 +800,7 @@
           <color red="187" green="187" blue="187">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <horizontal_alignment>1</horizontal_alignment>
         <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -897,7 +896,7 @@
           <color red="115" green="223" blue="255">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <border_alarm_sensitive>false</border_alarm_sensitive>
       </widget>
@@ -1049,7 +1048,7 @@
           <color red="187" green="187" blue="187">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <horizontal_alignment>1</horizontal_alignment>
         <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -1145,7 +1144,7 @@
           <color red="115" green="223" blue="255">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <border_alarm_sensitive>false</border_alarm_sensitive>
       </widget>
@@ -1297,7 +1296,7 @@
           <color red="187" green="187" blue="187">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <horizontal_alignment>1</horizontal_alignment>
         <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -1393,7 +1392,7 @@
           <color red="115" green="223" blue="255">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <border_alarm_sensitive>false</border_alarm_sensitive>
       </widget>
@@ -1545,7 +1544,7 @@
           <color red="187" green="187" blue="187">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <horizontal_alignment>1</horizontal_alignment>
         <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -1641,7 +1640,7 @@
           <color red="115" green="223" blue="255">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <border_alarm_sensitive>false</border_alarm_sensitive>
       </widget>
@@ -1793,7 +1792,7 @@
           <color red="187" green="187" blue="187">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <horizontal_alignment>1</horizontal_alignment>
         <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -1889,7 +1888,7 @@
           <color red="115" green="223" blue="255">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <border_alarm_sensitive>false</border_alarm_sensitive>
       </widget>
@@ -2041,7 +2040,7 @@
           <color red="187" green="187" blue="187">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <horizontal_alignment>1</horizontal_alignment>
         <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -2137,7 +2136,7 @@
           <color red="115" green="223" blue="255">
           </color>
         </background_color>
-        <format>2</format>
+        <format>1</format>
         <show_units>false</show_units>
         <border_alarm_sensitive>false</border_alarm_sensitive>
       </widget>

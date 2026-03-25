@@ -216,7 +216,7 @@ minor 1
 release 1
 x 535
 y 56
-w 90
+w 100
 h 20
 font "helvetica-medium-r-14.0"
 fontAlign "center"
@@ -224,7 +224,7 @@ fgColor rgb 2560 0 47104
 bgColor index 3
 useDisplayBg
 value {
-  "Width (s)"
+  "Width (us)"
 }
 endObjectProperties
 
@@ -381,7 +381,7 @@ y 86
 w 100
 h 20
 controlPv "$(P)$(M1)PCOPulseWidth_RBV"
-format "exponential"
+format "decimal"
 font "helvetica-medium-r-14.0"
 fontAlign "center"
 fgColor rgb 2560 0 47104
@@ -505,7 +505,7 @@ y 110
 w 100
 h 20
 controlPv "$(P)$(M1)PCOPulseWidth"
-format "exponential"
+format "decimal"
 font "helvetica-medium-r-12.0"
 fontAlign "left"
 fgColor rgb 0 0 0

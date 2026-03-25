@@ -219,14 +219,14 @@ text {
 	object {
 		x=535
 		y=56
-		width=90
+		width=100
 		height=20
 	}
 	"basic attribute" {
 		clr=54
 		fill="outline"
 	}
-	textix="Width (s)"
+	textix="Width (us)"
 	align="horiz. centered"
 }
 text {
@@ -347,7 +347,6 @@ composite {
 						bclr=4
 					}
 					align="horiz. centered"
-					format="exponential"
 					limits {
 					}
 				}
@@ -428,7 +427,6 @@ composite {
 						bclr=51
 					}
 					clrmod="discrete"
-					format="exponential"
 					limits {
 					}
 				}
@@ -558,7 +556,6 @@ composite {
 						bclr=4
 					}
 					align="horiz. centered"
-					format="exponential"
 					limits {
 					}
 				}
@@ -639,7 +636,6 @@ composite {
 						bclr=51
 					}
 					clrmod="discrete"
-					format="exponential"
 					limits {
 					}
 				}
@@ -769,7 +765,6 @@ composite {
 						bclr=4
 					}
 					align="horiz. centered"
-					format="exponential"
 					limits {
 					}
 				}
@@ -850,7 +845,6 @@ composite {
 						bclr=51
 					}
 					clrmod="discrete"
-					format="exponential"
 					limits {
 					}
 				}
@@ -980,7 +974,6 @@ composite {
 						bclr=4
 					}
 					align="horiz. centered"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1061,7 +1054,6 @@ composite {
 						bclr=51
 					}
 					clrmod="discrete"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1191,7 +1183,6 @@ composite {
 						bclr=4
 					}
 					align="horiz. centered"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1272,7 +1263,6 @@ composite {
 						bclr=51
 					}
 					clrmod="discrete"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1402,7 +1392,6 @@ composite {
 						bclr=4
 					}
 					align="horiz. centered"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1483,7 +1472,6 @@ composite {
 						bclr=51
 					}
 					clrmod="discrete"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1613,7 +1601,6 @@ composite {
 						bclr=4
 					}
 					align="horiz. centered"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1694,7 +1681,6 @@ composite {
 						bclr=51
 					}
 					clrmod="discrete"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1824,7 +1810,6 @@ composite {
 						bclr=4
 					}
 					align="horiz. centered"
-					format="exponential"
 					limits {
 					}
 				}
@@ -1905,7 +1890,6 @@ composite {
 						bclr=51
 					}
 					clrmod="discrete"
-					format="exponential"
 					limits {
 					}
 				}

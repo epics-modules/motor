@@ -47,16 +47,16 @@ record(ai,"$(P)$(M)PCOIncrement_RBV") {
 record(ao,"$(P)$(M)PCOPulseWidth") {
     field(PINI, "YES")
     field(PREC, "$(PREC)")
-    field(EGU,  "sec")
+    field(EGU,  "microsec")
     field(DTYP, "asynFloat64")
-    field(VAL,  "1e-6")    
+    field(VAL,  "1")
     field(OUT,  "@asyn($(PORT),$(ADDR))PCO_PULSE_WIDTH")
 }
 
 record(ai,"$(P)$(M)PCOPulseWidth_RBV") {
     field(PREC, "$(PREC)")
     field(DTYP, "asynFloat64")
-    field(EGU,  "sec")
+    field(EGU,  "microsec")
     field(INP,  "@asyn($(PORT),$(ADDR))PCO_PULSE_WIDTH")
     field(SCAN, "I/O Intr")
 }
