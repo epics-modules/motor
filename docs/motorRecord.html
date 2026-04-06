@@ -213,6 +213,9 @@ below.
     <a href="#Fields_res">Motor-resolution fields:</a>
   </li>
   <li>
+    <a href="#Fields_init">Initialization fields:</a>
+  </li>
+  <li>
     <a href="#Fields_motion">Motion-related fields:</a>
   </li>
   <li>
@@ -1017,7 +1020,7 @@ below.
     </td>
   </tr>
   <tr>
-    <td><a href="#Fields_res">RSTM</a></td>
+    <td><a href="#Fields_init">RSTM</a></td>
     <td>R/W</td>
     <td>Restore Mode</td>
     <td>RECCHOICE</td>
@@ -1630,6 +1633,53 @@ below.
     readback units to motor steps may not actually be constant.</td>
   </tr>
 
+  </tbody>
+</table>
+
+<hr>
+<table border="1" cellpadding="5" nosave="">
+  <caption>
+    <a name="Fields_init"></a> <h2>Initialization fields</h2>
+  </caption>
+  <tbody>
+  <tr valign="top">
+    <th>Name</th>
+    <th>Access</th>
+    <th>Prompt</th>
+    <th>Data type</th>
+    <th>Comments</th>
+  </tr>
+  <tr valign="top">
+    <td>RSTM</td>
+    <td>R/W</td>
+    <td>Restore Mode</td>
+    <td>RECCHOICE (0:"Never", 1:"Always", 2:"NearZero", 3:"Conditional")</td>
+    <td>
+      Controls whether the saved (autosave/restore) motor position (DVAL) is
+      written to the controller during IOC initialization. The default is
+      <b>NearZero</b>.
+      <ul>
+        <li><b>Never (0):</b> The controller's current position is always kept
+        at initialization; the saved position is never loaded into the
+        controller.</li>
+        <li><b>Always (1):</b> The saved position (DVAL) is always written to
+        the controller at initialization, regardless of the controller's current
+        position.</li>
+        <li><b>NearZero (2):</b> The saved position is written to the
+        controller only if the controller's reported position is near zero
+        (within RDBD) while the saved DVAL is significantly non-zero (&gt;
+        RDBD). This is equivalent to the pre-R6.10 behavior.</li>
+        <li><b>Conditional (3):</b> Same as NearZero, but additionally writes
+        the saved position when the motor is configured to use relative moves
+        (i.e., retries are enabled and UEIP or URIP is set). This corresponds
+        to the R6.10 behavior.</li>
+      </ul>
+      This field is particularly relevant when autosave/restore is used: it
+      resolves the ambiguity between trusting the controller's position versus
+      the saved position after an IOC restart. See also: RDBD, RTRY, UEIP,
+      URIP.
+    </td>
+  </tr>
   </tbody>
 </table>
 
