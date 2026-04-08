@@ -445,6 +445,14 @@ asynStatus asynMotorAxis::readbackProfile()
   return asynSuccess;
 }
 
+/** Function to enable or disable position compare output */
+asynStatus asynMotorAxis::enablePCO(bool enable)
+{
+  // static const char *functionName = "enablePCO";
+
+  return asynSuccess;
+}
+
 /****************************************************************************/
 /* The following functions are used by the automatic drive power control in the 
    base class poller in the asynMotorController class.*/

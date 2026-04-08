@@ -53,6 +53,8 @@ class epicsShareClass asynMotorAxis {
   virtual asynStatus executeProfile();
   virtual asynStatus abortProfile();
   virtual asynStatus readbackProfile();
+  
+  virtual asynStatus enablePCO(bool enable);
 
   void setReferencingModeMove(int distance);
   int getReferencingModeMove();
