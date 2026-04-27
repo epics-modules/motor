@@ -1,0 +1,2188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Saved on 2026-03-25 13:13:22 by epics-->
+<display version="2.0.0">
+  <name>PositionCompare8</name>
+  <x>429</x>
+  <y>346</y>
+  <width>785</width>
+  <height>560</height>
+  <background_color>
+    <color red="187" green="187" blue="187">
+    </color>
+  </background_color>
+  <grid_visible>false</grid_visible>
+  <grid_step_x>5</grid_step_x>
+  <widget type="label" version="2.0.0">
+    <name>text #6</name>
+    <text>Description</text>
+    <x>28</x>
+    <y>56</y>
+    <width>110</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #9</name>
+    <text>Motor</text>
+    <x>63</x>
+    <y>40</y>
+    <width>50</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #12</name>
+    <text>Position Compare</text>
+    <x>304</x>
+    <y>5</y>
+    <width>177</width>
+    <height>26</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>polyline #15</name>
+    <y>34</y>
+    <width>785</width>
+    <height>0</height>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="785.0" y="0.0">
+      </point>
+    </points>
+    <line_width>1</line_width>
+    <line_color>
+      <color red="0" green="0" blue="0">
+      </color>
+    </line_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #19</name>
+    <text>Position</text>
+    <x>225</x>
+    <y>56</y>
+    <width>80</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #22</name>
+    <text>Position</text>
+    <x>330</x>
+    <y>56</y>
+    <width>80</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #25</name>
+    <text>Increment</text>
+    <x>430</x>
+    <y>56</y>
+    <width>90</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #28</name>
+    <text>Start</text>
+    <x>240</x>
+    <y>40</y>
+    <width>50</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #31</name>
+    <text>End</text>
+    <x>355</x>
+    <y>40</y>
+    <width>30</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #34</name>
+    <text>Width (us)</text>
+    <x>535</x>
+    <y>56</y>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #37</name>
+    <text>Pulse</text>
+    <x>555</x>
+    <y>40</y>
+    <width>50</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>text #40</name>
+    <text>Enable</text>
+    <x>676</x>
+    <y>56</y>
+    <width>60</width>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="16.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="10" green="0" blue="184">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #43</name>
+    <x>5</x>
+    <y>80</y>
+    <width>775</width>
+    <height>55</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="group" version="2.0.0">
+      <name>composite #46</name>
+      <width>775</width>
+      <height>55</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #49</name>
+        <width>775</width>
+        <height>55</height>
+        <line_width>1</line_width>
+        <line_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #52</name>
+        <pv_name>$(P)$(M1).DESC</pv_name>
+        <x>5</x>
+        <y>30</y>
+        <width>200</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="199" green="187" blue="109">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #56</name>
+        <pv_name>$(P)$(M1)PCOIncrement</pv_name>
+        <x>420</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #60</name>
+        <pv_name>$(P)$(M1)PCOIncrement_RBV</pv_name>
+        <x>420</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #64</name>
+        <pv_name>$(P)$(M1)PCOPulseWidth_RBV</pv_name>
+        <x>525</x>
+        <y>6</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #68</name>
+        <pv_name>$(P)$(M1)PCOStartPosition</pv_name>
+        <x>210</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #72</name>
+        <pv_name>$(P)$(M1)PCOStartPosition_RBV</pv_name>
+        <x>210</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #76</name>
+        <pv_name>$(P)$(M1)PCOEndPosition</pv_name>
+        <x>315</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #80</name>
+        <pv_name>$(P)$(M1)PCOEndPosition_RBV</pv_name>
+        <x>315</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #84</name>
+        <pv_name>$(P)$(M1)PCOPulseWidth</pv_name>
+        <x>525</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="choice" version="2.0.0">
+        <name>choice button #88</name>
+        <pv_name>$(P)$(M1)PCOEnable</pv_name>
+        <x>630</x>
+        <y>30</y>
+        <width>140</width>
+        <height>20</height>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+        <items>
+          <item>Item 1</item>
+          <item>Item 2</item>
+        </items>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #91</name>
+        <pv_name>$(P)$(M1)PCOEnable_RBV</pv_name>
+        <x>631</x>
+        <y>5</y>
+        <width>140</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <format>6</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #95</name>
+    <x>5</x>
+    <y>140</y>
+    <width>775</width>
+    <height>55</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="group" version="2.0.0">
+      <name>composite #98</name>
+      <width>775</width>
+      <height>55</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #101</name>
+        <width>775</width>
+        <height>55</height>
+        <line_width>1</line_width>
+        <line_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #104</name>
+        <pv_name>$(P)$(M2).DESC</pv_name>
+        <x>5</x>
+        <y>30</y>
+        <width>200</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="199" green="187" blue="109">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #108</name>
+        <pv_name>$(P)$(M2)PCOIncrement</pv_name>
+        <x>420</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #112</name>
+        <pv_name>$(P)$(M2)PCOIncrement_RBV</pv_name>
+        <x>420</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #116</name>
+        <pv_name>$(P)$(M2)PCOPulseWidth_RBV</pv_name>
+        <x>525</x>
+        <y>6</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #120</name>
+        <pv_name>$(P)$(M2)PCOStartPosition</pv_name>
+        <x>210</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #124</name>
+        <pv_name>$(P)$(M2)PCOStartPosition_RBV</pv_name>
+        <x>210</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #128</name>
+        <pv_name>$(P)$(M2)PCOEndPosition</pv_name>
+        <x>315</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #132</name>
+        <pv_name>$(P)$(M2)PCOEndPosition_RBV</pv_name>
+        <x>315</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #136</name>
+        <pv_name>$(P)$(M2)PCOPulseWidth</pv_name>
+        <x>525</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="choice" version="2.0.0">
+        <name>choice button #140</name>
+        <pv_name>$(P)$(M2)PCOEnable</pv_name>
+        <x>630</x>
+        <y>30</y>
+        <width>140</width>
+        <height>20</height>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+        <items>
+          <item>Item 1</item>
+          <item>Item 2</item>
+        </items>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #143</name>
+        <pv_name>$(P)$(M2)PCOEnable_RBV</pv_name>
+        <x>631</x>
+        <y>5</y>
+        <width>140</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <format>6</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #147</name>
+    <x>5</x>
+    <y>200</y>
+    <width>775</width>
+    <height>55</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="group" version="2.0.0">
+      <name>composite #150</name>
+      <width>775</width>
+      <height>55</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #153</name>
+        <width>775</width>
+        <height>55</height>
+        <line_width>1</line_width>
+        <line_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #156</name>
+        <pv_name>$(P)$(M3).DESC</pv_name>
+        <x>5</x>
+        <y>30</y>
+        <width>200</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="199" green="187" blue="109">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #160</name>
+        <pv_name>$(P)$(M3)PCOIncrement</pv_name>
+        <x>420</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #164</name>
+        <pv_name>$(P)$(M3)PCOIncrement_RBV</pv_name>
+        <x>420</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #168</name>
+        <pv_name>$(P)$(M3)PCOPulseWidth_RBV</pv_name>
+        <x>525</x>
+        <y>6</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #172</name>
+        <pv_name>$(P)$(M3)PCOStartPosition</pv_name>
+        <x>210</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #176</name>
+        <pv_name>$(P)$(M3)PCOStartPosition_RBV</pv_name>
+        <x>210</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #180</name>
+        <pv_name>$(P)$(M3)PCOEndPosition</pv_name>
+        <x>315</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #184</name>
+        <pv_name>$(P)$(M3)PCOEndPosition_RBV</pv_name>
+        <x>315</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #188</name>
+        <pv_name>$(P)$(M3)PCOPulseWidth</pv_name>
+        <x>525</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="choice" version="2.0.0">
+        <name>choice button #192</name>
+        <pv_name>$(P)$(M3)PCOEnable</pv_name>
+        <x>630</x>
+        <y>30</y>
+        <width>140</width>
+        <height>20</height>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+        <items>
+          <item>Item 1</item>
+          <item>Item 2</item>
+        </items>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #195</name>
+        <pv_name>$(P)$(M3)PCOEnable_RBV</pv_name>
+        <x>631</x>
+        <y>5</y>
+        <width>140</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <format>6</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #199</name>
+    <x>5</x>
+    <y>260</y>
+    <width>775</width>
+    <height>55</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="group" version="2.0.0">
+      <name>composite #202</name>
+      <width>775</width>
+      <height>55</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #205</name>
+        <width>775</width>
+        <height>55</height>
+        <line_width>1</line_width>
+        <line_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #208</name>
+        <pv_name>$(P)$(M4).DESC</pv_name>
+        <x>5</x>
+        <y>30</y>
+        <width>200</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="199" green="187" blue="109">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #212</name>
+        <pv_name>$(P)$(M4)PCOIncrement</pv_name>
+        <x>420</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #216</name>
+        <pv_name>$(P)$(M4)PCOIncrement_RBV</pv_name>
+        <x>420</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #220</name>
+        <pv_name>$(P)$(M4)PCOPulseWidth_RBV</pv_name>
+        <x>525</x>
+        <y>6</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #224</name>
+        <pv_name>$(P)$(M4)PCOStartPosition</pv_name>
+        <x>210</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #228</name>
+        <pv_name>$(P)$(M4)PCOStartPosition_RBV</pv_name>
+        <x>210</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #232</name>
+        <pv_name>$(P)$(M4)PCOEndPosition</pv_name>
+        <x>315</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #236</name>
+        <pv_name>$(P)$(M4)PCOEndPosition_RBV</pv_name>
+        <x>315</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #240</name>
+        <pv_name>$(P)$(M4)PCOPulseWidth</pv_name>
+        <x>525</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="choice" version="2.0.0">
+        <name>choice button #244</name>
+        <pv_name>$(P)$(M4)PCOEnable</pv_name>
+        <x>630</x>
+        <y>30</y>
+        <width>140</width>
+        <height>20</height>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+        <items>
+          <item>Item 1</item>
+          <item>Item 2</item>
+        </items>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #247</name>
+        <pv_name>$(P)$(M4)PCOEnable_RBV</pv_name>
+        <x>631</x>
+        <y>5</y>
+        <width>140</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <format>6</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #251</name>
+    <x>5</x>
+    <y>320</y>
+    <width>775</width>
+    <height>55</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="group" version="2.0.0">
+      <name>composite #254</name>
+      <width>775</width>
+      <height>55</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #257</name>
+        <width>775</width>
+        <height>55</height>
+        <line_width>1</line_width>
+        <line_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #260</name>
+        <pv_name>$(P)$(M5).DESC</pv_name>
+        <x>5</x>
+        <y>30</y>
+        <width>200</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="199" green="187" blue="109">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #264</name>
+        <pv_name>$(P)$(M5)PCOIncrement</pv_name>
+        <x>420</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #268</name>
+        <pv_name>$(P)$(M5)PCOIncrement_RBV</pv_name>
+        <x>420</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #272</name>
+        <pv_name>$(P)$(M5)PCOPulseWidth_RBV</pv_name>
+        <x>525</x>
+        <y>6</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #276</name>
+        <pv_name>$(P)$(M5)PCOStartPosition</pv_name>
+        <x>210</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #280</name>
+        <pv_name>$(P)$(M5)PCOStartPosition_RBV</pv_name>
+        <x>210</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #284</name>
+        <pv_name>$(P)$(M5)PCOEndPosition</pv_name>
+        <x>315</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #288</name>
+        <pv_name>$(P)$(M5)PCOEndPosition_RBV</pv_name>
+        <x>315</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #292</name>
+        <pv_name>$(P)$(M5)PCOPulseWidth</pv_name>
+        <x>525</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="choice" version="2.0.0">
+        <name>choice button #296</name>
+        <pv_name>$(P)$(M5)PCOEnable</pv_name>
+        <x>630</x>
+        <y>30</y>
+        <width>140</width>
+        <height>20</height>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+        <items>
+          <item>Item 1</item>
+          <item>Item 2</item>
+        </items>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #299</name>
+        <pv_name>$(P)$(M5)PCOEnable_RBV</pv_name>
+        <x>631</x>
+        <y>5</y>
+        <width>140</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <format>6</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #303</name>
+    <x>5</x>
+    <y>380</y>
+    <width>775</width>
+    <height>55</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="group" version="2.0.0">
+      <name>composite #306</name>
+      <width>775</width>
+      <height>55</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #309</name>
+        <width>775</width>
+        <height>55</height>
+        <line_width>1</line_width>
+        <line_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #312</name>
+        <pv_name>$(P)$(M6).DESC</pv_name>
+        <x>5</x>
+        <y>30</y>
+        <width>200</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="199" green="187" blue="109">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #316</name>
+        <pv_name>$(P)$(M6)PCOIncrement</pv_name>
+        <x>420</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #320</name>
+        <pv_name>$(P)$(M6)PCOIncrement_RBV</pv_name>
+        <x>420</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #324</name>
+        <pv_name>$(P)$(M6)PCOPulseWidth_RBV</pv_name>
+        <x>525</x>
+        <y>6</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #328</name>
+        <pv_name>$(P)$(M6)PCOStartPosition</pv_name>
+        <x>210</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #332</name>
+        <pv_name>$(P)$(M6)PCOStartPosition_RBV</pv_name>
+        <x>210</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #336</name>
+        <pv_name>$(P)$(M6)PCOEndPosition</pv_name>
+        <x>315</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #340</name>
+        <pv_name>$(P)$(M6)PCOEndPosition_RBV</pv_name>
+        <x>315</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #344</name>
+        <pv_name>$(P)$(M6)PCOPulseWidth</pv_name>
+        <x>525</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="choice" version="2.0.0">
+        <name>choice button #348</name>
+        <pv_name>$(P)$(M6)PCOEnable</pv_name>
+        <x>630</x>
+        <y>30</y>
+        <width>140</width>
+        <height>20</height>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+        <items>
+          <item>Item 1</item>
+          <item>Item 2</item>
+        </items>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #351</name>
+        <pv_name>$(P)$(M6)PCOEnable_RBV</pv_name>
+        <x>631</x>
+        <y>5</y>
+        <width>140</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <format>6</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #355</name>
+    <x>5</x>
+    <y>440</y>
+    <width>775</width>
+    <height>55</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="group" version="2.0.0">
+      <name>composite #358</name>
+      <width>775</width>
+      <height>55</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #361</name>
+        <width>775</width>
+        <height>55</height>
+        <line_width>1</line_width>
+        <line_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #364</name>
+        <pv_name>$(P)$(M7).DESC</pv_name>
+        <x>5</x>
+        <y>30</y>
+        <width>200</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="199" green="187" blue="109">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #368</name>
+        <pv_name>$(P)$(M7)PCOIncrement</pv_name>
+        <x>420</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #372</name>
+        <pv_name>$(P)$(M7)PCOIncrement_RBV</pv_name>
+        <x>420</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #376</name>
+        <pv_name>$(P)$(M7)PCOPulseWidth_RBV</pv_name>
+        <x>525</x>
+        <y>6</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #380</name>
+        <pv_name>$(P)$(M7)PCOStartPosition</pv_name>
+        <x>210</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #384</name>
+        <pv_name>$(P)$(M7)PCOStartPosition_RBV</pv_name>
+        <x>210</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #388</name>
+        <pv_name>$(P)$(M7)PCOEndPosition</pv_name>
+        <x>315</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #392</name>
+        <pv_name>$(P)$(M7)PCOEndPosition_RBV</pv_name>
+        <x>315</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #396</name>
+        <pv_name>$(P)$(M7)PCOPulseWidth</pv_name>
+        <x>525</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="choice" version="2.0.0">
+        <name>choice button #400</name>
+        <pv_name>$(P)$(M7)PCOEnable</pv_name>
+        <x>630</x>
+        <y>30</y>
+        <width>140</width>
+        <height>20</height>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+        <items>
+          <item>Item 1</item>
+          <item>Item 2</item>
+        </items>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #403</name>
+        <pv_name>$(P)$(M7)PCOEnable_RBV</pv_name>
+        <x>631</x>
+        <y>5</y>
+        <width>140</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <format>6</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>composite #407</name>
+    <x>5</x>
+    <y>500</y>
+    <width>775</width>
+    <height>55</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="group" version="2.0.0">
+      <name>composite #410</name>
+      <width>775</width>
+      <height>55</height>
+      <style>3</style>
+      <transparent>true</transparent>
+      <widget type="rectangle" version="2.0.0">
+        <name>rectangle #413</name>
+        <width>775</width>
+        <height>55</height>
+        <line_width>1</line_width>
+        <line_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </line_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <transparent>true</transparent>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #416</name>
+        <pv_name>$(P)$(M8).DESC</pv_name>
+        <x>5</x>
+        <y>30</y>
+        <width>200</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="199" green="187" blue="109">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #420</name>
+        <pv_name>$(P)$(M8)PCOIncrement</pv_name>
+        <x>420</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #424</name>
+        <pv_name>$(P)$(M8)PCOIncrement_RBV</pv_name>
+        <x>420</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #428</name>
+        <pv_name>$(P)$(M8)PCOPulseWidth_RBV</pv_name>
+        <x>525</x>
+        <y>6</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #432</name>
+        <pv_name>$(P)$(M8)PCOStartPosition</pv_name>
+        <x>210</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #436</name>
+        <pv_name>$(P)$(M8)PCOStartPosition_RBV</pv_name>
+        <x>210</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #440</name>
+        <pv_name>$(P)$(M8)PCOEndPosition</pv_name>
+        <x>315</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #444</name>
+        <pv_name>$(P)$(M8)PCOEndPosition_RBV</pv_name>
+        <x>315</x>
+        <y>5</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="187" green="187" blue="187">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="textentry" version="3.0.0">
+        <name>text entry #448</name>
+        <pv_name>$(P)$(M8)PCOPulseWidth</pv_name>
+        <x>525</x>
+        <y>30</y>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <format>1</format>
+        <show_units>false</show_units>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+      </widget>
+      <widget type="choice" version="2.0.0">
+        <name>choice button #452</name>
+        <pv_name>$(P)$(M8)PCOEnable</pv_name>
+        <x>630</x>
+        <y>30</y>
+        <width>140</width>
+        <height>20</height>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="115" green="223" blue="255">
+          </color>
+        </background_color>
+        <border_alarm_sensitive>false</border_alarm_sensitive>
+        <items>
+          <item>Item 1</item>
+          <item>Item 2</item>
+        </items>
+      </widget>
+      <widget type="textupdate" version="2.0.0">
+        <name>text update #455</name>
+        <pv_name>$(P)$(M8)PCOEnable_RBV</pv_name>
+        <x>631</x>
+        <y>5</y>
+        <width>140</width>
+        <font>
+          <font family="Liberation Sans" style="REGULAR" size="16.0">
+          </font>
+        </font>
+        <foreground_color>
+          <color red="10" green="0" blue="184">
+          </color>
+        </foreground_color>
+        <background_color>
+          <color red="0" green="0" blue="0">
+          </color>
+        </background_color>
+        <format>6</format>
+        <show_units>false</show_units>
+        <horizontal_alignment>1</horizontal_alignment>
+      </widget>
+    </widget>
+  </widget>
+</display>
