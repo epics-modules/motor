@@ -1465,8 +1465,10 @@ enter_do_work:
     else
     {
         if (pmr->mip & MIP_JOG)
-            pmr->lvio = (pmr->jogf && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
-                        (pmr->jogr && (pmr->rbv < pmr->llm + pmr->jvel)) ||
+            pmr->lvio = ((pmr->jogf && pmr->jvel > 0.) && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
+                        ((pmr->jogr && pmr->jvel < 0.) && (pmr->rbv > pmr->hlm + pmr->jvel)) ||
+                        ((pmr->jogr && pmr->jvel > 0.) && (pmr->rbv < pmr->llm + pmr->jvel)) ||
+                        ((pmr->jogf && pmr->jvel < 0.) && (pmr->rbv < pmr->llm - pmr->jvel)) ||
                         (pmr->dllm > pmr->dhlm);
         else if (pmr->mip & MIP_HOME)
             pmr->lvio = false;  /* Disable soft-limit error check during home search. */
@@ -2084,8 +2086,10 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             /* check for limit violation */
             if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
                 ;
-            else if ((pmr->jogf && (pmr->val > pmr->hlm - pmr->jvel)) ||
-                     (pmr->jogr && (pmr->val < pmr->llm + pmr->jvel)) ||
+            else if (((pmr->jogf && pmr->jvel > 0.) && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
+                     ((pmr->jogr && pmr->jvel < 0.) && (pmr->rbv > pmr->hlm + pmr->jvel)) ||
+                     ((pmr->jogr && pmr->jvel > 0.) && (pmr->rbv < pmr->llm + pmr->jvel)) ||
+                     ((pmr->jogf && pmr->jvel < 0.) && (pmr->rbv < pmr->llm - pmr->jvel)) ||
                      (pmr->dllm > pmr->dhlm))
             {
                 pmr->lvio = 1;
@@ -2124,10 +2128,10 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
                 MARK(M_DMOV);
                 pmr->pp = TRUE;
                 if (pmr->jogf)
-                    pmr->cdir = 1;
+                    pmr->cdir = (pmr->jvel > 0.) ? 1 : 0;
                 else
                 {
-                    pmr->cdir = 0;
+                    pmr->cdir = (pmr->jvel > 0.) ? 0 : 1;
                     jogv = -jogv;
                 }
 
@@ -3054,7 +3058,11 @@ pidcof:
         break;
 
     case motorRecordJVEL:
-        range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+        if (pmr->jvel >= 0) {
+            range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+        } else {
+            range_check(pmr, &pmr->jvel, -pmr->vmax, -pmr->vbas);
+        }
 
         if ((pmr->mip & MIP_JOGF) || (pmr->mip & MIP_JOGR))
         {
@@ -3074,7 +3082,7 @@ pidcof:
     case motorRecordJAR:
         // Valid JAR; 0 < JAR < JVEL [egu / sec] / 0.1 [sec]
         if (pmr->jar <= 0.0)
-            pmr->jar = pmr->jvel / 0.1;
+            pmr->jar = fabs(pmr->jvel) / 0.1;
         break;
 
     case motorRecordHVEL:
@@ -3142,7 +3150,11 @@ velcheckA:
                 db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
             }
 
-            range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+            if (pmr->jvel >= 0) {
+                range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+            } else {
+                range_check(pmr, &pmr->jvel, -pmr->vmax, -pmr->vbas);
+            }
             range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
     }
     /* Do not process (i.e., clear) marked fields here.  PP fields (e.g., MRES) must remain marked. */
@@ -4054,8 +4066,13 @@ static void check_speed_and_resolution(motorRecord * pmr)
     /* Sanity check on jog velocity and acceleration rate. */
     if (pmr->jvel == 0.0)
         pmr->jvel = pmr->velo;
-    else
-        range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+    else {
+        if (pmr->jvel >= 0) {
+            range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+        } else {
+            range_check(pmr, &pmr->jvel, -pmr->vmax, -pmr->vbas);
+        }
+    }
 
     if (pmr->jar == 0.0)
         pmr->jar = pmr->velo / pmr->accl;
