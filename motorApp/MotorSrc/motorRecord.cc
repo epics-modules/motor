@@ -241,6 +241,8 @@ static void set_dial_highlimit(motorRecord *, struct motor_dset *);
 static void set_dial_lowlimit(motorRecord *, struct motor_dset *);
 static void set_userlimits(motorRecord *);
 static void range_check(motorRecord *, double *, double, double);
+static void jvel_range_check(motorRecord *);
+static bool jvel_limit_check(motorRecord *);
 static void clear_buttons(motorRecord *);
 static void syncTargetPosition(motorRecord *);
 
@@ -1465,11 +1467,7 @@ enter_do_work:
     else
     {
         if (pmr->mip & MIP_JOG)
-            pmr->lvio = ((pmr->jogf && pmr->jvel > 0.) && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
-                        ((pmr->jogr && pmr->jvel < 0.) && (pmr->rbv > pmr->hlm + pmr->jvel)) ||
-                        ((pmr->jogr && pmr->jvel > 0.) && (pmr->rbv < pmr->llm + pmr->jvel)) ||
-                        ((pmr->jogf && pmr->jvel < 0.) && (pmr->rbv < pmr->llm - pmr->jvel)) ||
-                        (pmr->dllm > pmr->dhlm);
+            pmr->lvio = jvel_limit_check(pmr);
         else if (pmr->mip & MIP_HOME)
             pmr->lvio = false;  /* Disable soft-limit error check during home search. */
     }
@@ -2086,11 +2084,7 @@ static RTN_STATUS do_work(motorRecord * pmr, CALLBACK_VALUE proc_ind)
             /* check for limit violation */
             if ((pmr->dhlm == pmr->dllm) && (pmr->dllm == 0.0))
                 ;
-            else if (((pmr->jogf && pmr->jvel > 0.) && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
-                     ((pmr->jogr && pmr->jvel < 0.) && (pmr->rbv > pmr->hlm + pmr->jvel)) ||
-                     ((pmr->jogr && pmr->jvel > 0.) && (pmr->rbv < pmr->llm + pmr->jvel)) ||
-                     ((pmr->jogf && pmr->jvel < 0.) && (pmr->rbv < pmr->llm - pmr->jvel)) ||
-                     (pmr->dllm > pmr->dhlm))
+            else if (jvel_limit_check(pmr))
             {
                 pmr->lvio = 1;
                 MARK(M_LVIO);
@@ -3058,12 +3052,7 @@ pidcof:
         break;
 
     case motorRecordJVEL:
-        if (pmr->jvel >= 0) {
-            range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
-        } else {
-            range_check(pmr, &pmr->jvel, -pmr->vmax, -pmr->vbas);
-        }
-
+        jvel_range_check(pmr);
         if ((pmr->mip & MIP_JOGF) || (pmr->mip & MIP_JOGR))
         {
             double jogv = (pmr->jvel * dir) / pmr->mres;
@@ -3150,11 +3139,7 @@ velcheckA:
                 db_post_events(pmr, &pmr->sbak, DBE_VAL_LOG);
             }
 
-            if (pmr->jvel >= 0) {
-                range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
-            } else {
-                range_check(pmr, &pmr->jvel, -pmr->vmax, -pmr->vbas);
-            }
+            jvel_range_check(pmr);
             range_check(pmr, &pmr->hvel, pmr->vbas, pmr->vmax);
     }
     /* Do not process (i.e., clear) marked fields here.  PP fields (e.g., MRES) must remain marked. */
@@ -4067,11 +4052,7 @@ static void check_speed_and_resolution(motorRecord * pmr)
     if (pmr->jvel == 0.0)
         pmr->jvel = pmr->velo;
     else {
-        if (pmr->jvel >= 0) {
-            range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
-        } else {
-            range_check(pmr, &pmr->jvel, -pmr->vmax, -pmr->vbas);
-        }
+        jvel_range_check(pmr);
     }
 
     if (pmr->jar == 0.0)
@@ -4395,6 +4376,32 @@ static void range_check(motorRecord *pmr, double *parm_ptr, double min, double m
     }
 }
 
+/*
+FUNCTION... void jvel_range_check(motorRecord *)
+USAGE... Limit jvel parameter to valid range;
+*/
+static void jvel_range_check(motorRecord *pmr)
+{        
+    if (pmr->jvel >= 0) {
+        range_check(pmr, &pmr->jvel, pmr->vbas, pmr->vmax);
+    } else {
+        range_check(pmr, &pmr->jvel, -pmr->vmax, -pmr->vbas);
+    }
+}
+
+/*
+FUNCTION... void jvel_limit_check(motorRecord *)
+USAGE... Return true if jogging for 1 second would result in soft limit violation;
+*/
+
+static bool jvel_limit_check(motorRecord *pmr)
+{
+    return (((pmr->jogf && pmr->jvel > 0.) && (pmr->rbv > pmr->hlm - pmr->jvel)) ||
+            ((pmr->jogr && pmr->jvel < 0.) && (pmr->rbv > pmr->hlm + pmr->jvel)) ||
+            ((pmr->jogr && pmr->jvel > 0.) && (pmr->rbv < pmr->llm + pmr->jvel)) ||
+            ((pmr->jogf && pmr->jvel < 0.) && (pmr->rbv < pmr->llm - pmr->jvel)) ||
+            (pmr->dllm > pmr->dhlm));
+}
 
 /*
 FUNCTION... void clear_buttons(motorRecord *)
