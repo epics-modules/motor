@@ -943,6 +943,12 @@ static long postProcess(motorRecord * pmr)
                     WRITE_MSG(MOVE_REL, &relbpos);
                 else
                     WRITE_MSG(MOVE_ABS, &bpos);
+                /* 'diff' (hence relpos) was zeroed by the drive-to-readback
+                 * sync above, so the shared CDIR assignment below would key on
+                 * a stale 0.  The take-out leg just commanded here moves by
+                 * relbpos (MOVE_REL) or to bpos, whose stroke is also relbpos
+                 * (MOVE_ABS); make CDIR reflect that actual direction. */
+                relpos = relbpos;
                 pmr->mip = MIP_JOG_BL1;
             }
             else
