@@ -754,6 +754,12 @@ recordtype(motor) {
                 special(SPC_MOD)
                 interest(1)
         }
+        field(MINP,DBF_INLINK) {
+                prompt("MSTA Input Link")
+                promptgroup(GUI_COMMON)
+                special(SPC_MOD)
+                interest(1)
+        }
         field(RINP,DBF_INLINK) {
                 prompt("RMP Input Link")
                 promptgroup(GUI_COMMON)
