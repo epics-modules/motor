@@ -162,7 +162,12 @@ static RTN_STATUS build(motor_cmnd command, double *parms, struct motorRecord *m
     {
         case MOVE_ABS:
         case MOVE_REL:
-            status = dbPutLink(&mr->out, DBR_DOUBLE, &mr->dval, 1);
+            {
+                struct soft_private *ptr = (struct soft_private *) mr->dpvt;
+                // Prevent an early RDBL callback from asserting done based on a stale dinp_value
+                ptr->dinp_value = SOFTMOVE;
+                status = dbPutLink(&mr->out, DBR_DOUBLE, &mr->dval, 1);
+            }
             break;
 
         case STOP_AXIS:
