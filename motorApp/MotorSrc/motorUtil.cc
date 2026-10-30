@@ -35,6 +35,7 @@ USAGE...        Motor Record Utility Support.
 #include <iocsh.h>
 #include <epicsExport.h>
 #include <errlog.h>
+#include <epicsStdio.h>
 
 #include <motor.h>
 
@@ -344,7 +345,8 @@ static void moving(int callback_motor_index, chid callback_chid,
         ca_put(DBR_LONG, chid_moving, &numMotorsMoving);
 	
 	/* Tell which motor's dmov changed */
-	sprintf(diffStr, "%c%s", diffChar, motorArray[callback_motor_index].name);
+	epicsSnprintf(diffStr, sizeof(diffStr), "%c%s",
+	              diffChar, motorArray[callback_motor_index].name);
 	ca_array_put(DBR_CHAR, strlen(diffStr)+1, chid_movingdiff, diffStr); 
 
         old_numMotorsMoving = numMotorsMoving;
