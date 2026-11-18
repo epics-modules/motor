@@ -35,6 +35,7 @@ USAGE...        Motor Record Utility Support.
 #include <cantProceed.h>
 #include <dbStaticLib.h>
 #include <errlog.h>
+#include <epicsStdio.h>
 
 #include "dbAccessDefs.h"
 
@@ -69,7 +70,8 @@ char ** getMotorList()
             a_status = dbIsAlias(pdbentry);
 	    if (a_status == 0)
 	    {
-                length = sprintf(temp, "%s", dbGetRecordName(pdbentry));
+                length = epicsSnprintf(temp, sizeof(temp), "%s",
+                                       dbGetRecordName(pdbentry));
                 paprecords[index] = (char *) callocMustSucceed(length+1,
                                            sizeof(char), "getMotorList(2nd)");
                 strcpy(paprecords[index], temp);
